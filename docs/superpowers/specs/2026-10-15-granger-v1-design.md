@@ -228,7 +228,7 @@ Events are queued locally; a screen shows the exact pending payload; upload happ
 - Trademark search for "Granger".
 - Lawyer review of GPLv3 + Play IAP approach before public launch.
 - Exact Pro price (tested in beta).
-- Hugging Face gating for Gemma 4 LiteRT files (see §3).
+- Hugging Face gating: Gemma 4 LiteRT files are **not** gated (checked 2026-10-15). EmbeddingGemma **is** gated and is licensed under the Gemma Terms of Use (not Apache-2.0): plan to self-host it with the required notice, and include it in the lawyer review.
 - Confirm the curated Wikipedia core and WikiMed sizes for the Starter preset.
 - Final Granger Classics title list; verify the US public-domain status of each translation (notably the Quran translation choice).
 - Non-US public-domain terms (life + 70 jurisdictions) for Classics and Gutenberg packs.
