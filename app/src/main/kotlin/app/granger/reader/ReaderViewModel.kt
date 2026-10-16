@@ -1,5 +1,6 @@
 package app.granger.reader
 
+import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Library
@@ -38,6 +39,12 @@ class ReaderViewModel(
         val bookmarked: Boolean = false,
         val error: String? = null,
     )
+
+    /**
+     * The WebView's back/forward history, saved when the screen's WebView is released (Search opened,
+     * rotation) so the next WebView restores it instead of starting a new history.
+     */
+    var webViewState: Bundle? = null
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()

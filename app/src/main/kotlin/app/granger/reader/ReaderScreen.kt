@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -109,10 +110,14 @@ fun ReaderScreen(
                     )
                     ReaderWebView(context, client).also {
                         webView = it
-                        it.loadUrl(startUrl)
+                        val saved = viewModel.webViewState
+                        if (saved == null || it.restoreState(saved) == null) it.loadUrl(startUrl)
                     }
                 },
-                onRelease = { it.destroy() },
+                onRelease = {
+                    viewModel.webViewState = Bundle().apply { it.saveState(this) }
+                    it.destroy()
+                },
             )
         }
     }
