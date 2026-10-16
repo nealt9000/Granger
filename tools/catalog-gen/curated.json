@@ -1,0 +1,47 @@
+{
+  "packs": [
+    {"name": "wikipedia_en_medicine", "flavour": "nopic", "category": "Medical", "license": "CC BY-SA 4.0",
+     "title": "WikiMed (no pictures)"},
+    {"name": "wikipedia_en_medicine", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 4.0",
+     "title": "WikiMed"},
+    {"name": "wikem_en_all", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 3.0",
+     "title": "WikEM emergency medicine"},
+    {"name": "wikipedia_en_top", "flavour": "nopic", "category": "Reference", "license": "CC BY-SA 4.0",
+     "title": "Wikipedia: best articles (no pictures)"},
+    {"name": "wikipedia_en_top", "flavour": "maxi", "category": "Reference", "license": "CC BY-SA 4.0",
+     "title": "Wikipedia: best articles"},
+    {"name": "wikipedia_en_100", "category": "Reference", "license": "CC BY-SA 4.0",
+     "title": "Wikipedia: 100 essential articles"},
+    {"name": "wikipedia_en_ray-charles", "flavour": "maxi", "category": "Reference", "license": "CC BY-SA 4.0",
+     "title": "Wikipedia sample: Ray Charles (2 MB)"},
+    {"name": "gutenberg_en_lcc-b", "category": "Religion & Philosophy", "license": "Public domain (US)",
+     "title": "Project Gutenberg: Philosophy & Religion"},
+    {"name": "wikisource_en_all", "flavour": "nopic", "category": "Literature & Drama", "license": "CC BY-SA 4.0",
+     "title": "Wikisource (no pictures)"},
+    {"name": "gutenberg_en_lcc-pr", "category": "Literature & Drama", "license": "Public domain (US)",
+     "title": "Project Gutenberg: English literature"},
+    {"name": "wikivoyage_en_all", "flavour": "nopic", "category": "Regional", "license": "CC BY-SA 4.0",
+     "title": "Wikivoyage travel guide (no pictures)"}
+  ],
+  "models": [
+    {"id": "gemma-4-e2b-gpu", "title": "Gemma 4 E2B (answers questions)", "role": "small",
+     "fileName": "gemma-4-E2B-it-gpu.litertlm", "sizeBytes": 2008432640, "minRamGb": 6,
+     "sha256": "a53a59001894c58e6bdb5b9b227709f91a2e3e556baa7d85acf9c55402ba5cf5",
+     "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1/gemma-4-E2B-it-gpu.litertlm",
+     "license": "Apache-2.0", "evalPassed": false},
+    {"id": "gemma-4-e4b-gpu", "title": "Gemma 4 E4B (Think deeper)", "role": "large",
+     "fileName": "gemma-4-E4B-it-gpu.litertlm", "sizeBytes": 2969059328, "minRamGb": 8,
+     "sha256": "4912bb5a9c30993c51a7711f763212077458529312175df0573a78323a2bb7ff",
+     "url": "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/2eee7ac325f20eb8c9ac1d0e972f7c84663062da/gemma-4-E4B-it-gpu.litertlm",
+     "license": "Apache-2.0", "evalPassed": false},
+    {"id": "embeddinggemma-2-text-270m", "title": "EmbeddingGemma 2 (ranks passages)", "role": "embedder",
+     "fileName": "embeddinggemma-2-text-270m.litertlm", "sizeBytes": 164626432, "minRamGb": 6,
+     "sha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+     "url": "https://huggingface.co/litert-community/embeddinggemma-2-text-270m-litert-lm/resolve/9be6e8b90982095dc05c2bd162e4b954ee4dbac7/embeddinggemma-2-text-270m.litertlm",
+     "license": "Apache-2.0", "evalPassed": false}
+  ],
+  "presets": [
+    {"id": "starter", "title": "Starter",
+     "items": ["gemma-4-e2b-gpu", "embeddinggemma-2-text-270m", "wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic"]}
+  ]
+}

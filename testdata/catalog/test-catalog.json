@@ -1,0 +1,35 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-10-16T00:00:00Z",
+  "futureField": {"ignored": true},
+  "packs": [
+    {"id": "wikipedia_en_medicine_nopic", "title": "WikiMed (no pictures)", "description": "Medical encyclopedia",
+     "category": "Medical", "language": "eng", "sizeBytes": 1047708672,
+     "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+     "urls": ["https://download.kiwix.org/zim/wikipedia/wikipedia_en_medicine_nopic_2026-10.zim"],
+     "snapshotDate": "2026-10-10", "license": "CC BY-SA 4.0", "hasFulltextIndex": true, "topics": [],
+     "zimUuid": "1f8cf2fe-e076-e018-2e09-004387350cba", "zimName": "wikipedia_en_medicine"},
+    {"id": "bad-sha", "title": "Bad", "category": "Reference", "language": "eng", "sizeBytes": 10,
+     "sha256": "nothex", "urls": ["https://example.com/a.zim"], "snapshotDate": "2026-10-10",
+     "license": "CC0", "hasFulltextIndex": false, "zimUuid": "u", "zimName": "n"},
+    {"id": "../escape", "title": "Escape", "category": "Reference", "language": "eng", "sizeBytes": 10,
+     "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+     "urls": ["https://example.com/a.zim"], "snapshotDate": "2026-10-10",
+     "license": "CC0", "hasFulltextIndex": false, "zimUuid": "u2", "zimName": "n2"}
+  ],
+  "models": [
+    {"id": "gemma-4-e2b-gpu", "title": "Gemma 4 E2B", "role": "small", "fileName": "gemma-4-E2B-it-gpu.litertlm",
+     "sizeBytes": 2008432640, "minRamGb": 6,
+     "sha256": "a53a59001894c58e6bdb5b9b227709f91a2e3e556baa7d85acf9c55402ba5cf5",
+     "url": "https://huggingface.co/x/resolve/abc/gemma-4-E2B-it-gpu.litertlm", "license": "Apache-2.0",
+     "evalPassed": true},
+    {"id": "gemma-4-e4b-gpu", "title": "Gemma 4 E4B", "role": "large", "fileName": "gemma-4-E4B-it-gpu.litertlm",
+     "sizeBytes": 2969059328, "minRamGb": 8,
+     "sha256": "4912bb5a9c30993c51a7711f763212077458529312175df0573a78323a2bb7ff",
+     "url": "https://huggingface.co/x/resolve/abc/gemma-4-E4B-it-gpu.litertlm", "license": "Apache-2.0",
+     "evalPassed": false}
+  ],
+  "presets": [
+    {"id": "starter", "title": "Starter", "items": ["gemma-4-e2b-gpu", "wikipedia_en_medicine_nopic", "bad-sha"]}
+  ]
+}
