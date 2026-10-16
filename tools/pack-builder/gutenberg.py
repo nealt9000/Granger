@@ -20,6 +20,8 @@ REMOVED_TAGS = ["script", "link", "meta", "img", "svg", "object", "iframe", "for
 BLOCKS = {"p", "div", "pre", "blockquote", "table", "li", "ul", "ol", "dl", "section", "header", "footer",
           "h1", "h2", "h3", "h4", "h5", "h6", "figure", "center"}
 SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
+NOTICE = re.compile(r"[Cc]opyright|[Pp]ublished|[Ee]dition|[Pp]rinted|[Rr]eprint")
+FRONT_MATTER_CHARS = 12_000
 
 
 class NotAGutenbergBook(ValueError):
@@ -125,3 +127,13 @@ def _drop_branding(root: Tag) -> int:
         else:
             block.decompose()
         removed += 1
+
+
+def later_edition_notices(body: Tag, after: int = 1930) -> list[str]:
+    """Sentences near the start that date this edition after the public-domain line, such as a modern introduction.
+
+    The manifest's year can't catch these: the text is old, but the edition Gutenberg copied may add newer material.
+    """
+    text = " ".join(body.get_text(" ").split())[:FRONT_MATTER_CHARS]
+    sentences = re.split(r"(?<!\b[A-Z]\.)(?<=[.!?])\s+", text)  # not after initials like "E. P."
+    return [s for s in sentences if NOTICE.search(s) and any(int(y) > after for y in re.findall(r"\b(1[89]\d\d|20\d\d)\b", s))]

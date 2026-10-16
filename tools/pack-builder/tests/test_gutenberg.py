@@ -45,3 +45,11 @@ def test_heading_images_become_their_alt_text():
     html = fixture("pg-old.html").replace(b"<h2>II</h2>", b'<h2><img alt="CHAPTER II." src="i.jpg"></h2>')
     c = gutenberg.clean(html)
     assert c.body.find_all("h2")[1].get_text() == "CHAPTER II."
+
+
+def test_later_edition_notices_are_found():
+    html = fixture("pg-old.html").replace(
+        b"<h2>I</h2>", b"<p>This paperback edition Published 1958 by E. P. Dutton. Copyright, 1890.</p><h2>I</h2>")
+    c = gutenberg.clean(html)
+    assert gutenberg.later_edition_notices(c.body) == ["This paperback edition Published 1958 by E. P. Dutton."]
+    assert gutenberg.later_edition_notices(gutenberg.clean(fixture("pg-old.html")).body) == []
