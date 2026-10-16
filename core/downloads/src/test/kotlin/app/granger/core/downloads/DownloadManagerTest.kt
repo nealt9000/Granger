@@ -183,6 +183,18 @@ class DownloadManagerTest {
         assertThat(File(file.path + ".part").exists()).isFalse()
     }
 
+    @Test fun cancellingASamePathUpdateKeepsOnlyTheOldVersion() = test {
+        val file = File(internal, "models/e2b.litertlm").apply { parentFile!!.mkdirs(); writeText("old model") }
+        installed(packEntry(sha256 = SHA_1), file.path)
+        dao.upsert(
+            DownloadRecord("med", SHA_2, ItemKind.PACK, "WikiMed", listOf("https://a.test/x"), 9, file.path, "", true,
+                DownloadState.QUEUED, 0, createdAt = 2, updatedAt = 2),
+        )
+        manager.cancel("med")
+        assertThat(records().map { it.sha256 to it.state }).containsExactly(SHA_1 to DownloadState.INSTALLED)
+        assertThat(file.readText()).isEqualTo("old model")
+    }
+
     @Test fun repairWhileAnUpdateIsActiveDoesNothing() = test {
         installed(packEntry(sha256 = SHA_1), File(internal, "packs/med_2026-09-01.zim").path)
         manager.enqueue(packEntry(sha256 = SHA_2), internal, true)

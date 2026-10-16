@@ -40,6 +40,15 @@ interface DownloadDao {
         itemId: String, sha256: String, state: DownloadState, error: String?, bytesDone: Long, hashFailures: Int, now: Long,
     ): Int
 
+    /** Like [setState] but never touches an INSTALLED row (e.g. one a cancelled repair restored). */
+    @Query(
+        "UPDATE downloads SET state = :state, error = :error, bytesDone = :bytesDone, hashFailures = :hashFailures, " +
+            "updatedAt = :now WHERE itemId = :itemId AND sha256 = :sha256 AND state != 'INSTALLED'",
+    )
+    suspend fun setActiveState(
+        itemId: String, sha256: String, state: DownloadState, error: String?, bytesDone: Long, hashFailures: Int, now: Long,
+    ): Int
+
     @Query(
         "UPDATE downloads SET state = 'INSTALLED', bytesDone = sizeBytes, error = NULL, hashFailures = 0, " +
             "verifiedAt = :now, updatedAt = :now WHERE itemId = :itemId AND sha256 = :sha256",

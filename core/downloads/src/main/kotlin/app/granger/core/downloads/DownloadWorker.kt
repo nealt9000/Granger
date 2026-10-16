@@ -42,14 +42,19 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
             // Android 12+ refuses a foreground service started from the background; download anyway.
         }
         var shownAt = 0L
-        val outcome = runner.run(itemId, sha256) { done, total ->
-            val t = SystemClock.elapsedRealtime()
-            if (t - shownAt >= NOTIFY_EVERY_MS) {
-                shownAt = t
-                notifications.update(itemId, title, done, total)
+        try {
+            val outcome = runner.run(itemId, sha256) { done, total ->
+                val t = SystemClock.elapsedRealtime()
+                if (t - shownAt >= NOTIFY_EVERY_MS) {
+                    shownAt = t
+                    notifications.update(itemId, title, done, total)
+                }
             }
+            return outcome.toWorkResult()
+        } finally {
+            // Also removes a progress notification posted when setForeground was refused.
+            notifications.cancel(itemId)
         }
-        return outcome.toWorkResult()
     }
 
     companion object {
@@ -106,6 +111,10 @@ internal class DownloadNotifications(private val context: Context) {
     /** Silently dropped when the user declined notifications. */
     fun update(itemId: String, title: String, done: Long, total: Long) {
         manager.notify(itemId.hashCode(), build(title, done, total))
+    }
+
+    fun cancel(itemId: String) {
+        manager.cancel(itemId.hashCode())
     }
 
     private fun build(title: String, done: Long, total: Long): Notification {

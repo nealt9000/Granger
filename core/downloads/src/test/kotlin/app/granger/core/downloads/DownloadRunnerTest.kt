@@ -1,7 +1,11 @@
 package app.granger.core.downloads
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -194,5 +198,36 @@ class DownloadRunnerTest {
         assertThat(dao.forItem("med")).isEmpty()
         assertThat(record.file.exists()).isFalse()
         assertThat(installed).isEmpty()
+    }
+
+    @Test fun aRestoredInstalledRowIsNotOverwritten() = runTest {
+        server.files[url] = Random(1).nextBytes(content.size) // mismatch, so the runner writes state again
+        val record = queued()
+        val outcome = runner.run("med", record.sha256) { done, total ->
+            if (done == total) runBlocking { dao.setState("med", record.sha256, DownloadState.INSTALLED, null, content.size.toLong(), 0, 5) }
+        }
+        assertThat(outcome).isEqualTo(RunOutcome.GONE)
+        assertThat(record()!!.state).isEqualTo(DownloadState.INSTALLED)
+    }
+
+    @Test fun aSecondRunWaitsForTheFirstToExit() = runTest {
+        server.files[url] = content
+        server.hang += url
+        val record = queued()
+        val a = launch(Dispatchers.Default) { runner.run("med", record.sha256) }
+        awaitRequests(1)
+        server.hang -= url
+        val b = launch(Dispatchers.Default) { runner.run("med", record.sha256) }
+        withContext(Dispatchers.Default) { delay(300) }
+        assertThat(server.requests).hasSize(1)
+        a.cancel()
+        a.join()
+        b.join()
+        assertThat(server.requests).hasSize(2)
+        assertThat(record()!!.state).isEqualTo(DownloadState.INSTALLED)
+    }
+
+    private suspend fun awaitRequests(n: Int) = withContext(Dispatchers.Default) {
+        withTimeout(10_000) { while (server.requests.size < n) delay(10) }
     }
 }

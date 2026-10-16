@@ -114,10 +114,12 @@ class DownloadManager(
 
     override suspend fun cancel(itemId: String) = mutex.withLock {
         scheduler.cancel(itemId)
+        val hasInstalledVersion = dao.forItem(itemId).any { !it.isActive }
         for (record in dao.forItem(itemId).filter { it.isActive }) {
             val fileExists = withContext(io) { record.partFile.delete(); record.file.exists() }
-            if (fileExists) {
+            if (fileExists && !hasInstalledVersion) {
                 // A cancelled repair: the verified file is still there, so keep its ledger row.
+                // (With another installed version, a file at this path belongs to that version.)
                 dao.upsert(
                     record.copy(
                         state = DownloadState.INSTALLED, bytesDone = record.sizeBytes, error = null,

@@ -4,6 +4,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 enum class RunOutcome { INSTALLED, RETRY, FAILED, GONE }
@@ -20,14 +22,22 @@ class DownloadRunner(
     private val now: () -> Long = System::currentTimeMillis,
     private val progressEveryMillis: Long = 1_000,
 ) {
+    private val locks = mutableMapOf<String, Mutex>()
+
+    /** One run per record at a time: a replacing run waits until the old one has fully exited. */
     suspend fun run(itemId: String, sha256: String, onProgress: (done: Long, total: Long) -> Unit = { _, _ -> }): RunOutcome {
+        val lock = synchronized(locks) { locks.getOrPut("$itemId@$sha256") { Mutex() } }
+        return lock.withLock { runLocked(itemId, sha256, onProgress) }
+    }
+
+    private suspend fun runLocked(itemId: String, sha256: String, onProgress: (done: Long, total: Long) -> Unit): RunOutcome {
         val record = dao.get(itemId, sha256) ?: return RunOutcome.GONE
         if (record.state == DownloadState.INSTALLED) return RunOutcome.INSTALLED
         var hashFailures = record.hashFailures
         try {
             while (true) {
                 val part = record.partFile
-                val started = dao.setState(itemId, sha256, DownloadState.RUNNING, null, part.length(), hashFailures, now())
+                val started = dao.setActiveState(itemId, sha256, DownloadState.RUNNING, null, part.length(), hashFailures, now())
                 if (started == 0) return RunOutcome.GONE
                 var lastWrite = 0L
                 val request = DownloadRequest(record.urls, record.sizeBytes, sha256)
@@ -52,8 +62,8 @@ class DownloadRunner(
                         return fail(record, "Not enough free space: about $mb MB more is needed.", hashFailures)
                     }
                     is DownloadResult.Failed -> {
-                        dao.setState(itemId, sha256, DownloadState.QUEUED, result.reason, part.length(), hashFailures, now())
-                        return RunOutcome.RETRY
+                        val queued = dao.setActiveState(itemId, sha256, DownloadState.QUEUED, result.reason, part.length(), hashFailures, now())
+                        return if (queued == 0) RunOutcome.GONE else RunOutcome.RETRY
                     }
                 }
             }
@@ -83,8 +93,8 @@ class DownloadRunner(
     }
 
     private suspend fun fail(record: DownloadRecord, reason: String, hashFailures: Int): RunOutcome {
-        dao.setState(record.itemId, record.sha256, DownloadState.FAILED, reason, record.partFile.length(), hashFailures, now())
-        return RunOutcome.FAILED
+        val changed = dao.setActiveState(record.itemId, record.sha256, DownloadState.FAILED, reason, record.partFile.length(), hashFailures, now())
+        return if (changed == 0) RunOutcome.GONE else RunOutcome.FAILED
     }
 
     private companion object {
