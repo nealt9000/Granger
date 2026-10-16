@@ -119,11 +119,15 @@ interface ShelfDao {
 
 @Dao
 interface SessionDao {
-    @Query("SELECT * FROM reading_tabs WHERE onRail = 1 ORDER BY openedAt DESC LIMIT :limit")
+    @Query("SELECT * FROM reading_tabs WHERE onRail = 1 ORDER BY openedAt DESC, id DESC LIMIT :limit")
     fun observeRailTabs(limit: Int): Flow<List<ReadingTab>>
 
-    @Query("SELECT * FROM reading_tabs ORDER BY openedAt DESC LIMIT 1")
+    /** The most recently used tab still on the rail; a closed tab is never restored. */
+    @Query("SELECT * FROM reading_tabs WHERE onRail = 1 ORDER BY openedAt DESC, id DESC LIMIT 1")
     suspend fun latestTab(): ReadingTab?
+
+    @Query("SELECT * FROM reading_tabs WHERE onRail = 1 AND packId = :packId AND path = :path ORDER BY openedAt DESC, id DESC LIMIT 1")
+    suspend fun railTabShowing(packId: String, path: String): ReadingTab?
 
     @Query("SELECT * FROM reading_tabs WHERE id = :id")
     suspend fun tab(id: Long): ReadingTab?
@@ -139,6 +143,9 @@ interface SessionDao {
 
     @Query("UPDATE reading_tabs SET packId = :to WHERE packId = :from")
     suspend fun moveTabsToPack(from: String, to: String)
+
+    @Query("DELETE FROM reading_tabs WHERE packId = :packId")
+    suspend fun deleteTabsForPack(packId: String)
 
     @Upsert
     suspend fun upsertHistory(entry: HistoryEntry)
@@ -156,13 +163,13 @@ interface SessionDao {
     @Upsert
     suspend fun upsertRecentSearch(search: RecentSearch)
 
-    @Query("SELECT * FROM recent_searches ORDER BY searchedAt DESC LIMIT :limit")
+    @Query("SELECT * FROM recent_searches ORDER BY searchedAt DESC, query LIMIT :limit")
     fun observeRecentSearches(limit: Int): Flow<List<RecentSearch>>
 
     /** Keeps only the [limit] newest searches. */
     @Query(
         "DELETE FROM recent_searches WHERE query NOT IN " +
-            "(SELECT query FROM recent_searches ORDER BY searchedAt DESC LIMIT :limit)",
+            "(SELECT query FROM recent_searches ORDER BY searchedAt DESC, query LIMIT :limit)",
     )
     suspend fun trimRecentSearches(limit: Int)
 }

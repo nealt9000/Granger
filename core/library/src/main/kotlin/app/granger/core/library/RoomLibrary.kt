@@ -26,6 +26,7 @@ class RoomLibrary(
     private val packDao = db.packDao()
     private val bookmarkDao = db.bookmarkDao()
     private val positionDao = db.readingPositionDao()
+    private val sessionDao = db.sessionDao()
     private val refreshMutex = Mutex()
     private val openArchives = HashMap<String, ZimArchive>()
 
@@ -103,6 +104,9 @@ class RoomLibrary(
             bookmarkDao.deleteForPack(old.id)
             positionDao.moveToPack(old.id, new.id)
             positionDao.deleteForPack(old.id)
+            sessionDao.moveTabsToPack(old.id, new.id)
+            sessionDao.moveHistoryToPack(old.id, new.id)
+            sessionDao.deleteHistoryForPack(old.id)
             packDao.delete(old.id)
             packDao.upsert(new.copy(addedAt = old.addedAt))
         }
@@ -118,6 +122,8 @@ class RoomLibrary(
             db.withTransaction {
                 bookmarkDao.deleteForPack(packId)
                 positionDao.deleteForPack(packId)
+                sessionDao.deleteHistoryForPack(packId)
+                sessionDao.deleteTabsForPack(packId)
                 packDao.delete(packId)
             }
             true
