@@ -17,3 +17,14 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 9 | Beta | Release config, signing, Play listing, internal track | |
 
 Plan 1's measurements feed directly into Plans 6–8 (backend choice, model files in the catalog, the latency target, embedder co-residency).
+
+## Carried forward from Plan 2's review
+
+For Plan 3, which introduces pack updates and internet access:
+- **Pack identity across updates.** Packs are keyed by ZIM UUID, which changes with every snapshot. When the downloader replaces a snapshot, re-key `bookmarks` and `reading_positions` to the new pack (match on the ZIM `Name` metadata), or users lose them.
+- **Reader network block.** The reader makes no requests today only because the app lacks `INTERNET`. Before adding it, set `blockNetworkLoads = true` and disable Safe Browsing on `ReaderWebView`.
+
+Deferred, low priority:
+- Opening the reader after the OS killed the app shows the article it was first opened on, not the last page.
+- Large media entries are read whole into memory.
+- No device test yet for a ZIM truncated or ejected (SD card) while it is open.
