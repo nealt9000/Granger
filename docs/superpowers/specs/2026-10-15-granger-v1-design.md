@@ -233,5 +233,4 @@ Events are queued locally; a screen shows the exact pending payload; upload happ
 - Final Granger Classics title list; verify the US public-domain status of each translation (notably the Quran translation choice).
 - Non-US public-domain terms (life + 70 jurisdictions) for Classics and Gutenberg packs.
 - Whether redistributing Kiwix's Gutenberg packs alongside a paid Pro tier touches the Project Gutenberg trademark terms (lawyer).
-- Ask Caltech / Basic Books about licensing the Feynman Lectures (low odds; not planned).
 - Fahrenheit 451 easter egg (on hold).
