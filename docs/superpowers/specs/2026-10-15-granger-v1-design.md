@@ -29,7 +29,7 @@ Governing rule: **knowledge lives in files, not in model weights.** The model is
 | --- | --- |
 | Platform | Kotlin, Jetpack Compose, Android 10+ |
 | Models | Gemma 4 **E2B** = small (default answerer); Gemma 4 **E4B** = large ("Think deeper", user-triggered). Stock models, no fine-tune unless eval fails. |
-| Runtime | **LiteRT-LM only.** One model resident at a time. |
+| Runtime | **LiteRT-LM only.** One model resident at a time. Backend: GPU; model files: `gemma-4-E2B-it-gpu.litertlm`, `gemma-4-E4B-it-gpu.litertlm`, `embeddinggemma-2-text-270m.litertlm`. |
 | Embedder | EmbeddingGemma 2 Text 270M (`.litertlm`, Apache-2.0) on LiteRT-LM's `EmbeddingEngine`, may co-reside with E2B |
 | Device tiers | < 6 GB RAM: library only · 6 GB: + Ask (E2B) · 8 GB+: + Think deeper (E4B) |
 | Retrieval | LLM query rewrite → ZIM built-in full-text index → passage chunking → embedding rerank → threshold or decline |
@@ -46,7 +46,7 @@ Governing rule: **knowledge lives in files, not in model weights.** The model is
 ### Success criteria for v1
 
 - Play internal beta shipped.
-- On the Pixel 6, E2B first token in ≈3 s or less after retrieval (validated in milestone 1; the target adjusts if the spike shows otherwise, the architecture does not).
+- On the Pixel 6, E2B first token in ≈9 s or less after retrieval (measured: 8.9 s on Pixel 6 including the query rewrite, see docs/superpowers/spikes/2026-10-model-spike-results.md).
 - Every Ask response cites at least one passage or declines.
 - Eval: ≥ 90% correct declines on unanswerable questions; ≥ 80% grounded answers on answerable ones.
 
@@ -95,7 +95,7 @@ The answer view always shows cited passages; tapping one opens the article at th
 ### ModelManager
 
 - Determines the device tier once from total RAM (`ActivityManager.MemoryInfo.totalMem`) and persists it; shown in Readiness.
-- Guarantees at most one LLM resident; the embedder may co-reside with E2B (to be confirmed by the milestone-1 memory measurements; if not, it loads per query).
+- Guarantees at most one LLM resident; the embedder may co-reside with E2B (measured: co-resident peak RSS 2.2 GB, 27% of the Pixel 6's RAM).
 - Hides Ask / Think deeper on devices below the tier or when models aren't installed.
 
 ## 3. Content, catalog, downloads, storage, billing
