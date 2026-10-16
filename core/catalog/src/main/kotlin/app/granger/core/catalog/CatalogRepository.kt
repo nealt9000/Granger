@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.io.IOException
 import java.time.Instant
 
 data class CatalogState(
@@ -58,8 +59,12 @@ class CatalogRepository(
     override suspend fun refresh() = mutex.withLock {
         loadCacheOnce()
         _state.update { it.copy(refreshing = true) }
-        val error = withContext(io) { fetchAndCache() }
-        _state.update { it.copy(refreshing = false, error = error) }
+        var error: CatalogError? = CatalogError.NETWORK
+        try {
+            error = withContext(io) { fetchAndCache() }
+        } finally {
+            _state.update { it.copy(refreshing = false, error = error) }
+        }
     }
 
     private suspend fun loadCacheOnce() {
@@ -105,13 +110,21 @@ class CatalogRepository(
     }
 
     private fun writeCache(bytes: ByteArray, signature: ByteArray) {
-        cacheDir.mkdirs()
-        val tmpJson = File(cacheDir, "catalog.json.tmp").apply { writeBytes(bytes) }
-        val tmpSig = File(cacheDir, "catalog.json.sig.tmp").apply { writeBytes(signature) }
-        // A crash between the two renames leaves a mismatched pair, which fails verification and is
-        // treated as no cache: safe, and fixed by the next refresh.
-        tmpJson.renameTo(jsonFile)
-        tmpSig.renameTo(sigFile)
+        val tmpJson = File(cacheDir, "catalog.json.tmp")
+        val tmpSig = File(cacheDir, "catalog.json.sig.tmp")
+        try {
+            cacheDir.mkdirs()
+            tmpJson.writeBytes(bytes)
+            tmpSig.writeBytes(signature)
+            // A crash between the two renames leaves a mismatched pair, which fails verification and is
+            // treated as no cache: safe, and fixed by the next refresh.
+            tmpJson.renameTo(jsonFile)
+            tmpSig.renameTo(sigFile)
+        } catch (e: IOException) {
+            // The catalog is verified, so it is still shown; only the cache is not updated.
+            tmpJson.delete()
+            tmpSig.delete()
+        }
     }
 
     private companion object {

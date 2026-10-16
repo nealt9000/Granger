@@ -145,4 +145,28 @@ class CatalogRepositoryTest {
         repo.refresh()
         assertThat(repo.state.value.catalog!!.models.map { it.id }).containsExactly("e2b")
     }
+
+    @Test fun anUnwritableCacheStillShowsTheVerifiedCatalog() = test {
+        cacheDir.parentFile!!.mkdirs()
+        cacheDir.writeText("not a directory")
+        serve(catalogJson())
+        val repo = repo()
+        repo.refresh()
+        assertThat(repo.state.value.catalog!!.packs.single().title).isEqualTo("WikiMed")
+        assertThat(repo.state.value.error).isNull()
+        assertThat(repo.state.value.refreshing).isFalse()
+    }
+
+    @Test fun anEarlierErrorClearsOnALaterSuccessfulRefresh() = test {
+        http.offline = true
+        val repo = repo()
+        repo.refresh()
+        assertThat(repo.state.value.error).isEqualTo(CatalogError.NETWORK)
+
+        http.offline = false
+        serve(catalogJson())
+        repo.refresh()
+        assertThat(repo.state.value.error).isNull()
+        assertThat(repo.state.value.catalog).isNotNull()
+    }
 }
