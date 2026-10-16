@@ -115,8 +115,18 @@ class DownloadManager(
     override suspend fun cancel(itemId: String) = mutex.withLock {
         scheduler.cancel(itemId)
         for (record in dao.forItem(itemId).filter { it.isActive }) {
-            dao.delete(record.itemId, record.sha256)
-            withContext(io) { record.partFile.delete() }
+            val fileExists = withContext(io) { record.partFile.delete(); record.file.exists() }
+            if (fileExists) {
+                // A cancelled repair: the verified file is still there, so keep its ledger row.
+                dao.upsert(
+                    record.copy(
+                        state = DownloadState.INSTALLED, bytesDone = record.sizeBytes, error = null,
+                        hashFailures = 0, verifiedAt = null, updatedAt = now(),
+                    ),
+                )
+            } else {
+                dao.delete(record.itemId, record.sha256)
+            }
         }
     }
 
@@ -132,7 +142,9 @@ class DownloadManager(
     }
 
     override suspend fun repair(itemId: String) = mutex.withLock {
-        val installed = dao.forItem(itemId).firstOrNull { it.state == DownloadState.INSTALLED } ?: return@withLock
+        val versions = dao.forItem(itemId)
+        if (versions.any { it.isActive }) return@withLock
+        val installed = versions.firstOrNull { it.state == DownloadState.INSTALLED } ?: return@withLock
         val queued = installed.copy(state = DownloadState.QUEUED, bytesDone = 0, error = null, hashFailures = 0, verifiedAt = null, updatedAt = now())
         dao.upsert(queued)
         scheduler.schedule(queued, replace = true)
@@ -144,6 +156,8 @@ class DownloadManager(
 
     override suspend fun setWifiOnly(wifiOnly: Boolean) = mutex.withLock {
         dao.setWifiOnlyForActive(wifiOnly)
-        for (record in dao.getAll().filter { it.isActive }) scheduler.schedule(record, replace = true)
+        for (record in dao.getAll().filter { it.state == DownloadState.QUEUED || it.state == DownloadState.RUNNING }) {
+            scheduler.schedule(record, replace = true)
+        }
     }
 }

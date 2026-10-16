@@ -28,20 +28,23 @@ fun interface VolumeSource {
 class AndroidVolumes(private val context: Context) : VolumeSource {
     override fun list(): List<Volume> {
         val storage = context.getSystemService(StorageManager::class.java)
+        // A volume the framework cannot describe is skipped rather than failing the whole list.
         return context.getExternalFilesDirs(null).filterNotNull()
-            .filter { Environment.getExternalStorageState(it) == Environment.MEDIA_MOUNTED }
-            .map { root ->
-                val removable = Environment.isExternalStorageRemovable(root)
-                Volume(
-                    root = root,
-                    label = storage.getStorageVolume(root)?.getDescription(context)
-                        ?: if (removable) "SD card" else "Internal storage",
-                    removable = removable,
-                    freeBytes = root.usableSpace,
-                    totalBytes = root.totalSpace,
-                    grangerBytes = sizeOf(File(root, "packs")) + sizeOf(File(root, "models")),
-                )
-            }
+            .mapNotNull { root -> runCatching { describe(storage, root) }.getOrNull() }
+    }
+
+    private fun describe(storage: StorageManager, root: File): Volume? {
+        if (Environment.getExternalStorageState(root) != Environment.MEDIA_MOUNTED) return null
+        val removable = Environment.isExternalStorageRemovable(root)
+        return Volume(
+            root = root,
+            label = storage.getStorageVolume(root)?.getDescription(context)
+                ?: if (removable) "SD card" else "Internal storage",
+            removable = removable,
+            freeBytes = root.usableSpace,
+            totalBytes = root.totalSpace,
+            grangerBytes = sizeOf(File(root, "packs")) + sizeOf(File(root, "models")),
+        )
     }
 
     private fun sizeOf(dir: File): Long = dir.listFiles()?.sumOf { if (it.isFile) it.length() else 0L } ?: 0L

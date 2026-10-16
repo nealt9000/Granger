@@ -169,14 +169,43 @@ class DownloadManagerTest {
         assertThat(scheduler.scheduled.single().second).isTrue()
     }
 
+    @Test fun cancellingARepairKeepsTheInstalledRecord() = test {
+        val file = File(internal, "packs/med.zim").apply { parentFile!!.mkdirs(); writeText("data") }
+        installed(packEntry(), file.path)
+        manager.repair("med")
+        File(file.path + ".part").writeText("half")
+        manager.cancel("med")
+        val record = records().single()
+        assertThat(record.state).isEqualTo(DownloadState.INSTALLED)
+        assertThat(record.bytesDone).isEqualTo(record.sizeBytes)
+        assertThat(record.verifiedAt).isNull()
+        assertThat(file.exists()).isTrue()
+        assertThat(File(file.path + ".part").exists()).isFalse()
+    }
+
+    @Test fun repairWhileAnUpdateIsActiveDoesNothing() = test {
+        installed(packEntry(sha256 = SHA_1), File(internal, "packs/med_2026-09-01.zim").path)
+        manager.enqueue(packEntry(sha256 = SHA_2), internal, true)
+        val before = records()
+        val scheduledBefore = scheduler.scheduled.size
+        manager.repair("med")
+        assertThat(records()).isEqualTo(before)
+        assertThat(scheduler.scheduled).hasSize(scheduledBefore)
+    }
+
     @Test fun setWifiOnlyReschedulesActiveDownloads() = test {
         installed(packEntry(id = "old"), "/x/old.zim")
         manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
+        manager.enqueue(packEntry(id = "f"), internal, wifiOnly = true)
+        dao.setState("f", SHA_1, DownloadState.FAILED, "boom", 0, 0, 9)
         manager.setWifiOnly(false)
         assertThat(records().first { it.itemId == "a" }.wifiOnly).isFalse()
         assertThat(records().first { it.itemId == "old" }.wifiOnly).isTrue()
         assertThat(scheduler.scheduled.last().let { it.first.itemId to it.second }).isEqualTo("a" to true)
         assertThat(scheduler.scheduled.last().first.wifiOnly).isFalse()
+        assertThat(records().first { it.itemId == "f" }.wifiOnly).isFalse()
+        assertThat(records().first { it.itemId == "f" }.state).isEqualTo(DownloadState.FAILED)
+        assertThat(scheduler.scheduled.filter { it.second }.map { it.first.itemId }).containsExactly("a")
     }
 
     @Test fun recordCheckSetsAndClearsVerifiedAt() = test {
