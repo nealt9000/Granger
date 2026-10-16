@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Granger"
-include(":app", ":core:ai")
+include(":app", ":core:ai", ":core:zim")

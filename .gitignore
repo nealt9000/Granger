@@ -11,3 +11,6 @@ captures/
 models/
 *.litertlm
 *.tflite
+# ZIM packs are never committed, except the test ZIM
+*.zim
+!testdata/granger-test.zim
