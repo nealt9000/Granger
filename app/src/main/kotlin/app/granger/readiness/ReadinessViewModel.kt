@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 
 enum class CheckStatus { VERIFIED, SIZE_OK, INCOMPLETE, CORRUPTED, MISSING, DAMAGED, NOT_FROM_CATALOG }
 
@@ -94,11 +95,16 @@ class ReadinessViewModel(
             progress.update { it + (key to 0f) }
             try {
                 var shown = 0f
-                val result = full(record) { p ->
-                    if (p - shown >= 0.01f || p >= 1f) {
-                        shown = p
-                        progress.update { it + (key to p) }
+                val result = try {
+                    full(record) { p ->
+                        if (p - shown >= 0.01f || p >= 1f) {
+                            shown = p
+                            progress.update { it + (key to p) }
+                        }
                     }
+                } catch (e: IOException) {
+                    // The file vanished or the card was pulled mid-check.
+                    withContext(io) { quick(record) }
                 }
                 results.update { it + (key to result) }
                 downloads.recordCheck(record.itemId, record.sha256, result == Integrity.VERIFIED)
@@ -128,10 +134,13 @@ class ReadinessViewModel(
         val rows = installed.map { record ->
             val key = keyOf(record)
             val pack = packByPath[record.filePath]
+            val live = quick(record)
             val status = when {
+                // A file that has since gone or shrunk beats any earlier full check.
+                live == Integrity.MISSING || live == Integrity.INCOMPLETE -> live.toStatus()
                 res[key] == Integrity.CORRUPTED -> CheckStatus.CORRUPTED
                 pack?.status == PackStatus.CORRUPT -> CheckStatus.DAMAGED
-                else -> (res[key] ?: quick(record)).toStatus()
+                else -> (res[key] ?: live).toStatus()
             }
             CheckRow(
                 key = key,

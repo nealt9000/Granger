@@ -14,6 +14,7 @@ import app.granger.pack
 import app.granger.record
 import app.granger.volume
 import com.google.common.truth.Truth.assertThat
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -29,6 +30,7 @@ class ReadinessViewModelTest {
     private val volumes = FakeVolumes(listOf(volume("/internal", "Internal storage", free = 9_000, total = 64_000)))
     private val quick = mutableMapOf<String, Integrity>()
     private var fullResult = CompletableDeferred<Integrity>()
+    private var fullThrows = false
 
     private val med = record("med", DownloadState.INSTALLED, filePath = "/internal/packs/med.zim")
     private val e2b = record("e2b", DownloadState.INSTALLED, kind = ItemKind.MODEL, filePath = "/internal/models/e2b.litertlm")
@@ -40,6 +42,7 @@ class ReadinessViewModelTest {
             io = main.dispatcher,
             quick = { quick[it.itemId] ?: Integrity.SIZE_OK },
             full = { _, progress ->
+                if (fullThrows) throw IOException("card pulled")
                 progress(0.5f)
                 fullResult.await()
             },
@@ -119,5 +122,31 @@ class ReadinessViewModelTest {
         vm.repair(key(med))
         testScheduler.advanceUntilIdle()
         assertThat(downloads.calls).contains("repair:med")
+    }
+
+    @Test fun aFailingCheckFallsBackToTheQuickStatus() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med)
+        fullThrows = true
+        quick["med"] = Integrity.MISSING
+        val vm = viewModel()
+        vm.verify(key(med))
+        testScheduler.advanceUntilIdle()
+        val row = vm.ui.value.packs.single()
+        assertThat(row.progress).isNull()
+        assertThat(row.status).isEqualTo(CheckStatus.MISSING)
+        assertThat(downloads.calls).contains("check:med:false")
+    }
+
+    @Test fun aLaterMissingFileBeatsAnEarlierVerifiedResult() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med)
+        fullResult.complete(Integrity.VERIFIED)
+        val vm = viewModel()
+        vm.verify(key(med))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.packs.single().status).isEqualTo(CheckStatus.VERIFIED)
+        quick["med"] = Integrity.MISSING
+        downloads.list.value = listOf(med.copy(verifiedAt = 1L)) // any emission rebuilds the rows
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.packs.single().status).isEqualTo(CheckStatus.MISSING)
     }
 }
