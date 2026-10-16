@@ -89,6 +89,14 @@ class RoomLibrary(
         }
     }
 
+    override suspend fun fileReplaced(path: String) = refreshMutex.withLock {
+        withContext(io) {
+            val absolute = File(path).absolutePath
+            // A repair keeps the path and the ZIM's uuid, so refresh() alone would keep the old file handle.
+            for (pack in packDao.getAll()) if (pack.filePath == absolute) closeArchive(pack.id)
+        }
+    }
+
     private suspend fun inherit(old: Pack, new: Pack) {
         db.withTransaction {
             bookmarkDao.moveToPack(old.id, new.id)

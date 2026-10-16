@@ -153,6 +153,21 @@ class RoomLibraryTest {
         assertThat((first as FakeZimArchive).closed).isTrue()
     }
 
+    @Test fun aFileReplacedAtTheSamePathIsOpenedAgain() = test {
+        val file = zim(internal, "a.zim", "u-a")
+        zim(internal, "b.zim", "u-b")
+        library.refresh()
+        val old = library.archive("u-a") as FakeZimArchive
+        val other = library.archive("u-b") as FakeZimArchive
+        library.fileReplaced(file.path)
+        assertThat(old.closed).isTrue()
+        val reopened = library.archive("u-a")
+        assertThat(reopened).isNotSameInstanceAs(old)
+        assertThat(reopened).isNotNull()
+        assertThat(other.closed).isFalse()
+        assertThat(library.archive("u-b")).isSameInstanceAs(other)
+    }
+
     @Test fun packMovedToAnotherVolumeStaysOkAndKeepsAddedAt() = test {
         val file = zim(internal, "a.zim", "u-a")
         library.refresh()

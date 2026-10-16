@@ -52,6 +52,9 @@ class FakeLibrary : Library {
     }
 
     override suspend fun refresh() { refreshes++ }
+
+    val replacedFiles = mutableListOf<String>()
+    override suspend fun fileReplaced(path: String) { replacedFiles += path }
     override fun archive(packId: String) = archives[packId]
     override fun cachedArchive(packId: String) = archives[packId]
     override suspend fun startPath(packId: String) = lastRead[packId] ?: archives[packId]?.mainPath

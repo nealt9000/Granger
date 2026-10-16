@@ -14,6 +14,9 @@ interface Library {
     /** Re-scans the pack folders on every volume and updates [packs]. */
     suspend fun refresh()
 
+    /** A verified file was written at [path]; drop any open archive for it so the next read opens the new file. */
+    suspend fun fileReplaced(path: String)
+
     /**
      * The open archive for an OK pack, or null when the pack is unknown, missing, damaged, or fails
      * to open. Blocking: call it off the main thread.

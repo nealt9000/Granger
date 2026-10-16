@@ -94,6 +94,11 @@ class AppContainer(context: Context) {
     val downloadRunner = DownloadRunner(
         dao = downloadDao,
         downloader = FileDownloader(http),
-        onInstalled = { record -> if (record.kind == ItemKind.PACK) library.refresh() },
+        onInstalled = { record ->
+            if (record.kind == ItemKind.PACK) {
+                library.fileReplaced(record.filePath)
+                library.refresh()
+            }
+        },
     )
 }
