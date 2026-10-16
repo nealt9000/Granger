@@ -1,0 +1,14 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.DS_Store
+.superpowers/
+# Model files are never committed
+models/
+*.litertlm
+*.tflite
+sentencepiece.model
