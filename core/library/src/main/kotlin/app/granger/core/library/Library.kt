@@ -34,4 +34,10 @@ interface Library {
     suspend fun savePosition(packId: String, path: String, scrollFraction: Float)
 
     suspend fun position(packId: String, path: String): Float?
+
+    /**
+     * Deletes the pack's file, its entry, bookmarks and reading positions. False only when the file
+     * exists and can't be deleted; an unknown id is already gone, so it returns true.
+     */
+    suspend fun remove(packId: String): Boolean
 }

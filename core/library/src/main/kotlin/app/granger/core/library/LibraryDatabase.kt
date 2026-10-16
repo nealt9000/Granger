@@ -1,11 +1,17 @@
 package app.granger.core.library
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Pack::class, Bookmark::class, ReadingPosition::class], version = 1, exportSchema = true)
+@Database(
+    entities = [Pack::class, Bookmark::class, ReadingPosition::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
+)
 abstract class LibraryDatabase : RoomDatabase() {
     abstract fun packDao(): PackDao
     abstract fun bookmarkDao(): BookmarkDao

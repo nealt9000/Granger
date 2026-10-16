@@ -37,6 +37,13 @@ interface BookmarkDao {
 
     @Query("DELETE FROM bookmarks WHERE packId = :packId AND path = :path")
     suspend fun delete(packId: String, path: String)
+
+    /** Moves bookmarks to another pack; one that already exists there wins. */
+    @Query("UPDATE OR IGNORE bookmarks SET packId = :to WHERE packId = :from")
+    suspend fun moveToPack(from: String, to: String)
+
+    @Query("DELETE FROM bookmarks WHERE packId = :packId")
+    suspend fun deleteForPack(packId: String)
 }
 
 @Dao
@@ -49,4 +56,10 @@ interface ReadingPositionDao {
 
     @Query("SELECT * FROM reading_positions WHERE packId = :packId ORDER BY updatedAt DESC LIMIT 1")
     suspend fun lastRead(packId: String): ReadingPosition?
+
+    @Query("UPDATE OR IGNORE reading_positions SET packId = :to WHERE packId = :from")
+    suspend fun moveToPack(from: String, to: String)
+
+    @Query("DELETE FROM reading_positions WHERE packId = :packId")
+    suspend fun deleteForPack(packId: String)
 }

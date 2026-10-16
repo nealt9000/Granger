@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import androidx.room.withTransaction
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimOpenResult
 import app.granger.core.zim.ZimOpener
@@ -16,7 +17,7 @@ import java.io.File
  * external-files volume); [refresh] reconciles the table with what is on disk.
  */
 class RoomLibrary(
-    db: LibraryDatabase,
+    private val db: LibraryDatabase,
     private val opener: ZimOpener,
     private val packDirs: () -> List<File>,
     private val io: CoroutineDispatcher = Dispatchers.IO,
@@ -34,12 +35,14 @@ class RoomLibrary(
     override suspend fun refresh() = refreshMutex.withLock {
         withContext(io) {
             val known = packDao.getAll()
+            val knownIds = known.mapTo(HashSet()) { it.id }
             val files = packDirs()
                 .flatMap { dir -> dir.listFiles()?.toList().orEmpty() }
                 .filter { it.isFile && it.name.endsWith(".zim", ignoreCase = true) }
                 .sortedBy { it.absolutePath }
             val seenPaths = HashSet<String>()
             val seenIds = HashSet<String>()
+            val added = ArrayList<Pack>()
             for (file in files) {
                 val path = file.absolutePath
                 seenPaths += path
@@ -64,13 +67,52 @@ class RoomLibrary(
                     packDao.upsert(pack)
                     closeArchive(pack.id)
                 }
+                if (pack.id !in knownIds && pack.status == PackStatus.OK) added += pack
+            }
+            // A new snapshot whose predecessor is gone from disk takes over its bookmarks and positions.
+            val superseded = HashSet<String>()
+            for (pack in added) {
+                if (pack.name.isBlank()) continue
+                val old = known.firstOrNull {
+                    it.name == pack.name && it.id !in seenIds && it.id !in superseded
+                } ?: continue
+                inherit(old, pack)
+                superseded += old.id
             }
             for (pack in known) {
+                if (pack.id in superseded) continue
                 if (pack.id !in seenIds && pack.filePath !in seenPaths && pack.status != PackStatus.MISSING) {
                     packDao.upsert(pack.copy(status = PackStatus.MISSING))
                     closeArchive(pack.id)
                 }
             }
+        }
+    }
+
+    private suspend fun inherit(old: Pack, new: Pack) {
+        db.withTransaction {
+            bookmarkDao.moveToPack(old.id, new.id)
+            bookmarkDao.deleteForPack(old.id)
+            positionDao.moveToPack(old.id, new.id)
+            positionDao.deleteForPack(old.id)
+            packDao.delete(old.id)
+            packDao.upsert(new.copy(addedAt = old.addedAt))
+        }
+        closeArchive(old.id)
+    }
+
+    override suspend fun remove(packId: String): Boolean = refreshMutex.withLock {
+        withContext(io) {
+            val pack = packDao.get(packId) ?: return@withContext true
+            closeArchive(packId)
+            val file = File(pack.filePath)
+            if (file.exists() && !file.delete()) return@withContext false
+            db.withTransaction {
+                bookmarkDao.deleteForPack(packId)
+                positionDao.deleteForPack(packId)
+                packDao.delete(packId)
+            }
+            true
         }
     }
 

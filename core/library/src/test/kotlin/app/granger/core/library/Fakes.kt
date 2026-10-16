@@ -18,8 +18,9 @@ class FakeZimArchive(
     var suggestions: List<ZimHit> = emptyList(),
     var results: List<ZimHit> = emptyList(),
     var failSearch: Boolean = false,
+    name: String = uuid,
 ) : ZimArchive {
-    override val metadata = ZimMetadata(title, "About $title", "eng", "2026-10-15", uuid)
+    override val metadata = ZimMetadata(title, "About $title", "eng", "2026-10-15", name)
     var closed = false
 
     override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }

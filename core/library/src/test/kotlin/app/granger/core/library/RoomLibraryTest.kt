@@ -32,9 +32,16 @@ class RoomLibraryTest {
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
-    private fun zim(dir: File, name: String, uuid: String, title: String = uuid, paths: Set<String> = setOf("index")): File {
-        opener.archives[name] = { FakeZimArchive(uuid, title, paths) }
-        return File(dir, name).apply { writeText("zim $uuid") }
+    private fun zim(
+        dir: File,
+        fileName: String,
+        uuid: String,
+        title: String = uuid,
+        paths: Set<String> = setOf("index"),
+        name: String = uuid,
+    ): File {
+        opener.archives[fileName] = { FakeZimArchive(uuid, title, paths, name = name) }
+        return File(dir, fileName).apply { writeText("zim $uuid") }
     }
 
     private suspend fun packs() = library.packs.first()
@@ -220,5 +227,119 @@ class RoomLibraryTest {
         assertThat(library.bookmarks.first()).hasSize(1)
         library.setBookmarked("p", "C++", "C++", false)
         assertThat(library.isBookmarked("p", "C++").first()).isFalse()
+    }
+
+    @Test fun recordsTheZimName() = test {
+        zim(internal, "a.zim", "u-a", name = "wikipedia_en_top")
+        library.refresh()
+        assertThat(packs().single().name).isEqualTo("wikipedia_en_top")
+    }
+
+    @Test fun updatedSnapshotKeepsBookmarksPositionsAndAddedAt() = test {
+        val old = zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top", paths = setOf("index", "C++"))
+        library.refresh()
+        library.setBookmarked("u-old", "C++", "C++", true)
+        library.savePosition("u-old", "C++", 0.5f)
+        clock = 9_000L
+
+        zim(internal, "top_2026-09.zim", "u-new", name = "wikipedia_en_top", paths = setOf("index", "C++"))
+        old.delete()
+        library.refresh()
+
+        assertThat(packs().map { it.id }).containsExactly("u-new")
+        assertThat(packs().single().status).isEqualTo(PackStatus.OK)
+        assertThat(packs().single().addedAt).isEqualTo(1_000L)
+        assertThat(library.bookmarks.first().map { it.packId to it.path }).containsExactly("u-new" to "C++")
+        assertThat(library.position("u-new", "C++")).isEqualTo(0.5f)
+        assertThat(library.position("u-old", "C++")).isNull()
+        assertThat(library.startPath("u-new")).isEqualTo("C++")
+    }
+
+    @Test fun snapshotReplacedAtTheSamePathKeepsBookmarks() = test {
+        zim(internal, "top.zim", "u-old", name = "wikipedia_en_top")
+        library.refresh()
+        library.setBookmarked("u-old", "index", "Home", true)
+
+        zim(internal, "top.zim", "u-new", name = "wikipedia_en_top")
+        library.refresh()
+
+        assertThat(packs().map { it.id }).containsExactly("u-new")
+        assertThat(library.bookmarks.first().map { it.packId }).containsExactly("u-new")
+    }
+
+    @Test fun bothSnapshotsPresentStayApart() = test {
+        zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top")
+        library.refresh()
+        library.setBookmarked("u-old", "index", "Home", true)
+
+        zim(sdCard, "top_2026-09.zim", "u-new", name = "wikipedia_en_top")
+        library.refresh()
+
+        assertThat(packs().map { it.id }).containsExactly("u-old", "u-new")
+        assertThat(library.bookmarks.first().map { it.packId }).containsExactly("u-old")
+    }
+
+    @Test fun differentNamesAreNotMerged() = test {
+        val old = zim(internal, "med.zim", "u-med", name = "wikipedia_en_medicine")
+        library.refresh()
+        library.setBookmarked("u-med", "index", "Home", true)
+        old.delete()
+        zim(internal, "top.zim", "u-top", name = "wikipedia_en_top")
+        library.refresh()
+
+        assertThat(packs().first { it.id == "u-med" }.status).isEqualTo(PackStatus.MISSING)
+        assertThat(library.bookmarks.first().map { it.packId }).containsExactly("u-med")
+    }
+
+    @Test fun blankNamesAreNeverMerged() = test {
+        val old = zim(internal, "a.zim", "u-a", name = "")
+        library.refresh()
+        old.delete()
+        zim(internal, "b.zim", "u-b", name = "")
+        library.refresh()
+        assertThat(packs().map { it.id to it.status })
+            .containsExactly("u-a" to PackStatus.MISSING, "u-b" to PackStatus.OK)
+    }
+
+    @Test fun movingKeepsOneBookmarkWhenBothSnapshotsHadIt() = test {
+        val old = zim(internal, "old.zim", "u-old", name = "n")
+        library.refresh()
+        library.setBookmarked("u-old", "index", "Old title", true)
+        // A bookmark already saved against the new id (e.g. the user opened it before the old one vanished).
+        library.setBookmarked("u-new", "index", "New title", true)
+        old.delete()
+        zim(internal, "new.zim", "u-new", name = "n")
+        library.refresh()
+        assertThat(library.bookmarks.first().map { it.packId to it.title }).containsExactly("u-new" to "New title")
+    }
+
+    @Test fun removeDeletesFileRowBookmarksAndPositions() = test {
+        val file = zim(internal, "a.zim", "u-a")
+        zim(internal, "b.zim", "u-b")
+        library.refresh()
+        val opened = library.archive("u-a") as FakeZimArchive
+        library.setBookmarked("u-a", "index", "Home", true)
+        library.setBookmarked("u-b", "index", "Home", true)
+        library.savePosition("u-a", "index", 0.3f)
+
+        assertThat(library.remove("u-a")).isTrue()
+
+        assertThat(file.exists()).isFalse()
+        assertThat(opened.closed).isTrue()
+        assertThat(packs().map { it.id }).containsExactly("u-b")
+        assertThat(library.bookmarks.first().map { it.packId }).containsExactly("u-b")
+        assertThat(library.position("u-a", "index")).isNull()
+        library.refresh()
+        assertThat(packs().map { it.id }).containsExactly("u-b")
+    }
+
+    @Test fun removeWorksForMissingAndUnknownPacks() = test {
+        val file = zim(sdCard, "a.zim", "u-a")
+        library.refresh()
+        file.delete()
+        library.refresh()
+        assertThat(library.remove("u-a")).isTrue()
+        assertThat(packs()).isEmpty()
+        assertThat(library.remove("nope")).isTrue()
     }
 }

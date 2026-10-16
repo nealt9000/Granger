@@ -42,6 +42,15 @@ class FakeLibrary : Library {
     override val packs: Flow<List<Pack>> = packList
     override val bookmarks: Flow<List<Bookmark>> = bookmarkList
 
+    val removed = mutableListOf<String>()
+
+    override suspend fun remove(packId: String): Boolean {
+        removed += packId
+        packList.update { list -> list.filterNot { it.id == packId } }
+        bookmarkList.update { list -> list.filterNot { it.packId == packId } }
+        return true
+    }
+
     override suspend fun refresh() { refreshes++ }
     override fun archive(packId: String) = archives[packId]
     override fun cachedArchive(packId: String) = archives[packId]

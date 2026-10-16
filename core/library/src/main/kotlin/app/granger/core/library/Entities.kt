@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import app.granger.core.zim.ZimArchive
@@ -26,6 +27,8 @@ data class Pack(
     val hasFulltextIndex: Boolean,
     val status: PackStatus,
     val addedAt: Long,
+    /** The ZIM's `Name` metadata, shared by every snapshot of the same content; blank if unknown. */
+    @ColumnInfo(defaultValue = "") val name: String = "",
 ) {
     companion object {
         fun from(archive: ZimArchive, file: File, addedAt: Long) = Pack(
@@ -39,6 +42,7 @@ data class Pack(
             hasFulltextIndex = archive.hasFulltextIndex,
             status = PackStatus.OK,
             addedAt = addedAt,
+            name = archive.metadata.name,
         )
 
         fun unreadable(file: File, addedAt: Long) = Pack(
