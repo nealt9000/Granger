@@ -140,16 +140,14 @@ class SourceViewModelTest {
         assertThat(vm.rowIds()).hasSize(3)
     }
 
-    @Test fun getQueuesOnTheChosenVolumeWithTheWifiSetting() = runTest(main.dispatcher) {
+    @Test fun getUsesTheChoicesSettingsMadeAfterTheScreenWasBuilt() = runTest(main.dispatcher) {
         val vm = viewModel()
-        vm.selectVolume("/sd")
-        vm.setWifiOnly(false)
+        prefs.volumePath = "/sd"
+        prefs.wifiOnly = false
         vm.get("med")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued.single()).isEqualTo("med" to File("/sd"))
-        assertThat(prefs.volumePath).isEqualTo("/sd")
-        assertThat(prefs.wifiOnly).isFalse()
-        assertThat(downloads.calls).contains("wifi:false")
+        assertThat(vm.ui.value.selectedVolume).isEqualTo("/sd")
         assertThat(vm.ui.value.sections.first { it.title == "Medical" }.rows.single().status)
             .isEqualTo(ItemStatus.Queued(wifiOnly = false))
     }

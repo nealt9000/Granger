@@ -136,8 +136,10 @@ class SourceViewModel(
         refreshVolumes()
     }
 
-    /** Free space changes outside the app; called on resume and after every action. */
+    /** Free space and, from Settings, the download choices change outside this screen; called on resume and after every action. */
     fun refreshVolumes() {
+        selectedPath.value = prefs.volumePath
+        wifiOnly.value = prefs.wifiOnly
         viewModelScope.launch { volumeList.value = withContext(io) { volumes.list() } }
     }
 
@@ -194,17 +196,6 @@ class SourceViewModel(
         }
     }
 
-    fun setWifiOnly(value: Boolean) {
-        wifiOnly.value = value
-        prefs.wifiOnly = value
-        appScope.launch { downloads.setWifiOnly(value) }
-    }
-
-    fun selectVolume(path: String) {
-        selectedPath.value = path
-        prefs.volumePath = path
-    }
-
     fun setTab(value: SourceTab) {
         tab.value = value
     }
@@ -222,11 +213,11 @@ class SourceViewModel(
     /** Queues [items] in order and stops at the first one that doesn't fit. Returns the notice to show. */
     private suspend fun enqueue(items: List<CatalogItem>): String? {
         val all = volumeList.value.ifEmpty { withContext(io) { volumes.list() } }
-        val volume = all.firstOrNull { it.root.path == selectedPath.value } ?: all.firstOrNull()
+        val volume = all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
             ?: return "No storage is available right now."
         var queued = 0
         for (item in items) {
-            val problem = when (val result = downloads.enqueue(item, volume.root, wifiOnly.value)) {
+            val problem = when (val result = downloads.enqueue(item, volume.root, prefs.wifiOnly)) {
                 EnqueueResult.Queued -> null.also { queued++ }
                 EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace ->
