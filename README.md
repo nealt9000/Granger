@@ -11,5 +11,7 @@ Requires JDK 21 and the Android SDK (`ANDROID_HOME` set).
     ./gradlew assembleDebug           # build
     ./gradlew test                    # JVM unit tests
     ./gradlew installDebug            # install on a connected phone
+    ./gradlew connectedDebugAndroidTest   # on-device tests (Pixel 6 over USB)
+    tools/dev/push-packs.sh            # put a small Wikipedia ZIM and the test ZIM on the phone
 
 Design: `docs/superpowers/specs/2026-10-15-granger-v1-design.md`

@@ -7,8 +7,8 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | # | Plan | Delivers | Status |
 | --- | --- | --- | --- |
 | 1 | Foundation + model spike | Toolchain, Gradle project, `:app` + `:core:ai`, `DeviceTier`, `LlmEngine` over LiteRT-LM, debug spike screen, measured Pixel 6 results and decisions | **Written:** `2026-10-15-plan-01-foundation-model-spike.md` |
-| 2 | Reader | `:core:zim` (java-libkiwix `org.kiwix:libkiwix`), test ZIM, `:core:library` (Room), Library screen, WebView reader, title + full-text search, bookmarks, reading position | Next |
-| 3 | Catalog + downloads + Readiness | `tools/catalog-gen`, Ed25519-signed catalog, `:core:catalog`, `:core:downloads` (WorkManager, resume, sha256, volumes), Downloads + Readiness screens | |
+| 2 | Reader | `:core:zim` (java-libkiwix `org.kiwix:libkiwix`), test ZIM, `:core:library` (Room), Library screen, WebView reader, title + full-text search, bookmarks, reading position | **Done:** `2026-10-15-plan-02-reader.md` |
+| 3 | Catalog + downloads + Readiness | `tools/catalog-gen`, Ed25519-signed catalog, `:core:catalog`, `:core:downloads` (WorkManager, resume, sha256, volumes), Downloads + Readiness screens | Next |
 | 4 | Pack builder + Granger Classics | `tools/pack-builder` (python-libzim), Classics manifest, OpenStax physics pack, catalog entries | |
 | 5 | Import | `:core:imports` (EPUB/PDF/TXT/MD, DRM detection, FTS5), `:core:search` (`SearchSource`), My books, EPUB/PDF/TXT readers | |
 | 6 | Ask pipeline | `:core:ask-logic`, rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper, Ask screen | |
