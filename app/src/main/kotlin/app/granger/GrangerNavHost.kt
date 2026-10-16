@@ -1,6 +1,5 @@
 package app.granger
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -13,6 +12,8 @@ import app.granger.downloads.DownloadsScreen
 import app.granger.downloads.DownloadsViewModel
 import app.granger.library.LibraryScreen
 import app.granger.library.LibraryViewModel
+import app.granger.readiness.ReadinessScreen
+import app.granger.readiness.ReadinessViewModel
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
 import app.granger.search.SearchScreen
@@ -75,6 +76,16 @@ fun GrangerNavHost(container: AppContainer) {
                 onBack = { nav.popBackStack() },
             )
         }
-        composable<ReadinessRoute> { Text("Readiness") }
+        composable<ReadinessRoute> {
+            ReadinessScreen(
+                viewModel = viewModel {
+                    ReadinessViewModel(
+                        container.downloads, container.library, container.volumes,
+                        container.deviceTier, container.totalRamBytes, container.appScope,
+                    )
+                },
+                onBack = { nav.popBackStack() },
+            )
+        }
     }
 }
