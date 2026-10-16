@@ -232,7 +232,13 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
             Column {
                 Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
                 when (status) {
-                    is ItemStatus.Queued -> Text(if (status.wifiOnly) "Waiting for Wi-Fi" else "Queued")
+                    is ItemStatus.Queued -> Text(
+                        when {
+                            status.lastError != null -> "Retrying: ${status.lastError}"
+                            status.wifiOnly -> "Waiting for Wi-Fi"
+                            else -> "Queued"
+                        },
+                    )
                     is ItemStatus.Downloading -> {
                         LinearProgressIndicator(
                             progress = { status.fraction },

@@ -32,6 +32,12 @@ class ItemStatusTest {
             .isEqualTo(ItemStatus.Failed("Checksum mismatch"))
     }
 
+    @Test fun aQueuedRetryCarriesTheLastError() {
+        val records = listOf(record("med", DownloadState.QUEUED, wifiOnly = false, error = "a.test answered 503"))
+        assertThat(statusOf(med, records, emptyList(), tier))
+            .isEqualTo(ItemStatus.Queued(wifiOnly = false, lastError = "a.test answered 503"))
+    }
+
     @Test fun anUnfinishedUpdateShowsOverTheInstalledVersion() {
         val records = listOf(record("med", DownloadState.INSTALLED, sha256 = SHA_B), record("med", DownloadState.RUNNING, bytesDone = 500))
         assertThat(statusOf(med, records, emptyList(), tier)).isEqualTo(ItemStatus.Downloading(0.5f))

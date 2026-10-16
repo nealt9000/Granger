@@ -30,6 +30,18 @@ class DownloadRunner(
         return lock.withLock { runLocked(itemId, sha256, onProgress) }
     }
 
+    /** Called after too many retries: a queued or running record becomes failed, keeping its last error. */
+    suspend fun giveUp(itemId: String, sha256: String) {
+        val lock = synchronized(locks) { locks.getOrPut("$itemId@$sha256") { Mutex() } }
+        lock.withLock {
+            val record = dao.get(itemId, sha256) ?: return
+            if (record.state != DownloadState.QUEUED && record.state != DownloadState.RUNNING) return
+            val bytes = withContext(io) { record.partFile.length() }
+            val reason = "Gave up after repeated failures: ${record.error ?: "unknown error"}"
+            dao.setActiveState(itemId, sha256, DownloadState.FAILED, reason, bytes, record.hashFailures, now())
+        }
+    }
+
     private suspend fun runLocked(itemId: String, sha256: String, onProgress: (done: Long, total: Long) -> Unit): RunOutcome {
         val record = dao.get(itemId, sha256) ?: return RunOutcome.GONE
         if (record.state == DownloadState.INSTALLED) return RunOutcome.INSTALLED
@@ -62,6 +74,7 @@ class DownloadRunner(
                         return fail(record, "Not enough free space: about $mb MB more is needed.", hashFailures)
                     }
                     is DownloadResult.Failed -> {
+                        if (result.permanent) return fail(record, result.reason, hashFailures)
                         val queued = dao.setActiveState(itemId, sha256, DownloadState.QUEUED, result.reason, part.length(), hashFailures, now())
                         return if (queued == 0) RunOutcome.GONE else RunOutcome.RETRY
                     }
@@ -71,6 +84,11 @@ class DownloadRunner(
             // Stopped by WorkManager (Wi-Fi lost, cancelled, time limit): the part file stays for a resume.
             withContext(NonCancellable) { dao.requeueIfRunning(itemId, sha256, now()) }
             throw e
+        } catch (e: Exception) {
+            // E.g. the database or disk failing mid-download: never leave the record RUNNING with no worker.
+            return withContext(NonCancellable) {
+                fail(record, "Download stopped: ${e.message ?: e.javaClass.simpleName}", hashFailures)
+            }
         }
     }
 

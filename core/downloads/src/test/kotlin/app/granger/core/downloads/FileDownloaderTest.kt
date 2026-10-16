@@ -135,6 +135,40 @@ class FileDownloaderTest {
         assertThat((result as DownloadResult.Failed).reason).contains("503")
     }
 
+    @Test fun everyMirrorMissingTheFileIsPermanent() = runTest {
+        val result = downloader.download(request(a, b), part)
+        assertThat(result).isInstanceOf(DownloadResult.Failed::class.java)
+        assertThat((result as DownloadResult.Failed).permanent).isTrue()
+        assertThat(result.reason).contains("404")
+    }
+
+    @Test fun aMirrorWithADifferentFileIsPermanent() = runTest {
+        server.files[a] = Random(5).nextBytes(5_000)
+        val result = downloader.download(request(a), part) as DownloadResult.Failed
+        assertThat(result.permanent).isTrue()
+    }
+
+    @Test fun oneMissingAndOneDroppedIsNotPermanent() = runTest {
+        server.files[b] = content
+        server.failAfter[b] = 1_000
+        val result = downloader.download(request(a, b), part) as DownloadResult.Failed
+        assertThat(result.permanent).isFalse()
+    }
+
+    @Test fun serverErrorsAndRateLimitsAreNotPermanent() = runTest {
+        server.status[a] = 404
+        server.status[b] = 429
+        assertThat((downloader.download(request(a, b), part) as DownloadResult.Failed).permanent).isFalse()
+        server.status[b] = 503
+        assertThat((downloader.download(request(a, b), part) as DownloadResult.Failed).permanent).isFalse()
+    }
+
+    @Test fun aBadAddressIsPermanent() = runTest {
+        val result = downloader.download(request("not a url"), part) as DownloadResult.Failed
+        assertThat(result.permanent).isTrue()
+        assertThat(result.reason).contains("Bad address")
+    }
+
     @Test fun cancellingDuringAStalledReadReturnsPromptly() {
         server.files[a] = content
         server.hang += a

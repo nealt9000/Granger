@@ -13,7 +13,8 @@ import app.granger.core.library.PackStatus
 
 sealed interface ItemStatus {
     data object NotInstalled : ItemStatus
-    data class Queued(val wifiOnly: Boolean) : ItemStatus
+    /** [lastError] is why the previous attempt stopped, when this is a retry. */
+    data class Queued(val wifiOnly: Boolean, val lastError: String? = null) : ItemStatus
     data class Downloading(val fraction: Float) : ItemStatus
     data class Failed(val reason: String) : ItemStatus
     data object Installed : ItemStatus
@@ -27,7 +28,7 @@ fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>
     val versions = records.filter { it.itemId == item.id }
     versions.firstOrNull { it.isActive }?.let { active ->
         return when (active.state) {
-            DownloadState.QUEUED -> ItemStatus.Queued(active.wifiOnly)
+            DownloadState.QUEUED -> ItemStatus.Queued(active.wifiOnly, active.error)
             DownloadState.RUNNING ->
                 ItemStatus.Downloading(if (active.sizeBytes > 0) active.bytesDone.toFloat() / active.sizeBytes else 0f)
             else -> ItemStatus.Failed(active.error ?: "Download failed")

@@ -16,4 +16,10 @@ class WorkResultTest {
         assertThat(RunOutcome.RETRY.toWorkResult()).isEqualTo(ListenableWorker.Result.retry())
         assertThat(RunOutcome.FAILED.toWorkResult()).isEqualTo(ListenableWorker.Result.failure())
     }
+
+    @Test fun theTenthAttemptIsTheLast() {
+        // runAttemptCount starts at 0, so attempt 10 has a count of 9.
+        assertThat(DownloadWorker.isLastAttempt(8)).isFalse()
+        assertThat(DownloadWorker.isLastAttempt(9)).isTrue()
+    }
 }

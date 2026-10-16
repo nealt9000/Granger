@@ -26,8 +26,11 @@ sealed interface DownloadResult {
     /** Writing on would leave less than the reserve free. The bytes so far are kept. */
     data class NoSpace(val neededBytes: Long) : DownloadResult
 
-    /** Every URL failed; [reason] is the last error. The bytes so far are kept for a resume. */
-    data class Failed(val reason: String) : DownloadResult
+    /**
+     * Every URL failed; [reason] is the last error. The bytes so far are kept for a resume.
+     * [permanent] means every URL failed in a way retrying won't fix (gone, a different file, a bad address).
+     */
+    data class Failed(val reason: String, val permanent: Boolean = false) : DownloadResult
 }
 
 /**
@@ -56,6 +59,7 @@ class FileDownloader(
             }
             onProgress(offset)
             var lastError = "No download address"
+            var permanent = true
             for (url in request.urls) {
                 if (offset >= request.sizeBytes) break
                 val attempt = fetch(url, request, part, dir, digest, offset, onProgress)
@@ -71,8 +75,9 @@ class FileDownloader(
                 }
                 if (attempt.noSpace) return@withContext DownloadResult.NoSpace(request.sizeBytes - offset)
                 attempt.error?.let { lastError = it }
+                if (!attempt.permanent) permanent = false
             }
-            if (offset < request.sizeBytes) return@withContext DownloadResult.Failed(lastError)
+            if (offset < request.sizeBytes) return@withContext DownloadResult.Failed(lastError, permanent)
             if (digest.digest().toHex() != request.sha256.lowercase()) {
                 part.delete()
                 return@withContext DownloadResult.HashMismatch
@@ -80,7 +85,7 @@ class FileDownloader(
             DownloadResult.Done
         }
 
-    private class Attempt(val offset: Long, val error: String? = null, val noSpace: Boolean = false)
+    private class Attempt(val offset: Long, val error: String? = null, val noSpace: Boolean = false, val permanent: Boolean = false)
 
     @OptIn(InternalCoroutinesApi::class)
     private suspend fun fetch(
@@ -95,7 +100,7 @@ class FileDownloader(
         val builder = try {
             Request.Builder().url(url)
         } catch (e: IllegalArgumentException) {
-            return Attempt(start, "Bad address: $url")
+            return Attempt(start, "Bad address: $url", permanent = true)
         }
         if (start > 0) builder.header("Range", "bytes=$start-")
         val call = client.newCall(builder.build())
@@ -108,17 +113,17 @@ class FileDownloader(
                 val restart = when (response.code) {
                     206 -> {
                         if (start == 0L || !response.header("Content-Range").orEmpty().startsWith("bytes $start-")) {
-                            return Attempt(offset, "$host sent the wrong part of the file")
+                            return Attempt(offset, "$host sent the wrong part of the file", permanent = true)
                         }
                         false
                     }
                     200 -> true // no range support: start the file again
-                    else -> return Attempt(offset, "$host answered ${response.code}")
+                    else -> return Attempt(offset, "$host answered ${response.code}", permanent = response.code.isPermanentStatus())
                 }
                 val body = response.body
                 val expected = if (restart) request.sizeBytes else request.sizeBytes - start
                 if (body.contentLength() != -1L && body.contentLength() != expected) {
-                    return Attempt(offset, "$host has a different file")
+                    return Attempt(offset, "$host has a different file", permanent = true)
                 }
                 if (restart && start > 0) {
                     digest.reset()
@@ -133,9 +138,15 @@ class FileDownloader(
                             currentCoroutineContext().ensureActive()
                             val n = input.read(buffer)
                             if (n < 0) break
-                            if (offset + n > request.sizeBytes) return Attempt(offset, "$host sent too many bytes")
+                            if (offset + n > request.sizeBytes) return Attempt(offset, "$host sent too many bytes", permanent = true)
                             if (freeBytes(dir) - n < reserveBytes) return Attempt(offset, noSpace = true)
-                            out.write(buffer, 0, n)
+                            try {
+                                out.write(buffer, 0, n)
+                            } catch (e: IOException) {
+                                // A volume that filled up anyway (another app wrote to it) is out of space, not a network error.
+                                if (freeBytes(dir) < reserveBytes + BUFFER_SIZE) return Attempt(offset, noSpace = true)
+                                throw e
+                            }
                             digest.update(buffer, 0, n)
                             offset += n
                             if (offset - reported >= PROGRESS_STEP || offset == request.sizeBytes) {
@@ -156,6 +167,9 @@ class FileDownloader(
             cancelHook.dispose()
         }
     }
+
+    /** 4xx means this URL won't work however often we ask, except a timeout (408) or a rate limit (429). */
+    private fun Int.isPermanentStatus() = this in 400..499 && this != 408 && this != 429
 
     companion object {
         /** Never fill a volume past this, whatever the queue check allowed. */

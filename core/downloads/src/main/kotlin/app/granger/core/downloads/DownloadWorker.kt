@@ -50,6 +50,11 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
                     notifications.update(itemId, title, done, total)
                 }
             }
+            if (outcome == RunOutcome.RETRY && isLastAttempt(runAttemptCount)) {
+                // WorkManager retries forever; stop and show the last error with a Retry button.
+                runner.giveUp(itemId, sha256)
+                return Result.failure()
+            }
             return outcome.toWorkResult()
         } finally {
             // Also removes a progress notification posted when setForeground was refused.
@@ -62,6 +67,12 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
         const val KEY_SHA256 = "sha256"
         const val KEY_TITLE = "title"
         private const val NOTIFY_EVERY_MS = 2_000L
+
+        /** Attempts per download before giving up (WorkManager has no limit of its own). */
+        const val MAX_ATTEMPTS = 10
+
+        /** [runAttemptCount] counts from 0, so attempt [MAX_ATTEMPTS] is the last. */
+        fun isLastAttempt(runAttemptCount: Int) = runAttemptCount >= MAX_ATTEMPTS - 1
     }
 }
 

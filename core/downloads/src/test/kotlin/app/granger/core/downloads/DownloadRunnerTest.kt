@@ -121,6 +121,50 @@ class DownloadRunnerTest {
         assertThat(record()!!.error).contains("space")
     }
 
+    @Test fun aPermanentFailureFailsWithItsReason() = runTest {
+        val record = queued() // the server has no such file: 404
+        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.FAILED)
+        val stored = record()!!
+        assertThat(stored.state).isEqualTo(DownloadState.FAILED)
+        assertThat(stored.error).contains("404")
+    }
+
+    @Test fun givingUpFailsWithTheLastError() = runTest {
+        server.files[url] = content
+        server.failAfter[url] = 20_000
+        val record = queued()
+        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.RETRY)
+        val lastError = record()!!.error!!
+        runner.giveUp("med", record.sha256)
+        val stored = record()!!
+        assertThat(stored.state).isEqualTo(DownloadState.FAILED)
+        assertThat(stored.error).isEqualTo("Gave up after repeated failures: $lastError")
+        assertThat(record.partFile.length()).isEqualTo(20_000L)
+    }
+
+    @Test fun givingUpLeavesInstalledAndFailedRecordsAlone() = runTest {
+        server.files[url] = content
+        val record = queued()
+        runner.run("med", record.sha256)
+        runner.giveUp("med", record.sha256)
+        assertThat(record()!!.state).isEqualTo(DownloadState.INSTALLED)
+
+        val failed = queued(sha256 = SHA_1, state = DownloadState.FAILED)
+        dao.setState("med", SHA_1, DownloadState.FAILED, "Checksum mismatch", 0, 2, 5)
+        runner.giveUp("med", failed.sha256)
+        assertThat(record(SHA_1)!!.error).isEqualTo("Checksum mismatch")
+    }
+
+    @Test fun anUnexpectedErrorFailsTheRecordInsteadOfLeavingItRunning() = runTest {
+        server.files[url] = content
+        val record = queued()
+        val outcome = runner.run("med", record.sha256) { done, _ -> if (done > 0) throw RuntimeException("disk I/O error") }
+        assertThat(outcome).isEqualTo(RunOutcome.FAILED)
+        val stored = record()!!
+        assertThat(stored.state).isEqualTo(DownloadState.FAILED)
+        assertThat(stored.error).isEqualTo("Download stopped: disk I/O error")
+    }
+
     @Test fun rerunAfterInstallDoesNothing() = runTest {
         server.files[url] = content
         val record = queued()
