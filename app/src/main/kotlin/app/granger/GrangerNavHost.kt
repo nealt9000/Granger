@@ -30,6 +30,8 @@ import app.granger.core.library.ReadingTab
 import app.granger.downloads.DownloadsScreen
 import app.granger.downloads.DownloadsViewModel
 import app.granger.launch.StartScreen
+import app.granger.library.CollectionScreen
+import app.granger.library.CollectionViewModel
 import app.granger.library.LibraryScreen
 import app.granger.library.LibraryViewModel
 import app.granger.readiness.ReadinessScreen
@@ -50,6 +52,7 @@ import kotlinx.serialization.Serializable
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
+@Serializable data class CollectionRoute(val collectionId: String)
 @Serializable data class ReaderRoute(val tabId: Long)
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
@@ -87,10 +90,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     }
 
     fun showTab(tabId: Long) {
-        if (tabId == readerTabId) return
+        // Read the back stack now, not the composition's copy: a tap's openTab suspends, and a second tap
+        // meanwhile must replace the reader the first one pushed.
+        val top = nav.currentBackStackEntry
+        val showing = top?.takeIf { it.destination.hasRoute<ReaderRoute>() }?.toRoute<ReaderRoute>()?.tabId
+        if (tabId == showing) return
         nav.navigate(ReaderRoute(tabId)) {
             // Switching tabs replaces the reader instead of stacking one per tab.
-            if (readerTabId != null) popUpTo<ReaderRoute> { inclusive = true }
+            if (showing != null) popUpTo<ReaderRoute> { inclusive = true }
         }
     }
 
@@ -101,7 +108,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
 
     val selected = when {
         destination == null -> null
-        destination.hasRoute<LibraryRoute>() -> RailTool.LIBRARY
+        destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() -> RailTool.LIBRARY
         destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
         destination.hasRoute<DownloadsRoute>() -> RailTool.SETTINGS
         else -> null
@@ -130,18 +137,27 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         NavHost(nav, startDestination = LibraryRoute((start as? StartScreen.Library)?.notice)) {
             composable<LibraryRoute> { backStackEntry ->
                 LibraryScreen(
-                    viewModel = viewModel { LibraryViewModel(container.library) },
+                    viewModel = viewModel { LibraryViewModel(container.shelves, container.library) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
-                    onOpenPack = { pack ->
-                        scope.launch {
-                            showTab(container.sessions.openTab(pack.id, container.library.startPath(pack.id) ?: "", pack.title))
-                        }
-                    },
+                    onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
+                    // Until Task 8 builds the source screens, both rows open Downloads.
+                    onOpenSource = { nav.navigate(DownloadsRoute) },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
-                    onDownloads = { nav.navigate(DownloadsRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
+                )
+            }
+            composable<CollectionRoute> { backStackEntry ->
+                CollectionScreen(
+                    viewModel = viewModel {
+                        CollectionViewModel(
+                            backStackEntry.toRoute<CollectionRoute>().collectionId,
+                            container.shelves, container.library, container.sessions,
+                        )
+                    },
+                    onOpened = ::showTab,
+                    onBack = { nav.popBackStack() },
                 )
             }
             composable<ReaderRoute> { backStackEntry ->
