@@ -30,7 +30,7 @@ class ReaderWebViewTest {
         instrumentation.context.assets.open("granger-test.zim").use { input -> file.outputStream().use { input.copyTo(it) } }
         archive = (KiwixZimOpener(instrumentation.targetContext).open(file) as ZimOpenResult.Opened).archive
         val client = ZimWebViewClient(
-            resolver = ZimResolver { id -> archive.takeIf { id == "test" } },
+            resolver = ZimResolver(archiveFor = { id -> archive.takeIf { id == "test" } }),
             onExternalLink = { external.add(it) },
             onLeavingPage = {},
             onPageShown = { _, url -> shown.add(url) },

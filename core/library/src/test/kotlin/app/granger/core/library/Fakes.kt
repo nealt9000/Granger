@@ -12,6 +12,7 @@ class FakeZimArchive(
     override val uuid: String,
     title: String = uuid,
     private val paths: Set<String> = setOf("index"),
+    private val redirects: Map<String, String> = emptyMap(),
     override val mainPath: String? = "index",
     override val hasFulltextIndex: Boolean = true,
     var suggestions: List<ZimHit> = emptyList(),
@@ -21,7 +22,7 @@ class FakeZimArchive(
     override val metadata = ZimMetadata(title, "About $title", "eng", "2026-10-15", uuid)
     var closed = false
 
-    override fun resolvePath(path: String) = path.takeIf { it in paths && !closed }
+    override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
     override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", ByteArray(0)) }
 
     override fun suggest(query: String, limit: Int): List<ZimHit> {

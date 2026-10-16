@@ -30,5 +30,5 @@ class AppContainer(context: Context) {
 
     val library: Library = RoomLibrary(LibraryDatabase.create(context), KiwixZimOpener(context), packDirs)
     val search: LibrarySearch = ZimLibrarySearch(library)
-    val resolver = ZimResolver(library::archive)
+    val resolver = ZimResolver(library::archive, library::cachedArchive)
 }

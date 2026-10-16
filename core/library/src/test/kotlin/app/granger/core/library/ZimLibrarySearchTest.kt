@@ -64,6 +64,22 @@ class ZimLibrarySearchTest {
         assertThat(hits.last().snippet).isEqualTo("<b>aspirin</b> is")
     }
 
+    @Test fun redirectTitlesPointAtTheirArticleAndAreNotRepeated() = test {
+        install("music.zim", FakeZimArchive(
+            "u-mus", "Music",
+            paths = setOf("Georgia_on_My_Mind"),
+            redirects = mapOf("Georgia_On_My_Mind" to "Georgia_on_My_Mind", "Georgia_(song)" to "Georgia_on_My_Mind"),
+            suggestions = listOf(
+                ZimHit("Georgia_On_My_Mind", "Georgia On My Mind"),
+                ZimHit("Georgia_(song)", "Georgia (song)"),
+                ZimHit("Georgia_on_My_Mind", "Georgia on My Mind"),
+            ),
+        ))
+        library.refresh()
+        val hits = search.titles("georgia").filter { it.packId == "u-mus" }
+        assertThat(hits.map { it.path }).containsExactly("Georgia_on_My_Mind")
+    }
+
     @Test fun blankQueriesSearchNothing() = test {
         assertThat(search.titles("  ")).isEmpty()
         assertThat(search.fullText("")).isEmpty()

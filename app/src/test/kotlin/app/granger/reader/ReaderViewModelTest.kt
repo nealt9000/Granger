@@ -30,6 +30,17 @@ class ReaderViewModelTest {
         assertThat(reader("C++").state.value.url).isEqualTo(url("C++"))
     }
 
+    @Test fun aRedirectPathOpensItsCanonicalArticle() = runTest(main.dispatcher) {
+        library.archives["p"] = FakeZimArchive("p", setOf("index", "Photosynthesis"), redirects = mapOf("Plants" to "Photosynthesis"))
+        assertThat(reader("Plants").state.value.url).isEqualTo(url("Photosynthesis"))
+    }
+
+    @Test fun aLastReadRedirectAlsoOpensItsCanonicalArticle() = runTest(main.dispatcher) {
+        library.archives["p"] = FakeZimArchive("p", setOf("index", "Photosynthesis"), redirects = mapOf("Plants" to "Photosynthesis"))
+        library.lastRead["p"] = "Plants"
+        assertThat(reader().state.value.url).isEqualTo(url("Photosynthesis"))
+    }
+
     @Test fun opensTheMainPageOnFirstVisit() = runTest(main.dispatcher) {
         assertThat(reader().state.value.url).isEqualTo(url("index"))
     }

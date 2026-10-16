@@ -20,6 +20,9 @@ interface Library {
      */
     fun archive(packId: String): ZimArchive?
 
+    /** The archive only if it is already open; never touches the database or disk. Safe on the main thread. */
+    fun cachedArchive(packId: String): ZimArchive?
+
     /** Where to open a pack: the last article read, if it still exists, else the main page. */
     suspend fun startPath(packId: String): String?
 

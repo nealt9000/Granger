@@ -45,11 +45,15 @@ class ReaderViewModel(
 
     init {
         viewModelScope.launch {
-            if (withContext(io) { library.archive(packId) } == null) {
+            val archive = withContext(io) { library.archive(packId) }
+            if (archive == null) {
                 _state.update { it.copy(error = PACK_UNAVAILABLE) }
                 return@launch
             }
-            val path = requestedPath ?: library.startPath(packId)
+            // Search hits, bookmarks and last-read entries may be redirects; open the article itself so
+            // relative links resolve and positions/bookmarks are keyed by its real path.
+            val path = (requestedPath ?: library.startPath(packId))
+                ?.let { p -> withContext(io) { archive.resolvePath(p) } ?: p }
             if (path == null) {
                 _state.update { it.copy(error = NO_MAIN_PAGE) }
                 return@launch

@@ -45,7 +45,11 @@ class RoomLibrary(
                 seenPaths += path
                 val previous = known.firstOrNull { it.filePath == path }
                 val pack = when (val result = opener.open(file)) {
-                    is ZimOpenResult.Opened -> result.archive.use { Pack.from(it, file, previous?.addedAt ?: now()) }
+                    is ZimOpenResult.Opened -> result.archive.use { archive ->
+                        // A pack moved to another folder or volume keeps its addedAt.
+                        val sameZim = previous ?: known.firstOrNull { it.id == archive.uuid }
+                        Pack.from(archive, file, sameZim?.addedAt ?: now())
+                    }
                     is ZimOpenResult.Failed ->
                         previous?.copy(status = PackStatus.CORRUPT, sizeBytes = file.length())
                             ?: Pack.unreadable(file, now())
@@ -62,7 +66,7 @@ class RoomLibrary(
                 }
             }
             for (pack in known) {
-                if (pack.filePath !in seenPaths && pack.status != PackStatus.MISSING) {
+                if (pack.id !in seenIds && pack.filePath !in seenPaths && pack.status != PackStatus.MISSING) {
                     packDao.upsert(pack.copy(status = PackStatus.MISSING))
                     closeArchive(pack.id)
                 }
@@ -74,6 +78,11 @@ class RoomLibrary(
         synchronized(openArchives) { openArchives[packId]?.let { return it } }
         val pack = packDao.get(packId)?.takeIf { it.status == PackStatus.OK } ?: return null
         val opened = (opener.open(File(pack.filePath)) as? ZimOpenResult.Opened)?.archive ?: return null
+        if (opened.uuid != packId) {
+            // The file was replaced (e.g. a new snapshot) since the last refresh; it isn't this pack.
+            opened.close()
+            return null
+        }
         synchronized(openArchives) {
             openArchives[packId]?.let { existing ->
                 opened.close() // another thread won the race
@@ -83,6 +92,8 @@ class RoomLibrary(
             return opened
         }
     }
+
+    override fun cachedArchive(packId: String): ZimArchive? = synchronized(openArchives) { openArchives[packId] }
 
     private fun closeArchive(packId: String) {
         synchronized(openArchives) { openArchives.remove(packId) }?.close()

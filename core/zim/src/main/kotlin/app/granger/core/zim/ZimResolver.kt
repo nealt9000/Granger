@@ -20,7 +20,14 @@ sealed interface LinkAction {
     data object Ignore : LinkAction
 }
 
-class ZimResolver(private val archiveFor: (packId: String) -> ZimArchive?) {
+/**
+ * [archiveFor] may block (it can open the file); [cachedArchiveFor] must not, because link taps are
+ * decided on the main thread.
+ */
+class ZimResolver(
+    private val archiveFor: (packId: String) -> ZimArchive?,
+    private val cachedArchiveFor: (packId: String) -> ZimArchive? = archiveFor,
+) {
     fun response(url: String): ZimResponse {
         val zim = ZimUrls.parse(url) ?: return ZimResponse.Blocked
         val item = archiveFor(zim.packId)?.read(zim.path) ?: return ZimResponse.NotFound
@@ -35,7 +42,9 @@ class ZimResolver(private val archiveFor: (packId: String) -> ZimArchive?) {
             } else {
                 LinkAction.Ignore
             }
-        val target = archiveFor(zim.packId)?.resolvePath(zim.path) ?: return LinkAction.Load
+        // Runs on the main thread: only an already-open archive is consulted. On a miss the WebView
+        // loads the URL and shouldInterceptRequest serves it from a background thread.
+        val target = cachedArchiveFor(zim.packId)?.resolvePath(zim.path) ?: return LinkAction.Load
         return if (target == zim.path) {
             LinkAction.Load
         } else {

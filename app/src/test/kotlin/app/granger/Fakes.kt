@@ -20,10 +20,11 @@ class FakeZimArchive(
     override val uuid: String = "p",
     private val paths: Set<String> = setOf("index"),
     override val mainPath: String? = "index",
+    private val redirects: Map<String, String> = emptyMap(),
 ) : ZimArchive {
     override val metadata = ZimMetadata(uuid, "", "eng", "2026-10-15", uuid)
     override val hasFulltextIndex = true
-    override fun resolvePath(path: String) = path.takeIf { it in paths }
+    override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
     override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", ByteArray(0)) }
     override fun suggest(query: String, limit: Int) = emptyList<ZimHit>()
     override fun search(query: String, limit: Int) = emptyList<ZimHit>()
@@ -43,6 +44,7 @@ class FakeLibrary : Library {
 
     override suspend fun refresh() { refreshes++ }
     override fun archive(packId: String) = archives[packId]
+    override fun cachedArchive(packId: String) = archives[packId]
     override suspend fun startPath(packId: String) = lastRead[packId] ?: archives[packId]?.mainPath
 
     override fun isBookmarked(packId: String, path: String) =

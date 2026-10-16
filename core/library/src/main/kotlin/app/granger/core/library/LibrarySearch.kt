@@ -45,7 +45,11 @@ class ZimLibrarySearch(
             packs.flatMap { pack ->
                 val archive = library.archive(pack.id) ?: return@flatMap emptyList()
                 val hits = try { run(archive) } catch (e: Exception) { emptyList() }
-                hits.map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, hit.title, hit.snippet) }
+                // Title suggestions are often redirects; point them at the article itself so the
+                // reader keys bookmarks and positions by the real path, and list each article once.
+                hits.map { hit -> hit.copy(path = archive.resolvePath(hit.path) ?: hit.path) }
+                    .distinctBy { it.path }
+                    .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, hit.title, hit.snippet) }
             }
         }
     }

@@ -146,6 +146,36 @@ class RoomLibraryTest {
         assertThat((first as FakeZimArchive).closed).isTrue()
     }
 
+    @Test fun packMovedToAnotherVolumeStaysOkAndKeepsAddedAt() = test {
+        val file = zim(internal, "a.zim", "u-a")
+        library.refresh()
+        clock = 5_000L
+        file.renameTo(File(sdCard, "a.zim"))
+        library.refresh()
+        val pack = packs().single()
+        assertThat(pack.status).isEqualTo(PackStatus.OK)
+        assertThat(pack.filePath).isEqualTo(File(sdCard, "a.zim").absolutePath)
+        assertThat(pack.addedAt).isEqualTo(1_000L)
+    }
+
+    @Test fun archiveRefusesAFileThatIsNoLongerThatPack() = test {
+        zim(internal, "wiki.zim", "u-old")
+        library.refresh()
+        // A new snapshot replaced the file but no refresh has run yet (e.g. process restored into the reader).
+        opener.archives["wiki.zim"] = { FakeZimArchive("u-new") }
+        assertThat(library.archive("u-old")).isNull()
+    }
+
+    @Test fun cachedArchiveNeverOpensAnything() = test {
+        zim(internal, "a.zim", "u-a")
+        library.refresh()
+        val opens = opener.opened.size
+        assertThat(library.cachedArchive("u-a")).isNull()
+        assertThat(opener.opened.size).isEqualTo(opens)
+        val opened = library.archive("u-a")
+        assertThat(library.cachedArchive("u-a")).isSameInstanceAs(opened)
+    }
+
     @Test fun archiveIsNullForUnknownPacks() = test {
         assertThat(library.archive("nope")).isNull()
     }

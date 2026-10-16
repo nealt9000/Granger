@@ -15,7 +15,7 @@ class ZimResolverTest {
         ),
         redirects = mapOf("Plants" to "Photosynthesis"),
     )
-    private val resolver = ZimResolver { id -> archive.takeIf { id == "p" } }
+    private val resolver = ZimResolver(archiveFor = { id -> archive.takeIf { id == "p" } })
 
     private fun content(url: String) = resolver.response(url) as ZimResponse.Content
 
@@ -66,6 +66,15 @@ class ZimResolverTest {
     @Test fun redirectLinksLoadTheCanonicalUrlAndKeepTheFragment() {
         assertThat(resolver.linkAction(ZimUrls.forEntry("p", "Plants", "s2")))
             .isEqualTo(LinkAction.Redirect(ZimUrls.forEntry("p", "Photosynthesis", "s2")))
+    }
+
+    @Test fun linkTapsUseOnlyTheNonBlockingArchiveLookup() {
+        // linkAction runs on the main thread; when the archive isn't already open it must not open it.
+        val coldResolver = ZimResolver(archiveFor = { archive }, cachedArchiveFor = { null })
+        assertThat(coldResolver.linkAction(ZimUrls.forEntry("p", "Plants"))).isEqualTo(LinkAction.Load)
+        val warmResolver = ZimResolver(archiveFor = { null }, cachedArchiveFor = { archive })
+        assertThat(warmResolver.linkAction(ZimUrls.forEntry("p", "Plants")))
+            .isEqualTo(LinkAction.Redirect(ZimUrls.forEntry("p", "Photosynthesis")))
     }
 
     @Test fun webAndMailLinksLeaveTheApp() {
