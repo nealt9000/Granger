@@ -2,6 +2,7 @@ package app.granger.core.downloads
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.job
@@ -48,7 +49,11 @@ class FileDownloader(
             if (part.length() > request.sizeBytes) part.delete()
             // Hash what an earlier run left, so the final check covers every byte of the file.
             val digest = MessageDigest.getInstance("SHA-256")
-            var offset = hashFile(part, digest)
+            var offset = try {
+                hashFile(part, digest)
+            } catch (e: IOException) {
+                return@withContext DownloadResult.Failed(e.message ?: "Can't read the partial download")
+            }
             onProgress(offset)
             var lastError = "No download address"
             for (url in request.urls) {
@@ -57,7 +62,13 @@ class FileDownloader(
                 ensureActive()
                 offset = attempt.offset
                 // A failed write can leave bytes the digest never saw; cut the file back to what it covers.
-                if (part.length() != offset) RandomAccessFile(part, "rw").use { it.setLength(offset) }
+                if (part.length() != offset) {
+                    try {
+                        RandomAccessFile(part, "rw").use { it.setLength(offset) }
+                    } catch (e: IOException) {
+                        return@withContext DownloadResult.Failed(e.message ?: "Can't trim the partial download")
+                    }
+                }
                 if (attempt.noSpace) return@withContext DownloadResult.NoSpace(request.sizeBytes - offset)
                 attempt.error?.let { lastError = it }
             }
@@ -71,6 +82,7 @@ class FileDownloader(
 
     private class Attempt(val offset: Long, val error: String? = null, val noSpace: Boolean = false)
 
+    @OptIn(InternalCoroutinesApi::class)
     private suspend fun fetch(
         url: String,
         request: DownloadRequest,
@@ -88,7 +100,7 @@ class FileDownloader(
         if (start > 0) builder.header("Range", "bytes=$start-")
         val call = client.newCall(builder.build())
         // Cancelling the coroutine aborts a read that is blocked on the network.
-        val cancelHook = currentCoroutineContext().job.invokeOnCompletion { call.cancel() }
+        val cancelHook = currentCoroutineContext().job.invokeOnCompletion(onCancelling = true, invokeImmediately = true) { call.cancel() }
         var offset = start
         try {
             call.execute().use { response ->

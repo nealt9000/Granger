@@ -1,7 +1,14 @@
 package app.granger.core.downloads
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -126,5 +133,26 @@ class FileDownloaderTest {
         server.status[a] = 503
         val result = downloader.download(request(a), part)
         assertThat((result as DownloadResult.Failed).reason).contains("503")
+    }
+
+    @Test fun cancellingDuringAStalledReadReturnsPromptly() {
+        server.files[a] = content
+        server.hang += a
+        runBlocking {
+            val job = CoroutineScope(Dispatchers.Default).launch { downloader.download(request(a), part) }
+            withTimeout(5_000) { while (server.requests.isEmpty()) delay(10) }
+            delay(100)
+            job.cancel()
+            withTimeout(5_000) { job.join() }
+            assertThat(job.isCancelled).isTrue()
+        }
+    }
+
+    @Test fun unreadablePartFileIsAFailureNotACrash() = runTest {
+        partWith(content.copyOf(10_000))
+        part.setReadable(false)
+        assumeTrue(!part.canRead())
+        val result = downloader.download(request(a), part)
+        assertThat(result).isInstanceOf(DownloadResult.Failed::class.java)
     }
 }

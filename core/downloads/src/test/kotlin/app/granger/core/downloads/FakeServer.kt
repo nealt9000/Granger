@@ -1,5 +1,6 @@
 package app.granger.core.downloads
 
+import okhttp3.Call
 import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -27,6 +28,8 @@ class FakeServer : Interceptor {
     val failAfter = mutableMapOf<String, Int>()
     val ignoreRange = mutableSetOf<String>()
     val status = mutableMapOf<String, Int>()
+    /** Bodies for these URLs block on read until the call is cancelled. */
+    val hang = mutableSetOf<String>()
     val requests = mutableListOf<Request>()
 
     fun client(): OkHttpClient = OkHttpClient.Builder().addInterceptor(this).build()
@@ -44,20 +47,24 @@ class FakeServer : Interceptor {
             ?: return response.code(404).body(ByteArray(0).toResponseBody()).build()
         val start = request.header("Range")?.removePrefix("bytes=")?.removeSuffix("-")?.toInt()
         val partial = start != null && url !in ignoreRange
-        val bytes = if (partial) content.copyOfRange(start!!, content.size) else content
+        val bytes = if (partial) content.copyOfRange(start, content.size) else content
         if (partial) response.header("Content-Range", "bytes $start-${content.size - 1}/${content.size}")
         return response
             .code(if (partial) 206 else 200)
-            .body(DroppingBody(bytes, failAfter[url]))
+            .body(DroppingBody(bytes, failAfter[url], if (url in hang) chain.call() else null))
             .build()
     }
 
-    private class DroppingBody(private val bytes: ByteArray, private val failAfter: Int?) : ResponseBody() {
+    private class DroppingBody(private val bytes: ByteArray, private val failAfter: Int?, private val hangUntilCancelled: Call? = null) : ResponseBody() {
         override fun contentType(): MediaType? = null
         override fun contentLength(): Long = bytes.size.toLong()
         override fun source(): BufferedSource = object : Source {
             private var pos = 0
             override fun read(sink: Buffer, byteCount: Long): Long {
+                if (hangUntilCancelled != null) {
+                    while (!hangUntilCancelled.isCanceled()) Thread.sleep(10)
+                    throw IOException("Canceled")
+                }
                 if (failAfter != null && pos >= failAfter) throw IOException("connection reset")
                 if (pos >= bytes.size) return -1
                 val end = minOf(bytes.size.toLong(), pos + byteCount, (failAfter ?: Int.MAX_VALUE).toLong()).toInt()
