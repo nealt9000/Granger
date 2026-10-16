@@ -29,6 +29,8 @@ dependencies {
     implementation(project(":core:ai"))
     implementation(project(":core:zim"))
     implementation(project(":core:library"))
+    implementation(project(":core:catalog"))
+    implementation(project(":core:downloads"))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
