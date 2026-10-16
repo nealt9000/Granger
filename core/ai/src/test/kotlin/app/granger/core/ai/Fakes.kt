@@ -25,3 +25,43 @@ open class ScriptedLlm(
     }
     override fun close() { closed = true }
 }
+
+class FakeLlmFactory(
+    private val clock: FakeClock,
+    private val failLoadFor: Set<String> = emptySet(),
+    private val delaysMs: List<Long> = listOf(400, 50, 50, 50),
+) : LlmEngineFactory {
+    val openEngines = mutableSetOf<LlmEngine>()
+    var maxOpen = 0
+    val events = mutableListOf<String>()
+
+    override fun create(modelPath: String, backend: LlmBackend): LlmEngine {
+        events += "create $modelPath"
+        val engine = object : ScriptedLlm(clock, delaysMs) {
+            override fun load() {
+                events += "load $modelPath"
+                if (modelPath in failLoadFor) error("load failed: $modelPath")
+                super.load()
+            }
+            override fun close() {
+                events += "close $modelPath"
+                openEngines -= this
+                super.close()
+            }
+        }
+        openEngines += engine
+        maxOpen = maxOf(maxOpen, openEngines.size)
+        return engine
+    }
+}
+
+class FakeEmbedder : TextEmbedder {
+    var closed = false
+    override fun load() {}
+    override fun embed(texts: List<String>, isQuery: Boolean) = texts.map { FloatArray(4) }
+    override fun close() { closed = true }
+}
+
+class FakeMemory(private val mb: Int = 1234) : MemorySampler {
+    override suspend fun <T> peakPssMb(block: suspend () -> T): Pair<T, Int> = block() to mb
+}
