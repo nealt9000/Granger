@@ -1,0 +1,270 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-10-16T10:57:52Z",
+  "packs": [
+    {
+      "id": "wikipedia_en_medicine_nopic",
+      "title": "WikiMed (no pictures)",
+      "description": "The largest medical encyclopedia, from Wikipedia",
+      "category": "Medical",
+      "language": "eng",
+      "sizeBytes": 1047708415,
+      "sha256": "718fadad40b3491be3fa8f95181a948e4d726f97a79a14e0ef1b90c6b2b03625",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_medicine_nopic_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_medicine_nopic_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_medicine_nopic_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-10",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "1f8cf2fe-e076-e018-2e09-004387350cba",
+      "zimName": "wikipedia_en_medicine"
+    },
+    {
+      "id": "wikipedia_en_medicine_maxi",
+      "title": "WikiMed",
+      "description": "The largest medical encyclopedia, from Wikipedia",
+      "category": "Medical",
+      "language": "eng",
+      "sizeBytes": 1864210320,
+      "sha256": "9a1570f2f346aa18694ee520e0483f19b7447f69e0970e2f727c53ccf0dcc7d6",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_medicine_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_medicine_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_medicine_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-10",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "f0902c7c-81ad-0490-6f91-fecc14810992",
+      "zimName": "wikipedia_en_medicine"
+    },
+    {
+      "id": "wikem_en_all_maxi",
+      "title": "WikEM emergency medicine",
+      "description": "The world's largest emergency medicine open-access resource",
+      "category": "Medical",
+      "language": "eng",
+      "sizeBytes": 374632362,
+      "sha256": "7bbdd705544616df1ff37f8b4e0e5382e7b4d92532feecea42227af4169fbd7f",
+      "urls": [
+        "https://download.kiwix.org/zim/other/wikem_en_all_maxi_2026-07.zim"
+      ],
+      "snapshotDate": "2026-07-24",
+      "license": "CC BY-SA 3.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "2a517a3f-68d0-4f27-508f-20a7ed5fd4f1",
+      "zimName": "wikem_en_all"
+    },
+    {
+      "id": "wikipedia_en_top_nopic",
+      "title": "Wikipedia: best articles (no pictures)",
+      "description": "A selection of the best 50,000 Wikipedia articles",
+      "category": "Reference",
+      "language": "eng",
+      "sizeBytes": 2745850723,
+      "sha256": "8369b95b6b2179051b56ebed0d43fd3646020d03367eb03d7fc34d84090c501b",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_top_nopic_2026-09.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_top_nopic_2026-09.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_top_nopic_2026-09.zim"
+      ],
+      "snapshotDate": "2026-09-14",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "65d4124b-2288-7c85-1e69-e675a5bbd288",
+      "zimName": "wikipedia_en_top"
+    },
+    {
+      "id": "wikipedia_en_top_maxi",
+      "title": "Wikipedia: best articles",
+      "description": "A selection of the best 50,000 Wikipedia articles",
+      "category": "Reference",
+      "language": "eng",
+      "sizeBytes": 6991081681,
+      "sha256": "7c08d2a7557ef7e3da751bb429d081e1c7c8971e50fee4fef097021a03ea6b0a",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_top_maxi_2026-09.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_top_maxi_2026-09.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_top_maxi_2026-09.zim"
+      ],
+      "snapshotDate": "2026-09-14",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "a23995dc-abaf-1016-344b-730d6ab92fe2",
+      "zimName": "wikipedia_en_top"
+    },
+    {
+      "id": "wikipedia_en_100",
+      "title": "Wikipedia: 100 essential articles",
+      "description": "Top one hundred Wikipedia articles",
+      "category": "Reference",
+      "language": "eng",
+      "sizeBytes": 333429922,
+      "sha256": "2eb7fd115bfb8644a08a9482f01f52b507428b1b8a30129fead92f7b6715440b",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_100_2026-08.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_100_2026-08.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_100_2026-08.zim"
+      ],
+      "snapshotDate": "2026-08-20",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "dd8a2bd2-c05b-ac6c-8074-6c30e14803fb",
+      "zimName": "wikipedia_en_100"
+    },
+    {
+      "id": "wikipedia_en_ray-charles_maxi",
+      "title": "Wikipedia sample: Ray Charles (2 MB)",
+      "description": "Wikipedia articles about Ray Charles",
+      "category": "Reference",
+      "language": "eng",
+      "sizeBytes": 3010245,
+      "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-08.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-08.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-08.zim"
+      ],
+      "snapshotDate": "2026-08-02",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "c334200f-6662-3e7b-9d53-dbf334702fa8",
+      "zimName": "wikipedia_en_ray-charles"
+    },
+    {
+      "id": "gutenberg_en_lcc-b",
+      "title": "Project Gutenberg: Philosophy & Religion",
+      "description": "Philosophy, psychology, religion",
+      "category": "Religion & Philosophy",
+      "language": "eng",
+      "sizeBytes": 6365165314,
+      "sha256": "62ae584ad7f178e313bc045c22aae58a7149515644eb7e8e70853a3ad6eb4a28",
+      "urls": [
+        "https://download.kiwix.org/zim/gutenberg/gutenberg_en_lcc-b_2026-03.zim"
+      ],
+      "snapshotDate": "2026-03-05",
+      "license": "Public domain (US)",
+      "hasFulltextIndex": false,
+      "topics": [],
+      "zimUuid": "15a27523-aaf3-8c03-fa4d-0279f158491e",
+      "zimName": "gutenberg_en_lcc-b"
+    },
+    {
+      "id": "wikisource_en_all_nopic",
+      "title": "Wikisource (no pictures)",
+      "description": "Wikisource is an library of public domain texts",
+      "category": "Literature & Drama",
+      "language": "eng",
+      "sizeBytes": 3905588830,
+      "sha256": "6180cd199142862fb0d276861ccc5b48a40f7bae427b8427b2b6a573796e2f98",
+      "urls": [
+        "https://download.kiwix.org/zim/wikisource/wikisource_en_all_nopic_2026-09.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikisource/wikisource_en_all_nopic_2026-09.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikisource/wikisource_en_all_nopic_2026-09.zim"
+      ],
+      "snapshotDate": "2026-09-08",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "322c01de-c325-7aad-87fe-9a3cd3cd4a3c",
+      "zimName": "wikisource_en_all"
+    },
+    {
+      "id": "gutenberg_en_lcc-pr",
+      "title": "Project Gutenberg: English literature",
+      "description": "English literature",
+      "category": "Literature & Drama",
+      "language": "eng",
+      "sizeBytes": 16152121320,
+      "sha256": "439daa227e59e52c9f3b9b3d81a49c518583c799bd0bf15780e93e101a0a429d",
+      "urls": [
+        "https://download.kiwix.org/zim/gutenberg/gutenberg_en_lcc-pr_2026-03.zim"
+      ],
+      "snapshotDate": "2026-03-05",
+      "license": "Public domain (US)",
+      "hasFulltextIndex": false,
+      "topics": [],
+      "zimUuid": "b6a29128-cbf7-ab30-afe6-ff641b25b5b9",
+      "zimName": "gutenberg_en_lcc-pr"
+    },
+    {
+      "id": "wikivoyage_en_all_nopic",
+      "title": "Wikivoyage travel guide (no pictures)",
+      "description": "The collaborative travel guide",
+      "category": "Regional",
+      "language": "eng",
+      "sizeBytes": 272495142,
+      "sha256": "4305c50550f065d83e70f75fd1d2016a694f5d67aa1e0ef00fdf6bb74fc092ac",
+      "urls": [
+        "https://download.kiwix.org/zim/wikivoyage/wikivoyage_en_all_nopic_2026-09.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikivoyage/wikivoyage_en_all_nopic_2026-09.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikivoyage/wikivoyage_en_all_nopic_2026-09.zim"
+      ],
+      "snapshotDate": "2026-09-13",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "c5181ff1-fa01-053c-cf3c-9c4c66259687",
+      "zimName": "wikivoyage_en_all"
+    }
+  ],
+  "models": [
+    {
+      "id": "gemma-4-e2b-gpu",
+      "title": "Gemma 4 E2B (answers questions)",
+      "role": "small",
+      "fileName": "gemma-4-E2B-it-gpu.litertlm",
+      "sizeBytes": 2008432640,
+      "minRamGb": 6,
+      "sha256": "a53a59001894c58e6bdb5b9b227709f91a2e3e556baa7d85acf9c55402ba5cf5",
+      "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1/gemma-4-E2B-it-gpu.litertlm",
+      "license": "Apache-2.0",
+      "evalPassed": false
+    },
+    {
+      "id": "gemma-4-e4b-gpu",
+      "title": "Gemma 4 E4B (Think deeper)",
+      "role": "large",
+      "fileName": "gemma-4-E4B-it-gpu.litertlm",
+      "sizeBytes": 2969059328,
+      "minRamGb": 8,
+      "sha256": "4912bb5a9c30993c51a7711f763212077458529312175df0573a78323a2bb7ff",
+      "url": "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/2eee7ac325f20eb8c9ac1d0e972f7c84663062da/gemma-4-E4B-it-gpu.litertlm",
+      "license": "Apache-2.0",
+      "evalPassed": false
+    },
+    {
+      "id": "embeddinggemma-2-text-270m",
+      "title": "EmbeddingGemma 2 (ranks passages)",
+      "role": "embedder",
+      "fileName": "embeddinggemma-2-text-270m.litertlm",
+      "sizeBytes": 164626432,
+      "minRamGb": 6,
+      "sha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+      "url": "https://huggingface.co/litert-community/embeddinggemma-2-text-270m-litert-lm/resolve/9be6e8b90982095dc05c2bd162e4b954ee4dbac7/embeddinggemma-2-text-270m.litertlm",
+      "license": "Apache-2.0",
+      "evalPassed": false
+    }
+  ],
+  "presets": [
+    {
+      "id": "starter",
+      "title": "Starter",
+      "items": [
+        "gemma-4-e2b-gpu",
+        "embeddinggemma-2-text-270m",
+        "wikipedia_en_medicine_nopic",
+        "wikipedia_en_top_nopic"
+      ]
+    }
+  ]
+}
