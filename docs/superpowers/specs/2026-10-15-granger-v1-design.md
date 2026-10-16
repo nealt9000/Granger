@@ -38,7 +38,7 @@ Governing rule: **knowledge lives in files, not in model weights.** The model is
 | Content | Public domain or commercially redistributable licenses only. US public-domain line: published 1930 or earlier (as of 2026). |
 | License | GPLv3, public repo from day one, libzim/libkiwix via Kiwix's published Android bindings |
 | Channels | Google Play (paid Pro) and F-Droid/direct APK (**uncapped**, "support development" link) |
-| Hosting | We host only a signed catalog JSON; packs from Kiwix mirrors, models from Hugging Face |
+| Hosting | We host only a signed catalog JSON; packs from Kiwix mirrors, models from Hugging Face. Packs Granger builds itself (Granger Classics) are GitHub release assets on `nealt9000/Granger`. |
 | Telemetry | Opt-in (off by default), minimal, user-inspectable queue, never queries or content |
 | Language | English only; strings i18n-ready |
 | Team | Neal + Claude Code; test device Pixel 6 (8 GB, Tensor G1) |
@@ -104,7 +104,7 @@ The answer view always shows cited passages; tapping one opens the article at th
 
 - Ship only public-domain or commercially redistributable content. Works published in the US in 1930 or earlier are public domain as of 2026; later works need a license. Non-US public-domain terms differ (open item).
 - **Excluded from v1:** *Fahrenheit 451* (copyright Bradbury estate) and the Feynman Lectures online edition (Caltech grants no download or redistribution right). Users who own DRM-free copies of works like these can import them (Pro).
-- Physics substitute for Feynman: OpenStax *University Physics* (CC BY 4.0).
+- Physics substitute for Feynman: to be chosen in a curation spike. OpenStax *University Physics* became CC BY-NC-SA 4.0 (2026-06), which rules it out.
 
 ### Catalog categories
 
@@ -112,8 +112,8 @@ Medical, Reference, Religion & Philosophy, Literature & Drama, Science, Repair, 
 
 | Pack | Source | Approx. size | Notes |
 | --- | --- | --- | --- |
-| **Granger Classics** | Built by `tools/pack-builder` | 300–600 MB (target) | In Starter. Hand-picked: King James Bible, a public-domain English Quran translation (Rodwell/Palmer via Gutenberg; Pickthall 1930 if verified), Plato, Aristotle, Marcus Aurelius and core philosophy; complete Shakespeare; public-domain opera libretti; a few hundred essential novels and plays from antiquity to 1930. Gutenberg branding stripped. |
-| OpenStax University Physics | Built by `tools/pack-builder` | ~100–300 MB | CC BY; optional |
+| **Granger Classics** | Built by `tools/pack-builder` | 84 MB (text-only, 347 works, 2026-10-16) | In Starter. Hand-picked: King James Bible, two public-domain English Quran translations (Rodwell 1861, Sale 1734; Palmer isn't on Gutenberg and Pickthall only appears beside the 1934 Yusuf Ali), Plato, Aristotle, Marcus Aurelius and core philosophy; complete Shakespeare; public-domain opera libretti; a few hundred essential novels and plays from antiquity to 1930. Gutenberg branding stripped. |
+| ~~OpenStax University Physics~~ | — | — | Out: became CC BY-NC-SA 4.0 (2026-06). A physics text is chosen in a later curation spike. |
 | Gutenberg: Philosophy & Religion (`lcc-b`) | Kiwix | 5.9 GB | Optional |
 | Gutenberg: English lit (`lcc-pr`), American lit (`lcc-ps`), Fiction (`lcc-pz`), Classical (`lcc-pa`), Romance langs (`lcc-pq`), etc. | Kiwix | 0.5–18 GB each | Optional |
 | Wikisource English (no pictures) | Kiwix | 3.6 GB | Optional; libretti, scripture, historical texts |
@@ -216,7 +216,7 @@ Events are queued locally; a screen shows the exact pending payload; upload happ
 1. **Model spike on the Pixel 6** — LiteRT-LM loads E2B, E4B, EmbeddingGemma; measure time to first token, tokens/s, peak memory, swap cost, embedder co-residency. Riskiest assumptions first.
 2. **Reader** — `:core:zim`, test ZIM, Library screen, WebView, search, bookmarks.
 3. **Catalog + downloads** — signed catalog, `catalog-gen`, WorkManager downloads, volumes, Readiness.
-4. **Pack builder + Granger Classics** — `tools/pack-builder`, Classics manifest, OpenStax physics pack, add to catalog.
+4. **Pack builder + Granger Classics** — `tools/pack-builder`, Classics manifest, add to catalog (the physics pack moved to a later curation spike).
 5. **Import** — `:core:imports`, `:core:search` abstraction, My books, EPUB/PDF/TXT readers.
 6. **Ask pipeline** — rewrite, find (all sources), chunk, rank, answer, decline, medical banner, Think deeper.
 7. **Eval harness + dataset** — tune threshold and prompts to the pass bar (dataset includes questions over Granger Classics).
@@ -230,7 +230,7 @@ Events are queued locally; a screen shows the exact pending payload; upload happ
 - Exact Pro price (tested in beta).
 - Hugging Face gating: Gemma 4 LiteRT files and EmbeddingGemma 2 Text 270M (`litert-community/embeddinggemma-2-text-270m-litert-lm`) are **not** gated and are Apache-2.0 (checked 2026-10-15). The original EmbeddingGemma 300M is gated under the Gemma Terms of Use, so it was replaced.
 - Confirm the curated Wikipedia core and WikiMed sizes for the Starter preset.
-- Final Granger Classics title list; verify the US public-domain status of each translation (notably the Quran translation choice).
+- Physics pack: pick a redistributable physics text to replace OpenStax *University Physics* (now CC BY-NC-SA 4.0).
 - Non-US public-domain terms (life + 70 jurisdictions) for Classics and Gutenberg packs.
 - Whether redistributing Kiwix's Gutenberg packs alongside a paid Pro tier touches the Project Gutenberg trademark terms (lawyer).
 - Fahrenheit 451 easter egg (on hold).

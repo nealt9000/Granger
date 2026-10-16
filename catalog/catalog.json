@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-16T10:57:52Z",
+  "generatedAt": "2026-10-16T18:41:47Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -215,6 +215,24 @@
       "topics": [],
       "zimUuid": "c5181ff1-fa01-053c-cf3c-9c4c66259687",
       "zimName": "wikivoyage_en_all"
+    },
+    {
+      "id": "granger_classics_en",
+      "title": "Granger Classics",
+      "description": "Scripture, philosophy, drama, libretti and novels to 1930",
+      "category": "Literature & Drama",
+      "language": "eng",
+      "sizeBytes": 84222783,
+      "sha256": "91f15e527be1d8bbb34ef6d92cdd2d0f830c5dd6b325d61bbd70b396c493e1f3",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/classics-2026-10-16/granger_classics_en_2026-10-16.zim"
+      ],
+      "snapshotDate": "2026-10-16",
+      "license": "Public domain (US)",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "b44953cc-40b1-1a1e-54c7-6c5c5a731b02",
+      "zimName": "granger_classics_en"
     }
   ],
   "models": [
@@ -263,7 +281,8 @@
         "gemma-4-e2b-gpu",
         "embeddinggemma-2-text-270m",
         "wikipedia_en_medicine_nopic",
-        "wikipedia_en_top_nopic"
+        "wikipedia_en_top_nopic",
+        "granger_classics_en"
       ]
     }
   ]
