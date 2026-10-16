@@ -184,3 +184,49 @@ def test_keygen_writes_private_seed(tmp_path):
     assert len(seed) == 32
     assert base64.b64decode(public_b64) == cg.public_key(seed)
     assert oct(key.stat().st_mode & 0o777) == "0o600"
+
+
+DESCRIPTOR = {
+    "id": "granger_classics_en", "description": "Scripture, philosophy, drama, libretti and novels to 1930",
+    "language": "eng", "sizeBytes": 123,
+    "sha256": "718fadad40b3491be3fa8f95181a948e4d726f97a79a14e0ef1b90c6b2b03625",
+    "urls": ["https://github.com/nealt9000/Granger/releases/download/classics-2026-10-16/granger_classics_en_2026-10-16.zim"],
+    "snapshotDate": "2026-10-16", "hasFulltextIndex": True,
+    "zimUuid": "0b5c1f2e-0000-4000-8000-000000000001", "zimName": "granger_classics_en",
+}
+RELEASE_ROW = {"release": "rel.json", "category": "Literature & Drama", "license": "Public domain (US)",
+               "title": "Granger Classics"}
+
+
+def write_descriptor(path, **changes):
+    path.write_text(json.dumps({**DESCRIPTOR, **changes}))
+
+
+def test_release_pack_comes_from_its_descriptor(tmp_path):
+    write_descriptor(tmp_path / "rel.json")
+    entry = cg.release_entry(RELEASE_ROW, head=lambda url: 123, root=tmp_path)
+    assert entry["id"] == "granger_classics_en" and entry["category"] == "Literature & Drama"
+    assert entry["title"] == "Granger Classics" and entry["license"] == "Public domain (US)"
+    assert set(entry) == set(cg.pack_entry(CURATED_MED, fake_fetch(ROUTES)))  # same keys as a Kiwix pack
+    assert entry["topics"] == [] and entry["zimUuid"] == DESCRIPTOR["zimUuid"]
+
+
+def test_release_size_mismatch_fails(tmp_path):
+    write_descriptor(tmp_path / "rel.json")
+    with pytest.raises(SystemExit, match="123"):
+        cg.release_entry(RELEASE_ROW, head=lambda url: 999, root=tmp_path)
+
+
+def test_release_with_non_https_url_fails(tmp_path):
+    write_descriptor(tmp_path / "rel.json", urls=["http://example.com/x.zim"])
+    with pytest.raises(SystemExit):
+        cg.release_entry(RELEASE_ROW, head=lambda url: 123, root=tmp_path)
+
+
+def test_build_mixes_kiwix_and_release_packs(tmp_path, monkeypatch):
+    write_descriptor(tmp_path / "rel.json")
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    curated = {"packs": [CURATED_MED, RELEASE_ROW], "models": [],
+               "presets": [{"id": "starter", "title": "Starter", "items": ["granger_classics_en"]}]}
+    catalog = cg.build(curated, fake_fetch(ROUTES), head=lambda url: 123)
+    assert [p["id"] for p in catalog["packs"]] == ["wikipedia_en_medicine_nopic", "granger_classics_en"]

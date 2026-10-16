@@ -9,6 +9,9 @@ one snapshot by its sha256 from Kiwix's metalink file. Models are listed in cura
   catalog_gen.py sign   --key ~/.config/granger/catalog-signing.key catalog/catalog.json
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
 
+Packs we build ourselves (tools/pack-builder) are listed with a "release" row in curated.json that names
+their release descriptor; the hosted file's size is checked against it.
+
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
 import argparse
@@ -36,12 +39,22 @@ METALINK = "{urn:ietf:params:xml:ns:metalink}"
 STABLE_MIRRORS = ("ftpmirror.your.org", "dumps.wikimedia.org")
 MAX_URLS = 3
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+RELEASE_KEYS = ("id", "description", "language", "sizeBytes", "sha256", "urls", "snapshotDate",
+                "hasFulltextIndex", "zimUuid", "zimName")
 
 
 def http_get(url):
     request = urllib.request.Request(url, headers={"User-Agent": "granger-catalog-gen"})
     with urllib.request.urlopen(request, timeout=60) as response:
         return response.read()
+
+
+def http_head(url):
+    """The Content-Length the URL finally serves, after redirects (GitHub releases redirect to a CDN)."""
+    request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "granger-catalog-gen"})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return int(response.headers["Content-Length"])
 
 
 def opds_entries(xml_bytes):
@@ -113,9 +126,40 @@ def pack_entry(curated, fetch=http_get):
     }
 
 
-def build(curated, fetch=http_get, now=None):
+def release_entry(curated, head=http_head, root=None):
+    """A pack we build and host ourselves, from the descriptor `pack_builder.py describe` wrote."""
+    path = pathlib.Path(root or REPO_ROOT) / curated["release"]
+    descriptor = json.loads(path.read_text(encoding="utf-8"))
+    missing = [key for key in RELEASE_KEYS if key not in descriptor]
+    if missing:
+        raise SystemExit(f"{path}: missing {missing}")
+    if not descriptor["urls"] or not all(u.startswith("https://") for u in descriptor["urls"]):
+        raise SystemExit(f"{path}: every URL must be https, got {descriptor['urls']}")
+    for url in descriptor["urls"]:
+        served = head(url)
+        if served != descriptor["sizeBytes"]:
+            raise SystemExit(f"{url} serves {served} bytes; the descriptor says {descriptor['sizeBytes']}")
+    return {
+        "id": descriptor["id"],
+        "title": curated["title"],
+        "description": descriptor["description"],
+        "category": curated["category"],
+        "language": descriptor["language"],
+        "sizeBytes": descriptor["sizeBytes"],
+        "sha256": descriptor["sha256"],
+        "urls": descriptor["urls"],
+        "snapshotDate": descriptor["snapshotDate"],
+        "license": curated["license"],
+        "hasFulltextIndex": descriptor["hasFulltextIndex"],
+        "topics": [],
+        "zimUuid": descriptor["zimUuid"],
+        "zimName": descriptor["zimName"],
+    }
+
+
+def build(curated, fetch=http_get, now=None, head=http_head):
     now = now or datetime.datetime.now(datetime.timezone.utc)
-    packs = [pack_entry(c, fetch) for c in curated["packs"]]
+    packs = [release_entry(c, head) if "release" in c else pack_entry(c, fetch) for c in curated["packs"]]
     models = curated["models"]
     for item in packs + models:
         for key in ("id", "fileName"):
