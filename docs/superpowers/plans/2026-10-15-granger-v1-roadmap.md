@@ -10,11 +10,16 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 2 | Reader | `:core:zim` (java-libkiwix `org.kiwix:libkiwix`), test ZIM, `:core:library` (Room), Library screen, WebView reader, title + full-text search, bookmarks, reading position | **Done:** `2026-10-15-plan-02-reader.md` |
 | 3 | Catalog + downloads + Readiness | `tools/catalog-gen`, Ed25519-signed catalog, `:core:catalog`, `:core:downloads` (WorkManager, resume, sha256, volumes), Downloads + Readiness screens | **Done:** `2026-10-16-plan-03-catalog-downloads-readiness.md` |
 | 4 | Pack builder + Granger Classics | `tools/pack-builder` (python-libzim), Classics manifest, Classics pack on a GitHub release, catalog entry | **Done:** `2026-10-16-plan-04-pack-builder-classics.md` |
-| 5 | Import | `:core:imports` (EPUB/PDF/TXT/MD, DRM detection, FTS5), `:core:search` (`SearchSource`), My books, EPUB/PDF/TXT readers | |
-| 6 | Ask pipeline | `:core:ask-logic`, rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper, Ask screen | |
-| 7 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | |
-| 8 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap + import gating, onboarding, `:core:telemetry` | |
-| 9 | Beta | Release config, signing, Play listing, internal track | |
+| 5 | Shell + Library | Flame theme + icon, side rail (bookmarks per article, History, Recent), immersive mode, open-to-last-place, media types / collections / filing, Library screens, Granger + Kiwix source screens, Settings (Models, Readiness), polished web-style reader with selection actions, schema migration | |
+| 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:imports` (EPUB/TXT/MD, DRM detection, FTS5), My books, pack-builder EPUB output, Classics re-release, Search over e-books | |
+| 7 | Archive.org source | Public-domain filter until waiver, search/browse, open-only downloads with sha1/md5 verify, filing, metadata | |
+| 8 | Inquire & Abstract | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats | |
+| 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | |
+| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources) + import gating, onboarding, `:core:telemetry` | |
+| 11 | Beta | Release config, signing, Play listing (incl. archive.org policy check), internal track | |
+| — | After v1: Media | Player, mini-player, audiobooks/music/video, read-aloud + mix, then the PDF pass | |
+
+Library redesign spec (2026-10-16): `docs/superpowers/specs/2026-10-16-library-redesign-design.md` amends the v1 spec and set this order.
 
 Plan 1's measurements feed directly into Plans 6–8 (backend choice, model files in the catalog, the latency target, embedder co-residency).
 
@@ -44,7 +49,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Classics presentation defects found on the Pixel 6 (2026-10-16), left unfixed pending the library redesign below: the two Korans both read "The Koran" on the main page (translator not shown when there's no author); some books' Gutenberg CSS overrides the reader theme (`body { background: initial; color: initial }` and link colours load after `classics.css`, so Hamlet shows default blue links on near-black; `.pagenum` sits past the right edge, clipping "[Pg 3]"); full-text snippets start with the nav bar text ("Hamlet‹ PreviousNext ›"); some merged heading-only titles read oddly ("by William Shakespeare — Contents").
 - Deferred minors from the Plan 4 review: anchor ids are lost when their `<a>` is unwrapped (65 TOC links land at page top); size-splitting a giant `<pre>`/`<table>` drops the wrapper; build failures other than `CleaningError` don't name the work; seven Canterbury Tales titles show literal `<1>` markers.
 
-### Design pivot raised after Plan 4 (not yet designed)
+### Design pivot raised after Plan 4 (designed: see the library redesign spec)
 
 Neal's direction, 2026-10-16, to brainstorm before the next plan: the library will hold more media types from more sources (Kiwix, Granger Classics, archive.org with a legal disclaimer, the user's own collections). Instead of everything landing flat in the Library, content is grouped into collections: Wikipedia packs nest in a Wikipedia area, and Granger Classics becomes a collection whose works are individual e-books rather than one ZIM read as a website. All e-books, whether Classics, archive.org or the user's own, open in one shared e-book reader. Finished-app picture: opening the app shows where you left off in the book you were reading; a vertical side toolbar has a section at the top with bookmarks to recently opened books and media. This likely reshapes Plan 5 (Import) and the Classics pack format, so the four Classics defects above wait for it.
 
