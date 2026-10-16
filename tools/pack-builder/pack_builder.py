@@ -31,11 +31,11 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str) -> Path:
     for spec in m.works:
         try:
             cleaned = gutenberg.clean(source.html(spec.gutenberg))
-        except gutenberg.NotAGutenbergBook as error:
-            raise gutenberg.NotAGutenbergBook(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
+        except gutenberg.CleaningError as error:
+            raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
-        pages = chapters.split(cleaned.body, spec.split_at)
+        pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles))
         print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
         works.append(zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                                   published=spec.published, section=spec.section, chapters=pages,

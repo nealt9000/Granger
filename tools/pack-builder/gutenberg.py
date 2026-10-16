@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from bs4 import BeautifulSoup, Comment, NavigableString, Tag
 
-BRANDING = re.compile(r"project gutenberg|gutenberg\.(org|net)", re.I)
+BRANDING = re.compile(r"project[\s_-]+gutenberg|gutenberg[\s-]*e-?texts?|gutenberg\.(org|net)", re.I)
 # The Distributed Proofreaders credit line always sits next to Gutenberg's own.
 CREDITS = re.compile(r"pgdp\.net|distributed proofread", re.I)
 START = re.compile(r"\*\*\*\s*START OF (THE|THIS) PROJECT GUTENBERG[^*]*\*\*\*", re.I)
@@ -19,12 +19,19 @@ REMOVED_TAGS = ["script", "link", "meta", "img", "svg", "object", "iframe", "for
                 "noscript", "embed"]
 BLOCKS = {"p", "div", "pre", "blockquote", "table", "li", "ul", "ol", "dl", "section", "header", "footer",
           "h1", "h2", "h3", "h4", "h5", "h6", "figure", "center"}
+HEADINGS = re.compile(r"^h[1-6]$")
 SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 NOTICE = re.compile(r"[Cc]opyright|[Pp]ublished|[Ee]dition|[Pp]rinted|[Rr]eprint")
 FRONT_MATTER_CHARS = 12_000
+# Branding removal that takes more text than it leaves, past this much, means a wrapper holding the book went.
+GUTTED_CHARS = 10_000
 
 
-class NotAGutenbergBook(ValueError):
+class CleaningError(ValueError):
+    """The book can't be cleaned safely, so it must not ship."""
+
+
+class NotAGutenbergBook(CleaningError):
     """The HTML has no Gutenberg start and end markers, so there's no safe place to cut."""
 
 
@@ -43,7 +50,8 @@ def clean(html: bytes) -> Cleaned:
     root = soup.body or soup
     start, end = root.find(id="pg-start-separator"), root.find(id="pg-end-separator")
     if start is None or end is None:
-        start, end = _text_marker(root, START, keep="after"), _text_marker(root, END, keep="before")
+        start = _text_marker(soup, root, START)
+        end = _text_marker(soup, root, END) if start is not None else None
     if start is None or end is None:
         raise NotAGutenbergBook("no Project Gutenberg start and end markers")
     _drop_after(end, root)
@@ -56,11 +64,14 @@ def clean(html: bytes) -> Cleaned:
     for link in root.find_all("a", href=True):
         if SCHEME.match(link["href"].strip()):
             link.unwrap()
-    removed = _drop_branding(root)
+    removed, removed_chars = _drop_branding(root)
 
     body = soup.new_tag("div")
     for child in list(root.contents):
         body.append(child.extract())
+    kept = len(" ".join(body.get_text().split()))
+    if kept == 0 or removed_chars > max(kept, GUTTED_CHARS):
+        raise CleaningError(f"cleaning left {kept} characters and removed {removed_chars} as branding")
     return Cleaned(body=body, styles=styles, branding_removed=removed)
 
 
@@ -68,27 +79,23 @@ def _styles(soup: BeautifulSoup) -> str:
     css = "\n".join(style.get_text() for style in soup.find_all("style"))
     for style in soup.find_all("style"):
         style.decompose()
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    css = re.sub(r"[^;{}]*(pg-|gutenberg|pgdp)[^;{}]*\{[^{}]*\}", "", css, flags=re.I)  # Gutenberg's own rules
     css = re.sub(r"@import[^;]*;", "", css)
     css = re.sub(r"[^;{}]*url\([^)]*\)[^;{}]*;?", "", css)
     return css.strip()
 
 
-def _text_marker(root: Tag, pattern: re.Pattern, keep: str) -> Tag | None:
-    """The element holding a text marker. Text on the kept side of it, in the same element, moves out first."""
+def _text_marker(soup: BeautifulSoup, root: Tag, pattern: re.Pattern) -> Tag | None:
+    """An empty marker element put exactly where the text marker was, so cutting at it keeps the text around it."""
     string = root.find(string=pattern)
     if string is None:
         return None
-    element = string.parent
-    before, after = pattern.split(str(string), maxsplit=1)[0], pattern.split(str(string), maxsplit=1)[-1]
-    rest = after if keep == "after" else before
-    if rest.strip() and element.name == "pre":
-        moved = BeautifulSoup("", "lxml").new_tag("pre")
-        moved.string = rest.strip("\n")
-        if keep == "after":
-            element.insert_after(moved)
-        else:
-            element.insert_before(moved)
-    return element
+    text = str(string)
+    match = pattern.search(text)
+    marker = soup.new_tag("span")
+    string.replace_with(NavigableString(text[:match.start()]), marker, NavigableString(text[match.end():]))
+    return marker
 
 
 def _drop_before(marker: Tag, root: Tag) -> None:
@@ -109,8 +116,9 @@ def _drop_after(marker: Tag, root: Tag) -> None:
     marker.decompose()
 
 
-def _drop_branding(root: Tag) -> int:
-    removed = 0
+def _drop_branding(root: Tag) -> tuple[int, int]:
+    """Removes each block naming Project Gutenberg, or only the text when the block holds headings (a wrapper)."""
+    removed = chars = 0
     for tag in root.find_all(True):
         for name, value in list(tag.attrs.items()):
             text = " ".join(value) if isinstance(value, list) else str(value)
@@ -120,11 +128,13 @@ def _drop_branding(root: Tag) -> int:
         string = root.find(string=lambda s: isinstance(s, NavigableString)
                            and (BRANDING.search(s) or CREDITS.search(s)))
         if string is None:
-            return removed
+            return removed, chars
         block = next((p for p in string.parents if p.name in BLOCKS), None)
-        if block is None or block is root:
+        if block is None or block is root or block.find(HEADINGS):
+            chars += len(string.strip())
             string.extract()
         else:
+            chars += len(block.get_text().strip())
             block.decompose()
         removed += 1
 

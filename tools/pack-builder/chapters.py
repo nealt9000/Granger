@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
 
 MAX_TITLE = 120
 FRONT_MATTER_CHARS = 200
+HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
 PAGE_NUMBER = {"pagenum", "pageno", "page-num", "pagenumber"}
 SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 
@@ -84,8 +85,38 @@ def _text_len(nodes: list[PageElement]) -> int:
     return sum(len(n.get_text() if isinstance(n, Tag) else str(n).strip()) for n in nodes)
 
 
+def _bytes(node: PageElement) -> int:
+    """The node's size on its page, counting the page name a same-book link may gain (`#x` -> `001#x`)."""
+    text = str(node)
+    return len(text.encode()) + 3 * text.count('href="#')
+
+
 def _size(nodes: list[PageElement]) -> int:
-    return sum(len(str(n).encode()) for n in nodes)
+    return sum(_bytes(n) for n in nodes)
+
+
+def _heading_only(part: _Part) -> bool:
+    """True when the part's only text is its headings, like a bare "PART I" page."""
+    for node in part.nodes:
+        strings = [node] if isinstance(node, NavigableString) else node.find_all(string=True)
+        if any(s.strip() and not any(p.name in HEADINGS for p in s.parents) for s in strings):
+            return False
+    return True
+
+
+def _merge_heading_only(groups: list[_Part]) -> list[_Part]:
+    """Folds each heading-only part into the part after it, so Next never lands on a page with no text."""
+    out: list[_Part] = []
+    carry = None
+    for i, part in enumerate(groups):
+        if carry:
+            part = _Part(_title(f"{carry.title} — {part.title}"), carry.nodes + part.nodes)
+            carry = None
+        if i < len(groups) - 1 and _heading_only(part):
+            carry = part
+        else:
+            out.append(part)
+    return out
 
 
 def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_bytes: int) -> list[_Part] | None:
@@ -95,14 +126,16 @@ def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_b
     for node in nodes:
         if _has(node, level):
             heading = node if node.name == f"h{level}" else node.find(f"h{level}")
-            title = _heading_title(heading) or f"Part {len(groups) + 1}"
-            groups.append(_Part(f"{parent} — {title}" if parent else title, [node]))
+            groups.append(_Part(_heading_title(heading) or f"Part {len(groups) + 1}", [node]))
         elif groups:
             groups[-1].nodes.append(node)
         else:
             front.append(node)
     if not groups:
         return None
+    groups = _merge_heading_only(groups)
+    if parent:
+        groups = [_Part(f"{parent} — {g.title}", g.nodes) for g in groups]
     if _text_len(front) > FRONT_MATTER_CHARS:
         groups.insert(0, _Part(parent or "Front matter", front))
     else:
@@ -128,7 +161,7 @@ def _by_size(part: _Part, max_bytes: int) -> list[_Part]:
     pending = list(part.nodes)
     while pending:
         node = pending.pop(0)
-        n = len(str(node).encode())
+        n = _bytes(node)
         if n > max_bytes:
             if isinstance(node, Tag) and node.contents:
                 pending[:0] = list(node.contents)

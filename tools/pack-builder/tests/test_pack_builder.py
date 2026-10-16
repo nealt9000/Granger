@@ -70,3 +70,17 @@ def test_book_without_markers_names_the_work(tmp_path):
 
     with pytest.raises(NotAGutenbergBook, match="modern-book"):
         build(two_works(tmp_path), NoMarkers(), tmp_path, "2026-10-16")
+
+
+def test_every_page_stays_under_the_page_limit(tmp_path):
+    class Big(FakeSource):
+        def html(self, book_id):
+            css = b"<style>" + b"".join(b".c%d { margin: 0 }\n" % i for i in range(400)) + b"</style>"
+            chapters = b"".join(b"<h2>Chapter %d</h2>" % i + b"<p>" + b"word " * 29_900 + b"</p>" for i in range(3))
+            return (b"<html><head>" + css + b"</head><body><div id='pg-start-separator'></div>" + chapters
+                    + b"<div id='pg-end-separator'></div></body></html>")
+
+    a = Archive(build(two_works(tmp_path), Big(), tmp_path, "2026-10-16"))
+    for i in range(a.all_entry_count):
+        item = a._get_entry_by_id(i).get_item()
+        assert len(bytes(item.content)) <= 150_000, item.path

@@ -14,6 +14,8 @@ from libzim.writer import Creator, Hint, Item, StringProvider
 
 from chapters import Chapter, page_name
 
+PAGE_LIMIT = 150_000  # bytes per page, so the WebView and the Ask chunker never get one huge entry
+
 CSS = """
 :root { color-scheme: light dark; --ink: #222; --paper: #fdfbf7; --muted: #6b6257; --accent: #7a4b1e; }
 @media (prefers-color-scheme: dark) { :root { --ink: #e8e2d8; --paper: #1b1915; --muted: #a59a8a; --accent: #d9a46a; } }
@@ -105,6 +107,13 @@ def _chapter_page(work: Work, index: int) -> str:
     nav = '<nav class="nav">' + "".join(f"<span>{link}</span>" for link in links) + "</nav>"
     chapter = work.chapters[index]
     return _document(f"{work.title} — {chapter.title}", nav + chapter.html + nav, depth=1, styles=work.styles)
+
+
+def chapter_budget(title: str, styles: str) -> int:
+    """How many bytes of chapter HTML fit on one page once the head, the book's styles and both nav bars are added."""
+    probe = Work(slug="x" * 80, title=title, author="", translator=None, published=0, section="",
+                 chapters=[Chapter("x" * 120, "")] * 3, styles=styles)
+    return PAGE_LIMIT - len(_chapter_page(probe, 1).encode())
 
 
 def _book_page(work: Work, sections: dict[str, str]) -> str:

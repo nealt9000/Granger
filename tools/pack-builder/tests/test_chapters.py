@@ -66,7 +66,7 @@ def test_unknown_anchor_is_unwrapped():
 
 
 def test_heading_titles_are_whitespace_collapsed_and_capped():
-    chapters = split(body("<h2>  CHAPTER\n  I.<br/>Loomings  </h2><p>t</p>" + "<h2>B</h2><h2>" + "y" * 300 + "</h2>"))
+    chapters = split(body("<h2>  CHAPTER\n  I.<br/>Loomings  </h2><p>t</p>" + "<h2>B</h2><p>t</p><h2>" + "y" * 300 + "</h2><p>t</p>"))
     assert chapters[0].title == "CHAPTER I. Loomings"
     assert len(chapters[2].title) == 120
 
@@ -76,7 +76,7 @@ def test_page_names_are_three_digits():
 
 
 def test_page_numbers_are_left_out_of_titles():
-    html = "".join(f'<h2><a id="c{i}"></a><span class="pagenum"><a id="p{i}">{{{i}}}</a></span>Chapter {i}</h2>'
+    html = "".join(f'<h2><a id="c{i}"></a><span class="pagenum"><a id="p{i}">{{{i}}}</a></span>Chapter {i}</h2><p>t</p>'
                    for i in range(3))
     assert [c.title for c in split(body(html))] == ["Chapter 0", "Chapter 1", "Chapter 2"]
 
@@ -84,3 +84,11 @@ def test_page_numbers_are_left_out_of_titles():
 def test_footnote_markers_are_left_out_of_titles():
     html = "".join(f'<h2>SURA<a href="#fn{i}"><sup>1</sup></a> {i}</h2><p id="fn{i}">note</p>' for i in range(3))
     assert [c.title for c in split(body(html))] == ["SURA 0", "SURA 1", "SURA 2"]
+
+
+def test_a_heading_only_part_merges_into_the_next():
+    html = ("<h2>PART I</h2>" + "".join(f"<h2>Chapter {i}</h2><p>t{i}</p>" for i in range(1, 3))
+            + "<h2>PART II</h2><h2>Chapter 3</h2><p>t3</p>")
+    chapters = split(body(html))
+    assert [c.title for c in chapters] == ["PART I — Chapter 1", "Chapter 2", "PART II — Chapter 3"]
+    assert "PART I" in chapters[0].html and "t1" in chapters[0].html
