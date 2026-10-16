@@ -27,8 +27,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.core.library.ReadingTab
-import app.granger.downloads.DownloadsScreen
-import app.granger.downloads.DownloadsViewModel
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
 import app.granger.library.CollectionViewModel
@@ -46,6 +44,11 @@ import app.granger.shell.HistoryViewModel
 import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
+import app.granger.settings.SettingsScreen
+import app.granger.settings.SettingsViewModel
+import app.granger.sources.CatalogScope
+import app.granger.sources.SourceScreen
+import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -56,7 +59,8 @@ import kotlinx.serialization.Serializable
 @Serializable data class ReaderRoute(val tabId: Long)
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
-@Serializable object DownloadsRoute
+@Serializable data class SourceRoute(val scope: CatalogScope)
+@Serializable object SettingsRoute
 @Serializable object ReadinessRoute
 
 /** The tab the reader shows; lives as long as the activity's view models so the rail's flow survives rotation. */
@@ -110,7 +114,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         destination == null -> null
         destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() -> RailTool.LIBRARY
         destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
-        destination.hasRoute<DownloadsRoute>() -> RailTool.SETTINGS
+        destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
+            destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
         else -> null
     }
 
@@ -124,8 +129,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             when (tool) {
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
-                // Until Settings exists (Task 8), the Settings tool opens Downloads.
-                RailTool.SETTINGS -> nav.navigate(DownloadsRoute) { launchSingleTop = true }
+                RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.INQUIRE, RailTool.PLAYER -> Unit // Hidden behind Features flags.
             }
         },
@@ -141,8 +145,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
-                    // Until Task 8 builds the source screens, both rows open Downloads.
-                    onOpenSource = { nav.navigate(DownloadsRoute) },
+                    onOpenSource = { source -> nav.navigate(SourceRoute(source)) },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
@@ -184,14 +187,26 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<DownloadsRoute> {
-                DownloadsScreen(
+            composable<SourceRoute> { backStackEntry ->
+                val source = backStackEntry.toRoute<SourceRoute>().scope
+                SourceScreen(
                     viewModel = viewModel {
-                        DownloadsViewModel(
-                            container.catalog, container.downloads, container.library, container.volumes,
+                        SourceViewModel(
+                            source, container.catalog, container.downloads, container.library, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope,
                         )
                     },
+                    title = source.title,
+                    onBack = { nav.popBackStack() },
+                )
+            }
+            composable<SettingsRoute> {
+                SettingsScreen(
+                    viewModel = viewModel {
+                        SettingsViewModel(container.downloads, container.volumes, container.downloadPrefs, container.appScope)
+                    },
+                    onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
+                    onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
                 )
             }

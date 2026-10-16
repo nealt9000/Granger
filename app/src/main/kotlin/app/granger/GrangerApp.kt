@@ -29,8 +29,8 @@ import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.zim.ZimResolver
-import app.granger.downloads.DownloadPrefs
-import app.granger.downloads.SharedDownloadPrefs
+import app.granger.sources.DownloadPrefs
+import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope

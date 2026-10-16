@@ -1,4 +1,4 @@
-package app.granger.downloads
+package app.granger.sources
 
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogItem

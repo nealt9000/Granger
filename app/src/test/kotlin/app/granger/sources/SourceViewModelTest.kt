@@ -1,6 +1,7 @@
-package app.granger.downloads
+package app.granger.sources
 
 import app.granger.FakeCatalogSource
+import app.granger.SHA_B
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
 import app.granger.FakePrefs
@@ -26,7 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 
-class DownloadsViewModelTest {
+class SourceViewModelTest {
     @get:Rule val main = MainDispatcherRule()
 
     private val med = packEntry("med", category = "Medical")
@@ -45,8 +46,11 @@ class DownloadsViewModelTest {
     private val volumes = FakeVolumes(listOf(volume("/internal", "Internal storage"), volume("/sd", "SD card")))
     private val prefs = FakePrefs()
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.THINK_DEEPER): DownloadsViewModel {
-        val vm = DownloadsViewModel(catalog, downloads, library, volumes, prefs, tier, appScope = this, io = main.dispatcher)
+    private fun TestScope.viewModel(
+        scope: CatalogScope = CatalogScope.GRANGER,
+        tier: DeviceTier = DeviceTier.THINK_DEEPER,
+    ): SourceViewModel {
+        val vm = SourceViewModel(scope, catalog, downloads, library, volumes, prefs, tier, appScope = this, io = main.dispatcher)
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         return vm
@@ -58,11 +62,82 @@ class DownloadsViewModelTest {
         assertThat(catalog.refreshes).isEqualTo(1)
     }
 
-    @Test fun modelsFirstThenCategoriesInTheirOrder() = runTest(main.dispatcher) {
+    @Test fun categoriesInTheirOrder() = runTest(main.dispatcher) {
         val ui = viewModel().ui.value
-        assertThat(ui.sections.map { it.title }).containsExactly("AI models", "Medical", "Reference", "Regional").inOrder()
+        assertThat(ui.sections.map { it.title }).containsExactly("Medical", "Reference", "Regional").inOrder()
         assertThat(ui.loading).isFalse()
-        assertThat(ui.sections[1].rows.single().details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
+        assertThat(ui.sections[0].rows.single().details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
+    }
+
+    @Test fun modelsScopeListsTheModelsSection() = runTest(main.dispatcher) {
+        val ui = viewModel(CatalogScope.MODELS).ui.value
+        assertThat(ui.sections.map { it.title }).containsExactly("AI models")
+    }
+
+    @Test fun onlyItemsInScopeAreListed() = runTest(main.dispatcher) {
+        val kiwixPack = packEntry("wiki", category = "Reference", urls = listOf("https://download.kiwix.org/zim/wiki.zim"))
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(med, kiwixPack), listOf(e2b)))
+        fun ids(scope: CatalogScope) = viewModel(scope).ui.value.sections.flatMap { it.rows }.map { it.id }
+        assertThat(ids(CatalogScope.GRANGER)).containsExactly("med")
+        assertThat(ids(CatalogScope.KIWIX)).containsExactly("wiki")
+        assertThat(ids(CatalogScope.MODELS)).containsExactly("e2b")
+    }
+
+    @Test fun presetsOnlyOnGranger() = runTest(main.dispatcher) {
+        assertThat(viewModel(CatalogScope.GRANGER).ui.value.presets).hasSize(1)
+        assertThat(viewModel(CatalogScope.KIWIX).ui.value.presets).isEmpty()
+        assertThat(viewModel(CatalogScope.MODELS).ui.value.presets).isEmpty()
+    }
+
+    private fun SourceViewModel.rowIds() = ui.value.sections.flatMap { it.rows }.map { it.id }
+
+    @Test fun browseShowsEverythingInScope() = runTest(main.dispatcher) {
+        assertThat(viewModel().apply { setTab(SourceTab.BROWSE) }.rowIds()).containsExactly("med", "top", "voyage")
+    }
+
+    @Test fun installedTabShowsInstalledUpdatesAndActive() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("u-med"))
+        downloads.list.value = listOf(
+            record("top", DownloadState.RUNNING),
+            record("voyage", DownloadState.INSTALLED, sha256 = SHA_B),
+        )
+        val vm = viewModel()
+        vm.setTab(SourceTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        // med is installed, top is downloading, voyage is installed from an older snapshot.
+        assertThat(vm.rowIds()).containsExactly("med", "top", "voyage")
+        library.packList.value = emptyList()
+        downloads.list.value = emptyList()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rowIds()).isEmpty()
+    }
+
+    @Test fun updatesTabShowsOnlyUpdates() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("u-med"))
+        downloads.list.value = listOf(
+            record("top", DownloadState.RUNNING),
+            record("voyage", DownloadState.INSTALLED, sha256 = SHA_B),
+        )
+        val vm = viewModel()
+        vm.setTab(SourceTab.UPDATES)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rowIds()).containsExactly("voyage")
+    }
+
+    @Test fun queryFiltersTitleAndDescription() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(listOf(med, packEntry("top", description = "First aid for the field"), voyage)),
+        )
+        val vm = viewModel()
+        vm.setQuery("PACK MED")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rowIds()).containsExactly("med")
+        vm.setQuery("first AID")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rowIds()).containsExactly("top")
+        vm.setQuery("")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rowIds()).hasSize(3)
     }
 
     @Test fun getQueuesOnTheChosenVolumeWithTheWifiSetting() = runTest(main.dispatcher) {
@@ -149,7 +224,7 @@ class DownloadsViewModelTest {
     }
 
     @Test fun removingAModelOnlyTouchesDownloads() = runTest(main.dispatcher) {
-        val vm = viewModel()
+        val vm = viewModel(CatalogScope.MODELS)
         vm.remove("e2b")
         testScheduler.advanceUntilIdle()
         assertThat(library.removed).isEmpty()
@@ -187,8 +262,9 @@ class DownloadsViewModelTest {
     }
 
     @Test fun weakPhonesCannotGetModels() = runTest(main.dispatcher) {
-        val ui = viewModel(tier = DeviceTier.LIBRARY_ONLY).ui.value
-        assertThat(ui.sections.first().rows.single().status).isEqualTo(ItemStatus.NeedsMoreMemory)
-        assertThat(ui.presets.single().remainingCount).isEqualTo(3)
+        val models = viewModel(CatalogScope.MODELS, DeviceTier.LIBRARY_ONLY).ui.value
+        assertThat(models.sections.single().rows.single().status).isEqualTo(ItemStatus.NeedsMoreMemory)
+        val granger = viewModel(tier = DeviceTier.LIBRARY_ONLY).ui.value
+        assertThat(granger.presets.single().remainingCount).isEqualTo(3)
     }
 }

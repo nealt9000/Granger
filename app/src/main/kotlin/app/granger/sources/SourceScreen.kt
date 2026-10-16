@@ -1,11 +1,10 @@
-package app.granger.downloads
+package app.granger.sources
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,10 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,11 +27,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -53,7 +53,7 @@ import app.granger.formatBytes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DownloadsScreen(viewModel: DownloadsViewModel, onBack: () -> Unit) {
+fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
@@ -82,7 +82,7 @@ fun DownloadsScreen(viewModel: DownloadsViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Downloads") },
+                title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
@@ -96,14 +96,32 @@ fun DownloadsScreen(viewModel: DownloadsViewModel, onBack: () -> Unit) {
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
-            item(key = "storage") { StorageSection(ui, viewModel::selectVolume) }
-            item(key = "wifi") {
-                ListItem(
-                    headlineContent = { Text("Download on Wi-Fi only") },
-                    supportingContent = { Text("Turn off to use mobile data") },
-                    trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
+            item(key = "search") {
+                OutlinedTextField(
+                    value = ui.query,
+                    onValueChange = viewModel::setQuery,
+                    placeholder = { Text("Search ${title}") },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 )
-                HorizontalDivider()
+            }
+            item(key = "tabs") {
+                PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
+                    for (tab in SourceTab.entries) {
+                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(tab.title) })
+                    }
+                }
+            }
+            storageSummary(ui)?.let { summary ->
+                item(key = "storage") {
+                    Text(
+                        summary,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
             }
             ui.catalogProblem?.let { problem ->
                 item(key = "problem") {
@@ -113,6 +131,15 @@ fun DownloadsScreen(viewModel: DownloadsViewModel, onBack: () -> Unit) {
             if (ui.loading) {
                 item(key = "loading") {
                     Box(Modifier.fillMaxWidth().padding(32.dp), Alignment.Center) { CircularProgressIndicator() }
+                }
+            }
+            if (!ui.loading && ui.catalogProblem == null && ui.sections.isEmpty()) {
+                item(key = "empty") {
+                    Text(
+                        if (ui.query.isNotBlank()) "Nothing matches that search." else "Nothing here yet.",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             items(ui.presets, key = { "preset-${it.id}" }) { preset ->
@@ -169,44 +196,10 @@ fun DownloadsScreen(viewModel: DownloadsViewModel, onBack: () -> Unit) {
     }
 }
 
-@Composable
-private fun StorageSection(ui: DownloadsUi, onSelect: (String) -> Unit) {
-    val choosable = ui.volumes.size > 1
-    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Storage", style = MaterialTheme.typography.titleSmall)
-        for (volume in ui.volumes) {
-            val selected = volume.path == ui.selectedVolume
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().let {
-                    if (choosable) it.selectable(selected = selected, onClick = { onSelect(volume.path) }) else it
-                },
-            ) {
-                if (choosable) RadioButton(selected = selected, onClick = null)
-                Column(Modifier.weight(1f).padding(start = if (choosable) 8.dp else 0.dp)) {
-                    Text(volume.label)
-                    val used = if (volume.totalBytes > 0) 1f - volume.freeBytes.toFloat() / volume.totalBytes else 0f
-                    LinearProgressIndicator(
-                        progress = { used.coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    )
-                    Text(
-                        buildString {
-                            append("${formatBytes(volume.freeBytes)} free · Granger uses ${formatBytes(volume.grangerBytes)}")
-                            if (volume.queuedBytes > 0) append(" · ${formatBytes(volume.queuedBytes)} to download")
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
-        }
-        if (choosable) Text("New downloads go to the selected storage.", style = MaterialTheme.typography.bodySmall)
-        Text(
-            "Uninstalling Granger deletes everything it downloaded.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+/** "38.2 GB free on Phone · Granger uses 4.1 GB" for the volume downloads will go to. */
+private fun storageSummary(ui: SourceUi): String? {
+    val volume = ui.volumes.firstOrNull { it.path == ui.selectedVolume } ?: return null
+    return "${formatBytes(volume.freeBytes)} free on ${volume.label} · Granger uses ${formatBytes(volume.grangerBytes)}"
 }
 
 @Composable

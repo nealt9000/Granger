@@ -15,7 +15,7 @@ import app.granger.core.downloads.EnqueueResult
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
-import app.granger.downloads.DownloadPrefs
+import app.granger.sources.DownloadPrefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -24,9 +24,16 @@ import java.io.File
 val SHA_A = "a".repeat(64)
 val SHA_B = "b".repeat(64)
 
-fun packEntry(id: String, category: String = "Medical", size: Long = 1_000, sha256: String = SHA_A) = PackEntry(
-    id = id, title = "Pack $id", category = category, language = "eng", sizeBytes = size, sha256 = sha256,
-    urls = listOf("https://a.test/$id.zim"), snapshotDate = "2026-10-10", license = "CC BY-SA 4.0",
+fun packEntry(
+    id: String,
+    category: String = "Medical",
+    size: Long = 1_000,
+    sha256: String = SHA_A,
+    description: String = "",
+    urls: List<String> = listOf("https://a.test/$id.zim"),
+) = PackEntry(
+    id = id, title = "Pack $id", description = description, category = category, language = "eng", sizeBytes = size, sha256 = sha256,
+    urls = urls, snapshotDate = "2026-10-10", license = "CC BY-SA 4.0",
     hasFulltextIndex = true, zimUuid = "u-$id", zimName = "n-$id",
 )
 
