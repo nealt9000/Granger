@@ -79,3 +79,8 @@ def test_page_numbers_are_left_out_of_titles():
     html = "".join(f'<h2><a id="c{i}"></a><span class="pagenum"><a id="p{i}">{{{i}}}</a></span>Chapter {i}</h2>'
                    for i in range(3))
     assert [c.title for c in split(body(html))] == ["Chapter 0", "Chapter 1", "Chapter 2"]
+
+
+def test_footnote_markers_are_left_out_of_titles():
+    html = "".join(f'<h2>SURA<a href="#fn{i}"><sup>1</sup></a> {i}</h2><p id="fn{i}">note</p>' for i in range(3))
+    assert [c.title for c in split(body(html))] == ["SURA 0", "SURA 1", "SURA 2"]

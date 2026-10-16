@@ -68,16 +68,16 @@ def _title(text: str) -> str:
 
 
 def _heading_title(heading: Tag) -> str:
-    """The heading's words, leaving out page-number markers like `{ix}` that Gutenberg files put in headings."""
-    def in_page_number(string) -> bool:
+    """The heading's words, leaving out page-number markers like `{ix}` and footnote superscripts."""
+    def in_marker(string) -> bool:
         node = string.parent
         while node is not None and node is not heading:
-            if PAGE_NUMBER.intersection(node.get("class") or []):
+            if node.name == "sup" or PAGE_NUMBER.intersection(node.get("class") or []):
                 return True
             node = node.parent
         return False
 
-    return _title(" ".join(str(s) for s in heading.find_all(string=True) if not in_page_number(s)))
+    return _title(" ".join(str(s) for s in heading.find_all(string=True) if not in_marker(s)))
 
 
 def _text_len(nodes: list[PageElement]) -> int:
