@@ -81,6 +81,12 @@ class CatalogParserTest {
         assertThat(traversal.packs).isEmpty()
     }
 
+    @Test fun aModelReusingAnEarlierFileNameIsDropped() {
+        // Two models must never download to the same file; SD cards ignore case, so neither may differ only by case.
+        assertThat(ok(parse(catalogJson(modelFileName = "e4b.litertlm"))).models.map { it.id }).containsExactly("e2b")
+        assertThat(ok(parse(catalogJson(modelFileName = "E4B.litertlm"))).models.map { it.id }).containsExactly("e2b")
+    }
+
     @Test fun releaseBuildsListOnlyEvaluatedModels() {
         val catalog = ok(parse(catalogJson()))
         assertThat(catalog.forBuild(includeUnevaluatedModels = true).models.map { it.id }).containsExactly("e2b", "e4b")

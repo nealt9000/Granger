@@ -47,6 +47,8 @@ object CatalogParser {
         val models = entries<ModelEntry>(root, "models")
             .filter { valid(it) && SAFE_NAME.matches(it.fileName) }
             .distinctBy { it.id }
+            // Two models must never share a target file (compared ignoring case, as SD cards do).
+            .distinctBy { it.fileName.lowercase() }
         val ids = (packs.map { it.id } + models.map { it.id }).toSet()
         val presets = entries<Preset>(root, "presets").map { preset -> preset.copy(items = preset.items.filter { it in ids }) }
         return ParseResult.Ok(Catalog(version, generatedAt, packs, models, presets))
