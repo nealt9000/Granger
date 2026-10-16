@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -22,16 +21,25 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 
@@ -40,9 +48,11 @@ import app.granger.core.library.PackStatus
 fun LibraryScreen(
     viewModel: LibraryViewModel,
     packsFolder: String,
-    onOpenPack: (packId: String) -> Unit,
+    /** Shown once as a snackbar, e.g. why the app didn't resume reading. */
+    notice: String?,
+    onOpenPack: (Pack) -> Unit,
     onSearch: () -> Unit,
-    onBookmarks: () -> Unit,
+    onHistory: () -> Unit,
     onDownloads: () -> Unit,
     onReadiness: () -> Unit,
 ) {
@@ -51,13 +61,22 @@ fun LibraryScreen(
         onPauseOrDispose {}
     }
     val packs by viewModel.packs.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    var noticeShown by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(notice) {
+        if (notice != null && !noticeShown) {
+            noticeShown = true
+            snackbar.showSnackbar(notice)
+        }
+    }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("Library") },
                 actions = {
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
-                    IconButton(onClick = onBookmarks) { Icon(Icons.Filled.Star, contentDescription = "Bookmarks") }
+                    IconButton(onClick = onHistory) { Icon(painterResource(R.drawable.ic_history), contentDescription = "History") }
                     IconButton(onClick = onDownloads) { Icon(Icons.Filled.Add, contentDescription = "Downloads") }
                     IconButton(onClick = onReadiness) { Icon(Icons.Filled.CheckCircle, contentDescription = "Readiness") }
                 },
@@ -76,7 +95,7 @@ fun LibraryScreen(
             }
             else -> LazyColumn(Modifier.padding(padding).fillMaxSize()) {
                 items(list, key = { it.id }) { pack ->
-                    PackRow(pack, onClick = { onOpenPack(pack.id) })
+                    PackRow(pack, onClick = { onOpenPack(pack) })
                     HorizontalDivider()
                 }
             }

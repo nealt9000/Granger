@@ -3,6 +3,7 @@ package app.granger
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.provider.Settings
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
 import app.granger.core.catalog.CatalogRepository
@@ -20,12 +21,17 @@ import app.granger.core.downloads.WorkManagerScheduler
 import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.ReadingSessions
 import app.granger.core.library.RoomLibrary
+import app.granger.core.library.RoomReadingSessions
+import app.granger.core.library.RoomShelves
+import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.zim.ZimResolver
 import app.granger.downloads.DownloadPrefs
 import app.granger.downloads.SharedDownloadPrefs
+import app.granger.launch.SessionMarker
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +61,16 @@ class AppContainer(context: Context) {
         context.getExternalFilesDirs(null).filterNotNull().map { File(it, "packs").apply { mkdirs() } }
     }
 
-    val library: Library = RoomLibrary(LibraryDatabase.create(context), KiwixZimOpener(context), packDirs)
+    private val libraryDb = LibraryDatabase.create(context)
+    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs)
+    val shelves: Shelves = RoomShelves(libraryDb, library)
+    val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
+
+    /** Clean-exit and reboot tracking for the launch decision; BOOT_COUNT is -1 (unavailable) on odd builds. */
+    val sessionMarker = SessionMarker(
+        prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE),
+        bootCount = { Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1) },
+    )
     val search: LibrarySearch = ZimLibrarySearch(library)
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
