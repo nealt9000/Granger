@@ -10,6 +10,8 @@
         tools:replace="android:allowBackup,android:label"
         android:allowBackup="false"
         android:label="Granger"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@android:style/Theme.Material.NoActionBar">
         <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="false" />
         <uses-native-library android:name="libOpenCL.so" android:required="false" />
