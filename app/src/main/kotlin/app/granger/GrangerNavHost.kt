@@ -6,6 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import app.granger.bookmarks.BookmarksScreen
+import app.granger.bookmarks.BookmarksViewModel
 import app.granger.library.LibraryScreen
 import app.granger.library.LibraryViewModel
 import app.granger.reader.ReaderScreen
@@ -17,6 +19,7 @@ import kotlinx.serialization.Serializable
 @Serializable object LibraryRoute
 @Serializable data class ReaderRoute(val packId: String, val path: String? = null)
 @Serializable object SearchRoute
+@Serializable object BookmarksRoute
 
 @Composable
 fun GrangerNavHost(container: AppContainer) {
@@ -28,7 +31,7 @@ fun GrangerNavHost(container: AppContainer) {
                 packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                 onOpenPack = { nav.navigate(ReaderRoute(it)) },
                 onSearch = { nav.navigate(SearchRoute) },
-                onBookmarks = {}, // Task 11
+                onBookmarks = { nav.navigate(BookmarksRoute) },
             )
         }
         composable<ReaderRoute> { entry ->
@@ -44,6 +47,13 @@ fun GrangerNavHost(container: AppContainer) {
             SearchScreen(
                 viewModel = viewModel { SearchViewModel(container.search) },
                 onOpen = { hit -> nav.navigate(ReaderRoute(hit.packId, hit.path)) },
+                onBack = { nav.popBackStack() },
+            )
+        }
+        composable<BookmarksRoute> {
+            BookmarksScreen(
+                viewModel = viewModel { BookmarksViewModel(container.library, container.appScope) },
+                onOpen = { bookmark -> nav.navigate(ReaderRoute(bookmark.packId, bookmark.path)) },
                 onBack = { nav.popBackStack() },
             )
         }
