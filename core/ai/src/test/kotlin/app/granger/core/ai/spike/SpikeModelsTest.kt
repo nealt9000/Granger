@@ -19,7 +19,6 @@ class SpikeModelsTest {
 
     @Test fun embedderFilesAreShared() {
         val m = SpikeModels.forBackend(LlmBackend.GPU, "/m")
-        assertThat(m.embedder).isEqualTo("/m/embeddinggemma-300M_seq512_mixed-precision.tflite")
-        assertThat(m.embedderTokenizer).isEqualTo("/m/sentencepiece.model")
+        assertThat(m.embedder).isEqualTo("/m/embeddinggemma-2-text-270m.litertlm")
     }
 }

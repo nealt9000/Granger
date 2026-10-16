@@ -21,7 +21,7 @@ data class SpikeMeasurement(
     val backend: LlmBackend,
     val step: String,
     val millis: Long? = null,
-    val peakPssMb: Int? = null,
+    val peakRssMb: Int? = null,
     val ttftMs: Long? = null,
     val chunksPerSecond: Double? = null,
     val error: String? = null,
@@ -39,12 +39,16 @@ class SpikeRunner(
     private val clock: MonoClock,
     private val fileExists: (String) -> Boolean,
 ) {
-    suspend fun run(config: SpikeConfig, onProgress: (String) -> Unit = {}): List<SpikeMeasurement> {
+    suspend fun run(
+        config: SpikeConfig,
+        onProgress: (String) -> Unit = {},
+        onRow: (SpikeMeasurement) -> Unit = {},
+    ): List<SpikeMeasurement> {
         val m = config.models
         val b = config.backend
-        val missing = listOf(m.small, m.large, m.embedder, m.embedderTokenizer).filterNot(fileExists)
+        val missing = listOf(m.small, m.large, m.embedder).filterNot(fileExists)
         if (missing.isNotEmpty()) {
-            return missing.map { SpikeMeasurement(b, "check files", error = "missing: $it") }
+            return missing.map { SpikeMeasurement(b, "check files", error = "missing: $it").also(onRow) }
         }
 
         val out = mutableListOf<SpikeMeasurement>()
@@ -52,7 +56,7 @@ class SpikeRunner(
         var embedder: TextEmbedder? = null
 
         suspend fun step(name: String, block: suspend () -> GenerationResult?) =
-            measure(b, name, out, onProgress, block)
+            measure(b, name, out, onProgress, onRow, block)
 
         suspend fun generate(prompt: String) =
             timeGeneration(checkNotNull(llm) { "model not loaded" }, prompt, config.maxChunks, clock)
@@ -61,7 +65,7 @@ class SpikeRunner(
             step("load small") { llm = openLlm(m.small, b); null }
             step("rewrite (small)") { generate(SpikePrompts.REWRITE) }
             step("answer (small)") { generate(SpikePrompts.ANSWER) }
-            step("load embedder (small resident)") { embedder = openEmbedder(m.embedder, m.embedderTokenizer); null }
+            step("load embedder (small resident)") { embedder = openEmbedder(m.embedder); null }
             step("embed query + 8 passages") {
                 val e = checkNotNull(embedder) { "embedder not loaded" }
                 e.embed(listOf(SpikePrompts.QUESTION), isQuery = true)
@@ -72,7 +76,7 @@ class SpikeRunner(
             embedder?.close()
             embedder = null
             step("swap small->large") { llm?.close(); llm = null; llm = openLlm(m.large, b); null }
-            step("answer (large)") { generate(SpikePrompts.ANSWER) }
+            step("answer (large)") { generate(SpikePrompts.ANSWER_DEEP) }
             step("swap large->small") { llm?.close(); llm = null; llm = openLlm(m.small, b); null }
         } finally {
             embedder?.close()
@@ -92,8 +96,8 @@ class SpikeRunner(
         return engine
     }
 
-    private fun openEmbedder(model: String, tokenizer: String): TextEmbedder {
-        val embedder = embedderFactory.create(model, tokenizer)
+    private fun openEmbedder(model: String): TextEmbedder {
+        val embedder = embedderFactory.create(model)
         try {
             embedder.load()
         } catch (t: Throwable) {
@@ -108,26 +112,35 @@ class SpikeRunner(
         name: String,
         out: MutableList<SpikeMeasurement>,
         onProgress: (String) -> Unit,
+        onRow: (SpikeMeasurement) -> Unit,
         block: suspend () -> GenerationResult?,
     ) {
         onProgress(name)
-        val start = clock.nanos()
-        try {
-            val (gen, peak) = memory.peakPssMb { block() }
-            out += SpikeMeasurement(
+        val row = try {
+            // Time inside the sampled block so the sampler's own cost is not counted.
+            val (timed, peak) = memory.peakRssMb {
+                val start = clock.nanos()
+                val gen = block()
+                gen to (clock.nanos() - start) / 1_000_000
+            }
+            val (gen, millis) = timed
+            SpikeMeasurement(
                 backend = backend,
                 step = name,
-                millis = (clock.nanos() - start) / 1_000_000,
-                peakPssMb = peak,
+                millis = millis,
+                peakRssMb = peak,
                 ttftMs = gen?.ttftMs,
                 chunksPerSecond = gen?.chunksPerSecond,
                 error = if (gen != null && gen.chunks == 0) "no output" else null,
             )
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
-            out += SpikeMeasurement(backend, name, error = e.message ?: e::class.simpleName)
+        } catch (t: Throwable) {
+            // Errors too (UnsatisfiedLinkError, OutOfMemoryError): record them and keep going.
+            SpikeMeasurement(backend, name, error = t.message ?: t::class.simpleName)
         }
+        out += row
+        onRow(row)
     }
 
     companion object {

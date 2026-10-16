@@ -11,4 +11,3 @@ captures/
 models/
 *.litertlm
 *.tflite
-sentencepiece.model

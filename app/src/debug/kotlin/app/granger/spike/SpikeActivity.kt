@@ -31,14 +31,15 @@ import androidx.compose.ui.unit.sp
 import app.granger.core.ai.DeviceTiers
 import app.granger.core.ai.LiteRtLlmEngine
 import app.granger.core.ai.LlmBackend
-import app.granger.core.ai.PssMemorySampler
-import app.granger.core.ai.RagTextEmbedder
+import app.granger.core.ai.LiteRtTextEmbedder
+import app.granger.core.ai.RssMemorySampler
 import app.granger.core.ai.SystemMonoClock
 import app.granger.core.ai.spike.SpikeConfig
 import app.granger.core.ai.spike.SpikeModels
 import app.granger.core.ai.spike.SpikeReport
 import app.granger.core.ai.spike.SpikeRunner
 import java.io.File
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,15 +57,15 @@ class SpikeActivity : ComponentActivity() {
         val modelsDir = findModelsDir()
         val runner = SpikeRunner(
             llmFactory = { path, backend -> LiteRtLlmEngine(path, backend, cacheDir.path) },
-            embedderFactory = { model, tokenizer -> RagTextEmbedder(model, tokenizer) },
-            memory = PssMemorySampler(),
+            embedderFactory = { model -> LiteRtTextEmbedder(model, cacheDir.path) },
+            memory = RssMemorySampler(),
             clock = SystemMonoClock,
             fileExists = { File(it).canRead() },
         )
         setContent {
             MaterialTheme {
                 Surface(Modifier.fillMaxSize()) {
-                    SpikeScreen(deviceLine, modelsDir, runner, ::saveReport)
+                    SpikeScreen(deviceLine, modelsDir, runner, ::newReportFile)
                 }
             }
         }
@@ -76,11 +77,8 @@ class SpikeActivity : ComponentActivity() {
         return candidates.firstOrNull { File(it, SpikeModels.SMALL_CPU).canRead() } ?: candidates.first()
     }
 
-    private fun saveReport(backend: LlmBackend, markdown: String): File {
-        val file = File(getExternalFilesDir(null), "spike-${backend.name.lowercase()}-${System.currentTimeMillis()}.md")
-        file.writeText(markdown)
-        return file
-    }
+    private fun newReportFile(backend: LlmBackend): File =
+        File(getExternalFilesDir(null), "spike-${backend.name.lowercase()}-${System.currentTimeMillis()}.md")
 }
 
 @Composable
@@ -88,7 +86,7 @@ private fun SpikeScreen(
     deviceLine: String,
     modelsDir: File,
     runner: SpikeRunner,
-    save: (LlmBackend, String) -> File,
+    newReportFile: (LlmBackend) -> File,
 ) {
     val scope = rememberCoroutineScope()
     var running by remember { mutableStateOf(false) }
@@ -104,16 +102,27 @@ private fun SpikeScreen(
                     onClick = {
                         running = true
                         scope.launch {
-                            val rows = withContext(Dispatchers.Default) {
-                                runner.run(SpikeConfig(backend, SpikeModels.forBackend(backend, modelsDir.path))) { step ->
-                                    scope.launch { log += "$backend: $step…" }
+                            try {
+                                val header = "$deviceLine · $backend"
+                                val file = newReportFile(backend)
+                                // Rows are appended as measured, so a crash or low-memory kill keeps partial results.
+                                withContext(Dispatchers.IO) { file.writeText(SpikeReport.toMarkdown(header, emptyList())) }
+                                val rows = withContext(Dispatchers.Default) {
+                                    runner.run(
+                                        SpikeConfig(backend, SpikeModels.forBackend(backend, modelsDir.path)),
+                                        onProgress = { step -> scope.launch { log += "$backend: $step…" } },
+                                        onRow = { row -> file.appendText(SpikeReport.row(row) + "\n") },
+                                    )
                                 }
+                                log += SpikeReport.toMarkdown(header, rows)
+                                log += "Saved ${file.path}"
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (t: Throwable) {
+                                log += "Run failed: $t"
+                            } finally {
+                                running = false
                             }
-                            val markdown = SpikeReport.toMarkdown("$deviceLine · $backend", rows)
-                            val file = withContext(Dispatchers.IO) { save(backend, markdown) }
-                            log += markdown
-                            log += "Saved ${file.path}"
-                            running = false
                         }
                     },
                 ) { Text("Run $backend") }

@@ -7,5 +7,5 @@ interface TextEmbedder : AutoCloseable {
 }
 
 fun interface TextEmbedderFactory {
-    fun create(modelPath: String, tokenizerPath: String): TextEmbedder
+    fun create(modelPath: String): TextEmbedder
 }

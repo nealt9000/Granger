@@ -21,13 +21,18 @@ object SpikePrompts {
             "Reply only with JSON: {\"searchTerms\": [\"...\"], \"medical\": true or false}.\n" +
             "Question: $QUESTION"
 
-    val ANSWER = buildString {
+    val ANSWER = answerPrompt(passages = 4)
+
+    /** Think deeper reuses retrieval but expands to ~8 passages (spec: Ask pipeline). */
+    val ANSWER_DEEP = answerPrompt(passages = 8)
+
+    private fun answerPrompt(passages: Int) = buildString {
         appendLine(
             "Answer the question using only the numbered passages. Cite every claim like [1]. " +
                 "If the passages do not contain the answer, reply exactly: NOT_IN_LIBRARY.",
         )
         appendLine()
-        passages(4).forEach { appendLine(it); appendLine() }
+        passages(passages).forEach { appendLine(it); appendLine() }
         append("Question: $QUESTION")
     }
 }

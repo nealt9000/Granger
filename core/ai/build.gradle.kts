@@ -14,7 +14,6 @@ android {
 
 dependencies {
     implementation(libs.litertlm.android)
-    implementation(libs.localagents.rag)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

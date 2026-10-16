@@ -47,4 +47,34 @@ class GenerationTimingTest {
         assertThat(r.ttftMs).isEqualTo(300)
         assertThat(r.chunksPerSecond).isEqualTo(0.0)
     }
+
+    @Test fun emptyTextChunksAreNotTokens() = runTest {
+        val clock = FakeClock()
+        val llm = ScriptedLlm(clock, listOf(100, 100, 100), texts = listOf("", "", ""))
+
+        val r = timeGeneration(llm, "q", maxChunks = 10, clock = clock)
+
+        assertThat(r.ttftMs).isNull()
+        assertThat(r.chunks).isEqualTo(0)
+    }
+
+    @Test fun firstTokenIsFirstNonEmptyChunk() = runTest {
+        val clock = FakeClock()
+        val llm = ScriptedLlm(clock, listOf(100, 200, 100), texts = listOf("", "a", "b"))
+
+        val r = timeGeneration(llm, "q", maxChunks = 10, clock = clock)
+
+        assertThat(r.ttftMs).isEqualTo(300)
+        assertThat(r.chunks).isEqualTo(2)
+        assertThat(r.text).isEqualTo("ab")
+    }
+
+    @Test fun passesMaxChunksToTheEngineAsTokenLimit() = runTest {
+        val clock = FakeClock()
+        val llm = ScriptedLlm(clock, listOf(10))
+
+        timeGeneration(llm, "q", maxChunks = 3, clock = clock)
+
+        assertThat(llm.lastMaxTokens).isEqualTo(3)
+    }
 }

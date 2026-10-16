@@ -7,7 +7,7 @@ PRIMARY=/sdcard/Android/data/app.granger/files/models
 FALLBACK=/data/local/tmp/granger-models
 
 files=(gemma-4-E2B-it.litertlm gemma-4-E2B-it-gpu.litertlm gemma-4-E4B-it.litertlm gemma-4-E4B-it-gpu.litertlm
-       embeddinggemma-300M_seq512_mixed-precision.tflite sentencepiece.model)
+       embeddinggemma-2-text-270m.litertlm)
 
 target="${1:-$PRIMARY}"
 [[ "$target" == "fallback" ]] && target=$FALLBACK

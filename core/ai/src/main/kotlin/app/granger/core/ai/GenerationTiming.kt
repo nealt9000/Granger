@@ -1,5 +1,6 @@
 package app.granger.core.ai
 
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 
 fun interface MonoClock {
@@ -32,7 +33,8 @@ suspend fun timeGeneration(
     var last = -1L
     var count = 0
     val text = StringBuilder()
-    engine.generate(prompt).take(maxChunks).collect { chunk ->
+    // Empty chunks (e.g. thinking-only or final deltas) are not visible tokens.
+    engine.generate(prompt, maxChunks).filter { it.isNotEmpty() }.take(maxChunks).collect { chunk ->
         val now = clock.nanos()
         if (first < 0) first = now
         last = now

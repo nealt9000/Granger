@@ -9,7 +9,7 @@ class SpikeReportTest {
         val md = SpikeReport.toMarkdown(
             "Pixel 6",
             listOf(
-                SpikeMeasurement(LlmBackend.GPU, "answer (small)", millis = 4200, peakPssMb = 2100, ttftMs = 900, chunksPerSecond = 21.456),
+                SpikeMeasurement(LlmBackend.GPU, "answer (small)", millis = 4200, peakRssMb = 2100, ttftMs = 900, chunksPerSecond = 21.456),
                 SpikeMeasurement(LlmBackend.GPU, "swap small->large", error = "load failed"),
             ),
         )
@@ -18,7 +18,7 @@ class SpikeReportTest {
             """
             |## Pixel 6
             |
-            || Backend | Step | Time (ms) | Peak PSS (MB) | TTFT (ms) | Chunks/s | Error |
+            || Backend | Step | Time (ms) | Peak RSS (MB) | TTFT (ms) | Chunks/s | Error |
             || --- | --- | --- | --- | --- | --- | --- |
             || GPU | answer (small) | 4200 | 2100 | 900 | 21.5 |  |
             || GPU | swap small->large | — | — | — | — | load failed |

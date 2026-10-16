@@ -9,8 +9,8 @@ interface LlmEngine : AutoCloseable {
     /** Blocking and slow (up to ~10 s). Never call on the main thread. */
     fun load()
 
-    /** Streams the reply as text chunks (roughly one token each). */
-    fun generate(prompt: String): Flow<String>
+    /** Streams the reply as text chunks (roughly one token each), stopping natively after [maxTokens]. */
+    fun generate(prompt: String, maxTokens: Int): Flow<String>
 }
 
 fun interface LlmEngineFactory {
