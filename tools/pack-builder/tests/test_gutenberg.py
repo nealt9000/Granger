@@ -39,3 +39,9 @@ def test_old_text_markers_are_cut():
 def test_book_without_markers_is_rejected():
     with pytest.raises(gutenberg.NotAGutenbergBook):
         gutenberg.clean(fixture("pg-nomarkers.html"))
+
+
+def test_heading_images_become_their_alt_text():
+    html = fixture("pg-old.html").replace(b"<h2>II</h2>", b'<h2><img alt="CHAPTER II." src="i.jpg"></h2>')
+    c = gutenberg.clean(html)
+    assert c.body.find_all("h2")[1].get_text() == "CHAPTER II."

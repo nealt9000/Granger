@@ -47,6 +47,8 @@ def clean(html: bytes) -> Cleaned:
     _drop_after(end, root)
     _drop_before(start, root)
 
+    for image in root.select("h1 img[alt], h2 img[alt], h3 img[alt], h4 img[alt], h5 img[alt], h6 img[alt]"):
+        image.replace_with(image["alt"])
     for tag in root.find_all(REMOVED_TAGS):
         tag.decompose()
     for link in root.find_all("a", href=True):
