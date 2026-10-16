@@ -1,5 +1,6 @@
 package app.granger
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -8,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.bookmarks.BookmarksScreen
 import app.granger.bookmarks.BookmarksViewModel
+import app.granger.downloads.DownloadsScreen
+import app.granger.downloads.DownloadsViewModel
 import app.granger.library.LibraryScreen
 import app.granger.library.LibraryViewModel
 import app.granger.reader.ReaderScreen
@@ -20,6 +23,8 @@ import kotlinx.serialization.Serializable
 @Serializable data class ReaderRoute(val packId: String, val path: String? = null)
 @Serializable object SearchRoute
 @Serializable object BookmarksRoute
+@Serializable object DownloadsRoute
+@Serializable object ReadinessRoute
 
 @Composable
 fun GrangerNavHost(container: AppContainer) {
@@ -32,6 +37,8 @@ fun GrangerNavHost(container: AppContainer) {
                 onOpenPack = { nav.navigate(ReaderRoute(it)) },
                 onSearch = { nav.navigate(SearchRoute) },
                 onBookmarks = { nav.navigate(BookmarksRoute) },
+                onDownloads = { nav.navigate(DownloadsRoute) },
+                onReadiness = { nav.navigate(ReadinessRoute) },
             )
         }
         composable<ReaderRoute> { entry ->
@@ -57,5 +64,17 @@ fun GrangerNavHost(container: AppContainer) {
                 onBack = { nav.popBackStack() },
             )
         }
+        composable<DownloadsRoute> {
+            DownloadsScreen(
+                viewModel = viewModel {
+                    DownloadsViewModel(
+                        container.catalog, container.downloads, container.library, container.volumes,
+                        container.downloadPrefs, container.deviceTier, container.appScope,
+                    )
+                },
+                onBack = { nav.popBackStack() },
+            )
+        }
+        composable<ReadinessRoute> { Text("Readiness") }
     }
 }

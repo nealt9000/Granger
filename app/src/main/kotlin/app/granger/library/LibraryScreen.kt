@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,6 +43,8 @@ fun LibraryScreen(
     onOpenPack: (packId: String) -> Unit,
     onSearch: () -> Unit,
     onBookmarks: () -> Unit,
+    onDownloads: () -> Unit,
+    onReadiness: () -> Unit,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -53,6 +58,8 @@ fun LibraryScreen(
                 actions = {
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
                     IconButton(onClick = onBookmarks) { Icon(Icons.Filled.Star, contentDescription = "Bookmarks") }
+                    IconButton(onClick = onDownloads) { Icon(Icons.Filled.Add, contentDescription = "Downloads") }
+                    IconButton(onClick = onReadiness) { Icon(Icons.Filled.CheckCircle, contentDescription = "Readiness") }
                 },
             )
         },
@@ -61,9 +68,10 @@ fun LibraryScreen(
         when {
             list == null -> Unit
             list.isEmpty() -> Box(Modifier.padding(padding).fillMaxSize().padding(24.dp), Alignment.Center) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("No packs installed yet.", style = MaterialTheme.typography.titleMedium)
-                    Text("Copy .zim files into $packsFolder", style = MaterialTheme.typography.bodyMedium)
+                    Button(onClick = onDownloads) { Text("Get packs") }
+                    Text("Or copy .zim files into $packsFolder", style = MaterialTheme.typography.bodySmall)
                 }
             }
             else -> LazyColumn(Modifier.padding(padding).fillMaxSize()) {
