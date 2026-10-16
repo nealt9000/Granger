@@ -39,7 +39,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Physics pack: OpenStax *University Physics* is now CC BY-NC-SA 4.0, so it's out. A curation spike picks a replacement before it's built.
 - Rebuilding Classics means a new release tag (`classics-<date>`), `pack_builder.py describe` into `tools/pack-builder/releases/granger_classics_en.json`, then a catalog rebuild and re-sign. The monthly Kiwix regeneration leaves the Classics entry alone.
 - The Gutenberg cache (HTML + RDF from the aleph.pglaf.org mirror) lives at `~/.cache/granger/gutenberg/`; a rebuild from a warm cache takes a few minutes and fetches nothing.
-- Measured: the first Classics build is 84.2 MB, 347 works, 13,816 entries, under the 300–600 MB target because it's text-only. There's room to add works.
+- Measured: the first Classics build is 83.7 MB, 347 works, 13,194 entries, no page over 150 KB, under the 300–600 MB target because it's text-only. There's room to add works.
 - ZIM full-text search has no phrase search (libzim indexes without positions): a famous line like "the quality of mercy" finds its play, but not first; a distinctive word (`Portia mercy`) does.
 
 Deferred, low priority (from Plan 2):

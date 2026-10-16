@@ -2,13 +2,13 @@
   "id": "granger_classics_en",
   "description": "Scripture, philosophy, drama, libretti and novels to 1930",
   "language": "eng",
-  "sizeBytes": 84222783,
-  "sha256": "91f15e527be1d8bbb34ef6d92cdd2d0f830c5dd6b325d61bbd70b396c493e1f3",
+  "sizeBytes": 83668291,
+  "sha256": "7663d8e3a71ae9b5bc40ecdea589d7f979a9f3f02b0b56577a5db2956569a235",
   "urls": [
     "https://github.com/nealt9000/Granger/releases/download/classics-2026-10-16/granger_classics_en_2026-10-16.zim"
   ],
   "snapshotDate": "2026-10-16",
   "hasFulltextIndex": true,
-  "zimUuid": "b44953cc-40b1-1a1e-54c7-6c5c5a731b02",
+  "zimUuid": "0878ee2a-46e2-9a0e-a67b-91f751589dcf",
   "zimName": "granger_classics_en"
 }
