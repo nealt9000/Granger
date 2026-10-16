@@ -10,10 +10,13 @@ import app.granger.library.LibraryScreen
 import app.granger.library.LibraryViewModel
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
+import app.granger.search.SearchScreen
+import app.granger.search.SearchViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable object LibraryRoute
 @Serializable data class ReaderRoute(val packId: String, val path: String? = null)
+@Serializable object SearchRoute
 
 @Composable
 fun GrangerNavHost(container: AppContainer) {
@@ -24,7 +27,7 @@ fun GrangerNavHost(container: AppContainer) {
                 viewModel = viewModel { LibraryViewModel(container.library) },
                 packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                 onOpenPack = { nav.navigate(ReaderRoute(it)) },
-                onSearch = {}, // Task 10
+                onSearch = { nav.navigate(SearchRoute) },
                 onBookmarks = {}, // Task 11
             )
         }
@@ -34,7 +37,14 @@ fun GrangerNavHost(container: AppContainer) {
                 viewModel = viewModel { ReaderViewModel(route.packId, route.path, container.library, container.appScope) },
                 resolver = container.resolver,
                 onBack = { nav.popBackStack() },
-                onSearch = {}, // Task 10
+                onSearch = { nav.navigate(SearchRoute) },
+            )
+        }
+        composable<SearchRoute> {
+            SearchScreen(
+                viewModel = viewModel { SearchViewModel(container.search) },
+                onOpen = { hit -> nav.navigate(ReaderRoute(hit.packId, hit.path)) },
+                onBack = { nav.popBackStack() },
             )
         }
     }
