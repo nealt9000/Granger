@@ -81,16 +81,16 @@ Imported EPUBs reuse the same WebView: an EPUB is a zip of XHTML, served by the 
 
 ### Ask pipeline
 
-1. **Rewrite** — E2B produces structured output: `{ searchTerms: [...], medical: bool }`. The rewrite is kept even though it costs roughly 1–2 s, because ZIM search is keyword-only.
+1. **Rewrite** — E2B produces a short structured output, a few keywords plus the medical flag (about 15 output tokens). The spike measured ~6 s for a full JSON rewrite, so output is capped. If the rewrite runs slow or produces nothing usable, fall back to plain keyword extraction from the question. Plan 6 measures the capped cost.
 2. **Find** — query every `SearchSource`: the full-text index of each installed pack with `hasFulltextIndex`, plus imported books (FTS5, which already stores passages); take the top ~8 documents overall.
 3. **Chunk** — extract article text; split into ~200-word passages along headings/paragraphs, keeping article title + section heading as passage metadata.
-4. **Rank** — EmbeddingGemma 2 scores passages against the original question; keep the top ~4 above a similarity threshold. **If none pass, decline in code** ("Not in your library") — the LLM is not called.
+4. **Rank** — preselect at most ~12 passages by full-text score, then EmbeddingGemma 2 scores them against the original question; keep the top ~4 above a similarity threshold. The spike measured ~1 s per passage on CPU, so Plan 6 tests the embedder on GPU; if reranking is still too slow, rank by full-text score only. **If none pass, decline in code** ("Not in your library") — the LLM is not called.
 5. **Answer** — E2B answers from numbered passages, required to cite `[n]`. Post-validate: every citation must reference a supplied passage, and at least one must exist. On failure, show the passages with "Couldn't answer from these" instead of model text.
 6. **Medical** — if flagged, the UI prepends a fixed banner ("Not medical advice. If you can reach emergency services or a professional, do so.") and the prompt instructs close quoting.
 
 The answer view always shows cited passages; tapping one opens the article at that section.
 
-**Think deeper** reuses retrieved passages (expanded to ~8), unloads E2B, loads E4B, regenerates. E4B stays resident until the next normal Ask swaps back. A loading indicator shows progress and an estimated wait.
+**Think deeper** reuses retrieved passages (expanded to ~8), unloads E2B, loads E4B, regenerates. E4B stays resident until the next normal Ask swaps back. It stays available on 8 GB phones as a deliberate slow action: the spike measured ~15 s to swap plus ~20 s to the first token on the Pixel 6, so the button states the expected wait ("about 30 s") before starting, and a progress indicator shows the load and then the answer streaming in.
 
 ### ModelManager
 
