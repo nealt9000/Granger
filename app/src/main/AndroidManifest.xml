@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- Catalog and downloads only. The reader blocks all network loads (ReaderWebView). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".GrangerApp"
         tools:replace="android:allowBackup,android:label"
         android:allowBackup="false"
         android:label="Granger"
         android:theme="@android:style/Theme.Material.NoActionBar">
+        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="false" />
         <uses-native-library android:name="libOpenCL.so" android:required="false" />
         <uses-native-library android:name="libvndksupport.so" android:required="false" />
         <activity

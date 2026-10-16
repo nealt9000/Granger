@@ -14,6 +14,10 @@ class ReaderWebView(context: Context, client: ZimWebViewClient) : WebView(contex
         settings.allowContentAccess = false
         settings.builtInZoomControls = true
         settings.displayZoomControls = false
+        // Belt and braces: ZimWebViewClient already refuses every non-ZIM request, and the app now
+        // holds INTERNET for downloads. Intercepted ZIM responses are unaffected by this setting.
+        settings.blockNetworkLoads = true
+        settings.safeBrowsingEnabled = false
         webViewClient = client
     }
 

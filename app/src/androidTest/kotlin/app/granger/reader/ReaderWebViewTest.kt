@@ -93,4 +93,14 @@ class ReaderWebViewTest {
         load("No_such_article")
         assertThat(js("document.body.innerText")).contains("isn't in this pack")
     }
+
+    @Test fun webViewCannotReachTheNetwork() {
+        instrumentation.runOnMainSync {
+            assertThat(webView.settings.blockNetworkLoads).isTrue()
+            assertThat(webView.settings.safeBrowsingEnabled).isFalse()
+        }
+        // ZIM content still loads through request interception.
+        load("Photosynthesis")
+        assertThat(js("document.querySelector('img').naturalWidth")).isEqualTo("1")
+    }
 }
