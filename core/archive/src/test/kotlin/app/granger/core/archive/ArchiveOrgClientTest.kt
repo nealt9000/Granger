@@ -108,6 +108,22 @@ class ArchiveOrgClientTest {
         assertThat(item.title).isNotEmpty()
     }
 
+    @Test fun yearIsTheFirstFourDigitsOfTheDateElseTheYearField() {
+        fun yearFor(meta: String): Int? {
+            server.bodies["/metadata/y"] = """{"metadata":{"identifier":"y",$meta},"files":[]}"""
+            return kotlinx.coroutines.runBlocking { client.item("y") }.year
+        }
+        assertThat(yearFor("\"date\":\"1890-05-01\"")).isEqualTo(1890)
+        assertThat(yearFor("\"date\":\"c1890\"")).isEqualTo(1890)
+        assertThat(yearFor("\"date\":\"[1890]\"")).isEqualTo(1890)
+        assertThat(yearFor("\"date\":\"May 12, 1890\"")).isEqualTo(1890)
+        assertThat(yearFor("\"date\":\"circa 189-\"")).isNull()
+        assertThat(yearFor("\"date\":\"unknown\",\"year\":\"1901\"")).isEqualTo(1901)
+        assertThat(yearFor("\"year\":1902")).isEqualTo(1902)
+        assertThat(yearFor("\"date\":\"1890\",\"year\":\"1950\"")).isEqualTo(1890)
+        assertThat(yearFor("\"title\":\"t\"")).isNull()
+    }
+
     @Test fun emptyMetadataIsNotFound() = runTest {
         server.bodies["/metadata/nope"] = "{}"
         val e = assertThrows(ArchiveError::class.java) { kotlinx.coroutines.runBlocking { client.item("nope") } }

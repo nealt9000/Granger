@@ -24,17 +24,13 @@ object ArchiveQuery {
 
     fun isValidIdentifier(id: String): Boolean = identifier.matches(id) && !id.startsWith(".")
 
-    /** Drops all quotes if they don't pair up, and all parentheses if they don't nest. */
+    /**
+     * Drops all quotes if they don't pair up, and every parenthesis: counting them can't tell one inside a quoted
+     * phrase from one outside, so any of them could close the `AND (…)` group early.
+     */
     private fun balance(text: String): String {
-        var out = text
+        var out = text.replace("(", "").replace(")", "")
         if (out.count { it == '"' } % 2 != 0) out = out.replace("\"", "")
-        var depth = 0
-        var balanced = true
-        for (c in out) {
-            if (c == '(') depth++
-            if (c == ')' && --depth < 0) { balanced = false; break }
-        }
-        if (!balanced || depth != 0) out = out.replace("(", "").replace(")", "")
         return out
     }
 }

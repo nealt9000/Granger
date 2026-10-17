@@ -109,9 +109,43 @@ class ArchiveOfferTest {
         assertThat(ArchiveOffers.choose(item(file("a.pdf", "Text PDF"), restricted = true))).isEqualTo(Offer.LendOnly)
     }
 
-    @Test fun restrictedItemWithOpenEpubStillDownloads() {
-        assertThat(ArchiveOffers.choose(item(file("a.epub", "EPUB"), restricted = true)))
-            .isInstanceOf(Offer.Download::class.java)
+    @Test fun restrictedItemIsLendOnlyEvenWithAnOpenEpub() {
+        // Spec §5: an item archive.org restricts to lending is "Borrow on archive.org", whatever its files.
+        assertThat(ArchiveOffers.choose(item(file("a.epub", "EPUB"), restricted = true))).isEqualTo(Offer.LendOnly)
+        assertThat(ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT"), restricted = true))).isEqualTo(Offer.LendOnly)
+        assertThat(ArchiveOffers.preview(doc(listOf("EPUB", "DjVuTXT"), restricted = true))).isEqualTo(Offer.LendOnly)
+    }
+
+    @Test fun textTooBigToConvertIsNotOfferedAsText() {
+        val limit = 1_000L
+        val big = ArchiveOffers.choose(
+            item(file("a.txt", "Text", size = 1_001), file("a_djvu.txt", "DjVuTXT", "derivative", size = 2_000), file("a.pdf", "Text PDF")),
+            maxTextBytes = limit,
+        )
+        assertThat(big).isEqualTo(Offer.PdfOnly)
+        assertThat(ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT", size = 1_001)), maxTextBytes = limit)).isEqualTo(Offer.Nothing)
+        val atLimit = ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT", size = 1_000)), maxTextBytes = limit) as Offer.Download
+        assertThat(atLimit.kind).isEqualTo(TextKind.OCR_TEXT)
+        // An oversized original text falls through to an OCR text that fits.
+        val ocr = ArchiveOffers.choose(
+            item(file("a.txt", "Text", size = 1_001), file("a_djvu.txt", "DjVuTXT", "derivative", size = 900)), maxTextBytes = limit,
+        ) as Offer.Download
+        assertThat(ocr.kind).isEqualTo(TextKind.OCR_TEXT)
+        // EPUBs aren't converted, so the limit doesn't apply to them.
+        assertThat(ArchiveOffers.choose(item(file("a.epub", "EPUB", size = 5_000)), maxTextBytes = limit)).isInstanceOf(Offer.Download::class.java)
+        // The default is 20 MB.
+        assertThat(ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT", size = 20L * 1024 * 1024 + 1)))).isEqualTo(Offer.Nothing)
+        assertThat(ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT", size = 20L * 1024 * 1024)))).isInstanceOf(Offer.Download::class.java)
+    }
+
+    @Test fun plainTextFormatIsNotATextOffer() {
+        assertThat(ArchiveOffers.choose(item(file("a.txt", "Plain Text")))).isEqualTo(Offer.Nothing)
+    }
+
+    @Test fun aPrivateMetadataFileDoesNotMakeAnItemLendOnly() {
+        assertThat(ArchiveOffers.choose(item(file("x_meta.txt", "Metadata", isPrivate = true), file("a.pdf", "Text PDF"))))
+            .isEqualTo(Offer.PdfOnly)
+        assertThat(ArchiveOffers.choose(item(file("a.txt", "Text", isPrivate = true)))).isEqualTo(Offer.LendOnly)
     }
 
     @Test fun pdfOnlyItem() {

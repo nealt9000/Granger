@@ -9,20 +9,28 @@ sealed interface Offer {
     data object Nothing : Offer
 }
 
-/** Decides what an archive.org item offers. Private and LCP (DRM) files are never offered. */
+/**
+ * Decides what an archive.org item offers. Private and LCP (DRM) files are never offered, and an item archive.org
+ * restricts to lending is lend-only whatever its files (spec §5).
+ */
 object ArchiveOffers {
-    fun choose(item: ArchiveItem): Offer {
+    /** The largest text Granger converts to an EPUB; a bigger one would verify and then never reach the Library. */
+    const val MAX_TEXT_BYTES = 20L * 1024 * 1024
+
+    fun choose(item: ArchiveItem, maxTextBytes: Long = MAX_TEXT_BYTES): Offer {
+        if (item.restricted) return Offer.LendOnly
         val usable = item.files.filter(::isUsable)
         val pdf = usable.any { it.format.contains("PDF") }
+        val convertible = usable.filter { (it.sizeBytes ?: 0) <= maxTextBytes }
 
         usable.filter { it.format == "EPUB" }.maxByOrNull { it.sizeBytes ?: 0 }
             ?.let { return Offer.Download(it, TextKind.EPUB, alsoPdf = false) }
-        usable.firstOrNull { it.source == "original" && (it.format == "Text" || (it.name.endsWith(".txt") && it.format == "Plain Text")) }
+        convertible.firstOrNull { it.source == "original" && it.format == "Text" }
             ?.let { return Offer.Download(it, TextKind.TEXT, pdf) }
-        usable.firstOrNull { it.format == "DjVuTXT" }
+        convertible.firstOrNull { it.format == "DjVuTXT" }
             ?.let { return Offer.Download(it, TextKind.OCR_TEXT, pdf) }
 
-        if (item.restricted || item.files.any { it.isPrivate && isTextOrPdf(it) }) return Offer.LendOnly
+        if (item.files.any { it.isPrivate && isTextOrPdf(it) }) return Offer.LendOnly
         if (pdf) return Offer.PdfOnly
         return Offer.Nothing
     }
@@ -54,6 +62,6 @@ object ArchiveOffers {
     private fun isSafeName(name: String): Boolean =
         !name.startsWith("/") && name.split("/").none { it.isEmpty() || it == "." || it == ".." }
 
-    private fun isTextOrPdf(file: ArchiveFile): Boolean =
-        file.format in setOf("EPUB", "Text", "DjVuTXT") || file.format.contains("PDF") || file.name.endsWith(".epub") || file.name.endsWith(".txt")
+    private fun isTextOrPdf(file: ArchiveFile): Boolean = file.format != "Metadata" && (
+        file.format in setOf("EPUB", "Text", "DjVuTXT") || file.format.contains("PDF") || file.name.endsWith(".epub") || file.name.endsWith(".txt"))
 }

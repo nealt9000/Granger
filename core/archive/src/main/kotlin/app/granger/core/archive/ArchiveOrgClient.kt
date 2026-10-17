@@ -56,7 +56,7 @@ class ArchiveOrgClient(
                 title = meta["title"]?.firstString().orEmpty(),
                 creator = meta["creator"]?.allStrings().orEmpty().joinToString(", "),
                 date = date,
-                year = yearOf(date),
+                year = yearOf(date) ?: meta["year"]?.firstString()?.let(::yearOf),
                 subjects = meta["subject"]?.allStrings().orEmpty(),
                 description = stripHtml(meta["description"]?.firstString().orEmpty()),
                 language = meta["language"]?.firstString().orEmpty(),
@@ -127,7 +127,8 @@ class ArchiveOrgClient(
 
     private fun JsonElement.firstString(): String? = allStrings().firstOrNull()
 
-    private fun yearOf(date: String): Int? = date.take(4).takeIf { it.length == 4 && it.all(Char::isDigit) }?.toInt()
+    /** The first run of exactly four digits, so "c1890", "[1890]" and "May 12, 1890" all give 1890. */
+    private fun yearOf(date: String): Int? = YEAR.find(date)?.value?.toInt()
 
     private fun stripHtml(text: String): String =
         text.replace(TAG, " ").replace(SPACES, " ").trim().take(MAX_DESCRIPTION)
@@ -145,6 +146,7 @@ class ArchiveOrgClient(
     private companion object {
         val SEARCH_FIELDS = listOf("identifier", "title", "creator", "year", "format", "access-restricted-item", "downloads")
         val TAG = Regex("<[^>]*>")
+        val YEAR = Regex("(?<!\\d)\\d{4}(?!\\d)")
         val SPACES = Regex("\\s+")
         const val MAX_DESCRIPTION = 2000
     }

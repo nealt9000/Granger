@@ -19,6 +19,14 @@ class ArchiveQueryTest {
     @Test fun balancedQuotesSurvive() = assertThat(ArchiveQuery.build("\"steam engine\"", null, false))
         .isEqualTo("mediatype:texts AND (\"steam engine\")")
 
+    @Test fun parenthesesInsideQuotesCannotEscapeTheGroup() =
+        // Counted naively these balance, and would close the group early: `texts AND ("(" x) OR (y ")") AND …`.
+        assertThat(ArchiveQuery.build("\"(\" x) OR (y \")\"", null, filtered = true))
+            .isEqualTo("mediatype:texts AND (\"\" x OR y \"\") AND (year:[* TO 1930] OR licenseurl:*publicdomain*)")
+
+    @Test fun balancedParenthesesAreRemovedToo() = assertThat(ArchiveQuery.build("steam (engine OR boiler)", null, false))
+        .isEqualTo("mediatype:texts AND (steam engine OR boiler)")
+
     @Test fun identifiersAreValidated() {
         assertThat(ArchiveQuery.isValidIdentifier("lbg.vol.xviii.p.1.x_b7i9")).isTrue()
         for (bad in listOf("../x", ".x", "a/b", "a b", "")) assertThat(ArchiveQuery.isValidIdentifier(bad)).isFalse()
