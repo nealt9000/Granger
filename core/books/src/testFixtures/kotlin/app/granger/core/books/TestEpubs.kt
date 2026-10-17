@@ -20,6 +20,10 @@ object TestEpubs {
      * @param chapters XHTML body fragments, one per spine item (`OEBPS/c001.xhtml`, ...).
      * @param drmFiles extra zip entries by path (for example `META-INF/license.lcpl`).
      * @param includeOpf false leaves out the package document (container.xml still points at it).
+     * @param epub3Roles true gives each author and translator an id and an EPUB 3
+     *   `<meta refines="#id" property="role" scheme="marc:relators">` (`aut`, `trl`) instead of `opf:role`.
+     * @param translatorTag the element translators are written as (`dc:contributor`, or `dc:creator` as some EPUB 3
+     *   books do).
      */
     fun build(
         dir: File,
@@ -40,6 +44,8 @@ object TestEpubs {
         chapters: List<String> = listOf("<p>Hello world.</p>"),
         drmFiles: Map<String, String> = emptyMap(),
         includeOpf: Boolean = true,
+        epub3Roles: Boolean = false,
+        translatorTag: String = "dc:contributor",
     ): File {
         val file = File(dir, name)
         ZipOutputStream(file.outputStream()).use { z ->
@@ -57,7 +63,7 @@ object TestEpubs {
                 """<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>""".toByteArray(),
             )
             if (includeOpf) {
-                z.put("OEBPS/content.opf", opf(title, authors, translators, language, subjects, description, date, identifier, collection, cover, chapters.size, coverHref).toByteArray())
+                z.put("OEBPS/content.opf", opf(title, authors, translators, language, subjects, description, date, identifier, collection, cover, chapters.size, coverHref, epub3Roles, translatorTag).toByteArray())
             }
             chapters.forEachIndexed { i, body -> z.put("OEBPS/c%03d.xhtml".format(i + 1), xhtml(body).toByteArray()) }
             if (cover != CoverStyle.NONE) z.put("OEBPS/$coverHref", coverBytes)
@@ -99,12 +105,22 @@ object TestEpubs {
         title: String?, authors: List<String>, translators: List<String>, language: String,
         subjects: List<String>, description: String, date: String, identifier: String,
         collection: String?, cover: CoverStyle, chapterCount: Int, coverHref: String,
+        epub3Roles: Boolean, translatorTag: String,
     ): String {
         val meta = StringBuilder()
         meta.append("<dc:identifier id=\"id\">${esc(identifier)}</dc:identifier>")
         if (title != null) meta.append("<dc:title>${esc(title)}</dc:title>")
-        authors.forEach { meta.append("<dc:creator>${esc(it)}</dc:creator>") }
-        translators.forEach { meta.append("<dc:contributor opf:role=\"trl\">${esc(it)}</dc:contributor>") }
+        if (epub3Roles) {
+            fun refined(tag: String, id: String, name: String, role: String) = meta.append(
+                "<$tag id=\"$id\">${esc(name)}</$tag>" +
+                    "<meta refines=\"#$id\" property=\"role\" scheme=\"marc:relators\">$role</meta>",
+            )
+            authors.forEachIndexed { i, name -> refined("dc:creator", "aut$i", name, "aut") }
+            translators.forEachIndexed { i, name -> refined(translatorTag, "trl$i", name, "trl") }
+        } else {
+            authors.forEach { meta.append("<dc:creator>${esc(it)}</dc:creator>") }
+            translators.forEach { meta.append("<$translatorTag opf:role=\"trl\">${esc(it)}</$translatorTag>") }
+        }
         meta.append("<dc:language>$language</dc:language><dc:date>$date</dc:date>")
         subjects.forEach { meta.append("<dc:subject>${esc(it)}</dc:subject>") }
         if (description.isNotEmpty()) meta.append("<dc:description>${esc(description)}</dc:description>")

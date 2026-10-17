@@ -16,7 +16,10 @@ object DrmCheck {
         if (zip.getEntry("META-INF/rights.xml") != null) return DrmKind.ADOBE
         val entry = zip.getEntry("META-INF/encryption.xml") ?: return null
         val xml = Jsoup.parse(readCapped(zip, entry, XML_LIMIT).inputStream(), "UTF-8", "", Parser.xmlParser())
-        val protected = xml.getElementsByTag("EncryptionMethod").any { it.attr("Algorithm") !in FONT_ALGORITHMS }
+        // By local name: real files often write `<enc:EncryptionMethod>`, and the XML parser keeps the prefix.
+        val protected = xml.allElements
+            .filter { it.tagName().substringAfterLast(':') == "EncryptionMethod" }
+            .any { it.attr("Algorithm") !in FONT_ALGORITHMS }
         return if (protected) DrmKind.OTHER else null
     }
 }

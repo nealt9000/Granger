@@ -36,6 +36,20 @@ class DrmCheckTest {
         assertThat(check(mapOf("META-INF/encryption.xml" to xml))).isEqualTo(DrmKind.OTHER)
     }
 
+    /** As real files write it: the XML Encryption elements under an `enc:` prefix. */
+    private fun prefixedEncryption(algorithm: String) =
+        """<?xml version="1.0"?><encryption xmlns="urn:oasis:names:tc:opendocument:xmlns:container" xmlns:enc="http://www.w3.org/2001/04/xmlenc#"><enc:EncryptedData><enc:EncryptionMethod Algorithm="$algorithm"/><enc:CipherData><enc:CipherReference URI="OEBPS/c001.xhtml"/></enc:CipherData></enc:EncryptedData></encryption>"""
+
+    @Test fun prefixedOtherEncryptionIsProtected() {
+        val xml = prefixedEncryption("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
+        assertThat(check(mapOf("META-INF/encryption.xml" to xml))).isEqualTo(DrmKind.OTHER)
+    }
+
+    @Test fun prefixedFontObfuscationIsAllowed() {
+        val xml = prefixedEncryption("http://www.idpf.org/2008/embedding")
+        assertThat(check(mapOf("META-INF/encryption.xml" to xml))).isNull()
+    }
+
     @Test fun plainEpubIsClean() {
         assertThat(check(emptyMap())).isNull()
     }

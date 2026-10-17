@@ -38,6 +38,27 @@ class EpubInspectorTest {
         assertThat(meta.spine).containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml").inOrder()
     }
 
+    @Test fun epub3RefinedRolesGiveAuthorsAndTranslators() {
+        val contributors = ok(
+            TestEpubs.build(
+                tmp.root, name = "a.epub", epub3Roles = true,
+                authors = listOf("Leo Tolstoy"), translators = listOf("Louise Maude", "Aylmer Maude"),
+            ),
+        )
+        assertThat(contributors.authors).containsExactly("Leo Tolstoy")
+        assertThat(contributors.translators).containsExactly("Louise Maude", "Aylmer Maude").inOrder()
+
+        // Translators written as creators are translators, not authors.
+        val creators = ok(
+            TestEpubs.build(
+                tmp.root, name = "b.epub", epub3Roles = true, translatorTag = "dc:creator",
+                authors = listOf("Homer"), translators = listOf("Samuel Butler"),
+            ),
+        )
+        assertThat(creators.authors).containsExactly("Homer")
+        assertThat(creators.translators).containsExactly("Samuel Butler")
+    }
+
     @Test fun missingTitleUsesFileName() {
         val file = TestEpubs.build(tmp.root, name = "lost-book.epub", title = null)
         assertThat(ok(file).title).isEqualTo("lost-book")

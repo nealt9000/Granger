@@ -6,6 +6,7 @@ import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 
 class EpubMeta(
@@ -73,15 +74,28 @@ object EpubInspector {
         }
 
         fun texts(tag: String) = opf.getElementsByTag(tag).map { it.text().trim() }.filter { it.isNotEmpty() }
-        val translators = opf.getElementsByTag("dc:contributor").filter { it.attr("opf:role") == "trl" }
-            .map { it.text().trim() }.filter { it.isNotEmpty() }
+        // A creator's or contributor's MARC relator: EPUB 2's opf:role, else an EPUB 3 <meta refines="#id" property="role">.
+        val refinedRoles = opf.getElementsByTag("meta")
+            .filter { it.attr("property") == "role" && it.attr("refines").startsWith("#") }
+            .filter { it.attr("scheme").let { scheme -> scheme.isEmpty() || scheme == "marc:relators" } }
+            .groupBy({ it.attr("refines").removePrefix("#") }, { it.text().trim() })
+        fun roles(e: Element): List<String> =
+            listOfNotNull(e.attr("opf:role").trim().takeIf { it.isNotEmpty() }) + refinedRoles[e.id()].orEmpty()
+        fun names(elements: List<Element>) = elements.map { it.text().trim() }.filter { it.isNotEmpty() }
+        val creators = opf.getElementsByTag("dc:creator")
+        val contributors = opf.getElementsByTag("dc:contributor")
+        val translators = names((creators + contributors).filter { "trl" in roles(it) })
+        // Creators without a role are authors; so is anyone marked aut. Other roles (translator, editor) aren't.
+        val authors = names(
+            creators.filter { roles(it).isEmpty() || "aut" in roles(it) } + contributors.filter { "aut" in roles(it) },
+        ).ifEmpty { names(creators.filter { "trl" !in roles(it) }) }
         val collection = opf.getElementsByTag("meta").firstOrNull { it.attr("property") == "belongs-to-collection" }
             ?.text()?.trim()
             ?: opf.getElementsByTag("meta").firstOrNull { it.attr("name") == "calibre:series" }?.attr("content")?.trim()
         return Inspection.Ok(
             EpubMeta(
                 title = texts("dc:title").firstOrNull() ?: fallbackTitle,
-                authors = texts("dc:creator"),
+                authors = authors,
                 translators = translators,
                 date = texts("dc:date").firstOrNull().orEmpty(),
                 language = texts("dc:language").firstOrNull().orEmpty(),
