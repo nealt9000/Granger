@@ -104,3 +104,11 @@ def test_a_book_cleaned_down_to_nothing_is_refused():
             b"<div id='pg-end-separator'></div></body></html>")
     with pytest.raises(gutenberg.CleaningError):
         gutenberg.clean(html)
+
+
+def test_unwrapped_scheme_link_keeps_its_id():
+    html = fixture("pg-modern.html").replace(
+        b'<a href="https://example.com/">the link text</a>',
+        b'<a id="ext" href="https://example.com/">the link text</a>')
+    body = str(gutenberg.clean(html).body)
+    assert '<span id="ext">the link text</span>' in body and "example.com" not in body

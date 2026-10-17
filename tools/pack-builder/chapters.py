@@ -7,8 +7,11 @@ page that now holds the anchor.
 """
 import re
 from dataclasses import dataclass
+from typing import Callable
 
 from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
+
+from gutenberg import unwrap_link
 
 MAX_TITLE = 120
 FRONT_MATTER_CHARS = 200
@@ -33,13 +36,23 @@ def page_name(index: int) -> str:
     return f"{index + 1:03d}"
 
 
-def split(body: Tag, split_at: str | None = None, max_bytes: int = 150_000) -> list[Chapter]:
+def clean_title(title: str, work_title: str, author: str, index: int) -> str:
+    """A chapter title for a reader's contents list: no byline, no "Contents", no repeat of the work's title."""
+    segments = (s.strip() for s in re.sub(r"<\d+>", "", title).split(" — "))
+    kept = [s for s in segments
+            if s and not re.match(r"by\s", s, re.I) and s.lower() not in ("contents", "table of contents")
+            and s.lower() != work_title.strip().lower()]
+    return " — ".join(kept) or f"Part {index + 1}"
+
+
+def split(body: Tag, split_at: str | None = None, max_bytes: int = 150_000,
+          page_href: Callable[[int], str] = page_name) -> list[Chapter]:
     nodes = list(body.contents)
     level = int(split_at[1]) if split_at else _pick_level(body)
     parts = _split_level(nodes, level, None, max_bytes) if level else None
     if not parts:
         parts = _fit(_Part("", nodes), max_bytes, 1)
-    return _finish(parts)
+    return _finish(parts, page_href)
 
 
 def _pick_level(body: Tag) -> int | None:
@@ -188,7 +201,7 @@ def _split_text(node: PageElement, max_bytes: int) -> list[PageElement]:
     return pieces
 
 
-def _finish(parts: list[_Part]) -> list[Chapter]:
+def _finish(parts: list[_Part], page_href: Callable[[int], str]) -> list[Chapter]:
     holder = BeautifulSoup("", "lxml")
     pages = []
     for part in parts:
@@ -210,7 +223,7 @@ def _finish(parts: list[_Part]) -> list[Chapter]:
             fragment = href.split("#", 1)[1] if "#" in href else ""
             if fragment in anchors:
                 target = anchors[fragment]
-                link["href"] = f"#{fragment}" if target == index else f"{page_name(target)}#{fragment}"
+                link["href"] = f"#{fragment}" if target == index else f"{page_href(target)}#{fragment}"
             else:
-                link.unwrap()
+                unwrap_link(link)
     return [Chapter(part.title, div.decode_contents()) for part, div in zip(parts, pages)]
