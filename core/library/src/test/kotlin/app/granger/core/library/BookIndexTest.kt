@@ -178,6 +178,19 @@ class BookIndexTest {
         assertThat(index.passages(listOf("ishmael", "whale"))).hasSize(2)
     }
 
+    @Test fun passagesMatchAPhrasesWordsAnywhereInAChunk() = test {
+        add("merchant", "<p>The quality of mercy is not strained, said Portia.</p>", "<p>Mercy alone.</p>", "<p>Portia alone.</p>")
+        index.indexPending()
+
+        assertThat(index.passages(listOf("portia mercy")).map { it.href }).containsExactly("OEBPS/c001.xhtml")
+        assertThat(index.passages(listOf("portia dialogue"))).isEmpty()
+        // A chunk two phrases match comes back once.
+        assertThat(index.passages(listOf("portia mercy", "quality mercy", "mercy alone")).map { it.href })
+            .containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml")
+        // Query syntax inside a keyword is just words.
+        assertThat(index.passages(listOf("mercy OR nothing"))).isEmpty()
+    }
+
     @Test fun passagesCarryTheBook() = test {
         val moby = add("moby", "<p>The whale surfaced at dawn.</p>", title = "Moby-Dick")
         index.indexPending()

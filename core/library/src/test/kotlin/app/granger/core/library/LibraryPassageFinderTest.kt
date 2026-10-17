@@ -136,6 +136,25 @@ class LibraryPassageFinderTest {
         assertThat(card.sourceId).isEqualTo(book.id)
     }
 
+    @Test fun eachKeywordIsSearchedOnItsOwnAndHitsMerge() = test {
+        val archive = FakeZimArchive(
+            "wiki", paths = setOf("Boiler"), results = listOf(ZimHit("Boiler", "Boiler", score = 3)),
+            html = mapOf("Boiler" to page("A boiler makes steam.")),
+        )
+        val found = finder(listOf(pack("wiki")), mapOf("wiki" to archive)).find(listOf("boiler pressure", "steam"))
+
+        assertThat(archive.queries).containsExactly("boiler pressure", "steam")
+        assertThat(found.filter { it.kind == SourceKind.ARTICLE }).hasSize(1)
+    }
+
+    @Test fun bookCardWhenAPhrasesWordsAreSpreadOverItsFields() = test {
+        val file = TestEpubs.build(File(booksDir, "granger").apply { mkdirs() }, "origin_2026-01-01.epub", title = "Origin", chapters = listOf("<p>x</p>"))
+        val book = shelf.addDownloaded(file, BookOrigin.GRANGER, "origin")!!.copy(author = "Charles Darwin")
+        val found = finder(emptyList(), emptyMap(), books = listOf(book)).find(listOf("darwin origin", "darwin beagle"))
+
+        assertThat(found.filter { it.kind == SourceKind.CARD }.map { it.sourceId }).containsExactly(book.id)
+    }
+
     @Test fun packCardOmitsBlankValues() = test {
         val p = pack("wiki", "Wikipedia").copy(description = "")
         val found = finder(listOf(p), emptyMap(), rows = listOf(collection("Wikipedia", listOf(p)))).find(listOf("wikipedia"))

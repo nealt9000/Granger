@@ -8,6 +8,7 @@ import app.granger.core.books.Inspection
 import app.granger.core.books.Snippets
 import app.granger.core.books.TextQuote
 import app.granger.core.books.XhtmlText
+import app.granger.core.research.Keywords
 import java.io.File
 import java.io.IOException
 import java.util.zip.ZipFile
@@ -100,22 +101,30 @@ class BookIndex(
         }
     }
 
-    /** Chunks containing any of [keywords] (each a quoted phrase, OR'd), with their text; a bad query gives none. */
+    /**
+     * Chunks matching any of [keywords], with their text. A keyword matches a chunk holding all its words, in any order,
+     * so the rewrite's phrases ("portia mercy") find text that doesn't say them verbatim. Each keyword gets an equal
+     * share of [limit]; a bad query gives none.
+     */
     suspend fun passages(keywords: List<String>, limit: Int = 40): List<BookPassage> {
-        val phrases = keywords.map { it.replace("\"", "").trim() }.filter { p -> p.any { it.isLetterOrDigit() } }
-        if (phrases.isEmpty()) return emptyList()
-        val match = phrases.joinToString(" OR ") { "\"$it\"" }
+        // Each word quoted, so query syntax (OR, NEAR, -) inside a keyword is just a word; spaces AND them.
+        val matches = keywords.map { k -> Keywords.words(k) }.filter { it.isNotEmpty() }.distinct()
+            .map { words -> words.joinToString(" ") { "\"$it\"" } }
+        if (matches.isEmpty()) return emptyList()
+        val share = maxOf(1, limit / matches.size)
         return withContext(io) {
-            val chunks = try {
-                dao.chunksMatching(
-                    SimpleSQLiteQuery(
-                        "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? LIMIT ?",
-                        arrayOf<Any>(match, limit),
-                    ),
-                )
-            } catch (_: SQLException) {
-                emptyList()
-            }
+            val chunks = matches.flatMap { match ->
+                try {
+                    dao.chunksMatching(
+                        SimpleSQLiteQuery(
+                            "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? LIMIT ?",
+                            arrayOf<Any>(match, share),
+                        ),
+                    )
+                } catch (_: SQLException) {
+                    emptyList()
+                }
+            }.distinctBy { it.id }.take(limit)
             chunks.groupBy { it.bookId }.flatMap { (bookId, hits) ->
                 val book = dao.get(bookId) ?: return@flatMap emptyList()
                 val texts = chunkTexts(book.filePath, hits)

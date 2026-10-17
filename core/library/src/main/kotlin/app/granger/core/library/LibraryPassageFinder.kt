@@ -1,6 +1,7 @@
 package app.granger.core.library
 
 import app.granger.core.research.HtmlPassages
+import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Passage
 import app.granger.core.research.PassageFinder
@@ -53,13 +54,14 @@ class LibraryPassageFinder(
         emptyMap()
     }
 
-    private suspend fun articles(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
-        val query = words.joinToString(" ")
-        return withContext(io) {
+    /** Each keyword is searched on its own (the full-text engine wants every word of a query); an article found twice keeps its best score. */
+    private suspend fun articles(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> =
+        withContext(io) {
             val hits = packs.filter { it.hasFulltextIndex }.flatMap { pack ->
                 try {
                     val archive = library.archive(pack.id) ?: return@flatMap emptyList()
-                    archive.search(query, perPack).map { Triple(pack, archive, it) }
+                    words.flatMap { archive.search(it, perPack) }
+                        .groupBy { it.path }.values.map { same -> Triple(pack, archive, same.maxBy { it.score }) }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
@@ -76,7 +78,6 @@ class LibraryPassageFinder(
                 }
             }
         }
-    }
 
     private fun articlePassages(pack: Pack, archive: ZimArchive, hit: ZimHit, collection: String): List<Passage> {
         val item = archive.read(hit.path) ?: return emptyList()
@@ -162,9 +163,13 @@ class LibraryPassageFinder(
     private fun lines(vararg fields: Pair<String, String>): String =
         fields.filter { it.second.isNotBlank() }.joinToString("\n") { (label, value) -> "$label: ${value.trim()}" }
 
-    private fun mentions(words: List<String>, vararg fields: String): Boolean =
-        words.any { word ->
-            val whole = Regex("(?<![\\p{L}\\p{N}])${Regex.escape(word)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
-            fields.any { whole.containsMatchIn(it) }
+    /** Whether every word of some keyword appears in the fields, as whole words. */
+    private fun mentions(keywords: List<String>, vararg fields: String): Boolean =
+        keywords.any { keyword ->
+            val words = Keywords.words(keyword)
+            words.isNotEmpty() && words.all { word ->
+                val whole = Regex("(?<![\\p{L}\\p{N}])${Regex.escape(word)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
+                fields.any { whole.containsMatchIn(it) }
+            }
         }
 }

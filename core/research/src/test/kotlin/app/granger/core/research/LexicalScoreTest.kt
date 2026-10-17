@@ -22,5 +22,11 @@ class LexicalScoreTest {
     @Test fun headingCountsAndPhrasesMatch() =
         assertThat(LexicalScore.of(passage("text", heading = "Boiler Pressure"), listOf("boiler pressure"))).isWithin(1e-9).of(1.0)
 
+    @Test fun aPhraseCountsWhenAllItsWordsArePresent() {
+        val portia = passage("The quality of mercy is not strained, said Portia.")
+        assertThat(LexicalScore.of(portia, listOf("portia mercy", "portia dialogue"))).isWithin(1e-9).of(0.5)
+        assertThat(LexicalScore.of(passage("text", title = "Mercy and Portia"), listOf("portia mercy"))).isWithin(1e-9).of(0.1)
+    }
+
     @Test fun noKeywordsScoresZero() = assertThat(LexicalScore.of(passage("text"), emptyList())).isEqualTo(0.0)
 }

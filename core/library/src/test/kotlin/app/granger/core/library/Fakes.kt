@@ -37,8 +37,11 @@ class FakeZimArchive(
         return suggestions.take(limit)
     }
 
+    val queries = mutableListOf<String>()
+
     override fun search(query: String, limit: Int): List<ZimHit> {
         searches++
+        queries += query
         if (failSearch) error("native failure")
         return results.take(limit)
     }

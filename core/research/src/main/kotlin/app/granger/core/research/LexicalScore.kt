@@ -1,6 +1,9 @@
 package app.granger.core.research
 
-/** How well a passage matches the rewrite keywords, independent of the search engine's own score. */
+/**
+ * How well a passage matches the rewrite keywords, independent of the search engine's own score. A keyword phrase
+ * counts when all its words are there.
+ */
 object LexicalScore {
     private const val TITLE_BONUS = 0.1
 
@@ -12,9 +15,11 @@ object LexicalScore {
         return found.toDouble() / keywords.size + title
     }
 
+    /** Every word of [keyword] appears as a whole word, in any order. */
     private fun containsWhole(haystack: String, keyword: String): Boolean {
-        val k = keyword.trim()
-        if (k.isEmpty()) return false
-        return Regex("(?<![\\p{L}\\p{N}])${Regex.escape(k)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE).containsMatchIn(haystack)
+        val words = Keywords.words(keyword)
+        return words.isNotEmpty() && words.all {
+            Regex("(?<![\\p{L}\\p{N}])${Regex.escape(it)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE).containsMatchIn(haystack)
+        }
     }
 }

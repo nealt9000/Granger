@@ -16,6 +16,7 @@ object Keywords {
     private val SPLIT = Regex("[^\\p{L}\\p{N}']+")
     private val POSSESSIVE = Regex("'s(?![\\p{L}\\p{N}])")
     private val SPACES = Regex("\\s+")
+    private val WORD = Regex("[\\p{L}\\p{N}]+")
 
     fun extract(question: String, max: Int = 6): List<String> =
         question.lowercase().replace('\u2019', '\'').split(SPLIT)
@@ -23,6 +24,9 @@ object Keywords {
             .filter { it.length >= 3 && it !in STOPWORDS }
             .distinct()
             .take(max)
+
+    /** The words of a keyword phrase: the rewrite's phrases ("portia mercy") are matched word by word, in any order. */
+    fun words(keyword: String): List<String> = WORD.findAll(keyword).map { it.value }.toList()
 
     /** Lowercases a keyword or phrase and drops apostrophes the way [extract] does, so "Darwin’s finches" becomes "darwin finches". */
     fun normalize(keyword: String): String =
