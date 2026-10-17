@@ -10,5 +10,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="app.granger.research.ResearchBenchmarkActivity"
+            android:exported="true"
+            android:label="Research benchmark" />
     </application>
 </manifest>

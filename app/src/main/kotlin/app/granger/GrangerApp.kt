@@ -49,6 +49,7 @@ import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
 import app.granger.core.zim.KiwixZimOpener
+import app.granger.core.research.RankingConfig
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.zim.ZimResolver
 import app.granger.ebook.BookOpener
@@ -124,11 +125,14 @@ internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, reco
     )
 }
 
-/** Whether Research reranks passages with the embedding model; Task 9's on-device eval decides. */
-const val RERANK_WITH_EMBEDDER = true
+/**
+ * Whether Research reranks passages with the embedding model. Off: on the Pixel 6 a query plus 12 passages took
+ * 4.2–4.7 s on the GPU (9.6–10.2 s on the CPU), over the 3 s budget, so ranking is lexical (Plan 8 Task 9).
+ */
+const val RERANK_WITH_EMBEDDER = false
 
-/** Where the embedding model runs; Task 9 may move it. */
-val EMBEDDER_BACKEND = LlmBackend.CPU
+/** Where the embedding model runs when reranking is on: the GPU, about twice as fast as the CPU on the Pixel 6. */
+val EMBEDDER_BACKEND = LlmBackend.GPU
 
 /** Hand-wired dependencies; one instance per process. */
 class AppContainer(context: Context) {
@@ -252,5 +256,10 @@ class AppContainer(context: Context) {
         appScope, useEmbedder = RERANK_WITH_EMBEDDER,
     )
 
-    val research = ResearchPipeline(LibraryPassageFinder(library, bookIndex, bookshelf, shelves), ModelsAdapter(modelManager))
+    val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves)
+
+    /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9). */
+    val rankingConfig = RankingConfig()
+
+    val research = ResearchPipeline(passageFinder, ModelsAdapter(modelManager), rankingConfig)
 }
