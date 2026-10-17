@@ -77,8 +77,10 @@ def clean(html: bytes) -> Cleaned:
 
 def unwrap_link(link: Tag) -> None:
     """Drops the link but keeps its text, and keeps an id or name it carried as a span so TOC links still land."""
-    anchor = link.get("id") or link.get("name")
+    anchor, other = link.get("id") or link.get("name"), link.get("name")
     if anchor:
+        if other and other != anchor:  # both were targets: keep both
+            link.insert_before(BeautifulSoup("", "lxml").new_tag("span", attrs={"id": other}))
         link.attrs = {"id": anchor}
         link.name = "span"
     else:

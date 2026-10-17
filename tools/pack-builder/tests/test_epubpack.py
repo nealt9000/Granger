@@ -138,3 +138,66 @@ def test_chapter_titles_in_nav_are_clean(tmp_path):
     w = work(html="".join(f"<h2>The Modern Book — Part {i} &lt;{i}&gt;</h2><p>t</p>" for i in range(1, 4)))
     nav = build(tmp_path, w).read("OEBPS/nav.xhtml").decode()
     assert "Part 1</a>" in nav and "&lt;1&gt;" not in nav and "The Modern Book —" not in nav
+
+
+def chapter1(tmp_path, html):
+    return build(tmp_path, work(html=html)).read("OEBPS/c001.xhtml").decode()
+
+
+def test_named_anchors_become_ids(tmp_path):
+    page = chapter1(tmp_path, '<p><a name="x"></a>hi <a href="#x">go</a> <a name="p" id="q">both</a> '
+                              '<a href="#p">p</a></p>')
+    assert 'id="x"' in page and "name=" not in page
+    assert 'id="p"' in page and 'id="q"' in page and 'href="#p"' in page
+
+
+def test_ids_inside_page_numbers_survive_so_links_to_them_resolve(tmp_path):
+    page = chapter1(tmp_path, '<p>one <span class="pagenum"><a name="Page_5" id="Page_5">[5]</a></span> two</p>'
+                              '<p><a href="#Page_5">page 5</a></p>')
+    assert "[5]" not in page and "pagenum" not in page
+    assert 'id="Page_5"' in page and 'href="#Page_5"' in page
+
+
+def test_page_number_id_inside_a_list_moves_to_the_list(tmp_path):
+    page = chapter1(tmp_path, '<ul><li>a</li><span class="pagenum" id="Page_9">9</span><li>b</li></ul>'
+                              '<p><a href="#Page_9">9</a></p>')
+    assert "<ul id=\"Page_9\"" in page and "<ul><span" not in page
+
+
+def test_links_to_missing_targets_are_unwrapped(tmp_path):
+    from chapters import Chapter
+    w = work(html="<p>x</p>")
+    w.chapters = [Chapter("A", '<p>see <a href="c002.xhtml#gone">Z</a> and <a href="c002.xhtml#here">H</a> '
+                               '<a href="c009.xhtml">N</a> <a href="https://example.org/">E</a></p>'),
+                  Chapter("B", '<p id="here">b</p>')]
+    page = build(tmp_path, w).read("OEBPS/c001.xhtml").decode()
+    assert "#gone" not in page and "see Z and" in page and "c009" not in page
+    assert 'href="c002.xhtml#here"' in page and 'href="https://example.org/"' in page
+
+
+def test_obsolete_presentational_attributes_are_dropped(tmp_path):
+    page = chapter1(tmp_path, '<p align="center">a</p><table border="1" cellpadding="3"><colgroup>'
+                              '<col align="left"/></colgroup><tr><td valign="top" width="50%">c</td></tr></table>')
+    for attr in ("align=", "border=", "cellpadding=", "valign=", "width="):
+        assert attr not in page
+
+
+def test_stray_definition_items_are_wrapped_in_a_list(tmp_path):
+    page = chapter1(tmp_path, "<dt>1.</dt><dd>one</dd><dt>2.</dt><dd>two</dd><p>after</p>")
+    body = page.split("<body>")[1]
+    assert body.startswith("<dl><dt>1.</dt><dd>one</dd><dt>2.</dt><dd>two</dd></dl><p>after</p>")
+    chapter = chapter1(tmp_path, "<dl><dt>a</dt><dd>b</dd></dl>")
+    assert chapter.count("<dl>") == 1
+
+
+def test_broken_inline_styles_lose_only_the_broken_declaration(tmp_path):
+    page = chapter1(tmp_path, "<p><span style=\"font-style: 'italic\">x</span> "
+                              "<span style=\"margin-left: 2em; font-style: 'italic\">y</span></p>")
+    assert "'italic" not in page and 'style="margin-left: 2em"' in page
+
+
+def test_definition_list_cut_between_term_and_definition_stays_valid(tmp_path):
+    ends_with_term = chapter1(tmp_path, "<dt>1.</dt><dd>one</dd><dt>2.</dt>").split("<body>")[1]
+    assert ends_with_term.startswith("<dl><dt>1.</dt><dd>one</dd><dt>2.</dt><dd/></dl>")
+    starts_with_definition = chapter1(tmp_path, "<dd>two</dd><dt>3.</dt><dd>three</dd>").split("<body>")[1]
+    assert starts_with_definition.startswith("<dl><dt/><dd>two</dd><dt>3.</dt><dd>three</dd></dl>")

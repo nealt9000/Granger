@@ -93,11 +93,103 @@ def to_xhtml(html: str) -> str:
     return "".join(parts)
 
 
-def _without_page_numbers(html: str) -> str:
-    soup = BeautifulSoup(html, "lxml")
-    for tag in soup.find_all(class_=lambda c: c and PAGE_NUMBER.intersection(c.split())):
+# Presentational attributes EPUB 3 XHTML no longer allows; the reader's own styling replaces them.
+_OBSOLETE_ATTRIBUTES = ("align", "valign", "bgcolor", "border", "cellpadding", "cellspacing", "clear", "compact",
+                        "frame", "hspace", "vspace", "noshade", "nowrap", "rules", "summary", "char", "charoff",
+                        "text", "link", "vlink", "alink", "background")
+_NO_PHRASING_CHILDREN = {"ul", "ol", "dl", "table", "thead", "tbody", "tfoot", "tr", "colgroup", "select"}
+_SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
+
+
+def _is_page_number(tag) -> bool:
+    return bool(PAGE_NUMBER.intersection(tag.get("class") or ()))
+
+
+def _drop_page_numbers(soup: BeautifulSoup) -> None:
+    """Removes page-number marks but keeps the ids on them, so links to a page still land."""
+    for tag in soup.find_all(_is_page_number):
+        if tag.decomposed:
+            continue
+        ids = [t["id"] for t in [tag, *tag.find_all(id=True)] if t.get("id")]
+        ids += [t["name"] for t in [tag, *tag.find_all("a", attrs={"name": True})] if t.get("name")]
+        parent = tag.parent
+        for ident in dict.fromkeys(ids):
+            if parent.name in _NO_PHRASING_CHILDREN:
+                parent.attrs.setdefault("id", ident)
+            else:
+                tag.insert_before(soup.new_tag("span", attrs={"id": ident}))
         tag.decompose()
+
+
+def _fix_attributes(soup: BeautifulSoup) -> None:
+    for tag in soup.find_all(True):
+        for attr in _OBSOLETE_ATTRIBUTES:
+            if tag.name != "meta":
+                tag.attrs.pop(attr, None)
+        if tag.name not in ("img", "svg", "canvas", "video", "iframe", "object", "embed", "input", "source"):
+            tag.attrs.pop("width", None)
+            tag.attrs.pop("height", None)
+        if tag.name == "a" and "name" in tag.attrs:
+            name = tag.attrs.pop("name")
+            if not tag.get("id"):
+                tag["id"] = name
+            elif tag["id"] != name:
+                tag.insert_before(soup.new_tag("span", attrs={"id": name}))
+        if tag.get("style"):
+            declarations = [d for d in tag["style"].split(";") if d.strip() and d.count("'") % 2 == 0
+                            and d.count('"') % 2 == 0]
+            if declarations:
+                tag["style"] = "; ".join(d.strip() for d in declarations)
+            else:
+                del tag["style"]
+
+
+def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
+    """A definition list split across chapters leaves dt/dd runs without their dl."""
+    wrapper, created = None, []
+    for item in soup.find_all(["dt", "dd"]):
+        if item.parent is None or item.parent.name == "dl":
+            continue
+        previous = item.previous_sibling
+        while isinstance(previous, str) and not previous.strip():
+            previous = previous.previous_sibling
+        if wrapper is None or previous is not wrapper:
+            wrapper = soup.new_tag("dl")
+            item.insert_before(wrapper)
+            created.append(wrapper)
+        wrapper.append(item.extract())
+    for wrapper in created:
+        items = wrapper.find_all(["dt", "dd"], recursive=False)
+        if items[0].name == "dd":  # its dt ended the previous chapter
+            wrapper.insert(0, soup.new_tag("dt"))
+        if items[-1].name == "dt":  # its dd starts the next one
+            wrapper.append(soup.new_tag("dd"))
+
+
+def _prepare(html: str) -> BeautifulSoup:
+    soup = BeautifulSoup(html, "lxml")
+    _drop_page_numbers(soup)
+    _fix_attributes(soup)
+    _wrap_stray_definitions(soup)
+    return soup
+
+
+def _body(soup: BeautifulSoup) -> str:
     return soup.body.decode_contents() if soup.body else ""
+
+
+def _unwrap_dangling_links(soups: list[BeautifulSoup]) -> None:
+    """Links whose target isn't in the book (a lost anchor, a dropped page) become plain text."""
+    ids = {chapter_href(i): {t["id"] for t in soup.find_all(id=True)} for i, soup in enumerate(soups)}
+    for i, soup in enumerate(soups):
+        for link in soup.find_all("a", href=True):
+            href = link["href"].strip()
+            if _SCHEME.match(href):
+                continue
+            file, _, fragment = href.partition("#")
+            file = file or chapter_href(i)
+            if file not in ids or (fragment and fragment not in ids[file]):
+                link.unwrap()
 
 
 def _page(title: str, language: str, body: str) -> str:
@@ -182,8 +274,10 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
         ("OEBPS/cover.xhtml", _page(title, meta.language,
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
     ]
-    for i, chapter in enumerate(work.chapters):
-        body = to_xhtml(_without_page_numbers(chapter.html))
+    soups = [_prepare(chapter.html) for chapter in work.chapters]
+    _unwrap_dangling_links(soups)
+    for i, soup in enumerate(soups):
+        body = to_xhtml(_body(soup))
         files.append((f"OEBPS/{chapter_href(i)}", _page(f"{title} — {titles[i]}", meta.language, body)))
 
     out = Path(out)

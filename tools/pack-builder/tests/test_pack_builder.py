@@ -84,3 +84,49 @@ def test_every_page_stays_under_the_page_limit(tmp_path):
     for i in range(a.all_entry_count):
         item = a._get_entry_by_id(i).get_item()
         assert len(bytes(item.content)) <= 150_000, item.path
+
+
+def test_build_epubs_writes_one_file_per_work(tmp_path):
+    from pack_builder import build_epubs
+    out = tmp_path / "out"
+    out.mkdir()
+    files = build_epubs(two_works(tmp_path), FakeSource(), out, "2026-10-17")
+    assert sorted(f.name for f in files) == ["gc-koran-rodwell_2026-10-17.epub", "gc-modern-book_2026-10-17.epub"]
+    import zipfile
+    for f in files:
+        names = zipfile.ZipFile(f).namelist()
+        assert names[0] == "mimetype" and "OEBPS/content.opf" in names and "OEBPS/c001.xhtml" in names
+
+
+def test_build_failure_names_the_work(tmp_path, monkeypatch):
+    import pack_builder
+    from pack_builder import build_epubs
+
+    def boom(*args, **kwargs):
+        raise ValueError("no headings")
+    monkeypatch.setattr(pack_builder.chapters, "split", boom)
+    with pytest.raises(Exception) as caught:
+        build_epubs(two_works(tmp_path), FakeSource(), tmp_path, "2026-10-17")
+    assert str(caught.value).startswith("modern-book (#1342): ")
+    assert "no headings" in str(caught.value)
+    assert list(tmp_path.glob("*.epub*")) == []
+
+
+def test_describe_epubs_hashes_and_lists(tmp_path):
+    from pack_builder import build_epubs, describe_epubs
+    m = two_works(tmp_path)
+    build_epubs(m, FakeSource(), tmp_path, "2026-10-17")
+    base = "https://github.com/nealt9000/Granger/releases/download/classics-2026-10-17"
+    d = describe_epubs(tmp_path, base, m)
+    assert d["releaseDate"] == "2026-10-17" and d["collection"] == "granger-classics"
+    by_id = {b["id"]: b for b in d["books"]}
+    assert list(by_id) == ["gc-modern-book", "gc-koran-rodwell"]
+    koran = by_id["gc-koran-rodwell"]
+    path = tmp_path / "gc-koran-rodwell_2026-10-17.epub"
+    assert koran["title"] == "The Koran (tr. J. M. Rodwell)" and koran["author"] == ""
+    assert koran["translator"] == "J. M. Rodwell" and koran["published"] == 1861
+    assert koran["section"] == "Scripture & religion" and koran["language"] == "en"
+    assert koran["sizeBytes"] == path.stat().st_size
+    assert koran["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+    assert koran["urls"] == [f"{base}/gc-koran-rodwell_2026-10-17.epub"]
+    assert by_id["gc-modern-book"]["translator"] is None

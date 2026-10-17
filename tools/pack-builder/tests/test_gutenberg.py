@@ -112,3 +112,11 @@ def test_unwrapped_scheme_link_keeps_its_id():
         b'<a id="ext" href="https://example.com/">the link text</a>')
     body = str(gutenberg.clean(html).body)
     assert '<span id="ext">the link text</span>' in body and "example.com" not in body
+
+
+def test_unwrap_link_keeps_both_id_and_name_as_targets():
+    from bs4 import BeautifulSoup
+    from gutenberg import unwrap_link
+    soup = BeautifulSoup('<p><a id="a" name="b">x</a></p>', "lxml")
+    unwrap_link(soup.a)
+    assert {t["id"] for t in soup.find_all(id=True)} == {"a", "b"}

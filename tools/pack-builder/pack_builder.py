@@ -5,6 +5,9 @@
   pack_builder.py build    --manifest classics/manifest.json --out-dir ~/granger-build [--date YYYY-MM-DD]
   pack_builder.py describe ~/granger-build/granger_classics_en_<date>.zim --url <release url> \\
                            --out releases/granger_classics_en.json
+  pack_builder.py build-epubs --manifest classics/manifest.json --out-dir ~/granger-build/classics-epub [--date D]
+  pack_builder.py describe-epubs ~/granger-build/classics-epub --release-url-base <release download url> \\
+                           --manifest classics/manifest.json     # writes releases/granger_classics_books.json
 
 `build` validates first and stops on any error. `describe` writes the release descriptor that
 tools/catalog-gen turns into a catalog entry. Sources are cached in ~/.cache/granger/gutenberg/.
@@ -19,6 +22,8 @@ from pathlib import Path
 from libzim.reader import Archive
 
 import chapters
+import covers
+import epubpack
 import gutenberg
 import manifest as manifests
 import zimpack
@@ -46,6 +51,59 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str) -> Path:
     zimpack.write_zim(zim, info, works)
     print(f"{zim}: {zim.stat().st_size / 1e6:.1f} MB, {len(works)} works")
     return zim
+
+
+def _work(spec, source) -> zimpack.Work:
+    cleaned = gutenberg.clean(source.html(spec.gutenberg))
+    for notice in gutenberg.later_edition_notices(cleaned.body):
+        print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
+    pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),
+                           page_href=epubpack.chapter_href)
+    print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
+    return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
+                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles)
+
+
+def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str) -> list[Path]:
+    """One EPUB 3 per work: `<out>/gc-<slug>_<date>.epub`. Any failure names the work."""
+    sections = dict(m.sections)
+    files = []
+    for spec in m.works:
+        try:
+            work = _work(spec, source)
+            meta = epubpack.BookMeta(
+                id=epubpack.book_id(spec.slug), title=epubpack.display_title(work), author=spec.author,
+                translator=spec.translator, published=spec.published, section_title=sections[spec.section],
+                language="en", source_url=f"https://www.gutenberg.org/ebooks/{spec.gutenberg}", date=date)
+            path = Path(out) / f"{meta.id}_{date}.epub"
+            epubpack.write_epub(path, work, meta, covers.cover_jpeg(meta.title, spec.author))
+        except Exception as error:
+            raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
+        files.append(path)
+    return files
+
+
+def describe_epubs(directory: Path, url_base: str, m: Manifest) -> dict:
+    """The release descriptor for the EPUBs `build_epubs` wrote into `directory`."""
+    sections = dict(m.sections)
+    books, dates = [], set()
+    for spec in m.works:
+        book = epubpack.book_id(spec.slug)
+        found = sorted(Path(directory).glob(f"{book}_????-??-??.epub"))
+        if len(found) != 1:
+            raise SystemExit(f"{book}: expected one EPUB in {directory}, found {len(found)}")
+        path = found[0]
+        dates.add(path.stem.rsplit("_", 1)[1])
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        title = epubpack.display_title(zimpack.Work(spec.slug, spec.title, spec.author, spec.translator,
+                                                    spec.published, spec.section, []))
+        books.append({"id": book, "title": title, "author": spec.author, "translator": spec.translator,
+                      "published": spec.published, "section": sections[spec.section], "language": "en",
+                      "sizeBytes": path.stat().st_size, "sha256": digest,
+                      "urls": [f"{url_base.rstrip('/')}/{path.name}"]})
+    if len(dates) != 1:
+        raise SystemExit(f"EPUBs from several build dates: {sorted(dates)}")
+    return {"releaseDate": dates.pop(), "collection": "granger-classics", "books": books}
 
 
 def describe(zim: Path, url: str) -> dict:
@@ -82,11 +140,16 @@ def main(argv):
     p = sub.add_parser("validate"); p.add_argument("--manifest", required=True)
     p = sub.add_parser("build"); p.add_argument("--manifest", required=True); p.add_argument("--out-dir", required=True)
     p.add_argument("--date", default=datetime.date.today().isoformat())
+    p = sub.add_parser("build-epubs"); p.add_argument("--manifest", required=True); p.add_argument("--out-dir", required=True)
+    p.add_argument("--date", default=datetime.date.today().isoformat())
+    p = sub.add_parser("describe-epubs"); p.add_argument("directory"); p.add_argument("--release-url-base", required=True)
+    p.add_argument("--manifest", required=True)
+    p.add_argument("--out", default=str(Path(__file__).parent / "releases" / "granger_classics_books.json"))
     p = sub.add_parser("describe"); p.add_argument("zim"); p.add_argument("--url", required=True)
     p.add_argument("--out", required=True)
     args = parser.parse_args(argv)
 
-    if args.command in ("validate", "build"):
+    if args.command in ("validate", "build", "build-epubs"):
         m, source = manifests.load(Path(args.manifest)), GutenbergSource()
         errors = _validate(m, source)
         for error in errors:
@@ -94,10 +157,19 @@ def main(argv):
         print(f"{args.manifest}: {len(m.works)} works, {len(errors)} errors")
         if errors:
             raise SystemExit(1)
-        if args.command == "build":
+        if args.command in ("build", "build-epubs"):
             out_dir = Path(args.out_dir).expanduser()
             out_dir.mkdir(parents=True, exist_ok=True)
-            build(m, source, out_dir, args.date)
+            if args.command == "build":
+                build(m, source, out_dir, args.date)
+            else:
+                files = build_epubs(m, source, out_dir, args.date)
+                print(f"{out_dir}: {len(files)} EPUBs, {sum(f.stat().st_size for f in files) / 1e6:.1f} MB")
+    elif args.command == "describe-epubs":
+        descriptor = describe_epubs(Path(args.directory).expanduser(), args.release_url_base,
+                                    manifests.load(Path(args.manifest)))
+        Path(args.out).write_text(json.dumps(descriptor, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"wrote {args.out}: {len(descriptor['books'])} books")
     elif args.command == "describe":
         descriptor = describe(Path(args.zim).expanduser(), args.url)
         Path(args.out).write_text(json.dumps(descriptor, indent=2) + "\n", encoding="utf-8")
