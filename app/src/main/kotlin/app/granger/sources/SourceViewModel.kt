@@ -1,5 +1,8 @@
 package app.granger.sources
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.ai.DeviceTier
@@ -123,6 +126,14 @@ class SourceViewModel(
     private val notice = MutableStateFlow<String?>(null)
     private val tab = MutableStateFlow(SourceTab.BROWSE)
     private val query = MutableStateFlow("")
+
+    /**
+     * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
+     * value from a flow: a value that lags a dispatch behind the keyboard is pushed back into the field and scrambles
+     * fast typing (seen on the Pixel 6, 2026-10-17).
+     */
+    var searchText by mutableStateOf("")
+        private set
     private val settings = combine(
         combine(volumeList, selectedPath, wifiOnly, notice, ::Choices),
         tab,
@@ -210,6 +221,7 @@ class SourceViewModel(
     }
 
     fun setQuery(value: String) {
+        searchText = value
         query.value = value
     }
 

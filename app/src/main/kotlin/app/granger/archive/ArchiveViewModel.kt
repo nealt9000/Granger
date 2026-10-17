@@ -1,5 +1,8 @@
 package app.granger.archive
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.archive.ArchiveDoc
@@ -112,6 +115,14 @@ class ArchiveViewModel(
 
     private val state = MutableStateFlow(State(filtered = !prefs.waiverAccepted.value))
 
+    /**
+     * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
+     * value from a flow: a value that lags a dispatch behind the keyboard is pushed back into the field and scrambles
+     * fast typing (seen on the Pixel 6, 2026-10-17).
+     */
+    var searchText by mutableStateOf("")
+        private set
+
     /** Bumped by every search; a response for an older generation is dropped (Review Focus 2). */
     @Volatile private var generation = 0
     private var queryJob: Job? = null
@@ -132,6 +143,7 @@ class ArchiveViewModel(
 
     /** Searches [value] with no shelf after a 400 ms pause; clearing it goes back to Most downloaded. */
     fun setQuery(value: String) {
+        searchText = value
         state.update { it.copy(query = value) }
         queryJob?.cancel()
         queryJob = viewModelScope.launch {
@@ -145,6 +157,7 @@ class ArchiveViewModel(
 
     fun selectShelf(shelf: ArchiveShelf) {
         queryJob?.cancel()
+        searchText = ""
         state.update { it.copy(query = "", searchedQuery = "", shelf = shelf) }
         search(reset = true)
     }

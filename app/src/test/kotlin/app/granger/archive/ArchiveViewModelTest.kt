@@ -115,6 +115,16 @@ class ArchiveViewModelTest {
         return vm
     }
 
+    @Test fun theSearchFieldTextUpdatesSynchronously() = runTest(main.dispatcher) {
+        // ui is combine(...).stateIn(...), so ui.value.query lags a dispatch behind each keystroke; a text field
+        // fed from it gets stale values back and scrambles fast typing. The field reads searchText instead.
+        val vm = viewModel()
+        vm.setQuery("s"); vm.setQuery("st"); vm.setQuery("ste")
+        assertThat(vm.searchText).isEqualTo("ste")
+        vm.selectShelf(ArchiveShelf.MANUALS)
+        assertThat(vm.searchText).isEmpty()
+    }
+
     @Test fun startsOnMostDownloadedFiltered() = runTest(main.dispatcher) {
         val vm = viewModel()
         assertThat(searches().first().queryParameter("q")).isEqualTo(ArchiveQuery.build("", ArchiveShelf.MOST_DOWNLOADED, true))

@@ -107,7 +107,7 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             item(key = "search") {
                 OutlinedTextField(
-                    value = ui.query,
+                    value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
                     placeholder = { Text("Search archive.org texts") },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },

@@ -98,7 +98,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             item(key = "search") {
                 OutlinedTextField(
-                    value = ui.query,
+                    value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
                     placeholder = { Text("Search ${title}") },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
