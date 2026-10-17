@@ -172,16 +172,62 @@ class BookshelfTest {
     }
 
     @Test fun importThatThrowsLeavesNoFile() = test {
-        val failure = runCatching {
-            shelf.import("half.epub") {
-                object : java.io.InputStream() {
-                    var sent = 0
-                    override fun read(): Int = if (sent++ < 10) 'P'.code else throw java.io.IOException("unplugged")
-                }
+        val halfway = shelf.import("half.epub") {
+            object : java.io.InputStream() {
+                var sent = 0
+                override fun read(): Int = if (sent++ < 10) 'P'.code else throw java.io.IOException("unplugged")
             }
         }
-        assertThat(failure.exceptionOrNull()).isInstanceOf(java.io.IOException::class.java)
+        assertThat(halfway).isEqualTo(ImportResult.Damaged("Couldn't read the file"))
+        val unopenable = shelf.import("gone.epub") { throw java.io.FileNotFoundException("gone") }
+        assertThat(unopenable).isEqualTo(ImportResult.Damaged("Couldn't read the file"))
         assertThat(importFiles()).isEmpty()
+        assertThat(shelf.books.first()).isEmpty()
+    }
+
+    @Test fun importOverCapTextIsDamaged() = test {
+        val small = RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, maxTextBytes = 10)
+        val source = File(src, "long.txt").apply { writeText("This text is longer than ten bytes.") }
+        assertThat(small.import("long.txt") { source.inputStream() }).isEqualTo(ImportResult.Damaged("Too large"))
+        assertThat(importFiles()).isEmpty()
+        // EPUBs aren't held in memory whole, so the cap doesn't apply to them.
+        val epub = TestEpubs.build(src, "book.epub")
+        assertThat(small.import("book.epub") { epub.inputStream() }).isInstanceOf(ImportResult.Imported::class.java)
+    }
+
+    @Test fun textNameStartingWithPkIsConverted() = test {
+        val source = File(src, "notes.txt").apply { writeText("PK wrote these notes.\n\nSecond paragraph.") }
+        val result = shelf.import("notes.txt") { source.inputStream() }
+        val book = shelf.book((result as ImportResult.Imported).bookId)!!
+        assertThat(book.title).isEqualTo("notes")
+        assertThat(EpubInspector.inspect(File(book.filePath))).isInstanceOf(Inspection.Ok::class.java)
+        assertThat(importFiles()).containsExactly(File(book.filePath).name)
+    }
+
+    @Test fun reimportRestoresAMissingBook() = test {
+        val source = TestEpubs.build(src, "again.epub")
+        val first = shelf.import("again.epub") { source.inputStream() } as ImportResult.Imported
+        File(shelf.book(first.bookId)!!.filePath).delete()
+        shelf.refresh()
+        assertThat(shelf.book(first.bookId)!!.status).isEqualTo(PackStatus.MISSING)
+
+        assertThat(shelf.import("again.epub") { source.inputStream() }).isEqualTo(ImportResult.Imported(first.bookId))
+        val book = shelf.book(first.bookId)!!
+        assertThat(book.status).isEqualTo(PackStatus.OK)
+        assertThat(File(book.filePath).exists()).isTrue()
+        assertThat(importFiles()).containsExactly(File(book.filePath).name)
+        // Present and OK: the next import is a no-op.
+        assertThat(shelf.import("again.epub") { source.inputStream() }).isEqualTo(ImportResult.AlreadyThere(first.bookId))
+    }
+
+    @Test fun oddCoverExtensionsAreWrittenInsideCoversDir() = test {
+        for ((ref, href) in listOf("slash" to "cover.j/pg", "long" to "cover.abcdefghij", "upper" to "cover.JPG")) {
+            val file = TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", cover = TestEpubs.CoverStyle.EPUB3_PROPERTY, coverHref = href)
+            val cover = File(shelf.addDownloaded(file, ref)!!.coverPath!!)
+            assertThat(cover.parentFile).isEqualTo(coversDir)
+            assertThat(cover.readBytes()).isEqualTo(TestEpubs.COVER_BYTES)
+        }
+        assertThat(coversDir.listFiles()!!.map { it.extension }).containsExactly("img", "img", "jpg")
     }
 
     @Test fun refreshMarksMissingAndRegistersStrays() = test {

@@ -82,6 +82,24 @@ class BookIndexTest {
         assertThat(db.bookDao().notIndexed()).isEmpty()
     }
 
+    @Test fun bookChangedDuringIndexingStaysPending() = test {
+        val moby = add("moby", "<p>The whale surfaced.</p>")
+        // A re-download lands while the old file is being indexed.
+        index.beforeCommit = {
+            db.openHelper.writableDatabase.execSQL("UPDATE books SET filePath = ? WHERE id = ?", arrayOf("/new/moby.epub", moby.id))
+        }
+        index.indexPending()
+        assertThat(db.bookDao().notIndexed().map { it.id }).containsExactly(moby.id)
+    }
+
+    @Test fun userTypedTrailingStarStillMatches() = test {
+        add("talk", "<p>He said hello there.</p>")
+        index.indexPending()
+        assertThat(index.search("hello*")).hasSize(1)
+        assertThat(index.search("hel**")).hasSize(1)
+        assertThat(index.search("said hello*")).hasSize(1)
+    }
+
     @Test fun reindexedBookMatchesOnce() = test {
         add("moby", "<p>The whale surfaced.</p>")
         index.indexPending()

@@ -194,6 +194,9 @@ interface BookDao {
     @Query("DELETE FROM books WHERE id = :id")
     suspend fun delete(id: String)
 
+    @Query("UPDATE books SET status = :status WHERE id = :id")
+    suspend fun setStatus(id: String, status: PackStatus)
+
     @Query("SELECT * FROM books WHERE status = 'OK' AND indexedAt IS NULL")
     suspend fun notIndexed(): List<Book>
 

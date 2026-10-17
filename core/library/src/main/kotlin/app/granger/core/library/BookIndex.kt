@@ -55,7 +55,9 @@ class BookIndex(
     }
 
     suspend fun search(query: String, limit: Int = 30, perBook: Int = 3): List<BookHit> {
-        val words = query.split(WHITESPACE).map { it.replace("\"", "") }.filter { word -> word.any { it.isLetterOrDigit() } }
+        // Quotes would end the phrase early; a typed trailing `*` is dropped since the last word gets one anyway.
+        val words = query.split(WHITESPACE).map { it.replace("\"", "").trimEnd('*') }
+            .filter { word -> word.any { it.isLetterOrDigit() } }
         if (words.isEmpty()) return emptyList()
         val match = words.mapIndexed { i, w -> if (i == words.lastIndex) "\"$w*\"" else "\"$w\"" }.joinToString(" ")
         return withContext(io) {
@@ -122,7 +124,10 @@ class BookIndex(
         }
     }
 
-    /** All or nothing: the book's chunks and text go in, and it's marked indexed, in one transaction. */
+    /**
+     * All or nothing: the book's chunks and text go in, and it's marked indexed, in one transaction. It's marked only
+     * if the row is unchanged since [book] was read.
+     */
     private suspend fun index(book: Book) {
         val file = File(book.filePath)
         if (!file.isFile) return
@@ -140,7 +145,8 @@ class BookIndex(
                 }
             }
             beforeCommit(book.id)
-            dao.setIndexed(book.id, now())
+            // A re-download or refresh while the file was being read means this text may be stale: stay pending.
+            if (dao.get(book.id) == book) dao.setIndexed(book.id, now())
         }
     }
 

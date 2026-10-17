@@ -35,6 +35,8 @@ object TestEpubs {
         collection: String? = null,
         cover: CoverStyle = CoverStyle.NONE,
         coverBytes: ByteArray = COVER_BYTES,
+        /** The cover's manifest href and zip path under `OEBPS/`. */
+        coverHref: String = "cover.png",
         chapters: List<String> = listOf("<p>Hello world.</p>"),
         drmFiles: Map<String, String> = emptyMap(),
         includeOpf: Boolean = true,
@@ -55,10 +57,10 @@ object TestEpubs {
                 """<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>""".toByteArray(),
             )
             if (includeOpf) {
-                z.put("OEBPS/content.opf", opf(title, authors, translators, language, subjects, description, date, identifier, collection, cover, chapters.size).toByteArray())
+                z.put("OEBPS/content.opf", opf(title, authors, translators, language, subjects, description, date, identifier, collection, cover, chapters.size, coverHref).toByteArray())
             }
             chapters.forEachIndexed { i, body -> z.put("OEBPS/c%03d.xhtml".format(i + 1), xhtml(body).toByteArray()) }
-            if (cover != CoverStyle.NONE) z.put("OEBPS/cover.png", coverBytes)
+            if (cover != CoverStyle.NONE) z.put("OEBPS/$coverHref", coverBytes)
             drmFiles.forEach { (path, content) -> z.put(path, content.toByteArray()) }
         }
         return file
@@ -96,7 +98,7 @@ object TestEpubs {
     private fun opf(
         title: String?, authors: List<String>, translators: List<String>, language: String,
         subjects: List<String>, description: String, date: String, identifier: String,
-        collection: String?, cover: CoverStyle, chapterCount: Int,
+        collection: String?, cover: CoverStyle, chapterCount: Int, coverHref: String,
     ): String {
         val meta = StringBuilder()
         meta.append("<dc:identifier id=\"id\">${esc(identifier)}</dc:identifier>")
@@ -111,7 +113,7 @@ object TestEpubs {
         val manifest = StringBuilder()
         if (cover != CoverStyle.NONE) {
             val props = if (cover == CoverStyle.EPUB3_PROPERTY) " properties=\"cover-image\"" else ""
-            manifest.append("<item id=\"cover-img\" href=\"cover.png\" media-type=\"image/png\"$props/>")
+            manifest.append("<item id=\"cover-img\" href=\"${esc(coverHref)}\" media-type=\"image/png\"$props/>")
         }
         val spine = StringBuilder()
         for (i in 1..chapterCount) {

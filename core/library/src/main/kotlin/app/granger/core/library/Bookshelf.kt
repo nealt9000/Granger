@@ -50,7 +50,11 @@ interface Bookshelf {
     /** Registers a finished catalog download; null if the file isn't a readable EPUB. */
     suspend fun addDownloaded(file: File, catalogId: String): Book?
 
-    /** Copies a user's file into the library, converting TXT and Markdown to EPUB. */
+    /**
+     * Copies a user's file into the library, converting TXT and Markdown to EPUB. A file whose book is already here
+     * and readable is [ImportResult.AlreadyThere]; one whose book is missing or damaged is imported again. Failing to
+     * read [open] gives [ImportResult.Damaged]; other exceptions propagate. No partial file is left behind either way.
+     */
     suspend fun import(displayName: String, open: () -> InputStream): ImportResult
 
     /** Deletes the file, cover and search text; the position and marks are kept. False if the file can't be deleted. */
@@ -67,6 +71,7 @@ interface Bookshelf {
 /**
  * @param bookDirs each volume's `books/` folder; downloads live in `granger/` and imports in `imports/` under it.
  * @param importDir where imports are copied (the internal volume's `books/imports`).
+ * @param maxTextBytes the largest TXT or Markdown file imported; conversion holds the whole text in memory.
  */
 class RoomBookshelf(
     private val db: LibraryDatabase,
@@ -75,6 +80,7 @@ class RoomBookshelf(
     private val coversDir: File,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
+    private val maxTextBytes: Long = 20L * 1024 * 1024,
 ) : Bookshelf {
     private val dao = db.bookDao()
 
@@ -95,29 +101,47 @@ class RoomBookshelf(
         val incoming = File(dir, ".incoming-${UUID.randomUUID()}")
         val converted = File(dir, "${incoming.name}.epub")
         try {
-            val sha = open().use { input -> incoming.outputStream().use { out -> sha256(input, out) } }
+            val sha = try {
+                open().use { input -> incoming.outputStream().use { out -> sha256(input, out) } }
+            } catch (_: IOException) {
+                return@withContext ImportResult.Damaged("Couldn't read the file")
+            }
             val id = BookIds.of(BookOrigin.IMPORT, sha)
-            if (dao.get(id) != null) return@withContext ImportResult.AlreadyThere(id)
+            val existing = dao.get(id)
+            if (existing != null && existing.status == PackStatus.OK && File(existing.filePath).exists()) {
+                return@withContext ImportResult.AlreadyThere(id)
+            }
             if (incoming.length() == 0L) return@withContext ImportResult.Damaged("Empty file")
 
             val title = titleOf(displayName)
+            val textName = isTextName(displayName)
             val head = incoming.inputStream().use { input ->
                 ByteArray(SNIFF_BYTES).let { buf -> buf.copyOf(input.read(buf).coerceAtLeast(0)) }
             }
-            val epub = when {
-                head.size >= 2 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte() -> incoming
-                isTextName(displayName) || head.none { it == 0.toByte() } -> {
-                    val markdown = displayName.lowercase().let { it.endsWith(".md") || it.endsWith(".markdown") }
-                    val text = TextDecoding.decode(incoming.readBytes())
-                    converted.outputStream().use { TextToEpub.convert(text, title, markdown, it) }
-                    converted
+            val zip = head.size >= 2 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()
+
+            var epub: File? = null
+            var meta: EpubMeta? = null
+            if (zip) {
+                when (val inspection = EpubInspector.inspect(incoming, title)) {
+                    is Inspection.Ok -> { epub = incoming; meta = inspection.meta }
+                    is Inspection.Protected -> return@withContext ImportResult.Protected(inspection.kind)
+                    // A text file can happen to start with "PK"; only its name says so.
+                    is Inspection.Invalid -> if (!textName) return@withContext ImportResult.Damaged(inspection.reason)
                 }
-                else -> return@withContext ImportResult.Unsupported
             }
-            val meta = when (val inspection = EpubInspector.inspect(epub, title)) {
-                is Inspection.Ok -> inspection.meta
-                is Inspection.Protected -> return@withContext ImportResult.Protected(inspection.kind)
-                is Inspection.Invalid -> return@withContext ImportResult.Damaged(inspection.reason)
+            if (epub == null || meta == null) {
+                if (!zip && !textName && head.any { it == 0.toByte() }) return@withContext ImportResult.Unsupported
+                if (incoming.length() > maxTextBytes) return@withContext ImportResult.Damaged("Too large")
+                val markdown = displayName.lowercase().let { it.endsWith(".md") || it.endsWith(".markdown") }
+                val text = TextDecoding.decode(incoming.readBytes())
+                converted.outputStream().use { TextToEpub.convert(text, title, markdown, it) }
+                epub = converted
+                meta = when (val inspection = EpubInspector.inspect(converted, title)) {
+                    is Inspection.Ok -> inspection.meta
+                    is Inspection.Protected -> return@withContext ImportResult.Protected(inspection.kind)
+                    is Inspection.Invalid -> return@withContext ImportResult.Damaged(inspection.reason)
+                }
             }
 
             val target = File(dir, "${sha.take(12)}-${sanitise(title)}.epub")
@@ -128,6 +152,8 @@ class RoomBookshelf(
                 target.delete()
                 throw e
             }
+            // A re-import replaces a damaged or misplaced copy; don't leave the old one as a stray.
+            if (existing != null && existing.filePath != target.absolutePath) File(existing.filePath).delete()
             ImportResult.Imported(id)
         } finally {
             incoming.delete()
@@ -145,7 +171,7 @@ class RoomBookshelf(
                     PackStatus.CORRUPT
                 else -> PackStatus.OK
             }
-            if (status != book.status) dao.upsert(book.copy(status = status))
+            if (status != book.status) dao.setStatus(book.id, status)
         }
 
         val knownPaths = known.map { File(it.filePath).absolutePath }.toSet()
@@ -230,7 +256,8 @@ class RoomBookshelf(
     /** Writes the cover's raw bytes to `coversDir/<sha1 of id>.<ext>` and removes any older cover; null if none. */
     private fun writeCover(id: String, meta: EpubMeta, oldPath: String?): String? {
         val bytes = meta.cover
-        val target = bytes?.let { File(coversDir, "${sha1(id)}.${meta.coverExtension ?: "img"}") }
+        val extension = meta.coverExtension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
+        val target = bytes?.let { File(coversDir, "${sha1(id)}.$extension") }
         if (oldPath != null && oldPath != target?.absolutePath) File(oldPath).delete()
         if (target == null) return null
         return try {
@@ -260,6 +287,7 @@ class RoomBookshelf(
         const val SNIFF_BYTES = 4096
         val TEXT_EXTENSIONS = listOf(".txt", ".md", ".markdown")
         val UNSAFE = Regex("[^A-Za-z0-9._-]+")
+        val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
 
         fun isTextName(name: String) = TEXT_EXTENSIONS.any { name.lowercase().endsWith(it) }
 
