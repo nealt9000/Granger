@@ -12,7 +12,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 4 | Pack builder + Granger Classics | `tools/pack-builder` (python-libzim), Classics manifest, Classics pack on a GitHub release, catalog entry | **Done:** `2026-10-16-plan-04-pack-builder-classics.md` |
 | 5 | Shell + Library | Flame theme + icon, side rail (bookmarks per article, History, Recent), immersive mode, open-to-last-place, media types / collections / filing, Library screens, Granger + Kiwix source screens, Settings (Models, Readiness), polished web-style reader with selection actions, schema migration | **Done:** `2026-10-16-plan-05-shell-library.md` (reader device tests pending) |
 | 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:books` (EPUB/TXT/MD, DRM detection; search index is contentless FTS4), My books, pack-builder EPUB output, Classics re-release, Search over e-books | **Done:** `2026-10-17-plan-06-ebook-reader-classics.md` (the 347-book "Download all" not yet run on a device) |
-| 7 | Archive.org source | Public-domain filter until waiver, search/browse, open-only downloads with sha1/md5 verify, filing, metadata | |
+| 7 | Archive.org source | Public-domain filter (1930 or earlier) until waiver, shelves + search, open-only downloads (EPUB, else text / OCR text) with sha1/md5 verify, filing, metadata | **Done:** `2026-10-17-plan-07-archive-org.md` |
 | 8 | Inquire & Abstract | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats | |
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources) + import gating, onboarding, `:core:telemetry` | |
@@ -103,7 +103,44 @@ Still open:
 - Imported text books are titled by file name, not by their first heading.
 - Book search results are unranked (`LIMIT 400`); TXT files with single-newline paragraphs become one paragraph per chapter; the shared cover cache (4 MB) re-decodes while scrolling a long grid.
 - Plan 10: import is Pro-only; queueing the whole Classics preset must be checked against the cap as one group (spec §13); `Features.IMPORT` becomes the entitlement check.
-- Plan 7: archive.org books go to `books/archive-org/` with origin `ARCHIVE_ORG`; `Bookshelf.addDownloaded` needs an origin parameter then.
+- ~~Plan 7: archive.org books go to `books/archive-org/` with origin `ARCHIVE_ORG`; `Bookshelf.addDownloaded` needs an origin parameter then.~~ Done in Plan 7.
 - Plan 8: `BookIndex` and `BookHit` are the e-book retrieval path for Inquire & Abstract; the `INQUIRE` selection action is already wired.
 - The search-grouping call from Plan 5 is still open.
 - The four Classics presentation defects from Plan 4 are fixed in the EPUB build (translator in the Koran titles, publisher CSS dropped, page numbers not clipped, clean titles).
+
+## Carried forward from Plan 7
+
+Neal's calls (2026-10-17):
+- Items with no EPUB download their text: an uploaded `.txt` first, else archive.org's OCR text (`*_djvu.txt`), labelled "OCR text: may have errors" and converted to EPUB beside it. About 470k public-domain texts have an EPUB; about 9 million have only scans plus OCR text.
+- Browse is four fixed shelves: Most downloaded, Technical manuals (`collection:manuals`), Science & engineering, Literature.
+- **The public-domain filter is date only (published 1930 or earlier).** The spec's "or marked public domain / CC0" was dropped after the Pixel 6 walkthrough: uploader licence tags put Diary of a Wimpy Kid (2007), a modern surgery textbook and a 2009 solutions manual in the filtered view. Spec §5 and §14 are updated.
+- Later idea, not planned: data sources per library category, with archive.org under several (texts, audio, video).
+
+Builder's calls made while building:
+- Items archive.org restricts to lending are lend-only ("Borrow on archive.org") even if a file is served openly (spec §5 wording).
+- Each archive.org book keeps a small `<identifier>.json` with its archive.org metadata in the internal `books/archive-org/` until it's removed, so a Readiness repair keeps the title and details.
+- Removing a book made from text also deletes its `.txt`; text over 20 MB isn't offered (it can't be converted).
+- Every request to archive.org hosts, file downloads included, sends `User-Agent: Granger/<version> (+https://github.com/nealt9000/Granger)`.
+- The download ledger is Room version 2: `sha256` is renamed `hash`, and `hashAlgorithm` (SHA256/SHA1/MD5) is added; old records migrate as SHA256.
+
+Pixel 6 walkthrough (2026-10-17), all passed after the fixes below:
+- The upgrade kept packs, books, rail and resume; a migrated pack record re-verified in Readiness.
+- An OCR-text book (History of the Frick Company, 81 KB) and a 62 MB scan EPUB (Steam-engine principles and practice) downloaded, verified, filed under Literature → Archive.org with archive.org's titles, opened, and the OCR text is found by Search under "In books".
+- A lending item shows only Borrow, which opens Chrome; the waiver dialog, the unfiltered rerun and withdrawing it in Settings (files stay) work; offline shows "Couldn't reach archive.org" with Retry and the Installed tab still lists downloads.
+- Remove deletes the `.txt`, `.epub` and `.json` and the rail shows the book as not available; the item sheet survives rotation.
+- Killing the process at 6.8 of 9 MB: WorkManager restarted it after its backoff (about a minute), it resumed from the `.part` file, verified with sha1, and filed the book.
+
+Fixed after the walkthrough:
+- The filter change above.
+- Search fields (Archive.org, Granger/Kiwix sources, library Search) scrambled and dropped fast typing: their text came back through the view model's combined flow a frame late. They now read Compose state set on each keystroke.
+- The Installed tab called OCR downloads "Plain text"; it reads the kind from the metadata file.
+- In scan EPUBs a page-wide image inside an indented paragraph ran off the page, and Readium's edge tap couldn't leave that page. Every book page gets one rule, `p:has(img) { text-indent: 0 !important }`; books' own image sizes are left alone.
+
+Still open:
+- Readium's edge tap can still be trapped by other content that overflows by less than a page (a wide table, `<pre>`); swiping works.
+- Image width relies on ReadiumCSS's non-important `max-width: 100%`; a book that sets `max-width: none` on images can overflow.
+- OCR text is plain: page headers and hyphenation from the scan stay inline. PDF-only items wait for the PDF pass. No thumbnails in results.
+- Archive.org items have no versions, so there is no Updates tab; a file archive.org re-derives later is not offered as an update.
+- Plan 11: the Play policy check for this source.
+- Minor polish deferred from the reviews: the filtered view's Get re-check and query both use `year`, which some items lack (they need the waiver); the archive tests wait in real time on the IO dispatcher; silent failure when no browser is installed; "PDF: coming soon" sits below the buttons rather than beside Get.
+
