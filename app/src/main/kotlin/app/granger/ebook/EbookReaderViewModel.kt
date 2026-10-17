@@ -9,6 +9,8 @@ import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import org.readium.r2.navigator.Decoration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
@@ -60,6 +62,17 @@ data class EbookUi(
     val highlights: List<BookMark> = emptyList(),
     val isBookmarkedHere: Boolean = false,
     val panel: Panel? = null,
+    /** The highlights drawn on the page; the screen applies them to the navigator whenever they change. */
+    val decorations: List<Decoration> = emptyList(),
+    /** Highlights whose chapter isn't in this edition: listed, but not drawn and not jumpable. */
+    val unplaceable: Set<Long> = emptySet(),
+    val search: BookSearchUi = BookSearchUi(),
+    /** The search result last jumped to, marked on the page until the next search or the panel closes. */
+    val searchHit: Locator? = null,
+    /** The highlight whose sheet (colour, note, delete) is open. */
+    val editingHighlight: Long? = null,
+    /** Whether that sheet opens with the note field focused (a new note). */
+    val focusNote: Boolean = false,
 )
 
 data class TocRow(val title: String, val href: String, val depth: Int)
@@ -93,6 +106,7 @@ class EbookReaderViewModel(
     private val prefsStore: ReadingPrefsStore,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val searcher: BookSearcher = ReadiumBookSearcher(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(EbookUi(prefs = prefsStore.prefs.value))
     val state: StateFlow<EbookUi> = _state.asStateFlow()
@@ -104,6 +118,8 @@ class EbookReaderViewModel(
     val navigation: Flow<Locator> = _navigation.receiveAsFlow()
 
     private val bookmarkLock = Mutex()
+    private val highlightLock = Mutex()
+    private var searchJob: Job? = null
 
     /** Builds the navigator fragment; set with the publication, before the state shows it. */
     var navigatorFactory: EpubNavigatorFactory? = null
@@ -201,9 +217,14 @@ class EbookReaderViewModel(
 
     private fun onMarks(marks: List<BookMark>) {
         _state.update {
+            val highlights = marks.filter { m -> m.kind == MarkKind.HIGHLIGHT }
+            val placed = place(it.publication, highlights)
             it.copy(
                 bookmarks = marks.filter { m -> m.kind == MarkKind.BOOKMARK }.sortedWith(compareByDescending<BookMark> { m -> m.createdAt }.thenByDescending { m -> m.id }),
-                highlights = marks.filter { m -> m.kind == MarkKind.HIGHLIGHT },
+                highlights = highlights,
+                decorations = placed.decorations,
+                unplaceable = placed.unplaceable,
+                editingHighlight = it.editingHighlight?.takeIf { id -> highlights.any { h -> h.id == id } },
             ).derived()
         }
     }
@@ -216,11 +237,7 @@ class EbookReaderViewModel(
         return copy(currentTocIndex = index, isBookmarkedHere = marked)
     }
 
-    private fun parse(json: String): Locator? = try {
-        Locator.fromJSON(JSONObject(json))
-    } catch (e: Exception) {
-        null
-    }
+    private fun parse(json: String): Locator? = parseLocator(json)
 
     /**
      * Adds a bookmark at the current place, or removes the one here. Serialised, and decided from the stored
@@ -272,7 +289,78 @@ class EbookReaderViewModel(
     }
 
     fun goToMark(mark: BookMark) {
+        if (mark.id in _state.value.unplaceable) return
         jump(parse(mark.locatorJson) ?: return)
+    }
+
+    /**
+     * Saves the selection as a highlight and returns its new id. Serialised with the other highlight writes, and
+     * run on [appScope], so leaving the screen mid-write doesn't lose it.
+     */
+    suspend fun highlight(locator: Locator, text: String, color: String = "yellow"): Long {
+        val id = bookId ?: return -1L
+        return appScope.async {
+            highlightLock.withLock {
+                val now = System.currentTimeMillis()
+                bookshelf.addMark(
+                    BookMark(0, id, MarkKind.HIGHLIGHT, locator.toJSON().toString(), text, color, "", now, now),
+                )
+            }
+        }.await()
+    }
+
+    /** A yellow highlight with its note editor open. */
+    suspend fun note(locator: Locator, text: String) {
+        val id = highlight(locator, text)
+        if (id >= 0) _state.update { it.copy(editingHighlight = id, focusNote = true) }
+    }
+
+    /** Opens (or closes, with null) the sheet for a highlight drawn on the page. */
+    fun editHighlight(id: Long?) {
+        _state.update { it.copy(editingHighlight = id, focusNote = false) }
+    }
+
+    /** Saves a changed colour or note. */
+    fun updateHighlight(mark: BookMark) {
+        appScope.launch {
+            highlightLock.withLock { bookshelf.updateMark(mark.copy(updatedAt = System.currentTimeMillis())) }
+        }
+    }
+
+    fun deleteHighlight(id: Long) {
+        _state.update { if (it.editingHighlight == id) it.copy(editingHighlight = null) else it }
+        appScope.launch { highlightLock.withLock { bookshelf.deleteMark(id) } }
+    }
+
+    /** Searches the book for [query]; any search still running is dropped. A blank query clears the results. */
+    fun search(query: String) {
+        searchJob?.cancel()
+        val trimmed = query.trim()
+        _state.update { it.copy(search = BookSearchUi(query = query), searchHit = null) }
+        val opened = _state.value.publication
+        if (trimmed.isEmpty() || opened == null) return
+        _state.update { it.copy(search = it.search.copy(running = true)) }
+        searchJob = viewModelScope.launch {
+            val hits = try {
+                withContext(io) { searcher.search(opened, trimmed) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Searching the book failed", e)
+                emptyList()
+            }
+            _state.update {
+                it.copy(search = BookSearchUi(query, SearchRows.build(trimmed, it.highlights, hits, it.toc), running = false))
+            }
+        }
+    }
+
+    /** A search result: jump there and mark the match on the page. */
+    fun goToHit(row: BookSearchRow) {
+        val locator = row.locator ?: return
+        if (row.markId != null && row.markId in _state.value.unplaceable) return
+        _state.update { it.copy(panel = null, searchHit = if (row.markId == null) locator else null) }
+        _navigation.trySend(locator)
     }
 
     private fun jump(locator: Locator) {
@@ -281,7 +369,7 @@ class EbookReaderViewModel(
     }
 
     fun open(panel: Panel?) {
-        _state.update { it.copy(panel = panel) }
+        _state.update { it.copy(panel = panel, searchHit = null) }
     }
 
     fun updatePrefs(prefs: ReadingPrefs) = prefsStore.update(prefs)

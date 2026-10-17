@@ -40,12 +40,9 @@ import org.json.JSONObject
 import org.readium.r2.shared.publication.Locator
 
 /** The swatch for a highlight colour name. */
-internal fun highlightColor(name: String): Color = when (name) {
-    "green" -> Color(0xFF7BC47F)
-    "blue" -> Color(0xFF6FA8DC)
-    "pink" -> Color(0xFFE88FB4)
-    else -> Color(0xFFE8C94A)
-}
+internal fun highlightColor(name: String): Color = Color(HighlightColors.argb(name))
+
+internal const val CANT_FIND = "Can't find this passage in the current edition"
 
 /** The stored locator's share of the book, as a percent; null when it can't be read. */
 internal fun markPercent(mark: BookMark): Int? = try {
@@ -101,11 +98,18 @@ fun ContentsPanel(
                     }
                     else -> if (state.highlights.isEmpty()) Empty("No highlights yet. Select text in the book to highlight it.") else LazyColumn {
                         items(state.highlights, key = { it.id }) { mark ->
-                            Row(Modifier.fillMaxWidth().clickable { onMark(mark) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                            val lost = mark.id in state.unplaceable
+                            Row(
+                                Modifier.fillMaxWidth().then(if (lost) Modifier else Modifier.clickable { onMark(mark) })
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                            ) {
                                 Box(Modifier.padding(top = 4.dp).size(12.dp).clip(CircleShape).background(highlightColor(mark.color)))
                                 Spacer(Modifier.width(12.dp))
                                 Column {
                                     Text(mark.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                                    if (lost) {
+                                        Text(CANT_FIND, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                                    }
                                     if (mark.note.isNotBlank()) {
                                         Text(mark.note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }

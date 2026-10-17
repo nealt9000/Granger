@@ -11,7 +11,14 @@ import androidx.fragment.app.FragmentFactory
 import kotlinx.coroutines.CancellationException
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
+import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.search.isSearchable
+import org.readium.r2.shared.publication.services.search.search
 import org.readium.r2.shared.util.asset.AssetRetriever
 import org.readium.r2.shared.util.getOrElse
 import org.readium.r2.shared.util.http.DefaultHttpClient
@@ -23,11 +30,43 @@ import java.io.File
  * The navigator's configuration. ReadiumCSS night mode paints links #63caff, which beats the theme's text colour;
  * links take the app's accent instead, in every theme, visited or not.
  */
-fun readerConfiguration(): EpubNavigatorFragment.Configuration {
+fun readerConfiguration(
+    onSelection: (SelectionAction) -> Unit = {},
+    dictionaryAvailable: Boolean = false,
+): EpubNavigatorFragment.Configuration {
     val accent = CssColor.Int(GrangerColors.Flame.toArgb())
     return EpubNavigatorFragment.Configuration(
         readiumCssRsProperties = RsProperties(linkColor = accent, visitedColor = accent),
+        selectionActionModeCallback = SelectionMenu(onSelection, dictionaryAvailable),
     )
+}
+
+/** Finds a phrase in the book's text. */
+interface BookSearcher {
+    /** Up to [max] places where [query] occurs, in book order; empty when the book can't be searched. */
+    suspend fun search(publication: Publication, query: String, max: Int = 200): List<Locator>
+}
+
+/** Readium's search service, read page by page until it runs dry or [max] hits are in. */
+@OptIn(ExperimentalReadiumApi::class)
+class ReadiumBookSearcher : BookSearcher {
+    override suspend fun search(publication: Publication, query: String, max: Int): List<Locator> {
+        if (!publication.isSearchable) return emptyList()
+        return withContext(Dispatchers.IO) {
+            val iterator = publication.search(query) ?: return@withContext emptyList()
+            try {
+                val found = mutableListOf<Locator>()
+                while (found.size < max) {
+                    ensureActive()
+                    val page = iterator.next().getOrNull() ?: break
+                    found += page.locators
+                }
+                found.take(max)
+            } finally {
+                iterator.close()
+            }
+        }
+    }
 }
 
 /** Opens a book file for reading. */

@@ -9,6 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalContext
+import app.granger.ebook.Dictionary
+import app.granger.ebook.DictionaryChoice
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -76,9 +82,10 @@ private fun NavBackStackEntry.readingTabId(): Long? = when {
 
 /**
  * The one way to open a reading tab: a book goes to [BookRoute], an article to [ReaderRoute]. A reader already on top
- * is replaced rather than stacked, and showing the same tab again does nothing unless [at] asks for a place in it.
+ * is replaced rather than stacked ([keepCurrent] stacks instead), and showing the same tab again does nothing unless
+ * [at] asks for a place in it.
  */
-fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null) {
+fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: Boolean = false) {
     // Read the back stack now, not the composition's copy: opening a tab suspends, and a second tap
     // meanwhile must replace the reader the first one pushed.
     val top = currentBackStackEntry
@@ -88,7 +95,8 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null) {
         if (BookIds.isBook(tab.packId)) BookRoute(tab.id, at?.href, at?.progression) else ReaderRoute(tab.id)
     navigate(route) {
         // Switching tabs replaces the reader instead of stacking one per tab.
-        if (showing != null && top != null) popUpTo(top.destination.id) { inclusive = true }
+        // keepCurrent stacks it on the reader instead (a dictionary entry over the book), so Back returns to the page.
+        if (showing != null && top != null && !keepCurrent) popUpTo(top.destination.id) { inclusive = true }
     }
 }
 
@@ -137,6 +145,21 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     val scope = rememberCoroutineScope()
     fun showTab(tabId: Long) {
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
+    }
+
+    // What Define does in the e-book reader; null until known, so the book opens with the right selection menu.
+    val appContext = LocalContext.current.applicationContext
+    val dictionary by produceState<DictionaryChoice?>(null) {
+        val handler = withContext(Dispatchers.IO) { Dictionary.hasProcessTextHandler(appContext) }
+        container.library.packs.collect { value = Dictionary.choose(it, handler) }
+    }
+    /** Opens [word]'s Wiktionary entry over the book, so Back returns to the page; false when there is none. */
+    suspend fun lookUpInWiktionary(packId: String, word: String): Boolean {
+        val hit = withContext(Dispatchers.IO) { container.library.archive(packId)?.suggest(word, 5) }
+            ?.let { Dictionary.pick(it, word) } ?: return false
+        val tab = container.sessions.openTab(packId, hit.path, hit.title).let { container.sessions.tab(it) } ?: return false
+        nav.showTab(tab, keepCurrent = true)
+        return true
     }
 
     val selected = when {
@@ -233,6 +256,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
                     showChromeRequest = showChromeRequest,
+                    dictionary = dictionary,
+                    onSearchText = { text -> nav.navigate(SearchRoute(text)) },
+                    onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
                 )
             }

@@ -1,6 +1,8 @@
 package app.granger.ebook
 
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -16,9 +18,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
 import app.granger.shell.NarrowRailWidth
+import kotlinx.coroutines.launch
+import org.readium.r2.navigator.DecorableNavigator
+import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
@@ -53,6 +63,11 @@ fun EbookReaderScreen(
     viewModel: EbookReaderViewModel,
     onChromeVisibleChange: (Boolean) -> Unit,
     showChromeRequest: Int = 0,
+    /** How Define works; null while that is still being worked out, and the book waits for it. */
+    dictionary: DictionaryChoice? = DictionaryChoice.None,
+    onSearchText: (String) -> Unit = {},
+    /** Opens the word's Wiktionary entry in [packId]; false when it has none. */
+    onLookUp: suspend (packId: String, word: String) -> Boolean = { _, _ -> false },
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -60,7 +75,40 @@ fun EbookReaderScreen(
     val appContext = LocalContext.current.applicationContext
     // Outlives a rotation inside the restored navigator, so it holds nothing tied to an activity.
     val listener = remember(appContext) { ExternalLinkListener(appContext) }
-    val config = remember { readerConfiguration() }
+    val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
+    val currentDictionary by rememberUpdatedState(dictionary)
+    val searchText by rememberUpdatedState(onSearchText)
+    val lookUp by rememberUpdatedState(onLookUp)
+    val openNavigator by rememberUpdatedState(navigator)
+    // The menu's tap: read the selection, act, then clear it. Reached through rememberUpdatedState so the
+    // configuration (kept inside restored navigators) never holds this composition.
+    val onSelection = rememberUpdatedState { action: SelectionAction ->
+        val fragment = openNavigator
+        if (fragment != null) {
+            scope.launch {
+                val selection = fragment.currentSelection() ?: return@launch
+                val text = selection.locator.text.highlight.orEmpty().trim()
+                try {
+                    if (text.isNotEmpty()) {
+                        when (action) {
+                            SelectionAction.COPY -> appContext.getSystemService(ClipboardManager::class.java)
+                                ?.setPrimaryClip(ClipData.newPlainText("", text))
+                            SelectionAction.HIGHLIGHT -> viewModel.highlight(selection.locator, text)
+                            SelectionAction.NOTE -> viewModel.note(selection.locator, text)
+                            SelectionAction.DEFINE -> define(appContext, currentDictionary, text, lookUp, snackbar)
+                            SelectionAction.SEARCH -> searchText(text.take(200))
+                            SelectionAction.INQUIRE -> Unit
+                        }
+                    }
+                } finally {
+                    fragment.clearSelection()
+                }
+            }
+        }
+    }
+    val dictionaryAvailable = dictionary != null && dictionary != DictionaryChoice.None
+    val config = remember(dictionaryAvailable) { readerConfiguration({ onSelection.value(it) }, dictionaryAvailable) }
 
     // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts.
     val requestAtEntry = remember { showChromeRequest }
@@ -76,6 +124,27 @@ fun EbookReaderScreen(
     LaunchedEffect(navigator) {
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }
     }
+    // Highlights are drawn again whenever they change, and on every new navigator (rotation builds one).
+    LaunchedEffect(navigator, state.decorations) {
+        navigator?.applyDecorations(state.decorations, HIGHLIGHT_GROUP)
+    }
+    LaunchedEffect(navigator, state.searchHit) {
+        val hit = state.searchHit?.let { Decoration("search-hit", it, Decoration.Style.Highlight(tint = SEARCH_HIT_TINT)) }
+        navigator?.applyDecorations(listOfNotNull(hit), SEARCH_GROUP)
+    }
+    // One tap listener per navigator instance; a tap on a drawn highlight opens its sheet.
+    DisposableEffect(navigator) {
+        val fragment = navigator
+        val listener = object : DecorableNavigator.Listener {
+            override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
+                val id = event.decoration.id.toLongOrNull() ?: return false
+                viewModel.editHighlight(id)
+                return true
+            }
+        }
+        fragment?.addDecorationListener(HIGHLIGHT_GROUP, listener)
+        onDispose { fragment?.removeDecorationListener(listener) }
+    }
     // Back closes an open panel first, then leaves the reader.
     BackHandler(enabled = state.panel != null) { viewModel.open(null) }
     LaunchedEffect(navigator, state.prefs) {
@@ -90,7 +159,7 @@ fun EbookReaderScreen(
             error != null -> Box(Modifier.fillMaxSize().padding(start = NarrowRailWidth).padding(32.dp), Alignment.Center) {
                 Text(error, textAlign = TextAlign.Center)
             }
-            state.publication != null && factory != null && bookId != null -> NavigatorHost(
+            state.publication != null && factory != null && bookId != null && dictionary != null -> NavigatorHost(
                 bookId = bookId,
                 factory = factory,
                 // The latest place, so a navigator rebuilt after rotation opens where the reader is.
@@ -148,9 +217,43 @@ fun EbookReaderScreen(
         when (state.panel) {
             Panel.CONTENTS -> ContentsPanel(state, viewModel::goTo, viewModel::goToMark, onDismiss = { viewModel.open(null) })
             Panel.SETTINGS -> TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
-            // Search in the book arrives with the next task; until then the panel shows nothing.
-            Panel.SEARCH, null -> Unit
+            Panel.SEARCH -> BookSearchPanel(state.search, viewModel::search, viewModel::goToHit, onDismiss = { viewModel.open(null) })
+            null -> Unit
         }
+        state.editingHighlight?.let { id ->
+            state.highlights.firstOrNull { it.id == id }?.let { mark ->
+                HighlightSheet(
+                    mark = mark,
+                    focusNote = state.focusNote,
+                    onChange = viewModel::updateHighlight,
+                    onDelete = { viewModel.deleteHighlight(id) },
+                    onDismiss = { viewModel.editHighlight(null) },
+                )
+            }
+        }
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(start = NarrowRailWidth))
+    }
+}
+
+/** Define: the Wiktionary entry opened over the book, else the phone's dictionary app; a snackbar when neither can. */
+private suspend fun define(
+    context: Context,
+    choice: DictionaryChoice?,
+    selection: String,
+    lookUp: suspend (String, String) -> Boolean,
+    snackbar: SnackbarHostState,
+) {
+    when (choice) {
+        is DictionaryChoice.Wiktionary -> {
+            val word = Dictionary.normalise(selection)
+            if (word.isEmpty() || !lookUp(choice.packId, word)) {
+                snackbar.showSnackbar("No entry for “$word” in Wiktionary")
+            }
+        }
+        DictionaryChoice.ProcessText -> if (!Dictionary.startProcessText(context, selection)) {
+            snackbar.showSnackbar("No dictionary app is installed")
+        }
+        DictionaryChoice.None, null -> Unit
     }
 }
 

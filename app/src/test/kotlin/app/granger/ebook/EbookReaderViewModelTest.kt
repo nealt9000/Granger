@@ -28,6 +28,7 @@ import app.granger.core.library.MarkKind
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
+import org.readium.r2.navigator.Decoration
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -68,11 +69,12 @@ class EbookReaderViewModelTest {
         fileExists: Boolean = true,
         target: BookTarget? = null,
         appScope: CoroutineScope = this,
+        searcher: BookSearcher = FakeBookSearcher(),
     ): EbookReaderViewModel {
         val file = tmp.root.resolve("b.epub").apply { if (fileExists) writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher)
+        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -360,5 +362,154 @@ class EbookReaderViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
         advanceUntilIdle()
         assertThat(seen.map { it.href.toString() }).containsExactly("c001.xhtml", "c002.xhtml", "c003.xhtml").inOrder()
+    }
+
+    // --- Highlights, notes and search in the book ---
+
+    private fun selection(href: String, text: String, before: String = "", after: String = "", title: String = "Two") =
+        locator(href, 0.3, 0.4, title).copy(text = Locator.Text(before = before, highlight = text, after = after))
+
+    @Test fun highlightIsStoredAndDecorated() = runTest(main.dispatcher) {
+        val vm = reader()
+        val id = vm.highlight(selection("c002.xhtml", "the self"), "the self", "green")
+        advanceUntilIdle()
+        val mark = bookshelf.markList.value.single()
+        assertThat(mark.id).isEqualTo(id)
+        assertThat(mark.kind).isEqualTo(MarkKind.HIGHLIGHT)
+        assertThat(mark.color).isEqualTo("green")
+        assertThat(mark.text).isEqualTo("the self")
+        val decoration = vm.state.value.decorations.single()
+        assertThat(decoration.id).isEqualTo(id.toString())
+        assertThat((decoration.style as Decoration.Style.Highlight).tint).isEqualTo(HighlightColors.argb("green"))
+        assertThat(vm.state.value.unplaceable).isEmpty()
+    }
+
+    @Test fun unplaceableHighlightIsListedNotDrawn() = runTest(main.dispatcher) {
+        val gone = bookmark(7, "gone.xhtml", 1, 0.1, 1).copy(kind = MarkKind.HIGHLIGHT, text = "lost", color = "yellow")
+        val here = bookmark(8, "c002.xhtml", 2, 0.4, 2).copy(kind = MarkKind.HIGHLIGHT, text = "kept", color = "blue")
+        bookshelf.markList.value = listOf(gone, here)
+        val vm = reader()
+        assertThat(vm.state.value.unplaceable).containsExactly(7L)
+        assertThat(vm.state.value.decorations.map { it.id }).containsExactly("8")
+        assertThat(vm.state.value.highlights).hasSize(2)
+    }
+
+    @Test fun noteCreatesHighlightWithNote() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.note(selection("c002.xhtml", "tat tvam asi"), "tat tvam asi")
+        advanceUntilIdle()
+        val mark = bookshelf.markList.value.single()
+        assertThat(mark.color).isEqualTo("yellow")
+        assertThat(vm.state.value.editingHighlight).isEqualTo(mark.id)
+        vm.updateHighlight(mark.copy(note = "You are that", color = "pink"))
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value.single().note).isEqualTo("You are that")
+        assertThat(bookshelf.markList.value.single().color).isEqualTo("pink")
+        vm.deleteHighlight(mark.id)
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value).isEmpty()
+        assertThat(vm.state.value.decorations).isEmpty()
+        assertThat(vm.state.value.editingHighlight).isNull()
+    }
+
+    private fun hit(href: String, before: String, match: String, after: String) =
+        selection(href, match, before, after, title = "")
+
+    @Test fun searchListsMarksThenTextHits() = runTest(main.dispatcher) {
+        val searcher = FakeBookSearcher()
+        searcher.results["fire"] = listOf(hit("c003.xhtml", "a ", "fire", " burns"))
+        val marked = bookmark(1, "c001.xhtml", 1, 0.1, 1).copy(kind = MarkKind.HIGHLIGHT, text = "Sacred FIRE rises", color = "yellow")
+        val noted = bookmark(2, "c002.xhtml", 2, 0.4, 2).copy(kind = MarkKind.HIGHLIGHT, text = "other", color = "blue", note = "about fire")
+        val unrelated = bookmark(3, "c002.xhtml", 2, 0.4, 3).copy(kind = MarkKind.HIGHLIGHT, text = "water", color = "blue")
+        bookshelf.markList.value = listOf(marked, noted, unrelated)
+        val vm = reader(searcher = searcher)
+        vm.search("fire")
+        advanceUntilIdle()
+        val ui = vm.state.value.search
+        assertThat(ui.running).isFalse()
+        assertThat(ui.results.map { it.markId }).containsExactly(1L, 2L, null).inOrder()
+        assertThat(ui.results[0].chapter).startsWith("Your highlight")
+        assertThat(ui.results[1].chapter).startsWith("Your note")
+        val text = ui.results[2]
+        assertThat(text.before).isEqualTo("a ")
+        assertThat(text.match).isEqualTo("fire")
+        assertThat(text.after).isEqualTo(" burns")
+        assertThat(text.locator!!.href).isEqualTo(Url("c003.xhtml"))
+    }
+
+    @Test fun blankSearchClearsAndRunsNothing() = runTest(main.dispatcher) {
+        val searcher = FakeBookSearcher()
+        searcher.results["fire"] = listOf(hit("c003.xhtml", "", "fire", ""))
+        val vm = reader(searcher = searcher)
+        vm.search("fire")
+        advanceUntilIdle()
+        assertThat(vm.state.value.search.results).hasSize(1)
+        vm.search("   ")
+        advanceUntilIdle()
+        assertThat(vm.state.value.search.results).isEmpty()
+        assertThat(searcher.calls).containsExactly("fire")
+    }
+
+    @Test fun newSearchCancelsTheOld() = runTest(main.dispatcher) {
+        val searcher = FakeBookSearcher()
+        val slow = CompletableDeferred<List<Locator>>()
+        searcher.gates["old"] = slow
+        searcher.results["new"] = listOf(hit("c002.xhtml", "", "new", ""))
+        val vm = reader(searcher = searcher)
+        vm.search("old")
+        runCurrent()
+        assertThat(vm.state.value.search.running).isTrue()
+        vm.search("new")
+        advanceUntilIdle()
+        slow.complete(listOf(hit("c001.xhtml", "", "old", "")))
+        advanceUntilIdle()
+        val ui = vm.state.value.search
+        assertThat(ui.query).isEqualTo("new")
+        assertThat(ui.running).isFalse()
+        assertThat(ui.results.map { it.match }).containsExactly("new")
+    }
+
+    @Test fun tappingAResultJumpsAndMarksTheHitUntilTheNextSearchOrDismissal() = runTest(main.dispatcher) {
+        val searcher = FakeBookSearcher()
+        searcher.results["fire"] = listOf(hit("c003.xhtml", "", "fire", ""))
+        val vm = reader(searcher = searcher)
+        val seen = mutableListOf<Locator>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
+        vm.open(Panel.SEARCH)
+        vm.search("fire")
+        advanceUntilIdle()
+        vm.goToHit(vm.state.value.search.results.single())
+        advanceUntilIdle()
+        assertThat(seen.single().href).isEqualTo(Url("c003.xhtml"))
+        assertThat(vm.state.value.panel).isNull()
+        assertThat(vm.state.value.searchHit).isNotNull()
+        vm.search("water")
+        assertThat(vm.state.value.searchHit).isNull()
+        vm.goToHit(BookSearchRow(hit("c003.xhtml", "", "x", ""), "", "", "x", "", null))
+        vm.open(Panel.SEARCH)
+        vm.open(null)
+        assertThat(vm.state.value.searchHit).isNull()
+    }
+
+    @Test fun searchWithoutAServiceIsEmptyNotACrash() = runTest(main.dispatcher) {
+        val searcher = FakeBookSearcher().apply { fail = true }
+        val vm = reader(searcher = searcher)
+        vm.search("fire")
+        advanceUntilIdle()
+        assertThat(vm.state.value.search.results).isEmpty()
+        assertThat(vm.state.value.search.running).isFalse()
+    }
+}
+
+class FakeBookSearcher : BookSearcher {
+    val results = mutableMapOf<String, List<Locator>>()
+    val gates = mutableMapOf<String, CompletableDeferred<List<Locator>>>()
+    val calls = mutableListOf<String>()
+    var fail = false
+    override suspend fun search(publication: Publication, query: String, max: Int): List<Locator> {
+        calls += query
+        if (fail) throw IllegalStateException("no search service")
+        gates[query]?.let { return it.await() }
+        return results[query].orEmpty()
     }
 }
