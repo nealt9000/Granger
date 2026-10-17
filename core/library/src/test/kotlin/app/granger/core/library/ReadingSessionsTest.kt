@@ -80,4 +80,11 @@ class ReadingSessionsTest {
         repeat(60) { frozen.recordSearch("q%02d".format(it)) }
         assertThat(db.sessionDao().observeRecentSearches(100).first()).hasSize(50)
     }
+
+    @Test fun recentSearchRowsCarryTimes() = runTest {
+        sessions.recordSearch("cats")
+        sessions.recordSearch("dogs")
+        assertThat(sessions.recentSearchRows().first())
+            .containsExactly(RecentSearch("dogs", 1_001L), RecentSearch("cats", 1_000L)).inOrder()
+    }
 }

@@ -14,8 +14,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         MediaType::class, ShelfCollection::class, Placement::class,
         ReadingTab::class, HistoryEntry::class, RecentSearch::class,
         Book::class, BookPosition::class, BookMark::class, BookChunk::class,
+        ResearchChat::class, ResearchTurn::class, ResearchPassage::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -26,6 +27,7 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun shelfDao(): ShelfDao
     abstract fun sessionDao(): SessionDao
     abstract fun bookDao(): BookDao
+    abstract fun researchDao(): ResearchDao
 
     companion object {
         /** Adds media types, collections, placements, reading tabs, history and recent searches. */
@@ -56,6 +58,16 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds kept Research chats, their turns and cited passages. */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `research_chats` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `research_turns` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chatId` INTEGER NOT NULL, `question` TEXT NOT NULL, `outcome` TEXT NOT NULL, `answer` TEXT NOT NULL, `medical` INTEGER NOT NULL, `usedLarge` INTEGER NOT NULL, `askedDeeper` INTEGER NOT NULL, `keywords` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_research_turns_chatId` ON `research_turns` (`chatId`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `research_passages` (`turnId` INTEGER NOT NULL, `ordinal` INTEGER NOT NULL, `role` TEXT NOT NULL, `kind` TEXT NOT NULL, `sourceId` TEXT NOT NULL, `sourceTitle` TEXT NOT NULL, `packTitle` TEXT NOT NULL, `location` TEXT NOT NULL, `anchor` TEXT, `progression` REAL NOT NULL, `heading` TEXT NOT NULL, `text` TEXT NOT NULL, `author` TEXT NOT NULL, `date` TEXT NOT NULL, `subjects` TEXT NOT NULL, `collection` TEXT NOT NULL, PRIMARY KEY(`turnId`, `ordinal`))")
+            }
+        }
+
         /**
          * Seeds the built-in media types and creates `book_text` on a fresh install. Every database builder
          * must add this: Room doesn't manage `book_text`, so only this callback and [MIGRATION_3_4] create it.
@@ -81,7 +93,7 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         fun create(context: Context): LibraryDatabase =
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
-                .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .addCallback(SeedCallback)
                 .build()
     }

@@ -246,3 +246,51 @@ interface BookDao {
     @RawQuery
     suspend fun chunksMatching(query: SupportSQLiteQuery): List<BookChunk>
 }
+
+@Dao
+interface ResearchDao {
+    @Query("SELECT * FROM research_chats ORDER BY updatedAt DESC, id DESC LIMIT :limit")
+    fun observeRecent(limit: Int): Flow<List<ResearchChat>>
+
+    @Query("SELECT * FROM research_chats WHERE id = :id")
+    suspend fun chat(id: Long): ResearchChat?
+
+    @Insert
+    suspend fun insertChat(chat: ResearchChat): Long
+
+    @Query("UPDATE research_chats SET updatedAt = :at WHERE id = :id")
+    suspend fun touchChat(id: Long, at: Long)
+
+    @Query("SELECT * FROM research_turns WHERE chatId = :chatId ORDER BY createdAt, id")
+    fun observeTurns(chatId: Long): Flow<List<ResearchTurn>>
+
+    @Query("SELECT * FROM research_passages WHERE turnId IN (SELECT id FROM research_turns WHERE chatId = :chatId) ORDER BY turnId, ordinal")
+    fun observePassages(chatId: Long): Flow<List<ResearchPassage>>
+
+    @Query("SELECT * FROM research_turns WHERE id = :id")
+    suspend fun turn(id: Long): ResearchTurn?
+
+    @Insert
+    suspend fun insertTurn(turn: ResearchTurn): Long
+
+    @Update
+    suspend fun updateTurn(turn: ResearchTurn)
+
+    @Insert
+    suspend fun insertPassages(passages: List<ResearchPassage>)
+
+    @Query("DELETE FROM research_passages WHERE turnId = :turnId")
+    suspend fun deletePassages(turnId: Long)
+
+    @Query("UPDATE research_turns SET outcome = 'INTERRUPTED' WHERE outcome = 'PENDING'")
+    suspend fun interruptPending(): Int
+
+    @Query("DELETE FROM research_passages WHERE turnId IN (SELECT id FROM research_turns WHERE chatId = :chatId)")
+    suspend fun deletePassagesForChat(chatId: Long)
+
+    @Query("DELETE FROM research_turns WHERE chatId = :chatId")
+    suspend fun deleteTurnsForChat(chatId: Long)
+
+    @Query("DELETE FROM research_chats WHERE id = :id")
+    suspend fun deleteChat(id: Long)
+}

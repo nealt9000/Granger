@@ -18,6 +18,9 @@ interface ReadingSessions {
     /** Distinct queries, newest first. */
     fun recentSearches(limit: Int = 5): Flow<List<String>>
 
+    /** The rows behind [recentSearches], with the time each was searched. */
+    fun recentSearchRows(limit: Int = 5): Flow<List<RecentSearch>>
+
     /** Opens an article from Library, Search or History: a new rail tab, or the tab already showing it. Returns the tab id. */
     suspend fun openTab(packId: String, path: String, title: String): Long
 
@@ -48,6 +51,8 @@ class RoomReadingSessions(
 
     override fun recentSearches(limit: Int): Flow<List<String>> =
         dao.observeRecentSearches(limit).map { rows -> rows.map { it.query } }
+
+    override fun recentSearchRows(limit: Int): Flow<List<RecentSearch>> = dao.observeRecentSearches(limit)
 
     override suspend fun openTab(packId: String, path: String, title: String): Long = db.withTransaction {
         val time = now()

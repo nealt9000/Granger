@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import app.granger.core.research.SourceKind
 import app.granger.core.zim.ZimArchive
 import java.io.File
 
@@ -169,4 +170,58 @@ data class BookChunk(
     val href: String,
     val ordinal: Int,
     val progression: Double,
+)
+
+enum class TurnOutcome { PENDING, ANSWERED, DECLINED, UNVERIFIED, FAILED, INTERRUPTED }
+
+/** A kept Research conversation. */
+@Entity(tableName = "research_chats")
+data class ResearchChat(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val title: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+/** One question and its answer in a chat. [keywords] is `"; "`-joined; blank when there are none. */
+@Entity(tableName = "research_turns", indices = [Index("chatId")])
+data class ResearchTurn(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val chatId: Long,
+    val question: String,
+    val outcome: TurnOutcome,
+    val answer: String,
+    val medical: Boolean,
+    val usedLarge: Boolean,
+    val askedDeeper: Boolean,
+    val keywords: String,
+    val createdAt: Long,
+)
+
+enum class PassageRole {
+    /** The numbered passages given to the model, in order. */
+    SHOWN,
+    /** Extras kept for Think deeper. */
+    CANDIDATE,
+}
+
+/** A cited or candidate passage of a turn. [ordinal] orders them within the turn, shown ones first. */
+@Entity(tableName = "research_passages", primaryKeys = ["turnId", "ordinal"])
+data class ResearchPassage(
+    val turnId: Long,
+    val ordinal: Int,
+    val role: PassageRole,
+    val kind: SourceKind,
+    val sourceId: String,
+    val sourceTitle: String,
+    val packTitle: String,
+    val location: String,
+    val anchor: String?,
+    val progression: Double,
+    val heading: String,
+    val text: String,
+    val author: String,
+    val date: String,
+    val subjects: String,
+    val collection: String,
 )

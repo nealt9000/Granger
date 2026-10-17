@@ -29,6 +29,8 @@ dependencies {
     api(project(":core:zim"))
     // Public: ImportResult.Protected exposes DrmKind.
     api(project(":core:books"))
+    // Public: ResearchChats exposes Passage.
+    api(project(":core:research"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

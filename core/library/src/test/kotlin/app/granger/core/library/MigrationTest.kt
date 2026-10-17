@@ -89,4 +89,29 @@ class MigrationTest {
             assertThat(it.getLong(0)).isEqualTo(7L)
         }
     }
+
+    @Test fun migrate4To5KeepsBooksTabsAndAddsChats() {
+        helper.createDatabase("migrate5.db", 4).apply {
+            execSQL(
+                "INSERT INTO books (id, origin, sourceRef, filePath, title, author, translator, date, language, subjects, description, coverPath, sizeBytes, status, indexedAt, addedAt) " +
+                    "VALUES ('b', 'IMPORT', 'r', '/b.epub', 'B', 'A', '', '', 'eng', '', '', NULL, 10, 'OK', NULL, 1)",
+            )
+            execSQL("INSERT INTO reading_tabs (packId, path, title, openedAt, onRail) VALUES ('u-a', 'index', 'Home', 1, 1)")
+            execSQL("INSERT INTO recent_searches (query, searchedAt) VALUES ('cats', 3)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate5.db", 5, false, LibraryDatabase.MIGRATION_4_5)
+        for (table in listOf("books", "reading_tabs", "recent_searches")) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(1)
+            }
+        }
+        for (table in listOf("research_chats", "research_turns", "research_passages")) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(0)
+            }
+        }
+    }
 }
