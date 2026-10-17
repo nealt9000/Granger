@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -287,6 +288,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         EbookReaderViewModel(
                             route.tabId, target, container.bookshelf, container.sessions, container.bookOpener,
                             container.readingPrefs, container.appScope,
+                            savedState = createSavedStateHandle(),
                         )
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },

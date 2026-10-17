@@ -1,6 +1,7 @@
 package app.granger.ebook
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
 import app.granger.BookTarget
@@ -70,11 +71,12 @@ class EbookReaderViewModelTest {
         target: BookTarget? = null,
         appScope: CoroutineScope = this,
         searcher: BookSearcher = FakeBookSearcher(),
+        savedState: SavedStateHandle = SavedStateHandle(),
     ): EbookReaderViewModel {
         val file = tmp.root.resolve("b.epub").apply { if (fileExists) writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher)
+        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -100,6 +102,22 @@ class EbookReaderViewModelTest {
             mapOf("b" to BookPosition("b", locator("c002.xhtml", 0.4, 0.45).toJSON().toString(), 0.45, "Two", 0L))
         val vm = reader(target = BookTarget("c003.xhtml", 0.5))
         assertThat(vm.state.value.initial!!.href).isEqualTo(Url("c003.xhtml"))
+    }
+
+    @Test fun openingConsumesTheRouteTarget() = runTest(main.dispatcher) {
+        val savedState = SavedStateHandle()
+        reader(target = BookTarget("c003.xhtml", 0.5), savedState = savedState)
+        assertThat(savedState.get<Boolean>(EbookReaderViewModel.TARGET_CONSUMED)).isTrue()
+    }
+
+    @Test fun consumedTargetIsNotReappliedAfterProcessDeath() = runTest(main.dispatcher) {
+        bookshelf.positionMap.value =
+            mapOf("b" to BookPosition("b", locator("c002.xhtml", 0.4, 0.45).toJSON().toString(), 0.45, "Two", 0L))
+        // The back stack restored the route's target, and the flag saved with it says it was already used.
+        val restored = SavedStateHandle(mapOf(EbookReaderViewModel.TARGET_CONSUMED to true))
+        val vm = reader(target = BookTarget("c003.xhtml", 0.5), savedState = restored)
+        assertThat(vm.state.value.initial!!.href).isEqualTo(Url("c002.xhtml"))
+        assertThat(vm.state.value.initial!!.locations.progression).isEqualTo(0.4)
     }
 
     @Test fun missingFileShowsBookGone() = runTest(main.dispatcher) {
@@ -301,6 +319,24 @@ class EbookReaderViewModelTest {
         vm.goToMark(bookmark(1, "c003.xhtml", 3, 0.8, 1))
         advanceUntilIdle()
         assertThat(seen.single().href).isEqualTo(Url("c003.xhtml"))
+    }
+
+    @Test fun staleBookmarkJumpsNearby() = runTest(main.dispatcher) {
+        val vm = reader()
+        val seen = mutableListOf<Locator>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
+        runCurrent()
+        vm.open(Panel.CONTENTS)
+        // A re-release renamed the chapter files: the bookmark's progression through the book still places it.
+        vm.goToMark(bookmark(1, "renamed/c003.xhtml", 3, 0.8, 1))
+        advanceUntilIdle()
+        assertThat(seen.single().href).isEqualTo(Url("c003.xhtml"))
+        assertThat(vm.state.value.panel).isNull()
+        // Nothing to place it by: the tap does nothing.
+        val lost = Locator(Url("gone.xhtml")!!, MediaType.XHTML, locations = Locator.Locations(progression = 0.5))
+        vm.goToMark(BookMark(2, "b", MarkKind.BOOKMARK, lost.toJSON().toString(), "", "", "", 2, 2))
+        advanceUntilIdle()
+        assertThat(seen).hasSize(1)
     }
 
     @Test fun prefsChangesAreStored() = runTest(main.dispatcher) {
@@ -529,6 +565,15 @@ class EbookReaderViewModelTest {
         bookshelf.markList.value = emptyList()
         advanceUntilIdle()
         assertThat(vm.state.value.editingHighlight).isNotNull()
+    }
+
+    @Test fun aClearedReaderCannotClaimTheMenu() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.clear()
+        assertThat(SelectionBridge.sink).isNull()
+        vm.claimSelection()
+        assertThat(SelectionBridge.sink).isNull()
+        assertThat(vm.isCleared).isTrue()
     }
 
     @Test fun backToAnOlderReaderCanClaimTheMenuAgain() = runTest(main.dispatcher) {

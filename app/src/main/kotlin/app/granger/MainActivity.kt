@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import app.granger.core.library.BookIds
+import app.granger.core.library.Bookshelf
 import app.granger.ebook.ReadiumFragmentFactory
 import app.granger.launch.LaunchDecider
 import app.granger.launch.LaunchFacts
@@ -20,7 +21,9 @@ import app.granger.launch.isBookResumable
 import app.granger.launch.isPackResumable
 import app.granger.theme.GrangerTheme
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,23 +42,7 @@ class MainActivity : FragmentActivity() {
         container = (application as GrangerApp).container
         // So rail availability reflects the files on disk now, not the last scan.
         container.appScope.launch { runCatching { container.library.refresh() } }
-        container.appScope.launch {
-            // Neither may crash the launch; a failed scan or index pass is retried at the next start.
-            try {
-                container.bookshelf.refresh()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.e("Granger", "Book scan failed", e)
-            }
-            try {
-                container.bookIndex.indexPending()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.e("Granger", "Book indexing failed", e)
-            }
-        }
+        startBookWork(savedInstanceState, container.appScope, container.bookshelf) { container.bookIndex.indexPending() }
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -103,5 +90,35 @@ class MainActivity : FragmentActivity() {
         // Backgrounded, swiped away or reclaimed later: all normal; only a crash in the foreground skips this.
         container.sessionMarker.markCleanExit()
         super.onStop()
+    }
+}
+
+/**
+ * Scans the books folders, then indexes what's pending, on [scope]: only on a fresh start, not when the activity is
+ * recreated (rotation) with [savedInstanceState]. Neither may crash the launch; a failed pass is retried at the next
+ * start. Returns the job, or null when nothing was started.
+ */
+internal fun startBookWork(
+    savedInstanceState: Bundle?,
+    scope: CoroutineScope,
+    bookshelf: Bookshelf,
+    indexPending: suspend () -> Unit,
+): Job? {
+    if (savedInstanceState != null) return null
+    return scope.launch {
+        try {
+            bookshelf.refresh()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("Granger", "Book scan failed", e)
+        }
+        try {
+            indexPending()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("Granger", "Book indexing failed", e)
+        }
     }
 }

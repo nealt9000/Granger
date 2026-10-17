@@ -44,6 +44,8 @@ fun NavigatorHost(
     config: EpubNavigatorFragment.Configuration,
     onReady: (EpubNavigatorFragment) -> Unit,
     modifier: Modifier = Modifier,
+    /** True once the reader's view model is cleared: a screen still composing on its way out claims nothing. */
+    isCleared: () -> Boolean = { false },
 ) {
     val activity = LocalContext.current.findFragmentActivity()
     val fragmentManager = activity.supportFragmentManager
@@ -60,6 +62,7 @@ fun NavigatorHost(
     // What ReadiumFragmentFactory builds a restored navigator with. This reader is current again, too, when it
     // returns to the top after another reader of the same book took over and was cleared.
     SideEffect {
+        if (isCleared()) return@SideEffect
         if (OpenBooks.current?.second !== factory) OpenBooks.current = bookId to factory
         OpenBooks.navigatorFragments = factory to fragments
     }

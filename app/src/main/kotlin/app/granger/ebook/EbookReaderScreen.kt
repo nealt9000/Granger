@@ -174,6 +174,7 @@ fun EbookReaderScreen(
                 prefs = state.prefs.toEpub(),
                 listener = listener,
                 config = config,
+                isCleared = { viewModel.isCleared },
                 onReady = { fragment ->
                     fragment.addInputListener(
                         DirectionalNavigationAdapter(

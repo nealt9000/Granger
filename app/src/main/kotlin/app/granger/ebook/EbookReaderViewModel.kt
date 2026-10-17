@@ -1,6 +1,7 @@
 package app.granger.ebook
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
@@ -107,7 +108,13 @@ class EbookReaderViewModel(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val searcher: BookSearcher = ReadiumBookSearcher(),
+    /** Survives process death with the route; remembers that the route's [target] was already used. */
+    private val savedState: SavedStateHandle = SavedStateHandle(),
 ) : ViewModel() {
+    /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
+    @Volatile var isCleared: Boolean = false
+        private set
+
     private val _state = MutableStateFlow(EbookUi(prefs = prefsStore.prefs.value))
     val state: StateFlow<EbookUi> = _state.asStateFlow()
 
@@ -159,13 +166,16 @@ class EbookReaderViewModel(
                 throw e
             } ?: return@launch fail(BOOK_DAMAGED)
             val saved = bookshelf.position(book.id)
-            val initial = StartLocator.choose(opened, saved?.locatorJson, target)
+            // The route keeps its target after process death; once used, the saved place wins, not the old search hit.
+            val targetUsed = savedState.get<Boolean>(TARGET_CONSUMED) == true
+            val initial = StartLocator.choose(opened, saved?.locatorJson, target.takeUnless { targetUsed })
             val factory = EpubNavigatorFactory(opened)
             bookId = book.id
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
             appScope.launch { sessions.showInTab(tabId, book.id, "", book.title) }
             _state.update { it.copy(loading = false, publication = opened, initial = initial, toc = flatten(opened.tableOfContents, 0)).derived() }
+            savedState[TARGET_CONSUMED] = true
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
             launch {
@@ -295,9 +305,13 @@ class EbookReaderViewModel(
         }
     }
 
+    /** A bookmark or highlight. One whose chapter a re-release renamed is placed as [StartLocator.repair] does; unplaceable: ignored. */
     fun goToMark(mark: BookMark) {
         if (mark.id in _state.value.unplaceable) return
-        jump(parse(mark.locatorJson) ?: return)
+        val opened = _state.value.publication ?: return
+        val stored = parse(mark.locatorJson) ?: return
+        // Main.immediate: a mark in this edition jumps at once, so back-to-back taps keep their order.
+        viewModelScope.launch { StartLocator.repair(opened, stored)?.let(::jump) }
     }
 
     /**
@@ -393,10 +407,12 @@ class EbookReaderViewModel(
 
     /** Makes this reader the one the selection menu reaches; called whenever its screen is shown. */
     fun claimSelection() {
+        if (isCleared) return
         SelectionBridge.sink = selectionSink
     }
 
     override fun onCleared() {
+        isCleared = true
         if (SelectionBridge.sink === selectionSink) SelectionBridge.sink = null
         navigatorFactory?.let(OpenBooks::release)
         publication.getAndSet(null)?.let(::closeLater)
@@ -412,5 +428,6 @@ class EbookReaderViewModel(
         const val BOOK_GONE = "This book isn't on the phone any more. Check the SD card, or download it again from Granger."
         const val BOOK_DAMAGED = "This book couldn't be opened. Try removing it, then download or import it again."
         const val SAVE_DEBOUNCE_MS = 1_000L
+        const val TARGET_CONSUMED = "targetConsumed"
     }
 }

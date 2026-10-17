@@ -35,9 +35,16 @@ object StartLocator {
                 )
             }
         }
-        val saved = parse(savedJson) ?: return null
-        if (publication.chapterFor(saved.href) != null) return saved
-        val total = saved.locations.totalProgression ?: return null
+        return repair(publication, parse(savedJson) ?: return null)
+    }
+
+    /**
+     * [stored] if its chapter is in [publication]'s reading order; else the place at its progression through the
+     * book (a rebuilt edition renamed its chapter files), if that lands in the reading order; else null.
+     */
+    suspend fun repair(publication: Publication, stored: Locator): Locator? {
+        if (publication.chapterFor(stored.href) != null) return stored
+        val total = stored.locations.totalProgression ?: return null
         return try {
             publication.locateProgression(total.coerceIn(0.0, 1.0))
                 ?.takeIf { publication.chapterFor(it.href) != null }
