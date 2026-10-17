@@ -278,7 +278,11 @@ private fun FindBar(
     )
 }
 
-/** Hides the status and navigation bars while [hidden]; a swipe from an edge shows them briefly. */
+/**
+ * Hides the status and navigation bars while [hidden]; a swipe from an edge shows them briefly. Readers on screen at
+ * once (a crossfade between two) share one count of hide requests, so the outgoing reader's cleanup can't show the
+ * bars the incoming one just hid.
+ */
 @Composable
 internal fun SystemBarsHidden(hidden: Boolean) {
     val view = LocalView.current
@@ -286,8 +290,21 @@ internal fun SystemBarsHidden(hidden: Boolean) {
         val window = view.context.findActivity()?.window ?: return@DisposableEffect onDispose {}
         val controller = WindowCompat.getInsetsController(window, view)
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        if (hidden) controller.hide(WindowInsetsCompat.Type.systemBars()) else controller.show(WindowInsetsCompat.Type.systemBars())
-        onDispose { controller.show(WindowInsetsCompat.Type.systemBars()) }
+        if (hidden) BarsHideRequests.count++
+        BarsHideRequests.apply(controller)
+        onDispose {
+            if (hidden) BarsHideRequests.count--
+            BarsHideRequests.apply(controller)
+        }
+    }
+}
+
+/** How many readers currently want the system bars hidden. Touched only on the main thread. */
+internal object BarsHideRequests {
+    var count = 0
+
+    fun apply(controller: WindowInsetsControllerCompat) {
+        if (count > 0) controller.hide(WindowInsetsCompat.Type.systemBars()) else controller.show(WindowInsetsCompat.Type.systemBars())
     }
 }
 
