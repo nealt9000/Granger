@@ -33,8 +33,11 @@ object AnswerText {
         val out = mutableListOf<Segment>()
         var from = 0
         for (match in CITATION.findAll(answer)) {
+            // A number too long for an Int (an ISBN in brackets) is not a citation; the bracket stays text.
+            val numbers = match.groupValues[1].split(',').map { it.trim().toIntOrNull() }
+            if (numbers.any { it == null }) continue
             if (match.range.first > from) out += Segment.Text(answer.substring(from, match.range.first))
-            match.groupValues[1].split(',').forEach { out += Segment.Cite(it.trim().toInt()) }
+            numbers.forEach { out += Segment.Cite(it!!) }
             from = match.range.last + 1
         }
         if (from < answer.length) out += Segment.Text(answer.substring(from))

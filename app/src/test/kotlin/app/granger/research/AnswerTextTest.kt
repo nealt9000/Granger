@@ -20,4 +20,10 @@ class AnswerTextTest {
             Segment.Text("See [a] and "), Segment.Cite(1),
         ).inOrder()
     }
+
+    @Test fun oversizedNumberStaysText() {
+        assertThat(AnswerText.segments("ISBN [9780140449136] and [1, 99999999999] [2]")).containsExactly(
+            Segment.Text("ISBN [9780140449136] and [1, 99999999999] "), Segment.Cite(2),
+        ).inOrder()
+    }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +46,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -168,8 +171,20 @@ fun ResearchScreen(
     val list = rememberLazyListState()
     val rows = rows(state)
     var flashing by remember { mutableStateOf<String?>(null) }
-    // Follow the reply as it streams, unless the user has scrolled up to read.
-    var follow by remember { mutableStateOf(true) }
+    // Follow the reply as it streams, unless the user has scrolled up to read. Saved, like the list's position, so
+    // rotation or Back from a citation leaves the thread where the user was.
+    var follow by rememberSaveable { mutableStateOf(true) }
+    // How many turns this screen has shown; more means a new turn started (Send, Think deeper, Retry) or a chat loaded.
+    var seenTurns by rememberSaveable { mutableIntStateOf(-1) }
+    // Set by the user's own drags only, so the screen's scrolls never turn following off.
+    var userScrolling by remember { mutableStateOf(false) }
+
+    suspend fun scrollToEnd() {
+        if (rows.isEmpty()) return
+        list.scrollToItem(rows.lastIndex)
+        // The list stops at its end; this reaches the bottom of a last row taller than the screen.
+        list.scrollBy(Float.MAX_VALUE / 2)
+    }
 
     fun open(passage: Passage) {
         scope.launch {
@@ -194,17 +209,29 @@ fun ResearchScreen(
     }
 
     LaunchedEffect(list) {
-        snapshotFlow { list.isScrollInProgress to list.canScrollForward }.collect { (scrolling, more) ->
-            if (scrolling) follow = !more
+        list.interactionSource.interactions.collect { if (it is DragInteraction.Start) userScrolling = true }
+    }
+    // When the user's drag (and its fling) settles, follow again only if it ended at the bottom.
+    LaunchedEffect(list) {
+        snapshotFlow { list.isScrollInProgress }.collect { scrolling ->
+            if (!scrolling && userScrolling) {
+                userScrolling = false
+                follow = !list.canScrollForward
+            }
         }
     }
-    val streamed = state.turns.lastOrNull()?.partial?.length ?: 0
-    LaunchedEffect(rows.size) { follow = true }
-    LaunchedEffect(rows.size, streamed, state.running) {
-        if (follow && state.turns.isNotEmpty() && rows.isNotEmpty()) {
-            list.scrollToItem(rows.lastIndex)
-            list.scrollBy(Float.MAX_VALUE / 2)
+    val turnCount = state.turns.size
+    LaunchedEffect(turnCount) {
+        // Equal after rotation or Back: the restored list position stands.
+        if (turnCount > seenTurns) {
+            follow = true
+            scrollToEnd()
         }
+        seenTurns = turnCount
+    }
+    val streamed = state.turns.lastOrNull()?.partial?.length ?: 0
+    LaunchedEffect(rows.size, streamed) {
+        if (follow && state.running) scrollToEnd()
     }
 
     Scaffold(
@@ -294,7 +321,14 @@ fun ResearchScreen(
 @Composable
 private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, running: Boolean, canSend: Boolean, focus: Boolean) {
     val requester = remember { FocusRequester() }
-    LaunchedEffect(Unit) { if (focus) requester.requestFocus() }
+    // Once per chat, not again after rotation or Back.
+    var focused by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (focus && !focused) {
+            focused = true
+            requester.requestFocus()
+        }
+    }
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
