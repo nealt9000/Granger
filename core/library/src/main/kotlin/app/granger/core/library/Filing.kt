@@ -1,6 +1,6 @@
 package app.granger.core.library
 
-/** Decides where a pack is filed by default: which collection, named what, under which media type. */
+/** Decides where a pack or book is filed by default: which collection, named what, under which media type. */
 object Filing {
     private class Rule(val matches: (String) -> Boolean, val key: String, val name: String)
 
@@ -34,4 +34,26 @@ object Filing {
     /** Every ZIM is reading material. */
     @Suppress("UNUSED_PARAMETER")
     fun defaultMediaType(pack: Pack): String = "literature"
+
+    /** Books are filed by origin; these are their collections' keys and names. */
+    private val BOOK_COLLECTIONS = mapOf(
+        BookOrigin.GRANGER to ("granger-classics" to "Granger Classics"),
+        BookOrigin.IMPORT to ("my-books" to "My books"),
+        BookOrigin.ARCHIVE_ORG to ("archive-org" to "Archive.org"),
+    )
+
+    /** Identity of a book across re-downloads: its id, which is derived from origin and source. */
+    fun bookKey(book: Book): String = book.id
+
+    fun defaultKey(book: Book): String = BOOK_COLLECTIONS.getValue(book.origin).first
+
+    fun defaultName(key: String, book: Book): String =
+        BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second ?: book.title
+
+    /** Every book is reading material. */
+    @Suppress("UNUSED_PARAMETER")
+    fun defaultMediaType(book: Book): String = "literature"
+
+    /** The old Classics ZIM, replaced by the Granger Classics books. Only reported; nothing is hidden or deleted here. */
+    fun isSuperseded(pack: Pack): Boolean = pack.name == "granger_classics_en"
 }

@@ -68,7 +68,7 @@ abstract class LibraryDatabase : RoomDatabase() {
         }
 
         /** Contentless FTS4 index of book text; a row's `docid` is its `BookChunk.id`. Room doesn't manage it. */
-        private fun createBookText(db: SupportSQLiteDatabase) {
+        internal fun createBookText(db: SupportSQLiteDatabase) {
             db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS book_text USING fts4(content=\"\", text, tokenize=unicode61)")
         }
 

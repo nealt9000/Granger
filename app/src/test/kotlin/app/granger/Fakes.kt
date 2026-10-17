@@ -1,5 +1,6 @@
 package app.granger
 
+import app.granger.core.library.Book
 import app.granger.core.library.Bookmark
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.HistoryEntry
@@ -143,6 +144,7 @@ class FakeShelves : Shelves {
         shelfList.map { shelves -> shelves.flatMap { it.collections }.firstOrNull { it.collection.id == id } }
 
     override suspend fun movePack(pack: Pack, toCollectionId: String) { moves += pack.id to toCollectionId }
+    override suspend fun moveBook(book: Book, toCollectionId: String) { moves += book.id to toCollectionId }
     override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) {}
     override suspend fun createMediaType(name: String) = "new-${nextId++}"
     override suspend fun deleteMediaType(id: String) = false

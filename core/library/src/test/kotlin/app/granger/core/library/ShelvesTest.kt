@@ -1,9 +1,6 @@
 package app.granger.core.library
 
-import app.granger.core.zim.ZimArchive
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -11,22 +8,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-
-private class StubLibrary(initial: List<Pack>) : Library {
-    val state = MutableStateFlow(initial)
-    override val packs: Flow<List<Pack>> = state
-    override val bookmarks: Flow<List<Bookmark>> = MutableStateFlow(emptyList())
-    override suspend fun refresh() = Unit
-    override suspend fun fileReplaced(path: String) = Unit
-    override fun archive(packId: String): ZimArchive? = null
-    override fun cachedArchive(packId: String): ZimArchive? = null
-    override suspend fun startPath(packId: String): String? = null
-    override fun isBookmarked(packId: String, path: String): Flow<Boolean> = MutableStateFlow(false)
-    override suspend fun setBookmarked(packId: String, path: String, title: String, bookmarked: Boolean) = Unit
-    override suspend fun savePosition(packId: String, path: String, scrollFraction: Float) = Unit
-    override suspend fun position(packId: String, path: String): Float? = null
-    override suspend fun remove(packId: String): Boolean = true
-}
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -41,9 +22,11 @@ class ShelvesTest {
     private val medicine = named("m1", "wikipedia_en_medicine")
     private val ifixit = named("i1", "ifixit_en_all")
 
+    private val bookshelf = StubBookshelf()
+
     private fun shelves(vararg packs: Pack): Pair<RoomShelves, StubLibrary> {
         val library = StubLibrary(packs.toList())
-        return RoomShelves(db, library) to library
+        return RoomShelves(db, library, bookshelf) to library
     }
 
     @Test fun packsWithoutAPlacementAreFiledOnFirstRead() = runTest {
@@ -121,11 +104,62 @@ class ShelvesTest {
         assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature")
     }
 
+    @Test fun booksAndPacksShareACollection() = runTest {
+        val (s, _) = shelves(named("z1", "granger_classics_en"))
+        bookshelf.state.value = listOf(book("pride"))
+        val row = s.shelves.first().single().collections.single()
+        assertThat(row.collection.defaultKey).isEqualTo("granger-classics")
+        assertThat(row.collection.name).isEqualTo("Granger Classics")
+        assertThat(row.packs.map { it.id }).containsExactly("z1")
+        assertThat(row.books.map { it.id }).containsExactly(BookIds.of(BookOrigin.GRANGER, "pride"))
+    }
+
+    @Test fun importsFileUnderMyBooks() = runTest {
+        val (s, _) = shelves()
+        bookshelf.state.value = listOf(book("abc", BookOrigin.IMPORT), book("ia1", BookOrigin.ARCHIVE_ORG))
+        // A shelf holding only books is shown.
+        val shelf = s.shelves.first().single()
+        assertThat(shelf.mediaType.id).isEqualTo("literature")
+        assertThat(shelf.collections.map { it.collection.name }).containsExactly("Archive.org", "My books").inOrder()
+        val mine = shelf.collections.first { it.collection.defaultKey == "my-books" }
+        assertThat(mine.books.map { it.sourceRef }).containsExactly("abc")
+        assertThat(mine.packs).isEmpty()
+    }
+
+    @Test fun movedBookKeepsItsPlace() = runTest {
+        val (s, _) = shelves()
+        val pride = book("pride")
+        bookshelf.state.value = listOf(pride)
+        s.shelves.first()
+        val mine = s.createCollection("Mine", "literature")
+        s.moveBook(pride, mine)
+        // A re-download changes the file but not the id.
+        bookshelf.state.value = listOf(pride.copy(filePath = "/books/pride_2026-11-01.epub", title = "Pride (revised)"))
+        val row = s.shelves.first().single().collections.single()
+        assertThat(row.collection.id).isEqualTo(mine)
+        assertThat(row.books.map { it.title }).containsExactly("Pride (revised)")
+        assertThat(s.collection(mine).first()!!.books.map { it.id }).containsExactly(pride.id)
+        // A collection holding a book isn't empty, so its media type can't be deleted.
+        val reference = s.createMediaType("Reference")
+        s.moveCollection(mine, reference)
+        assertThat(s.deleteMediaType(reference)).isFalse()
+        // Deleting the collection files the book back by origin.
+        s.deleteCollection(mine)
+        val back = s.shelves.first().single().collections.single()
+        assertThat(back.collection.defaultKey).isEqualTo("granger-classics")
+        assertThat(back.books.map { it.id }).containsExactly(pride.id)
+    }
+
     @Test fun filingRules() {
         assertThat(Filing.defaultKey(named("a", "wikipedia_en_medicine"))).isEqualTo("wikipedia")
         assertThat(Filing.defaultKey(named("a", "granger_classics"))).isEqualTo("granger-classics")
         assertThat(Filing.defaultKey(named("a", "askubuntu.com_en_stackexchange"))).isEqualTo("stack-exchange")
         assertThat(Filing.defaultKey(named("a", "zimgit"))).isEqualTo("pack:zimgit")
         assertThat(Filing.packKey(pack("a"))).isEqualTo("a")
+        assertThat(Filing.bookKey(book("x"))).isEqualTo("book:granger:x")
+        assertThat(Filing.defaultKey(book("x", BookOrigin.IMPORT))).isEqualTo("my-books")
+        assertThat(Filing.defaultKey(book("x", BookOrigin.ARCHIVE_ORG))).isEqualTo("archive-org")
+        assertThat(Filing.isSuperseded(named("a", "granger_classics_en"))).isTrue()
+        assertThat(Filing.isSuperseded(named("a", "gutenberg_en_all"))).isFalse()
     }
 }

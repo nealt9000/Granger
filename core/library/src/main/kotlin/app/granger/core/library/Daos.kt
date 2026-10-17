@@ -4,8 +4,10 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
 import androidx.room.Upsert
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -222,6 +224,9 @@ interface BookDao {
     @Delete
     suspend fun deleteMark(mark: BookMark)
 
+    @Query("DELETE FROM book_marks WHERE id = :id")
+    suspend fun deleteMarkById(id: Long)
+
     @Insert
     suspend fun insertChunk(chunk: BookChunk): Long
 
@@ -233,4 +238,8 @@ interface BookDao {
 
     @Query("SELECT * FROM book_chunks WHERE id = :id")
     suspend fun chunk(id: Long): BookChunk?
+
+    /** For queries over `book_text`, which Room doesn't know about; they must select `book_chunks` columns. */
+    @RawQuery
+    suspend fun chunksMatching(query: SupportSQLiteQuery): List<BookChunk>
 }

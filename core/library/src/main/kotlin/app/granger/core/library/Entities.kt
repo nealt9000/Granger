@@ -84,7 +84,10 @@ data class ShelfCollection(
     val defaultKey: String?,
 )
 
-/** Files a pack in a collection. [packKey] is `Pack.name` if not blank, else `Pack.id`; [userSet] marks a manual move. */
+/**
+ * Files a pack or a book in a collection. [packKey] is `Pack.name` if not blank, else `Pack.id`; for a book it is
+ * `Book.id`. [userSet] marks a manual move.
+ */
 @Entity(tableName = "placements")
 data class Placement(@PrimaryKey val packKey: String, val collectionId: String, val userSet: Boolean)
 
