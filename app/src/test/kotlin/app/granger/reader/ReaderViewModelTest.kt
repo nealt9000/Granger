@@ -2,9 +2,11 @@ package app.granger.reader
 
 import androidx.lifecycle.viewModelScope
 import app.granger.FakeLibrary
+import app.granger.FakeReadingSessions
 import app.granger.FakeZimArchive
 import app.granger.MainDispatcherRule
 import app.granger.core.library.Bookmark
+import app.granger.core.library.ReadingTab
 import app.granger.core.zim.ZimUrls
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -21,13 +23,67 @@ class ReaderViewModelTest {
         archives["p"] = FakeZimArchive("p", setOf("index", "C++", "What_is_this?", "Photosynthesis"))
     }
 
-    private fun TestScope.reader(path: String? = null, appScope: CoroutineScope = this) =
-        ReaderViewModel("p", path, library, appScope, main.dispatcher).also { testScheduler.advanceUntilIdle() }
+    private val sessions = FakeReadingSessions()
+
+    /** Opens tab 1 on [path] in pack "p"; an empty path is a pack opened without an article. */
+    private fun TestScope.reader(path: String? = null, appScope: CoroutineScope = this): ReaderViewModel {
+        sessions.tabs.value = listOf(ReadingTab(1, "p", path.orEmpty(), path.orEmpty(), 1L, onRail = true))
+        return ReaderViewModel(1, library, sessions, appScope, main.dispatcher).also { testScheduler.advanceUntilIdle() }
+    }
 
     private fun url(path: String, fragment: String? = null) = ZimUrls.forEntry("p", path, fragment)
 
-    @Test fun opensTheRequestedArticle() = runTest(main.dispatcher) {
+    @Test fun opensTheTabsPath() = runTest(main.dispatcher) {
         assertThat(reader("C++").state.value.url).isEqualTo(url("C++"))
+    }
+
+    @Test fun missingTabShowsTabGone() = runTest(main.dispatcher) {
+        val vm = ReaderViewModel(42, library, sessions, this, main.dispatcher)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.error).isEqualTo(ReaderViewModel.TAB_GONE)
+        assertThat(vm.state.value.url).isNull()
+    }
+
+    @Test fun pageShownUpdatesTheTab() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        vm.onPageShown(url("Photosynthesis"), "Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        val tab = sessions.tab(1)!!
+        assertThat(tab.path).isEqualTo("Photosynthesis")
+        assertThat(tab.title).isEqualTo("Photosynthesis")
+    }
+
+    @Test fun chromeStartsHiddenAndToggles() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isFalse()
+    }
+
+    @Test fun errorsKeepTheChromeVisibleSoTheUserCanLeave() = runTest(main.dispatcher) {
+        // A back stack restored after the OS reclaimed the app can reopen a tab whose pack has since gone.
+        library.archives.clear()
+        val vm = reader("C++")
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+    }
+
+    @Test fun findOpensTheChromeAndHidingTheChromeEndsIt() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        vm.startFind()
+        assertThat(vm.state.value.findQuery).isEqualTo("")
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.setFindQuery("light")
+        assertThat(vm.state.value.findQuery).isEqualTo("light")
+        vm.endFind()
+        assertThat(vm.state.value.findQuery).isNull()
+        vm.startFind()
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        assertThat(vm.state.value.findQuery).isNull()
     }
 
     @Test fun aRedirectPathOpensItsCanonicalArticle() = runTest(main.dispatcher) {

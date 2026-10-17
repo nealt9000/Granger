@@ -66,7 +66,9 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * The app frame: the side rail beside every screen. The narrow rail sits in the layout; the expanded one is
  * drawn over the content with a scrim. An edge swipe (from x < 24 dp) or tapping the rail's background expands
  * it; tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
- * content column, pushing it down; it's the post-v1 player's slot and is null for now.
+ * content column, pushing it down; it's the post-v1 player's slot and is null for now. With [railOverContent] the
+ * narrow rail is drawn over the content instead of beside it, so showing it doesn't narrow the content (the reader,
+ * whose page would otherwise reflow on every middle tap).
  */
 @Composable
 fun GrangerShell(
@@ -80,6 +82,7 @@ fun GrangerShell(
     onCloseTab: (Long) -> Unit,
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
+    railOverContent: Boolean = false,
     miniPlayer: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -91,8 +94,9 @@ fun GrangerShell(
             .background(MaterialTheme.colorScheme.background)
             .then(if (railVisible && !expanded) Modifier.edgeSwipe(onToggleExpanded) else Modifier),
     ) {
+        val railBeside = railVisible && !railOverContent
         Row(Modifier.fillMaxSize()) {
-            if (railVisible) {
+            if (railBeside) {
                 NarrowRail(rail, selected, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch)
             }
             Column(
@@ -100,11 +104,14 @@ fun GrangerShell(
                     .weight(1f)
                     .fillMaxHeight()
                     // The rail already pads for the start inset (landscape cutout); screens shouldn't again.
-                    .then(if (railVisible) Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Start)) else Modifier),
+                    .then(if (railBeside) Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Start)) else Modifier),
             ) {
                 miniPlayer?.invoke()
                 Box(Modifier.weight(1f).fillMaxWidth()) { content() }
             }
+        }
+        if (railVisible && railOverContent) {
+            NarrowRail(rail, selected, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch)
         }
         if (railVisible && !expanded) {
             // Gesture navigation claims the left edge for Back; Android lets an app take back up to 200 dp of it.

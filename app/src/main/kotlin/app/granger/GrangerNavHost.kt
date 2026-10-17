@@ -1,22 +1,12 @@
 package app.granger
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,7 +16,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import app.granger.core.library.ReadingTab
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
 import app.granger.library.CollectionViewModel
@@ -81,7 +70,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     val destination = entry?.destination
     val readerTabId = entry?.takeIf { destination?.hasRoute<ReaderRoute>() == true }?.toRoute<ReaderRoute>()?.tabId
     LaunchedEffect(readerTabId) { currentTab.id.value = readerTabId }
-    // Non-reader screens always show the rail; the reader keeps it too until it goes immersive (Task 9).
+    // Non-reader screens always show the rail; the reader shows it only with its chrome (a middle tap).
     LaunchedEffect(destination) { if (destination?.hasRoute<ReaderRoute>() != true) shell.railVisible = true }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
@@ -137,6 +126,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         onCloseTab = railViewModel::closeTab,
         onHistory = { nav.navigate(HistoryRoute) { launchSingleTop = true } },
         onRecentSearch = { query -> nav.navigate(SearchRoute(query)) { popUpTo<SearchRoute> { inclusive = true } } },
+        // Over the page, so a middle tap doesn't narrow it and reflow the text.
+        railOverContent = readerTabId != null,
     ) {
         NavHost(nav, startDestination = LibraryRoute((start as? StartScreen.Library)?.notice)) {
             composable<LibraryRoute> { backStackEntry ->
@@ -164,11 +155,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 )
             }
             composable<ReaderRoute> { backStackEntry ->
-                ReaderDestination(
-                    container = container,
-                    tabId = backStackEntry.toRoute<ReaderRoute>().tabId,
+                val tabId = backStackEntry.toRoute<ReaderRoute>().tabId
+                ReaderScreen(
+                    viewModel = viewModel { ReaderViewModel(tabId, container.library, container.sessions, container.appScope) },
+                    resolver = container.resolver,
+                    onChromeVisibleChange = { visible -> shell.railVisible = visible },
+                    onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onBack = { nav.popBackStack() },
-                    onSearch = { nav.navigate(SearchRoute()) },
                 )
             }
             composable<SearchRoute> { backStackEntry ->
@@ -222,36 +215,5 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 )
             }
         }
-    }
-}
-
-/** Looks the tab up, then shows today's reader on its article. Task 9 moves the lookup into ReaderViewModel. */
-@Composable
-private fun ReaderDestination(container: AppContainer, tabId: Long, onBack: () -> Unit, onSearch: () -> Unit) {
-    var tab by remember { mutableStateOf<ReadingTab?>(null) }
-    var gone by remember { mutableStateOf(false) }
-    LaunchedEffect(tabId) {
-        val found = container.sessions.tab(tabId)
-        if (found == null) gone = true else tab = found
-    }
-    val shown = tab
-    when {
-        gone -> Column(
-            Modifier.fillMaxSize().padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text("This bookmark was removed.")
-            Button(onClick = onBack) { Text("Back") }
-        }
-        shown != null -> ReaderScreen(
-            viewModel = viewModel {
-                // An empty path (a pack opened from the Library with no main page) falls back to the pack's start.
-                ReaderViewModel(shown.packId, shown.path.ifEmpty { null }, container.library, container.appScope)
-            },
-            resolver = container.resolver,
-            onBack = onBack,
-            onSearch = onSearch,
-        )
     }
 }
