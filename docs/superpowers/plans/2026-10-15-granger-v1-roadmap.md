@@ -11,7 +11,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 3 | Catalog + downloads + Readiness | `tools/catalog-gen`, Ed25519-signed catalog, `:core:catalog`, `:core:downloads` (WorkManager, resume, sha256, volumes), Downloads + Readiness screens | **Done:** `2026-10-16-plan-03-catalog-downloads-readiness.md` |
 | 4 | Pack builder + Granger Classics | `tools/pack-builder` (python-libzim), Classics manifest, Classics pack on a GitHub release, catalog entry | **Done:** `2026-10-16-plan-04-pack-builder-classics.md` |
 | 5 | Shell + Library | Flame theme + icon, side rail (bookmarks per article, History, Recent), immersive mode, open-to-last-place, media types / collections / filing, Library screens, Granger + Kiwix source screens, Settings (Models, Readiness), polished web-style reader with selection actions, schema migration | **Done:** `2026-10-16-plan-05-shell-library.md` (reader device tests pending) |
-| 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:imports` (EPUB/TXT/MD, DRM detection, FTS5), My books, pack-builder EPUB output, Classics re-release, Search over e-books | |
+| 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:books` (EPUB/TXT/MD, DRM detection; search index is contentless FTS4), My books, pack-builder EPUB output, Classics re-release, Search over e-books | **Done:** `2026-10-17-plan-06-ebook-reader-classics.md` (the 347-book "Download all" not yet run on a device) |
 | 7 | Archive.org source | Public-domain filter until waiver, search/browse, open-only downloads with sha1/md5 verify, filing, metadata | |
 | 8 | Inquire & Abstract | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats | |
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | |
@@ -60,9 +60,9 @@ Deferred, low priority (from Plan 2):
 
 ## Carried forward from Plan 5
 
-- Rail letter tiles become covers in Plan 6.
+- ~~Rail letter tiles become covers in Plan 6.~~ Done in Plan 6.
 - The Inquire & Abstract slot in the rail is switched on in Plan 8.
-- The Classics ZIM stays filed as "Granger Classics" until Plan 6 replaces it with e-books.
+- ~~The Classics ZIM stays filed as "Granger Classics" until Plan 6 replaces it with e-books.~~ Plan 6: the ZIM is retired from the catalog; an installed copy shows "Replaced by the Granger Classics e-books" with "Get the e-books".
 - The three `ReaderWebViewTest` device tests are written but unrun, pending the owner's go-ahead: `connectedDebugAndroidTest` uninstalls the app and wipes downloaded packs and models.
 - Pixel 6 walkthrough, after unlock: moving Wikipedia into a new "Reference" media type and back, the Granger, Kiwix and Models source screens, and About all passed. Not checked on a device:
   - Reboot → Library: a reboot leaves the phone on a secure lock screen that adb can't pass. The unit tests cover BOOT_COUNT.
@@ -82,3 +82,28 @@ Deferred, low priority (from Plan 2):
 - Theme: the remaining Material purple-tinted roles (inverse, surface containers, dim/bright, secondary and tertiary containers, scrim) are warm neutrals and flame tones; tests check contrast and that no role keeps the baseline.
 - Follow-up: the edge-swipe request is one-shot, so a reader opened after a swipe starts immersive (checked on the Pixel 6, including rotation).
 - Resume no longer fades the Library into the book; a recent search from the rail replaces only a Search that is on top (a reader opened from Search stays on the stack); a tap on a greyed rail tile explains why nothing opened; unused coroutine scope and import removed.
+
+## Carried forward from Plan 6
+
+Released and measured:
+- Release `classics-2026-10-17`: 347 EPUB 3 files, 95.2 MB in total, the largest *Les Misérables* at 1.7 MB. epubcheck 5.2.1 reports 0 errors and 0 warnings for every file. The catalog has a `books` array (347 entries) and a `granger-classics` preset, "Granger Classics: all books"; the Starter preset now has 351 items. The old `classics-2026-10-16` ZIM release and its descriptor are left in place, unreferenced, so older builds' cached catalogs still resolve.
+- Library database on the Pixel 6 with 5 books indexed: 3,876 KB (library.db 2,972 KB + wal 406 KB + shm 32 KB).
+- **Not measured:** "Get all" (347 downloads, 95 MB) time over Wi-Fi and the index size afterwards. The automated tap on "Get all" was blocked by the session's permission check; run it by hand and record the numbers here.
+
+Pixel 6 walkthrough (2026-10-17), after the fixes below: the upgrade kept packs, tabs, History and saved articles; cover grid; Night links in the flame accent (no blue); tap zones 20/60/20, a link in the middle band follows the link; slider label; contents, bookmarks, highlights, notes, colours legible in Day/Sepia/Night; selection menu (Copy · Highlight · Note · Define · Search) closes after each action and works after rotation; in-book search jumps and marks; Search "quality of mercy" → *The Merchant of Venice* under "In books", opens at the passage and marks it; rotation and process death keep the page; imports of TXT (Windows-1252 and UTF-16), Markdown (script shown as text, `javascript:` link inert) succeed, and a PDF renamed `.epub` and a DRM EPUB are refused with their messages; removing a book shows "Removed book" on the rail and in History.
+
+Fixed after the walkthrough (merged `f8082c9`): a crash on the first launch after process death with a book open; the Contents panel's tabs under the status bar in portrait; reopening a book one page early; a search hit landing a page late and unmarked; the rail clipped in landscape (a Plan 5 bug: the cutout inset was taken out of the rail's width); the status bar left showing after switching readers through the rail.
+
+Still open:
+- Define with no Wiktionary pack hands the word to another app (`PROCESS_TEXT`); not exercised on the device. Define through a Wiktionary pack is untested on a device too.
+- Classics pushed by hand into `books/granger/` show "Get", not installed: installed status comes from download records only.
+- A page turn within ~0.3 s before Back is lost (the outgoing reader's reports are ignored once it leaves the screen).
+- System Back from a book opened through the rail goes to the Library, not the previous book (rail destinations replace each other).
+- Contents panel tab labels are cut off in landscape.
+- Imported text books are titled by file name, not by their first heading.
+- Book search results are unranked (`LIMIT 400`); TXT files with single-newline paragraphs become one paragraph per chapter; the shared cover cache (4 MB) re-decodes while scrolling a long grid.
+- Plan 10: import is Pro-only; queueing the whole Classics preset must be checked against the cap as one group (spec §13); `Features.IMPORT` becomes the entitlement check.
+- Plan 7: archive.org books go to `books/archive-org/` with origin `ARCHIVE_ORG`; `Bookshelf.addDownloaded` needs an origin parameter then.
+- Plan 8: `BookIndex` and `BookHit` are the e-book retrieval path for Inquire & Abstract; the `INQUIRE` selection action is already wired.
+- The search-grouping call from Plan 5 is still open.
+- The four Classics presentation defects from Plan 4 are fixed in the EPUB build (translator in the Koran titles, publisher CSS dropped, page numbers not clipped, clean titles).
