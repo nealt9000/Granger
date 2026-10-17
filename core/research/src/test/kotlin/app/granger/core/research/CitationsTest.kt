@@ -20,6 +20,11 @@ class CitationsTest {
     }
 
     @Test
+    fun overflowingCitationIsInvalid() {
+        assertThat(Citations.check("It does [99999999999].", 4)).isEqualTo(CitationCheck.Invalid)
+    }
+
+    @Test
     fun noCitationIsInvalid() {
         assertThat(Citations.check("It does.", 4)).isEqualTo(CitationCheck.Invalid)
     }

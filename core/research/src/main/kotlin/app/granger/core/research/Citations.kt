@@ -12,8 +12,9 @@ object Citations {
 
     fun check(answer: String, passageCount: Int): CitationCheck {
         if (answer.trim().startsWith(AnswerPrompt.DECLINE_TOKEN)) return CitationCheck.ModelDeclined
+        // A digit run too big for Int is bad model output, not a crash.
         val numbers = group.findAll(answer)
-            .flatMap { it.groupValues[1].split(',').map { n -> n.trim().toInt() } }
+            .flatMap { it.groupValues[1].split(',').map { n -> n.trim().toIntOrNull() ?: return CitationCheck.Invalid } }
             .toSet()
         if (numbers.isEmpty() || numbers.any { it !in 1..passageCount }) return CitationCheck.Invalid
         return CitationCheck.Valid(numbers)
