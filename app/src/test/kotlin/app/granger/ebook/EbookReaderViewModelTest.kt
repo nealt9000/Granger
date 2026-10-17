@@ -7,6 +7,13 @@ import app.granger.FakeBookOpener
 import app.granger.FakeBookshelf
 import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
+import app.granger.TrackingContainer
+import app.granger.testPublication
+import androidx.lifecycle.ViewModelStore
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.test.advanceUntilIdle
+import org.readium.r2.shared.publication.Publication
+import java.io.File
 import app.granger.book
 import app.granger.core.library.BookPosition
 import app.granger.core.library.ReadingTab
@@ -140,6 +147,53 @@ class EbookReaderViewModelTest {
         advanceTimeBy(2_000)
         runCurrent()
         assertThat(bookshelf.positionMap.value["b"]).isNull()
+    }
+
+    private fun EbookReaderViewModel.clear() = ViewModelStore().also { it.put("vm", this) }.clear()
+
+    @Test fun clearingClosesThePublicationAndReleasesTheBook() = runTest(main.dispatcher) {
+        val container = TrackingContainer()
+        opener.publication = testPublication(container = container)
+        val vm = reader()
+        assertThat(OpenBooks.current?.first).isEqualTo("b")
+        vm.clear()
+        advanceUntilIdle()
+        assertThat(container.closed).isTrue()
+        assertThat(OpenBooks.current).isNull()
+    }
+
+    @Test fun clearingLeavesANewerReaderCurrent() = runTest(main.dispatcher) {
+        val first = reader()
+        val newer = EbookReaderViewModel(1, null, bookshelf, sessions, FakeBookOpener(), prefsStore, this, main.dispatcher)
+        advanceUntilIdle()
+        val newerFactory = newer.navigatorFactory
+        first.clear()
+        advanceUntilIdle()
+        assertThat(OpenBooks.current?.second).isSameInstanceAs(newerFactory)
+    }
+
+    @Test fun publicationOpenedAfterClearingIsClosed() = runTest(main.dispatcher) {
+        val container = TrackingContainer()
+        val gate = CompletableDeferred<Unit>()
+        var started = false
+        val slow = object : BookOpener {
+            override suspend fun open(file: File): Publication {
+                started = true
+                gate.await()
+                return testPublication(container = container)
+            }
+        }
+        val file = tmp.root.resolve("b.epub").apply { writeText("epub") }
+        bookshelf.bookList.value = listOf(book("b").copy(filePath = file.path))
+        sessions.tabs.value = listOf(ReadingTab(1, "b", "", "b", 1L, onRail = true))
+        val vm = EbookReaderViewModel(1, null, bookshelf, sessions, slow, prefsStore, this, main.dispatcher)
+        runCurrent()
+        assertThat(started).isTrue()
+        vm.clear()
+        gate.complete(Unit)
+        advanceUntilIdle()
+        assertThat(container.closed).isTrue()
+        assertThat(OpenBooks.current).isNull()
     }
 
     @Test fun chromeStartsHiddenAndToggles() = runTest(main.dispatcher) {

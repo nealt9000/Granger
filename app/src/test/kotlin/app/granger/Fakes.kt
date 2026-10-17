@@ -29,6 +29,8 @@ import org.readium.r2.shared.publication.LocalizedString
 import org.readium.r2.shared.publication.services.PerResourcePositionsService
 import org.readium.r2.shared.publication.services.positionsServiceFactory
 import org.readium.r2.shared.util.Url
+import org.readium.r2.shared.util.data.Container
+import org.readium.r2.shared.util.resource.Resource
 import org.readium.r2.shared.util.mediatype.MediaType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -205,12 +207,28 @@ class FakeBookshelf : Bookshelf {
     override suspend fun deleteMark(id: Long) {}
 }
 
-/** A three-chapter EPUB-like publication (c001..c003.xhtml) with one position per chapter, so progressions resolve. */
-fun testPublication(title: String = "Test Book"): Publication = Publication(
+/** Records whether the publication holding it was closed. */
+class TrackingContainer : Container<Resource> {
+    var closed = false
+    override val entries: Set<Url> = emptySet()
+    override fun get(url: Url): Resource? = null
+    override fun close() { closed = true }
+}
+
+/**
+ * An EPUB-like publication whose reading order is [chapters] (decoded paths, which Readium percent-encodes), one
+ * position per chapter so progressions resolve. [container] shows whether it was closed.
+ */
+fun testPublication(
+    title: String = "Test Book",
+    chapters: List<String> = listOf("c001.xhtml", "c002.xhtml", "c003.xhtml"),
+    container: TrackingContainer = TrackingContainer(),
+): Publication = Publication(
     manifest = Manifest(
         metadata = Metadata(localizedTitle = LocalizedString(title)),
-        readingOrder = listOf("c001.xhtml", "c002.xhtml", "c003.xhtml").map { Link(Url(it)!!, mediaType = MediaType.XHTML) },
+        readingOrder = chapters.map { Link(Url.fromDecodedPath(it)!!, mediaType = MediaType.XHTML) },
     ),
+    container = container,
     servicesBuilder = Publication.ServicesBuilder().apply {
         positionsServiceFactory = PerResourcePositionsService.createFactory(MediaType.XHTML)
     },

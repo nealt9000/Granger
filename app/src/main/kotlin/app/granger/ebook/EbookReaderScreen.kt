@@ -66,7 +66,7 @@ fun EbookReaderScreen(
     val appContext = LocalContext.current.applicationContext
     // Outlives a rotation inside the restored navigator, so it holds nothing tied to an activity.
     val listener = remember(appContext) { ExternalLinkListener(appContext) }
-    val config = remember { EpubNavigatorFragment.Configuration() }
+    val config = remember { readerConfiguration() }
 
     // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts.
     val requestAtEntry = remember { showChromeRequest }

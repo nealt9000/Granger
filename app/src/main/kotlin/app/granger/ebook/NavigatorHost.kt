@@ -3,6 +3,7 @@ package app.granger.ebook
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
@@ -47,6 +48,7 @@ fun NavigatorHost(
     val activity = LocalContext.current.findFragmentActivity()
     val fragmentManager = activity.supportFragmentManager
     val ready by rememberUpdatedState(onReady)
+    // Deliberately rebuilt whenever the place changes (initial is the latest locator), so a restored navigator opens there.
     val fragments = remember(factory, initial, prefs, listener, config) {
         factory.createFragmentFactory(
             initialLocator = initial,
@@ -55,8 +57,12 @@ fun NavigatorHost(
             configuration = config,
         )
     }
-    // What ReadiumFragmentFactory builds a restored navigator with.
-    SideEffect { OpenBooks.navigatorFragments = factory to fragments }
+    // What ReadiumFragmentFactory builds a restored navigator with. This reader is current again, too, when it
+    // returns to the top after another reader of the same book took over and was cleared.
+    SideEffect {
+        if (OpenBooks.current?.second !== factory) OpenBooks.current = bookId to factory
+        OpenBooks.navigatorFragments = factory to fragments
+    }
 
     val holder = remember { arrayOfNulls<FragmentContainerView>(1) }
     AndroidView(
@@ -66,7 +72,11 @@ fun NavigatorHost(
 
     DisposableEffect(fragmentManager, bookId, factory) {
         val container = holder[0]
-        if (container == null || fragmentManager.isDestroyed) return@DisposableEffect onDispose {}
+        if (container == null) {
+            Log.e("Granger", "E-book navigator container missing; the book can't be shown")
+            return@DisposableEffect onDispose {}
+        }
+        if (fragmentManager.isDestroyed) return@DisposableEffect onDispose {}
         val tag = navigatorTag(bookId)
         var navigator = fragmentManager.findFragmentByTag(tag) as? EpubNavigatorFragment
         if (navigator != null) {

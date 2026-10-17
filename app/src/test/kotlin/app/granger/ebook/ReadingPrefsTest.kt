@@ -49,6 +49,14 @@ class ReadingPrefsTest {
         assertThat(ReadingPrefs(theme = ReadingTheme.DAY).toEpub().backgroundColor).isNull()
     }
 
+    @Test fun linksUseTheAppAccentInEveryTheme() {
+        // ReadiumCSS night mode would otherwise paint links #63caff: blue on black.
+        val accent = org.readium.r2.navigator.epub.css.Color.Int(GrangerColors.Flame.toArgb())
+        val css = readerConfiguration().readiumCssRsProperties
+        assertThat(css.linkColor).isEqualTo(accent)
+        assertThat(css.visitedColor).isEqualTo(accent)
+    }
+
     @Test fun storeClampsOutOfRangeValues() {
         val store = ReadingPrefsStore(shared)
         assertThat(store.prefs.value).isEqualTo(ReadingPrefs())

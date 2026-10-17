@@ -45,6 +45,28 @@ class StartLocatorTest {
         assertThat(target.href.removeFragment()).isEqualTo(Url("c002.xhtml"))
     }
 
+    @Test fun targetHrefIsADecodedZipPath() = runTest {
+        // The book index stores decoded zip paths; Readium's reading order holds them percent-encoded.
+        val spaced = testPublication(chapters = listOf("OEBPS/Title Page.xhtml", "OEBPS/Chapter 1.xhtml", "OEBPS/Café.xhtml"))
+        val chapter = StartLocator.choose(spaced, null, BookTarget("OEBPS/Chapter 1.xhtml#x", 0.3))!!
+        assertThat(chapter.href).isEqualTo(Url.fromDecodedPath("OEBPS/Chapter 1.xhtml"))
+        assertThat(chapter.locations.fragments).containsExactly("x")
+        assertThat(chapter.locations.progression).isEqualTo(0.3)
+
+        val accented = StartLocator.choose(spaced, null, BookTarget("OEBPS/Café.xhtml", 0.0))!!
+        assertThat(accented.href).isEqualTo(Url.fromDecodedPath("OEBPS/Café.xhtml"))
+
+        // A place Readium saved (its JSON holds the encoded href) still matches its chapter.
+        val savedJson = Locator(
+            href = Url.fromDecodedPath("OEBPS/Chapter 1.xhtml")!!,
+            mediaType = MediaType.XHTML,
+            locations = Locator.Locations(progression = 0.6, totalProgression = 0.5),
+        ).toJSON().toString()
+        val saved = StartLocator.choose(spaced, savedJson, null)!!
+        assertThat(saved.href).isEqualTo(Url.fromDecodedPath("OEBPS/Chapter 1.xhtml"))
+        assertThat(saved.locations.progression).isEqualTo(0.6)
+    }
+
     @Test fun staleHrefFallsBackToTotalProgression() = runTest {
         // A rebuilt edition renamed its chapter files; the saved place is kept by how far through the book it was.
         val locator = StartLocator.choose(publication, savedJson("c009.xhtml", total = 0.5), null)!!

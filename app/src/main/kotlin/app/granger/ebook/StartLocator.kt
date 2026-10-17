@@ -19,15 +19,17 @@ object StartLocator {
      */
     suspend fun choose(publication: Publication, savedJson: String?, target: BookTarget?): Locator? {
         if (target != null) {
-            val href = Url(target.href)
-            val link = href?.let { publication.chapterFor(it) }
-            if (href != null && link != null) {
+            // Targets come from the book index: decoded zip paths ("OEBPS/Chapter 1.xhtml"), not URLs.
+            val path = target.href.substringBefore('#')
+            val fragment = target.href.substringAfter('#', "").takeIf { it.isNotEmpty() }
+            val link = path.takeIf { it.isNotEmpty() }?.let { Url.fromDecodedPath(it) }?.let { publication.chapterFor(it) }
+            if (link != null) {
                 return Locator(
                     // The reading order's own href; a #fragment the target pointed at goes in the locations.
                     href = link.url(),
                     mediaType = link.mediaType ?: MediaType.XHTML,
                     locations = Locator.Locations(
-                        fragments = listOfNotNull(href.fragment),
+                        fragments = listOfNotNull(fragment),
                         progression = target.progression,
                     ),
                 )

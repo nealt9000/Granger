@@ -9,6 +9,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +22,7 @@ import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
 
 data class EbookUi(
     val title: String = "",
@@ -59,10 +62,11 @@ class EbookReaderViewModel(
     /** The open book's id; set with [navigatorFactory]. */
     var bookId: String? = null
         private set
-    private var publication: Publication? = null
+    /** The open publication; whoever takes it out closes it. */
+    private val publication = AtomicReference<Publication?>(null)
 
-    /** The place not yet written, and the debounced write that will write it. */
-    @Volatile private var unsaved: Locator? = null
+    /** The place not yet written, and the debounced write that will write it. Main thread only. */
+    private var unsaved: Locator? = null
     private var saveJob: Job? = null
 
     init {
@@ -72,11 +76,17 @@ class EbookReaderViewModel(
             _state.update { it.copy(title = book.title) }
             val file = File(book.filePath)
             if (!withContext(io) { file.isFile }) return@launch fail(BOOK_GONE)
-            val opened = withContext(io) { opener.open(file) } ?: return@launch fail(BOOK_DAMAGED)
+            // Not cancellable, and recorded the moment it opens, so a publication is never lost: whichever comes
+            // second, the open finishing or this view model being cleared, closes it.
+            val opened = try {
+                withContext(io + NonCancellable) { opener.open(file)?.also(publication::set) }
+            } catch (e: CancellationException) {
+                publication.getAndSet(null)?.let(::closeLater)
+                throw e
+            } ?: return@launch fail(BOOK_DAMAGED)
             val saved = bookshelf.position(book.id)
             val initial = StartLocator.choose(opened, saved?.locatorJson, target)
             val factory = EpubNavigatorFactory(opened)
-            publication = opened
             bookId = book.id
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
@@ -98,7 +108,8 @@ class EbookReaderViewModel(
         val id = bookId ?: return
         unsaved = locator
         saveJob?.cancel()
-        saveJob = appScope.launch {
+        // On Main, which owns unsaved and saveJob; Bookshelf does the write on IO.
+        saveJob = appScope.launch(Dispatchers.Main.immediate) {
             delay(SAVE_DEBOUNCE_MS)
             save(id, locator)
         }
@@ -109,7 +120,7 @@ class EbookReaderViewModel(
         val id = bookId ?: return
         val locator = unsaved ?: return
         saveJob?.cancel()
-        saveJob = appScope.launch { save(id, locator) }
+        saveJob = appScope.launch(Dispatchers.Main.immediate) { save(id, locator) }
     }
 
     private suspend fun save(id: String, locator: Locator) {
@@ -134,8 +145,12 @@ class EbookReaderViewModel(
 
     override fun onCleared() {
         navigatorFactory?.let(OpenBooks::release)
-        // Off the main thread: closing the publication closes its zip.
-        publication?.let { opened -> appScope.launch(io) { opened.close() } }
+        publication.getAndSet(null)?.let(::closeLater)
+    }
+
+    /** Off the main thread: closing the publication closes its zip. */
+    private fun closeLater(opened: Publication) {
+        appScope.launch(io) { opened.close() }
     }
 
     companion object {

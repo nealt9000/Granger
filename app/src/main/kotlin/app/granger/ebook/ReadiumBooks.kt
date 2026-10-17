@@ -2,7 +2,11 @@ package app.granger.ebook
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import app.granger.theme.GrangerColors
+import org.readium.r2.navigator.epub.css.RsProperties
+import org.readium.r2.navigator.epub.css.Color as CssColor
 import androidx.fragment.app.FragmentFactory
 import kotlinx.coroutines.CancellationException
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
@@ -14,6 +18,17 @@ import org.readium.r2.shared.util.http.DefaultHttpClient
 import org.readium.r2.streamer.PublicationOpener
 import org.readium.r2.streamer.parser.DefaultPublicationParser
 import java.io.File
+
+/**
+ * The navigator's configuration. ReadiumCSS night mode paints links #63caff, which beats the theme's text colour;
+ * links take the app's accent instead, in every theme, visited or not.
+ */
+fun readerConfiguration(): EpubNavigatorFragment.Configuration {
+    val accent = CssColor.Int(GrangerColors.Flame.toArgb())
+    return EpubNavigatorFragment.Configuration(
+        readiumCssRsProperties = RsProperties(linkColor = accent, visitedColor = accent),
+    )
+}
 
 /** Opens a book file for reading. */
 interface BookOpener {
