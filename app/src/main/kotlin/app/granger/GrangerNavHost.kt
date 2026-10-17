@@ -1,5 +1,6 @@
 package app.granger
 
+import android.util.Log
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -10,15 +11,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.ui.platform.LocalContext
-import app.granger.ebook.Dictionary
-import app.granger.ebook.DictionaryChoice
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,33 +29,39 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.core.library.BookIds
+import app.granger.core.library.ReadingTab
+import app.granger.ebook.Dictionary
+import app.granger.ebook.DictionaryChoice
 import app.granger.ebook.EbookReaderScreen
 import app.granger.ebook.EbookReaderViewModel
-import app.granger.core.library.ReadingTab
+import app.granger.ebook.SelectionBridge
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
 import app.granger.library.CollectionViewModel
 import app.granger.library.LibraryScreen
 import app.granger.library.LibraryViewModel
-import app.granger.readiness.ReadinessScreen
-import app.granger.readiness.ReadinessViewModel
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
+import app.granger.readiness.ReadinessScreen
+import app.granger.readiness.ReadinessViewModel
 import app.granger.search.SearchScreen
 import app.granger.search.SearchViewModel
+import app.granger.settings.SettingsScreen
+import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
 import app.granger.shell.HistoryViewModel
 import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
-import app.granger.settings.SettingsScreen
-import app.granger.settings.SettingsViewModel
 import app.granger.sources.CatalogScope
 import app.granger.sources.SourceScreen
 import app.granger.sources.SourceViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
@@ -147,11 +150,28 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
 
-    // What Define does in the e-book reader; null until known, so the book opens with the right selection menu.
+    // What Define does in the e-book reader; the selection menu reads it live through SelectionBridge.
     val appContext = LocalContext.current.applicationContext
-    val dictionary by produceState<DictionaryChoice?>(null) {
-        val handler = withContext(Dispatchers.IO) { Dictionary.hasProcessTextHandler(appContext) }
-        container.library.packs.collect { value = Dictionary.choose(it, handler) }
+    val dictionary by produceState<DictionaryChoice>(DictionaryChoice.None) {
+        val handler = try {
+            withContext(Dispatchers.IO) { Dictionary.hasProcessTextHandler(appContext) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
+        try {
+            container.library.packs.collect {
+                value = Dictionary.choose(it, handler)
+                SelectionBridge.dictionaryAvailable = value != DictionaryChoice.None
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Granger", "Couldn't read the installed packs for Define", e)
+            value = DictionaryChoice.None
+            SelectionBridge.dictionaryAvailable = false
+        }
     }
     /** Opens [word]'s Wiktionary entry over the book, so Back returns to the page; false when there is none. */
     suspend fun lookUpInWiktionary(packId: String, word: String): Boolean {

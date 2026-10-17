@@ -1,6 +1,7 @@
 package app.granger.ebook
 
 import android.content.Context
+import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
 import app.granger.BookTarget
 import app.granger.FakeBookOpener
@@ -8,33 +9,32 @@ import app.granger.FakeBookshelf
 import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.TrackingContainer
-import app.granger.testPublication
-import androidx.lifecycle.ViewModelStore
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.test.advanceUntilIdle
-import org.readium.r2.shared.publication.Publication
-import java.io.File
 import app.granger.book
+import app.granger.core.library.BookMark
 import app.granger.core.library.BookPosition
+import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingTab
+import app.granger.testPublication
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import app.granger.core.library.BookMark
-import app.granger.core.library.MarkKind
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.json.JSONObject
 import org.junit.After
-import org.readium.r2.navigator.Decoration
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
-import org.json.JSONObject
+import org.readium.r2.navigator.Decoration
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.mediatype.MediaType
 import org.robolectric.RobolectricTestRunner
@@ -498,6 +498,37 @@ class EbookReaderViewModelTest {
         advanceUntilIdle()
         assertThat(vm.state.value.search.results).isEmpty()
         assertThat(vm.state.value.search.running).isFalse()
+    }
+
+    @Test fun menuTapsReachTheViewModelsChannel() = runTest(main.dispatcher) {
+        val vm = reader()
+        val seen = mutableListOf<SelectionAction>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.selectionActions.collect { seen += it.action } }
+        runCurrent()
+        SelectionBridge.dispatch(SelectionRequest(SelectionAction.SEARCH, null))
+        advanceUntilIdle()
+        assertThat(seen).containsExactly(SelectionAction.SEARCH)
+    }
+
+    @Test fun newestReaderOwnsTheBridgeAndClearingAnOlderOneKeepsIt() = runTest(main.dispatcher) {
+        val first = reader()
+        val newer = reader()
+        val seen = mutableListOf<SelectionAction>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { newer.selectionActions.collect { seen += it.action } }
+        runCurrent()
+        first.clear()
+        SelectionBridge.dispatch(SelectionRequest(SelectionAction.COPY, null))
+        advanceUntilIdle()
+        assertThat(seen).containsExactly(SelectionAction.COPY)
+    }
+
+    @Test fun noteSheetSurvivesMarksArrivingLate() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.note(selection("c002.xhtml", "word"), "word")
+        // The stored marks haven't reached the screen yet.
+        bookshelf.markList.value = emptyList()
+        advanceUntilIdle()
+        assertThat(vm.state.value.editingHighlight).isNotNull()
     }
 }
 

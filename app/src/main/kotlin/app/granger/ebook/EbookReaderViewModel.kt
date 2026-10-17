@@ -1,5 +1,6 @@
 package app.granger.ebook
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
@@ -7,38 +8,37 @@ import app.granger.core.library.BookMark
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
+import java.io.File
+import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import org.readium.r2.navigator.Decoration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.readium.r2.navigator.epub.EpubNavigatorFactory
-import org.readium.r2.shared.publication.Locator
 import org.json.JSONObject
+import org.readium.r2.navigator.Decoration
+import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.shared.publication.Link
+import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.Url
-import java.io.File
-import java.util.concurrent.atomic.AtomicReference
 
 data class EbookUi(
     val title: String = "",
@@ -117,6 +117,13 @@ class EbookReaderViewModel(
     /** Places the reader asked to jump to; the screen hands each to the navigator. */
     val navigation: Flow<Locator> = _navigation.receiveAsFlow()
 
+    // Unlimited, so a menu tap is never dropped; the screen reads the selection and acts on each.
+    private val _selectionActions = Channel<SelectionRequest>(Channel.UNLIMITED)
+
+    /** Taps on the selection menu, for the screen to carry out with its current navigator. */
+    val selectionActions: Flow<SelectionRequest> = _selectionActions.receiveAsFlow()
+    private val selectionSink: (SelectionRequest) -> Unit = { _selectionActions.trySend(it) }
+
     private val bookmarkLock = Mutex()
     private val highlightLock = Mutex()
     private var searchJob: Job? = null
@@ -136,6 +143,7 @@ class EbookReaderViewModel(
     private var saveJob: Job? = null
 
     init {
+        SelectionBridge.sink = selectionSink
         viewModelScope.launch {
             val tab = sessions.tab(tabId) ?: return@launch fail(TAB_GONE)
             val book = bookshelf.book(tab.packId) ?: return@launch fail(BOOK_GONE)
@@ -224,7 +232,6 @@ class EbookReaderViewModel(
                 highlights = highlights,
                 decorations = placed.decorations,
                 unplaceable = placed.unplaceable,
-                editingHighlight = it.editingHighlight?.takeIf { id -> highlights.any { h -> h.id == id } },
             ).derived()
         }
     }
@@ -385,6 +392,7 @@ class EbookReaderViewModel(
     }
 
     override fun onCleared() {
+        if (SelectionBridge.sink === selectionSink) SelectionBridge.sink = null
         navigatorFactory?.let(OpenBooks::release)
         publication.getAndSet(null)?.let(::closeLater)
     }

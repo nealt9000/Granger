@@ -24,11 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
 import app.granger.shell.NarrowRailWidth
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.Decoration
@@ -63,8 +63,8 @@ fun EbookReaderScreen(
     viewModel: EbookReaderViewModel,
     onChromeVisibleChange: (Boolean) -> Unit,
     showChromeRequest: Int = 0,
-    /** How Define works; null while that is still being worked out, and the book waits for it. */
-    dictionary: DictionaryChoice? = DictionaryChoice.None,
+    /** How Define works. */
+    dictionary: DictionaryChoice = DictionaryChoice.None,
     onSearchText: (String) -> Unit = {},
     /** Opens the word's Wiktionary entry in [packId]; false when it has none. */
     onLookUp: suspend (packId: String, word: String) -> Boolean = { _, _ -> false },
@@ -75,40 +75,13 @@ fun EbookReaderScreen(
     val appContext = LocalContext.current.applicationContext
     // Outlives a rotation inside the restored navigator, so it holds nothing tied to an activity.
     val listener = remember(appContext) { ExternalLinkListener(appContext) }
-    val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
     val currentDictionary by rememberUpdatedState(dictionary)
     val searchText by rememberUpdatedState(onSearchText)
     val lookUp by rememberUpdatedState(onLookUp)
-    val openNavigator by rememberUpdatedState(navigator)
-    // The menu's tap: read the selection, act, then clear it. Reached through rememberUpdatedState so the
-    // configuration (kept inside restored navigators) never holds this composition.
-    val onSelection = rememberUpdatedState { action: SelectionAction ->
-        val fragment = openNavigator
-        if (fragment != null) {
-            scope.launch {
-                val selection = fragment.currentSelection() ?: return@launch
-                val text = selection.locator.text.highlight.orEmpty().trim()
-                try {
-                    if (text.isNotEmpty()) {
-                        when (action) {
-                            SelectionAction.COPY -> appContext.getSystemService(ClipboardManager::class.java)
-                                ?.setPrimaryClip(ClipData.newPlainText("", text))
-                            SelectionAction.HIGHLIGHT -> viewModel.highlight(selection.locator, text)
-                            SelectionAction.NOTE -> viewModel.note(selection.locator, text)
-                            SelectionAction.DEFINE -> define(appContext, currentDictionary, text, lookUp, snackbar)
-                            SelectionAction.SEARCH -> searchText(text.take(200))
-                            SelectionAction.INQUIRE -> Unit
-                        }
-                    }
-                } finally {
-                    fragment.clearSelection()
-                }
-            }
-        }
-    }
-    val dictionaryAvailable = dictionary != null && dictionary != DictionaryChoice.None
-    val config = remember(dictionaryAvailable) { readerConfiguration({ onSelection.value(it) }, dictionaryAvailable) }
+    // Holds nothing of this composition: the menu reaches the view model through SelectionBridge, so it still
+    // works inside a navigator that rotation restored.
+    val config = remember { readerConfiguration() }
 
     // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts.
     val requestAtEntry = remember { showChromeRequest }
@@ -123,6 +96,37 @@ fun EbookReaderScreen(
     }
     LaunchedEffect(navigator) {
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }
+    }
+    // The selection menu's taps: read the selection, act, then clear it and close the menu, then say what went wrong.
+    LaunchedEffect(navigator) {
+        val fragment = navigator ?: return@LaunchedEffect
+        val effectScope = this
+        viewModel.selectionActions.collect { request ->
+            var message: String? = null
+            try {
+                val selection = fragment.currentSelection()
+                val text = selection?.locator?.text?.highlight.orEmpty().trim()
+                if (selection != null && text.isNotEmpty()) {
+                    when (request.action) {
+                        SelectionAction.COPY -> appContext.getSystemService(ClipboardManager::class.java)
+                            ?.setPrimaryClip(ClipData.newPlainText("", text))
+                        SelectionAction.HIGHLIGHT -> viewModel.highlight(selection.locator, text)
+                        SelectionAction.NOTE -> viewModel.note(selection.locator, text)
+                        SelectionAction.DEFINE -> message = define(appContext, currentDictionary, text, lookUp)
+                        SelectionAction.SEARCH -> searchText(text.take(200))
+                        SelectionAction.INQUIRE -> Unit
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Selection action ${request.action} failed", e)
+            } finally {
+                fragment.clearSelection()
+                request.mode?.finish()
+            }
+            message?.let { effectScope.launch { snackbar.showSnackbar(it) } }
+        }
     }
     // Highlights are drawn again whenever they change, and on every new navigator (rotation builds one).
     LaunchedEffect(navigator, state.decorations) {
@@ -159,7 +163,7 @@ fun EbookReaderScreen(
             error != null -> Box(Modifier.fillMaxSize().padding(start = NarrowRailWidth).padding(32.dp), Alignment.Center) {
                 Text(error, textAlign = TextAlign.Center)
             }
-            state.publication != null && factory != null && bookId != null && dictionary != null -> NavigatorHost(
+            state.publication != null && factory != null && bookId != null -> NavigatorHost(
                 bookId = bookId,
                 factory = factory,
                 // The latest place, so a navigator rebuilt after rotation opens where the reader is.
@@ -235,25 +239,29 @@ fun EbookReaderScreen(
     }
 }
 
-/** Define: the Wiktionary entry opened over the book, else the phone's dictionary app; a snackbar when neither can. */
+/**
+ * Define: the Wiktionary entry opened over the book, else the phone's dictionary app. Returns what to tell the
+ * reader (null when it worked or there was nothing to look up); never throws.
+ */
 private suspend fun define(
     context: Context,
-    choice: DictionaryChoice?,
+    choice: DictionaryChoice,
     selection: String,
     lookUp: suspend (String, String) -> Boolean,
-    snackbar: SnackbarHostState,
-) {
-    when (choice) {
-        is DictionaryChoice.Wiktionary -> {
-            val word = Dictionary.normalise(selection)
-            if (word.isEmpty() || !lookUp(choice.packId, word)) {
-                snackbar.showSnackbar("No entry for “$word” in Wiktionary")
-            }
+): String? {
+    val word = Dictionary.normalise(selection)
+    if (word.isEmpty()) return null
+    return try {
+        when (choice) {
+            is DictionaryChoice.Wiktionary -> if (lookUp(choice.packId, word)) null else "No entry for “$word” in Wiktionary"
+            DictionaryChoice.ProcessText -> if (Dictionary.startProcessText(context, selection)) null else "No dictionary app is installed"
+            DictionaryChoice.None -> null
         }
-        DictionaryChoice.ProcessText -> if (!Dictionary.startProcessText(context, selection)) {
-            snackbar.showSnackbar("No dictionary app is installed")
-        }
-        DictionaryChoice.None, null -> Unit
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w("Granger", "Looking up “$word” failed", e)
+        "Couldn’t look up “$word”"
     }
 }
 
