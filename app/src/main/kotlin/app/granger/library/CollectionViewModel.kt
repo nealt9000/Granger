@@ -2,6 +2,7 @@ package app.granger.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.archive.ArchiveDownloads
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.BookPosition
@@ -86,7 +87,11 @@ class CollectionViewModel(
      */
     fun removeBook(book: Book) {
         appScope.launch {
-            if (book.origin == BookOrigin.GRANGER) downloads.remove(book.sourceRef)
+            when (book.origin) {
+                BookOrigin.GRANGER -> downloads.remove(book.sourceRef)
+                BookOrigin.ARCHIVE_ORG -> downloads.remove(ArchiveDownloads.itemId(book.sourceRef))
+                else -> Unit
+            }
             bookshelf.remove(book.id)
         }
     }

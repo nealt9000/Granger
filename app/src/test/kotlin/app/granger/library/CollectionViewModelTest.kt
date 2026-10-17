@@ -126,6 +126,15 @@ class CollectionViewModelTest {
         assertThat(bookshelf.bookList.value).isEmpty()
     }
 
+    @Test fun removingAnArchiveBookRemovesItsDownload() = runTest(main.dispatcher) {
+        val b = book("book:archive-org:x", "Old").copy(origin = BookOrigin.ARCHIVE_ORG, sourceRef = "x")
+        bookshelf.bookList.value = listOf(b)
+        vm("c1").removeBook(b)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("remove:archive-org:x")
+        assertThat(bookshelf.bookList.value).isEmpty()
+    }
+
     @Test fun removeImportedBookLeavesDownloadsAlone() = runTest(main.dispatcher) {
         val b = book("import:abc", "Mine").copy(origin = BookOrigin.IMPORT, sourceRef = "abc")
         bookshelf.bookList.value = listOf(b)

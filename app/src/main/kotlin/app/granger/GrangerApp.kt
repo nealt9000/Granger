@@ -20,7 +20,12 @@ import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.WorkManagerScheduler
 import app.granger.core.library.BookIndex
+import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
+import app.granger.archive.ArchiveDownloads
+import app.granger.archive.ArchivePrefs
+import app.granger.archive.SharedArchivePrefs
+import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
@@ -63,17 +68,24 @@ class GrangerApp : Application(), DownloadsHost {
  * Files a finished book download. Never throws: the runner would turn an exception into FAILED for a download whose
  * file is already installed, and a book that didn't register is found by the next start's scan.
  */
-internal suspend fun onBookInstalled(bookshelf: Bookshelf, file: File, itemId: String, startIndexing: () -> Unit) {
+internal suspend fun onBookInstalled(
+    bookshelf: Bookshelf,
+    file: File,
+    origin: BookOrigin,
+    ref: String,
+    details: BookDetails?,
+    startIndexing: () -> Unit,
+) {
     try {
-        if (bookshelf.addDownloaded(file, BookOrigin.GRANGER, itemId) == null) {
-            android.util.Log.w("Granger", "Downloaded book $itemId is not a readable EPUB")
+        if (bookshelf.addDownloaded(file, origin, ref, details) == null) {
+            android.util.Log.w("Granger", "Downloaded book $ref is not a readable EPUB")
             return
         }
         startIndexing()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        android.util.Log.e("Granger", "Filing downloaded book $itemId failed", e)
+        android.util.Log.e("Granger", "Filing downloaded book $ref failed", e)
     }
 }
 
@@ -139,6 +151,12 @@ class AppContainer(context: Context) {
         includeUnevaluatedModels = BuildConfig.DEBUG,
     )
 
+    val archiveClient = ArchiveOrgClient(http, "Granger/${BuildConfig.VERSION_NAME} (+https://github.com/nealt9000/Granger)")
+    val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
+
+    /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
+    val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")
+
     val volumes: VolumeSource = AndroidVolumes(context)
     val downloadPrefs: DownloadPrefs = SharedDownloadPrefs(context)
 
@@ -165,9 +183,18 @@ class AppContainer(context: Context) {
                 library.fileReplaced(record.filePath)
                 library.refresh()
             } else if (record.kind == ItemKind.BOOK) {
-                onBookInstalled(bookshelf, File(record.filePath), record.itemId) {
+                val identifier = ArchiveDownloads.identifierOf(record.itemId)
+                val sidecar = identifier?.takeIf { app.granger.core.archive.ArchiveQuery.isValidIdentifier(it) }
+                    ?.let { File(archiveSidecarDir, "$it.json") }
+                onBookInstalled(
+                    bookshelf, File(record.filePath),
+                    if (identifier != null) BookOrigin.ARCHIVE_ORG else BookOrigin.GRANGER,
+                    identifier ?: record.itemId,
+                    sidecar?.let { ArchiveDownloads.readSidecar(it)?.first },
+                ) {
                     appScope.launch { bookIndex.indexPending() }
                 }
+                sidecar?.delete()
             }
         },
     )
