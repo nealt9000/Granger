@@ -1,0 +1,83 @@
+package app.granger.core.books
+
+import com.google.common.truth.Truth.assertThat
+import java.io.File
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+class EpubInspectorTest {
+    @get:Rule val tmp = TemporaryFolder()
+
+    private fun ok(file: File) = (EpubInspector.inspect(file) as Inspection.Ok).meta
+
+    @Test fun readsMetadataCoverAndSpine() {
+        val file = TestEpubs.build(
+            tmp.root,
+            title = "Moby Dick",
+            authors = listOf("Herman Melville"),
+            translators = listOf("T. Ranslator"),
+            subjects = listOf("Whales", "Sea"),
+            description = "A whale.",
+            collection = "Sea Stories",
+            cover = TestEpubs.CoverStyle.EPUB3_PROPERTY,
+            chapters = listOf("<p>One</p>", "<p>Two</p>"),
+        )
+        val meta = ok(file)
+        assertThat(meta.title).isEqualTo("Moby Dick")
+        assertThat(meta.authors).containsExactly("Herman Melville")
+        assertThat(meta.translators).containsExactly("T. Ranslator")
+        assertThat(meta.subjects).containsExactly("Whales", "Sea").inOrder()
+        assertThat(meta.description).isEqualTo("A whale.")
+        assertThat(meta.language).isEqualTo("en")
+        assertThat(meta.date).isEqualTo("2020-01-02")
+        assertThat(meta.identifier).startsWith("urn:uuid:")
+        assertThat(meta.collection).isEqualTo("Sea Stories")
+        assertThat(meta.cover).isEqualTo(TestEpubs.COVER_BYTES)
+        assertThat(meta.coverExtension).isEqualTo("png")
+        assertThat(meta.spine).containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml").inOrder()
+    }
+
+    @Test fun missingTitleUsesFileName() {
+        val file = TestEpubs.build(tmp.root, name = "lost-book.epub", title = null)
+        assertThat(ok(file).title).isEqualTo("lost-book")
+        assertThat((EpubInspector.inspect(file, "Given") as Inspection.Ok).meta.title).isEqualTo("Given")
+    }
+
+    @Test fun epub2CoverMetaIsFound() {
+        val meta = ok(TestEpubs.build(tmp.root, cover = TestEpubs.CoverStyle.EPUB2_META))
+        assertThat(meta.cover).isEqualTo(TestEpubs.COVER_BYTES)
+    }
+
+    @Test fun noCoverIsNull() {
+        val meta = ok(TestEpubs.build(tmp.root))
+        assertThat(meta.cover).isNull()
+        assertThat(meta.coverExtension).isNull()
+        assertThat(meta.collection).isNull()
+    }
+
+    @Test fun pdfRenamedEpubIsInvalid() {
+        val file = tmp.newFile("fake.epub").apply { writeText("%PDF-1.7 not a zip at all") }
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
+
+    @Test fun zipWithoutOpfIsInvalid() {
+        val file = TestEpubs.build(tmp.root, includeOpf = false)
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
+
+    @Test fun emptySpineIsInvalid() {
+        val file = TestEpubs.build(tmp.root, chapters = emptyList())
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
+
+    @Test fun emptyFileIsInvalid() {
+        val file = tmp.newFile("empty.epub")
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
+
+    @Test fun protectedIsReportedBeforeParsing() {
+        val file = TestEpubs.build(tmp.root, includeOpf = false, drmFiles = mapOf("META-INF/license.lcpl" to "{}"))
+        assertThat(EpubInspector.inspect(file)).isEqualTo(Inspection.Protected(DrmKind.LCP))
+    }
+}
