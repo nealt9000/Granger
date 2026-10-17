@@ -222,16 +222,20 @@ fun ResearchScreen(
     }
     val turnCount = state.turns.size
     LaunchedEffect(turnCount) {
-        // Equal after rotation or Back: the restored list position stands.
-        if (turnCount > seenTurns) {
+        // Equal after rotation or Back: the restored list position stands. An empty chat (its Recent chats list) stays at the top.
+        if (turnCount > 0 && turnCount > seenTurns) {
             follow = true
             scrollToEnd()
         }
         seenTurns = turnCount
     }
     val streamed = state.turns.lastOrNull()?.partial?.length ?: 0
-    LaunchedEffect(rows.size, streamed) {
-        if (follow && state.running) scrollToEnd()
+    // Keyed on running too, so a turn that just finished (its final answer and source cards) gets one last scroll.
+    val running = state.running
+    var wasRunning by remember { mutableStateOf(running) }
+    LaunchedEffect(rows.size, streamed, running) {
+        if (follow && (running || wasRunning)) scrollToEnd()
+        wasRunning = running
     }
 
     Scaffold(
