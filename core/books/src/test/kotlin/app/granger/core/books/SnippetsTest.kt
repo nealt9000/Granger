@@ -24,4 +24,28 @@ class SnippetsTest {
     @Test fun shortTextHasNoEllipsis() {
         assertThat(Snippets.around("hello world", "world")).isEqualTo("hello <b>world</b>")
     }
+
+    @Test fun quoteFindsThePhraseWithContext() {
+        val text = "On what compulsion must I? Tell me that.\nPORTIA. The quality of\n mercy is not strain'd, It droppeth"
+        val q = Snippets.quote(text, "Quality of mercy", context = 12)!!
+        assertThat(q.highlight).isEqualTo("quality of\n mercy")
+        assertThat(q.before).isEqualTo("PORTIA. The ")
+        assertThat(q.after).isEqualTo(" is not stra")
+    }
+
+    @Test fun quoteFallsBackToTheFirstWordFound() {
+        val q = Snippets.quote("the gentle rain from heaven, mercy seasons justice", "mercy rain")!!
+        assertThat(q.highlight).isEqualTo("rain")
+        assertThat(q.before).isEqualTo("the gentle ")
+    }
+
+    @Test fun quoteIsNullWithoutAMatch() {
+        assertThat(Snippets.quote("nothing here", "mercy")).isNull()
+        assertThat(Snippets.quote("nothing here", "  ")).isNull()
+    }
+
+    @Test fun quoteIsCappedInLength() {
+        val q = Snippets.quote("a " + "x".repeat(300), "x".repeat(300), maxLength = 50)!!
+        assertThat(q.highlight).hasLength(50)
+    }
 }

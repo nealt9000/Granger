@@ -32,6 +32,10 @@ object StartLocator {
                         fragments = listOfNotNull(fragment),
                         progression = target.progression,
                     ),
+                    // Readium looks for this text first and lands on the page where it starts; the progression,
+                    // measured in characters rather than layout, is only the fallback when it isn't found.
+                    text = target.quote?.let { Locator.Text(before = it.before, highlight = it.highlight, after = it.after) }
+                        ?: Locator.Text(),
                 )
             }
         }

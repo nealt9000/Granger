@@ -1,10 +1,16 @@
 package app.granger.ebook
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
+import androidx.fragment.app.FragmentManager
 import app.granger.theme.GrangerColors
 import java.io.File
 import kotlinx.coroutines.CancellationException
@@ -136,13 +142,49 @@ object OpenBooks {
 /**
  * Installed on the activity's fragment manager before `super.onCreate`, so a restored [EpubNavigatorFragment]
  * is built from the open book. With nothing open (the process died and the book isn't reopened yet) it returns a
- * blank fragment, which [NavigatorHost] replaces once the book is open. Every other class is built as usual.
+ * [NavigatorStandIn], which the activity drops right after `super.onCreate` ([dropNavigatorStandIns]); should one
+ * survive, [NavigatorHost] replaces it once the book is open. Every other class is built as usual.
  */
-class ReadiumFragmentFactory : FragmentFactory() {
+class ReadiumFragmentFactory(
+    /** The class built from the open book; a parameter only so tests can stand a plain fragment in for it. */
+    private val navigatorClass: String = EpubNavigatorFragment::class.java.name,
+) : FragmentFactory() {
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
-        if (className != EpubNavigatorFragment::class.java.name) return super.instantiate(classLoader, className)
-        val open = OpenBooks.current ?: return Fragment()
-        val fragments = OpenBooks.navigatorFragments?.takeIf { it.first === open.second } ?: return Fragment()
+        if (className != navigatorClass) return super.instantiate(classLoader, className)
+        val open = OpenBooks.current ?: return NavigatorStandIn()
+        val fragments = OpenBooks.navigatorFragments?.takeIf { it.first === open.second } ?: return NavigatorStandIn()
         return fragments.second.instantiate(classLoader, className)
     }
+}
+
+/**
+ * What a navigator restored after process death becomes. The navigator's saved state still holds its page
+ * fragments, and the fragment manager restores them as this fragment's children and moves them on with it. A child
+ * looks up its container in its parent's view, and a parent with no view throws ("does not have a view") from the
+ * activity's `onStart`. So this fragment has a view, and drops the restored children as soon as they're created:
+ * they belong to a navigator that no longer exists.
+ */
+class NavigatorStandIn : Fragment() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState) // Restores the children, at CREATED.
+        val children = childFragmentManager.fragments
+        if (children.isNotEmpty()) {
+            childFragmentManager.beginTransaction().apply { children.forEach(::remove) }.commitNowAllowingStateLoss()
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        FrameLayout(inflater.context)
+}
+
+/**
+ * Removes the stand-ins the fragment manager restored, before anything waits on their container: called right after
+ * `super.onCreate`, while the fragments are only CREATED. A real navigator (rotation, book still open) is kept for
+ * [NavigatorHost] to adopt. Returns how many were removed.
+ */
+fun dropNavigatorStandIns(fragmentManager: FragmentManager): Int {
+    val strays = fragmentManager.fragments.filterIsInstance<NavigatorStandIn>()
+    if (strays.isEmpty() || fragmentManager.isDestroyed) return 0
+    fragmentManager.beginTransaction().apply { strays.forEach(::remove) }.commitNowAllowingStateLoss()
+    return strays.size
 }

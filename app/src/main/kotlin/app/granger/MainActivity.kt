@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.ebook.ReadiumFragmentFactory
+import app.granger.ebook.dropNavigatorStandIns
 import app.granger.launch.LaunchDecider
 import app.granger.launch.LaunchFacts
 import app.granger.launch.StartScreen
@@ -40,6 +41,9 @@ class MainActivity : FragmentActivity() {
         // Before super.onCreate, which restores fragments: the e-book navigator is rebuilt from the open book.
         supportFragmentManager.fragmentFactory = ReadiumFragmentFactory()
         super.onCreate(savedInstanceState)
+        // After process death a restored navigator is a stand-in with nothing to show; drop it before onStart
+        // moves it on, so nothing restored waits on a container Compose hasn't made yet.
+        dropNavigatorStandIns(supportFragmentManager)
         container = (application as GrangerApp).container
         // So rail availability reflects the files on disk now, not the last scan.
         container.appScope.launch { runCatching { container.library.refresh() } }

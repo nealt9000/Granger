@@ -1,6 +1,7 @@
 package app.granger.ebook
 
 import app.granger.BookTarget
+import app.granger.core.books.TextQuote
 import app.granger.testPublication
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -38,6 +39,19 @@ class StartLocatorTest {
         assertThat(fromSaved.locations.progression).isEqualTo(0.25)
 
         assertThat(StartLocator.choose(publication, null, null)).isNull()
+    }
+
+    @Test fun targetQuoteBecomesTheLocatorText() = runTest {
+        val quote = TextQuote("PORTIA. The ", "quality of mercy", " is not strain'd")
+        val target = StartLocator.choose(publication, null, BookTarget("c002.xhtml", 0.39, quote))!!
+        // Readium finds this text on the page before it falls back to the progression.
+        assertThat(target.text.highlight).isEqualTo("quality of mercy")
+        assertThat(target.text.before).isEqualTo("PORTIA. The ")
+        assertThat(target.text.after).isEqualTo(" is not strain'd")
+        assertThat(target.locations.progression).isEqualTo(0.39)
+
+        val plain = StartLocator.choose(publication, null, BookTarget("c002.xhtml", 0.39))!!
+        assertThat(plain.text.highlight).isNull()
     }
 
     @Test fun targetWithAFragmentStillMatchesItsChapter() = runTest {
