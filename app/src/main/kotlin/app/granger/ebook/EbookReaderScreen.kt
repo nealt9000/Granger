@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,6 +83,8 @@ fun EbookReaderScreen(
     // Holds nothing of this composition: the menu reaches the view model through SelectionBridge, so it still
     // works inside a navigator that rotation restored.
     val config = remember { readerConfiguration() }
+    // Another reader may have taken the menu (or cleared it on its way out) while this one was underneath.
+    SideEffect { viewModel.claimSelection() }
 
     // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts.
     val requestAtEntry = remember { showChromeRequest }

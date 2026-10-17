@@ -391,6 +391,11 @@ class EbookReaderViewModel(
         _state.update { it.copy(chromeVisible = true) }
     }
 
+    /** Makes this reader the one the selection menu reaches; called whenever its screen is shown. */
+    fun claimSelection() {
+        SelectionBridge.sink = selectionSink
+    }
+
     override fun onCleared() {
         if (SelectionBridge.sink === selectionSink) SelectionBridge.sink = null
         navigatorFactory?.let(OpenBooks::release)

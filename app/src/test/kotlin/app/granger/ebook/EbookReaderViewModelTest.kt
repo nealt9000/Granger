@@ -530,6 +530,20 @@ class EbookReaderViewModelTest {
         advanceUntilIdle()
         assertThat(vm.state.value.editingHighlight).isNotNull()
     }
+
+    @Test fun backToAnOlderReaderCanClaimTheMenuAgain() = runTest(main.dispatcher) {
+        val a = reader()
+        val b = reader()
+        b.clear()
+        assertThat(SelectionBridge.sink).isNull()
+        val seen = mutableListOf<SelectionAction>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { a.selectionActions.collect { seen += it.action } }
+        runCurrent()
+        a.claimSelection()
+        SelectionBridge.dispatch(SelectionRequest(SelectionAction.HIGHLIGHT, null))
+        advanceUntilIdle()
+        assertThat(seen).containsExactly(SelectionAction.HIGHLIGHT)
+    }
 }
 
 class FakeBookSearcher : BookSearcher {
