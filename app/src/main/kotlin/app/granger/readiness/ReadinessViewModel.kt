@@ -14,7 +14,7 @@ import app.granger.core.downloads.VolumeSource
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
-import app.granger.downloads.VolumeRow
+import app.granger.sources.VolumeRow
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

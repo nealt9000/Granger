@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark only. isLightTheme=false also tells the reader's WebView to darken pages that don't style themselves. -->
+    <style name="Theme.Granger" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:isLightTheme">false</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowBackground">@color/granger_background</item>
+    </style>
+</resources>

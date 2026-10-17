@@ -23,7 +23,7 @@ class MigrationTest {
             execSQL("INSERT INTO bookmarks (packId, path, title, createdAt) VALUES ('u-a', 'index', 'Home', 1)")
             close()
         }
-        val db = helper.runMigrationsAndValidate("migrate.db", 2, true)
+        val db = helper.runMigrationsAndValidate("migrate.db", 3, true, LibraryDatabase.MIGRATION_2_3)
         db.query("SELECT id, name FROM packs").use {
             assertThat(it.moveToFirst()).isTrue()
             assertThat(it.getString(0)).isEqualTo("u-a")
@@ -33,5 +33,27 @@ class MigrationTest {
             it.moveToFirst()
             assertThat(it.getInt(0)).isEqualTo(1)
         }
+    }
+
+    @Test fun version2DataSurvivesAndBuiltInsAreSeeded() {
+        helper.createDatabase("migrate3.db", 2).apply {
+            execSQL(
+                "INSERT INTO packs (id, filePath, title, description, language, date, sizeBytes, hasFulltextIndex, status, addedAt, name) " +
+                    "VALUES ('u-a', '/p/a.zim', 'A', '', 'eng', '2026-10-15', 10, 1, 'OK', 5, 'a')",
+            )
+            execSQL("INSERT INTO bookmarks (packId, path, title, createdAt) VALUES ('u-a', 'index', 'Home', 1)")
+            execSQL("INSERT INTO reading_positions (packId, path, scrollFraction, updatedAt) VALUES ('u-a', 'index', 0.5, 2)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate3.db", 3, true, LibraryDatabase.MIGRATION_2_3)
+        for (table in listOf("packs", "bookmarks", "reading_positions")) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(1)
+            }
+        }
+        val ids = mutableListOf<String>()
+        db.query("SELECT id FROM media_types ORDER BY sortOrder").use { while (it.moveToNext()) ids += it.getString(0) }
+        assertThat(ids).containsExactly("literature", "audiobooks", "music", "video").inOrder()
     }
 }

@@ -1,4 +1,4 @@
-package app.granger.downloads
+package app.granger.sources
 
 import app.granger.SHA_A
 import app.granger.SHA_B

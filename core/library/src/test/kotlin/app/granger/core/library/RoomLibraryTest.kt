@@ -270,6 +270,30 @@ class RoomLibraryTest {
         assertThat(library.startPath("u-new")).isEqualTo("C++")
     }
 
+    @Test fun newSnapshotInheritsTabsAndHistory() = test {
+        val old = zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top")
+        library.refresh()
+        val sessions = RoomReadingSessions(db) { clock }
+        val tabId = sessions.openTab("u-old", "index", "Home")
+
+        zim(internal, "top_2026-09.zim", "u-new", name = "wikipedia_en_top")
+        old.delete()
+        library.refresh()
+
+        assertThat(sessions.tab(tabId)?.packId).isEqualTo("u-new")
+        assertThat(sessions.history.first().map { it.packId }).containsExactly("u-new")
+    }
+
+    @Test fun removingAPackDeletesItsTabsAndHistory() = test {
+        zim(internal, "a.zim", "u-a")
+        library.refresh()
+        val sessions = RoomReadingSessions(db) { clock }
+        val tabId = sessions.openTab("u-a", "index", "Home")
+        assertThat(library.remove("u-a")).isTrue()
+        assertThat(sessions.tab(tabId)).isNull()
+        assertThat(sessions.history.first()).isEmpty()
+    }
+
     @Test fun snapshotReplacedAtTheSamePathKeepsBookmarks() = test {
         zim(internal, "top.zim", "u-old", name = "wikipedia_en_top")
         library.refresh()

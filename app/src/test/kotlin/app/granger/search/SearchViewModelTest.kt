@@ -1,5 +1,6 @@
 package app.granger.search
 
+import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.SearchHit
@@ -24,9 +25,10 @@ class SearchViewModelTest {
     }
 
     private val search = FakeSearch()
+    private val sessions = FakeReadingSessions()
 
     @Test fun typingIsDebouncedToTheLastQuery() = runTest(main.dispatcher) {
-        val vm = SearchViewModel(search)
+        val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange("p")
         vm.onQueryChange("ph")
         vm.onQueryChange("pho")
@@ -36,7 +38,7 @@ class SearchViewModelTest {
     }
 
     @Test fun showsTitlesThenFullTextWithoutDuplicates() = runTest(main.dispatcher) {
-        val vm = SearchViewModel(search)
+        val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange("photo")
         testScheduler.advanceUntilIdle()
         val state = vm.state.value
@@ -46,7 +48,7 @@ class SearchViewModelTest {
     }
 
     @Test fun clearingTheQueryClearsResults() = runTest(main.dispatcher) {
-        val vm = SearchViewModel(search)
+        val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange("photo")
         testScheduler.advanceUntilIdle()
         vm.onQueryChange("   ")
@@ -57,12 +59,51 @@ class SearchViewModelTest {
     }
 
     @Test fun surroundingSpacesDoNotStartANewSearch() = runTest(main.dispatcher) {
-        val vm = SearchViewModel(search)
+        val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange("photo")
         testScheduler.advanceUntilIdle()
         vm.onQueryChange("photo ")
         testScheduler.advanceUntilIdle()
         assertThat(search.titleQueries).containsExactly("photo")
         assertThat(vm.state.value.query).isEqualTo("photo ")
+    }
+
+    @Test fun initialQueryIsSearchedImmediately() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.runCurrent()
+        assertThat(vm.state.value.query).isEqualTo("photo")
+        assertThat(search.titleQueries).containsExactly("photo")
+        assertThat(vm.state.value.titles.map { it.path }).containsExactly("Photosynthesis")
+    }
+
+    @Test fun openingAHitRecordsTheSearchAndOpensATab() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange(" photo ")
+        testScheduler.advanceUntilIdle()
+        val id = vm.open(vm.state.value.titles.single())
+        assertThat(sessions.searches.value).containsExactly("photo")
+        val tab = sessions.tabs.value.single()
+        assertThat(tab.id).isEqualTo(id)
+        assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("p", "Photosynthesis", "Photosynthesis").inOrder()
+        assertThat(tab.onRail).isTrue()
+    }
+
+    @Test fun emptyFieldShowsRecentSearches() = runTest(main.dispatcher) {
+        sessions.searches.value = listOf("cats", "dogs")
+        val vm = SearchViewModel(search, sessions, "")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.recent).containsExactly("cats", "dogs").inOrder()
+    }
+
+    @Test fun typedInputWaitsForTheDebounce() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "")
+        testScheduler.runCurrent()
+        vm.onQueryChange("photo")
+        testScheduler.advanceTimeBy(SearchViewModel.DEBOUNCE_MS - 1)
+        testScheduler.runCurrent()
+        assertThat(search.titleQueries).isEmpty()
+        testScheduler.advanceTimeBy(1)
+        testScheduler.runCurrent()
+        assertThat(search.titleQueries).containsExactly("photo")
     }
 }

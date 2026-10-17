@@ -24,6 +24,7 @@ class ReaderWebViewTest {
     private lateinit var webView: ReaderWebView
     private val shown = LinkedBlockingQueue<String>()
     private val external = LinkedBlockingQueue<String>()
+    private val chromeToggles = LinkedBlockingQueue<Unit>()
 
     @Before fun setUp() {
         val file = File(instrumentation.targetContext.cacheDir, "granger-test.zim")
@@ -31,11 +32,14 @@ class ReaderWebViewTest {
         archive = (KiwixZimOpener(instrumentation.targetContext).open(file) as ZimOpenResult.Opened).archive
         val client = ZimWebViewClient(
             resolver = ZimResolver(archiveFor = { id -> archive.takeIf { id == "test" } }),
+            assets = instrumentation.targetContext.assets,
             onExternalLink = { external.add(it) },
             onLeavingPage = {},
             onPageShown = { _, url -> shown.add(url) },
         )
-        instrumentation.runOnMainSync { webView = ReaderWebView(instrumentation.targetContext, client) }
+        instrumentation.runOnMainSync {
+            webView = ReaderWebView(instrumentation.targetContext, client, onToggleChrome = { chromeToggles.add(Unit) })
+        }
     }
 
     @After fun tearDown() {
@@ -102,5 +106,43 @@ class ReaderWebViewTest {
         // ZIM content still loads through request interception.
         load("Photosynthesis")
         assertThat(js("document.querySelector('img').naturalWidth")).isEqualTo("1")
+    }
+
+    /** Dispatches a click on the first element matching [selector], at [xFraction] of the page's width. */
+    private fun clickAt(selector: String, xFraction: Double) {
+        js(
+            "document.querySelector('$selector').dispatchEvent(new MouseEvent('click', " +
+                "{bubbles: true, cancelable: true, clientX: window.innerWidth * $xFraction, clientY: 10}))",
+        )
+    }
+
+    @Test fun tapInTheMiddleOfTextTogglesChrome() {
+        load("Photosynthesis")
+        clickAt("p", 0.5)
+        assertThat(chromeToggles.poll(5, TimeUnit.SECONDS)).isNotNull()
+        // Near the edges a tap is left to the page.
+        clickAt("p", 0.1)
+        clickAt("p", 0.9)
+        assertThat(chromeToggles.poll(1, TimeUnit.SECONDS)).isNull()
+    }
+
+    @Test fun tapOnALinkDoesNotToggleChrome() {
+        load("index")
+        clickAt("a[href=\"https://example.com/\"]", 0.5)
+        assertThat(external.poll(10, TimeUnit.SECONDS)).isEqualTo("https://example.com/")
+        assertThat(chromeToggles.poll(1, TimeUnit.SECONDS)).isNull()
+    }
+
+    @Test fun kiwixMainPagesGetJqueryFromTheApp() {
+        load("index")
+        js("var s = document.createElement('script'); s.src = '${MainPageFixes.JQUERY_URL}'; document.head.appendChild(s)")
+        // The app's own copy, served by interception; the WebView can't reach code.jquery.com.
+        var version = js("window.jQuery ? jQuery.fn.jquery : null")
+        var tries = 0
+        while (version == "null" && tries++ < 50) {
+            Thread.sleep(100)
+            version = js("window.jQuery ? jQuery.fn.jquery : null")
+        }
+        assertThat(version).isEqualTo("\"3.7.1\"")
     }
 }

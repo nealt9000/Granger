@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 
 fun inMemoryDatabase(): LibraryDatabase =
     Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), LibraryDatabase::class.java)
+        .addCallback(LibraryDatabase.SeedCallback)
         .allowMainThreadQueries()
         .build()
 

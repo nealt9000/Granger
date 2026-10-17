@@ -2,6 +2,7 @@ package app.granger.core.library
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import app.granger.core.zim.ZimArchive
 import java.io.File
@@ -65,3 +66,42 @@ data class Bookmark(val packId: String, val path: String, val title: String, val
 
 @Entity(tableName = "reading_positions", primaryKeys = ["packId", "path"])
 data class ReadingPosition(val packId: String, val path: String, val scrollFraction: Float, val updatedAt: Long)
+
+/** A kind of media the library files packs under. The four built-ins are seeded; [sortOrder] orders the toolbar. */
+@Entity(tableName = "media_types")
+data class MediaType(@PrimaryKey val id: String, val name: String, val builtIn: Boolean, val sortOrder: Int)
+
+/**
+ * A named group of packs within a [MediaType]. [defaultKey] is the filing key for collections the app made
+ * (`"wikipedia"`, `"other"`, ...); null for ones the user created.
+ */
+@Entity(tableName = "collections", indices = [Index(value = ["defaultKey"], unique = true)])
+data class ShelfCollection(
+    @PrimaryKey val id: String,
+    val name: String,
+    val mediaTypeId: String,
+    val userCreated: Boolean,
+    val defaultKey: String?,
+)
+
+/** Files a pack in a collection. [packKey] is `Pack.name` if not blank, else `Pack.id`; [userSet] marks a manual move. */
+@Entity(tableName = "placements")
+data class Placement(@PrimaryKey val packKey: String, val collectionId: String, val userSet: Boolean)
+
+/** An open article in the reader; [onRail] tabs show in the side rail. */
+@Entity(tableName = "reading_tabs")
+data class ReadingTab(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val packId: String,
+    val path: String,
+    val title: String,
+    val openedAt: Long,
+    val onRail: Boolean,
+)
+
+/** An article that was opened, one row per article. */
+@Entity(tableName = "history", primaryKeys = ["packId", "path"], indices = [Index("openedAt")])
+data class HistoryEntry(val packId: String, val path: String, val title: String, val openedAt: Long)
+
+@Entity(tableName = "recent_searches")
+data class RecentSearch(@PrimaryKey val query: String, val searchedAt: Long)

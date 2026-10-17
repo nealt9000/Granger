@@ -30,6 +30,11 @@ android {
     sourceSets {
         getByName("androidTest") { assets.directories.add(rootProject.file("testdata").path) }
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        // Robolectric reads FileDescriptor internals by reflection, which JDK 17+ blocks by default.
+        unitTests.all { it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED") }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -52,11 +57,14 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.webkit)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)

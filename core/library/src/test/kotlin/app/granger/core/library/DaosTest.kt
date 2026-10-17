@@ -58,4 +58,28 @@ class DaosTest {
         assertThat(dao.get("p", "A")!!.scrollFraction).isEqualTo(0.5f)
         assertThat(dao.lastRead("nobody")).isNull()
     }
+
+    @Test fun freshDatabaseHasBuiltInMediaTypes() = runTest {
+        val types = db.shelfDao().observeMediaTypes().first()
+        assertThat(types.map { it.id }).containsExactly("literature", "audiobooks", "music", "video").inOrder()
+        assertThat(types.all { it.builtIn }).isTrue()
+    }
+
+    @Test fun railTabsAreNewestFirstAndLimited() = runTest {
+        val dao = db.sessionDao()
+        for (i in 1..10) dao.insertTab(ReadingTab(0, "p", "page$i", "Page $i", openedAt = i.toLong(), onRail = i != 10))
+        val rail = dao.observeRailTabs(8).first()
+        assertThat(rail.map { it.path }).containsExactly(
+            "page9", "page8", "page7", "page6", "page5", "page4", "page3", "page2",
+        ).inOrder()
+    }
+
+    @Test fun historyUpsertKeepsOneRowPerArticle() = runTest {
+        val dao = db.sessionDao()
+        dao.upsertHistory(HistoryEntry("p", "a", "A", 1L))
+        dao.upsertHistory(HistoryEntry("p", "a", "A", 5L))
+        val all = dao.observeHistory().first()
+        assertThat(all).hasSize(1)
+        assertThat(all.single().openedAt).isEqualTo(5L)
+    }
 }

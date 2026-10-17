@@ -10,7 +10,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 2 | Reader | `:core:zim` (java-libkiwix `org.kiwix:libkiwix`), test ZIM, `:core:library` (Room), Library screen, WebView reader, title + full-text search, bookmarks, reading position | **Done:** `2026-10-15-plan-02-reader.md` |
 | 3 | Catalog + downloads + Readiness | `tools/catalog-gen`, Ed25519-signed catalog, `:core:catalog`, `:core:downloads` (WorkManager, resume, sha256, volumes), Downloads + Readiness screens | **Done:** `2026-10-16-plan-03-catalog-downloads-readiness.md` |
 | 4 | Pack builder + Granger Classics | `tools/pack-builder` (python-libzim), Classics manifest, Classics pack on a GitHub release, catalog entry | **Done:** `2026-10-16-plan-04-pack-builder-classics.md` |
-| 5 | Shell + Library | Flame theme + icon, side rail (bookmarks per article, History, Recent), immersive mode, open-to-last-place, media types / collections / filing, Library screens, Granger + Kiwix source screens, Settings (Models, Readiness), polished web-style reader with selection actions, schema migration | |
+| 5 | Shell + Library | Flame theme + icon, side rail (bookmarks per article, History, Recent), immersive mode, open-to-last-place, media types / collections / filing, Library screens, Granger + Kiwix source screens, Settings (Models, Readiness), polished web-style reader with selection actions, schema migration | **Done:** `2026-10-16-plan-05-shell-library.md` (reader device tests pending) |
 | 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:imports` (EPUB/TXT/MD, DRM detection, FTS5), My books, pack-builder EPUB output, Classics re-release, Search over e-books | |
 | 7 | Archive.org source | Public-domain filter until waiver, search/browse, open-only downloads with sha1/md5 verify, filing, metadata | |
 | 8 | Inquire & Abstract | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats | |
@@ -54,6 +54,31 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 Neal's direction, 2026-10-16, to brainstorm before the next plan: the library will hold more media types from more sources (Kiwix, Granger Classics, archive.org with a legal disclaimer, the user's own collections). Instead of everything landing flat in the Library, content is grouped into collections: Wikipedia packs nest in a Wikipedia area, and Granger Classics becomes a collection whose works are individual e-books rather than one ZIM read as a website. All e-books, whether Classics, archive.org or the user's own, open in one shared e-book reader. Finished-app picture: opening the app shows where you left off in the book you were reading; a vertical side toolbar has a section at the top with bookmarks to recently opened books and media. This likely reshapes Plan 5 (Import) and the Classics pack format, so the four Classics defects above wait for it.
 
 Deferred, low priority (from Plan 2):
-- Opening the reader after the OS killed the app shows the article it was first opened on, not the last page.
+- ~~Opening the reader after the OS killed the app shows the article it was first opened on, not the last page.~~ Fixed by Plan 5: tabs keep the path and scroll position.
 - Large media entries are read whole into memory.
 - No device test yet for a ZIM truncated or ejected (SD card) while it is open.
+
+## Carried forward from Plan 5
+
+- Rail letter tiles become covers in Plan 6.
+- The Inquire & Abstract slot in the rail is switched on in Plan 8.
+- The Classics ZIM stays filed as "Granger Classics" until Plan 6 replaces it with e-books.
+- The three `ReaderWebViewTest` device tests are written but unrun, pending the owner's go-ahead: `connectedDebugAndroidTest` uninstalls the app and wipes downloaded packs and models.
+- Pixel 6 walkthrough, after unlock: moving Wikipedia into a new "Reference" media type and back, the Granger, Kiwix and Models source screens, and About all passed. Not checked on a device:
+  - Reboot → Library: a reboot leaves the phone on a secure lock screen that adb can't pass. The unit tests cover BOOT_COUNT.
+  - A small-pack download and remove: no uninstalled pack is under 50 MB; the next smallest is 272 MB.
+- The rail's edge swipe works only inside a 24 dp wide, 200 dp tall strip at the left-middle (Android's gesture-navigation exclusion limit), and, after the final review fix, also in the immersive reader, where it shows the chrome and rail. Judge its discoverability on a device; tapping the narrow rail's background is the other way to expand it.
+- On Kiwix main pages every tile is a link, and the reader's middle tap ignores links, so a tap on a tile navigates instead of summoning the chrome. By reading the code, the gaps between tiles still toggle it, but nothing else does (Back only goes back a page). Fixed in the final review (see below). On the device, the left-edge swipe brings up the chrome in the reader, and later readers still open immersive.
+- `PublishedCatalogTest` expected a four-item Starter preset; it has had five since the Classics entry was added (Plan 4). The assertion is now five.
+- The schema-migration check covered the end state only (the migrated database opens and reads). The first open after the upgrade was not reproduced.
+- Search groups results as Titles / In article text with the pack shown on each hit, rather than grouping by collection as spec section 4 says. This is a plan-level deviation for Neal to decide: keep it, or regroup by collection.
+- The Readiness screen's Library top-bar entry is left as it is: the owner's call.
+- System-bar swipes (the transient bars) do not show the reader chrome; only the left-edge swipe and the middle tap do.
+
+### Fixed in the final whole-branch review of Plan 5
+
+- Immersive reader: the left-edge swipe and its gesture-exclusion strip now stay active in the reader and show the chrome and rail, so a main page of links can't strand the user. The page script's click listener runs in the capture phase and ignores handled clicks, headings and `[role=button]`, so collapsible Wikipedia headings don't also toggle the chrome.
+- Launch decision: resume requires the pack's file to exist, not only an OK row from the last scan, and `library.refresh()` runs at startup, so a pulled SD card lands on the Library with the missing-pack notice.
+- Theme: the remaining Material purple-tinted roles (inverse, surface containers, dim/bright, secondary and tertiary containers, scrim) are warm neutrals and flame tones; tests check contrast and that no role keeps the baseline.
+- Follow-up: the edge-swipe request is one-shot, so a reader opened after a swipe starts immersive (checked on the Pixel 6, including rotation).
+- Resume no longer fades the Library into the book; a recent search from the rail replaces only a Search that is on top (a reader opened from Search stays on the stack); a tap on a greyed rail tile explains why nothing opened; unused coroutine scope and import removed.

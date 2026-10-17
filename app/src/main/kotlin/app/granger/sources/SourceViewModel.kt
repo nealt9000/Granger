@@ -1,4 +1,4 @@
-package app.granger.downloads
+package app.granger.sources
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,7 +56,11 @@ data class Section(val title: String, val rows: List<ItemRow>)
 
 data class PresetRow(val id: String, val title: String, val itemCount: Int, val remainingCount: Int, val remainingBytes: Long)
 
-data class DownloadsUi(
+enum class SourceTab(val title: String) { BROWSE("Browse"), INSTALLED("Installed"), UPDATES("Updates") }
+
+data class SourceUi(
+    val tab: SourceTab = SourceTab.BROWSE,
+    val query: String = "",
     val loading: Boolean = true,
     val refreshing: Boolean = false,
     val catalogProblem: String? = null,
@@ -68,7 +72,26 @@ data class DownloadsUi(
     val notice: String? = null,
 )
 
-class DownloadsViewModel(
+/** One row per volume, with what is still to download onto it. */
+fun volumeRows(volumes: List<Volume>, records: List<DownloadRecord>): List<VolumeRow> {
+    val active = records.filter { it.isActive }
+    return volumes.map { v ->
+        VolumeRow(
+            path = v.root.path,
+            label = v.label,
+            removable = v.removable,
+            freeBytes = v.freeBytes,
+            totalBytes = v.totalBytes,
+            grangerBytes = v.grangerBytes,
+            queuedBytes = active.filter { it.filePath.startsWith(v.root.path + File.separator) }
+                .sumOf { it.sizeBytes - it.bytesDone },
+        )
+    }
+}
+
+/** One archive source (Granger, Kiwix or Models): the catalog items in [scope], with the downloads around them. */
+class SourceViewModel(
+    private val scope: CatalogScope,
     private val catalog: CatalogSource,
     private val downloads: Downloads,
     private val library: Library,
@@ -78,17 +101,32 @@ class DownloadsViewModel(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
-    private data class Settings(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: String?)
+    private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: String?)
+
+    private data class Settings(
+        val volumes: List<Volume>,
+        val selectedPath: String?,
+        val wifiOnly: Boolean,
+        val notice: String?,
+        val tab: SourceTab,
+        val query: String,
+    )
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
     private val selectedPath = MutableStateFlow(prefs.volumePath)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val notice = MutableStateFlow<String?>(null)
-    private val settings = combine(volumeList, selectedPath, wifiOnly, notice, ::Settings)
+    private val tab = MutableStateFlow(SourceTab.BROWSE)
+    private val query = MutableStateFlow("")
+    private val settings = combine(
+        combine(volumeList, selectedPath, wifiOnly, notice, ::Choices),
+        tab,
+        query,
+    ) { c, tab, query -> Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query) }
 
-    val ui: StateFlow<DownloadsUi> =
+    val ui: StateFlow<SourceUi> =
         combine(catalog.state, downloads.records, library.packs, settings, ::buildUi)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DownloadsUi())
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SourceUi())
 
     init {
         viewModelScope.launch {
@@ -98,8 +136,10 @@ class DownloadsViewModel(
         refreshVolumes()
     }
 
-    /** Free space changes outside the app; called on resume and after every action. */
+    /** Free space and, from Settings, the download choices change outside this screen; called on resume and after every action. */
     fun refreshVolumes() {
+        selectedPath.value = prefs.volumePath
+        wifiOnly.value = prefs.wifiOnly
         viewModelScope.launch { volumeList.value = withContext(io) { volumes.list() } }
     }
 
@@ -156,15 +196,12 @@ class DownloadsViewModel(
         }
     }
 
-    fun setWifiOnly(value: Boolean) {
-        wifiOnly.value = value
-        prefs.wifiOnly = value
-        appScope.launch { downloads.setWifiOnly(value) }
+    fun setTab(value: SourceTab) {
+        tab.value = value
     }
 
-    fun selectVolume(path: String) {
-        selectedPath.value = path
-        prefs.volumePath = path
+    fun setQuery(value: String) {
+        query.value = value
     }
 
     fun dismissNotice() {
@@ -176,11 +213,11 @@ class DownloadsViewModel(
     /** Queues [items] in order and stops at the first one that doesn't fit. Returns the notice to show. */
     private suspend fun enqueue(items: List<CatalogItem>): String? {
         val all = volumeList.value.ifEmpty { withContext(io) { volumes.list() } }
-        val volume = all.firstOrNull { it.root.path == selectedPath.value } ?: all.firstOrNull()
+        val volume = all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
             ?: return "No storage is available right now."
         var queued = 0
         for (item in items) {
-            val problem = when (val result = downloads.enqueue(item, volume.root, wifiOnly.value)) {
+            val problem = when (val result = downloads.enqueue(item, volume.root, prefs.wifiOnly)) {
                 EnqueueResult.Queued -> null.also { queued++ }
                 EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace ->
@@ -194,21 +231,9 @@ class DownloadsViewModel(
         return if (items.size > 1 && queued > 0) "Queued $queued downloads." else null
     }
 
-    private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): DownloadsUi {
+    private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): SourceUi {
         val current = state.catalog
-        val active = records.filter { it.isActive }
-        val volumeRows = s.volumes.map { v ->
-            VolumeRow(
-                path = v.root.path,
-                label = v.label,
-                removable = v.removable,
-                freeBytes = v.freeBytes,
-                totalBytes = v.totalBytes,
-                grangerBytes = v.grangerBytes,
-                queuedBytes = active.filter { it.filePath.startsWith(v.root.path + File.separator) }
-                    .sumOf { it.sizeBytes - it.bytesDone },
-            )
-        }
+        val volumeRows = volumeRows(s.volumes, records)
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
                 is PackEntry -> listOf(item.language, "Updated ${item.snapshotDate}", item.license)
@@ -217,19 +242,36 @@ class DownloadsViewModel(
             val packId = (item as? PackEntry)?.let { installedPackId(it, records, packs) }
             return ItemRow(item.id, item.title, details, item.sizeBytes, statusOf(item, records, packs, tier), packId)
         }
+        val needle = s.query.trim()
+        fun shown(item: CatalogItem): Boolean {
+            if (scopeOf(item) != scope) return false
+            val status = statusOf(item, records, packs, tier)
+            val inTab = when (s.tab) {
+                SourceTab.BROWSE -> true
+                SourceTab.INSTALLED -> status == ItemStatus.Installed || status == ItemStatus.UpdateAvailable ||
+                    records.any { it.itemId == item.id && it.isActive }
+                SourceTab.UPDATES -> status == ItemStatus.UpdateAvailable
+            }
+            val description = (item as? PackEntry)?.description.orEmpty()
+            return inTab && (needle.isEmpty() || item.title.contains(needle, ignoreCase = true) ||
+                description.contains(needle, ignoreCase = true))
+        }
         val sections = if (current == null) emptyList() else buildList {
-            if (current.models.isNotEmpty()) add(Section("AI models", current.models.map(::row)))
-            current.packs.groupBy { it.category }
+            val models = current.models.filter(::shown)
+            if (models.isNotEmpty()) add(Section("AI models", models.map(::row)))
+            current.packs.filter(::shown).groupBy { it.category }
                 .toList()
                 .sortedWith(compareBy({ categoryRank(it.first) }, { it.first }))
                 .forEach { (category, entries) -> add(Section(category, entries.map(::row))) }
         }
-        val presets = current?.presets.orEmpty().filter { it.items.isNotEmpty() }.map { preset ->
+        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val todo = items.filter { wanted(statusOf(it, records, packs, tier)) }
             PresetRow(preset.id, preset.title, items.size, todo.size, todo.sumOf { it.sizeBytes })
         }
-        return DownloadsUi(
+        return SourceUi(
+            tab = s.tab,
+            query = s.query,
             loading = current == null && state.error == null,
             refreshing = state.refreshing,
             catalogProblem = catalogProblem(state),
