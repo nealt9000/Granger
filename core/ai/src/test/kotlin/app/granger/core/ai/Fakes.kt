@@ -65,7 +65,7 @@ class FakeLlmFactory(
     }
 }
 
-class FakeEmbedder : TextEmbedder {
+open class FakeEmbedder : TextEmbedder {
     var closed = false
     override fun load() {}
     override fun embed(texts: List<String>, isQuery: Boolean) = texts.map { FloatArray(4) }

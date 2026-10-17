@@ -6,6 +6,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -65,6 +68,11 @@ class ModelManager(
     private var embedder: TextEmbedder? = null
     @Volatile private var releaseJob: Job? = null
 
+    private enum class Pending { NONE, SOON, NOW }
+    private val sync = Any()
+    private var holds = 0
+    private var pending = Pending.NONE
+
     /** The resident engine for [size], swapping out the other one first. Throws [ModelLoadException]. */
     suspend fun engine(size: LlmSize): LlmEngine {
         cancelRelease()
@@ -76,8 +84,10 @@ class ModelManager(
             val models = installed.first()
             val file = (if (size == LlmSize.SMALL) models.small else models.large)
                 ?: throw ModelLoadException(size, IllegalStateException("$size model is not installed"))
-            val loaded = try {
-                withContext(io) {
+            try {
+                // Store inside the block: withContext drops its result if the caller was cancelled meanwhile,
+                // and a blocking load can't be interrupted, so the loaded model must not be orphaned.
+                withContext(io + NonCancellable) {
                     val e = llms.create(file.path, backend)
                     try {
                         e.load()
@@ -85,16 +95,16 @@ class ModelManager(
                         runCatching { e.close() }
                         throw t
                     }
-                    e
+                    llm = e
+                    llmSize = size
                 }
             } catch (c: CancellationException) {
                 throw c
             } catch (t: Throwable) {
                 throw ModelLoadException(size, t)
             }
-            llm = loaded
-            llmSize = size
-            loaded
+            coroutineContext.ensureActive()
+            checkNotNull(llm)
         }
     }
 
@@ -107,7 +117,7 @@ class ModelManager(
             embedder?.let { return@withLock it }
             val file = installed.first().embedder ?: return@withLock null
             try {
-                withContext(io) {
+                withContext(io + NonCancellable) {
                     val e = embedders.create(file.path)
                     try {
                         e.load()
@@ -115,8 +125,10 @@ class ModelManager(
                         runCatching { e.close() }
                         throw t
                     }
-                    e
-                }.also { embedder = it }
+                    embedder = e
+                }
+                coroutineContext.ensureActive()
+                embedder
             } catch (c: CancellationException) {
                 throw c
             } catch (t: Throwable) {
@@ -127,22 +139,65 @@ class ModelManager(
         }
     }
 
-    /** Closes everything after [releaseAfterMs] unless [engine] or [embedder] is called first. */
-    fun releaseSoon() {
-        cancelRelease()
-        releaseJob = scope.launch {
-            delay(releaseAfterMs)
-            lock.withLock { closeAll() }
+    /** Marks an engine/embedder as in use; releases wait until the returned let-go function (idempotent) is called. */
+    fun hold(): () -> Unit {
+        synchronized(sync) { holds++ }
+        var letGo = false
+        return {
+            val run = synchronized(sync) {
+                if (letGo) {
+                    null
+                } else {
+                    letGo = true
+                    holds--
+                    if (holds == 0) pending.also { pending = Pending.NONE } else null
+                }
+            }
+            when (run) {
+                Pending.SOON -> releaseSoon()
+                Pending.NOW -> releaseNow()
+                else -> Unit
+            }
         }
     }
 
-    /** Closes everything now (once any load in progress finishes). */
-    fun releaseNow() {
-        cancelRelease()
-        scope.launch { lock.withLock { closeAll() } }
+    /** Closes everything after [releaseAfterMs] unless [engine] or [embedder] is called first. */
+    fun releaseSoon() {
+        stopTimer()
+        if (deferIfHeld(Pending.SOON)) return
+        releaseJob = scope.launch {
+            delay(releaseAfterMs)
+            closeIfFree(Pending.SOON)
+        }
     }
 
+    /** Closes everything now (once any load in progress finishes, and nothing is held). */
+    fun releaseNow() {
+        stopTimer()
+        if (deferIfHeld(Pending.NOW)) return
+        releaseJob = scope.launch { closeIfFree(Pending.NOW) }
+    }
+
+    private fun deferIfHeld(kind: Pending): Boolean = synchronized(sync) {
+        if (holds > 0) {
+            if (pending != Pending.NOW) pending = kind
+            true
+        } else {
+            false
+        }
+    }
+
+    private suspend fun closeIfFree(kind: Pending) = lock.withLock {
+        if (!deferIfHeld(kind)) closeAll()
+    }
+
+    /** A use cancels any release, including one deferred by a hold. */
     private fun cancelRelease() {
+        synchronized(sync) { pending = Pending.NONE }
+        stopTimer()
+    }
+
+    private fun stopTimer() {
         releaseJob?.cancel()
         releaseJob = null
     }

@@ -3,7 +3,9 @@ package app.granger.core.ai
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -136,5 +138,89 @@ class ModelManagerTest {
         r.manager.engine(LlmSize.SMALL)
         assertThat(r.manager.embedder()).isNull()
         assertThat(r.embedders).isEmpty()
+    }
+
+    @Test fun cancelDuringLlmLoadKeepsTheEngineResidentNotLeaked() = runTest {
+        var job: Job? = null
+        val llms = object : LlmEngineFactory {
+            val created = mutableListOf<ScriptedLlm>()
+            override fun create(modelPath: String, backend: LlmBackend): LlmEngine =
+                object : ScriptedLlm(FakeClock(), emptyList()) {
+                    override fun load() { job?.cancel(); super.load() }
+                }.also { created += it }
+        }
+        val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), llms, { FakeEmbedder() }, backgroundScope, true, io = StandardTestDispatcher(testScheduler))
+        job = launch { m.engine(LlmSize.SMALL) }
+        runCurrent()
+        assertThat(job.isCancelled).isTrue()
+        // Nothing orphaned: the loaded engine is the resident one, and the next call reuses it.
+        val again = m.engine(LlmSize.SMALL)
+        assertThat(llms.created).hasSize(1)
+        assertThat(again).isSameInstanceAs(llms.created.single())
+    }
+
+    @Test fun cancelDuringEmbedderLoadKeepsItResident() = runTest {
+        var job: Job? = null
+        val created = mutableListOf<FakeEmbedder>()
+        val factory = TextEmbedderFactory {
+            object : FakeEmbedder() { override fun load() { job?.cancel() } }.also { created += it }
+        }
+        val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), FakeLlmFactory(FakeClock()), factory, backgroundScope, true, io = StandardTestDispatcher(testScheduler))
+        job = launch { m.embedder() }
+        runCurrent()
+        assertThat(job.isCancelled).isTrue()
+        assertThat(m.embedder()).isSameInstanceAs(created.single())
+        assertThat(created).hasSize(1)
+    }
+
+    @Test fun releaseNowThenEngineKeepsTheEngine() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        r.manager.releaseNow()
+        val e = r.manager.engine(LlmSize.SMALL)
+        runCurrent()
+        assertThat(r.llms.openEngines).containsExactly(e)
+    }
+
+    @Test fun releaseNowWhileHeldWaitsForLetGo() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val letGo = r.manager.hold()
+        r.manager.releaseNow()
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        letGo()
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun releaseSoonTimerWhileHeldWaitsForLetGo() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val letGo = r.manager.hold()
+        r.manager.releaseSoon()
+        advanceTimeBy(150_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        letGo()
+        advanceTimeBy(119_000)
+        assertThat(r.llms.openEngines).hasSize(1)
+        advanceTimeBy(2_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun letGoTwiceCountsOnce() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val a = r.manager.hold()
+        val b = r.manager.hold()
+        r.manager.releaseNow()
+        a(); a(); a()
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1) // b still holds
+        b()
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
     }
 }
