@@ -24,13 +24,19 @@ import org.readium.r2.navigator.epub.css.Color as CssColor
 import org.readium.r2.navigator.epub.css.RsProperties
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.search.SearchIterator
 import org.readium.r2.shared.publication.services.search.isSearchable
 import org.readium.r2.shared.publication.services.search.search
+import org.readium.r2.shared.util.Try
 import org.readium.r2.shared.util.asset.AssetRetriever
+import org.readium.r2.shared.util.data.Container
 import org.readium.r2.shared.util.getOrElse
 import org.readium.r2.shared.util.http.DefaultHttpClient
+import org.readium.r2.shared.util.resource.Resource
+import org.readium.r2.shared.util.resource.TransformingContainer
+import org.readium.r2.shared.util.resource.map
 import org.readium.r2.streamer.PublicationOpener
 import org.readium.r2.streamer.parser.DefaultPublicationParser
 
@@ -79,6 +85,16 @@ class ReadiumBookSearcher : BookSearcher {
     }
 }
 
+/** [container] with [BookCss] added to every HTML page [manifest] lists; other resources pass through. */
+internal fun withBookCss(manifest: Manifest, container: Container<Resource>): Container<Resource> =
+    TransformingContainer(container) { url, resource ->
+        if (manifest.linkWithHref(url)?.mediaType?.isHtml == true) {
+            resource.map { bytes -> Try.success(BookCss.inject(bytes)) }
+        } else {
+            resource
+        }
+    }
+
 /** Opens a book file for reading. */
 interface BookOpener {
     /** The opened publication, which the caller closes; null when the file can't be read as a book. */
@@ -102,7 +118,13 @@ class ReadiumBookOpener(context: Context) : BookOpener {
                 Log.w(TAG, "Can't read ${file.name}: ${it.message}")
                 return null
             }
-            publicationOpener.open(asset, allowUserInteraction = false).getOrElse {
+            // Passed to open(), not the constructor: in Readium 3.4 the open() parameter shadows the constructor's
+            // onCreatePublication inside open(), so the constructor's is never called.
+            publicationOpener.open(
+                asset,
+                allowUserInteraction = false,
+                onCreatePublication = { container = withBookCss(manifest, container) },
+            ).getOrElse {
                 Log.w(TAG, "Can't open ${file.name}: ${it.message}")
                 asset.close()
                 return null
