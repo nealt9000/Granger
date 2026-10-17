@@ -53,6 +53,10 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str) -> Path:
     return zim
 
 
+class BuildError(Exception):
+    """A work failed to build; the message starts with its slug and Gutenberg id."""
+
+
 def _work(spec, source) -> zimpack.Work:
     cleaned = gutenberg.clean(source.html(spec.gutenberg))
     for notice in gutenberg.later_edition_notices(cleaned.body):
@@ -78,7 +82,7 @@ def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str) -> l
             path = Path(out) / f"{meta.id}_{date}.epub"
             epubpack.write_epub(path, work, meta, covers.cover_jpeg(meta.title, spec.author))
         except Exception as error:
-            raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
+            raise BuildError(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         files.append(path)
     return files
 

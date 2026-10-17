@@ -5,6 +5,7 @@ name the `cNNN.xhtml` files written here. Output is deterministic: fixed zip tim
 taken from the build date.
 """
 import re
+import sys
 import zipfile
 from dataclasses import dataclass
 from html import escape
@@ -115,7 +116,9 @@ def _drop_page_numbers(soup: BeautifulSoup) -> None:
         parent = tag.parent
         for ident in dict.fromkeys(ids):
             if parent.name in _NO_PHRASING_CHILDREN:
-                parent.attrs.setdefault("id", ident)
+                if parent.attrs.setdefault("id", ident) != ident:
+                    print(f"note: page-number id {ident!r} dropped; <{parent.name}> already has an id",
+                          file=sys.stderr)
             else:
                 tag.insert_before(soup.new_tag("span", attrs={"id": ident}))
         tag.decompose()

@@ -130,3 +130,15 @@ def test_describe_epubs_hashes_and_lists(tmp_path):
     assert koran["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert koran["urls"] == [f"{base}/gc-koran-rodwell_2026-10-17.epub"]
     assert by_id["gc-modern-book"]["translator"] is None
+
+
+def test_any_exception_type_is_wrapped_with_the_slug(tmp_path, monkeypatch):
+    import pack_builder
+    from pack_builder import BuildError, build_epubs
+
+    def boom(*args, **kwargs):
+        raise UnicodeDecodeError("utf-8", b"\xff", 0, 1, "bad")
+    monkeypatch.setattr(pack_builder.chapters, "split", boom)
+    with pytest.raises(BuildError, match=r"^modern-book \(#1342\): ") as caught:
+        build_epubs(two_works(tmp_path), FakeSource(), tmp_path, "2026-10-17")
+    assert isinstance(caught.value.__cause__, UnicodeDecodeError)
