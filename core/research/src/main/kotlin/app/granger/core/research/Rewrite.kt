@@ -1,6 +1,7 @@
 package app.granger.core.research
 
-data class RewriteResult(val keywords: List<String>, val medical: Boolean)
+/** [medical] is null when the reply has no `medical:` line (it can be cut off by the token cap). */
+data class RewriteResult(val keywords: List<String>, val medical: Boolean?)
 
 /** Turns a question into catalogue keywords with one short model call. */
 object Rewrite {
@@ -21,7 +22,7 @@ object Rewrite {
         val line = KEYWORDS_LINE.find(reply)?.groupValues?.get(1) ?: return null
         val keywords = line.split(',').map { it.trim() }.filter { it.isNotEmpty() }
         if (keywords.isEmpty()) return null
-        val medical = MEDICAL_LINE.find(reply)?.groupValues?.get(1).equals("yes", ignoreCase = true)
+        val medical = MEDICAL_LINE.find(reply)?.groupValues?.get(1)?.equals("yes", ignoreCase = true)
         return RewriteResult(keywords, medical)
     }
 }

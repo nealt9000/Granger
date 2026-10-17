@@ -9,6 +9,9 @@ class RewriteTest {
 
     @Test fun medicalYes() = assertThat(Rewrite.parse("keywords: burn, first aid\nmedical: yes")!!.medical).isTrue()
 
+    @Test fun missingMedicalLineIsUnknown() =
+        assertThat(Rewrite.parse("keywords: burn treatment, first aid for burns, burn care")!!.medical).isNull()
+
     @Test fun noKeywordsIsNull() = assertThat(Rewrite.parse("I'm sorry, I can't help")).isNull()
 
     @Test fun toleratesCaseAndExtraText() {

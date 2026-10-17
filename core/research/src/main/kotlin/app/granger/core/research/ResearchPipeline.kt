@@ -114,7 +114,7 @@ class ResearchPipeline(
             ranked = request.deeperFrom
         } else {
             val rewrite = rewrite(generator.model, request)
-            medical = rewrite.medical || request.medicalHint
+            medical = rewrite.medical == true || request.medicalHint
             keywords = rewrite.keywords
             emit(ResearchEvent.Progress(Stage.SEARCHING))
             val found = Ranking.preselect(finder.find(keywords), keywords, config)
@@ -171,7 +171,10 @@ class ResearchPipeline(
         }
     }
 
-    /** The model's keywords, or the plain keyword fallback when it times out, errors, or replies with nothing usable. */
+    /**
+     * The model's keywords, or the plain keyword fallback when it times out, errors, or replies with nothing usable.
+     * The medical lexicon decides whenever the model didn't say.
+     */
     private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest): RewriteResult {
         val parsed = try {
             withTimeoutOrNull(rewriteTimeoutMs) {
@@ -185,8 +188,8 @@ class ResearchPipeline(
             null
         }
         val keywords = parsed?.keywords.orEmpty().map(Keywords::normalize).filter { it.isNotBlank() }.distinct()
-        if (parsed != null && keywords.isNotEmpty()) return RewriteResult(keywords, parsed.medical)
         val text = listOfNotNull(request.question, request.priorQuestion).joinToString(" ")
+        if (parsed != null && keywords.isNotEmpty()) return RewriteResult(keywords, parsed.medical ?: Medical.looksMedical(text))
         return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
     }
 

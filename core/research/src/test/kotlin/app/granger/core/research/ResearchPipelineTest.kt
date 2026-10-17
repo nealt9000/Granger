@@ -177,6 +177,16 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun rewriteCutOffBeforeItsMedicalLineFallsBackToTheLexicon() = runTest {
+        // A long keyword line uses up the 32 tokens before "medical:" is written.
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: burn treatment, first aid for burns, burn care, treating") })
+        val finder = FakeFinder(emptyList())
+        val events = ResearchPipeline(finder, FakeModels(gen)).run(ResearchRequest("How do I treat a burn?")).toList()
+        assertThat(finder.calls.single()).contains("burn treatment")
+        assertThat(outcome(events).medical).isTrue()
+    }
+
+    @Test
     fun medicalFromRewrite() = runTest {
         val gen = FakeGenerator(rewrite = { flowOf("keywords: water, boils\nmedical: yes") })
         val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder))
