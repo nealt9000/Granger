@@ -18,6 +18,7 @@ import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -84,7 +85,7 @@ class RoomBookshelf(
 ) : Bookshelf {
     private val dao = db.bookDao()
 
-    override val books: Flow<List<Book>> = dao.observeAll()
+    override val books: Flow<List<Book>> = dao.observeAll().ignoringIndexedAt()
 
     override val positions: Flow<Map<String, BookPosition>> =
         dao.observePositions().map { list -> list.associateBy { it.bookId } }
@@ -118,7 +119,10 @@ class RoomBookshelf(
             val head = incoming.inputStream().use { input ->
                 ByteArray(SNIFF_BYTES).let { buf -> buf.copyOf(input.read(buf).coerceAtLeast(0)) }
             }
-            val zip = head.size >= 2 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()
+            if (head.startsWith(PDF_MAGIC)) return@withContext ImportResult.Unsupported
+            val zip = head.startsWith(ZIP_MAGIC)
+            // Not a zip: only a text name, or no extension at all, is worth reading as text (a .epub, .pdf, .html isn't).
+            if (!zip && !textName && hasExtension(displayName)) return@withContext ImportResult.Unsupported
 
             var epub: File? = null
             var meta: EpubMeta? = null
@@ -181,7 +185,7 @@ class RoomBookshelf(
             .distinctBy { it.absolutePath }
             .flatMap { strays(it, knownPaths) }
         val candidates =
-            grangerFiles.map { Triple(BookOrigin.GRANGER, it.nameWithoutExtension.substringBefore('_'), it) } +
+            grangerFiles.map { Triple(BookOrigin.GRANGER, it.nameWithoutExtension.substringBeforeLast('_'), it) } +
                 importFiles.map { file -> Triple(BookOrigin.IMPORT, file.inputStream().use { sha256(it) }, file) }
 
         for ((key, group) in candidates.groupBy { (origin, ref, _) -> origin to ref }) {
@@ -285,11 +289,18 @@ class RoomBookshelf(
 
     private companion object {
         const val SNIFF_BYTES = 4096
-        val TEXT_EXTENSIONS = listOf(".txt", ".md", ".markdown")
+        val TEXT_EXTENSIONS = listOf(".txt", ".md", ".markdown", ".text")
+        val ZIP_MAGIC = "PK".toByteArray()
+        val PDF_MAGIC = "%PDF".toByteArray()
         val UNSAFE = Regex("[^A-Za-z0-9._-]+")
         val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
 
         fun isTextName(name: String) = TEXT_EXTENSIONS.any { name.lowercase().endsWith(it) }
+
+        /** Whether the file name (not a folder in it) has an extension; a leading dot alone isn't one. */
+        fun hasExtension(name: String) = name.substringAfterLast('/').trim().lastIndexOf('.') > 0
+
+        fun ByteArray.startsWith(prefix: ByteArray) = size >= prefix.size && prefix.indices.all { this[it] == prefix[it] }
 
         /** The display name without its extension, or the whole name if that leaves nothing. */
         fun titleOf(displayName: String): String =
@@ -316,3 +327,10 @@ class RoomBookshelf(
         private fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
     }
 }
+
+/**
+ * Drops an emission that differs from the last only in `indexedAt`: indexing a book touches its row, and nothing that
+ * watches the list needs to redraw for that. A list emitted for any other change carries the current values.
+ */
+internal fun Flow<List<Book>>.ignoringIndexedAt(): Flow<List<Book>> =
+    distinctUntilChanged { old, new -> old.size == new.size && old.indices.all { old[it].copy(indexedAt = null) == new[it].copy(indexedAt = null) } }

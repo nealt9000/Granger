@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.security.MessageDigest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -195,6 +196,35 @@ class BookshelfTest {
         assertThat(small.import("book.epub") { epub.inputStream() }).isInstanceOf(ImportResult.Imported::class.java)
     }
 
+    @Test fun pdfRenamedEpubIsUnsupported() = test {
+        val pdf = File(src, "paper.epub").apply { writeText("%PDF-1.7\nplain looking text without zero bytes") }
+        assertThat(shelf.import("paper.epub") { pdf.inputStream() }).isEqualTo(ImportResult.Unsupported)
+        // Whatever it's called.
+        assertThat(shelf.import("paper.txt") { pdf.inputStream() }).isEqualTo(ImportResult.Unsupported)
+        assertThat(shelf.import("paper") { pdf.inputStream() }).isEqualTo(ImportResult.Unsupported)
+        assertThat(importFiles()).isEmpty()
+        assertThat(shelf.books.first()).isEmpty()
+    }
+
+    @Test fun onlyTextOrExtensionlessNamesAreSniffedAsText() = test {
+        val text = File(src, "story").apply { writeText("Once upon a time.\n\nThe end.") }
+        for (name in listOf("story.epub", "story.html", "story.pdf", "story.docx")) {
+            assertThat(shelf.import(name) { text.inputStream() }).isEqualTo(ImportResult.Unsupported)
+        }
+        assertThat(importFiles()).isEmpty()
+        assertThat(shelf.import("story.text") { text.inputStream() }).isInstanceOf(ImportResult.Imported::class.java)
+    }
+
+    @Test fun booksIgnoresIndexedAtOnlyChanges() = test {
+        val a = book("a")
+        val emitted = kotlinx.coroutines.flow.flowOf(
+            listOf(a),
+            listOf(a.copy(indexedAt = 5L)),
+            listOf(a.copy(indexedAt = 5L, title = "Renamed")),
+        ).ignoringIndexedAt().toList()
+        assertThat(emitted.map { it.single().title }).containsExactly("a", "Renamed").inOrder()
+    }
+
     @Test fun textNameStartingWithPkIsConverted() = test {
         val source = File(src, "notes.txt").apply { writeText("PK wrote these notes.\n\nSecond paragraph.") }
         val result = shelf.import("notes.txt") { source.inputStream() }
@@ -236,6 +266,7 @@ class BookshelfTest {
         TestEpubs.build(grangerDir, "beta_2026-01-01.epub", title = "Beta old")
         TestEpubs.build(grangerDir, "beta_2026-02-01.epub", title = "Beta new")
         File(grangerDir, "gamma_2026-01-01.epub").writeText("not a zip")
+        TestEpubs.build(grangerDir, "war_and_peace_2026-01-01.epub", title = "War and Peace")
         File(grangerDir, ".incoming-123").writeText("partial")
         File(grangerDir, "notes.txt").writeText("not a book")
         importDir.mkdirs()
@@ -248,17 +279,19 @@ class BookshelfTest {
         assertThat(beta.title).isEqualTo("Beta new")
         assertThat(beta.status).isEqualTo(PackStatus.OK)
         assertThat(shelf.book(BookIds.of(BookOrigin.GRANGER, "gamma"))!!.status).isEqualTo(PackStatus.CORRUPT)
+        // A catalog id may hold underscores; only the last one starts the release date.
+        assertThat(shelf.book(BookIds.of(BookOrigin.GRANGER, "war_and_peace"))!!.title).isEqualTo("War and Peace")
         val imported = shelf.book(BookIds.of(BookOrigin.IMPORT, sha256(stray)))!!
         assertThat(imported.title).isEqualTo("Stray")
         assertThat(imported.origin).isEqualTo(BookOrigin.IMPORT)
-        assertThat(shelf.books.first()).hasSize(4)
+        assertThat(shelf.books.first()).hasSize(5)
 
         // The file comes back: the book is OK again and nothing is registered twice.
         TestEpubs.build(grangerDir, "alpha_2026-01-01.epub")
         shelf.refresh()
         assertThat(shelf.book(alpha.id)!!.status).isEqualTo(PackStatus.OK)
         assertThat(shelf.book(BookIds.of(BookOrigin.GRANGER, "beta"))!!.filePath).isEqualTo(beta.filePath)
-        assertThat(shelf.books.first()).hasSize(4)
+        assertThat(shelf.books.first()).hasSize(5)
     }
 
     @Test fun removeDeletesFileButKeepsMarks() = test {
