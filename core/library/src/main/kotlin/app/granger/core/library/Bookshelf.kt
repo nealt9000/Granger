@@ -15,6 +15,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -234,7 +235,13 @@ class RoomBookshelf(
             for (txt in dir.listFiles().orEmpty()) {
                 if (!txt.isFile || !txt.extension.equals("txt", ignoreCase = true) || txt.name.startsWith(".incoming-")) continue
                 if (File(dir, txt.nameWithoutExtension + ".epub").exists()) continue
-                convertText(txt, null)
+                try {
+                    convertText(txt, null)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    android.util.Log.w("Granger", "Converting ${txt.name} failed", e)
+                }
             }
         }
         val archiveFiles = archiveDirs.flatMap { strays(it, knownPaths) }
@@ -265,6 +272,11 @@ class RoomBookshelf(
         val book = dao.get(id) ?: return@withContext true
         val file = File(book.filePath)
         if (file.exists() && !file.delete()) return@withContext false
+        // A converted text book's source stays beside it; left alone, the next refresh() would convert it again.
+        if (book.origin == BookOrigin.ARCHIVE_ORG) {
+            val txt = File(file.parentFile, file.nameWithoutExtension + ".txt")
+            if (txt.exists() && !txt.delete()) return@withContext false
+        }
         book.coverPath?.let { File(it).delete() }
         db.withTransaction {
             dao.deleteChunks(id)

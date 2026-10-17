@@ -126,6 +126,16 @@ class BookshelfTest {
         assertThat(book.status).isEqualTo(PackStatus.OK)
     }
 
+    @Test fun removingAConvertedTextBookDeletesItsTextSoRefreshDoesNotBringItBack() = test {
+        val txt = File(archiveDir, "gone.txt").apply { writeText("Hello there.\n\nSecond paragraph.") }
+        val book = shelf.addDownloaded(txt, BookOrigin.ARCHIVE_ORG, "gone")!!
+        assertThat(shelf.remove(book.id)).isTrue()
+        shelf.refresh()
+        assertThat(shelf.book(book.id)).isNull()
+        assertThat(File(archiveDir, "gone.txt").exists()).isFalse()
+        assertThat(File(archiveDir, "gone.epub").exists()).isFalse()
+    }
+
     @Test fun addDownloadedRejectsAFileThatIsNotAnEpub() = test {
         val file = File(grangerDir, "junk_2026-10-01.epub").apply { writeText("junk") }
         assertThat(shelf.addDownloaded(file, BookOrigin.GRANGER, "junk")).isNull()
