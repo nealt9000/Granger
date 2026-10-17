@@ -9,11 +9,15 @@ import com.google.ai.edge.litertlm.InputData
 class LiteRtTextEmbedder(
     private val modelPath: String,
     private val cacheDir: String,
+    private val backend: LlmBackend = LlmBackend.CPU,
 ) : TextEmbedder {
     private var engine: EmbeddingEngine? = null
 
     override fun load() {
-        val e = EmbeddingEngine(EmbeddingEngineConfig(modelPath = modelPath, backend = Backend.CPU(), cacheDir = cacheDir))
+        val e = EmbeddingEngine(EmbeddingEngineConfig(modelPath = modelPath, backend = when (backend) {
+            LlmBackend.CPU -> Backend.CPU()
+            LlmBackend.GPU -> Backend.GPU()
+        }, cacheDir = cacheDir))
         try {
             e.initialize()
         } catch (t: Throwable) {
