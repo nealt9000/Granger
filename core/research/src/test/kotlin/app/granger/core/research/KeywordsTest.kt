@@ -14,6 +14,17 @@ class KeywordsTest {
     @Test fun dedupeKeepsFirstOccurrence() =
         assertThat(Keywords.extract("steam engine steam")).containsExactly("steam", "engine").inOrder()
 
+    @Test fun possessiveIsStripped() {
+        assertThat(Keywords.extract("What are Darwin's finches?")).containsExactly("darwin", "finches").inOrder()
+    }
+
+    @Test fun curlyApostropheDoesNotLeaveFragments() {
+        val k = Keywords.extract("Why don\u2019t birds migrate?")
+        assertThat(k).doesNotContain("don")
+        assertThat(k).containsExactly("birds", "migrate").inOrder()
+        assertThat(Keywords.extract("Darwin\u2019s finches")).containsExactly("darwin", "finches").inOrder()
+    }
+
     @Test fun medicalLexicon() {
         assertThat(Medical.looksMedical("What dose of insulin is safe?")).isTrue()
         assertThat(Medical.looksMedical("How do I treat a Burn?")).isTrue()

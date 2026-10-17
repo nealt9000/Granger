@@ -11,13 +11,13 @@ object Keywords {
         "your", "yours", "mine", "ours", "theirs", "tell", "explain", "give", "show", "say", "said", "know",
         "get", "got", "make", "made", "much", "many", "more", "most", "other", "over", "under", "again", "once",
         "here", "each", "few", "both", "between", "through", "during", "before", "after", "above", "below", "off",
-        "can't", "don't", "isn't", "doesn't", "didn't", "whats", "hows",
+        "cant", "dont", "isnt", "doesnt", "didnt", "whats", "hows",
     )
     private val SPLIT = Regex("[^\\p{L}\\p{N}']+")
 
     fun extract(question: String, max: Int = 6): List<String> =
-        question.lowercase().split(SPLIT)
-            .map { it.trim('\'') }
+        question.lowercase().replace('\u2019', '\'').split(SPLIT)
+            .map { it.removeSuffix("'s").replace("'", "") }
             .filter { it.length >= 3 && it !in STOPWORDS }
             .distinct()
             .take(max)
