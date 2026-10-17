@@ -48,6 +48,12 @@ class MainActivity : FragmentActivity() {
         // So rail availability reflects the files on disk now, not the last scan.
         container.appScope.launch { runCatching { container.library.refresh() } }
         startBookWork(container.booksScannedThisProcess, container.appScope, container.bookshelf) { container.bookIndex.indexPending() }
+        if (container.chatsSettledThisProcess.compareAndSet(false, true)) {
+            // A turn still PENDING was cut off when its process died.
+            container.appScope.launch { container.researchChats.interruptPending() }
+            // Model roles come from the catalog; load the cached one (no network) so Research knows its models.
+            container.appScope.launch { container.catalog.load() }
+        }
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -89,6 +95,12 @@ class MainActivity : FragmentActivity() {
         super.onStart()
         // Back in the foreground after a clean stop: a crash from here on must count.
         container.sessionMarker.markDirty()
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        // The UI is hidden: free the models' memory (deferred while a reply is still being written).
+        if (level >= TRIM_MEMORY_UI_HIDDEN) container.modelManager.releaseNow()
     }
 
     override fun onStop() {

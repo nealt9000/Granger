@@ -15,6 +15,7 @@ import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ReadingTab
+import app.granger.core.library.RecentSearch
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
 import app.granger.core.zim.ZimArchive
@@ -117,6 +118,9 @@ class FakeReadingSessions : ReadingSessions {
     override val history: Flow<List<HistoryEntry>> = historyList
 
     override fun recentSearches(limit: Int): Flow<List<String>> = searches.map { it.take(limit) }
+
+    override fun recentSearchRows(limit: Int): Flow<List<RecentSearch>> =
+        searches.map { list -> list.take(limit).map { RecentSearch(it, 0L) } }
 
     override suspend fun openTab(packId: String, path: String, title: String): Long {
         val time = ++clock

@@ -6,6 +6,11 @@ import android.content.Context
 import android.provider.Settings
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
+import app.granger.core.ai.InstalledModels
+import app.granger.core.ai.LiteRtLlmEngine
+import app.granger.core.ai.LiteRtTextEmbedder
+import app.granger.core.ai.LlmBackend
+import app.granger.core.ai.ModelManager
 import app.granger.core.catalog.CatalogRepository
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.AndroidVolumes
@@ -32,15 +37,19 @@ import app.granger.core.archive.ArchiveQuery
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
+import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.RoomBookshelf
 import app.granger.core.library.RoomLibrary
+import app.granger.core.library.ResearchChats
 import app.granger.core.library.RoomReadingSessions
+import app.granger.core.library.RoomResearchChats
 import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
 import app.granger.core.zim.KiwixZimOpener
+import app.granger.core.research.ResearchPipeline
 import app.granger.core.zim.ZimResolver
 import app.granger.ebook.BookOpener
 import app.granger.ebook.ReadingPrefsStore
@@ -48,13 +57,19 @@ import app.granger.ebook.ReadiumBookOpener
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
+import app.granger.research.ModelsAdapter
+import app.granger.research.installedModelsOf
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.io.File
@@ -108,6 +123,12 @@ internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, reco
         startIndexing,
     )
 }
+
+/** Whether Research reranks passages with the embedding model; Task 9's on-device eval decides. */
+const val RERANK_WITH_EMBEDDER = true
+
+/** Where the embedding model runs; Task 9 may move it. */
+val EMBEDDER_BACKEND = LlmBackend.CPU
 
 /** Hand-wired dependencies; one instance per process. */
 class AppContainer(context: Context) {
@@ -211,4 +232,25 @@ class AppContainer(context: Context) {
             }
         },
     )
+
+    val researchChats: ResearchChats = RoomResearchChats(libraryDb)
+
+    /** Set by the first activity start in this process: turns left PENDING by a dead process are settled once. */
+    val chatsSettledThisProcess = AtomicBoolean(false)
+
+    /** The model files on disk, by catalog role; empty until the catalog has loaded from its cache. */
+    val installedModels: Flow<InstalledModels> =
+        combine(downloads.records, catalog.state.map { it.catalog?.models.orEmpty() }) { r, m -> installedModelsOf(r, m) }
+            .flowOn(Dispatchers.IO)
+
+    private val modelCacheDir = context.cacheDir.path
+
+    val modelManager = ModelManager(
+        deviceTier, installedModels,
+        { path, backend -> LiteRtLlmEngine(path, backend, modelCacheDir) },
+        { path -> LiteRtTextEmbedder(path, modelCacheDir, EMBEDDER_BACKEND) },
+        appScope, useEmbedder = RERANK_WITH_EMBEDDER,
+    )
+
+    val research = ResearchPipeline(LibraryPassageFinder(library, bookIndex, bookshelf, shelves), ModelsAdapter(modelManager))
 }
