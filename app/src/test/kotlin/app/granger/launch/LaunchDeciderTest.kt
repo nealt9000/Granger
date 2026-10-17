@@ -1,5 +1,6 @@
 package app.granger.launch
 
+import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -34,5 +35,11 @@ class LaunchDeciderTest {
     @Test fun launchWithMissingPackOpensLibraryWithNotice() {
         assertThat(LaunchDecider.decide(normal.copy(lastTabPackOk = false)))
             .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
+    }
+
+    @Test fun aMissingFileIsNotResumableEvenWhenTheRowIsOk() {
+        assertThat(isPackResumable(PackStatus.OK, "/sd/p.zim") { false }).isFalse()
+        assertThat(isPackResumable(PackStatus.OK, "/sd/p.zim") { true }).isTrue()
+        assertThat(isPackResumable(PackStatus.MISSING, "/sd/p.zim") { true }).isFalse()
     }
 }

@@ -1,10 +1,15 @@
 package app.granger
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -39,7 +44,6 @@ import app.granger.sources.CatalogScope
 import app.granger.sources.SourceScreen
 import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
@@ -61,7 +65,9 @@ private class CurrentTab : ViewModel() {
 fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     val nav = rememberNavController()
     val shell = rememberShellState()
-    val scope = rememberCoroutineScope()
+    // True only for the first resume navigation; read when that navigation's transitions are chosen.
+    var skipTransition by remember { mutableStateOf(false) }
+    var showChromeRequest by rememberSaveable { mutableStateOf(0) }
     val currentTab = viewModel { CurrentTab() }
     val railViewModel = viewModel { RailViewModel(container.sessions, container.library, currentTab.id) }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
@@ -71,14 +77,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     val readerTabId = entry?.takeIf { destination?.hasRoute<ReaderRoute>() == true }?.toRoute<ReaderRoute>()?.tabId
     LaunchedEffect(readerTabId) { currentTab.id.value = readerTabId }
     // Non-reader screens always show the rail; the reader shows it only with its chrome (a middle tap).
-    LaunchedEffect(destination) { if (destination?.hasRoute<ReaderRoute>() != true) shell.railVisible = true }
+    LaunchedEffect(destination) { if (destination?.hasRoute<ReaderRoute>() != true) shell.railVisible = true else skipTransition = false }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
     var resumeHandled by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!resumeHandled) {
             resumeHandled = true
-            if (start is StartScreen.Reader) nav.navigate(ReaderRoute(start.tabId))
+            if (start is StartScreen.Reader) {
+                skipTransition = true
+                nav.navigate(ReaderRoute(start.tabId))
+            }
         }
     }
 
@@ -109,6 +118,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         railVisible = shell.railVisible,
         selected = selected,
         onToggleExpanded = { shell.expanded = !shell.expanded },
+        onEdgeSwipe = {
+            // Immersive reader: the swipe brings the chrome (and with it the rail) up; elsewhere it opens the rail.
+            if (readerTabId != null && !shell.railVisible) showChromeRequest++ else shell.expanded = !shell.expanded
+        },
         onTool = { tool ->
             when (tool) {
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
@@ -120,11 +133,23 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         onTab = ::showTab,
         onCloseTab = railViewModel::closeTab,
         onHistory = { nav.navigate(HistoryRoute) { launchSingleTop = true } },
-        onRecentSearch = { query -> nav.navigate(SearchRoute(query)) { popUpTo<SearchRoute> { inclusive = true } } },
+        onRecentSearch = { query ->
+            // Replace a Search that is on top; otherwise push, so Back returns to the article it was opened from.
+            val searchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<SearchRoute>() == true
+            nav.navigate(SearchRoute(query)) { if (searchOnTop) popUpTo<SearchRoute> { inclusive = true } }
+        },
         // Over the page, so a middle tap doesn't narrow it and reflow the text.
         railOverContent = readerTabId != null,
     ) {
-        NavHost(nav, startDestination = LibraryRoute((start as? StartScreen.Library)?.notice)) {
+        NavHost(
+            nav,
+            startDestination = LibraryRoute((start as? StartScreen.Library)?.notice),
+            // The first resume goes straight to the book instead of fading the Library into it.
+            enterTransition = { if (skipTransition) EnterTransition.None else fadeIn(tween(700)) },
+            exitTransition = { if (skipTransition) ExitTransition.None else fadeOut(tween(700)) },
+            popEnterTransition = { fadeIn(tween(700)) },
+            popExitTransition = { fadeOut(tween(700)) },
+        ) {
             composable<LibraryRoute> { backStackEntry ->
                 LibraryScreen(
                     viewModel = viewModel { LibraryViewModel(container.shelves, container.library) },
@@ -155,6 +180,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     viewModel = viewModel { ReaderViewModel(tabId, container.library, container.sessions, container.appScope) },
                     resolver = container.resolver,
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
+                    showChromeRequest = showChromeRequest,
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onBack = { nav.popBackStack() },
                 )

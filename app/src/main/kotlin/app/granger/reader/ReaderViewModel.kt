@@ -123,6 +123,11 @@ class ReaderViewModel(
         }
     }
 
+    /** The left-edge swipe: always brings the chrome up (the way back in when a page has no plain content to tap). */
+    fun showChrome() {
+        _state.update { it.copy(chromeVisible = true) }
+    }
+
     fun startFind() {
         _state.update { it.copy(chromeVisible = true, findQuery = it.findQuery ?: "") }
     }

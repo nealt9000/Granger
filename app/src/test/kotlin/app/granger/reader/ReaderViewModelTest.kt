@@ -62,6 +62,14 @@ class ReaderViewModelTest {
         assertThat(vm.state.value.chromeVisible).isFalse()
     }
 
+    @Test fun showChromeBringsItUpAndIsIdempotent() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        vm.showChrome()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.showChrome()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+    }
+
     @Test fun errorsKeepTheChromeVisibleSoTheUserCanLeave() = runTest(main.dispatcher) {
         // A back stack restored after the OS reclaimed the app can reopen a tab whose pack has since gone.
         library.archives.clear()

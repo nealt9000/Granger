@@ -11,10 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import app.granger.core.library.PackStatus
 import app.granger.launch.LaunchDecider
 import app.granger.launch.LaunchFacts
 import app.granger.launch.StartScreen
+import app.granger.launch.isPackResumable
 import app.granger.theme.GrangerTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -30,6 +30,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         container = (application as GrangerApp).container
+        // So rail availability reflects the files on disk now, not the last scan.
+        container.appScope.launch { runCatching { container.library.refresh() } }
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -56,11 +58,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Uses the Room rows from the last scan; `library.refresh()` may not have run yet this launch. */
+    /** Uses the Room rows from the last scan, plus a check that the pack's file still exists. */
     private suspend fun decide(clean: Boolean, booted: Boolean, firstRun: Boolean): StartScreen {
         val lastTab = container.sessions.lastTab()
         val packOk = lastTab != null &&
-            container.library.packs.first().any { it.id == lastTab.packId && it.status == PackStatus.OK }
+            container.library.packs.first().any { it.id == lastTab.packId && isPackResumable(it.status, it.filePath) }
         return LaunchDecider.decide(LaunchFacts(clean, booted, firstRun, lastTab, packOk))
     }
 

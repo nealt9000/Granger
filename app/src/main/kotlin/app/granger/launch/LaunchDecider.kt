@@ -1,6 +1,8 @@
 package app.granger.launch
 
+import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
+import java.io.File
 
 /** Where the app opens. */
 sealed interface StartScreen {
@@ -33,3 +35,10 @@ object LaunchDecider {
         return if (f.lastTabPackOk) StartScreen.Reader(tab.id) else StartScreen.Library(MISSING_NOTICE)
     }
 }
+
+/**
+ * A pack can be resumed only if the last scan found it OK and its file is still there: a pulled SD card or a file
+ * deleted outside the app leaves a stale OK row until the next scan. [fileExists] is injectable for tests.
+ */
+fun isPackResumable(status: PackStatus, filePath: String, fileExists: (String) -> Boolean = { File(it).exists() }): Boolean =
+    status == PackStatus.OK && fileExists(filePath)

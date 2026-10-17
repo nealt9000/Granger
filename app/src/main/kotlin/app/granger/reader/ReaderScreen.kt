@@ -74,13 +74,14 @@ private data class FindMatches(val active: Int, val count: Int, val done: Boolea
 /**
  * The web-style reader, full screen. A middle tap on the page shows or hides the chrome: the top bar here and the
  * shell's rail (through [onChromeVisibleChange]), with the system bars hidden alongside. Selecting text offers
- * Search ([onSearchText]); the top bar offers find in page and the bookmark star.
+ * Search ([onSearchText]); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome; the top bar offers find in page and the bookmark star.
  */
 @Composable
 fun ReaderScreen(
     viewModel: ReaderViewModel,
     resolver: ZimResolver,
     onChromeVisibleChange: (Boolean) -> Unit,
+    showChromeRequest: Int = 0,
     onSearchText: (String) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -95,6 +96,8 @@ fun ReaderScreen(
         webView?.let { viewModel.savePosition(it.url, it.scrollFraction()) }
     }
 
+    // The shell's left-edge swipe asks for the chrome; 0 is "never asked", so a fresh screen stays immersive.
+    LaunchedEffect(showChromeRequest) { if (showChromeRequest > 0) viewModel.showChrome() }
     LaunchedEffect(state.chromeVisible) { onChromeVisibleChange(state.chromeVisible) }
     SystemBarsHidden(!state.chromeVisible)
 

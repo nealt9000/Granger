@@ -1,5 +1,6 @@
 package app.granger.shell
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,6 +47,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -232,6 +234,8 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
     }
 }
 
+private const val UNAVAILABLE_MESSAGE = "This pack isn't available. Check that it's still on the phone or SD card."
+
 /** Tap opens the tab (when its pack is available); long-press offers "Remove from bookmarks". */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -243,10 +247,14 @@ private fun TabTarget(
     content: @Composable () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Box(modifier) {
         Box(
             Modifier.combinedClickable(
-                onClick = { if (tab.available) onTab(tab.tabId) },
+                onClick = {
+                    if (tab.available) onTab(tab.tabId)
+                    else Toast.makeText(context, UNAVAILABLE_MESSAGE, Toast.LENGTH_LONG).show()
+                },
                 onLongClick = { menu = true },
                 onLongClickLabel = "Remove from bookmarks",
             ),
