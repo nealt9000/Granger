@@ -16,6 +16,17 @@ class LaunchDeciderTest {
         assertThat(LaunchDecider.decide(normal)).isEqualTo(StartScreen.Reader(7))
     }
 
+    @Test fun normalOpenResumesLastBook() {
+        val book = tab.copy(id = 9, packId = "book:granger:pg1", path = "")
+        assertThat(LaunchDecider.decide(normal.copy(lastTab = book))).isEqualTo(StartScreen.Reader(9, book = true))
+    }
+
+    @Test fun launchWithMissingBookOpensLibraryWithNotice() {
+        val book = tab.copy(id = 9, packId = "book:granger:pg1", path = "")
+        assertThat(LaunchDecider.decide(normal.copy(lastTab = book, lastTabPackOk = false)))
+            .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
+    }
+
     @Test fun firstRunOpensLibrary() {
         assertThat(LaunchDecider.decide(normal.copy(firstRun = true))).isEqualTo(StartScreen.Library())
     }

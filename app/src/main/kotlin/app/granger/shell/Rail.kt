@@ -2,6 +2,7 @@ package app.granger.shell
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -46,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -230,11 +233,16 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
             .then(if (tab.current) Modifier.border(2.dp, GrangerColors.Flame, shape) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        Text(tab.initial.toString(), color = GrangerColors.OnSurface, fontWeight = FontWeight.SemiBold)
+        val cover = if (tab.coverPath != null) rememberRailCover(tab.coverPath, size.dp) else null
+        if (cover != null) {
+            Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        } else {
+            Text(tab.initial.toString(), color = GrangerColors.OnSurface, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 
-private const val UNAVAILABLE_MESSAGE = "This pack isn't available. Check that it's still on the phone or SD card."
+private const val UNAVAILABLE_MESSAGE = "This pack or book isn't available. Check that it's still on the phone or SD card."
 
 /** Tap opens the tab (when its pack is available); long-press offers "Remove from bookmarks". */
 @OptIn(ExperimentalFoundationApi::class)

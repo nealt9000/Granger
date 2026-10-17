@@ -36,6 +36,8 @@ android {
         unitTests.all { it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED") }
     }
     compileOptions {
+        // Readium's AARs require it (checkDebugAarMetadata).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -47,6 +49,7 @@ dependencies {
     implementation(project(":core:library"))
     implementation(project(":core:catalog"))
     implementation(project(":core:downloads"))
+    implementation(project(":core:books"))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -58,6 +61,11 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.webkit)
+    implementation(libs.readium.shared)
+    implementation(libs.readium.streamer)
+    implementation(libs.readium.navigator)
+    implementation(libs.androidx.fragment.compose)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

@@ -5,7 +5,6 @@ import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** A media type with the non-empty collections filed under it. */
@@ -49,12 +48,11 @@ interface Shelves {
 /**
  * Packs and books share one placement table: a pack's key is [Filing.packKey], a book's is [Filing.bookKey]
  * (`book:...`, which no pack name or id takes), so both are filed, moved and re-filed by the same paths.
- * [bookshelf] null files packs only.
  */
 class RoomShelves(
     private val db: LibraryDatabase,
     private val library: Library,
-    private val bookshelf: Bookshelf? = null,
+    private val bookshelf: Bookshelf,
     private val newId: () -> String = { UUID.randomUUID().toString() },
 ) : Shelves {
     private val dao = db.shelfDao()
@@ -102,7 +100,7 @@ class RoomShelves(
 
     private fun trigger(): Flow<Pair<List<Pack>, List<Book>>> =
         combine(
-            library.packs, bookshelf?.books ?: flowOf(emptyList()),
+            library.packs, bookshelf.books,
             dao.observeMediaTypes(), dao.observeCollections(), dao.observePlacements(),
         ) { packs, books, _, _, _ -> packs to books }
 

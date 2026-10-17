@@ -5,22 +5,32 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import app.granger.core.library.BookIds
+import app.granger.core.library.Bookshelf
+import app.granger.core.library.ReadingSessions
+import app.granger.core.library.ReadingTab
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
 import app.granger.library.CollectionViewModel
@@ -44,12 +54,57 @@ import app.granger.sources.CatalogScope
 import app.granger.sources.SourceScreen
 import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
 @Serializable data class CollectionRoute(val collectionId: String)
 @Serializable data class ReaderRoute(val tabId: Long)
+
+/** An e-book; [href] and [progression] ask the reader to open there (a search hit) instead of where it left off. */
+@Serializable data class BookRoute(val tabId: Long, val href: String? = null, val progression: Double? = null)
+
+/** A place in a book to open at. */
+data class BookTarget(val href: String, val progression: Double)
+
+private fun NavDestination.isReading() = hasRoute<ReaderRoute>() || hasRoute<BookRoute>()
+
+private fun NavBackStackEntry.readingTabId(): Long? = when {
+    destination.hasRoute<ReaderRoute>() -> toRoute<ReaderRoute>().tabId
+    destination.hasRoute<BookRoute>() -> toRoute<BookRoute>().tabId
+    else -> null
+}
+
+/**
+ * The one way to open a reading tab: a book goes to [BookRoute], an article to [ReaderRoute]. A reader already on top
+ * is replaced rather than stacked, and showing the same tab again does nothing unless [at] asks for a place in it.
+ */
+fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null) {
+    // Read the back stack now, not the composition's copy: opening a tab suspends, and a second tap
+    // meanwhile must replace the reader the first one pushed.
+    val top = currentBackStackEntry
+    val showing = top?.readingTabId()
+    if (tab.id == showing && at == null) return
+    val route: Any =
+        if (BookIds.isBook(tab.packId)) BookRoute(tab.id, at?.href, at?.progression) else ReaderRoute(tab.id)
+    navigate(route) {
+        // Switching tabs replaces the reader instead of stacking one per tab.
+        if (showing != null && top != null) popUpTo(top.destination.id) { inclusive = true }
+    }
+}
+
+/** The title of the book behind a tab, for the placeholder screen until the reader replaces it. */
+private class BookTitleViewModel(tabId: Long, sessions: ReadingSessions, bookshelf: Bookshelf) : ViewModel() {
+    val title = MutableStateFlow("")
+
+    init {
+        viewModelScope.launch {
+            val tab = sessions.tab(tabId)
+            title.value = tab?.let { bookshelf.book(it.packId)?.title ?: it.title }.orEmpty()
+        }
+    }
+}
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
@@ -69,15 +124,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     var skipTransition by remember { mutableStateOf(false) }
     var showChromeRequest by rememberSaveable { mutableStateOf(0) }
     val currentTab = viewModel { CurrentTab() }
-    val railViewModel = viewModel { RailViewModel(container.sessions, container.library, currentTab.id) }
+    val railViewModel = viewModel { RailViewModel(container.sessions, container.library, container.bookshelf, currentTab.id) }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
 
     val entry by nav.currentBackStackEntryAsState()
     val destination = entry?.destination
-    val readerTabId = entry?.takeIf { destination?.hasRoute<ReaderRoute>() == true }?.toRoute<ReaderRoute>()?.tabId
+    val readerTabId = entry?.readingTabId()
     LaunchedEffect(readerTabId) { currentTab.id.value = readerTabId }
     // Non-reader screens always show the rail; the reader shows it only with its chrome (a middle tap).
-    LaunchedEffect(destination) { if (destination?.hasRoute<ReaderRoute>() != true) shell.railVisible = true else skipTransition = false }
+    LaunchedEffect(destination) { if (destination?.isReading() != true) shell.railVisible = true else skipTransition = false }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
     var resumeHandled by rememberSaveable { mutableStateOf(false) }
@@ -86,21 +141,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             resumeHandled = true
             if (start is StartScreen.Reader) {
                 skipTransition = true
-                nav.navigate(ReaderRoute(start.tabId))
+                nav.navigate(if (start.book) BookRoute(start.tabId) else ReaderRoute(start.tabId))
             }
         }
     }
 
+    // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
+    val scope = rememberCoroutineScope()
     fun showTab(tabId: Long) {
-        // Read the back stack now, not the composition's copy: a tap's openTab suspends, and a second tap
-        // meanwhile must replace the reader the first one pushed.
-        val top = nav.currentBackStackEntry
-        val showing = top?.takeIf { it.destination.hasRoute<ReaderRoute>() }?.toRoute<ReaderRoute>()?.tabId
-        if (tabId == showing) return
-        nav.navigate(ReaderRoute(tabId)) {
-            // Switching tabs replaces the reader instead of stacking one per tab.
-            if (showing != null) popUpTo<ReaderRoute> { inclusive = true }
-        }
+        scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
 
     val selected = when {
@@ -185,6 +234,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
+            composable<BookRoute> { backStackEntry ->
+                val tabId = backStackEntry.toRoute<BookRoute>().tabId
+                val vm = viewModel { BookTitleViewModel(tabId, container.sessions, container.bookshelf) }
+                val title by vm.title.collectAsStateWithLifecycle()
+                Text(title) // Placeholder; the Readium reader replaces it.
+            }
             composable<SearchRoute> { backStackEntry ->
                 val query = backStackEntry.toRoute<SearchRoute>().query
                 SearchScreen(
@@ -195,7 +250,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             }
             composable<HistoryRoute> {
                 HistoryScreen(
-                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library) },
+                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library, container.bookshelf) },
                     onOpenTab = ::showTab,
                     onBack = { nav.popBackStack() },
                 )

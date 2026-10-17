@@ -19,10 +19,13 @@ import app.granger.core.downloads.FileDownloader
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.WorkManagerScheduler
+import app.granger.core.library.BookIndex
+import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.ReadingSessions
+import app.granger.core.library.RoomBookshelf
 import app.granger.core.library.RoomLibrary
 import app.granger.core.library.RoomReadingSessions
 import app.granger.core.library.RoomShelves
@@ -38,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.Base64
@@ -62,9 +66,20 @@ class AppContainer(context: Context) {
         context.getExternalFilesDirs(null).filterNotNull().map { File(it, "packs").apply { mkdirs() } }
     }
 
+    /** `<volume>/Android/data/app.granger/files/books` on internal storage and each SD card. */
+    val bookDirs: () -> List<File> = {
+        context.getExternalFilesDirs(null).filterNotNull().map { File(it, "books").apply { mkdirs() } }
+    }
+
     private val libraryDb = LibraryDatabase.create(context)
     val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs)
-    val shelves: Shelves = RoomShelves(libraryDb, library)
+    val bookshelf: Bookshelf = RoomBookshelf(
+        libraryDb, bookDirs,
+        importDir = { File(context.getExternalFilesDir(null) ?: context.filesDir, "books/imports") },
+        coversDir = File(context.filesDir, "covers"),
+    )
+    val bookIndex = BookIndex(libraryDb)
+    val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
 
     /** Clean-exit and reboot tracking for the launch decision; BOOT_COUNT is -1 (unavailable) on odd builds. */
@@ -72,7 +87,7 @@ class AppContainer(context: Context) {
         prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE),
         bootCount = { Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1) },
     )
-    val search: LibrarySearch = ZimLibrarySearch(library)
+    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex)
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
     val totalRamBytes: Long = ActivityManager.MemoryInfo()
@@ -118,6 +133,9 @@ class AppContainer(context: Context) {
             if (record.kind == ItemKind.PACK) {
                 library.fileReplaced(record.filePath)
                 library.refresh()
+            } else if (record.kind == ItemKind.BOOK) {
+                bookshelf.addDownloaded(File(record.filePath), record.itemId)
+                appScope.launch { bookIndex.indexPending() }
             }
         },
     )

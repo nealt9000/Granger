@@ -2,7 +2,12 @@ package app.granger.shell
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.core.library.Book
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookPosition
+import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
+import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /** One bookmark tab on the rail. [initial] fills the letter tile, since ZIM articles have no covers. */
 data class RailTabUi(
@@ -22,6 +28,8 @@ data class RailTabUi(
     val available: Boolean,
     /** The tab the reader is showing; outlined in flame. */
     val current: Boolean,
+    /** A book's cover image file, drawn instead of the letter tile when it can be decoded. */
+    val coverPath: String? = null,
 )
 
 data class RailUi(val tabs: List<RailTabUi>, val recentSearches: List<String>)
@@ -30,30 +38,56 @@ data class RailUi(val tabs: List<RailTabUi>, val recentSearches: List<String>)
 class RailViewModel(
     private val sessions: ReadingSessions,
     library: Library,
+    bookshelf: Bookshelf,
     currentTabId: StateFlow<Long?>,
 ) : ViewModel() {
+    private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
+
+    private val shelf = combine(library.packs, bookshelf.books, bookshelf.positions) { packs, books, positions ->
+        Shelf(packs.associateBy { it.id }, books.associateBy { it.id }, positions)
+    }
+
     val ui: StateFlow<RailUi> = combine(
         sessions.railTabs(),
-        library.packs,
+        shelf,
         currentTabId,
         sessions.recentSearches(),
-    ) { tabs, packs, current, searches ->
-        val byId = packs.associateBy { it.id }
+    ) { tabs, shelf, current, searches ->
         RailUi(
             tabs = tabs.map { tab ->
-                val pack = byId[tab.packId]
-                RailTabUi(
-                    tabId = tab.id,
-                    title = tab.title,
-                    subtitle = pack?.title ?: HistoryViewModel.REMOVED_PACK,
-                    initial = initialOf(tab.title),
-                    available = pack?.status == PackStatus.OK,
-                    current = tab.id == current,
-                )
+                if (BookIds.isBook(tab.packId)) {
+                    val book = shelf.books[tab.packId]
+                    RailTabUi(
+                        tabId = tab.id,
+                        title = book?.title ?: tab.title,
+                        subtitle = book?.let { bookSubtitle(it, shelf.positions[it.id]) } ?: HistoryViewModel.REMOVED_BOOK,
+                        initial = initialOf(book?.title ?: tab.title),
+                        available = book?.status == PackStatus.OK,
+                        current = tab.id == current,
+                        coverPath = book?.coverPath,
+                    )
+                } else {
+                    val pack = shelf.packs[tab.packId]
+                    RailTabUi(
+                        tabId = tab.id,
+                        title = tab.title,
+                        subtitle = pack?.title ?: HistoryViewModel.REMOVED_PACK,
+                        initial = initialOf(tab.title),
+                        available = pack?.status == PackStatus.OK,
+                        current = tab.id == current,
+                    )
+                }
             },
             recentSearches = searches,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailUi(emptyList(), emptyList()))
+
+    /** "Chapter 3 · 43%" once the book has been opened; its author before that. */
+    private fun bookSubtitle(book: Book, position: BookPosition?): String {
+        if (position == null) return book.author
+        val percent = "${(position.totalProgression * 100).roundToInt().coerceIn(0, 100)}%"
+        return if (position.chapterTitle.isBlank()) percent else "${position.chapterTitle} \u00b7 $percent"
+    }
 
     /** Long-press "Remove from bookmarks": off the rail, still in History. */
     fun closeTab(tabId: Long) {
