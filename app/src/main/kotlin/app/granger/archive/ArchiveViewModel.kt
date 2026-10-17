@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -94,7 +95,10 @@ class ArchiveViewModel(
 
     private data class State(
         val tab: ArchiveTab = ArchiveTab.BROWSE,
+        /** What is typed in the box, shown at once. */
         val query: String = "",
+        /** The text the shown results are for: [search] reads this and [shelf], never [query]. */
+        val searchedQuery: String = "",
         val shelf: ArchiveShelf? = ArchiveShelf.MOST_DOWNLOADED,
         val filtered: Boolean = true,
         val docs: List<ArchiveDoc> = emptyList(),
@@ -132,14 +136,16 @@ class ArchiveViewModel(
         queryJob?.cancel()
         queryJob = viewModelScope.launch {
             delay(DEBOUNCE_MS)
-            state.update { it.copy(shelf = if (value.isBlank()) ArchiveShelf.MOST_DOWNLOADED else null) }
+            state.update {
+                it.copy(searchedQuery = value, shelf = if (value.isBlank()) ArchiveShelf.MOST_DOWNLOADED else null)
+            }
             search(reset = true)
         }
     }
 
     fun selectShelf(shelf: ArchiveShelf) {
         queryJob?.cancel()
-        state.update { it.copy(query = "", shelf = shelf) }
+        state.update { it.copy(query = "", searchedQuery = "", shelf = shelf) }
         search(reset = true)
     }
 
@@ -221,7 +227,7 @@ class ArchiveViewModel(
         val gen = ++generation
         val s = state.value
         val page = if (reset) 1 else s.page + 1
-        val query = ArchiveQuery.build(s.query, s.shelf, s.filtered)
+        val query = ArchiveQuery.build(s.searchedQuery, s.shelf, s.filtered)
         state.update {
             if (reset) it.copy(loading = true, error = null, docs = emptyList(), total = 0, page = 0)
             else it.copy(loading = true, error = null)
@@ -260,7 +266,12 @@ class ArchiveViewModel(
         val spec = ArchiveDownloads.spec(item, offer, client)
         // Written first: the download may finish before enqueue returns.
         val sidecar = withContext(io) { ArchiveDownloads.writeSidecar(sidecarDir(), item, offer.kind) }
-        val result = downloads.enqueue(spec, volume.root, downloadPrefs.wifiOnly)
+        val result = try {
+            downloads.enqueue(spec, volume.root, downloadPrefs.wifiOnly)
+        } catch (e: Throwable) {
+            withContext(NonCancellable + io) { sidecar.delete() }
+            throw e
+        }
         if (result != EnqueueResult.Queued && result != EnqueueResult.AlreadyActive) {
             withContext(io) { sidecar.delete() }
         }

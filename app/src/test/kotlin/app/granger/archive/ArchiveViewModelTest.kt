@@ -95,6 +95,15 @@ class ArchiveViewModelTest {
         testScheduler.advanceUntilIdle()
     }
 
+    /** Like [settle] but without moving virtual time, so a pending debounce stays pending. */
+    private fun TestScope.settleNow(done: () -> Boolean) {
+        repeat(300) {
+            testScheduler.runCurrent()
+            if (done()) return
+            Thread.sleep(10)
+        }
+    }
+
     private fun TestScope.viewModel(settle: Boolean = true): ArchiveViewModel {
         val vm = ArchiveViewModel(
             client, downloads, bookshelf, prefs, volumes, downloadPrefs, sidecarDir = { sidecars },
@@ -203,11 +212,55 @@ class ArchiveViewModelTest {
         assertThat(searches()).hasSize(2)
     }
 
+    @Test fun loadMoreDuringTheDebounceStaysOnTheShownQuery() = runTest(main.dispatcher) {
+        searchBody = { q, page ->
+            if ("steam" in q) searchJson(4, "s1", "s2") else if (page == 1) searchJson(4, "a", "b") else searchJson(4, "c", "d")
+        }
+        val vm = viewModel()
+        vm.setQuery("steam")
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        vm.loadMore()
+        settleNow { vm.ui.value.rows.size == 4 }
+        assertThat(searches().none { "steam" in it.queryParameter("q")!! }).isTrue()
+        assertThat(searches().last().queryParameter("q")).isEqualTo(ArchiveQuery.build("", ArchiveShelf.MOST_DOWNLOADED, true))
+        assertThat(searches().last().queryParameter("page")).isEqualTo("2")
+        assertThat(vm.ui.value.rows.map { it.identifier }).containsExactly("a", "b", "c", "d").inOrder()
+        assertThat(vm.ui.value.query).isEqualTo("steam")
+        // The debounce then runs the typed search from page 1, replacing the rows.
+        settle { vm.ui.value.rows.map { it.identifier } == listOf("s1", "s2") }
+        assertThat(vm.ui.value.rows.map { it.identifier }).containsExactly("s1", "s2").inOrder()
+        assertThat(searches().last().queryParameter("q")).isEqualTo(ArchiveQuery.build("steam", null, true))
+        assertThat(searches().last().queryParameter("page")).isEqualTo("1")
+    }
+
+    @Test fun theWaiverRerunDuringTheDebounceStaysOnTheShownQuery() = runTest(main.dispatcher) {
+        val vm = viewModel()
+        vm.setQuery("steam")
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        vm.acceptWaiver()
+        settleNow { searches().size == 2 }
+        assertThat(searches()[1].queryParameter("q")).isEqualTo(ArchiveQuery.build("", ArchiveShelf.MOST_DOWNLOADED, false))
+    }
+
+    @Test fun aThrowingEnqueueLeavesNoSidecar() = runTest(main.dispatcher) {
+        downloads.onEnqueue = { throw IllegalStateException("database closed") }
+        val vm = viewModel()
+        vm.get(epubId)
+        settle { vm.ui.value.notice != null }
+        assertThat(File(sidecars, "$epubId.json").exists()).isFalse()
+    }
+
     @Test fun openItemFillsTheSheetWithOfferAndSize() = runTest(main.dispatcher) {
         val vm = viewModel()
+        val gate = CountDownLatch(1)
+        val serve = itemBody
+        itemBody = { id -> gate.await(5, TimeUnit.SECONDS); serve(id) }
         vm.openItem(scanId)
         testScheduler.runCurrent()
         assertThat(vm.ui.value.sheet!!.loading).isTrue()
+        gate.countDown()
         settle { vm.ui.value.sheet?.loading == false }
         val sheet = vm.ui.value.sheet!!
         assertThat(sheet.identifier).isEqualTo(scanId)
