@@ -39,6 +39,7 @@ import app.granger.ebook.ReadiumBookOpener
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -101,6 +102,9 @@ class AppContainer(context: Context) {
         coversDir = File(context.filesDir, "covers"),
     )
     val bookIndex = BookIndex(libraryDb)
+
+    /** Set by the first activity start in this process: the book scan and index pass run once per process. */
+    val booksScannedThisProcess = AtomicBoolean(false)
     val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)

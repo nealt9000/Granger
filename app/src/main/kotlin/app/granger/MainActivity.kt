@@ -20,6 +20,7 @@ import app.granger.launch.StartScreen
 import app.granger.launch.isBookResumable
 import app.granger.launch.isPackResumable
 import app.granger.theme.GrangerTheme
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +43,7 @@ class MainActivity : FragmentActivity() {
         container = (application as GrangerApp).container
         // So rail availability reflects the files on disk now, not the last scan.
         container.appScope.launch { runCatching { container.library.refresh() } }
-        startBookWork(savedInstanceState, container.appScope, container.bookshelf) { container.bookIndex.indexPending() }
+        startBookWork(container.booksScannedThisProcess, container.appScope, container.bookshelf) { container.bookIndex.indexPending() }
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -94,17 +95,18 @@ class MainActivity : FragmentActivity() {
 }
 
 /**
- * Scans the books folders, then indexes what's pending, on [scope]: only on a fresh start, not when the activity is
- * recreated (rotation) with [savedInstanceState]. Neither may crash the launch; a failed pass is retried at the next
- * start. Returns the job, or null when nothing was started.
+ * Scans the books folders, then indexes what's pending, on [scope]: once per process, guarded by [startedThisProcess].
+ * Rotation recreates the activity in the same process and skips it; a process restored after death runs it again.
+ * Neither step may crash the launch; a failed pass is retried in the next process. Returns the job, or null when it
+ * already ran.
  */
 internal fun startBookWork(
-    savedInstanceState: Bundle?,
+    startedThisProcess: AtomicBoolean,
     scope: CoroutineScope,
     bookshelf: Bookshelf,
     indexPending: suspend () -> Unit,
 ): Job? {
-    if (savedInstanceState != null) return null
+    if (!startedThisProcess.compareAndSet(false, true)) return null
     return scope.launch {
         try {
             bookshelf.refresh()
