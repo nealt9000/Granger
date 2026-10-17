@@ -166,4 +166,34 @@ class BookIndexTest {
         assertThat(index.search("- * : ( )")).isEmpty()
         assertThat(index.search("NEAR hello*")).isEmpty()
     }
+
+    @Test fun passagesMatchAnyKeyword() = test {
+        add("moby", "<p>Call me Ishmael.</p>", "<p>The whale surfaced at dawn.</p>")
+        index.indexPending()
+
+        val found = index.passages(listOf("whale", "nonexistentword"))
+        assertThat(found).hasSize(1)
+        assertThat(found.single().text).contains("whale")
+        assertThat(found.single().href).isEqualTo("OEBPS/c002.xhtml")
+        assertThat(index.passages(listOf("ishmael", "whale"))).hasSize(2)
+    }
+
+    @Test fun passagesCarryTheBook() = test {
+        val moby = add("moby", "<p>The whale surfaced at dawn.</p>", title = "Moby-Dick")
+        index.indexPending()
+
+        val passage = index.passages(listOf("whale")).single()
+        assertThat(passage.book.id).isEqualTo(moby.id)
+        assertThat(passage.book.title).isEqualTo("Moby-Dick")
+        assertThat(passage.progression).isAtLeast(0.0)
+    }
+
+    @Test fun passagesOfNothingIsEmpty() = test {
+        add("moby", "<p>The whale surfaced at dawn.</p>")
+        index.indexPending()
+
+        assertThat(index.passages(emptyList())).isEmpty()
+        assertThat(index.passages(listOf("\""))).isEmpty()
+        assertThat(index.passages(listOf("  ", "-"))).isEmpty()
+    }
 }

@@ -23,12 +23,14 @@ class FakeZimArchive(
     var results: List<ZimHit> = emptyList(),
     var failSearch: Boolean = false,
     name: String = uuid,
+    private val html: Map<String, String> = emptyMap(),
 ) : ZimArchive {
     override val metadata = ZimMetadata(title, "About $title", "eng", "2026-10-15", name)
     var closed = false
+    var searches = 0
 
     override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
-    override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", ByteArray(0)) }
+    override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", html[it].orEmpty().toByteArray()) }
 
     override fun suggest(query: String, limit: Int): List<ZimHit> {
         if (failSearch) error("native failure")
@@ -36,6 +38,7 @@ class FakeZimArchive(
     }
 
     override fun search(query: String, limit: Int): List<ZimHit> {
+        searches++
         if (failSearch) error("native failure")
         return results.take(limit)
     }

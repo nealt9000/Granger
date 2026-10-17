@@ -30,6 +30,9 @@ data class BookHit(
     val quote: TextQuote? = null,
 )
 
+/** A book chunk that matches some of the words asked about, with its text. */
+data class BookPassage(val book: Book, val href: String, val progression: Double, val text: String)
+
 /**
  * Full-text search over books. Each `book_chunks` row has a `book_text` row with the same id holding its text;
  * the text isn't stored, so snippets re-read the book. `book_text` is contentless and can't delete rows: a
@@ -93,6 +96,30 @@ class BookIndex(
                         quote = texts[chunk.id]?.let { Snippets.quote(it, snippetQuery) },
                     )
                 }
+            }
+        }
+    }
+
+    /** Chunks containing any of [keywords] (each a quoted phrase, OR'd), with their text; a bad query gives none. */
+    suspend fun passages(keywords: List<String>, limit: Int = 40): List<BookPassage> {
+        val phrases = keywords.map { it.replace("\"", "").trim() }.filter { p -> p.any { it.isLetterOrDigit() } }
+        if (phrases.isEmpty()) return emptyList()
+        val match = phrases.joinToString(" OR ") { "\"$it\"" }
+        return withContext(io) {
+            val chunks = try {
+                dao.chunksMatching(
+                    SimpleSQLiteQuery(
+                        "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? LIMIT ?",
+                        arrayOf<Any>(match, limit),
+                    ),
+                )
+            } catch (_: SQLException) {
+                emptyList()
+            }
+            chunks.groupBy { it.bookId }.flatMap { (bookId, hits) ->
+                val book = dao.get(bookId) ?: return@flatMap emptyList()
+                val texts = chunkTexts(book.filePath, hits)
+                hits.mapNotNull { chunk -> texts[chunk.id]?.let { BookPassage(book, chunk.href, chunk.progression, it) } }
             }
         }
     }
