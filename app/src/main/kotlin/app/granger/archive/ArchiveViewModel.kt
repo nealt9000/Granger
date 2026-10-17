@@ -28,6 +28,7 @@ import app.granger.formatBytes
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.ItemStatus
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -128,7 +130,12 @@ class ArchiveViewModel(
     private var queryJob: Job? = null
     private var sheetJob: Job? = null
 
+    /** Installed items' [TextKind]s read from their sidecars on [io]; a missing sidecar isn't cached, so a later one is seen. */
+    private val sidecarKinds = ConcurrentHashMap<String, TextKind>()
+
+    // Built on [io]: the Installed tab reads sidecars from disk.
     val ui: StateFlow<ArchiveUi> = combine(state, downloads.records, ::buildUi)
+        .flowOn(io)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ArchiveUi(filtered = !prefs.waiverAccepted.value))
 
     init {
@@ -214,7 +221,7 @@ class ArchiveViewModel(
     fun cancel(identifier: String) {
         appScope.launch {
             downloads.cancel(ArchiveDownloads.itemId(identifier))
-            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }
+            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
         }
     }
 
@@ -230,7 +237,7 @@ class ArchiveViewModel(
         appScope.launch {
             downloads.remove(ArchiveDownloads.itemId(identifier))
             bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier))
-            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }
+            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
         }
     }
 
@@ -326,7 +333,7 @@ class ArchiveViewModel(
                     identifier = identifier,
                     title = latest.title.ifBlank { identifier },
                     details = formatBytes(latest.sizeBytes),
-                    preview = previewOfFile(latest.filePath),
+                    preview = previewOf(identifier, latest.filePath),
                     status = statusOf(identifier, ours),
                 )
             }
@@ -370,10 +377,17 @@ class ArchiveViewModel(
         return if (versions.any { it.state == DownloadState.INSTALLED }) ItemStatus.Installed else ItemStatus.NotInstalled
     }
 
-    private fun previewOfFile(path: String): Offer? = when (File(path).extension.lowercase()) {
-        "epub" -> Offer.Download(PLACEHOLDER, TextKind.EPUB, alsoPdf = false)
-        "txt" -> Offer.Download(PLACEHOLDER, TextKind.TEXT, alsoPdf = false)
-        else -> null
+    /** The sidecar's kind when there is one (an OCR `.txt` looks like plain text on disk), else the file's extension. */
+    private fun previewOf(identifier: String, path: String): Offer? {
+        val fromSidecar = sidecarKinds[identifier]
+            ?: ArchiveDownloads.readSidecar(ArchiveDownloads.sidecarFile(sidecarDir(), identifier))?.second
+                ?.also { sidecarKinds[identifier] = it }
+        val kind = fromSidecar ?: when (File(path).extension.lowercase()) {
+            "epub" -> TextKind.EPUB
+            "txt" -> TextKind.TEXT
+            else -> return null
+        }
+        return Offer.Download(PLACEHOLDER, kind, alsoPdf = false)
     }
 
     private fun messageOf(e: Exception): String = (e as? ArchiveError)?.message ?: OFFLINE

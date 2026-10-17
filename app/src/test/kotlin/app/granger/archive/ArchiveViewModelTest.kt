@@ -5,6 +5,7 @@ import app.granger.FakeDownloads
 import app.granger.FakePrefs
 import app.granger.FakeVolumes
 import app.granger.MainDispatcherRule
+import app.granger.core.archive.ArchiveItem
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.ArchiveQuery
 import app.granger.core.archive.ArchiveShelf
@@ -434,6 +435,20 @@ class ArchiveViewModelTest {
         assertThat(removed.exists()).isFalse()
         assertThat(cancelled.exists()).isFalse()
         assertThat(kept.exists()).isTrue()
+    }
+
+    @Test fun installedTabLabelsTextDownloadsFromTheirSidecar() = runTest(main.dispatcher) {
+        // Both are .txt on disk; only the sidecar knows one is OCR. The third has no sidecar: the extension decides.
+        ArchiveDownloads.writeSidecar(sidecars, ArchiveItem("ocr", "OCR", "", "", 1900, emptyList(), "", "", "", false, emptyList()), TextKind.OCR_TEXT)
+        ArchiveDownloads.writeSidecar(sidecars, ArchiveItem("plain", "Plain", "", "", 1900, emptyList(), "", "", "", false, emptyList()), TextKind.TEXT)
+        downloads.list.value = listOf("ocr", "plain", "bare").map { id ->
+            record("archive-org:$id", DownloadState.INSTALLED, kind = ItemKind.BOOK, filePath = "/internal/books/archive-org/$id.txt", title = id)
+        }
+        val vm = viewModel()
+        vm.setTab(ArchiveTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        val kinds = vm.ui.value.rows.associate { it.identifier to (it.preview as Offer.Download).kind }
+        assertThat(kinds).containsExactly("ocr", TextKind.OCR_TEXT, "plain", TextKind.TEXT, "bare", TextKind.TEXT)
     }
 
     @Test fun offlineSearchShowsAMessageAndInstalledStillWorks() = runTest(main.dispatcher) {
