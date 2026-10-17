@@ -94,11 +94,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         }
     }
 
-    /** Opening from Library, Search or History adds a rail tab (or reuses the one showing that article). */
-    fun openArticle(packId: String, path: String, title: String) {
-        scope.launch { showTab(container.sessions.openTab(packId, path, title)) }
-    }
-
     val selected = when {
         destination == null -> null
         destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() -> RailTool.LIBRARY
@@ -167,9 +162,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             composable<SearchRoute> { backStackEntry ->
                 val query = backStackEntry.toRoute<SearchRoute>().query
                 SearchScreen(
-                    // Task 10 makes the initial query a SearchViewModel parameter.
-                    viewModel = viewModel { SearchViewModel(container.search).apply { if (query.isNotBlank()) onQueryChange(query) } },
-                    onOpen = { hit -> openArticle(hit.packId, hit.path, hit.title) },
+                    viewModel = viewModel { SearchViewModel(container.search, container.sessions, query) },
+                    onOpenTab = ::showTab,
                     onBack = { nav.popBackStack() },
                 )
             }

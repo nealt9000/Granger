@@ -10,6 +10,7 @@ import app.granger.pack
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -51,5 +52,29 @@ class HistoryViewModelTest {
         assertThat(tab.id).isEqualTo(id)
         assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("a", "Hamlet", "Hamlet").inOrder()
         assertThat(tab.onRail).isTrue()
+    }
+
+    @Test fun historyFilterMatchesTitleOrPack() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a", "Classics"), pack("b", "WikiMed"))
+        sessions.historyList.value = listOf(
+            HistoryEntry("a", "Hamlet", "Hamlet", 3L),
+            HistoryEntry("b", "Aspirin", "Aspirin", 2L),
+            HistoryEntry("b", "Ibuprofen", "Ibuprofen", 1L),
+        )
+        library.bookmarkList.value = listOf(Bookmark("a", "Hamlet", "Hamlet", 3L))
+        val vm = HistoryViewModel(sessions, library)
+        val ui = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        vm.setFilter("HAM")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value!!.history.map { it.title }).containsExactly("Hamlet")
+        vm.setFilter("wikimed")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value!!.history.map { it.title }).containsExactly("Aspirin", "Ibuprofen")
+        assertThat(vm.ui.value!!.saved.map { it.title }).containsExactly("Hamlet")
+        vm.setFilter("")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value!!.history).hasSize(3)
+        ui.cancel()
     }
 }

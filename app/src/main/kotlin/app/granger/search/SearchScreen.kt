@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -34,11 +35,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.SearchHit
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(viewModel: SearchViewModel, onOpen: (SearchHit) -> Unit, onBack: () -> Unit) {
+fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     Scaffold(
@@ -67,10 +70,19 @@ fun SearchScreen(viewModel: SearchViewModel, onOpen: (SearchHit) -> Unit, onBack
                 Text("Nothing in your library matches.", Modifier.align(Alignment.Center).padding(24.dp))
             }
             LazyColumn(Modifier.fillMaxSize()) {
+                if (state.query.isBlank() && state.recent.isNotEmpty()) {
+                    item { SectionHeader("Recent") }
+                    items(state.recent, key = { "r:$it" }) { recent ->
+                        ListItem(
+                            modifier = Modifier.clickable { viewModel.onQueryChange(recent) },
+                            headlineContent = { Text(recent) },
+                        )
+                    }
+                }
                 if (state.titles.isNotEmpty()) item { SectionHeader("Titles") }
                 items(state.titles, key = { "t:${it.packId}/${it.path}" }) { hit ->
                     ListItem(
-                        modifier = Modifier.clickable { onOpen(hit) },
+                        modifier = Modifier.clickable { scope.launch { onOpenTab(viewModel.open(hit)) } },
                         headlineContent = { Text(hit.title) },
                         supportingContent = { Text(hit.packTitle) },
                     )
@@ -78,7 +90,7 @@ fun SearchScreen(viewModel: SearchViewModel, onOpen: (SearchHit) -> Unit, onBack
                 if (state.fullText.isNotEmpty()) item { SectionHeader("In article text") }
                 items(state.fullText, key = { "f:${it.packId}/${it.path}" }) { hit ->
                     ListItem(
-                        modifier = Modifier.clickable { onOpen(hit) },
+                        modifier = Modifier.clickable { scope.launch { onOpenTab(viewModel.open(hit)) } },
                         headlineContent = { Text(hit.title) },
                         supportingContent = {
                             Column {

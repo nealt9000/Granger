@@ -6,6 +6,7 @@ import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -18,14 +19,23 @@ class HistoryViewModel(private val sessions: ReadingSessions, private val librar
 
     data class Ui(val history: List<Row>, val saved: List<Row>)
 
+    private val filter = MutableStateFlow("")
+
     /** Null until loaded. Rows in missing, damaged or removed packs stay listed but disabled. */
-    val ui: StateFlow<Ui?> = combine(sessions.history, library.bookmarks, library.packs) { history, bookmarks, packs ->
+    val ui: StateFlow<Ui?> = combine(sessions.history, library.bookmarks, library.packs, filter) { history, bookmarks, packs, filter ->
         val byId = packs.associateBy { it.id }
+        val needle = filter.trim()
         Ui(
-            history = history.sortedByDescending { it.openedAt }.map { row(it.packId, it.path, it.title, byId) },
+            history = history.sortedByDescending { it.openedAt }.map { row(it.packId, it.path, it.title, byId) }
+                .filter { needle.isEmpty() || it.title.contains(needle, ignoreCase = true) || it.packTitle.contains(needle, ignoreCase = true) },
             saved = bookmarks.map { row(it.packId, it.path, it.title, byId) },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Narrows the History list to titles or pack titles containing [text], ignoring case. Saved stays unfiltered. */
+    fun setFilter(text: String) {
+        filter.value = text
+    }
 
     /** Opens the article in a rail tab (or the tab already showing it); returns the tab id. */
     suspend fun open(row: Row): Long = sessions.openTab(row.packId, row.path, row.title)
