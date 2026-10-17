@@ -38,7 +38,9 @@ import app.granger.ebook.SelectionBridge
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
 import app.granger.library.CollectionViewModel
+import app.granger.library.ImportRunner
 import app.granger.library.LibraryScreen
+import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
@@ -231,7 +233,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         ) {
             composable<LibraryRoute> { backStackEntry ->
                 LibraryScreen(
-                    viewModel = viewModel { LibraryViewModel(container.shelves, container.library) },
+                    viewModel = viewModel {
+                        val context = appContext
+                        LibraryViewModel(
+                            container.shelves, container.library,
+                            ImportRunner(
+                                container.bookshelf,
+                                open = { uri -> context.contentResolver.openInputStream(uri) },
+                                nameOf = { uri -> displayNameOf(context, uri) },
+                            ),
+                            container.appScope,
+                        )
+                    },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
@@ -247,9 +260,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         CollectionViewModel(
                             backStackEntry.toRoute<CollectionRoute>().collectionId,
                             container.shelves, container.library, container.sessions,
+                            container.bookshelf, container.downloads, container.appScope,
                         )
                     },
                     onOpened = ::showTab,
+                    onGetBooks = { nav.navigate(SourceRoute(CatalogScope.GRANGER)) },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -287,6 +302,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 SearchScreen(
                     viewModel = viewModel { SearchViewModel(container.search, container.sessions, query) },
                     onOpenTab = ::showTab,
+                    onOpenBook = { tabId, at ->
+                        scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it, at) } }
+                    },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -302,7 +320,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 SourceScreen(
                     viewModel = viewModel {
                         SourceViewModel(
-                            source, container.catalog, container.downloads, container.library, container.volumes,
+                            source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope,
                         )
                     },

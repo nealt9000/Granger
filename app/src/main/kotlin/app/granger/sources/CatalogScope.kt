@@ -12,7 +12,7 @@ enum class CatalogScope(val title: String) { GRANGER("Granger"), KIWIX("Kiwix"),
 /** Models are Models; a pack with any mirror on kiwix.org is Kiwix's; every other pack is Granger's own. */
 fun scopeOf(item: CatalogItem): CatalogScope = when (item) {
     is ModelEntry -> CatalogScope.MODELS
-    // Books are Granger's own; the bookshelf that lists them comes later, so no source screen section shows them yet.
+    // Books are Granger's own.
     is BookEntry -> CatalogScope.GRANGER
     is PackEntry -> if (item.urls.any(::isKiwixUrl)) CatalogScope.KIWIX else CatalogScope.GRANGER
 }

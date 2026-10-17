@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,15 +35,23 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.BookTarget
+import app.granger.core.library.BookHit
 import app.granger.core.library.SearchHit
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: () -> Unit) {
+fun SearchScreen(
+    viewModel: SearchViewModel,
+    onOpenTab: (Long) -> Unit,
+    onOpenBook: (tabId: Long, at: BookTarget) -> Unit,
+    onBack: () -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     fun open(hit: SearchHit) { scope.launch { onOpenTab(viewModel.open(hit)) } }
+    fun open(hit: BookHit) { scope.launch { viewModel.openBook(hit).let { (tab, at) -> onOpenBook(tab, at) } } }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     Scaffold(
@@ -64,7 +73,7 @@ fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: 
         },
     ) { padding ->
         val nothingFound = state.query.isNotBlank() && !state.searching &&
-            state.titles.isEmpty() && state.fullText.isEmpty()
+            state.titles.isEmpty() && state.fullText.isEmpty() && state.books.isEmpty()
         Box(Modifier.padding(padding).fillMaxSize()) {
             if (state.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
             if (nothingFound) {
@@ -99,6 +108,21 @@ fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: 
                                     Text(AnnotatedString.fromHtml(it), maxLines = 3, overflow = TextOverflow.Ellipsis)
                                 }
                                 Text(hit.packTitle)
+                            }
+                        },
+                    )
+                }
+                if (state.books.isNotEmpty()) item { SectionHeader("In books") }
+                itemsIndexed(state.books, key = { index, _ -> "b:$index" }) { _, hit ->
+                    ListItem(
+                        modifier = Modifier.clickable { open(hit) },
+                        headlineContent = { Text(hit.bookTitle) },
+                        supportingContent = {
+                            Column {
+                                if (hit.author.isNotBlank()) Text(hit.author)
+                                if (hit.snippet.isNotBlank()) {
+                                    Text(AnnotatedString.fromHtml(hit.snippet), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                                }
                             }
                         },
                     )

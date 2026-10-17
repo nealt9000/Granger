@@ -2,6 +2,8 @@ package app.granger.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.BookTarget
+import app.granger.core.library.BookHit
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.SearchHit
@@ -30,6 +32,8 @@ class SearchViewModel(
         val titles: List<SearchHit> = emptyList(),
         /** Full-text hits whose article is not already in [titles]. */
         val fullText: List<SearchHit> = emptyList(),
+        /** Hits inside books, after the article sections. */
+        val books: List<BookHit> = emptyList(),
         val searching: Boolean = false,
         /** Recent searches, newest first; shown while the field is empty. */
         val recent: List<String> = emptyList(),
@@ -52,7 +56,7 @@ class SearchViewModel(
                 wait
             }.distinctUntilChanged().collectLatest { q ->
                 if (q.isBlank()) {
-                    _state.update { it.copy(titles = emptyList(), fullText = emptyList(), searching = false) }
+                    _state.update { it.copy(titles = emptyList(), fullText = emptyList(), books = emptyList(), searching = false) }
                     return@collectLatest
                 }
                 _state.update { it.copy(searching = true) }
@@ -60,7 +64,9 @@ class SearchViewModel(
                 _state.update { it.copy(titles = titles) }
                 val shown = titles.map { it.packId to it.path }.toSet()
                 val fullText = search.fullText(q).filterNot { (it.packId to it.path) in shown }
-                _state.update { it.copy(fullText = fullText, searching = false) }
+                _state.update { it.copy(fullText = fullText) }
+                val books = search.books(q)
+                _state.update { it.copy(books = books, searching = false) }
             }
         }
     }
@@ -74,6 +80,12 @@ class SearchViewModel(
     suspend fun open(hit: SearchHit): Long {
         sessions.recordSearch(query.value)
         return sessions.openTab(hit.packId, hit.path, hit.title)
+    }
+
+    /** Remembers the current query, opens (or reuses) the book's tab, and returns it with the place to open at. */
+    suspend fun openBook(hit: BookHit): Pair<Long, BookTarget> {
+        sessions.recordSearch(query.value)
+        return sessions.openTab(hit.bookId, "", hit.bookTitle) to BookTarget(hit.href, hit.progression)
     }
 
     companion object {

@@ -1,6 +1,10 @@
 package app.granger.library
 
+import android.net.Uri
+import app.granger.FakeBookshelf
 import app.granger.FakeLibrary
+import app.granger.core.library.Bookshelf
+import app.granger.core.library.ImportResult
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
 import app.granger.pack
@@ -15,11 +19,26 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import java.io.InputStream
+import kotlinx.coroutines.test.TestScope
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class LibraryViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val library = FakeLibrary()
     private val shelves = FakeShelves()
+
+    private class ImportingShelf : Bookshelf by FakeBookshelf() {
+        override suspend fun import(displayName: String, open: () -> InputStream): ImportResult =
+            if (displayName == "bad.epub") ImportResult.Unsupported else ImportResult.Imported(displayName)
+    }
+
+    private fun TestScope.vm() =
+        LibraryViewModel(shelves, library, ImportRunner(ImportingShelf(), { java.io.ByteArrayInputStream(ByteArray(1)) }) { it.lastPathSegment.orEmpty() }, appScope = this)
 
     private fun shelf(type: String, vararg collections: Pair<String, Int>) = Shelf(
         MediaType(type.lowercase(), type, builtIn = true, sortOrder = 0),
@@ -32,7 +51,7 @@ class LibraryViewModelTest {
     )
 
     @Test fun refreshRescansTheLibrary() = runTest(main.dispatcher) {
-        val vm = LibraryViewModel(shelves, library)
+        val vm = vm()
         vm.refresh()
         vm.refresh()
         testScheduler.advanceUntilIdle()
@@ -41,7 +60,7 @@ class LibraryViewModelTest {
 
     @Test fun showsShelvesAndBothSources() = runTest(main.dispatcher) {
         shelves.shelfList.value = listOf(shelf("Literature", "Wikipedia" to 3, "Medicine" to 1))
-        val ui = LibraryViewModel(shelves, library).ui.filterNotNull().first()
+        val ui = vm().ui.filterNotNull().first()
         assertThat(ui.media.map { it.mediaType.name }).containsExactly("Literature")
         assertThat(ui.media.single().collections.map { it.packs.size }).containsExactly(3, 1).inOrder()
         assertThat(ui.sources).containsExactly(CatalogScope.GRANGER, CatalogScope.KIWIX).inOrder()
@@ -49,8 +68,17 @@ class LibraryViewModelTest {
     }
 
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {
-        val ui = LibraryViewModel(shelves, library).ui.filterNotNull().first()
+        val ui = vm().ui.filterNotNull().first()
         assertThat(ui.emptyLibrary).isTrue()
         assertThat(ui.sources).hasSize(2)
+    }
+
+    @Test fun importSummaryIsShown() = runTest(main.dispatcher) {
+        val vm = vm()
+        vm.import(listOf("a.epub", "bad.epub", "b.epub").map { Uri.parse("content://docs/$it") })
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.notice.value).isEqualTo("Imported 2 books. bad.epub isn't an EPUB, TXT or Markdown file.")
+        vm.dismissNotice()
+        assertThat(vm.notice.value).isNull()
     }
 }
