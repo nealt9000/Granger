@@ -14,7 +14,7 @@ class IntegrityCheckerTest {
     private val content = Random(4).nextBytes(300_000)
 
     private fun record(file: File, verifiedAt: Long? = null) = DownloadRecord(
-        itemId = "med", sha256 = sha256(content), kind = ItemKind.PACK, title = "WikiMed", urls = emptyList(),
+        itemId = "med", hash = sha256(content), kind = ItemKind.PACK, title = "WikiMed", urls = emptyList(),
         sizeBytes = content.size.toLong(), filePath = file.path, snapshotDate = "2026-10-10", wifiOnly = true,
         state = DownloadState.INSTALLED, verifiedAt = verifiedAt, createdAt = 1, updatedAt = 1,
     )
@@ -35,6 +35,14 @@ class IntegrityCheckerTest {
         assertThat(IntegrityChecker.full(record(file)) { progress += it }).isEqualTo(Integrity.VERIFIED)
         assertThat(progress.last()).isEqualTo(1f)
         assertThat(progress).isInOrder()
+    }
+
+    @Test fun fullCheckUsesTheRecordsAlgorithm() = runTest {
+        val file = File(tmp.root, "med.zim").apply { writeBytes(content) }
+        val good = record(file).copy(hash = sha1(content), hashAlgorithm = HashAlgorithm.SHA1)
+        assertThat(IntegrityChecker.full(good)).isEqualTo(Integrity.VERIFIED)
+        val bad = good.copy(hash = "0".repeat(40))
+        assertThat(IntegrityChecker.full(bad)).isEqualTo(Integrity.CORRUPTED)
     }
 
     @Test fun fullCheckFindsCorruption() = runTest {

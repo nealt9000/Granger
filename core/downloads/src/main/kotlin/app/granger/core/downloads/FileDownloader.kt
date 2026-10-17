@@ -15,12 +15,12 @@ import java.io.IOException
 import java.io.RandomAccessFile
 import java.security.MessageDigest
 
-data class DownloadRequest(val urls: List<String>, val sizeBytes: Long, val sha256: String)
+data class DownloadRequest(val urls: List<String>, val sizeBytes: Long, val hash: String, val algorithm: HashAlgorithm = HashAlgorithm.SHA256)
 
 sealed interface DownloadResult {
     data object Done : DownloadResult
 
-    /** The bytes didn't match the expected sha256. The part file has been deleted. */
+    /** The bytes didn't match the expected checksum. The part file has been deleted. */
     data object HashMismatch : DownloadResult
 
     /** Writing on would leave less than the reserve free. The bytes so far are kept. */
@@ -35,7 +35,7 @@ sealed interface DownloadResult {
 
 /**
  * Downloads one file into a `.part` file with HTTP Range resume, mirror fallback, a streaming
- * sha256 and a free-space check before every write. It never renames or registers anything.
+ * checksum and a free-space check before every write. It never renames or registers anything.
  */
 class FileDownloader(
     private val client: OkHttpClient,
@@ -51,7 +51,7 @@ class FileDownloader(
             }
             if (part.length() > request.sizeBytes) part.delete()
             // Hash what an earlier run left, so the final check covers every byte of the file.
-            val digest = MessageDigest.getInstance("SHA-256")
+            val digest = MessageDigest.getInstance(request.algorithm.jcaName)
             var offset = try {
                 hashFile(part, digest)
             } catch (e: IOException) {
@@ -78,7 +78,7 @@ class FileDownloader(
                 if (!attempt.permanent) permanent = false
             }
             if (offset < request.sizeBytes) return@withContext DownloadResult.Failed(lastError, permanent)
-            if (digest.digest().toHex() != request.sha256.lowercase()) {
+            if (digest.digest().toHex() != request.hash.lowercase()) {
                 part.delete()
                 return@withContext DownloadResult.HashMismatch
             }

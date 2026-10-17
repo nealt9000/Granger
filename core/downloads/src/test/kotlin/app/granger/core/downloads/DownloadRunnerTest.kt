@@ -52,7 +52,7 @@ class DownloadRunnerTest {
         size: Long = content.size.toLong(),
     ): DownloadRecord {
         val record = DownloadRecord(
-            itemId = "med", sha256 = sha256, kind = kind, title = "WikiMed", urls = listOf(url), sizeBytes = size,
+            itemId = "med", hash = sha256, kind = kind, title = "WikiMed", urls = listOf(url), sizeBytes = size,
             filePath = File(root, fileName).path, snapshotDate = "2026-10-10", wifiOnly = true, state = state,
             createdAt = 1, updatedAt = 1,
         )
@@ -65,7 +65,7 @@ class DownloadRunnerTest {
     @Test fun installsAVerifiedFile() = runTest {
         server.files[url] = content
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.INSTALLED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.INSTALLED)
         assertThat(record.file.readBytes()).isEqualTo(content)
         assertThat(record.partFile.exists()).isFalse()
         val stored = record()!!
@@ -78,7 +78,7 @@ class DownloadRunnerTest {
     @Test fun anUnverifiedFileIsNeverInstalled() = runTest {
         server.files[url] = Random(1).nextBytes(content.size)
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.FAILED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
         assertThat(record.file.exists()).isFalse()
         assertThat(record.partFile.exists()).isFalse()
         val stored = record()!!
@@ -93,7 +93,7 @@ class DownloadRunnerTest {
         server.once[url] = Random(1).nextBytes(content.size)
         server.files[url] = content
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.INSTALLED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.INSTALLED)
         assertThat(record.file.readBytes()).isEqualTo(content)
     }
 
@@ -101,7 +101,7 @@ class DownloadRunnerTest {
         server.files[url] = content
         server.failAfter[url] = 20_000
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.RETRY)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.RETRY)
         val stored = record()!!
         assertThat(stored.state).isEqualTo(DownloadState.QUEUED)
         assertThat(stored.error).isNotNull()
@@ -109,7 +109,7 @@ class DownloadRunnerTest {
         assertThat(record.partFile.length()).isEqualTo(20_000L)
 
         server.failAfter.remove(url)
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.INSTALLED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.INSTALLED)
         assertThat(server.rangesRequested(url).last()).isEqualTo("bytes=20000-")
     }
 
@@ -117,13 +117,13 @@ class DownloadRunnerTest {
         server.files[url] = content
         free = 0
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.FAILED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
         assertThat(record()!!.error).contains("space")
     }
 
     @Test fun aPermanentFailureFailsWithItsReason() = runTest {
         val record = queued() // the server has no such file: 404
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.FAILED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
         val stored = record()!!
         assertThat(stored.state).isEqualTo(DownloadState.FAILED)
         assertThat(stored.error).contains("404")
@@ -133,9 +133,9 @@ class DownloadRunnerTest {
         server.files[url] = content
         server.failAfter[url] = 20_000
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.RETRY)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.RETRY)
         val lastError = record()!!.error!!
-        runner.giveUp("med", record.sha256)
+        runner.giveUp("med", record.hash)
         val stored = record()!!
         assertThat(stored.state).isEqualTo(DownloadState.FAILED)
         assertThat(stored.error).isEqualTo("Gave up after repeated failures: $lastError")
@@ -145,20 +145,20 @@ class DownloadRunnerTest {
     @Test fun givingUpLeavesInstalledAndFailedRecordsAlone() = runTest {
         server.files[url] = content
         val record = queued()
-        runner.run("med", record.sha256)
-        runner.giveUp("med", record.sha256)
+        runner.run("med", record.hash)
+        runner.giveUp("med", record.hash)
         assertThat(record()!!.state).isEqualTo(DownloadState.INSTALLED)
 
         val failed = queued(sha256 = SHA_1, state = DownloadState.FAILED)
         dao.setState("med", SHA_1, DownloadState.FAILED, "Checksum mismatch", 0, 2, 5)
-        runner.giveUp("med", failed.sha256)
+        runner.giveUp("med", failed.hash)
         assertThat(record(SHA_1)!!.error).isEqualTo("Checksum mismatch")
     }
 
     @Test fun anUnexpectedErrorFailsTheRecordInsteadOfLeavingItRunning() = runTest {
         server.files[url] = content
         val record = queued()
-        val outcome = runner.run("med", record.sha256) { done, _ -> if (done > 0) throw RuntimeException("disk I/O error") }
+        val outcome = runner.run("med", record.hash) { done, _ -> if (done > 0) throw RuntimeException("disk I/O error") }
         assertThat(outcome).isEqualTo(RunOutcome.FAILED)
         val stored = record()!!
         assertThat(stored.state).isEqualTo(DownloadState.FAILED)
@@ -168,9 +168,9 @@ class DownloadRunnerTest {
     @Test fun rerunAfterInstallDoesNothing() = runTest {
         server.files[url] = content
         val record = queued()
-        runner.run("med", record.sha256)
+        runner.run("med", record.hash)
         val requests = server.requests.size
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.INSTALLED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.INSTALLED)
         assertThat(server.requests.size).isEqualTo(requests)
         assertThat(installed).hasSize(1)
     }
@@ -182,27 +182,27 @@ class DownloadRunnerTest {
     @Test fun updateDeletesTheOldFileOnlyAfterVerifying() = runTest {
         val oldFile = File(root, "packs/med_2026-09-01.zim").apply { parentFile!!.mkdirs(); writeText("old snapshot") }
         dao.upsert(
-            DownloadRecord("med", SHA_1, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", true,
+            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", true,
                 DownloadState.INSTALLED, 12, createdAt = 1, updatedAt = 1),
         )
         server.files[url] = content
         val record = queued()
         var oldExistedDuringDownload = false
-        runner.run("med", record.sha256) { _, _ -> oldExistedDuringDownload = oldFile.exists() }
+        runner.run("med", record.hash) { _, _ -> oldExistedDuringDownload = oldFile.exists() }
         assertThat(oldExistedDuringDownload).isTrue()
         assertThat(oldFile.exists()).isFalse()
-        assertThat(dao.forItem("med").map { it.sha256 }).containsExactly(record.sha256)
+        assertThat(dao.forItem("med").map { it.hash }).containsExactly(record.hash)
     }
 
     @Test fun failedUpdateKeepsTheOldVersion() = runTest {
         val oldFile = File(root, "packs/med_2026-09-01.zim").apply { parentFile!!.mkdirs(); writeText("old snapshot") }
         dao.upsert(
-            DownloadRecord("med", SHA_1, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", true,
+            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", true,
                 DownloadState.INSTALLED, 12, createdAt = 1, updatedAt = 1),
         )
         server.files[url] = Random(2).nextBytes(content.size)
         val record = queued()
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.FAILED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
         assertThat(oldFile.readText()).isEqualTo("old snapshot")
         assertThat(dao.get("med", SHA_1)!!.state).isEqualTo(DownloadState.INSTALLED)
     }
@@ -211,14 +211,14 @@ class DownloadRunnerTest {
         val path = "models/e2b.litertlm"
         val file = File(root, path).apply { parentFile!!.mkdirs(); writeText("old model") }
         dao.upsert(
-            DownloadRecord("med", SHA_1, ItemKind.MODEL, "E2B", listOf(url), 9, file.path, "", true,
+            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.MODEL, "E2B", listOf(url), 9, file.path, "", true,
                 DownloadState.INSTALLED, 9, createdAt = 1, updatedAt = 1),
         )
         server.files[url] = content
         val record = queued(fileName = path, kind = ItemKind.MODEL)
-        assertThat(runner.run("med", record.sha256)).isEqualTo(RunOutcome.INSTALLED)
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.INSTALLED)
         assertThat(file.readBytes()).isEqualTo(content)
-        assertThat(dao.forItem("med").map { it.sha256 }).containsExactly(record.sha256)
+        assertThat(dao.forItem("med").map { it.hash }).containsExactly(record.hash)
     }
 
     @Test fun stoppedWorkerGoesBackToQueued() = runTest {
@@ -226,7 +226,7 @@ class DownloadRunnerTest {
         server.failAfter[url] = Int.MAX_VALUE // never drops; the job is cancelled instead
         val record = queued(size = content.size.toLong())
         lateinit var job: Job
-        job = launch { runner.run("med", record.sha256) { done, _ -> if (done > 0) job.cancel() } }
+        job = launch { runner.run("med", record.hash) { done, _ -> if (done > 0) job.cancel() } }
         job.join()
         assertThat(record()!!.state).isEqualTo(DownloadState.QUEUED)
         assertThat(record.file.exists()).isFalse()
@@ -235,8 +235,8 @@ class DownloadRunnerTest {
     @Test fun cancelledRecordIsNotResurrected() = runTest {
         server.files[url] = content
         val record = queued()
-        val outcome = runner.run("med", record.sha256) { done, total ->
-            if (done == total) runBlocking { dao.delete("med", record.sha256) }
+        val outcome = runner.run("med", record.hash) { done, total ->
+            if (done == total) runBlocking { dao.delete("med", record.hash) }
         }
         assertThat(outcome).isEqualTo(RunOutcome.GONE)
         assertThat(dao.forItem("med")).isEmpty()
@@ -247,8 +247,8 @@ class DownloadRunnerTest {
     @Test fun aRestoredInstalledRowIsNotOverwritten() = runTest {
         server.files[url] = Random(1).nextBytes(content.size) // mismatch, so the runner writes state again
         val record = queued()
-        val outcome = runner.run("med", record.sha256) { done, total ->
-            if (done == total) runBlocking { dao.setState("med", record.sha256, DownloadState.INSTALLED, null, content.size.toLong(), 0, 5) }
+        val outcome = runner.run("med", record.hash) { done, total ->
+            if (done == total) runBlocking { dao.setState("med", record.hash, DownloadState.INSTALLED, null, content.size.toLong(), 0, 5) }
         }
         assertThat(outcome).isEqualTo(RunOutcome.GONE)
         assertThat(record()!!.state).isEqualTo(DownloadState.INSTALLED)
@@ -258,10 +258,10 @@ class DownloadRunnerTest {
         server.files[url] = content
         server.hang += url
         val record = queued()
-        val a = launch(Dispatchers.Default) { runner.run("med", record.sha256) }
+        val a = launch(Dispatchers.Default) { runner.run("med", record.hash) }
         awaitRequests(1)
         server.hang -= url
-        val b = launch(Dispatchers.Default) { runner.run("med", record.sha256) }
+        val b = launch(Dispatchers.Default) { runner.run("med", record.hash) }
         withContext(Dispatchers.Default) { delay(300) }
         assertThat(server.requests).hasSize(1)
         a.cancel()

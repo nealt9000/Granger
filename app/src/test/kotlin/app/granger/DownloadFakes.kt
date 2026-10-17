@@ -10,6 +10,7 @@ import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.Preset
 import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadSpec
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
@@ -67,7 +68,7 @@ fun record(
     wifiOnly: Boolean = true,
     verifiedAt: Long? = null,
 ) = DownloadRecord(
-    itemId = itemId, sha256 = sha256, kind = kind, title = "Title $itemId", urls = listOf("https://a.test/$itemId"),
+    itemId = itemId, hash = sha256, kind = kind, title = "Title $itemId", urls = listOf("https://a.test/$itemId"),
     sizeBytes = sizeBytes, filePath = filePath, snapshotDate = "2026-10-10", wifiOnly = wifiOnly, state = state,
     bytesDone = bytesDone, error = error, verifiedAt = verifiedAt, createdAt = 1, updatedAt = 1,
 )
@@ -89,7 +90,20 @@ class FakeDownloads : Downloads {
     override val records = list
     var nextResult: EnqueueResult = EnqueueResult.Queued
     val enqueued = mutableListOf<Pair<String, File>>()
+    val enqueuedSpecs = mutableListOf<DownloadSpec>()
     val calls = mutableListOf<String>()
+
+    override suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+        enqueuedSpecs += spec
+        enqueued += spec.itemId to volumeRoot
+        val result = nextResult
+        if (result == EnqueueResult.Queued) {
+            list.update {
+                it + record(spec.itemId, DownloadState.QUEUED, sha256 = spec.hash, kind = spec.kind, sizeBytes = spec.sizeBytes, wifiOnly = wifiOnly)
+            }
+        }
+        return result
+    }
 
     override suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
         enqueued += item.id to volumeRoot
@@ -104,7 +118,7 @@ class FakeDownloads : Downloads {
     override suspend fun cancel(itemId: String) { calls += "cancel:$itemId" }
     override suspend fun remove(itemId: String) { calls += "remove:$itemId" }
     override suspend fun repair(itemId: String) { calls += "repair:$itemId" }
-    override suspend fun recordCheck(itemId: String, sha256: String, verified: Boolean) { calls += "check:$itemId:$verified" }
+    override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) { calls += "check:$itemId:$verified" }
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
 }
 

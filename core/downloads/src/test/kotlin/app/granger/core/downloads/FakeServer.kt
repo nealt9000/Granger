@@ -81,3 +81,8 @@ class FakeServer : Interceptor {
 
 fun sha256(bytes: ByteArray): String =
     MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+
+fun digestHex(algorithm: String, bytes: ByteArray): String =
+    MessageDigest.getInstance(algorithm).digest(bytes).joinToString("") { "%02x".format(it) }
+
+fun sha1(bytes: ByteArray): String = digestHex("SHA-1", bytes)

@@ -46,7 +46,7 @@ class DownloadManagerTest {
     private suspend fun installed(entry: app.granger.core.catalog.CatalogItem, filePath: String) {
         dao.upsert(
             DownloadRecord(
-                itemId = entry.id, sha256 = entry.sha256, kind = ItemKind.PACK, title = entry.title, urls = entry.urls,
+                itemId = entry.id, hash = entry.sha256, kind = ItemKind.PACK, title = entry.title, urls = entry.urls,
                 sizeBytes = entry.sizeBytes, filePath = filePath, snapshotDate = "2026-09-01", wifiOnly = true,
                 state = DownloadState.INSTALLED, bytesDone = entry.sizeBytes, createdAt = 1, updatedAt = 1,
             ),
@@ -104,7 +104,7 @@ class DownloadManagerTest {
     @Test fun aNewerVersionQueuesNextToTheInstalledOne() = test {
         installed(packEntry(sha256 = SHA_1), "/x/med_2026-09-01.zim")
         assertThat(manager.enqueue(packEntry(sha256 = SHA_2), internal, true)).isEqualTo(EnqueueResult.Queued)
-        assertThat(records().map { it.sha256 to it.state })
+        assertThat(records().map { it.hash to it.state })
             .containsExactly(SHA_1 to DownloadState.INSTALLED, SHA_2 to DownloadState.QUEUED)
     }
 
@@ -131,6 +131,47 @@ class DownloadManagerTest {
         assertThat(manager.enqueue(packEntry(id = "b"), sd, true)).isEqualTo(EnqueueResult.Queued)
     }
 
+    private fun spec(hash: String = "a".repeat(40), size: Long = 20, capped: Boolean = true) = DownloadSpec(
+        itemId = "archive-org:x", kind = ItemKind.BOOK, title = "X", urls = listOf("https://archive.org/download/x/x.epub"),
+        sizeBytes = size, hash = hash, hashAlgorithm = HashAlgorithm.SHA1, relativePath = "books/archive-org/x.epub",
+        snapshotDate = "2026-10-17", capped = capped,
+    )
+
+    @Test fun specIsQueuedAtItsRelativePathWithItsAlgorithm() = test {
+        assertThat(manager.enqueue(spec(), sd, true)).isEqualTo(EnqueueResult.Queued)
+        val record = records().single()
+        assertThat(record.filePath).isEqualTo(File(sd, "books/archive-org/x.epub").path)
+        assertThat(record.hashAlgorithm).isEqualTo(HashAlgorithm.SHA1)
+        assertThat(record.hash).isEqualTo("a".repeat(40))
+        assertThat(record.kind).isEqualTo(ItemKind.BOOK)
+        assertThat(record.snapshotDate).isEqualTo("2026-10-17")
+        assertThat(scheduler.scheduled.single()).isEqualTo(record to false)
+    }
+
+    @Test fun cappedSpecCountsAgainstTheCap() = test {
+        cap = 100
+        installedPackBytes = 90
+        assertThat(manager.enqueue(spec(size = 20), internal, true)).isEqualTo(EnqueueResult.OverCap(100, 110))
+    }
+
+    @Test fun uncappedSpecIgnoresTheCap() = test {
+        cap = 100
+        installedPackBytes = 90
+        assertThat(manager.enqueue(spec(size = 20, capped = false), internal, true)).isEqualTo(EnqueueResult.Queued)
+    }
+
+    @Test fun specWithTheInstalledHashIsAlreadyInstalled() = test {
+        dao.upsert(
+            DownloadRecord(
+                itemId = "archive-org:x", hash = "a".repeat(40), hashAlgorithm = HashAlgorithm.SHA1, kind = ItemKind.BOOK,
+                title = "X", urls = emptyList(), sizeBytes = 20, filePath = "/x/x.epub", snapshotDate = "", wifiOnly = true,
+                state = DownloadState.INSTALLED, bytesDone = 20, createdAt = 1, updatedAt = 1,
+            ),
+        )
+        assertThat(manager.enqueue(spec(), internal, true)).isEqualTo(EnqueueResult.AlreadyInstalled)
+        assertThat(scheduler.scheduled).isEmpty()
+    }
+
     @Test fun cancelDeletesPartAndRecord() = test {
         manager.enqueue(packEntry(), internal, true)
         val record = records().single()
@@ -146,7 +187,7 @@ class DownloadManagerTest {
         installed(packEntry(sha256 = SHA_1), "/x/med_2026-09-01.zim")
         manager.enqueue(packEntry(sha256 = SHA_2), internal, true)
         manager.cancel("med")
-        assertThat(records().map { it.sha256 }).containsExactly(SHA_1)
+        assertThat(records().map { it.hash }).containsExactly(SHA_1)
     }
 
     @Test fun retryRequeuesAFailedDownload() = test {
@@ -164,7 +205,7 @@ class DownloadManagerTest {
         val old = File(internal, "packs/med_2026-09-01.zim").apply { parentFile!!.mkdirs(); writeText("old") }
         installed(packEntry(sha256 = SHA_1), old.path)
         manager.enqueue(packEntry(sha256 = SHA_2), internal, true)
-        val part = records().first { it.sha256 == SHA_2 }.partFile.apply { writeText("new") }
+        val part = records().first { it.hash == SHA_2 }.partFile.apply { writeText("new") }
         manager.remove("med")
         assertThat(records()).isEmpty()
         assertThat(old.exists()).isFalse()
@@ -201,11 +242,11 @@ class DownloadManagerTest {
         val file = File(internal, "models/e2b.litertlm").apply { parentFile!!.mkdirs(); writeText("old model") }
         installed(packEntry(sha256 = SHA_1), file.path)
         dao.upsert(
-            DownloadRecord("med", SHA_2, ItemKind.PACK, "WikiMed", listOf("https://a.test/x"), 9, file.path, "", true,
+            DownloadRecord("med", SHA_2, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf("https://a.test/x"), 9, file.path, "", true,
                 DownloadState.QUEUED, 0, createdAt = 2, updatedAt = 2),
         )
         manager.cancel("med")
-        assertThat(records().map { it.sha256 to it.state }).containsExactly(SHA_1 to DownloadState.INSTALLED)
+        assertThat(records().map { it.hash to it.state }).containsExactly(SHA_1 to DownloadState.INSTALLED)
         assertThat(file.readText()).isEqualTo("old model")
     }
 

@@ -68,6 +68,27 @@ class FileDownloaderTest {
         assertThat(server.rangesRequested(a)).containsExactly(null)
     }
 
+    @Test fun verifiesWithSha1() = runTest {
+        server.files[a] = content
+        val result = downloader.download(DownloadRequest(listOf(a), content.size.toLong(), sha1(content), HashAlgorithm.SHA1), part)
+        assertThat(result).isEqualTo(DownloadResult.Done)
+    }
+
+    @Test fun md5MismatchDeletesThePart() = runTest {
+        server.files[a] = content
+        val result = downloader.download(DownloadRequest(listOf(a), content.size.toLong(), "0".repeat(32), HashAlgorithm.MD5), part)
+        assertThat(result).isEqualTo(DownloadResult.HashMismatch)
+        assertThat(part.exists()).isFalse()
+    }
+
+    @Test fun resumedSha1DownloadHashesTheEarlierBytes() = runTest {
+        server.files[a] = content
+        partWith(content.copyOf(40_000))
+        val result = downloader.download(DownloadRequest(listOf(a), content.size.toLong(), sha1(content), HashAlgorithm.SHA1), part)
+        assertThat(result).isEqualTo(DownloadResult.Done)
+        assertThat(server.rangesRequested(a)).containsExactly("bytes=40000-")
+    }
+
     @Test fun completePartNeedsNoNetwork() = runTest {
         partWith(content)
         assertThat(downloader.download(request(a), part)).isEqualTo(DownloadResult.Done)

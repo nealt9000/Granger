@@ -34,7 +34,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
 
     override suspend fun doWork(): Result {
         val itemId = inputData.getString(KEY_ITEM_ID) ?: return Result.failure()
-        val sha256 = inputData.getString(KEY_SHA256) ?: return Result.failure()
+        val hash = (inputData.getString(KEY_HASH) ?: inputData.getString(LEGACY_KEY_SHA256)) ?: return Result.failure()
         val runner = (applicationContext as DownloadsHost).downloadRunner
         try {
             setForeground(notifications.foregroundInfo(itemId, title, 0, 0))
@@ -43,7 +43,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
         }
         var shownAt = 0L
         try {
-            val outcome = runner.run(itemId, sha256) { done, total ->
+            val outcome = runner.run(itemId, hash) { done, total ->
                 val t = SystemClock.elapsedRealtime()
                 if (t - shownAt >= NOTIFY_EVERY_MS) {
                     shownAt = t
@@ -52,7 +52,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
             }
             if (outcome == RunOutcome.RETRY && isLastAttempt(runAttemptCount)) {
                 // WorkManager retries forever; stop and show the last error with a Retry button.
-                runner.giveUp(itemId, sha256)
+                runner.giveUp(itemId, hash)
                 return Result.failure()
             }
             return outcome.toWorkResult()
@@ -64,7 +64,10 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
 
     companion object {
         const val KEY_ITEM_ID = "itemId"
-        const val KEY_SHA256 = "sha256"
+        const val KEY_HASH = "hash"
+
+        /** Work queued by the version before Plan 7 carries the checksum under this key. */
+        private const val LEGACY_KEY_SHA256 = "sha256"
         const val KEY_TITLE = "title"
         private const val NOTIFY_EVERY_MS = 2_000L
 
@@ -91,7 +94,7 @@ class WorkManagerScheduler(context: Context) : DownloadScheduler {
             .setInputData(
                 workDataOf(
                     DownloadWorker.KEY_ITEM_ID to record.itemId,
-                    DownloadWorker.KEY_SHA256 to record.sha256,
+                    DownloadWorker.KEY_HASH to record.hash,
                     DownloadWorker.KEY_TITLE to record.title,
                 ),
             )

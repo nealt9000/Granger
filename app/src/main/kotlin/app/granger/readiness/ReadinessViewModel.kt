@@ -107,7 +107,7 @@ class ReadinessViewModel(
                     withContext(io) { quick(record) }
                 }
                 results.update { it + (key to result) }
-                downloads.recordCheck(record.itemId, record.sha256, result == Integrity.VERIFIED)
+                downloads.recordCheck(record.itemId, record.hash, result == Integrity.VERIFIED)
             } finally {
                 progress.update { it - key }
             }
@@ -195,6 +195,6 @@ class ReadinessViewModel(
     private companion object {
         val REPAIRABLE = setOf(CheckStatus.INCOMPLETE, CheckStatus.CORRUPTED, CheckStatus.DAMAGED, CheckStatus.MISSING)
 
-        fun keyOf(record: DownloadRecord) = "${record.itemId}@${record.sha256}"
+        fun keyOf(record: DownloadRecord) = "${record.itemId}@${record.hash}"
     }
 }
