@@ -185,6 +185,7 @@ class FakeBookshelf : Bookshelf {
     val bookList = MutableStateFlow<List<Book>>(emptyList())
     val positionMap = MutableStateFlow<Map<String, BookPosition>>(emptyMap())
     var refreshes = 0
+    val removed = mutableListOf<String>()
 
     override val books: Flow<List<Book>> = bookList
     override val positions: Flow<Map<String, BookPosition>> = positionMap
@@ -193,6 +194,7 @@ class FakeBookshelf : Bookshelf {
     override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
     override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = ImportResult.Unsupported
     override suspend fun remove(id: String): Boolean {
+        removed += id
         bookList.update { list -> list.filterNot { it.id == id } }
         return true
     }

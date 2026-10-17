@@ -14,6 +14,7 @@ import app.granger.core.downloads.DownloadSpec
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
+import app.granger.core.downloads.HashAlgorithm
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
@@ -67,8 +68,10 @@ fun record(
     error: String? = null,
     wifiOnly: Boolean = true,
     verifiedAt: Long? = null,
+    title: String = "Title $itemId",
+    hashAlgorithm: HashAlgorithm = HashAlgorithm.SHA256,
 ) = DownloadRecord(
-    itemId = itemId, hash = sha256, kind = kind, title = "Title $itemId", urls = listOf("https://a.test/$itemId"),
+    itemId = itemId, hash = sha256, hashAlgorithm = hashAlgorithm, kind = kind, title = title, urls = listOf("https://a.test/$itemId"),
     sizeBytes = sizeBytes, filePath = filePath, snapshotDate = "2026-10-10", wifiOnly = wifiOnly, state = state,
     bytesDone = bytesDone, error = error, verifiedAt = verifiedAt, createdAt = 1, updatedAt = 1,
 )
@@ -93,13 +96,21 @@ class FakeDownloads : Downloads {
     val enqueuedSpecs = mutableListOf<DownloadSpec>()
     val calls = mutableListOf<String>()
 
+    /** Runs as a spec is enqueued, before the result is decided. */
+    var onEnqueue: (DownloadSpec) -> Unit = {}
+
     override suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+        onEnqueue(spec)
         enqueuedSpecs += spec
         enqueued += spec.itemId to volumeRoot
         val result = nextResult
         if (result == EnqueueResult.Queued) {
             list.update {
-                it + record(spec.itemId, DownloadState.QUEUED, sha256 = spec.hash, kind = spec.kind, sizeBytes = spec.sizeBytes, wifiOnly = wifiOnly)
+                it + record(
+                    spec.itemId, DownloadState.QUEUED, sha256 = spec.hash, kind = spec.kind,
+                    filePath = File(volumeRoot, spec.relativePath).path, sizeBytes = spec.sizeBytes, wifiOnly = wifiOnly,
+                    title = spec.title, hashAlgorithm = spec.hashAlgorithm,
+                )
             }
         }
         return result
