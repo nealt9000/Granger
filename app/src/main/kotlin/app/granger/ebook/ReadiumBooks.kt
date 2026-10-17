@@ -85,15 +85,18 @@ class ReadiumBookSearcher : BookSearcher {
     }
 }
 
-/** [container] with [BookCss] added to every HTML page [manifest] lists; other resources pass through. */
+/** [container] with [BookCss] added to every HTML page [manifest] lists; other resources pass through. Wraps once. */
 internal fun withBookCss(manifest: Manifest, container: Container<Resource>): Container<Resource> =
-    TransformingContainer(container) { url, resource ->
+    container as? BookCssContainer ?: BookCssContainer(manifest, container)
+
+internal class BookCssContainer(manifest: Manifest, container: Container<Resource>) : Container<Resource> by
+    TransformingContainer(container, { url, resource ->
         if (manifest.linkWithHref(url)?.mediaType?.isHtml == true) {
             resource.map { bytes -> Try.success(BookCss.inject(bytes)) }
         } else {
             resource
         }
-    }
+    })
 
 /** Opens a book file for reading. */
 interface BookOpener {
@@ -118,8 +121,9 @@ class ReadiumBookOpener(context: Context) : BookOpener {
                 Log.w(TAG, "Can't read ${file.name}: ${it.message}")
                 return null
             }
-            // Passed to open(), not the constructor: in Readium 3.4 the open() parameter shadows the constructor's
-            // onCreatePublication inside open(), so the constructor's is never called.
+            // Passed to open(), not the constructor: in Readium 3.4 open() calls its own parameter twice (both
+            // `this.onCreatePublication()` and `onCreatePublication()` resolve to it) and the constructor's never,
+            // so withBookCss wraps only once.
             publicationOpener.open(
                 asset,
                 allowUserInteraction = false,

@@ -36,11 +36,28 @@ class BookCssTest {
         assertThat(out.replace(BookCss.STYLE, "")).isEqualTo(scanPage)
     }
 
-    @Test fun imagesAreCappedAtThePageAndTheirParagraphsLoseTheIndent() {
+    @Test fun aParagraphHoldingAnImageLosesItsIndent() {
         // The book's `p { text-indent: 4em }` pushed a 100%-wide image 4em past the right edge.
-        assertThat(BookCss.STYLE).contains("max-width: 100% !important")
-        assertThat(BookCss.STYLE).contains("p:has(img)")
-        assertThat(BookCss.STYLE).contains("text-indent: 0 !important")
+        assertThat(BookCss.STYLE).contains("p:has(img) { text-indent: 0 !important; }")
+    }
+
+    @Test fun theBooksOwnImageSizesAreLeftAlone() {
+        // Equation glyphs at `height: 1.2em` and `height: 100%` covers keep their sizes; ReadiumCSS already caps width.
+        assertThat(BookCss.STYLE).doesNotContain("height")
+        assertThat(BookCss.STYLE).doesNotContain("width")
+    }
+
+    @Test fun injectingTwiceAddsTheStyleOnce() {
+        val once = BookCss.inject(scanPage.toByteArray())
+        assertThat(String(BookCss.inject(once))).isEqualTo(String(once))
+    }
+
+    @Test fun aStyleAttributeCountsAsStylesOnlyAsReadiumCountsIt() {
+        // Readium's hasStyles looks for the literal " style="; a newline before it doesn't count there, so not here.
+        val newline = "<html><head></head><body\nstyle=\"x\"></body></html>"
+        assertThat(String(BookCss.inject(newline.toByteArray()))).isEqualTo(newline)
+        val space = "<html><head></head><body style=\"x\"></body></html>"
+        assertThat(String(BookCss.inject(space.toByteArray()))).contains(BookCss.STYLE)
     }
 
     @Test fun anUnstyledPageIsLeftAloneSoReadiumStillGivesItItsDefaultStyles() {
@@ -65,7 +82,7 @@ class BookCssTest {
         try {
             val page = publication.readingOrder.single()
             val html = String(publication.get(page)!!.read().getOrNull()!!)
-            assertThat(html).contains(BookCss.STYLE)
+            assertThat(html.split(BookCss.STYLE).size - 1).isEqualTo(1)
             val css = publication.resources.single { it.href.toString().endsWith(".css") }
             assertThat(String(publication.get(css)!!.read().getOrNull()!!)).doesNotContain(BookCss.STYLE)
         } finally {
