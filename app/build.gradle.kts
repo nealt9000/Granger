@@ -47,6 +47,7 @@ dependencies {
     implementation(project(":core:ai"))
     implementation(project(":core:zim"))
     implementation(project(":core:library"))
+    implementation(project(":core:archive"))
     implementation(project(":core:catalog"))
     implementation(project(":core:downloads"))
     implementation(project(":core:books"))
