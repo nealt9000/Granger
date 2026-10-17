@@ -70,7 +70,7 @@ class SearchViewModelTest {
 
     @Test fun initialQueryIsSearchedImmediately() = runTest(main.dispatcher) {
         val vm = SearchViewModel(search, sessions, "photo")
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
         assertThat(vm.state.value.query).isEqualTo("photo")
         assertThat(search.titleQueries).containsExactly("photo")
         assertThat(vm.state.value.titles.map { it.path }).containsExactly("Photosynthesis")
@@ -93,5 +93,17 @@ class SearchViewModelTest {
         val vm = SearchViewModel(search, sessions, "")
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.recent).containsExactly("cats", "dogs").inOrder()
+    }
+
+    @Test fun typedInputWaitsForTheDebounce() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "")
+        testScheduler.runCurrent()
+        vm.onQueryChange("photo")
+        testScheduler.advanceTimeBy(SearchViewModel.DEBOUNCE_MS - 1)
+        testScheduler.runCurrent()
+        assertThat(search.titleQueries).isEmpty()
+        testScheduler.advanceTimeBy(1)
+        testScheduler.runCurrent()
+        assertThat(search.titleQueries).containsExactly("photo")
     }
 }

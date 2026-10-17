@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@OptIn(FlowPreview::class)
 /**
  * Search over titles then article text. [initialQuery] (for example text selected in the reader, or a
  * recent search) is searched straight away; opening a hit remembers the query and opens a rail tab.
  */
+@OptIn(FlowPreview::class)
 class SearchViewModel(
     private val search: LibrarySearch,
     private val sessions: ReadingSessions,
@@ -44,7 +44,13 @@ class SearchViewModel(
             sessions.recentSearches().collect { recent -> _state.update { it.copy(recent = recent) } }
         }
         viewModelScope.launch {
-            query.debounce(DEBOUNCE_MS).distinctUntilChanged().collectLatest { q ->
+            // The seed query is searched at once; anything typed afterwards is debounced.
+            var seed = true
+            query.debounce {
+                val wait = if (seed && it.isNotBlank()) 0L else DEBOUNCE_MS
+                seed = false
+                wait
+            }.distinctUntilChanged().collectLatest { q ->
                 if (q.isBlank()) {
                     _state.update { it.copy(titles = emptyList(), fullText = emptyList(), searching = false) }
                     return@collectLatest

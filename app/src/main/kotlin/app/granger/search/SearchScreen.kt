@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    fun open(hit: SearchHit) { scope.launch { onOpenTab(viewModel.open(hit)) } }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     Scaffold(
@@ -82,7 +83,7 @@ fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: 
                 if (state.titles.isNotEmpty()) item { SectionHeader("Titles") }
                 items(state.titles, key = { "t:${it.packId}/${it.path}" }) { hit ->
                     ListItem(
-                        modifier = Modifier.clickable { scope.launch { onOpenTab(viewModel.open(hit)) } },
+                        modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.title) },
                         supportingContent = { Text(hit.packTitle) },
                     )
@@ -90,7 +91,7 @@ fun SearchScreen(viewModel: SearchViewModel, onOpenTab: (Long) -> Unit, onBack: 
                 if (state.fullText.isNotEmpty()) item { SectionHeader("In article text") }
                 items(state.fullText, key = { "f:${it.packId}/${it.path}" }) { hit ->
                     ListItem(
-                        modifier = Modifier.clickable { scope.launch { onOpenTab(viewModel.open(hit)) } },
+                        modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.title) },
                         supportingContent = {
                             Column {
