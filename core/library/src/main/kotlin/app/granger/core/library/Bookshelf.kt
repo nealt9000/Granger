@@ -39,6 +39,16 @@ sealed interface ImportResult {
     }
 }
 
+/** What a source knows about a book; its non-blank fields win over the EPUB's own metadata. */
+data class BookDetails(
+    val title: String,
+    val author: String,
+    val date: String,
+    val subjects: List<String>,
+    val description: String,
+    val language: String,
+)
+
 /** The e-books on the device, where each reader left off, and its bookmarks and highlights. */
 interface Bookshelf {
     val books: Flow<List<Book>>
@@ -48,8 +58,12 @@ interface Bookshelf {
     /** Re-checks every book's file and registers EPUBs found in the books folders that have no row. */
     suspend fun refresh()
 
-    /** Registers a finished catalog download; null if the file isn't a readable EPUB. */
-    suspend fun addDownloaded(file: File, catalogId: String): Book?
+    /**
+     * Registers a finished download of [origin] with source reference [ref]; null if the file isn't a readable EPUB.
+     * A `.txt` file is converted to an EPUB beside it (null if it is over the size limit). Non-blank [details]
+     * fields win over the EPUB's own metadata.
+     */
+    suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails? = null): Book?
 
     /**
      * Copies a user's file into the library, converting TXT and Markdown to EPUB. A file whose book is already here
@@ -92,9 +106,39 @@ class RoomBookshelf(
 
     override suspend fun book(id: String): Book? = dao.get(id)
 
-    override suspend fun addDownloaded(file: File, catalogId: String): Book? = withContext(io) {
-        val meta = (EpubInspector.inspect(file) as? Inspection.Ok)?.meta ?: return@withContext null
-        register(BookIds.of(BookOrigin.GRANGER, catalogId), BookOrigin.GRANGER, catalogId, file, meta)
+    override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? =
+        withContext(io) {
+            val epub = if (file.extension.equals("txt", ignoreCase = true)) {
+                convertText(file, details?.title?.takeIf { it.isNotBlank() }) ?: return@withContext null
+            } else {
+                file
+            }
+            val meta = (EpubInspector.inspect(epub) as? Inspection.Ok)?.meta
+            if (meta == null) {
+                if (epub != file) epub.delete()
+                return@withContext null
+            }
+            register(BookIds.of(origin, ref), origin, ref, epub, meta, details)
+        }
+
+    /**
+     * Converts the text file [txt] to `<name>.epub` beside it (via a `.incoming-` partial); null if it is too large
+     * or can't be read or written. Leaves the text file in place.
+     */
+    private fun convertText(txt: File, title: String?): File? {
+        val target = File(txt.parentFile, txt.nameWithoutExtension + ".epub")
+        val partial = File(txt.parentFile, ".incoming-${UUID.randomUUID()}.epub")
+        return try {
+            if (txt.length() > maxTextBytes) return null
+            val text = TextDecoding.decode(txt.readBytes())
+            partial.outputStream().use { TextToEpub.convert(text, title ?: txt.nameWithoutExtension, false, it) }
+            Files.move(partial.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            target
+        } catch (_: IOException) {
+            null
+        } finally {
+            partial.delete()
+        }
     }
 
     override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = withContext(io) {
@@ -184,8 +228,19 @@ class RoomBookshelf(
         val importFiles = (dirs.map { File(it, "imports") } + importDir())
             .distinctBy { it.absolutePath }
             .flatMap { strays(it, knownPaths) }
+        val archiveDirs = dirs.map { File(it, "archive-org") }
+        // A verified text download whose conversion never happened (the process died) is converted now.
+        for (dir in archiveDirs) {
+            for (txt in dir.listFiles().orEmpty()) {
+                if (!txt.isFile || !txt.extension.equals("txt", ignoreCase = true) || txt.name.startsWith(".incoming-")) continue
+                if (File(dir, txt.nameWithoutExtension + ".epub").exists()) continue
+                convertText(txt, null)
+            }
+        }
+        val archiveFiles = archiveDirs.flatMap { strays(it, knownPaths) }
         val candidates =
             grangerFiles.map { Triple(BookOrigin.GRANGER, it.nameWithoutExtension.substringBeforeLast('_'), it) } +
+                archiveFiles.map { Triple(BookOrigin.ARCHIVE_ORG, it.nameWithoutExtension, it) } +
                 importFiles.map { file -> Triple(BookOrigin.IMPORT, file.inputStream().use { sha256(it) }, file) }
 
         for ((key, group) in candidates.groupBy { (origin, ref, _) -> origin to ref }) {
@@ -233,20 +288,23 @@ class RoomBookshelf(
     override suspend fun deleteMark(id: Long) = dao.deleteMarkById(id)
 
     /** Upserts the book with fresh metadata and cover; an existing row keeps its id and `addedAt`, and is re-indexed. */
-    private suspend fun register(id: String, origin: BookOrigin, ref: String, file: File, meta: EpubMeta): Book {
+    private suspend fun register(
+        id: String, origin: BookOrigin, ref: String, file: File, meta: EpubMeta, details: BookDetails? = null,
+    ): Book {
         val existing = dao.get(id)
         val book = Book(
             id = id,
             origin = origin,
             sourceRef = ref,
             filePath = file.absolutePath,
-            title = meta.title,
-            author = meta.authors.joinToString(", "),
+            title = details?.title.orElse(meta.title),
+            author = details?.author.orElse(meta.authors.joinToString(", ")),
             translator = meta.translators.joinToString(", "),
-            date = meta.date,
-            language = meta.language,
-            subjects = meta.subjects.joinToString("; "),
-            description = meta.description,
+            date = details?.date.orElse(meta.date),
+            language = details?.language.orElse(meta.language),
+            subjects = details?.subjects?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() }?.joinToString("; ")
+                ?: meta.subjects.joinToString("; "),
+            description = details?.description.orElse(meta.description),
             coverPath = writeCover(id, meta, existing?.coverPath),
             sizeBytes = file.length(),
             status = PackStatus.OK,
@@ -294,6 +352,8 @@ class RoomBookshelf(
         val PDF_MAGIC = "%PDF".toByteArray()
         val UNSAFE = Regex("[^A-Za-z0-9._-]+")
         val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
+
+        fun String?.orElse(fallback: String) = this?.takeIf { it.isNotBlank() } ?: fallback
 
         fun isTextName(name: String) = TEXT_EXTENSIONS.any { name.lowercase().endsWith(it) }
 

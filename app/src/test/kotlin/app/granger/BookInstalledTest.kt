@@ -1,6 +1,8 @@
 package app.granger
 
 import app.granger.core.library.Book
+import app.granger.core.library.BookDetails
+import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -14,7 +16,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class BookInstalledTest {
     private class Shelf(val result: () -> Book?) : Bookshelf by FakeBookshelf() {
-        override suspend fun addDownloaded(file: File, catalogId: String): Book? = result()
+        override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = result()
     }
 
     @Test fun aThrowingBookshelfDoesNotFailTheInstall() = runTest {

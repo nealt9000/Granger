@@ -33,7 +33,7 @@ class BookIndexTest {
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
     private suspend fun add(ref: String, vararg chapters: String, title: String = ref): Book =
-        shelf.addDownloaded(TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", title = title, chapters = chapters.toList()), ref)!!
+        shelf.addDownloaded(TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", title = title, chapters = chapters.toList()), BookOrigin.GRANGER, ref)!!
 
     private fun chunkSequence(): Long =
         db.query("SELECT seq FROM sqlite_sequence WHERE name = 'book_chunks'", null).use { if (it.moveToFirst()) it.getLong(0) else 0L }

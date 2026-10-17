@@ -20,6 +20,7 @@ import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.WorkManagerScheduler
 import app.granger.core.library.BookIndex
+import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
@@ -64,7 +65,7 @@ class GrangerApp : Application(), DownloadsHost {
  */
 internal suspend fun onBookInstalled(bookshelf: Bookshelf, file: File, itemId: String, startIndexing: () -> Unit) {
     try {
-        if (bookshelf.addDownloaded(file, itemId) == null) {
+        if (bookshelf.addDownloaded(file, BookOrigin.GRANGER, itemId) == null) {
             android.util.Log.w("Granger", "Downloaded book $itemId is not a readable EPUB")
             return
         }
