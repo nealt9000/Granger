@@ -12,6 +12,7 @@ import app.granger.core.downloads.AndroidVolumes
 import app.granger.core.downloads.DownloadDatabase
 import app.granger.core.downloads.DownloadManager
 import app.granger.core.downloads.DownloadRunner
+import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.DownloadsHost
 import app.granger.core.downloads.FileDownloader
@@ -100,8 +101,12 @@ class AppContainer(context: Context) {
     val downloads: Downloads = DownloadManager(
         dao = downloadDao,
         scheduler = WorkManagerScheduler(context),
-        // Every installed pack counts towards the cap, SD card included (spec "Storage cap").
-        installedPackBytes = { library.packs.first().sumOf { it.sizeBytes } },
+        // Every installed pack and book counts towards the cap, SD card included (spec "Storage cap").
+        // Books are not in the library yet, so they come from the downloads ledger.
+        installedPackBytes = {
+            library.packs.first().sumOf { it.sizeBytes } +
+                downloadDao.getAll().filter { it.kind == ItemKind.BOOK && it.state == DownloadState.INSTALLED }.sumOf { it.sizeBytes }
+        },
         // Uncapped until Plan 8 wires :core:billing.
         capBytes = { Long.MAX_VALUE },
     )

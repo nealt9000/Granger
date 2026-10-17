@@ -52,3 +52,18 @@ fun testdata(name: String): File {
     while (dir != null && !File(dir, "testdata").isDirectory) dir = dir.parentFile
     return File(dir ?: error("testdata/ not found"), "testdata/$name")
 }
+
+/** A catalog with one pack, two books (the second optionally dated [secondBookDate]) and a preset naming a book. */
+fun catalogWithBooksJson(secondBookDate: String = "2026-10-17"): ByteArray = """
+    {"formatVersion": 1, "generatedAt": "2026-10-17T00:00:00Z",
+     "packs": [{"id": "med", "title": "WikiMed", "category": "Medical", "language": "eng", "sizeBytes": 1000,
+                "sha256": "$SHA_A", "urls": ["https://download.kiwix.org/zim/med.zim"], "snapshotDate": "2026-10-10",
+                "license": "CC BY-SA 4.0", "hasFulltextIndex": true, "zimUuid": "u-med", "zimName": "n"}],
+     "books": [{"id": "gc-dracula", "title": "Dracula", "author": "Bram Stoker", "category": "Fiction", "language": "en",
+                "sizeBytes": 500, "sha256": "$SHA_A", "urls": ["https://example.com/gc-dracula.epub"],
+                "releaseDate": "2026-10-17", "license": "Public domain (US)", "collection": "granger-classics", "published": 1897},
+               {"id": "gc-emma", "title": "Emma", "category": "Fiction", "language": "en",
+                "sizeBytes": 600, "sha256": "$SHA_B", "urls": ["https://example.com/gc-emma.epub"],
+                "releaseDate": "$secondBookDate", "license": "Public domain (US)", "collection": "granger-classics"}],
+     "presets": [{"id": "classics", "title": "Classics", "items": ["gc-dracula", "gc-emma", "med", "missing"]}]}
+""".trimIndent().toByteArray()

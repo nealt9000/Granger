@@ -3,7 +3,7 @@ package app.granger.core.downloads
 import androidx.room.Entity
 import java.io.File
 
-enum class ItemKind { PACK, MODEL }
+enum class ItemKind { PACK, MODEL, BOOK }
 
 enum class DownloadState { QUEUED, RUNNING, FAILED, INSTALLED }
 
@@ -21,7 +21,7 @@ data class DownloadRecord(
     val sizeBytes: Long,
     /** Where the verified file ends up; it is written to `<filePath>.part` first. */
     val filePath: String,
-    /** Packs only; blank for models. */
+    /** Packs and books (their release date); blank for models. */
     val snapshotDate: String,
     val wifiOnly: Boolean,
     val state: DownloadState,

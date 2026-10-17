@@ -8,6 +8,7 @@ import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.CatalogState
 import app.granger.core.catalog.ModelEntry
+import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.Downloads
@@ -237,6 +238,7 @@ class SourceViewModel(
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
                 is PackEntry -> listOf(item.language, "Updated ${item.snapshotDate}", item.license)
+                is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")
             val packId = (item as? PackEntry)?.let { installedPackId(it, records, packs) }

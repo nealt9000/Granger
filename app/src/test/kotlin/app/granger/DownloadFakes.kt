@@ -43,7 +43,7 @@ fun modelEntry(id: String, role: ModelRole = ModelRole.SMALL, size: Long = 2_000
 )
 
 fun catalogOf(packs: List<PackEntry> = emptyList(), models: List<ModelEntry> = emptyList(), presets: List<Preset> = emptyList()) =
-    Catalog(1, "2026-10-16T00:00:00Z", packs, models, presets)
+    Catalog(1, "2026-10-16T00:00:00Z", packs, models, presets = presets)
 
 fun record(
     itemId: String,
