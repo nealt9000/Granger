@@ -368,7 +368,7 @@ class ArchiveViewModel(
     private companion object {
         const val DEBOUNCE_MS = 400L
         const val NOTHING_TO_DOWNLOAD = "Nothing on this item can be downloaded."
-        const val NOT_PUBLIC_DOMAIN = "This item isn't marked public domain. Show everything to download it."
+        const val NOT_PUBLIC_DOMAIN = "This item wasn't published in 1930 or earlier. Show everything to download it."
         const val OFFLINE = "Couldn't reach archive.org. Check your connection and try again."
         val PLACEHOLDER = ArchiveFile(name = "", format = "", sizeBytes = null, sha1 = null, md5 = null, source = "", isPrivate = false)
     }

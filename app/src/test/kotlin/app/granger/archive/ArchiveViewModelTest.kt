@@ -54,6 +54,7 @@ class ArchiveViewModelTest {
             scanId -> resource("item-scan-only.json")
             lendingId -> resource("item-lending.json")
             MODERN -> MODERN_JSON
+            TAGGED -> TAGGED_JSON
             else -> "{}"
         }
     }
@@ -321,7 +322,7 @@ class ArchiveViewModelTest {
         val vm = viewModel()
         vm.get(MODERN)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo("This item isn't marked public domain. Show everything to download it.")
+        assertThat(vm.ui.value.notice).isEqualTo("This item wasn't published in 1930 or earlier. Show everything to download it.")
         assertThat(downloads.enqueuedSpecs).isEmpty()
         assertThat(File(sidecars, "$MODERN.json").exists()).isFalse()
         vm.dismissNotice()
@@ -329,6 +330,22 @@ class ArchiveViewModelTest {
         vm.get(MODERN)
         settle { downloads.enqueuedSpecs.isNotEmpty() }
         assertThat(downloads.enqueuedSpecs.single().itemId).isEqualTo("archive-org:$MODERN")
+    }
+
+    @Test fun filteredGetRefusesAModernItemTaggedPublicDomain() = runTest(main.dispatcher) {
+        // Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags are not trusted.
+        val vm = viewModel()
+        vm.get(TAGGED)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This item wasn't published in 1930 or earlier. Show everything to download it.")
+        assertThat(downloads.enqueuedSpecs).isEmpty()
+    }
+
+    @Test fun filteredSearchesFilterByDateOnly() = runTest(main.dispatcher) {
+        viewModel()
+        val q = searches().last().queryParameter("q")!!
+        assertThat(q).endsWith(" AND year:[* TO 1930]")
+        assertThat(q).doesNotContain("licenseurl")
     }
 
     @Test fun withdrawingTheWaiverRefusesAnItemOpenedWhileUnfiltered() = runTest(main.dispatcher) {
@@ -339,7 +356,7 @@ class ArchiveViewModelTest {
         prefs.withdraw()
         vm.get(MODERN)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo("This item isn't marked public domain. Show everything to download it.")
+        assertThat(vm.ui.value.notice).isEqualTo("This item wasn't published in 1930 or earlier. Show everything to download it.")
         assertThat(downloads.enqueuedSpecs).isEmpty()
     }
 
@@ -484,6 +501,13 @@ class ArchiveViewModelTest {
         val MODERN_JSON = """
             {"metadata":{"identifier":"$MODERN","title":"A Modern Book","creator":"Someone","date":"1950","mediatype":"texts"},
              "files":[{"name":"$MODERN.epub","format":"EPUB","size":"1000","sha1":"${"c".repeat(40)}","source":"derivative"}]}
+        """.trimIndent()
+
+        const val TAGGED = "wimpykid2007"
+        val TAGGED_JSON = """
+            {"metadata":{"identifier":"$TAGGED","title":"A Tagged Modern Book","creator":"Someone","date":"2007","mediatype":"texts",
+             "licenseurl":"http://creativecommons.org/publicdomain/mark/1.0/"},
+             "files":[{"name":"$TAGGED.epub","format":"EPUB","size":"1000","sha1":"${"d".repeat(40)}","source":"derivative"}]}
         """.trimIndent()
 
         fun searchJson(total: Int, vararg ids: String) =

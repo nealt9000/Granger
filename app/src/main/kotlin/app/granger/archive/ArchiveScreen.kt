@@ -125,7 +125,7 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
             item(key = "note") {
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(
-                        if (ui.filtered) "Showing public-domain texts only: published 1930 or earlier, or marked public domain."
+                        if (ui.filtered) "Showing public-domain texts only: published 1930 or earlier."
                         else "Showing everything archive.org serves openly. You're responsible for what you download.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -18,7 +18,7 @@
 
 ## Global Constraints
 
-- Filtered view (until the waiver is accepted): `mediatype:texts AND (year:[* TO 1930] OR licenseurl:*publicdomain*)`. Items with no year and no public-domain licence never match, so undated items are left out (spec §5). `licenseurl:*publicdomain*` covers both the PD mark and CC0 (`creativecommons.org/publicdomain/zero/…`).
+- Filtered view (until the waiver is accepted): `mediatype:texts AND year:[* TO 1930]`. Items with no year never match, so undated items are left out (spec §5). Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags are not trusted. (It was `(year:[* TO 1930] OR licenseurl:*publicdomain*)`; the licence half let modern books through.)
 - Unfiltered view: `mediatype:texts` with no rights clause.
 - **Never download** a file with `private == "true"`, or a file whose format starts with `LCP Encrypted`. No lending accounts, no DRM handling (spec §5, §2 anti-goal).
 - Lend-only items (`access-restricted-item` true with no open EPUB or text) show **"Borrow on archive.org"**, which opens `https://archive.org/details/<identifier>` in the system browser.
@@ -28,7 +28,7 @@
 - Archive.org downloads count toward the cap exactly like Classics books (`ItemKind.BOOK`, capped). Free, not Pro-only (spec §13).
 - Every archive.org request sends `User-Agent: Granger/<versionName> (+https://github.com/nealt9000/Granger)`.
 - Copy (exact):
-  - Filter note: "Showing public-domain texts only: published 1930 or earlier, or marked public domain." plus a **Show everything** button.
+  - Filter note: "Showing public-domain texts only: published 1930 or earlier." (changed 2026-10-17; it ended ", or marked public domain") plus a **Show everything** button.
   - Unfiltered note: "Showing everything archive.org serves openly. You're responsible for what you download."
   - Waiver dialog title "Show everything on archive.org?", body: "Granger is a browser for archive.org. It doesn't host, check or vouch for anything there, and much of it is still under copyright. You're responsible for having the right to download and use what you take.", buttons **I accept** / **Cancel**.
   - Standing disclaimer at the foot of the source screen: "Archive.org content is provided by the Internet Archive. Granger doesn't host or vouch for it."
@@ -142,7 +142,7 @@ git commit -m "Downloads verify with sha1 or md5 as well as sha256, and queue it
     - `MANUALS("Technical manuals", "collection:manuals")`
     - `SCIENCE("Science & engineering", "subject:(science OR engineering OR mechanics OR chemistry OR physics)")`
     - `LITERATURE("Literature", "subject:(fiction OR literature OR poetry OR drama)")`
-  - `object ArchiveQuery { const val PUBLIC_DOMAIN = "(year:[* TO 1930] OR licenseurl:*publicdomain*)"; fun build(text: String, shelf: ArchiveShelf?, filtered: Boolean): String; fun isValidIdentifier(id: String): Boolean }`. `build` gives `mediatype:texts`, then ` AND (<text>)` when the text isn't blank, ` AND <clause>` for a shelf with one, and ` AND $PUBLIC_DOMAIN` when filtered. Search text is passed through, but unbalanced quotes and parentheses are stripped first, so a stray `"` can't break the whole query.
+  - `object ArchiveQuery { const val PUBLIC_DOMAIN = "year:[* TO 1930]"; fun build(text: String, shelf: ArchiveShelf?, filtered: Boolean): String; fun isValidIdentifier(id: String): Boolean }`. `build` gives `mediatype:texts`, then ` AND (<text>)` when the text isn't blank, ` AND <clause>` for a shelf with one, and ` AND $PUBLIC_DOMAIN` when filtered. Search text is passed through, but unbalanced quotes and parentheses are stripped first, so a stray `"` can't break the whole query.
   - `data class ArchiveDoc(val identifier: String, val title: String, val creator: String, val year: Int?, val formats: List<String>, val restricted: Boolean, val downloads: Long)`
   - `data class SearchPage(val total: Int, val docs: List<ArchiveDoc>)`
   - `data class ArchiveFile(val name: String, val format: String, val sizeBytes: Long?, val sha1: String?, val md5: String?, val source: String, val private: Boolean)`
@@ -169,10 +169,10 @@ Parsing notes, all checked against the live API on 2026-10-17:
 ```kotlin
 // ArchiveQueryTest
 @Test fun filteredSearchAddsThePublicDomainClause() = assertThat(ArchiveQuery.build("steam engine", null, filtered = true))
-    .isEqualTo("mediatype:texts AND (steam engine) AND (year:[* TO 1930] OR licenseurl:*publicdomain*)")
+    .isEqualTo("mediatype:texts AND (steam engine) AND year:[* TO 1930]")
 @Test fun unfilteredShelfHasNoRightsClause() = assertThat(ArchiveQuery.build("", ArchiveShelf.MANUALS, filtered = false))
     .isEqualTo("mediatype:texts AND collection:manuals")
-@Test fun mostDownloadedFilteredIsJustTextsAndRights() // "mediatype:texts AND (year:[* TO 1930] OR licenseurl:*publicdomain*)"
+@Test fun mostDownloadedFilteredIsJustTextsAndRights() // "mediatype:texts AND year:[* TO 1930]"
 @Test fun unbalancedQuotesAndParensAreStripped()      // build("\"steam (engine", null, false) == "mediatype:texts AND (steam engine)"
 @Test fun identifiersAreValidated()                   // "lbg.vol.xviii.p.1.x_b7i9" ok; "../x", ".x", "a/b", "a b", "" rejected
 
@@ -222,7 +222,7 @@ git commit -m "Add :core:archive: archive.org search, shelves and item metadata"
   - `object ArchiveOffers`:
     - `fun choose(item: ArchiveItem): Offer`
     - `fun preview(doc: ArchiveDoc): Offer?`, a guess from search formats for the result list, before metadata. It returns `Download` with a placeholder file (`ArchiveFile(name = "", …)`), so the screen only reads `kind` and `alsoPdf`. It is null when it can't tell.
-    - `fun isPublicDomain(item: ArchiveItem): Boolean`: `year != null && year <= 1930`, or `"publicdomain" in licenseUrl.lowercase()`.
+    - `fun isPublicDomain(item: ArchiveItem): Boolean`: `year != null && year <= 1930` (licence ignored since 2026-10-17).
 
 Rules for `choose`, in order:
 1. Usable files are those not `private` and not `format.startsWith("LCP Encrypted")`, with `sha1` or `md5` present and a `sizeBytes` greater than 0.
@@ -251,7 +251,7 @@ Rules for `choose`, in order:
 @Test fun originalTextBeatsOcr()                     // item with an original "Text" .txt and a DjVuTXT → TEXT
 @Test fun fileWithoutAnyChecksumIsNotOffered()       // the only EPUB has sha1 = null, md5 = null → falls through to PdfOnly/Nothing
 @Test fun pdfOnlyItem()                              // only "Text PDF" → PdfOnly
-@Test fun isPublicDomainByYearOrLicence()            // year 1930 → true; 1931 → false; null year + ".../publicdomain/zero/1.0/" → true; null + "" → false
+@Test fun isPublicDomainByYearOnly()                 // year 1930 → true; 1931 → false; null year + ".../publicdomain/zero/1.0/" → false (2026-10-17); null + "" → false
 @Test fun previewFromSearchFormats()                 // ["EPUB"] → EPUB; ["DjVuTXT","Text PDF"] → OCR_TEXT alsoPdf; restricted → LendOnly; ["Text PDF"] → PdfOnly; [] → null
 ```
 
@@ -412,7 +412,7 @@ Behaviour:
 - `get`:
   1. Fetch `client.item`, or use the sheet's item if it's loaded.
   2. Choose the offer; anything but `Download` → notice "Nothing on this item can be downloaded."
-  3. If filtered and not `ArchiveOffers.isPublicDomain(item)` → notice "This item isn't marked public domain. Show everything to download it." Nothing is queued.
+  3. If filtered and not `ArchiveOffers.isPublicDomain(item)` → notice "This item wasn't published in 1930 or earlier. Show everything to download it." (changed 2026-10-17) Nothing is queued.
   4. Write the sidecar.
   5. `downloads.enqueue(spec, volume.root, downloadPrefs.wifiOnly)`. Map the `EnqueueResult` to the same notices `SourceViewModel.enqueue` uses (no space, over cap).
 - `remove(identifier)`: `downloads.remove(itemId)`, then `bookshelf.remove(BookIds.of(ARCHIVE_ORG, identifier))`.

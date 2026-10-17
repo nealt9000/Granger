@@ -48,8 +48,8 @@ object ArchiveOffers {
         }
     }
 
-    fun isPublicDomain(item: ArchiveItem): Boolean =
-        (item.year != null && item.year <= 1930) || "publicdomain" in item.licenseUrl.lowercase()
+    /** Published 1930 or earlier. The uploader's licence tag is ignored: it isn't trusted (2026-10-17). */
+    fun isPublicDomain(item: ArchiveItem): Boolean = item.year != null && item.year <= 1930
 
     private fun isUsable(file: ArchiveFile): Boolean =
         !file.isPrivate &&

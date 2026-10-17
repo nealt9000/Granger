@@ -8,7 +8,11 @@ enum class ArchiveShelf(val title: String, val clause: String) {
 }
 
 object ArchiveQuery {
-    const val PUBLIC_DOMAIN = "(year:[* TO 1930] OR licenseurl:*publicdomain*)"
+    /**
+     * Date only: published 1930 or earlier. Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags
+     * are not trusted (modern books tagged public domain by their uploaders showed up in the filtered view).
+     */
+    const val PUBLIC_DOMAIN = "year:[* TO 1930]"
 
     private val identifier = Regex("[A-Za-z0-9._-]+")
 

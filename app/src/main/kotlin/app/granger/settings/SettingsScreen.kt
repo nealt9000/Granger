@@ -104,7 +104,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
                     supportingContent = {
                         Text(
                             if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
-                            else "Only public-domain texts are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
+                            else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
                         )
                     },
                     trailingContent = {

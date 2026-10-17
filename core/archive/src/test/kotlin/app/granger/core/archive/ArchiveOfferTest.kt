@@ -156,11 +156,13 @@ class ArchiveOfferTest {
         assertThat(ArchiveOffers.choose(item())).isEqualTo(Offer.Nothing)
     }
 
-    @Test fun isPublicDomainByYearOrLicence() {
+    @Test fun isPublicDomainByYearOnly() {
+        // Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags are not trusted.
         assertThat(ArchiveOffers.isPublicDomain(item(year = 1930))).isTrue()
         assertThat(ArchiveOffers.isPublicDomain(item(year = 1931))).isFalse()
-        assertThat(ArchiveOffers.isPublicDomain(item(year = null, license = "https://creativecommons.org/publicdomain/zero/1.0/"))).isTrue()
-        assertThat(ArchiveOffers.isPublicDomain(item(year = null, license = "https://creativecommons.org/PublicDomain/mark/1.0/"))).isTrue()
+        assertThat(ArchiveOffers.isPublicDomain(item(year = null, license = "https://creativecommons.org/publicdomain/zero/1.0/"))).isFalse()
+        assertThat(ArchiveOffers.isPublicDomain(item(year = 2007, license = "https://creativecommons.org/publicdomain/mark/1.0/"))).isFalse()
+        assertThat(ArchiveOffers.isPublicDomain(item(year = 1900, license = "https://creativecommons.org/publicdomain/mark/1.0/"))).isTrue()
         assertThat(ArchiveOffers.isPublicDomain(item(year = null, license = ""))).isFalse()
     }
 
