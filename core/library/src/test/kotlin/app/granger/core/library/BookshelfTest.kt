@@ -49,7 +49,7 @@ class BookshelfTest {
     @Test fun downloadedBookIsFiledUnderGrangerClassics() = test {
         val file = TestEpubs.build(grangerDir, "pride_2026-10-01.epub", title = "Pride and Prejudice",
             authors = listOf("Jane Austen"), cover = TestEpubs.CoverStyle.EPUB3_PROPERTY)
-        val book = shelf.addDownloaded(file, "pride")!!
+        val book = shelf.addDownloaded(file, BookOrigin.GRANGER, "pride")!!
         assertThat(book.id).isEqualTo(BookIds.of(BookOrigin.GRANGER, "pride"))
         assertThat(book.origin).isEqualTo(BookOrigin.GRANGER)
         assertThat(book.sourceRef).isEqualTo("pride")
@@ -67,20 +67,89 @@ class BookshelfTest {
         assertThat(row.books.map { it.id }).containsExactly(book.id)
     }
 
+    private val archiveDir by lazy { File(booksDir, "archive-org").apply { mkdirs() } }
+
+    @Test fun archiveEpubIsFiledUnderArchiveOrgWithItsMetadata() = test {
+        val file = TestEpubs.build(archiveDir, "steam_1908.epub", title = "Untitled scan")
+        val book = shelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, "steam_1908",
+            BookDetails("Steam Engines", "A. Watt", "1908", listOf("steam", "engines"), "A manual.", "eng"))!!
+        assertThat(book.id).isEqualTo("book:archive-org:steam_1908")
+        assertThat(book.title).isEqualTo("Steam Engines")
+        assertThat(book.author).isEqualTo("A. Watt")
+        assertThat(book.subjects).isEqualTo("steam; engines")
+        assertThat(book.date).isEqualTo("1908")
+        assertThat(book.description).isEqualTo("A manual.")
+        assertThat(book.language).isEqualTo("eng")
+    }
+
+    @Test fun archiveTextIsConvertedBesideItAndRegistered() = test {
+        val txt = File(archiveDir, "x.txt").apply { writeText("Chapter one.\n\nIt was a dark night.") }
+        val book = shelf.addDownloaded(txt, BookOrigin.ARCHIVE_ORG, "x",
+            BookDetails("Night Book", "", "", emptyList(), "", ""))!!
+        assertThat(File(archiveDir, "x.epub").exists()).isTrue()
+        assertThat(book.filePath).endsWith("x.epub")
+        assertThat(book.title).isEqualTo("Night Book")
+        assertThat(book.id).isEqualTo("book:archive-org:x")
+    }
+
+    @Test fun archiveTextOverTheLimitIsRefused() = test {
+        val small = RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, maxTextBytes = 10)
+        val txt = File(archiveDir, "big.txt").apply { writeText("x".repeat(100)) }
+        assertThat(small.addDownloaded(txt, BookOrigin.ARCHIVE_ORG, "big")).isNull()
+        assertThat(File(archiveDir, "big.epub").exists()).isFalse()
+    }
+
+    @Test fun blankDetailFieldsKeepTheEpubsOwn() = test {
+        val file = TestEpubs.build(archiveDir, "b.epub", title = "Own Title", authors = listOf("Own Author"))
+        val book = shelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, "b",
+            BookDetails("Better Title", "", "", emptyList(), "", ""))!!
+        assertThat(book.title).isEqualTo("Better Title")
+        assertThat(book.author).isEqualTo("Own Author")
+        assertThat(book.date).isEqualTo("2020-01-02")
+    }
+
+    @Test fun refreshRegistersAStrayArchiveEpub() = test {
+        TestEpubs.build(archiveDir, "a.b_c.epub", title = "Stray")
+        File(archiveDir, "a.b_c.json").writeText("{}")
+        File(archiveDir, ".incoming-1.epub").writeText("partial")
+        shelf.refresh()
+        val books = shelf.books.first()
+        assertThat(books.map { it.id }).containsExactly("book:archive-org:a.b_c")
+        assertThat(books.single().origin).isEqualTo(BookOrigin.ARCHIVE_ORG)
+    }
+
+    @Test fun refreshConvertsAStrayArchiveText() = test {
+        File(archiveDir, "scan.txt").writeText("Hello there.\n\nSecond paragraph.")
+        shelf.refresh()
+        assertThat(File(archiveDir, "scan.epub").exists()).isTrue()
+        val book = shelf.book("book:archive-org:scan")!!
+        assertThat(book.status).isEqualTo(PackStatus.OK)
+    }
+
+    @Test fun removingAConvertedTextBookDeletesItsTextSoRefreshDoesNotBringItBack() = test {
+        val txt = File(archiveDir, "gone.txt").apply { writeText("Hello there.\n\nSecond paragraph.") }
+        val book = shelf.addDownloaded(txt, BookOrigin.ARCHIVE_ORG, "gone")!!
+        assertThat(shelf.remove(book.id)).isTrue()
+        shelf.refresh()
+        assertThat(shelf.book(book.id)).isNull()
+        assertThat(File(archiveDir, "gone.txt").exists()).isFalse()
+        assertThat(File(archiveDir, "gone.epub").exists()).isFalse()
+    }
+
     @Test fun addDownloadedRejectsAFileThatIsNotAnEpub() = test {
         val file = File(grangerDir, "junk_2026-10-01.epub").apply { writeText("junk") }
-        assertThat(shelf.addDownloaded(file, "junk")).isNull()
+        assertThat(shelf.addDownloaded(file, BookOrigin.GRANGER, "junk")).isNull()
         assertThat(shelf.books.first()).isEmpty()
     }
 
     @Test fun redownloadKeepsPositionAndMarks() = test {
-        val first = shelf.addDownloaded(TestEpubs.build(grangerDir, "pride_2026-10-01.epub"), "pride")!!
+        val first = shelf.addDownloaded(TestEpubs.build(grangerDir, "pride_2026-10-01.epub"), BookOrigin.GRANGER, "pride")!!
         shelf.savePosition(first.id, "{\"p\":1}", 0.4, "Chapter 3")
         val markId = shelf.addMark(mark(first.id))
         assertThat(shelf.remove(first.id)).isTrue()
 
         val second = shelf.addDownloaded(
-            TestEpubs.build(grangerDir, "pride_2026-11-01.epub", title = "Pride (revised)"), "pride",
+            TestEpubs.build(grangerDir, "pride_2026-11-01.epub", title = "Pride (revised)"), BookOrigin.GRANGER, "pride",
         )!!
         assertThat(second.id).isEqualTo(first.id)
         assertThat(second.title).isEqualTo("Pride (revised)")
@@ -90,7 +159,7 @@ class BookshelfTest {
     }
 
     @Test fun marksCanBeUpdatedAndDeleted() = test {
-        val book = shelf.addDownloaded(TestEpubs.build(grangerDir, "a_2026-10-01.epub"), "a")!!
+        val book = shelf.addDownloaded(TestEpubs.build(grangerDir, "a_2026-10-01.epub"), BookOrigin.GRANGER, "a")!!
         val id = shelf.addMark(mark(book.id))
         shelf.updateMark(mark(book.id).copy(id = id, note = "Lovely", color = "green"))
         assertThat(shelf.marks(book.id).first().single().note).isEqualTo("Lovely")
@@ -253,7 +322,7 @@ class BookshelfTest {
     @Test fun oddCoverExtensionsAreWrittenInsideCoversDir() = test {
         for ((ref, href) in listOf("slash" to "cover.j/pg", "long" to "cover.abcdefghij", "upper" to "cover.JPG")) {
             val file = TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", cover = TestEpubs.CoverStyle.EPUB3_PROPERTY, coverHref = href)
-            val cover = File(shelf.addDownloaded(file, ref)!!.coverPath!!)
+            val cover = File(shelf.addDownloaded(file, BookOrigin.GRANGER, ref)!!.coverPath!!)
             assertThat(cover.parentFile).isEqualTo(coversDir)
             assertThat(cover.readBytes()).isEqualTo(TestEpubs.COVER_BYTES)
         }
@@ -261,7 +330,7 @@ class BookshelfTest {
     }
 
     @Test fun refreshMarksMissingAndRegistersStrays() = test {
-        val alpha = shelf.addDownloaded(TestEpubs.build(grangerDir, "alpha_2026-01-01.epub"), "alpha")!!
+        val alpha = shelf.addDownloaded(TestEpubs.build(grangerDir, "alpha_2026-01-01.epub"), BookOrigin.GRANGER, "alpha")!!
         File(alpha.filePath).delete()
         TestEpubs.build(grangerDir, "beta_2026-01-01.epub", title = "Beta old")
         TestEpubs.build(grangerDir, "beta_2026-02-01.epub", title = "Beta new")
@@ -296,7 +365,7 @@ class BookshelfTest {
 
     @Test fun removeDeletesFileButKeepsMarks() = test {
         val book = shelf.addDownloaded(
-            TestEpubs.build(grangerDir, "x_2026-01-01.epub", cover = TestEpubs.CoverStyle.EPUB3_PROPERTY), "x",
+            TestEpubs.build(grangerDir, "x_2026-01-01.epub", cover = TestEpubs.CoverStyle.EPUB3_PROPERTY), BookOrigin.GRANGER, "x",
         )!!
         shelf.savePosition(book.id, "{}", 0.5, "One")
         shelf.addMark(mark(book.id))

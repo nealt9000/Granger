@@ -62,7 +62,7 @@ fun SearchScreen(
                 },
                 title = {
                     TextField(
-                        value = state.query,
+                        value = viewModel.searchText,
                         onValueChange = viewModel::onQueryChange,
                         placeholder = { Text("Search your library") },
                         singleLine = true,

@@ -12,7 +12,6 @@ import app.granger.core.library.CollectionRow
 import app.granger.core.library.MediaType
 import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
-import app.granger.sources.CatalogScope
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -50,6 +49,12 @@ class LibraryViewModelTest {
         },
     )
 
+    @Test fun archiveSourcesListArchiveOrgLast() = runTest(main.dispatcher) {
+        val vm = vm()
+        val ui = vm.ui.filterNotNull().first()
+        assertThat(ui.sources).containsExactly(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG).inOrder()
+    }
+
     @Test fun refreshRescansTheLibrary() = runTest(main.dispatcher) {
         val vm = vm()
         vm.refresh()
@@ -58,19 +63,19 @@ class LibraryViewModelTest {
         assertThat(library.refreshes).isEqualTo(2)
     }
 
-    @Test fun showsShelvesAndBothSources() = runTest(main.dispatcher) {
+    @Test fun showsShelvesAndSources() = runTest(main.dispatcher) {
         shelves.shelfList.value = listOf(shelf("Literature", "Wikipedia" to 3, "Medicine" to 1))
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.media.map { it.mediaType.name }).containsExactly("Literature")
         assertThat(ui.media.single().collections.map { it.packs.size }).containsExactly(3, 1).inOrder()
-        assertThat(ui.sources).containsExactly(CatalogScope.GRANGER, CatalogScope.KIWIX).inOrder()
+        assertThat(ui.sources).containsExactly(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG).inOrder()
         assertThat(ui.emptyLibrary).isFalse()
     }
 
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.emptyLibrary).isTrue()
-        assertThat(ui.sources).hasSize(2)
+        assertThat(ui.sources).hasSize(3)
     }
 
     @Test fun importSummaryIsShown() = runTest(main.dispatcher) {

@@ -36,9 +36,9 @@ fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>
         }
     }
     val currentInstalled = when (item) {
-        is PackEntry -> versions.any { it.sha256 == item.sha256 } ||
+        is PackEntry -> versions.any { it.hash == item.sha256 } ||
             packs.any { it.id == item.zimUuid && it.status != PackStatus.MISSING }
-        is BookEntry, is ModelEntry -> versions.any { it.sha256 == item.sha256 }
+        is BookEntry, is ModelEntry -> versions.any { it.hash == item.sha256 }
     }
     return when {
         currentInstalled -> ItemStatus.Installed

@@ -2,6 +2,7 @@ package app.granger.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.archive.ArchivePrefs
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
@@ -23,6 +24,8 @@ data class SettingsUi(
     val volumes: List<VolumeRow> = emptyList(),
     val selectedVolume: String? = null,
     val wifiOnly: Boolean = true,
+    /** The archive.org waiver is accepted: searches there show everything, not only public domain. */
+    val archiveEverything: Boolean = false,
 )
 
 /** Where downloads go and whether they may use mobile data; the choices the source screens used to carry. */
@@ -30,6 +33,7 @@ class SettingsViewModel(
     private val downloads: Downloads,
     private val volumes: VolumeSource,
     private val prefs: DownloadPrefs,
+    private val archivePrefs: ArchivePrefs,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
@@ -38,9 +42,9 @@ class SettingsViewModel(
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
 
     val ui: StateFlow<SettingsUi> =
-        combine(volumeList, downloads.records, selectedPath, wifiOnly) { list, records, path, wifi ->
+        combine(volumeList, downloads.records, selectedPath, wifiOnly, archivePrefs.waiverAccepted) { list, records, path, wifi, archive ->
             val rows = volumeRows(list, records)
-            SettingsUi(rows, rows.firstOrNull { it.path == path }?.path ?: rows.firstOrNull()?.path, wifi)
+            SettingsUi(rows, rows.firstOrNull { it.path == path }?.path ?: rows.firstOrNull()?.path, wifi, archive)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUi())
 
     init {
@@ -61,5 +65,13 @@ class SettingsViewModel(
     fun selectVolume(path: String) {
         selectedPath.value = path
         prefs.volumePath = path
+    }
+
+    fun acceptArchiveWaiver() {
+        archivePrefs.accept()
+    }
+
+    fun withdrawArchiveWaiver() {
+        archivePrefs.withdraw()
     }
 }

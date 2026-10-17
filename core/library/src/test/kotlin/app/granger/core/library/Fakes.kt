@@ -78,7 +78,7 @@ class StubBookshelf(initial: List<Book> = emptyList()) : Bookshelf {
     override val positions: Flow<Map<String, BookPosition>> = MutableStateFlow(emptyMap())
     override suspend fun book(id: String): Book? = state.value.firstOrNull { it.id == id }
     override suspend fun refresh() = Unit
-    override suspend fun addDownloaded(file: File, catalogId: String): Book? = null
+    override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
     override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = ImportResult.Unsupported
     override suspend fun remove(id: String): Boolean = true
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) = Unit

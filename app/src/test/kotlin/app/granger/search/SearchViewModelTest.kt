@@ -32,6 +32,13 @@ class SearchViewModelTest {
     private val search = FakeSearch()
     private val sessions = FakeReadingSessions()
 
+    @Test fun theSearchFieldTextUpdatesSynchronously() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "pho")
+        assertThat(vm.searchText).isEqualTo("pho")
+        vm.onQueryChange("phot"); vm.onQueryChange("photo")
+        assertThat(vm.searchText).isEqualTo("photo")
+    }
+
     @Test fun typingIsDebouncedToTheLastQuery() = runTest(main.dispatcher) {
         val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange("p")

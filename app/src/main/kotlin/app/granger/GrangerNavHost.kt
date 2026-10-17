@@ -29,6 +29,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import app.granger.archive.ArchiveScreen
+import app.granger.archive.ArchiveViewModel
 import app.granger.core.library.BookIds
 import app.granger.core.library.ReadingTab
 import app.granger.ebook.Dictionary
@@ -43,6 +45,7 @@ import app.granger.library.ImportRunner
 import app.granger.library.LibraryScreen
 import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
+import app.granger.library.SourceLink
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
 import app.granger.readiness.ReadinessScreen
@@ -129,6 +132,7 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
+@Serializable object ArchiveRoute
 @Serializable object SettingsRoute
 @Serializable object ReadinessRoute
 
@@ -207,7 +211,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
 
     val selected = when {
         destination == null -> null
-        destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() -> RailTool.LIBRARY
+        destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
+            destination.hasRoute<ArchiveRoute>() -> RailTool.LIBRARY
         destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
         destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
             destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
@@ -269,7 +274,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
-                    onOpenSource = { source -> nav.navigate(SourceRoute(source)) },
+                    onOpenSource = { source ->
+                        when (source) {
+                            SourceLink.GRANGER -> nav.navigate(SourceRoute(CatalogScope.GRANGER))
+                            SourceLink.KIWIX -> nav.navigate(SourceRoute(CatalogScope.KIWIX))
+                            SourceLink.ARCHIVE_ORG -> nav.navigate(ArchiveRoute)
+                        }
+                    },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
@@ -281,7 +292,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         CollectionViewModel(
                             backStackEntry.toRoute<CollectionRoute>().collectionId,
                             container.shelves, container.library, container.sessions,
-                            container.bookshelf, container.downloads, container.appScope,
+                            container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
                         )
                     },
                     onOpened = ::showTab,
@@ -350,10 +361,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
+            composable<ArchiveRoute> {
+                ArchiveScreen(
+                    viewModel = viewModel {
+                        ArchiveViewModel(
+                            container.archiveClient, container.downloads, container.bookshelf, container.archivePrefs,
+                            container.volumes, container.downloadPrefs, { container.archiveSidecarDir }, container.appScope,
+                        )
+                    },
+                    detailsUrl = container.archiveClient::detailsUrl,
+                    onBack = { nav.popBackStack() },
+                )
+            }
             composable<SettingsRoute> {
                 SettingsScreen(
                     viewModel = viewModel {
-                        SettingsViewModel(container.downloads, container.volumes, container.downloadPrefs, container.appScope)
+                        SettingsViewModel(container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appScope)
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onReadiness = { nav.navigate(ReadinessRoute) },

@@ -11,6 +11,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    sourceSets {
+        getByName("test") { assets.directories.add("$projectDir/schemas") }
+    }
     testOptions {
         unitTests.isIncludeAndroidResources = true
         // Robolectric reads FileDescriptor internals by reflection, which JDK 17+ blocks by default.
@@ -36,4 +39,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.room.testing)
 }

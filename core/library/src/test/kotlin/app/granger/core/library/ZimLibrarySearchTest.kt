@@ -112,7 +112,7 @@ class ZimLibrarySearchTest {
         val index = BookIndex(db, dispatcher)
         val withBooks = ZimLibrarySearch(library, index, dispatcher)
         val file = TestEpubs.build(booksDir, "moby_2026-01-01.epub", chapters = listOf("<p>The whale surfaced.</p>"))
-        shelf.addDownloaded(file, "moby")
+        shelf.addDownloaded(file, BookOrigin.GRANGER, "moby")
         index.indexPending()
 
         val hits = withBooks.books("whale")

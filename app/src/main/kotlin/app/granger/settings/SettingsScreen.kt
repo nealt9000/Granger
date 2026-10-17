@@ -27,6 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import app.granger.archive.WaiverDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -46,6 +50,16 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    var showWaiver by rememberSaveable { mutableStateOf(false) }
+    if (showWaiver) {
+        WaiverDialog(
+            onAccept = {
+                viewModel.acceptArchiveWaiver()
+                showWaiver = false
+            },
+            onDismiss = { showWaiver = false },
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,6 +95,24 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
                     headlineContent = { Text("Download on Wi-Fi only") },
                     supportingContent = { Text("Turn off to use mobile data") },
                     trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
+                )
+                HorizontalDivider()
+            }
+            item(key = "archive") {
+                ListItem(
+                    headlineContent = { Text("Archive.org: show everything") },
+                    supportingContent = {
+                        Text(
+                            if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
+                            else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = ui.archiveEverything,
+                            onCheckedChange = { on -> if (on) showWaiver = true else viewModel.withdrawArchiveWaiver() },
+                        )
+                    },
                 )
                 HorizontalDivider()
             }

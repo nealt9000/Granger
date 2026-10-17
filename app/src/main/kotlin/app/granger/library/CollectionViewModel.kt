@@ -2,6 +2,7 @@ package app.granger.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.archive.ArchiveDownloads
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.BookPosition
@@ -31,6 +32,8 @@ class CollectionViewModel(
     private val bookshelf: Bookshelf,
     private val downloads: Downloads,
     private val appScope: CoroutineScope,
+    /** Where archive.org sidecars live (R2); null leaves them alone. */
+    private val archiveSidecarDir: java.io.File? = null,
 ) : ViewModel() {
     /** Null until loaded, and again if the collection goes away (emptied or deleted). */
     val ui: StateFlow<CollectionRow?> =
@@ -82,12 +85,17 @@ class CollectionViewModel(
 
     /**
      * Deletes the book's file from the phone; its place, bookmarks and highlights are kept. A Granger book's download
-     * record goes first so it can be fetched again. Runs in the app scope so leaving the screen can't cut it short.
+     * record goes first so it can be fetched again; an archive.org book's metadata sidecar goes last. Runs in the app scope so leaving the screen can't cut it short.
      */
     fun removeBook(book: Book) {
         appScope.launch {
-            if (book.origin == BookOrigin.GRANGER) downloads.remove(book.sourceRef)
+            when (book.origin) {
+                BookOrigin.GRANGER -> downloads.remove(book.sourceRef)
+                BookOrigin.ARCHIVE_ORG -> downloads.remove(ArchiveDownloads.itemId(book.sourceRef))
+                else -> Unit
+            }
             bookshelf.remove(book.id)
+            if (book.origin == BookOrigin.ARCHIVE_ORG) archiveSidecarDir?.let { ArchiveDownloads.deleteSidecar(it, book.sourceRef) }
         }
     }
 

@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
-import app.granger.sources.CatalogScope
 
 /** "Media" (media types, each expanding to its collections) and "Archive sources". */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +56,7 @@ fun LibraryScreen(
     /** Shown once as a snackbar, e.g. why the app didn't resume reading. */
     notice: String?,
     onOpenCollection: (collectionId: String) -> Unit,
-    onOpenSource: (CatalogScope) -> Unit,
+    onOpenSource: (SourceLink) -> Unit,
     onSearch: () -> Unit,
     onHistory: () -> Unit,
     onReadiness: () -> Unit,

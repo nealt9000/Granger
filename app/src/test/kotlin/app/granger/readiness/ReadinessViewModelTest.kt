@@ -34,7 +34,7 @@ class ReadinessViewModelTest {
 
     private val med = record("med", DownloadState.INSTALLED, filePath = "/internal/packs/med.zim")
     private val e2b = record("e2b", DownloadState.INSTALLED, kind = ItemKind.MODEL, filePath = "/internal/models/e2b.litertlm")
-    private fun key(r: DownloadRecord) = "${r.itemId}@${r.sha256}"
+    private fun key(r: DownloadRecord) = "${r.itemId}@${r.hash}"
 
     private fun TestScope.viewModel(): ReadinessViewModel {
         val vm = ReadinessViewModel(

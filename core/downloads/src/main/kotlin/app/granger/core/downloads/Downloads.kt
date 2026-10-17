@@ -12,6 +12,23 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/**
+ * One file to download, whether or not it is in the catalog. [relativePath] is under the volume root,
+ * e.g. `books/archive-org/x.epub`; [capped] says whether it counts toward the storage cap.
+ */
+data class DownloadSpec(
+    val itemId: String,
+    val kind: ItemKind,
+    val title: String,
+    val urls: List<String>,
+    val sizeBytes: Long,
+    val hash: String,
+    val hashAlgorithm: HashAlgorithm,
+    val relativePath: String,
+    val snapshotDate: String,
+    val capped: Boolean,
+)
+
 /** What the app's screens use to download, cancel and check items. */
 interface Downloads {
     /** Every version of every item, oldest first. */
@@ -19,6 +36,9 @@ interface Downloads {
 
     /** Checks the cap and free space on [volumeRoot], then queues [item]. */
     suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
+
+    /** Checks the cap and free space on [volumeRoot], then queues [spec], which needn't be in the catalog. */
+    suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
 
     /** Queues a failed download again, with a fresh checksum retry. */
     suspend fun retry(itemId: String)
@@ -32,8 +52,8 @@ interface Downloads {
     /** Downloads an installed item again, e.g. after Readiness found it damaged. */
     suspend fun repair(itemId: String)
 
-    /** Stores the result of a full sha256 check from Readiness. */
-    suspend fun recordCheck(itemId: String, sha256: String, verified: Boolean)
+    /** Stores the result of a full checksum check from Readiness. */
+    suspend fun recordCheck(itemId: String, hash: String, verified: Boolean)
 
     /** Applies the Wi-Fi-only setting to every unfinished download. */
     suspend fun setWifiOnly(wifiOnly: Boolean)
@@ -60,20 +80,21 @@ class DownloadManager(
 
     override val records: Flow<List<DownloadRecord>> = dao.observeAll()
 
-    override suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult = mutex.withLock {
-        val versions = dao.forItem(item.id)
+    override suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult =
+        enqueue(specOf(item), volumeRoot, wifiOnly)
+
+    override suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult = mutex.withLock {
+        val versions = dao.forItem(spec.itemId)
         if (versions.any { it.isActive }) return@withLock EnqueueResult.AlreadyActive
-        if (versions.any { it.sha256 == item.sha256 }) return@withLock EnqueueResult.AlreadyInstalled
+        if (versions.any { it.hash == spec.hash }) return@withLock EnqueueResult.AlreadyInstalled
         val root = volumeRoot.absoluteFile
         val active = dao.getAll().filter { it.isActive }
-        // Packs and books both count against the storage cap; models do not.
-        val isCapped = item is PackEntry || item is BookEntry
         val verdict = QueuePolicy.check(
-            itemBytes = item.sizeBytes,
-            isPack = isCapped,
+            itemBytes = spec.sizeBytes,
+            isPack = spec.capped,
             installedPackBytes = installedPackBytes(),
             queuedPackBytes = active.filter { it.kind == ItemKind.PACK || it.kind == ItemKind.BOOK }.sumOf { it.sizeBytes },
-            replacedPackBytes = if (isCapped) versions.sumOf { it.sizeBytes } else 0L,
+            replacedPackBytes = if (spec.capped) versions.sumOf { it.sizeBytes } else 0L,
             capBytes = capBytes(),
             freeBytes = withContext(io) { freeBytes(root) },
             queuedOnVolumeBytes = active
@@ -83,18 +104,15 @@ class DownloadManager(
         if (verdict != EnqueueResult.Queued) return@withLock verdict
         val t = now()
         val record = DownloadRecord(
-            itemId = item.id,
-            sha256 = item.sha256,
-            kind = when (item) {
-                is PackEntry -> ItemKind.PACK
-                is BookEntry -> ItemKind.BOOK
-                is ModelEntry -> ItemKind.MODEL
-            },
-            title = item.title,
-            urls = item.urls,
-            sizeBytes = item.sizeBytes,
-            filePath = targetFile(item, root).path,
-            snapshotDate = snapshotDate(item),
+            itemId = spec.itemId,
+            hash = spec.hash,
+            hashAlgorithm = spec.hashAlgorithm,
+            kind = spec.kind,
+            title = spec.title,
+            urls = spec.urls,
+            sizeBytes = spec.sizeBytes,
+            filePath = File(root, spec.relativePath).path,
+            snapshotDate = spec.snapshotDate,
             wifiOnly = wifiOnly,
             state = DownloadState.QUEUED,
             createdAt = t,
@@ -105,17 +123,20 @@ class DownloadManager(
         EnqueueResult.Queued
     }
 
-    private fun snapshotDate(item: CatalogItem): String = when (item) {
-        is PackEntry -> item.snapshotDate
-        is BookEntry -> item.releaseDate
-        is ModelEntry -> ""
-    }
-
-    /** Each pack snapshot and book release gets its own file, so an update never overwrites the pack being read. */
-    private fun targetFile(item: CatalogItem, root: File): File = when (item) {
-        is PackEntry -> File(root, "packs/${item.id}_${item.snapshotDate}.zim")
-        is BookEntry -> File(root, "books/granger/${item.id}_${item.releaseDate}.epub")
-        is ModelEntry -> File(root, "models/${item.fileName}")
+    /** Packs and books count against the storage cap; models do not. Each pack snapshot and book release gets its own file, so an update never overwrites the pack being read. */
+    private fun specOf(item: CatalogItem): DownloadSpec = when (item) {
+        is PackEntry -> DownloadSpec(
+            item.id, ItemKind.PACK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+            "packs/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, capped = true,
+        )
+        is BookEntry -> DownloadSpec(
+            item.id, ItemKind.BOOK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+            "books/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, capped = true,
+        )
+        is ModelEntry -> DownloadSpec(
+            item.id, ItemKind.MODEL, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+            "models/${item.fileName}", "", capped = false,
+        )
     }
 
     override suspend fun retry(itemId: String) = mutex.withLock {
@@ -140,7 +161,7 @@ class DownloadManager(
                     ),
                 )
             } else {
-                dao.delete(record.itemId, record.sha256)
+                dao.delete(record.itemId, record.hash)
             }
         }
     }
@@ -148,7 +169,7 @@ class DownloadManager(
     override suspend fun remove(itemId: String) = mutex.withLock {
         scheduler.cancel(itemId)
         for (record in dao.forItem(itemId)) {
-            dao.delete(record.itemId, record.sha256)
+            dao.delete(record.itemId, record.hash)
             withContext(io) {
                 record.partFile.delete()
                 record.file.delete()
@@ -165,8 +186,8 @@ class DownloadManager(
         scheduler.schedule(queued, replace = true)
     }
 
-    override suspend fun recordCheck(itemId: String, sha256: String, verified: Boolean) {
-        dao.setVerifiedAt(itemId, sha256, if (verified) now() else null)
+    override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) {
+        dao.setVerifiedAt(itemId, hash, if (verified) now() else null)
     }
 
     override suspend fun setWifiOnly(wifiOnly: Boolean) = mutex.withLock {

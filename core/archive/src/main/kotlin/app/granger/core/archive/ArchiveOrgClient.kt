@@ -1,0 +1,153 @@
+package app.granger.core.archive
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.longOrNull
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
+
+class ArchiveOrgClient(
+    private val client: OkHttpClient,
+    private val userAgent: String,
+    private val baseUrl: String = "https://archive.org",
+) {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    suspend fun search(query: String, page: Int, rows: Int = 50, sortByDownloads: Boolean = true): SearchPage {
+        val url = "$baseUrl/advancedsearch.php".toHttpUrl().newBuilder().apply {
+            addQueryParameter("q", query)
+            for (field in SEARCH_FIELDS) addQueryParameter("fl[]", field)
+            if (sortByDownloads) addQueryParameter("sort[]", "downloads desc")
+            addQueryParameter("rows", rows.toString())
+            addQueryParameter("page", page.toString())
+            addQueryParameter("output", "json")
+        }.build()
+        val root = fetch(url)
+        return parse {
+            val response = root["response"]!!.jsonObject
+            SearchPage(
+                total = response["numFound"]?.asInt() ?: 0,
+                docs = (response["docs"] as? JsonArray).orEmpty().map { it.jsonObject.toDoc() },
+            )
+        }
+    }
+
+    suspend fun item(identifier: String): ArchiveItem {
+        if (!ArchiveQuery.isValidIdentifier(identifier)) throw ArchiveError("Not found on archive.org")
+        val root = fetch("$baseUrl/metadata/$identifier".toHttpUrl())
+        if (root.isEmpty() || root["is_dark"]?.asBool() == true) throw ArchiveError("Not found on archive.org")
+        return parse {
+            val meta = root["metadata"]?.jsonObject ?: throw ArchiveError("Not found on archive.org")
+            val date = meta["date"]?.firstString().orEmpty()
+            ArchiveItem(
+                identifier = meta["identifier"]?.firstString() ?: identifier,
+                title = meta["title"]?.firstString().orEmpty(),
+                creator = meta["creator"]?.allStrings().orEmpty().joinToString(", "),
+                date = date,
+                year = yearOf(date) ?: meta["year"]?.firstString()?.let(::yearOf),
+                subjects = meta["subject"]?.allStrings().orEmpty(),
+                description = stripHtml(meta["description"]?.firstString().orEmpty()),
+                language = meta["language"]?.firstString().orEmpty(),
+                licenseUrl = meta["licenseurl"]?.firstString().orEmpty(),
+                restricted = meta["access-restricted-item"]?.asBool() == true,
+                files = (root["files"] as? JsonArray).orEmpty().map { it.jsonObject.toFile() },
+            )
+        }
+    }
+
+    fun downloadUrl(identifier: String, fileName: String): String =
+        "$baseUrl/download/$identifier/" + fileName.split('/').joinToString("/") { encodeSegment(it) }
+
+    fun detailsUrl(identifier: String): String = "$baseUrl/details/$identifier"
+
+    private suspend fun fetch(url: HttpUrl): JsonObject = withContext(Dispatchers.IO) {
+        val request = Request.Builder().url(url).header("User-Agent", userAgent).build()
+        val body = try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw ArchiveError("archive.org answered ${response.code}")
+                response.body?.string().orEmpty()
+            }
+        } catch (e: ArchiveError) {
+            throw e
+        } catch (e: IOException) {
+            throw ArchiveError("Couldn't reach archive.org")
+        }
+        parse { json.parseToJsonElement(body).jsonObject }
+    }
+
+    private inline fun <T> parse(block: () -> T): T = try {
+        block()
+    } catch (e: ArchiveError) {
+        throw e
+    } catch (e: Exception) {
+        throw ArchiveError("archive.org sent something Granger couldn't read")
+    }
+
+    private fun JsonObject.toDoc() = ArchiveDoc(
+        identifier = this["identifier"]!!.firstString().orEmpty(),
+        title = this["title"]?.firstString().orEmpty(),
+        creator = this["creator"]?.allStrings().orEmpty().joinToString(", "),
+        year = this["year"]?.asInt(),
+        formats = this["format"]?.allStrings().orEmpty(),
+        restricted = this["access-restricted-item"]?.asBool() == true,
+        downloads = this["downloads"]?.asLong() ?: 0L,
+    )
+
+    private fun JsonObject.toFile() = ArchiveFile(
+        name = this["name"]!!.firstString().orEmpty(),
+        format = this["format"]?.firstString().orEmpty(),
+        sizeBytes = this["size"]?.asLong(),
+        sha1 = this["sha1"]?.firstString()?.ifBlank { null },
+        md5 = this["md5"]?.firstString()?.ifBlank { null },
+        source = this["source"]?.firstString().orEmpty(),
+        isPrivate = this["private"]?.asBool() == true,
+    )
+
+    private fun JsonElement.asInt(): Int? = (this as? JsonPrimitive)?.let { it.intOrNull ?: it.contentOrNull?.trim()?.toIntOrNull() }
+    private fun JsonElement.asLong(): Long? = (this as? JsonPrimitive)?.let { it.longOrNull ?: it.contentOrNull?.trim()?.toLongOrNull() }
+    private fun JsonElement.asBool(): Boolean? = (this as? JsonPrimitive)?.let { it.booleanOrNull ?: it.contentOrNull?.trim()?.lowercase()?.toBooleanStrictOrNull() }
+
+    private fun JsonElement.allStrings(): List<String> = when (this) {
+        is JsonArray -> mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+        is JsonPrimitive -> listOfNotNull(contentOrNull)
+        else -> emptyList()
+    }
+
+    private fun JsonElement.firstString(): String? = allStrings().firstOrNull()
+
+    /** The first run of exactly four digits, so "c1890", "[1890]" and "May 12, 1890" all give 1890. */
+    private fun yearOf(date: String): Int? = YEAR.find(date)?.value?.toInt()
+
+    private fun stripHtml(text: String): String =
+        text.replace(TAG, " ").replace(SPACES, " ").trim().take(MAX_DESCRIPTION)
+
+    private fun encodeSegment(segment: String): String {
+        val out = StringBuilder()
+        for (b in segment.toByteArray(Charsets.UTF_8)) {
+            val c = b.toInt() and 0xFF
+            if (c < 128 && (c.toChar().isLetterOrDigit() || c.toChar() in "-._~")) out.append(c.toChar())
+            else out.append('%').append("%02X".format(c))
+        }
+        return out.toString()
+    }
+
+    private companion object {
+        val SEARCH_FIELDS = listOf("identifier", "title", "creator", "year", "format", "access-restricted-item", "downloads")
+        val TAG = Regex("<[^>]*>")
+        val YEAR = Regex("(?<!\\d)\\d{4}(?!\\d)")
+        val SPACES = Regex("\\s+")
+        const val MAX_DESCRIPTION = 2000
+    }
+}

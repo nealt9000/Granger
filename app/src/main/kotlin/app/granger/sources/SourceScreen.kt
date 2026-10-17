@@ -98,7 +98,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             item(key = "search") {
                 OutlinedTextField(
-                    value = ui.query,
+                    value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
                     placeholder = { Text("Search ${title}") },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
@@ -225,27 +225,7 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
         supportingContent = {
             Column {
                 Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
-                when (status) {
-                    is ItemStatus.Queued -> Text(
-                        when {
-                            status.lastError != null -> "Retrying: ${status.lastError}"
-                            status.wifiOnly -> "Waiting for Wi-Fi"
-                            else -> "Queued"
-                        },
-                    )
-                    is ItemStatus.Downloading -> {
-                        LinearProgressIndicator(
-                            progress = { status.fraction },
-                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                        )
-                        Text("${(status.fraction * 100).toInt()}%")
-                    }
-                    is ItemStatus.Failed -> Text(status.reason, color = MaterialTheme.colorScheme.error)
-                    ItemStatus.Installed -> Text("Installed", color = MaterialTheme.colorScheme.primary)
-                    ItemStatus.UpdateAvailable -> Text("A newer version is available")
-                    ItemStatus.NeedsMoreMemory -> Text("Needs a phone with more memory")
-                    ItemStatus.NotInstalled -> Unit
-                }
+                ItemStatusText(status)
             }
         },
         trailingContent = {
@@ -265,4 +245,30 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
             }
         },
     )
+}
+
+/** The status line under an item: queue or progress, failure, installed. Shared with the archive.org rows. */
+@Composable
+internal fun ItemStatusText(status: ItemStatus) {
+    when (status) {
+        is ItemStatus.Queued -> Text(
+            when {
+                status.lastError != null -> "Retrying: ${status.lastError}"
+                status.wifiOnly -> "Waiting for Wi-Fi"
+                else -> "Queued"
+            },
+        )
+        is ItemStatus.Downloading -> {
+            LinearProgressIndicator(
+                progress = { status.fraction },
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            )
+            Text("${(status.fraction * 100).toInt()}%")
+        }
+        is ItemStatus.Failed -> Text(status.reason, color = MaterialTheme.colorScheme.error)
+        ItemStatus.Installed -> Text("Installed", color = MaterialTheme.colorScheme.primary)
+        ItemStatus.UpdateAvailable -> Text("A newer version is available")
+        ItemStatus.NeedsMoreMemory -> Text("Needs a phone with more memory")
+        ItemStatus.NotInstalled -> Unit
+    }
 }

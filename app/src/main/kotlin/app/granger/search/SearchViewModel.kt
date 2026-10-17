@@ -1,5 +1,8 @@
 package app.granger.search
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
@@ -43,6 +46,14 @@ class SearchViewModel(
     private val _state = MutableStateFlow(State(query = initialQuery))
     val state: StateFlow<State> = _state.asStateFlow()
 
+    /**
+     * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
+     * value from a flow: a value that lags a dispatch behind the keyboard is pushed back into the field and scrambles
+     * fast typing (seen on the Pixel 6, 2026-10-17).
+     */
+    var searchText by mutableStateOf(initialQuery)
+        private set
+
     init {
         viewModelScope.launch {
             sessions.recentSearches().collect { recent -> _state.update { it.copy(recent = recent) } }
@@ -72,6 +83,7 @@ class SearchViewModel(
     }
 
     fun onQueryChange(text: String) {
+        searchText = text
         query.value = text.trim()
         _state.update { it.copy(query = text) }
     }

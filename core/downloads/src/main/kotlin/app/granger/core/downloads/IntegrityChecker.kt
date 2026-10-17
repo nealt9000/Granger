@@ -7,7 +7,7 @@ import java.security.MessageDigest
 
 enum class Integrity { VERIFIED, SIZE_OK, INCOMPLETE, CORRUPTED, MISSING }
 
-/** Readiness checks: a size check always, a full sha256 re-hash on request (spec "Readiness"). */
+/** Readiness checks: a size check always, a full checksum re-hash on request (spec "Readiness"). */
 object IntegrityChecker {
     fun quick(record: DownloadRecord): Integrity {
         val file = record.file
@@ -27,8 +27,8 @@ object IntegrityChecker {
         val file = record.file
         if (!file.isFile) return@withContext Integrity.MISSING
         if (file.length() != record.sizeBytes) return@withContext Integrity.INCOMPLETE
-        val digest = MessageDigest.getInstance("SHA-256")
+        val digest = MessageDigest.getInstance(record.hashAlgorithm.jcaName)
         hashFile(file, digest) { onProgress(it.toFloat() / record.sizeBytes) }
-        if (digest.digest().toHex() == record.sha256) Integrity.VERIFIED else Integrity.CORRUPTED
+        if (digest.digest().toHex() == record.hash.lowercase()) Integrity.VERIFIED else Integrity.CORRUPTED
     }
 }

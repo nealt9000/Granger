@@ -2,6 +2,7 @@ package app.granger
 
 import app.granger.core.library.Book
 import app.granger.core.library.BookMark
+import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.BookPosition
 import app.granger.core.library.Bookshelf
@@ -184,14 +185,16 @@ class FakeBookshelf : Bookshelf {
     val bookList = MutableStateFlow<List<Book>>(emptyList())
     val positionMap = MutableStateFlow<Map<String, BookPosition>>(emptyMap())
     var refreshes = 0
+    val removed = mutableListOf<String>()
 
     override val books: Flow<List<Book>> = bookList
     override val positions: Flow<Map<String, BookPosition>> = positionMap
     override suspend fun book(id: String): Book? = bookList.value.firstOrNull { it.id == id }
     override suspend fun refresh() { refreshes++ }
-    override suspend fun addDownloaded(file: File, catalogId: String): Book? = null
+    override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
     override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = ImportResult.Unsupported
     override suspend fun remove(id: String): Boolean {
+        removed += id
         bookList.update { list -> list.filterNot { it.id == id } }
         return true
     }

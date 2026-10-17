@@ -111,7 +111,7 @@ v1 lists the curated Kiwix packs from the signed catalog, searchable. *Builder's
 ### Archive.org
 For **old books, technical manuals and, after v1, public-domain audiobooks**. Granger behaves like a web browser built for one site: it searches and browses archive.org's public API and downloads files archive.org serves openly.
 
-- **Filtered by default.** Until the user accepts the waiver, search and browse show only texts that are public domain: published 1930 or earlier, or marked public domain / CC0 in their rights metadata. A short note says the view is filtered and how to change it. *Builder's call: the exact archive.org query; when an item's date is missing, leave it out of the filtered view.*
+- **Filtered by default.** Until the user accepts the waiver, search and browse show only texts that are public domain: published 1930 or earlier. (Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags are not trusted. Modern books tagged public domain by their uploaders, such as a 2007 novel, showed up in the filtered view, so the date is the only test.) A short note says the view is filtered and how to change it. *Builder's call: the exact archive.org query; when an item's date is missing, leave it out of the filtered view.*
 - **Waiver:** a "Show everything" option (on the source screen and in Settings) asks the user to accept a waiver. In substance it says: Granger is a browser for archive.org; Granger doesn't host, check or vouch for the content; you are responsible for having the right to download and use what you take. Once it's accepted, the filter is lifted and everything archive.org serves openly is shown. The waiver can be withdrawn in Settings, which restores the filter; files already downloaded stay. *Builder's call: exact wording, kept plain.*
 - **Openly downloadable files only.** Items archive.org restricts to lending (`access-restricted-item` or files marked private) appear with a "Borrow on archive.org" label that opens the item in the system browser. Granger never handles lending accounts or copy protection (LCP/Adobe), consistent with the v1 import rule of never removing DRM.
 - **Books you own:** Granger cannot check ownership. Openly downloadable → download; lend-only → the browser link, or import your own copy.
@@ -231,7 +231,7 @@ The rest of the roadmap reorders like this (Plans 1–4 are done):
 - Narrow/expanded rail on phones; the rail hidden while reading until a middle tap.
 - Rail bookmarks added automatically on open, removable, capped at about 8; older ones stay in History.
 - Swipe-away and OS reclaim resume the book; only crash, reboot and first open land on the Library.
-- Archive.org filtered view: published 1930 or earlier, or marked public domain/CC0; undated items hidden until the waiver.
+- Archive.org filtered view: published 1930 or earlier (date only); undated items hidden until the waiver. Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags are not trusted.
 - Readium for the e-book reader; EPUB 3 for Classics, one file per work.
 - Archive.org: openly downloadable files only, lend-only items link out, sha1/md5 verification, PDF-only items listed but disabled until the PDF pass.
 - Models and Readiness move under Settings; Downloads content moves to the archive sources.

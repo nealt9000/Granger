@@ -127,6 +127,12 @@ class SourceViewModelTest {
         assertThat(vm.rowIds()).containsExactly("voyage")
     }
 
+    @Test fun theSearchFieldTextUpdatesSynchronously() = runTest(main.dispatcher) {
+        val vm = viewModel()
+        vm.setQuery("f"); vm.setQuery("fi")
+        assertThat(vm.searchText).isEqualTo("fi")
+    }
+
     @Test fun queryFiltersTitleAndDescription() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(
             catalog = catalogOf(listOf(med, packEntry("top", description = "First aid for the field"), voyage)),

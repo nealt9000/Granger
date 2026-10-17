@@ -40,7 +40,11 @@ class CollectionViewModelTest {
         shelves.shelfList.value = listOf(Shelf(MediaType("lit", "Literature", true, 0), rows.toList()))
     }
 
-    private fun TestScope.vm(id: String) = CollectionViewModel(id, shelves, library, sessions, bookshelf, downloads, appScope = this)
+    @get:Rule val tmp = org.junit.rules.TemporaryFolder()
+    private val sidecars by lazy { tmp.newFolder("sidecars") }
+
+    private fun TestScope.vm(id: String) =
+        CollectionViewModel(id, shelves, library, sessions, bookshelf, downloads, appScope = this, archiveSidecarDir = sidecars)
 
     @Test fun openStartsATabAtTheLastReadPath() = runTest(main.dispatcher) {
         val p = pack("wiki", "Wikipedia")
@@ -124,6 +128,26 @@ class CollectionViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(downloads.calls).containsExactly("remove:emma")
         assertThat(bookshelf.bookList.value).isEmpty()
+    }
+
+    @Test fun removingAnArchiveBookRemovesItsDownload() = runTest(main.dispatcher) {
+        val b = book("book:archive-org:x", "Old").copy(origin = BookOrigin.ARCHIVE_ORG, sourceRef = "x")
+        bookshelf.bookList.value = listOf(b)
+        vm("c1").removeBook(b)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("remove:archive-org:x")
+        assertThat(bookshelf.bookList.value).isEmpty()
+    }
+
+    @Test fun removingAnArchiveBookDeletesItsSidecar() = runTest(main.dispatcher) {
+        val sidecar = java.io.File(sidecars, "x.json").apply { writeText("{}") }
+        val other = java.io.File(sidecars, "y.json").apply { writeText("{}") }
+        val b = book("book:archive-org:x", "Old").copy(origin = BookOrigin.ARCHIVE_ORG, sourceRef = "x")
+        bookshelf.bookList.value = listOf(b)
+        vm("c1").removeBook(b)
+        testScheduler.advanceUntilIdle()
+        assertThat(sidecar.exists()).isFalse()
+        assertThat(other.exists()).isTrue()
     }
 
     @Test fun removeImportedBookLeavesDownloadsAlone() = runTest(main.dispatcher) {
