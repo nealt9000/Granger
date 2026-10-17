@@ -6,6 +6,9 @@ import app.granger.core.library.Library
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
 import app.granger.sources.CatalogScope
+import android.net.Uri
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -15,7 +18,29 @@ import kotlinx.coroutines.launch
 /** The Library's two sections: [media] (media types with their collections) and the archive [sources]. */
 data class LibraryUi(val media: List<Shelf>, val sources: List<CatalogScope>, val emptyLibrary: Boolean)
 
-class LibraryViewModel(shelves: Shelves, private val library: Library) : ViewModel() {
+class LibraryViewModel(
+    shelves: Shelves,
+    private val library: Library,
+    private val importer: ImportRunner,
+    private val appScope: CoroutineScope,
+) : ViewModel() {
+    private val _notice = MutableStateFlow<String?>(null)
+
+    /** What the last import did, shown once as a snackbar. */
+    val notice: StateFlow<String?> = _notice
+
+    fun dismissNotice() {
+        _notice.value = null
+    }
+
+    /** Imports the chosen files one by one. Runs in the app scope so leaving the screen doesn't stop it. */
+    fun import(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        appScope.launch {
+            _notice.value = importer.run(uris).text()
+        }
+    }
+
     /** Null until the first load finishes. */
     val ui: StateFlow<LibraryUi?> = shelves.shelves
         .map { LibraryUi(it, listOf(CatalogScope.GRANGER, CatalogScope.KIWIX), emptyLibrary = it.isEmpty()) }

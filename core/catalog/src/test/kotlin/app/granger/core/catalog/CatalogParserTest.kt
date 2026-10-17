@@ -93,4 +93,33 @@ class CatalogParserTest {
         assertThat(catalog.forBuild(includeUnevaluatedModels = false).models.map { it.id }).containsExactly("e2b")
         assertThat(catalog.items.map { it.id }).containsExactly("e2b", "e4b", "med").inOrder()
     }
+
+    @Test fun booksParseAndAppearInItems() {
+        val catalog = ok(parse(catalogWithBooksJson()))
+        assertThat(catalog.books.map { it.id }).containsExactly("gc-dracula", "gc-emma").inOrder()
+        val dracula = catalog.books.first()
+        assertThat(dracula.author).isEqualTo("Bram Stoker")
+        assertThat(dracula.published).isEqualTo(1897)
+        assertThat(dracula.collection).isEqualTo("granger-classics")
+        assertThat(catalog.books.last().author).isEmpty()
+        assertThat(catalog.books.last().published).isNull()
+        assertThat(catalog.items.map { it.id }).containsExactly("med", "gc-dracula", "gc-emma")
+        assertThat(catalog.item("gc-emma")).isSameInstanceAs(catalog.books.last())
+    }
+
+    @Test fun bookWithBadDateIsDropped() {
+        val catalog = ok(parse(catalogWithBooksJson(secondBookDate = "../../x")))
+        assertThat(catalog.books.map { it.id }).containsExactly("gc-dracula")
+    }
+
+    @Test fun presetKeepsBookIds() {
+        val catalog = ok(parse(catalogWithBooksJson()))
+        assertThat(catalog.presets.single().items).containsExactly("gc-dracula", "gc-emma", "med").inOrder()
+    }
+
+    @Test fun catalogWithoutBooksStillParses() {
+        val catalog = ok(parse(catalogJson()))
+        assertThat(catalog.books).isEmpty()
+        assertThat(catalog.items).hasSize(3)
+    }
 }

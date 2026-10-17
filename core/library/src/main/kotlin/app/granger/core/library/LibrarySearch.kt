@@ -20,10 +20,14 @@ data class SearchHit(
 interface LibrarySearch {
     suspend fun titles(query: String): List<SearchHit>
     suspend fun fullText(query: String): List<SearchHit>
+
+    /** Full-text hits inside books; empty where books aren't searchable. */
+    suspend fun books(query: String): List<BookHit> = emptyList()
 }
 
 class ZimLibrarySearch(
     private val library: Library,
+    private val bookIndex: BookIndex? = null,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val titlesPerPack: Int = 8,
     private val fullTextLimit: Int = 30,
@@ -36,6 +40,8 @@ class ZimLibrarySearch(
             .sortedByDescending { it.first.score }
             .take(fullTextLimit)
             .map { it.second }
+
+    override suspend fun books(query: String): List<BookHit> = bookIndex?.search(query) ?: emptyList()
 
     /** Runs [run] on each OK pack; a pack that fails is skipped so the others still answer. */
     private suspend fun across(query: String, run: (ZimArchive) -> List<ZimHit>): List<Pair<ZimHit, SearchHit>> {

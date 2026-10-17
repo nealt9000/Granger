@@ -1,10 +1,13 @@
 package app.granger.core.library
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
 import androidx.room.Upsert
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -172,4 +175,74 @@ interface SessionDao {
             "(SELECT query FROM recent_searches ORDER BY searchedAt DESC, query LIMIT :limit)",
     )
     suspend fun trimRecentSearches(limit: Int)
+}
+
+@Dao
+interface BookDao {
+    @Query("SELECT * FROM books ORDER BY title COLLATE NOCASE")
+    fun observeAll(): Flow<List<Book>>
+
+    @Query("SELECT * FROM books")
+    suspend fun getAll(): List<Book>
+
+    @Query("SELECT * FROM books WHERE id = :id")
+    suspend fun get(id: String): Book?
+
+    @Upsert
+    suspend fun upsert(book: Book)
+
+    @Query("DELETE FROM books WHERE id = :id")
+    suspend fun delete(id: String)
+
+    @Query("UPDATE books SET status = :status WHERE id = :id")
+    suspend fun setStatus(id: String, status: PackStatus)
+
+    @Query("SELECT * FROM books WHERE status = 'OK' AND indexedAt IS NULL")
+    suspend fun notIndexed(): List<Book>
+
+    @Query("UPDATE books SET indexedAt = :at WHERE id = :id")
+    suspend fun setIndexed(id: String, at: Long)
+
+    @Query("UPDATE books SET indexedAt = NULL")
+    suspend fun clearIndexed()
+
+    @Upsert
+    suspend fun upsertPosition(position: BookPosition)
+
+    @Query("SELECT * FROM book_positions WHERE bookId = :bookId")
+    suspend fun position(bookId: String): BookPosition?
+
+    @Query("SELECT * FROM book_positions")
+    fun observePositions(): Flow<List<BookPosition>>
+
+    @Query("SELECT * FROM book_marks WHERE bookId = :bookId ORDER BY createdAt, id")
+    fun observeMarks(bookId: String): Flow<List<BookMark>>
+
+    @Insert
+    suspend fun insertMark(mark: BookMark): Long
+
+    @Update
+    suspend fun updateMark(mark: BookMark)
+
+    @Delete
+    suspend fun deleteMark(mark: BookMark)
+
+    @Query("DELETE FROM book_marks WHERE id = :id")
+    suspend fun deleteMarkById(id: Long)
+
+    @Insert
+    suspend fun insertChunk(chunk: BookChunk): Long
+
+    @Query("DELETE FROM book_chunks WHERE bookId = :bookId")
+    suspend fun deleteChunks(bookId: String)
+
+    @Query("SELECT COUNT(*) FROM book_chunks")
+    suspend fun chunkCount(): Int
+
+    @Query("SELECT * FROM book_chunks WHERE id = :id")
+    suspend fun chunk(id: Long): BookChunk?
+
+    /** For queries over `book_text`, which Room doesn't know about; they must select `book_chunks` columns. */
+    @RawQuery
+    suspend fun chunksMatching(query: SupportSQLiteQuery): List<BookChunk>
 }

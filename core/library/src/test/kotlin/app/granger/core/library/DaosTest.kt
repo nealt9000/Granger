@@ -82,4 +82,55 @@ class DaosTest {
         assertThat(all).hasSize(1)
         assertThat(all.single().openedAt).isEqualTo(5L)
     }
+
+    private fun book(id: String, title: String = id, status: PackStatus = PackStatus.OK, indexedAt: Long? = null) = Book(
+        id = id, origin = BookOrigin.IMPORT, sourceRef = id, filePath = "/books/$id.epub", title = title,
+        author = "", translator = "", date = "", language = "eng", subjects = "", description = "",
+        coverPath = null, sizeBytes = 10L, status = status, indexedAt = indexedAt, addedAt = 1L,
+    )
+
+    @Test fun freshDatabaseHasBookText() {
+        val sqlite = db.openHelper.writableDatabase
+        sqlite.execSQL("INSERT INTO book_text (docid, text) VALUES (1, 'call me ishmael')")
+        sqlite.query("SELECT docid FROM book_text WHERE book_text MATCH 'ishmael'").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getLong(0)).isEqualTo(1L)
+        }
+    }
+
+    @Test fun chunkIdsAreNeverReused() = runTest {
+        val dao = db.bookDao()
+        val first = (1..3).map { dao.insertChunk(BookChunk(0, "b", "c$it.xhtml", it, 0.0)) }
+        assertThat(first).containsExactly(1L, 2L, 3L).inOrder()
+        dao.deleteChunks("b")
+        assertThat(dao.chunkCount()).isEqualTo(0)
+        assertThat(dao.insertChunk(BookChunk(0, "b", "c.xhtml", 0, 0.0))).isEqualTo(4L)
+        assertThat(dao.chunk(4L)!!.href).isEqualTo("c.xhtml")
+    }
+
+    @Test fun notIndexedListsOnlyOkUnindexedBooks() = runTest {
+        val dao = db.bookDao()
+        dao.upsert(book("fresh"))
+        dao.upsert(book("done", indexedAt = 5L))
+        dao.upsert(book("gone", status = PackStatus.MISSING))
+        assertThat(dao.notIndexed().map { it.id }).containsExactly("fresh")
+        dao.setIndexed("fresh", 9L)
+        assertThat(dao.notIndexed()).isEmpty()
+        dao.clearIndexed()
+        assertThat(dao.notIndexed().map { it.id }).containsExactly("fresh", "done")
+    }
+
+    @Test fun marksAreOldestFirstPerBook() = runTest {
+        val dao = db.bookDao()
+        fun mark(bookId: String, at: Long) = BookMark(0, bookId, MarkKind.HIGHLIGHT, "{}", "t$at", "yellow", "", at, at)
+        dao.insertMark(mark("a", 30L))
+        dao.insertMark(mark("a", 10L))
+        dao.insertMark(mark("b", 20L))
+        assertThat(dao.observeMarks("a").first().map { it.createdAt }).containsExactly(10L, 30L).inOrder()
+        val m = dao.observeMarks("b").first().single()
+        dao.updateMark(m.copy(note = "n"))
+        assertThat(dao.observeMarks("b").first().single().note).isEqualTo("n")
+        dao.deleteMark(m)
+        assertThat(dao.observeMarks("b").first()).isEmpty()
+    }
 }

@@ -1,6 +1,7 @@
 package app.granger
 
 import app.granger.core.catalog.Catalog
+import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.CatalogState
@@ -42,8 +43,17 @@ fun modelEntry(id: String, role: ModelRole = ModelRole.SMALL, size: Long = 2_000
     sha256 = sha256, url = "https://hf.test/$id", license = "Apache-2.0", evalPassed = true,
 )
 
-fun catalogOf(packs: List<PackEntry> = emptyList(), models: List<ModelEntry> = emptyList(), presets: List<Preset> = emptyList()) =
-    Catalog(1, "2026-10-16T00:00:00Z", packs, models, presets)
+fun bookEntry(id: String, category: String = "Novels", sha256: String = SHA_A, author: String = "An Author") = BookEntry(
+    id = id, title = "Book $id", author = author, category = category, language = "eng", sizeBytes = 500, sha256 = sha256,
+    urls = listOf("https://a.test/$id.epub"), releaseDate = "2026-10-10", license = "Public domain", collection = "classics",
+)
+
+fun catalogOf(
+    packs: List<PackEntry> = emptyList(),
+    models: List<ModelEntry> = emptyList(),
+    presets: List<Preset> = emptyList(),
+    books: List<BookEntry> = emptyList(),
+) = Catalog(1, "2026-10-16T00:00:00Z", packs, models, books = books, presets = presets)
 
 fun record(
     itemId: String,

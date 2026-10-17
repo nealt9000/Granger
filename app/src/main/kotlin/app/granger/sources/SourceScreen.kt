@@ -149,8 +149,9 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
                 }
                 HorizontalDivider()
             }
-            for (section in ui.sections) {
-                item(key = "section-${section.title}") {
+            for ((index, section) in ui.sections.withIndex()) {
+                // Indexed: a pack category and a book category can share a name.
+                item(key = "section-$index-${section.title}") {
                     Text(
                         section.title,
                         style = MaterialTheme.typography.titleSmall,

@@ -74,6 +74,20 @@ class DownloadManagerTest {
         assertThat(record.wifiOnly).isFalse()
     }
 
+    @Test fun bookTargetsBooksGrangerFolder() = test {
+        manager.enqueue(bookEntry(), sd, wifiOnly = true)
+        val record = records().single()
+        assertThat(record.kind).isEqualTo(ItemKind.BOOK)
+        assertThat(record.filePath).isEqualTo(File(sd, "books/granger/gc-emma_2026-10-17.epub").path)
+        assertThat(record.snapshotDate).isEqualTo("2026-10-17")
+    }
+
+    @Test fun booksCountTowardTheCap() = test {
+        cap = 1_500
+        assertThat(manager.enqueue(bookEntry(size = 600), internal, true)).isEqualTo(EnqueueResult.Queued)
+        assertThat(manager.enqueue(packEntry(size = 1_000), internal, true)).isEqualTo(EnqueueResult.OverCap(1_500, 1_600))
+    }
+
     @Test fun enqueueTwiceIsOneDownload() = test {
         manager.enqueue(packEntry(), internal, true)
         assertThat(manager.enqueue(packEntry(), internal, true)).isEqualTo(EnqueueResult.AlreadyActive)

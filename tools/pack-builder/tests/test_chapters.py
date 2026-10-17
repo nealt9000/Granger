@@ -92,3 +92,28 @@ def test_a_heading_only_part_merges_into_the_next():
     chapters = split(body(html))
     assert [c.title for c in chapters] == ["PART I — Chapter 1", "Chapter 2", "PART II — Chapter 3"]
     assert "PART I" in chapters[0].html and "t1" in chapters[0].html
+
+
+def test_clean_title_drops_byline_and_contents():
+    from chapters import clean_title
+    assert clean_title("by William Shakespeare — Contents", "Hamlet", "William Shakespeare", 0) == "Part 1"
+    assert clean_title("ACT I — Scene II", "Hamlet", "William Shakespeare", 3) == "ACT I — Scene II"
+    assert clean_title("Hamlet — Table of Contents", "Hamlet", "", 4) == "Part 5"
+    assert clean_title("Hamlet — ACT I", "Hamlet", "", 0) == "ACT I"
+
+
+def test_clean_title_strips_numeric_markers():
+    from chapters import clean_title
+    assert clean_title("The Knight's Tale <1>", "Tales", "Chaucer", 2) == "The Knight's Tale"
+
+
+def test_unwrapped_link_keeps_its_id():
+    chapters = split(body('<h2>A</h2><p><a name="top" href="#nowhere">text</a></p><h2>B</h2><p>x</p><h2>C</h2>'))
+    assert '<span id="top">text</span>' in chapters[0].html
+    assert "<a" not in chapters[0].html
+
+
+def test_page_href_names_cross_page_targets():
+    html = '<h2>A</h2><p><a href="#z">to Z</a></p><h2>B</h2><p>b</p><h2 id="z">C</h2><p>x</p>'
+    chapters = split(body(html), page_href=lambda i: f"c{i + 1:03d}.xhtml")
+    assert 'href="c003.xhtml#z"' in chapters[0].html

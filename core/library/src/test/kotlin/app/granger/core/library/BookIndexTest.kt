@@ -1,0 +1,169 @@
+package app.granger.core.library
+
+import app.granger.core.books.TestEpubs
+import com.google.common.truth.Truth.assertThat
+import java.io.File
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
+class BookIndexTest {
+    @get:Rule val tmp = TemporaryFolder()
+
+    private val db = inMemoryDatabase()
+    private val dispatcher = StandardTestDispatcher()
+    private val booksDir by lazy { tmp.newFolder("books") }
+    private val grangerDir by lazy { File(booksDir, "granger").apply { mkdirs() } }
+    private val shelf by lazy {
+        RoomBookshelf(db, { listOf(booksDir) }, { File(booksDir, "imports") }, File(tmp.root, "covers"), dispatcher)
+    }
+    private val index = BookIndex(db, dispatcher, now = { 5L })
+
+    @After fun close() = db.close()
+
+    private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
+
+    private suspend fun add(ref: String, vararg chapters: String, title: String = ref): Book =
+        shelf.addDownloaded(TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", title = title, chapters = chapters.toList()), ref)!!
+
+    private fun chunkSequence(): Long =
+        db.query("SELECT seq FROM sqlite_sequence WHERE name = 'book_chunks'", null).use { if (it.moveToFirst()) it.getLong(0) else 0L }
+
+    @Test fun indexesAndFindsAWord() = test {
+        val moby = add("moby", "<p>Call me Ishmael.</p>", "<p>The whale surfaced at dawn.</p>", title = "Moby-Dick")
+        index.indexPending()
+
+        val hit = index.search("whale").single()
+        assertThat(hit.bookId).isEqualTo(moby.id)
+        assertThat(hit.bookTitle).isEqualTo("Moby-Dick")
+        assertThat(hit.author).isEqualTo("Ann Author")
+        assertThat(hit.href).isEqualTo("OEBPS/c002.xhtml")
+        assertThat(hit.snippet).contains("<b>whale</b>")
+        // The last word is a prefix.
+        assertThat(index.search("surf").map { it.href }).containsExactly("OEBPS/c002.xhtml")
+        assertThat(index.search("call ishm").map { it.href }).containsExactly("OEBPS/c001.xhtml")
+        assertThat(shelf.book(moby.id)!!.indexedAt).isEqualTo(5L)
+    }
+
+    @Test fun hitsAreGroupedByBookAndLimited() = test {
+        val many = add("many", "<p>fox one</p>", "<p>fox two</p>", "<p>fox three</p>", "<p>fox four</p>")
+        val few = add("few", "<p>fox alone</p>")
+        index.indexPending()
+
+        val hits = index.search("fox", limit = 4, perBook = 3)
+        assertThat(hits.map { it.bookId }).containsExactly(many.id, many.id, many.id, few.id).inOrder()
+        assertThat(index.search("fox", limit = 2).map { it.bookId }).containsExactly(many.id, many.id)
+    }
+
+    @Test fun indexingIsResumableAndIdempotent() = test {
+        val a = add("alpha", "<p>apples everywhere</p>")
+        index.indexPending()
+        val b = add("beta", "<p>bananas everywhere</p>")
+        index.beforeCommit = { if (it == b.id) error("disk full") }
+        index.indexPending()
+
+        assertThat(index.search("apples").map { it.bookId }).containsExactly(a.id)
+        assertThat(index.search("bananas")).isEmpty()
+        assertThat(db.bookDao().notIndexed().map { it.id }).containsExactly(b.id)
+
+        index.beforeCommit = {}
+        index.indexPending()
+        assertThat(index.search("bananas").map { it.bookId }).containsExactly(b.id)
+        assertThat(index.search("everywhere").map { it.bookId }).containsExactly(a.id, b.id)
+        assertThat(db.bookDao().notIndexed()).isEmpty()
+    }
+
+    @Test fun bookChangedDuringIndexingStaysPending() = test {
+        val moby = add("moby", "<p>The whale surfaced.</p>")
+        // A re-download lands while the old file is being indexed.
+        index.beforeCommit = {
+            db.openHelper.writableDatabase.execSQL("UPDATE books SET filePath = ? WHERE id = ?", arrayOf("/new/moby.epub", moby.id))
+        }
+        index.indexPending()
+        assertThat(db.bookDao().notIndexed().map { it.id }).containsExactly(moby.id)
+    }
+
+    @Test fun userTypedTrailingStarStillMatches() = test {
+        add("talk", "<p>He said hello there.</p>")
+        index.indexPending()
+        assertThat(index.search("hello*")).hasSize(1)
+        assertThat(index.search("hel**")).hasSize(1)
+        assertThat(index.search("said hello*")).hasSize(1)
+    }
+
+    @Test fun reindexedBookMatchesOnce() = test {
+        add("moby", "<p>The whale surfaced.</p>")
+        index.indexPending()
+        val chunks = db.bookDao().chunkCount()
+        add("moby", "<p>The whale surfaced.</p>")
+        index.indexPending()
+
+        assertThat(index.search("whale")).hasSize(1)
+        assertThat(db.bookDao().chunkCount()).isEqualTo(chunks)
+    }
+
+    @Test fun removedBookNeverMatches() = test {
+        val moby = add("moby", "<p>The whale surfaced.</p>")
+        index.indexPending()
+        assertThat(shelf.remove(moby.id)).isTrue()
+        index.indexPending()
+        assertThat(index.search("whale")).isEmpty()
+    }
+
+    @Test fun missingFileIsSkippedAndLeftPending() = test {
+        val moby = add("moby", "<p>The whale surfaced.</p>")
+        File(moby.filePath).delete()
+        index.indexPending()
+        assertThat(db.bookDao().notIndexed().map { it.id }).containsExactly(moby.id)
+        assertThat(index.search("whale")).isEmpty()
+    }
+
+    @Test fun snippetIsEmptyWhenTheFileIsGone() = test {
+        val moby = add("moby", "<p>The whale surfaced.</p>")
+        index.indexPending()
+        File(moby.filePath).delete()
+        val hit = index.search("whale").single()
+        assertThat(hit.snippet).isEmpty()
+    }
+
+    @Test fun compactionRebuildsWhenOrphansDominate() = test {
+        val compacting = BookIndex(db, dispatcher, now = { 5L }, compactThreshold = 1)
+        add("moby", "<p>The whale surfaced.</p>")
+        compacting.indexPending()
+        add("moby", "<p>The whale surfaced.</p>")
+        compacting.indexPending()
+        // One orphan for one live chunk: not yet dominant.
+        assertThat(chunkSequence()).isEqualTo(2L)
+
+        add("moby", "<p>The whale surfaced.</p>")
+        compacting.indexPending()
+        // Two orphans for one live chunk: rebuilt from scratch, ids start again.
+        assertThat(db.bookDao().chunkCount()).isEqualTo(1)
+        assertThat(chunkSequence()).isEqualTo(1L)
+        assertThat(compacting.search("whale")).hasSize(1)
+        assertThat(db.bookDao().notIndexed()).isEmpty()
+    }
+
+    @Test fun quotesInQueryAreSafe() = test {
+        add("talk", "<p>He said \"hello there\" and left.</p>")
+        index.indexPending()
+
+        assertThat(index.search("\"hello")).hasSize(1)
+        assertThat(index.search("hello\" \"left")).hasSize(1)
+        assertThat(index.search("hello\" OR \"left")).isEmpty()
+        assertThat(index.search("\"\"\"")).isEmpty()
+        assertThat(index.search("   ")).isEmpty()
+        assertThat(index.search("")).isEmpty()
+        assertThat(index.search("- * : ( )")).isEmpty()
+        assertThat(index.search("NEAR hello*")).isEmpty()
+    }
+}

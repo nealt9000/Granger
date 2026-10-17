@@ -1,6 +1,8 @@
 package app.granger.sources
 
+import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
+import app.granger.bookEntry
 import app.granger.SHA_B
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
@@ -43,6 +45,7 @@ class SourceViewModelTest {
     )
     private val downloads = FakeDownloads()
     private val library = FakeLibrary()
+    private val bookshelf = FakeBookshelf()
     private val volumes = FakeVolumes(listOf(volume("/internal", "Internal storage"), volume("/sd", "SD card")))
     private val prefs = FakePrefs()
 
@@ -50,7 +53,7 @@ class SourceViewModelTest {
         scope: CatalogScope = CatalogScope.GRANGER,
         tier: DeviceTier = DeviceTier.THINK_DEEPER,
     ): SourceViewModel {
-        val vm = SourceViewModel(scope, catalog, downloads, library, volumes, prefs, tier, appScope = this, io = main.dispatcher)
+        val vm = SourceViewModel(scope, catalog, downloads, library, bookshelf, volumes, prefs, tier, appScope = this, io = main.dispatcher)
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         return vm
@@ -171,6 +174,53 @@ class SourceViewModelTest {
         vm.dismissNotice()
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.notice).isNull()
+    }
+
+    @Test fun overTheCapTalksAboutDownloadsNotPacks() = runTest(main.dispatcher) {
+        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
+        val vm = viewModel()
+        vm.get("med")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.notice).contains("your downloads")
+        assertThat(vm.ui.value.notice).doesNotContain("packs")
+    }
+
+    @Test fun grangerListsBooksByCategory() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                packs = listOf(med),
+                books = listOf(bookEntry("emma", "Novels"), bookEntry("hamlet", "Plays"), bookEntry("persuasion", "Novels")),
+            ),
+        )
+        val ui = viewModel().ui.value
+        assertThat(ui.sections.map { it.title }).containsExactly("Medical", "Novels", "Plays").inOrder()
+        val novels = ui.sections.first { it.title == "Novels" }.rows
+        assertThat(novels.map { it.id }).containsExactly("emma", "persuasion").inOrder()
+        assertThat(novels.first().details).isEqualTo("An Author · Public domain")
+        assertThat(viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }).isEmpty()
+    }
+
+    @Test fun classicsPresetComesFirst() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                packs = listOf(med),
+                books = listOf(bookEntry("emma")),
+                presets = listOf(
+                    Preset("starter", "Starter", listOf("med")),
+                    Preset("granger-classics", "Granger Classics", listOf("emma")),
+                ),
+            ),
+        )
+        assertThat(viewModel().ui.value.presets.map { it.id }).containsExactly("granger-classics", "starter").inOrder()
+    }
+
+    @Test fun installedTabIncludesBooks() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(books = listOf(bookEntry("emma"), bookEntry("hamlet"))))
+        downloads.list.value = listOf(record("emma", DownloadState.INSTALLED, kind = app.granger.core.downloads.ItemKind.BOOK))
+        val vm = viewModel()
+        vm.setTab(SourceTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rowIds()).containsExactly("emma")
     }
 
     @Test fun overTheCapExplains() = runTest(main.dispatcher) {

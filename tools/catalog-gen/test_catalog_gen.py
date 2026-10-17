@@ -230,3 +230,54 @@ def test_build_mixes_kiwix_and_release_packs(tmp_path, monkeypatch):
                "presets": [{"id": "starter", "title": "Starter", "items": ["granger_classics_en"]}]}
     catalog = cg.build(curated, fake_fetch(ROUTES), head=lambda url: 123)
     assert [p["id"] for p in catalog["packs"]] == ["wikipedia_en_medicine_nopic", "granger_classics_en"]
+
+
+BOOKS = {"releaseDate": "2026-10-17", "collection": "granger-classics", "books": [
+    {"id": f"gc-{slug}", "title": title, "author": "W. Shakespeare", "translator": None, "published": 1603,
+     "section": "Drama", "language": "en", "sizeBytes": 10 + i, "sha256": "ab" * 32,
+     "urls": [f"https://github.com/nealt9000/Granger/releases/download/classics-2026-10-17/gc-{slug}_2026-10-17.epub"]}
+    for i, (slug, title) in enumerate([("hamlet", "Hamlet"), ("macbeth", "Macbeth")])]}
+BOOK_ROW = {"bookRelease": "books.json", "license": "Public domain (US)"}
+
+
+def test_book_release_adds_books_and_preset(tmp_path, monkeypatch):
+    (tmp_path / "books.json").write_text(json.dumps(BOOKS))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in BOOKS["books"]}
+    curated = {"packs": [], "models": [], "books": [BOOK_ROW], "presets": []}
+    catalog = cg.build(curated, fake_fetch(ROUTES), head=lambda url: sizes[url])
+    hamlet = catalog["books"][0]
+    assert hamlet == {"id": "gc-hamlet", "title": "Hamlet", "author": "W. Shakespeare", "description": "",
+                      "category": "Drama", "language": "en", "sizeBytes": 10, "sha256": "ab" * 32,
+                      "urls": BOOKS["books"][0]["urls"], "releaseDate": "2026-10-17",
+                      "license": "Public domain (US)", "collection": "granger-classics", "published": 1603}
+    assert [b["id"] for b in catalog["books"]] == ["gc-hamlet", "gc-macbeth"]
+    assert {"id": "granger-classics", "title": "Granger Classics: all books",
+            "items": ["gc-hamlet", "gc-macbeth"]} in catalog["presets"]
+
+
+def test_book_size_mismatch_fails(tmp_path, monkeypatch):
+    (tmp_path / "books.json").write_text(json.dumps(BOOKS))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    with pytest.raises(SystemExit, match="serves"):
+        cg.build({"packs": [], "models": [], "books": [BOOK_ROW], "presets": []}, fake_fetch(ROUTES),
+                 head=lambda url: 1)
+
+
+def test_starter_preset_swaps_classics_zim_for_books():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
+    assert not any(p.get("release", "").endswith("granger_classics_en.json") for p in curated["packs"])
+    assert any("bookRelease" in b for b in curated["books"])
+    starter = next(p for p in curated["presets"] if p["id"] == "starter")
+    assert "granger_classics_en" not in starter["items"]
+    assert "@granger-classics" in starter["items"]
+
+
+def test_collection_token_expands_to_book_ids_in_presets(tmp_path, monkeypatch):
+    (tmp_path / "books.json").write_text(json.dumps(BOOKS))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    curated = {"packs": [], "models": [], "books": [BOOK_ROW],
+               "presets": [{"id": "starter", "title": "Starter", "items": ["@granger-classics"]}]}
+    catalog = cg.build(curated, fake_fetch(ROUTES), head=lambda url: 10 if "hamlet" in url else 11)
+    starter = next(p for p in catalog["presets"] if p["id"] == "starter")
+    assert starter["items"] == ["gc-hamlet", "gc-macbeth"]

@@ -84,7 +84,10 @@ data class ShelfCollection(
     val defaultKey: String?,
 )
 
-/** Files a pack in a collection. [packKey] is `Pack.name` if not blank, else `Pack.id`; [userSet] marks a manual move. */
+/**
+ * Files a pack or a book in a collection. [packKey] is `Pack.name` if not blank, else `Pack.id`; for a book it is
+ * `Book.id`. [userSet] marks a manual move.
+ */
 @Entity(tableName = "placements")
 data class Placement(@PrimaryKey val packKey: String, val collectionId: String, val userSet: Boolean)
 
@@ -105,3 +108,65 @@ data class HistoryEntry(val packId: String, val path: String, val title: String,
 
 @Entity(tableName = "recent_searches")
 data class RecentSearch(@PrimaryKey val query: String, val searchedAt: Long)
+
+/** An e-book on the shelf. [sourceRef] is the catalog id, the import's sha256, or the archive.org identifier. */
+@Entity(tableName = "books")
+data class Book(
+    @PrimaryKey val id: String,
+    val origin: BookOrigin,
+    val sourceRef: String,
+    val filePath: String,
+    val title: String,
+    val author: String,
+    val translator: String,
+    val date: String,
+    val language: String,
+    /** `"; "`-joined. */
+    val subjects: String,
+    val description: String,
+    val coverPath: String?,
+    val sizeBytes: Long,
+    val status: PackStatus,
+    /** When the text was last put into the `book_text` index; null if not indexed. */
+    val indexedAt: Long?,
+    val addedAt: Long,
+)
+
+/** Where the reader left off in a book. [locatorJson] is opaque to the library. */
+@Entity(tableName = "book_positions")
+data class BookPosition(
+    @PrimaryKey val bookId: String,
+    val locatorJson: String,
+    val totalProgression: Double,
+    val chapterTitle: String,
+    val updatedAt: Long,
+)
+
+enum class MarkKind { BOOKMARK, HIGHLIGHT }
+
+/** A bookmark or highlight. [color] is "yellow", "green", "blue" or "pink"; blank for bookmarks. */
+@Entity(tableName = "book_marks", indices = [Index("bookId")])
+data class BookMark(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val bookId: String,
+    val kind: MarkKind,
+    val locatorJson: String,
+    val text: String,
+    val color: String,
+    val note: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+)
+
+/**
+ * A searchable slice of a book. Its [id] is the `docid` of the matching `book_text` row. AUTOINCREMENT means ids
+ * are never reused: contentless FTS4 rows can't be deleted, so a reused id would match stale text.
+ */
+@Entity(tableName = "book_chunks", indices = [Index("bookId")])
+data class BookChunk(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val bookId: String,
+    val href: String,
+    val ordinal: Int,
+    val progression: Double,
+)

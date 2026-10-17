@@ -3,16 +3,17 @@ package app.granger.core.catalog
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** The signed list of packs and models the app can download. */
+/** The signed list of packs, models and books the app can download. */
 @Serializable
 data class Catalog(
     val formatVersion: Int,
     val generatedAt: String,
     val packs: List<PackEntry> = emptyList(),
     val models: List<ModelEntry> = emptyList(),
+    val books: List<BookEntry> = emptyList(),
     val presets: List<Preset> = emptyList(),
 ) {
-    val items: List<CatalogItem> get() = models + packs
+    val items: List<CatalogItem> get() = models + packs + books
 
     fun item(id: String): CatalogItem? = items.firstOrNull { it.id == id }
 
@@ -50,6 +51,25 @@ data class PackEntry(
     val zimUuid: String,
     /** The ZIM's `Name` metadata, shared by every snapshot (and flavour) of the same content. */
     val zimName: String,
+) : CatalogItem
+
+/** An e-book (EPUB) the reader opens. */
+@Serializable
+data class BookEntry(
+    override val id: String,
+    override val title: String,
+    val author: String = "",
+    val description: String = "",
+    val category: String,
+    val language: String,
+    override val sizeBytes: Long,
+    override val sha256: String,
+    override val urls: List<String>,
+    val releaseDate: String,
+    override val license: String,
+    val collection: String,
+    /** The year the work was first published, when known. */
+    val published: Int? = null,
 ) : CatalogItem
 
 @Serializable

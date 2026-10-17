@@ -63,7 +63,7 @@ def clean(html: bytes) -> Cleaned:
         tag.decompose()
     for link in root.find_all("a", href=True):
         if SCHEME.match(link["href"].strip()):
-            link.unwrap()
+            unwrap_link(link)
     removed, removed_chars = _drop_branding(root)
 
     body = soup.new_tag("div")
@@ -73,6 +73,18 @@ def clean(html: bytes) -> Cleaned:
     if kept == 0 or removed_chars > max(kept, GUTTED_CHARS):
         raise CleaningError(f"cleaning left {kept} characters and removed {removed_chars} as branding")
     return Cleaned(body=body, styles=styles, branding_removed=removed)
+
+
+def unwrap_link(link: Tag) -> None:
+    """Drops the link but keeps its text, and keeps an id or name it carried as a span so TOC links still land."""
+    anchor, other = link.get("id") or link.get("name"), link.get("name")
+    if anchor:
+        if other and other != anchor:  # both were targets: keep both
+            link.insert_before(BeautifulSoup("", "lxml").new_tag("span", attrs={"id": other}))
+        link.attrs = {"id": anchor}
+        link.name = "span"
+    else:
+        link.unwrap()
 
 
 def _styles(soup: BeautifulSoup) -> str:

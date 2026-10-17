@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The e-book reader's fragment container; stable so the fragment manager restores the navigator into it. -->
+    <item name="readium_navigator_container" type="id" />
+</resources>

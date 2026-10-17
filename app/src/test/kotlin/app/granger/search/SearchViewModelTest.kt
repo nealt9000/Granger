@@ -2,6 +2,8 @@ package app.granger.search
 
 import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
+import app.granger.BookTarget
+import app.granger.core.library.BookHit
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.SearchHit
 import com.google.common.truth.Truth.assertThat
@@ -22,6 +24,8 @@ class SearchViewModelTest {
 
         override suspend fun titles(query: String): List<SearchHit> { titleQueries += query; return titles }
         override suspend fun fullText(query: String) = fullText
+        var bookHits = listOf(BookHit("import:abc", "Emma", "Jane Austen", "OEBPS/ch2.xhtml", 0.25, "a <b>photo</b> of"))
+        override suspend fun books(query: String) = bookHits
     }
 
     private val search = FakeSearch()
@@ -105,5 +109,33 @@ class SearchViewModelTest {
         testScheduler.advanceTimeBy(1)
         testScheduler.runCurrent()
         assertThat(search.titleQueries).containsExactly("photo")
+    }
+
+    @Test fun bookHitsAppearInTheirOwnSection() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.books.map { it.bookTitle }).containsExactly("Emma")
+        assertThat(vm.state.value.titles).hasSize(1)
+        assertThat(vm.state.value.searching).isFalse()
+        search.bookHits = emptyList()
+        vm.onQueryChange("photos")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.books).isEmpty()
+    }
+
+    @Test fun openingABookHitRecordsTheSearchAndTargetsTheHit() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange(" photo ")
+        testScheduler.advanceUntilIdle()
+        val hit = vm.state.value.books.single()
+        val (id, target) = vm.openBook(hit)
+        val (again, _) = vm.openBook(hit)
+        assertThat(again).isEqualTo(id)
+        assertThat(sessions.searches.value).containsExactly("photo")
+        val tab = sessions.tabs.value.single()
+        assertThat(tab.id).isEqualTo(id)
+        assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("import:abc", "", "Emma").inOrder()
+        assertThat(target).isEqualTo(BookTarget("OEBPS/ch2.xhtml", 0.25))
     }
 }

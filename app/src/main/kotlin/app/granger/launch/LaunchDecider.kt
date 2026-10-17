@@ -1,13 +1,15 @@
 package app.granger.launch
 
+import app.granger.core.library.Book
+import app.granger.core.library.BookIds
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
 import java.io.File
 
 /** Where the app opens. */
 sealed interface StartScreen {
-    /** Resume reading the tab with this id. */
-    data class Reader(val tabId: Long) : StartScreen
+    /** Resume reading the tab with this id; [book] tabs open the e-book reader. */
+    data class Reader(val tabId: Long, val book: Boolean = false) : StartScreen
 
     /** Open the Library, optionally with a one-line [notice] explaining why we did not resume. */
     data class Library(val notice: String? = null) : StartScreen
@@ -32,9 +34,13 @@ object LaunchDecider {
         if (f.firstRun || !f.previousExitClean || f.bootedSinceLastSession || tab == null) {
             return StartScreen.Library()
         }
-        return if (f.lastTabPackOk) StartScreen.Reader(tab.id) else StartScreen.Library(MISSING_NOTICE)
+        return if (f.lastTabPackOk) StartScreen.Reader(tab.id, BookIds.isBook(tab.packId)) else StartScreen.Library(MISSING_NOTICE)
     }
 }
+
+/** A book can be resumed only if its row is OK and its file is still there. */
+fun isBookResumable(book: Book?, fileExists: (String) -> Boolean = { File(it).exists() }): Boolean =
+    book != null && isPackResumable(book.status, book.filePath, fileExists)
 
 /**
  * A pack can be resumed only if the last scan found it OK and its file is still there: a pulled SD card or a file

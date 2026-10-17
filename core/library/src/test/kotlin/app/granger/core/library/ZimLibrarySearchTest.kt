@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.books.TestEpubs
 import app.granger.core.zim.ZimHit
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -24,7 +25,7 @@ class ZimLibrarySearchTest {
     private val dir by lazy { tmp.newFolder("packs") }
     private val dispatcher = StandardTestDispatcher()
     private val library = RoomLibrary(db, opener, { listOf(dir) }, dispatcher)
-    private val search = ZimLibrarySearch(library, dispatcher, titlesPerPack = 2, fullTextLimit = 3)
+    private val search = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 2, fullTextLimit = 3)
 
     private val med = FakeZimArchive(
         "u-med", "WikiMed",
@@ -103,5 +104,20 @@ class ZimLibrarySearchTest {
         File(dir, "broken.zim").writeText("garbage")
         library.refresh()
         assertThat(search.titles("as").map { it.packId }).containsExactly("u-cls")
+    }
+
+    @Test fun booksDelegatesToIndex() = test {
+        val booksDir = tmp.newFolder("books")
+        val shelf = RoomBookshelf(db, { listOf(booksDir) }, { File(booksDir, "imports") }, File(tmp.root, "covers"), dispatcher)
+        val index = BookIndex(db, dispatcher)
+        val withBooks = ZimLibrarySearch(library, index, dispatcher)
+        val file = TestEpubs.build(booksDir, "moby_2026-01-01.epub", chapters = listOf("<p>The whale surfaced.</p>"))
+        shelf.addDownloaded(file, "moby")
+        index.indexPending()
+
+        val hits = withBooks.books("whale")
+        assertThat(hits.map { it.bookId }).containsExactly(BookIds.of(BookOrigin.GRANGER, "moby"))
+        assertThat(hits).isEqualTo(index.search("whale"))
+        assertThat(search.books("whale")).isEmpty()
     }
 }

@@ -2,6 +2,7 @@ package app.granger.core.downloads
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
@@ -19,6 +20,13 @@ fun packEntry(id: String = "med", sha256: String = SHA_1, size: Long = 1_000, da
         id = id, title = "Pack $id", category = "Medical", language = "eng", sizeBytes = size, sha256 = sha256,
         urls = urls, snapshotDate = date, license = "CC BY-SA 4.0", hasFulltextIndex = true,
         zimUuid = "u-$id", zimName = "n-$id",
+    )
+
+fun bookEntry(id: String = "gc-emma", sha256: String = SHA_1, size: Long = 500, date: String = "2026-10-17") =
+    BookEntry(
+        id = id, title = "Book $id", category = "Fiction", language = "en", sizeBytes = size, sha256 = sha256,
+        urls = listOf("https://a.test/$id.epub"), releaseDate = date, license = "Public domain (US)",
+        collection = "granger-classics",
     )
 
 fun modelEntry(id: String = "e2b", sha256: String = SHA_2, size: Long = 2_000, url: String = "https://hf.test/$id") =

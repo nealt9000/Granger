@@ -1,6 +1,16 @@
 package app.granger.library
 
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import app.granger.Features
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +75,16 @@ fun LibraryScreen(
             snackbar.showSnackbar(notice)
         }
     }
+    val importNotice by viewModel.notice.collectAsStateWithLifecycle()
+    LaunchedEffect(importNotice) {
+        val text = importNotice ?: return@LaunchedEffect
+        snackbar.showSnackbar(text)
+        viewModel.dismissNotice()
+    }
+    var menuOpen by remember { mutableStateOf(false) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        viewModel.import(uris)
+    }
     // Media type ids the user has collapsed; all start expanded.
     var collapsed by rememberSaveable { mutableStateOf(emptyList<String>()) }
     Scaffold(
@@ -76,6 +96,15 @@ fun LibraryScreen(
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
                     IconButton(onClick = onHistory) { Icon(painterResource(R.drawable.ic_history), contentDescription = "History") }
                     IconButton(onClick = onReadiness) { Icon(Icons.Filled.CheckCircle, contentDescription = "Readiness") }
+                    if (Features.IMPORT) Box {
+                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        DropdownMenu(menuOpen, { menuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Import books…") },
+                                onClick = { menuOpen = false; picker.launch(IMPORT_TYPES) },
+                            )
+                        }
+                    }
                 },
             )
         },
@@ -93,6 +122,9 @@ fun LibraryScreen(
                         Text("No packs installed yet.", style = MaterialTheme.typography.titleMedium)
                         Text("Get packs from Granger or Kiwix", style = MaterialTheme.typography.bodyMedium)
                         Text("Or copy .zim files into $packsFolder", style = MaterialTheme.typography.bodySmall)
+                        if (Features.IMPORT) {
+                            Text("Or import your own EPUB, TXT or Markdown books", style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }
@@ -113,11 +145,10 @@ fun LibraryScreen(
                 }
                 if (open) for (row in shelf.collections) {
                     item(key = "collection:${row.collection.id}") {
-                        val n = row.packs.size
                         ListItem(
                             modifier = Modifier.clickable { onOpenCollection(row.collection.id) }.padding(start = 16.dp),
                             headlineContent = { Text(row.collection.name) },
-                            supportingContent = { Text(if (n == 1) "1 pack" else "$n packs") },
+                            supportingContent = { Text(countText(row.packs.size, row.books.size)) },
                         )
                     }
                 }
@@ -134,6 +165,27 @@ fun LibraryScreen(
             }
         }
     }
+}
+
+private val IMPORT_TYPES = arrayOf(
+    "application/epub+zip", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
+)
+
+private fun countText(packs: Int, books: Int): String = listOfNotNull(
+    if (packs > 0) (if (packs == 1) "1 pack" else "$packs packs") else null,
+    if (books > 0) (if (books == 1) "1 book" else "$books books") else null,
+).joinToString(" · ")
+
+/** The file's display name from the document provider, falling back to the last part of its URI. */
+fun displayNameOf(context: Context, uri: Uri): String {
+    val queried = try {
+        context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+            if (c.moveToFirst()) c.getString(0) else null
+        }
+    } catch (e: Exception) {
+        null
+    }
+    return queried?.takeIf { it.isNotBlank() } ?: uri.lastPathSegment.orEmpty()
 }
 
 @Composable

@@ -1,5 +1,6 @@
 package app.granger.core.downloads
 
+import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.PackEntry
@@ -65,13 +66,14 @@ class DownloadManager(
         if (versions.any { it.sha256 == item.sha256 }) return@withLock EnqueueResult.AlreadyInstalled
         val root = volumeRoot.absoluteFile
         val active = dao.getAll().filter { it.isActive }
-        val isPack = item is PackEntry
+        // Packs and books both count against the storage cap; models do not.
+        val isCapped = item is PackEntry || item is BookEntry
         val verdict = QueuePolicy.check(
             itemBytes = item.sizeBytes,
-            isPack = isPack,
+            isPack = isCapped,
             installedPackBytes = installedPackBytes(),
-            queuedPackBytes = active.filter { it.kind == ItemKind.PACK }.sumOf { it.sizeBytes },
-            replacedPackBytes = if (isPack) versions.sumOf { it.sizeBytes } else 0L,
+            queuedPackBytes = active.filter { it.kind == ItemKind.PACK || it.kind == ItemKind.BOOK }.sumOf { it.sizeBytes },
+            replacedPackBytes = if (isCapped) versions.sumOf { it.sizeBytes } else 0L,
             capBytes = capBytes(),
             freeBytes = withContext(io) { freeBytes(root) },
             queuedOnVolumeBytes = active
@@ -83,12 +85,16 @@ class DownloadManager(
         val record = DownloadRecord(
             itemId = item.id,
             sha256 = item.sha256,
-            kind = if (isPack) ItemKind.PACK else ItemKind.MODEL,
+            kind = when (item) {
+                is PackEntry -> ItemKind.PACK
+                is BookEntry -> ItemKind.BOOK
+                is ModelEntry -> ItemKind.MODEL
+            },
             title = item.title,
             urls = item.urls,
             sizeBytes = item.sizeBytes,
             filePath = targetFile(item, root).path,
-            snapshotDate = (item as? PackEntry)?.snapshotDate.orEmpty(),
+            snapshotDate = snapshotDate(item),
             wifiOnly = wifiOnly,
             state = DownloadState.QUEUED,
             createdAt = t,
@@ -99,9 +105,16 @@ class DownloadManager(
         EnqueueResult.Queued
     }
 
-    /** Each pack snapshot gets its own file, so an update never overwrites the pack being read. */
+    private fun snapshotDate(item: CatalogItem): String = when (item) {
+        is PackEntry -> item.snapshotDate
+        is BookEntry -> item.releaseDate
+        is ModelEntry -> ""
+    }
+
+    /** Each pack snapshot and book release gets its own file, so an update never overwrites the pack being read. */
     private fun targetFile(item: CatalogItem, root: File): File = when (item) {
         is PackEntry -> File(root, "packs/${item.id}_${item.snapshotDate}.zim")
+        is BookEntry -> File(root, "books/granger/${item.id}_${item.releaseDate}.epub")
         is ModelEntry -> File(root, "models/${item.fileName}")
     }
 

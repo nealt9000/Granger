@@ -1,6 +1,12 @@
 package app.granger.library
 
+import app.granger.FakeBookshelf
+import app.granger.FakeDownloads
 import app.granger.FakeLibrary
+import app.granger.book
+import app.granger.core.library.Book
+import app.granger.core.library.BookOrigin
+import app.granger.core.library.BookPosition
 import app.granger.FakeReadingSessions
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
@@ -13,6 +19,8 @@ import app.granger.core.library.ShelfCollection
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -22,17 +30,17 @@ class CollectionViewModelTest {
     private val library = FakeLibrary()
     private val shelves = FakeShelves()
     private val sessions = FakeReadingSessions()
+    private val bookshelf = FakeBookshelf()
+    private val downloads = FakeDownloads()
 
-    private fun collection(id: String, userCreated: Boolean, vararg packs: app.granger.core.library.Pack) = CollectionRow(
-        ShelfCollection(id, id, "lit", userCreated, defaultKey = if (userCreated) null else id),
-        packs.toList(),
-    )
+    private fun collection(id: String, userCreated: Boolean, vararg packs: app.granger.core.library.Pack, books: List<Book> = emptyList()) =
+        CollectionRow(ShelfCollection(id, id, "lit", userCreated, defaultKey = if (userCreated) null else id), packs.toList(), books)
 
     private fun show(vararg rows: CollectionRow) {
         shelves.shelfList.value = listOf(Shelf(MediaType("lit", "Literature", true, 0), rows.toList()))
     }
 
-    private fun vm(id: String) = CollectionViewModel(id, shelves, library, sessions)
+    private fun TestScope.vm(id: String) = CollectionViewModel(id, shelves, library, sessions, bookshelf, downloads, appScope = this)
 
     @Test fun openStartsATabAtTheLastReadPath() = runTest(main.dispatcher) {
         val p = pack("wiki", "Wikipedia")
@@ -76,5 +84,71 @@ class CollectionViewModelTest {
         vm("c1").movePack(p, "c2")
         testScheduler.advanceUntilIdle()
         assertThat(shelves.moves).containsExactly("a" to "c2")
+    }
+
+    @Test fun booksListWithProgress() = runTest(main.dispatcher) {
+        val b = book("b1", "Emma")
+        show(collection("c1", false, books = listOf(b)))
+        bookshelf.positionMap.value = mapOf("b1" to BookPosition("b1", "{}", 0.4, "Ch 2", 0L))
+        val vm = vm("c1")
+        backgroundScope.launch { vm.ui.collect {} }
+        backgroundScope.launch { vm.positions.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value!!.books.map { it.id }).containsExactly("b1")
+        assertThat(vm.positions.value["b1"]!!.totalProgression).isEqualTo(0.4)
+    }
+
+    @Test fun openBookOpensOneTabPerBook() = runTest(main.dispatcher) {
+        val b = book("b1", "Emma")
+        show(collection("c1", false, books = listOf(b)))
+        val vm = vm("c1")
+        val first = vm.openBook(b)
+        val second = vm.openBook(b)
+        assertThat(second).isEqualTo(first)
+        assertThat(sessions.tabs.value.single().packId).isEqualTo("b1")
+        assertThat(sessions.tabs.value.single().title).isEqualTo("Emma")
+    }
+
+    @Test fun openBookDoesNothingUnlessItIsOk() = runTest(main.dispatcher) {
+        val vm = vm("c1")
+        assertThat(vm.openBook(book("b1", status = PackStatus.MISSING))).isNull()
+        assertThat(vm.openBook(book("b2", status = PackStatus.CORRUPT))).isNull()
+        assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    @Test fun removeGrangerBookAlsoRemovesItsDownload() = runTest(main.dispatcher) {
+        val b = book("granger:emma", "Emma").copy(origin = BookOrigin.GRANGER, sourceRef = "emma")
+        bookshelf.bookList.value = listOf(b)
+        show(collection("c1", false, books = listOf(b)))
+        vm("c1").removeBook(b)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("remove:emma")
+        assertThat(bookshelf.bookList.value).isEmpty()
+    }
+
+    @Test fun removeImportedBookLeavesDownloadsAlone() = runTest(main.dispatcher) {
+        val b = book("import:abc", "Mine").copy(origin = BookOrigin.IMPORT, sourceRef = "abc")
+        bookshelf.bookList.value = listOf(b)
+        vm("c1").removeBook(b)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).isEmpty()
+        assertThat(bookshelf.bookList.value).isEmpty()
+    }
+
+    @Test fun moveBookPassesThroughToShelves() = runTest(main.dispatcher) {
+        val b = book("b1")
+        vm("c1").moveBook(b, "c2")
+        testScheduler.advanceUntilIdle()
+        assertThat(shelves.moves).containsExactly("b1" to "c2")
+    }
+
+    @Test fun supersededClassicsZimIsFlagged() = runTest(main.dispatcher) {
+        val old = pack("z1", "Classics").copy(name = "granger_classics_en")
+        val other = pack("z2", "Wikipedia")
+        show(collection("c1", false, old, other))
+        val vm = vm("c1")
+        backgroundScope.launch { vm.superseded.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.superseded.value).containsExactly("z1")
     }
 }

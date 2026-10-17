@@ -23,7 +23,7 @@ object CatalogParser {
     private val SHA256 = Regex("^[0-9a-f]{64}$")
     /** Ids and model file names become file names on the phone. */
     private val SAFE_NAME = Regex("^[A-Za-z0-9][A-Za-z0-9._-]*$")
-    /** Pack snapshot dates are part of the file name too. */
+    /** Pack snapshot and book release dates are part of the file name too. */
     private val DATE = Regex("^\\d{4}-\\d{2}-\\d{2}$")
 
     /** Checks the signature first, then parses. Entries that don't validate are dropped, not fatal. */
@@ -44,14 +44,17 @@ object CatalogParser {
         val packs = entries<PackEntry>(root, "packs")
             .filter { valid(it) && DATE.matches(it.snapshotDate) }
             .distinctBy { it.id }
+        val books = entries<BookEntry>(root, "books")
+            .filter { valid(it) && DATE.matches(it.releaseDate) }
+            .distinctBy { it.id }
         val models = entries<ModelEntry>(root, "models")
             .filter { valid(it) && SAFE_NAME.matches(it.fileName) }
             .distinctBy { it.id }
             // Two models must never share a target file (compared ignoring case, as SD cards do).
             .distinctBy { it.fileName.lowercase() }
-        val ids = (packs.map { it.id } + models.map { it.id }).toSet()
+        val ids = (packs.map { it.id } + models.map { it.id } + books.map { it.id }).toSet()
         val presets = entries<Preset>(root, "presets").map { preset -> preset.copy(items = preset.items.filter { it in ids }) }
-        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, presets))
+        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets))
     }
 
     private inline fun <reified T> entries(root: JsonObject, key: String): List<T> =

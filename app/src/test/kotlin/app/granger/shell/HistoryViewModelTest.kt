@@ -1,6 +1,8 @@
 package app.granger.shell
 
+import app.granger.FakeBookshelf
 import app.granger.FakeLibrary
+import app.granger.book
 import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.core.library.Bookmark
@@ -19,6 +21,7 @@ class HistoryViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val sessions = FakeReadingSessions()
     private val library = FakeLibrary()
+    private val bookshelf = FakeBookshelf()
 
     @Test fun historyNewestFirstWithPackTitles() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("a", "Classics"), pack("b", "WikiMed", PackStatus.MISSING))
@@ -27,7 +30,7 @@ class HistoryViewModelTest {
             HistoryEntry("gone", "X", "X", 3L),
             HistoryEntry("b", "Aspirin", "Aspirin", 2L),
         )
-        val ui = HistoryViewModel(sessions, library).ui.filterNotNull().first()
+        val ui = HistoryViewModel(sessions, library, bookshelf).ui.filterNotNull().first()
         assertThat(ui.history).containsExactly(
             HistoryViewModel.Row("gone", "X", "X", HistoryViewModel.REMOVED_PACK, available = false),
             HistoryViewModel.Row("b", "Aspirin", "Aspirin", "WikiMed", available = false),
@@ -38,7 +41,7 @@ class HistoryViewModelTest {
     @Test fun savedListsStarredArticles() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("a", "Classics"))
         library.bookmarkList.value = listOf(Bookmark("a", "Hamlet", "Hamlet", 3L), Bookmark("gone", "X", "X", 1L))
-        val ui = HistoryViewModel(sessions, library).ui.filterNotNull().first()
+        val ui = HistoryViewModel(sessions, library, bookshelf).ui.filterNotNull().first()
         assertThat(ui.saved).containsExactly(
             HistoryViewModel.Row("a", "Hamlet", "Hamlet", "Classics", available = true),
             HistoryViewModel.Row("gone", "X", "X", HistoryViewModel.REMOVED_PACK, available = false),
@@ -47,7 +50,7 @@ class HistoryViewModelTest {
 
     @Test fun openingFromHistoryAddsATab() = runTest(main.dispatcher) {
         val row = HistoryViewModel.Row("a", "Hamlet", "Hamlet", "Classics", available = true)
-        val id = HistoryViewModel(sessions, library).open(row)
+        val id = HistoryViewModel(sessions, library, bookshelf).open(row)
         val tab = sessions.tabs.value.single()
         assertThat(tab.id).isEqualTo(id)
         assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("a", "Hamlet", "Hamlet").inOrder()
@@ -62,7 +65,7 @@ class HistoryViewModelTest {
             HistoryEntry("b", "Ibuprofen", "Ibuprofen", 1L),
         )
         library.bookmarkList.value = listOf(Bookmark("a", "Hamlet", "Hamlet", 3L))
-        val vm = HistoryViewModel(sessions, library)
+        val vm = HistoryViewModel(sessions, library, bookshelf)
         val ui = backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         vm.setFilter("HAM")
@@ -76,5 +79,21 @@ class HistoryViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value!!.history).hasSize(3)
         ui.cancel()
+    }
+
+    @Test fun bookHistoryRowUsesBookTitle() = runTest(main.dispatcher) {
+        bookshelf.bookList.value = listOf(book("book:granger:1", "Emma", author = "Jane Austen"))
+        sessions.historyList.value = listOf(
+            HistoryEntry("book:granger:1", "", "old title", 2L),
+            HistoryEntry("book:granger:gone", "", "Lost", 1L),
+        )
+        val vm = HistoryViewModel(sessions, library, bookshelf)
+        val ui = vm.ui.filterNotNull().first()
+        assertThat(ui.history).containsExactly(
+            HistoryViewModel.Row("book:granger:1", "", "Emma", "Jane Austen", available = true),
+            HistoryViewModel.Row("book:granger:gone", "", "Lost", HistoryViewModel.REMOVED_BOOK, available = false),
+        ).inOrder()
+        val id = vm.open(ui.history.first())
+        assertThat(sessions.tabs.value.single { it.id == id }.packId).isEqualTo("book:granger:1")
     }
 }

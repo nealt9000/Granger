@@ -1,5 +1,6 @@
 package app.granger
 
+import android.util.Log
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -9,47 +10,102 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import app.granger.core.library.BookIds
+import app.granger.core.library.ReadingTab
+import app.granger.ebook.Dictionary
+import app.granger.ebook.DictionaryChoice
+import app.granger.ebook.EbookReaderScreen
+import app.granger.ebook.EbookReaderViewModel
+import app.granger.ebook.SelectionBridge
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
 import app.granger.library.CollectionViewModel
+import app.granger.library.ImportRunner
 import app.granger.library.LibraryScreen
+import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
-import app.granger.readiness.ReadinessScreen
-import app.granger.readiness.ReadinessViewModel
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
+import app.granger.readiness.ReadinessScreen
+import app.granger.readiness.ReadinessViewModel
 import app.granger.search.SearchScreen
 import app.granger.search.SearchViewModel
+import app.granger.settings.SettingsScreen
+import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
 import app.granger.shell.HistoryViewModel
 import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
-import app.granger.settings.SettingsScreen
-import app.granger.settings.SettingsViewModel
 import app.granger.sources.CatalogScope
 import app.granger.sources.SourceScreen
 import app.granger.sources.SourceViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
 @Serializable data class CollectionRoute(val collectionId: String)
 @Serializable data class ReaderRoute(val tabId: Long)
+
+/** An e-book; [href] and [progression] ask the reader to open there (a search hit) instead of where it left off. */
+@Serializable data class BookRoute(val tabId: Long, val href: String? = null, val progression: Double? = null)
+
+/** A place in a book to open at. */
+data class BookTarget(val href: String, val progression: Double)
+
+private fun NavDestination.isReading() = hasRoute<ReaderRoute>() || hasRoute<BookRoute>()
+
+private fun NavBackStackEntry.readingTabId(): Long? = when {
+    destination.hasRoute<ReaderRoute>() -> toRoute<ReaderRoute>().tabId
+    destination.hasRoute<BookRoute>() -> toRoute<BookRoute>().tabId
+    else -> null
+}
+
+/**
+ * The one way to open a reading tab: a book goes to [BookRoute], an article to [ReaderRoute]. A reader already on top
+ * is replaced rather than stacked ([keepCurrent] stacks instead), and showing the same tab again does nothing unless
+ * [at] asks for a place in it.
+ */
+fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: Boolean = false) {
+    // Read the back stack now, not the composition's copy: opening a tab suspends, and a second tap
+    // meanwhile must replace the reader the first one pushed.
+    val top = currentBackStackEntry
+    val showing = top?.readingTabId()
+    if (tab.id == showing && at == null) return
+    val route: Any =
+        if (BookIds.isBook(tab.packId)) BookRoute(tab.id, at?.href, at?.progression) else ReaderRoute(tab.id)
+    navigate(route) {
+        // Switching tabs replaces the reader instead of stacking one per tab.
+        // keepCurrent stacks it on the reader instead (a dictionary entry over the book), so Back returns to the page.
+        if (showing != null && top != null && !keepCurrent) popUpTo(top.destination.id) { inclusive = true }
+    }
+}
+
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
@@ -69,15 +125,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     var skipTransition by remember { mutableStateOf(false) }
     var showChromeRequest by rememberSaveable { mutableStateOf(0) }
     val currentTab = viewModel { CurrentTab() }
-    val railViewModel = viewModel { RailViewModel(container.sessions, container.library, currentTab.id) }
+    val railViewModel = viewModel { RailViewModel(container.sessions, container.library, container.bookshelf, currentTab.id) }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
 
     val entry by nav.currentBackStackEntryAsState()
     val destination = entry?.destination
-    val readerTabId = entry?.takeIf { destination?.hasRoute<ReaderRoute>() == true }?.toRoute<ReaderRoute>()?.tabId
+    val readerTabId = entry?.readingTabId()
     LaunchedEffect(readerTabId) { currentTab.id.value = readerTabId }
     // Non-reader screens always show the rail; the reader shows it only with its chrome (a middle tap).
-    LaunchedEffect(destination) { if (destination?.hasRoute<ReaderRoute>() != true) shell.railVisible = true else skipTransition = false }
+    LaunchedEffect(destination) { if (destination?.isReading() != true) shell.railVisible = true else skipTransition = false }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
     var resumeHandled by rememberSaveable { mutableStateOf(false) }
@@ -86,21 +142,47 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             resumeHandled = true
             if (start is StartScreen.Reader) {
                 skipTransition = true
-                nav.navigate(ReaderRoute(start.tabId))
+                nav.navigate(if (start.book) BookRoute(start.tabId) else ReaderRoute(start.tabId))
             }
         }
     }
 
+    // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
+    val scope = rememberCoroutineScope()
     fun showTab(tabId: Long) {
-        // Read the back stack now, not the composition's copy: a tap's openTab suspends, and a second tap
-        // meanwhile must replace the reader the first one pushed.
-        val top = nav.currentBackStackEntry
-        val showing = top?.takeIf { it.destination.hasRoute<ReaderRoute>() }?.toRoute<ReaderRoute>()?.tabId
-        if (tabId == showing) return
-        nav.navigate(ReaderRoute(tabId)) {
-            // Switching tabs replaces the reader instead of stacking one per tab.
-            if (showing != null) popUpTo<ReaderRoute> { inclusive = true }
+        scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
+    }
+
+    // What Define does in the e-book reader; the selection menu reads it live through SelectionBridge.
+    val appContext = LocalContext.current.applicationContext
+    val dictionary by produceState<DictionaryChoice>(DictionaryChoice.None) {
+        val handler = try {
+            withContext(Dispatchers.IO) { Dictionary.hasProcessTextHandler(appContext) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
         }
+        try {
+            container.library.packs.collect {
+                value = Dictionary.choose(it, handler)
+                SelectionBridge.dictionaryAvailable = value != DictionaryChoice.None
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Granger", "Couldn't read the installed packs for Define", e)
+            value = DictionaryChoice.None
+            SelectionBridge.dictionaryAvailable = false
+        }
+    }
+    /** Opens [word]'s Wiktionary entry over the book, so Back returns to the page; false when there is none. */
+    suspend fun lookUpInWiktionary(packId: String, word: String): Boolean {
+        val hit = withContext(Dispatchers.IO) { container.library.archive(packId)?.suggest(word, 5) }
+            ?.let { Dictionary.pick(it, word) } ?: return false
+        val tab = container.sessions.openTab(packId, hit.path, hit.title).let { container.sessions.tab(it) } ?: return false
+        nav.showTab(tab, keepCurrent = true)
+        return true
     }
 
     val selected = when {
@@ -152,7 +234,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         ) {
             composable<LibraryRoute> { backStackEntry ->
                 LibraryScreen(
-                    viewModel = viewModel { LibraryViewModel(container.shelves, container.library) },
+                    viewModel = viewModel {
+                        val context = appContext
+                        LibraryViewModel(
+                            container.shelves, container.library,
+                            ImportRunner(
+                                container.bookshelf,
+                                open = { uri -> context.contentResolver.openInputStream(uri) },
+                                nameOf = { uri -> displayNameOf(context, uri) },
+                            ),
+                            container.appScope,
+                        )
+                    },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
@@ -168,9 +261,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         CollectionViewModel(
                             backStackEntry.toRoute<CollectionRoute>().collectionId,
                             container.shelves, container.library, container.sessions,
+                            container.bookshelf, container.downloads, container.appScope,
                         )
                     },
                     onOpened = ::showTab,
+                    onGetBooks = { nav.navigate(SourceRoute(CatalogScope.GRANGER)) },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -185,17 +280,39 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
+            composable<BookRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<BookRoute>()
+                val target = route.href?.let { BookTarget(it, route.progression ?: 0.0) }
+                EbookReaderScreen(
+                    viewModel = viewModel {
+                        EbookReaderViewModel(
+                            route.tabId, target, container.bookshelf, container.sessions, container.bookOpener,
+                            container.readingPrefs, container.appScope,
+                            savedState = createSavedStateHandle(),
+                        )
+                    },
+                    onChromeVisibleChange = { visible -> shell.railVisible = visible },
+                    showChromeRequest = showChromeRequest,
+                    dictionary = dictionary,
+                    onSearchText = { text -> nav.navigate(SearchRoute(text)) },
+                    onLookUp = ::lookUpInWiktionary,
+                    onBack = { nav.popBackStack() },
+                )
+            }
             composable<SearchRoute> { backStackEntry ->
                 val query = backStackEntry.toRoute<SearchRoute>().query
                 SearchScreen(
                     viewModel = viewModel { SearchViewModel(container.search, container.sessions, query) },
                     onOpenTab = ::showTab,
+                    onOpenBook = { tabId, at ->
+                        scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it, at) } }
+                    },
                     onBack = { nav.popBackStack() },
                 )
             }
             composable<HistoryRoute> {
                 HistoryScreen(
-                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library) },
+                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library, container.bookshelf) },
                     onOpenTab = ::showTab,
                     onBack = { nav.popBackStack() },
                 )
@@ -205,7 +322,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 SourceScreen(
                     viewModel = viewModel {
                         SourceViewModel(
-                            source, container.catalog, container.downloads, container.library, container.volumes,
+                            source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope,
                         )
                     },

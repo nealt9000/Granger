@@ -8,6 +8,7 @@ import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.CatalogState
 import app.granger.core.catalog.ModelEntry
+import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.Downloads
@@ -15,6 +16,9 @@ import app.granger.core.downloads.EnqueueResult
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.isActive
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookOrigin
+import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.formatBytes
@@ -95,6 +99,7 @@ class SourceViewModel(
     private val catalog: CatalogSource,
     private val downloads: Downloads,
     private val library: Library,
+    private val bookshelf: Bookshelf,
     private val volumes: VolumeSource,
     private val prefs: DownloadPrefs,
     private val tier: DeviceTier,
@@ -192,6 +197,10 @@ class SourceViewModel(
                 return@launch
             }
             downloads.remove(itemId)
+            // A book's shelf entry goes with its download; its place and marks stay for a later re-download.
+            if (catalog.state.value.catalog?.item(itemId) is BookEntry) {
+                bookshelf.remove(BookIds.of(BookOrigin.GRANGER, itemId))
+            }
             refreshVolumes()
         }
     }
@@ -223,7 +232,7 @@ class SourceViewModel(
                 is EnqueueResult.NoSpace ->
                     "Not enough space on ${volume.label} for ${item.title}: free up ${formatBytes(result.neededBytes)}."
                 is EnqueueResult.OverCap ->
-                    "${item.title} would bring your packs to ${formatBytes(result.wouldUseBytes)}, " +
+                    "${item.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
                         "over the ${formatBytes(result.capBytes)} limit."
             }
             if (problem != null) return if (queued > 0) "$problem Queued $queued before that." else problem
@@ -237,6 +246,7 @@ class SourceViewModel(
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
                 is PackEntry -> listOf(item.language, "Updated ${item.snapshotDate}", item.license)
+                is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")
             val packId = (item as? PackEntry)?.let { installedPackId(it, records, packs) }
@@ -252,7 +262,11 @@ class SourceViewModel(
                     records.any { it.itemId == item.id && it.isActive }
                 SourceTab.UPDATES -> status == ItemStatus.UpdateAvailable
             }
-            val description = (item as? PackEntry)?.description.orEmpty()
+            val description = when (item) {
+                is PackEntry -> item.description
+                is BookEntry -> item.description
+                else -> ""
+            }
             return inTab && (needle.isEmpty() || item.title.contains(needle, ignoreCase = true) ||
                 description.contains(needle, ignoreCase = true))
         }
@@ -263,8 +277,11 @@ class SourceViewModel(
                 .toList()
                 .sortedWith(compareBy({ categoryRank(it.first) }, { it.first }))
                 .forEach { (category, entries) -> add(Section(category, entries.map(::row))) }
+            // Books come after the packs, grouped by category in catalog order.
+            current.books.filter(::shown).groupBy { it.category }
+                .forEach { (category, entries) -> add(Section(category, entries.map(::row))) }
         }
-        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.map { preset ->
+        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val todo = items.filter { wanted(statusOf(it, records, packs, tier)) }
             PresetRow(preset.id, preset.title, items.size, todo.size, todo.sumOf { it.sizeBytes })
@@ -298,6 +315,8 @@ class SourceViewModel(
     }
 
     private companion object {
+        const val CLASSICS_PRESET = "granger-classics"
+
         val CATEGORY_ORDER = listOf(
             "Medical", "Reference", "Religion & Philosophy", "Literature & Drama", "Science", "Repair", "Regional",
         )

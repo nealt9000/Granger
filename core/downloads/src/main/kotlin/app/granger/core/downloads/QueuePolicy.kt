@@ -18,7 +18,7 @@ object QueuePolicy {
 
     /**
      * The checks made when queueing (spec "Storage cap", "Insufficient space"). The cap covers packs
-     * only; models are excluded. An update's old snapshot ([replacedPackBytes]) is not counted twice.
+     * and books ([isPack] means "is capped"); models are excluded. An update's old snapshot ([replacedPackBytes]) is not counted twice.
      */
     fun check(
         itemBytes: Long,

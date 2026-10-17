@@ -10,7 +10,9 @@ one snapshot by its sha256 from Kiwix's metalink file. Models are listed in cura
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
 
 Packs we build ourselves (tools/pack-builder) are listed with a "release" row in curated.json that names
-their release descriptor; the hosted file's size is checked against it.
+their release descriptor; the hosted file's size is checked against it. A "books" row names the descriptor
+of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a catalog entry and the
+collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids.
 
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
@@ -157,18 +159,64 @@ def release_entry(curated, head=http_head, root=None):
     }
 
 
+BOOK_KEYS = ("releaseDate", "collection", "books")
+BOOK_FIELDS = ("id", "title", "author", "language", "sizeBytes", "sha256", "urls", "published", "section")
+
+
+def book_entries(curated, head=http_head, root=None):
+    """Every e-book of a release descriptor `pack_builder.py describe-epubs` wrote, as (collection, entries)."""
+    path = pathlib.Path(root or REPO_ROOT) / curated["bookRelease"]
+    descriptor = json.loads(path.read_text(encoding="utf-8"))
+    missing = [key for key in BOOK_KEYS if key not in descriptor]
+    if missing:
+        raise SystemExit(f"{path}: missing {missing}")
+    entries = []
+    for book in descriptor["books"]:
+        missing = [key for key in BOOK_FIELDS if key not in book]
+        if missing:
+            raise SystemExit(f"{path}: {book.get('id')}: missing {missing}")
+        if not book["urls"] or not all(u.startswith("https://") for u in book["urls"]):
+            raise SystemExit(f"{path}: {book['id']}: every URL must be https, got {book['urls']}")
+        for url in book["urls"]:
+            served = head(url)
+            if served != book["sizeBytes"]:
+                raise SystemExit(f"{url} serves {served} bytes; the descriptor says {book['sizeBytes']}")
+        entries.append({
+            "id": book["id"], "title": book["title"], "author": book["author"], "description": "",
+            "category": book["section"], "language": book["language"], "sizeBytes": book["sizeBytes"],
+            "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
+            "license": curated["license"], "collection": descriptor["collection"],
+            "published": book["published"],
+        })
+    return descriptor["collection"], entries
+
+
 def build(curated, fetch=http_get, now=None, head=http_head):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     packs = [release_entry(c, head) if "release" in c else pack_entry(c, fetch) for c in curated["packs"]]
     models = curated["models"]
+    books, collections = [], {}
+    for row in curated.get("books", []):
+        collection, entries = book_entries(row, head)
+        books += entries
+        collections[collection] = [e["id"] for e in entries]
     for item in packs + models:
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
                 raise SystemExit(f"unsafe {key}: {item[key]!r}")
-    ids = [item["id"] for item in packs + models]
+    for book in books:
+        if not SAFE_NAME.match(book["id"]):
+            raise SystemExit(f"unsafe id: {book['id']!r}")
+    ids = [item["id"] for item in packs + models + books]
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
-    for preset in curated["presets"]:
+    # "@<collection>" in a preset stands for every book of that collection.
+    presets = [{**p, "items": [i for item in p["items"] for i in
+                               (collections.get(item[1:], [item]) if item.startswith("@") else [item])]}
+               for p in curated["presets"]]
+    presets += [{"id": name, "title": "Granger Classics: all books", "items": ids_}
+                for name, ids_ in collections.items()]
+    for preset in presets:
         unknown = set(preset["items"]) - set(ids)
         if unknown:
             raise SystemExit(f"preset {preset['id']} lists unknown items {sorted(unknown)}")
@@ -177,7 +225,8 @@ def build(curated, fetch=http_get, now=None, head=http_head):
         "generatedAt": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "packs": packs,
         "models": models,
-        "presets": curated["presets"],
+        "books": books,
+        "presets": presets,
     }
 
 

@@ -56,4 +56,37 @@ class MigrationTest {
         db.query("SELECT id FROM media_types ORDER BY sortOrder").use { while (it.moveToNext()) ids += it.getString(0) }
         assertThat(ids).containsExactly("literature", "audiobooks", "music", "video").inOrder()
     }
+
+    @Test fun version3DataSurvivesAndBookTablesExist() {
+        helper.createDatabase("migrate4.db", 3).apply {
+            execSQL(
+                "INSERT INTO packs (id, filePath, title, description, language, date, sizeBytes, hasFulltextIndex, status, addedAt, name) " +
+                    "VALUES ('u-a', '/p/a.zim', 'A', '', 'eng', '2026-10-15', 10, 1, 'OK', 5, 'a')",
+            )
+            execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES ('a', 'c', 0)")
+            execSQL("INSERT INTO reading_tabs (packId, path, title, openedAt, onRail) VALUES ('u-a', 'index', 'Home', 1, 1)")
+            execSQL("INSERT INTO history (packId, path, title, openedAt) VALUES ('u-a', 'index', 'Home', 1)")
+            close()
+        }
+        // validateDroppedTables is off: book_text is raw FTS4 that Room doesn't manage, so the helper calls it unexpected.
+        // Room still validates every table it does manage.
+        val db = helper.runMigrationsAndValidate("migrate4.db", 4, false, LibraryDatabase.MIGRATION_2_3, LibraryDatabase.MIGRATION_3_4)
+        for (table in listOf("packs", "placements", "reading_tabs", "history")) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(1)
+            }
+        }
+        for (table in listOf("books", "book_positions", "book_marks", "book_chunks")) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(0)
+            }
+        }
+        db.execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
+        db.query("SELECT docid FROM book_text WHERE book_text MATCH 'quick'").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getLong(0)).isEqualTo(7L)
+        }
+    }
 }
