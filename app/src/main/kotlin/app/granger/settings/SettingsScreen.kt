@@ -28,8 +28,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import app.granger.archive.WaiverDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +50,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    var showWaiver by remember { mutableStateOf(false) }
+    var showWaiver by rememberSaveable { mutableStateOf(false) }
     if (showWaiver) {
         WaiverDialog(
             onAccept = {
@@ -103,8 +103,8 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
                     headlineContent = { Text("Archive.org: show everything") },
                     supportingContent = {
                         Text(
-                            if (ui.archiveEverything) "Downloaded files stay."
-                            else "Off: only public-domain texts. Turning it on asks you to accept responsibility.",
+                            if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
+                            else "Only public-domain texts are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
                         )
                     },
                     trailingContent = {

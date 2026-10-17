@@ -386,6 +386,29 @@ class ArchiveViewModelTest {
         assertThat(vm.ui.value.notice).isNull()
     }
 
+    @Test fun anAlreadyInstalledItemKeepsItsSidecar() = runTest(main.dispatcher) {
+        // The installed book's sidecar is what a later repair files it with.
+        downloads.nextResult = EnqueueResult.AlreadyInstalled
+        val vm = viewModel()
+        vm.get(epubId)
+        settle { downloads.enqueuedSpecs.isNotEmpty() }
+        testScheduler.advanceUntilIdle()
+        assertThat(File(sidecars, "$epubId.json").exists()).isTrue()
+    }
+
+    @Test fun removeAndCancelDeleteTheSidecar() = runTest(main.dispatcher) {
+        val vm = viewModel()
+        val removed = File(sidecars, "$epubId.json").apply { writeText("{}") }
+        val cancelled = File(sidecars, "a.json").apply { writeText("{}") }
+        val kept = File(sidecars, "b.json").apply { writeText("{}") }
+        vm.remove(epubId)
+        vm.cancel("a")
+        testScheduler.advanceUntilIdle()
+        assertThat(removed.exists()).isFalse()
+        assertThat(cancelled.exists()).isFalse()
+        assertThat(kept.exists()).isTrue()
+    }
+
     @Test fun offlineSearchShowsAMessageAndInstalledStillWorks() = runTest(main.dispatcher) {
         offline = true
         downloads.list.value = listOf(

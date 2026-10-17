@@ -199,18 +199,25 @@ class ArchiveViewModel(
     }
 
     fun cancel(identifier: String) {
-        appScope.launch { downloads.cancel(ArchiveDownloads.itemId(identifier)) }
+        appScope.launch {
+            downloads.cancel(ArchiveDownloads.itemId(identifier))
+            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }
+        }
     }
 
     fun retryDownload(identifier: String) {
         appScope.launch { downloads.retry(ArchiveDownloads.itemId(identifier)) }
     }
 
-    /** The download goes first, then the shelf entry; the book's place and marks stay for a later re-download. */
+    /**
+     * The download goes first, then the shelf entry and the metadata sidecar; the book's place and marks stay for a
+     * later re-download.
+     */
     fun remove(identifier: String) {
         appScope.launch {
             downloads.remove(ArchiveDownloads.itemId(identifier))
             bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier))
+            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }
         }
     }
 
@@ -272,7 +279,8 @@ class ArchiveViewModel(
             withContext(NonCancellable + io) { sidecar.delete() }
             throw e
         }
-        if (result != EnqueueResult.Queued && result != EnqueueResult.AlreadyActive) {
+        // A refused enqueue leaves no sidecar; an installed book keeps its (now refreshed) one for later repairs.
+        if (result is EnqueueResult.NoSpace || result is EnqueueResult.OverCap) {
             withContext(io) { sidecar.delete() }
         }
         return when (result) {

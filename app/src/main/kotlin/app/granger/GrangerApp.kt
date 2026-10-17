@@ -11,6 +11,7 @@ import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.AndroidVolumes
 import app.granger.core.downloads.DownloadDatabase
 import app.granger.core.downloads.DownloadManager
+import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadRunner
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
@@ -25,7 +26,9 @@ import app.granger.core.library.BookOrigin
 import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
 import app.granger.archive.SharedArchivePrefs
+import app.granger.archive.ArchiveUserAgent
 import app.granger.core.archive.ArchiveOrgClient
+import app.granger.core.archive.ArchiveQuery
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
@@ -89,6 +92,23 @@ internal suspend fun onBookInstalled(
     }
 }
 
+/**
+ * Files a finished book download: archive.org records with their sidecar's metadata, the rest as Granger books.
+ * The sidecar is kept: a Readiness repair re-files the same record later and needs it. It goes when the item is
+ * removed or cancelled ([ArchiveDownloads.deleteSidecar]).
+ */
+internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, record: DownloadRecord, startIndexing: () -> Unit) {
+    val identifier = ArchiveDownloads.identifierOf(record.itemId)
+    val sidecar = identifier?.takeIf { ArchiveQuery.isValidIdentifier(it) }?.let { ArchiveDownloads.sidecarFile(sidecarDir, it) }
+    onBookInstalled(
+        bookshelf, File(record.filePath),
+        if (identifier != null) BookOrigin.ARCHIVE_ORG else BookOrigin.GRANGER,
+        identifier ?: record.itemId,
+        sidecar?.let { ArchiveDownloads.readSidecar(it)?.first },
+        startIndexing,
+    )
+}
+
 /** Hand-wired dependencies; one instance per process. */
 class AppContainer(context: Context) {
     /** For writes that must finish even if the screen that started them is gone. */
@@ -138,9 +158,13 @@ class AppContainer(context: Context) {
         .totalMem
     val deviceTier: DeviceTier = DeviceTiers.forTotalRam(totalRamBytes)
 
+    private val archiveUserAgent = "Granger/${BuildConfig.VERSION_NAME} (+https://github.com/nealt9000/Granger)"
+
     private val http = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
+        // A network interceptor sees each redirect hop, so archive.org file downloads carry it to the item's server.
+        .addNetworkInterceptor(ArchiveUserAgent(archiveUserAgent))
         .build()
 
     val catalog: CatalogSource = CatalogRepository(
@@ -151,7 +175,7 @@ class AppContainer(context: Context) {
         includeUnevaluatedModels = BuildConfig.DEBUG,
     )
 
-    val archiveClient = ArchiveOrgClient(http, "Granger/${BuildConfig.VERSION_NAME} (+https://github.com/nealt9000/Granger)")
+    val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
@@ -183,18 +207,7 @@ class AppContainer(context: Context) {
                 library.fileReplaced(record.filePath)
                 library.refresh()
             } else if (record.kind == ItemKind.BOOK) {
-                val identifier = ArchiveDownloads.identifierOf(record.itemId)
-                val sidecar = identifier?.takeIf { app.granger.core.archive.ArchiveQuery.isValidIdentifier(it) }
-                    ?.let { File(archiveSidecarDir, "$it.json") }
-                onBookInstalled(
-                    bookshelf, File(record.filePath),
-                    if (identifier != null) BookOrigin.ARCHIVE_ORG else BookOrigin.GRANGER,
-                    identifier ?: record.itemId,
-                    sidecar?.let { ArchiveDownloads.readSidecar(it)?.first },
-                ) {
-                    appScope.launch { bookIndex.indexPending() }
-                }
-                sidecar?.delete()
+                fileBookRecord(bookshelf, archiveSidecarDir, record) { appScope.launch { bookIndex.indexPending() } }
             }
         },
     )

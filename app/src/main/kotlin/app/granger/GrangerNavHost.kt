@@ -292,7 +292,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         CollectionViewModel(
                             backStackEntry.toRoute<CollectionRoute>().collectionId,
                             container.shelves, container.library, container.sessions,
-                            container.bookshelf, container.downloads, container.appScope,
+                            container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
                         )
                     },
                     onOpened = ::showTab,

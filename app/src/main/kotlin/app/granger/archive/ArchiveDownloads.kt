@@ -72,10 +72,20 @@ object ArchiveDownloads {
         require(ArchiveQuery.isValidIdentifier(item.identifier)) { "Bad archive.org identifier" }
         dir.mkdirs()
         val d = details(item, kind)
-        val file = File(dir, "${item.identifier}.json")
+        val file = sidecarFile(dir, item.identifier)
         file.writeText(json.encodeToString(Sidecar.serializer(),
             Sidecar(d.title, d.author, d.date, d.subjects, d.description, d.language, kind.name)))
         return file
+    }
+
+    fun sidecarFile(dir: File, identifier: String): File = File(dir, "$identifier.json")
+
+    /**
+     * Deletes `<dir>/<identifier>.json`. A sidecar stays for as long as its book does (a repair re-files with it),
+     * so this runs only when the item is removed or cancelled, or its enqueue is refused.
+     */
+    fun deleteSidecar(dir: File, identifier: String) {
+        if (ArchiveQuery.isValidIdentifier(identifier)) sidecarFile(dir, identifier).delete()
     }
 
     /** Null when the file is missing or unreadable. */
