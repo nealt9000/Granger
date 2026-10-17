@@ -5,7 +5,6 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -28,8 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.core.library.BookIds
-import app.granger.core.library.Bookshelf
-import app.granger.core.library.ReadingSessions
+import app.granger.ebook.EbookReaderScreen
+import app.granger.ebook.EbookReaderViewModel
 import app.granger.core.library.ReadingTab
 import app.granger.launch.StartScreen
 import app.granger.library.CollectionScreen
@@ -94,17 +92,6 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null) {
     }
 }
 
-/** The title of the book behind a tab, for the placeholder screen until the reader replaces it. */
-private class BookTitleViewModel(tabId: Long, sessions: ReadingSessions, bookshelf: Bookshelf) : ViewModel() {
-    val title = MutableStateFlow("")
-
-    init {
-        viewModelScope.launch {
-            val tab = sessions.tab(tabId)
-            title.value = tab?.let { bookshelf.book(it.packId)?.title ?: it.title }.orEmpty()
-        }
-    }
-}
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
@@ -235,10 +222,19 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 )
             }
             composable<BookRoute> { backStackEntry ->
-                val tabId = backStackEntry.toRoute<BookRoute>().tabId
-                val vm = viewModel { BookTitleViewModel(tabId, container.sessions, container.bookshelf) }
-                val title by vm.title.collectAsStateWithLifecycle()
-                Text(title) // Placeholder; the Readium reader replaces it.
+                val route = backStackEntry.toRoute<BookRoute>()
+                val target = route.href?.let { BookTarget(it, route.progression ?: 0.0) }
+                EbookReaderScreen(
+                    viewModel = viewModel {
+                        EbookReaderViewModel(
+                            route.tabId, target, container.bookshelf, container.sessions, container.bookOpener,
+                            container.readingPrefs, container.appScope,
+                        )
+                    },
+                    onChromeVisibleChange = { visible -> shell.railVisible = visible },
+                    showChromeRequest = showChromeRequest,
+                    onBack = { nav.popBackStack() },
+                )
             }
             composable<SearchRoute> { backStackEntry ->
                 val query = backStackEntry.toRoute<SearchRoute>().query

@@ -33,6 +33,9 @@ import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.zim.ZimResolver
+import app.granger.ebook.BookOpener
+import app.granger.ebook.ReadingPrefsStore
+import app.granger.ebook.ReadiumBookOpener
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
@@ -100,6 +103,10 @@ class AppContainer(context: Context) {
     val bookIndex = BookIndex(libraryDb)
     val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
+    val bookOpener: BookOpener = ReadiumBookOpener(context)
+
+    /** How books look; one set for every book. */
+    val readingPrefs = ReadingPrefsStore(context.getSharedPreferences("reading", Context.MODE_PRIVATE))
 
     /** Clean-exit and reboot tracking for the launch decision; BOOT_COUNT is -1 (unavailable) on odd builds. */
     val sessionMarker = SessionMarker(

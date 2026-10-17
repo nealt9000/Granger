@@ -20,6 +20,16 @@ import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimItem
 import app.granger.core.zim.ZimMetadata
+import app.granger.ebook.BookOpener
+import org.readium.r2.shared.publication.Link
+import org.readium.r2.shared.publication.Manifest
+import org.readium.r2.shared.publication.Metadata
+import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.LocalizedString
+import org.readium.r2.shared.publication.services.PerResourcePositionsService
+import org.readium.r2.shared.publication.services.positionsServiceFactory
+import org.readium.r2.shared.util.Url
+import org.readium.r2.shared.util.mediatype.MediaType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -193,4 +203,24 @@ class FakeBookshelf : Bookshelf {
     override suspend fun addMark(mark: BookMark): Long = 0L
     override suspend fun updateMark(mark: BookMark) {}
     override suspend fun deleteMark(id: Long) {}
+}
+
+/** A three-chapter EPUB-like publication (c001..c003.xhtml) with one position per chapter, so progressions resolve. */
+fun testPublication(title: String = "Test Book"): Publication = Publication(
+    manifest = Manifest(
+        metadata = Metadata(localizedTitle = LocalizedString(title)),
+        readingOrder = listOf("c001.xhtml", "c002.xhtml", "c003.xhtml").map { Link(Url(it)!!, mediaType = MediaType.XHTML) },
+    ),
+    servicesBuilder = Publication.ServicesBuilder().apply {
+        positionsServiceFactory = PerResourcePositionsService.createFactory(MediaType.XHTML)
+    },
+)
+
+/** [publication] is what every open returns; null is a file Readium can't open. [opened] records each file asked for. */
+class FakeBookOpener(var publication: Publication? = testPublication()) : BookOpener {
+    val opened = mutableListOf<File>()
+    override suspend fun open(file: File): Publication? {
+        opened += file
+        return publication
+    }
 }

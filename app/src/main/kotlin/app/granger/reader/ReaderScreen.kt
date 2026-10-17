@@ -280,7 +280,7 @@ private fun FindBar(
 
 /** Hides the status and navigation bars while [hidden]; a swipe from an edge shows them briefly. */
 @Composable
-private fun SystemBarsHidden(hidden: Boolean) {
+internal fun SystemBarsHidden(hidden: Boolean) {
     val view = LocalView.current
     DisposableEffect(view, hidden) {
         val window = view.context.findActivity()?.window ?: return@DisposableEffect onDispose {}
