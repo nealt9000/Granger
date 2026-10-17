@@ -96,8 +96,9 @@ fun ReaderScreen(
         webView?.let { viewModel.savePosition(it.url, it.scrollFraction()) }
     }
 
-    // The shell's left-edge swipe asks for the chrome; 0 is "never asked", so a fresh screen stays immersive.
-    LaunchedEffect(showChromeRequest) { if (showChromeRequest > 0) viewModel.showChrome() }
+    // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts, so a fresh screen stays immersive.
+    val requestAtEntry = remember { showChromeRequest }
+    LaunchedEffect(showChromeRequest) { if (isNewChromeRequest(requestAtEntry, showChromeRequest)) viewModel.showChrome() }
     LaunchedEffect(state.chromeVisible) { onChromeVisibleChange(state.chromeVisible) }
     SystemBarsHidden(!state.chromeVisible)
 
@@ -303,3 +304,6 @@ private fun openExternal(context: Context, url: String) {
         Toast.makeText(context, "No app on this phone can open that link.", Toast.LENGTH_SHORT).show()
     }
 }
+
+/** A shell edge-swipe request counts only when it is newer than the counter value this reader started with. */
+internal fun isNewChromeRequest(atEntry: Int, current: Int): Boolean = current > atEntry
