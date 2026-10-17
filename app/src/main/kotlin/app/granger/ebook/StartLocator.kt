@@ -57,9 +57,13 @@ object StartLocator {
         }
     }
 
-    /** The reading-order item [href] points into; hrefs compare without their #fragment, normalised alike. */
-    private fun Publication.chapterFor(href: Url): Link? {
-        val wanted = href.removeFragment()
-        return readingOrder.firstOrNull { it.url().removeFragment().isEquivalent(wanted) }
-    }
 }
+
+/** The reading-order item [href] points into; hrefs compare without their #fragment, normalised alike. */
+internal fun Publication.chapterFor(href: Url): Link? {
+    val wanted = href.removeFragment()
+    return readingOrder.firstOrNull { it.url().removeFragment().isEquivalent(wanted) }
+}
+
+/** Whether two hrefs name the same file, ignoring #fragments. The one comparison the reader uses. */
+internal fun sameFile(a: Url, b: Url): Boolean = a.removeFragment().isEquivalent(b.removeFragment())

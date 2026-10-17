@@ -201,10 +201,17 @@ class FakeBookshelf : Bookshelf {
     }
 
     override suspend fun position(bookId: String): BookPosition? = positionMap.value[bookId]
-    override fun marks(bookId: String): Flow<List<BookMark>> = MutableStateFlow(emptyList())
-    override suspend fun addMark(mark: BookMark): Long = 0L
-    override suspend fun updateMark(mark: BookMark) {}
-    override suspend fun deleteMark(id: Long) {}
+    /** Oldest first, like the DAO. */
+    val markList = MutableStateFlow<List<BookMark>>(emptyList())
+    private var nextMarkId = 1L
+    override fun marks(bookId: String): Flow<List<BookMark>> = markList.map { all -> all.filter { it.bookId == bookId } }
+    override suspend fun addMark(mark: BookMark): Long {
+        val id = nextMarkId++
+        markList.update { it + mark.copy(id = id) }
+        return id
+    }
+    override suspend fun updateMark(mark: BookMark) { markList.update { all -> all.map { if (it.id == mark.id) mark else it } } }
+    override suspend fun deleteMark(id: Long) { markList.update { all -> all.filterNot { it.id == id } } }
 }
 
 /** Records whether the publication holding it was closed. */
@@ -223,10 +230,15 @@ fun testPublication(
     title: String = "Test Book",
     chapters: List<String> = listOf("c001.xhtml", "c002.xhtml", "c003.xhtml"),
     container: TrackingContainer = TrackingContainer(),
+    /** Table of contents: each entry's href (a URL, fragment allowed; its title is the same text) and its children's. */
+    toc: List<Pair<String, List<String>>> = emptyList(),
 ): Publication = Publication(
     manifest = Manifest(
         metadata = Metadata(localizedTitle = LocalizedString(title)),
         readingOrder = chapters.map { Link(Url.fromDecodedPath(it)!!, mediaType = MediaType.XHTML) },
+        tableOfContents = toc.map { (href, children) ->
+            Link(Url(href)!!, title = href, children = children.map { Link(Url(it)!!, title = it) })
+        },
     ),
     container = container,
     servicesBuilder = Publication.ServicesBuilder().apply {

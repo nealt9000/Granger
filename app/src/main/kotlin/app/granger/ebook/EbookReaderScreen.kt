@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,14 +15,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -79,6 +73,11 @@ fun EbookReaderScreen(
     LaunchedEffect(navigator) {
         navigator?.currentLocator?.collect(viewModel::onLocator)
     }
+    LaunchedEffect(navigator) {
+        navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }
+    }
+    // Back closes an open panel first, then leaves the reader.
+    BackHandler(enabled = state.panel != null) { viewModel.open(null) }
     LaunchedEffect(navigator, state.prefs) {
         navigator?.submitPreferences(state.prefs.toEpub())
     }
@@ -114,14 +113,43 @@ fun EbookReaderScreen(
                 modifier = Modifier.fillMaxSize(),
             )
         }
+        // The shell's rail is drawn over the reader's left edge while the chrome shows.
         AnimatedVisibility(
             visible = state.chromeVisible,
-            // The shell's rail is drawn over the reader's left edge while the chrome shows.
-            modifier = Modifier.padding(start = NarrowRailWidth),
+            modifier = Modifier.padding(start = NarrowRailWidth).align(Alignment.TopCenter),
             enter = fadeIn() + slideInVertically { -it },
             exit = fadeOut() + slideOutVertically { -it },
         ) {
-            EbookTopBar(title = state.title, chapter = state.locator?.title.orEmpty(), onBack = onBack)
+            EbookTopBar(
+                title = state.title,
+                onBack = onBack,
+                onContents = { viewModel.open(Panel.CONTENTS) },
+                onSearch = { viewModel.open(Panel.SEARCH) },
+            )
+        }
+        if (state.error == null) {
+            AnimatedVisibility(
+                visible = state.chromeVisible,
+                modifier = Modifier.padding(start = NarrowRailWidth).align(Alignment.BottomCenter),
+                enter = fadeIn() + slideInVertically { it },
+                exit = fadeOut() + slideOutVertically { it },
+            ) {
+                EbookBottomBar(
+                    locator = state.locator ?: state.initial,
+                    positionsCount = state.positionsCount,
+                    bookmarked = state.isBookmarkedHere,
+                    onSeek = viewModel::goToProgression,
+                    onContents = { viewModel.open(Panel.CONTENTS) },
+                    onTextSettings = { viewModel.open(Panel.SETTINGS) },
+                    onBookmark = viewModel::toggleBookmark,
+                )
+            }
+        }
+        when (state.panel) {
+            Panel.CONTENTS -> ContentsPanel(state, viewModel::goTo, viewModel::goToMark, onDismiss = { viewModel.open(null) })
+            Panel.SETTINGS -> TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+            // Search in the book arrives with the next task; until then the panel shows nothing.
+            Panel.SEARCH, null -> Unit
         }
     }
 }
@@ -152,22 +180,4 @@ private class ExternalLinkListener(private val appContext: Context) : EpubNaviga
             Log.w("Granger", "No app can open $url")
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EbookTopBar(title: String, chapter: String, onBack: () -> Unit) {
-    TopAppBar(
-        title = {
-            Text(
-                chapter.ifEmpty { title },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
-        },
-    )
 }

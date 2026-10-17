@@ -3,7 +3,9 @@ package app.granger.ebook
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
+import app.granger.core.library.BookMark
 import app.granger.core.library.Bookshelf
+import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +14,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,7 +25,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.shared.publication.Locator
+import org.json.JSONObject
+import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.locateProgression
+import org.readium.r2.shared.publication.services.positions
+import org.readium.r2.shared.util.Url
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
@@ -36,7 +46,35 @@ data class EbookUi(
     /** The place on screen now; null until the navigator reports one. */
     val locator: Locator? = null,
     val prefs: ReadingPrefs = ReadingPrefs(),
+    val toc: List<TocRow> = emptyList(),
+    /** The last [toc] row in the chapter file on screen; null when none matches. */
+    val currentTocIndex: Int? = null,
+    /** Pages in the book; 0 until Readium has counted them, and the label shows percent meanwhile. */
+    val positionsCount: Int = 0,
+    /** Newest first. */
+    val bookmarks: List<BookMark> = emptyList(),
+    val highlights: List<BookMark> = emptyList(),
+    val isBookmarkedHere: Boolean = false,
+    val panel: Panel? = null,
 )
+
+data class TocRow(val title: String, val href: String, val depth: Int)
+
+enum class Panel { CONTENTS, SETTINGS, SEARCH }
+
+/** "Chapter · p. 120 of 410", or "Chapter · 29%" while the pages are uncounted. */
+object ProgressLabel {
+    fun of(locator: Locator, positionsCount: Int): String {
+        val chapter = locator.title?.trim().orEmpty()
+        val position = locator.locations.position
+        val where = if (positionsCount > 0 && position != null) {
+            "p. $position of $positionsCount"
+        } else {
+            "${((locator.locations.totalProgression ?: 0.0) * 100).toInt().coerceIn(0, 100)}%"
+        }
+        return if (chapter.isEmpty()) where else "$chapter · $where"
+    }
+}
 
 /**
  * One book in a reading tab. The publication is opened once and lives as long as this view model, so rotation
@@ -54,6 +92,11 @@ class EbookReaderViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(EbookUi(prefs = prefsStore.prefs.value))
     val state: StateFlow<EbookUi> = _state.asStateFlow()
+
+    private val _navigation = MutableSharedFlow<Locator>(extraBufferCapacity = 1)
+
+    /** Places the reader asked to jump to; the screen hands each to the navigator. */
+    val navigation: SharedFlow<Locator> = _navigation.asSharedFlow()
 
     /** Builds the navigator fragment; set with the publication, before the state shows it. */
     var navigatorFactory: EpubNavigatorFactory? = null
@@ -91,7 +134,19 @@ class EbookReaderViewModel(
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
             appScope.launch { sessions.showInTab(tabId, book.id, "", book.title) }
-            _state.update { it.copy(loading = false, publication = opened, initial = initial) }
+            _state.update { it.copy(loading = false, publication = opened, initial = initial, toc = flatten(opened.tableOfContents, 0)).derived() }
+            launch { bookshelf.marks(book.id).collect(::onMarks) }
+            // Counting pages can be slow for a big book; the label shows percent until it's done.
+            launch {
+                val count = try {
+                    withContext(io) { opened.positions().size }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    0
+                }
+                _state.update { it.copy(positionsCount = count) }
+            }
         }
         viewModelScope.launch {
             prefsStore.prefs.collect { prefs -> _state.update { it.copy(prefs = prefs) } }
@@ -104,7 +159,7 @@ class EbookReaderViewModel(
 
     /** The navigator moved; the place is saved once it has stayed put for a second. */
     fun onLocator(locator: Locator) {
-        _state.update { it.copy(locator = locator) }
+        _state.update { it.copy(locator = locator).derived() }
         val id = bookId ?: return
         unsaved = locator
         saveJob?.cancel()
@@ -132,6 +187,95 @@ class EbookReaderViewModel(
             locator.title.orEmpty(),
         )
     }
+
+    private fun flatten(links: List<Link>, depth: Int): List<TocRow> =
+        links.flatMap { listOf(TocRow(it.title.orEmpty().trim(), it.href.toString(), depth)) + flatten(it.children, depth + 1) }
+
+    private fun onMarks(marks: List<BookMark>) {
+        _state.update {
+            it.copy(
+                bookmarks = marks.filter { m -> m.kind == MarkKind.BOOKMARK }.sortedWith(compareByDescending<BookMark> { m -> m.createdAt }.thenByDescending { m -> m.id }),
+                highlights = marks.filter { m -> m.kind == MarkKind.HIGHLIGHT },
+            ).derived()
+        }
+    }
+
+    /** Fills in what follows from the place, the contents and the bookmarks. */
+    private fun EbookUi.derived(): EbookUi {
+        val here = locator ?: return copy(currentTocIndex = null, isBookmarkedHere = false)
+        val index = toc.indexOfLast { row -> Url(row.href)?.let { sameFile(it, here.href) } == true }.takeIf { it >= 0 }
+        val marked = bookmarks.any { m ->
+            val at = parse(m.locatorJson) ?: return@any false
+            sameFile(at.href, here.href) && at.locations.position == here.locations.position
+        }
+        return copy(currentTocIndex = index, isBookmarkedHere = marked)
+    }
+
+    private fun parse(json: String): Locator? = try {
+        Locator.fromJSON(JSONObject(json))
+    } catch (e: Exception) {
+        null
+    }
+
+    /** Adds a bookmark at the current place, or removes the one here. */
+    fun toggleBookmark() {
+        val id = bookId ?: return
+        val here = _state.value.locator ?: return
+        val existing = _state.value.bookmarks.filter { m ->
+            val at = parse(m.locatorJson) ?: return@filter false
+            sameFile(at.href, here.href) && at.locations.position == here.locations.position
+        }
+        appScope.launch {
+            if (existing.isNotEmpty()) {
+                existing.forEach { bookshelf.deleteMark(it.id) }
+            } else {
+                val now = System.currentTimeMillis()
+                bookshelf.addMark(
+                    BookMark(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), here.title.orEmpty(), "", "", now, now),
+                )
+            }
+        }
+    }
+
+    /** A contents row: the chapter file it points into, with its #fragment. Not in the reading order: ignored. */
+    fun goTo(href: String) {
+        val target = Url(href) ?: return
+        val link = _state.value.publication?.chapterFor(target) ?: return
+        val base = _state.value.publication?.locatorFromLink(link) ?: return
+        val fragment = target.fragment
+        val locator = if (fragment == null) base else base.copy(locations = base.locations.copy(fragments = listOf(fragment)))
+        jump(locator)
+    }
+
+    /** The slider's release: [p] is the share of the whole book. */
+    fun goToProgression(p: Double) {
+        val opened = _state.value.publication ?: return
+        viewModelScope.launch {
+            val locator = try {
+                opened.locateProgression(p.coerceIn(0.0, 1.0))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+            if (locator != null) _navigation.emit(locator)
+        }
+    }
+
+    fun goToMark(mark: BookMark) {
+        jump(parse(mark.locatorJson) ?: return)
+    }
+
+    private fun jump(locator: Locator) {
+        _state.update { it.copy(panel = null) }
+        _navigation.tryEmit(locator)
+    }
+
+    fun open(panel: Panel?) {
+        _state.update { it.copy(panel = panel) }
+    }
+
+    fun updatePrefs(prefs: ReadingPrefs) = prefsStore.update(prefs)
 
     /** A middle tap. Errors keep the chrome up. */
     fun toggleChrome() {

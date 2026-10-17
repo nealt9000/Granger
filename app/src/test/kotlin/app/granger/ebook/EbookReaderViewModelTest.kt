@@ -23,6 +23,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import app.granger.core.library.BookMark
+import app.granger.core.library.MarkKind
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -205,5 +209,104 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.chromeVisible).isFalse()
         vm.showChrome()
         assertThat(vm.state.value.chromeVisible).isTrue()
+    }
+
+    private fun bookmark(id: Long, href: String, position: Int, total: Double, createdAt: Long, title: String = "T") = BookMark(
+        id, "b", MarkKind.BOOKMARK, locator(href, 0.1, total, title).copy(
+            locations = Locator.Locations(progression = 0.1, position = position, totalProgression = total),
+        ).toJSON().toString(), title, "", "", createdAt, createdAt,
+    )
+
+    @Test fun tocIsFlattenedWithDepth() = runTest(main.dispatcher) {
+        opener.publication = testPublication(toc = listOf("c001.xhtml" to listOf("c002.xhtml#s1"), "c003.xhtml" to emptyList()))
+        val vm = reader()
+        assertThat(vm.state.value.toc.map { it.depth }).containsExactly(0, 1, 0).inOrder()
+        assertThat(vm.state.value.toc.map { it.title }).containsExactly("c001.xhtml", "c002.xhtml#s1", "c003.xhtml").inOrder()
+    }
+
+    @Test fun currentChapterFollowsLocator() = runTest(main.dispatcher) {
+        opener.publication = testPublication(toc = listOf("c001.xhtml" to listOf("c002.xhtml#s1"), "c003.xhtml" to emptyList()))
+        val vm = reader()
+        assertThat(vm.state.value.currentTocIndex).isNull()
+        vm.onLocator(locator("c002.xhtml", 0.5, 0.4))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(1)
+        vm.onLocator(locator("c003.xhtml", 0.5, 0.8))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(2)
+    }
+
+    @Test fun positionsCountComesFromThePublication() = runTest(main.dispatcher) {
+        val vm = reader()
+        assertThat(vm.state.value.positionsCount).isEqualTo(3)
+    }
+
+    @Test fun bookmarkTogglesAtCurrentPlace() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.onLocator(locator("c002.xhtml", 0.2, 0.4, "Two").copy(locations = Locator.Locations(position = 2, totalProgression = 0.4)))
+        assertThat(vm.state.value.isBookmarkedHere).isFalse()
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value.single().kind).isEqualTo(MarkKind.BOOKMARK)
+        assertThat(bookshelf.markList.value.single().text).isEqualTo("Two")
+        assertThat(vm.state.value.bookmarks).hasSize(1)
+        assertThat(vm.state.value.isBookmarkedHere).isTrue()
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value).isEmpty()
+        assertThat(vm.state.value.isBookmarkedHere).isFalse()
+    }
+
+    @Test fun marksAreSplitAndBookmarksNewestFirst() = runTest(main.dispatcher) {
+        bookshelf.markList.value = listOf(
+            bookmark(1, "c001.xhtml", 1, 0.1, 100),
+            bookmark(2, "c003.xhtml", 3, 0.8, 200),
+            bookmark(3, "c001.xhtml", 1, 0.1, 150).copy(kind = MarkKind.HIGHLIGHT),
+        )
+        val vm = reader()
+        assertThat(vm.state.value.bookmarks.map { it.id }).containsExactly(2L, 1L).inOrder()
+        assertThat(vm.state.value.highlights.map { it.id }).containsExactly(3L)
+    }
+
+    @Test fun sliderJumpEmitsNavigation() = runTest(main.dispatcher) {
+        val vm = reader()
+        val seen = mutableListOf<Locator>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
+        runCurrent()
+        vm.goToProgression(0.9)
+        advanceUntilIdle()
+        assertThat(seen.single().href).isEqualTo(Url("c003.xhtml"))
+    }
+
+    @Test fun contentsTapNavigatesKeepingFragmentAndClosesPanel() = runTest(main.dispatcher) {
+        val vm = reader()
+        val seen = mutableListOf<Locator>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
+        runCurrent()
+        vm.open(Panel.CONTENTS)
+        vm.goTo("c002.xhtml#s1")
+        vm.goTo("missing.xhtml")
+        advanceUntilIdle()
+        assertThat(seen).hasSize(1)
+        assertThat(seen[0].href).isEqualTo(Url("c002.xhtml"))
+        assertThat(seen[0].locations.fragments).containsExactly("s1")
+        assertThat(vm.state.value.panel).isNull()
+    }
+
+    @Test fun markTapNavigatesToItsLocator() = runTest(main.dispatcher) {
+        val vm = reader()
+        val seen = mutableListOf<Locator>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
+        runCurrent()
+        vm.goToMark(bookmark(1, "c003.xhtml", 3, 0.8, 1))
+        advanceUntilIdle()
+        assertThat(seen.single().href).isEqualTo(Url("c003.xhtml"))
+    }
+
+    @Test fun prefsChangesAreStored() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.updatePrefs(ReadingPrefs(theme = ReadingTheme.SEPIA, fontScale = 9.0))
+        advanceUntilIdle()
+        assertThat(vm.state.value.prefs.theme).isEqualTo(ReadingTheme.SEPIA)
+        assertThat(vm.state.value.prefs.fontScale).isEqualTo(ReadingPrefs.MAX_FONT_SCALE)
+        assertThat(prefsStore.prefs.value.theme).isEqualTo(ReadingTheme.SEPIA)
     }
 }
