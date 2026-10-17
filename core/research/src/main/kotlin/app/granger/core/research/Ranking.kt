@@ -16,10 +16,12 @@ object Ranking {
     /** Best-first by lexical score then search score, at most [RankingConfig.perSource] per source. */
     fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
         val perSource = HashMap<String, Int>()
+        val score = LexicalScore.scorer(keywords)
+        // Scored once each: a sort comparator would score every passage many times over.
         return passages
-            .sortedWith(
-                compareByDescending<Passage> { LexicalScore.of(it, keywords) }.thenByDescending { it.searchScore },
-            )
+            .map { it to score(it) }
+            .sortedWith(compareByDescending<Pair<Passage, Double>> { it.second }.thenByDescending { it.first.searchScore })
+            .map { it.first }
             .filter { p ->
                 val seen = perSource.merge(p.sourceId, 1, Int::plus)!!
                 seen <= config.perSource
@@ -54,11 +56,13 @@ object Ranking {
             .take(config.large)
             .map { candidates[it.first] }
 
-    fun byLexical(candidates: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> =
-        candidates
-            .map { it to LexicalScore.of(it, keywords) }
+    fun byLexical(candidates: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
+        val score = LexicalScore.scorer(keywords)
+        return candidates
+            .map { it to score(it) }
             .filter { it.second >= config.lexicalThreshold }
             .sortedByDescending { it.second }
             .take(config.large)
             .map { it.first }
+    }
 }

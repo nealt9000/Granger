@@ -28,5 +28,14 @@ class LexicalScoreTest {
         assertThat(LexicalScore.of(passage("text", title = "Mercy and Portia"), listOf("portia mercy"))).isWithin(1e-9).of(0.1)
     }
 
+    @Test fun scorerMatchesOf() {
+        val keywords = listOf("steam", "boiler pressure", "valve")
+        val score = LexicalScore.scorer(keywords)
+        listOf(passage("Steam in the boiler raises its pressure."), passage("valve", title = "Steam"), passage("nothing")).forEach {
+            assertThat(score(it)).isEqualTo(LexicalScore.of(it, keywords))
+        }
+        assertThat(LexicalScore.scorer(emptyList())(passage("steam"))).isEqualTo(0.0)
+    }
+
     @Test fun noKeywordsScoresZero() = assertThat(LexicalScore.of(passage("text"), emptyList())).isEqualTo(0.0)
 }

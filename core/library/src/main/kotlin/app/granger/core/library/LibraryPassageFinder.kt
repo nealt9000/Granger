@@ -149,7 +149,8 @@ class LibraryPassageFinder(
                 Passage(SourceKind.CARD, pack.id, pack.title, packTitle = pack.title, text = text, meta = SourceMeta(date = pack.date, collection = collections[pack.id].orEmpty()))
             }
         }
-        return made.sortedByDescending { LexicalScore.of(it, words) }.take(cards)
+        val score = LexicalScore.scorer(words)
+        return made.map { it to score(it) }.sortedByDescending { it.second }.take(cards).map { it.first }
     }
 
     private inline fun <T> attempt(block: () -> T?): T? = try {
