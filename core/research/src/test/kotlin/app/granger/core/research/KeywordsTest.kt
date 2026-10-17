@@ -25,6 +25,12 @@ class KeywordsTest {
         assertThat(Keywords.extract("Darwin\u2019s finches")).containsExactly("darwin", "finches").inOrder()
     }
 
+    @Test fun normalizeHandlesPossessivesPerPhrase() {
+        assertThat(Keywords.normalize("Darwin\u2019s Finches")).isEqualTo("darwin finches")
+        assertThat(Keywords.normalize(" Darwin's ")).isEqualTo("darwin")
+        assertThat(Keywords.normalize("rock 'n' roll")).isEqualTo("rock n roll")
+    }
+
     @Test fun medicalLexicon() {
         assertThat(Medical.looksMedical("What dose of insulin is safe?")).isTrue()
         assertThat(Medical.looksMedical("How do I treat a Burn?")).isTrue()

@@ -14,6 +14,8 @@ object Keywords {
         "cant", "dont", "isnt", "doesnt", "didnt", "whats", "hows",
     )
     private val SPLIT = Regex("[^\\p{L}\\p{N}']+")
+    private val POSSESSIVE = Regex("'s(?![\\p{L}\\p{N}])")
+    private val SPACES = Regex("\\s+")
 
     fun extract(question: String, max: Int = 6): List<String> =
         question.lowercase().replace('\u2019', '\'').split(SPLIT)
@@ -21,6 +23,14 @@ object Keywords {
             .filter { it.length >= 3 && it !in STOPWORDS }
             .distinct()
             .take(max)
+
+    /** Lowercases a keyword or phrase and drops apostrophes the way [extract] does, so "Darwin’s finches" becomes "darwin finches". */
+    fun normalize(keyword: String): String =
+        keyword.lowercase().replace('\u2019', '\'')
+            .replace(POSSESSIVE, "")
+            .replace("'", "")
+            .trim()
+            .replace(SPACES, " ")
 }
 
 /** Cheap check used only when the rewrite fails and the model can't say whether a question is medical. */
