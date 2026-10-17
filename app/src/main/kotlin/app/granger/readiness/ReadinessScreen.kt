@@ -84,9 +84,9 @@ fun ReadinessScreen(viewModel: ReadinessViewModel, onBack: () -> Unit) {
 }
 
 private fun tierText(tier: DeviceTier) = when (tier) {
-    DeviceTier.LIBRARY_ONLY -> "Library only: Ask needs a phone with 6 GB of memory"
-    DeviceTier.ASK -> "Library and Ask"
-    DeviceTier.THINK_DEEPER -> "Library, Ask and Think deeper"
+    DeviceTier.LIBRARY_ONLY -> "Library only: Research needs a phone with 6 GB of memory"
+    DeviceTier.ASK -> "Library and Research"
+    DeviceTier.THINK_DEEPER -> "Library, Research and Think deeper"
 }
 
 @Composable

@@ -10,6 +10,7 @@ import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
+import app.granger.core.library.ResearchChats
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -32,16 +33,33 @@ data class RailTabUi(
     val coverPath: String? = null,
 )
 
-data class RailUi(val tabs: List<RailTabUi>, val recentSearches: List<String>)
+/** A row in the rail's Recent section; [at] is when it was last searched or answered. */
+sealed interface RecentItem {
+    val at: Long
+
+    data class Search(val query: String, override val at: Long) : RecentItem
+
+    data class Chat(val chatId: Long, val title: String, override val at: Long) : RecentItem
+}
+
+/** [recent] holds searches and Research chats together, newest first. */
+data class RailUi(val tabs: List<RailTabUi>, val recent: List<RecentItem>)
 
 /** The rail's Bookmarks and Recent sections. [currentTabId] is the tab on screen, null off the reader. */
 class RailViewModel(
     private val sessions: ReadingSessions,
     library: Library,
     bookshelf: Bookshelf,
+    chats: ResearchChats,
     currentTabId: StateFlow<Long?>,
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
+
+    private val recent = combine(sessions.recentSearchRows(RECENT), chats.recent(RECENT)) { searches, chats ->
+        (searches.map { RecentItem.Search(it.query, it.searchedAt) } + chats.map { RecentItem.Chat(it.id, it.title, it.updatedAt) })
+            .sortedByDescending { it.at }
+            .take(RECENT)
+    }
 
     private val shelf = combine(library.packs, bookshelf.books, bookshelf.positions) { packs, books, positions ->
         Shelf(packs.associateBy { it.id }, books.associateBy { it.id }, positions)
@@ -51,8 +69,8 @@ class RailViewModel(
         sessions.railTabs(),
         shelf,
         currentTabId,
-        sessions.recentSearches(),
-    ) { tabs, shelf, current, searches ->
+        recent,
+    ) { tabs, shelf, current, recent ->
         RailUi(
             tabs = tabs.map { tab ->
                 if (BookIds.isBook(tab.packId)) {
@@ -78,7 +96,7 @@ class RailViewModel(
                     )
                 }
             },
-            recentSearches = searches,
+            recent = recent,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailUi(emptyList(), emptyList()))
 
@@ -95,4 +113,8 @@ class RailViewModel(
     }
 
     private fun initialOf(title: String): Char = title.firstOrNull { it.isLetterOrDigit() }?.uppercaseChar() ?: '#'
+
+    private companion object {
+        const val RECENT = 5
+    }
 }

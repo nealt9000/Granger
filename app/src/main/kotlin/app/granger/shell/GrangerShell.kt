@@ -68,7 +68,8 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * it; tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
  * content column, pushing it down; it's the post-v1 player's slot and is null for now. With [railOverContent] the
  * narrow rail is drawn over the content instead of beside it, so showing it doesn't narrow the content (the reader,
- * whose page would otherwise reflow on every middle tap).
+ * whose page would otherwise reflow on every middle tap). [showResearch] is false on phones below the ASK tier, which
+ * hides the Research tool.
  */
 @Composable
 fun GrangerShell(
@@ -83,6 +84,8 @@ fun GrangerShell(
     onCloseTab: (Long) -> Unit,
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
+    onRecentChat: (Long) -> Unit = {},
+    showResearch: Boolean = false,
     railOverContent: Boolean = false,
     miniPlayer: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
@@ -100,7 +103,7 @@ fun GrangerShell(
         val railBeside = railVisible && !railOverContent
         Row(Modifier.fillMaxSize()) {
             if (railBeside) {
-                NarrowRail(rail, selected, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch)
+                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat)
             }
             Column(
                 Modifier
@@ -114,7 +117,7 @@ fun GrangerShell(
             }
         }
         if (railVisible && railOverContent) {
-            NarrowRail(rail, selected, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch)
+            NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat)
         }
         if (edgeSwipeActive) {
             // Gesture navigation claims the left edge for Back; Android lets an app take back up to 200 dp of it.
@@ -139,11 +142,13 @@ fun GrangerShell(
             ExpandedRail(
                 rail = rail,
                 selected = selected,
+                showResearch = showResearch,
                 onTool = { onTool(it); onToggleExpanded() },
                 onTab = { onTab(it); onToggleExpanded() },
                 onCloseTab = onCloseTab,
                 onHistory = { onHistory(); onToggleExpanded() },
                 onRecentSearch = { onRecentSearch(it); onToggleExpanded() },
+                onRecentChat = { onRecentChat(it); onToggleExpanded() },
             )
         }
     }

@@ -36,6 +36,7 @@ import org.readium.r2.shared.util.resource.Resource
 import org.readium.r2.shared.util.mediatype.MediaType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import java.io.File
@@ -119,8 +120,11 @@ class FakeReadingSessions : ReadingSessions {
 
     override fun recentSearches(limit: Int): Flow<List<String>> = searches.map { it.take(limit) }
 
+    /** Timed rows for [recentSearchRows]; when empty, [searches] stand in with time 0. */
+    val searchRows = MutableStateFlow<List<RecentSearch>>(emptyList())
+
     override fun recentSearchRows(limit: Int): Flow<List<RecentSearch>> =
-        searches.map { list -> list.take(limit).map { RecentSearch(it, 0L) } }
+        combine(searches, searchRows) { list, rows -> rows.ifEmpty { list.map { RecentSearch(it, 0L) } }.take(limit) }
 
     override suspend fun openTab(packId: String, path: String, title: String): Long {
         val time = ++clock

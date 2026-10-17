@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 /**
  * One reading tab: the article it shows and the pages reached by following links from it. Writes (positions,
  * bookmarks, the tab's current page) go to [appScope] so they finish even when the user leaves the screen first.
+ * [fragment] scrolls the first page to that section (a cited passage's heading).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReaderViewModel(
@@ -30,6 +31,7 @@ class ReaderViewModel(
     private val sessions: ReadingSessions,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val fragment: String? = null,
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
@@ -56,7 +58,8 @@ class ReaderViewModel(
     private val page = MutableStateFlow<Page?>(null)
 
     /** The tab's pack, known once the tab is read; null before then or when the tab is gone. */
-    private var packId: String? = null
+    var packId: String? = null
+        private set
 
     init {
         viewModelScope.launch {
@@ -69,7 +72,7 @@ class ReaderViewModel(
                 ?.let { p -> withContext(io) { archive.resolvePath(p) } ?: p }
                 ?: return@launch fail(NO_MAIN_PAGE)
             packId = tab.packId
-            _state.update { it.copy(url = ZimUrls.forEntry(tab.packId, path)) }
+            _state.update { it.copy(url = ZimUrls.forEntry(tab.packId, path, fragment)) }
         }
         viewModelScope.launch {
             page.flatMapLatest { p ->

@@ -2,8 +2,8 @@ package app.granger
 
 /** Features whose code paths exist but stay hidden until they ship. */
 object Features {
-    /** Inquire & Abstract (the on-device model); Plan 8. */
-    const val INQUIRE = false
+    /** Research, the on-device librarian (Plan 8); also needs a phone of the ASK tier. */
+    const val RESEARCH = true
 
     /** The audio/video player and its mini-player; after v1. */
     const val PLAYER = false

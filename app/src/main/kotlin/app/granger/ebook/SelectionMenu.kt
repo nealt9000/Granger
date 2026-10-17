@@ -12,7 +12,7 @@ enum class SelectionAction(val label: String) {
     NOTE("Note"),
     DEFINE("Define"),
     SEARCH("Search"),
-    INQUIRE("Inquire & Abstract"),
+    RESEARCH("Research"),
 }
 
 /** A menu tap, with the menu to close once the screen has read the selection and acted. */
@@ -21,7 +21,7 @@ class SelectionRequest(val action: SelectionAction, val mode: ActionMode?)
 /**
  * What the selection menu reaches without touching any composition: the navigator's configuration (and so the menu)
  * outlives the screen that built it, through rotation. The current reader's view model sets [sink]; the app keeps
- * [dictionaryAvailable] current.
+ * [dictionaryAvailable] and [researchAvailable] current.
  */
 object SelectionBridge {
     /** Where taps go; the current reader's. A menu from an older reader still reaches the newest. */
@@ -29,6 +29,12 @@ object SelectionBridge {
 
     /** Whether Define can do anything now; read each time the menu is shown. */
     @Volatile var dictionaryAvailable: Boolean = false
+
+    /** Whether this phone can run Research (its tier is ASK or better); both readers' menus read it. */
+    @Volatile var researchAvailable: Boolean = false
+
+    /** Whether the selection menus offer Research now. */
+    val offersResearch: Boolean get() = Features.RESEARCH && researchAvailable
 
     fun dispatch(request: SelectionRequest) {
         sink?.invoke(request)
@@ -38,10 +44,10 @@ object SelectionBridge {
 /**
  * Replaces the system's selection menu in the navigator. A tap goes to [SelectionBridge]; the screen reads the
  * navigator's selection, acts, clears it and finishes the menu. Define is always added and shown or hidden each
- * time the menu is prepared. INQUIRE only with [Features.INQUIRE]. Holds nothing tied to an activity.
+ * time the menu is prepared, and so is Research ([SelectionBridge.offersResearch]). Holds nothing tied to an activity.
  */
 class SelectionMenu : ActionMode.Callback {
-    private val actions = SelectionAction.entries.filter { it != SelectionAction.INQUIRE || Features.INQUIRE }
+    private val actions = SelectionAction.entries.toList()
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         actions.forEachIndexed { i, action ->
@@ -53,6 +59,8 @@ class SelectionMenu : ActionMode.Callback {
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
         val define = actions.indexOf(SelectionAction.DEFINE)
         menu.findItem(MENU_ID_BASE + define)?.isVisible = SelectionBridge.dictionaryAvailable
+        val research = actions.indexOf(SelectionAction.RESEARCH)
+        menu.findItem(MENU_ID_BASE + research)?.isVisible = SelectionBridge.offersResearch
         return true
     }
 

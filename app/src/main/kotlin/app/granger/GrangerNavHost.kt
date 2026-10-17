@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -70,11 +71,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import app.granger.core.books.TextQuote
+import app.granger.core.ai.DeviceTier
+import app.granger.core.research.Passage
+import app.granger.core.research.SourceKind
+import app.granger.research.CitationTarget
+import app.granger.research.ResearchScreen
+import app.granger.research.ResearchViewModel
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
 @Serializable data class CollectionRoute(val collectionId: String)
-@Serializable data class ReaderRoute(val tabId: Long)
+/** An article; [fragment] scrolls its first page to that section (a cited passage's heading). */
+@Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null)
 
 /**
  * An e-book; [href] and [progression] ask the reader to open there (a search hit) instead of where it left off.
@@ -108,19 +116,19 @@ private fun NavBackStackEntry.readingTabId(): Long? = when {
 /**
  * The one way to open a reading tab: a book goes to [BookRoute], an article to [ReaderRoute]. A reader already on top
  * is replaced rather than stacked ([keepCurrent] stacks instead), and showing the same tab again does nothing unless
- * [at] asks for a place in it.
+ * [at] (a book) or [fragment] (an article's section) asks for a place in it.
  */
-fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: Boolean = false) {
+fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: Boolean = false, fragment: String? = null) {
     // Read the back stack now, not the composition's copy: opening a tab suspends, and a second tap
     // meanwhile must replace the reader the first one pushed.
     val top = currentBackStackEntry
     val showing = top?.readingTabId()
-    if (tab.id == showing && at == null) return
+    if (tab.id == showing && at == null && fragment == null) return
     val route: Any =
         if (BookIds.isBook(tab.packId)) {
             BookRoute(tab.id, at?.href, at?.progression, at?.quote?.highlight, at?.quote?.before, at?.quote?.after)
         } else {
-            ReaderRoute(tab.id)
+            ReaderRoute(tab.id, fragment)
         }
     navigate(route) {
         // Switching tabs replaces the reader instead of stacking one per tab.
@@ -136,6 +144,46 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable object SettingsRoute
 @Serializable object ReadinessRoute
 
+/**
+ * A Research chat: [chatId] opens a kept one, 0 starts a new one. [quote] is a reader's selection, from [quoteSourceId]
+ * (a pack or book id) titled [quoteTitle], at [quoteLocation] (an entry path or a book href) and [quoteProgression].
+ */
+@Serializable data class ResearchRoute(
+    val chatId: Long = 0,
+    val quote: String? = null,
+    val quoteSourceId: String? = null,
+    val quoteTitle: String? = null,
+    val quoteLocation: String? = null,
+    val quoteProgression: Double? = null,
+) {
+    /** The selection as the passage the first question is asked about. */
+    fun quotePassage(): Passage? = quote?.let {
+        Passage(
+            kind = SourceKind.SELECTION,
+            sourceId = quoteSourceId.orEmpty(),
+            sourceTitle = quoteTitle.orEmpty(),
+            location = quoteLocation.orEmpty(),
+            progression = quoteProgression ?: 0.0,
+            text = it,
+        )
+    }
+
+    companion object {
+        /** Longer selections are cut before they go into the route. */
+        const val MAX_QUOTE = 2_000
+
+        /** Research about a selection in a reader. */
+        fun about(text: String, sourceId: String, title: String, location: String, progression: Double? = null) =
+            ResearchRoute(
+                quote = text.take(MAX_QUOTE),
+                quoteSourceId = sourceId,
+                quoteTitle = title,
+                quoteLocation = location,
+                quoteProgression = progression,
+            )
+    }
+}
+
 /** The tab the reader shows; lives as long as the activity's view models so the rail's flow survives rotation. */
 private class CurrentTab : ViewModel() {
     val id = MutableStateFlow<Long?>(null)
@@ -149,7 +197,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     var skipTransition by remember { mutableStateOf(false) }
     var showChromeRequest by rememberSaveable { mutableStateOf(0) }
     val currentTab = viewModel { CurrentTab() }
-    val railViewModel = viewModel { RailViewModel(container.sessions, container.library, container.bookshelf, currentTab.id) }
+    val railViewModel = viewModel {
+        RailViewModel(container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id)
+    }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
 
     val entry by nav.currentBackStackEntryAsState()
@@ -214,9 +264,19 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
             destination.hasRoute<ArchiveRoute>() -> RailTool.LIBRARY
         destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
+        destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
         destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
             destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
         else -> null
+    }
+
+    // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
+    val showResearch = container.deviceTier >= DeviceTier.ASK
+    SideEffect { SelectionBridge.researchAvailable = showResearch }
+    /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
+    fun openResearch(route: ResearchRoute) {
+        val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
+        nav.navigate(route) { if (researchOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
     GrangerShell(
@@ -234,7 +294,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
-                RailTool.INQUIRE, RailTool.PLAYER -> Unit // Hidden behind Features flags.
+                RailTool.RESEARCH -> nav.navigate(ResearchRoute()) { launchSingleTop = true }
+                RailTool.PLAYER -> Unit // Hidden behind Features.PLAYER.
             }
         },
         onTab = ::showTab,
@@ -245,6 +306,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             val searchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<SearchRoute>() == true
             nav.navigate(SearchRoute(query)) { if (searchOnTop) popUpTo<SearchRoute> { inclusive = true } }
         },
+        onRecentChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+        showResearch = showResearch,
         // Over the page, so a middle tap doesn't narrow it and reflow the text.
         railOverContent = readerTabId != null,
     ) {
@@ -301,13 +364,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 )
             }
             composable<ReaderRoute> { backStackEntry ->
-                val tabId = backStackEntry.toRoute<ReaderRoute>().tabId
+                val route = backStackEntry.toRoute<ReaderRoute>()
                 ReaderScreen(
-                    viewModel = viewModel { ReaderViewModel(tabId, container.library, container.sessions, container.appScope) },
+                    viewModel = viewModel {
+                        ReaderViewModel(route.tabId, container.library, container.sessions, container.appScope, fragment = route.fragment)
+                    },
                     resolver = container.resolver,
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
                     showChromeRequest = showChromeRequest,
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
+                    onResearch = { text, packId, path, title -> nav.navigate(ResearchRoute.about(text, packId, title, path)) },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -326,6 +392,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     showChromeRequest = showChromeRequest,
                     dictionary = dictionary,
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
+                    onResearch = { text, bookId, title, href, progression ->
+                        nav.navigate(ResearchRoute.about(text, bookId, title, href, progression))
+                    },
                     onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
                 )
@@ -338,6 +407,35 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onOpenBook = { tabId, at ->
                         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it, at) } }
                     },
+                    onBack = { nav.popBackStack() },
+                )
+            }
+            composable<ResearchRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<ResearchRoute>()
+                ResearchScreen(
+                    viewModel = viewModel {
+                        ResearchViewModel(
+                            route.chatId.takeIf { it != 0L }, route.quotePassage(),
+                            container.researchChats, container.research, container.modelManager, container.sessions,
+                            container.library, container.bookshelf, container.appScope,
+                        )
+                    },
+                    focusInput = route.quote != null,
+                    onOpenCitation = { target ->
+                        // Pushed over the chat (Research isn't a reader), so Back returns to it.
+                        scope.launch {
+                            when (target) {
+                                is CitationTarget.Article -> container.sessions.tab(target.tabId)?.let { nav.showTab(it, fragment = target.fragment) }
+                                is CitationTarget.Book -> container.sessions.tab(target.tabId)?.let { nav.showTab(it, target.at) }
+                                CitationTarget.Gone -> Unit
+                            }
+                        }
+                    },
+                    onSearch = { keywords -> nav.navigate(SearchRoute(keywords)) },
+                    onGetModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
+                    onReadiness = { nav.navigate(ReadinessRoute) },
+                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+                    onNewChat = { openResearch(ResearchRoute()) },
                     onBack = { nav.popBackStack() },
                 )
             }

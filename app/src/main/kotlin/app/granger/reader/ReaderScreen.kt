@@ -74,7 +74,7 @@ private data class FindMatches(val active: Int, val count: Int, val done: Boolea
 /**
  * The web-style reader, full screen. A middle tap on the page shows or hides the chrome: the top bar here and the
  * shell's rail (through [onChromeVisibleChange]), with the system bars hidden alongside. Selecting text offers
- * Search ([onSearchText]); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome; the top bar offers find in page and the bookmark star.
+ * Search ([onSearchText]) and Research ([onResearch], with the article it was selected in); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome; the top bar offers find in page and the bookmark star.
  */
 @Composable
 fun ReaderScreen(
@@ -83,6 +83,7 @@ fun ReaderScreen(
     onChromeVisibleChange: (Boolean) -> Unit,
     showChromeRequest: Int = 0,
     onSearchText: (String) -> Unit,
+    onResearch: (text: String, packId: String, path: String, title: String) -> Unit = { _, _, _, _ -> },
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -91,6 +92,7 @@ fun ReaderScreen(
     var canGoBack by remember { mutableStateOf(false) }
     var matches by remember { mutableStateOf<FindMatches?>(null) }
     val searchText by rememberUpdatedState(onSearchText)
+    val research by rememberUpdatedState(onResearch)
 
     fun saveScroll() {
         webView?.let { viewModel.savePosition(it.url, it.scrollFraction()) }
@@ -152,7 +154,11 @@ fun ReaderScreen(
                         onSelectionAction = { action, text ->
                             when (action) {
                                 SelectionAction.SEARCH -> searchText(text.take(200))
-                                SelectionAction.INQUIRE -> Unit // Plan 8; hidden behind Features.INQUIRE.
+                                SelectionAction.RESEARCH -> {
+                                    val page = viewModel.state.value.page
+                                    val pack = viewModel.packId
+                                    if (page != null && pack != null) research(text, pack, page.path, page.title)
+                                }
                             }
                         },
                     ).also {

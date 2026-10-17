@@ -51,6 +51,7 @@ class SelectionMenuTest {
     @After fun reset() {
         SelectionBridge.sink = null
         SelectionBridge.dictionaryAvailable = false
+        SelectionBridge.researchAvailable = false
     }
 
     private fun shown(): Menu {
@@ -84,6 +85,20 @@ class SelectionMenuTest {
         SelectionBridge.dictionaryAvailable = true
         callback.onPrepareActionMode(mode, menu)
         assertThat(menu.visibleTitles()).contains("Define")
+    }
+
+    @Test fun researchActionShownOnlyWhenAvailable() {
+        SelectionBridge.researchAvailable = false
+        assertThat(shown().visibleTitles()).doesNotContain("Research")
+        SelectionBridge.researchAvailable = true
+        assertThat(shown().visibleTitles()).containsExactly("Copy", "Highlight", "Note", "Search", "Research").inOrder()
+    }
+
+    @Test fun noInquireLabelLeft() {
+        val labels = SelectionAction.entries.map { it.label } +
+            app.granger.reader.SelectionAction.entries.map { it.label } +
+            app.granger.shell.RailTool.entries.map { it.label }
+        assertThat(labels.filter { "Inquire" in it }).isEmpty()
     }
 
     @Test fun tapsReachWhicheverSinkIsCurrent() {

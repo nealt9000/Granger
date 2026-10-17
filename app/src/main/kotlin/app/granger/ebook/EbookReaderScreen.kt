@@ -68,6 +68,8 @@ fun EbookReaderScreen(
     /** How Define works. */
     dictionary: DictionaryChoice = DictionaryChoice.None,
     onSearchText: (String) -> Unit = {},
+    /** Research about the selection, with the book and the selection's href and progression in it. */
+    onResearch: (text: String, bookId: String, title: String, href: String, progression: Double) -> Unit = { _, _, _, _, _ -> },
     /** Opens the word's Wiktionary entry in [packId]; false when it has none. */
     onLookUp: suspend (packId: String, word: String) -> Boolean = { _, _ -> false },
     onBack: () -> Unit,
@@ -80,6 +82,7 @@ fun EbookReaderScreen(
     val snackbar = remember { SnackbarHostState() }
     val currentDictionary by rememberUpdatedState(dictionary)
     val searchText by rememberUpdatedState(onSearchText)
+    val research by rememberUpdatedState(onResearch)
     val lookUp by rememberUpdatedState(onLookUp)
     // Holds nothing of this composition: the menu reaches the view model through SelectionBridge, so it still
     // works inside a navigator that rotation restored.
@@ -119,7 +122,12 @@ fun EbookReaderScreen(
                         SelectionAction.NOTE -> viewModel.note(selection.locator, text)
                         SelectionAction.DEFINE -> message = define(appContext, currentDictionary, text, lookUp)
                         SelectionAction.SEARCH -> searchText(text.take(200))
-                        SelectionAction.INQUIRE -> Unit
+                        SelectionAction.RESEARCH -> viewModel.bookId?.let { id ->
+                            val at = selection.locator
+                            // A decoded path, like the book index's hrefs that a cited passage opens at.
+                            val href = at.href.path ?: at.href.toString()
+                            research(text, id, state.title, href, at.locations.progression ?: 0.0)
+                        }
                     }
                 }
             } catch (e: CancellationException) {

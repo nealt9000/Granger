@@ -12,14 +12,14 @@ import android.webkit.WebView
 import androidx.compose.ui.graphics.toArgb
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
-import app.granger.Features
+import app.granger.ebook.SelectionBridge
 import app.granger.theme.GrangerColors
 import org.json.JSONTokener
 
 /** What the text-selection menu offers besides the system's own Copy. */
 enum class SelectionAction(val label: String) {
     SEARCH("Search"),
-    INQUIRE("Inquire & Abstract"),
+    RESEARCH("Research"),
 }
 
 /**
@@ -77,7 +77,7 @@ class ReaderWebView(
 
     /** The system's selection menu (Copy, Select all…) plus Granger's actions, ahead of them. */
     private inner class SelectionCallback(private val system: ActionMode.Callback) : ActionMode.Callback2() {
-        private val actions = SelectionAction.entries.filter { it != SelectionAction.INQUIRE || Features.INQUIRE }
+        private val actions = SelectionAction.entries.filter { it != SelectionAction.RESEARCH || SelectionBridge.offersResearch }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val created = system.onCreateActionMode(mode, menu)

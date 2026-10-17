@@ -37,6 +37,14 @@ class ReaderViewModelTest {
         assertThat(reader("C++").state.value.url).isEqualTo(url("C++"))
     }
 
+    @Test fun fragmentGoesIntoTheFirstUrl() = runTest(main.dispatcher) {
+        sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
+        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, fragment = "History")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.url).isEqualTo(url("Photosynthesis", "History"))
+        assertThat(vm.state.value.url).endsWith("#History")
+    }
+
     @Test fun missingTabShowsTabGone() = runTest(main.dispatcher) {
         val vm = ReaderViewModel(42, library, sessions, this, main.dispatcher)
         testScheduler.advanceUntilIdle()

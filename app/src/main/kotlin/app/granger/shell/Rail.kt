@@ -27,7 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -64,7 +63,7 @@ import app.granger.theme.GrangerColors
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
 enum class RailTool(val label: String, val shown: Boolean) {
     SEARCH("Search", true),
-    INQUIRE("Inquire & Abstract", Features.INQUIRE),
+    RESEARCH("Research", Features.RESEARCH),
     LIBRARY("Library", true),
     PLAYER("Player", Features.PLAYER),
     SETTINGS("Settings", true),
@@ -73,29 +72,33 @@ enum class RailTool(val label: String, val shown: Boolean) {
 internal val NarrowRailWidth = 56.dp
 internal val ExpandedRailWidth = 200.dp
 
-private val TopTools = RailTool.entries.filter { it.shown && it != RailTool.SETTINGS }
+/** The tools at the top; Research also needs a phone that can run it ([showResearch]). */
+private fun topTools(showResearch: Boolean) =
+    RailTool.entries.filter { it.shown && it != RailTool.SETTINGS && (it != RailTool.RESEARCH || showResearch) }
 private val RailInsets @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
 
 @Composable
 private fun RailTool.painter(): Painter = when (this) {
     RailTool.SEARCH -> rememberVectorPainter(Icons.Filled.Search)
-    RailTool.INQUIRE -> rememberVectorPainter(Icons.Filled.Create)
+    RailTool.RESEARCH -> painterResource(R.drawable.ic_research)
     RailTool.LIBRARY -> painterResource(R.drawable.ic_library)
     RailTool.PLAYER -> rememberVectorPainter(Icons.Filled.PlayArrow)
     RailTool.SETTINGS -> rememberVectorPainter(Icons.Filled.Settings)
 }
 
-/** The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent-search icons, Settings. */
+/** The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent search and chat icons, Settings. */
 @Composable
 internal fun NarrowRail(
     rail: RailUi,
     selected: RailTool?,
+    showResearch: Boolean,
     onExpand: () -> Unit,
     onTool: (RailTool) -> Unit,
     onTab: (Long) -> Unit,
     onCloseTab: (Long) -> Unit,
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
+    onRecentChat: (Long) -> Unit,
 ) {
     Column(
         Modifier
@@ -109,7 +112,7 @@ internal fun NarrowRail(
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        TopTools.forEach { tool -> ToolIcon(tool, selected == tool) { onTool(tool) } }
+        topTools(showResearch).forEach { tool -> ToolIcon(tool, selected == tool) { onTool(tool) } }
         RailDivider(Modifier.width(32.dp))
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()),
@@ -120,15 +123,25 @@ internal fun NarrowRail(
             IconButton(onClick = onHistory) {
                 Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = GrangerColors.OnSurfaceVariant)
             }
-            if (rail.recentSearches.isNotEmpty()) RailDivider(Modifier.width(32.dp))
-            rail.recentSearches.forEach { query ->
-                IconButton(onClick = { onRecentSearch(query) }) {
-                    Icon(
-                        Icons.Filled.Search,
-                        contentDescription = "Recent search: $query",
-                        tint = GrangerColors.Outline,
-                        modifier = Modifier.size(18.dp),
-                    )
+            if (rail.recent.isNotEmpty()) RailDivider(Modifier.width(32.dp))
+            rail.recent.forEach { item ->
+                when (item) {
+                    is RecentItem.Search -> IconButton(onClick = { onRecentSearch(item.query) }) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = "Recent search: ${item.query}",
+                            tint = GrangerColors.Outline,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                    is RecentItem.Chat -> IconButton(onClick = { onRecentChat(item.chatId) }) {
+                        Icon(
+                            painterResource(R.drawable.ic_research),
+                            contentDescription = "Research chat: ${item.title}",
+                            tint = GrangerColors.Outline,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
                 }
             }
         }
@@ -141,11 +154,13 @@ internal fun NarrowRail(
 internal fun ExpandedRail(
     rail: RailUi,
     selected: RailTool?,
+    showResearch: Boolean,
     onTool: (RailTool) -> Unit,
     onTab: (Long) -> Unit,
     onCloseTab: (Long) -> Unit,
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
+    onRecentChat: (Long) -> Unit,
 ) {
     Column(
         Modifier
@@ -157,16 +172,23 @@ internal fun ExpandedRail(
             .width(ExpandedRailWidth)
             .padding(vertical = 8.dp),
     ) {
-        TopTools.forEach { tool -> LabelledRow(tool.painter(), tool.label, selected == tool) { onTool(tool) } }
+        topTools(showResearch).forEach { tool -> LabelledRow(tool.painter(), tool.label, selected == tool) { onTool(tool) } }
         RailDivider(Modifier.fillMaxWidth().padding(horizontal = 12.dp))
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             SectionLabel("Bookmarks")
             rail.tabs.forEach { tab -> TabListRow(tab, onTab, onCloseTab) }
             LabelledRow(painterResource(R.drawable.ic_history), "History", selected = false, onClick = onHistory)
-            if (rail.recentSearches.isNotEmpty()) {
+            if (rail.recent.isNotEmpty()) {
                 SectionLabel("Recent")
-                rail.recentSearches.forEach { query ->
-                    LabelledRow(rememberVectorPainter(Icons.Filled.Search), query, selected = false) { onRecentSearch(query) }
+                rail.recent.forEach { item ->
+                    when (item) {
+                        is RecentItem.Search -> LabelledRow(rememberVectorPainter(Icons.Filled.Search), item.query, selected = false) {
+                            onRecentSearch(item.query)
+                        }
+                        is RecentItem.Chat -> LabelledRow(painterResource(R.drawable.ic_research), item.title, selected = false) {
+                            onRecentChat(item.chatId)
+                        }
+                    }
                 }
             }
         }
