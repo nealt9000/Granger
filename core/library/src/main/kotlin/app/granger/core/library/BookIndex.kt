@@ -6,6 +6,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.Snippets
+import app.granger.core.books.TextQuote
 import app.granger.core.books.XhtmlText
 import java.io.File
 import java.io.IOException
@@ -25,6 +26,8 @@ data class BookHit(
     val href: String,
     val progression: Double,
     val snippet: String,
+    /** The match itself, for the reader to find and mark on the page; null if the text couldn't be read. */
+    val quote: TextQuote? = null,
 )
 
 /**
@@ -87,6 +90,7 @@ class BookIndex(
                         href = chunk.href,
                         progression = chunk.progression,
                         snippet = texts[chunk.id]?.let { Snippets.around(it, snippetQuery) }.orEmpty(),
+                        quote = texts[chunk.id]?.let { Snippets.quote(it, snippetQuery) },
                     )
                 }
             }

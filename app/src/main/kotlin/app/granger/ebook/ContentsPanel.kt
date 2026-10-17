@@ -7,12 +7,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
@@ -51,6 +56,14 @@ internal fun markPercent(mark: BookMark): Int? = try {
     null
 }
 
+/**
+ * What a side sheet's content keeps clear of: the status bar (its tab row or search box would sit under it and lose
+ * every tap), the right-hand cutout or navigation bar in landscape, and the navigation bar below. The sheet's
+ * surface still runs edge to edge behind them.
+ */
+internal val SidePanelInsets @Composable get() =
+    WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.End + WindowInsetsSides.Bottom)
+
 /** A side sheet from the right with Contents, Bookmarks and Highlights; a tap on a row navigates and closes it. */
 @Composable
 fun ContentsPanel(
@@ -67,7 +80,7 @@ fun ContentsPanel(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
             color = MaterialTheme.colorScheme.surface,
         ) {
-            Column {
+            Column(Modifier.windowInsetsPadding(SidePanelInsets)) {
                 TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface) {
                     listOf("Contents", "Bookmarks", "Highlights").forEachIndexed { i, label ->
                         Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, maxLines = 1) })

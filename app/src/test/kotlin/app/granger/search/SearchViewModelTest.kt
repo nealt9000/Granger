@@ -3,6 +3,7 @@ package app.granger.search
 import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.BookTarget
+import app.granger.core.books.TextQuote
 import app.granger.core.library.BookHit
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.SearchHit
@@ -24,7 +25,7 @@ class SearchViewModelTest {
 
         override suspend fun titles(query: String): List<SearchHit> { titleQueries += query; return titles }
         override suspend fun fullText(query: String) = fullText
-        var bookHits = listOf(BookHit("import:abc", "Emma", "Jane Austen", "OEBPS/ch2.xhtml", 0.25, "a <b>photo</b> of"))
+        var bookHits = listOf(BookHit("import:abc", "Emma", "Jane Austen", "OEBPS/ch2.xhtml", 0.25, "a <b>photo</b> of", TextQuote("a ", "photo", " of")))
         override suspend fun books(query: String) = bookHits
     }
 
@@ -136,6 +137,6 @@ class SearchViewModelTest {
         val tab = sessions.tabs.value.single()
         assertThat(tab.id).isEqualTo(id)
         assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("import:abc", "", "Emma").inOrder()
-        assertThat(target).isEqualTo(BookTarget("OEBPS/ch2.xhtml", 0.25))
+        assertThat(target).isEqualTo(BookTarget("OEBPS/ch2.xhtml", 0.25, TextQuote("a ", "photo", " of")))
     }
 }

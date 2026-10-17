@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
@@ -94,8 +95,9 @@ fun EbookReaderScreen(
     // Backgrounded, or the screen left: write the place now rather than after the debounce.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
 
-    LaunchedEffect(navigator) {
-        navigator?.currentLocator?.collect(viewModel::onLocator)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(navigator, lifecycle) {
+        navigator?.currentLocator?.collect { viewModel.onLocator(it, onScreen = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) }
     }
     LaunchedEffect(navigator) {
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }

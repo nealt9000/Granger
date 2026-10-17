@@ -85,7 +85,7 @@ class SearchViewModel(
     /** Remembers the current query, opens (or reuses) the book's tab, and returns it with the place to open at. */
     suspend fun openBook(hit: BookHit): Pair<Long, BookTarget> {
         sessions.recordSearch(query.value)
-        return sessions.openTab(hit.bookId, "", hit.bookTitle) to BookTarget(hit.href, hit.progression)
+        return sessions.openTab(hit.bookId, "", hit.bookTitle) to BookTarget(hit.href, hit.progression, hit.quote)
     }
 
     companion object {

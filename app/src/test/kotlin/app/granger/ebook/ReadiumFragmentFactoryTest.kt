@@ -33,18 +33,18 @@ class ReadiumFragmentFactoryTest {
         OpenBooks.navigatorFragments = null
     }
 
-    @Test fun nothingOpenGivesABlankFragment() {
+    @Test fun nothingOpenGivesAStandIn() {
         OpenBooks.navigatorFragments = factory to builds // Left from a reader whose book is gone.
         val fragment = ReadiumFragmentFactory().instantiate(loader, navigatorClass)
-        assertThat(fragment.javaClass).isEqualTo(Fragment::class.java)
+        assertThat(fragment).isInstanceOf(NavigatorStandIn::class.java)
     }
 
-    @Test fun fragmentsPairedWithAnotherBookGiveABlankFragment() {
+    @Test fun fragmentsPairedWithAnotherBookGiveAStandIn() {
         OpenBooks.current = "b" to factory
         OpenBooks.navigatorFragments = EpubNavigatorFactory(testPublication()) to builds
-        assertThat(ReadiumFragmentFactory().instantiate(loader, navigatorClass).javaClass).isEqualTo(Fragment::class.java)
+        assertThat(ReadiumFragmentFactory().instantiate(loader, navigatorClass)).isInstanceOf(NavigatorStandIn::class.java)
         OpenBooks.navigatorFragments = null
-        assertThat(ReadiumFragmentFactory().instantiate(loader, navigatorClass).javaClass).isEqualTo(Fragment::class.java)
+        assertThat(ReadiumFragmentFactory().instantiate(loader, navigatorClass)).isInstanceOf(NavigatorStandIn::class.java)
     }
 
     @Test fun matchingPairBuildsTheNavigator() {

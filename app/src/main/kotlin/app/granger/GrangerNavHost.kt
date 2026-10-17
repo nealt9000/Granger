@@ -66,17 +66,33 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import app.granger.core.books.TextQuote
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
 @Serializable data class CollectionRoute(val collectionId: String)
 @Serializable data class ReaderRoute(val tabId: Long)
 
-/** An e-book; [href] and [progression] ask the reader to open there (a search hit) instead of where it left off. */
-@Serializable data class BookRoute(val tabId: Long, val href: String? = null, val progression: Double? = null)
+/**
+ * An e-book; [href] and [progression] ask the reader to open there (a search hit) instead of where it left off.
+ * [highlight], with [before] and [after] around it, is the hit's text, which the reader finds on the page and marks.
+ */
+@Serializable data class BookRoute(
+    val tabId: Long,
+    val href: String? = null,
+    val progression: Double? = null,
+    val highlight: String? = null,
+    val before: String? = null,
+    val after: String? = null,
+) {
+    /** The place this route asks for, if any. */
+    fun target(): BookTarget? = href?.let { h ->
+        BookTarget(h, progression ?: 0.0, highlight?.takeIf { it.isNotBlank() }?.let { TextQuote(before.orEmpty(), it, after.orEmpty()) })
+    }
+}
 
-/** A place in a book to open at. */
-data class BookTarget(val href: String, val progression: Double)
+/** A place in a book to open at; [quote] is the text there to find and mark, which beats [progression] when found. */
+data class BookTarget(val href: String, val progression: Double, val quote: TextQuote? = null)
 
 private fun NavDestination.isReading() = hasRoute<ReaderRoute>() || hasRoute<BookRoute>()
 
@@ -98,7 +114,11 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
     val showing = top?.readingTabId()
     if (tab.id == showing && at == null) return
     val route: Any =
-        if (BookIds.isBook(tab.packId)) BookRoute(tab.id, at?.href, at?.progression) else ReaderRoute(tab.id)
+        if (BookIds.isBook(tab.packId)) {
+            BookRoute(tab.id, at?.href, at?.progression, at?.quote?.highlight, at?.quote?.before, at?.quote?.after)
+        } else {
+            ReaderRoute(tab.id)
+        }
     navigate(route) {
         // Switching tabs replaces the reader instead of stacking one per tab.
         // keepCurrent stacks it on the reader instead (a dictionary entry over the book), so Back returns to the page.
@@ -282,7 +302,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             }
             composable<BookRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<BookRoute>()
-                val target = route.href?.let { BookTarget(it, route.progression ?: 0.0) }
+                val target = route.target()
                 EbookReaderScreen(
                     viewModel = viewModel {
                         EbookReaderViewModel(

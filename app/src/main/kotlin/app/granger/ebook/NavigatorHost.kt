@@ -29,7 +29,7 @@ private fun navigatorTag(bookId: String) = "readium:$bookId"
 /**
  * Readium's navigator fragment in a [FragmentContainerView]. The fragment is committed only when the container
  * doesn't already hold a live navigator for [bookId], so after rotation the one the system restored is reused.
- * A blank or foreign fragment there (restored after process death, or another book's) is replaced. Leaving the
+ * A stand-in or foreign fragment there (a [NavigatorStandIn] the activity didn't drop, or another book's) is replaced. Leaving the
  * screen removes the fragment; rotating keeps it. [initial] is where a new navigator opens: the reader passes the
  * latest place, so a navigator rebuilt after rotation opens there too. [onReady] gets every navigator shown.
  */

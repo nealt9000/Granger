@@ -11,6 +11,7 @@ import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.TrackingContainer
 import app.granger.book
+import app.granger.core.books.TextQuote
 import app.granger.core.library.BookMark
 import app.granger.core.library.BookPosition
 import app.granger.core.library.MarkKind
@@ -158,6 +159,33 @@ class EbookReaderViewModelTest {
         assertThat(saved.chapterTitle).isEqualTo("Two")
         assertThat(Locator.fromJSON(JSONObject(saved.locatorJson))!!.href).isEqualTo(Url("c002.xhtml"))
         assertThat(vm.state.value.locator!!.href).isEqualTo(Url("c002.xhtml"))
+    }
+
+    @Test fun placesReportedOffScreenAreIgnored() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.onLocator(locator("c002.xhtml", 0.5, 0.4))
+        advanceTimeBy(1_100)
+        runCurrent()
+        // Leaving the reader: the outgoing navigator reports the page before; that mustn't replace the place.
+        vm.onLocator(locator("c002.xhtml", 0.33, 0.38), onScreen = false)
+        vm.flush()
+        advanceTimeBy(2_000)
+        runCurrent()
+        assertThat(bookshelf.positionMap.value["b"]!!.totalProgression).isEqualTo(0.4)
+        assertThat(vm.state.value.locator!!.locations.progression).isEqualTo(0.5)
+    }
+
+    @Test fun searchHitWithTextIsMarkedWhereTheReaderLands() = runTest(main.dispatcher) {
+        val vm = reader(target = BookTarget("c003.xhtml", 0.5, TextQuote("The ", "quality of mercy", " is")))
+        val hit = vm.state.value.searchHit!!
+        assertThat(hit).isSameInstanceAs(vm.state.value.initial)
+        assertThat(hit.text.highlight).isEqualTo("quality of mercy")
+    }
+
+    @Test fun usedTargetIsNotMarkedAgainAfterProcessDeath() = runTest(main.dispatcher) {
+        val restored = SavedStateHandle(mapOf(EbookReaderViewModel.TARGET_CONSUMED to true))
+        val vm = reader(target = BookTarget("c003.xhtml", 0.5, TextQuote("", "mercy", "")), savedState = restored)
+        assertThat(vm.state.value.searchHit).isNull()
     }
 
     @Test fun flushSavesAtOnce() = runTest(main.dispatcher) {

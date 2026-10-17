@@ -174,7 +174,11 @@ class EbookReaderViewModel(
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
             appScope.launch { sessions.showInTab(tabId, book.id, "", book.title) }
-            _state.update { it.copy(loading = false, publication = opened, initial = initial, toc = flatten(opened.tableOfContents, 0)).derived() }
+            // A search hit's text is marked where the reader lands, as an in-book search hit is.
+            val hit = initial?.takeIf { !targetUsed && target?.quote != null && it.text.highlight != null }
+            _state.update {
+                it.copy(loading = false, publication = opened, initial = initial, searchHit = hit, toc = flatten(opened.tableOfContents, 0)).derived()
+            }
             savedState[TARGET_CONSUMED] = true
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
@@ -199,8 +203,13 @@ class EbookReaderViewModel(
         _state.update { it.copy(loading = false, error = message, chromeVisible = true) }
     }
 
-    /** The navigator moved; the place is saved once it has stayed put for a second. */
-    fun onLocator(locator: Locator) {
+    /**
+     * The navigator moved; the place is saved once it has stayed put for a second. Ignored when the screen isn't
+     * [onScreen] (below STARTED): a navigator on its way out (Back, Home, rotation) re-lays out its page as its view
+     * goes, and reports a place up to a page before the one the reader left.
+     */
+    fun onLocator(locator: Locator, onScreen: Boolean = true) {
+        if (!onScreen) return
         _state.update { it.copy(locator = locator).derived() }
         val id = bookId ?: return
         unsaved = locator

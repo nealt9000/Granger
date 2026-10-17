@@ -99,12 +99,13 @@ internal fun NarrowRail(
 ) {
     Column(
         Modifier
-            .width(NarrowRailWidth)
             .fillMaxHeight()
             .background(GrangerColors.Surface)
             // Tapping the rail's background opens the expanded rail.
             .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onExpand)
             .windowInsetsPadding(RailInsets)
+            // After the insets: in landscape the cutout widens the rail rather than squeezing its 56 dp.
+            .width(NarrowRailWidth)
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -148,12 +149,12 @@ internal fun ExpandedRail(
 ) {
     Column(
         Modifier
-            .width(ExpandedRailWidth)
             .fillMaxHeight()
             .background(GrangerColors.SurfaceVariant)
             // Swallow taps on the panel so they don't reach the scrim beneath it.
             .clickable(remember { MutableInteractionSource() }, indication = null) {}
             .windowInsetsPadding(RailInsets)
+            .width(ExpandedRailWidth)
             .padding(vertical = 8.dp),
     ) {
         TopTools.forEach { tool -> LabelledRow(tool.painter(), tool.label, selected == tool) { onTool(tool) } }
