@@ -26,4 +26,17 @@ class TextDecodingTest {
     @Test fun windows1252CurlyQuotes() {
         assertThat(TextDecoding.decode(byteArrayOf(0x93.toByte(), 0x94.toByte()))).isEqualTo("“”")
     }
+
+    @Test fun emptyInput() {
+        assertThat(TextDecoding.decode(ByteArray(0))).isEmpty()
+    }
+
+    @Test fun invalidUtf8MixedWithAsciiFallsBack() {
+        assertThat(TextDecoding.decode(byteArrayOf('a'.code.toByte(), 0xE9.toByte(), 'b'.code.toByte()))).isEqualTo("a\u00E9b")
+    }
+
+    @Test fun invalidUtf8AfterBomFallsBack() {
+        val bytes = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte(), 'a'.code.toByte(), 0xE9.toByte())
+        assertThat(TextDecoding.decode(bytes)).isEqualTo("a\u00E9")
+    }
 }

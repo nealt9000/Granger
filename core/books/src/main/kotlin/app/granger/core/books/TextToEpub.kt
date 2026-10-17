@@ -25,9 +25,10 @@ object TextToEpub {
     private val BLANK_LINES = Regex("(?:\\r?\\n[ \\t]*){2,}")
 
     fun convert(text: String, title: String, markdown: Boolean, out: OutputStream, maxChapterChars: Int = 100_000) {
-        val chapters = (if (markdown) markdownChapters(text) else txtChapters(text, maxChapterChars))
+        val clean = stripInvalidXml(text)
+        val chapters = (if (markdown) markdownChapters(clean) else txtChapters(clean, maxChapterChars))
             .ifEmpty { listOf(Chapter("Part 1", "")) }
-        write(chapters, title, text, out)
+        write(chapters, stripInvalidXml(title), clean, out)
     }
 
     // ---- TXT ----
@@ -74,21 +75,6 @@ object TextToEpub {
         return sb.toString()
     }
 
-    private fun cutAtSpaces(text: String, max: Int): List<String> {
-        if (text.length <= max) return listOf(text)
-        val out = ArrayList<String>()
-        var start = 0
-        while (text.length - start > max) {
-            var end = text.lastIndexOf(' ', start + max)
-            if (end <= start) end = start + max
-            out.add(text.substring(start, end).trim())
-            start = end
-            while (start < text.length && text[start] == ' ') start++
-        }
-        if (start < text.length) out.add(text.substring(start))
-        return out.filter { it.isNotEmpty() }
-    }
-
     // ---- Markdown ----
 
     private fun markdownChapters(text: String): List<Chapter> {
@@ -104,7 +90,7 @@ object TextToEpub {
         }
         val level = counts.filterValues { it >= 2 }.keys.minOrNull()
 
-        val html = HtmlRenderer.builder().escapeHtml(true).build().render(doc)
+        val html = HtmlRenderer.builder().escapeHtml(true).sanitizeUrls(true).build().render(doc)
         val nodes = Jsoup.parseBodyFragment(html).body().children()
         val result = ArrayList<Chapter>()
         var title: String? = null
@@ -176,16 +162,4 @@ object TextToEpub {
     private fun page(title: String, body: String) =
         """<?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en"><head><meta charset="utf-8"/><title>${esc(title)}</title></head><body>$body</body></html>"""
-
-    private fun esc(s: String): String {
-        val sb = StringBuilder(s.length + 16)
-        for (c in s) when (c) {
-            '&' -> sb.append("&amp;")
-            '<' -> sb.append("&lt;")
-            '>' -> sb.append("&gt;")
-            '"' -> sb.append("&quot;")
-            else -> sb.append(c)
-        }
-        return sb.toString()
-    }
 }

@@ -50,4 +50,33 @@ class XhtmlTextTest {
         assertThat(cs.map { it.href }).containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml").inOrder()
         assertThat(cs.map { it.text }).containsExactly("one", "two").inOrder()
     }
+
+    @Test fun missingHrefGivesEmpty() {
+        val file = TestEpubs.build(tmp.root)
+        assertThat(ZipFile(file).use { XhtmlText.chunks(it, "OEBPS/nope.xhtml") }).isEmpty()
+    }
+
+    @Test fun corruptChapterGivesEmptyAndAllSkipsIt() {
+        val file = TestEpubs.build(tmp.root, chapters = listOf("<p>" + "good ".repeat(50) + "</p>", "<p>" + "bad ".repeat(50) + "</p>"))
+        TestEpubs.corrupt(file, "OEBPS/c001.xhtml")
+        assertThat(ZipFile(file).use { XhtmlText.chunks(it, "OEBPS/c001.xhtml") }).isEmpty()
+        val cs = XhtmlText.all(file, listOf("OEBPS/c001.xhtml", "OEBPS/c002.xhtml", "OEBPS/missing.xhtml")).toList()
+        assertThat(cs.map { it.href }.distinct()).containsExactly("OEBPS/c002.xhtml")
+    }
+
+    @Test fun shortBlockBeforeLongBlockStillMakesFullChunks() {
+        val short = "short ".repeat(16).trim()
+        val long = "long ".repeat(390).trim()
+        val file = TestEpubs.build(tmp.root, chapters = listOf("<p>$short</p><p>$long</p><p>tail</p>"))
+        val cs = ZipFile(file).use { XhtmlText.chunks(it, "OEBPS/c001.xhtml") }
+        assertThat(cs.dropLast(1).all { it.text.length >= 400 }).isTrue()
+        assertThat(cs.all { it.text.length <= 2000 }).isTrue()
+        assertThat(cs.joinToString(" ") { it.text }.replace(Regex("\\s+"), " ")).isEqualTo("$short $long tail")
+    }
+
+    @Test fun containerKeepsInlineTextAndSelfClosingDivIsFine() {
+        val file = TestEpubs.build(tmp.root, chapters = listOf("<div/><div>Hello <em>world</em> and <b>more</b><p>x</p></div><p>y</p>"))
+        val cs = ZipFile(file).use { XhtmlText.chunks(it, "OEBPS/c001.xhtml") }
+        assertThat(cs.single().text).isEqualTo("Hello world and more\nx\ny")
+    }
 }

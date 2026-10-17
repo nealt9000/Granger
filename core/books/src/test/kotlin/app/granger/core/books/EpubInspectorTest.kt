@@ -80,4 +80,31 @@ class EpubInspectorTest {
         val file = TestEpubs.build(tmp.root, includeOpf = false, drmFiles = mapOf("META-INF/license.lcpl" to "{}"))
         assertThat(EpubInspector.inspect(file)).isEqualTo(Inspection.Protected(DrmKind.LCP))
     }
+
+    @Test fun corruptOpfIsInvalid() {
+        val file = TestEpubs.build(tmp.root)
+        TestEpubs.corrupt(file, "OEBPS/content.opf")
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
+
+    @Test fun corruptContainerIsInvalid() {
+        val file = TestEpubs.build(tmp.root)
+        TestEpubs.corrupt(file, "META-INF/container.xml")
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
+
+    @Test fun oversizedCoverIsDroppedButBookIsOk() {
+        val file = TestEpubs.build(
+            tmp.root,
+            cover = TestEpubs.CoverStyle.EPUB3_PROPERTY,
+            coverBytes = ByteArray(20 * 1024 * 1024),
+        )
+        assertThat(ok(file).cover).isNull()
+        assertThat(ok(file).coverExtension).isNull()
+    }
+
+    @Test fun oversizedOpfIsInvalid() {
+        val file = TestEpubs.build(tmp.root, description = "x".repeat(5 * 1024 * 1024))
+        assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Invalid::class.java)
+    }
 }

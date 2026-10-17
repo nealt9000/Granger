@@ -88,4 +88,30 @@ class TextToEpubTest {
             assertThat(first.method).isEqualTo(java.util.zip.ZipEntry.STORED)
         }
     }
+
+    @Test fun markdownJavascriptLinkIsSanitised() {
+        val cs = chapters(convert("# A\n\n[x](javascript:alert(1))\n\n# B\n\n[y](JavaScript:evil)", markdown = true))
+        assertThat(cs.none { it.contains("javascript:", ignoreCase = true) }).isTrue()
+    }
+
+    private fun assertWellFormed(xml: String) {
+        javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            .parse(org.xml.sax.InputSource(java.io.StringReader(xml)))
+    }
+
+    @Test fun xmlIllegalCharactersAreStripped() {
+        val dirty = "\u0000bad\u000C text \uFFFF\uD800 ok"
+        for (md in listOf(false, true)) {
+            val out = ByteArrayOutputStream()
+            TextToEpub.convert("# T$dirty\n\nbody$dirty\n\n# U\n\nmore", "Title$dirty", md, out)
+            val file = tmp.newFile().apply { writeBytes(out.toByteArray()) }
+            assertThat(EpubInspector.inspect(file)).isInstanceOf(Inspection.Ok::class.java)
+            ZipFile(file).use { z ->
+                z.entries().asSequence().filter { it.name.endsWith(".xhtml") || it.name.endsWith(".opf") }.forEach {
+                    assertWellFormed(z.getInputStream(it).readBytes().toString(Charsets.UTF_8))
+                }
+            }
+            assertThat(chapters(file).joinToString("")).contains("bad text  ok")
+        }
+    }
 }

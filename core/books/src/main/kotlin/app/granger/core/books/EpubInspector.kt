@@ -39,12 +39,20 @@ object EpubInspector {
         } catch (e: java.io.IOException) {
             return Inspection.Invalid("Cannot read file: ${e.message}")
         }
-        return zip.use { inspect(it, fallbackTitle) }
+        return zip.use {
+            try {
+                inspect(it, fallbackTitle)
+            } catch (e: java.io.IOException) {
+                Inspection.Invalid("Corrupt EPUB: ${e.message}")
+            } catch (e: RuntimeException) {
+                Inspection.Invalid("Corrupt EPUB: ${e.message}")
+            }
+        }
     }
 
     private fun inspect(zip: ZipFile, fallbackTitle: String): Inspection {
         DrmCheck.check(zip)?.let { return Inspection.Protected(it) }
-        val mime = zip.getEntry("mimetype")?.let { zip.getInputStream(it).use { s -> s.readBytes().toString(Charsets.UTF_8).trim() } }
+        val mime = zip.getEntry("mimetype")?.let { readCapped(zip, it, MIMETYPE_LIMIT).toString(Charsets.UTF_8).trim() }
         if (mime != "application/epub+zip") return Inspection.Invalid("Missing EPUB mimetype")
         val container = xml(zip, "META-INF/container.xml") ?: return Inspection.Invalid("Missing container.xml")
         val opfPath = container.getElementsByTag("rootfile").firstOrNull()?.attr("full-path")?.takeIf { it.isNotBlank() }
@@ -60,7 +68,9 @@ object EpubInspector {
             ?: opf.getElementsByTag("meta").firstOrNull { it.attr("name") == "cover" }
                 ?.let { manifest[it.attr("content")] }
         val coverPath = coverItem?.attr("href")?.let { resolve(opfPath, it) }
-        val cover = coverPath?.let { p -> zip.getEntry(p)?.let { e -> zip.getInputStream(e).use { it.readBytes() } } }
+        val cover = coverPath?.let { p ->
+            zip.getEntry(p)?.let { e -> try { readCapped(zip, e, COVER_LIMIT) } catch (_: java.io.IOException) { null } }
+        }
 
         fun texts(tag: String) = opf.getElementsByTag(tag).map { it.text().trim() }.filter { it.isNotEmpty() }
         val translators = opf.getElementsByTag("dc:contributor").filter { it.attr("opf:role") == "trl" }
@@ -88,7 +98,7 @@ object EpubInspector {
 
     private fun xml(zip: ZipFile, path: String): Document? {
         val entry = zip.getEntry(path) ?: return null
-        return zip.getInputStream(entry).use { Jsoup.parse(it, "UTF-8", "", Parser.xmlParser()) }
+        return Jsoup.parse(readCapped(zip, entry, XML_LIMIT).inputStream(), "UTF-8", "", Parser.xmlParser())
     }
 
     /** Resolves a manifest href against the package document's folder into a zip path. */

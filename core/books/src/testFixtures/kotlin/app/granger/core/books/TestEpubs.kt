@@ -34,6 +34,7 @@ object TestEpubs {
         identifier: String = "urn:uuid:11111111-2222-3333-4444-555555555555",
         collection: String? = null,
         cover: CoverStyle = CoverStyle.NONE,
+        coverBytes: ByteArray = COVER_BYTES,
         chapters: List<String> = listOf("<p>Hello world.</p>"),
         drmFiles: Map<String, String> = emptyMap(),
         includeOpf: Boolean = true,
@@ -57,10 +58,31 @@ object TestEpubs {
                 z.put("OEBPS/content.opf", opf(title, authors, translators, language, subjects, description, date, identifier, collection, cover, chapters.size).toByteArray())
             }
             chapters.forEachIndexed { i, body -> z.put("OEBPS/c%03d.xhtml".format(i + 1), xhtml(body).toByteArray()) }
-            if (cover != CoverStyle.NONE) z.put("OEBPS/cover.png", COVER_BYTES)
+            if (cover != CoverStyle.NONE) z.put("OEBPS/cover.png", coverBytes)
             drmFiles.forEach { (path, content) -> z.put(path, content.toByteArray()) }
         }
         return file
+    }
+
+    /** Overwrites the start of [entryName]'s compressed data so reading it fails. */
+    fun corrupt(file: File, entryName: String) {
+        val bytes = file.readBytes()
+        val name = entryName.toByteArray()
+        var i = 0
+        while (i + 30 < bytes.size) {
+            if (bytes[i] == 0x50.toByte() && bytes[i + 1] == 0x4B.toByte() && bytes[i + 2] == 3.toByte() && bytes[i + 3] == 4.toByte()) {
+                fun u16(o: Int) = (bytes[i + o].toInt() and 0xFF) or ((bytes[i + o + 1].toInt() and 0xFF) shl 8)
+                val nameLen = u16(26)
+                val dataStart = i + 30 + nameLen + u16(28)
+                if (nameLen == name.size && bytes.copyOfRange(i + 30, i + 30 + nameLen).contentEquals(name)) {
+                    for (k in dataStart until minOf(dataStart + 8, bytes.size)) bytes[k] = 0xFF.toByte()
+                    file.writeBytes(bytes)
+                    return
+                }
+            }
+            i++
+        }
+        error("No entry $entryName")
     }
 
     private fun ZipOutputStream.put(path: String, bytes: ByteArray) {
