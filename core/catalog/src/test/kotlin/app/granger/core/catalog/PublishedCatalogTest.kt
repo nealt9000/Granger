@@ -22,6 +22,6 @@ class PublishedCatalogTest {
         val raw = kotlinx.serialization.json.Json.parseToJsonElement(bytes.decodeToString()) as kotlinx.serialization.json.JsonObject
         assertThat(catalog.packs.size).isEqualTo((raw["packs"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.models.size).isEqualTo((raw["models"] as kotlinx.serialization.json.JsonArray).size)
-        assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(4)
+        assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(5)
     }
 }
