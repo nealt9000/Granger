@@ -15,6 +15,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -43,16 +47,20 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
                 }
             }
             Setting("Line spacing") {
+                var value by remember(prefs.lineHeight) { mutableFloatStateOf(prefs.lineHeight.toFloat()) }
                 Slider(
-                    value = prefs.lineHeight.toFloat(),
-                    onValueChange = { onChange(prefs.copy(lineHeight = it.toDouble())) },
+                    value = value,
+                    onValueChange = { value = it },
+                    onValueChangeFinished = { onChange(prefs.copy(lineHeight = value.toDouble())) },
                     valueRange = ReadingPrefs.MIN_LINE_HEIGHT.toFloat()..ReadingPrefs.MAX_LINE_HEIGHT.toFloat(),
                 )
             }
             Setting("Margins") {
+                var value by remember(prefs.margins) { mutableFloatStateOf(prefs.margins.toFloat()) }
                 Slider(
-                    value = prefs.margins.toFloat(),
-                    onValueChange = { onChange(prefs.copy(margins = it.toDouble())) },
+                    value = value,
+                    onValueChange = { value = it },
+                    onValueChangeFinished = { onChange(prefs.copy(margins = value.toDouble())) },
                     valueRange = ReadingPrefs.MIN_MARGINS.toFloat()..ReadingPrefs.MAX_MARGINS.toFloat(),
                 )
             }

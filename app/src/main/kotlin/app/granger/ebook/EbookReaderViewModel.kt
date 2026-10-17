@@ -14,10 +14,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -93,10 +97,13 @@ class EbookReaderViewModel(
     private val _state = MutableStateFlow(EbookUi(prefs = prefsStore.prefs.value))
     val state: StateFlow<EbookUi> = _state.asStateFlow()
 
-    private val _navigation = MutableSharedFlow<Locator>(extraBufferCapacity = 1)
+    // Unlimited, so a jump is never dropped or suspended; trySend on it always succeeds.
+    private val _navigation = Channel<Locator>(Channel.UNLIMITED)
 
     /** Places the reader asked to jump to; the screen hands each to the navigator. */
-    val navigation: SharedFlow<Locator> = _navigation.asSharedFlow()
+    val navigation: Flow<Locator> = _navigation.receiveAsFlow()
+
+    private val bookmarkLock = Mutex()
 
     /** Builds the navigator fragment; set with the publication, before the state shows it. */
     var navigatorFactory: EpubNavigatorFactory? = null
@@ -143,6 +150,7 @@ class EbookReaderViewModel(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    Log.w("Granger", "Couldn't count the book's pages", e)
                     0
                 }
                 _state.update { it.copy(positionsCount = count) }
@@ -204,10 +212,7 @@ class EbookReaderViewModel(
     private fun EbookUi.derived(): EbookUi {
         val here = locator ?: return copy(currentTocIndex = null, isBookmarkedHere = false)
         val index = toc.indexOfLast { row -> Url(row.href)?.let { sameFile(it, here.href) } == true }.takeIf { it >= 0 }
-        val marked = bookmarks.any { m ->
-            val at = parse(m.locatorJson) ?: return@any false
-            sameFile(at.href, here.href) && at.locations.position == here.locations.position
-        }
+        val marked = bookmarks.any { m -> parse(m.locatorJson)?.let { isSamePlace(it, here) } == true }
         return copy(currentTocIndex = index, isBookmarkedHere = marked)
     }
 
@@ -217,22 +222,26 @@ class EbookReaderViewModel(
         null
     }
 
-    /** Adds a bookmark at the current place, or removes the one here. */
+    /**
+     * Adds a bookmark at the current place, or removes the one here. Serialised, and decided from the stored
+     * marks rather than the screen's copy, so a double tap can't add twice.
+     */
     fun toggleBookmark() {
         val id = bookId ?: return
         val here = _state.value.locator ?: return
-        val existing = _state.value.bookmarks.filter { m ->
-            val at = parse(m.locatorJson) ?: return@filter false
-            sameFile(at.href, here.href) && at.locations.position == here.locations.position
-        }
         appScope.launch {
-            if (existing.isNotEmpty()) {
-                existing.forEach { bookshelf.deleteMark(it.id) }
-            } else {
-                val now = System.currentTimeMillis()
-                bookshelf.addMark(
-                    BookMark(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), here.title.orEmpty(), "", "", now, now),
-                )
+            bookmarkLock.withLock {
+                val existing = bookshelf.marks(id).first().filter { m ->
+                    m.kind == MarkKind.BOOKMARK && parse(m.locatorJson)?.let { isSamePlace(it, here) } == true
+                }
+                if (existing.isNotEmpty()) {
+                    existing.forEach { bookshelf.deleteMark(it.id) }
+                } else {
+                    val now = System.currentTimeMillis()
+                    bookshelf.addMark(
+                        BookMark(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), here.title.orEmpty(), "", "", now, now),
+                    )
+                }
             }
         }
     }
@@ -258,7 +267,7 @@ class EbookReaderViewModel(
             } catch (e: Exception) {
                 null
             }
-            if (locator != null) _navigation.emit(locator)
+            if (locator != null) _navigation.trySend(locator)
         }
     }
 
@@ -268,7 +277,7 @@ class EbookReaderViewModel(
 
     private fun jump(locator: Locator) {
         _state.update { it.copy(panel = null) }
-        _navigation.tryEmit(locator)
+        _navigation.trySend(locator)
     }
 
     fun open(panel: Panel?) {

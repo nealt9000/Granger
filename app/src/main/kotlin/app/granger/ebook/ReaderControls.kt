@@ -22,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.granger.Features
 import app.granger.theme.GrangerColors
 import org.readium.r2.shared.publication.Locator
 
@@ -65,7 +65,15 @@ fun EbookBottomBar(
     onBookmark: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // The released value stays shown until the navigator reports a new place, so the thumb doesn't snap back.
     var dragging by remember { mutableStateOf<Float?>(null) }
+    var released by remember { mutableStateOf(false) }
+    LaunchedEffect(locator) {
+        if (released) {
+            dragging = null
+            released = false
+        }
+    }
     val followed = (locator?.locations?.totalProgression ?: 0.0).toFloat().coerceIn(0f, 1f)
     Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -80,19 +88,19 @@ fun EbookBottomBar(
             }
             Slider(
                 value = dragging ?: followed,
-                onValueChange = { dragging = it },
+                onValueChange = { dragging = it; released = false },
                 onValueChangeFinished = {
-                    dragging?.let { onSeek(it.toDouble()) }
-                    dragging = null
+                    dragging?.let {
+                        released = true
+                        onSeek(it.toDouble())
+                    }
                 },
                 colors = SliderDefaults.colors(thumbColor = GrangerColors.Flame, activeTrackColor = GrangerColors.Flame),
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onContents) { Icon(Icons.Filled.Menu, contentDescription = "Contents") }
                 IconButton(onClick = onTextSettings) { Text("Aa", style = MaterialTheme.typography.titleMedium) }
-                if (Features.READ_ALOUD) {
-                    // Read aloud ships later; its button joins the bar then.
-                }
+                // The read-aloud button arrives with Features.READ_ALOUD.
                 IconButton(onClick = onBookmark) {
                     if (bookmarked) {
                         Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = GrangerColors.Flame)

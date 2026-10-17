@@ -67,3 +67,19 @@ internal fun Publication.chapterFor(href: Url): Link? {
 
 /** Whether two hrefs name the same file, ignoring #fragments. The one comparison the reader uses. */
 internal fun sameFile(a: Url, b: Url): Boolean = a.removeFragment().isEquivalent(b.removeFragment())
+
+/**
+ * Whether two locators are the same place: the same file, and the same page position. Without a position on both
+ * sides, the progression through the book decides, within [PLACE_TOLERANCE].
+ */
+internal fun isSamePlace(a: Locator, b: Locator): Boolean {
+    if (!sameFile(a.href, b.href)) return false
+    val pa = a.locations.position
+    val pb = b.locations.position
+    if (pa != null && pb != null) return pa == pb
+    val ta = a.locations.totalProgression ?: return false
+    val tb = b.locations.totalProgression ?: return false
+    return kotlin.math.abs(ta - tb) <= PLACE_TOLERANCE
+}
+
+private const val PLACE_TOLERANCE = 0.0005

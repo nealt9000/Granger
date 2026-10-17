@@ -309,4 +309,56 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.prefs.fontScale).isEqualTo(ReadingPrefs.MAX_FONT_SCALE)
         assertThat(prefsStore.prefs.value.theme).isEqualTo(ReadingTheme.SEPIA)
     }
+
+    private fun placed(href: String, position: Int?, total: Double, title: String = "T") =
+        locator(href, 0.1, total, title).copy(locations = Locator.Locations(position = position, totalProgression = total))
+
+    @Test fun doubleTapOnBookmarkEndsWithNone() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.onLocator(placed("c002.xhtml", 2, 0.4))
+        vm.toggleBookmark()
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value).isEmpty()
+        vm.toggleBookmark()
+        vm.toggleBookmark()
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value).hasSize(1)
+    }
+
+    @Test fun nullPositionsCompareByProgression() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.onLocator(placed("c002.xhtml", null, 0.40))
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(vm.state.value.isBookmarkedHere).isTrue()
+        vm.onLocator(placed("c002.xhtml", null, 0.45))
+        assertThat(vm.state.value.isBookmarkedHere).isFalse()
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value).hasSize(2)
+        vm.onLocator(placed("c002.xhtml", null, 0.4003))
+        assertThat(vm.state.value.isBookmarkedHere).isTrue()
+    }
+
+    @Test fun lastMatchingTocRowInTheFileIsCurrent() = runTest(main.dispatcher) {
+        opener.publication = testPublication(
+            toc = listOf("c001.xhtml" to listOf("c002.xhtml", "c002.xhtml#a", "c002.xhtml#b"), "c003.xhtml" to emptyList()),
+        )
+        val vm = reader()
+        vm.onLocator(locator("c002.xhtml", 0.5, 0.4))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(3)
+    }
+
+    @Test fun backToBackJumpsAreAllDelivered() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.goToMark(bookmark(1, "c001.xhtml", 1, 0.1, 1))
+        vm.goToMark(bookmark(2, "c002.xhtml", 2, 0.4, 2))
+        vm.goToMark(bookmark(3, "c003.xhtml", 3, 0.8, 3))
+        val seen = mutableListOf<Locator>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.navigation.collect { seen += it } }
+        advanceUntilIdle()
+        assertThat(seen.map { it.href.toString() }).containsExactly("c001.xhtml", "c002.xhtml", "c003.xhtml").inOrder()
+    }
 }

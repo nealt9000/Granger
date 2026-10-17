@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.BookMark
+import app.granger.shell.NarrowRailWidth
 import app.granger.theme.GrangerColors
 import org.json.JSONObject
 import org.readium.r2.shared.publication.Locator
@@ -62,7 +63,8 @@ fun ContentsPanel(
     onDismiss: () -> Unit,
 ) {
     var tab by remember { mutableIntStateOf(0) }
-    Box(Modifier.fillMaxSize()) {
+    // Clear of the shell's rail, as the bars are.
+    Box(Modifier.fillMaxSize().padding(start = NarrowRailWidth)) {
         Box(Modifier.fillMaxSize().background(GrangerColors.Scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
         Surface(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
