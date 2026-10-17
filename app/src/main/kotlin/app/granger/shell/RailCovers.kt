@@ -25,6 +25,9 @@ internal object RailCovers {
         override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount
     }
 
+    /** Covers that failed to decode, so a bad one isn't retried on every recomposition. */
+    private val failed = HashSet<String>()
+
     /** The largest power of two that keeps the decoded image at least [targetPx] on its shorter side. */
     fun sampleSize(width: Int, height: Int, targetPx: Int): Int {
         var sample = 1
@@ -37,6 +40,7 @@ internal object RailCovers {
     fun load(path: String, targetPx: Int): Bitmap? {
         val key = "$path@$targetPx"
         cache.get(key)?.let { return it }
+        if (synchronized(failed) { key in failed }) return null
         val bitmap = try {
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeFile(path, bounds)
@@ -49,7 +53,7 @@ internal object RailCovers {
         } catch (_: Throwable) { // Includes OutOfMemoryError; a bad cover must never take the rail down.
             null
         }
-        if (bitmap != null) cache.put(key, bitmap)
+        if (bitmap != null) cache.put(key, bitmap) else synchronized(failed) { failed += key }
         return bitmap
     }
 

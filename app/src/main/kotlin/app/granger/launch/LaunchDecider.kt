@@ -1,5 +1,6 @@
 package app.granger.launch
 
+import app.granger.core.library.Book
 import app.granger.core.library.BookIds
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
@@ -36,6 +37,10 @@ object LaunchDecider {
         return if (f.lastTabPackOk) StartScreen.Reader(tab.id, BookIds.isBook(tab.packId)) else StartScreen.Library(MISSING_NOTICE)
     }
 }
+
+/** A book can be resumed only if its row is OK and its file is still there. */
+fun isBookResumable(book: Book?, fileExists: (String) -> Boolean = { File(it).exists() }): Boolean =
+    book != null && isPackResumable(book.status, book.filePath, fileExists)
 
 /**
  * A pack can be resumed only if the last scan found it OK and its file is still there: a pulled SD card or a file

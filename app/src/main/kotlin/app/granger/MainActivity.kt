@@ -15,6 +15,7 @@ import app.granger.core.library.BookIds
 import app.granger.launch.LaunchDecider
 import app.granger.launch.LaunchFacts
 import app.granger.launch.StartScreen
+import app.granger.launch.isBookResumable
 import app.granger.launch.isPackResumable
 import app.granger.theme.GrangerTheme
 import kotlinx.coroutines.CancellationException
@@ -82,7 +83,7 @@ class MainActivity : FragmentActivity() {
     private suspend fun decide(clean: Boolean, booted: Boolean, firstRun: Boolean): StartScreen {
         val lastTab = container.sessions.lastTab()
         val packOk = lastTab != null && if (BookIds.isBook(lastTab.packId)) {
-            container.bookshelf.book(lastTab.packId)?.let { isPackResumable(it.status, it.filePath) } == true
+            isBookResumable(container.bookshelf.book(lastTab.packId))
         } else {
             container.library.packs.first().any { it.id == lastTab.packId && isPackResumable(it.status, it.filePath) }
         }
