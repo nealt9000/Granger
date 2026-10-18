@@ -72,3 +72,31 @@ def test_aborts_after_consecutive_adb_errors(tmp_path):
 
     with pytest.raises(SystemExit, match="3 times in a row"):
         adb.run_eval(Dead(), ds, "r1", tmp_path / "runs", sleep=lambda s: None, max_errors=3)
+
+
+def test_missing_marker_with_empty_output_is_not_an_error(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+
+    class Quiet(Fake):
+        def __call__(self, args):
+            r = super().__call__(args)
+            return (1, "") if r[0] == 1 else r
+
+    f = Quiet(done_after=15)  # more polls than max_errors
+    adb.run_eval(f, ds, "r1", tmp_path / "runs", sleep=lambda s: None, max_errors=3)
+    assert f.polls == 15
+
+
+def test_no_devices_error_aborts(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+
+    class NoDev(Fake):
+        def __call__(self, args):
+            if "ls" in args:
+                return 1, "error: no devices/emulators found"
+            return super().__call__(args)
+
+    with pytest.raises(SystemExit, match="2 times in a row"):
+        adb.run_eval(NoDev(), ds, "r1", tmp_path / "runs", sleep=lambda s: None, max_errors=2)

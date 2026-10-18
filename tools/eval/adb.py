@@ -15,8 +15,16 @@ MAX_ERRORS = 10
 
 
 def real_runner(args):
-    p = subprocess.run(["adb"] + list(args), capture_output=True, text=True)
+    p = subprocess.run(["adb"] + list(args), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)  # stderr merged: adb shell ls reports there
     return p.returncode, p.stdout
+
+
+ADB_ERRORS = ("device offline", "no devices", "device not found", "unauthorized", "no emulators")
+
+
+def is_adb_error(output):
+    low = output.strip().lower()
+    return low.startswith("error:") or any(m in low for m in ADB_ERRORS)
 
 
 def front_package(runner):
@@ -61,8 +69,8 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
         rc, o = runner(["shell", "ls", "%s/%s/done" % (REMOTE, run_id)])
         if rc == 0:
             break
-        if "No such file" in o:
-            errors = 0
+        if not is_adb_error(o):
+            errors = 0  # any other failed ls just means the done marker is not there yet
         else:
             errors += 1
             if errors >= max_errors:
