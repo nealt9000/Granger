@@ -156,10 +156,10 @@ class ResearchPipeline(
         } else {
             val rewrite = rewrite(generator.model, request)
             medical = rewrite.medical == true || request.medicalHint ||
-                Medical.looksMedical(request.question) || PersonalMedical.matches(request.question)
+                Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
             if (medical) emit(ResearchEvent.Medical)
             keywords = rewrite.keywords
-            if (PersonalMedical.matches(request.question)) {
+            if (request.quote == null && PersonalMedical.matches(request.question, medical)) {
                 // One person's own health: the app's medical copy, whatever the library holds. No search, no answer.
                 emit(ResearchEvent.Done(Outcome.Declined(medical = true, keywords)))
                 return@flow

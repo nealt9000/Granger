@@ -531,4 +531,15 @@ class ResearchPipelineTest {
         )
         assertThat(out.medical).isTrue()
     }
+
+    @Test
+    fun quoteQuestionIsNotDeclinedAsPersonal() = runTest {
+        val finder = FakeFinder(listOf(water))
+        val gen = FakeGenerator(answer = { flowOf("It was the best of times [1].") })
+        val out = outcome(
+            ResearchPipeline(finder, FakeModels(gen, embedder = embedder))
+                .run(ResearchRequest("Do I have to read this closely? My dad says it is a fever dream.", quote = quote)).toList(),
+        )
+        assertThat(out).isNotInstanceOf(Outcome.Declined::class.java)
+    }
 }

@@ -67,7 +67,7 @@ class KeywordsTest {
             "My two year old has a fever of 101. Do I need to take her to the ER?",
             "Can I double my sertraline dose since it doesn't seem to be working?",
             "What did my doctor mean when she said my scan showed a shadow?",
-        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it)).isTrue() }
+        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it, medicalSignal = true)).isTrue() }
     }
 
     @Test fun generalQuestionsDoNotMatch() {
@@ -82,6 +82,47 @@ class KeywordsTest {
             "Who wrote the book of Romans?",
             "How old was Mary Shelley when Frankenstein came out?",
             "My grandfather says salary comes from salt. Is that true?",
-        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it)).isFalse() }
+            "Should I take the GRE?",
+            "should I take the train or the bus to Paris?",
+            "Can I take photos in the Louvre?",
+            "How much flour should I take for a loaf?",
+            "How much water should I give my tomatoes?",
+            "my test scores are low, how do I study better?",
+            "How do I improve my results in the race?",
+            "is this normal for a cat?",
+            "Is my sourdough starter ok?",
+            "What are my chances of winning the lottery?",
+            "do i have a question",
+            "Do I have a right to remain silent?",
+            "Do I need to bring a passport to Canada?",
+            "My dad says the Erie Canal opened in 1825, true?",
+            "My wife asked what era the Bayeux Tapestry is from",
+            "My son is painting a model of the Titanic, what colour was the hull?",
+            "My daughter asked about the Doctor Who series",
+        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it, Medical.looksMedical(it))).isFalse() }
+    }
+
+    @Test fun strongQuestionsMatchWithoutAMedicalSignal() {
+        listOf(
+            "Is it safe for me to have a couple beers tonight with the meds I'm on?",
+            "My ALT came back at 80 on my blood test. Is my liver ok?",
+            "My two year old has a fever of 101. Do I need to take her to the ER?",
+            "Can I double my sertraline dose since it doesn't seem to be working?",
+            "My two year old has a fever of 103, what should I do?",
+            "can i give my baby honey",
+            "my daughter swallowed a battery",
+            "I took 20 tylenol an hour ago what happens",
+            "Should I be worried about a headache that won't go away?",
+        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it, medicalSignal = false)).isTrue() }
+    }
+
+    @Test fun lexiconWordBoundaries() {
+        listOf(
+            "Newton's influence on Leibniz", "fluent in French", "What is a fluid", "Who invented the flute",
+            "What goes in the appendices of a thesis?", "Lyme Regis",
+        ).forEach { assertWithMessage(it).that(Medical.looksMedical(it)).isFalse() }
+        listOf("what is the flu", "treating a burn", "tylenol overdose", "a mole on my arm").forEach {
+            assertWithMessage(it).that(Medical.looksMedical(it)).isTrue()
+        }
     }
 }
