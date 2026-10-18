@@ -18,6 +18,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -40,33 +42,34 @@ fun installedModelsOf(
 
 /**
  * Research's view of [ModelManager]. Every generation and embedding holds the models, so a release asked for
- * meanwhile (the app going to the background) waits until the work is done.
+ * meanwhile (the app going to the background) waits until the work is done. They also take [models] in turn: two
+ * chats can be open at once, and one's swap to the other model size would close the engine the other is using.
  */
 class ModelsAdapter(
     private val manager: ModelManager,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** One model use at a time, across every adapter in the process. */
+    private val models: Mutex = MODELS_IN_USE,
 ) : ResearchModels {
     override suspend fun generator(deeper: Boolean): TextGenerator {
         val size = if (deeper) LlmSize.LARGE else LlmSize.SMALL
         // Load now, so a model that won't load is reported here rather than mid-answer.
-        held { engine(size) }
+        inTurn { engine(size) }
         return TextGenerator { prompt, maxTokens ->
             flow {
-                val letGo = manager.hold()
-                try {
+                // Until the reply is done or cancelled.
+                inTurn {
                     // Fetched per reply: a release between replies closes the engine, and this loads it again.
                     emitAll(engine(size).generate(prompt, maxTokens))
-                } finally {
-                    letGo()
                 }
             }
         }
     }
 
     override suspend fun embedder(): PassageEmbedder? {
-        held { manager.embedder() } ?: return null
+        inTurn { manager.embedder() } ?: return null
         return PassageEmbedder { texts, isQuery ->
-            held {
+            inTurn {
                 val embedder = checkNotNull(manager.embedder()) { "The embedder is no longer available" }
                 withContext(io) { embedder.embed(texts, isQuery) }
             }
@@ -79,12 +82,17 @@ class ModelsAdapter(
         throw ModelUnavailableException("The $size model won't load", e)
     }
 
-    private suspend fun <T> held(block: suspend () -> T): T {
+    /** Runs [block] holding the models, once no other generation or embedding is running. */
+    private suspend fun <T> inTurn(block: suspend () -> T): T = models.withLock {
         val letGo = manager.hold()
         try {
-            return block()
+            block()
         } finally {
             letGo()
         }
+    }
+
+    private companion object {
+        val MODELS_IN_USE = Mutex()
     }
 }

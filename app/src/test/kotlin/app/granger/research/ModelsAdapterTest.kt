@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -60,7 +61,39 @@ class ModelsAdapterTest {
             TextEmbedderFactory { CountingEmbedder().also { embedders += it } },
             backgroundScope, useEmbedder = true, io = io,
         )
-        return ModelsAdapter(manager, io) to manager
+        return ModelsAdapter(manager, io, Mutex()) to manager
+    }
+
+    @Test fun aSecondGenerationWaitsForTheFirst() = runTest {
+        val (adapter, _) = adapter(InstalledModels(small = File("small")))
+        val generator = adapter.generator(deeper = false)
+        val heard = mutableListOf<String>()
+        launch { generator.generate("a", 16).collect { heard += "a:$it" } }
+        advanceUntilIdle()
+        launch { generator.generate("b", 16).collect { heard += "b:$it" } }
+        advanceUntilIdle()
+        assertThat(heard).containsExactly("a:one ")
+        engines.single().gate.complete(Unit)
+        advanceUntilIdle()
+        assertThat(heard).containsExactly("a:one ", "a:two", "b:one ", "b:two").inOrder()
+    }
+
+    @Test fun anotherChatsSwapWaitsUntilTheReplyIsDone() = runTest {
+        val (adapter, _) = adapter(InstalledModels(small = File("small"), large = File("large")))
+        val small = adapter.generator(deeper = false)
+        var reply: List<String>? = null
+        launch { reply = small.generate("q", 16).toList() }
+        advanceUntilIdle()
+        // A second chat's Think deeper would load the large model, closing the small one mid-reply.
+        launch { adapter.generator(deeper = true) }
+        advanceUntilIdle()
+        assertThat(engines.map { it.path }).containsExactly("small")
+        assertThat(engines.single().closed).isFalse()
+        engines.single().gate.complete(Unit)
+        advanceUntilIdle()
+        assertThat(reply).containsExactly("one ", "two").inOrder()
+        assertThat(engines.map { it.path }).containsExactly("small", "large").inOrder()
+        assertThat(engines.first().closed).isTrue()
     }
 
     @Test fun releaseRequestedMidGenerationWaitsForTheReply() = runTest {
