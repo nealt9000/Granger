@@ -35,6 +35,13 @@ class CitationsTest {
     }
 
     @Test
+    fun declineTokenAfterACitedSentenceStillDeclines() {
+        // E4B on the Pixel 6: it quoted the passage, then declined.
+        assertThat(Citations.check("The passage states: \"caviare to the general\" [1]\n\nNOT IN LIBRARY", 1))
+            .isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
     fun stripRemovesGroups() {
         assertThat(Citations.strip("A [1] b [2, 3].")).isEqualTo("A b.")
     }

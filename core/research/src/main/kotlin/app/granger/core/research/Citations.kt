@@ -11,7 +11,8 @@ object Citations {
     private val group = Regex("\\[(\\d+(?:\\s*,\\s*\\d+)*)]")
 
     fun check(answer: String, passageCount: Int): CitationCheck {
-        if (answer.trim().startsWith(AnswerPrompt.DECLINE_TOKEN)) return CitationCheck.ModelDeclined
+        // Anywhere, not just first: a model that cites a line and then declines has still declined.
+        if (AnswerPrompt.DECLINE_TOKEN in answer) return CitationCheck.ModelDeclined
         // A digit run too big for Int is bad model output, not a crash.
         val parsed = group.findAll(answer)
             .flatMap { it.groupValues[1].split(',').map { n -> n.trim().toIntOrNull() } }
