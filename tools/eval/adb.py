@@ -2,6 +2,7 @@
 
 The default runner calls the real adb. Nothing here is imported at module load that needs a device.
 """
+import re
 import shutil
 import subprocess
 import time
@@ -27,13 +28,18 @@ def is_adb_error(output):
     return low.startswith("error:") or any(m in low for m in ADB_ERRORS)
 
 
+RESUMED_LINE = re.compile(r"(?<![A-Za-z])(?:m|top)?ResumedActivity[:=]")  # mResumedActivity, topResumedActivity, ResumedActivity
+RECORD_PKG = re.compile(r"ActivityRecord\{[^}]*?\s([A-Za-z0-9_.]+)/")
+
+
 def front_package(runner):
+    # Android 16 prints topResumedActivity=; multi-display prints several lines, the first is the top one
     _, out = runner(["shell", "dumpsys", "activity", "activities"])
     for line in out.splitlines():
-        if "mResumedActivity" in line:
-            for tok in line.split():
-                if "/" in tok:
-                    return tok.split("/")[0].lstrip("{")
+        if RESUMED_LINE.search(line):
+            m = RECORD_PKG.search(line)
+            if m:
+                return m.group(1)
     return None
 
 

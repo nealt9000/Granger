@@ -129,3 +129,15 @@ def test_failed_marker_stops_the_wait_with_its_message(tmp_path):
     with pytest.raises(SystemExit, match="no dataset at"):
         adb.run_eval(f, ds, "r1", tmp_path / "runs", sleep=lambda s: None)
     assert not any("pull" in " ".join(c) for c in f.calls)
+
+
+def test_top_resumed_activity_format_is_read():
+    # Android 16 (Pixel 6) prints topResumedActivity= instead of mResumedActivity:
+    line = "    topResumedActivity=ActivityRecord{169309199 u0 app.granger/.MainActivity t44593}\n"
+    adb.check_front(lambda args: (0, line) if "dumpsys" in args else (0, ""))
+
+
+def test_top_resumed_activity_other_app_refuses_naming_package():
+    line = "    topResumedActivity=ActivityRecord{1 u0 com.whatsapp/.Main t2}\n"
+    with pytest.raises(SystemExit, match="com.whatsapp"):
+        adb.check_front(lambda args: (0, line) if "dumpsys" in args else (0, ""))
