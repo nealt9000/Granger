@@ -147,6 +147,17 @@ class EvalRunnerTest {
     }
 
     @Test
+    fun aModelDeclinedRecordKeepsItsPassagesAndReply() = runTest {
+        val declining = Gen("small") { if (it.contains("Passages:")) "NOT IN LIBRARY" else "x" }
+        val out = File(tmp.root, "r/results.jsonl")
+        runner(small = declining).run(listOf(item("d")), out, GuessModels.NONE)
+        val r = records(out).single()
+        assertThat(r.getString("outcome")).isEqualTo("declined")
+        assertThat(r.getString("reply")).isEqualTo("NOT IN LIBRARY")
+        assertThat(r.getJSONArray("chosen").length()).isGreaterThan(0)
+    }
+
+    @Test
     fun answeredItemGetsNoGuesses() = runTest {
         val out = File(tmp.root, "r/results.jsonl")
         runner().run(listOf(item("a")), out, GuessModels.BOTH)

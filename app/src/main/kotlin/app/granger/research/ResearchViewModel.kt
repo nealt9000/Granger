@@ -114,7 +114,7 @@ class ResearchViewModel(
     ) {
         /**
          * The last turn is done and its source cards are present, so the screen's last scroll can run. An answered turn
-         * whose cards haven't arrived from the database yet (after a stream or a Retry) is not settled.
+         * is not settled while it runs or its row is still PENDING; the stored row carries the outcome and the cards together.
          */
         val settled: Boolean
             get() {
@@ -122,7 +122,8 @@ class ResearchViewModel(
                 val last = turns.lastOrNull()?.turn ?: return true
                 return when (last.outcome) {
                     TurnOutcome.PENDING -> false
-                    TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED -> last.shown.isNotEmpty()
+                    // A final outcome is settled. Its cards arrive in the same stored row, so the only wait is the
+                    // stream's end (running) and the PENDING row turning final; a turn with no cards is settled too.
                     else -> true
                 }
             }

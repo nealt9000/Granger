@@ -18,7 +18,7 @@ class SettledTest {
     }
 
     @Test fun lastScrollWaitsForTheSourceCards() {
-        assertThat(state(TurnOutcome.ANSWERED, emptyList()).settled).isFalse()
+        assertThat(state(TurnOutcome.ANSWERED, emptyList()).settled).isTrue() // a final row with no cards (old rows)
         assertThat(state(TurnOutcome.PENDING, emptyList()).settled).isFalse()
         assertThat(state(TurnOutcome.ANSWERED, listOf(card), running = true).settled).isFalse()
         assertThat(state(TurnOutcome.ANSWERED, listOf(card)).settled).isTrue()

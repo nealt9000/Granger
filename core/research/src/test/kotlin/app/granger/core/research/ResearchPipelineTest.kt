@@ -466,4 +466,22 @@ class ResearchPipelineTest {
         assertThat(out.passages).isEqualTo(eight.take(4))
         assertThat(out.candidates).isEqualTo(eight.drop(4))
     }
+
+    @Test
+    fun aModelDeclineCarriesItsPassagesAndReply() = runTest {
+        val found = listOf(passage("water", "Water boils at 100 degrees.", "Water"))
+        val gen = FakeGenerator(answer = { flowOf("NOT IN LIBRARY") })
+        val events = ResearchPipeline(FakeFinder(found), FakeModels(gen)).run(ResearchRequest("Water boils?")).toList()
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.reply).isEqualTo("NOT IN LIBRARY")
+        assertThat(out.passages).isNotEmpty()
+    }
+
+    @Test
+    fun aCodeDeclineCarriesNoPassagesOrReply() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator())).run(ResearchRequest("Water boils?")).toList()
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.passages).isEmpty()
+        assertThat(out.reply).isEmpty()
+    }
 }

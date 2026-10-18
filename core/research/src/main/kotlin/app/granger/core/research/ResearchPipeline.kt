@@ -76,7 +76,16 @@ sealed interface Outcome {
         override val keywords: List<String>,
     ) : Outcome
 
-    data class Declined(override val medical: Boolean, override val keywords: List<String>) : Outcome
+    /**
+     * [passages] and [reply] are what the model was given and said when it declined; empty for a decline in code
+     * (nothing found or ranked), before the model was asked.
+     */
+    data class Declined(
+        override val medical: Boolean,
+        override val keywords: List<String>,
+        val passages: List<Passage> = emptyList(),
+        val reply: String = "",
+    ) : Outcome
 
     /** The reply's citations didn't check out; [text] is the raw reply, and the UI shows [passages] instead. */
     data class Unverified(
@@ -213,7 +222,7 @@ class ResearchPipeline(
         val outcome = when (val check = Citations.check(reply, passages.size)) {
             is CitationCheck.Valid ->
                 Outcome.Answered(reply, passages, check.cited, candidates, usedLarge, medical, keywords)
-            CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords)
+            CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords, passages, reply)
             CitationCheck.Invalid -> Outcome.Unverified(reply, passages, candidates, usedLarge, medical, keywords)
         }
         emit(ResearchEvent.Done(outcome))

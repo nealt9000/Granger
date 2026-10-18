@@ -200,7 +200,7 @@ class EvalRunner(
     private fun describe(outcome: Outcome?): Described = when (outcome) {
         is Outcome.Answered -> Described("answered", outcome.text, outcome.cited.sorted(), outcome.passages)
         is Outcome.Unverified -> Described("unverified", outcome.text, emptyList(), outcome.passages)
-        is Outcome.Declined -> Described("declined", "", emptyList(), emptyList())
+        is Outcome.Declined -> Described("declined", outcome.reply, emptyList(), outcome.passages)
         is Outcome.Failed -> Described("failed", failureText(outcome), emptyList(), emptyList())
         else -> Described("failed", "", emptyList(), emptyList())
     }
