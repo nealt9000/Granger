@@ -176,10 +176,13 @@ class ResearchViewModel(
         }
     }
 
-    /** Stops the running turn: while writing, the reply so far is checked and kept; before that, the turn is interrupted. */
+    /**
+     * Stops the running turn: once the reply has begun, what it has so far is checked and kept; before that (still
+     * reading the prompt, with no chunk to stop after), the turn is interrupted.
+     */
     fun stop() {
         val running = live.value ?: return
-        if (running.stage == Stage.WRITING) stopRequested = true else job?.cancel()
+        if (running.stage == Stage.WRITING && running.partial != null) stopRequested = true else job?.cancel()
     }
 
     /** Asks the last turn's question again with the large model, over the passages it already found. */

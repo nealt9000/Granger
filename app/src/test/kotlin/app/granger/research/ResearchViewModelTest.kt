@@ -283,6 +283,20 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.running).isFalse()
     }
 
+    @Test fun stopBeforeTheFirstChunkInterruptsTheTurn() = runTest(main.dispatcher) {
+        small.gateAt = 0 // the model is still reading the prompt
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.stage).isEqualTo(Stage.WRITING)
+        assertThat(live.partial).isNull()
+        vm.stop()
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().outcome).isEqualTo(TurnOutcome.INTERRUPTED)
+        assertThat(vm.state.value.running).isFalse()
+    }
+
     @Test fun leavingMidAnswerMarksTheTurnInterrupted() = runTest(main.dispatcher) {
         small.answer = listOf("Plants use light [1].", " And")
         small.gateAt = 1
