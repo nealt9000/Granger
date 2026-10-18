@@ -193,6 +193,8 @@ class ResearchBenchmarkActivity : ComponentActivity() {
                     file.appendText(JSONObject(mapOf("keywords" to JSONArray(words))).toString().dropLast(1) + ",\"passages\":[$rows]}\n")
                 }
                 wholeKeywordTop = found.maxOfOrNull { wholeKeywordScore(it, words) }
+                // The pipeline's own preselect cost is the SEARCHING-to-RANKING gap minus find and this.
+                Log.i(TAG, "Research: (b)    recording took ${SystemClock.elapsedRealtime() - start - ms} ms")
             }
         }
 
