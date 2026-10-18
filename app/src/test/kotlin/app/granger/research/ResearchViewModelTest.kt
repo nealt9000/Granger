@@ -209,6 +209,41 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.running).isFalse()
     }
 
+    @Test fun aStorageErrorLeavesTheChatUsable() = runTest(main.dispatcher) {
+        chats.failure = IllegalStateException("disk I/O error")
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.running).isFalse()
+        assertThat(chats.chats.value).isEmpty()
+        chats.failure = null
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().outcome).isEqualTo(TurnOutcome.ANSWERED)
+    }
+
+    @Test fun aStorageErrorSettlingAFailedTurnIsSurvived() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " And")
+        small.gateAt = 1
+        small.failAt = 1
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        chats.failure = IllegalStateException("disk I/O error")
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.running).isFalse()
+        assertThat(chats.turnList.value.single().outcome).isEqualTo(TurnOutcome.PENDING)
+    }
+
+    @Test fun aStorageErrorOpeningAChatIsSurvived() = runTest(main.dispatcher) {
+        val chatId = chats.create("How do plants use light?")
+        chats.failure = IllegalStateException("disk I/O error")
+        val vm = vm(chatId = chatId)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.title).isEmpty()
+    }
+
     @Test fun longQuestionIsCut() = runTest(main.dispatcher) {
         val vm = vm()
         vm.ask("  " + "light ".repeat(300))

@@ -24,8 +24,9 @@ fun article(n: Int) = Passage(
     text = "Photosynthesis turns light into sugar in plants, part $n.",
 )
 
-/** In-memory [ResearchChats]. */
+/** In-memory [ResearchChats]. [failure], when set, is thrown by every call that reads or writes one chat. */
 class FakeChats : ResearchChats {
+    var failure: Exception? = null
     val chats = MutableStateFlow<List<ChatSummary>>(emptyList())
     val turnList = MutableStateFlow<List<ChatTurn>>(emptyList())
     private var nextChat = 1L
@@ -39,15 +40,20 @@ class FakeChats : ResearchChats {
 
     override fun turns(chatId: Long): Flow<List<ChatTurn>> = turnList.map { list -> list.filter { it.chatId == chatId } }
 
-    override suspend fun chat(chatId: Long): ChatSummary? = chats.value.firstOrNull { it.id == chatId }
+    override suspend fun chat(chatId: Long): ChatSummary? {
+        failure?.let { throw it }
+        return chats.value.firstOrNull { it.id == chatId }
+    }
 
     override suspend fun create(title: String): Long {
+        failure?.let { throw it }
         val id = nextChat++
         chats.update { it + ChatSummary(id, title, ++clock) }
         return id
     }
 
     override suspend fun startTurn(chatId: Long, question: String, askedDeeper: Boolean, quote: Passage?): Long {
+        failure?.let { throw it }
         val id = nextTurn++
         turnList.update {
             it + ChatTurn(
@@ -68,6 +74,7 @@ class FakeChats : ResearchChats {
         shown: List<Passage>,
         candidates: List<Passage>,
     ) {
+        failure?.let { throw it }
         val turn = turnList.value.firstOrNull { it.id == turnId } ?: return
         turnList.update { list ->
             list.map {

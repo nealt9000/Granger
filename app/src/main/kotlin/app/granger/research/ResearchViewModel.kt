@@ -129,7 +129,7 @@ class ResearchViewModel(
     )
 
     init {
-        if (chatId != null) viewModelScope.launch { title.value = chats.chat(chatId)?.title.orEmpty() }
+        if (chatId != null) viewModelScope.launch { logErrors { title.value = chats.chat(chatId)?.title.orEmpty() } }
     }
 
     /** Asks what is in [input]; a blank input asks [EMPTY_QUOTE_QUESTION] about the quote, or does nothing without one. */
@@ -225,10 +225,21 @@ class ResearchViewModel(
         live.value = Live(null, null, null, false)
         job = viewModelScope.launch {
             try {
-                work()
+                logErrors { work() }
             } finally {
                 live.value = null
             }
+        }
+    }
+
+    /** Runs [block], logging a storage error instead of crashing: the chat stays usable and Send works again. */
+    private suspend fun logErrors(block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            runCatching { android.util.Log.w("Granger", "Research chat storage failed", e) }
         }
     }
 
@@ -263,7 +274,9 @@ class ResearchViewModel(
         } catch (e: CancellationException) {
             val id = turnId
             if (id != null && !settled) {
-                appScope.launch { chats.finishTurn(id, TurnOutcome.INTERRUPTED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
+                appScope.launch {
+                    logErrors { chats.finishTurn(id, TurnOutcome.INTERRUPTED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
+                }
             }
             throw e
         } catch (e: Exception) {
@@ -271,8 +284,9 @@ class ResearchViewModel(
             runCatching { android.util.Log.w("Granger", "Research turn failed", e) }
             val id = turnId
             if (id != null && !settled) {
+                // The error may be the database's own; the turn then stays PENDING until the next launch interrupts it.
                 withContext(NonCancellable) {
-                    chats.finishTurn(id, TurnOutcome.FAILED, "", ask.medicalHint, false, emptyList(), kept, emptyList())
+                    logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
                 }
             }
         }
