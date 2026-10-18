@@ -42,6 +42,40 @@ class CitationsTest {
     }
 
     @Test
+    fun proseDeclineIsADecline() {
+        val a = "The provided passages do not contain information about your chances [1, 2]. However, odds vary."
+        assertThat(Citations.check(a, 2)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun passagesDontSayButAnswerIsAnAnswer() {
+        assertThat(Citations.check("The passages do not give the exact day, but he died in 1616 [2].", 2))
+            .isEqualTo(CitationCheck.Valid(setOf(2)))
+    }
+
+    @Test
+    fun noInformationPhrasingDeclines() {
+        assertThat(Citations.check("There is no information about this in the passages.", 2)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun answerMentioningPassagesLaterIsAnAnswer() {
+        assertThat(Citations.check("Paul wrote Romans [1]. The passages do not say when.", 2))
+            .isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun decimalDoesNotEndTheFirstSentence() {
+        assertThat(Citations.check("Everest is 8,848.86 m tall [1]. The passages do not say who measured it.", 1))
+            .isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun leadingCitationIsSkipped() {
+        assertThat(Citations.check("[1] The passages do not mention Ishmael.", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
     fun stripRemovesGroups() {
         assertThat(Citations.strip("A [1] b [2, 3].")).isEqualTo("A b.")
     }

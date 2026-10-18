@@ -32,6 +32,31 @@ class AnswerPromptTest {
         assertThat(header.length).isAtMost(241)
     }
 
+    private fun rules(medical: Boolean = false): List<String> =
+        build(medical = medical).lines().dropWhile { it != "Rules:" }.drop(1).takeWhile { it.startsWith("- ") }
+
+    @Test
+    fun promptAsksForTheAnswerFirst() {
+        val rules = rules()
+        val first = rules.indexOfFirst { it.contains("Answer the question directly in your first sentence") }
+        val decline = rules.indexOfFirst { it.contains(AnswerPrompt.DECLINE_TOKEN) }
+        assertThat(first).isAtLeast(0)
+        assertThat(first).isLessThan(decline)
+    }
+
+    @Test
+    fun promptAllowsCombiningPassages() {
+        assertThat(rules().joinToString("\n")).contains("combine facts from different passages and work out simple things from them (dates, ages")
+    }
+
+    @Test
+    fun declineRuleSaysOnlyIfNothingAnswers() {
+        val last = rules().last()
+        assertThat(last).startsWith("- Only if nothing in the passages answers the question")
+        assertThat(last).contains("NOT IN LIBRARY")
+        assertThat(rules(medical = true).last()).contains("medical question")
+    }
+
     @Test
     fun medicalRuleOnlyWhenMedical() {
         assertThat(build(medical = true)).contains("This is a medical question.")

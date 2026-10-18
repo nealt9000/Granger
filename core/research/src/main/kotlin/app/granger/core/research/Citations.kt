@@ -10,9 +10,46 @@ sealed interface CitationCheck {
 object Citations {
     private val group = Regex("\\[(\\d+(?:\\s*,\\s*\\d+)*)]")
 
+    /**
+     * A first sentence saying the passages lack the answer: "the passages do not ...", "... contain no ...",
+     * "there is no information", "no information was provided", "I cannot find", "not mentioned in the passages".
+     */
+    private val lacksAnswer = Regex(
+        "(the |these |provided |given )*passages? (do|does|did) not|" +
+            "(the |these |provided |given )*passages? (don't|doesn't)|" +
+            "(the |these |provided |given )*passages? (contain|provide|include|mention|say|state)s? no|" +
+            "there is no information|no information (is|was) (given|provided|available)|" +
+            "i (cannot|can't|could not|couldn't) find|" +
+            "not (mentioned|stated|found|covered) in the passages",
+        RegexOption.IGNORE_CASE,
+    )
+    private val goesOnToAnswer = Regex("\\b(but|however|although)\\b|;\\s*\\S", RegexOption.IGNORE_CASE)
+    private val leadingGroup = Regex("^\\s*" + group.pattern + "\\s*")
+    private val sentenceEnd = Regex("[.!?](?=\\s)|\\n")
+    private val abbreviation = Regex("(?:^|\\s)(?:\\p{Lu}|\\p{L}(?:\\.\\p{L})+)$")
+
+    /** Up to the first sentence end: not after a digit, a single capital (St.) or a dotted abbreviation (e.g., U.S.). */
+    internal fun firstSentence(answer: String): String {
+        val text = answer.replace(leadingGroup, "")
+        for (m in sentenceEnd.findAll(text)) {
+            if (m.value != "\n") {
+                val before = text.substring(0, m.range.first)
+                if (before.lastOrNull()?.isDigit() == true || abbreviation.containsMatchIn(before)) continue
+            }
+            return text.substring(0, m.range.first)
+        }
+        return text
+    }
+
+    private fun declinesInProse(answer: String): Boolean {
+        val sentence = firstSentence(answer)
+        return lacksAnswer.containsMatchIn(sentence) && !goesOnToAnswer.containsMatchIn(sentence)
+    }
+
     fun check(answer: String, passageCount: Int): CitationCheck {
         // Anywhere, not just first: a model that cites a line and then declines has still declined.
         if (AnswerPrompt.DECLINE_TOKEN in answer) return CitationCheck.ModelDeclined
+        if (declinesInProse(answer)) return CitationCheck.ModelDeclined
         // A digit run too big for Int is bad model output, not a crash.
         val parsed = group.findAll(answer)
             .flatMap { it.groupValues[1].split(',').map { n -> n.trim().toIntOrNull() } }

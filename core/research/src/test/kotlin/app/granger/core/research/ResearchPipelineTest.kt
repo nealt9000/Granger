@@ -478,6 +478,17 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun proseDeclineEndsAsDeclinedWithItsPassages() = runTest {
+        val found = listOf(passage("water", "Water boils at 100 degrees.", "Water"))
+        val reply = "The provided passages do not contain information about that [1]."
+        val gen = FakeGenerator(answer = { flowOf(reply) })
+        val events = ResearchPipeline(FakeFinder(found), FakeModels(gen)).run(ResearchRequest("Water boils?")).toList()
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.reply).isEqualTo(reply)
+        assertThat(out.passages).isNotEmpty()
+    }
+
+    @Test
     fun aCodeDeclineCarriesNoPassagesOrReply() = runTest {
         val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator())).run(ResearchRequest("Water boils?")).toList()
         val out = outcome(events) as Outcome.Declined
