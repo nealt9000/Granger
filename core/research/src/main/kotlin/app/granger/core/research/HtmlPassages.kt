@@ -11,6 +11,10 @@ object HtmlPassages {
     private const val BLOCKS = "h1, h2, h3, h4, p, li, dd, blockquote, pre"
     private const val NESTING = "p, li, dd, blockquote, pre"
     private val HEADINGS = setOf("h1", "h2", "h3", "h4")
+    private val SKIPPED_SECTIONS = setOf(
+        "references", "notes", "footnotes", "citations", "sources", "bibliography", "further reading",
+        "external links", "see also", "notes and references", "references and notes", "works cited", "literature cited",
+    )
     private val WHITESPACE = Regex("[\\s\\u00A0\\u2007\\u202F]+")
 
     fun split(html: String, targetWords: Int = 200, maxWords: Int = 300): List<HtmlPassage> {
@@ -22,6 +26,7 @@ object HtmlPassages {
         var anchor: String? = null
         val buffer = mutableListOf<String>() // words of the passage being built
         val blocks = mutableListOf<String>()
+        var skipLevel = 0 // level of the bibliography-style heading being skipped; 0 when not skipping
 
         fun flush() {
             if (buffer.isNotEmpty()) out += HtmlPassage(heading, anchor, blocks.joinToString("\n"))
@@ -32,10 +37,15 @@ object HtmlPassages {
         for (el in doc.select(BLOCKS)) {
             if (el.tagName() in HEADINGS) {
                 flush()
-                heading = el.text().trim()
+                val level = el.tagName()[1] - '0'
+                val title = el.text().trim()
+                if (skipLevel != 0 && level <= skipLevel) skipLevel = 0
+                if (skipLevel == 0 && title.lowercase() in SKIPPED_SECTIONS) skipLevel = level
+                heading = title
                 anchor = anchorOf(el)
                 continue
             }
+            if (skipLevel != 0) continue
             // A <p> inside an <li> or <blockquote> is already part of that block's text.
             if (el.parents().any { it.`is`(NESTING) }) continue
             val words = el.text().trim().split(WHITESPACE).filter { it.isNotEmpty() }

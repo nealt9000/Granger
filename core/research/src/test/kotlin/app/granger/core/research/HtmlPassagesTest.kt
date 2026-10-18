@@ -50,4 +50,24 @@ class HtmlPassagesTest {
         val out = HtmlPassages.split("<p>one\u00A0two&nbsp;three\u202Ffour</p>")
         assertThat(out.single().text).isEqualTo("one two three four")
     }
+
+    @Test fun referencesSectionGivesNoPassages() {
+        val out = HtmlPassages.split("<h2>Beliefs</h2><p>Many drank wine.</p><h2>References</h2><p>Smith 2001 Wine.</p><ul><li>Jones 1999.</li></ul>")
+        assertThat(out.map { it.heading }).containsExactly("Beliefs")
+    }
+
+    @Test fun subsectionsOfSkippedSectionAreSkipped() {
+        val out = HtmlPassages.split("<h2>Notes</h2><h3>Citations</h3><p>x</p><h3>Other</h3><p>y</p><h2>Legacy</h2><p>z</p>")
+        assertThat(out.map { it.heading }).containsExactly("Legacy")
+    }
+
+    @Test fun headingMatchIsExactNotSubstring() {
+        val out = HtmlPassages.split("<h2>Sources of the Nile</h2><p>It rises far south.</p>")
+        assertThat(out.map { it.heading }).containsExactly("Sources of the Nile")
+    }
+
+    @Test fun seeAlsoIsSkippedCaseInsensitively() {
+        val out = HtmlPassages.split("<h2>Intro</h2><p>a</p><h2>see also</h2><p>b</p><ul><li>c</li></ul>")
+        assertThat(out.map { it.heading }).containsExactly("Intro")
+    }
 }
