@@ -257,7 +257,10 @@ class SourceViewModel(
         val volumeRows = volumeRows(s.volumes, records)
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
-                is PackEntry -> listOf(item.language, "Updated ${item.snapshotDate}", item.license)
+                is PackEntry -> listOf(
+                    item.language, "Updated ${item.snapshotDate}",
+                    if (item.nonCommercial) "${item.license} · provided by Kiwix" else item.license,
+                )
                 is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")

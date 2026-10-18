@@ -51,6 +51,8 @@ data class PackEntry(
     val zimUuid: String,
     /** The ZIM's `Name` metadata, shared by every snapshot (and flavour) of the same content. */
     val zimName: String,
+    /** The license forbids commercial use (iFixit): the app says Kiwix provides the pack. Absent in older catalogs. */
+    val nonCommercial: Boolean = false,
 ) : CatalogItem
 
 /** An e-book (EPUB) the reader opens. */

@@ -110,7 +110,7 @@ def pack_entry(curated, fetch=http_get):
     canonical = meta4_url.removesuffix(".meta4").replace("://lb.download.kiwix.org/", "://download.kiwix.org/")
     stable = [u for u in meta["mirrors"]
               if u.startswith("https://") and urllib.parse.urlparse(u).hostname in STABLE_MIRRORS]
-    return {
+    result = {
         "id": f"{name}_{flavour}" if flavour else name,
         "title": curated.get("title", entry["title"]),
         "description": entry["summary"],
@@ -126,6 +126,9 @@ def pack_entry(curated, fetch=http_get):
         "zimUuid": entry["uuid"],
         "zimName": entry["name"],
     }
+    if curated.get("nonCommercial"):
+        result["nonCommercial"] = True
+    return result
 
 
 def release_entry(curated, head=http_head, root=None):

@@ -44,6 +44,15 @@ class CatalogParserTest {
         assertThat(catalog.item("wikipedia_en_medicine_nopic")).isSameInstanceAs(med)
     }
 
+    @Test fun nonCommercialDefaultsToFalse() {
+        assertThat(ok(parse(catalogJson())).packs.single().nonCommercial).isFalse()
+    }
+
+    @Test fun nonCommercialIsRead() {
+        val catalog = ok(parse(catalogJson(packExtra = ""","nonCommercial": true""")))
+        assertThat(catalog.packs.single().nonCommercial).isTrue()
+    }
+
     @Test fun tamperedBytesFailTheSignature() {
         val bytes = catalogJson()
         val sig = TestKeys.sign(bytes)

@@ -32,11 +32,12 @@ fun catalogJson(
     modelFileName: String = "e2b.litertlm",
     packUrl: String = "https://download.kiwix.org/zim/wikipedia/med.zim",
     snapshotDate: String = "2026-10-10",
+    packExtra: String = "",
 ): ByteArray = """
     {"formatVersion": $formatVersion, "generatedAt": "$generatedAt",
      "packs": [{"id": "med", "title": "$packTitle", "category": "Medical", "language": "eng", "sizeBytes": 1000,
                 "sha256": "$SHA_A", "urls": ["$packUrl"], "snapshotDate": "$snapshotDate", "license": "CC BY-SA 4.0",
-                "hasFulltextIndex": true, "zimUuid": "u-med", "zimName": "wikipedia_en_medicine"}],
+                "hasFulltextIndex": true, "zimUuid": "u-med", "zimName": "wikipedia_en_medicine"$packExtra}],
      "models": [{"id": "e2b", "title": "E2B", "role": "small", "fileName": "$modelFileName", "sizeBytes": 2000,
                  "minRamGb": 6, "sha256": "$SHA_B", "url": "https://huggingface.co/e2b", "license": "Apache-2.0",
                  "evalPassed": true},

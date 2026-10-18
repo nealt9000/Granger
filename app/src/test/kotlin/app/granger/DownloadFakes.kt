@@ -34,10 +34,12 @@ fun packEntry(
     sha256: String = SHA_A,
     description: String = "",
     urls: List<String> = listOf("https://a.test/$id.zim"),
+    license: String = "CC BY-SA 4.0",
+    nonCommercial: Boolean = false,
 ) = PackEntry(
     id = id, title = "Pack $id", description = description, category = category, language = "eng", sizeBytes = size, sha256 = sha256,
-    urls = urls, snapshotDate = "2026-10-10", license = "CC BY-SA 4.0",
-    hasFulltextIndex = true, zimUuid = "u-$id", zimName = "n-$id",
+    urls = urls, snapshotDate = "2026-10-10", license = license,
+    hasFulltextIndex = true, zimUuid = "u-$id", zimName = "n-$id", nonCommercial = nonCommercial,
 )
 
 fun modelEntry(id: String, role: ModelRole = ModelRole.SMALL, size: Long = 2_000, sha256: String = SHA_B) = ModelEntry(

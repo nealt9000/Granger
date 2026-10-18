@@ -21,7 +21,21 @@
     {"name": "gutenberg_en_lcc-pr", "category": "Literature & Drama", "license": "Public domain (US)",
      "title": "Project Gutenberg: English literature"},
     {"name": "wikivoyage_en_all", "flavour": "nopic", "category": "Regional", "license": "CC BY-SA 4.0",
-     "title": "Wikivoyage travel guide (no pictures)"}
+     "title": "Wikivoyage travel guide (no pictures)"},
+    {"name": "wiktionary_en_all", "flavour": "nopic", "category": "Reference", "license": "CC BY-SA 4.0",
+     "title": "Wiktionary"},
+    {"name": "wikipedia_en_geography", "flavour": "maxi", "category": "Reference", "license": "CC BY-SA 4.0",
+     "title": "Geography (Wikipedia)"},
+    {"name": "wikipedia_en_physics", "flavour": "maxi", "category": "Science & Math", "license": "CC BY-SA 4.0",
+     "title": "Physics (Wikipedia)"},
+    {"name": "wikipedia_en_chemistry", "flavour": "maxi", "category": "Science & Math", "license": "CC BY-SA 4.0",
+     "title": "Chemistry (Wikipedia)"},
+    {"name": "wikipedia_en_mathematics", "flavour": "maxi", "category": "Science & Math", "license": "CC BY-SA 4.0",
+     "title": "Mathematics (Wikipedia)"},
+    {"name": "wikipedia_en_knots", "flavour": "maxi", "category": "How-to", "license": "CC BY-SA 4.0",
+     "title": "Knots (Wikipedia)"},
+    {"name": "ifixit_en_all", "category": "How-to", "license": "CC BY-NC-SA 3.0", "nonCommercial": true,
+     "title": "iFixit repair guides"}
   ],
   "books": [
     {"bookRelease": "tools/pack-builder/releases/granger_classics_books.json", "license": "Public domain (US)"}
