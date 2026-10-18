@@ -79,8 +79,9 @@ class EvalActivity : ComponentActivity() {
             val packNames = c.library.packs.first().associate { it.id to it.name }
             val sourceName = { p: Passage -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
             val finder = RecordingFinder(c.passageFinder)
-            val pipeline = ResearchPipeline(finder, ModelsAdapter(c.modelManager), c.rankingConfig)
-            val runner = EvalRunner(pipeline, finder, sourceName) { android.os.SystemClock.elapsedRealtime() }
+            val prompts = PromptRecorder(ModelsAdapter(c.modelManager))
+            val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig)
+            val runner = EvalRunner(pipeline, finder, sourceName, prompts) { android.os.SystemClock.elapsedRealtime() }
             runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
             log("run $runId: ${items.size} items, guesses=$guesses")
             runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)

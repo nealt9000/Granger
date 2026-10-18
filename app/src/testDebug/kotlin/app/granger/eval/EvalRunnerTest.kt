@@ -12,6 +12,8 @@ import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Rule
@@ -51,7 +53,8 @@ class EvalRunnerTest {
 
     private fun runner(results: List<Passage> = listOf(water), source: (Passage) -> String = { it.sourceId }, small: Gen = this.small): EvalRunner {
         val finder = RecordingFinder(Finder(results))
-        return EvalRunner(ResearchPipeline(finder, Models(small, large)), finder, source) { ticks += 10; ticks }
+        val prompts = PromptRecorder(Models(small, large))
+        return EvalRunner(ResearchPipeline(finder, prompts), finder, source, prompts) { ticks += 10; ticks }
     }
 
     private fun item(id: String, question: String = "At what temperature does water boil?", prior: String? = null, multiStep: Boolean = false) =
@@ -80,6 +83,70 @@ class EvalRunnerTest {
         assertThat(ms.getLong("total")).isAtLeast(ms.getLong("firstWords"))
         assertThat(r.has("deeper")).isFalse()
         assertThat(r.has("guesses")).isFalse()
+    }
+
+    @Test
+    fun recordsPromptsInCallOrderWithStagesAndConcatenatedOutput() = runTest {
+        val out = File(tmp.root, "r/results.jsonl")
+        runner().run(listOf(item("a")), out, GuessModels.NONE)
+        val p = records(out).single().getJSONArray("prompts")
+        assertThat((0 until p.length()).map { p.getJSONObject(it).getString("stage") }).containsExactly("rewrite", "answer").inOrder()
+        assertThat(p.getJSONObject(0).getString("prompt")).startsWith("Turn the question")
+        assertThat(p.getJSONObject(0).getString("output")).isEqualTo("keywords: water, boils\nmedical: no")
+        assertThat(p.getJSONObject(1).getString("prompt")).contains("Passages:")
+        assertThat(p.getJSONObject(1).getString("output")).isEqualTo("Water boils at 100 °C [1].")
+    }
+
+    @Test
+    fun promptStagesCoverPriorDeeperAndGuesses() = runTest {
+        val declining = Gen("small") { if (it.contains("Passages:")) "NOT IN LIBRARY" else "Maybe." }
+        val out = File(tmp.root, "r/results.jsonl")
+        runner(small = declining).run(listOf(item("d", prior = "Before?")), out, GuessModels.BOTH)
+        val p = records(out).single().getJSONArray("prompts")
+        assertThat((0 until p.length()).map { p.getJSONObject(it).getString("stage") })
+            .containsExactly("prior-rewrite", "prior-answer", "rewrite", "answer", "guess-small", "guess-large").inOrder()
+        val deeperOut = File(tmp.root, "r2/results.jsonl")
+        runner().run(listOf(item("m", multiStep = true)), deeperOut, GuessModels.NONE)
+        val q = records(deeperOut).single().getJSONArray("prompts")
+        assertThat((0 until q.length()).map { q.getJSONObject(it).getString("stage") }).containsExactly("rewrite", "answer", "deeper").inOrder()
+    }
+
+    @Test
+    fun promptRecordingResetsPerItem() = runTest {
+        val out = File(tmp.root, "r/results.jsonl")
+        runner().run(listOf(item("a"), item("b")), out, GuessModels.NONE)
+        for (r in records(out)) assertThat(r.getJSONArray("prompts").length()).isEqualTo(2)
+    }
+
+    @Test
+    fun recorderForwardsOnReadyAndChunks() = runTest {
+        val inner = object : ResearchModels {
+            override suspend fun generator(deeper: Boolean) = object : TextGenerator {
+                override fun generate(prompt: String, maxTokens: Int): Flow<String> = flowOf("a", "b")
+                override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flowOf("c", "d").onStart { onReady(); ready = true }
+            }
+            override suspend fun embedder(): PassageEmbedder? = null
+        }
+        val rec = PromptRecorder(inner)
+        var fired = false
+        val chunks = rec.generator(false).generate("p", 5) { fired = true }.toList()
+        assertThat(fired).isTrue()
+        assertThat(ready).isTrue()
+        assertThat(chunks).containsExactly("c", "d").inOrder()
+        assertThat(rec.toJson().getJSONObject(0).getString("output")).isEqualTo("cd")
+    }
+
+    private var ready = false
+
+    @Test
+    fun aFailedRecordKeepsThePromptsItHas() = runTest {
+        val finder = RecordingFinder(PassageFinder { throw IllegalStateException("disk I/O error") })
+        val prompts = PromptRecorder(Models(small, large))
+        val out = File(tmp.root, "rf/results.jsonl")
+        EvalRunner(ResearchPipeline(finder, prompts), finder, { it.sourceId }, prompts) { ticks += 10; ticks }.run(listOf(item("a")), out, GuessModels.NONE)
+        val r = records(out).single()
+        assertThat(r.getString("outcome")).isEqualTo("failed")
+        assertThat(r.getJSONArray("prompts").getJSONObject(0).getString("stage")).isEqualTo("rewrite")
     }
 
     @Test

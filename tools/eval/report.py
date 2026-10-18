@@ -7,8 +7,8 @@ from grading import current_grade
 CSS = """body{font:15px/1.5 system-ui,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem;color:#1b1b1b;background:#fff}
 table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:.25rem .6rem;text-align:left}
 .pass{color:#0a6b2a;font-weight:600}.fail{color:#b00020;font-weight:600}.q{border-top:1px solid #ccc;margin-top:1.5rem;padding-top:.5rem}
-pre{white-space:pre-wrap;background:#f4f4f4;padding:.5rem}.dim{color:#666}small{color:#666}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#e8e8e8}pre{background:#242424}td,th,.q{border-color:#444}.dim,small{color:#aaa}.pass{color:#6fdc8c}.fail{color:#ff7a8a}}"""
+pre{white-space:pre-wrap;background:#f4f4f4;padding:.5rem}.badge{background:#0a6b2a;color:#fff;border-radius:3px;padding:0 .4rem;font-size:.8em}.picked{background:#e6f4ea}details{margin:.25rem 0}button{margin:0 .25rem .5rem 0}.dim{color:#666}small{color:#666}
+@media(prefers-color-scheme:dark){.picked{background:#1d3324}.badge{background:#2f8f4f}body{background:#161616;color:#e8e8e8}pre{background:#242424}td,th,.q{border-color:#444}.dim,small{color:#aaa}.pass{color:#6fdc8c}.fail{color:#ff7a8a}}"""
 
 
 def pct(x):
@@ -46,11 +46,43 @@ def totals_text(m):
     return re.sub(r"<[^>]+>|</tr>", lambda x: "\n" if x.group(0) == "</tr>" else "\t", totals_rows(m)).replace("\t\t", "\t").strip()
 
 
-def passages(ps):
-    if not ps:
+def _key(p):
+    return (p.get("source", ""), p.get("location", ""), p.get("heading") or "")
+
+
+def found_table(found, chosen):
+    """The candidates as a table (rank, source, title, place, lexical score); the ones sent to the model are marked."""
+    if not found:
         return "<p class=dim>none</p>"
-    return "<ol>%s</ol>" % "".join("<li>%s / %s / %s%s</li>" % (e(p.get("source", "")), e(p.get("title", "")), e(p.get("heading") or p.get("location", "")),
-                                                                 " <small>lexical %.2f</small>" % p["lexical"] if "lexical" in p else "") for p in ps)
+    picked = {_key(p) for p in chosen}
+    rows = "".join('<tr%s><td>%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
+        ' class="picked"' if _key(p) in picked else "", i, e(p.get("source", "")), e(p.get("title", "")), e(p.get("heading") or p.get("location", "")),
+        "%.2f" % p["lexical"] if "lexical" in p else "", "chosen" if _key(p) in picked else "") for i, p in enumerate(found, 1))
+    return "<table><tr><th>#</th><th>Source</th><th>Title</th><th>Heading / location</th><th>Lexical</th><th></th></tr>%s</table>" % rows
+
+
+def chosen_list(chosen, cited):
+    """The passages as the model saw them, numbered from 1; cited ones are badged and open."""
+    if not chosen:
+        return "<p class=dim>none</p>"
+    out = []
+    for n, p in enumerate(chosen, 1):
+        is_cited = n in cited
+        out.append('<details%s><summary><b>[%d]</b> %s / %s / %s%s</summary><pre>%s</pre></details>' % (
+            " open" if is_cited else "", n, e(p.get("source", "")), e(p.get("title", "")), e(p.get("heading") or p.get("location", "")),
+            ' <span class="badge">cited</span>' if is_cited else "", e(p.get("text", ""))))
+    return "".join(out)
+
+
+def timings_line(ms):
+    names = (("rewrite", "rewrite"), ("search", "search"), ("rank", "rank"), ("firstWords", "first words"), ("total", "total"))
+    parts = ["%s %.1f s" % (label, ms[k] / 1000) for k, label in names if isinstance(ms.get(k), (int, float))]
+    return "<p><b>Timings:</b> %s</p>" % " · ".join(parts) if parts else ""
+
+
+def prompts_block(prompts):
+    return "".join("<details><summary>Prompt: %s</summary><p><b>Prompt</b></p><pre>%s</pre><p><b>Output</b></p><pre>%s</pre></details>" % (
+        e(p.get("stage", "")), e(p.get("prompt", "")), e(p.get("output", ""))) for p in prompts or [])
 
 
 def grade_text(grades, id, kind, reply):
@@ -58,13 +90,38 @@ def grade_text(grades, id, kind, reply):
     return "<b>%s</b> %s" % (e(g["grade"]), e(g.get("reason", ""))) if g else "<span class=dim>ungraded</span>"
 
 
+def grade_summary(item, rec, grades):
+    """(label for the index, set of filter flags) from the answer grade, or the guess grades."""
+    flags, labels = set(), []
+    if item.get("answerable") and rec["outcome"] == "answered":
+        g = current_grade(grades, rec["id"], "answer", rec.get("reply", ""))
+        labels.append(g["grade"] if g else "ungraded")
+        if g and g["grade"] == "not-grounded":
+            flags.add("not-grounded")
+    d = rec.get("deeper")
+    if d:
+        g = current_grade(grades, rec["id"], "deeper", d.get("reply", ""))
+        if g and g["grade"] == "not-grounded":
+            flags.add("not-grounded")
+    for model, gu in (rec.get("guesses") or {}).items():
+        g = current_grade(grades, rec["id"], "guess-" + model, gu.get("text", ""))
+        labels.append("%s: %s" % (model, g["grade"] if g else "ungraded"))
+        if g and g["grade"] == "confidently-wrong":
+            flags.add("confidently-wrong")
+    return ", ".join(labels), flags
+
+
 def question_block(item, rec, grades):
     id = rec["id"]
-    h = ['<div class="q"><h3>%s <small>%s, %s%s</small></h3><p>%s</p>' % (e(id), e(item.get("group", "")), e(item.get("split", "")), ", medical" if item.get("medical") else "", e(item["question"]))]
+    _, flags = grade_summary(item, rec, grades)
+    h = ['<div class="q" id="q-%s" data-outcome="%s" data-flags="%s"><h3>%s <small>%s, %s%s</small></h3><p>%s</p>' % (
+        e(id), e(rec["outcome"]), e(" ".join(sorted(flags))), e(id), e(item.get("group", "")), e(item.get("split", "")), ", medical" if item.get("medical") else "", e(item["question"]))]
     h.append("<p><b>Reference:</b> %s</p>" % e(item.get("reference") or ""))
-    h.append("<p><b>Keywords:</b> %s%s</p>" % (e(", ".join(rec.get("keywords", []))), " (rewrite fell back)" if rec.get("rewriteFallback") else ""))
-    h.append("<details><summary>Found (%d)</summary>%s</details>" % (len(rec.get("found", [])), passages(rec.get("found", []))))
-    h.append("<p><b>Chosen:</b></p>%s" % passages(rec.get("chosen", [])))
+    h.append(timings_line(rec.get("ms") or {}))
+    h.append("<p><b>Search words:</b> %s%s</p>" % (e(", ".join(rec.get("keywords", []))), " (rewrite fell back)" if rec.get("rewriteFallback") else ""))
+    found, chosen = rec.get("found", []), rec.get("chosen", [])
+    h.append("<details><summary><b>Found</b> (%d)</summary>%s</details>" % (len(found), found_table(found, chosen)))
+    h.append("<p><b>Chosen (sent to the model):</b></p>%s" % chosen_list(chosen, rec.get("cited", [])))
     h.append("<p><b>Outcome:</b> %s, cited %s</p><pre>%s</pre>" % (e(rec["outcome"]), e(str(rec.get("cited", []))), e(rec.get("reply", ""))))
     if item.get("answerable") and rec["outcome"] == "answered":
         h.append("<p><b>Grade:</b> %s</p>" % grade_text(grades, id, "answer", rec.get("reply", "")))
@@ -73,7 +130,24 @@ def question_block(item, rec, grades):
         h.append("<p><b>Think deeper:</b> %s</p><pre>%s</pre><p>%s</p>" % (e(d["outcome"]), e(d.get("reply", "")), grade_text(grades, id, "deeper", d.get("reply", ""))))
     for model, g in (rec.get("guesses") or {}).items():
         h.append("<p><b>Best guess (%s):</b></p><pre>%s</pre><p>%s</p>" % (e(model), e(g.get("text", "")), grade_text(grades, id, "guess-" + model, g.get("text", ""))))
+    if rec.get("prompts"):
+        h.append("<p><b>Prompts</b></p>%s" % prompts_block(rec["prompts"]))
     return "".join(h) + "</div>"
+
+
+FILTERS = (("All", "all"), ("Answered", "answered"), ("Declined", "declined"), ("Not grounded", "not-grounded"), ("Confidently wrong", "confidently-wrong"))
+
+FILTER_JS = """document.querySelectorAll('#filters button').forEach(function(b){b.onclick=function(){var f=b.dataset.f;
+document.querySelectorAll('.q').forEach(function(q){var ok=f==='all'||q.dataset.outcome===f||(q.dataset.flags||'').split(' ').indexOf(f)>=0;q.style.display=ok?'':'none'})}})"""
+
+
+def index_table(items_recs, grades):
+    rows = []
+    for item, rec in items_recs:
+        label, _ = grade_summary(item, rec, grades)
+        rows.append('<tr><td><a href="#q-%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td></tr>' % (e(rec["id"]), e(rec["id"]), e(item.get("group", "")), e(rec["outcome"]), e(label)))
+    buttons = "".join('<button type="button" data-f="%s">%s</button> ' % (f, e(t)) for t, f in FILTERS)
+    return '<div id="filters">%s</div><table><tr><th>Question</th><th>Group</th><th>Outcome</th><th>Grade</th></tr>%s</table><script>%s</script>' % (buttons, "".join(rows), FILTER_JS)
 
 
 def _state(item, rec, grades):
@@ -100,8 +174,10 @@ def run_report(run_id, items, records, grades, compare=None):
     body = ["<h1>Research eval: %s</h1><p>%d questions</p><h2>Against the bar</h2>%s" % (e(run_id), m["n"], totals_rows(m))]
     if compare:
         body.append(compare_block(items, compare[1], records, grades))
+    pairs = [(by_id[r["id"]], r) for r in records if r["id"] in by_id]
     body.append("<h2>Questions</h2>")
-    body += [question_block(by_id[r["id"]], r, grades) for r in records if r["id"] in by_id]
+    body.append(index_table(pairs, grades))
+    body += [question_block(i, r, grades) for i, r in pairs]
     return page("Research eval %s" % run_id, "".join(body))
 
 
