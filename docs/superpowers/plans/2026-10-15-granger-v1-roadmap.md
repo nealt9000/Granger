@@ -181,8 +181,13 @@ For Plan 9:
 - The last scroll once stopped short of a finished turn's source cards (after Retry).
 - Any failure reads "The model needs repair". Tell search and storage (IO) failures apart from the model's.
 - Enforce the prompt budget at runtime; chars/4 undercounts tokens in non-English text.
-- The rail's Research tool should keep a kept chat open (`launchSingleTop`) rather than start a new one.
+- The rail's Research tool does nothing while a kept chat is open (`launchSingleTop` keeps it); only **+** starts a new chat, unlike `openResearch`.
 - Gate `Features.RESEARCH`, or flip `evalPassed`, before any release build.
 - Measure the per-keyword ZIM search cost on a full Wikipedia on the SD card before the beta.
 - Add a JVM test for ranking with `corpus` = all the passages found.
+- Only one model use runs at a time, and the wait for it counts toward the rewrite's 5 s timeout, so a question asked while another chat answers can fall back to plain keywords. Start the timeout once the model is free.
+- A background release requested mid-turn still runs at the turn's end even if the app is back in front, so the next question reloads the model.
+- A medical turn that is stopped or fails before its first words stores the question's medical hint rather than the pipeline's flag, so its banner can vanish once settled.
+- `deleteChat` and the Room `turns`/`recent` flows behind `stateIn` still have no error guard; a storage failure there can crash the app.
+- No JVM tests for the citation tab-lookup catch or the card-matching dispatcher move.
 - Minor polish deferred from the reviews: no `--release 17` on `:core:research`; `HtmlPassages` doesn't split on no-break spaces; `Rewrite.parse` doesn't cap at 6 keywords or reject an echoed placeholder; `Keywords` drops apostrophes (O'Brien → obrien) that passage text keeps; the question is capped at 1,000 characters, but the prompt header isn't length-capped; `Ranking.cosine` doesn't check vector sizes; `Citations.strip` eats newlines before a group; `ModelManager` closes the resident model before checking the requested file exists and doesn't enforce the tier; a large-model reload failure mid-answer fails the turn instead of falling back; `BookIndex.passages` takes its rows without `ORDER BY` and one damaged book drops all book passages; a citation to a vanished reading tab does nothing; `ZimUrls.forEntry` doesn't encode the fragment.
