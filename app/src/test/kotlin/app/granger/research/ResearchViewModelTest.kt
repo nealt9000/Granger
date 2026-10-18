@@ -9,7 +9,9 @@ import app.granger.MainDispatcherRule
 import app.granger.book
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.InstalledModels
+import app.granger.core.ai.LlmEngine
 import app.granger.core.ai.LlmEngineFactory
+import app.granger.core.ai.LlmSize
 import app.granger.core.ai.ModelManager
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.ai.TextEmbedderFactory
@@ -24,7 +26,10 @@ import app.granger.pack
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -47,16 +52,26 @@ class ResearchViewModelTest {
         text = "Chlorophyll in the leaves absorbs light so the plant can make sugar from water and air.",
     )
 
-    private fun TestScope.vm(chatId: Long? = null, quote: Passage? = null): ResearchViewModel {
-        val manager = ModelManager(
-            DeviceTier.THINK_DEEPER, installed,
-            LlmEngineFactory { _, _ -> error("the view model doesn't load models itself") },
-            TextEmbedderFactory { error("no embedder") },
-            backgroundScope, useEmbedder = false,
-        )
+    private fun TestScope.vm(
+        chatId: Long? = null,
+        quote: Passage? = null,
+        manager: ModelManager = manager(LlmEngineFactory { _, _ -> error("the view model doesn't load models itself") }),
+    ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf, backgroundScope,
         )
+    }
+
+    private fun TestScope.manager(llms: LlmEngineFactory) = ModelManager(
+        DeviceTier.THINK_DEEPER, installed, llms, TextEmbedderFactory { error("no embedder") }, backgroundScope,
+        useEmbedder = false, io = StandardTestDispatcher(testScheduler),
+    )
+
+    private class ClosingLlm : LlmEngine {
+        var closed = false
+        override fun load() {}
+        override fun generate(prompt: String, maxTokens: Int): Flow<String> = emptyFlow()
+        override fun close() { closed = true }
     }
 
     private fun ResearchViewModel.ask(question: String) {
@@ -180,6 +195,41 @@ class ResearchViewModelTest {
         vm.ask("How do plants use light?")
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.turns.single().medical).isFalse()
+    }
+
+    @Test fun theModelIsReleasedAQuietSpellAfterEachTurn() = runTest(main.dispatcher) {
+        val llm = ClosingLlm()
+        val manager = manager(LlmEngineFactory { _, _ -> llm })
+        manager.engine(LlmSize.SMALL) // as the turn's pipeline would
+        val vm = vm(manager = manager)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.running).isFalse()
+        testScheduler.advanceTimeBy(119_000)
+        testScheduler.runCurrent()
+        assertThat(llm.closed).isFalse()
+        testScheduler.advanceTimeBy(2_000)
+        testScheduler.runCurrent()
+        assertThat(llm.closed).isTrue()
+    }
+
+    @Test fun aBackgroundReleaseMidTurnWaitsForTheTurnsEnd() = runTest(main.dispatcher) {
+        val llm = ClosingLlm()
+        val manager = manager(LlmEngineFactory { _, _ -> llm })
+        manager.engine(LlmSize.SMALL)
+        small.answer = listOf("Plants use light [1].", " And")
+        small.gateAt = 1
+        val vm = vm(manager = manager)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        manager.releaseNow()
+        testScheduler.runCurrent()
+        assertThat(llm.closed).isFalse()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        assertThat(vm.state.value.running).isFalse()
+        assertThat(llm.closed).isTrue()
     }
 
     @Test fun stopBeforeWritingInterruptsTheTurn() = runTest(main.dispatcher) {

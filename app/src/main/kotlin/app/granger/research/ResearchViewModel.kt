@@ -228,15 +228,23 @@ class ResearchViewModel(
         models.releaseSoon()
     }
 
-    /** Runs [work] as the one running turn; nothing else starts until it ends. */
+    /**
+     * Runs [work] as the one running turn; nothing else starts until it ends. The turn holds the models, so a release
+     * asked for meanwhile (the app going to the background) waits for its end rather than reloading between stages;
+     * after it, they go after a quiet spell, so a chat left open (or under a reader) doesn't keep them.
+     */
     private fun begin(work: suspend () -> Unit) {
         stopRequested = false
         live.value = Live(null, null, null, false)
         job = viewModelScope.launch {
+            val letGo = models.hold()
             try {
                 logErrors { work() }
             } finally {
                 live.value = null
+                // Asked while still held, so a background release waiting on the hold isn't replaced by the timer.
+                models.releaseSoon()
+                letGo()
             }
         }
     }
