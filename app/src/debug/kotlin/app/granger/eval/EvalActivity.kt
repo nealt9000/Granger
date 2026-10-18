@@ -38,6 +38,9 @@ class EvalActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // An unattended run starts over the lock screen and keeps the screen on, so the phone never puts it in the background.
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
         setContent {
             MaterialTheme {
                 Surface(Modifier.fillMaxSize()) {
