@@ -11,11 +11,44 @@ class RankingTest {
 
     @Test
     fun preselectCapsPerSource() {
-        val a = (1..6).map { passage("A", "steam engine", it) }
+        val a = (1..6).map { passage("A", "steam engine", it).copy(location = "A-1") }
         val b = (1..2).map { passage("B", "steam", it) }
         val out = Ranking.preselect(a + b, listOf("steam", "engine"), config)
         assertThat(out.count { it.sourceId == "A" }).isEqualTo(3)
         assertThat(out.count { it.sourceId == "B" }).isEqualTo(2)
+    }
+
+    @Test
+    fun perDocumentCapCountsArticlesNotPacks() {
+        fun article(title: String, n: Int) =
+            Passage(SourceKind.ARTICLE, "pack", title, location = "$title.html", heading = "H$n", text = "steam engine $n")
+        val ps = (1..5).map { article("One", it) } + (1..5).map { article("Two", it) }
+        val out = Ranking.preselect(ps, listOf("steam", "engine"), config)
+        assertThat(out.count { it.sourceTitle == "One" }).isEqualTo(3)
+        assertThat(out.count { it.sourceTitle == "Two" }).isEqualTo(3)
+    }
+
+    @Test
+    fun realCorpusLeadBeatsLaterSections() {
+        fun article(title: String, heading: String, text: String) =
+            Passage(SourceKind.ARTICLE, "wiki", title, location = "$title.html", heading = heading, text = text)
+        val lead = article(
+            "Mary Shelley", "Mary Shelley",
+            "Mary Wollstonecraft Shelley (nee Godwin; 30 August 1797 - 1 February 1851) was an English novelist, " +
+                "who wrote the Gothic novel Frankenstein (1818).",
+        )
+        val career = article(
+            "Mary Shelley", "Return to England and writing career",
+            "Mary Shelley returned to England. The publication of Frankenstein made her known.",
+        )
+        val editorial = article(
+            "Mary Shelley", "Editorial work",
+            "Mary Shelley edited the poems of Percy; publication of Frankenstein in a new edition followed.",
+        )
+        val film = article("Frankenstein (1931 film)", "Frankenstein (1931 film)", "Frankenstein is a 1931 American horror film.")
+        val keywords = listOf("mary shelley", "frankenstein", "publication date")
+        val out = Ranking.byLexical(Ranking.preselect(listOf(career, editorial, film, lead), keywords, config), keywords, config)
+        assertThat(out.first()).isEqualTo(lead)
     }
 
     @Test
@@ -57,17 +90,6 @@ class RankingTest {
         val none = passage("C", "river", 3)
         val out = Ranking.byLexical(listOf(none, half, full), listOf("steam", "engine"), config)
         assertThat(out).containsExactly(full, half).inOrder()
-    }
-
-    @Test
-    fun lexicalRankWeighsWordsOverTheWholeCorpus() {
-        val target = passage("T", "steam engine")
-        val others = (1..9).map { passage("S$it", "steam boiler", it) }
-        val keywords = listOf("steam engine", "boiler")
-        val strict = config.copy(lexicalThreshold = 0.6)
-        // Alone, "boiler" looks as rare as "engine"; across the corpus "engine" is the rare word, and target has it.
-        assertThat(Ranking.byLexical(listOf(target), keywords, strict)).isEmpty()
-        assertThat(Ranking.byLexical(listOf(target), keywords, strict, corpus = listOf(target) + others)).containsExactly(target)
     }
 
     @Test

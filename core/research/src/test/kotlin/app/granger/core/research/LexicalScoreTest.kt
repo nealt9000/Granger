@@ -1,12 +1,11 @@
 package app.granger.core.research
 
 import com.google.common.truth.Truth.assertThat
-import kotlin.math.ln
 import org.junit.Test
 
 class LexicalScoreTest {
     private fun passage(text: String, title: String = "Untitled", heading: String = "") =
-        Passage(SourceKind.ARTICLE, "id", title, heading = heading, text = text)
+        Passage(SourceKind.BOOK, "id", title, heading = heading, text = text)
 
     @Test fun fractionOfKeywordsPresent() =
         assertThat(LexicalScore.of(passage("Steam drives the piston in a boiler."), listOf("steam", "piston", "gauge", "valve")))
@@ -48,20 +47,26 @@ class LexicalScoreTest {
     @Test fun stopwordsInAKeywordAreIgnored() =
         assertThat(LexicalScore.of(passage("Open the doors."), listOf("the library", "doors"))).isWithin(1e-9).of(0.5)
 
-    @Test fun overACorpusRarerWordsCountMore() {
-        val hours = passage("Library access hours.")
-        val wifi = passage("The wifi password is on the desk.")
-        val corpus = listOf(hours, wifi, passage("Library rules."), passage("Library cards."))
-        val keywords = listOf("wifi password", "library access")
-        // Smoothed idf over the 4 passages: ln((4 + 1) / (df + 1)) + 1; library is in 3 of them, the rest in 1.
-        val rare = ln(5.0 / 2) + 1
-        val library = ln(5.0 / 4) + 1
-        val total = 3 * rare + library
-        val score = LexicalScore.scorer(keywords, corpus)
-        assertThat(score(hours)).isWithin(1e-9).of((library + rare) / total)
-        assertThat(score(wifi)).isWithin(1e-9).of(2 * rare / total)
-        // Without a corpus each keyword counts equally: both score 0.5.
-        assertThat(LexicalScore.of(hours, keywords)).isWithin(1e-9).of(0.5)
+    @Test fun everyKeywordWordWeighsTheSame() {
+        val topic = passage("Alcohol and the Bible.")
+        val side = passage("The Bible has a rare verse.")
+        val other = passage("Alcohol and wine.")
+        val score = LexicalScore.scorer(listOf("alcohol", "bible", "verse"))
+        assertThat(score(topic)).isWithin(1e-9).of(2.0 / 3)
+        assertThat(score(side)).isWithin(1e-9).of(2.0 / 3)
+        assertThat(score(other)).isWithin(1e-9).of(1.0 / 3)
+        assertThat(score(topic)).isAtLeast(score(other))
+    }
+
+    @Test fun leadPassageGetsTheBonusOnlyWhenItMatches() {
+        fun p(heading: String, text: String, kind: SourceKind = SourceKind.ARTICLE) =
+            Passage(kind, "s", "Overview", heading = heading, text = text)
+        val keywords = listOf("steam", "valve")
+        assertThat(LexicalScore.of(p(" overview ", "steam"), keywords)).isWithin(1e-9).of(0.5 + 0.3)
+        assertThat(LexicalScore.of(p("", "steam"), keywords)).isWithin(1e-9).of(0.5 + 0.3)
+        assertThat(LexicalScore.of(p("Overview", "river"), keywords)).isEqualTo(0.0)
+        assertThat(LexicalScore.of(p("History", "steam"), keywords)).isWithin(1e-9).of(0.5)
+        assertThat(LexicalScore.of(p("", "steam", SourceKind.BOOK), keywords)).isWithin(1e-9).of(0.5)
     }
 
     @Test fun noKeywordsScoresZero() = assertThat(LexicalScore.of(passage("text"), emptyList())).isEqualTo(0.0)

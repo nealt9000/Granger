@@ -37,9 +37,9 @@ class RecordingFinder(private val inner: PassageFinder) : PassageFinder {
         return inner.find(keywords).also { passages = it }
     }
 
-    /** The passages with their lexical score (weighted against all of them, as Ranking.preselect does), best first. */
+    /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
     fun scored(): List<Pair<Passage, Double>> {
-        val score = LexicalScore.scorer(keywords, corpus = passages)
+        val score = LexicalScore.scorer(keywords)
         return passages.map { it to score(it) }.sortedByDescending { it.second }
     }
 }
