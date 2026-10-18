@@ -100,3 +100,20 @@ def test_no_devices_error_aborts(tmp_path):
 
     with pytest.raises(SystemExit, match="2 times in a row"):
         adb.run_eval(NoDev(), ds, "r1", tmp_path / "runs", sleep=lambda s: None, max_errors=2)
+
+
+def test_failed_marker_stops_the_wait_with_its_message(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+
+    class Failing(Fake):
+        def __call__(self, args):
+            if "cat" in args:
+                self.calls.append(args)
+                return 0, "no dataset at /x/dataset.json\n"
+            return super().__call__(args)
+
+    f = Failing(done_after=99)
+    with pytest.raises(SystemExit, match="no dataset at"):
+        adb.run_eval(f, ds, "r1", tmp_path / "runs", sleep=lambda s: None)
+    assert not any("pull" in " ".join(c) for c in f.calls)

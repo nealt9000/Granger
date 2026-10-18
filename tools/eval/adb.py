@@ -71,6 +71,9 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
             break
         if not is_adb_error(o):
             errors = 0  # any other failed ls just means the done marker is not there yet
+            frc, fo = runner(["shell", "cat", "%s/%s/failed" % (REMOTE, run_id)])
+            if frc == 0 and fo.strip() and "no such file" not in fo.lower() and not is_adb_error(fo):
+                raise SystemExit("the eval failed on the phone: " + fo.strip())
         else:
             errors += 1
             if errors >= max_errors:

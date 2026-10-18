@@ -17,6 +17,8 @@
         <activity
             android:name="app.granger.eval.EvalActivity"
             android:exported="true"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="Granger eval" />
     </application>
 </manifest>

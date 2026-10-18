@@ -23,7 +23,6 @@ import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.SourceKind
 import app.granger.research.ModelsAdapter
 import java.io.File
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -49,52 +48,51 @@ class EvalActivity : ComponentActivity() {
                 }
             }
         }
-        if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                try {
-                    run()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (t: Throwable) {
-                    Log.e(TAG, "Eval: failed", t)
-                    status = "failed: $t"
-                }
-            }
-        }
+        lifecycleScope.launch { EvalSession.status.collect { status = it } }
+        if (savedInstanceState == null) begin()
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        begin()
     }
 
     private fun log(line: String) {
         Log.i(TAG, "Eval: $line")
-        status = line
+        EvalSession.status.value = line
     }
 
-    private suspend fun run() {
+    private fun begin() {
+        val root = File(getExternalFilesDir(null), "eval")
         val runId = intent.getStringExtra("runId")?.takeIf { it.isNotBlank() && '/' !in it && ".." !in it }
         if (runId == null) {
             log("no valid runId extra")
             return
         }
-        val root = File(getExternalFilesDir(null), "eval")
-        val dataset = File(root, "dataset.json")
-        if (!dataset.exists()) {
-            log("no dataset at $dataset")
-            return
-        }
-        val items = EvalJson.filter(EvalJson.parseDataset(dataset.readText()), intent.getStringExtra("ids"), intent.getStringExtra("groups"))
-        val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
         val c = (application as GrangerApp).container
-        val packNames = c.library.packs.first().associate { it.id to it.name }
-        val sourceName = { p: Passage -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
-        val finder = RecordingFinder(c.passageFinder)
-        val pipeline = ResearchPipeline(finder, ModelsAdapter(c.modelManager), c.rankingConfig)
-        val runner = EvalRunner(pipeline, finder, sourceName) { android.os.SystemClock.elapsedRealtime() }
-        runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-        val results = File(root, "$runId/results.jsonl")
-        log("run $runId: ${items.size} items, guesses=$guesses")
-        runner.run(items, results, guesses, runId)
-        File(root, "$runId/done").writeText("done\n")
-        log("done $runId")
-        c.modelManager.releaseSoon()
+        val ids = intent.getStringExtra("ids")
+        val groups = intent.getStringExtra("groups")
+        val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
+        val result = EvalSession.start(runId, root, ::log) {
+            val items = EvalSession.loadItems(root, ids, groups)
+            val packNames = c.library.packs.first().associate { it.id to it.name }
+            val sourceName = { p: Passage -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
+            val finder = RecordingFinder(c.passageFinder)
+            val pipeline = ResearchPipeline(finder, ModelsAdapter(c.modelManager), c.rankingConfig)
+            val runner = EvalRunner(pipeline, finder, sourceName) { android.os.SystemClock.elapsedRealtime() }
+            runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
+            log("run $runId: ${items.size} items, guesses=$guesses")
+            runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
+            File(root, "$runId/done").writeText("done\n")
+            log("done $runId")
+            c.modelManager.releaseSoon()
+        }
+        when (result) {
+            EvalSession.Start.STARTED -> Unit
+            EvalSession.Start.ATTACHED -> log("run $runId is already running; showing its progress")
+            EvalSession.Start.BUSY -> log("another eval is running; $runId was not started")
+        }
     }
 
     private companion object {

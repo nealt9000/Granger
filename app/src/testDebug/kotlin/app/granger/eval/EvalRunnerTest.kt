@@ -186,4 +186,44 @@ class EvalRunnerTest {
         assertThat(GuessModels.parse("both")).isEqualTo(GuessModels.BOTH)
         assertThat(GuessModels.parse(null)).isEqualTo(GuessModels.NONE)
     }
+
+    @Test
+    fun datasetMedicalFlagIsNotPassedAsAHint() = runTest {
+        val out = File(tmp.root, "r/results.jsonl")
+        runner().run(listOf(item("m").copy(medical = true)), out, GuessModels.NONE)
+        assertThat(records(out).single().getBoolean("medical")).isFalse()
+    }
+
+    @Test
+    fun failedRecordsAreRetriedOnResume() = runTest {
+        val out = File(tmp.root, "r/results.jsonl").apply { parentFile!!.mkdirs(); writeText("{\"id\":\"a\",\"outcome\":\"answered\"}\n{\"id\":\"b\",\"outcome\":\"failed\"}\n") }
+        runner().run(listOf(item("a"), item("b")), out, GuessModels.NONE)
+        val recs = records(out)
+        assertThat(recs.map { it.getString("id") }).containsExactly("a", "b").inOrder()
+        assertThat(recs[1].getString("outcome")).isEqualTo("answered")
+        assertThat(File(out.parentFile, "results.jsonl.tmp").exists()).isFalse()
+    }
+
+    @Test
+    fun anErrorAtTheTopWritesAFailedMarker() = runTest {
+        val log = mutableListOf<String>()
+        EvalSession.guarded(tmp.root, "r9", { log += it }) { throw NoSuchFieldError("boom") }
+        assertThat(File(tmp.root, "r9/failed").readText()).contains("boom")
+        assertThat(log.single()).contains("failed")
+    }
+
+    @Test
+    fun missingDatasetFailsWithAReadableMessage() = runTest {
+        EvalSession.guarded(tmp.root, "r8", {}) { EvalSession.loadItems(tmp.root, null, null) }
+        assertThat(File(tmp.root, "r8/failed").readText()).contains("no dataset at")
+    }
+
+    @Test
+    fun cancellationIsRethrownAndLeavesNoMarker() = runTest {
+        val thrown = runCatching {
+            EvalSession.guarded(tmp.root, "r7", {}) { throw kotlin.coroutines.cancellation.CancellationException("stop") }
+        }.exceptionOrNull()
+        assertThat(thrown).isInstanceOf(kotlin.coroutines.cancellation.CancellationException::class.java)
+        assertThat(File(tmp.root, "r7/failed").exists()).isFalse()
+    }
 }

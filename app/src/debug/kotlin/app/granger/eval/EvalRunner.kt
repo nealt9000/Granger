@@ -76,18 +76,27 @@ class EvalRunner(
         }
     }
 
-    /** Drops anything after the last parseable line and returns the ids recorded. */
+    /**
+     * Keeps the complete, non-failed lines (a truncated tail is dropped, and a failed item is retried) and returns
+     * the ids recorded. The file is replaced through a temp file, so a crash here can't lose records.
+     */
     private fun keepCompleteLines(out: File): Set<String> {
         if (!out.exists()) return emptySet()
         val ids = LinkedHashSet<String>()
         val good = mutableListOf<String>()
+        var dropped = false
         for (line in out.readLines()) {
             if (line.isBlank()) continue
-            val o = try { JSONObject(line) } catch (e: org.json.JSONException) { break }
+            val o = try { JSONObject(line) } catch (e: org.json.JSONException) { dropped = true; break }
+            if (o.optString("outcome") == "failed") { dropped = true; continue }
             ids += o.optString("id")
             good += line
         }
-        out.writeText(good.joinToString("") { it + "\n" })
+        if (dropped || !out.readText().endsWith("\n")) {
+            val tmp = File(out.parentFile, out.name + ".tmp")
+            tmp.writeText(good.joinToString("") { it + "\n" })
+            java.nio.file.Files.move(tmp.toPath(), out.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE)
+        }
         return ids
     }
 
@@ -131,7 +140,7 @@ class EvalRunner(
             if (first is Outcome.Answered) prior = PriorTurn(item.priorQuestion, first.text)
         }
         finder.reset()
-        val request = ResearchRequest(item.question, prior = prior, priorQuestion = item.priorQuestion, medicalHint = item.medical)
+        val request = ResearchRequest(item.question, prior = prior, priorQuestion = item.priorQuestion)
         val main = execute(pipeline.run(request))
         val outcome = main.outcome
         val keywords = outcome?.keywords.orEmpty()
