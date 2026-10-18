@@ -338,4 +338,58 @@ class ResearchPipelineTest {
             .containsExactly(Stage.LOADING_MODEL, Stage.SEARCHING, Stage.RANKING, Stage.WRITING).inOrder()
         assertThat(events.last()).isInstanceOf(ResearchEvent.Done::class.java)
     }
+
+    @Test
+    fun guessStreamsPartialsThenGuessed() = runTest {
+        val gen = FakeGenerator(answer = { flowOf("Probably ", "Paris.") })
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(gen))
+            .guess("Capital of France?", priorQuestion = null, large = false).toList()
+        assertThat(events.take(2)).containsExactly(
+            ResearchEvent.Progress(Stage.LOADING_MODEL),
+            ResearchEvent.Progress(Stage.WRITING),
+        ).inOrder()
+        assertThat(events.filterIsInstance<ResearchEvent.Partial>().map { it.text })
+            .containsExactly("Probably ", "Probably Paris.").inOrder()
+        val out = outcome(events) as Outcome.Guessed
+        assertThat(out.text).isEqualTo("Probably Paris.")
+        assertThat(out.usedLarge).isFalse()
+        assertThat(out.fellBack).isFalse()
+        assertThat(out.medical).isFalse()
+        assertThat(out.keywords).isEmpty()
+        assertThat(gen.maxTokens).containsExactly(512)
+    }
+
+    @Test
+    fun guessNeverCallsTheFinder() = runTest {
+        val finder = FakeFinder(listOf(water))
+        ResearchPipeline(finder, FakeModels(FakeGenerator()))
+            .guess("Anything?", priorQuestion = "Before?", large = false).toList()
+        assertThat(finder.calls).isEmpty()
+    }
+
+    @Test
+    fun guessFallsBackToSmallWhenLargeWontLoad() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = FakeGenerator(), large = null))
+            .guess("Anything?", priorQuestion = null, large = true).toList()
+        assertThat(events).contains(ResearchEvent.GuessFallback)
+        val out = outcome(events) as Outcome.Guessed
+        assertThat(out.fellBack).isTrue()
+        assertThat(out.usedLarge).isFalse()
+    }
+
+    @Test
+    fun guessStopKeepsTheTextSoFar() = runTest {
+        val gen = FakeGenerator(answer = { flowOf("One ", "two ", "three") })
+        var chunks = 0
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(gen))
+            .guess("Count?", priorQuestion = null, large = false, stop = { ++chunks >= 2 }).toList()
+        assertThat((outcome(events) as Outcome.Guessed).text).isEqualTo("One two ")
+    }
+
+    @Test
+    fun guessWithNoModelFails() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = null))
+            .guess("Anything?", priorQuestion = null, large = false).toList()
+        assertThat(outcome(events)).isEqualTo(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList()))
+    }
 }

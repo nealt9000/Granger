@@ -75,6 +75,12 @@ sealed interface Outcome {
         override val keywords: List<String>,
     ) : Outcome
 
+    /** A best guess from the model's own knowledge: no passages, no citations. [fellBack] is true when the large model wouldn't load. */
+    data class Guessed(val text: String, val usedLarge: Boolean, val fellBack: Boolean) : Outcome {
+        override val medical: Boolean get() = false
+        override val keywords: List<String> get() = emptyList()
+    }
+
     data class Failed(val reason: FailReason, override val medical: Boolean, override val keywords: List<String>) : Outcome
 }
 
@@ -86,6 +92,8 @@ sealed interface ResearchEvent {
     data object Medical : ResearchEvent
     /** The large model wouldn't load, so the small one answers. */
     data object LargeFallback : ResearchEvent
+    /** The large model wouldn't load for a best guess, so the small one writes it. */
+    data object GuessFallback : ResearchEvent
     data class Done(val outcome: Outcome) : ResearchEvent
 }
 
@@ -158,15 +166,41 @@ class ResearchPipeline(
         emit(ResearchEvent.Done(outcome))
     }
 
+    /** A best guess with no passages: loads the model, streams the reply, and ends with [Outcome.Guessed]. */
+    fun guess(question: String, priorQuestion: String?, large: Boolean, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
+        emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
+        var fellBack = false
+        val generator = loadGenerator(large) { fellBack = true; emit(ResearchEvent.GuessFallback) }
+        if (generator == null) {
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList())))
+            return@flow
+        }
+        emit(ResearchEvent.Progress(Stage.WRITING))
+        val reply = generator.model.generate(GuessPrompt.build(question, priorQuestion), ANSWER_TOKENS)
+            .transformWhile { chunk ->
+                emit(chunk)
+                !stop()
+            }
+            .fold("") { soFar, chunk ->
+                val text = soFar + chunk
+                emit(ResearchEvent.Partial(text))
+                text
+            }
+        emit(ResearchEvent.Done(Outcome.Guessed(reply, generator.large, fellBack)))
+    }
+
     private class Loaded(val model: TextGenerator, val large: Boolean)
 
     /** Null when even the small model won't load. */
-    private suspend fun FlowCollector<ResearchEvent>.loadGenerator(deeper: Boolean): Loaded? {
+    private suspend fun FlowCollector<ResearchEvent>.loadGenerator(
+        deeper: Boolean,
+        onFallback: suspend () -> Unit = { emit(ResearchEvent.LargeFallback) },
+    ): Loaded? {
         if (deeper) {
             try {
                 return Loaded(models.generator(deeper = true), large = true)
             } catch (e: ModelUnavailableException) {
-                emit(ResearchEvent.LargeFallback)
+                onFallback()
             }
         }
         return try {

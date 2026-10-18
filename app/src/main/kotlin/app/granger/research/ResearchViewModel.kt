@@ -312,6 +312,7 @@ class ResearchViewModel(
                         fellBack = true
                         live.update { it?.copy(largeFallback = true) }
                     }
+                    ResearchEvent.GuessFallback -> Unit // Only guess() emits this; handled in a later task.
                     is ResearchEvent.Done -> withContext(NonCancellable) {
                         settle(checkNotNull(turnId), event.outcome, kept, usedLarge = ask.askedDeeper && !fellBack)
                         settled = true
@@ -354,6 +355,8 @@ class ResearchViewModel(
                 chats.finishTurn(turnId, TurnOutcome.DECLINED, "", outcome.medical, usedLarge, outcome.keywords, kept, emptyList())
             is Outcome.Failed ->
                 chats.finishTurn(turnId, TurnOutcome.FAILED, "", outcome.medical, false, outcome.keywords, kept, emptyList())
+            // Only ResearchPipeline.guess produces this; the app handles it in a later task.
+            is Outcome.Guessed -> error("run() never ends in a best guess")
         }
     }
 
