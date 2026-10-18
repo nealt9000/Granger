@@ -267,4 +267,13 @@ class BookIndexTest {
         val idf = Math.log((100 - 10 + 0.5) / (10 + 0.5) + 1)
         assertThat(bm25(blob)).isWithin(1e-9).of(idf * 2 * 2.2 / (2 + 1.2))
     }
+
+    @Test fun bestChunkAtAHighIdIsFoundPastACommonWord() = test {
+        add("a", *Array(200) { "<p>bible verse $it</p>" }, "<p>bible tattoo</p>")
+        index.indexPending()
+
+        // Old per-keyword id order gave "bible" one slot (chunk 1) ahead of the tattoo chunk, which has the highest id.
+        assertThat(index.passages(listOf("bible", "tattoo"), limit = 3, perBook = 3).first().text).isEqualTo("bible tattoo")
+        assertThat(index.passages(listOf("bible tattoo", "bible"), limit = 3, perBook = 3).first().text).isEqualTo("bible tattoo")
+    }
 }

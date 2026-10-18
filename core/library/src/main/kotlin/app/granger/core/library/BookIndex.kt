@@ -117,6 +117,7 @@ class BookIndex(
             val sql = db.openHelper.readableDatabase
             for (match in matches) {
                 try {
+                    // Rows come in docid order, so a word matching more than 3000 chunks scores only its first 3000.
                     sql.query(
                         SimpleSQLiteQuery(
                             "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ? LIMIT 3000",
@@ -130,17 +131,21 @@ class BookIndex(
                 }
             }
             val ranked = scores.entries.sortedWith(compareByDescending<Map.Entry<Long, Double>> { it.value }.thenBy { it.key })
-            // Orphans of re-indexed books have no chunk row and drop out here.
-            val rows = ranked.map { it.key }.chunked(500).flatMap { ids ->
-                dao.chunksMatching(SimpleSQLiteQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
-            }.associateBy { it.id }
+            // Rows load in rank order, 200 ids at a time, until [limit] are kept. Orphans of re-indexed books have no row.
             val perBookCount = HashMap<String, Int>()
             val chunks = ArrayList<BookChunk>()
-            for (entry in ranked) {
+            for (ids in ranked.map { it.key }.chunked(200)) {
                 if (chunks.size >= limit) break
-                val chunk = rows[entry.key] ?: continue
-                val n = perBookCount.merge(chunk.bookId, 1, Int::plus)!!
-                if (n <= perBook) chunks.add(chunk)
+                val rows = try {
+                    dao.chunksMatching(SimpleSQLiteQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
+                } catch (_: SQLException) {
+                    break
+                }.associateBy { it.id }
+                for (id in ids) {
+                    if (chunks.size >= limit) break
+                    val chunk = rows[id] ?: continue
+                    if (perBookCount.merge(chunk.bookId, 1, Int::plus)!! <= perBook) chunks.add(chunk)
+                }
             }
             val texts = HashMap<Long, BookPassage>()
             chunks.groupBy { it.bookId }.forEach { (bookId, hits) ->
