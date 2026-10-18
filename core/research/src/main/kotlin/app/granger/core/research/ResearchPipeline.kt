@@ -117,9 +117,10 @@ class ResearchPipeline(
             medical = rewrite.medical == true || request.medicalHint
             keywords = rewrite.keywords
             emit(ResearchEvent.Progress(Stage.SEARCHING))
-            val found = Ranking.preselect(finder.find(keywords), keywords, config)
+            val all = finder.find(keywords)
+            val found = Ranking.preselect(all, keywords, config)
             emit(ResearchEvent.Progress(Stage.RANKING))
-            ranked = rank(request.question, found, keywords)
+            ranked = rank(request.question, found, keywords, all)
         }
 
         val quote = request.quote
@@ -193,9 +194,10 @@ class ResearchPipeline(
         return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
     }
 
-    private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>): List<Passage> {
+    /** [all] is everything the search found: lexical ranking weighs words by how rare they are in it. */
+    private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>, all: List<Passage>): List<Passage> {
         if (candidates.isEmpty()) return emptyList()
-        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config)
+        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config, corpus = all)
         val query = embedder.embed(listOf(question), isQuery = true).single()
         val vectors = embedder.embed(candidates.map { it.text }, isQuery = false)
         return Ranking.byEmbedding(candidates, query, vectors, config)

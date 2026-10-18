@@ -6,7 +6,7 @@ data class RankingConfig(
     val preselect: Int = 12,
     val perSource: Int = 3,
     val cosineThreshold: Float = 0.40f,
-    val lexicalThreshold: Double = 0.50,
+    val lexicalThreshold: Double = 0.32,
     val small: Int = 4,
     val large: Int = 8,
 )
@@ -16,7 +16,7 @@ object Ranking {
     /** Best-first by lexical score then search score, at most [RankingConfig.perSource] per source. */
     fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
         val perSource = HashMap<String, Int>()
-        val score = LexicalScore.scorer(keywords)
+        val score = LexicalScore.scorer(keywords, corpus = passages)
         // Scored once each: a sort comparator would score every passage many times over.
         return passages
             .map { it to score(it) }
@@ -56,8 +56,14 @@ object Ranking {
             .take(config.large)
             .map { candidates[it.first] }
 
-    fun byLexical(candidates: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
-        val score = LexicalScore.scorer(keywords)
+    /** [corpus] is everything the search found, which sets how rare each keyword word is. */
+    fun byLexical(
+        candidates: List<Passage>,
+        keywords: List<String>,
+        config: RankingConfig,
+        corpus: List<Passage> = candidates,
+    ): List<Passage> {
+        val score = LexicalScore.scorer(keywords, corpus)
         return candidates
             .map { it to score(it) }
             .filter { it.second >= config.lexicalThreshold }

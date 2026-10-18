@@ -25,6 +25,8 @@ object Keywords {
             .distinct()
             .take(max)
 
+    fun isStopword(word: String): Boolean = word.lowercase() in STOPWORDS
+
     /** The words of a keyword phrase: the rewrite's phrases ("portia mercy") are matched word by word, in any order. */
     fun words(keyword: String): List<String> = WORD.findAll(keyword).map { it.value }.toList()
 

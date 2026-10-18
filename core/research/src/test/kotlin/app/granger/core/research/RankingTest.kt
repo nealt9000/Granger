@@ -60,6 +60,17 @@ class RankingTest {
     }
 
     @Test
+    fun lexicalRankWeighsWordsOverTheWholeCorpus() {
+        val target = passage("T", "steam engine")
+        val others = (1..9).map { passage("S$it", "steam boiler", it) }
+        val keywords = listOf("steam engine", "boiler")
+        val strict = config.copy(lexicalThreshold = 0.6)
+        // Alone, "boiler" looks as rare as "engine"; across the corpus "engine" is the rare word, and target has it.
+        assertThat(Ranking.byLexical(listOf(target), keywords, strict)).isEmpty()
+        assertThat(Ranking.byLexical(listOf(target), keywords, strict, corpus = listOf(target) + others)).containsExactly(target)
+    }
+
+    @Test
     fun nothingPassesGivesEmpty() {
         val ps = listOf(passage("A", "river", 1))
         assertThat(Ranking.byLexical(ps, listOf("steam"), config)).isEmpty()
