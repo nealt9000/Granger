@@ -84,6 +84,24 @@ class ModelManagerTest {
         assertThat(r.llms.maxOpen).isEqualTo(1)
     }
 
+    @Test fun aMissingFileLeavesTheResidentModelLoaded() = runTest {
+        val r = rig(models = InstalledModels(small = small, embedder = emb))
+        val resident = r.manager.engine(LlmSize.SMALL)
+        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
+        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
+        assertThat(r.llms.openEngines).hasSize(1)
+        assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
+    }
+
+    @Test fun largeIsRefusedBelowTheThinkDeeperTier() = runTest {
+        val r = rig(tier = DeviceTier.ASK)
+        val resident = r.manager.engine(LlmSize.SMALL)
+        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
+        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
+        assertThat(r.llms.events.none { it.contains(large.path) }).isTrue()
+        assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
+    }
+
     @Test fun largeClosesTheEmbedder() = runTest {
         val r = rig()
         r.manager.engine(LlmSize.SMALL)

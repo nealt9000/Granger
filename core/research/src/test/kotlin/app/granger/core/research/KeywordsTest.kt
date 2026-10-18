@@ -36,4 +36,10 @@ class KeywordsTest {
         assertThat(Medical.looksMedical("How do I treat a Burn?")).isTrue()
         assertThat(Medical.looksMedical("How does a steam engine work?")).isFalse()
     }
+
+    @Test fun apostrophesInNamesStayAsInPassageText() {
+        assertThat(Keywords.extract("Who was O'Brien?")).containsExactly("o'brien")
+        assertThat(Keywords.normalize("O\u2019Brien")).isEqualTo("o'brien")
+        assertThat(Keywords.words("o'brien")).containsExactly("o", "brien").inOrder()
+    }
 }

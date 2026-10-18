@@ -133,7 +133,8 @@ class ResearchPipeline(
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, request.medicalHint, emptyList(), loadFailure)))
             return@flow
         }
-        val usedLarge = deeper && generator.large
+        var usedLarge = deeper && generator.large
+        var model = generator.model
 
         val medical: Boolean
         val keywords: List<String>
@@ -176,14 +177,32 @@ class ResearchPipeline(
             return@flow
         }
         val pool = (listOfNotNull(quote) + ranked.filter { it != quote }).take(config.large)
-        val wanted = pool.take(if (usedLarge) config.large else config.small)
-        // Dropped for the prompt's budget, a passage can't be cited; it stays a candidate for Think deeper.
-        val passages = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null)
-        val candidates = pool.drop(passages.size)
+        /** The passages that fit the prompt for the large or the small model; the rest stay candidates for Think deeper. */
+        fun fit(large: Boolean): Pair<List<Passage>, List<Passage>> {
+            val wanted = pool.take(if (large) config.large else config.small)
+            // Dropped for the prompt's budget, a passage can't be cited.
+            val fitted = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null)
+            return fitted to pool.drop(fitted.size)
+        }
+        var (passages, candidates) = fit(usedLarge)
 
         emit(ResearchEvent.Progress(Stage.WRITING))
-        val prompt = AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null)
-        val streamed = streamReply(generator.model, prompt, stop)
+        var streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
+        if (usedLarge && streamed.text == null && streamed.chunks == 0 && streamed.cause is ModelUnavailableException) {
+            // The large model wouldn't reload for this reply (it can be released between the rewrite and the answer):
+            // answer with the small one, as when it fails to load at the start.
+            val small = try {
+                models.generator(deeper = false)
+            } catch (e: ModelUnavailableException) {
+                emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, e)))
+                return@flow
+            }
+            emit(ResearchEvent.LargeFallback)
+            usedLarge = false
+            model = small
+            fit(false).let { passages = it.first; candidates = it.second }
+            streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
+        }
         val reply = streamed.text
         if (reply == null) {
             // Reported here, not thrown: a failure would reach the collector without the flags the pipeline knows.
@@ -223,6 +242,7 @@ class ResearchPipeline(
     /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far, or the failure. */
     private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): StreamResult {
         var failure: Throwable? = null
+        var chunks = 0
         val text = model.generate(prompt, ANSWER_TOKENS)
             .catch { e ->
                 if (e is CancellationException) throw e
@@ -233,15 +253,16 @@ class ResearchPipeline(
                 !stop()
             }
             .fold("") { soFar, chunk ->
+                chunks++
                 val text = soFar + chunk
                 emit(ResearchEvent.Partial(text))
                 text
             }
-        return if (failure != null) StreamResult(null, failure) else StreamResult(text, null)
+        return if (failure != null) StreamResult(null, failure, chunks) else StreamResult(text, null, chunks)
     }
 
-    /** [text] is null when the model failed with [cause]. */
-    private class StreamResult(val text: String?, val cause: Throwable?)
+    /** [text] is null when the model failed with [cause]; [chunks] is how many pieces of the reply arrived first. */
+    private class StreamResult(val text: String?, val cause: Throwable?, val chunks: Int)
 
     private class Loaded(val model: TextGenerator, val large: Boolean)
 

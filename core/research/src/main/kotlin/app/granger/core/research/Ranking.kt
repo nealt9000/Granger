@@ -30,6 +30,7 @@ object Ranking {
     }
 
     fun cosine(a: FloatArray, b: FloatArray): Float {
+        require(a.size == b.size) { "Vector sizes differ: ${a.size} and ${b.size}" }
         var dot = 0f
         var na = 0f
         var nb = 0f

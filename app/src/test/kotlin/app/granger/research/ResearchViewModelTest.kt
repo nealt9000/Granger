@@ -704,6 +704,14 @@ class ResearchViewModelTest {
         assertThat(sessions.tabs.value).isEmpty()
     }
 
+    @Test fun aCitationToAVanishedTabSaysTheSourceIsGone() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("pack1"))
+        val vanishing = object : ReadingSessions by sessions {
+            override suspend fun tab(id: Long) = null
+        }
+        assertThat(vm(sessions = vanishing).open(article(1))).isEqualTo(CitationTarget.Gone)
+    }
+
     @Test fun aCitationThatCantBeOpenedIsGoneRatherThanACrash() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("pack1"))
         val broken = object : ReadingSessions by sessions {

@@ -117,7 +117,7 @@ class BookIndex(
                 try {
                     dao.chunksMatching(
                         SimpleSQLiteQuery(
-                            "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? LIMIT ?",
+                            "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? ORDER BY c.id LIMIT ?",
                             arrayOf<Any>(match, share),
                         ),
                     )
@@ -127,7 +127,14 @@ class BookIndex(
             }.distinctBy { it.id }.take(limit)
             chunks.groupBy { it.bookId }.flatMap { (bookId, hits) ->
                 val book = dao.get(bookId) ?: return@flatMap emptyList()
-                val texts = chunkTexts(book.filePath, hits)
+                // One damaged book drops only its own passages.
+                val texts = try {
+                    chunkTexts(book.filePath, hits)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    return@flatMap emptyList()
+                }
                 hits.mapNotNull { chunk -> texts[chunk.id]?.let { BookPassage(book, chunk.href, chunk.progression, it) } }
             }
         }

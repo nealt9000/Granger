@@ -75,15 +75,20 @@ class ModelManager(
 
     /** The resident engine for [size], swapping out the other one first. Throws [ModelLoadException]. */
     suspend fun engine(size: LlmSize): LlmEngine {
+        // Only the Think deeper tier has room for the large model.
+        if (size == LlmSize.LARGE && tier < DeviceTier.THINK_DEEPER) {
+            throw ModelLoadException(size, IllegalStateException("This phone's tier ($tier) can't run the large model"))
+        }
         cancelRelease()
         return lock.withLock {
             val resident = llm
             if (resident != null && llmSize == size) return@withLock resident
-            closeLlm()
-            if (size == LlmSize.LARGE) closeEmbedder()
+            // Checked before closing, so asking for a model that isn't there leaves the resident one loaded.
             val models = installed.first()
             val file = (if (size == LlmSize.SMALL) models.small else models.large)
                 ?: throw ModelLoadException(size, IllegalStateException("$size model is not installed"))
+            closeLlm()
+            if (size == LlmSize.LARGE) closeEmbedder()
             try {
                 // Store inside the block: withContext drops its result if the caller was cancelled meanwhile,
                 // and a blocking load can't be interrupted, so the loaded model must not be orphaned.

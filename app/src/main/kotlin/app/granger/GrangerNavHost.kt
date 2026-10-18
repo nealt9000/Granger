@@ -145,6 +145,11 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable object SettingsRoute
 @Serializable object ReadinessRoute
 
+/** How [route] is opened: [replacesChatOnTop] drops a Research chat on top first (its view model would otherwise stay). */
+internal data class ResearchOpening(val route: ResearchRoute, val replacesChatOnTop: Boolean)
+
+internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean) = ResearchOpening(route, researchOnTop)
+
 /**
  * A Research chat: [chatId] opens a kept one, 0 starts a new one. [quote] is a reader's selection, from [quoteSourceId]
  * (a pack or book id) titled [quoteTitle], at [quoteLocation] (an entry path or a book href) and [quoteProgression].
@@ -277,7 +282,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
     fun openResearch(route: ResearchRoute) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
-        nav.navigate(route) { if (researchOnTop) popUpTo<ResearchRoute> { inclusive = true } }
+        val open = researchOpening(route, researchOnTop)
+        nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
     GrangerShell(
@@ -295,7 +301,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
-                RailTool.RESEARCH -> nav.navigate(ResearchRoute()) { launchSingleTop = true }
+                RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
                 RailTool.PLAYER -> Unit // Hidden behind Features.PLAYER.
             }
         },

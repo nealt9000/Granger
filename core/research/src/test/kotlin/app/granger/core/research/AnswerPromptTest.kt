@@ -26,6 +26,13 @@ class AnswerPromptTest {
     }
 
     @Test
+    fun theHeaderIsLengthCapped() {
+        val long = darwin.copy(sourceTitle = "T".repeat(5_000), meta = SourceMeta(author = "A".repeat(5_000)))
+        val header = build(listOf(long)).lines().first { it.startsWith("[1]") }
+        assertThat(header.length).isAtMost(241)
+    }
+
+    @Test
     fun medicalRuleOnlyWhenMedical() {
         assertThat(build(medical = true)).contains("This is a medical question.")
         assertThat(build(medical = false)).doesNotContain("medical question")

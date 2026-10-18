@@ -45,4 +45,9 @@ class CitationsTest {
     fun stripRemovesGroups() {
         assertThat(Citations.strip("A [1] b [2, 3].")).isEqualTo("A b.")
     }
+
+    @Test
+    fun stripKeepsNewlines() {
+        assertThat(Citations.strip("One.\n\n[1] Two [2].")).contains("\n\n")
+    }
 }

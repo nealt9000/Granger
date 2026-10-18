@@ -111,7 +111,22 @@ class ResearchViewModel(
         val quote: Passage?,
         /** The last [RECENT_CHATS] chats, shown while this one is empty. */
         val recentChats: List<ChatSummary>,
-    )
+    ) {
+        /**
+         * The last turn is done and its source cards are present, so the screen's last scroll can run. An answered turn
+         * whose cards haven't arrived from the database yet (after a stream or a Retry) is not settled.
+         */
+        val settled: Boolean
+            get() {
+                if (running) return false
+                val last = turns.lastOrNull()?.turn ?: return true
+                return when (last.outcome) {
+                    TurnOutcome.PENDING -> false
+                    TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED -> last.shown.isNotEmpty()
+                    else -> true
+                }
+            }
+    }
 
     /** The running turn; [turnId] is null until its row exists. */
     private data class Live(
@@ -303,11 +318,14 @@ class ResearchViewModel(
             // A catalogue card describes the whole pack, so it opens the pack's main page.
             val card = passage.kind == SourceKind.CARD
             val tabId = sessions.openTab(pack.id, if (card) "" else passage.location, passage.sourceTitle)
+            // The tab can vanish between opening and showing it (closed from the rail): the source is gone, say so.
+            if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
             return CitationTarget.Article(tabId, if (card) null else passage.anchor)
         }
         val book = bookshelf.book(passage.sourceId)
         if (book == null || book.status != PackStatus.OK) return CitationTarget.Gone
         val tabId = sessions.openTab(book.id, "", book.title)
+        if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
         val placed = passage.kind == SourceKind.BOOK || (passage.kind == SourceKind.SELECTION && passage.location.isNotEmpty())
         if (!placed) return CitationTarget.Book(tabId, at = null)
         val quote = TextQuote("", cutAtWord(passage.text.trim(), BOOK_QUOTE), "")

@@ -45,4 +45,9 @@ class HtmlPassagesTest {
 
     @Test fun emptyHeadingsAreDropped() =
         assertThat(HtmlPassages.split("<h2 id=\"a\">Only heading</h2>")).isEmpty()
+
+    @Test fun splitsOnNoBreakSpaces() {
+        val out = HtmlPassages.split("<p>one\u00A0two&nbsp;three\u202Ffour</p>")
+        assertThat(out.single().text).isEqualTo("one two three four")
+    }
 }

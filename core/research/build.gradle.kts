@@ -11,8 +11,12 @@ java {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        // The JDK 17 API only, so nothing newer than Android's desugared library slips in.
+        freeCompilerArgs.add("-Xjdk-release=17")
     }
 }
+
+tasks.withType<JavaCompile>().configureEach { options.release.set(17) }
 
 dependencies {
     api(libs.kotlinx.coroutines.core)

@@ -2,7 +2,7 @@ package app.granger.core.zim
 
 import java.io.ByteArrayOutputStream
 
-/** A reader URL split into its pack and the ZIM entry path inside it. `fragment` is kept raw. */
+/** A reader URL split into its pack and the ZIM entry path inside it. `fragment` is percent-decoded (it is encoded in [forEntry]). */
 data class ZimUrl(val packId: String, val path: String, val fragment: String? = null)
 
 /**
@@ -18,12 +18,12 @@ object ZimUrls {
 
     fun forEntry(packId: String, path: String, fragment: String? = null): String =
         PREFIX + encode(packId) + "/" + path.split('/').joinToString("/") { encode(it) } +
-            (fragment?.let { "#$it" } ?: "")
+            (fragment?.let { "#" + encode(it) } ?: "")
 
     fun parse(url: String): ZimUrl? {
         if (!url.startsWith(PREFIX, ignoreCase = true)) return null
         val afterHost = url.substring(PREFIX.length)
-        val fragment = afterHost.substringAfter('#', "").ifEmpty { null }
+        val fragment = afterHost.substringAfter('#', "").ifEmpty { null }?.let(::decode)
         val beforeQuery = afterHost.substringBefore('#').substringBefore('?')
         val slash = beforeQuery.indexOf('/')
         if (slash <= 0) return null

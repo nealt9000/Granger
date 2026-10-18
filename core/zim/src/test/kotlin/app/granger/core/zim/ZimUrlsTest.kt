@@ -4,6 +4,12 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class ZimUrlsTest {
+    @Test fun forEntryEncodesTheFragment() {
+        val url = ZimUrls.forEntry("p", "Page", "Early life#1 é")
+        assertThat(url).isEqualTo("https://zim.granger.invalid/p/Page#Early%20life%231%20%C3%A9")
+        assertThat(ZimUrls.parse(url)).isEqualTo(ZimUrl("p", "Page", "Early life#1 é"))
+    }
+
     private fun roundTrip(path: String) =
         assertThat(ZimUrls.parse(ZimUrls.forEntry("pack-1", path))).isEqualTo(ZimUrl("pack-1", path))
 

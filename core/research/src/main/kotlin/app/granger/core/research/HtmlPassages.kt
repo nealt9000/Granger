@@ -11,7 +11,7 @@ object HtmlPassages {
     private const val BLOCKS = "h1, h2, h3, h4, p, li, dd, blockquote, pre"
     private const val NESTING = "p, li, dd, blockquote, pre"
     private val HEADINGS = setOf("h1", "h2", "h3", "h4")
-    private val WHITESPACE = Regex("\\s+")
+    private val WHITESPACE = Regex("[\\s\\u00A0\\u2007\\u202F]+")
 
     fun split(html: String, targetWords: Int = 200, maxWords: Int = 300): List<HtmlPassage> {
         val doc = Jsoup.parse(html)

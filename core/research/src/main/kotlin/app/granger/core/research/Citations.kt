@@ -23,5 +23,5 @@ object Citations {
         return CitationCheck.Valid(numbers)
     }
 
-    fun strip(answer: String): String = answer.replace(Regex("\\s*" + group.pattern), "").trim()
+    fun strip(answer: String): String = answer.replace(Regex("[ \\t]*" + group.pattern), "").trim()
 }

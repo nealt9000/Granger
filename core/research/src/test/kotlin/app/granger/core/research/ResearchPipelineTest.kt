@@ -449,4 +449,21 @@ class ResearchPipelineTest {
         assertThat(out.usedLarge).isTrue()
         assertThat(out.fellBack).isFalse()
     }
+
+    @Test
+    fun largeReloadFailureMidAnswerFallsBackToSmall() = runTest {
+        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
+        val small = FakeGenerator(answer = { flowOf("Small answer [1].") })
+        // The large model loaded for the request but won't reload when the reply starts.
+        val large = FakeGenerator(answer = { flow { throw ModelUnavailableException("won't reload") } })
+        val models = FakeModels(small, large = large)
+        val events = ResearchPipeline(FakeFinder(emptyList()), models)
+            .run(ResearchRequest("Why?", deeperFrom = eight)).toList()
+        assertThat(events).contains(ResearchEvent.LargeFallback)
+        val out = outcome(events) as Outcome.Answered
+        assertThat(out.text).isEqualTo("Small answer [1].")
+        assertThat(out.usedLarge).isFalse()
+        assertThat(out.passages).isEqualTo(eight.take(4))
+        assertThat(out.candidates).isEqualTo(eight.drop(4))
+    }
 }

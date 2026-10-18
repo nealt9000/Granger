@@ -191,6 +191,24 @@ class BookIndexTest {
         assertThat(index.passages(listOf("mercy OR nothing"))).isEmpty()
     }
 
+    @Test fun passagesComeInChunkOrder() = test {
+        add("many", "<p>fox one</p>", "<p>fox two</p>", "<p>fox three</p>")
+        index.indexPending()
+
+        assertThat(index.passages(listOf("fox"), limit = 2).map { it.href }).containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml").inOrder()
+    }
+
+    @Test fun oneDamagedBookDoesNotDropTheOthers() = test {
+        val bad = add("bad", "<p>fox in the bad book ${"padding ".repeat(200)}</p>")
+        add("good", "<p>fox in the good book</p>")
+        index.indexPending()
+        // A path the zip reader rejects outright (not just an unreadable file): this book's passages go, not the other's.
+        db.openHelper.writableDatabase.execSQL("UPDATE books SET filePath = ? WHERE id = ?", arrayOf<Any>("bad\u0000path", bad.id))
+
+        val found = index.passages(listOf("fox"))
+        assertThat(found.map { it.text }).containsExactly("fox in the good book")
+    }
+
     @Test fun passagesCarryTheBook() = test {
         val moby = add("moby", "<p>The whale surfaced at dawn.</p>", title = "Moby-Dick")
         index.indexPending()

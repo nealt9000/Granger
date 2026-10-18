@@ -32,4 +32,13 @@ class RewriteTest {
                 "Question: who was Darwin",
         )
     }
+
+    @Test fun capsAtSixKeywords() {
+        val r = Rewrite.parse("keywords: a1, b2, c3, d4, e5, f6, g7, h8\nmedical: no")!!
+        assertThat(r.keywords).containsExactly("a1", "b2", "c3", "d4", "e5", "f6").inOrder()
+    }
+
+    @Test fun anEchoedPlaceholderIsNotKeywords() {
+        assertThat(Rewrite.parse("keywords: <3 to 6 keywords or short phrases, comma-separated>\nmedical: no")).isNull()
+    }
 }

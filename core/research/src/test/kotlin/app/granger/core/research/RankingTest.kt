@@ -82,4 +82,9 @@ class RankingTest {
         val ps = (1..20).map { passage("S$it", "steam", it) }
         assertThat(Ranking.byLexical(ps, listOf("steam"), config)).hasSize(8)
     }
+
+    @Test fun cosineRejectsVectorsOfDifferentSizes() {
+        val e = runCatching { Ranking.cosine(floatArrayOf(1f, 0f), floatArrayOf(1f)) }.exceptionOrNull()
+        assertThat(e).isInstanceOf(IllegalArgumentException::class.java)
+    }
 }

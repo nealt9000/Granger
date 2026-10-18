@@ -235,8 +235,8 @@ fun ResearchScreen(
     }
     val streamed = state.turns.lastOrNull()?.partial?.length ?: 0
     // A turn that just finished gets one last scroll once its final answer and source cards are stored. They arrive
-    // from the database after the stream ends, so the turn counts as live until it is no longer pending.
-    val live = state.running || state.turns.lastOrNull()?.turn?.outcome == TurnOutcome.PENDING
+    // from the database after the stream ends, so the turn counts as live until it is settled (cards present).
+    val live = !state.settled
     var wasLive by remember { mutableStateOf(live) }
     LaunchedEffect(rows.size, streamed, live) {
         if (follow && (live || wasLive)) scrollToEnd()

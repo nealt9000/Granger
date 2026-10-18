@@ -20,8 +20,9 @@ object Keywords {
 
     fun extract(question: String, max: Int = 6): List<String> =
         question.lowercase().replace('\u2019', '\'').split(SPLIT)
-            .map { it.removeSuffix("'s").replace("'", "") }
-            .filter { it.length >= 3 && it !in STOPWORDS }
+            .map { it.trim('\'').removeSuffix("'s") }
+            // Inner apostrophes stay (O'Brien), as in passage text; the stopword check ignores them (don't = dont).
+            .filter { it.length >= 3 && it.replace("'", "") !in STOPWORDS }
             .distinct()
             .take(max)
 
@@ -30,13 +31,15 @@ object Keywords {
     /** The words of a keyword phrase: the rewrite's phrases ("portia mercy") are matched word by word, in any order. */
     fun words(keyword: String): List<String> = WORD.findAll(keyword).map { it.value }.toList()
 
-    /** Lowercases a keyword or phrase and drops apostrophes the way [extract] does, so "Darwin’s finches" becomes "darwin finches". */
+    /** Lowercases a keyword or phrase and drops possessives and loose quote marks the way [extract] does, so "Darwin’s finches" becomes "darwin finches"; "O’Brien" keeps its apostrophe. */
     fun normalize(keyword: String): String =
         keyword.lowercase().replace('\u2019', '\'')
             .replace(POSSESSIVE, "")
-            .replace("'", "")
             .trim()
-            .replace(SPACES, " ")
+            .split(SPACES)
+            .map { it.trim('\'') }
+            .filter { it.isNotEmpty() }
+            .joinToString(" ")
 }
 
 /** Cheap check used only when the rewrite fails and the model can't say whether a question is medical. */

@@ -7,6 +7,7 @@ data class PriorTurn(val question: String, val answer: String)
 object AnswerPrompt {
     const val DECLINE_TOKEN = "NOT IN LIBRARY"
     private const val PRIOR_CHARS = 600
+    private const val MAX_HEADER = 240
     private const val TEXT_CHARS = 1_200
     private const val QUOTE_CHARS = 1_500
 
@@ -66,7 +67,7 @@ object AnswerPrompt {
         if (p.meta.date.isNotBlank()) append(" (${p.meta.date})")
         if (p.meta.collection.isNotBlank()) append(" · ${p.meta.collection}")
         if (p.heading.isNotBlank()) append(" · ${p.heading}")
-    }
+    }.let { cut(it, MAX_HEADER) }
 
     /** Cuts to at most [max] characters at a word boundary and appends an ellipsis. */
     private fun cut(text: String, max: Int): String {
