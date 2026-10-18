@@ -1,5 +1,6 @@
 package app.granger.research
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import app.granger.BookTarget
 import app.granger.FakeBookshelf
@@ -56,9 +57,11 @@ class ResearchViewModelTest {
         chatId: Long? = null,
         quote: Passage? = null,
         manager: ModelManager = manager(LlmEngineFactory { _, _ -> error("the view model doesn't load models itself") }),
+        savedState: SavedStateHandle = SavedStateHandle(),
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf, backgroundScope,
+            savedState,
         )
     }
 
@@ -151,6 +154,31 @@ class ResearchViewModelTest {
         assertThat(first.shown.first()).isEqualTo(quote)
         assertThat(second.shown.none { it.kind == SourceKind.SELECTION }).isTrue()
         assertThat(small.answerPrompts[1]).doesNotContain("Chlorophyll in the leaves")
+    }
+
+    @Test fun processDeathRestoresTheNewChatWithoutItsQuote() = runTest(main.dispatcher) {
+        val savedState = SavedStateHandle()
+        val first = vm(quote = quote, savedState = savedState)
+        first.ask("What absorbs light?")
+        testScheduler.advanceUntilIdle()
+        val chatId = chats.chats.value.single().id
+        // The process dies; the route still has no chat id and the reader's quote, and the handle comes back.
+        val restored = vm(quote = quote, savedState = SavedStateHandle(savedState.keys().associateWith { savedState.get<Any?>(it) }))
+        testScheduler.advanceUntilIdle()
+        assertThat(restored.state.value.chatId).isEqualTo(chatId)
+        assertThat(restored.state.value.title).isEqualTo("What absorbs light?")
+        assertThat(restored.state.value.turns).hasSize(1)
+        assertThat(restored.state.value.quote).isNull()
+    }
+
+    @Test fun aDeletedChatStaysGoneAfterProcessDeath() = runTest(main.dispatcher) {
+        val chatId = chats.create("How do plants use light?")
+        val savedState = SavedStateHandle()
+        vm(chatId = chatId, savedState = savedState).deleteChat()
+        testScheduler.advanceUntilIdle()
+        val restored = vm(chatId = chatId, savedState = SavedStateHandle(savedState.keys().associateWith { savedState.get<Any?>(it) }))
+        testScheduler.advanceUntilIdle()
+        assertThat(restored.state.value.chatId).isNull()
     }
 
     @Test fun stopKeepsAValidlyCitedPartial() = runTest(main.dispatcher) {

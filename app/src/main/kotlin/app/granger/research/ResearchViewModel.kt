@@ -3,6 +3,7 @@ package app.granger.research
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
@@ -62,6 +63,8 @@ class ResearchViewModel(
     private val bookshelf: Bookshelf,
     /** Settles a turn cut short when this view model is gone. */
     private val appScope: CoroutineScope,
+    /** Survives process death with the route: the chat this one became, and that the route's [quote] was asked. */
+    private val savedState: SavedStateHandle = SavedStateHandle(),
 ) : ViewModel() {
     /**
      * A stored turn, with the reply so far, the stage and the large-model fallback while it is running. [medical] shows
@@ -103,9 +106,12 @@ class ResearchViewModel(
         val medicalHint: Boolean = false,
     )
 
-    private val chat = MutableStateFlow(chatId)
+    // A saved id wins over the route's, even a null one: the chat was deleted.
+    private val startChat = if (savedState.contains(CHAT_ID)) savedState.get<Long>(CHAT_ID) else chatId
+    private val startQuote = quote.takeUnless { savedState.get<Boolean>(QUOTE_USED) == true }
+    private val chat = MutableStateFlow(startChat)
     private val title = MutableStateFlow("")
-    private val pendingQuote = MutableStateFlow(quote)
+    private val pendingQuote = MutableStateFlow(startQuote)
     private val live = MutableStateFlow<Live?>(null)
     private var job: Job? = null
     @Volatile private var stopRequested = false
@@ -134,11 +140,11 @@ class ResearchViewModel(
         )
     }.stateIn(
         viewModelScope, SharingStarted.Eagerly,
-        State(chatId, "", emptyList(), false, models.readiness.value, false, quote, emptyList()),
+        State(startChat, "", emptyList(), false, models.readiness.value, false, startQuote, emptyList()),
     )
 
     init {
-        if (chatId != null) viewModelScope.launch { logErrors { title.value = chats.chat(chatId)?.title.orEmpty() } }
+        if (startChat != null) viewModelScope.launch { logErrors { title.value = chats.chat(startChat)?.title.orEmpty() } }
     }
 
     /** Asks what is in [input]; a blank input asks [EMPTY_QUOTE_QUESTION] about the quote, or does nothing without one. */
@@ -149,6 +155,7 @@ class ResearchViewModel(
         val question = typed.ifEmpty { if (quote != null) EMPTY_QUOTE_QUESTION else return }
         input = ""
         pendingQuote.value = null
+        if (quote != null) savedState[QUOTE_USED] = true
         val newTitle = if (quote != null && question == EMPTY_QUOTE_QUESTION) {
             "About: " + quote.text.trim().take(QUOTE_TITLE).trimEnd()
         } else {
@@ -158,6 +165,7 @@ class ResearchViewModel(
             val id = chat.value ?: chats.create(newTitle).also {
                 title.value = newTitle
                 chat.value = it
+                savedState[CHAT_ID] = it
             }
             runTurn(id, Ask(question, quote), before = chats.turns(id).first())
         }
@@ -219,6 +227,7 @@ class ResearchViewModel(
         val id = chat.value ?: return
         job?.cancel()
         chat.value = null
+        savedState[CHAT_ID] = null
         title.value = ""
         appScope.launch { chats.delete(id) }
     }
@@ -345,6 +354,8 @@ class ResearchViewModel(
     private fun ChatTurn.quote(): Passage? = shown.firstOrNull()?.takeIf { it.kind == SourceKind.SELECTION }
 
     companion object {
+        const val CHAT_ID = "chatId"
+        const val QUOTE_USED = "quoteUsed"
         const val RECENT_CHATS = 10
         /** Longer questions are cut, so a pasted wall of text can't overflow the prompt. */
         const val MAX_QUESTION = 1_000

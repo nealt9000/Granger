@@ -418,6 +418,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                             route.chatId.takeIf { it != 0L }, route.quotePassage(),
                             container.researchChats, container.research, container.modelManager, container.sessions,
                             container.library, container.bookshelf, container.appScope,
+                            savedState = createSavedStateHandle(),
                         )
                     },
                     focusInput = route.quote != null,
