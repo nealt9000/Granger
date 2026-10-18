@@ -86,6 +86,18 @@ class EvalRunnerTest {
     }
 
     @Test
+    fun writesTheWholeSearchCorpusWithTextBesideTheRecords() = runTest {
+        val out = File(tmp.root, "c/results.jsonl")
+        runner().run(listOf(item("a"), item("b")), out, GuessModels.NONE)
+        val corpus = records(File(tmp.root, "c/found.jsonl"))
+        assertThat(corpus.map { it.getString("id") }).containsExactly("a", "b").inOrder()
+        assertThat(corpus[0].getJSONArray("keywords").getString(0)).isEqualTo("water")
+        val p = corpus[0].getJSONArray("passages").getJSONObject(0)
+        assertThat(p.getString("text")).isNotEmpty()
+        assertThat(p.has("searchScore")).isTrue()
+    }
+
+    @Test
     fun recordsPromptsInCallOrderWithStagesAndConcatenatedOutput() = runTest {
         val out = File(tmp.root, "r/results.jsonl")
         runner().run(listOf(item("a")), out, GuessModels.NONE)

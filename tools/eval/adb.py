@@ -101,6 +101,8 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
         sleep(POLL_SECONDS)
         waited += POLL_SECONDS
     rc, o = runner(["pull", "%s/%s/results.jsonl" % (REMOTE, run_id), str(out) + "/"])
+    # The search corpus (found.jsonl) is optional: older builds don't write it.
+    runner(["pull", "%s/%s/found.jsonl" % (REMOTE, run_id), str(out) + "/"])
     if rc:
         raise SystemExit("adb pull failed: " + o)
     return out

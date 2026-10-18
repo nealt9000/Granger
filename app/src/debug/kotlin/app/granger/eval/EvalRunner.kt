@@ -140,8 +140,16 @@ class EvalRunner(
                     .put("ms", JSONObject().put("total", 0)).also { o -> prompts?.let { o.put("prompts", it.toJson()) } }
             }
             out.appendText(record.toString() + "\n")
+            // Everything the search found, with text, so ranking can be tried offline against the real corpus.
+            File(out.parentFile, CORPUS_FILE).appendText(corpus(item).toString() + "\n")
         }
     }
+
+    private fun corpus(item: EvalItem): JSONObject = JSONObject().put("id", item.id).put("keywords", JSONArray(finder.keywords))
+        .put("passages", JSONArray(finder.passages.map { p ->
+            JSONObject().put("kind", p.kind.name).put("source", sourceName(p)).put("title", p.sourceTitle)
+                .put("location", p.location).put("heading", p.heading).put("searchScore", p.searchScore).put("text", p.text)
+        }))
 
     /**
      * Keeps the complete, non-failed lines (a truncated tail is dropped, and a failed item is retried) and returns
@@ -291,6 +299,7 @@ class EvalRunner(
 
     companion object {
         const val FOUND_CAP = 60
+        const val CORPUS_FILE = "found.jsonl"
         const val DEEPER_PASSAGES = 8
     }
 }
