@@ -217,7 +217,10 @@ class ModelManagerTest {
         r.manager.appReturned() // ...and came back before the turn ended
         turn()
         runCurrent()
-        assertThat(r.llms.openEngines).hasSize(1)
+        assertThat(r.llms.openEngines).hasSize(1) // not closed at the turn's end...
+        advanceTimeBy(121_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty() // ...but a quiet spell later it still goes
     }
 
     @Test fun appReturningKeepsTheQuietSpellRelease() = runTest {

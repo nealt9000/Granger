@@ -183,7 +183,7 @@ class ModelManager(
      * dropped, so the turn's next question doesn't reload the models. A quiet-spell release stays.
      */
     fun appReturned() {
-        synchronized(sync) { if (pending == Pending.NOW) pending = Pending.NONE }
+        synchronized(sync) { if (pending == Pending.NOW) pending = Pending.SOON }
     }
 
     private fun deferIfHeld(kind: Pending): Boolean = synchronized(sync) {

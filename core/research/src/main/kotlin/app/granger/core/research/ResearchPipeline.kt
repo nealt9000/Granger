@@ -94,7 +94,13 @@ sealed interface Outcome {
         override val keywords: List<String> get() = emptyList()
     }
 
-    data class Failed(val reason: FailReason, override val medical: Boolean, override val keywords: List<String>) : Outcome
+    data class Failed(
+        val reason: FailReason,
+        override val medical: Boolean,
+        override val keywords: List<String>,
+        /** The exception that was turned into this failure, when there was one. */
+        val cause: Throwable? = null,
+    ) : Outcome
 }
 
 sealed interface ResearchEvent {
@@ -121,9 +127,10 @@ class ResearchPipeline(
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
         val deeper = request.deeperFrom != null
-        val generator = loadGenerator(deeper)
+        var loadFailure: Throwable? = null
+        val generator = loadGenerator(deeper, onFailure = { loadFailure = it })
         if (generator == null) {
-            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, request.medicalHint, emptyList())))
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, request.medicalHint, emptyList(), loadFailure)))
             return@flow
         }
         val usedLarge = deeper && generator.large
@@ -147,7 +154,7 @@ class ResearchPipeline(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords)))
+                emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
                 return@flow
             }
             val found = Ranking.preselect(all, keywords, config)
@@ -158,7 +165,7 @@ class ResearchPipeline(
                 throw e
             } catch (e: Exception) {
                 // The embedder failed: a model failure, reported with what the pipeline knows.
-                emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords)))
+                emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, e)))
                 return@flow
             }
         }
@@ -176,10 +183,11 @@ class ResearchPipeline(
 
         emit(ResearchEvent.Progress(Stage.WRITING))
         val prompt = AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null)
-        val reply = streamReply(generator.model, prompt, stop)
+        val streamed = streamReply(generator.model, prompt, stop)
+        val reply = streamed.text
         if (reply == null) {
             // Reported here, not thrown: a failure would reach the collector without the flags the pipeline knows.
-            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords)))
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, streamed.cause)))
             return@flow
         }
 
@@ -196,27 +204,29 @@ class ResearchPipeline(
     fun guess(question: String, priorQuestion: String?, large: Boolean, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
         var fellBack = false
-        val generator = loadGenerator(large) { fellBack = true; emit(ResearchEvent.GuessFallback) }
+        var loadFailure: Throwable? = null
+        val generator = loadGenerator(large, onFailure = { loadFailure = it }) { fellBack = true; emit(ResearchEvent.GuessFallback) }
         if (generator == null) {
-            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList())))
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), loadFailure)))
             return@flow
         }
         emit(ResearchEvent.Progress(Stage.WRITING))
-        val reply = streamReply(generator.model, GuessPrompt.build(question, priorQuestion), stop)
+        val streamed = streamReply(generator.model, GuessPrompt.build(question, priorQuestion), stop)
+        val reply = streamed.text
         if (reply == null) {
-            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList())))
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), streamed.cause)))
             return@flow
         }
         emit(ResearchEvent.Done(Outcome.Guessed(reply, generator.large, fellBack)))
     }
 
-    /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far, or null when the model failed. */
-    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): String? {
-        var failed = false
+    /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far, or the failure. */
+    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): StreamResult {
+        var failure: Throwable? = null
         val text = model.generate(prompt, ANSWER_TOKENS)
             .catch { e ->
                 if (e is CancellationException) throw e
-                failed = true
+                failure = e
             }
             .transformWhile { chunk ->
                 emit(chunk)
@@ -227,14 +237,18 @@ class ResearchPipeline(
                 emit(ResearchEvent.Partial(text))
                 text
             }
-        return if (failed) null else text
+        return if (failure != null) StreamResult(null, failure) else StreamResult(text, null)
     }
+
+    /** [text] is null when the model failed with [cause]. */
+    private class StreamResult(val text: String?, val cause: Throwable?)
 
     private class Loaded(val model: TextGenerator, val large: Boolean)
 
     /** Null when even the small model won't load. */
     private suspend fun FlowCollector<ResearchEvent>.loadGenerator(
         deeper: Boolean,
+        onFailure: (Throwable) -> Unit = {},
         onFallback: suspend () -> Unit = { emit(ResearchEvent.LargeFallback) },
     ): Loaded? {
         if (deeper) {
@@ -247,6 +261,7 @@ class ResearchPipeline(
         return try {
             Loaded(models.generator(deeper = false), large = false)
         } catch (e: ModelUnavailableException) {
+            onFailure(e)
             null
         }
     }

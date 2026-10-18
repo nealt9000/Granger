@@ -191,10 +191,17 @@ class EvalRunner(
 
     private class Described(val outcome: String, val reply: String, val cited: List<Int>, val chosen: List<Passage>)
 
+    /** "<reason>: <ExceptionClass>: <message>", so a failed record says what failed. */
+    private fun failureText(outcome: Outcome.Failed): String {
+        val cause = outcome.cause ?: return outcome.reason.name
+        return "${outcome.reason}: ${cause::class.simpleName}: ${cause.message}"
+    }
+
     private fun describe(outcome: Outcome?): Described = when (outcome) {
         is Outcome.Answered -> Described("answered", outcome.text, outcome.cited.sorted(), outcome.passages)
         is Outcome.Unverified -> Described("unverified", outcome.text, emptyList(), outcome.passages)
         is Outcome.Declined -> Described("declined", "", emptyList(), emptyList())
+        is Outcome.Failed -> Described("failed", failureText(outcome), emptyList(), emptyList())
         else -> Described("failed", "", emptyList(), emptyList())
     }
 

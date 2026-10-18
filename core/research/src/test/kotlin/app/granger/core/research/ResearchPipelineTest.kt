@@ -173,6 +173,7 @@ class ResearchPipelineTest {
         val events = ResearchPipeline(finder, FakeModels(FakeGenerator())).run(ResearchRequest("At what temperature does water boil?")).toList()
         val out = outcome(events) as Outcome.Failed
         assertThat(out.reason).isEqualTo(FailReason.SEARCH_FAILED)
+        assertThat(out.cause).hasMessageThat().isEqualTo("disk I/O error")
         assertThat(out.keywords).containsExactly("water", "boils").inOrder()
     }
 
@@ -433,7 +434,10 @@ class ResearchPipelineTest {
     fun guessWithNoModelFails() = runTest {
         val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = null))
             .guess("Anything?", priorQuestion = null, large = false).toList()
-        assertThat(outcome(events)).isEqualTo(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList()))
+        val failed = outcome(events) as Outcome.Failed
+        assertThat(failed.reason).isEqualTo(FailReason.MODEL_UNAVAILABLE)
+        assertThat(failed.keywords).isEmpty()
+        assertThat(failed.cause).isInstanceOf(ModelUnavailableException::class.java)
     }
 
     @Test

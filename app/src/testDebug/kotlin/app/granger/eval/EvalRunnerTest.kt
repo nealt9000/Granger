@@ -195,6 +195,17 @@ class EvalRunnerTest {
     }
 
     @Test
+    fun aFailedRecordNamesTheReasonAndException() = runTest {
+        val finder = RecordingFinder(PassageFinder { throw IllegalStateException("disk I/O error") })
+        val runner = EvalRunner(ResearchPipeline(finder, Models(small, large)), finder, { it.sourceId }) { ticks += 10; ticks }
+        val out = File(tmp.root, "rf/results.jsonl")
+        runner.run(listOf(item("a")), out, GuessModels.NONE)
+        val r = records(out).single()
+        assertThat(r.getString("outcome")).isEqualTo("failed")
+        assertThat(r.getString("reply")).isEqualTo("SEARCH_FAILED: IllegalStateException: disk I/O error")
+    }
+
+    @Test
     fun failedRecordsAreRetriedOnResume() = runTest {
         val out = File(tmp.root, "r/results.jsonl").apply { parentFile!!.mkdirs(); writeText("{\"id\":\"a\",\"outcome\":\"answered\"}\n{\"id\":\"b\",\"outcome\":\"failed\"}\n") }
         runner().run(listOf(item("a"), item("b")), out, GuessModels.NONE)

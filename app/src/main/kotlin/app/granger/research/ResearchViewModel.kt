@@ -258,6 +258,7 @@ class ResearchViewModel(
                             settled = true
                             withContext(NonCancellable) { chats.setGuess(turnId, outcome.text, outcome.usedLarge, outcome.fellBack || fellBack) }
                         } else if (outcome is Outcome.Failed) {
+                            outcome.cause?.let { runCatching { android.util.Log.w("Granger", "Research guess failed", it) } }
                             // Only the model can fail a guess (it does no search); say so, without storing it.
                             guessFailed.value = turnId
                         }
@@ -391,6 +392,7 @@ class ResearchViewModel(
                     }
                     ResearchEvent.GuessFallback -> Unit // Only guess() emits this; see bestGuess.
                     is ResearchEvent.Done -> withContext(NonCancellable) {
+                        (event.outcome as? Outcome.Failed)?.cause?.let { runCatching { android.util.Log.w("Granger", "Research turn failed", it) } }
                         settle(checkNotNull(turnId), event.outcome, kept, usedLarge = ask.askedDeeper && !fellBack)
                         settled = true
                     }
