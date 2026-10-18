@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 enum class LlmSize { SMALL, LARGE }
 
@@ -45,6 +46,8 @@ class ModelManager(
     private val backend: LlmBackend = LlmBackend.GPU,
     private val releaseAfterMs: Long = 120_000,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** How long a load waits for its file to be listed: the list is empty until the catalog has loaded at startup. */
+    private val installWaitMs: Long = 10_000,
 ) {
     private val supported = tier >= DeviceTier.ASK
 
@@ -84,8 +87,7 @@ class ModelManager(
             val resident = llm
             if (resident != null && llmSize == size) return@withLock resident
             // Checked before closing, so asking for a model that isn't there leaves the resident one loaded.
-            val models = installed.first()
-            val file = (if (size == LlmSize.SMALL) models.small else models.large)
+            val file = installedFile(size)
                 ?: throw ModelLoadException(size, IllegalStateException("$size model is not installed"))
             closeLlm()
             if (size == LlmSize.LARGE) closeEmbedder()
@@ -111,6 +113,12 @@ class ModelManager(
             coroutineContext.ensureActive()
             checkNotNull(llm)
         }
+    }
+
+    /** [size]'s file once it is listed, or null when it isn't within [installWaitMs] (a question asked right after launch waits). */
+    private suspend fun installedFile(size: LlmSize): File? {
+        fun of(models: InstalledModels) = if (size == LlmSize.SMALL) models.small else models.large
+        return withTimeoutOrNull(installWaitMs) { of(installed.first { of(it) != null }) }
     }
 
     /** The embedder, or null (disabled, not installed, large model resident, or failed to load: callers rank lexically). */

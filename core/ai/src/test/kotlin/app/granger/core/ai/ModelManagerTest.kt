@@ -2,6 +2,7 @@ package app.granger.core.ai
 
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlinx.coroutines.async
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,6 +92,17 @@ class ModelManagerTest {
         assertThat(ex.size).isEqualTo(LlmSize.LARGE)
         assertThat(r.llms.openEngines).hasSize(1)
         assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
+    }
+
+    @Test fun loadRightAfterLaunchWaitsForTheModelList() = runTest {
+        // At startup the list is empty until the catalog has loaded from its cache.
+        val r = rig(models = InstalledModels())
+        val engine = async { r.manager.engine(LlmSize.SMALL) }
+        runCurrent()
+        assertThat(engine.isCompleted).isFalse()
+        r.installed.value = all
+        assertThat(engine.await()).isNotNull()
+        assertThat(r.llms.events).contains("load ${small.path}")
     }
 
     @Test fun largeIsRefusedBelowTheThinkDeeperTier() = runTest {
