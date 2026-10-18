@@ -172,7 +172,7 @@ These stay close to how the current build presents them, with production polish:
 
 ## 9. Research
 
-**Research** is the new name for Ask everywhere in the UI: the rail tool, both selection menus, the screen title and Readiness. (This spec first called it "Research"; Neal renamed it on 2026-10-17, in Plan 8.) Its v1 job, as in the v1 spec, is the cited answer or "Not in your library." This redesign widens its stated purpose:
+**Research** is the new name for Ask everywhere in the UI: the rail tool, both selection menus, the screen title and Readiness. (This spec first called it "Inquire & Abstract"; Neal renamed it on 2026-10-17, in Plan 8.) Its v1 job, as in the v1 spec, is the cited answer or "Not in your library." This redesign widens its stated purpose:
 
 - Beyond finding and summarising, it is a thinking partner for working through scientific, engineering, philosophical and other scenarios.
 - It grounds every claim in your library's text **and metadata** (author, date, subject, collection), citing as before. Book and pack catalogue cards are passages too, so "which books by Darwin do I have?" can be answered and cited.
