@@ -8,7 +8,7 @@ Amends `2026-10-15-granger-v1-design.md`. Where the two differ, this document wi
 
 Plan 4 shipped Granger Classics as one 84 MB ZIM read like a website. Reading it on the Pixel 6 exposed a bigger miss (Neal: "a bigger overall design miss on my part"): Granger is turning into a personal library of many media types from many sources, and the current app treats everything as a flat list of website-style packs. Books should feel like books, the library should be organised the way a person thinks about it, and the app should open onto what you were doing.
 
-**Picture of the finished app (Neal's):** you open Granger and you are back in the book you were reading, where you left off. Down the left edge is a vertical toolbar: tools at the top, then bookmarks to the books and media you have open, then recent chats, searches and media, and Settings at the very bottom. Something you half-remember is found through Search; failing that, through Inquire & Abstract, the app's expert librarian and senior research scientist over everything in your library.
+**Picture of the finished app (Neal's):** you open Granger and you are back in the book you were reading, where you left off. Down the left edge is a vertical toolbar: tools at the top, then bookmarks to the books and media you have open, then recent chats, searches and media, and Settings at the very bottom. Something you half-remember is found through Search; failing that, through Research, the app's expert librarian and senior research scientist over everything in your library.
 
 ## 2. Goals, non-goals, anti-goals
 
@@ -41,16 +41,16 @@ Plan 4 shipped Granger Classics as one 84 MB ZIM read like a website. Reading it
 
 Top to bottom:
 
-1. **Tools**: Search · Inquire & Abstract · Library · Player. The Player button is hidden in v1 and reserved in the layout.
+1. **Tools**: Search · Research · Library · Player. The Player button is hidden in v1 and reserved in the layout. Research shows on every phone that can run it (6 GB of memory or more), even before its models are installed; its screen then says what to get, with a button to Settings → Models.
 2. **Bookmarks**: the books and articles you have open, most recently opened first. Each one jumps back into that item where you left it, so you can move quickly between several. **Each article is its own spot**: three open Wikipedia articles take three spots. Opening a book or article adds it; you can remove one (long-press). An item's place survives removal; it's just no longer on the rail. At the bottom of the section, a **History** button opens the full list of everything you've opened, newest first, searchable. *Builder's call: the cap on how many spots show (around 8), and what happens past it (oldest drop off the rail but stay in History).*
-3. **Recent**: recent Inquire & Abstract chats and searches, newest first, tapping one reopens it. After v1, Recent also lists audio and video you played.
+3. **Recent**: recent Research chats and searches, newest first, tapping one reopens it. After v1, Recent also lists audio and video you played.
 4. **Settings**: pinned to the bottom.
 
 **On a phone** the rail has two widths:
 - **Narrow** (about 56–60 dp): icons for tools, small covers for bookmarks (the current item outlined in flame orange), icons for recents.
 - **Expanded** (about 200 dp, over the content with a scrim): labels, titles with progress ("Ch. XII · 34%"), and the text of recent chats and searches. Opened by swiping from the left edge or tapping the rail.
 
-**Immersive reading:** in either reader, reading is full screen with no rail. Tapping the middle of the page brings up the reader's controls **and** the rail (and, after v1, the mini-player when something is playing). Tapping the middle again hides them. On non-reading screens (Library, Search, Inquire & Abstract, Settings, archive sources) the narrow rail is always visible.
+**Immersive reading:** in either reader, reading is full screen with no rail. Tapping the middle of the page brings up the reader's controls **and** the rail (and, after v1, the mini-player when something is playing). Tapping the middle again hides them. On non-reading screens (Library, Search, Research, Settings, archive sources) the narrow rail is always visible.
 
 *Builder's call:* the exact icons, the scrim, animation, and whether a tablet/landscape layout keeps the rail expanded.
 
@@ -100,7 +100,7 @@ Search (the rail tool) searches everything installed: ZIM full-text and title su
 
 ## 5. Archive sources
 
-Each source screen has search, browse, and **Installed** / **Updates** views (Updates where the source has versions). Downloading, resuming, verifying and storage location use the existing `:core:downloads` machinery and storage meter. The current Downloads screen's contents move here; models move to **Settings → Models** (Inquire & Abstract points there when no model is installed). Readiness moves to **Settings → Readiness**.
+Each source screen has search, browse, and **Installed** / **Updates** views (Updates where the source has versions). Downloading, resuming, verifying and storage location use the existing `:core:downloads` machinery and storage meter. The current Downloads screen's contents move here; models move to **Settings → Models** (Research points there when no model is installed). Readiness moves to **Settings → Readiness**.
 
 ### Granger
 Lists Granger Classics (whole collection or single books) and the Starter/Full presets. Comes from the signed catalog.
@@ -117,7 +117,7 @@ For **old books, technical manuals and, after v1, public-domain audiobooks**. Gr
 - **Books you own:** Granger cannot check ownership. Openly downloadable → download; lend-only → the browser link, or import your own copy.
 - **Formats in v1:** EPUB. When an item offers EPUB, download that. Items offering only PDF are listed but marked "PDF: coming soon" until the PDF pass. Text-only (TXT) items are allowed and open in the e-book reader as simple text.
 - **No signed hash:** archive.org's metadata API gives each file's size and md5/sha1. The download is verified against those (sha1 preferred) rather than a catalog sha256. That's weaker than the signed catalog and accepted for this source.
-- Downloaded books are filed under Literature → *Archive.org*, indexed for Search and Inquire & Abstract like any e-book, and keep their archive.org identifier and metadata (title, creator, date, subject).
+- Downloaded books are filed under Literature → *Archive.org*, indexed for Search and Research like any e-book, and keep their archive.org identifier and metadata (title, creator, date, subject).
 - **Free, but capped:** archive.org downloads are free (not Pro-only) and count toward the Free 10 GB cap like packs.
 - **Play Store risk:** an in-app archive.org downloader may draw Play policy review. The default public-domain filter, the waiver and the openly-downloadable-only rule are the mitigation; F-Droid/direct APK channels are unaffected. Check Play policy before the beta (Plan 9).
 
@@ -145,14 +145,14 @@ One reader for every e-book: Granger Classics, archive.org books and imports. Mo
 - **Dictionary lookup** on a selected word. *Builder's call: use an installed offline dictionary pack (Wiktionary from Kiwix) when present, else Android's text-processing intent, else hide the option. This must not need a network.*
 - **Search inside the book**, with results in context.
 
-**Selecting text** brings up: Copy · Highlight · Note · Define · **Search** · **Inquire & Abstract**. Search and Inquire & Abstract open that tool with the selection already filled in, so it's easy to start a search or a chat from what you're reading.
+**Selecting text** brings up: Copy · Highlight · Note · Define · **Search** · **Research**. Search and Research open that tool with the selection already filled in, so it's easy to start a search or a chat from what you're reading.
 
 ## 7. The web-style reader (Wikipedia, Kiwix and other web-style packs)
 
 These stay close to how the current build presents them, with production polish:
 
 - The same immersive behaviour: full screen; tapping a non-link area shows or hides controls and the rail.
-- The same text-selection actions: Copy · Search · Inquire & Abstract (Highlight/Note can wait).
+- The same text-selection actions: Copy · Search · Research (Highlight/Note can wait).
 - Reopens at the last article and scroll position (exists today).
 - Bookmarks on the rail work the same as for e-books.
 - Production refinements: consistent app theme over pack styles where packs allow it; Kiwix-style jQuery injection so main pages like the Ray Charles sample render (Plan 3 carry-forward); a find-in-page; a tidy, readable title bar. *Builder's call: the rest of the polish list, judged on the Pixel 6.*
@@ -168,19 +168,21 @@ These stay close to how the current build presents them, with production polish:
   - Also fix the Plan 4 minors that carry over (lost anchor ids, `<1>` markers in Canterbury Tales titles, failures that don't name the work).
 - **Hosting:** individual EPUBs as assets on a GitHub release (`classics-<date>`), each in the signed catalog with its own sha256 and metadata, plus a "whole collection" entry that queues them all. *Builder's call: whether a single archive bundle is also offered for the whole set.*
 - The Classics ZIM is retired from the catalog. An installed Classics ZIM keeps working but is labelled as superseded, with a prompt to download the e-book collection.
-- Full-text search and Inquire & Abstract reach Classics through the e-book FTS5 index rather than ZIM full-text.
+- Full-text search and Research reach Classics through the e-book FTS5 index rather than ZIM full-text.
 
-## 9. Inquire & Abstract
+## 9. Research
 
-**Inquire & Abstract** is the new name for Ask everywhere in the UI. Its v1 job, as in the v1 spec, is the cited answer or "not in your library". This redesign widens its stated purpose so that Plan 6 designs for it:
+**Research** is the new name for Ask everywhere in the UI: the rail tool, both selection menus, the screen title and Readiness. (This spec first called it "Research"; Neal renamed it on 2026-10-17, in Plan 8.) Its v1 job, as in the v1 spec, is the cited answer or "Not in your library." This redesign widens its stated purpose:
 
 - Beyond finding and summarising, it is a thinking partner for working through scientific, engineering, philosophical and other scenarios.
-- It grounds every claim in your library's text **and metadata** (author, date, subject, collection), citing as before.
-- Where it helps, it surfaces connections between sources that seem unrelated.
-- It can be started from a text selection in either reader (§6, §7).
-- Chats are kept and listed in the rail's Recent section. That lifts "Ask history" out of the v1 spec's deferred list.
+- It grounds every claim in your library's text **and metadata** (author, date, subject, collection), citing as before. Book and pack catalogue cards are passages too, so "which books by Darwin do I have?" can be answered and cited.
+- Where it helps, it surfaces connections between sources that seem unrelated (at most 3 passages per source reach ranking, so several works reach the model).
+- It can be started from a text selection in either reader (§6, §7): a new chat opens with the selection quoted as source [1]; sending with the box empty asks "Explain this passage and how it connects to the rest of my library."
+- Chats are kept and listed in the rail's Recent section. That lifts "Ask history" out of the v1 spec's deferred list. **A chat is a thread with follow-ups:** each follow-up searches the library again with the new question plus the previous one, and the model sees the previous question and a short form of its answer. Every turn still cites or declines.
 
 The governing rule is unchanged: knowledge lives in files, not in model weights. Cite or decline.
+
+**Measured on the Pixel 6 (Plan 8, 2026-10-17).** Embedding a question plus 12 passages with EmbeddingGemma took 4.2–4.7 s on the GPU and 9.6–10.2 s on the CPU, over the 3 s budget, so v1 ranks passages lexically and the embedder stays off (it is still offered in Settings → Models). With the model loaded, "Who wrote Hamlet?" reached its first answer words in 6.8 s, inside the 9 s target: about 2–3 s rewriting the question, 1–1.5 s searching, and 1–3 s before the model's first words. Thresholds are first guesses for Plan 9's eval to tune.
 
 ## 10. Brand and theme
 
@@ -212,7 +214,7 @@ The rest of the roadmap reorders like this (Plans 1–4 are done):
 | 5 | **Shell + Library** | Theme and icon, side rail, immersive behaviour, open-to-last-place, media types/collections/filing, Library screens, archive-source screens for Granger and Kiwix (Downloads content moved), Settings with Models and Readiness, polished web-style reader with selection actions, schema migration |
 | 6 | **E-book reader + Classics EPUBs** | Readium reader with all §6 features, `:core:imports` EPUB/TXT/MD import + FTS5 index + DRM detection, My books, pack-builder EPUB output, Classics re-release and catalog entries, Search over e-books |
 | 7 | **Archive.org source** | Disclaimer, search/browse, open-only downloads with md5/sha1 verify, filing, metadata |
-| 8 | Inquire & Abstract | Old Plan 6 (Ask pipeline) under the new name, with metadata-aware grounding, cross-source connections, selection entry and kept chats |
+| 8 | **Research** | Old Plan 6 (Ask pipeline) under the new name, with metadata-aware grounding, cross-source connections, selection entry and kept chats |
 | 9 | Eval harness | Old Plan 7 |
 | 10 | Monetization + onboarding + telemetry | Old Plan 8 |
 | 11 | Beta | Old Plan 9; includes the Play policy check for the archive.org source |
@@ -236,6 +238,6 @@ The rest of the roadmap reorders like this (Plans 1–4 are done):
 - Archive.org: openly downloadable files only, lend-only items link out, sha1/md5 verification, PDF-only items listed but disabled until the PDF pass.
 - Models and Readiness move under Settings; Downloads content moves to the archive sources.
 - Dictionary from an offline Wiktionary pack when installed.
-- Ask renamed to Inquire & Abstract everywhere; chats kept (Ask history moves into v1).
+- Ask renamed to Research everywhere; chats kept, with threaded follow-ups (Ask history moves into v1).
 - Dark-only theme in v1 unless light is cheap; tokens structured for change.
 - The Classics ZIM is retired, not deleted from devices.

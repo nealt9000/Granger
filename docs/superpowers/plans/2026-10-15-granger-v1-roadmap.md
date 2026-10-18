@@ -13,7 +13,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 5 | Shell + Library | Flame theme + icon, side rail (bookmarks per article, History, Recent), immersive mode, open-to-last-place, media types / collections / filing, Library screens, Granger + Kiwix source screens, Settings (Models, Readiness), polished web-style reader with selection actions, schema migration | **Done:** `2026-10-16-plan-05-shell-library.md` (reader device tests pending) |
 | 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:books` (EPUB/TXT/MD, DRM detection; search index is contentless FTS4), My books, pack-builder EPUB output, Classics re-release, Search over e-books | **Done:** `2026-10-17-plan-06-ebook-reader-classics.md` (the 347-book "Download all" not yet run on a device) |
 | 7 | Archive.org source | Public-domain filter (1930 or earlier) until waiver, shelves + search, open-only downloads (EPUB, else text / OCR text) with sha1/md5 verify, filing, metadata | **Done:** `2026-10-17-plan-07-archive-org.md` |
-| 8 | Inquire & Abstract | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats | |
+| 8 | Research (was Inquire & Abstract) | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats with threaded follow-ups | **Done:** `2026-10-17-plan-08-research.md` |
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources) + import gating, onboarding, `:core:telemetry` | |
 | 11 | Beta | Release config, signing, Play listing (incl. archive.org policy check), internal track | |
@@ -61,7 +61,7 @@ Deferred, low priority (from Plan 2):
 ## Carried forward from Plan 5
 
 - ~~Rail letter tiles become covers in Plan 6.~~ Done in Plan 6.
-- The Inquire & Abstract slot in the rail is switched on in Plan 8.
+- ~~The Inquire & Abstract slot in the rail is switched on in Plan 8.~~ Done in Plan 8, as Research.
 - ~~The Classics ZIM stays filed as "Granger Classics" until Plan 6 replaces it with e-books.~~ Plan 6: the ZIM is retired from the catalog; an installed copy shows "Replaced by the Granger Classics e-books" with "Get the e-books".
 - The three `ReaderWebViewTest` device tests are written but unrun, pending the owner's go-ahead: `connectedDebugAndroidTest` uninstalls the app and wipes downloaded packs and models.
 - Pixel 6 walkthrough, after unlock: moving Wikipedia into a new "Reference" media type and back, the Granger, Kiwix and Models source screens, and About all passed. Not checked on a device:
@@ -104,7 +104,7 @@ Still open:
 - Book search results are unranked (`LIMIT 400`); TXT files with single-newline paragraphs become one paragraph per chapter; the shared cover cache (4 MB) re-decodes while scrolling a long grid.
 - Plan 10: import is Pro-only; queueing the whole Classics preset must be checked against the cap as one group (spec §13); `Features.IMPORT` becomes the entitlement check.
 - ~~Plan 7: archive.org books go to `books/archive-org/` with origin `ARCHIVE_ORG`; `Bookshelf.addDownloaded` needs an origin parameter then.~~ Done in Plan 7.
-- Plan 8: `BookIndex` and `BookHit` are the e-book retrieval path for Inquire & Abstract; the `INQUIRE` selection action is already wired.
+- ~~Plan 8: `BookIndex` and `BookHit` are the e-book retrieval path for Inquire & Abstract; the `INQUIRE` selection action is already wired.~~ Done in Plan 8 (`BookIndex.passages`; the action is now `RESEARCH`).
 - The search-grouping call from Plan 5 is still open.
 - The four Classics presentation defects from Plan 4 are fixed in the EPUB build (translator in the Koran titles, publisher CSS dropped, page numbers not clipped, clean titles).
 
@@ -144,3 +144,38 @@ Still open:
 - Plan 11: the Play policy check for this source.
 - Minor polish deferred from the reviews: the filtered view's Get re-check and query both use `year`, which some items lack (they need the waiver); the archive tests wait in real time on the IO dispatcher; silent failure when no browser is installed; "PDF: coming soon" sits below the buttons rather than beside Get.
 
+## Carried forward from Plan 8
+
+Neal's calls (2026-10-17):
+- **Inquire & Abstract is renamed Research** everywhere in the UI (rail tool, both selection menus, screen title, Readiness); in code `INQUIRE` became `RESEARCH`. Spec §9 is updated.
+- Chats are threads with follow-ups: each follow-up searches again with the new question plus the previous one, and the model sees the previous question and a short form of its answer.
+- Research from a selection opens a new chat with the selection quoted as source [1]; sending empty asks "Explain this passage and how it connects to the rest of my library."
+
+Builder's calls made while building:
+- The Research tool shows at the ASK tier and up even before the models are installed; the screen points to Settings → Models.
+- Models are released 2 minutes after leaving Research, or at once when the app goes to the background.
+- Book and pack catalogue cards are passages, so metadata questions can be cited; at most 3 passages per source reach ranking.
+- **Rerank is off** (`RERANK_WITH_EMBEDDER = false`, `EMBEDDER_BACKEND = GPU` for when it comes back): the rule was "on only if a query plus 12 passages embeds in ≤ 3,000 ms on the faster backend".
+- A rewrite keyword phrase ("portia mercy") matches its words in any order, in book chunks, ZIM full text (one search per keyword), catalogue cards and lexical scoring. Before this, phrases had to occur verbatim and most questions found nothing.
+- When the rewrite is cut off before its `medical:` line, the medical lexicon decides. A reply containing `NOT IN LIBRARY` anywhere is a decline.
+
+Pixel 6 measurements (2026-10-17; `ResearchBenchmarkActivity`, debug only, `adb shell am start -n app.granger/.research.ResearchBenchmarkActivity`, logcat tag `Granger`, lines `Research:`):
+- Embedder, "Who wrote Hamlet?" plus 12 real passages: GPU 4,218 / 4,375 / 4,667 ms (load 2.2 s warm, 6.9 s cold); CPU 9,663 / 9,575 / 10,222 ms (load 1.1 s warm, 3.5 s cold). With 6 passages: GPU 1,959–1,973 ms, CPU 4,014–4,210 ms.
+- Send to first answer words, E2B already loaded (7.7–8.1 s to load), lexical ranking: "Who wrote Hamlet?" **6,782 ms, inside the 9.0 s target** (rewrite 2.2 s, search 1.4 s, ranking under 0.1 s, then 3.2 s to the first words). Declines in code take 3.5–4.1 s; declines by the model about 4.5–4.7 s.
+- Top cosine of the passages each question found (embedder on): answerable "Who wrote Hamlet?" 0.774, "What does Portia say about mercy?" 0.830, "What is the boiling point of water?" 0.635; unanswerable "routing number" 0.564, "2031 World Cup" 0.637, "library Wi-Fi password" 0.666. **They overlap**, so `cosineThreshold` stays 0.40. Leaving out the boiling-point question, which the phone's library can't really answer (the model declined it), the gap would be 0.666–0.774.
+- Top lexical scores: answerable 0.50 / 0.20 (Portia) / 0.50; unanswerable 0.17 / 0.17 / 0.50 (Wi-Fi). `lexicalThreshold` stays 0.50.
+- The phone has no real Wikipedia pack, only the 3 MB Ray Charles test ZIM and the retired Classics ZIM (still searched, so Classics texts can come back twice: as ZIM articles and as e-book chunks).
+
+Pixel 6 walkthrough (2026-10-17): the Research tool and empty screen; "Who wrote Hamlet?" answered with a [n] chip that outlines its card, and cards open the book or article at the passage; a follow-up carries the previous question into its keywords; an unanswerable question says "Not in your library." and Search instead opens Search with the keywords; the medical banner (after the fix above); Stop keeps what was written; Think deeper shows "Loading the model…" and E4B replies (it quoted the passage and then declined, which led to the decline fix below); Research from a book selection and from an article selection, sent empty, explain the quote; chats are in Recent and reopen intact after a force-stop; killing the process mid-answer leaves "Stopped before an answer." and Retry works; rotating while streaming keeps the turn; a removed book's citation says "That source is no longer in your library." (Hamlet was removed and got again).
+
+Fixed after the walkthrough: the phrase matching, medical and decline fixes above; preselect scored every passage inside its sort comparator, compiling regexes on each comparison (5–17 s of ranking with about 200 candidates; now under 0.1 s); the last scroll after a turn ran before the stored answer and its cards arrived, leaving the list above the new answer.
+
+For Plan 9:
+- **Lexical ranking declines too much.** The rewrite gives 4–6 multi-word keywords, many of them about the question's form ("portia quote", "literature analysis"), so passages rarely hold half of them: "What does Portia say about mercy?", "Tell me about the life of Ray Charles", "Why was Ray banned from playing in Georgia?" and the Hamlet follow-up "When was it first performed?" were all declined though the library holds the answer (Portia's speech scored 0.20; with the embedder it scored 0.830 and was answered). Options to weigh: rerank on GPU anyway (about +4.5 s, about 11 s to the first words), embed 6 passages instead of 12 (about 2 s), or score keywords by word coverage. Needs Neal's call.
+- Tune `cosineThreshold` and `lexicalThreshold` on the eval set; the rerank decision above; the 9 s target is met only with lexical ranking.
+- Models are still `evalPassed: false`.
+- "Search instead" passes every rewrite keyword joined, which the library's Search rarely matches ("world cup 2031 football soccer…" found nothing).
+- With rerank off, EmbeddingGemma (165 MB) is still listed in Settings → Models but unused; hide it or say so.
+- Answers can carry Markdown (`*Hamlet*`), shown as typed.
+- The last scroll once stopped short of a finished turn's source cards (after Retry).
+- Minor polish deferred from the reviews: no `--release 17` on `:core:research`; `HtmlPassages` doesn't split on no-break spaces; blank keywords count in LexicalScore's denominator; `Rewrite.parse` doesn't cap at 6 keywords or reject an echoed placeholder; `Keywords` drops apostrophes (O'Brien → obrien) that passage text keeps; the question and prompt header aren't length-capped (a huge pasted question can pass 3,400 tokens); `Ranking.cosine` doesn't check vector sizes; `Citations.strip` eats newlines before a group; Stop is polled per chunk, not during prefill; `ModelManager` closes the resident model before checking the requested file exists and doesn't enforce the tier; a large-model reload failure mid-answer fails the turn instead of falling back; a Room failure in a turn's first write is uncaught; `BookIndex.passages` takes its rows without `ORDER BY` and one damaged book drops all book passages; a citation to a vanished reading tab does nothing; `ZimUrls.forEntry` doesn't encode the fragment.
