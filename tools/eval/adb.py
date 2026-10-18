@@ -43,10 +43,18 @@ def front_package(runner):
     return None
 
 
+def keyguard_showing(runner):
+    _, out = runner(["shell", "dumpsys", "window"])
+    return "isKeyguardShowing=true" in out
+
+
 def check_front(runner):
     pkg = front_package(runner)
     if pkg is None:
         raise SystemExit("could not tell which app is in front (is the phone connected and awake?)")
+    # The lock screen is System UI; the eval screen shows over it, and nobody is using an app behind it.
+    if pkg == "com.android.systemui" and keyguard_showing(runner):
+        return
     if pkg != PKG and "launcher" not in pkg:
         raise SystemExit("%s is in front on the phone; close it (or go to the home screen) before the eval starts" % pkg)
 

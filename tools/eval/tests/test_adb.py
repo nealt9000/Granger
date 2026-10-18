@@ -26,6 +26,18 @@ def test_refuses_when_another_app_is_in_front():
     adb.check_front(Fake("com.google.android.apps.nexuslauncher"))
 
 
+def test_starts_over_the_lock_screen_but_not_over_the_open_shade():
+    def phone(keyguard):
+        def run(args):
+            if args[-1] == "window":
+                return 0, "    isKeyguardShowing=%s\n" % ("true" if keyguard else "false")
+            return 0, DUMPSYS % "com.android.systemui"
+        return run
+    adb.check_front(phone(keyguard=True))
+    with pytest.raises(SystemExit, match="systemui"):
+        adb.check_front(phone(keyguard=False))
+
+
 def test_run_pulls_results_and_stops_on_done_marker(tmp_path):
     ds = tmp_path / "d.json"
     ds.write_text("[]")
