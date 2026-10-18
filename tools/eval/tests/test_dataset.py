@@ -61,3 +61,13 @@ def test_validate_books(tmp_path):
     bad = item(id="b-2", answers=[{"source": "book:granger:pg1", "location": "chap9", "quote": "best of times"}])
     problems = dataset.validate_answers([ok, bad], books=tmp_path)
     assert len(problems) == 1 and "b-2" in problems[0]
+
+
+def test_article_location_must_be_the_exact_entry_path(tmp_path):
+    shutil.copy(TEST_ZIM, tmp_path / "granger-test.zim")
+    # "Photosynth" is a substring of the entry path Photosynthesis; an article answer must name the whole path
+    short = item(id="s-1", answers=[{"source": "granger-test", "location": "Photosynth", "quote": "green plants"}])
+    assert "s-1" in dataset.validate_answers([short], packs=tmp_path)[0]
+    # a fragment on either side is ignored, and the match is case-insensitive
+    frag = item(id="s-2", answers=[{"source": "granger-test", "location": "photosynthesis#Light", "quote": "green plants"}])
+    assert dataset.validate_answers([frag], packs=tmp_path) == []

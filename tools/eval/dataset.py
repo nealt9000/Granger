@@ -4,8 +4,8 @@ A dataset file is a JSON array of items (see docs/superpowers/specs/2026-10-17-r
 `check` validates structure only. `validate_answers` checks that each answer's location and quote really exist:
 
 * Article sources are the pack's ZIM name (e.g. `wikipedia_en_top`); the file is `<PACKS>/<name>.zim`. The location
-  is matched case-insensitively as a substring of an entry's path or title, and the quote must appear in that entry's
-  text (HTML stripped, whitespace and case folded).
+  must equal an entry's path exactly, case-insensitively, ignoring any `#fragment` on either side (see `location_matches`),
+  and the quote must appear in that entry's text (HTML stripped, whitespace and case folded).
 * Book sources are ids like `book:granger:<ref>`; the file is `<BOOKS>/<ref>.epub`. The location is matched as a
   substring of a spine item's href, and the quote must appear in that item's text.
 """
@@ -46,6 +46,21 @@ def check(items):
                 raise ValueError("%s: an answerable question needs an answer with a source and a location" % i)
 
 
+def location_matches(source, want, have):
+    """Does a passage at location `have` (from source `source`) satisfy an answer's location `want`?
+
+    Book sources (`book:...`) match `want` as a case-insensitive substring of `have`. Article sources match exactly,
+    case-insensitively, after dropping any `#fragment` from both sides.
+    """
+    if source.startswith("book:"):
+        return want.lower() in have.lower()
+    return _bare(want) == _bare(have)
+
+
+def _bare(loc):
+    return (loc or "").split("#", 1)[0].lower()
+
+
 def _norm(s):
     return re.sub(r"\s+", " ", html.unescape(s)).strip().lower()
 
@@ -56,11 +71,10 @@ def _text(markup):
 
 
 def _zim_problem(archive, a):
-    loc = a["location"].lower()
     matched = False
     for n in range(archive.all_entry_count):
         e = archive._get_entry_by_id(n)
-        if e.is_redirect or not (loc in e.path.lower()):
+        if e.is_redirect or not location_matches(a["source"], a["location"], e.path):
             continue
         item = e.get_item()
         matched = matched or item.mimetype.startswith("text/html")

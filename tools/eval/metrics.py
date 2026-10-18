@@ -6,6 +6,7 @@ Only items that have a record count. `apply_threshold` re-decides outcomes from 
 import copy
 import math
 
+from dataset import location_matches
 from grading import current_grade, replies
 
 BAR = {"unanswerable": 0.90, "answerable": 0.80, "guessWrongMax": 0.10, "guessGoodMin": 0.60}
@@ -16,7 +17,7 @@ def _rate(a, b):
 
 
 def matches(passage, answers):
-    return any(passage.get("source") == a["source"] and a["location"].lower() in (passage.get("location") or "").lower() for a in answers)
+    return any(passage.get("source") == a["source"] and location_matches(a["source"], a["location"], passage.get("location") or "") for a in answers)
 
 
 def percentile(values, p):

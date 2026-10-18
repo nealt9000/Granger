@@ -105,3 +105,16 @@ def test_sweep_moves_declines_with_threshold():
     assert high["unanswerable"]["handled"] == 4  # u2 (0.60) and u3 (0.45) now decline
     assert metrics.apply_threshold(recs, 0.65)[1]["outcome"] == "declined"
     assert metrics.apply_threshold(recs, 0.20)[1]["outcome"] == "answered"
+
+
+def test_article_answer_matches_exact_path_only():
+    ans = [{"source": "s", "location": "Moon", "quote": "x"}]
+    assert not metrics.matches(P(location="Moon_landing"), ans)
+    assert metrics.matches(P(location="Moon"), ans)
+    assert metrics.matches(P(location="moon#History"), ans)
+
+
+def test_book_answer_still_matches_by_substring():
+    ans = [{"source": "book:granger:romans", "location": "chap1", "quote": "x"}]
+    assert metrics.matches(P(source="book:granger:romans", location="OEBPS/chap1.xhtml"), ans)
+    assert not metrics.matches(P(source="book:granger:romans", location="OEBPS/chap9.xhtml"), ans)
