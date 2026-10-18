@@ -162,7 +162,7 @@ Added to `tools/catalog-gen/curated.json` from Kiwix, then the catalog is rebuil
 
 - Wikipedia best articles (maxi) and WikiMed (maxi) are already in the catalog.
 - Each new pack's `hasFulltextIndex` is checked; a pack without one can't be searched by Research, so it's flagged to Neal.
-- Media types (*Claude's call*): Wiktionary under Reference; Physics, Chemistry and Mathematics under a new "Science & Math"; Geography under Reference; iFixit and Knots under a new "How-to".
+- Catalog categories, which group the Kiwix source screen (*Claude's call*): Wiktionary and Geography under Reference; Physics, Chemistry and Mathematics under a new "Science & Math"; iFixit and Knots under a new "How-to". Filing in the Library is unchanged: the Wikipedia topic packs join the Wikipedia collection, and Wiktionary and iFixit get their existing collections.
 - iFixit's license is checked from the pack itself before it is listed (believed to be CC BY-NC-SA). If non-commercial, it is listed under the content rule in §10a.
 - Kiwix's separate "A Library of Knots" (`zimgit-knots_en`, 30 MB) isn't added unless Neal asks.
 - Neal then downloads the library on the Pixel 6 himself; the 10 GB cap isn't enforced yet (Plan 10).
