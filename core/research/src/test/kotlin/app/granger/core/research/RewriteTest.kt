@@ -25,10 +25,17 @@ class RewriteTest {
         val p = Rewrite.prompt("who was Darwin", null)
         assertThat(p).doesNotContain("Previous question")
         assertThat(p).isEqualTo(
-            "Turn the question into search keywords for a library catalogue.\n" +
+            "Turn the question into search words for finding the text that answers it in a library.\n" +
+                "Use the words that text itself would contain: names of people, places, works and things, and the source's own wording (older or formal words too).\n" +
+                "Don't use words about the question, like definition, meaning, history, facts, problems, references, etymology.\n" +
+                "For what a word means or where it comes from, give the word itself.\n" +
                 "Reply in exactly two lines:\n" +
-                "keywords: <3 to 6 keywords or short phrases, comma-separated>\n" +
+                "keywords: <3 to 6 words or short names, comma-separated>\n" +
                 "medical: <yes if the question is about health, illness, injury, the body, medicines or treatment; otherwise no>\n" +
+                "Example:\n" +
+                "Question: where in the bible does it talk about being drunk\n" +
+                "keywords: wine, strong drink, drunkenness, drunk\n" +
+                "medical: no\n" +
                 "Question: who was Darwin",
         )
     }
@@ -39,7 +46,7 @@ class RewriteTest {
     }
 
     @Test fun anEchoedPlaceholderIsNotKeywords() {
-        assertThat(Rewrite.parse("keywords: <3 to 6 keywords or short phrases, comma-separated>\nmedical: no")).isNull()
+        assertThat(Rewrite.parse("keywords: <3 to 6 words or short names, comma-separated>\nmedical: no")).isNull()
     }
 
     @Test fun echoedMedicalPlaceholderIsNotYes() {
@@ -49,4 +56,30 @@ class RewriteTest {
 
     @Test fun readsMedicalYesWithNewPromptWording() =
         assertThat(Rewrite.parse("keywords: stroke, signs\nmedical: yes")!!.medical).isTrue()
+
+    @Test fun promptAsksForSourceWording() {
+        val p = Rewrite.prompt("q", null)
+        assertThat(p).contains("Use the words that text itself would contain")
+        assertThat(p).contains("Don't use words about the question")
+    }
+
+    @Test fun promptHasAnExample() {
+        val p = Rewrite.prompt("who was Darwin", null)
+        assertThat(p).contains("Question: where in the bible does it talk about being drunk")
+        assertThat(p).contains("keywords: wine, strong drink, drunkenness, drunk")
+        assertThat(p.lines().last()).isEqualTo("Question: who was Darwin")
+    }
+
+    @Test fun metaWordsAreDropped() {
+        assertThat(Rewrite.parse("keywords: betimes definition, betimes meaning, word origin")!!.keywords)
+            .containsExactly("betimes", "word").inOrder()
+    }
+
+    @Test fun allMetaKeepsOriginal() {
+        assertThat(Rewrite.parse("keywords: history, facts")!!.keywords).containsExactly("history", "facts").inOrder()
+    }
+
+    @Test fun keywordWithMetaInsideKeepsTheRest() {
+        assertThat(Rewrite.parse("keywords: granny knot problems")!!.keywords).containsExactly("granny knot")
+    }
 }

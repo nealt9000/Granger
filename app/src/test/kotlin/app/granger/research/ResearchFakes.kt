@@ -146,7 +146,7 @@ class ScriptedGenerator(
     val gate = CompletableDeferred<Unit>()
     var failAt: Int? = null
 
-    val answerPrompts get() = prompts.filterNot { it.startsWith("Turn the question into search keywords") }
+    val answerPrompts get() = prompts.filterNot { it.startsWith("Turn the question into search words") }
 
     override fun generate(prompt: String, maxTokens: Int): Flow<String> = flow {
         prompts += prompt
