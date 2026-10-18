@@ -521,6 +521,96 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.running).isFalse()
     }
 
+    @Test fun searchFailureShowsRetryNotRepair() = runTest(main.dispatcher) {
+        finder.failure = IllegalStateException("disk I/O error")
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.SEARCH_FAILED)
+        assertThat(vm.state.value.running).isFalse()
+        // Retry asks it again, and the search works this time.
+        finder.failure = null
+        vm.retry(turn.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnsOf(turn.chatId).last().outcome).isEqualTo(TurnOutcome.ANSWERED)
+    }
+
+    @Test fun aModelFailureStaysFailed() = runTest(main.dispatcher) {
+        models.smallFails = true
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().outcome).isEqualTo(TurnOutcome.FAILED)
+    }
+
+    @Test fun failedGuessShowsTheModelNotice() = runTest(main.dispatcher) {
+        val vm = vm()
+        val id = declined(vm)
+        models.smallFails = true
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.guessFailed).isTrue()
+        assertThat(ui.offersGuess).isTrue()
+        assertThat(ui.turn.guess).isEmpty()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        // The notice isn't stored: the next try starts clean.
+        models.smallFails = false
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().guessFailed).isFalse()
+        assertThat(chats.turnList.value.single().guess).isNotEmpty()
+    }
+
+    @Test fun stoppedTurnKeepsPipelineMedicalFlag() = runTest(main.dispatcher) {
+        // The question itself doesn't look medical; the model's rewrite says it is.
+        small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
+        finder.gate = CompletableDeferred()
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().stage).isEqualTo(Stage.SEARCHING)
+        vm.stop()
+        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.INTERRUPTED)
+        assertThat(turn.medical).isTrue()
+    }
+
+    @Test fun failedTurnKeepsPipelineMedicalFlag() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
+        small.failAt = 0
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.FAILED)
+        assertThat(turn.medical).isTrue()
+    }
+
+    @Test fun turnsFlowErrorDoesNotCrash() = runTest(main.dispatcher) {
+        val chatId = chats.create("How do plants use light?")
+        chats.flowFailure = IllegalStateException("disk I/O error")
+        val vm = vm(chatId = chatId)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns).isEmpty()
+        assertThat(vm.state.value.recentChats).isEmpty()
+    }
+
+    @Test fun deleteChatErrorDoesNotCrash() = runTest(main.dispatcher) {
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        chats.failure = IllegalStateException("disk I/O error")
+        vm.deleteChat()
+        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        assertThat(vm.state.value.chatId).isNull()
+        assertThat(vm.state.value.turns).isEmpty()
+    }
+
     @Test fun aStorageErrorLeavesTheChatUsable() = runTest(main.dispatcher) {
         chats.failure = IllegalStateException("disk I/O error")
         val vm = vm()

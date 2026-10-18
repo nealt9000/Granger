@@ -10,9 +10,27 @@ object AnswerPrompt {
     private const val TEXT_CHARS = 1_200
     private const val QUOTE_CHARS = 1_500
 
-    fun estimateTokens(prompt: String): Int = prompt.length / 4
+    /** The most tokens a prompt may take (the model's window less room for the reply). */
+    const val MAX_TOKENS = 3_400
 
+    /** Characters per token: 4 for mostly English text, 3 when most characters are non-ASCII (they tokenize into more). */
+    fun estimateTokens(prompt: String): Int {
+        val nonAscii = prompt.count { it.code > 127 }
+        return if (nonAscii * 2 > prompt.length) prompt.length / 3 else prompt.length / 4
+    }
+
+    /** [passages] from the start, as many as fit [MAX_TOKENS]: the last are dropped first, and the first always stays. */
+    fun fit(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): List<Passage> {
+        var kept = passages
+        while (kept.size > 1 && estimateTokens(render(question, kept, medical, prior, hasQuote)) > MAX_TOKENS) kept = kept.dropLast(1)
+        return kept
+    }
+
+    /** The prompt for the passages that [fit]; the pipeline numbers its citations by the same list. */
     fun build(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): String =
+        render(question, fit(question, passages, medical, prior, hasQuote), medical, prior, hasQuote)
+
+    private fun render(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): String =
         buildString {
             appendLine("You are Granger's research librarian. Answer the question using only the numbered passages from the user's library below.")
             appendLine("Rules:")

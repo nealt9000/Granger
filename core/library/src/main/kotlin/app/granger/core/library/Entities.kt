@@ -172,7 +172,8 @@ data class BookChunk(
     val progression: Double,
 )
 
-enum class TurnOutcome { PENDING, ANSWERED, DECLINED, UNVERIFIED, FAILED, INTERRUPTED }
+/** [FAILED] is the model's failure; [SEARCH_FAILED] is the library search or its storage. */
+enum class TurnOutcome { PENDING, ANSWERED, DECLINED, UNVERIFIED, FAILED, INTERRUPTED, SEARCH_FAILED }
 
 /** A kept Research conversation. */
 @Entity(tableName = "research_chats")

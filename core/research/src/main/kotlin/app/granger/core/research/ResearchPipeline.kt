@@ -2,10 +2,15 @@ package app.granger.core.research
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.fold
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformWhile
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 /** Searches the library for passages matching the keywords. */
@@ -16,6 +21,13 @@ fun interface PassageFinder {
 /** Streams a model's reply to [prompt] in chunks. */
 fun interface TextGenerator {
     fun generate(prompt: String, maxTokens: Int): Flow<String>
+
+    /**
+     * As [generate], and calls [onReady] when the model is free to start: a generator that waits its turn for the
+     * model (another chat may hold it) calls it once the wait is over. The default has no wait.
+     */
+    fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> =
+        generate(prompt, maxTokens).onStart { onReady() }
 }
 
 /** Turns texts into vectors; [isQuery] marks the question side for models that embed queries differently. */
@@ -33,7 +45,8 @@ class ModelUnavailableException(message: String, cause: Throwable? = null) : Exc
 
 enum class Stage { LOADING_MODEL, SEARCHING, RANKING, WRITING }
 
-enum class FailReason { MODEL_UNAVAILABLE }
+/** [SEARCH_FAILED] is the library search or its storage failing; [MODEL_UNAVAILABLE] is the model. */
+enum class FailReason { MODEL_UNAVAILABLE, SEARCH_FAILED }
 
 /**
  * One question. [quote] is the user's selection and always becomes passage [1]. With [deeperFrom] set, retrieval
@@ -129,10 +142,25 @@ class ResearchPipeline(
             if (medical) emit(ResearchEvent.Medical)
             keywords = rewrite.keywords
             emit(ResearchEvent.Progress(Stage.SEARCHING))
-            val all = finder.find(keywords)
+            val all = try {
+                finder.find(keywords)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords)))
+                return@flow
+            }
             val found = Ranking.preselect(all, keywords, config)
             emit(ResearchEvent.Progress(Stage.RANKING))
-            ranked = rank(request.question, found, keywords, all)
+            ranked = try {
+                rank(request.question, found, keywords, all)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // The embedder failed: a model failure, reported with what the pipeline knows.
+                emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords)))
+                return@flow
+            }
         }
 
         val quote = request.quote
@@ -141,12 +169,19 @@ class ResearchPipeline(
             return@flow
         }
         val pool = (listOfNotNull(quote) + ranked.filter { it != quote }).take(config.large)
-        val passages = pool.take(if (usedLarge) config.large else config.small)
+        val wanted = pool.take(if (usedLarge) config.large else config.small)
+        // Dropped for the prompt's budget, a passage can't be cited; it stays a candidate for Think deeper.
+        val passages = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null)
         val candidates = pool.drop(passages.size)
 
         emit(ResearchEvent.Progress(Stage.WRITING))
         val prompt = AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null)
         val reply = streamReply(generator.model, prompt, stop)
+        if (reply == null) {
+            // Reported here, not thrown: a failure would reach the collector without the flags the pipeline knows.
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords)))
+            return@flow
+        }
 
         val outcome = when (val check = Citations.check(reply, passages.size)) {
             is CitationCheck.Valid ->
@@ -168,12 +203,21 @@ class ResearchPipeline(
         }
         emit(ResearchEvent.Progress(Stage.WRITING))
         val reply = streamReply(generator.model, GuessPrompt.build(question, priorQuestion), stop)
+        if (reply == null) {
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList())))
+            return@flow
+        }
         emit(ResearchEvent.Done(Outcome.Guessed(reply, generator.large, fellBack)))
     }
 
-    /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far. */
-    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): String =
-        model.generate(prompt, ANSWER_TOKENS)
+    /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far, or null when the model failed. */
+    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): String? {
+        var failed = false
+        val text = model.generate(prompt, ANSWER_TOKENS)
+            .catch { e ->
+                if (e is CancellationException) throw e
+                failed = true
+            }
             .transformWhile { chunk ->
                 emit(chunk)
                 !stop()
@@ -183,6 +227,8 @@ class ResearchPipeline(
                 emit(ResearchEvent.Partial(text))
                 text
             }
+        return if (failed) null else text
+    }
 
     private class Loaded(val model: TextGenerator, val large: Boolean)
 
@@ -211,11 +257,24 @@ class ResearchPipeline(
      */
     private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest): RewriteResult {
         val parsed = try {
-            withTimeoutOrNull(rewriteTimeoutMs) {
-                val reply = generator.generate(Rewrite.prompt(request.question, request.priorQuestion), REWRITE_TOKENS)
-                    .fold("") { acc, chunk -> acc + chunk }
-                Rewrite.parse(reply)
+            var result: RewriteResult? = null
+            // The timeout runs from the model being free to start, not from asking: another chat may hold it first.
+            coroutineScope {
+                val ready = CompletableDeferred<Unit>()
+                val work = launch {
+                    val reply = generator.generate(Rewrite.prompt(request.question, request.priorQuestion), REWRITE_TOKENS) { ready.complete(Unit) }
+                        .fold("") { acc, chunk -> acc + chunk }
+                    result = Rewrite.parse(reply)
+                }
+                val timer = launch {
+                    ready.await()
+                    delay(rewriteTimeoutMs)
+                    work.cancel()
+                }
+                work.join()
+                timer.cancel()
             }
+            result
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

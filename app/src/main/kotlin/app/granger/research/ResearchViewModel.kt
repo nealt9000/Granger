@@ -19,6 +19,7 @@ import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.TurnOutcome
+import app.granger.core.research.FailReason
 import app.granger.core.research.Outcome
 import app.granger.core.research.Passage
 import app.granger.core.research.PriorTurn
@@ -37,6 +38,8 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -92,6 +95,8 @@ class ResearchViewModel(
         val guessLarge: Boolean = false,
         /** The large model couldn't load, so the guess is from the standard one. */
         val guessFellBack: Boolean = false,
+        /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
+        val guessFailed: Boolean = false,
     )
 
     data class State(
@@ -138,25 +143,30 @@ class ResearchViewModel(
     private val title = MutableStateFlow("")
     private val pendingQuote = MutableStateFlow(startQuote)
     private val live = MutableStateFlow<Live?>(null)
+    /** The turn whose Best guess just failed; cleared when anything else starts. */
+    private val guessFailed = MutableStateFlow<Long?>(null)
     private var job: Job? = null
     @Volatile private var stopRequested = false
 
     /** The question field, as Compose state written synchronously on every keystroke (see SearchViewModel.searchText). */
     var input by mutableStateOf("")
 
-    private val turns = chat.flatMapLatest { id -> if (id == null) flowOf(emptyList()) else chats.turns(id) }
+    // A storage error shows an empty thread (and no recent chats) rather than crashing the screen.
+    private val turns = chat.flatMapLatest { id ->
+        if (id == null) flowOf(emptyList()) else chats.turns(id).emptyOnError("Research turns")
+    }
 
     val state: StateFlow<State> = combine(
         turns,
         live,
-        combine(models.readiness, models.canThinkDeeper, ::Pair),
-        combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS), ::Header),
-    ) { turns, live, (readiness, deeperInstalled), header ->
+        combine(models.readiness, models.canThinkDeeper, guessFailed, ::Triple),
+        combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS).emptyOnError("Recent research chats"), ::Header),
+    ) { turns, live, (readiness, deeperInstalled, guessFailedId), header ->
         val last = turns.lastOrNull()
         State(
             chatId = header.chatId,
             title = header.title,
-            turns = turns.map { it.toUi(live) },
+            turns = turns.map { it.toUi(live, guessFailedId) },
             running = live != null,
             readiness = readiness,
             canThinkDeeper = deeperInstalled && live == null && last != null && last.canDeepen(),
@@ -247,6 +257,9 @@ class ResearchViewModel(
                         if (outcome is Outcome.Guessed && !settled) {
                             settled = true
                             withContext(NonCancellable) { chats.setGuess(turnId, outcome.text, outcome.usedLarge, outcome.fellBack || fellBack) }
+                        } else if (outcome is Outcome.Failed) {
+                            // Only the model can fail a guess (it does no search); say so, without storing it.
+                            guessFailed.value = turnId
                         }
                     }
                     // run() events; guess() doesn't emit them.
@@ -307,7 +320,7 @@ class ResearchViewModel(
         chat.value = null
         savedState[CHAT_ID] = null
         title.value = ""
-        appScope.launch { chats.delete(id) }
+        appScope.launch { logErrors { chats.delete(id) } }
     }
 
     override fun onCleared() {
@@ -322,6 +335,7 @@ class ResearchViewModel(
      */
     private fun begin(work: suspend () -> Unit) {
         stopRequested = false
+        guessFailed.value = null
         live.value = Live(null, null, null, false)
         job = viewModelScope.launch {
             val letGo = models.hold()
@@ -355,6 +369,8 @@ class ResearchViewModel(
         var turnId: Long? = null
         var settled = false
         var fellBack = false
+        // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
+        var medical = ask.medicalHint
         try {
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
@@ -365,7 +381,10 @@ class ResearchViewModel(
                 when (event) {
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
-                    ResearchEvent.Medical -> live.update { it?.copy(medical = true) }
+                    ResearchEvent.Medical -> {
+                        medical = true
+                        live.update { it?.copy(medical = true) }
+                    }
                     ResearchEvent.LargeFallback -> {
                         fellBack = true
                         live.update { it?.copy(largeFallback = true) }
@@ -381,7 +400,7 @@ class ResearchViewModel(
             val id = turnId
             if (id != null && !settled) {
                 appScope.launch {
-                    logErrors { chats.finishTurn(id, TurnOutcome.INTERRUPTED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
+                    logErrors { chats.finishTurn(id, TurnOutcome.INTERRUPTED, "", medical, false, emptyList(), kept, emptyList()) }
                 }
             }
             throw e
@@ -392,7 +411,7 @@ class ResearchViewModel(
             if (id != null && !settled) {
                 // The error may be the database's own; the turn then stays PENDING until the next launch interrupts it.
                 withContext(NonCancellable) {
-                    logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
+                    logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", medical, false, emptyList(), kept, emptyList()) }
                 }
             }
         }
@@ -411,14 +430,16 @@ class ResearchViewModel(
             )
             is Outcome.Declined ->
                 chats.finishTurn(turnId, TurnOutcome.DECLINED, "", outcome.medical, usedLarge, outcome.keywords, kept, emptyList())
-            is Outcome.Failed ->
-                chats.finishTurn(turnId, TurnOutcome.FAILED, "", outcome.medical, false, outcome.keywords, kept, emptyList())
+            is Outcome.Failed -> {
+                val kind = if (outcome.reason == FailReason.SEARCH_FAILED) TurnOutcome.SEARCH_FAILED else TurnOutcome.FAILED
+                chats.finishTurn(turnId, kind, "", outcome.medical, false, outcome.keywords, kept, emptyList())
+            }
             // Only ResearchPipeline.guess produces this, and bestGuess keeps it; a turn run() settles this way failed.
             is Outcome.Guessed -> chats.finishTurn(turnId, TurnOutcome.FAILED, "", false, false, emptyList(), kept, emptyList())
         }
     }
 
-    private fun ChatTurn.toUi(live: Live?): TurnUi {
+    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?): TurnUi {
         val running = live?.takeIf { it.turnId == id }
         return TurnUi(
             turn = this,
@@ -430,6 +451,7 @@ class ResearchViewModel(
             offersGuess = live == null && outcome == TurnOutcome.DECLINED && guess.isBlank() && !medical,
             guessLarge = running?.guessLarge == true,
             guessFellBack = running?.guessFellBack ?: guessFellBack,
+            guessFailed = guessFailedId == id && live == null,
         )
     }
 
@@ -449,7 +471,7 @@ class ResearchViewModel(
         const val BOOK_QUOTE = 80
         const val DEEPER_PASSAGES = 8
         private val DEEPENABLE = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED)
-        private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED)
+        private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED, TurnOutcome.SEARCH_FAILED)
         private val FALLBACK_SHOWN = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED, TurnOutcome.DECLINED)
     }
 }
@@ -462,4 +484,11 @@ internal fun cutAtWord(text: String, max: Int): String {
     val cut = text.take(max)
     val space = cut.lastIndexOf(' ')
     return (if (space > 0) cut.take(space) else cut).trimEnd()
+}
+
+/** This flow, with a storage error logged and replaced by an empty list instead of reaching the collector. */
+private fun <T> Flow<List<T>>.emptyOnError(what: String): Flow<List<T>> = catch { e ->
+    if (e is CancellationException) throw e
+    runCatching { android.util.Log.w("Granger", "$what couldn't be read", e) }
+    emit(emptyList())
 }

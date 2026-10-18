@@ -6,6 +6,8 @@ import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -134,6 +136,24 @@ class LibraryPassageFinderTest {
         assertThat(card.text).contains("Collection: Granger Classics")
         assertThat(card.text).contains("In your library as: e-book")
         assertThat(card.sourceId).isEqualTo(book.id)
+    }
+
+    @Test fun cardMatchingRunsOnTheIoDispatcher() = test {
+        // Counts the work handed to it. The article search is one such hop; the card matching (a regex over every
+        // book and pack, off the main thread) is another.
+        class CountingDispatcher : CoroutineDispatcher() {
+            var hops = 0
+            override fun dispatch(context: CoroutineContext, block: Runnable) {
+                hops++
+                dispatcher.dispatch(context, block)
+            }
+        }
+        val io = CountingDispatcher()
+        val p = pack("wiki", "Wikipedia", fulltext = false)
+        val found = LibraryPassageFinder(Archives(listOf(p), emptyMap()), index, StubBookshelf(emptyList()), FakeShelves(emptyList()), io)
+            .find(listOf("wikipedia"))
+        assertThat(found.single().kind).isEqualTo(SourceKind.CARD)
+        assertThat(io.hops).isAtLeast(2)
     }
 
     @Test fun eachKeywordIsSearchedOnItsOwnAndHitsMerge() = test {

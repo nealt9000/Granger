@@ -178,6 +178,14 @@ class ModelManager(
         releaseJob = scope.launch { closeIfFree(Pending.NOW) }
     }
 
+    /**
+     * The app is back in front: a [releaseNow] still waiting on a hold (asked for when it went to the background) is
+     * dropped, so the turn's next question doesn't reload the models. A quiet-spell release stays.
+     */
+    fun appReturned() {
+        synchronized(sync) { if (pending == Pending.NOW) pending = Pending.NONE }
+    }
+
     private fun deferIfHeld(kind: Pending): Boolean = synchronized(sync) {
         if (holds > 0) {
             if (pending != Pending.NOW) pending = kind

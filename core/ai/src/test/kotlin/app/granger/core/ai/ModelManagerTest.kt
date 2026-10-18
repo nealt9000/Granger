@@ -209,6 +209,29 @@ class ModelManagerTest {
         assertThat(r.llms.openEngines).isEmpty()
     }
 
+    @Test fun releaseRequestedMidTurnIsDroppedWhenAppReturns() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val turn = r.manager.hold()
+        r.manager.releaseNow() // the app went to the background mid-turn...
+        r.manager.appReturned() // ...and came back before the turn ended
+        turn()
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+    }
+
+    @Test fun appReturningKeepsTheQuietSpellRelease() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val turn = r.manager.hold()
+        r.manager.releaseSoon() // the turn's end asks for a quiet-spell release
+        r.manager.appReturned()
+        turn()
+        advanceTimeBy(121_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
     @Test fun releaseSoonTimerWhileHeldWaitsForLetGo() = runTest {
         val r = rig()
         r.manager.engine(LlmSize.SMALL)

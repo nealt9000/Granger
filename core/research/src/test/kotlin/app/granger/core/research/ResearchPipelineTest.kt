@@ -2,6 +2,7 @@ package app.granger.core.research
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -164,6 +165,48 @@ class ResearchPipelineTest {
         assertThat(finder.calls).containsExactly(Keywords.extract(question))
         assertThat(outcome(events).keywords).isEqualTo(Keywords.extract(question))
         assertThat(outcome(events)).isInstanceOf(Outcome.Answered::class.java)
+    }
+
+    @Test
+    fun finderExceptionFailsWithSearchFailed() = runTest {
+        val finder = PassageFinder { throw IllegalStateException("disk I/O error") }
+        val events = ResearchPipeline(finder, FakeModels(FakeGenerator())).run(ResearchRequest("At what temperature does water boil?")).toList()
+        val out = outcome(events) as Outcome.Failed
+        assertThat(out.reason).isEqualTo(FailReason.SEARCH_FAILED)
+        assertThat(out.keywords).containsExactly("water", "boils").inOrder()
+    }
+
+    @Test
+    fun rewriteTimeoutStartsAfterTheModelIsFree() = runTest {
+        // Another chat holds the model for 6 s (longer than the 5 s timeout) before this reply may begin.
+        val busy = object : TextGenerator {
+            override fun generate(prompt: String, maxTokens: Int): Flow<String> = generate(prompt, maxTokens) {}
+            override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flow {
+                delay(6_000)
+                onReady()
+                emit(if (prompt.startsWith("Turn the question")) "keywords: water, boils\nmedical: no" else "Water boils at 100 °C [1].")
+            }
+        }
+        val finder = FakeFinder(listOf(water))
+        val events = ResearchPipeline(finder, FakeModels(busy)).run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(finder.calls).containsExactly(listOf("water", "boils"))
+        assertThat(outcome(events).keywords).containsExactly("water", "boils").inOrder()
+    }
+
+    @Test
+    fun rewriteStillTimesOutOnceTheModelIsFree() = runTest {
+        val slow = object : TextGenerator {
+            override fun generate(prompt: String, maxTokens: Int): Flow<String> = generate(prompt, maxTokens) {}
+            override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flow {
+                onReady()
+                if (prompt.startsWith("Turn the question")) awaitCancellation()
+                emit("Water boils at 100 °C [1].")
+            }
+        }
+        val finder = FakeFinder(listOf(water))
+        val question = "At what temperature does water boil?"
+        ResearchPipeline(finder, FakeModels(slow)).run(ResearchRequest(question)).toList()
+        assertThat(finder.calls).containsExactly(Keywords.extract(question))
     }
 
     @Test

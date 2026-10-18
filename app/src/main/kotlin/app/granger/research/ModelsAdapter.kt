@@ -16,6 +16,7 @@ import app.granger.core.research.TextGenerator
 import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
@@ -55,12 +56,17 @@ class ModelsAdapter(
         val size = if (deeper) LlmSize.LARGE else LlmSize.SMALL
         // Load now, so a model that won't load is reported here rather than mid-answer.
         inTurn { engine(size) }
-        return TextGenerator { prompt, maxTokens ->
-            flow {
+        return object : TextGenerator {
+            override fun generate(prompt: String, maxTokens: Int): Flow<String> = generate(prompt, maxTokens) {}
+
+            override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flow {
                 // Until the reply is done or cancelled.
                 inTurn {
                     // Fetched per reply: a release between replies closes the engine, and this loads it again.
-                    emitAll(engine(size).generate(prompt, maxTokens))
+                    val engine = engine(size)
+                    // The models are free and loaded: the pipeline's rewrite timeout starts here, not at the wait.
+                    onReady()
+                    emitAll(engine.generate(prompt, maxTokens))
                 }
             }
         }

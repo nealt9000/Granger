@@ -75,6 +75,7 @@ import app.granger.core.ai.DeviceTier
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.research.CitationTarget
+import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.ResearchViewModel
 
@@ -430,14 +431,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                                 is CitationTarget.Book -> target.tabId
                                 CitationTarget.Gone -> return@launch
                             }
-                            // A tab that can't be read opens nothing, rather than crashing the tap.
-                            val tab = try {
-                                container.sessions.tab(tabId)
-                            } catch (e: CancellationException) {
-                                throw e
-                            } catch (e: Exception) {
-                                null
-                            } ?: return@launch
+                            val tab = citationTab(container.sessions, tabId) ?: return@launch
                             when (target) {
                                 is CitationTarget.Article -> nav.showTab(tab, fragment = target.fragment)
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)

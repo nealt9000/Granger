@@ -83,6 +83,7 @@ private const val THINK_DEEPER = "Think deeper (about 30 s)"
 private const val LARGE_FALLBACK = "Think deeper couldn't load the large model, so this answer is from the standard one."
 private const val MODELS_MISSING = "Research needs the Gemma 4 E2B model. Get it in Settings → Models."
 private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
+private const val SEARCH_FAILED = "Couldn't search your library. Try again."
 private const val INTERRUPTED = "Stopped before an answer."
 private const val SOURCE_GONE = "That source is no longer in your library."
 
@@ -398,6 +399,10 @@ private fun AnswerBlock(
                         Text(BEST_GUESS_WAIT, style = MaterialTheme.typography.bodySmall, color = GrangerColors.OnSurfaceVariant)
                     }
                 }
+                if (ui.guessFailed) {
+                    Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
+                    OutlinedButton(onClick = onReadiness) { Text("Readiness") }
+                }
                 if (ui.guessFellBack) Banner(BEST_GUESS_FALLBACK)
                 val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
                 if (guessText.isNotBlank()) GuessCard(guessText)
@@ -410,6 +415,10 @@ private fun AnswerBlock(
             }
             TurnOutcome.INTERRUPTED -> {
                 Text(INTERRUPTED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.OnSurfaceVariant)
+                OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
+            }
+            TurnOutcome.SEARCH_FAILED -> {
+                Text(SEARCH_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
                 OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
             }
             TurnOutcome.FAILED -> {
