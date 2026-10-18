@@ -104,6 +104,7 @@ class KeywordsTest {
             "My grandma took a train in 1950",
             "Did my team hit 20 home runs",
             "I took 3 buses",
+            "My kid ate a sandwich",
             "is 2 cups too much",
             "Should I be worried about the 2026 election?",
             "Is it safe for me to travel to Mexico?",

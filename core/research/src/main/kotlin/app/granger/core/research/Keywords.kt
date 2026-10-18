@@ -86,7 +86,7 @@ object PersonalMedical {
         "\\b(should|do) i (go to|see|call) (the |a |my )?(er|a&e|emergency|hospital|doctor|gp|dentist|911)\\b",
         "\\b(can|should) i give my ($RELATIVE)\\b",
         "\\bwhat (dose|dosage) of \\w+ for my\\b",
-        "\\bmy ($RELATIVE) (swallowed|drank|ate)\\b",
+        "\\bmy ($RELATIVE) (swallowed|drank)\\b",
         "\\bmy doctor (said|told|meant|mean|says)\\b",
     ).map { Regex(it, RegexOption.IGNORE_CASE) }
     private val GENERIC = listOf(
