@@ -78,6 +78,9 @@ class EvalActivity : ComponentActivity() {
         val groups = intent.getStringExtra("groups")
         val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
         val result = EvalSession.start(runId, root, ::log) {
+            // Model roles come from the catalog. MainActivity loads the cached one at launch; a cold start straight
+            // into this screen must too, or no model is listed and every question fails with "won't load".
+            c.catalog.load()
             val items = EvalSession.loadItems(root, ids, groups)
             val packNames = c.library.packs.first().associate { it.id to it.name }
             val sourceName = { p: Passage -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
