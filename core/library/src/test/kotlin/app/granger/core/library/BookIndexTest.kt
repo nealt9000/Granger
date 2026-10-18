@@ -227,4 +227,44 @@ class BookIndexTest {
         assertThat(index.passages(listOf("\""))).isEmpty()
         assertThat(index.passages(listOf("  ", "-"))).isEmpty()
     }
+
+    @Test fun passagesPreferTheChunkWithTheRareWord() = test {
+        add("a", *Array(30) { "<p>death and age number $it</p>" })
+        add("b", "<p>Methuselah lived nine hundred sixty and nine years and he died</p>")
+        index.indexPending()
+
+        val found = index.passages(listOf("methuselah", "death", "age"))
+        assertThat(found.first().text).contains("Methuselah")
+    }
+
+    @Test fun passagesMatchingMoreKeywordsRankHigher() = test {
+        add("a", "<p>wine one</p>", "<p>wine two</p>", "<p>wine and drunk</p>", "<p>wine three</p>")
+        index.indexPending()
+
+        assertThat(index.passages(listOf("wine", "drunk")).first().text).isEqualTo("wine and drunk")
+    }
+
+    @Test fun passagesKeepAtMostPerBook() = test {
+        add("a", *Array(10) { "<p>fox $it</p>" })
+        index.indexPending()
+
+        assertThat(index.passages(listOf("fox"), perBook = 4)).hasSize(4)
+    }
+
+    @Test fun commonKeywordDoesNotCrowdOutARareOne() = test {
+        add("a", *Array(200) { "<p>bible verse $it</p>" })
+        add("b", "<p>a tattoo here</p>")
+        index.indexPending()
+
+        val found = index.passages(listOf("bible", "tattoo"), limit = 10, perBook = 10)
+        assertThat(found.map { it.text }).contains("a tattoo here")
+    }
+
+    @Test fun bm25DecodesMatchinfo() {
+        val ints = intArrayOf(1, 1, 100, 2, 15, 10)
+        val blob = ByteArray(ints.size * 4)
+        ints.forEachIndexed { i, v -> for (b in 0..3) blob[4 * i + b] = (v shr (8 * b)).toByte() }
+        val idf = Math.log((100 - 10 + 0.5) / (10 + 0.5) + 1)
+        assertThat(bm25(blob)).isWithin(1e-9).of(idf * 2 * 2.2 / (2 + 1.2))
+    }
 }
