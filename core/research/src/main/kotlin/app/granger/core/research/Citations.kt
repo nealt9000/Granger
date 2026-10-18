@@ -16,25 +16,25 @@ object Citations {
      */
     private val lacksAnswer = Regex(
         "(the |these |provided |given )*passages? (do|does|did) not|" +
-            "(the |these |provided |given )*passages? (don't|doesn't)|" +
+            "(the |these |provided |given )*passages? (don['’]t|doesn['’]t)|" +
             "(the |these |provided |given )*passages? (contain|provide|include|mention|say|state)s? no|" +
             "there is no information|no information (is|was) (given|provided|available)|" +
-            "i (cannot|can't|could not|couldn't) find|" +
+            "i (cannot|can['’]t|could not|couldn['’]t) find|" +
             "not (mentioned|stated|found|covered) in the passages",
         RegexOption.IGNORE_CASE,
     )
-    private val goesOnToAnswer = Regex("\\b(but|however|although)\\b|;\\s*\\S", RegexOption.IGNORE_CASE)
+    private val goesOnToAnswer = Regex("\\b(but|however|although|though|while|yet)\\b|[;:]\\s*\\S", RegexOption.IGNORE_CASE)
     private val leadingGroup = Regex("^\\s*" + group.pattern + "\\s*")
     private val sentenceEnd = Regex("[.!?](?=\\s)|\\n")
-    private val abbreviation = Regex("(?:^|\\s)(?:\\p{Lu}|\\p{L}(?:\\.\\p{L})+)$")
+    private val abbreviation = Regex("(?:^|\\s)(?:(?:Mr|Mrs|Ms|Dr|St|vs|No|Mt|Jr|Sr)|\\p{L}(?:\\.\\p{L})+)$")
 
-    /** Up to the first sentence end: not after a digit, a single capital (St.) or a dotted abbreviation (e.g., U.S.). */
+    /** Up to the first sentence end: not after an honorific-style abbreviation (St.) or a dotted one (e.g., U.S.). */
     internal fun firstSentence(answer: String): String {
-        val text = answer.replace(leadingGroup, "")
+        val text = answer.trimStart().replace(leadingGroup, "")
         for (m in sentenceEnd.findAll(text)) {
             if (m.value != "\n") {
                 val before = text.substring(0, m.range.first)
-                if (before.lastOrNull()?.isDigit() == true || abbreviation.containsMatchIn(before)) continue
+                if (abbreviation.containsMatchIn(before)) continue
             }
             return text.substring(0, m.range.first)
         }

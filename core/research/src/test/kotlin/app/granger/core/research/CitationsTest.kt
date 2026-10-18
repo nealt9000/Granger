@@ -76,6 +76,48 @@ class CitationsTest {
     }
 
     @Test
+    fun sentenceEndingInANumberEnds() {
+        assertThat(Citations.check("He died in 1616 [1]. The passages do not give the day.", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("Apollo 11 landed in 1969 [1]. The passages do not say more.", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("He died in 1616. The passages do not give the day. [1]", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun singleCapitalEndsASentence() {
+        assertThat(Citations.check("The answer is vitamin C [1]. The passages do not say more.", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("The answer is Vitamin C. The passages do not say more. [1]", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun honorificDoesNotEndTheSentence() {
+        assertThat(Citations.check("The passages do not mention St. Paul, but Paul wrote Romans [1].", 1))
+            .isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun semicolonAndHoweverKeepTheAnswer() {
+        for (a in listOf(
+            "The passages do not say; he died in 1616 [1].",
+            "The passages do not say. However, he died in 1616 [1].".replace(". However", ", however"),
+            "The passages do not say, though he died in 1616 [1].",
+            "The passages do not say the day, while he died in 1616 [1].",
+            "The passages do not say the day, yet he died in 1616 [1].",
+            "The passages do not say: he died in 1616 [1].",
+            "The passages do not say, although he died in 1616 [1].",
+        )) assertThat(Citations.check(a, 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun curlyApostropheDeclines() {
+        assertThat(Citations.check("The passages don\u2019t mention Ishmael.", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun leadingNewlineDeclines() {
+        assertThat(Citations.check("\nThe passages do not mention Ishmael.", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
     fun stripRemovesGroups() {
         assertThat(Citations.strip("A [1] b [2, 3].")).isEqualTo("A b.")
     }
