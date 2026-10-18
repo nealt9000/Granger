@@ -194,6 +194,21 @@ class ModelManagerTest {
         assertThat(r.llms.openEngines).isEmpty()
     }
 
+    @Test fun releaseNowWhileHeldSurvivesALaterUse() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val turn = r.manager.hold()
+        r.manager.releaseNow() // the app went to the background mid-turn
+        val answer = r.manager.hold()
+        r.manager.engine(LlmSize.SMALL) // the same turn's next stage
+        answer()
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        turn()
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
     @Test fun releaseSoonTimerWhileHeldWaitsForLetGo() = runTest {
         val r = rig()
         r.manager.engine(LlmSize.SMALL)

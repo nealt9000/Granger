@@ -191,9 +191,12 @@ class ModelManager(
         if (!deferIfHeld(kind)) closeAll()
     }
 
-    /** A use cancels any release, including one deferred by a hold. */
+    /**
+     * A use cancels any release, including a quiet-spell one deferred by a hold. A deferred [releaseNow] stays: the app
+     * went to the background mid-turn, and the turn's later stages must not undo that, so the last let-go releases.
+     */
     private fun cancelRelease() {
-        synchronized(sync) { pending = Pending.NONE }
+        synchronized(sync) { if (pending == Pending.SOON) pending = Pending.NONE }
         stopTimer()
     }
 
