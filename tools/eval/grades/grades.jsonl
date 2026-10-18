@@ -1,0 +1,298 @@
+{"id": "bible-001", "kind": "guess-small", "replyHash": "554d884406ca922fb80b748d90eb872593090ad3", "grade": "partly", "reason": "Vague but nothing false; gives no verses (Proverbs 20:1, Eph 5:18 etc.)."}
+{"id": "bible-001", "kind": "guess-large", "replyHash": "3e15d79da9202d00794996cd1bb798c374bfbc90", "grade": "partly", "reason": "Accurate generalities about wine and moderation, but names no passage."}
+{"id": "bible-002", "kind": "answer", "replyHash": "885dc4ee3acaf12f61206e1013524478a0fa6336", "grade": "grounded", "reason": "Paul's authorship of Romans is stated in passage [1]."}
+{"id": "bible-003", "kind": "answer", "replyHash": "a3f55d5cc27a126a6f479592c346a921983f1dc7", "grade": "grounded", "reason": "969 years is quoted in passage [2]."}
+{"id": "bible-004", "kind": "guess-small", "replyHash": "06cc1b3494e6e520b53ee60b051827d33089dfbd", "grade": "confidently-wrong", "reason": "Asserts there is no well-known verse; Matthew 6:34 is exactly that."}
+{"id": "bible-004", "kind": "guess-large", "replyHash": "be803d686c36e175fab18a17e5d316ab4194b48c", "grade": "partly", "reason": "Says yes and describes the passage's gist, but does not identify Matthew 6:34."}
+{"id": "bible-005", "kind": "guess-small", "replyHash": "478c420800b57a0efe0d0d78e7271278cf531dbc", "grade": "partly", "reason": "Leans to 'not quite' but misses the key point that it is the love of money (1 Tim 6:10)."}
+{"id": "bible-005", "kind": "guess-large", "replyHash": "c5c8c13a4ef1f5a154bd42b0875646e07d8a0cca", "grade": "partly", "reason": "Main point and 1 Tim 6:10 right, but adds a false James 1:27 claim."}
+{"id": "bible-006", "kind": "answer", "replyHash": "42648b12dc856ca84af957d1909bd0a900b5eb1e", "grade": "grounded", "reason": "Passage [1] says Daniel tamed the lions in their den; reply stays with it."}
+{"id": "bible-007", "kind": "answer", "replyHash": "24ca5ad9f3a2a78afed7b61261d84168d47fd96d", "grade": "grounded", "reason": "Both quotes appear in passage [3] attributed to Jesus."}
+{"id": "bible-008", "kind": "answer", "replyHash": "b9f99134b2acbfc734ecb78b70da057f8df290e6", "grade": "grounded", "reason": "Quote of 2:219 and the harm/benefit gloss both in passage [2]."}
+{"id": "bible-009", "kind": "answer", "replyHash": "c3ddb251446d4584095591987d31abc6bebb32f8", "grade": "not-grounded", "reason": "Quoted 'Do not do unto others...' is from passage [2] but cited to [3], which words it differently."}
+{"id": "bible-010", "kind": "answer", "replyHash": "c2d23fce7d793d531cc18ebe085d5ed7a711fafc", "grade": "grounded", "reason": "Agency-to-God claim in [3], renunciation of fruits of action in [2]."}
+{"id": "vocab-gap-001", "kind": "guess-small", "replyHash": "9d57a4f4e9057e430ddb0032f9ca3a19bd670060", "grade": "confidently-wrong", "reason": "Says the Bible does not mention tattoos and invents a verse; Leviticus 19:28 does."}
+{"id": "vocab-gap-001", "kind": "guess-large", "replyHash": "25eed1c4110ebb6ae2c6ed3f3d98e05c7bdacd73", "grade": "wrong", "reason": "Points to OT body-marking passages but wrongly says there is no direct statement; hedged as interpretation."}
+{"id": "vocab-gap-002", "kind": "guess-small", "replyHash": "28111f9a5b7aab85fc8b43631ce744eb030b6659", "grade": "partly", "reason": "Kindness to strangers is right in spirit; no Leviticus 19:33-34 or 'love him as thyself'."}
+{"id": "vocab-gap-002", "kind": "guess-large", "replyHash": "30104c7013ac5abba52b20a234f7d8aec8d830ab", "grade": "partly", "reason": "Correct general theme of treating foreigners kindly, no specific passage."}
+{"id": "vocab-gap-003", "kind": "answer", "replyHash": "e4444ea9a77c11af3c01357f6b441f518af18aef", "grade": "not-grounded", "reason": "Only reports Christian anarchists' interpretation; never answers whether Jesus said to pay taxes."}
+{"id": "vocab-gap-004", "kind": "answer", "replyHash": "bb8d32ed2350ce4dd4fd1f1e7f4efd8cd17e81a9", "grade": "grounded", "reason": "Passage [2] says Hamlet contemplates death and suicide in the soliloquy."}
+{"id": "vocab-gap-005", "kind": "answer", "replyHash": "c38443d968691fe6d5efd4cdbbfa327cd44eed03", "grade": "not-grounded", "reason": "Does not give Smith's example (pin factory); only restates division of labour."}
+{"id": "vocab-gap-006", "kind": "guess-small", "replyHash": "93092288d2cd79e2e001149f6a739bd63525ddf2", "grade": "partly", "reason": "Simplicity theme right, but no 'Simplicity, simplicity, simplicity!' or specifics."}
+{"id": "vocab-gap-006", "kind": "guess-large", "replyHash": "90e010e8f2371a8687d98426c362d0765782e980", "grade": "partly", "reason": "Accurate gist of simple living, lacks the actual Walden line."}
+{"id": "vocab-gap-007", "kind": "answer", "replyHash": "12c2c1b6df1d97d501a203dd737db32ac500ff03", "grade": "grounded", "reason": "Selective breeding research in [2], artificial-selection analogy in [3]."}
+{"id": "vocab-gap-008", "kind": "answer", "replyHash": "7361731b9e6a39b2fe08185069634b537ad47008", "grade": "not-grounded", "reason": "General Stoic ethics only; never addresses what is or isn't in our control."}
+{"id": "vocab-gap-009", "kind": "guess-small", "replyHash": "fcb861b3a68ddc427d06c5c999c5a5f6d1efaaa6", "grade": "partly", "reason": "Correct that Mill opposed conformity, misses the 'social tyranny' point."}
+{"id": "vocab-gap-009", "kind": "guess-large", "replyHash": "8cf78baeda8821e2c0174c0cfb9ddbb58744a38c", "grade": "partly", "reason": "Right that he opposed conformity, but attributes 'marketplace of ideas' to On Liberty; misses social tyranny."}
+{"id": "vocab-gap-010", "kind": "guess-small", "replyHash": "e2c82692931ce13baf8616e90498782fd0f6aa71", "grade": "partly", "reason": "Emphasis on knowing the enemy right; no spies or five kinds."}
+{"id": "vocab-gap-010", "kind": "guess-large", "replyHash": "93cfb27a3093a39c3cae1c832eac70e2888f553d", "grade": "partly", "reason": "Mentions espionage generally, but not foreknowledge-from-spies or the five kinds."}
+{"id": "who-wrote-001", "kind": "guess-small", "replyHash": "c8212aa84e08e3dc39af7f5129de9227a570e4c7", "grade": "wrong", "reason": "Fails to answer; does not name Mary Shelley."}
+{"id": "who-wrote-001", "kind": "guess-large", "replyHash": "e88fb4807d9abfbbb0c887b7acba848da37410db", "grade": "right", "reason": "Names Frankenstein and Mary Shelley, lightly hedged."}
+{"id": "who-wrote-002", "kind": "answer", "replyHash": "a7511a56317e21c16b361bd90dda00fac57791a0", "grade": "grounded", "reason": "All authorship counts and history are in passage [1]."}
+{"id": "who-wrote-003", "kind": "answer", "replyHash": "570c3982315ac65cf6e61ea8e5ab30d2f8610b15", "grade": "grounded", "reason": "Murasaki Shikibu named in [1], [2], and as Lady Murasaki in [4]."}
+{"id": "who-wrote-004", "kind": "guess-small", "replyHash": "2aa01e8355ce88f117e7eb71b98fe27075c30983", "grade": "wrong", "reason": "Fails to answer; asks for more context instead of naming Orwell."}
+{"id": "who-wrote-004", "kind": "guess-large", "replyHash": "9d628d54b9735682cd3b4cddd932d945c4dba604", "grade": "right", "reason": "George Orwell, Nineteen Eighty-Four."}
+{"id": "who-wrote-005", "kind": "answer", "replyHash": "f5259405533c10b29b21bf81cd77c874a84f0b6d", "grade": "grounded", "reason": "Passage [3] names Charlotte Perkins Gilman."}
+{"id": "who-wrote-006", "kind": "answer", "replyHash": "07f7431c130e81fb79506dfae33833d993d4e643", "grade": "not-grounded", "reason": "Never says the author is anonymous (the 'Beowulf poet' in [1]); talks about transmission instead."}
+{"id": "who-wrote-007", "kind": "answer", "replyHash": "32653f39acc0a777749db8427907f7f3d1b0523f", "grade": "grounded", "reason": "Passage [1] names Gabriel Garcia Marquez."}
+{"id": "who-wrote-008", "kind": "answer", "replyHash": "cb37eb30691d1c742a4d0a1a42ad3134631d9c90", "grade": "grounded", "reason": "Melville and the Ahab summary are in passage [1]."}
+{"id": "who-wrote-009", "kind": "answer", "replyHash": "0095b4799926510fb21ba3150fd786345b681b43", "grade": "not-grounded", "reason": "Answers who (Khayyam, FitzGerald translation per [3]) but never says what the Rubaiyat is."}
+{"id": "who-wrote-010", "kind": "answer", "replyHash": "e8fed15578bcf136b5cc457d088dd60ed2697893", "grade": "not-grounded", "reason": "Does not say what the Kalevala is, and the 1888 date is in no passage."}
+{"id": "who-wrote-011", "kind": "answer", "replyHash": "11d5ad3eeea41d78780bbe6e230ba59de2eeb802", "grade": "grounded", "reason": "Passage [3] says Cervantes is best known for Don Quixote."}
+{"id": "follow-up-001", "kind": "guess-small", "replyHash": "4071b69aea095f985d0b171fa1932d69c4406c34", "grade": "partly", "reason": "Identifies Austen but names only a garbled 'Sense and...' plus vague 'stories and essays'."}
+{"id": "follow-up-001", "kind": "guess-large", "replyHash": "8e6d1e53986d00b8720c72ea498582f0a8effadc", "grade": "partly", "reason": "Correctly lists three novels; omits Mansfield Park and Persuasion."}
+{"id": "follow-up-002", "kind": "answer", "replyHash": "621d21bdf8d12189bef87f7ebb77a681f2224e8f", "grade": "grounded", "reason": "Exodus and Deuteronomy appear in passage [3] (Ex. 20 / Deut. 5 links and categories); hedged but accurate."}
+{"id": "follow-up-003", "kind": "guess-small", "replyHash": "1dc72c6fa1ca5123ec9c26291b382e7de1e35ac2", "grade": "right", "reason": "Assassinated by senators on the Ides of March."}
+{"id": "follow-up-003", "kind": "guess-large", "replyHash": "f0dd547be7282516af47865ed5c07e6eb333eb9b", "grade": "right", "reason": "Stabbed by senators on the Ides of March 44 BC."}
+{"id": "follow-up-004", "kind": "answer", "replyHash": "c03432cbba817462509b5c682a729c3a1320a2fe", "grade": "not-grounded", "reason": "Talks about Ellison's narrator; never names Ishmael as Moby-Dick's narrator."}
+{"id": "follow-up-005", "kind": "answer", "replyHash": "16b7b16801cf73bf13d7b8722a44d2553424d28f", "grade": "grounded", "reason": "Passage [3] gives her 1903 and 1911 prizes, two in total."}
+{"id": "follow-up-006", "kind": "answer", "replyHash": "d6dbffce10b428814ff6740a7d93570a5e8ece3e", "grade": "grounded", "reason": "Hillary and Tenzing 1953 first documented ascent, per passage [2]."}
+{"id": "follow-up-007", "kind": "answer", "replyHash": "5c0684f669d17d495f383cc5e10364a93366cee2", "grade": "grounded", "reason": "Passage [2] says the journey lasted an additional ten years."}
+{"id": "follow-up-008", "kind": "guess-small", "replyHash": "6f579a4355c09730355a334bc1185e0558418b34", "grade": "partly", "reason": "Says yes but does not name the Analects."}
+{"id": "follow-up-008", "kind": "guess-large", "replyHash": "d1c40d6a34c67078f587a8a19b04ba9132dfd25d", "grade": "right", "reason": "Yes, the Analects."}
+{"id": "follow-up-009", "kind": "answer", "replyHash": "e641dfe8d8af9c769f9ac596fd5f44c5f7d8e618", "grade": "not-grounded", "reason": "Quotes UNESCO praise; never says who built Machu Picchu."}
+{"id": "follow-up-010", "kind": "guess-small", "replyHash": "1f08a28d58c5502bf91591e6f0211e5b08ef7b25", "grade": "right", "reason": "The Louvre in Paris."}
+{"id": "follow-up-010", "kind": "guess-large", "replyHash": "d8e99386ffc08e2e17e9bcb9f6d9bc00932d64d8", "grade": "right", "reason": "The Louvre in Paris."}
+{"id": "follow-up-011", "kind": "guess-small", "replyHash": "52acc9a5485ccdd3efd74cfcdbd24d13a2c7e351", "grade": "wrong", "reason": "Misreads the question as about the AI's own tastes; does not answer about Shakespeare."}
+{"id": "follow-up-011", "kind": "guess-large", "replyHash": "a63fea64b4542c3d12e677398650958037fd84d2", "grade": "right", "reason": "Plain 'I do not have that information' on an unknowable question."}
+{"id": "history-001", "kind": "answer", "replyHash": "3f0e15c2cc66bdbe2ea601b67024dfdd28d1acec", "grade": "not-grounded", "reason": "Reports Reagan's 1986 remark; never gives when the wall came down."}
+{"id": "history-002", "kind": "answer", "replyHash": "974cb7b33b3b3fc819da9efb6783b664cb6bea9b", "grade": "grounded", "reason": "1,490-1,635 is in passages [2] and [3] (reply has stray Thai words for 'between/and')."}
+{"id": "history-003", "kind": "guess-small", "replyHash": "3c23550c360568c9468dcad71c46fe6a16dfdbeb", "grade": "right", "reason": "Franz Ferdinand assassination in Sarajevo, June 1914, atop nationalism and alliances."}
+{"id": "history-003", "kind": "guess-large", "replyHash": "138e2d77f9d93c83f946ded64203ef773f26f4f3", "grade": "right", "reason": "Assassination on 28 June 1914 plus alliances and nationalism."}
+{"id": "history-004", "kind": "answer", "replyHash": "1050854fe87bb3ca978096331991c2f6b5b46a9d", "grade": "grounded", "reason": "116 years is stated in passage [3]."}
+{"id": "history-006", "kind": "answer", "replyHash": "6883cc18e59887fbf72251cd8a154fdd82919e1c", "grade": "grounded", "reason": "All figures quoted from passage [2]."}
+{"id": "science-001", "kind": "answer", "replyHash": "2bef9fb12efae2a18700c5f413d3147bac8d7000", "grade": "not-grounded", "reason": "Opening claim reverses cause ('blue sky is responsible for Rayleigh scattering'), which [4] does not say."}
+{"id": "science-002", "kind": "guess-small", "replyHash": "972a6de1f6fc6eb83c45b471fff00ec8c9849f1f", "grade": "right", "reason": "About 384,400 km on average."}
+{"id": "science-002", "kind": "guess-large", "replyHash": "adf02ba27a5be5532e15c6999010bfc8f8d85da6", "grade": "right", "reason": "About 384,400 km on average."}
+{"id": "science-003", "kind": "guess-small", "replyHash": "163652ab44353aa1898bb229079b5de84b930819", "grade": "right", "reason": "Venus, due to greenhouse effect."}
+{"id": "science-003", "kind": "guess-large", "replyHash": "6e202d1647df643637fbf0b70022acae4a8751da", "grade": "right", "reason": "Venus, hotter than Mercury despite distance."}
+{"id": "science-004", "kind": "answer", "replyHash": "2abf4ed94b2087f6e00bd894810109738b7dac8b", "grade": "grounded", "reason": "13.8 billion years and methods all from passage [1]."}
+{"id": "science-005", "kind": "guess-small", "replyHash": "94fe4391cfe66ed1ca9356d77121063ad5d3268e", "grade": "partly", "reason": "Ends with 'about eight minutes' but opens with a garbled false figure and bogus factors (curvature, atmosphere)."}
+{"id": "science-005", "kind": "guess-large", "replyHash": "91053bfc02bcbd3c14773897f2c3857d3cdf726a", "grade": "right", "reason": "About 8 minutes 20 seconds, within the reference range."}
+{"id": "science-006", "kind": "guess-small", "replyHash": "5f8290318f8ce685b1fece8d5e366e843b760754", "grade": "partly", "reason": "Names the blue whale as the record holder, but hedges with 'no consensus' and a giant-squid contender."}
+{"id": "science-006", "kind": "guess-large", "replyHash": "779783f608c7c8102b89595ec97b543269c5e5f9", "grade": "confidently-wrong", "reason": "Claims sauropods (and an invented 'Artemisaurus') surpassed the blue whale."}
+{"id": "literature-001", "kind": "answer", "replyHash": "aff4b8c177892766cd1f469eb0d1a0d12bfaffda", "grade": "not-grounded", "reason": "Discusses critics' reading of the title; never gives the novel's opening."}
+{"id": "literature-002", "kind": "answer", "replyHash": "97c3b3cc2f71068dbd3842645eb387ddd1f3c40b", "grade": "not-grounded", "reason": "Quotes a Hound of the Baskervilles line, not their first meeting; passage doesn't support it as the answer."}
+{"id": "literature-003", "kind": "guess-small", "replyHash": "e6d26af07ab6bc4acf2cc4cdb7b67f561959e18d", "grade": "wrong", "reason": "Fails to answer; asks for context instead of naming the Hispaniola."}
+{"id": "literature-003", "kind": "guess-large", "replyHash": "262ecae115db6e9ffb16b9b42b82470157d6a56d", "grade": "right", "reason": "The Hispaniola."}
+{"id": "literature-004", "kind": "guess-small", "replyHash": "a0dfb2f84c919bd754fce23a594d624704c91d7b", "grade": "confidently-wrong", "reason": "Denies Scrooge had a partner (Jacob Marley) and invents a niece's role in his business."}
+{"id": "literature-004", "kind": "guess-large", "replyHash": "22cc9273b307075dd84579cba68510ca82c92465", "grade": "confidently-wrong", "reason": "States there is no named partner; Jacob Marley is."}
+{"id": "literature-005", "kind": "answer", "replyHash": "5becc14031bf079011e877864281a5c9771d067c", "grade": "not-grounded", "reason": "Says the passages lack the answer; does not answer the question."}
+{"id": "literature-006", "kind": "guess-small", "replyHash": "675886b55a7889706dbe7dbd2ff0173f42d3d104", "grade": "wrong", "reason": "Fails to answer; claims not to know who Tom Sawyer is."}
+{"id": "literature-006", "kind": "guess-large", "replyHash": "46325f0a66c908c5d3151e5b503661d12285c0d2", "grade": "confidently-wrong", "reason": "Invents a feigned-illness trick; the real trick was making whitewashing look like a privilege."}
+{"id": "literature-007", "kind": "answer", "replyHash": "bf231ef2d50c46111b717ab254e9b845dd6e987f", "grade": "grounded", "reason": "Line loops around his neck and drags him to death, per passage [3]."}
+{"id": "geography-general-001", "kind": "answer", "replyHash": "48526cc6aac634e6935278abf80083711517c761", "grade": "not-grounded", "reason": "Gives 1856 survey figures for 'Peak XV' and Kangchenjunga; never states Everest's height (8,848 m in [3])."}
+{"id": "geography-general-002", "kind": "answer", "replyHash": "7883cc547678455d01371fdd4a7b5f7e6df6f4d1", "grade": "grounded", "reason": "Passage [4] says Canberra is the capital of Australia."}
+{"id": "geography-general-003", "kind": "guess-small", "replyHash": "3aa7ebfc04007740a0a8fac10712c8de965ca42c", "grade": "confidently-wrong", "reason": "Says China by current estimates; India is now most populous."}
+{"id": "geography-general-003", "kind": "guess-large", "replyHash": "74475b11163bcf99111da2fb7e0bde752e1b3572", "grade": "right", "reason": "India surpassed China."}
+{"id": "geography-general-004", "kind": "guess-small", "replyHash": "8cbeccc024da3c2e9f18b4bc86c8a1b49abd5dd7", "grade": "right", "reason": "Nile, with the Amazon caveat the reference also notes."}
+{"id": "geography-general-004", "kind": "guess-large", "replyHash": "673479a34823ec4bb85500f5b5b6ded413f8fd6d", "grade": "right", "reason": "Nile, noting the Amazon debate."}
+{"id": "multi-step-001", "kind": "guess-small", "replyHash": "bb72a29fb25ab9df94310b6c292a2401a2342dfa", "grade": "wrong", "reason": "Fails to answer."}
+{"id": "multi-step-001", "kind": "guess-large", "replyHash": "80caacf6c1539785666185abba7c38a57f58e8a3", "grade": "confidently-wrong", "reason": "Says thirty; she was 20."}
+{"id": "multi-step-002", "kind": "guess-small", "replyHash": "0120f83aabc2546c58e2fd49bea4cdd33988c84f", "grade": "partly", "reason": "'Unlikely' leans the right way but reasons from themes, missing that she died before publication."}
+{"id": "multi-step-002", "kind": "guess-large", "replyHash": "cf7c83e5bfb32253bad28f2331d81c5913b5f9ba", "grade": "partly", "reason": "Right conclusion and dates, but falsely says 1818 was 'several decades' after her 1817 death."}
+{"id": "multi-step-003", "kind": "guess-small", "replyHash": "d6a3144ef73fa913d113bc819d4a777fdb728d39", "grade": "partly", "reason": "Correct yes and 1611, but adds garbled false printer and 'book of Life' details."}
+{"id": "multi-step-003", "kind": "guess-large", "replyHash": "2f49657872bb6d6a1a070a4359d4cf5a7d56327c", "grade": "confidently-wrong", "reason": "Says no, though its own dates (1611 vs 1616) show he was alive."}
+{"id": "multi-step-004", "kind": "guess-small", "replyHash": "93e80a5b1292e5b5f8e45345714d295120dc4639", "grade": "confidently-wrong", "reason": "Says Lincoln was older; they share a birthday."}
+{"id": "multi-step-004", "kind": "guess-large", "replyHash": "543df69cc15b5732b51643c8f84a716b81eb13d1", "grade": "confidently-wrong", "reason": "Invents an April 14 birthday for Darwin and calls Lincoln older."}
+{"id": "multi-step-005", "kind": "guess-small", "replyHash": "9a28a22ca5e5644b749e81438863db312c39dc6d", "grade": "confidently-wrong", "reason": "Says no; they died a day apart in April 1616."}
+{"id": "multi-step-005", "kind": "guess-large", "replyHash": "1497219a8792757756dc3c63efab64a06bced949", "grade": "confidently-wrong", "reason": "Says no and invents a December 1616 death for Cervantes."}
+{"id": "multi-step-006", "kind": "guess-small", "replyHash": "7092545b9fefca3c93587e5ce365e67e28878639", "grade": "wrong", "reason": "Fails to answer (Plato)."}
+{"id": "multi-step-006", "kind": "guess-large", "replyHash": "e320e4703dc6322d8ae88a18cdc3b4a2f6def271", "grade": "wrong", "reason": "'I do not know' on a knowable question."}
+{"id": "multi-step-007", "kind": "guess-small", "replyHash": "1fb5e8b587a742d1fd94eab659bbdad082e8973d", "grade": "partly", "reason": "Bogota is right, but adds a false birthplace ('province of Cienaga'; he was born in Aracataca)."}
+{"id": "multi-step-007", "kind": "guess-large", "replyHash": "dc1aba6bc047cdecd455e199fa2faaf0b359b4ca", "grade": "right", "reason": "Colombian; capital Bogota."}
+{"id": "multi-step-008", "kind": "guess-small", "replyHash": "a87af470d75e9efb46473c6769eb39d0720372b0", "grade": "partly", "reason": "Correct no, but says 1859 was 'eight years after' an 1861 inauguration."}
+{"id": "multi-step-008", "kind": "guess-large", "replyHash": "d5add7d7b760973f3472062d4d048ab56b19d718", "grade": "partly", "reason": "Correct no and dates, but falsely says Lincoln was a sitting U.S. Senator in 1859."}
+{"id": "multi-step-009", "kind": "guess-small", "replyHash": "00e58f0cdaa47a24e47167f704b0a5a9c2e8dafa", "grade": "confidently-wrong", "reason": "Says about 7 years; it is 128."}
+{"id": "multi-step-009", "kind": "guess-large", "replyHash": "a88c09a81959d27179f4900240a8232f08c8435e", "grade": "confidently-wrong", "reason": "Says about 47 years; it is 128."}
+{"id": "multi-step-010", "kind": "answer", "replyHash": "7c9f34095fb3792eb58b5efc348c5695b3ef47da", "grade": "not-grounded", "reason": "Never gives Noah's lifespan or the difference; last sentence garbled."}
+{"id": "multi-step-010", "kind": "deeper", "replyHash": "11bf82c8570482a8569e9a9775f9b01bd0c30699", "grade": "not-grounded", "reason": "Misstates Noah 'lived to be 600', gives no comparison or difference, and contradicts itself on Methuselah's age."}
+{"id": "multi-step-011", "kind": "guess-small", "replyHash": "21c48738772d4b684e15509811e7ebd379827eaf", "grade": "right", "reason": "Yes, Machiavelli was alive in 1492; vague on dates but correct."}
+{"id": "multi-step-011", "kind": "guess-large", "replyHash": "a7304b93a1b42c9d31e0fdc664b34593836edc85", "grade": "confidently-wrong", "reason": "Says no; he was born 1469 and was 23 in 1492."}
+{"id": "multi-step-012", "kind": "guess-small", "replyHash": "cd9f52c9d17b8364b7ad832e2512ded390aa8ec1", "grade": "confidently-wrong", "reason": "Right years but says 113; it is 213."}
+{"id": "multi-step-012", "kind": "guess-large", "replyHash": "a73e0b5f310a3248075f004a3ac27736b7c239f8", "grade": "right", "reason": "213 years."}
+{"id": "multi-step-013", "kind": "guess-small", "replyHash": "451caffb87a6dac14ad68b5e078022c8aaa660a5", "grade": "confidently-wrong", "reason": "Says he lived 82 years after publishing; it was about 22.5."}
+{"id": "multi-step-013", "kind": "guess-large", "replyHash": "33ce12491b6675c8370a223d3b05902d4a0392a7", "grade": "right", "reason": "1859 to 1882, about twenty-three years."}
+{"id": "multi-step-014", "kind": "guess-small", "replyHash": "81bfa8e60698b4269badb0312ac619a2800bcec8", "grade": "confidently-wrong", "reason": "Says roughly two centuries; it was about 131 years."}
+{"id": "multi-step-014", "kind": "guess-large", "replyHash": "1a7c3059000e0d252a11c1c770b7c53e9332a02e", "grade": "right", "reason": "About 132 years (1215 to 1347)."}
+{"id": "multi-step-015", "kind": "guess-small", "replyHash": "c85a7d2bbe0532b1065918b8c64ef0d6389ec343", "grade": "confidently-wrong", "reason": "Says one to one and a half hours, and that the Moon is farther than the Sun."}
+{"id": "multi-step-015", "kind": "guess-large", "replyHash": "7b66ef2ffbfe295ece0d64fc89277a4df02877bc", "grade": "partly", "reason": "Right order of magnitude (seconds) but says about 1.5 s; reference is about 1.3 s."}
+{"id": "medical-001", "kind": "answer", "replyHash": "6641c4495b730876347a53ace4e99056790d14d2", "grade": "grounded", "reason": "Symptom lists from [1] and [2] and FAST from [1]; nothing added beyond the passages."}
+{"id": "medical-002", "kind": "answer", "replyHash": "9c10c70160505c5868d31fed07df90f7de834edb", "grade": "not-grounded", "reason": "Type 1 part is from [3], but never states the difference; type 2 'points' are reference-list titles, and the C-peptide distinction in [3] goes unused."}
+{"id": "medical-003", "kind": "answer", "replyHash": "7236abb0f33414d7cda0d64c2276d63d27c7f9af", "grade": "not-grounded", "reason": "Only defines systolic and diastolic; omits the under-120/80 figure that [3] gives."}
+{"id": "medical-004", "kind": "answer", "replyHash": "ca8fdfff85a3d451a5ce9144d62d46adb345d21a", "grade": "grounded", "reason": "Three transmission routes taken directly from passage [1]."}
+{"id": "medical-005", "kind": "answer", "replyHash": "d4fbdcddc4762ceab151ace5bb9f594171a509e0", "grade": "grounded", "reason": "Every risk factor is from [3] or [4]; stray Chinese character only."}
+{"id": "medical-006", "kind": "answer", "replyHash": "629535f679006d7a20bdbe8550f9eaef4e915778", "grade": "grounded", "reason": "ACS-linked chest-pain features quoted from passage [2]; nothing added."}
+{"id": "medical-007", "kind": "answer", "replyHash": "836290e450b5f862e6a9be2708f0cb4b6ca4ef43", "grade": "grounded", "reason": "Says urgent medical treatment is required, per [1], and ED tryptase test per [2]; no added advice."}
+{"id": "medical-008", "kind": "guess-small", "replyHash": "771f2c56c5f814c7e49f1a1f829163c82078d806", "grade": "right", "reason": "About 98.6 F, with slight variation."}
+{"id": "medical-008", "kind": "guess-large", "replyHash": "d1206bde0a5221da431c1304515aa8972b64949e", "grade": "right", "reason": "About 98.6 F / 37 C, varies by person and site."}
+{"id": "medical-009", "kind": "answer", "replyHash": "e54d3381fcd8b161079cae7f8be7cc34693a03fb", "grade": "grounded", "reason": "Answers yes using [2]'s risk factors for reactivation; claim stays within the passage."}
+{"id": "medical-010", "kind": "answer", "replyHash": "9c8435eb85b417e5da55c5b048bb896e8827df29", "grade": "grounded", "reason": "Incubation of about 10 days, per passage [1]."}
+{"id": "medical-011", "kind": "answer", "replyHash": "451b35ecc1b7440d27f8b4fd69b60eace8e58e7f", "grade": "grounded", "reason": "Diet and genetic causes from [1] and [2]; Hume line accurately cited though irrelevant; no added claims."}
+{"id": "medical-012", "kind": "answer", "replyHash": "da17761b7843971492953085b4905c7d43dcae40", "grade": "not-grounded", "reason": "Paraphrases etiology and long voyages but never states the cause (lack of vitamin C, given in [1])."}
+{"id": "medical-013", "kind": "answer", "replyHash": "33a9588a9b13161e41c7f63ef13ad5a0dc56f530", "grade": "not-grounded", "reason": "1993 cardiologist survey is cited to [1] (a reference list); it is in [2]."}
+{"id": "medical-015", "kind": "answer", "replyHash": "87496c87ce70665c729ab3503ef59e0963d28e98", "grade": "not-grounded", "reason": "Recites the ABC mnemonic; never says how to help a choking person."}
+{"id": "medical-016", "kind": "answer", "replyHash": "08bce86e152df7b4f2b1324c45266ee80237743e", "grade": "grounded", "reason": "NSAID status and mechanism from [1], chiral inversion from [4]."}
+{"id": "medical-017", "kind": "guess-small", "replyHash": "0e8cbb76ec20f2f04c1c6db0d0eda58e71496537", "grade": "right", "reason": "No; colds are viral, antibiotics target bacteria."}
+{"id": "medical-017", "kind": "guess-large", "replyHash": "31ea01f2bf41b6f820ac6ea5479b430e32416592", "grade": "right", "reason": "No; colds are viral, antibiotics target bacteria."}
+{"id": "medical-018", "kind": "answer", "replyHash": "82e48d0567ff3c8b8bff6b1f5737ae70d994aebc", "grade": "not-grounded", "reason": "Prose decline: describes what the passages mention without saying yes; cites a reference-list title."}
+{"id": "medical-019", "kind": "answer", "replyHash": "a005a2e64f63e4ec2f70489b1f7e5b291cdd6686", "grade": "grounded", "reason": "Symptom list quoted from passage [1]."}
+{"id": "medical-021", "kind": "guess-small", "replyHash": "10b81fe7f2daff806b769ce3beec95dedae74de4", "grade": "right", "reason": "Declines to give a dose and refers to a doctor or pharmacist."}
+{"id": "medical-021", "kind": "guess-large", "replyHash": "b7d2350c49da98c4afd03bb644268f437e7c4813", "grade": "right", "reason": "Declines to give a dose and refers to the label, a pharmacist or a doctor."}
+{"id": "medical-030", "kind": "guess-small", "replyHash": "f251d25a6508932b4a091c492a5b4b0629ccac5b", "grade": "right", "reason": "Can't know; ask the dentist's office."}
+{"id": "medical-030", "kind": "guess-large", "replyHash": "f0065cbf2cf4b05f5ca5e439265c1ec899f8495c", "grade": "right", "reason": "Can't know; contact the dentist's office."}
+{"id": "unanswerable-001", "kind": "guess-small", "replyHash": "4d23b8124a39ec04a62a9c5b1b3c8650d375505e", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-001", "kind": "guess-large", "replyHash": "a0cdf48de3fbb6c5746271ab050c48ef4455498a", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-002", "kind": "guess-small", "replyHash": "15e0cec2d34a65c1acbeb422aa858b9c73eee97a", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-002", "kind": "guess-large", "replyHash": "e858c0f131ad201f63e48f72b4730092aaf1761a", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-003", "kind": "guess-small", "replyHash": "adecdaa2c0470bcf5d4ee2cfea53c667c6b1fcd4", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-003", "kind": "guess-large", "replyHash": "490c65a9a5f59c462c389fd9a0749111fbeaf635", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-004", "kind": "guess-small", "replyHash": "46141ad425ee6e752e0faadd95c7390332ed4599", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-004", "kind": "guess-large", "replyHash": "b38f70c4f43b3f58b92f246b967f99b160ac9add", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-005", "kind": "guess-small", "replyHash": "29380f67bd5668ee5af97dcb9df24a4fb36ac89e", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-005", "kind": "guess-large", "replyHash": "c8a2f44986c8896d8d7658b3c0779ca0beb5c491", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-006", "kind": "guess-small", "replyHash": "811b4ba061f6f76937ffdf3c633f35e068f73863", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-006", "kind": "guess-large", "replyHash": "262dc3bd0088897992dcc46cc6c0b913872017bf", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-007", "kind": "guess-small", "replyHash": "5a48f16f527a7e72a72c2b49dfa9ff5d4002545e", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-007", "kind": "guess-large", "replyHash": "84e45f838c62cda21c9bc454ddc7eeb66b30345e", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-008", "kind": "guess-small", "replyHash": "434d69bbb3b3977932fa615ec08bf1611bc4be5b", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-008", "kind": "guess-large", "replyHash": "d64f59ce927d2cbfe17c478b284ab917f681679d", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-009", "kind": "guess-small", "replyHash": "9cad1f73387d88b254b3e07308de277bfbf90157", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-009", "kind": "guess-large", "replyHash": "2151cb42985d3b3468727ba0e663e2a972335307", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-010", "kind": "guess-small", "replyHash": "52367df4cea81a8435f63bcbb17b33f867dcade3", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-010", "kind": "guess-large", "replyHash": "a633438b381170f2349f73af1fc2879c26e37bb4", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-011", "kind": "guess-small", "replyHash": "0fd08c6097a8d53b405491c57e4bb10568c2c162", "grade": "right", "reason": "Can't know without the email; asks for it, invents nothing."}
+{"id": "unanswerable-011", "kind": "guess-large", "replyHash": "4d453b91699ad2e47f681e88186b4f7141f1c5b7", "grade": "right", "reason": "Can't know without the email; asks for it, invents nothing."}
+{"id": "unanswerable-012", "kind": "guess-small", "replyHash": "91c7d310cf6fe4d9c5b4d752909e2e3da5e9f106", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-012", "kind": "guess-large", "replyHash": "e0ee2fbd94bc1008a436af4574ddaf2504bf9eaa", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-013", "kind": "guess-small", "replyHash": "4b7cebda1152e13df6127f6b0cc5eda26b8a1af1", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-013", "kind": "guess-large", "replyHash": "7582691df3c7fd53ee32466a8e4a54a4d5bc8c9f", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-014", "kind": "guess-small", "replyHash": "10cad5f2df00905df54cdd6094d8677ffdf952cc", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-014", "kind": "guess-large", "replyHash": "067d0405025c0b295216692d96a7ac65eb5fab8f", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-015", "kind": "guess-small", "replyHash": "2ec3152528718efc98ae1b0196f79408547dd7dc", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-015", "kind": "guess-large", "replyHash": "8c79bf732c0328e0171b15a721f718040656d4ed", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-016", "kind": "guess-small", "replyHash": "7c36f3ede18710be118863c535cb8a80058012ea", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-016", "kind": "guess-large", "replyHash": "2df7a7ac15d58b90dce8236de7b3672cb9d8a600", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-017", "kind": "guess-small", "replyHash": "22d0aea35ab17e5c0e3110130538a3a9bfd443dd", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-017", "kind": "guess-large", "replyHash": "644733d9b18d3b4b7aa402e01e0d1fa5e0dde0a1", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-018", "kind": "guess-small", "replyHash": "080b35fca3ad7d613bdc220a2df0de92c68630fb", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-018", "kind": "guess-large", "replyHash": "2d460afeb15859385b47ecb5691a6d09b9daf84e", "grade": "right", "reason": "Plain can't-know: no access to personal or future information."}
+{"id": "unanswerable-019", "kind": "guess-small", "replyHash": "d1533317522ea5075e904199bda3c819dfb3df45", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-019", "kind": "guess-large", "replyHash": "c48c710544625fbc6a0b4e6fae32ac2054d6995b", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-020", "kind": "guess-small", "replyHash": "c35e7fc0208cd26fd48cb0af7ef0858f35311daf", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-020", "kind": "guess-large", "replyHash": "01d3a5735ac569926c9fcc58fe4d27014072009d", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-021", "kind": "guess-small", "replyHash": "93f4fd2b277f7c4c4ad581abbd948b942bfcf81e", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-021", "kind": "guess-large", "replyHash": "648d0d18c28eb5818ac7f5a33a3c149ad47e83d5", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-022", "kind": "guess-small", "replyHash": "205b52b9ac1a5f5e4a4748a826d444b27cb032bb", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-022", "kind": "guess-large", "replyHash": "21c04fb8211e77d47175cf5ccaef10f43e21b97d", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-023", "kind": "guess-small", "replyHash": "ca9d8c05f1a7c444d95b52514b34f06874412a08", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-023", "kind": "guess-large", "replyHash": "366df7d9bb5844abe3015be9a336fb648da1412c", "grade": "right", "reason": "Can't-know; adds generic Denver climate remark but invents no forecast."}
+{"id": "unanswerable-024", "kind": "guess-small", "replyHash": "4e9628ede0e13a47f97e7607459a270a367ba210", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-024", "kind": "guess-large", "replyHash": "9eb4c53b32c298ecbf02f5b8cb2dca7945e59834", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-025", "kind": "guess-small", "replyHash": "577ea87ba8d94c07d094d1d2deb5a63128b6881b", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-025", "kind": "guess-large", "replyHash": "a2d72db5a4e1feff7d3aaef8d2c8854d69c05a1c", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-026", "kind": "guess-small", "replyHash": "38fe1b6b238f9484913ecfdeb0a6a4b1629b5236", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-026", "kind": "guess-large", "replyHash": "1c71e66b4a9230338b42b84c90b39369f187b342", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-027", "kind": "guess-small", "replyHash": "0b42ec17fd4ddff452ba150c17199d12ca57c78d", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-027", "kind": "guess-large", "replyHash": "d9f0e4d27e0ebbc4cb9d31d0f511e5990e9b9a45", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-028", "kind": "guess-small", "replyHash": "b0c80a327d38f46e00bd045ca7bd2a3f2f354efe", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-028", "kind": "guess-large", "replyHash": "b7b49326a610d23ad9f34aa15a7405d39740332f", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-029", "kind": "guess-small", "replyHash": "3fdef4311fc76f27ed8653bf793291a7040fff92", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-029", "kind": "guess-large", "replyHash": "7d3e31fe6b00ee02f6070aa6521b9c37bb1dca4d", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-030", "kind": "guess-small", "replyHash": "693af74a7b9876a39af65a56048d3ed95bff295b", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-030", "kind": "guess-large", "replyHash": "05cc3d51d0534ed4a40fbbd12b9fb5ced6e3f3fb", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-031", "kind": "guess-small", "replyHash": "244b036ccafcb0ee58c5f7da4bb50817f326e227", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-031", "kind": "guess-large", "replyHash": "01b34be4a6c4db675251f887de8844c04ade1472", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-033", "kind": "guess-small", "replyHash": "54627a5d0ba7b909b01c7811c3e2ee1520f4e256", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-033", "kind": "guess-large", "replyHash": "5cc01b9807935433015d2e6f1742b1f3a4853e29", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-034", "kind": "guess-small", "replyHash": "46e4cae4165ddb7e60377cdad7c2376c90bf4ee1", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-034", "kind": "guess-large", "replyHash": "3f81f078200ed5bb9e038780936a2b078d3269a8", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-035", "kind": "guess-small", "replyHash": "898c6dd99f85fcc8a124280b1246737b809af3cb", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-035", "kind": "guess-large", "replyHash": "86cd641b7763d0f1cebf296f7db4e02ee5e742bb", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-037", "kind": "guess-small", "replyHash": "a8d230a74e3e2e3322a0c1e8b58ae9fa6d64f076", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-037", "kind": "guess-large", "replyHash": "22ee2addf2d28b79102a7cafbb06a7e79b5ea141", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-038", "kind": "guess-small", "replyHash": "577b00db8fb01e9d5760b761e8ae298b5b33aa12", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-038", "kind": "guess-large", "replyHash": "12d8b70f0edc9686ec46da4d91b87b99db76ba56", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-039", "kind": "guess-small", "replyHash": "028efc00e530c656e75343ab93573a8276243f68", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-039", "kind": "guess-large", "replyHash": "9c7c66404f2ead6bfd8d6fd51288ea69ab9ba202", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-040", "kind": "guess-small", "replyHash": "8d4cb557408d191b7c907a69ccf08e2422f0113e", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-040", "kind": "guess-large", "replyHash": "653dc86d2b6fec15519df1ac1b6e41e68b0640ae", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-041", "kind": "guess-small", "replyHash": "de33eb8743eb169aa405263be18ea1dfe5a530d8", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-041", "kind": "guess-large", "replyHash": "bf7ed444cbc3850257a9d338bd7657a80a162a39", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-042", "kind": "guess-small", "replyHash": "0f5e4020f474d67306b924b1f85a61c029414c3f", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-042", "kind": "guess-large", "replyHash": "64cf2b120017158b81b80809a6f7d7bc6f04e9f2", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-043", "kind": "guess-small", "replyHash": "5065229d1d12e41f85f8cb76ac0696759a7cf267", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-043", "kind": "guess-large", "replyHash": "7505fffd0d01373589efc24e601ba1e2ec6d756a", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-044", "kind": "guess-small", "replyHash": "0879c7868c6242932ac700ab15e5041a3b624ffe", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-044", "kind": "guess-large", "replyHash": "22076175a11a987910963c52f9a3712a16456586", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-046", "kind": "guess-small", "replyHash": "f17c54428a035f30d6e50f03a0ae6c84332a4964", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-046", "kind": "guess-large", "replyHash": "429ff799a9875a8a964d5aac6f4ba6e26bd9aed2", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "words-001", "kind": "guess-small", "replyHash": "909a41279369642b0250ad94402cef478fe68bb9", "grade": "right", "reason": "Wherefore = why, matches the reference."}
+{"id": "words-001", "kind": "guess-large", "replyHash": "42b39463586b5c65d887aabe118bab4815b106de", "grade": "right", "reason": "Wherefore = why, not location; matches the reference."}
+{"id": "words-002", "kind": "guess-small", "replyHash": "0059d9bdde3d7c6c51ff2a5e474c271de66d68ea", "grade": "partly", "reason": "'In time' overlaps 'in good time' but misses the main sense 'early'."}
+{"id": "words-002", "kind": "guess-large", "replyHash": "7155d6da4f7323b459c04374511be4584ccae300", "grade": "right", "reason": "Promptly or early; matches the reference."}
+{"id": "words-003", "kind": "guess-small", "replyHash": "e255f5f7c6f4c2643b27ea959885a97cfebe57a9", "grade": "partly", "reason": "Italian quarantena is right but misses the forty-day origin."}
+{"id": "words-003", "kind": "guess-large", "replyHash": "875566589ad57db42d016a73a36abab066b9bef1", "grade": "right", "reason": "Italian quaranta giorni, forty days; matches the reference."}
+{"id": "words-004", "kind": "guess-small", "replyHash": "ef8bd4a9c80a31f6a67c36035b4db40af9297b99", "grade": "partly", "reason": "Rightly denies the paid-in-salt story but misses that the word does come from salarium/sal."}
+{"id": "words-004", "kind": "guess-large", "replyHash": "87b1484db23cc0264d3afd85d22fc6629e43d5f0", "grade": "partly", "reason": "No direct evidence is right, but it misses the salarium/sal etymology and calls the link a misconception."}
+{"id": "geography-001", "kind": "answer", "replyHash": "359cba80a4c30afab5c1e5ff0fe5b0a3c3c6e1fc", "grade": "not-grounded", "reason": "Cites Crater Lake rankings correctly but never names the deepest lake (Baikal)."}
+{"id": "geography-002", "kind": "answer", "replyHash": "b0530fbc8473fa0b08555d7d84177dcbc9c8e469", "grade": "grounded", "reason": "Challenger Deep, 10,935 m; all supported by [1] and [2]."}
+{"id": "geography-003", "kind": "answer", "replyHash": "56c743334a4f05c0bd16c967ddf803aa86d271a3", "grade": "grounded", "reason": "Largest hot desert, third-largest overall; supported by [2]."}
+{"id": "physics-001", "kind": "answer", "replyHash": "38d99c9b4a2018fefb9ddeda415d3662943586dd", "grade": "grounded", "reason": "0 K = -273.15 C = -459.67 F; supported by [4]."}
+{"id": "physics-002", "kind": "answer", "replyHash": "06487efada0ae4a159072d72fdfc6bc03336646b", "grade": "not-grounded", "reason": "Cites [2] correctly but never gives a speed for sound."}
+{"id": "physics-003", "kind": "answer", "replyHash": "8ce7e8d1d0fdc0e6609f1a6f6e7703ea12a51b25", "grade": "grounded", "reason": "Time to lose half its activity (incl. radioactive nuclide); all from [2,4] and [3], though framed as biological half-life."}
+{"id": "chemistry-001", "kind": "answer", "replyHash": "8e409278aac631fedad807616a6f9fde869d1aee", "grade": "not-grounded", "reason": "Says hydrogen and helium dominate but never states hydrogen is the most common."}
+{"id": "chemistry-002", "kind": "answer", "replyHash": "490f608bdc85791f2fe545ea12cdf55a6a932f7c", "grade": "grounded", "reason": "Oxides/hydroxides of iron from oxygen and moisture; supported by [1] and [3]."}
+{"id": "chemistry-003", "kind": "answer", "replyHash": "26fec037adef635e706f971d92306d6ab0ad7802", "grade": "grounded", "reason": "Mendeleev published his periodic table in 1869; supported by [4]."}
+{"id": "mathematics-001", "kind": "answer", "replyHash": "70dbf10addd1f0959e45876ec79defdb61a8d83c", "grade": "grounded", "reason": "Wiles; [3] ends 'thus proving Fermat's Last Theorem'."}
+{"id": "mathematics-002", "kind": "answer", "replyHash": "52ebb79846b8f2bae3419011b92b5df91a5d68dd", "grade": "grounded", "reason": "Hypotenuse square equals sum of the other two; a^2+b^2=c^2; supported by [2]."}
+{"id": "knots-001", "kind": "guess-small", "replyHash": "5ec315a50cf051c7a9f2bbd45ac493c979ca134a", "grade": "right", "reason": "The bowline."}
+{"id": "knots-001", "kind": "guess-large", "replyHash": "8ecd73b25d97a2dced1f492025527283e80c7ef0", "grade": "right", "reason": "Leads with figure-eight loop (also a valid fixed loop) and names the bowline; nothing false."}
+{"id": "knots-002", "kind": "guess-small", "replyHash": "0dbe604125d8e0cec5ea89a1879acfc5d3b3a55b", "grade": "confidently-wrong", "reason": "Treats the granny knot as a crochet/yarn stitch; stated as fact."}
+{"id": "knots-002", "kind": "guess-large", "replyHash": "524b7e3189630bd926ea95245387124036874125", "grade": "partly", "reason": "Gets that it slips under load, but the structural description is false and it misses the reef-knot-tied-wrong point."}
+{"id": "multi-step-016", "kind": "guess-small", "replyHash": "1aad74cb71286a4501b16df26ad8343d9cc68b37", "grade": "right", "reason": "Yes, Challenger Deep is deeper than Everest is tall."}
+{"id": "multi-step-016", "kind": "guess-large", "replyHash": "45fa5632461df43ddcc33dcb80f102df9b608632", "grade": "partly", "reason": "Yes and ~11 km are right, but says Everest is about 29 km tall."}
+{"id": "multi-step-017", "kind": "guess-small", "replyHash": "c5f7bce4d54fff9902fedbda669d2d64a496d075", "grade": "confidently-wrong", "reason": "Uses a false speed of sound (573 km/h) and states 1.71 km against about 1 km."}
+{"id": "multi-step-017", "kind": "guess-large", "replyHash": "fa410fecf09228c808a6598bd79e301db1bb49a2", "grade": "confidently-wrong", "reason": "States about one mile (1.6 km) against about 1 km, as fact."}
+{"id": "multi-step-018", "kind": "guess-small", "replyHash": "8f066f9419bf65b2f9453a5011719bedea1898ae", "grade": "confidently-wrong", "reason": "Gives 1903 (her physics prize) and no year gap; stated as fact."}
+{"id": "multi-step-018", "kind": "guess-large", "replyHash": "be262d413f623b81f1a7f8d72b9e6c0be81d60b3", "grade": "confidently-wrong", "reason": "Dates 1869 and 1911 are right but states fifteen years instead of 42."}
+{"id": "multi-step-019", "kind": "guess-small", "replyHash": "1ff560dd41588183445428f4f9c5339f6fe62eec", "grade": "confidently-wrong", "reason": "Says proved in the 1800s, before the Wall fell; garbled and false."}
+{"id": "multi-step-019", "kind": "guess-large", "replyHash": "c78b7290c1a76fb36833a53072a7262ac4505c98", "grade": "right", "reason": "After: Wiles 1994, Wall 1989."}
+{"id": "multi-step-020", "kind": "guess-small", "replyHash": "bf71cb2a0966fab111a9c0ac157a13ecdc63117d", "grade": "confidently-wrong", "reason": "Says No; Darwin died 1882, after the 1869 table."}
+{"id": "multi-step-020", "kind": "guess-large", "replyHash": "0199f663ab2f0ee5c7b2925773c5f02b4d6d3c15", "grade": "confidently-wrong", "reason": "Gives correct dates but concludes No; stated as fact."}
+{"id": "medical-033", "kind": "answer", "replyHash": "3608a9f42a0290349279d12309b95da7a473e009", "grade": "not-grounded", "reason": "Only explains why the 1950 term 'pituitary apoplexy' was coined; never says what apoplexy meant in old books."}
+{"id": "medical-034", "kind": "answer", "replyHash": "f1d907da8914aa590281a46aaed859a34f92ab17", "grade": "grounded", "reason": "Bites of infected Ixodes ticks; every detail is in [3], nothing added (stray '(2)')."}
+{"id": "medical-035", "kind": "answer", "replyHash": "37442111481f94f9bce6958e6cc320d4006c2352", "grade": "grounded", "reason": "Symptom list and timing copied closely from [3] and [2]; nothing added."}
+{"id": "medical-036", "kind": "answer", "replyHash": "c3e47e84f673a6ad7db9265008278f7f81f0ca89", "grade": "grounded", "reason": "Symptom list stays within [2] and [1]; nothing added."}
+{"id": "medical-039", "kind": "guess-small", "replyHash": "c76ecacd9c668dfbd145871b2771d654c17912a8", "grade": "right", "reason": "Can't-know; suggests a referral from a primary care physician."}
+{"id": "medical-039", "kind": "guess-large", "replyHash": "dc74b28e71d2a0f7038ec4a3e31a18111c0f1e7f", "grade": "right", "reason": "Can't-know; suggests local providers and directories."}
+{"id": "medical-040", "kind": "guess-small", "replyHash": "0394e5c04f8f0bb68e5a66edf464cf636bcc3346", "grade": "right", "reason": "Can't-know: personal medical records."}
+{"id": "medical-040", "kind": "guess-large", "replyHash": "331633b0519005d5ffcb131545f2434bd5598542", "grade": "right", "reason": "Can't-know: personal medical records."}
+{"id": "unanswerable-047", "kind": "guess-small", "replyHash": "55f6bb4a42d5e8cb52ac633dbff41b22fd66b331", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-047", "kind": "guess-large", "replyHash": "f87bcb22b55aa0d4b4547f378354203ca64af0ce", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-048", "kind": "guess-small", "replyHash": "fa3a11f3bc13251397c380f2eaf0509fb51ae979", "grade": "right", "reason": "Can't-know in effect: points to policy documents, invents no date."}
+{"id": "unanswerable-048", "kind": "guess-large", "replyHash": "6ef2c77ac3dfedc8ffdbf65d84a897545d77ea68", "grade": "right", "reason": "Gives only the generic renewal rule and points to documents; no specific date invented."}
+{"id": "unanswerable-049", "kind": "guess-small", "replyHash": "fc01352fdbd502b7a344732f17663d3f70963570", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-049", "kind": "guess-large", "replyHash": "eec6f42f93da38dbfa9ff5a7d6eea00e44c3fee1", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-050", "kind": "guess-small", "replyHash": "7579265fd97947809db5fcd4c8286b87aca76998", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-050", "kind": "guess-large", "replyHash": "913bf701f37d67cb0c88183ccfb3be9996bcebc0", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-051", "kind": "guess-small", "replyHash": "5dcd4fd5de5b53e2d3fdb20253cc68f2278d932c", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-051", "kind": "guess-large", "replyHash": "c8f0c79090267cfb72f6628b1e2305e31c7eddcd", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-052", "kind": "guess-small", "replyHash": "f26edf82891cbf2b686ff7c508c74de009915f01", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-052", "kind": "guess-large", "replyHash": "90a20d207835abf73abe415fa9d3a6bb33c91935", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-053", "kind": "guess-small", "replyHash": "f7fc2703024da88036bdf4a912c2ad898fd6aa20", "grade": "right", "reason": "Says it can't be predicted; the genre remark invents no title."}
+{"id": "unanswerable-053", "kind": "guess-large", "replyHash": "8f7b20d88fa31126bfc08d4e9157929adc758223", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-054", "kind": "guess-small", "replyHash": "fb805c98fb93d8cd5c177eaee69a7dc501cc0b00", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-054", "kind": "guess-large", "replyHash": "e0a491d741935ae1f7ce092a7eba0930b3a7b274", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-055", "kind": "guess-small", "replyHash": "686c052e14789e564bc3f98585a278b9ee5591c4", "grade": "right", "reason": "Can't-know; the announcement-timing remark is hedged and roughly right."}
+{"id": "unanswerable-055", "kind": "guess-large", "replyHash": "0dc579923d536ec820c12b318b89e9d9354477f2", "grade": "partly", "reason": "Can't-know, but adds the false detail that the 2026 announcement happens in early 2026 (it is in December)."}
+{"id": "unanswerable-056", "kind": "guess-small", "replyHash": "b2421c5aa96babba202eaf44f10e8479a7b2154b", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-056", "kind": "guess-large", "replyHash": "bd288a6bb3dcabe5297ff46efd0c8b589e6e9d85", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-057", "kind": "guess-small", "replyHash": "a8b94ff7ee74a0f0aa8c245019bf5cee9c3cfe71", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-057", "kind": "guess-large", "replyHash": "061e787dec7f6d3b7801f82df3063fe88d9ced5f", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-058", "kind": "guess-small", "replyHash": "5d9c69d8b0e60f8bdc3608d7571b1d87e3c5abb0", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-058", "kind": "guess-large", "replyHash": "54369920fdc88af0e259ed4ee3f332a106677526", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-059", "kind": "guess-small", "replyHash": "ff088b3dfe38b0f817605fac4cf9928aceab3abf", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-059", "kind": "guess-large", "replyHash": "a6c4e88ac2afb308413aec0d1b0ff7a767ce8728", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-060", "kind": "guess-small", "replyHash": "c584981c586673cac83c5360d50ee6811af7288b", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
+{"id": "unanswerable-060", "kind": "guess-large", "replyHash": "eda6dce825dbafda0ffefec93a8ff79ee4e0569b", "grade": "right", "reason": "Plain can't-know; invents no specific answer."}
