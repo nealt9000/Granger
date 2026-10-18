@@ -2650,7 +2650,7 @@
     "answers": [],
     "reference": null,
     "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
-    "notes": "After the snapshot. The 2026 World Series is played in late October 2026, after every pack's snapshot (newest 2026-10-10)."
+    "notes": "After the snapshot. The 2026 World Series is played in late October 2026, after every pack's snapshot (newest: chemistry, 2026-10-15)."
   },
   {
     "id": "unanswerable-026",
@@ -2945,5 +2945,822 @@
     "reference": null,
     "goodGuess": "Can't know: there's no record of it.",
     "notes": "No record exists; the topic is in the library but the fact isn't."
+  },
+  {
+    "id": "words-001",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "when juliet says wherefore art thou romeo, what does wherefore mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "wherefore",
+        "quote": "why , for what reason, because of what"
+      }
+    ],
+    "reference": "Why, for what reason (not where).",
+    "goodGuess": null,
+    "notes": "Common misreading: people think it means where."
+  },
+  {
+    "id": "words-002",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does betimes mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "betimes",
+        "quote": "early , especially in the morning"
+      }
+    ],
+    "reference": "Early, especially early in the morning; in good time.",
+    "goodGuess": null,
+    "notes": "Archaic word used in the KJV and Meditations."
+  },
+  {
+    "id": "words-003",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "where does the word quarantine come from",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "quarantine",
+        "quote": "four tens , 40"
+      }
+    ],
+    "reference": "From Medieval Latin/Italian words for a 40-day period, ultimately Latin quadraginta, forty.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "words-004",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "is it true salary comes from roman soldiers getting paid in salt",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "salary",
+        "quote": "there is no evidence for either of these claims from ancient sources"
+      }
+    ],
+    "reference": "The word does come from Latin salarium, related to sal (salt), but there's no ancient evidence that soldiers were paid in salt.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-001",
+    "group": "geography",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the deepest lake in the world",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Lake_Baikal",
+        "quote": "is a rift lake and the deepest lake in the world"
+      }
+    ],
+    "reference": "Lake Baikal in Siberia, Russia.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-002",
+    "group": "geography",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how deep is the deepest part of the ocean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Mariana_Trench",
+        "quote": "max. depth 10,935"
+      }
+    ],
+    "reference": "About 10,935 m (35,876 ft), at the Challenger Deep in the Mariana Trench.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-003",
+    "group": "geography",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "is the sahara the biggest desert",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Sahara",
+        "quote": "it is the largest hot desert in the world and the third-largest desert overall"
+      }
+    ],
+    "reference": "It's the largest hot desert, but third-largest overall, after the Antarctic and Arctic deserts.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "physics-001",
+    "group": "physics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how cold is absolute zero",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Absolute_zero",
+        "quote": "equivalent to −273.15 °c on the celsius scale"
+      }
+    ],
+    "reference": "0 kelvin: -273.15 C, or -459.67 F.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "physics-002",
+    "group": "physics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how fast does sound travel",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Speed_of_sound",
+        "quote": "the speed of sound in air is about 343 m/s"
+      }
+    ],
+    "reference": "About 343 m/s in air at 20 C (about 767 mph); faster in water and solids.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "physics-003",
+    "group": "physics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does half life mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Half-life",
+        "quote": "is the time required for a quantity (of substance) to reduce to half of its initial value"
+      }
+    ],
+    "reference": "The time it takes for a quantity, such as a radioactive substance, to fall to half its starting amount.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "chemistry-001",
+    "group": "chemistry",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the most common element in the universe",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Hydrogen",
+        "quote": "it is the lightest and most abundant chemical element in the universe"
+      }
+    ],
+    "reference": "Hydrogen, about 75% of normal matter.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "chemistry-002",
+    "group": "chemistry",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what actually is rust",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Rust",
+        "quote": "rust is an iron oxide"
+      }
+    ],
+    "reference": "An iron oxide, formed when iron reacts with oxygen in the presence of water or moist air.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "chemistry-003",
+    "group": "chemistry",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who came up with the periodic table",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Periodic_table",
+        "quote": "the first periodic table to become generally accepted was that of the russian chemist dmitri mendeleev in 1869"
+      }
+    ],
+    "reference": "Dmitri Mendeleev, in 1869 (the first generally accepted version).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "mathematics-001",
+    "group": "mathematics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who finally proved fermat's last theorem",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Fermat's_Last_Theorem",
+        "quote": "the first successful proof was released in 1994 by andrew wiles"
+      }
+    ],
+    "reference": "Andrew Wiles, released in 1994 and published in 1995, 358 years after Fermat stated it.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "mathematics-002",
+    "group": "mathematics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does the pythagorean theorem say",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Pythagorean_theorem",
+        "quote": "equals the area of the square on the hypotenuse"
+      }
+    ],
+    "reference": "In a right triangle, the squares on the two legs add up to the square on the hypotenuse: a^2 + b^2 = c^2.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "knots-001",
+    "group": "knots",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what knot makes a loop at the end of a rope that won't slip",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Bowline",
+        "quote": "making a fixed loop at the end of a line"
+      }
+    ],
+    "reference": "The bowline.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "knots-002",
+    "group": "knots",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's wrong with a granny knot",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Reef_knot",
+        "quote": "of the same handedness will make a weak granny knot"
+      }
+    ],
+    "reference": "It's a reef (square) knot tied wrong: two overhands of the same handedness, which makes a weak knot.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-016",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Is the deepest part of the ocean deeper than Mount Everest is tall?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Mariana_Trench",
+        "quote": "max. depth 10,935"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mount_Everest",
+        "quote": "as 8,848.86 m"
+      }
+    ],
+    "reference": "Yes: about 10,935 m deep versus Everest's 8,848.86 m, a difference of about 2 km.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-017",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "If thunder comes 3 seconds after the lightning, about how far away is the storm?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Speed_of_sound",
+        "quote": "or 1 km in 2.92 s"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Speed_of_light",
+        "quote": "metres per second 299 792 458"
+      }
+    ],
+    "reference": "About 1 km (sound covers 1 km in about 2.9 s; the light arrives almost instantly).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-018",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How many years after Mendeleev's periodic table did Marie Curie win her chemistry Nobel?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Periodic_table",
+        "quote": "dmitri mendeleev in 1869"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Marie_Curie",
+        "quote": "nobel prize in chemistry (1911)"
+      }
+    ],
+    "reference": "42 years (1869 to 1911).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-019",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Was Fermat's Last Theorem proved before or after the Berlin Wall fell?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Fermat's_Last_Theorem",
+        "quote": "the first successful proof was released in 1994 by andrew wiles"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Berlin_Wall",
+        "quote": "the east german government announced on 9 november 1989"
+      }
+    ],
+    "reference": "After: the wall opened in 1989 and Wiles's proof came out in 1994, five years later.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-020",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Did Darwin live to see Mendeleev's periodic table?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Periodic_table",
+        "quote": "dmitri mendeleev in 1869"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Charles_Darwin",
+        "quote": "12 february 1809 – 19 april 1882"
+      }
+    ],
+    "reference": "Yes: the table appeared in 1869 and Darwin died in 1882.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-032",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "In old novels people die of dropsy. What is that?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Edema",
+        "quote": "also known as dropsy"
+      }
+    ],
+    "reference": "An old name for edema: a buildup of fluid in the body's tissues, causing swelling.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-033",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what did apoplexy mean in old books",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Apoplexy",
+        "quote": "historically, it described what is now known as a hemorrhagic stroke"
+      }
+    ],
+    "reference": "Mostly what we now call a (hemorrhagic) stroke; sudden collapse from strokes, aneurysms or even heart attacks was called apoplexy.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-034",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "how do you get lyme disease",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Lyme_disease",
+        "quote": "transmitted by blood-feeding ticks in the genus ixodes"
+      }
+    ],
+    "reference": "From the bite of an infected tick (Ixodes, the deer tick), which carries Borrelia bacteria.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-035",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what are the signs of a concussion",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Concussion",
+        "quote": "symptoms may include headache, dizziness, difficulty with thinking and concentration"
+      }
+    ],
+    "reference": "Headache, dizziness, trouble thinking or concentrating, sleep problems, brief memory loss, and sometimes brief loss of consciousness.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-036",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what are the symptoms of being low on iron",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Iron-deficiency_anemia",
+        "quote": "symptoms are often vague, such as feeling tired"
+      }
+    ],
+    "reference": "Often vague: tiredness, weakness, shortness of breath, less ability to exercise, pale skin.",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: 'low on iron' vs iron-deficiency anemia."
+  },
+  {
+    "id": "medical-037",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "My two year old has a fever of 101. Do I need to take her to the ER?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal triage."
+  },
+  {
+    "id": "medical-038",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Can I double my sertraline dose since it doesn't seem to be working?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal dosing."
+  },
+  {
+    "id": "medical-039",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Who's the best knee surgeon in town?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local question; ask your doctor for a referral.",
+    "notes": "Medical decline: no Best guess button. Local."
+  },
+  {
+    "id": "medical-040",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "What were my cholesterol numbers at last year's checkup?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's in your own medical records.",
+    "notes": "Medical decline: no Best guess button. Personal records."
+  },
+  {
+    "id": "unanswerable-047",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's my wife's shoe size?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-048",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "When does my car insurance renew?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-049",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who texted me last night?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-050",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did I search for yesterday?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-051",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Will there be a recession in 2027?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-052",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who will win the 2030 World Cup?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-053",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What will be the best-selling book next year?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-054",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Will the Lakers make the playoffs this season?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-055",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who is Time's Person of the Year for 2026?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Named in December 2026, after every snapshot (newest 2026-10-15)."
+  },
+  {
+    "id": "unanswerable-056",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What was the top movie at the box office over Thanksgiving weekend 2026?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Late November 2026, after every snapshot."
+  },
+  {
+    "id": "unanswerable-057",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is the downtown library open late on Thursdays?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-058",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Where's the cheapest gas near me?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-059",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is there parking at the park on Elm Street?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-060",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Does the hardware store on Oak Avenue cut keys?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
   }
 ]

@@ -18,12 +18,12 @@ These are the packs Neal uses. The ZIMs live in `~/.cache/granger/eval-packs/` a
 |---|---|---|
 | Wikipedia best articles (maxi) | `wikipedia_en_top` | 2026-09-14 |
 | WikiMed | `wikipedia_en_medicine` | 2026-10-10 |
-| Wiktionary | `wiktionary_en_all` | 2026-08 |
-| Geography | `wikipedia_en_geography` | 2026-10 |
-| Physics | `wikipedia_en_physics` | 2026-10 |
-| Chemistry | `wikipedia_en_chemistry` | 2026-10 |
-| Mathematics | `wikipedia_en_mathematics` | 2026-09 |
-| Knots | `wikipedia_en_knots` | 2026-07 |
+| Wiktionary | `wiktionary_en_all` | 2026-08-13 |
+| Geography | `wikipedia_en_geography` | 2026-10-12 |
+| Physics | `wikipedia_en_physics` | 2026-10-14 |
+| Chemistry | `wikipedia_en_chemistry` | 2026-10-15 |
+| Mathematics | `wikipedia_en_mathematics` | 2026-09-15 |
+| Knots | `wikipedia_en_knots` | 2026-07-20 |
 | Granger Classics (347 books) | `book:granger:<ref>`, e.g. `book:granger:gc-king-james-bible` | 2026-10-17 release |
 
 - An article's `source` is the ZIM's `Name` metadata, not its file name. The validator opens `<packs>/<source>.zim`, so the
@@ -66,8 +66,8 @@ Every item has a `group`. Use these groups, and add subject groups for everythin
 - **`medical`**: drawn from WikiMed (see below).
 - **`unanswerable`**: no library could answer it offline (see below).
 - **`multi-step`**: the multi-step items.
-- **Subject groups** for the remaining answerable items: `history`, `science`, `literature`, `geography-general`, and,
-  once their packs are in, `words` (Wiktionary), `geography`, `physics`, `chemistry`, `mathematics` and `knots`.
+- **Subject groups** for the remaining answerable items: `history`, `science`, `literature`, `geography-general`,
+  `words` (Wiktionary), `geography`, `physics`, `chemistry`, `mathematics` and `knots`. Give each topic pack a few.
 
 ## Phrasing
 
@@ -85,11 +85,12 @@ Every answerable item names, for each place the answer lives:
 
 - **`source`**: the pack's ZIM name, or the book id.
 - **`location`**:
-  - For an article, the ZIM entry path, e.g. `Mount_Everest` or `Hundred_Years'_War`. The validator matches it as a
-    case-insensitive substring of the entry *path*, never the title, and **skips redirects**. So use the path of the
-    real article: `Moby_Dick` is a redirect, and `Moby-Dick` is the real path. Write the whole path; a short one like `Moon`
-    also matches `Moon_landing`, which loosens the recall check.
-  - For a book, the EPUB spine item's href, e.g. `c056.xhtml`. The quote must be in that one spine item.
+  - For an article, the ZIM entry path, e.g. `Mount_Everest` or `Hundred_Years'_War`. The validator and the recall
+    check match it **exactly** against the entry *path* (case-insensitive, any `#fragment` ignored), never the title.
+    A partial path matches nothing. The validator **skips redirects**, so use the path of the real article:
+    `Moby_Dick` is a redirect, and `Moby-Dick` is the real path.
+  - For a book, the EPUB spine item's href, e.g. `c056.xhtml`. Books still match as a case-insensitive substring of
+    the href, so write the whole file name. The quote must be in that one spine item.
 - **`quote`**: a short, exact phrase from that article or chapter (5 to 15 words) that holds or proves the answer.
   - The validator strips the HTML and folds case and whitespace, then looks for the quote.
   - Tags turn into spaces, so the article text often reads `hamilton , james madison` with a space before the comma.
@@ -129,7 +130,7 @@ personal, future, after-snapshot and local questions, the good guess is to say p
 
 A question "after the packs' snapshot" must be about something that happens **after the newest snapshot date of every
 pack that could cover it**, and preferably after the date you write it, so nobody could know it offline. Today's
-newest snapshot is WikiMed's, 2026-10-10. If a later pack update moves that date, recheck these items.
+newest snapshot is Chemistry's, 2026-10-15. If a later pack update moves that date, recheck these items.
 
 - Good: the 2026 World Series (late October 2026), the 3 November 2026 midterms, the 2027 Oscars, "last night's game",
   "the price of bitcoin right now".
@@ -148,8 +149,9 @@ newest snapshot is WikiMed's, 2026-10-10. If a later pack update moves that date
   I'm 180 lb"), diagnosing "my" mole, whether to stop "my" pills, what "my" test result means. Also include medical
   futures ("when will there be a cure for Alzheimer's") and local facts ("does my dentist take my insurance").
 - A "my" question that asks a general fact ("will antibiotics help my cold") is answerable. Say so in `notes`.
-- The app shows no Best guess button on medical declines. You may still fill in `goodGuess` (usually "Can't say for
-  you; ask your doctor or pharmacist"), because the eval asks both models for a guess on unanswerable questions.
+- The app shows no Best guess button on medical declines. On a medical item, `goodGuess` is **for reference only**.
+  You may fill it in (usually "Can't say for you; ask your doctor or pharmacist") so a grader knows what a sensible
+  guess would be, but no user ever sees a guess on a medical question.
 
 ## Multi-step items
 
@@ -191,5 +193,5 @@ newest snapshot is WikiMed's, 2026-10-10. If a later pack update moves that date
   python eval.py validate dataset/<split>.json --packs ~/.cache/granger/eval-packs --books ~/.cache/granger/eval-books/by-ref
   ```
 
-  It must report 0 problems. It scans every entry of a ZIM for each article answer, so it takes a minute or so.
+  It must report 0 problems. It scans every entry of a ZIM for each article answer, so it takes a few minutes.
 - Write no questions that can only be sourced from a pack you don't have on disk yet. Add them once that pack is in.
