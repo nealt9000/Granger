@@ -99,6 +99,17 @@ class KeywordsTest {
             "My wife asked what era the Bayeux Tapestry is from",
             "My son is painting a model of the Titanic, what colour was the hull?",
             "My daughter asked about the Doctor Who series",
+            "How do I give a good presentation?",
+            "how do I give feedback to my boss",
+            "My grandma took a train in 1950",
+            "Did my team hit 20 home runs",
+            "I took 3 buses",
+            "is 2 cups too much",
+            "Should I be worried about the 2026 election?",
+            "Is it safe for me to travel to Mexico?",
+            "My dad is a doctor; what is the history of the stethoscope?",
+            "my wife took my breath away",
+            "My son asked what pain au chocolat means",
         ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it, Medical.looksMedical(it))).isFalse() }
     }
 
@@ -106,14 +117,36 @@ class KeywordsTest {
         listOf(
             "Is it safe for me to have a couple beers tonight with the meds I'm on?",
             "My ALT came back at 80 on my blood test. Is my liver ok?",
+            "Can I double my sertraline dose since it doesn't seem to be working?",
+            "can i give my baby honey",
+            "my daughter swallowed a battery",
+            "What did my doctor mean when she said my scan showed a shadow?",
+            "What dose of tylenol for my son?",
+            "Should I go to the ER or wait?",
+        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it, medicalSignal = false)).isTrue() }
+    }
+
+    @Test fun positivesHoldWithoutTheRewriteFlag() {
+        listOf(
+            "How much ibuprofen should I take for my back pain? I'm about 180 pounds.",
+            "Is this mole on my shoulder cancer? It's dark and kind of uneven.",
+            "Should I stop taking my blood pressure pills now that my readings are better?",
+            "My ALT came back at 80 on my blood test. Is my liver ok?",
+            "Can I take the leftover amoxicillin from last year for my sore throat?",
+            "Is it safe for me to have a couple beers tonight with the meds I'm on?",
+            "What are my chances of getting breast cancer? My aunt had it.",
             "My two year old has a fever of 101. Do I need to take her to the ER?",
             "Can I double my sertraline dose since it doesn't seem to be working?",
+            "What did my doctor mean when she said my scan showed a shadow?",
             "My two year old has a fever of 103, what should I do?",
             "can i give my baby honey",
             "my daughter swallowed a battery",
             "I took 20 tylenol an hour ago what happens",
             "Should I be worried about a headache that won't go away?",
-        ).forEach { assertWithMessage(it).that(PersonalMedical.matches(it, medicalSignal = false)).isTrue() }
+        ).forEach {
+            val signal = Medical.looksMedical(it) || PersonalMedical.strong(it)
+            assertWithMessage(it).that(PersonalMedical.matches(it, signal)).isTrue()
+        }
     }
 
     @Test fun lexiconWordBoundaries() {

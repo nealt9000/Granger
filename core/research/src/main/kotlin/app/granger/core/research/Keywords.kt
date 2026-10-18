@@ -56,9 +56,10 @@ object Medical {
         "kidney stone", "disease", "cancer", "tumor", "tumour", "vaccin", "virus", "antibiotic", "ibuprofen",
         "aspirin", "paracetamol", "acetaminophen", "concussion", "choking", "appendicitis", "measles", "chickenpox",
         "shingles", "scurvy", "tuberculosis", "anemi", "anaemi", "iron deficien", "lyme disease", "migraine", "asthma",
+        "headache", "vomit", "cough", "breathing", "lump", "swelling", "doctor", "biopsy",
         "tylenol", "advil", "motrin", "benadryl", "xanax", "sertraline", "amoxicillin", "blood test", "cholesterol",
     ).map { "\\b" + Regex.escape(it) }
-    private val WHOLE_WORDS = listOf("flu", "gout", "burn(s|ed|t|ing)?", "liver(s)?", "mole(s)?", "rash(es)?")
+    private val WHOLE_WORDS = listOf("flu", "gout", "burn(s|ed|t|ing)?", "liver(s)?", "mole(s)?", "rash(es)?", "scan(s|ned|ning)?")
         .map { "\\b$it\\b" }
     private val PATTERN = Regex((TERMS + WHOLE_WORDS).joinToString("|"), RegexOption.IGNORE_CASE)
 
@@ -77,22 +78,16 @@ object Medical {
  */
 object PersonalMedical {
     private val NUMBER = "(\\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+    private val RELATIVE = "newborn|infant|baby|toddler|child|kid|son|daughter|husband|wife|partner|mom|mum|mother|dad|father|grandma|grandpa|grandmother|grandfather"
     private val STRONG = listOf(
-        "\\bis it (safe|ok|okay) (for me|for my|to take|with (my|the) (meds|medication|medicine|pills))",
+        "\\bis it (safe|ok|okay)\\b[^.?!;]*\\bwith (my|the) (meds|medication|medicine|pills)\\b",
         "\\bmy (\\w+ )?(meds|medication|medicine|pills|dose|dosage|prescription|inhaler|insulin)\\b",
         "\\bcame back (at|as|positive|negative|high|low)\\b",
         "\\b(should|do) i (go to|see|call) (the |a |my )?(er|a&e|emergency|hospital|doctor|gp|dentist|911)\\b",
-        "\\bmy ($NUMBER[- ]?(year|month|week)s?[- ]?old|newborn|infant|baby|toddler|child|kid|son|daughter|husband|wife|partner|mom|mum|mother|dad|father|grandma|grandpa|grandmother|grandfather)\\b[^.?!]*\\b(fever|rash|pain|vomit|breath|cough|bleed|er|hospital|doctor(?! who)|temperature)\\b",
-        "\\b(can|should) i give (him|her|my (newborn|infant|baby|toddler|child|kid|son|daughter|husband|wife|partner|mom|mum|mother|dad|father|grandma|grandpa|grandmother|grandfather))\\b",
-        "\\bdo i give\\b",
-        "\\bshould my \\w+ take\\b",
-        "\\bi (took|swallowed|drank|ate) \\d+",
-        "\\bmy \\w+ (swallowed|fell|ate|drank|took|hit)\\b",
-        "\\bi (have|got|found) (a |an )?(rash|lump|pain|fever|headache|bump|swelling)\\b",
-        "\\bis it safe for me\\b",
-        "\\bis \\d+ \\w+ too much\\b",
-        "\\bshould i be worried about\\b",
+        "\\b(can|should) i give my ($RELATIVE)\\b",
         "\\bwhat (dose|dosage) of \\w+ for my\\b",
+        "\\bmy ($RELATIVE) (swallowed|drank|ate)\\b",
+        "\\bmy doctor (said|told|meant|mean|says)\\b",
     ).map { Regex(it, RegexOption.IGNORE_CASE) }
     private val GENERIC = listOf(
         "\\b(should|can|could|may) i (take|stop|double|skip|increase|lower|mix|combine|have)\\b",
@@ -102,11 +97,19 @@ object PersonalMedical {
         "\\bwhat are my (chances|odds|risks?)\\b",
         "\\bdo i have (a |an )?\\w+",
         "\\bdo i need to (take|bring|go|see|call)\\b",
+        "\\bdo i give\\b",
+        "\\bmy \\w+ (fell|took|hit)\\b",
+        "\\bi (took|swallowed|drank|ate) \\d+",
+        "\\bis \\d+ \\w+ too much\\b",
+        "\\bshould i be worried about\\b",
+        "\\bis it safe for me\\b",
+        "\\bi (have|got|found) (a |an )?(rash|lump|pain|fever|headache|bump|swelling)\\b",
+        "\\bmy ($NUMBER[- ]?(year|month|week)s?[- ]?old|$RELATIVE)\\b[^.?!;]*\\b(fever|rash|pain|vomit|breath|cough|bleed|er|hospital|temperature)\\b",
     ).map { Regex(it, RegexOption.IGNORE_CASE) }
 
     private fun normal(q: String) = q.replace('’', '\'')
 
-    /** Phrasings that are personal medical questions on their own. */
+    /** Phrasings that are personal medical questions on their own (the unambiguous ones). */
     fun strong(question: String): Boolean = normal(question).let { q -> STRONG.any { it.containsMatchIn(q) } }
 
     /** [medicalSignal] is the pipeline's combined medical flag for the question; generic phrasings need it. */
