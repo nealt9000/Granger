@@ -31,7 +31,7 @@
 - Model files come from the downloads ledger: `INSTALLED` records of `ItemKind.MODEL`, with the role taken from the catalog's `ModelEntry` of the same id (`small`, `large`, `embedder`). Research needs `small`. `embedder` is optional; `large` enables Think deeper.
 - LiteRT-LM context is `MAX_CONTEXT_TOKENS = 4096`. The prompt must stay ≤ 3,400 estimated tokens (chars ÷ 4) so the reply fits.
 - Limits: rewrite `maxTokens = 32` with a 5,000 ms timeout, then keyword fallback; answer `maxTokens = 512`; up to 8 ZIM documents; preselect ≤ 12 passages, ≤ 3 per source; 4 passages to E2B, 8 to E4B; each passage cut to 1,200 chars in the prompt; quote cut to 1,500 chars; previous answer cut to 600 chars.
-- Initial thresholds: cosine ≥ `0.40` with the embedder; lexical ≥ `0.50` without it (both are constants in `RankingConfig`).
+- Initial thresholds: cosine ≥ `0.40` with the embedder; lexical ≥ `0.50` without it (both are constants in `RankingConfig`). (Task 9 ruling: 0.32 with idf-weighted partial credit)
 - Copy (exact):
   - Tool, menu item and screen title: "Research"
   - Input placeholder: "Ask about anything in your library"
@@ -153,7 +153,7 @@ git commit -m "Research logic module: passages, keyword fallback, rewrite prompt
 **Interfaces:**
 - Consumes: `Passage`, `LexicalScore` (Task 1).
 - Produces:
-  - `data class RankingConfig(val preselect: Int = 12, val perSource: Int = 3, val cosineThreshold: Float = 0.40f, val lexicalThreshold: Double = 0.50, val small: Int = 4, val large: Int = 8)`
+  - `data class RankingConfig(val preselect: Int = 12, val perSource: Int = 3, val cosineThreshold: Float = 0.40f, val lexicalThreshold: Double = 0.50, val small: Int = 4, val large: Int = 8)` (Task 9 ruling: 0.32 with idf-weighted partial credit)
   - `object Ranking { fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage>; fun cosine(a: FloatArray, b: FloatArray): Float; fun byEmbedding(candidates: List<Passage>, query: FloatArray, vectors: List<FloatArray>, config: RankingConfig): List<Passage>; fun byLexical(candidates: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> }`. `preselect` sorts by `LexicalScore` (descending), then `searchScore`, keeps ≤ `perSource` per `sourceId`, and takes `preselect`. `byEmbedding` and `byLexical` return the passages that pass the threshold, best first, at most `config.large` of them. A caller takes the first `small` for E2B.
   - `data class PriorTurn(val question: String, val answer: String)`
   - `object AnswerPrompt { fun build(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): String; const val DECLINE_TOKEN = "NOT IN LIBRARY"; fun estimateTokens(prompt: String): Int = prompt.length / 4 }`
