@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-17T12:43:50Z",
+  "generatedAt": "2026-10-18T12:00:39Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -215,6 +215,145 @@
       "topics": [],
       "zimUuid": "c5181ff1-fa01-053c-cf3c-9c4c66259687",
       "zimName": "wikivoyage_en_all"
+    },
+    {
+      "id": "wiktionary_en_all_nopic",
+      "title": "Wiktionary",
+      "description": "The largest dictionary on the web.",
+      "category": "Reference",
+      "language": "eng",
+      "sizeBytes": 9156425592,
+      "sha256": "5276f63a2e451518ec5b7c4452ca9a4f72fae48991da3fe7ebc47df74bae760a",
+      "urls": [
+        "https://download.kiwix.org/zim/wiktionary/wiktionary_en_all_nopic_2026-08.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wiktionary/wiktionary_en_all_nopic_2026-08.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wiktionary/wiktionary_en_all_nopic_2026-08.zim"
+      ],
+      "snapshotDate": "2026-08-13",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "f2c2fd4e-dba3-2b22-7318-3190feb051bc",
+      "zimName": "wiktionary_en_all"
+    },
+    {
+      "id": "wikipedia_en_geography_maxi",
+      "title": "Geography (Wikipedia)",
+      "description": "A selection of Wikipedia articles on geography",
+      "category": "Reference",
+      "language": "eng",
+      "sizeBytes": 1232518242,
+      "sha256": "9e662732aae7b025de940969b455d7139a96d172d74b47be149092919fdb4ef8",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_geography_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_geography_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_geography_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-12",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "3bdcf9ff-ffb8-6d8f-10e3-b40d536f40e7",
+      "zimName": "wikipedia_en_geography"
+    },
+    {
+      "id": "wikipedia_en_physics_maxi",
+      "title": "Physics (Wikipedia)",
+      "description": "A selection of Wikipedia articles on physics",
+      "category": "Science & Math",
+      "language": "eng",
+      "sizeBytes": 911983158,
+      "sha256": "2751c32efda00e18093e7ff4934269fcf916b6f0c7e5f2304efa83699d25442f",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_physics_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_physics_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_physics_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-14",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "a2d29e88-df36-66b5-09e4-cf9e65f33147",
+      "zimName": "wikipedia_en_physics"
+    },
+    {
+      "id": "wikipedia_en_chemistry_maxi",
+      "title": "Chemistry (Wikipedia)",
+      "description": "A selection of Wikipedia articles on chemistry",
+      "category": "Science & Math",
+      "language": "eng",
+      "sizeBytes": 383967742,
+      "sha256": "c197e6d3ce1bdf8838e8abbc63226bd6849a31ec81913bacb779d1d83bcc7d7b",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_chemistry_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_chemistry_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_chemistry_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-15",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "253cc41a-618c-2adb-6b14-6a644e835888",
+      "zimName": "wikipedia_en_chemistry"
+    },
+    {
+      "id": "wikipedia_en_mathematics_maxi",
+      "title": "Mathematics (Wikipedia)",
+      "description": "A selection of Wikipedia articles on mathematics",
+      "category": "Science & Math",
+      "language": "eng",
+      "sizeBytes": 996187168,
+      "sha256": "069b5c59f508d795f223e91e875190007e5d9ac23681cf07cfb72ee6d64d5793",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_mathematics_maxi_2026-09.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_mathematics_maxi_2026-09.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_mathematics_maxi_2026-09.zim"
+      ],
+      "snapshotDate": "2026-09-15",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "dae7677f-b798-1c28-f383-ac3a127800cc",
+      "zimName": "wikipedia_en_mathematics"
+    },
+    {
+      "id": "wikipedia_en_knots_maxi",
+      "title": "Knots (Wikipedia)",
+      "description": "A subset of Wikipedia encyclopedia dedicated to knots",
+      "category": "How-to",
+      "language": "eng",
+      "sizeBytes": 18462854,
+      "sha256": "26a926e463151a796ac4ba3274011b51da6967860c5edd8cf22ffc5edafbfeba",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_knots_maxi_2026-07.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-07.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-07.zim"
+      ],
+      "snapshotDate": "2026-07-20",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "3a4fe0d0-0bd0-7583-ada8-c52d173ae44d",
+      "zimName": "wikipedia_en_knots"
+    },
+    {
+      "id": "ifixit_en_all",
+      "title": "iFixit repair guides",
+      "description": "iFixit is a global community of people helping each other repair things. Let's …",
+      "category": "How-to",
+      "language": "eng",
+      "sizeBytes": 3570695757,
+      "sha256": "9bb5f3408707fd0300c6ef47a425c3217187f144cd9154a928183816aa72eead",
+      "urls": [
+        "https://download.kiwix.org/zim/ifixit/ifixit_en_all_2025-12.zim"
+      ],
+      "snapshotDate": "2025-12-21",
+      "license": "CC BY-NC-SA 3.0",
+      "hasFulltextIndex": false,
+      "topics": [],
+      "zimUuid": "bff12bdb-1fac-6ab0-ed6c-9f5f030722b3",
+      "zimName": "ifixit_en_all",
+      "nonCommercial": true
     }
   ],
   "models": [
