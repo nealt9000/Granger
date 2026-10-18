@@ -28,7 +28,7 @@ class RewriteTest {
             "Turn the question into search keywords for a library catalogue.\n" +
                 "Reply in exactly two lines:\n" +
                 "keywords: <3 to 6 keywords or short phrases, comma-separated>\n" +
-                "medical: <yes or no>\n" +
+                "medical: <yes if the question is about health, illness, injury, the body, medicines or treatment; otherwise no>\n" +
                 "Question: who was Darwin",
         )
     }
@@ -41,4 +41,12 @@ class RewriteTest {
     @Test fun anEchoedPlaceholderIsNotKeywords() {
         assertThat(Rewrite.parse("keywords: <3 to 6 keywords or short phrases, comma-separated>\nmedical: no")).isNull()
     }
+
+    @Test fun echoedMedicalPlaceholderIsNotYes() {
+        val r = Rewrite.parse("keywords: burn, first aid\nmedical: <yes if the question is about health; otherwise no>")!!
+        assertThat(r.medical).isNull()
+    }
+
+    @Test fun readsMedicalYesWithNewPromptWording() =
+        assertThat(Rewrite.parse("keywords: stroke, signs\nmedical: yes")!!.medical).isTrue()
 }

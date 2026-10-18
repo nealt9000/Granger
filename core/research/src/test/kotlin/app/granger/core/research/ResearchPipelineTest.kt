@@ -495,4 +495,40 @@ class ResearchPipelineTest {
         assertThat(out.passages).isEmpty()
         assertThat(out.reply).isEmpty()
     }
+
+    @Test
+    fun personalMedicalQuestionDeclinesWithoutSearching() = runTest {
+        val finder = FakeFinder(listOf(water))
+        val events = ResearchPipeline(finder, FakeModels(FakeGenerator(), embedder = embedder))
+            .run(ResearchRequest("My two year old has a fever of 101. Do I need to take her to the ER?")).toList()
+        assertThat(finder.calls).isEmpty()
+        assertThat(events).contains(ResearchEvent.Medical)
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.medical).isTrue()
+    }
+
+    @Test
+    fun generalMedicalQuestionStillAnswers() = runTest {
+        val pulse = passage("H", "A normal resting heart rate for adults is 60 to 100 beats per minute.", "Heart")
+        val gen = FakeGenerator(
+            rewrite = { flowOf("keywords: heart rate, resting\nmedical: yes") },
+            answer = { flowOf("A normal resting heart rate is 60 to 100 beats per minute [1].") },
+        )
+        val out = outcome(
+            ResearchPipeline(FakeFinder(listOf(pulse)), FakeModels(gen))
+                .run(ResearchRequest("what's a normal resting heart rate")).toList(),
+        )
+        assertThat(out).isInstanceOf(Outcome.Answered::class.java)
+        assertThat(out.medical).isTrue()
+    }
+
+    @Test
+    fun lexiconMarksMedicalWhenRewriteSaysNo() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: stroke, warning signs\nmedical: no") })
+        val out = outcome(
+            ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder))
+                .run(ResearchRequest("What are the warning signs someone is having a stroke?")).toList(),
+        )
+        assertThat(out.medical).isTrue()
+    }
 }

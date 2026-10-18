@@ -42,15 +42,56 @@ object Keywords {
             .joinToString(" ")
 }
 
-/** Cheap check used only when the rewrite fails and the model can't say whether a question is medical. */
+/**
+ * Cheap lexicon check for medical questions. The pipeline ORs it with the rewrite's own medical flag, which the small
+ * model misses for some questions ("warning signs of a stroke"), and it decides alone when the rewrite fails.
+ * Terms match as substrings of the lowercased text, so stems like "vaccin" and "anemi" cover their variants.
+ */
 object Medical {
     private val LEXICON = listOf(
         "symptom", "dose", "dosage", "medication", "overdose", "bleeding", "fracture", "burn", "poison",
         "infection", "fever", "pregnan", "allerg", "chest pain", "diabet", "insulin", "seizure", "cpr", "wound",
+        "stroke", "heart attack", "blood pressure", "heart rate", "body temperature", "flu", "influenza",
+        "kidney stone", "disease", "cancer", "tumor", "tumour", "vaccin", "virus", "antibiotic", "ibuprofen",
+        "aspirin", "paracetamol", "acetaminophen", "concussion", "choking", "appendic", "measles", "chickenpox",
+        "shingles", "gout", "scurvy", "tuberculosis", "anemi", "anaemi", "iron deficien", "lyme", "migraine", "asthma",
     )
 
     fun looksMedical(text: String): Boolean {
         val lower = text.lowercase()
         return LEXICON.any { lower.contains(it) }
+    }
+}
+
+/**
+ * True when a question asks for advice about the asker's, or one specific person's, own health, medicines, test
+ * results or care. Such questions decline with the medical copy whatever the library holds. Case-insensitive and
+ * deterministic: a small set of phrasings in five families (medicine decisions, one person's results,
+ * self-diagnosis, care decisions, care for a named relative). General questions stay false even when they say
+ * "my" or "you" in passing.
+ */
+object PersonalMedical {
+    private val PATTERNS = listOf(
+        // Medicine decisions.
+        "\\b(should|can|could|may) i (take|stop|double|skip|increase|lower|mix|combine|have)\\b",
+        "\\bhow much \\w+( \\w+)? should i (take|give)\\b",
+        "\\bis it (safe|ok|okay) (for me|for my|to take|with (my|the) (meds|medication|medicine|pills))",
+        "\\bmy (meds|medication|medicine|pills|dose|dosage|prescription|inhaler|insulin)\\b",
+        // One person's results.
+        "\\bmy (\\w+ ){0,2}(test|results?|scan|levels?|numbers|readings?|blood ?work|labs?|x-?ray|mri|biopsy)\\b",
+        "\\bcame back (at|as|positive|negative|high|low)\\b",
+        // Self-diagnosis.
+        "\\bis (this|my) (\\w+ ){0,5}(cancer|serious|normal|ok|okay|infected|broken|dangerous)\\b",
+        "\\bwhat are my (chances|odds|risks?)\\b",
+        "\\bdo i have (a |an )?\\w+",
+        // Care decisions for a specific person.
+        "\\bdo i need to (take|bring|go|see|call)\\b",
+        "\\b(should|do) i (go to|see|call) (the |a |my )?(er|a&e|emergency|hospital|doctor|gp|dentist|911)\\b",
+        "\\bmy (\\d+[- ]?(year|month|week)[- ]?old|baby|toddler|child|kid|son|daughter|husband|wife|partner|mom|mum|mother|dad|father)\\b.*\\b(fever|rash|pain|vomit|breath|cough|bleed|er|hospital|doctor|temperature)",
+    ).map { Regex(it, RegexOption.IGNORE_CASE) }
+
+    fun matches(question: String): Boolean {
+        val q = question.replace('\u2019', '\'')
+        return PATTERNS.any { it.containsMatchIn(q) }
     }
 }

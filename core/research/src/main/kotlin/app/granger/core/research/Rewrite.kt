@@ -14,7 +14,7 @@ object Rewrite {
         append("Turn the question into search keywords for a library catalogue.\n")
         append("Reply in exactly two lines:\n")
         append("keywords: <3 to 6 keywords or short phrases, comma-separated>\n")
-        append("medical: <yes or no>\n")
+        append("medical: <yes if the question is about health, illness, injury, the body, medicines or treatment; otherwise no>\n")
         if (previousQuestion != null) append("Previous question: ").append(previousQuestion).append('\n')
         append("Question: ").append(question)
     }
