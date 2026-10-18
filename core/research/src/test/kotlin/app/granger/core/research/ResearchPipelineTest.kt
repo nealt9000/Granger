@@ -392,4 +392,14 @@ class ResearchPipelineTest {
             .guess("Anything?", priorQuestion = null, large = false).toList()
         assertThat(outcome(events)).isEqualTo(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList()))
     }
+
+    @Test
+    fun guessUsesTheLargeModelWhenItLoads() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = FakeGenerator(), large = FakeGenerator()))
+            .guess("Anything?", priorQuestion = null, large = true).toList()
+        assertThat(events).doesNotContain(ResearchEvent.GuessFallback)
+        val out = outcome(events) as Outcome.Guessed
+        assertThat(out.usedLarge).isTrue()
+        assertThat(out.fellBack).isFalse()
+    }
 }

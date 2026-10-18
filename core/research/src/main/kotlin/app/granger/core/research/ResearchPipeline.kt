@@ -146,16 +146,7 @@ class ResearchPipeline(
 
         emit(ResearchEvent.Progress(Stage.WRITING))
         val prompt = AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null)
-        val reply = generator.model.generate(prompt, ANSWER_TOKENS)
-            .transformWhile { chunk ->
-                emit(chunk)
-                !stop()
-            }
-            .fold("") { soFar, chunk ->
-                val text = soFar + chunk
-                emit(ResearchEvent.Partial(text))
-                text
-            }
+        val reply = streamReply(generator.model, prompt, stop)
 
         val outcome = when (val check = Citations.check(reply, passages.size)) {
             is CitationCheck.Valid ->
@@ -176,7 +167,13 @@ class ResearchPipeline(
             return@flow
         }
         emit(ResearchEvent.Progress(Stage.WRITING))
-        val reply = generator.model.generate(GuessPrompt.build(question, priorQuestion), ANSWER_TOKENS)
+        val reply = streamReply(generator.model, GuessPrompt.build(question, priorQuestion), stop)
+        emit(ResearchEvent.Done(Outcome.Guessed(reply, generator.large, fellBack)))
+    }
+
+    /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far. */
+    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): String =
+        model.generate(prompt, ANSWER_TOKENS)
             .transformWhile { chunk ->
                 emit(chunk)
                 !stop()
@@ -186,8 +183,6 @@ class ResearchPipeline(
                 emit(ResearchEvent.Partial(text))
                 text
             }
-        emit(ResearchEvent.Done(Outcome.Guessed(reply, generator.large, fellBack)))
-    }
 
     private class Loaded(val model: TextGenerator, val large: Boolean)
 
