@@ -147,13 +147,11 @@ class ReaderViewModel(
 
     /** A middle tap. Hiding the chrome also closes the find bar. Errors keep the chrome up. */
     fun toggleChrome() {
+        if (_state.value.chromeVisible) searchJob?.cancel()
         _state.update {
             when {
                 it.error != null -> it
-                it.chromeVisible -> {
-                    searchJob?.cancel()
-                    it.copy(chromeVisible = false, findQuery = null, packSearch = null)
-                }
+                it.chromeVisible -> it.copy(chromeVisible = false, findQuery = null, packSearch = null)
                 else -> it.copy(chromeVisible = true)
             }
         }
@@ -207,7 +205,7 @@ class ReaderViewModel(
         if (query.isBlank()) return
         searchJob = viewModelScope.launch {
             delay(SUGGEST_DEBOUNCE_MS)
-            val hits = withContext(io) { archive.suggest(query, SUGGESTION_LIMIT) }
+            val hits = withContext(io) { resolved(archive, archive.suggest(query, SUGGESTION_LIMIT)) }
             setHits(query, hits)
         }
     }
@@ -219,13 +217,15 @@ class ReaderViewModel(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             val hits = withContext(io) {
-                val titles = archive.suggest(query, SUGGESTION_LIMIT)
-                val seen = titles.mapTo(HashSet()) { it.path }
-                titles + archive.search(query, FULLTEXT_LIMIT).filter { seen.add(it.path) }
+                resolved(archive, archive.suggest(query, SUGGESTION_LIMIT) + archive.search(query, FULLTEXT_LIMIT))
             }
             setHits(query, hits)
         }
     }
+
+    /** [hits] with redirects followed, so a result opens its real article; the first hit per path stays. */
+    private fun resolved(archive: ZimArchive, hits: List<ZimHit>): List<ZimHit> =
+        hits.map { it.copy(path = archive.resolvePath(it.path) ?: it.path) }.distinctBy { it.path }
 
     private fun setHits(query: String, hits: List<ZimHit>) {
         _state.update {

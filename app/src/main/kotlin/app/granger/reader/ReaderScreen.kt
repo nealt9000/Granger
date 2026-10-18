@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -229,6 +231,7 @@ fun ReaderScreen(
                     title = state.page?.title.orEmpty(),
                     showPageActions = state.page != null,
                     bookmarked = state.bookmarked,
+                    showMenu = state.error == null,
                     hasHome = state.hasHome,
                     onBack = onBack,
                     onSearchPack = viewModel::startPackSearch,
@@ -253,6 +256,7 @@ private fun ReaderTopBar(
     title: String,
     showPageActions: Boolean,
     bookmarked: Boolean,
+    showMenu: Boolean,
     hasHome: Boolean,
     onBack: () -> Unit,
     onSearchPack: () -> Unit,
@@ -278,7 +282,7 @@ private fun ReaderTopBar(
                     }
                 }
             }
-            Box {
+            if (showMenu) Box {
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     if (hasHome) {
@@ -331,7 +335,7 @@ private fun PackSearchPanel(
         if (search.searched && search.hits.isEmpty()) {
             Text("No matches in this pack.", Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
         }
-        LazyColumn(Modifier.fillMaxWidth()) {
+        LazyColumn(Modifier.fillMaxWidth().imePadding().navigationBarsPadding()) {
             items(search.hits, key = { it.path }) { hit ->
                 ListItem(
                     headlineContent = { Text(hit.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },

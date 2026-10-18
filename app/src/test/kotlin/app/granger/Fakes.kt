@@ -59,7 +59,11 @@ class FakeZimArchive(
     override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
     override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", ByteArray(0)) }
     override fun randomPath() = random
-    override fun suggest(query: String, limit: Int) = suggestions.take(limit)
+    var suggestCalls = 0
+    override fun suggest(query: String, limit: Int): List<ZimHit> {
+        suggestCalls++
+        return suggestions.take(limit)
+    }
     override fun search(query: String, limit: Int) = results.take(limit)
     override fun close() {}
 }

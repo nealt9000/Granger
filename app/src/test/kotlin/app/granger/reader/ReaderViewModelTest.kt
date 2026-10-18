@@ -276,4 +276,50 @@ class ReaderViewModelTest {
     @Test fun thePackTitleIsKnownForThePlaceholder() = runTest(main.dispatcher) {
         assertThat(reader("C++").state.value.packTitle).isEqualTo("p")
     }
+
+    @Test fun redirectHitsOpenTheirRealArticleAndDedupeWithTheirTarget() = runTest(main.dispatcher) {
+        val vm = searchable(
+            FakeZimArchive(
+                "p", setOf("index", "Photosynthesis"),
+                redirects = mapOf("Photosynthetic" to "Photosynthesis"),
+                suggestions = listOf(ZimHit("Photosynthetic", "Photosynthetic")),
+                results = listOf(ZimHit("Photosynthesis", "Photosynthesis", "<b>x</b>")),
+            ),
+        )
+        vm.setPackQuery("photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.packSearch!!.hits.map { it.path }).containsExactly("Photosynthesis")
+        vm.submitPackSearch()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.packSearch!!.hits.map { it.path }).containsExactly("Photosynthesis")
+    }
+
+    @Test fun retypingWithinThePauseSuggestsOnce() = runTest(main.dispatcher) {
+        val archive = FakeZimArchive("p", setOf("index"))
+        val vm = searchable(archive)
+        vm.setPackQuery("p")
+        vm.setPackQuery("ph")
+        vm.setPackQuery("pho")
+        testScheduler.advanceUntilIdle()
+        assertThat(archive.suggestCalls).isEqualTo(1)
+    }
+
+    @Test fun typingAfterSubmitDropsTheStaleFullTextResults() = runTest(main.dispatcher) {
+        val vm = searchable(FakeZimArchive("p", setOf("index"), results = listOf(ZimHit("Other", "Other", "s"))))
+        vm.setPackQuery("c")
+        vm.submitPackSearch()
+        vm.setPackQuery("cx")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.packSearch!!.query).isEqualTo("cx")
+        assertThat(vm.state.value.packSearch!!.hits.map { it.path }).doesNotContain("Other")
+    }
+
+    @Test fun closingWhileASearchIsInFlightLeavesNoResults() = runTest(main.dispatcher) {
+        val vm = searchable(FakeZimArchive("p", setOf("index"), results = listOf(ZimHit("Other", "Other", "s"))))
+        vm.setPackQuery("c")
+        vm.submitPackSearch()
+        vm.endPackSearch()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.packSearch).isNull()
+    }
 }
