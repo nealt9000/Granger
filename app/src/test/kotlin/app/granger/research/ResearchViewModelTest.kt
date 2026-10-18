@@ -18,6 +18,7 @@ import app.granger.core.ai.ResearchReadiness
 import app.granger.core.ai.TextEmbedderFactory
 import app.granger.core.books.TextQuote
 import app.granger.core.library.PackStatus
+import app.granger.core.library.ReadingSessions
 import app.granger.core.library.TurnOutcome
 import app.granger.core.research.Passage
 import app.granger.core.research.ResearchPipeline
@@ -60,6 +61,7 @@ class ResearchViewModelTest {
         manager: ModelManager = manager(LlmEngineFactory { _, _ -> error("the view model doesn't load models itself") }),
         savedState: SavedStateHandle = SavedStateHandle(),
         cpu: CoroutineDispatcher = main.dispatcher,
+        sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf, backgroundScope,
@@ -428,6 +430,15 @@ class ResearchViewModelTest {
         bookshelf.bookList.value = listOf(book("book:granger:emma", status = PackStatus.CORRUPT))
         assertThat(vm.open(bookPassage)).isEqualTo(CitationTarget.Gone)
         assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    @Test fun aCitationThatCantBeOpenedIsGoneRatherThanACrash() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("pack1"))
+        val broken = object : ReadingSessions by sessions {
+            override suspend fun openTab(packId: String, path: String, title: String): Long = throw IllegalStateException("disk I/O error")
+        }
+        val vm = vm(sessions = broken)
+        assertThat(vm.open(article(1))).isEqualTo(CitationTarget.Gone)
     }
 
     @Test fun articleCitationCarriesTheAnchor() = runTest(main.dispatcher) {

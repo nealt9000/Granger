@@ -425,9 +425,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onOpenCitation = { target ->
                         // Pushed over the chat (Research isn't a reader), so Back returns to it.
                         scope.launch {
+                            val tabId = when (target) {
+                                is CitationTarget.Article -> target.tabId
+                                is CitationTarget.Book -> target.tabId
+                                CitationTarget.Gone -> return@launch
+                            }
+                            // A tab that can't be read opens nothing, rather than crashing the tap.
+                            val tab = try {
+                                container.sessions.tab(tabId)
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                null
+                            } ?: return@launch
                             when (target) {
-                                is CitationTarget.Article -> container.sessions.tab(target.tabId)?.let { nav.showTab(it, fragment = target.fragment) }
-                                is CitationTarget.Book -> container.sessions.tab(target.tabId)?.let { nav.showTab(it, target.at) }
+                                is CitationTarget.Article -> nav.showTab(tab, fragment = target.fragment)
+                                is CitationTarget.Book -> nav.showTab(tab, target.at)
                                 CitationTarget.Gone -> Unit
                             }
                         }

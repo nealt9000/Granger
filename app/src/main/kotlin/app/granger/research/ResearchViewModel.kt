@@ -211,8 +211,20 @@ class ResearchViewModel(
         }
     }
 
-    /** Opens the cited passage's source in a rail tab, at the passage where it can; [CitationTarget.Gone] when it's gone. */
-    suspend fun open(passage: Passage): CitationTarget {
+    /**
+     * Opens the cited passage's source in a rail tab, at the passage where it can; [CitationTarget.Gone] when it's gone,
+     * or can't be opened (a storage error is logged, not thrown into the screen's tap handler).
+     */
+    suspend fun open(passage: Passage): CitationTarget = try {
+        target(passage)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        runCatching { android.util.Log.w("Granger", "Research citation couldn't be opened", e) }
+        CitationTarget.Gone
+    }
+
+    private suspend fun target(passage: Passage): CitationTarget {
         if (!BookIds.isBook(passage.sourceId)) {
             val pack = library.packs.first().firstOrNull { it.id == passage.sourceId }
             if (pack == null || pack.status != PackStatus.OK) return CitationTarget.Gone
