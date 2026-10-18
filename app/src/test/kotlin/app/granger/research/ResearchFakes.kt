@@ -11,7 +11,9 @@ import app.granger.core.research.PassageFinder
 import app.granger.core.research.ResearchModels
 import app.granger.core.research.SourceKind
 import app.granger.core.research.TextGenerator
+import kotlin.coroutines.ContinuationInterceptor
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
@@ -106,10 +108,13 @@ class FakeChats : ResearchChats {
 
 class FakeFinder(var passages: List<Passage> = (1..10).map(::article)) : PassageFinder {
     var calls = 0
+    /** The dispatcher the last search ran on. */
+    var ranOn: ContinuationInterceptor? = null
     /** When set, searching waits for it. */
     var gate: CompletableDeferred<Unit>? = null
     override suspend fun find(keywords: List<String>): List<Passage> {
         calls++
+        ranOn = currentCoroutineContext()[ContinuationInterceptor]
         gate?.await()
         return passages
     }

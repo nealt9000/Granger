@@ -28,7 +28,9 @@ import app.granger.core.research.ResearchRequest
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -65,6 +68,8 @@ class ResearchViewModel(
     private val appScope: CoroutineScope,
     /** Survives process death with the route: the chat this one became, and that the route's [quote] was asked. */
     private val savedState: SavedStateHandle = SavedStateHandle(),
+    /** Runs the pipeline's own work (prompt building, ranking, citation checks) off the main thread. */
+    private val cpu: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
     /**
      * A stored turn, with the reply so far, the stage and the large-model fallback while it is running. [medical] shows
@@ -283,7 +288,7 @@ class ResearchViewModel(
                 turnId = chats.startTurn(chatId, ask.question, ask.askedDeeper, ask.quote)
                 live.value = Live(turnId, null, null, false)
             }
-            pipeline.run(request) { stopRequested }.collect { event ->
+            pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }

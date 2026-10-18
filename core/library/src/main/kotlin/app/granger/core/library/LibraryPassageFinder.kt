@@ -126,6 +126,11 @@ class LibraryPassageFinder(
         } catch (_: Exception) {
             emptyList()
         }
+        // Regex matching over every book and pack: off the caller's (main) thread.
+        return withContext(io) { matchCards(words, books, packs, collections) }
+    }
+
+    private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
         val made = books.mapNotNull { book ->
             attempt {
                 if (!mentions(words, book.title, book.author, book.subjects, book.description)) return@attempt null

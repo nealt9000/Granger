@@ -27,6 +27,7 @@ import app.granger.pack
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -58,10 +59,11 @@ class ResearchViewModelTest {
         quote: Passage? = null,
         manager: ModelManager = manager(LlmEngineFactory { _, _ -> error("the view model doesn't load models itself") }),
         savedState: SavedStateHandle = SavedStateHandle(),
+        cpu: CoroutineDispatcher = main.dispatcher,
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf, backgroundScope,
-            savedState,
+            savedState, cpu,
         )
     }
 
@@ -258,6 +260,15 @@ class ResearchViewModelTest {
         testScheduler.runCurrent()
         assertThat(vm.state.value.running).isFalse()
         assertThat(llm.closed).isTrue()
+    }
+
+    @Test fun thePipelineRunsOffTheMainThread() = runTest(main.dispatcher) {
+        val cpu = StandardTestDispatcher(testScheduler, "cpu")
+        val vm = vm(cpu = cpu)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(finder.ranOn).isSameInstanceAs(cpu)
+        assertThat(chats.turnList.value.single().outcome).isEqualTo(TurnOutcome.ANSWERED)
     }
 
     @Test fun stopBeforeWritingInterruptsTheTurn() = runTest(main.dispatcher) {
