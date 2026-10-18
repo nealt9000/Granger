@@ -370,7 +370,7 @@ private fun AnswerBlock(
 ) {
     val turn = ui.turn
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (turn.medical) Banner(MEDICAL)
+        if (ui.medical) Banner(MEDICAL)
         if (ui.largeFallback) Banner(LARGE_FALLBACK)
         when (turn.outcome) {
             TurnOutcome.PENDING -> {

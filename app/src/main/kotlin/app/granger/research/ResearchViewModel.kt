@@ -63,8 +63,11 @@ class ResearchViewModel(
     /** Settles a turn cut short when this view model is gone. */
     private val appScope: CoroutineScope,
 ) : ViewModel() {
-    /** A stored turn, with the reply so far, the stage and the large-model fallback while it is running. */
-    data class TurnUi(val turn: ChatTurn, val partial: String?, val stage: Stage?, val largeFallback: Boolean)
+    /**
+     * A stored turn, with the reply so far, the stage and the large-model fallback while it is running. [medical] shows
+     * the banner, from the pipeline while the turn runs (the stored turn learns it only when settled).
+     */
+    data class TurnUi(val turn: ChatTurn, val partial: String?, val stage: Stage?, val largeFallback: Boolean, val medical: Boolean)
 
     data class State(
         val chatId: Long?,
@@ -81,7 +84,13 @@ class ResearchViewModel(
     )
 
     /** The running turn; [turnId] is null until its row exists. */
-    private data class Live(val turnId: Long?, val partial: String?, val stage: Stage?, val largeFallback: Boolean)
+    private data class Live(
+        val turnId: Long?,
+        val partial: String?,
+        val stage: Stage?,
+        val largeFallback: Boolean,
+        val medical: Boolean = false,
+    )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
 
@@ -261,6 +270,7 @@ class ResearchViewModel(
                 when (event) {
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
+                    ResearchEvent.Medical -> live.update { it?.copy(medical = true) }
                     ResearchEvent.LargeFallback -> {
                         fellBack = true
                         live.update { it?.copy(largeFallback = true) }
@@ -317,6 +327,7 @@ class ResearchViewModel(
             partial = running?.partial,
             stage = running?.stage,
             largeFallback = running?.largeFallback ?: (askedDeeper && !usedLarge && outcome in FALLBACK_SHOWN),
+            medical = medical || running?.medical == true,
         )
     }
 

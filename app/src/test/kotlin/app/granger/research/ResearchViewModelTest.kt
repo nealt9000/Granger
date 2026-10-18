@@ -157,6 +157,31 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.running).isFalse()
     }
 
+    @Test fun medicalBannerShowsWhileTheAnswerStreams() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
+        small.answer = listOf("Cool the burn under running water [1].", " Then")
+        small.gateAt = 1
+        val vm = vm()
+        vm.ask("How do I treat a burn?")
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.turn.outcome).isEqualTo(TurnOutcome.PENDING)
+        assertThat(live.turn.medical).isFalse()
+        assertThat(live.medical).isTrue()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().medical).isTrue()
+    }
+
+    @Test fun notMedicalHasNoBanner() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " And")
+        small.gateAt = 1
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().medical).isFalse()
+    }
+
     @Test fun stopBeforeWritingInterruptsTheTurn() = runTest(main.dispatcher) {
         finder.gate = CompletableDeferred()
         val vm = vm()

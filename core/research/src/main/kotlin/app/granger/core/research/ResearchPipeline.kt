@@ -82,6 +82,8 @@ sealed interface ResearchEvent {
     data class Progress(val stage: Stage) : ResearchEvent
     /** The reply so far. */
     data class Partial(val text: String) : ResearchEvent
+    /** The question is medical, known before the reply is written, so the answer shows its banner as it streams. */
+    data object Medical : ResearchEvent
     /** The large model wouldn't load, so the small one answers. */
     data object LargeFallback : ResearchEvent
     data class Done(val outcome: Outcome) : ResearchEvent
@@ -110,11 +112,13 @@ class ResearchPipeline(
         val ranked: List<Passage>
         if (request.deeperFrom != null) {
             medical = request.medicalHint
+            if (medical) emit(ResearchEvent.Medical)
             keywords = emptyList()
             ranked = request.deeperFrom
         } else {
             val rewrite = rewrite(generator.model, request)
             medical = rewrite.medical == true || request.medicalHint
+            if (medical) emit(ResearchEvent.Medical)
             keywords = rewrite.keywords
             emit(ResearchEvent.Progress(Stage.SEARCHING))
             val all = finder.find(keywords)

@@ -121,7 +121,7 @@ class FakeFinder(var passages: List<Passage> = (1..10).map(::article)) : Passage
  */
 class ScriptedGenerator(
     var answer: List<String> = listOf("Plants turn light into sugar [1]."),
-    private val rewrite: String = "keywords: photosynthesis, light\nmedical: no",
+    var rewrite: String = "keywords: photosynthesis, light\nmedical: no",
 ) : TextGenerator {
     val prompts = mutableListOf<String>()
     var gateAt: Int? = null

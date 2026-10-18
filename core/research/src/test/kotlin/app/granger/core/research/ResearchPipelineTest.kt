@@ -196,6 +196,33 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun medicalIsFlaggedBeforeTheReplyStreams() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: water, boils\nmedical: yes") })
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        val flagged = events.indexOf(ResearchEvent.Medical)
+        assertThat(flagged).isAtLeast(0)
+        assertThat(flagged).isLessThan(events.indexOfFirst { it is ResearchEvent.Partial })
+    }
+
+    @Test
+    fun deeperFlagsMedicalFromTheHint() = runTest {
+        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
+        val large = FakeGenerator(answer = { flowOf("Deep answer [8].") })
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator(), large = large))
+            .run(ResearchRequest("Why?", deeperFrom = eight, medicalHint = true)).toList()
+        assertThat(events.indexOf(ResearchEvent.Medical)).isLessThan(events.indexOfFirst { it is ResearchEvent.Partial })
+        assertThat(events).contains(ResearchEvent.Medical)
+    }
+
+    @Test
+    fun notMedicalIsNotFlagged() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events).doesNotContain(ResearchEvent.Medical)
+    }
+
+    @Test
     fun rewriteKeywordsAreNormalized() = runTest {
         val gen = FakeGenerator(rewrite = { flowOf("keywords: Darwin’s finches, Darwin's, , Galapagos\nmedical: no") })
         val finder = FakeFinder(emptyList())
