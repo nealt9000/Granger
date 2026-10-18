@@ -49,8 +49,20 @@ def test_stale_remote_dir_is_removed_before_start(tmp_path):
     f = Fake()
     adb.run_eval(f, ds, "r1", tmp_path / "runs", sleep=lambda s: None)
     cmds = [" ".join(c) for c in f.calls]
+    rm = next(i for i, c in enumerate(cmds) if "rm -f" in c and "eval/r1/done" in c and "eval/r1/failed" in c)
+    assert not any("rm -rf" in c for c in cmds)  # results.jsonl is kept so the phone can resume
+    push = next(i for i, c in enumerate(cmds) if "push" in c)
+    assert rm < push < next(i for i, c in enumerate(cmds) if "am start" in c)
+
+
+def test_fresh_wipes_the_remote_run_directory(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+    f = Fake()
+    adb.run_eval(f, ds, "r1", tmp_path / "runs", fresh=True, sleep=lambda s: None)
+    cmds = [" ".join(c) for c in f.calls]
     rm = next(i for i, c in enumerate(cmds) if "rm -rf" in c and "eval/r1" in c)
-    assert rm < next(i for i, c in enumerate(cmds) if "am start" in c)
+    assert rm < next(i for i, c in enumerate(cmds) if "push" in c) < next(i for i, c in enumerate(cmds) if "am start" in c)
 
 
 def test_times_out_when_never_done(tmp_path):

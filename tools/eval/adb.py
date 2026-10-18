@@ -45,7 +45,7 @@ def check_front(runner):
         raise SystemExit("%s is in front on the phone; close it (or go to the home screen) before the eval starts" % pkg)
 
 
-def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", sleep=time.sleep,
+def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, sleep=time.sleep,
              max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
     check_front(runner)
     runs_dir = Path(runs_dir)
@@ -53,7 +53,11 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     out.mkdir(parents=True, exist_ok=True)
     shutil.copy(dataset_path, out / "dataset.json")
     runner(["shell", "mkdir", "-p", REMOTE])
-    runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])  # a reused run id must not see an old done marker
+    if fresh:
+        runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])  # start the run over
+    else:
+        # keep results.jsonl so the phone resumes after the last finished item; old markers must not end the wait early
+        runner(["shell", "rm", "-f", "%s/%s/done" % (REMOTE, run_id), "%s/%s/failed" % (REMOTE, run_id)])
     rc, o = runner(["push", str(dataset_path), REMOTE + "/dataset.json"])
     if rc:
         raise SystemExit("adb push failed: " + o)

@@ -45,7 +45,7 @@ def cmd_validate(a):
 
 def cmd_run(a):
     items = dataset.load(a.dataset)
-    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses)
+    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh)
     print("results in %s (%d items in the dataset)" % (out, len(items)))
     return 0
 
@@ -93,7 +93,7 @@ def main(argv=None):
     s = p.add_subparsers(dest="cmd", required=True)
     v = s.add_parser("validate"); v.add_argument("dataset"); v.add_argument("--packs"); v.add_argument("--books"); v.set_defaults(f=cmd_validate)
     r = s.add_parser("run"); r.add_argument("dataset"); r.add_argument("--run-id", required=True)
-    r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"]); r.set_defaults(f=cmd_run)
+    r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"]); r.set_defaults(f=cmd_run)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)
     rp = s.add_parser("report"); rp.add_argument("targets", nargs="+"); rp.add_argument("--dataset-only", action="store_true")
     rp.add_argument("--totals-only", action="store_true"); rp.add_argument("--compare"); rp.set_defaults(f=cmd_report)
