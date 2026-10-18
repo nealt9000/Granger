@@ -72,6 +72,11 @@ class SourceViewModelTest {
         assertThat(ui.sections[0].rows.single().details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
     }
 
+    @Test fun aPackRowCarriesItsCatalogDescription() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(packEntry("top", description = "The best 50,000 articles"))))
+        assertThat(viewModel().ui.value.sections.flatMap { it.rows }.single().description).isEqualTo("The best 50,000 articles")
+    }
+
     @Test fun nonCommercialPackShowsProvidedByKiwix() = runTest(main.dispatcher) {
         val ifixit = packEntry("ifixit", category = "How-to", license = "CC BY-NC-SA 3.0", nonCommercial = true)
         val vm = SourceViewModel(

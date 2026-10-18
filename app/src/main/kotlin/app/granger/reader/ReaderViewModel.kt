@@ -5,11 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Library
 import app.granger.core.library.ReadingSessions
+import app.granger.core.zim.ZimArchive
+import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimUrls
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +39,16 @@ class ReaderViewModel(
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
+    /**
+     * Search inside the pack: [hits] are title suggestions while typing, then those plus full-text results once
+     * submitted. [searched] is true once [hits] answers the current [query], so an empty list means no matches.
+     */
+    data class PackSearch(
+        val query: String = "",
+        val hits: List<ZimHit> = emptyList(),
+        val searched: Boolean = false,
+    )
+
     data class State(
         /** The URL a newly created WebView should load: the start page, then the current page. */
         val url: String? = null,
@@ -45,6 +59,12 @@ class ReaderViewModel(
         val chromeVisible: Boolean = false,
         /** Find in page: null when the find bar is closed. */
         val findQuery: String? = null,
+        /** Search this pack: null when closed. */
+        val packSearch: PackSearch? = null,
+        /** The pack's title for the search placeholder; null when unknown. */
+        val packTitle: String? = null,
+        /** Whether the pack has a main page, so the overflow menu can offer Home. */
+        val hasHome: Boolean = false,
     )
 
     /**
@@ -61,6 +81,9 @@ class ReaderViewModel(
     var packId: String? = null
         private set
 
+    private var archive: ZimArchive? = null
+    private var searchJob: Job? = null
+
     init {
         viewModelScope.launch {
             val tab = sessions.tab(tabId) ?: return@launch fail(TAB_GONE)
@@ -72,7 +95,14 @@ class ReaderViewModel(
                 ?.let { p -> withContext(io) { archive.resolvePath(p) } ?: p }
                 ?: return@launch fail(NO_MAIN_PAGE)
             packId = tab.packId
-            _state.update { it.copy(url = ZimUrls.forEntry(tab.packId, path, fragment)) }
+            this@ReaderViewModel.archive = archive
+            _state.update {
+                it.copy(
+                    url = ZimUrls.forEntry(tab.packId, path, fragment),
+                    packTitle = archive.metadata.title.takeIf { t -> t.isNotBlank() },
+                    hasHome = archive.mainPath != null,
+                )
+            }
         }
         viewModelScope.launch {
             page.flatMapLatest { p ->
@@ -120,7 +150,10 @@ class ReaderViewModel(
         _state.update {
             when {
                 it.error != null -> it
-                it.chromeVisible -> it.copy(chromeVisible = false, findQuery = null)
+                it.chromeVisible -> {
+                    searchJob?.cancel()
+                    it.copy(chromeVisible = false, findQuery = null, packSearch = null)
+                }
                 else -> it.copy(chromeVisible = true)
             }
         }
@@ -132,7 +165,8 @@ class ReaderViewModel(
     }
 
     fun startFind() {
-        _state.update { it.copy(chromeVisible = true, findQuery = it.findQuery ?: "") }
+        searchJob?.cancel()
+        _state.update { it.copy(chromeVisible = true, findQuery = it.findQuery ?: "", packSearch = null) }
     }
 
     fun setFindQuery(query: String) {
@@ -143,7 +177,72 @@ class ReaderViewModel(
         _state.update { it.copy(findQuery = null) }
     }
 
+    /** The pack's main page (not the last-read page), or null when the pack has none. */
+    suspend fun homeUrl(): String? {
+        val pack = packId ?: return null
+        val archive = archive ?: return null
+        val main = withContext(io) { archive.mainPath } ?: return null
+        return ZimUrls.forEntry(pack, main, null)
+    }
+
+    /** A random article of the pack, or null when it has none to pick from. */
+    suspend fun randomUrl(): String? {
+        val pack = packId ?: return null
+        val archive = archive ?: return null
+        val path = withContext(io) { archive.randomPath() } ?: return null
+        return ZimUrls.forEntry(pack, path, null)
+    }
+
+    fun startPackSearch() {
+        if (archive == null) return
+        _state.update { it.copy(chromeVisible = true, findQuery = null, packSearch = it.packSearch ?: PackSearch()) }
+    }
+
+    /** Typing: after a short pause, shows title suggestions. A blank query clears the results. */
+    fun setPackQuery(query: String) {
+        if (_state.value.packSearch == null) return
+        searchJob?.cancel()
+        _state.update { it.copy(packSearch = PackSearch(query)) }
+        val archive = archive ?: return
+        if (query.isBlank()) return
+        searchJob = viewModelScope.launch {
+            delay(SUGGEST_DEBOUNCE_MS)
+            val hits = withContext(io) { archive.suggest(query, SUGGESTION_LIMIT) }
+            setHits(query, hits)
+        }
+    }
+
+    /** The keyboard's Search action: the suggestions first, then full-text results not already among them. */
+    fun submitPackSearch() {
+        val query = _state.value.packSearch?.query?.takeIf { it.isNotBlank() } ?: return
+        val archive = archive ?: return
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            val hits = withContext(io) {
+                val titles = archive.suggest(query, SUGGESTION_LIMIT)
+                val seen = titles.mapTo(HashSet()) { it.path }
+                titles + archive.search(query, FULLTEXT_LIMIT).filter { seen.add(it.path) }
+            }
+            setHits(query, hits)
+        }
+    }
+
+    private fun setHits(query: String, hits: List<ZimHit>) {
+        _state.update {
+            if (it.packSearch?.query == query) it.copy(packSearch = PackSearch(query, hits, searched = true)) else it
+        }
+    }
+
+    fun endPackSearch() {
+        searchJob?.cancel()
+        _state.update { it.copy(packSearch = null) }
+    }
+
     companion object {
+        private const val SUGGEST_DEBOUNCE_MS = 200L
+        private const val SUGGESTION_LIMIT = 10
+        private const val FULLTEXT_LIMIT = 25
+
         const val PACK_UNAVAILABLE =
             "This pack is missing or damaged. Check that its file is still on the phone or SD card."
         const val NO_MAIN_PAGE = "This pack has no main page. Use Search to open an article."

@@ -53,6 +53,8 @@ data class ItemRow(
     val id: String,
     val title: String,
     val details: String,
+    /** What the entry is, from the catalog; blank when it has none. */
+    val description: String,
     val sizeBytes: Long,
     val status: ItemStatus,
     /** The library pack this entry is installed as, if any. */
@@ -265,7 +267,12 @@ class SourceViewModel(
                 is ModelEntry -> listOf(item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")
             val packId = (item as? PackEntry)?.let { installedPackId(it, records, packs) }
-            return ItemRow(item.id, item.title, details, item.sizeBytes, statusOf(item, records, packs, tier), packId)
+            val description = when (item) {
+                is PackEntry -> item.description
+                is BookEntry -> item.description
+                is ModelEntry -> ""
+            }
+            return ItemRow(item.id, item.title, details, description, item.sizeBytes, statusOf(item, records, packs, tier), packId)
         }
         val needle = s.query.trim()
         fun shown(item: CatalogItem): Boolean {

@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -224,6 +225,9 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
+                if (row.description.isNotBlank()) {
+                    Text(row.description, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
                 Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
                 ItemStatusText(status)
             }

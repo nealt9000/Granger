@@ -8,6 +8,7 @@ class FakeZimArchive(
     override val mainPath: String? = "index",
     override val hasFulltextIndex: Boolean = true,
     override val metadata: ZimMetadata = ZimMetadata("Fake", "", "eng", "2026-10-15", "fake"),
+    var random: String? = null,
 ) : ZimArchive {
     override fun resolvePath(path: String): String? = (redirects[path] ?: path).takeIf { it in entries }
 
@@ -15,6 +16,8 @@ class FakeZimArchive(
         val (mimeType, body) = entries.getValue(p)
         ZimItem(p, mimeType, body.toByteArray())
     }
+
+    override fun randomPath(): String? = random
 
     override fun suggest(query: String, limit: Int): List<ZimHit> = emptyList()
     override fun search(query: String, limit: Int): List<ZimHit> = emptyList()
