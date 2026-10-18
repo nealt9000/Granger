@@ -14,5 +14,9 @@
             android:name="app.granger.research.ResearchBenchmarkActivity"
             android:exported="true"
             android:label="Research benchmark" />
+        <activity
+            android:name="app.granger.eval.EvalActivity"
+            android:exported="true"
+            android:label="Granger eval" />
     </application>
 </manifest>
