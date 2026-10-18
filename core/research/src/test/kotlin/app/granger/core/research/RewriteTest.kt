@@ -33,8 +33,8 @@ class RewriteTest {
                 "keywords: <3 to 6 words or short names, comma-separated>\n" +
                 "medical: <yes if the question is about health, illness, injury, the body, medicines or treatment; otherwise no>\n" +
                 "Example:\n" +
-                "Question: where in the bible does it talk about being drunk\n" +
-                "keywords: wine, strong drink, drunkenness, drunk\n" +
+                "Question: how did old sailors work out how far east or west they were\n" +
+                "keywords: longitude, marine chronometer, lunar distance, navigation\n" +
                 "medical: no\n" +
                 "Question: who was Darwin",
         )
@@ -65,8 +65,8 @@ class RewriteTest {
 
     @Test fun promptHasAnExample() {
         val p = Rewrite.prompt("who was Darwin", null)
-        assertThat(p).contains("Question: where in the bible does it talk about being drunk")
-        assertThat(p).contains("keywords: wine, strong drink, drunkenness, drunk")
+        assertThat(p).contains("Question: how did old sailors work out how far east or west they were")
+        assertThat(p).contains("keywords: longitude, marine chronometer, lunar distance, navigation")
         assertThat(p.lines().last()).isEqualTo("Question: who was Darwin")
     }
 
