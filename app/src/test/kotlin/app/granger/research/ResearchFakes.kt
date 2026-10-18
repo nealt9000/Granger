@@ -94,6 +94,13 @@ class FakeChats : ResearchChats {
         chats.update { list -> list.map { if (it.id == turn.chatId) it.copy(updatedAt = time) else it } }
     }
 
+    override suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean) {
+        failure?.let { throw it }
+        turnList.update { list ->
+            list.map { if (it.id == turnId) it.copy(guess = text, guessLarge = usedLarge, guessFellBack = fellBack) else it }
+        }
+    }
+
     override suspend fun interruptPending(): Int {
         val pending = turnList.value.count { it.outcome == TurnOutcome.PENDING }
         turnList.update { list -> list.map { if (it.outcome == TurnOutcome.PENDING) it.copy(outcome = TurnOutcome.INTERRUPTED) else it } }

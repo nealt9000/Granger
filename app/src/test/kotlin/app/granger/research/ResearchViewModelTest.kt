@@ -69,8 +69,8 @@ class ResearchViewModelTest {
         )
     }
 
-    private fun TestScope.manager(llms: LlmEngineFactory) = ModelManager(
-        DeviceTier.THINK_DEEPER, installed, llms, TextEmbedderFactory { error("no embedder") }, backgroundScope,
+    private fun TestScope.manager(llms: LlmEngineFactory, tier: DeviceTier = DeviceTier.THINK_DEEPER) = ModelManager(
+        tier, installed, llms, TextEmbedderFactory { error("no embedder") }, backgroundScope,
         useEmbedder = false, io = StandardTestDispatcher(testScheduler),
     )
 
@@ -227,6 +227,188 @@ class ResearchViewModelTest {
         vm.ask("How do plants use light?")
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.turns.single().medical).isFalse()
+    }
+
+    /** A question the library can't answer: the finder has nothing, so the turn is declined. */
+    private suspend fun TestScope.declined(vm: ResearchViewModel, question: String = "Why is the sky green?"): Long {
+        finder.passages = emptyList()
+        vm.ask(question)
+        testScheduler.advanceUntilIdle()
+        return chats.turnList.value.last().id
+    }
+
+    @Test fun declineOffersBestGuess() = runTest(main.dispatcher) {
+        val vm = vm()
+        declined(vm)
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.offersGuess).isTrue()
+        assertThat(ui.guessing).isFalse()
+    }
+
+    @Test fun answeredTurnOffersNoBestGuess() = runTest(main.dispatcher) {
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().offersGuess).isFalse()
+    }
+
+    @Test fun medicalDeclineOffersNoBestGuess() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: burn\nmedical: yes"
+        val vm = vm()
+        declined(vm, "How do I treat a burn?")
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.offersGuess).isFalse()
+    }
+
+    @Test fun stoppedMedicalTurnOffersNoBestGuess() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
+        small.answer = listOf("NOT IN", " LIBRARY")
+        small.gateAt = 1
+        val vm = vm()
+        vm.ask("How do I treat a burn?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().medical).isTrue()
+        vm.stop()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.offersGuess).isFalse()
+        vm.bestGuess(ui.turn.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().guess).isEmpty()
+    }
+
+    @Test fun bestGuessStoresTextAndHidesTheButton() = runTest(main.dispatcher) {
+        models.large = ScriptedGenerator(listOf("Probably ", "Rayleigh scattering."))
+        val vm = vm()
+        val id = declined(vm)
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(turn.guessLarge).isTrue()
+        assertThat(turn.guessFellBack).isFalse()
+        assertThat(vm.state.value.turns.single().offersGuess).isFalse()
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun guessShowsNoSourceCards() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        small.gateAt = 1
+        val vm = vm()
+        val id = declined(vm)
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.guessing).isTrue()
+        assertThat(live.partial).isEqualTo("Probably ")
+        assertThat(live.turn.shown).isEmpty()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().turn.shown).isEmpty()
+        assertThat(vm.state.value.turns.single().turn.candidates).isEmpty()
+    }
+
+    @Test fun largeGuessShowsTheWaitNote() = runTest(main.dispatcher) {
+        val large = ScriptedGenerator(listOf("Large ", "guess."))
+        large.gateAt = 1
+        models.large = large
+        val vm = vm()
+        val id = declined(vm)
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.guessing).isTrue()
+        assertThat(live.guessLarge).isTrue()
+        large.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.guess).isEqualTo("Large guess.")
+        assertThat(turn.guessLarge).isTrue()
+        assertThat(small.answerPrompts).isEmpty()
+    }
+
+    @Test fun phoneBelowThinkDeeperTierGuessesWithSmall() = runTest(main.dispatcher) {
+        val large = ScriptedGenerator(listOf("Large guess."))
+        models.large = large
+        small.answer = listOf("Small guess.")
+        val vm = vm(manager = manager(LlmEngineFactory { _, _ -> error("no engine") }, DeviceTier.ASK))
+        val id = declined(vm)
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.guess).isEqualTo("Small guess.")
+        assertThat(turn.guessLarge).isFalse()
+        assertThat(turn.guessFellBack).isFalse()
+        assertThat(large.prompts).isEmpty()
+    }
+
+    @Test fun guessFallbackShowsTheNote() = runTest(main.dispatcher) {
+        small.answer = listOf("Small ", "guess.")
+        small.gateAt = 1
+        val vm = vm()
+        val id = declined(vm)
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().guessFellBack).isTrue()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.guess).isEqualTo("Small guess.")
+        assertThat(turn.guessLarge).isFalse()
+        assertThat(turn.guessFellBack).isTrue()
+        assertThat(vm.state.value.turns.single().guessFellBack).isTrue()
+    }
+
+    @Test fun stopDuringGuessKeepsTheTextSoFar() = runTest(main.dispatcher) {
+        small.answer = listOf("Maybe", " plants", " more")
+        small.gateAt = 1
+        val vm = vm()
+        val id = declined(vm)
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().partial).isEqualTo("Maybe")
+        vm.stop()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().guess).isEqualTo("Maybe plants")
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun guessInterruptedByProcessDeathOffersTheButtonAgain() = runTest(main.dispatcher) {
+        val chatId = chats.create("Why is the sky green?")
+        val turnId = chats.startTurn(chatId, "Why is the sky green?", askedDeeper = false, quote = null)
+        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, false, emptyList(), emptyList(), emptyList())
+        val vm = vm(chatId = chatId)
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.offersGuess).isTrue()
+        assertThat(ui.guessing).isFalse()
+        assertThat(ui.partial).isNull()
+        assertThat(ui.stage).isNull()
+        assertThat(ui.turn.guess).isEmpty()
+    }
+
+    @Test fun followUpAfterGuessDoesNotPassGuessAsPriorAnswer() = runTest(main.dispatcher) {
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val id = declined(vm)
+        small.answer = listOf("Sky guess text.")
+        vm.bestGuess(id)
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.last().guess).isEqualTo("Sky guess text.")
+        finder.passages = (1..10).map(::article)
+        small.answer = listOf("Plants rest [1].")
+        vm.ask("And at night?")
+        testScheduler.advanceUntilIdle()
+        val prompt = small.prompts.last()
+        assertThat(prompt).contains("Plants turn light into sugar")
+        assertThat(prompt).doesNotContain("Sky guess text.")
     }
 
     @Test fun theModelIsReleasedAQuietSpellAfterEachTurn() = runTest(main.dispatcher) {

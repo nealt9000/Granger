@@ -196,6 +196,10 @@ data class ResearchTurn(
     val askedDeeper: Boolean,
     val keywords: String,
     val createdAt: Long,
+    /** The model's own best guess after a decline; blank until asked. */
+    @ColumnInfo(defaultValue = "''") val guess: String = "",
+    @ColumnInfo(defaultValue = "0") val guessLarge: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val guessFellBack: Boolean = false,
 )
 
 enum class PassageRole {

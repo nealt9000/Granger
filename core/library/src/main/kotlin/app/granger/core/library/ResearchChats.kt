@@ -23,6 +23,10 @@ data class ChatTurn(
     /** Extras kept for Think deeper. */
     val candidates: List<Passage>,
     val createdAt: Long,
+    /** The model's own best guess after a decline; blank until asked (never a source-backed answer). */
+    val guess: String = "",
+    val guessLarge: Boolean = false,
+    val guessFellBack: Boolean = false,
 )
 
 data class ChatSummary(val id: Long, val title: String, val updatedAt: Long)
@@ -54,6 +58,9 @@ interface ResearchChats {
         shown: List<Passage>,
         candidates: List<Passage>,
     )
+
+    /** Keeps the model's best guess on a declined turn, and bumps the chat's `updatedAt`. */
+    suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean)
 
     /** Marks every PENDING turn INTERRUPTED (the app died mid-answer); returns how many. */
     suspend fun interruptPending(): Int
@@ -89,6 +96,9 @@ class RoomResearchChats(
                     shown = rows.filter { it.role == PassageRole.SHOWN }.map { it.toPassage() },
                     candidates = rows.filter { it.role == PassageRole.CANDIDATE }.map { it.toPassage() },
                     createdAt = turn.createdAt,
+                    guess = turn.guess,
+                    guessLarge = turn.guessLarge,
+                    guessFellBack = turn.guessFellBack,
                 )
             }
         }
@@ -136,6 +146,14 @@ class RoomResearchChats(
                 shown.mapIndexed { i, p -> p.toRow(turnId, i + 1, PassageRole.SHOWN) } +
                     candidates.mapIndexed { i, p -> p.toRow(turnId, shown.size + i + 1, PassageRole.CANDIDATE) },
             )
+            dao.touchChat(turn.chatId, now())
+        }
+    }
+
+    override suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean) {
+        db.withTransaction {
+            val turn = dao.turn(turnId) ?: return@withTransaction
+            dao.updateTurn(turn.copy(guess = text, guessLarge = usedLarge, guessFellBack = fellBack))
             dao.touchChat(turn.chatId, now())
         }
     }

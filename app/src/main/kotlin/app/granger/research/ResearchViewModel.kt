@@ -50,6 +50,9 @@ import kotlinx.coroutines.withContext
 /** Asked when the user sends a quote without typing a question. */
 const val EMPTY_QUOTE_QUESTION = "Explain this passage and how it connects to the rest of my library."
 
+/** Whether a best guess may use the large model (when the phone's tier and the installed models allow it). */
+const val BEST_GUESS_USES_LARGE = true
+
 /**
  * One Research chat: questions and follow-ups answered from the library, Stop, Think deeper and Retry. [chatId] opens a
  * kept chat (null starts a new one on the first send); [quote] is the reader's selection, used by the first question.
@@ -75,7 +78,21 @@ class ResearchViewModel(
      * A stored turn, with the reply so far, the stage and the large-model fallback while it is running. [medical] shows
      * the banner, from the pipeline while the turn runs (the stored turn learns it only when settled).
      */
-    data class TurnUi(val turn: ChatTurn, val partial: String?, val stage: Stage?, val largeFallback: Boolean, val medical: Boolean)
+    data class TurnUi(
+        val turn: ChatTurn,
+        val partial: String?,
+        val stage: Stage?,
+        val largeFallback: Boolean,
+        val medical: Boolean,
+        /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
+        val guessing: Boolean = false,
+        /** The Best guess button is shown: a declined, non-medical turn with no guess yet, while nothing runs. */
+        val offersGuess: Boolean = false,
+        /** The guess being written uses the large model (it takes about half a minute). */
+        val guessLarge: Boolean = false,
+        /** The large model couldn't load, so the guess is from the standard one. */
+        val guessFellBack: Boolean = false,
+    )
 
     data class State(
         val chatId: Long?,
@@ -98,6 +115,9 @@ class ResearchViewModel(
         val stage: Stage?,
         val largeFallback: Boolean,
         val medical: Boolean = false,
+        val guessing: Boolean = false,
+        val guessLarge: Boolean = false,
+        val guessFellBack: Boolean = false,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -195,6 +215,44 @@ class ResearchViewModel(
             val from = (turn.shown + turn.candidates).filter { it.kind != SourceKind.SELECTION }.take(DEEPER_PASSAGES)
             val ask = Ask(turn.question, turn.quote(), askedDeeper = true, deeperFrom = from, medicalHint = turn.medical)
             runTurn(id, ask, before = turns.dropLast(1))
+        }
+    }
+
+    /**
+     * Asks the model for its own best guess at a declined turn's question. The guess is kept on that turn when it
+     * finishes or is stopped; if the app dies first nothing is kept and the button returns. Never for a medical turn.
+     */
+    fun bestGuess(turnId: Long) {
+        if (live.value != null) return
+        val id = chat.value ?: return
+        begin {
+            val turns = chats.turns(id).first()
+            val at = turns.indexOfFirst { it.id == turnId }
+            val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return@begin
+            val large = BEST_GUESS_USES_LARGE && models.canThinkDeeper.value
+            live.value = Live(turnId, null, null, false, guessing = true, guessLarge = large)
+            var fellBack = false
+            var settled = false
+            // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
+            pipeline.guess(turn.question, turns.getOrNull(at - 1)?.question, large) { stopRequested }.flowOn(cpu).collect { event ->
+                when (event) {
+                    is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
+                    is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
+                    ResearchEvent.GuessFallback -> {
+                        fellBack = true
+                        live.update { it?.copy(guessFellBack = true) }
+                    }
+                    is ResearchEvent.Done -> {
+                        val outcome = event.outcome
+                        if (outcome is Outcome.Guessed && !settled) {
+                            settled = true
+                            withContext(NonCancellable) { chats.setGuess(turnId, outcome.text, outcome.usedLarge, outcome.fellBack || fellBack) }
+                        }
+                    }
+                    // run() events; guess() doesn't emit them.
+                    ResearchEvent.Medical, ResearchEvent.LargeFallback -> Unit
+                }
+            }
         }
     }
 
@@ -312,7 +370,7 @@ class ResearchViewModel(
                         fellBack = true
                         live.update { it?.copy(largeFallback = true) }
                     }
-                    ResearchEvent.GuessFallback -> Unit // Only guess() emits this; handled in a later task.
+                    ResearchEvent.GuessFallback -> Unit // Only guess() emits this; see bestGuess.
                     is ResearchEvent.Done -> withContext(NonCancellable) {
                         settle(checkNotNull(turnId), event.outcome, kept, usedLarge = ask.askedDeeper && !fellBack)
                         settled = true
@@ -355,8 +413,8 @@ class ResearchViewModel(
                 chats.finishTurn(turnId, TurnOutcome.DECLINED, "", outcome.medical, usedLarge, outcome.keywords, kept, emptyList())
             is Outcome.Failed ->
                 chats.finishTurn(turnId, TurnOutcome.FAILED, "", outcome.medical, false, outcome.keywords, kept, emptyList())
-            // Only ResearchPipeline.guess produces this; the app handles it in a later task.
-            is Outcome.Guessed -> error("run() never ends in a best guess")
+            // Only ResearchPipeline.guess produces this, and bestGuess keeps it; a turn run() settles this way failed.
+            is Outcome.Guessed -> chats.finishTurn(turnId, TurnOutcome.FAILED, "", false, false, emptyList(), kept, emptyList())
         }
     }
 
@@ -368,6 +426,10 @@ class ResearchViewModel(
             stage = running?.stage,
             largeFallback = running?.largeFallback ?: (askedDeeper && !usedLarge && outcome in FALLBACK_SHOWN),
             medical = medical || running?.medical == true,
+            guessing = running?.guessing == true,
+            offersGuess = live == null && outcome == TurnOutcome.DECLINED && guess.isBlank() && !medical,
+            guessLarge = running?.guessLarge == true,
+            guessFellBack = running?.guessFellBack ?: guessFellBack,
         )
     }
 

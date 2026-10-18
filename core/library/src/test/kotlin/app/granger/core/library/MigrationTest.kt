@@ -114,4 +114,28 @@ class MigrationTest {
             }
         }
     }
+
+    @Test fun migration5To6KeepsChatsAndDefaultsGuessToEmpty() {
+        helper.createDatabase("migrate6.db", 5).apply {
+            execSQL("INSERT INTO research_chats (id, title, createdAt, updatedAt) VALUES (1, 'Chat', 1, 2)")
+            execSQL(
+                "INSERT INTO research_turns (id, chatId, question, outcome, answer, medical, usedLarge, askedDeeper, keywords, createdAt) " +
+                    "VALUES (1, 1, 'Why?', 'DECLINED', '', 0, 0, 0, '', 3)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate6.db", 6, true, LibraryDatabase.MIGRATION_5_6)
+        db.query("SELECT question, outcome, guess, guessLarge, guessFellBack FROM research_turns").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("Why?")
+            assertThat(it.getString(1)).isEqualTo("DECLINED")
+            assertThat(it.getString(2)).isEqualTo("")
+            assertThat(it.getInt(3)).isEqualTo(0)
+            assertThat(it.getInt(4)).isEqualTo(0)
+        }
+        db.query("SELECT COUNT(*) FROM research_chats").use {
+            it.moveToFirst()
+            assertThat(it.getInt(0)).isEqualTo(1)
+        }
+    }
 }
