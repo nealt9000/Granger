@@ -60,7 +60,7 @@ def _zim_problem(archive, a):
     matched = False
     for n in range(archive.all_entry_count):
         e = archive._get_entry_by_id(n)
-        if e.is_redirect or not (loc in e.path.lower() or loc in e.title.lower()):
+        if e.is_redirect or not (loc in e.path.lower()):
             continue
         item = e.get_item()
         matched = matched or item.mimetype.startswith("text/html")

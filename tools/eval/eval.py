@@ -20,6 +20,7 @@ import dataset
 import grading
 import metrics
 import report
+import results
 
 HERE = Path(__file__).resolve().parent
 RUNS = HERE / "runs"
@@ -29,7 +30,7 @@ GRADES = HERE / "grades" / "grades.jsonl"
 def load_run(run_id):
     d = RUNS / run_id
     items = json.loads((d / "dataset.json").read_text(encoding="utf-8"))
-    recs = [json.loads(l) for l in (d / "results.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    recs = results.load_results(d / "results.jsonl")
     return d, items, recs
 
 

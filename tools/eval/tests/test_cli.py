@@ -15,7 +15,12 @@ def test_report_worksheet_sweep_end_to_end(tmp_path, monkeypatch, capsys):
     sheet = (run / "worksheet.md").read_text()
     assert "none-001" in sheet and "bible-001" not in sheet  # the Romans answer is already graded
     assert cli.main(["report", "fx"]) == 0 and "bible-001" in (run / "report.html").read_text()
+    (run / "report.html").unlink()
+    capsys.readouterr()
     assert cli.main(["report", "fx", "--totals-only"]) == 0
+    totals = capsys.readouterr().out
+    assert not (run / "report.html").exists()
+    assert "Wi-Fi" not in totals and "Romans" not in totals and "Unanswerable" in totals
     assert cli.main(["sweep", "fx", "--lexical", "0.20:0.50:0.10"]) == 0
     out = capsys.readouterr().out
     assert "0.50" in out

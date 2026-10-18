@@ -2,8 +2,9 @@
 
 Grades live in grades/grades.jsonl, one line per graded reply:
   {"id", "kind": answer|deeper|guess-small|guess-large, "replyHash": sha1(reply), "grade", "reason"}
-A grade counts only while its replyHash matches the reply now in the results, so a changed reply needs a new grade.
-If an id/kind appears twice, the later line wins.
+Grades are keyed by (id, kind, replyHash), so a changed reply needs a new grade and the old reply keeps its grade
+(runs of different replies for one question each stay graded). If the same key appears twice, the later line wins.
+Malformed lines or grade values stop with a SystemExit naming the file and line.
 """
 import hashlib
 import json
@@ -17,14 +18,27 @@ def reply_hash(text):
     return hashlib.sha1((text or "").encode("utf-8")).hexdigest()
 
 
+KINDS = {"answer": ANSWER_GRADES, "deeper": ANSWER_GRADES, "guess-small": GUESS_GRADES, "guess-large": GUESS_GRADES}
+
+
 def load_grades(path):
     out = {}
     p = Path(path)
     if p.exists():
-        for line in p.read_text(encoding="utf-8").splitlines():
-            if line.strip():
+        for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.strip():
+                continue
+            where = "%s:%d" % (p, n)
+            try:
                 g = json.loads(line)
-                out[(g["id"], g["kind"])] = g
+                id, kind, h, grade = g["id"], g["kind"], g["replyHash"], g["grade"]
+            except (ValueError, KeyError, TypeError) as ex:
+                raise SystemExit("%s: bad grade line (%s: %s)" % (where, type(ex).__name__, ex))
+            if kind not in KINDS:
+                raise SystemExit("%s: unknown kind %r (want one of %s)" % (where, kind, ", ".join(KINDS)))
+            if grade not in KINDS[kind]:
+                raise SystemExit("%s: grade %r is not valid for %s (want one of %s)" % (where, grade, kind, ", ".join(KINDS[kind])))
+            out[(id, kind, h)] = g
     return out
 
 
@@ -42,8 +56,7 @@ def replies(item, rec):
 
 
 def current_grade(grades, id, kind, reply):
-    g = grades.get((id, kind))
-    return g if g and g.get("replyHash") == reply_hash(reply) else None
+    return grades.get((id, kind, reply_hash(reply)))
 
 
 def worksheet(items, records, grades):

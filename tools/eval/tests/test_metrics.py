@@ -32,7 +32,7 @@ def make():
 def grades(**by_id):
     g = {}
     for k, (kind, grade, reply) in by_id.items():
-        g[(k, kind)] = {"id": k, "kind": kind, "grade": grade, "replyHash": reply_hash(reply), "reason": ""}
+        g[(k, kind, reply_hash(reply))] = {"id": k, "kind": kind, "grade": grade, "replyHash": reply_hash(reply), "reason": ""}
     return g
 
 

@@ -42,6 +42,13 @@ def test_validate_finds_location_and_quote_in_zim(tmp_path):
     assert "b-2" in problems[0] and "c-3" in problems[1]
 
 
+def test_location_matches_entry_path_not_title(tmp_path):
+    shutil.copy(TEST_ZIM, tmp_path / "granger-test.zim")
+    # "Café au lait" is a title; its path is Café_au_lait, so a spaced location does not match at runtime and must not validate
+    spaced = item(id="t-1", answers=[{"source": "granger-test", "location": "Café au lait", "quote": "x"}])
+    assert "t-1" in dataset.validate_answers([spaced], packs=tmp_path)[0]
+
+
 def test_validate_books(tmp_path):
     import zipfile
     with zipfile.ZipFile(tmp_path / "pg1.epub", "w") as z:
