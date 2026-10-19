@@ -43,6 +43,9 @@ class ReplayGainProcessor : BaseAudioProcessor() {
 
     fun setGains(byMediaId: Map<String, Float>) { gains = byMediaId }
 
+    /** The factor set for [mediaId] (tests). */
+    internal fun gainOf(mediaId: String): Float = gains[mediaId] ?: 1f
+
     fun onMediaItemTransition(mediaId: String?) { if (!sawStreamMetadata) currentId = mediaId }
 
     /** The media ids this processor has switched to, in order (diagnostics and the device test). */

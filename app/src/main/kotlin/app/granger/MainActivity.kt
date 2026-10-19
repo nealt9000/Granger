@@ -99,6 +99,12 @@ class MainActivity : FragmentActivity() {
         container.modelManager.appReturned()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // The audio permission may have been granted or revoked in system settings meanwhile: rescan if so.
+        if (Features.PLAYER) container.phoneMediaScans.recheckPermission()
+    }
+
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         // The UI is hidden: free the models' memory (deferred while a reply is still being written).

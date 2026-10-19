@@ -75,12 +75,22 @@ data class MusicUi(
 
 /** `RecentPlay` keys and titles for what a play started from. */
 object MusicSources {
-    fun album(a: AlbumSummary) = PlaySource("album:${a.key}", a.title)
-    fun playlist(p: Playlist) = PlaySource("playlist:${p.id}", p.name)
-    fun artist(name: String) = PlaySource("artist:$name", name)
-    fun genre(name: String) = PlaySource("genre:$name", name)
-    fun folder(f: FolderPage) = PlaySource("folder:${f.path}", f.name)
-    fun songs(title: String) = PlaySource("songs", title)
+    const val ALBUM = "album:"
+    const val PLAYLIST = "playlist:"
+    const val ARTIST = "artist:"
+    const val GENRE = "genre:"
+    const val FOLDER = "folder:"
+    const val SONGS = "songs"
+
+    fun album(a: AlbumSummary) = PlaySource("$ALBUM${a.key}", a.title)
+    fun playlist(p: Playlist) = PlaySource("$PLAYLIST${p.id}", p.name)
+    fun artist(name: String) = PlaySource("$ARTIST$name", name)
+    fun genre(name: String) = PlaySource("$GENRE$name", name)
+    fun folder(f: FolderPage) = PlaySource("$FOLDER${f.path}", f.name)
+    fun songs(title: String) = PlaySource(SONGS, title)
+
+    /** A playlist key's id; null for any other key. */
+    fun playlistId(key: String): Long? = key.takeIf { it.startsWith(PLAYLIST) }?.removePrefix(PLAYLIST)?.toLongOrNull()
 }
 
 /** Pure browsing logic over music tracks (any status). */
@@ -211,6 +221,23 @@ object MusicCatalog {
         return FolderPage(path, folderName(path), sortSongs(inFolder, SongSort.ALBUM))
     }
 
+    /** [key]'s album in album order, as the album page lists it; empty when no track has that album key. */
+    fun albumTracks(key: String, tracks: List<Track>): List<Track> = Albums.ordered(tracks.filter { it.albumKey == key })
+
+    /**
+     * The list a music `RecentPlay` key ([MusicSources]) played, rebuilt from [tracks] as its screen builds it; null
+     * when the key isn't a music list or its source is gone. "songs" is all music by title (the Songs tab's default
+     * order; the key doesn't record a collection or a sort). Playlists need their entries: see [MusicSources.playlistId].
+     */
+    fun sourceTracks(key: String, tracks: List<Track>): List<Track>? = when {
+        key == MusicSources.SONGS -> sortSongs(tracks, SongSort.TITLE)
+        key.startsWith(MusicSources.ALBUM) -> albumTracks(key.removePrefix(MusicSources.ALBUM), tracks)
+        key.startsWith(MusicSources.ARTIST) -> artistPage(key.removePrefix(MusicSources.ARTIST), tracks)?.songs
+        key.startsWith(MusicSources.GENRE) -> genrePage(key.removePrefix(MusicSources.GENRE), tracks).songs
+        key.startsWith(MusicSources.FOLDER) -> folderPage(key.removePrefix(MusicSources.FOLDER), tracks).songs
+        else -> null
+    }?.takeIf { it.isNotEmpty() }
+
     /**
      * What to hand the player: only playable (OK) tracks, with the tapped track's index among them. Null when nothing
      * can play, or the tapped track itself is MISSING. [tapped] null starts at the first playable track.
@@ -279,8 +306,8 @@ class MusicViewModel(
     fun setSort(order: SongSort) { sort.value = order }
 
     fun album(key: String): Flow<AlbumPage?> = tracks.map { all ->
-        val group = all.filter { it.albumKey == key }
-        MusicCatalog.albums(group).firstOrNull()?.let { AlbumPage(it, Albums.ordered(group)) }
+        val group = MusicCatalog.albumTracks(key, all)
+        MusicCatalog.albums(group).firstOrNull()?.let { AlbumPage(it, group) }
     }.flowOn(compute)
 
     fun artist(name: String): Flow<ArtistPage?> = tracks.map { MusicCatalog.artistPage(name, it) }.flowOn(compute)
@@ -309,8 +336,7 @@ class MusicViewModel(
     private fun playableIds(tracks: List<Track>) = tracks.filter { it.status == PackStatus.OK }.map { it.id }
 
     /** [album]'s tracks in album order, from the current catalog. */
-    private suspend fun albumTracks(album: AlbumSummary): List<Track> =
-        Albums.ordered(tracks.first().filter { it.albumKey == album.key })
+    private suspend fun albumTracks(album: AlbumSummary): List<Track> = MusicCatalog.albumTracks(album.key, tracks.first())
 
     fun playAlbum(album: AlbumSummary, shuffle: Boolean = false) {
         viewModelScope.launch { play(albumTracks(album), null, MusicSources.album(album), shuffle) }

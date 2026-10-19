@@ -210,7 +210,14 @@ class PlayerEngine(
         }
     }
 
+    // Held here: SharedPreferences keeps its listeners weakly.
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        // A new ReplayGain mode applies at once: the processor reads the gains per buffer.
+        if (key == PlayerSettingsKeys.REPLAYGAIN_MODE) submit { updateGains() }
+    }
+
     init {
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
         player.addListener(listener)
         focus.listener = focusListener
         effects.open(player.audioSessionId, speech = false)
@@ -250,6 +257,7 @@ class PlayerEngine(
         if (released) return
         if (save) saveNow()
         released = true
+        prefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         commands.close()
         ticker.removeCallbacksAndMessages(null)
         player.removeListener(listener)

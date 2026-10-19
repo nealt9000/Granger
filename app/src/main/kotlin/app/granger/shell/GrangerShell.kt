@@ -100,6 +100,7 @@ fun GrangerShell(
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
     onRecentChat: (Long) -> Unit = {},
+    onRecentPlay: (RecentItem.Play) -> Unit = {},
     showResearch: Boolean = false,
     railOverContent: Boolean = false,
     miniPlayer: (@Composable () -> Unit)? = null,
@@ -119,7 +120,7 @@ fun GrangerShell(
         val railBeside = railVisible && !railOverContent
         Row(Modifier.fillMaxSize()) {
             if (railBeside) {
-                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat)
+                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat, onRecentPlay)
             }
             Column(
                 Modifier
@@ -154,7 +155,7 @@ fun GrangerShell(
             ) { miniPlayer() }
         }
         if (railVisible && railOverContent) {
-            NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat)
+            NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat, onRecentPlay)
         }
         if (edgeSwipeActive) {
             // Gesture navigation claims the left edge for Back; Android lets an app take back up to 200 dp of it.
@@ -186,6 +187,7 @@ fun GrangerShell(
                 onHistory = { onHistory(); onToggleExpanded() },
                 onRecentSearch = { onRecentSearch(it); onToggleExpanded() },
                 onRecentChat = { onRecentChat(it); onToggleExpanded() },
+                onRecentPlay = { onRecentPlay(it); onToggleExpanded() },
             )
         }
     }

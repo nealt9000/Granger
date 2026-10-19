@@ -8,7 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import app.granger.media.MediaPermissionState
+import app.granger.media.rememberMediaPermission
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -41,15 +47,35 @@ import app.granger.BuildConfig
 import app.granger.R
 import app.granger.formatBytes
 
-/** Models, Readiness, storage and download choices, and About. */
+/**
+ * Models, Readiness, storage and download choices, Music & audiobooks, and About. [scrollToMedia] opens it at the
+ * Music & audiobooks section (the Library's link). [onPermissionChecked] runs after each permission check (resume, or
+ * an answer to the prompt), so the app can rescan when the permission changed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadiness: () -> Unit, onBack: () -> Unit) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onModels: () -> Unit,
+    onReadiness: () -> Unit,
+    onBack: () -> Unit,
+    scrollToMedia: Boolean = false,
+    onPermissionChecked: () -> Unit = {},
+) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val media = viewModel.media
+    val listState = rememberLazyListState()
+    var scrolled by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(scrollToMedia, media) {
+        if (scrollToMedia && media != null && !scrolled) {
+            scrolled = true
+            listState.scrollToItem(MEDIA_SECTION_INDEX)
+        }
+    }
     var showWaiver by rememberSaveable { mutableStateOf(false) }
     if (showWaiver) {
         WaiverDialog(
@@ -70,7 +96,8 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
             )
         },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).fillMaxSize()) {
+        val mediaControls = media?.let { rememberMediaControls(it, onPermissionChecked) }
+        LazyColumn(Modifier.padding(padding).fillMaxSize(), state = listState) {
             item(key = "models") {
                 ListItem(
                     headlineContent = { Text("Models") },
@@ -116,8 +143,46 @@ fun SettingsScreen(viewModel: SettingsViewModel, onModels: () -> Unit, onReadine
                 )
                 HorizontalDivider()
             }
+            if (media != null && mediaControls != null) {
+                mediaSettingsSection(
+                    mediaControls.ui,
+                    onRequestPermission = mediaControls.permission::request,
+                    onOpenAppSettings = mediaControls.permission::openAppSettings,
+                    onAddFolder = mediaControls.addFolder,
+                    onRemoveFolder = media::removeFolder,
+                    onRescan = media::rescan,
+                    onReplayGain = media::setReplayGain,
+                    onSkipBack = media::setSkipBack,
+                    onSkipForward = media::setSkipForward,
+                    onHeadsetAutoplay = media::setHeadsetAutoplay,
+                )
+            }
             item(key = "about") { About() }
         }
+    }
+}
+
+/** Items before the Music & audiobooks section: models, readiness, storage, wifi, archive. */
+private const val MEDIA_SECTION_INDEX = 5
+
+private class MediaControls(val ui: MediaSettingsUi, val permission: MediaPermissionState, val addFolder: (Boolean) -> Unit)
+
+/** The permission prompt and the folder picker (read-only grants), wired to [media]. */
+@Composable
+private fun rememberMediaControls(media: MediaSettings, onPermissionChecked: () -> Unit): MediaControls {
+    val mediaUi by media.ui.collectAsStateWithLifecycle()
+    val permission = rememberMediaPermission { status ->
+        media.setPermission(status)
+        onPermissionChecked()
+    }
+    // Which kind the open picker is adding; saved, since the picker can outlive the activity.
+    var pickingAudiobooks by rememberSaveable { mutableStateOf(false) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) media.addFolder(uri.toString(), pickingAudiobooks)
+    }
+    return MediaControls(mediaUi, permission) { audiobooks ->
+        pickingAudiobooks = audiobooks
+        picker.launch(null)
     }
 }
 

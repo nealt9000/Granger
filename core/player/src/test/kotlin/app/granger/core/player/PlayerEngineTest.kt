@@ -128,12 +128,12 @@ class PlayerEngineTest {
         return book
     }
 
-    private fun newEngine(): PlayerEngine {
+    private fun newEngine(replayGain: ReplayGainProcessor? = null): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()
         return PlayerEngine(
             player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(focus),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), writer = Dispatchers.Unconfined,
-            random = Random(7),
+            random = Random(7), replayGain = replayGain,
         ).also { engines += it }
     }
 
@@ -486,6 +486,24 @@ class PlayerEngineTest {
         idle()
         assertThat(bookState(book.id)!!.finished).isFalse()
     }
+
+    @Test fun replayGainModeChangeAppliesToThePlayingQueue() {
+        val ids = musicFixtures()
+        runBlocking { db.mediaDao().upsertTracks(listOf(media.track(ids[0])!!.copy(rgTrackGain = -6.0206f, rgTrackPeak = null))) }
+        val rg = ReplayGainProcessor()
+        val engine = newEngine(rg)
+        engine.playTracks(ids, 0, false, PlaySource("songs", "Songs"))
+        idle()
+        assertThat(rg.gainOf(ids[0])).isWithin(0.01f).of(0.5f)
+
+        prefs.edit().putString(PlayerSettingsKeys.REPLAYGAIN_MODE, ReplayGainMode.OFF.name).commit()
+        idle()
+        assertThat(rg.gainOf(ids[0])).isEqualTo(1f)
+
+        prefs.edit().putString(PlayerSettingsKeys.REPLAYGAIN_MODE, ReplayGainMode.TRACK.name).commit()
+        idle()
+        assertThat(rg.gainOf(ids[0])).isWithin(0.01f).of(0.5f)
+    }
 }
 
 /** Long synthetic files for `fake://<ms>/<name>`; everything else goes to the real extractors. */
@@ -504,6 +522,7 @@ private class TestSources(context: Context) : MediaSource.Factory {
             .build()
         return FakeMediaSource(FakeTimeline(window), AUDIO)
     }
+
 
     companion object {
         val AUDIO: Format = Format.Builder().setSampleMimeType(MimeTypes.AUDIO_AAC).setChannelCount(2).setSampleRate(44_100).build()

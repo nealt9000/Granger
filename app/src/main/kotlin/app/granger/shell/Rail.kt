@@ -27,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -86,7 +87,17 @@ private fun RailTool.painter(): Painter = when (this) {
     RailTool.SETTINGS -> rememberVectorPainter(Icons.Filled.Settings)
 }
 
-/** The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent search and chat icons, Settings. */
+/** A recent play's icon by what it played: a book, a playlist, an artist, a folder, or other music. */
+@Composable
+private fun RecentItem.Play.painter(): Painter = when {
+    key.startsWith("audiobook:") -> painterResource(R.drawable.ic_headphones)
+    key.startsWith("playlist:") -> painterResource(R.drawable.ic_queue_music)
+    key.startsWith("artist:") -> rememberVectorPainter(Icons.Filled.Person)
+    key.startsWith("folder:") -> painterResource(R.drawable.ic_library)
+    else -> painterResource(R.drawable.ic_music_note) // album:, genre:, songs
+}
+
+/** The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent search, chat and play icons, Settings. */
 @Composable
 internal fun NarrowRail(
     rail: RailUi,
@@ -99,6 +110,7 @@ internal fun NarrowRail(
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
     onRecentChat: (Long) -> Unit,
+    onRecentPlay: (RecentItem.Play) -> Unit,
 ) {
     Column(
         Modifier
@@ -142,6 +154,14 @@ internal fun NarrowRail(
                             modifier = Modifier.size(18.dp),
                         )
                     }
+                    is RecentItem.Play -> IconButton(onClick = { onRecentPlay(item) }) {
+                        Icon(
+                            item.painter(),
+                            contentDescription = "Play again: ${item.title}",
+                            tint = GrangerColors.Outline,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
                 }
             }
         }
@@ -161,6 +181,7 @@ internal fun ExpandedRail(
     onHistory: () -> Unit,
     onRecentSearch: (String) -> Unit,
     onRecentChat: (Long) -> Unit,
+    onRecentPlay: (RecentItem.Play) -> Unit,
 ) {
     Column(
         Modifier
@@ -188,6 +209,7 @@ internal fun ExpandedRail(
                         is RecentItem.Chat -> LabelledRow(painterResource(R.drawable.ic_research), item.title, selected = false) {
                             onRecentChat(item.chatId)
                         }
+                        is RecentItem.Play -> LabelledRow(item.painter(), item.title, selected = false) { onRecentPlay(item) }
                     }
                 }
             }

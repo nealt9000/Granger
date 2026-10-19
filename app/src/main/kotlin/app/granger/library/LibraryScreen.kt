@@ -68,6 +68,11 @@ fun LibraryScreen(
     onSearch: () -> Unit,
     onHistory: () -> Unit,
     onReadiness: () -> Unit,
+    /**
+     * Settings → Music & audiobooks. Empty media types are hidden, so while Music or Audiobooks has nothing on it a
+     * row at the end of Media says so and links there. Null: no link (the player is off).
+     */
+    onMediaSettings: (() -> Unit)? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -184,6 +189,18 @@ fun LibraryScreen(
                 }
                 item(key = "divider:$id") { HorizontalDivider() }
             }
+            val missing = missingMediaText(loaded.media.map { it.mediaType.id })
+            if (onMediaSettings != null && missing != null) {
+                item(key = "media-hint") {
+                    ListItem(
+                        modifier = Modifier.clickable(onClick = onMediaSettings),
+                        headlineContent = { Text(missing) },
+                        supportingContent = { Text("Find them on this phone or add a folder in Settings") },
+                        trailingContent = { Icon(painterResource(R.drawable.ic_music_note), contentDescription = null) },
+                    )
+                    HorizontalDivider()
+                }
+            }
             item { SectionHeader("Archive sources") }
             for (source in loaded.sources) {
                 item(key = "source:${source.name}") {
@@ -194,6 +211,18 @@ fun LibraryScreen(
                 }
             }
         }
+    }
+}
+
+/** What the media-settings row says, given the media types on the shelves; null when Music and Audiobooks both show. */
+internal fun missingMediaText(shownTypeIds: List<String>): String? {
+    val music = MUSIC_TYPE_ID in shownTypeIds
+    val audiobooks = AUDIOBOOKS_TYPE_ID in shownTypeIds
+    return when {
+        !music && !audiobooks -> "No music or audiobooks yet"
+        !music -> "No music yet"
+        !audiobooks -> "No audiobooks yet"
+        else -> null
     }
 }
 

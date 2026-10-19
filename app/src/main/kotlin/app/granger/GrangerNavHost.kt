@@ -73,7 +73,16 @@ import app.granger.readiness.ReadinessScreen
 import app.granger.readiness.ReadinessViewModel
 import app.granger.search.SearchScreen
 import app.granger.search.SearchViewModel
+import android.content.Context
+import app.granger.media.PlayResumer
+import app.granger.settings.DaoMediaFolders
+import app.granger.settings.MediaSettings
+import app.granger.settings.ResolverFolderGrants
+import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.flowOf
 import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
@@ -181,7 +190,8 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
 @Serializable object ArchiveRoute
-@Serializable object SettingsRoute
+/** [media] opens it at the Music & audiobooks section. */
+@Serializable data class SettingsRoute(val media: Boolean = false)
 @Serializable object ReadinessRoute
 
 /** The full-screen player, music or audiobook, whichever is loaded (spec §8). */
@@ -258,7 +268,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     var showChromeRequest by rememberSaveable { mutableStateOf(0) }
     val currentTab = viewModel { CurrentTab() }
     val railViewModel = viewModel {
-        RailViewModel(container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id)
+        RailViewModel(
+            container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id,
+            plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.RECENT) else flowOf(emptyList()),
+            resumer = if (Features.PLAYER) PlayResumer(container.media, container.playlists, container.playerHub) else null,
+        )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
     // One for the activity: the mini-player and the full-screen player share it.
@@ -378,7 +392,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             when (tool) {
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
-                RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
+                RailTool.SETTINGS -> nav.navigate(SettingsRoute()) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
                 RailTool.PLAYER -> nav.togglePlayer()
             }
@@ -392,6 +406,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             nav.navigate(SearchRoute(query)) { if (searchOnTop) popUpTo<SearchRoute> { inclusive = true } }
         },
         onRecentChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+        onRecentPlay = { item ->
+            scope.launch {
+                // Gone or unplayable: the Library, with a notice saying so (it replaces the Library on the stack).
+                val notice = railViewModel.resume(item) ?: return@launch
+                nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
+            }
+        },
         showResearch = showResearch,
         // Over the page, so a middle tap doesn't narrow it and reflow the text.
         railOverContent = readerTabId != null,
@@ -449,6 +470,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
+                    onMediaSettings = if (Features.PLAYER) ({ nav.navigate(SettingsRoute(media = true)) }) else null,
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -629,14 +651,19 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<SettingsRoute> {
+            composable<SettingsRoute> { backStackEntry ->
                 SettingsScreen(
                     viewModel = viewModel {
-                        SettingsViewModel(container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appScope)
+                        SettingsViewModel(
+                            container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appScope,
+                            mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
+                        )
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
+                    scrollToMedia = backStackEntry.toRoute<SettingsRoute>().media,
+                    onPermissionChecked = { if (Features.PLAYER) container.phoneMediaScans.recheckPermission() },
                 )
             }
             if (player != null) {
@@ -658,3 +685,19 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         }
     }
 }
+
+/**
+ * Settings → Music & audiobooks over the app's scanner, folders and player prefs. Scans and folder changes run in the
+ * app scope, so leaving Settings doesn't stop them.
+ */
+private fun mediaSettings(container: AppContainer, context: Context, scope: CoroutineScope) = MediaSettings(
+    folders = DaoMediaFolders(container.playback),
+    grants = ResolverFolderGrants(context.contentResolver),
+    prefs = container.playerPrefs,
+    scanner = {
+        container.appScope.async { container.phoneScanner.scan() }.await()
+        ScanSummary.of(container.media)
+    },
+    scope = scope,
+    work = container.appScope,
+)
