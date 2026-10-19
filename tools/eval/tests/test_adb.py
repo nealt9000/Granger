@@ -153,3 +153,12 @@ def test_top_resumed_activity_other_app_refuses_naming_package():
     line = "    topResumedActivity=ActivityRecord{1 u0 com.whatsapp/.Main t2}\n"
     with pytest.raises(SystemExit, match="com.whatsapp"):
         adb.check_front(lambda args: (0, line) if "dumpsys" in args else (0, ""))
+
+
+def test_start_stops_the_app_first_so_the_screen_starts_fresh(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+    fake = Fake()
+    adb.run_eval(fake, ds, "r1", tmp_path / "runs", sleep=lambda s: None)
+    start = next(c for c in fake.calls if "am" in c and "start" in c)
+    assert "-S" in start and start[start.index("--es") + 1:start.index("--es") + 3] == ["runId", "r1"]

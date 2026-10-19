@@ -75,7 +75,9 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     rc, o = runner(["push", str(dataset_path), REMOTE + "/dataset.json"])
     if rc:
         raise SystemExit("adb push failed: " + o)
-    start = ["shell", "am", "start", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
+    # -S stops the app first, so the eval screen starts fresh with these extras (a screen left over from an install or
+    # an earlier run would otherwise take the intent and never begin).
+    start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
     for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses)):
         if val:
             start += ["--es", key, val]
