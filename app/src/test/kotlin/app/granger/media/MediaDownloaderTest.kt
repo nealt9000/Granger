@@ -241,4 +241,42 @@ class MediaDownloaderTest {
         d.get(book)
         assertThat(MediaManifests.read(dir())!!.files[0].tags).isNotNull()
     }
+
+    /**
+     * A worker still running when Remove deleted the folder recreates it (FileDownloader's mkdirs) and leaves a `.part`.
+     * After the removal's rescan, item folders in Granger's media roots with no manifest and no ledger rows go; nothing
+     * else is touched.
+     */
+    @Test fun removeDeletesAFolderAWorkerRecreatedWithAStrayPart() = runTest {
+        val stray = File(dir(), "01 - x.mp3.part")
+        val d = MediaDownloader(downloads, scanner, media, volumes, prefs, backgroundScope, onChanged = {
+            if (!dir().exists()) stray.apply { parentFile!!.mkdirs() }.writeBytes(byteArrayOf(1, 2, 3))
+        })
+        d.get(book)
+        arrive(0 until 1)
+        d.onFileInstalled(installed(0))
+
+        // Left alone: an item with a manifest, a manifest-less folder the ledger still downloads into, and anything
+        // that isn't an item folder in a media root.
+        val other = MediaFixtures.timeMachine().copy(ref = "900")
+        MediaManifests.write(dir(m = other).apply { mkdirs() }, other)
+        val active = File(internal, "audiobooks/librivox/901").apply { mkdirs() }
+        File(active, "01.mp3.part").writeBytes(byteArrayOf(1))
+        downloads.list.update {
+            it + record("media:librivox:901/001", DownloadState.RUNNING, kind = ItemKind.AUDIO,
+                filePath = File(active, "01.mp3").path).copy(groupId = "media:librivox:901")
+        }
+        val rootFile = File(internal, "audiobooks/librivox/notes.txt").apply { writeText("x") }
+        val elsewhere = File(internal, "books/librivox/902").apply { mkdirs() }
+        File(elsewhere, "keep.bin").writeBytes(byteArrayOf(1))
+
+        d.remove(group)
+        assertThat(stray.exists()).isFalse()
+        assertThat(dir().exists()).isFalse()
+        assertThat(MediaManifests.read(dir(m = other))).isNotNull()
+        assertThat(File(active, "01.mp3.part").isFile).isTrue()
+        assertThat(rootFile.isFile).isTrue()
+        assertThat(File(elsewhere, "keep.bin").isFile).isTrue()
+        assertThat(File(internal, "audiobooks/.nomedia").isFile).isTrue()
+    }
 }

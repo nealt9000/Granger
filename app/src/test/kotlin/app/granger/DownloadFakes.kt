@@ -18,6 +18,7 @@ import app.granger.core.downloads.HashAlgorithm
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
+import app.granger.core.downloads.isActive
 import app.granger.sources.DownloadPrefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -156,8 +157,17 @@ class FakeDownloads : Downloads {
         return result
     }
 
-    override suspend fun cancelGroup(groupId: String) { calls += "cancelGroup:$groupId" }
-    override suspend fun removeGroup(groupId: String) { calls += "removeGroup:$groupId" }
+    /** As the real one: the group's unfinished records go, the installed ones stay. */
+    override suspend fun cancelGroup(groupId: String) {
+        calls += "cancelGroup:$groupId"
+        list.update { all -> all.filterNot { it.groupId == groupId && it.isActive } }
+    }
+
+    /** As the real one: every record of the group goes. */
+    override suspend fun removeGroup(groupId: String) {
+        calls += "removeGroup:$groupId"
+        list.update { all -> all.filterNot { it.groupId == groupId } }
+    }
     override suspend fun retryGroup(groupId: String) { calls += "retryGroup:$groupId" }
 }
 

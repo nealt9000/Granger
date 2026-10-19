@@ -17,6 +17,12 @@ import app.granger.core.media.MediaManifests
 import app.granger.formatBytes
 import app.granger.sources.DownloadPrefs
 import java.io.File
+import java.io.IOException
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -61,6 +67,8 @@ class MediaDownloader(
         val group = MediaDownloads.groupId(m)
         require(sourceAndRef(group) != null) { "Bad media ref ${m.source}:${m.ref}" }
         val relativeDir = MediaManifests.relativeDir(m)
+        // A worker that outlived an earlier removal's sweep may have left a stray folder since.
+        sweepStrayFolders()
         val all = withContext(io) { volumes.list() }
         val records = downloads.records.first().filter { it.groupId == group }
         val volume = when (val placed = placedOn(all, relativeDir, records)) {
@@ -140,7 +148,8 @@ class MediaDownloader(
     /**
      * Forgets the item's rows (state kept), removes its group, deletes its folder, then rescans. The folder goes first
      * and the rows after a scan that started once it was gone: a scan that read the folder before it went can't bring
-     * the rows back as ghosts.
+     * the rows back as ghosts. A worker still running then can recreate the folder for its `.part`, so after the rescan
+     * [sweepStrayFolders] runs too.
      */
     suspend fun remove(groupId: String) {
         ops.withLock {
@@ -156,6 +165,7 @@ class MediaDownloader(
             downloads.removeGroup(groupId)
             withContext(io) { dirs.forEach { it.deleteRecursively() } }
             rescanQuietly()
+            sweepStrayFolders()
 
             val audiobookId = "audiobook:$source:$ref"
             val trackIds = buildSet {
@@ -166,6 +176,49 @@ class MediaDownloader(
             }
             media.forget(trackIds, listOf(audiobookId))
         }
+    }
+
+    /**
+     * Deletes item folders (`<volume>/{music,audiobooks}/<source>/<ref>`) that have no manifest and no ledger row
+     * pointing into them: what a worker racing a removal leaves (its `.part`, in a folder its mkdirs recreated). Only
+     * those folders, never anything else; a symlink is never followed. Run under [ops], so a Get writing its manifest
+     * can't be caught between mkdirs and the write. Never throws.
+     */
+    private suspend fun sweepStrayFolders() = withContext(io) {
+        try {
+            val ledger = downloads.records.first().map { it.filePath }
+            for (volume in volumes.list()) for (shelf in MEDIA_ROOTS) for (source in SOURCES) {
+                val sourceDir = File(volume.root, "$shelf/$source")
+                if (isLink(sourceDir)) continue
+                for (item in sourceDir.listFiles().orEmpty()) {
+                    if (!item.isDirectory || isLink(item) || File(item, MediaManifests.FILE_NAME).exists()) continue
+                    val prefix = item.path + File.separator
+                    if (ledger.any { it.startsWith(prefix) }) continue
+                    deleteTree(item.toPath())
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            runCatching { android.util.Log.w("Granger", "Stray media folder sweep failed", e) }
+        }
+    }
+
+    private fun isLink(f: File) = Files.isSymbolicLink(f.toPath())
+
+    /** Deletes [root] and what's in it; a symlink inside is deleted as a link, never followed. */
+    private fun deleteTree(root: Path) {
+        Files.walkFileTree(root, object : SimpleFileVisitor<Path>() {
+            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                Files.deleteIfExists(file)
+                return FileVisitResult.CONTINUE
+            }
+
+            override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
+                Files.deleteIfExists(dir)
+                return FileVisitResult.CONTINUE
+            }
+        })
     }
 
     /** The runner's onInstalled for AUDIO records: one rescan at a time; never throws. */
@@ -198,6 +251,11 @@ class MediaDownloader(
         } catch (e: Throwable) {
             runCatching { android.util.Log.e("Granger", "Downloaded media scan failed", e) }
         }
+    }
+
+    private companion object {
+        val MEDIA_ROOTS = listOf("music", "audiobooks")
+        val SOURCES = listOf(MediaManifest.LIBRIVOX, MediaManifest.ARCHIVE_ORG)
     }
 
     /** Validated before any path is built from it: a LibriVox id is digits, an identifier passes archive.org's rule. */
