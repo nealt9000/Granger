@@ -58,6 +58,7 @@ import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
 import app.granger.core.media.ContentResolverOpener
+import app.granger.core.media.FileTagReadGuard
 import app.granger.core.media.FolderSource
 import app.granger.core.media.MediaStoreSource
 import app.granger.core.media.PhoneScanner
@@ -205,6 +206,7 @@ class AppContainer(context: Context) {
             playback = playback,
             coversDir = File(context.filesDir, "media-covers"),
             hasPermission = { hasAudioPermission(context) },
+            tagGuard = FileTagReadGuard(File(context.noBackupFilesDir, "media-scan")),
         )
     }
     val phoneMediaScans: PhoneMediaScans by lazy { PhoneMediaScans(context, appScope, phoneScanner) }

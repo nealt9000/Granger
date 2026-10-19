@@ -207,6 +207,47 @@ class PhoneScannerTest {
         assertThat(phoneTracks().map { it.title }).containsExactly("good")
     }
 
+    /** Stands for TagLib crashing the process (a SIGSEGV): nothing after it in the scan runs, no catch sees it. */
+    private class NativeCrash : Error()
+
+    /**
+     * A file whose tags crashed the app mid-scan is never handed to the tag reader again (the crash would recur on
+     * every launch); it becomes a track named from its file, and the rest of the library is read as usual.
+     */
+    @Test fun fileThatCrashedTheTagReaderIsNeverReadForTagsAgain() = runTest {
+        val guardDir = tmp.newFolder("guard")
+        tags["good.mp3"] = FileTags(raw("Good song"), emptyList())
+        tags["bad.mp3"] = FileTags(raw("Bad song"), listOf(Chapter("One", 0)))
+        val good = found("content://media/1", "good.mp3")
+        val bad = found("content://media/2", "bad.mp3")
+        val after = found("content://media/3", "after.mp3")
+        val source = FakeSource(listOf(good, bad, after))
+        val read = mutableListOf<String>()
+        var crash = true
+        val reader = TagReader { pfd, f ->
+            read += f.displayName
+            if (crash && f.uri == bad.uri) throw NativeCrash()
+            tagReader.read(pfd, f)
+        }
+        fun newScanner() = PhoneScanner(listOf(source), opener, media, playback, coversDir, { true }, reader, FileTagReadGuard(guardDir))
+
+        assertThat(runCatching { newScanner().scan() }.exceptionOrNull()).isInstanceOf(NativeCrash::class.java)
+
+        // The next launch: the file it died on isn't handed to the reader; everything else is read.
+        read.clear()
+        assertThat(newScanner().scan()).isEqualTo(3)
+        assertThat(read).containsExactly("good.mp3", "after.mp3")
+        assertThat(phoneTracks().map { it.title }).containsExactly("Good song", "bad", "after")
+
+        // Permanently, even once the file changes and is opened again.
+        crash = false
+        read.clear()
+        source.files = source.files.map { if (it.uri == bad.uri) it.copy(modifiedMs = 9_000L) else it }
+        assertThat(newScanner().scan()).isEqualTo(1)
+        assertThat(read).isEmpty()
+        assertThat(phoneTracks().map { it.title }).containsExactly("Good song", "bad", "after")
+    }
+
     @Test fun permissionLostMarksPhoneItemsMissingAndKeepsState() = runTest {
         tags["Dune.m4b"] = FileTags(raw("Dune", album = "Dune"), listOf(Chapter("One", 0), Chapter("Two", 30_000)))
         val source = FakeSource(listOf(found("content://media/1", "Mars.mp3"), found("content://media/2", "Dune.m4b", "Audiobooks/")))

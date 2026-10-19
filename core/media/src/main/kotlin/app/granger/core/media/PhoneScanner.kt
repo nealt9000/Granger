@@ -37,6 +37,8 @@ import kotlinx.coroutines.withContext
  * - A source (or one picked folder) that throws means "unknown", not "empty": the items it owns are left exactly as
  *   they are while the other sources sync. If nothing could be listed, nothing changes.
  * - A file that can't be opened or read is skipped; one TagLib can't parse still becomes a track named from its file.
+ * - A file whose tags crashed the app (native TagLib) during an earlier scan is never read for tags again, see
+ *   [TagReadGuard]: it becomes a track named from its file.
  */
 class PhoneScanner(
     private val sources: List<AudioSource>,
@@ -46,6 +48,7 @@ class PhoneScanner(
     private val coversDir: File,
     private val hasPermission: () -> Boolean,
     private val tagReader: TagReader = NativeTagReader,
+    private val tagGuard: TagReadGuard = TagReadGuard.NONE,
 ) {
     private val lock = Mutex()
     private var running: CompletableDeferred<Int>? = null
@@ -108,8 +111,9 @@ class PhoneScanner(
     private suspend fun readAndSync(found: List<FoundFile>, unknown: (String) -> Boolean): Int {
         val storedChapters = mutableMapOf<String, List<AudiobookChapter>>()
         val folderCovers = mutableMapOf<String, String?>()
+        val skipTags = tagGuard.skipped()
         val entries = found.distinctBy { it.uri }.mapNotNull { file ->
-            cached(file, storedChapters) ?: read(file, folderCovers)
+            cached(file, storedChapters) ?: read(file, folderCovers, skipTags)
         }
 
         // The same bytes from two sources (a picked folder inside shared storage) are one track; the first source wins.
@@ -155,7 +159,7 @@ class PhoneScanner(
     }
 
     /** Opens and reads [file]; null (skipped) if it can't be opened or its bytes can't be read. */
-    private fun read(file: FoundFile, folderCovers: MutableMap<String, String?>): Entry? {
+    private fun read(file: FoundFile, folderCovers: MutableMap<String, String?>, skipTags: Set<String>): Entry? {
         val pfd = try {
             open(file.uri)
         } catch (e: Exception) {
@@ -164,7 +168,8 @@ class PhoneScanner(
         val (fingerprint, read) = try {
             pfd.use {
                 // Not closed: closing a stream made from a FileDescriptor would close the fd under pfd.
-                Fingerprint.of(FileInputStream(it.fileDescriptor).channel) to tagReader.read(it, file)
+                val fingerprint = Fingerprint.of(FileInputStream(it.fileDescriptor).channel)
+                fingerprint to readTags(it, file, skipTags)
             }
         } catch (e: Exception) {
             return null
@@ -173,6 +178,23 @@ class PhoneScanner(
         val cover = read.raw?.cover?.let { embeddedCover(it) }
             ?: file.folderCoverUri?.let { uri -> folderCovers.getOrPut(uri) { folderCover(uri) } }
         return Entry(file, fingerprint, tags, read.chapters, cover, MediaClassifier.isAudiobook(file), wasRead = true)
+    }
+
+    /**
+     * The file's tags, with [file]'s uri marked in [tagGuard] while TagLib reads it. Not cleared in a `finally`: only a
+     * return or an exception clears it, so a crash (or an Error) leaves it for the next scan to skip.
+     */
+    private fun readTags(pfd: ParcelFileDescriptor, file: FoundFile, skipTags: Set<String>): FileTags {
+        if (file.uri in skipTags) return FileTags(raw = null, chapters = emptyList())
+        tagGuard.begin(file.uri)
+        val tags = try {
+            tagReader.read(pfd, file)
+        } catch (e: Exception) {
+            tagGuard.end()
+            throw e
+        }
+        tagGuard.end()
+        return tags
     }
 
     /** `coversDir/<sha1 of the image>.jpg`: an album's art embedded in every track is stored once, and shared. */
