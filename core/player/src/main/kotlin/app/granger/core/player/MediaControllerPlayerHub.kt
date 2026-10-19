@@ -60,6 +60,12 @@ class MediaControllerPlayerHub(
         .flatMapLatest { it?.queue ?: flowOf(emptyList()) }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+    // Read from the db, not the engine, so the saved modes show even while the service is down.
+    override val saved: StateFlow<SavedModes> =
+        SavedModesReader(media, playback, app.getSharedPreferences(PlayerSettingsKeys.PREFS, Context.MODE_PRIVATE))
+            .flow()
+            .stateIn(scope, SharingStarted.Eagerly, SavedModes.UNKNOWN)
+
     private fun connect() {
         if (controller != null) return
         val token = SessionToken(app, ComponentName(app, PlaybackService::class.java))
@@ -95,6 +101,7 @@ class MediaControllerPlayerHub(
     override fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource) =
         send { it.playTracks(trackIds, startIndex, shuffle, source) }
     override fun playAudiobook(id: String, at: AudioBookmark?) = send { it.playAudiobook(id, at) }
+    override fun activate(mode: PlayerMode) = send { it.activate(mode) }
     override fun setFinished(audiobookId: String, finished: Boolean) = send { it.setFinished(audiobookId, finished) }
     override fun playPause() = send { it.playPause() }
     override fun next() = send { it.next() }

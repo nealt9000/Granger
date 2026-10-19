@@ -77,6 +77,9 @@ interface PlaybackDao {
     @Query("SELECT * FROM music_state WHERE id = 0")
     suspend fun musicState(): MusicState?
 
+    @Query("SELECT * FROM music_state WHERE id = 0")
+    fun observeMusicState(): Flow<MusicState?>
+
     @Upsert
     suspend fun upsertMusicState(state: MusicState)
 

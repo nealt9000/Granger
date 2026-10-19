@@ -742,6 +742,103 @@ class PlayerEngineTest {
         assertThat(bookState(book.id)).isNull()          // nothing confirmed, nothing saved
     }
 
+    // ---- the Player's tabs: activating a mode from its saved state ----
+
+    @Test fun activatingMusicRestoresTheSavedQueueAfterSavingTheAudiobook() {
+        val ids = musicFixtures()
+        val book = fakeBook("saga", 60_000)
+        val engine = newEngine()
+        engine.playTracks(ids, 1, true, PlaySource("songs", "Songs"))
+        idle()
+        engine.cycleRepeat()                        // off → all
+        idle()
+        run(engine.player).untilPosition(1, 1_200)
+        engine.playPause(); idle()
+        val queue = engine.queue.value.map { it.id }
+        val position = engine.player.currentPosition
+
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 9_000)
+
+        // The inactive music, read from its saved state without loading it.
+        idle()
+        val music = engine.saved.value.music!!
+        assertThat(music.queue.map { it.id }).isEqualTo(queue)
+        assertThat(music.track.id).isEqualTo(ids[1])
+        assertThat(music.positionMs).isEqualTo(position)
+        assertThat(music.shuffle).isTrue()
+        assertThat(music.repeat).isEqualTo(1)
+        assertThat(engine.saved.value.lastMode).isEqualTo(PlayerMode.AUDIOBOOK)
+
+        engine.activate(PlayerMode.MUSIC)
+        idle()
+        assertNear(bookState(book.id)!!.positionMs, 9_000L)    // saved (STOP) before the switch
+        val now = engine.ui.value.now as NowPlaying.Music
+        assertThat(now.track.id).isEqualTo(ids[1])
+        assertThat(now.shuffle).isTrue()
+        assertThat(now.repeat).isEqualTo(1)
+        assertThat(engine.queue.value.map { it.id }).isEqualTo(queue)
+        assertThat(engine.player.playedIds).isEqualTo(queue)
+        assertThat(engine.player.currentMediaItemIndex).isEqualTo(1)
+        assertThat(engine.player.currentPosition).isEqualTo(position)
+        assertThat(engine.player.repeatMode).isEqualTo(Player.REPEAT_MODE_ALL)
+        assertThat(engine.player.playWhenReady).isTrue()
+
+        // And the audiobook is now the saved one, where it was left.
+        val saved = engine.saved.value
+        assertThat(saved.lastMode).isEqualTo(PlayerMode.MUSIC)
+        assertThat(saved.book!!.book.id).isEqualTo(book.id)
+        assertNear(saved.book!!.inChapterMs, 9_000L)
+    }
+
+    @Test fun activatingTheAudiobookResumesTheLastBookAndLeavesTheMusicSaved() {
+        val ids = musicFixtures()
+        val book = fakeBook("odyssey", 30_000, 30_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(1, 4_000)
+        engine.playTracks(ids, 2, false, PlaySource("songs", "Songs"))
+        idle()
+        run(engine.player).untilPosition(2, 500)
+        engine.playPause(); idle()
+        val musicIndex = engine.player.currentMediaItemIndex
+        val savedBook = bookState(book.id)!!
+        assertThat(savedBook.trackId).isEqualTo("track:phone:odyssey-1")
+        engine.saved                                // read lazily: the first read starts it
+        idle()
+        assertThat(engine.saved.value.book!!.chapter.ordinal).isEqualTo(1)
+
+        engine.activate(PlayerMode.AUDIOBOOK)
+        idle()
+        val now = engine.ui.value.now as NowPlaying.Book
+        assertThat(now.book.id).isEqualTo(book.id)
+        assertThat(engine.player.currentMediaItemIndex).isEqualTo(1)
+        // From the saved spot, less the auto-rewind for the time it was paused.
+        assertThat(engine.player.currentPosition)
+            .isIn(com.google.common.collect.Range.closed(savedBook.positionMs - 3_000, savedBook.positionMs))
+        assertThat(engine.player.playWhenReady).isTrue()
+        assertThat(runBlocking { playback.musicState() }!!.index).isEqualTo(musicIndex)
+
+        // Already active: activating just plays.
+        engine.playPause(); idle()
+        engine.activate(PlayerMode.AUDIOBOOK); idle()
+        assertThat(engine.player.playWhenReady).isTrue()
+        assertThat((engine.ui.value.now as NowPlaying.Book).book.id).isEqualTo(book.id)
+    }
+
+    @Test fun activatingAModeNeverUsedDoesNothing() {
+        musicFixtures()
+        val engine = newEngine()
+        engine.saved
+        engine.activate(PlayerMode.MUSIC)
+        engine.activate(PlayerMode.AUDIOBOOK)
+        idle()
+        assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+        assertThat(engine.saved.value).isEqualTo(SavedModes(null, null, null))
+    }
+
     @Test fun replayGainModeChangeAppliesToThePlayingQueue() {
         val ids = musicFixtures()
         runBlocking { db.mediaDao().upsertTracks(listOf(media.track(ids[0])!!.copy(rgTrackGain = -6.0206f, rgTrackPeak = null))) }

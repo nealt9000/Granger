@@ -52,6 +52,7 @@ private data class QueueItem(val key: Int, val track: Track)
 /**
  * The music queue in play order. Long-press a song and drag to move it ([onMove] with play-order positions, once, on
  * release); the cross removes it ([onRemove]), except the last song. [current] is the playing song's position.
+ * Not [editable] (the saved queue of the inactive tab): just the list.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,11 +62,12 @@ fun QueueSheet(
     onMove: (from: Int, to: Int) -> Unit,
     onRemove: (Int) -> Unit,
     onDismiss: () -> Unit,
+    editable: Boolean = true,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding()) {
             Text("Queue", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-            ReorderableQueue(queue, current, onMove, onRemove)
+            if (editable) ReorderableQueue(queue, current, onMove, onRemove) else ReadOnlyQueue(queue, current)
         }
     }
 }
@@ -143,12 +145,26 @@ private fun ReorderableQueue(queue: List<Track>, current: Int, onMove: (Int, Int
     }
 }
 
+@Composable
+private fun ReadOnlyQueue(queue: List<Track>, current: Int) {
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = current.coerceIn(0, (queue.size - 1).coerceAtLeast(0)))
+    LazyColumn(state = list, modifier = Modifier.fillMaxWidth()) {
+        itemsIndexed(queue) { index, track ->
+            QueueRow(
+                track, playing = index == current, editable = false, canRemove = false, canMoveUp = false, canMoveDown = false,
+                onMoveBy = {}, onRemove = {}, modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow),
+            )
+        }
+    }
+}
+
 private fun LazyListState.itemAt(y: Int) = layoutInfo.visibleItemsInfo.firstOrNull { y in it.offset until it.offset + it.size }
 
 @Composable
 private fun QueueRow(
     track: Track,
     playing: Boolean,
+    editable: Boolean = true,
     canRemove: Boolean,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
@@ -170,8 +186,10 @@ private fun QueueRow(
             .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(painterResource(R.drawable.ic_drag_handle), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.width(12.dp))
+        if (editable) {
+            Icon(painterResource(R.drawable.ic_drag_handle), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(12.dp))
+        }
         PlayerCover(track.coverPath, book = false, size = 40.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
@@ -184,8 +202,10 @@ private fun QueueRow(
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        IconButton(onClick = onRemove, enabled = canRemove) {
-            Icon(Icons.Filled.Close, contentDescription = "Remove ${track.title} from queue")
+        if (editable) {
+            IconButton(onClick = onRemove, enabled = canRemove) {
+                Icon(Icons.Filled.Close, contentDescription = "Remove ${track.title} from queue")
+            }
         }
     }
 }

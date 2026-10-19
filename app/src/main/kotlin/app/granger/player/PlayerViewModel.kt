@@ -7,11 +7,16 @@ import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
+import app.granger.core.player.SavedBook
+import app.granger.core.player.SavedModes
+import app.granger.core.player.SavedMusic
 import app.granger.core.player.SleepSetting
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -70,6 +75,33 @@ fun bookProgressAt(
     return if (finished) progress.copy(positionMs = progress.durationMs) else progress
 }
 
+/** The mode [now] belongs to; null when idle. */
+fun modeOf(now: NowPlaying): PlayerMode? = when (now) {
+    is NowPlaying.Music -> PlayerMode.MUSIC
+    is NowPlaying.Book -> PlayerMode.AUDIOBOOK
+    NowPlaying.Idle -> null
+}
+
+/** The Player's tab: the one picked, else the active mode, else the mode last used, else Music. */
+fun playerTab(picked: PlayerMode?, now: NowPlaying, lastMode: PlayerMode?): PlayerMode =
+    picked ?: modeOf(now) ?: lastMode ?: PlayerMode.MUSIC
+
+/** The saved queue as the music player shows it: paused at its saved track and position. */
+fun SavedMusic.toUi(): PlayerUi = PlayerUi(
+    NowPlaying.Music(track, index, queue.size, shuffle, repeat),
+    playing = false, positionMs = positionMs, durationMs = track.durationMs, sleepRemainingMs = null,
+)
+
+/** The last audiobook as the audiobook player shows it: paused at its saved chapter and position. */
+fun SavedBook.toUi(): PlayerUi = PlayerUi(
+    NowPlaying.Book(book, chapter, chapters.size, speed, skipSilence, volumeBoostMb),
+    playing = false, positionMs = inChapterMs, durationMs = chapter.durationMs, sleepRemainingMs = null,
+)
+
+/** The saved book's progress, as the shelf shows it (a finished book is complete). */
+fun SavedBook.progress(): BookProgress = bookProgress(chapters, chapter, inChapterMs, book.durationMs)
+    .let { if (finished) it.copy(positionMs = it.durationMs) else it }
+
 /**
  * The mini-player and both full-screen players. Everything goes through [hub]; [chapters] and [bookmarks] read the
  * library for the loaded audiobook, and [skipBackSeconds]/[skipForwardSeconds] are the audiobook skip settings (for
@@ -86,6 +118,32 @@ class PlayerViewModel(
 ) : ViewModel() {
     val ui: StateFlow<PlayerUi> = hub.ui
     val queue: StateFlow<List<Track>> = hub.queue
+
+    /** Both modes' saved states: the Player's inactive tab shows one. */
+    val saved: StateFlow<SavedModes> = hub.saved
+
+    private val _pickedTab = MutableStateFlow<PlayerMode?>(null)
+
+    /** The tab the user picked in the Player, or null for the default ([playerTab]). Picking one plays nothing. */
+    val pickedTab: StateFlow<PlayerMode?> = _pickedTab
+
+    fun selectTab(mode: PlayerMode) { _pickedTab.value = mode }
+
+    /** The Player opens on the active mode (or the last one used). */
+    fun resetTab() { _pickedTab.value = null }
+
+    /** The tab shown now. */
+    fun tab(): PlayerMode = playerTab(_pickedTab.value, hub.ui.value.now, hub.saved.value.lastMode)
+
+    /**
+     * A control pressed on the inactive tab: [mode] becomes the active one, loaded from its saved state and playing
+     * (the active mode is saved first), then [then] does what was pressed (a seek, next, a chapter…). The hub runs
+     * them in that order. Only direct controls belong in [then]: the switch hasn't happened yet when it runs here.
+     */
+    fun activate(mode: PlayerMode, then: PlayerViewModel.() -> Unit = {}) {
+        hub.activate(mode)
+        then()
+    }
 
     private val bookId: Flow<String?> = hub.ui.map { (it.now as? NowPlaying.Book)?.book?.id }.distinctUntilChanged()
 

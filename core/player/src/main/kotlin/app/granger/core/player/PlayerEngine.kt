@@ -32,8 +32,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -328,10 +330,36 @@ class PlayerEngine(
         resume()
     }
 
-    override fun playAudiobook(id: String, at: AudioBookmark?) = submit {
-        val b = media.audiobook(id) ?: return@submit
+    override fun playAudiobook(id: String, at: AudioBookmark?) = submit { startBook(id, at) }
+
+    private suspend fun startBook(id: String, at: AudioBookmark?) {
+        val b = media.audiobook(id) ?: return
         stopCurrent()
         if (loadBook(id, at, play = true)) playback.upsertRecentPlay(RecentPlay(b.id, b.title, now()))
+    }
+
+    override val saved: StateFlow<SavedModes> by lazy {
+        SavedModesReader(media, playback, prefs).flow().stateIn(scope, SharingStarted.Eagerly, SavedModes.UNKNOWN)
+    }
+
+    override fun activate(mode: PlayerMode) = submit {
+        when (mode) {
+            PlayerMode.MUSIC -> {
+                if (this.mode != Mode.MUSIC) {
+                    // Read before the switch: a queue with nothing left to play leaves the audiobook where it is.
+                    val state = playback.musicState() ?: return@submit
+                    val restored = restoreQueue(state, random) { media.track(it) } ?: return@submit
+                    stopCurrent()                             // saves the audiobook (STOP) and waits for the write
+                    loadMusicState(state, restored)
+                }
+                resume()
+            }
+            PlayerMode.AUDIOBOOK -> {
+                if (this.mode == Mode.BOOK) return@submit resume()
+                val states = playback.observeAudiobookStates().first()
+                lastAudiobookId(prefs, states, media)?.let { startBook(it, null) }
+            }
+        }
     }
 
     override fun setFinished(audiobookId: String, finished: Boolean) = submit {
@@ -550,17 +578,12 @@ class PlayerEngine(
     }
 
     private suspend fun loadMusicState(state: MusicState) {
-        var q = MusicQueue.fromState(state, random)
-        val found = q.ids.associateWith { media.track(it) }
-        if (found.values.any { it == null }) {
-            // A row the queue names has gone (rows aren't deleted, so this is a damaged state): keep what's left.
-            val ids = q.ids.filter { found[it] != null }
-            if (ids.isEmpty()) return
-            q = MusicQueue(ids, 0, random)
-        }
+        restoreQueue(state, random) { media.track(it) }?.let { loadMusicState(state, it) }
+    }
+
+    private fun loadMusicState(state: MusicState, restored: RestoredQueue) {
         sourceKey = state.sourceKey
-        @Suppress("UNCHECKED_CAST")
-        startMusic(q, found.filterValues { it != null } as Map<String, Track>, state.positionMs)
+        startMusic(restored.queue, restored.tracks, state.positionMs)
         saveWhenReady = false                     // restored as it was: nothing new to save
         pausedAt = 0L
     }

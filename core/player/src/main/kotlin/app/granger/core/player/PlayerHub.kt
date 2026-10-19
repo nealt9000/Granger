@@ -30,6 +30,43 @@ data class PlayerUi(val now: NowPlaying, val playing: Boolean, val positionMs: L
     }
 }
 
+/** The player's two modes (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. */
+enum class PlayerMode { MUSIC, AUDIOBOOK }
+
+/**
+ * The saved music queue as it would resume: [queue] in play order (as [PlayerHub.queue] lists it), [index] the
+ * current track's position in it, [positionMs] within that track. [repeat]: 0 off, 1 all, 2 one.
+ */
+data class SavedMusic(val queue: List<Track>, val index: Int, val positionMs: Long, val shuffle: Boolean, val repeat: Int) {
+    val track: Track get() = queue[index]
+}
+
+/**
+ * The last audiobook as it would resume: [chapter] and [inChapterMs] are where its saved state points ([state] is
+ * null for a book that was loaded but never saved: its first chapter, at 0). [chapters] are in ordinal order.
+ */
+data class SavedBook(
+    val book: Audiobook,
+    val chapters: List<AudiobookChapter>,
+    val chapter: AudiobookChapter,
+    val inChapterMs: Long,
+    val speed: Float,
+    val skipSilence: Boolean,
+    val volumeBoostMb: Int,
+    val finished: Boolean,
+)
+
+/**
+ * Each mode's saved state, read from the db without loading anything into the player; it follows every save.
+ * [music]/[book] are null for a mode never used. [lastMode] is the mode last loaded (what a restore brings back).
+ * [loaded] is false until the db has been read once.
+ */
+data class SavedModes(val music: SavedMusic?, val book: SavedBook?, val lastMode: PlayerMode?, val loaded: Boolean = true) {
+    companion object {
+        val UNKNOWN = SavedModes(null, null, null, loaded = false)
+    }
+}
+
 /**
  * The one way the app talks to the player (spec §8). Calls are fire-and-forget and run in order; [ui] and [queue]
  * reflect them once applied.
@@ -39,6 +76,16 @@ interface PlayerHub {
 
     /** The music queue in play order (empty while an audiobook is the active player). */
     val queue: StateFlow<List<Track>>
+
+    /** Both modes' saved states, for showing the inactive one without loading it. The player stays their only writer. */
+    val saved: StateFlow<SavedModes>
+
+    /**
+     * Makes [mode] the active one and plays it. Already active: plays. Otherwise the active mode is saved first (as
+     * any switch does), then [mode] is loaded from its saved state (music: the saved queue, track, position, shuffle
+     * and repeat; audiobook: the last book at its saved position) and played. Nothing happens for a mode never used.
+     */
+    fun activate(mode: PlayerMode)
 
     fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource)
     /**

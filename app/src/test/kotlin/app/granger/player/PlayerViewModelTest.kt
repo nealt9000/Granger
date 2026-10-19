@@ -114,4 +114,29 @@ class PlayerViewModelTest {
         assertThat(vm.skipBackS()).isEqualTo(30)
         assertThat(vm.skipForwardS()).isEqualTo(60)
     }
+
+    @Test fun tabsFollowTheActiveModeUntilPickedAndPickingCallsNothing() {
+        val hub = FakePlayerHub(musicUi())
+        val vm = PlayerViewModel(hub)
+        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.MUSIC)
+        vm.selectTab(app.granger.core.player.PlayerMode.AUDIOBOOK)
+        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.AUDIOBOOK)
+        vm.selectTab(app.granger.core.player.PlayerMode.MUSIC)
+        vm.resetTab()
+        assertThat(hub.calls).isEmpty()
+
+        // Idle: the mode last used.
+        hub.ui.value = app.granger.core.player.PlayerUi.IDLE
+        hub.saved.value = app.granger.core.player.SavedModes(null, null, app.granger.core.player.PlayerMode.AUDIOBOOK)
+        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.AUDIOBOOK)
+        hub.saved.value = app.granger.core.player.SavedModes(null, null, null)
+        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.MUSIC)
+    }
+
+    @Test fun activatingSwitchesThenDoesThePressedControl() {
+        val hub = FakePlayerHub(musicUi())
+        val vm = PlayerViewModel(hub)
+        vm.activate(app.granger.core.player.PlayerMode.AUDIOBOOK) { seekTo(5_000L) }
+        assertThat(hub.calls).containsExactly("activate:AUDIOBOOK", "seekTo:5000").inOrder()
+    }
 }

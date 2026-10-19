@@ -9,6 +9,8 @@ import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlaySource
 import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerMode
+import app.granger.core.player.SavedModes
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SleepSetting
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
     override val ui = MutableStateFlow(initial)
     override val queue = MutableStateFlow<List<Track>>(emptyList())
+    override val saved = MutableStateFlow(SavedModes(null, null, null))
     val calls = mutableListOf<String>()
+
+    override fun activate(mode: PlayerMode) { calls += "activate:$mode" }
 
     /** Every [playTracks] call with its arguments. */
     data class Play(val trackIds: List<String>, val startIndex: Int, val shuffle: Boolean, val source: PlaySource)

@@ -39,9 +39,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.core.library.AudioBookmark
+import app.granger.core.library.AudiobookChapter
 import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerMode
+import app.granger.core.player.PlayerUi
 import app.granger.theme.GrangerColors
 
 /** The sheets the audiobook player opens; saved so a rotation keeps the open one. */
@@ -51,63 +54,76 @@ private enum class BookSheet { CHAPTERS, SPEED, SLEEP, BOOKMARKS }
  * The audiobook player (Voice-style): cover, book and chapter, a seek bar within the chapter and the whole book's
  * progress under it, big skip back/forward, chapter steps, and one tap to chapters, speed, the sleep timer and
  * bookmarks. Skip silence and volume boost are per-book toggles.
+ *
+ * [live]: the audiobook is the active mode and [ui] is the player's. Otherwise [ui], [chapters] and [progress] are the
+ * last book's saved state ([SavedBook.toUi][app.granger.core.player.SavedBook]), shown paused: any transport control
+ * first makes the audiobook the active mode, playing from there, and the per-book actions are left out.
  */
 @Composable
-fun AudiobookPlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
-    val ui by viewModel.ui.collectAsStateWithLifecycle()
-    val chapters by viewModel.bookChapters.collectAsStateWithLifecycle()
-    val bookmarks by viewModel.bookBookmarks.collectAsStateWithLifecycle()
-    val progress by viewModel.progress.collectAsStateWithLifecycle()
+internal fun AudiobookPlayer(
+    ui: PlayerUi,
+    chapters: List<AudiobookChapter>,
+    bookmarks: List<AudioBookmark>,
+    progress: BookProgress?,
+    live: Boolean,
+    viewModel: PlayerViewModel,
+) {
     val book = ui.now as? NowPlaying.Book ?: return
     var sheet by rememberSaveable { mutableStateOf<BookSheet?>(null) }
     val back = viewModel.skipBackS()
     val forward = viewModel.skipForwardS()
+    fun control(action: PlayerViewModel.() -> Unit) = if (live) viewModel.action() else viewModel.activate(PlayerMode.AUDIOBOOK, action)
+    // The saved book's chapter steps go by its own list; the live one's by the player's ([PlayerViewModel.nextChapter]).
+    val at = chapters.indexOfFirst { it.ordinal == book.chapter.ordinal }
+    fun stepChapter(by: Int) = when {
+        live -> if (by < 0) viewModel.previousChapter() else viewModel.nextChapter()
+        else -> chapters.getOrNull(at + by)?.let { c -> viewModel.activate(PlayerMode.AUDIOBOOK) { seekToChapter(c.ordinal) } } ?: Unit
+    }
 
-    Column(Modifier.fillMaxSize()) {
-        PlayerTopBar("Audiobook", onClose)
-        BoxWithConstraints(Modifier.fillMaxSize().playerInsets()) {
-            val coverSize = minOf(maxWidth - 48.dp, maxHeight * 0.42f, 320.dp)
-            Column(
-                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+    BoxWithConstraints(Modifier.fillMaxSize().playerInsets()) {
+        val coverSize = minOf(maxWidth - 48.dp, maxHeight * 0.42f, 320.dp)
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            PlayerCover(book.book.coverPath, book = true, size = coverSize)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    book.book.title, style = MaterialTheme.typography.titleLarge, maxLines = 2,
+                    overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+                )
+                if (book.book.author.isNotBlank()) {
+                    Text(book.book.author, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                }
+                Text(
+                    "${chapterTitle(book)} · ${book.chapter.ordinal + 1} of ${book.chapterCount}",
+                    style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Flame, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            SeekBar(ui.positionMs, ui.durationMs, { p -> control { seekTo(p) } }, label = "Seek in chapter")
+            progress?.let { BookProgressLine(it) }
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                PlayerCover(book.book.coverPath, book = true, size = coverSize)
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        book.book.title, style = MaterialTheme.typography.titleLarge, maxLines = 2,
-                        overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
-                    )
-                    if (book.book.author.isNotBlank()) {
-                        Text(book.book.author, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                    }
-                    Text(
-                        "${chapterTitle(book)} · ${book.chapter.ordinal + 1} of ${book.chapterCount}",
-                        style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Flame, maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                IconButton(onClick = { stepChapter(-1) }, enabled = book.chapter.ordinal > 0) {
+                    Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous chapter")
                 }
-                SeekBar(ui.positionMs, ui.durationMs, viewModel::seekTo, label = "Seek in chapter")
-                progress?.let { BookProgressLine(it) }
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = viewModel::previousChapter, enabled = book.chapter.ordinal > 0) {
-                        Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous chapter")
-                    }
-                    IconButton(onClick = viewModel::skipBack, modifier = Modifier.size(64.dp)) {
-                        Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back $back seconds", modifier = Modifier.size(40.dp))
-                    }
-                    BigPlayPause(ui.playing, viewModel::playPause)
-                    IconButton(onClick = viewModel::skipForward, modifier = Modifier.size(64.dp)) {
-                        Icon(painterResource(R.drawable.ic_forward), contentDescription = "Forward $forward seconds", modifier = Modifier.size(40.dp))
-                    }
-                    IconButton(onClick = viewModel::nextChapter, enabled = book.chapter.ordinal < book.chapterCount - 1) {
-                        Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next chapter")
-                    }
+                IconButton(onClick = { control { skipBack() } }, modifier = Modifier.size(64.dp)) {
+                    Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back $back seconds", modifier = Modifier.size(40.dp))
                 }
+                BigPlayPause(ui.playing, { if (live) viewModel.playPause() else viewModel.activate(PlayerMode.AUDIOBOOK) })
+                IconButton(onClick = { control { skipForward() } }, modifier = Modifier.size(64.dp)) {
+                    Icon(painterResource(R.drawable.ic_forward), contentDescription = "Forward $forward seconds", modifier = Modifier.size(40.dp))
+                }
+                IconButton(onClick = { stepChapter(+1) }, enabled = book.chapter.ordinal < book.chapterCount - 1) {
+                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next chapter")
+                }
+            }
+            if (live) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     PlayerAction(rememberVectorPainter(Icons.AutoMirrored.Filled.List), "Chapters", "Chapters") { sheet = BookSheet.CHAPTERS }
                     PlayerAction(painterResource(R.drawable.ic_speed), speedLabel(book.speed), "Playback speed ${speedLabel(book.speed)}") {
@@ -125,11 +141,12 @@ fun AudiobookPlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
                 }
                 ToggleRow("Skip silence", book.skipSilence, viewModel::setSkipSilence)
                 ToggleRow("Volume boost", book.volumeBoostMb > 0, viewModel::setVolumeBoost)
-                Spacer(Modifier.height(8.dp))
             }
+            Spacer(Modifier.height(8.dp))
         }
     }
 
+    if (!live) return
     when (sheet) {
         BookSheet.CHAPTERS -> ChaptersSheet(chapters, book.chapter.ordinal, onPick = { viewModel.seekToChapter(it); sheet = null }, onDismiss = { sheet = null })
         BookSheet.SPEED -> SpeedSheet(book.speed, viewModel::setSpeed, onDismiss = { sheet = null })
