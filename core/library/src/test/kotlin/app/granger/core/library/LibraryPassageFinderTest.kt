@@ -6,6 +6,8 @@ import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -66,7 +68,8 @@ class LibraryPassageFinderTest {
         rows: List<CollectionRow> = emptyList(),
         books: List<Book> = emptyList(),
         docs: Int = 8,
-    ) = LibraryPassageFinder(Archives(packs, archives), index, StubBookshelf(books), FakeShelves(rows), dispatcher, docs = docs)
+        bookLimit: Int = 40,
+    ) = LibraryPassageFinder(Archives(packs, archives), index, StubBookshelf(books), FakeShelves(rows), dispatcher, docs = docs, bookLimit = bookLimit)
 
     private fun page(text: String) = "<h2 id=\"s\">Section</h2><p>$text</p>"
 
@@ -136,6 +139,24 @@ class LibraryPassageFinderTest {
         assertThat(card.sourceId).isEqualTo(book.id)
     }
 
+    @Test fun cardMatchingRunsOnTheIoDispatcher() = test {
+        // Counts the work handed to it. The article search is one such hop; the card matching (a regex over every
+        // book and pack, off the main thread) is another.
+        class CountingDispatcher : CoroutineDispatcher() {
+            var hops = 0
+            override fun dispatch(context: CoroutineContext, block: Runnable) {
+                hops++
+                dispatcher.dispatch(context, block)
+            }
+        }
+        val io = CountingDispatcher()
+        val p = pack("wiki", "Wikipedia", fulltext = false)
+        val found = LibraryPassageFinder(Archives(listOf(p), emptyMap()), index, StubBookshelf(emptyList()), FakeShelves(emptyList()), io)
+            .find(listOf("wikipedia"))
+        assertThat(found.single().kind).isEqualTo(SourceKind.CARD)
+        assertThat(io.hops).isAtLeast(2)
+    }
+
     @Test fun eachKeywordIsSearchedOnItsOwnAndHitsMerge() = test {
         val archive = FakeZimArchive(
             "wiki", paths = setOf("Boiler"), results = listOf(ZimHit("Boiler", "Boiler", score = 3)),
@@ -189,5 +210,59 @@ class LibraryPassageFinderTest {
         val found = finder(listOf(pack("a")), mapOf("a" to archive)).find(emptyList())
         assertThat(found).isEmpty()
         assertThat(archive.searches).isEqualTo(0)
+    }
+
+    private suspend fun addBook(ref: String, title: String, vararg chapters: String): Book =
+        shelf.addDownloaded(
+            TestEpubs.build(File(booksDir, "granger").apply { mkdirs() }, "${ref}_2026-01-01.epub", title = title, chapters = chapters.toList()),
+            BookOrigin.GRANGER, ref,
+        )!!
+
+    @Test fun namedBookIsSearchedWithTheOtherKeywords() = test {
+        val kjv = addBook("kjv", "The King James Bible", "<p>For the love of money is the root of all evil.</p>")
+        val commentary = addBook("comm", "Commentary on Scripture", *Array(6) { "<p>bible money evil $it</p>" })
+        index.indexPending()
+
+        val found = finder(emptyList(), emptyMap(), books = listOf(kjv, commentary), bookLimit = 3)
+            .find(listOf("bible", "money", "evil")).filter { it.kind == SourceKind.BOOK }
+        assertThat(found.map { it.sourceId }).contains(kjv.id)
+        assertThat(found.first { it.sourceId == kjv.id }.text).contains("root of all evil")
+        assertThat(found.distinctBy { Triple(it.sourceId, it.location, it.text) }).hasSize(found.size)
+    }
+
+    @Test fun quranMatchesKoranTitle() = test {
+        val koran = addBook("koran", "The Koran", "<p>charity is a duty</p>", "<p>nothing</p>")
+        index.indexPending()
+
+        // bookLimit 0: only the scoped search inside the named book can find anything.
+        val found = finder(emptyList(), emptyMap(), books = listOf(koran), bookLimit = 0).find(listOf("quran", "charity", "duty"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("charity is a duty")
+    }
+
+    @Test fun gitaMatchesBhagavadTitle() = test {
+        val gita = addBook("gita", "The Bhagavad Gita", "<p>act without attachment</p>")
+        index.indexPending()
+
+        val found = finder(emptyList(), emptyMap(), books = listOf(gita), bookLimit = 0).find(listOf("gita", "attachment"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("act without attachment")
+    }
+
+    @Test fun aChunkFoundByBothSearchesAppearsOnce() = test {
+        val kjv = addBook("kjv", "The King James Bible", "<p>money is the root of evil</p>")
+        index.indexPending()
+
+        val found = finder(emptyList(), emptyMap(), books = listOf(kjv)).find(listOf("bible", "money", "evil"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }).hasSize(1)
+    }
+
+    @Test fun genericTitleWordsDoNotName() = test {
+        val works = addBook("works", "The Complete Works of X", "<p>filler</p>", "<p>zebra stripes</p>")
+        index.indexPending()
+
+        // "complete" names nothing, so no scoped search for "zebra" runs and the (limit 0) general search finds nothing.
+        val found = finder(emptyList(), emptyMap(), books = listOf(works), bookLimit = 0).find(listOf("complete", "zebra"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }).isEmpty()
+        val named = finder(emptyList(), emptyMap(), books = listOf(works), bookLimit = 0).find(listOf("works", "x", "zebra"))
+        assertThat(named.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("zebra stripes")
     }
 }

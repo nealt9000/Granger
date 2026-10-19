@@ -26,4 +26,18 @@ class AnswerTextTest {
             Segment.Text("ISBN [9780140449136] and [1, 99999999999] "), Segment.Cite(2),
         ).inOrder()
     }
+
+    @Test fun italicAndBoldRender() {
+        assertThat(AnswerText.segments("Read *Hamlet* and **Lear** now, 2 * 3 and # head `x`")).containsExactly(
+            Segment.Text("Read "), Segment.Text("Hamlet", italic = true), Segment.Text(" and "),
+            Segment.Text("Lear", bold = true), Segment.Text(" now, 2 * 3 and # head `x`"),
+        ).inOrder()
+    }
+
+    @Test fun citationsInsideItalicStillLink() {
+        assertThat(AnswerText.segments("*As said [1] here* ok")).containsExactly(
+            Segment.Text("As said ", italic = true), Segment.Cite(1, italic = true),
+            Segment.Text(" here", italic = true), Segment.Text(" ok"),
+        ).inOrder()
+    }
 }

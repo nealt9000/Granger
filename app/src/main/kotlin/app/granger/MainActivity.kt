@@ -95,6 +95,8 @@ class MainActivity : FragmentActivity() {
         super.onStart()
         // Back in the foreground after a clean stop: a crash from here on must count.
         container.sessionMarker.markDirty()
+        // A model release asked for mid-turn when the app was last hidden no longer applies.
+        container.modelManager.appReturned()
     }
 
     override fun onTrimMemory(level: Int) {

@@ -42,7 +42,106 @@ class CitationsTest {
     }
 
     @Test
+    fun proseDeclineIsADecline() {
+        val a = "The provided passages do not contain information about your chances [1, 2]. However, odds vary."
+        assertThat(Citations.check(a, 2)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun libraryAndNotSpecifiedPhrasingsDecline() {
+        for (a in listOf(
+            "The provided library does not contain information about your sister's phone number.",
+            "The provided library does not contain information about how many steps you have walked today [4].",
+            "The gate code for the Watergate complex is not specified in the provided library.",
+            "The winner of the 2026 Melbourne Cup is not mentioned in the provided library passages.",
+            "The current score of the Dodgers game is not provided in the library.",
+            "The sources don't say who won.",
+        )) assertThat(Citations.check(a, 4)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun notSpecifiedLaterOrWithButStillAnswers() {
+        assertThat(Citations.check("Paul wrote Romans [1]. The date is not specified.", 2)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("The exact day is not given, but he died in 1616 [2].", 2)).isEqualTo(CitationCheck.Valid(setOf(2)))
+    }
+
+    @Test
+    fun passagesDontSayButAnswerIsAnAnswer() {
+        assertThat(Citations.check("The passages do not give the exact day, but he died in 1616 [2].", 2))
+            .isEqualTo(CitationCheck.Valid(setOf(2)))
+    }
+
+    @Test
+    fun noInformationPhrasingDeclines() {
+        assertThat(Citations.check("There is no information about this in the passages.", 2)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun answerMentioningPassagesLaterIsAnAnswer() {
+        assertThat(Citations.check("Paul wrote Romans [1]. The passages do not say when.", 2))
+            .isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun decimalDoesNotEndTheFirstSentence() {
+        assertThat(Citations.check("Everest is 8,848.86 m tall [1]. The passages do not say who measured it.", 1))
+            .isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun leadingCitationIsSkipped() {
+        assertThat(Citations.check("[1] The passages do not mention Ishmael.", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun sentenceEndingInANumberEnds() {
+        assertThat(Citations.check("He died in 1616 [1]. The passages do not give the day.", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("Apollo 11 landed in 1969 [1]. The passages do not say more.", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("He died in 1616. The passages do not give the day. [1]", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun singleCapitalEndsASentence() {
+        assertThat(Citations.check("The answer is vitamin C [1]. The passages do not say more.", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("The answer is Vitamin C. The passages do not say more. [1]", 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun honorificDoesNotEndTheSentence() {
+        assertThat(Citations.check("The passages do not mention St. Paul, but Paul wrote Romans [1].", 1))
+            .isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun semicolonAndHoweverKeepTheAnswer() {
+        for (a in listOf(
+            "The passages do not say; he died in 1616 [1].",
+            "The passages do not say. However, he died in 1616 [1].".replace(". However", ", however"),
+            "The passages do not say, though he died in 1616 [1].",
+            "The passages do not say the day, while he died in 1616 [1].",
+            "The passages do not say the day, yet he died in 1616 [1].",
+            "The passages do not say: he died in 1616 [1].",
+            "The passages do not say, although he died in 1616 [1].",
+        )) assertThat(Citations.check(a, 1)).isEqualTo(CitationCheck.Valid(setOf(1)))
+    }
+
+    @Test
+    fun curlyApostropheDeclines() {
+        assertThat(Citations.check("The passages don\u2019t mention Ishmael.", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun leadingNewlineDeclines() {
+        assertThat(Citations.check("\nThe passages do not mention Ishmael.", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
     fun stripRemovesGroups() {
         assertThat(Citations.strip("A [1] b [2, 3].")).isEqualTo("A b.")
+    }
+
+    @Test
+    fun stripKeepsNewlines() {
+        assertThat(Citations.strip("One.\n\n[1] Two [2].")).contains("\n\n")
     }
 }

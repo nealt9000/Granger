@@ -99,7 +99,7 @@ class ResearchBenchmarkActivity : ComponentActivity() {
             val question = ANSWERABLE.first()
             val keywords = Keywords.extract(question)
             // Preselect's limit without its per-source cap, so a small library still gives a full 12.
-            val passages = Ranking.preselect(c.passageFinder.find(keywords), keywords, c.rankingConfig.copy(perSource = Int.MAX_VALUE))
+            val passages = Ranking.preselect(c.passageFinder.find(keywords), keywords, c.rankingConfig.copy(perDocument = Int.MAX_VALUE))
             log("(a) ${passages.size} passages for \"$question\" keywords=$keywords")
             for (backend in LlmBackend.entries) {
                 withContext(Dispatchers.IO) {
@@ -184,7 +184,7 @@ class ResearchBenchmarkActivity : ComponentActivity() {
             finder.find(words).also { found ->
                 val ms = SystemClock.elapsedRealtime() - start
                 Log.i(TAG, "Research: (b)    find $ms ms, ${found.size} passages, ${found.groupingBy { it.kind }.eachCount()}")
-                val score = LexicalScore.scorer(words, corpus = found)
+                val score = LexicalScore.scorer(words)
                 found.forEach { lexical += score(it) to it.text }
                 dump?.let { file ->
                     val rows = found.joinToString(",") { p ->

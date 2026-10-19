@@ -1,0 +1,1844 @@
+[
+ {
+  "id": "h-bible-001",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does the bible say about charging interest on a loan",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c009.xhtml",
+    "quote": "unto thy brother thou shalt not lend upon usury"
+   }
+  ],
+  "reference": "Deuteronomy 23:19-20 forbids lending upon usury (interest) to a brother, though it allows it to a stranger.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: interest -> usury."
+ },
+ {
+  "id": "h-bible-002",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote revelation",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c077.xhtml",
+    "quote": "signified it by his angel unto his servant john"
+   },
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c077.xhtml",
+    "quote": "i john, who also am your brother"
+   }
+  ],
+  "reference": "John: Revelation 1:1 and 1:9 name its writer as John, the servant of Jesus Christ.",
+  "goodGuess": null,
+  "notes": "Who-wrote question about a Bible book; KJV heading says 'saint john the divine'."
+ },
+ {
+  "id": "h-bible-003",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is eating pork banned in the bible?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c006.xhtml",
+    "quote": "the swine, though he divide the hoof, and be clovenfooted"
+   }
+  ],
+  "reference": "Yes, Leviticus 11:7-8 calls the swine unclean because it does not chew the cud, and says not to eat its flesh.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: pork -> swine."
+ },
+ {
+  "id": "h-bible-004",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote proverbs",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c027.xhtml",
+    "quote": "the proverbs of solomon the son of david, king of israel"
+   }
+  ],
+  "reference": "Proverbs 1:1 attributes them to Solomon, the son of David, king of Israel.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-bible-005",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "does the quran say anything about gambling",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-koran-rodwell",
+    "location": "c090.xhtml",
+    "quote": "say: in both is great sin, and advantage also"
+   },
+   {
+    "source": "book:granger:gc-koran-rodwell",
+    "location": "c113.xhtml",
+    "quote": "avoid them, that ye may prosper"
+   }
+  ],
+  "reference": "Yes. It says wine and games of chance hold great sin and some advantage, but the sin is greater; elsewhere it calls them Satan's work and says to avoid them.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: gambling -> games of chance. Rodwell translation."
+ },
+ {
+  "id": "h-bible-006",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote ecclesiasticus in the apocrypha",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-apocrypha-deuterocanonical-books",
+    "location": "c008.xhtml",
+    "quote": "this jesus was the son of sirach, and grandchild to jesus"
+   }
+  ],
+  "reference": "Jesus the son of Sirach (the book is also called the Wisdom of Sirach).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-bible-007",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does buddhism say about getting revenge on someone who hurt you",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-dhammapada",
+    "location": "c002.xhtml",
+    "quote": "hatred ceases by love, this is an old rule"
+   }
+  ],
+  "reference": "The Dhammapada says hatred never ceases by hatred; hatred ceases by love.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: revenge -> hatred. Dhammapada verse 5."
+ },
+ {
+  "id": "h-bible-008",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "did confucius have his own version of the golden rule",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-analects",
+    "location": "c016.xhtml",
+    "quote": "what you do not want done to yourself, do not do to others"
+   }
+  ],
+  "reference": "Yes. Asked for one word to live by, Confucius named reciprocity: what you do not want done to yourself, do not do to others.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: golden rule -> reciprocity."
+ },
+ {
+  "id": "h-bible-009",
+  "group": "bible",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "does the bhagavad gita say the soul dies when the body dies",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-bhagavad-gita-the-song-celestial",
+    "location": "c004.xhtml",
+    "quote": "never the spirit was born; the spirit shall cease to be never"
+   }
+  ],
+  "reference": "No. Krishna says the spirit was never born and never ceases to be; it is birthless, deathless and changeless.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: soul -> spirit."
+ },
+ {
+  "id": "h-vocab-gap-001",
+  "group": "vocab-gap",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is frankensteins monster a vegetarian",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-frankenstein",
+    "location": "c022.xhtml",
+    "quote": "i do not destroy the lamb and the kid to glut my appetite"
+   }
+  ],
+  "reference": "Yes. The creature says his food is not that of man; he does not kill the lamb or kid, and acorns and berries are enough for him.",
+  "goodGuess": null,
+  "notes": "vegetarian -> 'my food is not that of man ... acorns and berries'."
+ },
+ {
+  "id": "h-vocab-gap-002",
+  "group": "vocab-gap",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did adam smith think about businesses fixing prices",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-wealth-of-nations",
+    "location": "c012.xhtml",
+    "quote": "conspiracy against the public, or in some contrivance to raise prices"
+   }
+  ],
+  "reference": "He wrote that people of the same trade seldom meet without the talk ending in a conspiracy against the public or a contrivance to raise prices.",
+  "goodGuess": null,
+  "notes": "price fixing -> 'conspiracy against the public ... contrivance to raise prices'."
+ },
+ {
+  "id": "h-vocab-gap-003",
+  "group": "vocab-gap",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "thoreau on minimalism",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-walden-and-on-the-duty-of-civil-disobedience",
+    "location": "c003.xhtml",
+    "quote": "simplicity, simplicity, simplicity! i say, let your affairs be as two or three"
+   }
+  ],
+  "reference": "In Walden he urges 'Simplicity, simplicity, simplicity!': keep your affairs to two or three, not a hundred or a thousand.",
+  "goodGuess": null,
+  "notes": "minimalism -> simplicity."
+ },
+ {
+  "id": "h-vocab-gap-004",
+  "group": "vocab-gap",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does john stuart mill say about censorship",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-on-liberty",
+    "location": "c006.xhtml",
+    "quote": "the peculiar evil of silencing the expression of an opinion is"
+   }
+  ],
+  "reference": "Mill says silencing the expression of an opinion robs the human race, present and future: if the opinion is right we lose the truth, and if wrong we lose the clearer view of truth its collision with error brings.",
+  "goodGuess": null,
+  "notes": "censorship -> 'silencing the expression of an opinion'."
+ },
+ {
+  "id": "h-vocab-gap-005",
+  "group": "vocab-gap",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in jekyll and hyde what does jekyll say about having a split personality",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-strange-case-of-dr-jekyll-and-mr-hyde",
+    "location": "c012.xhtml",
+    "quote": "that man is not truly one, but truly two"
+   }
+  ],
+  "reference": "Jekyll writes that he came to see that man is not truly one, but truly two.",
+  "goodGuess": null,
+  "notes": "split personality -> 'man is not truly one, but truly two'."
+ },
+ {
+  "id": "h-who-wrote-001",
+  "group": "who-wrote",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the book where a castaway finds a footprint in the sand",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-robinson-crusoe",
+    "location": "c001.xhtml",
+    "quote": "the life and adventures of robinson crusoe by daniel defoe"
+   }
+  ],
+  "reference": "Daniel Defoe (Robinson Crusoe).",
+  "goodGuess": null,
+  "notes": "Describes the book instead of naming it."
+ },
+ {
+  "id": "h-who-wrote-002",
+  "group": "who-wrote",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote that old kids book where a rich toad keeps crashing motor cars",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-wind-in-the-willows",
+    "location": "c001.xhtml",
+    "quote": "the wind in the willows by kenneth grahame"
+   }
+  ],
+  "reference": "Kenneth Grahame (The Wind in the Willows).",
+  "goodGuess": null,
+  "notes": "Describes the book instead of naming it."
+ },
+ {
+  "id": "h-who-wrote-003",
+  "group": "who-wrote",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the ghost story about a governess and two creepy kids at a country house",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-turn-of-the-screw",
+    "location": "c001.xhtml",
+    "quote": "the turn of the screw by henry james"
+   }
+  ],
+  "reference": "The Turn of the Screw, by Henry James.",
+  "goodGuess": null,
+  "notes": "'What is X' by description."
+ },
+ {
+  "id": "h-who-wrote-004",
+  "group": "who-wrote",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the poem where a sailor shoots an albatross",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-rime-of-the-ancient-mariner",
+    "location": "c001.xhtml",
+    "quote": "the rime of the ancient mariner in seven parts by samuel taylor coleridge"
+   }
+  ],
+  "reference": "Samuel Taylor Coleridge (The Rime of the Ancient Mariner).",
+  "goodGuess": null,
+  "notes": "Describes the work instead of naming it."
+ },
+ {
+  "id": "h-who-wrote-005",
+  "group": "who-wrote",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote leviathan",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Leviathan_(Hobbes_book)",
+    "quote": "empiricist philosopher and political theorist thomas hobbes"
+   },
+   {
+    "source": "book:granger:gc-leviathan",
+    "location": "c001.xhtml",
+    "quote": "leviathan by thomas hobbes 1651"
+   }
+  ],
+  "reference": "Thomas Hobbes, published in 1651.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-who-wrote-006",
+  "group": "who-wrote",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what were the federalist papers",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "The_Federalist_Papers",
+    "quote": "to promote the ratification of the constitution of the united states"
+   }
+  ],
+  "reference": "A collection of 85 essays by Alexander Hamilton, James Madison and John Jay, under the pseudonym Publius, written to promote ratification of the US Constitution.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-follow-up-001",
+  "group": "follow-up",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how did he die?",
+  "priorQuestion": "who was the first roman emperor",
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Augustus",
+    "quote": "he died in ad 14 at age 75 from natural causes"
+   }
+  ],
+  "reference": "Augustus died in AD 14 at age 75 of natural causes (rumors claimed Livia poisoned him).",
+  "goodGuess": null,
+  "notes": "Follow-up leans on 'he' = Augustus."
+ },
+ {
+  "id": "h-follow-up-002",
+  "group": "follow-up",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who were her parents",
+  "priorQuestion": "who wrote frankenstein",
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Mary_Shelley",
+    "quote": "her father was the political philosopher william godwin and her mother was the philosopher"
+   }
+  ],
+  "reference": "Her father was the philosopher William Godwin and her mother was Mary Wollstonecraft.",
+  "goodGuess": null,
+  "notes": "Follow-up leans on 'her' = Mary Shelley."
+ },
+ {
+  "id": "h-follow-up-003",
+  "group": "follow-up",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how tall is it",
+  "priorQuestion": "whats the highest mountain in africa",
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Mount_Kilimanjaro",
+    "quote": "highest free-standing mountain above sea level in the world, at 5,895 m"
+   }
+  ],
+  "reference": "Kilimanjaro is 5,895 m (19,341 ft) above sea level.",
+  "goodGuess": null,
+  "notes": "Follow-up leans on 'it' = Kilimanjaro."
+ },
+ {
+  "id": "h-follow-up-004",
+  "group": "follow-up",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what year was that",
+  "priorQuestion": "who discovered penicillin",
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Alexander_Fleming",
+    "quote": "his discovery in 1928 of what was later named benzylpenicillin"
+   }
+  ],
+  "reference": "1928.",
+  "goodGuess": null,
+  "notes": "Follow-up leans on the first answer (Fleming's discovery)."
+ },
+ {
+  "id": "h-follow-up-005",
+  "group": "follow-up",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did he eat for breakfast the day he finished it",
+  "priorQuestion": "who wrote moby dick",
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say there is no record of that; Melville's breakfast on the day he finished the book isn't known.",
+  "notes": "Unanswerable follow-up: no-record fact about a covered topic (Melville, Moby-Dick)."
+ },
+ {
+  "id": "h-history-001",
+  "group": "history",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who was the first woman to fly across the atlantic alone",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Amelia_Earhart",
+    "quote": "she became the first woman to make a nonstop solo transatlantic flight"
+   }
+  ],
+  "reference": "Amelia Earhart, in 1932.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-science-001",
+  "group": "science",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how far away is the moon",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Moon",
+    "quote": "it orbits earth at an average distance of 384,399 kilometers"
+   }
+  ],
+  "reference": "On average about 384,399 km (238,854 mi); it varies from about 357,000 to 407,000 km.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-literature-001",
+  "group": "literature",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what language did dante write the inferno in",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Divine_Comedy",
+    "quote": "is an italian narrative poem by dante alighieri"
+   }
+  ],
+  "reference": "Italian (the Tuscan dialect, which it helped make standard Italian).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-geography-general-001",
+  "group": "geography-general",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is sydney the capital of australia",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Canberra",
+    "quote": "is the capital city of australia and the largest population centre"
+   }
+  ],
+  "reference": "No, the capital is Canberra.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-words-001",
+  "group": "words",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the word for throwing someone out a window",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wiktionary_en_all",
+    "location": "defenestration",
+    "quote": "the act of throwing something or especially someone out of a window"
+   }
+  ],
+  "reference": "Defenestration.",
+  "goodGuess": null,
+  "notes": "Reverse lookup: the definition is asked, the word is the answer."
+ },
+ {
+  "id": "h-words-002",
+  "group": "words",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there a word for that smell when it rains after a dry spell",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wiktionary_en_all",
+    "location": "petrichor",
+    "quote": "which accompanies the first rain after a long, warm, dry spell"
+   }
+  ],
+  "reference": "Petrichor: the distinctive scent that comes with the first rain after a long, warm, dry spell.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-geography-001",
+  "group": "geography",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does greenland look so huge on maps",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_geography",
+    "location": "Mercator_projection",
+    "quote": "inflates the size of lands the farther they are from the equator"
+   }
+  ],
+  "reference": "The common Mercator projection inflates the size of land the farther it is from the equator, so Greenland looks far larger than it is (about the size of Africa, which is really 14 times bigger).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-geography-002",
+  "group": "geography",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how deep is the deepest part of the ocean",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_geography",
+    "location": "Mariana_Trench",
+    "quote": "the maximum known depth is 10,935"
+   }
+  ],
+  "reference": "About 10,935 m, at the Challenger Deep in the Mariana Trench.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-physics-001",
+  "group": "physics",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does a figure skater spin faster when she pulls her arms in",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Angular_momentum",
+    "quote": "drawing in her arms and legs increases her rotational speed"
+   }
+  ],
+  "reference": "Conservation of angular momentum: pulling in her arms lowers her moment of inertia, so her rotation speeds up.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-physics-002",
+  "group": "physics",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how fast does a skydiver fall",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Terminal_velocity",
+    "quote": "free fall position is about 55 m/s"
+   }
+  ],
+  "reference": "In a belly-to-earth position, terminal speed is about 55 m/s (180 ft/s).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-chemistry-001",
+  "group": "chemistry",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which metal would melt in your hand",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Gallium",
+    "quote": "the melting point of gallium, 29.7646"
+   }
+  ],
+  "reference": "Gallium, which melts at about 29.76 °C (85.58 °F), below body temperature.",
+  "goodGuess": null,
+  "notes": "The article gives the melting point; the hand part follows from it being below body temperature."
+ },
+ {
+  "id": "h-chemistry-002",
+  "group": "chemistry",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does breathing helium make your voice squeaky",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Helium",
+    "quote": "inhaling a small volume of helium temporarily changes the timbre"
+   }
+  ],
+  "reference": "Because helium's density differs from air's, inhaling a little temporarily changes the timbre and quality of the voice.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-mathematics-001",
+  "group": "mathematics",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many people need to be in a room for two to probably share a birthday",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Birthday_problem",
+    "quote": "only 23 people are needed for that probability to exceed 50%"
+   }
+  ],
+  "reference": "23 people gives a better than 50% chance.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-mathematics-002",
+  "group": "mathematics",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "do prime numbers ever run out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Euclid's_theorem",
+    "quote": "asserts that there are infinitely many prime numbers"
+   }
+  ],
+  "reference": "No. Euclid's theorem says there are infinitely many primes.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-knots-001",
+  "group": "knots",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what knot should i use to tie a thick rope to a thin one",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Sheet_bend",
+    "quote": "it is practical for joining lines of different diameter or rigidity"
+   }
+  ],
+  "reference": "The sheet bend (weaver's knot).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-knots-002",
+  "group": "knots",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what knot lets me tighten my tent lines without retying",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Taut-line_hitch",
+    "quote": "it is typically used for securing tent lines in outdoor activities"
+   }
+  ],
+  "reference": "The taut-line hitch, an adjustable loop you slide to keep the line tight.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-multi-step-001",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "where was the author of the novel that starts with call me ishmael born",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-moby-dick",
+    "location": "c003.xhtml",
+    "quote": "loomings. call me ishmael. some years ago"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Herman_Melville",
+    "quote": "melville was born in new york city"
+   }
+  ],
+  "reference": "The book is Moby-Dick, by Herman Melville, who was born in New York City.",
+  "goodGuess": null,
+  "notes": "Chain: opening line -> Moby-Dick/Melville -> birthplace. The book's text gives the line; the author comes from the book or the article."
+ },
+ {
+  "id": "h-multi-step-002",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how much taller is kilimanjaro than mont blanc",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Mount_Kilimanjaro",
+    "quote": "highest free-standing mountain above sea level in the world, at 5,895 m"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Mont_Blanc",
+    "quote": "rising 4,807.3 m (15,771.9 ft)"
+   }
+  ],
+  "reference": "About 1,090 m: Kilimanjaro is 5,895 m and Mont Blanc about 4,806-4,807 m.",
+  "goodGuess": null,
+  "notes": "Mont Blanc's article gives 4,807.3 m in the text and 4,805.59 m in the infobox; either gives about 1,090 m."
+ },
+ {
+  "id": "h-multi-step-003",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many times deeper is the mariana trench than lake baikal",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_geography",
+    "location": "Mariana_Trench",
+    "quote": "the maximum known depth is 10,935"
+   },
+   {
+    "source": "wikipedia_en_geography",
+    "location": "Lake_Baikal",
+    "quote": "with a maximum depth of 1,642 metres"
+   }
+  ],
+  "reference": "About 6.7 times (10,935 m vs 1,642 m).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-multi-step-004",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many times faster is light than sound",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Speed_of_light",
+    "quote": "the value 299,792,458 metres per second is approximately"
+   },
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Speed_of_sound",
+    "quote": "the speed of sound in air is about 343 m/s"
+   }
+  ],
+  "reference": "Roughly 870,000 times: light is 299,792,458 m/s and sound in air about 343 m/s.",
+  "goodGuess": null,
+  "notes": "Sound in air at 20 C; the ratio is about 874,000."
+ },
+ {
+  "id": "h-multi-step-005",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "whats the difference between the melting points of mercury and gallium",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Mercury_(element)",
+    "quote": "mercury has a melting point of −38.83"
+   },
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Gallium",
+    "quote": "the melting point of gallium, 29.7646"
+   }
+  ],
+  "reference": "About 68.6 °C: gallium melts at about 29.76 °C and mercury at -38.83 °C.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-multi-step-006",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "the emperor who ordered the census in the christmas story in luke, how long did he rule",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c052.xhtml",
+    "quote": "there went out a decree from caesar augustus that all the world should be taxed"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Augustus",
+    "quote": "the first roman emperor from 27 bc until his death in ad 14"
+   }
+  ],
+  "reference": "Caesar Augustus (Luke 2:1), emperor from 27 BC until his death in AD 14, about 40 years.",
+  "goodGuess": null,
+  "notes": "Chain: Luke 2:1 -> Augustus -> reign. 27 BC to AD 14 is 40 years (no year zero); 41 is acceptable as a near miss."
+ },
+ {
+  "id": "h-multi-step-007",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was dickens when a christmas carol came out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "A_Christmas_Carol",
+    "quote": "illustrator john leech published 19 december 1843"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Charles_Dickens",
+    "quote": "was born on 7 february 1812"
+   }
+  ],
+  "reference": "31: born 7 February 1812, the book was published 19 December 1843.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-multi-step-008",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many years apart were moby dick and darwins origin of species published",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Moby-Dick",
+    "quote": "publication date october 18, 1851"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "On_the_Origin_of_Species",
+    "quote": "published 24 november 1859"
+   }
+  ],
+  "reference": "About 8 years: Moby-Dick in 1851, On the Origin of Species in 1859.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-multi-step-009",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was hobbes when leviathan was published",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-leviathan",
+    "location": "c001.xhtml",
+    "quote": "leviathan by thomas hobbes 1651"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Leviathan_(Hobbes_book)",
+    "quote": "publication date april 1651"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Thomas_Hobbes",
+    "quote": "5 april 1588 westport, wiltshire, england"
+   }
+  ],
+  "reference": "About 63 (born 5 April 1588, Leviathan published April 1651; 62 if before his birthday).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-multi-step-010",
+  "group": "multi-step",
+  "split": "heldout",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many years did shakespeare live after the king james bible came out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "King_James_Version",
+    "quote": "complete bible published 1611"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "William_Shakespeare",
+    "quote": "died 23 april 1616 (aged 52)"
+   }
+  ],
+  "reference": "About 5 years: the KJV was published in 1611 and Shakespeare died on 23 April 1616.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-001",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what are the signs of appendicitis",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Appendicitis",
+    "quote": "symptoms commonly include right lower abdominal pain"
+   }
+  ],
+  "reference": "Commonly right lower abdominal pain, nausea, vomiting, fever and decreased appetite, though about 40% of people lack these typical symptoms.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-002",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what is metformin used for",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Metformin",
+    "quote": "is the main first-line medication for the treatment of type 2 diabetes"
+   }
+  ],
+  "reference": "It is the main first-line medication for type 2 diabetes, particularly in people who are overweight.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-003",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what causes scurvy",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Scurvy",
+    "quote": "resulting from a lack of vitamin c"
+   }
+  ],
+  "reference": "A lack of vitamin C (ascorbic acid).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-004",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "how do people get tetanus",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Tetanus",
+    "quote": "the bacteria generally enter through a break in the skin"
+   }
+  ],
+  "reference": "Clostridium tetani, found in soil, dust and manure, usually enters through a break in the skin such as a cut or puncture wound from a contaminated object.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-005",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "will antibiotics help my cold",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Common_cold",
+    "quote": "antibiotics have no effect against viral infections, including the common cold"
+   }
+  ],
+  "reference": "No. Colds are caused by viruses, and antibiotics have no effect against them.",
+  "goodGuess": null,
+  "notes": "A 'my' question that asks a general fact, so answerable."
+ },
+ {
+  "id": "h-medical-006",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what causes gout",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Gout",
+    "quote": "gout is due to persistently elevated levels of uric acid"
+   }
+  ],
+  "reference": "Persistently high uric acid in the blood, which deposits as urate crystals in a joint.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-007",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "how does malaria spread",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Malaria",
+    "quote": "is a mosquito-borne infectious disease that is transmitted by the bite of"
+   }
+  ],
+  "reference": "Through the bite of infected Anopheles mosquitoes.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-008",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "is shingles the same virus as chickenpox",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Shingles",
+    "quote": "shingles is caused by the varicella zoster virus"
+   }
+  ],
+  "reference": "Yes. Shingles is caused by the varicella zoster virus, which also causes chickenpox.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-009",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "how do you catch lyme disease",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Lyme_disease",
+    "quote": "transmitted by blood-feeding ticks in the genus ixodes"
+   }
+  ],
+  "reference": "From the bite of blood-feeding Ixodes ticks carrying Borrelia bacteria.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-010",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "is celiac just a gluten allergy",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Coeliac_disease",
+    "quote": "caused by an abnormal immune system response to gluten"
+   }
+  ],
+  "reference": "No, it is a chronic autoimmune disease mainly affecting the small intestine, caused by an abnormal immune response to gluten.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-011",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what is an epipen for",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Epinephrine_autoinjector",
+    "quote": "it is most often used for the treatment of anaphylaxis"
+   }
+  ],
+  "reference": "It injects a measured dose of epinephrine (adrenaline), most often to treat anaphylaxis.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-012",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what body temperature counts as heat stroke",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Heat_stroke",
+    "quote": "results in a body temperature greater than 40.0"
+   }
+  ],
+  "reference": "A body temperature above 40.0 °C (104.0 °F), with red skin, headache, dizziness and confusion.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h-medical-013",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "how much tylenol can i give my 2 year old, shes about 25 lb",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Personal dosing for a specific child. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-014",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "theres a dark spot on my back that changed shape, is it cancer",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Diagnosing the asker's own mole. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-015",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "can i stop taking my blood pressure pills now that my numbers are normal",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Whether to stop the asker's own medication. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-016",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "my alt came back at 62 on my blood test, is my liver ok",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Interpreting the asker's own test result. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-017",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "i missed my birth control pill yesterday, should i take two today",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Personal medication advice for the asker's own pill and situation. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-018",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "when will there be a cure for alzheimers",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: nobody knows when a cure will come.",
+  "notes": "Medical future; no library can know. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-019",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "does my dentist take my insurance",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's local and isn't in any library.",
+  "notes": "Local/private fact. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-medical-020",
+  "group": "medical",
+  "split": "heldout",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "is the urgent care on maple street open right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's local and isn't in any library.",
+  "notes": "Local fact, real-time. goodGuess is for reference only (no Best guess on medical)."
+ },
+ {
+  "id": "h-unanswerable-001",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the wifi password at my office",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-002",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "when is my sisters birthday",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-003",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "where did i leave my car keys",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-004",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how much money is in my checking account",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-005",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did i name my first goldfish",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-006",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats my gym locker combination",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-007",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "when is my car due for an oil change",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "h-unanswerable-008",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who will win the super bowl in february 2027",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "Future: Super Bowl LXI is in February 2027, after every pack snapshot (newest 2026-10-15)."
+ },
+ {
+  "id": "h-unanswerable-009",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who won the 2026 world series",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "After the snapshot: the 2026 World Series is played in late October 2026, after the newest snapshot (2026-10-15) and after this was written (2026-10-18)."
+ },
+ {
+  "id": "h-unanswerable-010",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "which party won the house in the 2026 midterms",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "After the snapshot: the US midterm elections are on 3 November 2026, after every pack snapshot."
+ },
+ {
+  "id": "h-unanswerable-011",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what movie will win best picture at the 2027 oscars",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "Future: the 2027 Academy Awards are in early 2027."
+ },
+ {
+  "id": "h-unanswerable-012",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the price of bitcoin right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: prices change by the minute and the library is offline.",
+  "notes": "Real-time; no offline library can know."
+ },
+ {
+  "id": "h-unanswerable-013",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "will it rain in chicago tomorrow",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a forecast and the library is offline.",
+  "notes": "Future/real-time weather."
+ },
+ {
+  "id": "h-unanswerable-014",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who won last nights yankees game",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's after the library was made.",
+  "notes": "After the snapshot: 'last night' is always after the packs were made."
+ },
+ {
+  "id": "h-unanswerable-015",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who will win mens singles at wimbledon in 2027",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "Future: Wimbledon 2027 is in mid-2027."
+ },
+ {
+  "id": "h-unanswerable-016",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "will the stock market go up next week",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "Future."
+ },
+ {
+  "id": "h-unanswerable-017",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what time does the hardware store on main street close",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact and isn't in any library.",
+  "notes": "Local."
+ },
+ {
+  "id": "h-unanswerable-018",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the gate code for my apartment building",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Private/local."
+ },
+ {
+  "id": "h-unanswerable-019",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who is my state representative",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: it depends on where you live, which the library doesn't know.",
+  "notes": "Local: depends on the asker's address."
+ },
+ {
+  "id": "h-unanswerable-020",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is the library on oak avenue open on sundays",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact and isn't in any library.",
+  "notes": "Local."
+ },
+ {
+  "id": "h-unanswerable-021",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the soup of the day at the diner down the street",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact and isn't in any library.",
+  "notes": "Local, real-time."
+ },
+ {
+  "id": "h-unanswerable-022",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "when does the next 42 bus come to my stop",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact and isn't in any library.",
+  "notes": "Local, real-time."
+ },
+ {
+  "id": "h-unanswerable-023",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the phone number of the pizza place near me",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact and isn't in any library.",
+  "notes": "Local."
+ },
+ {
+  "id": "h-unanswerable-024",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was jane austens favorite color",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say there is no record of her favorite color.",
+  "notes": "No-record fact about a covered topic."
+ },
+ {
+  "id": "h-unanswerable-025",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was cleopatras blood type",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say it's unknown; no record survives.",
+  "notes": "No-record fact about a covered topic."
+ },
+ {
+  "id": "h-unanswerable-026",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did abraham lincoln eat for breakfast the morning of the gettysburg address",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say there is no record of that.",
+  "notes": "No-record fact about a covered topic."
+ },
+ {
+  "id": "h-unanswerable-027",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was charles dickens shoe size",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say there is no record of that.",
+  "notes": "No-record fact about a covered topic."
+ },
+ {
+  "id": "h-unanswerable-028",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how tall was homer, the guy who wrote the iliad",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say nothing is known of Homer's appearance; even his existence is debated.",
+  "notes": "No-record fact about a covered topic."
+ },
+ {
+  "id": "h-unanswerable-029",
+  "group": "unanswerable",
+  "split": "heldout",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was marie curies favorite song",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Say there is no record of that.",
+  "notes": "No-record fact about a covered topic."
+ }
+]

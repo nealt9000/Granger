@@ -17,6 +17,7 @@ import app.granger.core.catalog.Preset
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
 import app.granger.modelEntry
+import app.granger.core.catalog.ModelRole
 import app.granger.pack
 import app.granger.packEntry
 import app.granger.record
@@ -72,9 +73,39 @@ class SourceViewModelTest {
         assertThat(ui.sections[0].rows.single().details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
     }
 
+    @Test fun aPackRowCarriesItsCatalogDescription() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(packEntry("top", description = "The best 50,000 articles"))))
+        assertThat(viewModel().ui.value.sections.flatMap { it.rows }.single().description).isEqualTo("The best 50,000 articles")
+    }
+
+    @Test fun nonCommercialPackShowsProvidedByKiwix() = runTest(main.dispatcher) {
+        val ifixit = packEntry("ifixit", category = "How-to", license = "CC BY-NC-SA 3.0", nonCommercial = true)
+        val vm = SourceViewModel(
+            CatalogScope.GRANGER, FakeCatalogSource(catalogOf(packs = listOf(ifixit, med))), downloads, library, bookshelf,
+            volumes, prefs, DeviceTier.THINK_DEEPER, appScope = this, io = main.dispatcher,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        assertThat(rows.getValue("ifixit").details).isEqualTo("eng · Updated 2026-10-10 · CC BY-NC-SA 3.0 · provided by Kiwix")
+        assertThat(rows.getValue("med").details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
+    }
+
     @Test fun modelsScopeListsTheModelsSection() = runTest(main.dispatcher) {
         val ui = viewModel(CatalogScope.MODELS).ui.value
         assertThat(ui.sections.map { it.title }).containsExactly("AI models")
+    }
+
+    @Test fun unusedEmbedderSaysNotUsedYet() = runTest(main.dispatcher) {
+        val vm = SourceViewModel(
+            CatalogScope.MODELS, FakeCatalogSource(catalogOf(models = listOf(e2b, modelEntry("gemma-embed", ModelRole.EMBEDDER)))),
+            downloads, library, bookshelf, volumes, prefs, DeviceTier.THINK_DEEPER, appScope = this, io = main.dispatcher,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        assertThat(rows.getValue("gemma-embed").description).isEqualTo("Not used yet")
+        assertThat(rows.getValue("e2b").description).isEmpty()
     }
 
     @Test fun onlyItemsInScopeAreListed() = runTest(main.dispatcher) {

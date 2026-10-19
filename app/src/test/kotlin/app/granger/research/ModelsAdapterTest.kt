@@ -78,6 +78,20 @@ class ModelsAdapterTest {
         assertThat(heard).containsExactly("a:one ", "a:two", "b:one ", "b:two").inOrder()
     }
 
+    @Test fun aGenerationSaysItIsReadyOnlyOnceTheModelIsFree() = runTest {
+        val (adapter, _) = adapter(InstalledModels(small = File("small")))
+        val generator = adapter.generator(deeper = false)
+        launch { generator.generate("a", 16).toList() }
+        advanceUntilIdle()
+        var ready = false
+        launch { generator.generate("b", 16) { ready = true }.toList() }
+        advanceUntilIdle()
+        assertThat(ready).isFalse() // still waiting for the first reply
+        engines.single().gate.complete(Unit)
+        advanceUntilIdle()
+        assertThat(ready).isTrue()
+    }
+
     @Test fun anotherChatsSwapWaitsUntilTheReplyIsDone() = runTest {
         val (adapter, _) = adapter(InstalledModels(small = File("small"), large = File("large")))
         val small = adapter.generator(deeper = false)

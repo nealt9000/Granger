@@ -29,6 +29,8 @@ fun article(n: Int) = Passage(
 /** In-memory [ResearchChats]. [failure], when set, is thrown by every call that reads or writes one chat. */
 class FakeChats : ResearchChats {
     var failure: Exception? = null
+    /** When set, the `turns` and `recent` flows throw it. */
+    var flowFailure: Exception? = null
     val chats = MutableStateFlow<List<ChatSummary>>(emptyList())
     val turnList = MutableStateFlow<List<ChatTurn>>(emptyList())
     private var nextChat = 1L
@@ -38,9 +40,9 @@ class FakeChats : ResearchChats {
     fun turnsOf(chatId: Long) = turnList.value.filter { it.chatId == chatId }
 
     override fun recent(limit: Int): Flow<List<ChatSummary>> =
-        chats.map { list -> list.sortedByDescending { it.updatedAt }.take(limit) }
+        chats.map { list -> flowFailure?.let { throw it }; list.sortedByDescending { it.updatedAt }.take(limit) }
 
-    override fun turns(chatId: Long): Flow<List<ChatTurn>> = turnList.map { list -> list.filter { it.chatId == chatId } }
+    override fun turns(chatId: Long): Flow<List<ChatTurn>> = turnList.map { list -> flowFailure?.let { throw it }; list.filter { it.chatId == chatId } }
 
     override suspend fun chat(chatId: Long): ChatSummary? {
         failure?.let { throw it }
@@ -94,6 +96,13 @@ class FakeChats : ResearchChats {
         chats.update { list -> list.map { if (it.id == turn.chatId) it.copy(updatedAt = time) else it } }
     }
 
+    override suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean) {
+        failure?.let { throw it }
+        turnList.update { list ->
+            list.map { if (it.id == turnId) it.copy(guess = text, guessLarge = usedLarge, guessFellBack = fellBack) else it }
+        }
+    }
+
     override suspend fun interruptPending(): Int {
         val pending = turnList.value.count { it.outcome == TurnOutcome.PENDING }
         turnList.update { list -> list.map { if (it.outcome == TurnOutcome.PENDING) it.copy(outcome = TurnOutcome.INTERRUPTED) else it } }
@@ -101,6 +110,7 @@ class FakeChats : ResearchChats {
     }
 
     override suspend fun delete(chatId: Long) {
+        failure?.let { throw it }
         chats.update { list -> list.filterNot { it.id == chatId } }
         turnList.update { list -> list.filterNot { it.chatId == chatId } }
     }
@@ -112,8 +122,11 @@ class FakeFinder(var passages: List<Passage> = (1..10).map(::article)) : Passage
     var ranOn: ContinuationInterceptor? = null
     /** When set, searching waits for it. */
     var gate: CompletableDeferred<Unit>? = null
+    /** When set, searching throws it. */
+    var failure: Exception? = null
     override suspend fun find(keywords: List<String>): List<Passage> {
         calls++
+        failure?.let { throw it }
         ranOn = currentCoroutineContext()[ContinuationInterceptor]
         gate?.await()
         return passages
@@ -133,7 +146,7 @@ class ScriptedGenerator(
     val gate = CompletableDeferred<Unit>()
     var failAt: Int? = null
 
-    val answerPrompts get() = prompts.filterNot { it.startsWith("Turn the question into search keywords") }
+    val answerPrompts get() = prompts.filterNot { it.startsWith("Turn the question into search words") }
 
     override fun generate(prompt: String, maxTokens: Int): Flow<String> = flow {
         prompts += prompt
@@ -151,8 +164,16 @@ class ScriptedGenerator(
 
 /** The small model always loads; the large one only when [large] is set. No embedder: ranking is lexical. */
 class FakeResearchModels(val small: ScriptedGenerator = ScriptedGenerator(), var large: ScriptedGenerator? = null) : ResearchModels {
+    /** When set, even the small model won't load. */
+    var smallFails = false
+
     override suspend fun generator(deeper: Boolean): TextGenerator =
-        if (deeper) large ?: throw ModelUnavailableException("large model failed") else small
+        if (deeper) {
+            large ?: throw ModelUnavailableException("large model failed")
+        } else {
+            if (smallFails) throw ModelUnavailableException("small model failed")
+            small
+        }
 
     override suspend fun embedder(): PassageEmbedder? = null
 }

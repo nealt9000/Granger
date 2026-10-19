@@ -1,7 +1,5 @@
 package app.granger.core.research
 
-import kotlin.math.ln
-
 /**
  * How well a passage matches the rewrite keywords, independent of the search engine's own score. Each keyword counts
  * for the share of its words that are there, so "portia quote" half-matches a passage that names Portia. Stopwords
@@ -9,39 +7,38 @@ import kotlin.math.ln
  */
 object LexicalScore {
     private const val TITLE_BONUS = 0.1
+    private const val LEAD_BONUS = 0.3
 
     fun of(passage: Passage, keywords: List<String>): Double = scorer(keywords)(passage)
 
     /**
-     * [of] for many passages: the keyword patterns are built once. Given a [corpus] (the passages a search found),
-     * words are weighted by how rare they are in it, with a smoothed idf, and each keyword by the weight of its words.
-     * A keyword about the question's form ("literature analysis") then counts for little when its words are everywhere.
+     * [of] for many passages: the keyword patterns are built once. Every keyword word weighs the same; word rarity is
+     * not used, since in a search's results the question's own topic word is in nearly every passage and would count least.
+     * An article's opening passage (see [isLead]) that matches at least one word gets [LEAD_BONUS].
      */
-    fun scorer(keywords: List<String>, corpus: List<Passage> = emptyList()): (Passage) -> Double {
+    fun scorer(keywords: List<String>): (Passage) -> Double {
         val groups = keywords
             .map { k -> Keywords.words(k).map { it.lowercase() }.filterNot(Keywords::isStopword).distinct() }
             .filter { it.isNotEmpty() }
         if (groups.isEmpty()) return { 0.0 }
         val patterns = groups.flatten().distinct().associateWith(::wholeWord)
-        val weight: (String) -> Double = if (corpus.isEmpty()) {
-            { 1.0 }
-        } else {
-            val bodies = corpus.map(::body)
-            val docs = patterns.mapValues { (_, regex) -> bodies.count { regex.containsMatchIn(it) } }
-            ({ word -> ln((corpus.size + 1.0) / (docs.getValue(word) + 1)) + 1 })
-        }
-        val keywordWeight: (List<String>) -> Double = if (corpus.isEmpty()) { _ -> 1.0 } else { group -> group.sumOf(weight) }
-        val total = groups.sumOf(keywordWeight)
         return { passage ->
             val text = body(passage)
             val present = patterns.filterValues { it.containsMatchIn(text) }.keys
-            val found = groups.sumOf { group ->
-                keywordWeight(group) * group.filter { it in present }.sumOf(weight) / group.sumOf(weight)
-            }
-            val inTitle = groups.any { group -> group.all { patterns.getValue(it).containsMatchIn(passage.sourceTitle) } }
-            found / total + if (inTitle) TITLE_BONUS else 0.0
+            val titleWords = Keywords.words(passage.sourceTitle).map { it.lowercase() }.toSet()
+            // A title only adds a small bonus: crediting a whole keyword let "sister" pass every passage of Sister Carrie (tune-4).
+            val inTitle = groups.any { group -> group.all { w -> Keywords.alternatives(w).any { it in titleWords } } }
+            val found = groups.sumOf { group -> group.count { it in present }.toDouble() / group.size }
+            found / groups.size +
+                (if (inTitle) TITLE_BONUS else 0.0) +
+                (if (found > 0 && isLead(passage)) LEAD_BONUS else 0.0)
         }
     }
+
+    /** The text under an article's own title: its heading is blank or the title. Books have no such passage. */
+    private fun isLead(passage: Passage): Boolean =
+        passage.kind == SourceKind.ARTICLE &&
+            (passage.heading.isBlank() || passage.heading.trim().equals(passage.sourceTitle.trim(), ignoreCase = true))
 
     private fun body(passage: Passage) = "${passage.heading} ${passage.text}"
 

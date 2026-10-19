@@ -2,6 +2,7 @@ package app.granger.core.research
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -164,6 +165,49 @@ class ResearchPipelineTest {
         assertThat(finder.calls).containsExactly(Keywords.extract(question))
         assertThat(outcome(events).keywords).isEqualTo(Keywords.extract(question))
         assertThat(outcome(events)).isInstanceOf(Outcome.Answered::class.java)
+    }
+
+    @Test
+    fun finderExceptionFailsWithSearchFailed() = runTest {
+        val finder = PassageFinder { throw IllegalStateException("disk I/O error") }
+        val events = ResearchPipeline(finder, FakeModels(FakeGenerator())).run(ResearchRequest("At what temperature does water boil?")).toList()
+        val out = outcome(events) as Outcome.Failed
+        assertThat(out.reason).isEqualTo(FailReason.SEARCH_FAILED)
+        assertThat(out.cause).hasMessageThat().isEqualTo("disk I/O error")
+        assertThat(out.keywords).containsExactly("water", "boils").inOrder()
+    }
+
+    @Test
+    fun rewriteTimeoutStartsAfterTheModelIsFree() = runTest {
+        // Another chat holds the model for 6 s (longer than the 5 s timeout) before this reply may begin.
+        val busy = object : TextGenerator {
+            override fun generate(prompt: String, maxTokens: Int): Flow<String> = generate(prompt, maxTokens) {}
+            override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flow {
+                delay(6_000)
+                onReady()
+                emit(if (prompt.startsWith("Turn the question")) "keywords: water, boils\nmedical: no" else "Water boils at 100 °C [1].")
+            }
+        }
+        val finder = FakeFinder(listOf(water))
+        val events = ResearchPipeline(finder, FakeModels(busy)).run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(finder.calls).containsExactly(listOf("water", "boils"))
+        assertThat(outcome(events).keywords).containsExactly("water", "boils").inOrder()
+    }
+
+    @Test
+    fun rewriteStillTimesOutOnceTheModelIsFree() = runTest {
+        val slow = object : TextGenerator {
+            override fun generate(prompt: String, maxTokens: Int): Flow<String> = generate(prompt, maxTokens) {}
+            override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flow {
+                onReady()
+                if (prompt.startsWith("Turn the question")) awaitCancellation()
+                emit("Water boils at 100 °C [1].")
+            }
+        }
+        val finder = FakeFinder(listOf(water))
+        val question = "At what temperature does water boil?"
+        ResearchPipeline(finder, FakeModels(slow)).run(ResearchRequest(question)).toList()
+        assertThat(finder.calls).containsExactly(Keywords.extract(question))
     }
 
     @Test
@@ -337,5 +381,165 @@ class ResearchPipelineTest {
         assertThat(events.filterIsInstance<ResearchEvent.Progress>().map { it.stage })
             .containsExactly(Stage.LOADING_MODEL, Stage.SEARCHING, Stage.RANKING, Stage.WRITING).inOrder()
         assertThat(events.last()).isInstanceOf(ResearchEvent.Done::class.java)
+    }
+
+    @Test
+    fun guessStreamsPartialsThenGuessed() = runTest {
+        val gen = FakeGenerator(answer = { flowOf("Probably ", "Paris.") })
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(gen))
+            .guess("Capital of France?", priorQuestion = null, large = false).toList()
+        assertThat(events.take(2)).containsExactly(
+            ResearchEvent.Progress(Stage.LOADING_MODEL),
+            ResearchEvent.Progress(Stage.WRITING),
+        ).inOrder()
+        assertThat(events.filterIsInstance<ResearchEvent.Partial>().map { it.text })
+            .containsExactly("Probably ", "Probably Paris.").inOrder()
+        val out = outcome(events) as Outcome.Guessed
+        assertThat(out.text).isEqualTo("Probably Paris.")
+        assertThat(out.usedLarge).isFalse()
+        assertThat(out.fellBack).isFalse()
+        assertThat(out.medical).isFalse()
+        assertThat(out.keywords).isEmpty()
+        assertThat(gen.maxTokens).containsExactly(512)
+    }
+
+    @Test
+    fun guessNeverCallsTheFinder() = runTest {
+        val finder = FakeFinder(listOf(water))
+        ResearchPipeline(finder, FakeModels(FakeGenerator()))
+            .guess("Anything?", priorQuestion = "Before?", large = false).toList()
+        assertThat(finder.calls).isEmpty()
+    }
+
+    @Test
+    fun guessFallsBackToSmallWhenLargeWontLoad() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = FakeGenerator(), large = null))
+            .guess("Anything?", priorQuestion = null, large = true).toList()
+        assertThat(events).contains(ResearchEvent.GuessFallback)
+        val out = outcome(events) as Outcome.Guessed
+        assertThat(out.fellBack).isTrue()
+        assertThat(out.usedLarge).isFalse()
+    }
+
+    @Test
+    fun guessStopKeepsTheTextSoFar() = runTest {
+        val gen = FakeGenerator(answer = { flowOf("One ", "two ", "three") })
+        var chunks = 0
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(gen))
+            .guess("Count?", priorQuestion = null, large = false, stop = { ++chunks >= 2 }).toList()
+        assertThat((outcome(events) as Outcome.Guessed).text).isEqualTo("One two ")
+    }
+
+    @Test
+    fun guessWithNoModelFails() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = null))
+            .guess("Anything?", priorQuestion = null, large = false).toList()
+        val failed = outcome(events) as Outcome.Failed
+        assertThat(failed.reason).isEqualTo(FailReason.MODEL_UNAVAILABLE)
+        assertThat(failed.keywords).isEmpty()
+        assertThat(failed.cause).isInstanceOf(ModelUnavailableException::class.java)
+    }
+
+    @Test
+    fun guessUsesTheLargeModelWhenItLoads() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = FakeGenerator(), large = FakeGenerator()))
+            .guess("Anything?", priorQuestion = null, large = true).toList()
+        assertThat(events).doesNotContain(ResearchEvent.GuessFallback)
+        val out = outcome(events) as Outcome.Guessed
+        assertThat(out.usedLarge).isTrue()
+        assertThat(out.fellBack).isFalse()
+    }
+
+    @Test
+    fun largeReloadFailureMidAnswerFallsBackToSmall() = runTest {
+        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
+        val small = FakeGenerator(answer = { flowOf("Small answer [1].") })
+        // The large model loaded for the request but won't reload when the reply starts.
+        val large = FakeGenerator(answer = { flow { throw ModelUnavailableException("won't reload") } })
+        val models = FakeModels(small, large = large)
+        val events = ResearchPipeline(FakeFinder(emptyList()), models)
+            .run(ResearchRequest("Why?", deeperFrom = eight)).toList()
+        assertThat(events).contains(ResearchEvent.LargeFallback)
+        val out = outcome(events) as Outcome.Answered
+        assertThat(out.text).isEqualTo("Small answer [1].")
+        assertThat(out.usedLarge).isFalse()
+        assertThat(out.passages).isEqualTo(eight.take(4))
+        assertThat(out.candidates).isEqualTo(eight.drop(4))
+    }
+
+    @Test
+    fun aModelDeclineCarriesItsPassagesAndReply() = runTest {
+        val found = listOf(passage("water", "Water boils at 100 degrees.", "Water"))
+        val gen = FakeGenerator(answer = { flowOf("NOT IN LIBRARY") })
+        val events = ResearchPipeline(FakeFinder(found), FakeModels(gen)).run(ResearchRequest("Water boils?")).toList()
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.reply).isEqualTo("NOT IN LIBRARY")
+        assertThat(out.passages).isNotEmpty()
+    }
+
+    @Test
+    fun proseDeclineEndsAsDeclinedWithItsPassages() = runTest {
+        val found = listOf(passage("water", "Water boils at 100 degrees.", "Water"))
+        val reply = "The provided passages do not contain information about that [1]."
+        val gen = FakeGenerator(answer = { flowOf(reply) })
+        val events = ResearchPipeline(FakeFinder(found), FakeModels(gen)).run(ResearchRequest("Water boils?")).toList()
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.reply).isEqualTo(reply)
+        assertThat(out.passages).isNotEmpty()
+    }
+
+    @Test
+    fun aCodeDeclineCarriesNoPassagesOrReply() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator())).run(ResearchRequest("Water boils?")).toList()
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.passages).isEmpty()
+        assertThat(out.reply).isEmpty()
+    }
+
+    @Test
+    fun personalMedicalQuestionDeclinesWithoutSearching() = runTest {
+        val finder = FakeFinder(listOf(water))
+        val events = ResearchPipeline(finder, FakeModels(FakeGenerator(), embedder = embedder))
+            .run(ResearchRequest("My two year old has a fever of 101. Do I need to take her to the ER?")).toList()
+        assertThat(finder.calls).isEmpty()
+        assertThat(events).contains(ResearchEvent.Medical)
+        val out = outcome(events) as Outcome.Declined
+        assertThat(out.medical).isTrue()
+    }
+
+    @Test
+    fun generalMedicalQuestionStillAnswers() = runTest {
+        val pulse = passage("H", "A normal resting heart rate for adults is 60 to 100 beats per minute.", "Heart")
+        val gen = FakeGenerator(
+            rewrite = { flowOf("keywords: heart rate, resting\nmedical: yes") },
+            answer = { flowOf("A normal resting heart rate is 60 to 100 beats per minute [1].") },
+        )
+        val out = outcome(
+            ResearchPipeline(FakeFinder(listOf(pulse)), FakeModels(gen))
+                .run(ResearchRequest("what's a normal resting heart rate")).toList(),
+        )
+        assertThat(out).isInstanceOf(Outcome.Answered::class.java)
+        assertThat(out.medical).isTrue()
+    }
+
+    @Test
+    fun lexiconMarksMedicalWhenRewriteSaysNo() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: stroke, warning signs\nmedical: no") })
+        val out = outcome(
+            ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder))
+                .run(ResearchRequest("What are the warning signs someone is having a stroke?")).toList(),
+        )
+        assertThat(out.medical).isTrue()
+    }
+
+    @Test
+    fun quoteQuestionIsNotDeclinedAsPersonal() = runTest {
+        val finder = FakeFinder(listOf(water))
+        val gen = FakeGenerator(answer = { flowOf("It was the best of times [1].") })
+        val out = outcome(
+            ResearchPipeline(finder, FakeModels(gen, embedder = embedder))
+                .run(ResearchRequest("Do I have to read this closely? My dad says it is a fever dream.", quote = quote)).toList(),
+        )
+        assertThat(out).isNotInstanceOf(Outcome.Declined::class.java)
     }
 }

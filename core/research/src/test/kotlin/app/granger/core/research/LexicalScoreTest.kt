@@ -1,18 +1,19 @@
 package app.granger.core.research
 
 import com.google.common.truth.Truth.assertThat
-import kotlin.math.ln
 import org.junit.Test
 
 class LexicalScoreTest {
-    private fun passage(text: String, title: String = "Untitled", heading: String = "") =
-        Passage(SourceKind.ARTICLE, "id", title, heading = heading, text = text)
+    private fun passage(text: String, title: String = "Untitled", heading: String = "", kind: SourceKind = SourceKind.BOOK) =
+        Passage(kind, "id", title, heading = heading, text = text)
 
     @Test fun fractionOfKeywordsPresent() =
         assertThat(LexicalScore.of(passage("Steam drives the piston in a boiler."), listOf("steam", "piston", "gauge", "valve")))
             .isWithin(1e-9).of(0.5)
 
     @Test fun titleBonus() {
+        // A title is only a bonus, for books and articles alike.
+        assertThat(LexicalScore.of(passage("nothing here", title = "Steam engine", kind = SourceKind.ARTICLE), listOf("steam"))).isWithin(1e-9).of(0.1)
         assertThat(LexicalScore.of(passage("nothing here", title = "Steam engine"), listOf("steam"))).isWithin(1e-9).of(0.1)
         assertThat(LexicalScore.of(passage("steam power", title = "Steam engine"), listOf("steam"))).isWithin(1e-9).of(1.1)
     }
@@ -26,7 +27,7 @@ class LexicalScoreTest {
     @Test fun aPhraseCountsWhenAllItsWordsArePresent() {
         val portia = passage("The quality of mercy is not strained, said Portia.")
         assertThat(LexicalScore.of(portia, listOf("portia mercy", "quality mercy"))).isWithin(1e-9).of(1.0)
-        assertThat(LexicalScore.of(passage("text", title = "Mercy and Portia"), listOf("portia mercy"))).isWithin(1e-9).of(0.1)
+        assertThat(LexicalScore.of(passage("text", title = "Mercy and Portia", kind = SourceKind.ARTICLE), listOf("portia mercy"))).isWithin(1e-9).of(0.1)
     }
 
     @Test fun aPhraseGetsTheShareOfItsWordsPresent() {
@@ -48,21 +49,46 @@ class LexicalScoreTest {
     @Test fun stopwordsInAKeywordAreIgnored() =
         assertThat(LexicalScore.of(passage("Open the doors."), listOf("the library", "doors"))).isWithin(1e-9).of(0.5)
 
-    @Test fun overACorpusRarerWordsCountMore() {
-        val hours = passage("Library access hours.")
-        val wifi = passage("The wifi password is on the desk.")
-        val corpus = listOf(hours, wifi, passage("Library rules."), passage("Library cards."))
-        val keywords = listOf("wifi password", "library access")
-        // Smoothed idf over the 4 passages: ln((4 + 1) / (df + 1)) + 1; library is in 3 of them, the rest in 1.
-        val rare = ln(5.0 / 2) + 1
-        val library = ln(5.0 / 4) + 1
-        val total = 3 * rare + library
-        val score = LexicalScore.scorer(keywords, corpus)
-        assertThat(score(hours)).isWithin(1e-9).of((library + rare) / total)
-        assertThat(score(wifi)).isWithin(1e-9).of(2 * rare / total)
-        // Without a corpus each keyword counts equally: both score 0.5.
-        assertThat(LexicalScore.of(hours, keywords)).isWithin(1e-9).of(0.5)
+    @Test fun everyKeywordWordWeighsTheSame() {
+        val topic = passage("Alcohol and the Bible.")
+        val side = passage("The Bible has a rare verse.")
+        val other = passage("Alcohol and wine.")
+        val score = LexicalScore.scorer(listOf("alcohol", "bible", "verse"))
+        assertThat(score(topic)).isWithin(1e-9).of(2.0 / 3)
+        assertThat(score(side)).isWithin(1e-9).of(2.0 / 3)
+        assertThat(score(other)).isWithin(1e-9).of(1.0 / 3)
+        assertThat(score(topic)).isAtLeast(score(other))
+    }
+
+    @Test fun leadPassageGetsTheBonusOnlyWhenItMatches() {
+        fun p(heading: String, text: String, kind: SourceKind = SourceKind.ARTICLE) =
+            Passage(kind, "s", "Overview", heading = heading, text = text)
+        val keywords = listOf("steam", "valve")
+        assertThat(LexicalScore.of(p(" overview ", "steam"), keywords)).isWithin(1e-9).of(0.5 + 0.3)
+        assertThat(LexicalScore.of(p("", "steam"), keywords)).isWithin(1e-9).of(0.5 + 0.3)
+        assertThat(LexicalScore.of(p("Overview", "river"), keywords)).isEqualTo(0.0)
+        assertThat(LexicalScore.of(p("History", "steam"), keywords)).isWithin(1e-9).of(0.5)
+        assertThat(LexicalScore.of(p("", "steam", SourceKind.BOOK), keywords)).isWithin(1e-9).of(0.5)
     }
 
     @Test fun noKeywordsScoresZero() = assertThat(LexicalScore.of(passage("text"), emptyList())).isEqualTo(0.0)
+
+    @Test fun bookTitleIsOnlyABonus() {
+        // tune-4: crediting a title as a keyword let "sister" pass every passage of Sister Carrie.
+        val kjv = passage("For the love of money is the root of all evil.", title = "The King James Bible")
+        assertThat(LexicalScore.of(kjv, listOf("bible", "money", "evil"))).isWithin(1e-9).of(2.0 / 3 + 0.1)
+        val carrie = passage("She walked to the station.", title = "Sister Carrie")
+        assertThat(LexicalScore.of(carrie, listOf("sister", "phone number"))).isWithin(1e-9).of(0.1)
+    }
+
+    @Test fun articleTitleDoesNotCountAsBody() {
+        val article = passage("For the love of money is the root of all evil.", title = "Bible", kind = SourceKind.ARTICLE)
+        // 2/3, TITLE_BONUS for "bible" in the title, LEAD_BONUS for the opening passage.
+        assertThat(LexicalScore.of(article, listOf("bible", "money", "evil"))).isWithin(1e-9).of(2.0 / 3 + 0.1 + 0.3)
+    }
+
+    @Test fun titleBonusHonoursAliases() {
+        val koran = passage("Charity is a duty.", title = "The Koran")
+        assertThat(LexicalScore.of(koran, listOf("quran", "charity"))).isWithin(1e-9).of(0.5 + 0.1)
+    }
 }

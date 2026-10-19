@@ -75,6 +75,7 @@ import app.granger.core.ai.DeviceTier
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.research.CitationTarget
+import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.ResearchViewModel
 
@@ -143,6 +144,11 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable object ArchiveRoute
 @Serializable object SettingsRoute
 @Serializable object ReadinessRoute
+
+/** How [route] is opened: [replacesChatOnTop] drops a Research chat on top first (its view model would otherwise stay). */
+internal data class ResearchOpening(val route: ResearchRoute, val replacesChatOnTop: Boolean)
+
+internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean) = ResearchOpening(route, researchOnTop)
 
 /**
  * A Research chat: [chatId] opens a kept one, 0 starts a new one. [quote] is a reader's selection, from [quoteSourceId]
@@ -276,7 +282,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
     fun openResearch(route: ResearchRoute) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
-        nav.navigate(route) { if (researchOnTop) popUpTo<ResearchRoute> { inclusive = true } }
+        val open = researchOpening(route, researchOnTop)
+        nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
     GrangerShell(
@@ -294,7 +301,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
-                RailTool.RESEARCH -> nav.navigate(ResearchRoute()) { launchSingleTop = true }
+                RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
                 RailTool.PLAYER -> Unit // Hidden behind Features.PLAYER.
             }
         },
@@ -430,14 +437,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                                 is CitationTarget.Book -> target.tabId
                                 CitationTarget.Gone -> return@launch
                             }
-                            // A tab that can't be read opens nothing, rather than crashing the tap.
-                            val tab = try {
-                                container.sessions.tab(tabId)
-                            } catch (e: CancellationException) {
-                                throw e
-                            } catch (e: Exception) {
-                                null
-                            } ?: return@launch
+                            val tab = citationTab(container.sessions, tabId) ?: return@launch
                             when (target) {
                                 is CitationTarget.Article -> nav.showTab(tab, fragment = target.fragment)
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)

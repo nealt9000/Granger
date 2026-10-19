@@ -5,12 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.RERANK_WITH_EMBEDDER
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.CatalogState
 import app.granger.core.catalog.ModelEntry
+import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
@@ -53,6 +55,8 @@ data class ItemRow(
     val id: String,
     val title: String,
     val details: String,
+    /** What the entry is, from the catalog; blank when it has none. */
+    val description: String,
     val sizeBytes: Long,
     val status: ItemStatus,
     /** The library pack this entry is installed as, if any. */
@@ -257,12 +261,21 @@ class SourceViewModel(
         val volumeRows = volumeRows(s.volumes, records)
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
-                is PackEntry -> listOf(item.language, "Updated ${item.snapshotDate}", item.license)
+                is PackEntry -> listOf(
+                    item.language, "Updated ${item.snapshotDate}",
+                    if (item.nonCommercial) "${item.license} · provided by Kiwix" else item.license,
+                )
                 is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")
             val packId = (item as? PackEntry)?.let { installedPackId(it, records, packs) }
-            return ItemRow(item.id, item.title, details, item.sizeBytes, statusOf(item, records, packs, tier), packId)
+            val description = when (item) {
+                is PackEntry -> item.description
+                is BookEntry -> item.description
+                // Rerank is off (Plan 9 eval), so the embedder downloads but nothing uses it.
+                is ModelEntry -> if (item.role == ModelRole.EMBEDDER && !RERANK_WITH_EMBEDDER) "Not used yet" else ""
+            }
+            return ItemRow(item.id, item.title, details, description, item.sizeBytes, statusOf(item, records, packs, tier), packId)
         }
         val needle = s.query.trim()
         fun shown(item: CatalogItem): Boolean {

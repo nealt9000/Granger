@@ -26,6 +26,46 @@ class AnswerPromptTest {
     }
 
     @Test
+    fun theHeaderIsLengthCapped() {
+        val long = darwin.copy(sourceTitle = "T".repeat(5_000), meta = SourceMeta(author = "A".repeat(5_000)))
+        val header = build(listOf(long)).lines().first { it.startsWith("[1]") }
+        assertThat(header.length).isAtMost(241)
+    }
+
+    private fun rules(medical: Boolean = false): List<String> =
+        build(medical = medical).lines().dropWhile { it != "Rules:" }.drop(1).takeWhile { it.startsWith("- ") }
+
+    @Test
+    fun promptAsksForTheAnswerFirst() {
+        val rules = rules()
+        val first = rules.indexOfFirst { it.contains("Answer the question directly in your first sentence") }
+        val decline = rules.indexOfFirst { it.contains(AnswerPrompt.DECLINE_TOKEN) }
+        assertThat(first).isAtLeast(0)
+        assertThat(first).isLessThan(decline)
+    }
+
+    @Test
+    fun promptAllowsCombiningPassages() {
+        assertThat(rules().joinToString("\n")).contains("combine facts from different passages and work out simple things from them (dates, ages")
+    }
+
+    @Test
+    fun declineRuleIsLastAndPlain() {
+        val last = rules().last()
+        assertThat(last).startsWith("- If the passages don't answer the question, reply exactly")
+        assertThat(last).contains("NOT IN LIBRARY")
+        assertThat(rules(medical = true).last()).contains("medical question")
+    }
+
+    @Test
+    fun passagesAboutSomethingElseDontAnswer() {
+        val rules = rules()
+        val other = rules.indexOfFirst { it.contains("different person, year, place or event") }
+        assertThat(other).isAtLeast(0)
+        assertThat(other).isLessThan(rules.lastIndex)
+    }
+
+    @Test
     fun medicalRuleOnlyWhenMedical() {
         assertThat(build(medical = true)).contains("This is a medical question.")
         assertThat(build(medical = false)).doesNotContain("medical question")
@@ -64,5 +104,41 @@ class AnswerPromptTest {
             (2..8).map { darwin.copy(text = big) }
         val p = build(ps, medical = true, prior = PriorTurn("Q", "answer ".repeat(500)), hasQuote = true)
         assertThat(AnswerPrompt.estimateTokens(p)).isAtMost(3_400)
+    }
+
+    @Test
+    fun budgetEnforcedWithLongNonEnglishPassages() {
+        // Cyrillic: about one token per 2-3 characters, so chars / 4 would undercount it.
+        val russian = "Природа и закон естественного отбора ".repeat(32)
+        val ps = (1..8).map { darwin.copy(sourceTitle = "Книга $it", text = russian) }
+        val kept = AnswerPrompt.fit("Что такое отбор?", ps, medical = false, prior = null, hasQuote = false)
+        assertThat(kept.size).isLessThan(8)
+        assertThat(kept).isNotEmpty()
+        val p = AnswerPrompt.build("Что такое отбор?", ps, medical = false, prior = null, hasQuote = false)
+        assertThat(AnswerPrompt.estimateTokens(p)).isAtMost(3_400)
+        assertThat(p).doesNotContain("[${kept.size + 1}]")
+    }
+
+    @Test
+    fun trimsLastPassageFirst() {
+        val russian = "Природа и закон естественного отбора ".repeat(32)
+        val ps = (1..8).map { darwin.copy(sourceTitle = "Книга $it", text = russian) }
+        val kept = AnswerPrompt.fit("Что такое отбор?", ps, medical = false, prior = null, hasQuote = false)
+        assertThat(kept).isEqualTo(ps.take(kept.size))
+        val p = AnswerPrompt.build("Что такое отбор?", ps, medical = false, prior = null, hasQuote = false)
+        assertThat(p).contains("[${kept.size}] Книга ${kept.size}")
+        assertThat(p).doesNotContain("Книга ${kept.size + 1}")
+    }
+
+    @Test
+    fun englishPassagesThatFitAreAllKept() {
+        val ps = (1..8).map { darwin.copy(text = "word ".repeat(100)) }
+        assertThat(AnswerPrompt.fit("Q?", ps, false, null, false)).isEqualTo(ps)
+    }
+
+    @Test
+    fun theFirstPassageIsNeverDropped() {
+        val huge = darwin.copy(kind = SourceKind.SELECTION, text = "я".repeat(5_000))
+        assertThat(AnswerPrompt.fit("Q?", listOf(huge), false, PriorTurn("Q", "я".repeat(5_000)), true)).hasSize(1)
     }
 }

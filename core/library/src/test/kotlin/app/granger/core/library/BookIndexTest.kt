@@ -191,6 +191,24 @@ class BookIndexTest {
         assertThat(index.passages(listOf("mercy OR nothing"))).isEmpty()
     }
 
+    @Test fun passagesComeInChunkOrder() = test {
+        add("many", "<p>fox one</p>", "<p>fox two</p>", "<p>fox three</p>")
+        index.indexPending()
+
+        assertThat(index.passages(listOf("fox"), limit = 2).map { it.href }).containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml").inOrder()
+    }
+
+    @Test fun oneDamagedBookDoesNotDropTheOthers() = test {
+        val bad = add("bad", "<p>fox in the bad book ${"padding ".repeat(200)}</p>")
+        add("good", "<p>fox in the good book</p>")
+        index.indexPending()
+        // A path the zip reader rejects outright (not just an unreadable file): this book's passages go, not the other's.
+        db.openHelper.writableDatabase.execSQL("UPDATE books SET filePath = ? WHERE id = ?", arrayOf<Any>("bad\u0000path", bad.id))
+
+        val found = index.passages(listOf("fox"))
+        assertThat(found.map { it.text }).containsExactly("fox in the good book")
+    }
+
     @Test fun passagesCarryTheBook() = test {
         val moby = add("moby", "<p>The whale surfaced at dawn.</p>", title = "Moby-Dick")
         index.indexPending()
@@ -208,5 +226,66 @@ class BookIndexTest {
         assertThat(index.passages(emptyList())).isEmpty()
         assertThat(index.passages(listOf("\""))).isEmpty()
         assertThat(index.passages(listOf("  ", "-"))).isEmpty()
+    }
+
+    @Test fun passagesPreferTheChunkWithTheRareWord() = test {
+        add("a", *Array(30) { "<p>death and age number $it</p>" })
+        add("b", "<p>Methuselah lived nine hundred sixty and nine years and he died</p>")
+        index.indexPending()
+
+        val found = index.passages(listOf("methuselah", "death", "age"))
+        assertThat(found.first().text).contains("Methuselah")
+    }
+
+    @Test fun passagesMatchingMoreKeywordsRankHigher() = test {
+        add("a", "<p>wine one</p>", "<p>wine two</p>", "<p>wine and drunk</p>", "<p>wine three</p>")
+        index.indexPending()
+
+        assertThat(index.passages(listOf("wine", "drunk")).first().text).isEqualTo("wine and drunk")
+    }
+
+    @Test fun passagesKeepAtMostPerBook() = test {
+        add("a", *Array(10) { "<p>fox $it</p>" })
+        index.indexPending()
+
+        assertThat(index.passages(listOf("fox"), perBook = 4)).hasSize(4)
+    }
+
+    @Test fun commonKeywordDoesNotCrowdOutARareOne() = test {
+        add("a", *Array(200) { "<p>bible verse $it</p>" })
+        add("b", "<p>a tattoo here</p>")
+        index.indexPending()
+
+        val found = index.passages(listOf("bible", "tattoo"), limit = 10, perBook = 10)
+        assertThat(found.map { it.text }).contains("a tattoo here")
+    }
+
+    @Test fun bm25DecodesMatchinfo() {
+        val ints = intArrayOf(1, 1, 100, 2, 15, 10)
+        val blob = ByteArray(ints.size * 4)
+        ints.forEachIndexed { i, v -> for (b in 0..3) blob[4 * i + b] = (v shr (8 * b)).toByte() }
+        val idf = Math.log((100 - 10 + 0.5) / (10 + 0.5) + 1)
+        assertThat(bm25(blob)).isWithin(1e-9).of(idf * 2 * 2.2 / (2 + 1.2))
+    }
+
+    @Test fun bestChunkAtAHighIdIsFoundPastACommonWord() = test {
+        add("a", *Array(200) { "<p>bible verse $it</p>" }, "<p>bible tattoo</p>")
+        index.indexPending()
+
+        // Old per-keyword id order gave "bible" one slot (chunk 1) ahead of the tattoo chunk, which has the highest id.
+        assertThat(index.passages(listOf("bible", "tattoo"), limit = 3, perBook = 3).first().text).isEqualTo("bible tattoo")
+        assertThat(index.passages(listOf("bible tattoo", "bible"), limit = 3, perBook = 3).first().text).isEqualTo("bible tattoo")
+    }
+
+    @Test fun passagesInSearchesOnlyThatBook() = test {
+        add("a", "<p>money evil money evil</p>", "<p>money</p>")
+        val b = add("b", "<p>money</p>", "<p>money and evil</p>", "<p>evil</p>", "<p>money evil money evil money evil</p>")
+        index.indexPending()
+
+        val found = index.passagesIn(b.id, listOf("money evil"))
+        assertThat(found.map { it.book.id }.toSet()).containsExactly(b.id)
+        assertThat(found.map { it.text }).containsExactly("money evil money evil money evil", "money and evil").inOrder()
+        assertThat(index.passagesIn(b.id, listOf("money"), limit = 2)).hasSize(2)
+        assertThat(index.passagesIn(b.id, emptyList())).isEmpty()
     }
 }

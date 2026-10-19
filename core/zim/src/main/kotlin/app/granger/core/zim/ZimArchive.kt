@@ -35,6 +35,9 @@ interface ZimArchive : Closeable {
 
     fun read(path: String): ZimItem?
 
+    /** The path of a random article, or null when the pack has none (or is closed). */
+    fun randomPath(): String?
+
     fun suggest(query: String, limit: Int): List<ZimHit>
 
     /** Full-text search; empty when the pack has no full-text index. */

@@ -172,7 +172,8 @@ data class BookChunk(
     val progression: Double,
 )
 
-enum class TurnOutcome { PENDING, ANSWERED, DECLINED, UNVERIFIED, FAILED, INTERRUPTED }
+/** [FAILED] is the model's failure; [SEARCH_FAILED] is the library search or its storage. */
+enum class TurnOutcome { PENDING, ANSWERED, DECLINED, UNVERIFIED, FAILED, INTERRUPTED, SEARCH_FAILED }
 
 /** A kept Research conversation. */
 @Entity(tableName = "research_chats")
@@ -196,6 +197,10 @@ data class ResearchTurn(
     val askedDeeper: Boolean,
     val keywords: String,
     val createdAt: Long,
+    /** The model's own best guess after a decline; blank until asked. */
+    @ColumnInfo(defaultValue = "''") val guess: String = "",
+    @ColumnInfo(defaultValue = "0") val guessLarge: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val guessFellBack: Boolean = false,
 )
 
 enum class PassageRole {

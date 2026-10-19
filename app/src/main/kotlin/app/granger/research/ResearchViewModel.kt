@@ -19,6 +19,7 @@ import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.TurnOutcome
+import app.granger.core.research.FailReason
 import app.granger.core.research.Outcome
 import app.granger.core.research.Passage
 import app.granger.core.research.PriorTurn
@@ -37,6 +38,8 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -49,6 +52,9 @@ import kotlinx.coroutines.withContext
 
 /** Asked when the user sends a quote without typing a question. */
 const val EMPTY_QUOTE_QUESTION = "Explain this passage and how it connects to the rest of my library."
+
+/** Whether a best guess may use the large model (when the phone's tier and the installed models allow it). */
+const val BEST_GUESS_USES_LARGE = true
 
 /**
  * One Research chat: questions and follow-ups answered from the library, Stop, Think deeper and Retry. [chatId] opens a
@@ -75,7 +81,23 @@ class ResearchViewModel(
      * A stored turn, with the reply so far, the stage and the large-model fallback while it is running. [medical] shows
      * the banner, from the pipeline while the turn runs (the stored turn learns it only when settled).
      */
-    data class TurnUi(val turn: ChatTurn, val partial: String?, val stage: Stage?, val largeFallback: Boolean, val medical: Boolean)
+    data class TurnUi(
+        val turn: ChatTurn,
+        val partial: String?,
+        val stage: Stage?,
+        val largeFallback: Boolean,
+        val medical: Boolean,
+        /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
+        val guessing: Boolean = false,
+        /** The Best guess button is shown: a declined, non-medical turn with no guess yet, while nothing runs. */
+        val offersGuess: Boolean = false,
+        /** The guess being written uses the large model (it takes about half a minute). */
+        val guessLarge: Boolean = false,
+        /** The large model couldn't load, so the guess is from the standard one. */
+        val guessFellBack: Boolean = false,
+        /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
+        val guessFailed: Boolean = false,
+    )
 
     data class State(
         val chatId: Long?,
@@ -89,7 +111,23 @@ class ResearchViewModel(
         val quote: Passage?,
         /** The last [RECENT_CHATS] chats, shown while this one is empty. */
         val recentChats: List<ChatSummary>,
-    )
+    ) {
+        /**
+         * The last turn is done and its source cards are present, so the screen's last scroll can run. An answered turn
+         * is not settled while it runs or its row is still PENDING; the stored row carries the outcome and the cards together.
+         */
+        val settled: Boolean
+            get() {
+                if (running) return false
+                val last = turns.lastOrNull()?.turn ?: return true
+                return when (last.outcome) {
+                    TurnOutcome.PENDING -> false
+                    // A final outcome is settled. Its cards arrive in the same stored row, so the only wait is the
+                    // stream's end (running) and the PENDING row turning final; a turn with no cards is settled too.
+                    else -> true
+                }
+            }
+    }
 
     /** The running turn; [turnId] is null until its row exists. */
     private data class Live(
@@ -98,6 +136,9 @@ class ResearchViewModel(
         val stage: Stage?,
         val largeFallback: Boolean,
         val medical: Boolean = false,
+        val guessing: Boolean = false,
+        val guessLarge: Boolean = false,
+        val guessFellBack: Boolean = false,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -118,25 +159,30 @@ class ResearchViewModel(
     private val title = MutableStateFlow("")
     private val pendingQuote = MutableStateFlow(startQuote)
     private val live = MutableStateFlow<Live?>(null)
+    /** The turn whose Best guess just failed; cleared when anything else starts. */
+    private val guessFailed = MutableStateFlow<Long?>(null)
     private var job: Job? = null
     @Volatile private var stopRequested = false
 
     /** The question field, as Compose state written synchronously on every keystroke (see SearchViewModel.searchText). */
     var input by mutableStateOf("")
 
-    private val turns = chat.flatMapLatest { id -> if (id == null) flowOf(emptyList()) else chats.turns(id) }
+    // A storage error shows an empty thread (and no recent chats) rather than crashing the screen.
+    private val turns = chat.flatMapLatest { id ->
+        if (id == null) flowOf(emptyList()) else chats.turns(id).emptyOnError("Research turns")
+    }
 
     val state: StateFlow<State> = combine(
         turns,
         live,
-        combine(models.readiness, models.canThinkDeeper, ::Pair),
-        combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS), ::Header),
-    ) { turns, live, (readiness, deeperInstalled), header ->
+        combine(models.readiness, models.canThinkDeeper, guessFailed, ::Triple),
+        combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS).emptyOnError("Recent research chats"), ::Header),
+    ) { turns, live, (readiness, deeperInstalled, guessFailedId), header ->
         val last = turns.lastOrNull()
         State(
             chatId = header.chatId,
             title = header.title,
-            turns = turns.map { it.toUi(live) },
+            turns = turns.map { it.toUi(live, guessFailedId) },
             running = live != null,
             readiness = readiness,
             canThinkDeeper = deeperInstalled && live == null && last != null && last.canDeepen(),
@@ -198,6 +244,48 @@ class ResearchViewModel(
         }
     }
 
+    /**
+     * Asks the model for its own best guess at a declined turn's question. The guess is kept on that turn when it
+     * finishes or is stopped; if the app dies first nothing is kept and the button returns. Never for a medical turn.
+     */
+    fun bestGuess(turnId: Long) {
+        if (live.value != null) return
+        val id = chat.value ?: return
+        begin {
+            val turns = chats.turns(id).first()
+            val at = turns.indexOfFirst { it.id == turnId }
+            val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return@begin
+            val large = BEST_GUESS_USES_LARGE && models.canThinkDeeper.value
+            live.value = Live(turnId, null, null, false, guessing = true, guessLarge = large)
+            var fellBack = false
+            var settled = false
+            // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
+            pipeline.guess(turn.question, turns.getOrNull(at - 1)?.question, large) { stopRequested }.flowOn(cpu).collect { event ->
+                when (event) {
+                    is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
+                    is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
+                    ResearchEvent.GuessFallback -> {
+                        fellBack = true
+                        live.update { it?.copy(guessFellBack = true) }
+                    }
+                    is ResearchEvent.Done -> {
+                        val outcome = event.outcome
+                        if (outcome is Outcome.Guessed && !settled) {
+                            settled = true
+                            withContext(NonCancellable) { chats.setGuess(turnId, outcome.text, outcome.usedLarge, outcome.fellBack || fellBack) }
+                        } else if (outcome is Outcome.Failed) {
+                            outcome.cause?.let { runCatching { android.util.Log.w("Granger", "Research guess failed", it) } }
+                            // Only the model can fail a guess (it does no search); say so, without storing it.
+                            guessFailed.value = turnId
+                        }
+                    }
+                    // run() events; guess() doesn't emit them.
+                    ResearchEvent.Medical, ResearchEvent.LargeFallback -> Unit
+                }
+            }
+        }
+    }
+
     /** Asks an interrupted or failed turn's question again, as a new turn. */
     fun retry(turnId: Long) {
         if (live.value != null) return
@@ -231,11 +319,14 @@ class ResearchViewModel(
             // A catalogue card describes the whole pack, so it opens the pack's main page.
             val card = passage.kind == SourceKind.CARD
             val tabId = sessions.openTab(pack.id, if (card) "" else passage.location, passage.sourceTitle)
+            // The tab can vanish between opening and showing it (closed from the rail): the source is gone, say so.
+            if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
             return CitationTarget.Article(tabId, if (card) null else passage.anchor)
         }
         val book = bookshelf.book(passage.sourceId)
         if (book == null || book.status != PackStatus.OK) return CitationTarget.Gone
         val tabId = sessions.openTab(book.id, "", book.title)
+        if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
         val placed = passage.kind == SourceKind.BOOK || (passage.kind == SourceKind.SELECTION && passage.location.isNotEmpty())
         if (!placed) return CitationTarget.Book(tabId, at = null)
         val quote = TextQuote("", cutAtWord(passage.text.trim(), BOOK_QUOTE), "")
@@ -249,7 +340,7 @@ class ResearchViewModel(
         chat.value = null
         savedState[CHAT_ID] = null
         title.value = ""
-        appScope.launch { chats.delete(id) }
+        appScope.launch { logErrors { chats.delete(id) } }
     }
 
     override fun onCleared() {
@@ -264,6 +355,7 @@ class ResearchViewModel(
      */
     private fun begin(work: suspend () -> Unit) {
         stopRequested = false
+        guessFailed.value = null
         live.value = Live(null, null, null, false)
         job = viewModelScope.launch {
             val letGo = models.hold()
@@ -297,6 +389,8 @@ class ResearchViewModel(
         var turnId: Long? = null
         var settled = false
         var fellBack = false
+        // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
+        var medical = ask.medicalHint
         try {
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
@@ -307,12 +401,17 @@ class ResearchViewModel(
                 when (event) {
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
-                    ResearchEvent.Medical -> live.update { it?.copy(medical = true) }
+                    ResearchEvent.Medical -> {
+                        medical = true
+                        live.update { it?.copy(medical = true) }
+                    }
                     ResearchEvent.LargeFallback -> {
                         fellBack = true
                         live.update { it?.copy(largeFallback = true) }
                     }
+                    ResearchEvent.GuessFallback -> Unit // Only guess() emits this; see bestGuess.
                     is ResearchEvent.Done -> withContext(NonCancellable) {
+                        (event.outcome as? Outcome.Failed)?.cause?.let { runCatching { android.util.Log.w("Granger", "Research turn failed", it) } }
                         settle(checkNotNull(turnId), event.outcome, kept, usedLarge = ask.askedDeeper && !fellBack)
                         settled = true
                     }
@@ -322,7 +421,7 @@ class ResearchViewModel(
             val id = turnId
             if (id != null && !settled) {
                 appScope.launch {
-                    logErrors { chats.finishTurn(id, TurnOutcome.INTERRUPTED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
+                    logErrors { chats.finishTurn(id, TurnOutcome.INTERRUPTED, "", medical, false, emptyList(), kept, emptyList()) }
                 }
             }
             throw e
@@ -333,7 +432,7 @@ class ResearchViewModel(
             if (id != null && !settled) {
                 // The error may be the database's own; the turn then stays PENDING until the next launch interrupts it.
                 withContext(NonCancellable) {
-                    logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", ask.medicalHint, false, emptyList(), kept, emptyList()) }
+                    logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", medical, false, emptyList(), kept, emptyList()) }
                 }
             }
         }
@@ -352,12 +451,16 @@ class ResearchViewModel(
             )
             is Outcome.Declined ->
                 chats.finishTurn(turnId, TurnOutcome.DECLINED, "", outcome.medical, usedLarge, outcome.keywords, kept, emptyList())
-            is Outcome.Failed ->
-                chats.finishTurn(turnId, TurnOutcome.FAILED, "", outcome.medical, false, outcome.keywords, kept, emptyList())
+            is Outcome.Failed -> {
+                val kind = if (outcome.reason == FailReason.SEARCH_FAILED) TurnOutcome.SEARCH_FAILED else TurnOutcome.FAILED
+                chats.finishTurn(turnId, kind, "", outcome.medical, false, outcome.keywords, kept, emptyList())
+            }
+            // Only ResearchPipeline.guess produces this, and bestGuess keeps it; a turn run() settles this way failed.
+            is Outcome.Guessed -> chats.finishTurn(turnId, TurnOutcome.FAILED, "", false, false, emptyList(), kept, emptyList())
         }
     }
 
-    private fun ChatTurn.toUi(live: Live?): TurnUi {
+    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?): TurnUi {
         val running = live?.takeIf { it.turnId == id }
         return TurnUi(
             turn = this,
@@ -365,6 +468,11 @@ class ResearchViewModel(
             stage = running?.stage,
             largeFallback = running?.largeFallback ?: (askedDeeper && !usedLarge && outcome in FALLBACK_SHOWN),
             medical = medical || running?.medical == true,
+            guessing = running?.guessing == true,
+            offersGuess = live == null && outcome == TurnOutcome.DECLINED && guess.isBlank() && !medical,
+            guessLarge = running?.guessLarge == true,
+            guessFellBack = running?.guessFellBack ?: guessFellBack,
+            guessFailed = guessFailedId == id && live == null,
         )
     }
 
@@ -384,10 +492,17 @@ class ResearchViewModel(
         const val BOOK_QUOTE = 80
         const val DEEPER_PASSAGES = 8
         private val DEEPENABLE = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED)
-        private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED)
+        private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED, TurnOutcome.SEARCH_FAILED)
         private val FALLBACK_SHOWN = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED, TurnOutcome.DECLINED)
     }
 }
+
+/**
+ * What "Search instead" searches for: the first rewrite keyword, else the question. The library's Search
+ * matches whole phrases, so every keyword joined ("world cup 2031 football soccer") found nothing.
+ */
+internal fun searchInsteadQuery(keywords: List<String>, question: String): String =
+    keywords.firstOrNull { it.isNotBlank() }?.trim() ?: question
 
 /** [text] cut to at most [max] characters, at the last space when there is one. */
 internal fun cutAtWord(text: String, max: Int): String {
@@ -397,4 +512,11 @@ internal fun cutAtWord(text: String, max: Int): String {
     val cut = text.take(max)
     val space = cut.lastIndexOf(' ')
     return (if (space > 0) cut.take(space) else cut).trimEnd()
+}
+
+/** This flow, with a storage error logged and replaced by an empty list instead of reaching the collector. */
+private fun <T> Flow<List<T>>.emptyOnError(what: String): Flow<List<T>> = catch { e ->
+    if (e is CancellationException) throw e
+    runCatching { android.util.Log.w("Granger", "$what couldn't be read", e) }
+    emit(emptyList())
 }

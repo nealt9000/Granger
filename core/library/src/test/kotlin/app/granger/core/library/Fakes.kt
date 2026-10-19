@@ -24,6 +24,7 @@ class FakeZimArchive(
     var failSearch: Boolean = false,
     name: String = uuid,
     private val html: Map<String, String> = emptyMap(),
+    var random: String? = null,
 ) : ZimArchive {
     override val metadata = ZimMetadata(title, "About $title", "eng", "2026-10-15", name)
     var closed = false
@@ -31,6 +32,8 @@ class FakeZimArchive(
 
     override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
     override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", html[it].orEmpty().toByteArray()) }
+
+    override fun randomPath(): String? = random
 
     override fun suggest(query: String, limit: Int): List<ZimHit> {
         if (failSearch) error("native failure")

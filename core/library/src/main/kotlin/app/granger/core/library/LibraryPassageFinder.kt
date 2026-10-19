@@ -20,7 +20,9 @@ import kotlinx.coroutines.withContext
  * "catalogue cards" built from book and pack metadata (so "books by Darwin" has something to cite).
  *
  * @param docs how many articles are read, overall; @param perPack how many hits each pack is asked for;
- * @param cards how many catalogue cards are kept.
+ * @param cards how many catalogue cards are kept; @param bookLimit how many chunks the general book search keeps.
+ *
+ * A question that names a work ("does the bible say ...") also searches inside the named books, for the other keywords.
  */
 class LibraryPassageFinder(
     private val library: Library,
@@ -31,6 +33,7 @@ class LibraryPassageFinder(
     private val docs: Int = 8,
     private val perPack: Int = 8,
     private val cards: Int = 3,
+    private val bookLimit: Int = 40,
 ) : PassageFinder {
     override suspend fun find(keywords: List<String>): List<Passage> {
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
@@ -101,7 +104,15 @@ class LibraryPassageFinder(
 
     private suspend fun books(words: List<String>, collections: Map<String, String>): List<Passage> =
         try {
-            bookIndex.passages(words).map {
+            val named = try {
+                namedBookPassages(words)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                emptyList()
+            }
+            val found = bookIndex.passages(words, limit = bookLimit) + named
+            found.distinctBy { Triple(it.book.id, it.href, it.text) }.map {
                 Passage(
                     kind = SourceKind.BOOK,
                     sourceId = it.book.id,
@@ -117,6 +128,28 @@ class LibraryPassageFinder(
         } catch (_: Exception) {
             emptyList()
         }
+
+    /** For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. */
+    private suspend fun namedBookPassages(words: List<String>): List<BookPassage> {
+        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot(Keywords::isStopword).toSet()
+        if (keywordWords.isEmpty()) return emptyList()
+        val books = try {
+            bookshelf.books.first().filter { it.status == PackStatus.OK }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            return emptyList()
+        }
+        val named = books.mapNotNull { book ->
+            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { it !in GENERIC_TITLE_WORDS && !Keywords.isStopword(it) }.toSet()
+            val naming = keywordWords.filter { word -> Keywords.alternatives(word).any { it in titleWords } }.toSet()
+            if (naming.isEmpty()) null else book to naming
+        }.sortedByDescending { it.second.size }.take(NAMED_BOOKS)
+        return named.flatMap { (book, naming) ->
+            val rest = words.map { k -> Keywords.words(k).filter { it.lowercase() !in naming }.joinToString(" ") }.filter { it.isNotEmpty() }
+            if (rest.isEmpty()) emptyList() else bookIndex.passagesIn(book.id, rest)
+        }
+    }
 
     private suspend fun cards(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
         val books = try {
@@ -178,4 +211,14 @@ class LibraryPassageFinder(
                 fields.any { whole.containsMatchIn(it) }
             }
         }
+
+    private companion object {
+        const val NAMED_BOOKS = 3
+
+        /** Title words that don't name a work: "The Complete Works of X" is not named by "complete". */
+        val GENERIC_TITLE_WORDS = setOf(
+            "book", "books", "complete", "works", "volume", "vol", "collected", "selected", "edition",
+            "translated", "tr", "english", "version", "standard",
+        )
+    }
 }

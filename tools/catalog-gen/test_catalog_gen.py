@@ -116,6 +116,13 @@ def test_pack_entry_picks_the_flavour_and_builds_urls():
     ]
 
 
+def test_non_commercial_flag_passes_through():
+    plain = cg.pack_entry(CURATED_MED, fake_fetch(ROUTES))
+    assert "nonCommercial" not in plain
+    flagged = cg.pack_entry({**CURATED_MED, "nonCommercial": True}, fake_fetch(ROUTES))
+    assert flagged["nonCommercial"] is True
+
+
 def test_maxi_without_ftindex_tag():
     meta4_maxi = META4.replace("nopic", "maxi").replace("1047708672", "1864210432")
     routes = {**ROUTES, "https://lb.download.kiwix.org/zim/wikipedia/wikipedia_en_medicine_maxi": meta4_maxi}

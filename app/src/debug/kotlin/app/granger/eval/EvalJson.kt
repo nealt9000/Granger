@@ -1,0 +1,51 @@
+package app.granger.eval
+
+import org.json.JSONArray
+import org.json.JSONObject
+
+/** One question of an eval dataset: the fields the phone needs (the expected answers are only used on the desktop). */
+data class EvalItem(
+    val id: String,
+    val group: String,
+    val answerable: Boolean,
+    val medical: Boolean,
+    val multiStep: Boolean,
+    val question: String,
+    val priorQuestion: String?,
+)
+
+/** Which best guesses to ask for after a declined question. */
+enum class GuessModels(val small: Boolean, val large: Boolean) {
+    NONE(false, false), SMALL(true, false), LARGE(false, true), BOTH(true, true);
+
+    companion object {
+        fun parse(text: String?): GuessModels = entries.firstOrNull { it.name.equals(text?.trim(), ignoreCase = true) } ?: NONE
+    }
+}
+
+object EvalJson {
+    /** The dataset array written by `tools/eval`; extra fields are ignored. */
+    fun parseDataset(text: String): List<EvalItem> {
+        val array = JSONArray(text)
+        return List(array.length()) { i ->
+            val o = array.getJSONObject(i)
+            EvalItem(
+                id = o.getString("id"),
+                group = o.optString("group"),
+                answerable = o.optBoolean("answerable"),
+                medical = o.optBoolean("medical"),
+                multiStep = o.optBoolean("multiStep"),
+                question = o.getString("question"),
+                priorQuestion = if (o.isNull("priorQuestion")) null else o.optString("priorQuestion").ifBlank { null },
+            )
+        }
+    }
+
+    /** Keeps the items whose id is in [ids] (if given) and whose group is in [groups] (if given). Both are comma-joined. */
+    fun filter(items: List<EvalItem>, ids: String?, groups: String?): List<EvalItem> {
+        fun set(s: String?) = s?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet()?.takeIf { it.isNotEmpty() }
+        val wantIds = set(ids)
+        val wantGroups = set(groups)
+        return items.filter { (wantIds == null || it.id in wantIds) && (wantGroups == null || it.group in wantGroups) }
+    }
+}

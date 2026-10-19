@@ -50,6 +50,12 @@ class KiwixZimArchiveTest {
         assertThat(archive.read("Plants")!!.path).isEqualTo("Photosynthesis")
     }
 
+    @Test fun randomPathIsAReadableEntry() {
+        val path = archive.randomPath()
+        assertThat(path).isNotNull()
+        assertThat(archive.read(path!!)).isNotNull()
+    }
+
     @Test fun missingPathsReturnNull() {
         assertThat(archive.resolvePath("Nope")).isNull()
         assertThat(archive.read("Nope")).isNull()

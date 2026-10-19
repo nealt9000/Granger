@@ -2,6 +2,7 @@ package app.granger.core.ai
 
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlinx.coroutines.async
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,6 +83,35 @@ class ModelManagerTest {
         val e = r.llms.events
         assertThat(e.indexOf("close ${small.path}")).isLessThan(e.indexOf("load ${large.path}"))
         assertThat(r.llms.maxOpen).isEqualTo(1)
+    }
+
+    @Test fun aMissingFileLeavesTheResidentModelLoaded() = runTest {
+        val r = rig(models = InstalledModels(small = small, embedder = emb))
+        val resident = r.manager.engine(LlmSize.SMALL)
+        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
+        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
+        assertThat(r.llms.openEngines).hasSize(1)
+        assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
+    }
+
+    @Test fun loadRightAfterLaunchWaitsForTheModelList() = runTest {
+        // At startup the list is empty until the catalog has loaded from its cache.
+        val r = rig(models = InstalledModels())
+        val engine = async { r.manager.engine(LlmSize.SMALL) }
+        runCurrent()
+        assertThat(engine.isCompleted).isFalse()
+        r.installed.value = all
+        assertThat(engine.await()).isNotNull()
+        assertThat(r.llms.events).contains("load ${small.path}")
+    }
+
+    @Test fun largeIsRefusedBelowTheThinkDeeperTier() = runTest {
+        val r = rig(tier = DeviceTier.ASK)
+        val resident = r.manager.engine(LlmSize.SMALL)
+        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
+        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
+        assertThat(r.llms.events.none { it.contains(large.path) }).isTrue()
+        assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
     }
 
     @Test fun largeClosesTheEmbedder() = runTest {
@@ -205,6 +235,32 @@ class ModelManagerTest {
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1)
         turn()
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun releaseRequestedMidTurnIsDroppedWhenAppReturns() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val turn = r.manager.hold()
+        r.manager.releaseNow() // the app went to the background mid-turn...
+        r.manager.appReturned() // ...and came back before the turn ended
+        turn()
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1) // not closed at the turn's end...
+        advanceTimeBy(121_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty() // ...but a quiet spell later it still goes
+    }
+
+    @Test fun appReturningKeepsTheQuietSpellRelease() = runTest {
+        val r = rig()
+        r.manager.engine(LlmSize.SMALL)
+        val turn = r.manager.hold()
+        r.manager.releaseSoon() // the turn's end asks for a quiet-spell release
+        r.manager.appReturned()
+        turn()
+        advanceTimeBy(121_000)
         runCurrent()
         assertThat(r.llms.openEngines).isEmpty()
     }

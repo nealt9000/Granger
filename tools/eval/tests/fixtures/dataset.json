@@ -1,0 +1,2 @@
+[{"id":"bible-001","group":"bible","split":"tune","answerable":true,"medical":false,"multiStep":false,"question":"Who wrote the book of Romans?","priorQuestion":null,"answers":[{"source":"book:granger:romans","location":"romans","quote":"Paul, a servant of Jesus Christ"}],"reference":"Paul the Apostle","goodGuess":null,"notes":""},
+ {"id":"none-001","group":"personal","split":"tune","answerable":false,"medical":false,"multiStep":false,"question":"What is my library's Wi-Fi password?","priorQuestion":null,"answers":[],"reference":"","goodGuess":"Can't know.","notes":""}]

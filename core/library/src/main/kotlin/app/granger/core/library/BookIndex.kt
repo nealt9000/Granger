@@ -102,34 +102,73 @@ class BookIndex(
     }
 
     /**
-     * Chunks matching any of [keywords], with their text. A keyword matches a chunk holding all its words, in any order,
-     * so the rewrite's phrases ("portia mercy") find text that doesn't say them verbatim. Each keyword gets an equal
-     * share of [limit]; a bad query gives none.
+     * Chunks matching any of [keywords], best first, with their text. A keyword matches a chunk holding all its words,
+     * in any order, so the rewrite's phrases ("portia mercy") find text that doesn't say them verbatim. A chunk scores
+     * the sum of its BM25 over every keyword it matches, so chunks matching several keywords, or rare ones, rise. At
+     * most [perBook] come from one book and [limit] in all; a bad query gives none.
      */
-    suspend fun passages(keywords: List<String>, limit: Int = 40): List<BookPassage> {
-        // Each word quoted, so query syntax (OR, NEAR, -) inside a keyword is just a word; spaces AND them.
+    suspend fun passages(keywords: List<String>, limit: Int = 40, perBook: Int = 4): List<BookPassage> =
+        rankedPassages(keywords, bookId = null, limit = limit, perBook = perBook)
+
+    /** [passages] within one book, with no per-book cap: the best [limit] chunks of [bookId], best first. */
+    suspend fun passagesIn(bookId: String, keywords: List<String>, limit: Int = 8): List<BookPassage> =
+        rankedPassages(keywords, bookId = bookId, limit = limit, perBook = Int.MAX_VALUE)
+
+    private suspend fun rankedPassages(keywords: List<String>, bookId: String?, limit: Int, perBook: Int): List<BookPassage> {
+        // Each word quoted, so query syntax (OR, NEAR, -) inside a keyword is just words; spaces AND them.
         val matches = keywords.map { k -> Keywords.words(k) }.filter { it.isNotEmpty() }.distinct()
             .map { words -> words.joinToString(" ") { "\"$it\"" } }
         if (matches.isEmpty()) return emptyList()
-        val share = maxOf(1, limit / matches.size)
         return withContext(io) {
-            val chunks = matches.flatMap { match ->
+            val scores = HashMap<Long, Double>()
+            val sql = db.openHelper.readableDatabase
+            val scope = if (bookId == null) "" else " AND docid IN (SELECT id FROM book_chunks WHERE bookId = ?)"
+            for (match in matches) {
                 try {
-                    dao.chunksMatching(
+                    // Rows come in docid order, so a word matching more than 3000 chunks scores only its first 3000.
+                    sql.query(
                         SimpleSQLiteQuery(
-                            "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? LIMIT ?",
-                            arrayOf<Any>(match, share),
+                            "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ?$scope LIMIT 3000",
+                            if (bookId == null) arrayOf<Any>(match) else arrayOf<Any>(match, bookId),
                         ),
-                    )
+                    ).use { c ->
+                        while (c.moveToNext()) scores.merge(c.getLong(0), bm25(c.getBlob(1)), Double::plus)
+                    }
                 } catch (_: SQLException) {
-                    emptyList()
+                    // No candidates for this keyword.
                 }
-            }.distinctBy { it.id }.take(limit)
-            chunks.groupBy { it.bookId }.flatMap { (bookId, hits) ->
-                val book = dao.get(bookId) ?: return@flatMap emptyList()
-                val texts = chunkTexts(book.filePath, hits)
-                hits.mapNotNull { chunk -> texts[chunk.id]?.let { BookPassage(book, chunk.href, chunk.progression, it) } }
             }
+            val ranked = scores.entries.sortedWith(compareByDescending<Map.Entry<Long, Double>> { it.value }.thenBy { it.key })
+            // Rows load in rank order, 200 ids at a time, until [limit] are kept. Orphans of re-indexed books have no row.
+            val perBookCount = HashMap<String, Int>()
+            val chunks = ArrayList<BookChunk>()
+            for (ids in ranked.map { it.key }.chunked(200)) {
+                if (chunks.size >= limit) break
+                val rows = try {
+                    dao.chunksMatching(SimpleSQLiteQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
+                } catch (_: SQLException) {
+                    break
+                }.associateBy { it.id }
+                for (id in ids) {
+                    if (chunks.size >= limit) break
+                    val chunk = rows[id] ?: continue
+                    if (perBookCount.merge(chunk.bookId, 1, Int::plus)!! <= perBook) chunks.add(chunk)
+                }
+            }
+            val texts = HashMap<Long, BookPassage>()
+            chunks.groupBy { it.bookId }.forEach { (id, hits) ->
+                val book = dao.get(id) ?: return@forEach
+                // One damaged book drops only its own passages.
+                val read = try {
+                    chunkTexts(book.filePath, hits)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    return@forEach
+                }
+                for (chunk in hits) read[chunk.id]?.let { texts[chunk.id] = BookPassage(book, chunk.href, chunk.progression, it) }
+            }
+            chunks.mapNotNull { texts[it.id] }
         }
     }
 
@@ -208,4 +247,27 @@ class BookIndex(
     private companion object {
         val WHITESPACE = Regex("\\s+")
     }
+}
+
+/**
+ * BM25 (k1 = 1.2, no length normalisation) of one row from FTS4 `matchinfo(..., 'pcnx')`: unsigned little-endian ints
+ * `p c n`, then `hits-in-row, hits-in-all-rows, rows-with-hits` per phrase and column. Sums the phrases (one column).
+ */
+internal fun bm25(matchinfo: ByteArray): Double {
+    val ints = IntArray(matchinfo.size / 4) { i ->
+        (matchinfo[4 * i].toInt() and 0xFF) or ((matchinfo[4 * i + 1].toInt() and 0xFF) shl 8) or
+            ((matchinfo[4 * i + 2].toInt() and 0xFF) shl 16) or ((matchinfo[4 * i + 3].toInt() and 0xFF) shl 24)
+    }
+    if (ints.size < 3) return 0.0
+    val phrases = ints[0]
+    val n = ints[2].toLong() and 0xFFFFFFFFL
+    var score = 0.0
+    for (i in 0 until phrases) {
+        if (3 + 3 * i + 2 >= ints.size) break
+        val tf = (ints[3 + 3 * i].toLong() and 0xFFFFFFFFL).toDouble()
+        val df = (ints[3 + 3 * i + 2].toLong() and 0xFFFFFFFFL).toDouble()
+        val idf = Math.log((n - df + 0.5) / (df + 0.5) + 1)
+        score += idf * tf * 2.2 / (tf + 1.2)
+    }
+    return score
 }

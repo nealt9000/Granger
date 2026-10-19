@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Book::class, BookPosition::class, BookMark::class, BookChunk::class,
         ResearchChat::class, ResearchTurn::class, ResearchPassage::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -68,6 +68,15 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds the model's best guess to a turn: blank text, and whether the large model wrote it or fell back. */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `research_turns` ADD COLUMN `guess` TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE `research_turns` ADD COLUMN `guessLarge` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `research_turns` ADD COLUMN `guessFellBack` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         /**
          * Seeds the built-in media types and creates `book_text` on a fresh install. Every database builder
          * must add this: Room doesn't manage `book_text`, so only this callback and [MIGRATION_3_4] create it.
@@ -93,7 +102,7 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         fun create(context: Context): LibraryDatabase =
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
-                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .addCallback(SeedCallback)
                 .build()
     }

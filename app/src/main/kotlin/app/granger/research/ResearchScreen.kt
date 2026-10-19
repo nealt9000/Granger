@@ -76,10 +76,14 @@ private const val PLACEHOLDER = "Ask about anything in your library"
 private const val DECLINED = "Not in your library."
 private const val UNVERIFIED = "Couldn't answer from these passages."
 private const val MEDICAL = "Not medical advice. If you can reach emergency services or a professional, do so."
+private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
+private const val BEST_GUESS_WAIT = "This takes about half a minute"
+private const val BEST_GUESS_FALLBACK = "The large model couldn't load, so this guess is from the standard one."
 private const val THINK_DEEPER = "Think deeper (about 30 s)"
 private const val LARGE_FALLBACK = "Think deeper couldn't load the large model, so this answer is from the standard one."
 private const val MODELS_MISSING = "Research needs the Gemma 4 E2B model. Get it in Settings → Models."
 private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
+private const val SEARCH_FAILED = "Couldn't search your library. Try again."
 private const val INTERRUPTED = "Stopped before an answer."
 private const val SOURCE_GONE = "That source is no longer in your library."
 
@@ -231,8 +235,8 @@ fun ResearchScreen(
     }
     val streamed = state.turns.lastOrNull()?.partial?.length ?: 0
     // A turn that just finished gets one last scroll once its final answer and source cards are stored. They arrive
-    // from the database after the stream ends, so the turn counts as live until it is no longer pending.
-    val live = state.running || state.turns.lastOrNull()?.turn?.outcome == TurnOutcome.PENDING
+    // from the database after the stream ends, so the turn counts as live until it is settled (cards present).
+    val live = !state.settled
     var wasLive by remember { mutableStateOf(live) }
     LaunchedEffect(rows.size, streamed, live) {
         if (follow && (live || wasLive)) scrollToEnd()
@@ -297,8 +301,9 @@ fun ResearchScreen(
                         ui = row.turn,
                         running = state.running,
                         onCite = { n -> cite(row.turn.turn.id, n) },
-                        onSearch = { onSearch(row.turn.turn.keywords.joinToString(" ").ifBlank { row.turn.turn.question }) },
+                        onSearch = { onSearch(searchInsteadQuery(row.turn.turn.keywords, row.turn.turn.question)) },
                         onRetry = { viewModel.retry(row.turn.turn.id) },
+                        onGuess = { viewModel.bestGuess(row.turn.turn.id) },
                         onReadiness = onReadiness,
                     )
                     is ThreadRow.Source -> SourceCard(row.n, row.passage, flashing == row.key) { open(row.passage) }
@@ -366,6 +371,7 @@ private fun AnswerBlock(
     onCite: (Int) -> Unit,
     onSearch: () -> Unit,
     onRetry: () -> Unit,
+    onGuess: () -> Unit,
     onReadiness: () -> Unit,
 ) {
     val turn = ui.turn
@@ -384,10 +390,35 @@ private fun AnswerBlock(
             TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
                 Text(DECLINED, style = MaterialTheme.typography.bodyLarge)
-                OutlinedButton(onClick = onSearch) { Text("Search instead") }
+                if (ui.guessing) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                        ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = GrangerColors.OnSurfaceVariant) }
+                    }
+                    if (ui.guessLarge) {
+                        Text(BEST_GUESS_WAIT, style = MaterialTheme.typography.bodySmall, color = GrangerColors.OnSurfaceVariant)
+                    }
+                }
+                if (ui.guessFailed) {
+                    Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
+                    OutlinedButton(onClick = onReadiness) { Text("Readiness") }
+                }
+                if (ui.guessFellBack) Banner(BEST_GUESS_FALLBACK)
+                val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
+                if (guessText.isNotBlank()) GuessCard(guessText)
+                if (!ui.guessing) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = onSearch) { Text("Search instead") }
+                        if (ui.offersGuess) OutlinedButton(onClick = onGuess, enabled = !running) { Text("Best guess") }
+                    }
+                }
             }
             TurnOutcome.INTERRUPTED -> {
                 Text(INTERRUPTED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.OnSurfaceVariant)
+                OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
+            }
+            TurnOutcome.SEARCH_FAILED -> {
+                Text(SEARCH_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
                 OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
             }
             TurnOutcome.FAILED -> {
@@ -395,6 +426,27 @@ private fun AnswerBlock(
                 OutlinedButton(onClick = onReadiness) { Text("Readiness") }
             }
         }
+    }
+}
+
+/** The model's own guess, outlined and set apart from cited answers; it has no sources, so no chips or cards. */
+@Composable
+private fun GuessCard(text: String) {
+    val shape = RoundedCornerShape(8.dp)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer, shape)
+            .border(1.dp, MaterialTheme.colorScheme.outline, shape)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            BEST_GUESS_LABEL,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+        Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
     }
 }
 

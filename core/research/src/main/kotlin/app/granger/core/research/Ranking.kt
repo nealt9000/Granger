@@ -4,32 +4,35 @@ import kotlin.math.sqrt
 
 data class RankingConfig(
     val preselect: Int = 12,
-    val perSource: Int = 3,
+    val perDocument: Int = 3,
     val cosineThreshold: Float = 0.40f,
-    val lexicalThreshold: Double = 0.32,
+    // Set by sweep on the tune-2 corpus (Plan 9, 8d): recall is flat from 0.32 to 0.6, and 0.6 sends fewer unanswerable questions passages.
+    val lexicalThreshold: Double = 0.6,
     val small: Int = 4,
     val large: Int = 8,
 )
 
 /** Picks which passages go into the prompt: a cheap lexical preselect, then a threshold on embeddings or keywords. */
 object Ranking {
-    /** Best-first by lexical score then search score, at most [RankingConfig.perSource] per source. */
+    /** Best-first by lexical score then search score, at most [RankingConfig.perDocument] per article or book chapter
+     * (a source and location), not per pack. */
     fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
-        val perSource = HashMap<String, Int>()
-        val score = LexicalScore.scorer(keywords, corpus = passages)
+        val perDocument = HashMap<Pair<String, String>, Int>()
+        val score = LexicalScore.scorer(keywords)
         // Scored once each: a sort comparator would score every passage many times over.
         return passages
             .map { it to score(it) }
             .sortedWith(compareByDescending<Pair<Passage, Double>> { it.second }.thenByDescending { it.first.searchScore })
             .map { it.first }
             .filter { p ->
-                val seen = perSource.merge(p.sourceId, 1, Int::plus)!!
-                seen <= config.perSource
+                val seen = perDocument.merge(p.sourceId to p.location, 1, Int::plus)!!
+                seen <= config.perDocument
             }
             .take(config.preselect)
     }
 
     fun cosine(a: FloatArray, b: FloatArray): Float {
+        require(a.size == b.size) { "Vector sizes differ: ${a.size} and ${b.size}" }
         var dot = 0f
         var na = 0f
         var nb = 0f
@@ -56,14 +59,12 @@ object Ranking {
             .take(config.large)
             .map { candidates[it.first] }
 
-    /** [corpus] is everything the search found, which sets how rare each keyword word is. */
     fun byLexical(
         candidates: List<Passage>,
         keywords: List<String>,
         config: RankingConfig,
-        corpus: List<Passage> = candidates,
     ): List<Passage> {
-        val score = LexicalScore.scorer(keywords, corpus)
+        val score = LexicalScore.scorer(keywords)
         return candidates
             .map { it to score(it) }
             .filter { it.second >= config.lexicalThreshold }

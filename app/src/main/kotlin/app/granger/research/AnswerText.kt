@@ -11,36 +11,93 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.em
 import app.granger.theme.GrangerColors
 
-/** An answer split into its words and its `[n]` citations. */
+/** An answer split into its words and its `[n]` citations; `*italic*` and `**bold**` become styles, other Markdown stays as typed. */
 object AnswerText {
     sealed interface Segment {
-        data class Text(val text: String) : Segment
+        data class Text(val text: String, val bold: Boolean = false, val italic: Boolean = false) : Segment
 
-        /** Passage [n], counted from 1. */
-        data class Cite(val n: Int) : Segment
+        /** Passage [n], counted from 1. [bold] and [italic] carry the style it sits in, so a chip inside italics keeps it. */
+        data class Cite(val n: Int, val bold: Boolean = false, val italic: Boolean = false) : Segment
     }
 
     /** `[1]`, `[2, 3]`: one or more passage numbers in square brackets. */
     private val CITATION = Regex("""\[(\d+(?:\s*,\s*\d+)*)]""")
 
+    /** [answer] without its emphasis marks, and the style of each remaining character. */
+    private class Marked(val text: String, val bold: BooleanArray, val italic: BooleanArray)
+
+    /** A mark opens only before a non-space and with a closing mark later on the same line; it closes after a non-space. */
+    private fun mark(answer: String): Marked {
+        val out = StringBuilder()
+        val bold = ArrayList<Boolean>()
+        val italic = ArrayList<Boolean>()
+        var b = false
+        var i = false
+        var k = 0
+        fun closes(at: Int, mark: String): Boolean {
+            var j = at
+            while (j < answer.length && answer[j] != '\n') {
+                if (answer.startsWith(mark, j) && j > at && !answer[j - 1].isWhitespace() &&
+                    (mark.length == 2 || !answer.startsWith("**", j))
+                ) return true
+                j++
+            }
+            return false
+        }
+        while (k < answer.length) {
+            val c = answer[k]
+            if (c == '*') {
+                val double = answer.startsWith("**", k)
+                val mark = if (double) "**" else "*"
+                val after = k + mark.length
+                val canClose = (if (double) b else i) && k > 0 && !answer[k - 1].isWhitespace()
+                val canOpen = !(if (double) b else i) && after < answer.length && !answer[after].isWhitespace() &&
+                    answer[after] != '*' && closes(after, mark)
+                if (canClose || canOpen) {
+                    if (double) b = !b else i = !i
+                    k = after
+                    continue
+                }
+            }
+            out.append(c); bold += b; italic += i
+            k++
+        }
+        return Marked(out.toString(), bold.toBooleanArray(), italic.toBooleanArray())
+    }
+
     fun segments(answer: String): List<Segment> {
+        val marked = mark(answer)
+        val text = marked.text
         val out = mutableListOf<Segment>()
+        /** Text over [from, to), cut where the style changes. */
+        fun addText(from: Int, to: Int) {
+            var s = from
+            while (s < to) {
+                var e = s + 1
+                while (e < to && marked.bold[e] == marked.bold[s] && marked.italic[e] == marked.italic[s]) e++
+                out += Segment.Text(text.substring(s, e), marked.bold[s], marked.italic[s])
+                s = e
+            }
+        }
         var from = 0
-        for (match in CITATION.findAll(answer)) {
+        for (match in CITATION.findAll(text)) {
             // A number too long for an Int (an ISBN in brackets) is not a citation; the bracket stays text.
             val numbers = match.groupValues[1].split(',').map { it.trim().toIntOrNull() }
             if (numbers.any { it == null }) continue
-            if (match.range.first > from) out += Segment.Text(answer.substring(from, match.range.first))
-            numbers.forEach { out += Segment.Cite(it!!) }
+            addText(from, match.range.first)
+            val at = match.range.first
+            numbers.forEach { out += Segment.Cite(it!!, marked.bold[at], marked.italic[at]) }
             from = match.range.last + 1
         }
-        if (from < answer.length) out += Segment.Text(answer.substring(from))
+        addText(from, text.length)
         return out
     }
 }
@@ -57,10 +114,14 @@ internal fun AnswerBody(answer: String, onCite: (Int) -> Unit, modifier: Modifie
             fontSize = 0.75.em,
             baselineShift = BaselineShift.Superscript,
         )
+        fun style(bold: Boolean, italic: Boolean) = SpanStyle(
+            fontWeight = if (bold) FontWeight.Bold else null,
+            fontStyle = if (italic) FontStyle.Italic else null,
+        )
         buildAnnotatedString {
             AnswerText.segments(answer).forEach { segment ->
                 when (segment) {
-                    is AnswerText.Segment.Text -> append(segment.text)
+                    is AnswerText.Segment.Text -> withStyle(style(segment.bold, segment.italic)) { append(segment.text) }
                     is AnswerText.Segment.Cite -> {
                         val link = LinkAnnotation.Clickable("cite:${segment.n}", TextLinkStyles(chip)) { cite(segment.n) }
                         withLink(link) { append(" ${segment.n} ") }

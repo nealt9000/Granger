@@ -50,13 +50,21 @@ class FakeZimArchive(
     private val paths: Set<String> = setOf("index"),
     override val mainPath: String? = "index",
     private val redirects: Map<String, String> = emptyMap(),
+    var random: String? = null,
+    var suggestions: List<ZimHit> = emptyList(),
+    var results: List<ZimHit> = emptyList(),
 ) : ZimArchive {
     override val metadata = ZimMetadata(uuid, "", "eng", "2026-10-15", uuid)
     override val hasFulltextIndex = true
     override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
     override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", ByteArray(0)) }
-    override fun suggest(query: String, limit: Int) = emptyList<ZimHit>()
-    override fun search(query: String, limit: Int) = emptyList<ZimHit>()
+    override fun randomPath() = random
+    var suggestCalls = 0
+    override fun suggest(query: String, limit: Int): List<ZimHit> {
+        suggestCalls++
+        return suggestions.take(limit)
+    }
+    override fun search(query: String, limit: Int) = results.take(limit)
     override fun close() {}
 }
 

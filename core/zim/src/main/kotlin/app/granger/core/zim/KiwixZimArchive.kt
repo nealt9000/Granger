@@ -43,6 +43,8 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         if (archive.hasEntryByPath(path)) archive.getEntryByPath(path).getItem(true).path else null
     }
 
+    override fun randomPath(): String? = reading(null) { archive.randomEntry.getItem(true).path }
+
     override fun read(path: String): ZimItem? = reading(null) {
         if (!archive.hasEntryByPath(path)) return@reading null
         val item = archive.getEntryByPath(path).getItem(true)

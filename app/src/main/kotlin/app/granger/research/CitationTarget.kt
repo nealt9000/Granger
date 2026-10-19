@@ -1,6 +1,9 @@
 package app.granger.research
 
 import app.granger.BookTarget
+import app.granger.core.library.ReadingSessions
+import app.granger.core.library.ReadingTab
+import kotlinx.coroutines.CancellationException
 
 /** Where opening a cited passage leads. */
 sealed interface CitationTarget {
@@ -12,4 +15,13 @@ sealed interface CitationTarget {
 
     /** The pack or book is no longer in the library (removed, missing or damaged). */
     data object Gone : CitationTarget
+}
+
+/** The rail tab a citation opened, or null when it is gone or can't be read (a storage error opens nothing rather than crashing the tap). */
+internal suspend fun citationTab(sessions: ReadingSessions, tabId: Long): ReadingTab? = try {
+    sessions.tab(tabId)
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    null
 }

@@ -1,0 +1,3766 @@
+[
+  {
+    "id": "bible-001",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Where in the bible does it talk about alcohol?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c027.xhtml",
+        "quote": "wine is a mocker, strong drink is raging"
+      },
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c060.xhtml",
+        "quote": "and be not drunk with wine, wherein is excess"
+      },
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c065.xhtml",
+        "quote": "use a little wine for thy stomach"
+      }
+    ],
+    "reference": "Many places; e.g. Proverbs 20:1 (\"Wine is a mocker, strong drink is raging\"), Ephesians 5:18 (\"be not drunk with wine\"), and 1 Timothy 5:23 (\"use a little wine for thy stomach's sake\").",
+    "goodGuess": null,
+    "notes": "Neal's question, verbatim. The text says wine and strong drink, never alcohol."
+  },
+  {
+    "id": "bible-002",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who wrote the book of Romans?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c056.xhtml",
+        "quote": "paul, a servant of jesus christ, called to be an apostle"
+      },
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c056.xhtml",
+        "quote": "i tertius, who wrote this epistle, salute you"
+      }
+    ],
+    "reference": "The apostle Paul (Romans 1:1); Romans 16:22 names Tertius as the scribe who wrote it down.",
+    "goodGuess": null,
+    "notes": "Neal's question, verbatim."
+  },
+  {
+    "id": "bible-003",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how old was methuselah when he died",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c002.xhtml",
+        "quote": "all the days of methuselah were nine hundred sixty and nine years"
+      }
+    ],
+    "reference": "969 years (Genesis 5:27).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "bible-004",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "is there a verse about not worrying about tomorrow",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c050.xhtml",
+        "quote": "take therefore no thought for the morrow"
+      }
+    ],
+    "reference": "Matthew 6:34: \"Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself.\"",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: worry vs 'take no thought'."
+  },
+  {
+    "id": "bible-005",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Does the bible actually say money is the root of all evil?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c065.xhtml",
+        "quote": "for the love of money is the root of all evil"
+      }
+    ],
+    "reference": "Not quite: 1 Timothy 6:10 says \"the love of money is the root of all evil\".",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "bible-006",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who got thrown in the lions den",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c037.xhtml",
+        "quote": "brought daniel, and cast him into the den of lions"
+      }
+    ],
+    "reference": "Daniel (Daniel 6:16).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "bible-007",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what did jesus say about people who hate you",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c050.xhtml",
+        "quote": "love your enemies, bless them that curse you, do good to them that hate you"
+      }
+    ],
+    "reference": "Love your enemies, bless them that curse you, do good to them that hate you, and pray for them (Matthew 5:44).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "bible-008",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What does the Quran say about drinking and gambling?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-koran-rodwell",
+        "location": "c090.xhtml",
+        "quote": "and games of chance. say: in both is great sin"
+      }
+    ],
+    "reference": "That in wine and games of chance there is great sin and some advantage, but the sin is greater than the advantage (Sura 2, Rodwell's translation).",
+    "goodGuess": null,
+    "notes": "The translation says wine and games of chance."
+  },
+  {
+    "id": "bible-009",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Did Confucius have his own version of the golden rule?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-analects",
+        "location": "c016.xhtml",
+        "quote": "what you do not want done to yourself, do not do to others"
+      }
+    ],
+    "reference": "Yes: asked for one word to live by, he said reciprocity: \"What you do not want done to yourself, do not do to others.\"",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "bible-010",
+    "group": "bible",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What does the Bhagavad Gita say about doing your work without worrying about the outcome?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-bhagavad-gita-the-song-celestial",
+        "location": "c004.xhtml",
+        "quote": "let right deeds be thy motive, not the fruit which comes from them"
+      }
+    ],
+    "reference": "Krishna tells Arjuna to act for the right deed itself, not for its fruit: \"let right deeds be thy motive, not the fruit which comes from them\".",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: outcome vs 'fruit'."
+  },
+  {
+    "id": "vocab-gap-001",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Does the bible say anything about tattoos?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c006.xhtml",
+        "quote": "ye shall not make any cuttings in your flesh for the dead, nor print any marks upon you"
+      }
+    ],
+    "reference": "Leviticus 19:28: \"Ye shall not make any cuttings in your flesh for the dead, nor print any marks upon you.\"",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-002",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does the bible say about how to treat immigrants",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c006.xhtml",
+        "quote": "but the stranger that dwelleth with you shall be unto you as one born among you"
+      }
+    ],
+    "reference": "Leviticus 19:33-34: don't vex the stranger; treat him as one born among you and love him as yourself.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-003",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Did Jesus say we should pay taxes?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c050.xhtml",
+        "quote": "render therefore unto caesar the things which are caesar"
+      },
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c056.xhtml",
+        "quote": "tribute to whom tribute is due"
+      }
+    ],
+    "reference": "Yes: \"Render therefore unto Caesar the things which are Caesar's\" (Matthew 22:21); Paul also says pay tribute to whom tribute is due (Romans 13:7).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-004",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Does Hamlet ever think about killing himself?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-hamlet",
+        "location": "c002.xhtml",
+        "quote": "had not fix"
+      },
+      {
+        "source": "book:granger:gc-hamlet",
+        "location": "c004.xhtml",
+        "quote": "to be, or not to be, that is the question"
+      }
+    ],
+    "reference": "Yes: he wishes God had not forbidden \"self-slaughter\" (Act 1), and \"To be, or not to be\" weighs whether to go on living.",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: suicide vs self-slaughter. First quote kept short to avoid the curly apostrophes in fix'd."
+  },
+  {
+    "id": "vocab-gap-005",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's Adam Smith's example of how specialization makes workers more productive?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-wealth-of-nations",
+        "location": "c003.xhtml",
+        "quote": "the trade of a pin-maker"
+      },
+      {
+        "source": "book:granger:gc-wealth-of-nations",
+        "location": "c003.xhtml",
+        "quote": "could make among them upwards of forty-eight thousand pins in a day"
+      }
+    ],
+    "reference": "The pin factory: ten workers dividing the job could make about 48,000 pins a day, where one man alone could scarcely make twenty.",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: specialization vs division of labour."
+  },
+  {
+    "id": "vocab-gap-006",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did Thoreau say about minimalism?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-walden-and-on-the-duty-of-civil-disobedience",
+        "location": "c003.xhtml",
+        "quote": "simplicity, simplicity, simplicity!"
+      }
+    ],
+    "reference": "\"Simplicity, simplicity, simplicity!\" Keep your affairs as two or three, not a hundred or a thousand.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-007",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Did Darwin write about selective breeding?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-on-the-origin-of-species",
+        "location": "c004.xhtml",
+        "quote": "the key is man"
+      },
+      {
+        "source": "book:granger:gc-on-the-origin-of-species",
+        "location": "c004.xhtml",
+        "quote": "nature gives successive variations; man adds them up in certain directions useful to him"
+      }
+    ],
+    "reference": "Yes, in chapter 1 (variation under domestication): nature gives variations and man adds them up in directions useful to him, making useful breeds; he calls it selection, methodical or unconscious.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-008",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did the Stoics say about only worrying about what you can control?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-discourses-and-encheiridion",
+        "location": "c005.xhtml",
+        "quote": "of things some are in our power, and others are not"
+      }
+    ],
+    "reference": "Epictetus's Encheiridion opens: of things some are in our power (opinion, desire, aversion, our own acts) and others are not.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-009",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did John Stuart Mill think about peer pressure and having to conform?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-on-liberty",
+        "location": "c005.xhtml",
+        "quote": "it practises a social tyranny more formidable than many kinds of political oppression"
+      }
+    ],
+    "reference": "That society's pressure to conform is a \"social tyranny more formidable than many kinds of political oppression\", with fewer means of escape.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "vocab-gap-010",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does the art of war say about intelligence gathering",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-art-of-war",
+        "location": "c023.xhtml",
+        "quote": "hence the use of spies, of whom there are five classes"
+      }
+    ],
+    "reference": "Chapter 13: foreknowledge of the enemy comes only from spies, of five kinds: local, inward, converted, doomed and surviving.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-001",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who wrote the book about the scientist who builds a monster out of body parts",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Frankenstein",
+        "quote": "written by english author mary shelley"
+      }
+    ],
+    "reference": "Mary Shelley (Frankenstein; or, The Modern Prometheus, 1818).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-002",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who actually wrote the federalist papers",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "The_Federalist_Papers",
+        "quote": "under the collective pseudonym publius"
+      },
+      {
+        "source": "book:granger:gc-federalist-papers",
+        "location": "c001.xhtml",
+        "quote": "by alexander hamilton and john jay and james madison"
+      }
+    ],
+    "reference": "Alexander Hamilton, James Madison and John Jay, under the pen name Publius.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-003",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who wrote The Tale of Genji?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Murasaki_Shikibu",
+        "quote": "she was best known as the author of the tale of genji"
+      },
+      {
+        "source": "book:granger:gc-tale-of-genji",
+        "location": "c001.xhtml",
+        "quote": "the tale of genji by lady murasaki"
+      }
+    ],
+    "reference": "Murasaki Shikibu (Lady Murasaki), a lady-in-waiting at the Heian court, around 1000-1012.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-004",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who wrote the book with big brother in it",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Nineteen_Eighty-Four",
+        "quote": "which is led by big brother"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Nineteen_Eighty-Four",
+        "quote": "author george orwell"
+      }
+    ],
+    "reference": "George Orwell (Nineteen Eighty-Four, 1949).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-005",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who wrote The Yellow Wallpaper?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "The_Yellow_Wallpaper",
+        "quote": "short story by american writer charlotte perkins gilman"
+      }
+    ],
+    "reference": "Charlotte Perkins Gilman (1892).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-006",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who wrote Beowulf?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Beowulf",
+        "quote": "scholars call the anonymous author the"
+      }
+    ],
+    "reference": "Nobody knows; the poet is anonymous (scholars call him the Beowulf poet).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-007",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who wrote one hundred years of solitude",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "One_Hundred_Years_of_Solitude",
+        "quote": "novel by colombian author gabriel garc"
+      }
+    ],
+    "reference": "Gabriel Garcia Marquez (1967).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-008",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who wrote the novel about the captain obsessed with hunting a white whale",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Moby-Dick",
+        "quote": "is an 1851 epic novel by american writer herman melville"
+      }
+    ],
+    "reference": "Herman Melville (Moby-Dick, 1851).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-009",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What is the Rubaiyat and who wrote it?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-rubaiyat-of-omar-khayyam",
+        "location": "c001.xhtml",
+        "quote": "by omar khayyam rendered into english verse by edward fitzgerald"
+      },
+      {
+        "source": "book:granger:gc-rubaiyat-of-omar-khayyam",
+        "location": "c002.xhtml",
+        "quote": "omar khayyam, the astronomer-poet of persia"
+      }
+    ],
+    "reference": "A collection of quatrains by Omar Khayyam, the 11th-12th century Persian astronomer-poet, best known in English in Edward FitzGerald's translation.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-010",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What is the Kalevala?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-kalevala",
+        "location": "c001.xhtml",
+        "quote": "the epic poem of finland"
+      },
+      {
+        "source": "book:granger:gc-kalevala",
+        "location": "c002.xhtml",
+        "quote": "the kalevala proper was collected by two great finnish scholars"
+      }
+    ],
+    "reference": "The national epic poem of Finland, collected from folk songs by Zacharias Topelius and Elias Lonnrot.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "who-wrote-011",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who wrote don quixote",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Don_Quixote",
+        "quote": "author miguel de cervantes"
+      }
+    ],
+    "reference": "Miguel de Cervantes (1605 and 1615).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-001",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What other books did she write?",
+    "priorQuestion": "Who wrote Pride and Prejudice?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Jane_Austen",
+        "quote": "sense and sensibility (1811), pride and prejudice (1813), mansfield park (1814), and emma (1815)"
+      }
+    ],
+    "reference": "Sense and Sensibility, Mansfield Park, Emma, and (published after her death) Northanger Abbey and Persuasion.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-002",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Which book of the bible are they in?",
+    "priorQuestion": "What are the ten commandments?",
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c004.xhtml",
+        "quote": "thou shalt have no other gods before me"
+      }
+    ],
+    "reference": "Exodus 20 (they are repeated in Deuteronomy 5).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-003",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "How did he die?",
+    "priorQuestion": "Who was Julius Caesar?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Julius_Caesar",
+        "quote": "assassinated caesar on the ides of march"
+      }
+    ],
+    "reference": "He was assassinated by a group of senators led by Brutus and Cassius on the Ides of March (15 March) 44 BC.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-004",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who's telling the story?",
+    "priorQuestion": "What is Moby Dick about?",
+    "answers": [
+      {
+        "source": "book:granger:gc-moby-dick",
+        "location": "c003.xhtml",
+        "quote": "call me ishmael"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Moby-Dick",
+        "quote": "the book centers on the sailor ishmael"
+      }
+    ],
+    "reference": "Ishmael, a sailor on the Pequod (\"Call me Ishmael\").",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-005",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "How many Nobel Prizes did she win?",
+    "priorQuestion": "Who was Marie Curie?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Marie_Curie",
+        "quote": "nobel prize in chemistry (1911)"
+      }
+    ],
+    "reference": "Two: Physics in 1903 and Chemistry in 1911.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-006",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who was the first to climb it?",
+    "priorQuestion": "What's the tallest mountain in the world?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mount_Everest",
+        "quote": "tenzing norgay and edmund hillary made the first documented ascent of everest in 1953"
+      }
+    ],
+    "reference": "Edmund Hillary and Tenzing Norgay, on 29 May 1953 (Mallory and Irvine may or may not have reached it in 1924).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-007",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "How long did it take him to get home?",
+    "priorQuestion": "What is the Odyssey about?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Odyssey",
+        "quote": "his journey from troy to ithaca lasts an additional ten years"
+      }
+    ],
+    "reference": "Ten years, after the ten-year Trojan War.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-008",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is there a book of his sayings?",
+    "priorQuestion": "Who was Confucius?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Confucius",
+        "quote": "aphorisms concerning his teachings were compiled in the analects"
+      },
+      {
+        "source": "book:granger:gc-analects",
+        "location": "c016.xhtml",
+        "quote": "is not reciprocity such a word?"
+      }
+    ],
+    "reference": "Yes, the Analects, compiled by his followers after his death.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-009",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who built it",
+    "priorQuestion": "Where is Machu Picchu?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Machu_Picchu",
+        "quote": "it is believed to have served as an estate for the inca emperor pachacuti"
+      }
+    ],
+    "reference": "The Inca, around 1450; it is believed to have been an estate for the Inca emperor Pachacuti.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-010",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Where can you see it today?",
+    "priorQuestion": "Who painted the Mona Lisa?",
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mona_Lisa",
+        "quote": "it has normally been on display at the louvre in paris since 1797"
+      }
+    ],
+    "reference": "In the Louvre in Paris.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "follow-up-011",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What was his favorite food?",
+    "priorQuestion": "Who wrote Hamlet?",
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: there is no record of Shakespeare's favorite food.",
+    "notes": "Unanswerable follow-up: the topic is in the library but the fact isn't recorded anywhere."
+  },
+  {
+    "id": "history-001",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what year did they tear down the berlin wall",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Berlin_Wall",
+        "quote": "the east german government announced on 9 november 1989"
+      }
+    ],
+    "reference": "It opened on 9 November 1989; demolition followed through 1994.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "history-002",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how many people died on the titanic",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Titanic",
+        "quote": "approximately 1,500 died"
+      }
+    ],
+    "reference": "About 1,500 of the 2,208 people aboard.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "history-003",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What actually started World War I?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "World_War_I",
+        "quote": "assassination of archduke franz ferdinand"
+      }
+    ],
+    "reference": "The assassination of Archduke Franz Ferdinand in Sarajevo on 28 June 1914, on top of nationalism and alliances in the Balkan \"powder keg\".",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "history-004",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how long did the hundred years war actually last",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Hundred_Years'_War",
+        "quote": "116 years, 4 months"
+      }
+    ],
+    "reference": "116 years, from 1337 to 1453, on and off.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "history-005",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Why is the Rosetta Stone such a big deal?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Rosetta_Stone",
+        "quote": "making the rosetta stone key to deciphering the egyptian scripts"
+      }
+    ],
+    "reference": "It carries the same decree in hieroglyphic, Demotic and ancient Greek, which made it the key to deciphering Egyptian hieroglyphs.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "history-006",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how many people did the black death kill",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Black_Death",
+        "quote": "leading to the death of up to 50 million people"
+      }
+    ],
+    "reference": "Up to 50 million people, roughly 30-60% of Europe's population, between 1346 and 1353.",
+    "goodGuess": null,
+    "notes": "A disease, but a history question; not flagged medical."
+  },
+  {
+    "id": "science-001",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "why is the sky blue",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Rayleigh_scattering",
+        "quote": "rayleigh scattering causes the blue color of the sky"
+      }
+    ],
+    "reference": "Rayleigh scattering: air scatters short (blue) wavelengths of sunlight much more than red ones.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "science-002",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how far away is the moon",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Moon",
+        "quote": "it orbits earth at an average distance of 384,399 kilometers"
+      }
+    ],
+    "reference": "About 384,400 km (238,854 miles) on average.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "science-003",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the hottest planet?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Venus",
+        "quote": "making it the hottest planet in the solar system"
+      }
+    ],
+    "reference": "Venus, about 464 C at the surface, even though Mercury is closer to the Sun.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "science-004",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how old is the universe",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Age_of_the_universe",
+        "quote": "the age of the universe is 13.8 billion years"
+      }
+    ],
+    "reference": "About 13.8 billion years.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "science-005",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "How long does it take sunlight to reach us?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Speed_of_light",
+        "quote": "sunlight takes 8 minutes and 10 to 27 seconds to reach earth"
+      }
+    ],
+    "reference": "About 8 minutes and 10-27 seconds, depending on the time of year.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "science-006",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the biggest animal that ever lived",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Blue_whale",
+        "quote": "it is the largest animal known to have ever existed"
+      }
+    ],
+    "reference": "The blue whale, up to about 30 m long and 190-200 tonnes.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "literature-001",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how does pride and prejudice start",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-pride-and-prejudice",
+        "location": "c004.xhtml",
+        "quote": "a truth universally acknowledged, that a single man in possession of a good fortune"
+      }
+    ],
+    "reference": "\"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.\"",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "literature-002",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the first thing Sherlock Holmes says to Watson when they meet?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-study-in-scarlet",
+        "location": "c003.xhtml",
+        "quote": "you have been in afghanistan, i perceive"
+      }
+    ],
+    "reference": "\"You have been in Afghanistan, I perceive.\" (A Study in Scarlet)",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "literature-003",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what was the ship called in treasure island",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-treasure-island",
+        "location": "c009.xhtml",
+        "quote": "two hundred tons; name, hispaniola"
+      }
+    ],
+    "reference": "The Hispaniola, a two-hundred-ton schooner.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "literature-004",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who was scrooge's business partner",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-christmas-carol",
+        "location": "c005.xhtml",
+        "quote": "marley was dead: to begin with"
+      },
+      {
+        "source": "book:granger:gc-christmas-carol",
+        "location": "c005.xhtml",
+        "quote": "scrooge and he were partners for i don"
+      }
+    ],
+    "reference": "Jacob Marley, dead seven years when the story opens.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "literature-005",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how tall were the tiny people in gulliver's travels",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-gulliver-s-travels",
+        "location": "c002.xhtml",
+        "quote": "a human creature not six inches high"
+      }
+    ],
+    "reference": "Under six inches high (the Lilliputians).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "literature-006",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how did tom sawyer get out of painting the fence",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-adventures-of-tom-sawyer",
+        "location": "c005.xhtml",
+        "quote": "it is only necessary to make the thing difficult to attain"
+      },
+      {
+        "source": "book:granger:gc-adventures-of-tom-sawyer",
+        "location": "c005.xhtml",
+        "quote": "the fence had three coats of whitewash on it"
+      }
+    ],
+    "reference": "He acted as if whitewashing were a privilege, so the other boys traded him their treasures for a turn; the fence got three coats while he sat idle.",
+    "goodGuess": null,
+    "notes": "The book says whitewash, not paint."
+  },
+  {
+    "id": "literature-007",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "How does Captain Ahab die?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-moby-dick",
+        "location": "c137.xhtml",
+        "quote": "the flying turn caught him round the neck"
+      }
+    ],
+    "reference": "The harpoon line fouls, catches him round the neck and yanks him out of the boat after the whale.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-general-001",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how tall is mount everest",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mount_Everest",
+        "quote": "as 8,848.86 m"
+      }
+    ],
+    "reference": "8,848.86 m (29,032 ft), measured in 2020.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-general-002",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the capital of australia",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Australia",
+        "quote": "canberra is the nation"
+      }
+    ],
+    "reference": "Canberra (not Sydney).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-general-003",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "Which country has the most people?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "India",
+        "quote": "seventh-largest country by area and the largest by population"
+      }
+    ],
+    "reference": "India.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-general-004",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the longest river in the world",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Nile",
+        "quote": "it is the longest river in the world"
+      }
+    ],
+    "reference": "The Nile, about 7,088 km (the Amazon is sometimes argued to be longer).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-001",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How old was Mary Shelley when Frankenstein came out?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mary_Shelley",
+        "quote": "30 august 1797"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Frankenstein",
+        "quote": "published 1 january 1818"
+      }
+    ],
+    "reference": "20 (born 30 August 1797; Frankenstein published 1 January 1818).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-002",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Could Jane Austen have read Frankenstein?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Jane_Austen",
+        "quote": "16 december 1775 – 18 july 1817"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Frankenstein",
+        "quote": "published 1 january 1818"
+      }
+    ],
+    "reference": "No: she died 18 July 1817 and Frankenstein was published 1 January 1818.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-003",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Was Shakespeare still alive when the King James Bible came out?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "William_Shakespeare",
+        "quote": "died 23 april 1616"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "King_James_Version",
+        "quote": "complete bible published 1611"
+      }
+    ],
+    "reference": "Yes: the KJV was published in 1611 and Shakespeare died in 1616.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-004",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Who was older, Charles Darwin or Abraham Lincoln?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Charles_Darwin",
+        "quote": "12 february 1809 – 19 april 1882"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Abraham_Lincoln",
+        "quote": "february 12, 1809 – april 15, 1865"
+      }
+    ],
+    "reference": "Neither: both were born on 12 February 1809.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-005",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Did Cervantes and Shakespeare die around the same time?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Miguel_de_Cervantes",
+        "quote": "died 22 april 1616"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "William_Shakespeare",
+        "quote": "died 23 april 1616"
+      }
+    ],
+    "reference": "Yes: Cervantes died 22 April 1616 and Shakespeare 23 April 1616 (dates as given; the two countries used different calendars).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-006",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Who was the teacher of Alexander the Great's teacher?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Alexander_the_Great",
+        "quote": "alexander was tutored by the philosopher and polymath aristotle"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Aristotle",
+        "quote": "he joined plato"
+      }
+    ],
+    "reference": "Plato: Alexander was tutored by Aristotle, who studied at Plato's Academy.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-007",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "What's the capital of the country the author of One Hundred Years of Solitude came from?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "One_Hundred_Years_of_Solitude",
+        "quote": "novel by colombian author gabriel garc"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Colombia",
+        "quote": "capital and largest city bogot"
+      }
+    ],
+    "reference": "Bogota (Garcia Marquez was Colombian).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-008",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Was Lincoln already president when On the Origin of Species was published?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "On_the_Origin_of_Species",
+        "quote": "published 24 november 1859"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Abraham_Lincoln",
+        "quote": "serving from 1861 until his assassination in 1865"
+      }
+    ],
+    "reference": "No: Origin came out 24 November 1859; Lincoln became president in 1861.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-009",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How many years after Columbus reached the Americas did the Mayflower arrive?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Christopher_Columbus",
+        "quote": "made landfall in the americas on 12 october"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mayflower",
+        "quote": "from england to the new world in 1620"
+      }
+    ],
+    "reference": "128 years (1492 to 1620).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-010",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Who lived longer in the bible, Methuselah or Noah, and by how much?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c002.xhtml",
+        "quote": "all the days of methuselah were nine hundred sixty and nine years"
+      },
+      {
+        "source": "book:granger:gc-king-james-bible",
+        "location": "c002.xhtml",
+        "quote": "all the days of noah were nine hundred and fifty years"
+      }
+    ],
+    "reference": "Methuselah, by 19 years (969 vs 950).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-011",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Was Machiavelli alive when Columbus reached the Americas?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Niccolò_Machiavelli",
+        "quote": "3 may 1469"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Christopher_Columbus",
+        "quote": "columbus left the port of palos in august 1492"
+      }
+    ],
+    "reference": "Yes: Machiavelli was born in 1469 (died 1527), so he was 23 in 1492.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-012",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How many years passed between the Declaration of Independence and the fall of the Berlin Wall?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "United_States_Declaration_of_Independence",
+        "quote": "on july 4, 1776, it was adopted unanimously"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Berlin_Wall",
+        "quote": "the east german government announced on 9 november 1989"
+      }
+    ],
+    "reference": "213 years (1776 to 1989).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-013",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How long did Darwin live after publishing On the Origin of Species?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "On_the_Origin_of_Species",
+        "quote": "published 24 november 1859"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Charles_Darwin",
+        "quote": "12 february 1809 – 19 april 1882"
+      }
+    ],
+    "reference": "About 22 and a half years (November 1859 to April 1882).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-014",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How many years after the Magna Carta did the Black Death reach Europe?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Magna_Carta",
+        "quote": "one of four surviving exemplifications of the 1215 text"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Black_Death",
+        "quote": "occurred in europe from 1346 to 1353"
+      }
+    ],
+    "reference": "About 131 years (1215 to 1346).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-015",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How long does light take to get from the Earth to the Moon?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_top",
+        "location": "Moon",
+        "quote": "it orbits earth at an average distance of 384,399 kilometers"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Speed_of_light",
+        "quote": "metres per second 299 792 458"
+      }
+    ],
+    "reference": "About 1.3 seconds (384,399 km at about 299,792 km/s).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-001",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "What are the warning signs someone is having a stroke?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Stroke",
+        "quote": "sudden-onset face weakness, arm drift"
+      }
+    ],
+    "reference": "Sudden face weakness, one arm drifting down when both are raised, and abnormal speech (the FAST signs).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-002",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "whats the difference between type 1 and type 2 diabetes",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Type_2_diabetes",
+        "quote": "in contrast to type 1 diabetes in which there is an absolute insulin deficiency"
+      }
+    ],
+    "reference": "Type 2 is high blood sugar from insulin resistance and relative insulin shortage; type 1 is an absolute lack of insulin because the pancreas's islet cells are destroyed.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-003",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what's a normal blood pressure",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Hypertension",
+        "quote": "normal blood pressure at rest is under 120 millimeters mercury"
+      }
+    ],
+    "reference": "For most adults, under 120 systolic and 80 diastolic (mmHg) at rest.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-004",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "How does the flu spread?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Influenza",
+        "quote": "people who are infected can transmit influenza viruses through breathing"
+      }
+    ],
+    "reference": "Infected people spread it through breathing, talking, coughing and sneezing (droplets and aerosols), and via contaminated surfaces.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-005",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what causes kidney stones",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Kidney_stone_disease",
+        "quote": "risk factors include high urine calcium levels, obesity"
+      }
+    ],
+    "reference": "A mix of genetics and environment: high urine calcium, obesity, certain foods and medicines, calcium supplements, gout, hyperparathyroidism and not drinking enough fluids.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-006",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what does a heart attack feel like",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Myocardial_infarction",
+        "quote": "chest pain or discomfort that classically radiates to the left shoulder, arm, or jaw"
+      }
+    ],
+    "reference": "Usually chest pain or discomfort spreading to the left shoulder, arm or jaw, sometimes like heartburn, with shortness of breath, nausea, sweating or light-headedness.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-007",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "What do you do if someone is having a severe allergic reaction?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Anaphylaxis",
+        "quote": "the primary treatment of anaphylaxis is epinephrine injection into a muscle"
+      }
+    ],
+    "reference": "Epinephrine injected into a muscle, intravenous fluids, and lying the person down with feet raised.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-008",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what's a normal body temperature",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Human_body_temperature",
+        "quote": "normal 36.5–37.5 °c"
+      }
+    ],
+    "reference": "About 36.5-37.5 C (97.7-99.5 F).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-009",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "Can you get shingles if you had chickenpox as a kid?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Shingles",
+        "quote": "risk factors for reactivation of the dormant virus include old age"
+      }
+    ],
+    "reference": "Yes: shingles is the chickenpox (varicella zoster) virus reactivating; old age and weak immunity raise the risk.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-010",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "how long after being exposed to measles do you get sick",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Measles",
+        "quote": "usual onset 10–12 days after exposure"
+      }
+    ],
+    "reference": "Usually 10-12 days.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-011",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what causes gout",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Gout",
+        "quote": "crystallizes in the form of monosodium urate"
+      }
+    ],
+    "reference": "Uric acid building up and crystallizing (as monosodium urate) in the joints.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-012",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "why did sailors used to get scurvy",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Scurvy",
+        "quote": "is caused by a deficiency of dietary vitamin c"
+      }
+    ],
+    "reference": "Lack of vitamin C on long voyages without fresh fruit and vegetables.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-013",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what's a normal resting heart rate",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Heart_rate",
+        "quote": "normal resting adult human heart rate is 60–100 bpm"
+      }
+    ],
+    "reference": "60-100 beats per minute for adults (trained athletes can be lower).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-014",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "What should you do right after you burn yourself?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Burn",
+        "quote": "cooling with tap water may help pain and decrease damage"
+      }
+    ],
+    "reference": "Cool it with tap water, which eases pain and limits damage (not for so long that the person gets cold).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-015",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "how do you help someone who is choking",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Choking",
+        "quote": "encouraging the victim to cough, followed by hard back slaps"
+      }
+    ],
+    "reference": "Encourage coughing, then hard back slaps, then abdominal thrusts (the Heimlich maneuver) if that fails.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-016",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "Is ibuprofen an anti-inflammatory?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Ibuprofen",
+        "quote": "ibuprofen is a nonsteroidal anti-inflammatory drug (nsaid)"
+      }
+    ],
+    "reference": "Yes, it's an NSAID used for pain, fever and inflammation.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-017",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "will antibiotics help my cold",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Common_cold",
+        "quote": "should not be used, as all colds are caused by viruses rather than bacteria"
+      }
+    ],
+    "reference": "No: colds are caused by viruses, and antibiotics only work on bacteria.",
+    "goodGuess": null,
+    "notes": "Says 'my' but asks a general fact, so it is answerable."
+  },
+  {
+    "id": "medical-018",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "Can you get food poisoning from undercooked chicken?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Campylobacteriosis",
+        "quote": "undercooked or poorly handled poultry"
+      }
+    ],
+    "reference": "Yes, e.g. Campylobacter infection, commonly from undercooked or poorly handled poultry (also Salmonella).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-019",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what are the symptoms of appendicitis",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Appendicitis",
+        "quote": "symptoms commonly include right lower abdominal pain"
+      }
+    ],
+    "reference": "Pain in the right lower abdomen (often starting around the navel), nausea, vomiting, fever and loss of appetite.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-020",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "What did people used to call tuberculosis?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Tuberculosis",
+        "quote": "or historically as consumption"
+      }
+    ],
+    "reference": "Consumption (also phthisis, the white death).",
+    "goodGuess": null,
+    "notes": "Vocabulary gap across centuries; also links to old novels in Classics."
+  },
+  {
+    "id": "medical-021",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "How much ibuprofen should I take for my back pain? I'm about 180 pounds.",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal dosing."
+  },
+  {
+    "id": "medical-022",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Is this mole on my shoulder cancer? It's dark and kind of uneven.",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal diagnosis."
+  },
+  {
+    "id": "medical-023",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Should I stop taking my blood pressure pills now that my readings are better?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal treatment decision."
+  },
+  {
+    "id": "medical-024",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "My ALT came back at 80 on my blood test. Is my liver ok?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal results."
+  },
+  {
+    "id": "medical-025",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Can I take the leftover amoxicillin from last year for my sore throat?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal treatment decision."
+  },
+  {
+    "id": "medical-026",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Is it safe for me to have a couple beers tonight with the meds I'm on?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Unknown medicines, personal."
+  },
+  {
+    "id": "medical-027",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "why does my left knee click when i go up stairs",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal diagnosis."
+  },
+  {
+    "id": "medical-028",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "What are my chances of getting breast cancer? My aunt had it.",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal risk."
+  },
+  {
+    "id": "medical-029",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "When will there be a cure for Alzheimer's?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: nobody knows when or whether a cure will come.",
+    "notes": "Medical decline: no Best guess button. The future."
+  },
+  {
+    "id": "medical-030",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Does my dentist take Delta Dental?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: ask the dentist's office.",
+    "notes": "Medical decline: no Best guess button. Local/private."
+  },
+  {
+    "id": "medical-031",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "What did my doctor mean when she said my scan showed a shadow?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal results."
+  },
+  {
+    "id": "unanswerable-001",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's my library's wifi password?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-002",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "When is my mom's birthday?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-003",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "where did i park my car this morning",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-004",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "How much money is in my checking account right now?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-005",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's my sister's phone number",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-006",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Did I remember to lock the front door?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-007",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What grade did my son get on his math test yesterday?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-008",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what was the name of my first grade teacher",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-009",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the password to my email?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-010",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "How many steps have I walked today?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-011",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did my boss mean in the email he sent me this morning?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-012",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's my license plate number?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-013",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What am I getting for my birthday?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-014",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who's going to win the 2028 presidential election?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-015",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "will it rain here tomorrow",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-016",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What will the stock market do next week?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-017",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who will win the Super Bowl in February 2027?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-018",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "how much will gas cost next summer",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-019",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What numbers will come up in this Saturday's Powerball drawing?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: lottery draws are random.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-020",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Will my flight to Chicago on Friday be delayed?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-021",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Will interest rates go down next year?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-022",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "When will the next big earthquake hit California?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: earthquakes can't be predicted to a date.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-023",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the weather going to be like this weekend in Denver?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-024",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is my Amazon package going to arrive today?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-025",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who won the 2026 World Series?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. The 2026 World Series is played in late October 2026, after every pack's snapshot (newest: chemistry, 2026-10-15)."
+  },
+  {
+    "id": "unanswerable-026",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Which party won the House in the 2026 midterm elections?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Election day is 3 November 2026, after every snapshot."
+  },
+  {
+    "id": "unanswerable-027",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "who won the 2026 new york city marathon",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Run on 1 November 2026, after every snapshot."
+  },
+  {
+    "id": "unanswerable-028",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What won Best Picture at the 2027 Oscars?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Ceremony in early 2027."
+  },
+  {
+    "id": "unanswerable-029",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the top news story today?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Today's news is always after the snapshot."
+  },
+  {
+    "id": "unanswerable-030",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the price of bitcoin right now",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. A live price."
+  },
+  {
+    "id": "unanswerable-031",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What was the final score of last night's NFL game?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Last night is after every snapshot."
+  },
+  {
+    "id": "unanswerable-032",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who won the 2026 Melbourne Cup?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Run on 3 November 2026, after every snapshot."
+  },
+  {
+    "id": "unanswerable-033",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the score of the dodgers game right now",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. A live score."
+  },
+  {
+    "id": "unanswerable-034",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What time does the Walgreens on Main Street close tonight?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-035",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is the pizza place down the street open on Sundays?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-036",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the phone number for my dentist's office?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-037",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the gate code for my apartment complex?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-038",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "how much does a haircut cost at the barber near me",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-039",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's for lunch at my kid's school this week?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-040",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What day is garbage pickup on my street?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-041",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who is my state representative?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-042",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's my neighbor's dog's name?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-043",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "how long is the wait at the DMV near me today",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-044",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's the wifi password at the coffee shop on 5th Street?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-045",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did Julius Caesar's voice sound like?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: there are no recordings or descriptions precise enough.",
+    "notes": "No record exists; the topic is in the library but the fact isn't."
+  },
+  {
+    "id": "unanswerable-046",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What was Shakespeare's favorite color?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: there's no record of it.",
+    "notes": "No record exists; the topic is in the library but the fact isn't."
+  },
+  {
+    "id": "words-001",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "when juliet says wherefore art thou romeo, what does wherefore mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "wherefore",
+        "quote": "why , for what reason, because of what"
+      }
+    ],
+    "reference": "Why, for what reason (not where).",
+    "goodGuess": null,
+    "notes": "Common misreading: people think it means where."
+  },
+  {
+    "id": "words-002",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does betimes mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "betimes",
+        "quote": "early , especially in the morning"
+      }
+    ],
+    "reference": "Early, especially early in the morning; in good time.",
+    "goodGuess": null,
+    "notes": "Archaic word used in the KJV and Meditations."
+  },
+  {
+    "id": "words-003",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "where does the word quarantine come from",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "quarantine",
+        "quote": "four tens , 40"
+      }
+    ],
+    "reference": "From Medieval Latin/Italian words for a 40-day period, ultimately Latin quadraginta, forty.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "words-004",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "is it true salary comes from roman soldiers getting paid in salt",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_en_all",
+        "location": "salary",
+        "quote": "there is no evidence for either of these claims from ancient sources"
+      }
+    ],
+    "reference": "The word does come from Latin salarium, related to sal (salt), but there's no ancient evidence that soldiers were paid in salt.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-001",
+    "group": "geography",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the deepest lake in the world",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Lake_Baikal",
+        "quote": "is a rift lake and the deepest lake in the world"
+      }
+    ],
+    "reference": "Lake Baikal in Siberia, Russia.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-002",
+    "group": "geography",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how deep is the deepest part of the ocean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Mariana_Trench",
+        "quote": "max. depth 10,935"
+      }
+    ],
+    "reference": "About 10,935 m (35,876 ft), at the Challenger Deep in the Mariana Trench.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "geography-003",
+    "group": "geography",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "is the sahara the biggest desert",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Sahara",
+        "quote": "it is the largest hot desert in the world and the third-largest desert overall"
+      }
+    ],
+    "reference": "It's the largest hot desert, but third-largest overall, after the Antarctic and Arctic deserts.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "physics-001",
+    "group": "physics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how cold is absolute zero",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Absolute_zero",
+        "quote": "equivalent to −273.15 °c on the celsius scale"
+      }
+    ],
+    "reference": "0 kelvin: -273.15 C, or -459.67 F.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "physics-002",
+    "group": "physics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how fast does sound travel",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Speed_of_sound",
+        "quote": "the speed of sound in air is about 343 m/s"
+      }
+    ],
+    "reference": "About 343 m/s in air at 20 C (about 767 mph); faster in water and solids.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "physics-003",
+    "group": "physics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does half life mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Half-life",
+        "quote": "is the time required for a quantity (of substance) to reduce to half of its initial value"
+      }
+    ],
+    "reference": "The time it takes for a quantity, such as a radioactive substance, to fall to half its starting amount.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "chemistry-001",
+    "group": "chemistry",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's the most common element in the universe",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Hydrogen",
+        "quote": "it is the lightest and most abundant chemical element in the universe"
+      }
+    ],
+    "reference": "Hydrogen, about 75% of normal matter.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "chemistry-002",
+    "group": "chemistry",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what actually is rust",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Rust",
+        "quote": "rust is an iron oxide"
+      }
+    ],
+    "reference": "An iron oxide, formed when iron reacts with oxygen in the presence of water or moist air.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "chemistry-003",
+    "group": "chemistry",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who came up with the periodic table",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Periodic_table",
+        "quote": "the first periodic table to become generally accepted was that of the russian chemist dmitri mendeleev in 1869"
+      }
+    ],
+    "reference": "Dmitri Mendeleev, in 1869 (the first generally accepted version).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "mathematics-001",
+    "group": "mathematics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "who finally proved fermat's last theorem",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Fermat's_Last_Theorem",
+        "quote": "the first successful proof was released in 1994 by andrew wiles"
+      }
+    ],
+    "reference": "Andrew Wiles, released in 1994 and published in 1995, 358 years after Fermat stated it.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "mathematics-002",
+    "group": "mathematics",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does the pythagorean theorem say",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Pythagorean_theorem",
+        "quote": "equals the area of the square on the hypotenuse"
+      }
+    ],
+    "reference": "In a right triangle, the squares on the two legs add up to the square on the hypotenuse: a^2 + b^2 = c^2.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "knots-001",
+    "group": "knots",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what knot makes a loop at the end of a rope that won't slip",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Bowline",
+        "quote": "making a fixed loop at the end of a line"
+      }
+    ],
+    "reference": "The bowline.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "knots-002",
+    "group": "knots",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's wrong with a granny knot",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Reef_knot",
+        "quote": "of the same handedness will make a weak granny knot"
+      }
+    ],
+    "reference": "It's a reef (square) knot tied wrong: two overhands of the same handedness, which makes a weak knot.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-016",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Is the deepest part of the ocean deeper than Mount Everest is tall?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_geography",
+        "location": "Mariana_Trench",
+        "quote": "max. depth 10,935"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Mount_Everest",
+        "quote": "as 8,848.86 m"
+      }
+    ],
+    "reference": "Yes: about 10,935 m deep versus Everest's 8,848.86 m, a difference of about 2 km.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-017",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "If thunder comes 3 seconds after the lightning, about how far away is the storm?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Speed_of_sound",
+        "quote": "or 1 km in 2.92 s"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Speed_of_light",
+        "quote": "metres per second 299 792 458"
+      }
+    ],
+    "reference": "About 1 km (sound covers 1 km in about 2.9 s; the light arrives almost instantly).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-018",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "How many years after Mendeleev's periodic table did Marie Curie win her chemistry Nobel?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Periodic_table",
+        "quote": "dmitri mendeleev in 1869"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Marie_Curie",
+        "quote": "nobel prize in chemistry (1911)"
+      }
+    ],
+    "reference": "42 years (1869 to 1911).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-019",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Was Fermat's Last Theorem proved before or after the Berlin Wall fell?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Fermat's_Last_Theorem",
+        "quote": "the first successful proof was released in 1994 by andrew wiles"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Berlin_Wall",
+        "quote": "the east german government announced on 9 november 1989"
+      }
+    ],
+    "reference": "After: the wall opened in 1989 and Wiles's proof came out in 1994, five years later.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "multi-step-020",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "Did Darwin live to see Mendeleev's periodic table?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Periodic_table",
+        "quote": "dmitri mendeleev in 1869"
+      },
+      {
+        "source": "wikipedia_en_top",
+        "location": "Charles_Darwin",
+        "quote": "12 february 1809 – 19 april 1882"
+      }
+    ],
+    "reference": "Yes: the table appeared in 1869 and Darwin died in 1882.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-032",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "In old novels people die of dropsy. What is that?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Edema",
+        "quote": "also known as dropsy"
+      }
+    ],
+    "reference": "An old name for edema: a buildup of fluid in the body's tissues, causing swelling.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-033",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what did apoplexy mean in old books",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Apoplexy",
+        "quote": "historically, it described what is now known as a hemorrhagic stroke"
+      }
+    ],
+    "reference": "Mostly what we now call a (hemorrhagic) stroke; sudden collapse from strokes, aneurysms or even heart attacks was called apoplexy.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-034",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "how do you get lyme disease",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Lyme_disease",
+        "quote": "transmitted by blood-feeding ticks in the genus ixodes"
+      }
+    ],
+    "reference": "From the bite of an infected tick (Ixodes, the deer tick), which carries Borrelia bacteria.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-035",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what are the signs of a concussion",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Concussion",
+        "quote": "symptoms may include headache, dizziness, difficulty with thinking and concentration"
+      }
+    ],
+    "reference": "Headache, dizziness, trouble thinking or concentrating, sleep problems, brief memory loss, and sometimes brief loss of consciousness.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "medical-036",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "what are the symptoms of being low on iron",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Iron-deficiency_anemia",
+        "quote": "symptoms are often vague, such as feeling tired"
+      }
+    ],
+    "reference": "Often vague: tiredness, weakness, shortness of breath, less ability to exercise, pale skin.",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: 'low on iron' vs iron-deficiency anemia."
+  },
+  {
+    "id": "medical-037",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "My two year old has a fever of 101. Do I need to take her to the ER?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal triage."
+  },
+  {
+    "id": "medical-038",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Can I double my sertraline dose since it doesn't seem to be working?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't say for you personally; that needs your doctor or pharmacist.",
+    "notes": "Medical decline: no Best guess button. Personal dosing."
+  },
+  {
+    "id": "medical-039",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "Who's the best knee surgeon in town?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local question; ask your doctor for a referral.",
+    "notes": "Medical decline: no Best guess button. Local."
+  },
+  {
+    "id": "medical-040",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "What were my cholesterol numbers at last year's checkup?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's in your own medical records.",
+    "notes": "Medical decline: no Best guess button. Personal records."
+  },
+  {
+    "id": "unanswerable-047",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What's my wife's shoe size?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-048",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "When does my car insurance renew?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-049",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who texted me last night?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-050",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What did I search for yesterday?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "unanswerable-051",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Will there be a recession in 2027?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-052",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who will win the 2030 World Cup?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-053",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What will be the best-selling book next year?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-054",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Will the Lakers make the playoffs this season?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future."
+  },
+  {
+    "id": "unanswerable-055",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Who is Time's Person of the Year for 2026?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Named in December 2026, after every snapshot (newest 2026-10-15)."
+  },
+  {
+    "id": "unanswerable-056",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "What was the top movie at the box office over Thanksgiving weekend 2026?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it happened (or happens) after the library's snapshot (Sept-Oct 2026).",
+    "notes": "After the snapshot. Late November 2026, after every snapshot."
+  },
+  {
+    "id": "unanswerable-057",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is the downtown library open late on Thursdays?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-058",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Where's the cheapest gas near me?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-059",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Is there parking at the park on Elm Street?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  },
+  {
+    "id": "unanswerable-060",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "Does the hardware store on Oak Avenue cut keys?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local detail no library has; check with the place directly.",
+    "notes": "Local or private fact."
+  }
+]

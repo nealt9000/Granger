@@ -126,4 +126,22 @@ class ResearchChatsTest {
             assertThat(it.getInt(0)).isEqualTo(1)
         }
     }
+
+    @Test fun setGuessIsReadBack() = runTest {
+        val chatId = chats.create("q")
+        val turnId = chats.startTurn(chatId, "q", askedDeeper = false, quote = null)
+        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, false, emptyList(), emptyList(), emptyList())
+        val before = chats.turns(chatId).first().single()
+        assertThat(before.guess).isEmpty()
+        assertThat(before.guessLarge).isFalse()
+        assertThat(before.guessFellBack).isFalse()
+
+        chats.setGuess(turnId, "Probably chlorophyll.", usedLarge = true, fellBack = true)
+
+        val turn = chats.turns(chatId).first().single()
+        assertThat(turn.guess).isEqualTo("Probably chlorophyll.")
+        assertThat(turn.guessLarge).isTrue()
+        assertThat(turn.guessFellBack).isTrue()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+    }
 }
