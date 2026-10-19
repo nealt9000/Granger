@@ -9,7 +9,8 @@ keyed by reply hash. Runs after `tune-1` use greedy decoding, so the same build 
 | tune-1 | 8h answer prompt, 8i personal medical (random sampling; stopped at 72) | — | — | — | — |
 | tune-2 | + greedy decoding, 8a rewrite to source wording, 8c no bibliography passages | 70% (53/76) | 37% (47/126) | 98% | 14.5 s |
 | tune-3 | + 8k book BM25, 8l ranking (no idf, lead bonus, per-article cap), plain decline rule, threshold 0.6 | **91% (69/76)** | **44% (56/126)** | 98% | 14.2 s |
-| tune-4 | + 8m named-work search | (running) | | | |
+| tune-4 | + 8m named-work search (meta words, scoped book search, book title credits a keyword) | 89% (68/76) | 45% (57/126) | 98% | 13.8 s |
+| tune-5 | − book title credit (bonus only again) | **91% (69/76)** | **45% (57/126)** | 98% | 14.0 s |
 
 ## What each change did and why
 
@@ -34,6 +35,16 @@ keyed by reply hash. Runs after `tune-1` use greedy decoding, so the same build 
   Risk: 37 of 48 answer quotes sit in a lead, which may partly reflect how the questions were written. The held-out split checks this.
 - **Threshold 0.6** (`88161a2`): from a sweep on the tune-2 corpus. Recall is flat from 0.32 to 0.6, and fewer unanswerable questions
   get passages.
+
+- **8m named-work search** (`28785a9`, `3022bba`, `bd72c3a`): more source meta-words are dropped from the search, and a question naming a book also searches
+  inside it. bible-001 (Neal's alcohol question) is now grounded, from Wikipedia's *Alcohol intoxication* § Christianity. Crediting a
+  book title as a whole keyword let "sister" pass every passage of *Sister Carrie*, so tune-5 drops that part.
+
+## Exit
+
+tune-5 is the tuned configuration: 91% unanswerable declined (meets the 90% bar), 45% answerable grounded (bar 80%). 8a–8f plus
+further rounds (8h–8m) did not reach the grounded bar, so per the plan this goes to Task 9: one held-out run for the record and the
+Best guess model choice, then the stop path.
 
 ## Where tune-3 still fails (answerable, 70 not grounded)
 
