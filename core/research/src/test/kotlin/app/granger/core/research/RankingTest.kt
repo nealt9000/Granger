@@ -85,11 +85,12 @@ class RankingTest {
 
     @Test
     fun lexicalRankDropsBelowThreshold() {
-        val full = passage("A", "steam engine", 1)
-        val half = passage("B", "steam", 2)
-        val none = passage("C", "river", 3)
-        val out = Ranking.byLexical(listOf(none, half, full), listOf("steam", "engine"), config)
-        assertThat(out).containsExactly(full, half).inOrder()
+        // The threshold is 0.6: two of three keywords pass, one of three doesn't.
+        val full = passage("A", "steam engine boiler", 1)
+        val two = passage("B", "steam engine", 2)
+        val one = passage("C", "steam", 3)
+        val out = Ranking.byLexical(listOf(one, two, full), listOf("steam", "engine", "boiler"), config)
+        assertThat(out).containsExactly(full, two).inOrder()
     }
 
     @Test

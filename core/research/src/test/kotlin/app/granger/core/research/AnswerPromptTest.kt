@@ -50,11 +50,19 @@ class AnswerPromptTest {
     }
 
     @Test
-    fun declineRuleSaysOnlyIfNothingAnswers() {
+    fun declineRuleIsLastAndPlain() {
         val last = rules().last()
-        assertThat(last).startsWith("- Only if nothing in the passages answers the question")
+        assertThat(last).startsWith("- If the passages don't answer the question, reply exactly")
         assertThat(last).contains("NOT IN LIBRARY")
         assertThat(rules(medical = true).last()).contains("medical question")
+    }
+
+    @Test
+    fun passagesAboutSomethingElseDontAnswer() {
+        val rules = rules()
+        val other = rules.indexOfFirst { it.contains("different person, year, place or event") }
+        assertThat(other).isAtLeast(0)
+        assertThat(other).isLessThan(rules.lastIndex)
     }
 
     @Test

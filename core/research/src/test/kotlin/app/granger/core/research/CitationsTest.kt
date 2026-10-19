@@ -48,6 +48,24 @@ class CitationsTest {
     }
 
     @Test
+    fun libraryAndNotSpecifiedPhrasingsDecline() {
+        for (a in listOf(
+            "The provided library does not contain information about your sister's phone number.",
+            "The provided library does not contain information about how many steps you have walked today [4].",
+            "The gate code for the Watergate complex is not specified in the provided library.",
+            "The winner of the 2026 Melbourne Cup is not mentioned in the provided library passages.",
+            "The current score of the Dodgers game is not provided in the library.",
+            "The sources don't say who won.",
+        )) assertThat(Citations.check(a, 4)).isEqualTo(CitationCheck.ModelDeclined)
+    }
+
+    @Test
+    fun notSpecifiedLaterOrWithButStillAnswers() {
+        assertThat(Citations.check("Paul wrote Romans [1]. The date is not specified.", 2)).isEqualTo(CitationCheck.Valid(setOf(1)))
+        assertThat(Citations.check("The exact day is not given, but he died in 1616 [2].", 2)).isEqualTo(CitationCheck.Valid(setOf(2)))
+    }
+
+    @Test
     fun passagesDontSayButAnswerIsAnAnswer() {
         assertThat(Citations.check("The passages do not give the exact day, but he died in 1616 [2].", 2))
             .isEqualTo(CitationCheck.Valid(setOf(2)))

@@ -41,7 +41,8 @@ object AnswerPrompt {
             appendLine("- Use the source details (title, author, date, collection) when they matter to the question.")
             appendLine("- When passages from different works bear on each other, say how, citing each.")
             appendLine("- Don't add facts that aren't in the passages.")
-            appendLine("- Only if nothing in the passages answers the question, reply exactly: $DECLINE_TOKEN")
+            appendLine("- Passages about a different person, year, place or event than the question asks about don't answer it.")
+            appendLine("- If the passages don't answer the question, reply exactly: $DECLINE_TOKEN")
             if (medical) appendLine("- This is a medical question. Quote the passages closely and add nothing beyond them.")
             if (prior != null) {
                 appendLine()

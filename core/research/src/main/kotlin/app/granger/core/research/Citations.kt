@@ -11,15 +11,17 @@ object Citations {
     private val group = Regex("\\[(\\d+(?:\\s*,\\s*\\d+)*)]")
 
     /**
-     * A first sentence saying the passages lack the answer: "the passages do not ...", "... contain no ...",
-     * "there is no information", "no information was provided", "I cannot find", "not mentioned in the passages".
+     * A first sentence saying the passages lack the answer: "the passages (or library, sources, text) do not ...",
+     * "... contain no ...", "there is no information", "no information was provided", "I cannot find",
+     * "X is not specified / mentioned / provided (in the library)".
      */
     private val lacksAnswer = Regex(
-        "(the |these |provided |given )*passages? (do|does|did) not|" +
-            "(the |these |provided |given )*passages? (don['’]t|doesn['’]t)|" +
-            "(the |these |provided |given )*passages? (contain|provide|include|mention|say|state)s? no|" +
+        "(the |these |provided |given )*(passages?|library|sources?|texts?) (do|does|did) not|" +
+            "(the |these |provided |given )*(passages?|library|sources?|texts?) (don['’]t|doesn['’]t)|" +
+            "(the |these |provided |given )*(passages?|library|sources?|texts?) (contain|provide|include|mention|say|state)s? no|" +
             "there is no information|no information (is|was) (given|provided|available)|" +
             "i (cannot|can['’]t|could not|couldn['’]t) find|" +
+            "(is|are|was|were) not (mentioned|stated|specified|provided|given|found|covered|included|listed)\\b|" +
             "not (mentioned|stated|found|covered) in the passages",
         RegexOption.IGNORE_CASE,
     )

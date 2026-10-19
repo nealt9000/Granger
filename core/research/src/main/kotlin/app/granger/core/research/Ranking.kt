@@ -6,7 +6,8 @@ data class RankingConfig(
     val preselect: Int = 12,
     val perDocument: Int = 3,
     val cosineThreshold: Float = 0.40f,
-    val lexicalThreshold: Double = 0.32,
+    // Set by sweep on the tune-2 corpus (Plan 9, 8d): recall is flat from 0.32 to 0.6, and 0.6 sends fewer unanswerable questions passages.
+    val lexicalThreshold: Double = 0.6,
     val small: Int = 4,
     val large: Int = 8,
 )
