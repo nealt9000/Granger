@@ -138,4 +138,49 @@ class MigrationTest {
             assertThat(it.getInt(0)).isEqualTo(1)
         }
     }
+
+    @Test fun migrate6To7KeepsDataAndCreatesMediaTables() {
+        helper.createDatabase("migrate7.db", 6).apply {
+            execSQL(
+                "INSERT INTO packs (id, filePath, title, description, language, date, sizeBytes, hasFulltextIndex, status, addedAt, name) " +
+                    "VALUES ('u-a', '/p/a.zim', 'A', '', 'eng', '2026-10-15', 10, 1, 'OK', 5, 'a')",
+            )
+            execSQL("INSERT INTO research_chats (id, title, createdAt, updatedAt) VALUES (1, 'Chat', 1, 2)")
+            execSQL(
+                "INSERT INTO research_turns (id, chatId, question, outcome, answer, medical, usedLarge, askedDeeper, keywords, createdAt, guess, guessLarge, guessFellBack) " +
+                    "VALUES (1, 1, 'Why?', 'ANSWERED', 'Because.', 0, 1, 0, '', 3, '', 0, 0)",
+            )
+            // As on a real install: book_text exists beside the Room tables and must come through untouched.
+            LibraryDatabase.createBookText(this)
+            execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
+            close()
+        }
+        // validateDroppedTables is off for book_text, as in version3DataSurvivesAndBookTablesExist.
+        val db = helper.runMigrationsAndValidate("migrate7.db", 7, false, LibraryDatabase.MIGRATION_6_7)
+        for (table in listOf("packs", "research_chats", "research_turns")) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(1)
+            }
+        }
+        db.query("SELECT answer, usedLarge FROM research_turns").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("Because.")
+            assertThat(it.getInt(1)).isEqualTo(1)
+        }
+        val mediaTables = listOf(
+            "tracks", "audiobooks", "audiobook_chapters", "audiobook_states", "audio_bookmarks", "playlists",
+            "playlist_entries", "music_state", "recent_plays", "media_folders", "scan_cache",
+        )
+        for (table in mediaTables) {
+            db.query("SELECT COUNT(*) FROM $table").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(0)
+            }
+        }
+        db.query("SELECT docid FROM book_text WHERE book_text MATCH 'quick'").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getLong(0)).isEqualTo(7L)
+        }
+    }
 }
