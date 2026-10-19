@@ -71,6 +71,7 @@ Neal set the order of 1, 2 and 4. Putting the voice third was Claude's call: "re
 - **Rolling public-domain filter (Neal's call):** until the user accepts the waiver, audio shows only recordings published before **January 1 of (current year − 100)**. That's before 1926 in 2026, and the cutoff moves forward every January. Items with no date stay hidden. The waiver is the same one books use (Plan 7), and accepting it lifts the filter for audio too.
   - Why a separate rule from books' ≤1930: in the US a recording has its own copyright, apart from the composition, and pre-1972 recordings enter the public domain on this rolling schedule. Uploader licence tags are not trusted, the same lesson as books.
   - Consequence: before the waiver, archive.org music is mostly early recordings. Holst conducting *The Planets* (1926) clears in January 2027.
+- *Update 2026-10-19 (Neal, M2):* for **spoken word**, archive.org's date is often the text's, not the recording's, so the date filter can't be trusted. Before the waiver, Audiobooks → Archive.org shows no results, only a note pointing to LibriVox and offering the waiver. The rolling filter applies to music.
 - Lending-only and private files: same rules as books ("Borrow on archive.org" label, no lending accounts).
 - Downloads are verified by archive.org's sha1. *Builder's call: format preference per item.* Suggested: VBR MP3 when offered, else Ogg, else FLAC; an archive.org album item becomes an album with its files as tracks in archive.org's order.
 
@@ -88,6 +89,7 @@ Opening Archive.org from under a media type opens it filtered to that type. The 
 - Every downloaded item keeps its **origin**: source, identifier, file URL, size and checksum. That's enough for the future compression feature to fetch or stream it again.
 - **Show in other apps** (Settings, **off by default**, Claude's call): Granger publishes its Music and Audiobooks folders through Android's document-provider system. They appear in the Files app and in any app's file picker. Access is **read-only** (Claude's call): other apps can open and copy files but not change or delete them. Music players that only scan the shared media list (Auxio, YouTube Music) won't list them on their own. Neal accepted that trade-off over copying files into shared storage.
 - Media downloads **do not count toward the storage cap**. The cap code from Plans 3–7 stays for now; Plan 10 decides its fate (§11).
+  - *Update 2026-10-19 (Neal):* there is no storage cap at all, only the phone's free space. M2 checks free space only.
 
 ## 5. In the Library
 

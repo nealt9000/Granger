@@ -18,7 +18,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **Done:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10; parity `media-parity-checklist.md`: ✅ 39, ⏭ 4, ❌ 8) |
 | M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | Written after M1 merges (spec §3.2–§3.4, §4) |
 | M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | Written after M2 merges (spec §6/§7 Auto and widget rows, §9, §13) |
-| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources; non-commercial packs exempt) + import gating, onboarding, `:core:telemetry` | |
+| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
 Media spec (2026-10-19): `docs/superpowers/specs/2026-10-19-media-design.md` replaces the old "After v1: Media" row. Media (M1–M3) is built before Plans 10 and 11. It is the first of four projects, in this order (spec §1):
