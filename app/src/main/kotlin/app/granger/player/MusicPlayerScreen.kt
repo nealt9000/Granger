@@ -44,7 +44,7 @@ import app.granger.theme.GrangerColors
  * active mode, playing from there; shuffle and repeat only show, and the queue is read-only.
  */
 @Composable
-internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewModel: PlayerViewModel) {
+internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewModel: PlayerViewModel, onShelf: () -> Unit) {
     val music = ui.now as? NowPlaying.Music ?: return
     var showQueue by rememberSaveable { mutableStateOf(false) }
     fun control(action: PlayerViewModel.() -> Unit) = if (live) viewModel.action() else viewModel.activate(PlayerMode.MUSIC, action)
@@ -104,6 +104,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                 Spacer(Modifier.size(8.dp))
                 Text("Queue")
             }
+            ShelfLink(PlayerMode.MUSIC, onShelf)
             Spacer(Modifier.height(8.dp))
         }
     }

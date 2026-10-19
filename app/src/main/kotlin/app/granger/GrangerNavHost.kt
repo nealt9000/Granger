@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.archive.ArchiveScreen
 import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.player.PlayerUi
 import app.granger.player.MiniPlayer
@@ -207,6 +208,21 @@ fun NavController.togglePlayer() {
         popBackStack<PlayerRoute>(inclusive = false) -> Unit
         else -> navigate(PlayerRoute) { launchSingleTop = true }
     }
+}
+
+/**
+ * The player's shelf link: Music ([MusicRoute] for All music) or Audiobooks ([AudiobookShelfRoute] for all of them).
+ * The player is closed first, so Back from the shelf returns to the screen the player was opened from, as closing the
+ * player would; the mini-player keeps playing. When that screen already is the shelf, it is simply shown.
+ */
+fun NavController.openShelfFromPlayer(mode: PlayerMode) {
+    popBackStack<PlayerRoute>(inclusive = true)
+    val top = currentBackStackEntry
+    val showing = when (mode) {
+        PlayerMode.MUSIC -> top?.destination?.hasRoute<MusicRoute>() == true && top.toRoute<MusicRoute>().collectionId == null
+        PlayerMode.AUDIOBOOK -> top?.destination?.hasRoute<AudiobookShelfRoute>() == true && top.toRoute<AudiobookShelfRoute>().collectionId == null
+    }
+    if (!showing) navigate(if (mode == PlayerMode.MUSIC) MusicRoute(null) else AudiobookShelfRoute(null))
 }
 
 /** How [route] is opened: [replacesChatOnTop] drops a Research chat on top first (its view model would otherwise stay). */
@@ -668,7 +684,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             }
             if (player != null) {
                 composable<PlayerRoute> {
-                    PlayerScreen(player, onClose = { nav.popBackStack() })
+                    PlayerScreen(player, onClose = { nav.popBackStack() }, onShelf = { nav.openShelfFromPlayer(it) })
                 }
             }
             composable<ReadinessRoute> {

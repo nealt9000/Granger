@@ -4,7 +4,18 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import app.granger.core.player.NowPlaying
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import app.granger.AudiobookShelfRoute
+import app.granger.LibraryRoute
+import app.granger.MusicRoute
+import app.granger.PlayerRoute
+import app.granger.openShelfFromPlayer
+import app.granger.togglePlayer
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.SavedBook
 import app.granger.core.player.SavedModes
@@ -29,9 +40,11 @@ class PlayerTabsTest {
     private val songs = listOf(track("a", "Song A"), track("b", "Song B", album = "Second Album"), track("c", "Song C"))
     private val savedMusic = SavedMusic(songs, index = 1, positionMs = 42_000L, shuffle = true, repeat = 2)
 
+    private val shelves = mutableListOf<PlayerMode>()
+
     private fun show(hub: FakePlayerHub): PlayerViewModel {
         val vm = PlayerViewModel(hub)
-        compose.setContent { GrangerTheme { PlayerScreen(vm, onClose = {}) } }
+        compose.setContent { GrangerTheme { PlayerScreen(vm, onClose = {}, onShelf = { shelves += it }) } }
         return vm
     }
 
@@ -104,5 +117,53 @@ class PlayerTabsTest {
         compose.onNodeWithText("The Hobbit").assertExists()
         compose.onNodeWithContentDescription("Play").performClick()
         assertThat(hub.calls).containsExactly("activate:AUDIOBOOK")
+    }
+
+    @Test fun eachTabLinksToItsShelfLiveInactiveAndEmpty() {
+        val hub = FakePlayerHub(musicUi()).apply { saved.value = SavedModes(null, savedBook, PlayerMode.MUSIC) }
+        show(hub)
+        compose.onNodeWithText("Music shelf").performClick()              // live music
+        compose.onNodeWithText("Audiobooks").performClick()
+        compose.onNodeWithText("Audiobooks shelf").performClick()         // the saved book
+        hub.saved.value = SavedModes(null, null, PlayerMode.MUSIC)
+        compose.onNodeWithText("Nothing played yet").assertExists()
+        compose.onNodeWithText("Audiobooks shelf").performClick()         // never used
+        hub.ui.value = bookUi(book, chapters[0], chapterCount = 2)
+        compose.onNodeWithText("Audiobooks shelf").performClick()         // live book
+        assertThat(shelves).containsExactly(PlayerMode.MUSIC, PlayerMode.AUDIOBOOK, PlayerMode.AUDIOBOOK, PlayerMode.AUDIOBOOK).inOrder()
+        assertThat(hub.calls).isEmpty()
+    }
+
+    @Test fun shelfLinkClosesThePlayerSoBackReturnsToWhereItWasOpened() {
+        lateinit var nav: NavHostController
+        compose.setContent {
+            nav = rememberNavController()
+            NavHost(nav, startDestination = LibraryRoute()) {
+                composable<LibraryRoute> {}
+                composable<MusicRoute> {}
+                composable<AudiobookShelfRoute> {}
+                composable<PlayerRoute> {}
+            }
+        }
+        compose.runOnIdle { nav.togglePlayer() }
+        compose.runOnIdle { nav.openShelfFromPlayer(PlayerMode.MUSIC) }
+        compose.runOnIdle {
+            assertThat(nav.currentBackStackEntry!!.toRoute<MusicRoute>().collectionId).isNull()
+            assertThat(nav.previousBackStackEntry?.destination?.hasRoute<LibraryRoute>()).isTrue()
+        }
+        // Opened from All music: the link just closes the player, without stacking a second shelf.
+        compose.runOnIdle { nav.togglePlayer() }
+        compose.runOnIdle { nav.openShelfFromPlayer(PlayerMode.MUSIC) }
+        compose.runOnIdle {
+            assertThat(nav.currentDestination?.hasRoute<MusicRoute>()).isTrue()
+            assertThat(nav.previousBackStackEntry?.destination?.hasRoute<LibraryRoute>()).isTrue()
+        }
+        compose.runOnIdle { nav.togglePlayer() }
+        compose.runOnIdle { nav.openShelfFromPlayer(PlayerMode.AUDIOBOOK) }
+        compose.runOnIdle {
+            assertThat(nav.currentBackStackEntry!!.toRoute<AudiobookShelfRoute>().collectionId).isNull()
+            assertThat(nav.previousBackStackEntry?.destination?.hasRoute<MusicRoute>()).isTrue()
+            assertThat(nav.currentBackStack.value.none { it.destination.hasRoute<PlayerRoute>() }).isTrue()
+        }
     }
 }

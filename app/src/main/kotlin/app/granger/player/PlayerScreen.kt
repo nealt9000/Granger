@@ -1,6 +1,8 @@
 package app.granger.player
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
@@ -24,6 +27,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -43,10 +47,10 @@ import app.granger.theme.GrangerColors
  * [PlayerRoute][app.granger.PlayerRoute]: a Music and an Audiobooks tab (spec §8: one player, one active mode, each
  * mode with its own saved state). It opens on the active mode (or the last one used). The active mode's tab is the
  * live player; the other shows that mode's saved state, paused, until one of its controls makes it the active mode.
- * Switching tabs plays, stops and saves nothing.
+ * Switching tabs plays, stops and saves nothing. Each tab ends with a link to its shelf ([onShelf]).
  */
 @Composable
-fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
+fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit, onShelf: (PlayerMode) -> Unit = {}) {
     // Opening the player (not a rotation, which keeps the tab) shows the active mode.
     rememberSaveable { viewModel.resetTab(); true }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
@@ -70,9 +74,9 @@ fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
                     PlayerMode.MUSIC -> {
                         val music = saved.music
                         when {
-                            live -> MusicPlayer(ui, queue, live = true, viewModel)
-                            music != null -> MusicPlayer(music.toUi(), music.queue, live = false, viewModel)
-                            saved.loaded -> NothingPlayed()
+                            live -> MusicPlayer(ui, queue, live = true, viewModel) { onShelf(PlayerMode.MUSIC) }
+                            music != null -> MusicPlayer(music.toUi(), music.queue, live = false, viewModel) { onShelf(PlayerMode.MUSIC) }
+                            saved.loaded -> NothingPlayed(PlayerMode.MUSIC) { onShelf(PlayerMode.MUSIC) }
                         }
                     }
                     PlayerMode.AUDIOBOOK -> {
@@ -82,10 +86,12 @@ fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
                                 val chapters by viewModel.bookChapters.collectAsStateWithLifecycle()
                                 val bookmarks by viewModel.bookBookmarks.collectAsStateWithLifecycle()
                                 val progress by viewModel.progress.collectAsStateWithLifecycle()
-                                AudiobookPlayer(ui, chapters, bookmarks, progress, live = true, viewModel)
+                                AudiobookPlayer(ui, chapters, bookmarks, progress, live = true, viewModel) { onShelf(PlayerMode.AUDIOBOOK) }
                             }
-                            book != null -> AudiobookPlayer(book.toUi(), book.chapters, emptyList(), book.progress(), live = false, viewModel)
-                            saved.loaded -> NothingPlayed()
+                            book != null -> AudiobookPlayer(book.toUi(), book.chapters, emptyList(), book.progress(), live = false, viewModel) {
+                                onShelf(PlayerMode.AUDIOBOOK)
+                            }
+                            saved.loaded -> NothingPlayed(PlayerMode.AUDIOBOOK) { onShelf(PlayerMode.AUDIOBOOK) }
                         }
                     }
                 }
@@ -122,12 +128,32 @@ internal fun tabTitle(mode: PlayerMode): String = when (mode) {
     PlayerMode.AUDIOBOOK -> "Audiobooks"
 }
 
-/** A mode with no saved state. */
+/** A mode with no saved state, and the way to its shelf. */
 @Composable
-private fun NothingPlayed() {
-    Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+private fun NothingPlayed(mode: PlayerMode, onShelf: () -> Unit) {
+    Column(
+        Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
         Text("Nothing played yet", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ShelfLink(mode, onShelf)
     }
+}
+
+/** The link at the bottom of each player to its shelf: All music, or all audiobooks. */
+@Composable
+internal fun ShelfLink(mode: PlayerMode, onClick: () -> Unit) {
+    TextButton(onClick = onClick) {
+        Text(shelfLabel(mode))
+        Spacer(Modifier.size(4.dp))
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+    }
+}
+
+internal fun shelfLabel(mode: PlayerMode): String = when (mode) {
+    PlayerMode.MUSIC -> "Music shelf"
+    PlayerMode.AUDIOBOOK -> "Audiobooks shelf"
 }
 
 /** Both players' bar: close (back to the mini-player) and a small label. */

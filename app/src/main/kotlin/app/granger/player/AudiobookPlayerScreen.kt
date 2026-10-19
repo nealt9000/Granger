@@ -67,6 +67,7 @@ internal fun AudiobookPlayer(
     progress: BookProgress?,
     live: Boolean,
     viewModel: PlayerViewModel,
+    onShelf: () -> Unit,
 ) {
     val book = ui.now as? NowPlaying.Book ?: return
     var sheet by rememberSaveable { mutableStateOf<BookSheet?>(null) }
@@ -142,6 +143,7 @@ internal fun AudiobookPlayer(
                 ToggleRow("Skip silence", book.skipSilence, viewModel::setSkipSilence)
                 ToggleRow("Volume boost", book.volumeBoostMb > 0, viewModel::setVolumeBoost)
             }
+            ShelfLink(PlayerMode.AUDIOBOOK, onShelf)
             Spacer(Modifier.height(8.dp))
         }
     }
