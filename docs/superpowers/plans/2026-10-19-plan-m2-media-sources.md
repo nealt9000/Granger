@@ -958,6 +958,12 @@ git commit -m "Media M2: archive sources grouped by media type; download progres
       fun setEnabled(context: Context, on: Boolean)    // setComponentEnabledSetting(…, DONT_KILL_APP); also notifyChange on the roots URI
       fun isEnabled(context: Context): Boolean
   }
+  // As built: MediaSettings gains `sharing: OtherAppsSharing` (isEnabled/setEnabled; ComponentOtherAppsSharing wraps
+  // MediaSharing). The component's enabled state is the setting itself, no pref. MediaDownloader gains a last,
+  // defaulted `onChanged: () -> Unit`, run after every downloaded-media scan; AppContainer passes
+  // MediaSharing.notifyChanged (roots, root/music/audiobooks children, and the authority). A file id resolves only
+  // inside an item folder with a readable manifest; `*.tmp` files are hidden as well as dotfiles and `*.part`.
+  // Settings computes the media section's index from LEADING_KEYS (the rows above it, emitted from that same list).
   ```
 - Manifest:
   ```xml

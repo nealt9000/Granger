@@ -63,6 +63,7 @@ import app.granger.core.media.FolderSource
 import app.granger.core.media.MediaStoreSource
 import app.granger.core.media.PhoneScanner
 import app.granger.media.MediaDownloader
+import app.granger.media.MediaSharing
 import app.granger.media.PhoneMediaScans
 import app.granger.core.archive.LibriVoxClient
 import app.granger.core.media.DownloadedMediaScanner
@@ -316,7 +317,11 @@ class AppContainer(context: Context) {
 
     /** Gets, cancels and removes LibriVox and archive.org audio; every downloaded-media scan runs through it. */
     val mediaDownloader: MediaDownloader by lazy {
-        MediaDownloader(downloads, downloadedMedia, media, volumes, downloadPrefs, appScope)
+        MediaDownloader(
+            downloads, downloadedMedia, media, volumes, downloadPrefs, appScope,
+            // The Files app refreshes "Show in other apps" after each filing or removal.
+            onChanged = { MediaSharing.notifyChanged(context) },
+        )
     }
 
     val researchChats: ResearchChats = RoomResearchChats(libraryDb)

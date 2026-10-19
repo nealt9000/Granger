@@ -24,12 +24,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import app.granger.core.player.ReplayGainMode
 import app.granger.media.MediaPermissionStatus
 
 /** The first item's key: the Library's empty-media link scrolls here. */
 const val MEDIA_SECTION_KEY = "media"
+
+const val SHOW_IN_OTHER_APPS_TAG = "media-other-apps-switch"
 
 /**
  * Settings → Music & audiobooks: phone access, picked folders, "Rescan now", and the player's settings. Stateless:
@@ -43,6 +46,7 @@ fun LazyListScope.mediaSettingsSection(
     onAddFolder: (audiobooks: Boolean) -> Unit,
     onRemoveFolder: (uri: String) -> Unit,
     onRescan: () -> Unit,
+    onShowInOtherApps: (Boolean) -> Unit,
     onReplayGain: (ReplayGainMode) -> Unit,
     onSkipBack: (Int) -> Unit,
     onSkipForward: (Int) -> Unit,
@@ -119,6 +123,24 @@ fun LazyListScope.mediaSettingsSection(
             },
             trailingContent = { if (running) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp) },
             modifier = Modifier.clickable(enabled = !running, onClick = onRescan),
+        )
+    }
+    item(key = "media-other-apps") {
+        ListItem(
+            headlineContent = { Text("Show in other apps") },
+            supportingContent = {
+                Text(
+                    "Granger's downloaded music and audiobooks appear in the Files app and in other apps' file pickers, " +
+                        "read-only. Music players that only read the phone's media list won't list them.",
+                )
+            },
+            trailingContent = {
+                Switch(
+                    checked = ui.showInOtherApps,
+                    onCheckedChange = onShowInOtherApps,
+                    modifier = Modifier.testTag(SHOW_IN_OTHER_APPS_TAG),
+                )
+            },
         )
     }
     item(key = "media-replaygain") {

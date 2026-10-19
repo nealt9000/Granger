@@ -3,6 +3,7 @@ package app.granger.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -15,6 +16,7 @@ import app.granger.core.library.PlaybackDao
 import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.player.ReplayGainMode
 import app.granger.media.MediaPermissionStatus
+import app.granger.media.MediaSharing
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
@@ -155,7 +157,21 @@ data class MediaSettingsUi(
     val skipBackS: Int = MediaSettings.DEFAULT_SKIP_S,
     val skipForwardS: Int = MediaSettings.DEFAULT_SKIP_S,
     val headsetAutoplay: Boolean = false,
+    /** Downloaded media show read-only in the Files app and other apps' pickers (the documents provider is enabled). */
+    val showInOtherApps: Boolean = false,
 )
+
+/** The "Show in other apps" switch: whether the documents provider is enabled. */
+interface OtherAppsSharing {
+    fun isEnabled(): Boolean
+    fun setEnabled(on: Boolean)
+}
+
+/** [MediaSharing] for [context]: the provider component's enabled state is the setting itself. */
+class ComponentOtherAppsSharing(private val context: Context) : OtherAppsSharing {
+    override fun isEnabled() = MediaSharing.isEnabled(context)
+    override fun setEnabled(on: Boolean) = MediaSharing.setEnabled(context, on)
+}
 
 /**
  * Settings → Music & audiobooks: the audio permission's status (the screen asks; this only shows it), the picked
@@ -166,6 +182,7 @@ class MediaSettings(
     private val folders: MediaFolders,
     private val grants: FolderGrants,
     private val prefs: SharedPreferences,
+    private val sharing: OtherAppsSharing,
     private val scanner: suspend () -> ScanSummary,
     scope: CoroutineScope,
     private val work: CoroutineScope = scope,
@@ -176,8 +193,9 @@ class MediaSettings(
     private val permission = MutableStateFlow(MediaPermissionStatus.DENIED)
     private val scan = MutableStateFlow<RescanState>(RescanState.Idle)
     private val player = MutableStateFlow(readPlayer())
+    private val shared = MutableStateFlow(sharing.isEnabled())
 
-    val ui: StateFlow<MediaSettingsUi> = combine(folders.all, permission, scan, player) { list, status, scanState, p ->
+    val ui: StateFlow<MediaSettingsUi> = combine(folders.all, permission, scan, player, shared) { list, status, scanState, p, on ->
         MediaSettingsUi(
             permission = status,
             folders = list.map { FolderRow(it.uri, folderName(it.uri), it.audiobooks) },
@@ -186,8 +204,12 @@ class MediaSettings(
             skipBackS = p.skipBackS,
             skipForwardS = p.skipForwardS,
             headsetAutoplay = p.headsetAutoplay,
+            showInOtherApps = on,
         )
-    }.stateIn(scope, SharingStarted.WhileSubscribed(5_000), MediaSettingsUi(replayGain = player.value.replayGain))
+    }.stateIn(
+        scope, SharingStarted.WhileSubscribed(5_000),
+        MediaSettingsUi(replayGain = player.value.replayGain, showInOtherApps = shared.value),
+    )
 
     private fun readPlayer() = Player(
         replayGain = runCatching { ReplayGainMode.valueOf(prefs.getString(PlayerSettingsKeys.REPLAYGAIN_MODE, null) ?: "AUTO") }
@@ -260,6 +282,12 @@ class MediaSettings(
     fun setHeadsetAutoplay(on: Boolean) {
         prefs.edit().putBoolean(PlayerSettingsKeys.HEADSET_AUTOPLAY, on).apply()
         player.value = player.value.copy(headsetAutoplay = on)
+    }
+
+    /** Enables or disables the documents provider; off, no other app can see or query it. */
+    fun setShowInOtherApps(on: Boolean) {
+        sharing.setEnabled(on)
+        shared.value = sharing.isEnabled()
     }
 
     companion object {

@@ -81,6 +81,7 @@ import app.granger.search.SearchScreen
 import app.granger.search.SearchViewModel
 import android.content.Context
 import app.granger.media.PlayResumer
+import app.granger.settings.ComponentOtherAppsSharing
 import app.granger.settings.DaoMediaFolders
 import app.granger.settings.MediaSettings
 import app.granger.settings.ResolverFolderGrants
@@ -762,6 +763,7 @@ private fun mediaSettings(container: AppContainer, context: Context, scope: Coro
     folders = DaoMediaFolders(container.playback),
     grants = ResolverFolderGrants(context.contentResolver),
     prefs = container.playerPrefs,
+    sharing = ComponentOtherAppsSharing(context),
     scanner = {
         container.appScope.async {
             container.phoneScanner.scan()

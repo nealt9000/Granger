@@ -73,7 +73,7 @@ fun SettingsScreen(
     LaunchedEffect(scrollToMedia, media) {
         if (scrollToMedia && media != null && !scrolled) {
             scrolled = true
-            listState.scrollToItem(MEDIA_SECTION_INDEX)
+            listState.scrollToItem(settingsIndexOf(MEDIA_SECTION_KEY))
         }
     }
     var showWaiver by rememberSaveable { mutableStateOf(false) }
@@ -98,50 +98,55 @@ fun SettingsScreen(
     ) { padding ->
         val mediaControls = media?.let { rememberMediaControls(it, onPermissionChecked) }
         LazyColumn(Modifier.padding(padding).fillMaxSize(), state = listState) {
-            item(key = "models") {
-                ListItem(
-                    headlineContent = { Text("Models") },
-                    supportingContent = { Text("AI models for this phone") },
-                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                    modifier = Modifier.selectable(selected = false, onClick = onModels),
-                )
-                HorizontalDivider()
-            }
-            item(key = "readiness") {
-                ListItem(
-                    headlineContent = { Text("Readiness") },
-                    supportingContent = { Text("Check that what you downloaded still works") },
-                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                    modifier = Modifier.selectable(selected = false, onClick = onReadiness),
-                )
-                HorizontalDivider()
-            }
-            item(key = "storage") { StorageSection(ui, viewModel::selectVolume) }
-            item(key = "wifi") {
-                ListItem(
-                    headlineContent = { Text("Download on Wi-Fi only") },
-                    supportingContent = { Text("Turn off to use mobile data") },
-                    trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
-                )
-                HorizontalDivider()
-            }
-            item(key = "archive") {
-                ListItem(
-                    headlineContent = { Text("Archive.org: show everything") },
-                    supportingContent = {
-                        Text(
-                            if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
-                            else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
+            // The rows above Music & audiobooks come from LEADING_KEYS, so the media section's index is computed from them.
+            for (key in LEADING_KEYS) item(key = key) {
+                when (key) {
+                    "models" -> {
+                        ListItem(
+                            headlineContent = { Text("Models") },
+                            supportingContent = { Text("AI models for this phone") },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                            modifier = Modifier.selectable(selected = false, onClick = onModels),
                         )
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = ui.archiveEverything,
-                            onCheckedChange = { on -> if (on) showWaiver = true else viewModel.withdrawArchiveWaiver() },
+                        HorizontalDivider()
+                    }
+                    "readiness" -> {
+                        ListItem(
+                            headlineContent = { Text("Readiness") },
+                            supportingContent = { Text("Check that what you downloaded still works") },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                            modifier = Modifier.selectable(selected = false, onClick = onReadiness),
                         )
-                    },
-                )
-                HorizontalDivider()
+                        HorizontalDivider()
+                    }
+                    "storage" -> StorageSection(ui, viewModel::selectVolume)
+                    "wifi" -> {
+                        ListItem(
+                            headlineContent = { Text("Download on Wi-Fi only") },
+                            supportingContent = { Text("Turn off to use mobile data") },
+                            trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
+                        )
+                        HorizontalDivider()
+                    }
+                    "archive" -> {
+                        ListItem(
+                            headlineContent = { Text("Archive.org: show everything") },
+                            supportingContent = {
+                                Text(
+                                    if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
+                                    else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
+                                )
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = ui.archiveEverything,
+                                    onCheckedChange = { on -> if (on) showWaiver = true else viewModel.withdrawArchiveWaiver() },
+                                )
+                            },
+                        )
+                        HorizontalDivider()
+                    }
+                }
             }
             if (media != null && mediaControls != null) {
                 mediaSettingsSection(
@@ -151,6 +156,7 @@ fun SettingsScreen(
                     onAddFolder = mediaControls.addFolder,
                     onRemoveFolder = media::removeFolder,
                     onRescan = media::rescan,
+                    onShowInOtherApps = media::setShowInOtherApps,
                     onReplayGain = media::setReplayGain,
                     onSkipBack = media::setSkipBack,
                     onSkipForward = media::setSkipForward,
@@ -162,8 +168,11 @@ fun SettingsScreen(
     }
 }
 
-/** Items before the Music & audiobooks section: models, readiness, storage, wifi, archive. */
-private const val MEDIA_SECTION_INDEX = 5
+/** The keys of the rows above Music & audiobooks, in order. Add a row above it here and the scroll follows. */
+private val LEADING_KEYS = listOf("models", "readiness", "storage", "wifi", "archive")
+
+/** The list index of [key] when the media section is shown: one item per leading key, then [MEDIA_SECTION_KEY]. */
+internal fun settingsIndexOf(key: String): Int = (LEADING_KEYS + MEDIA_SECTION_KEY).indexOf(key)
 
 private class MediaControls(val ui: MediaSettingsUi, val permission: MediaPermissionState, val addFolder: (Boolean) -> Unit)
 

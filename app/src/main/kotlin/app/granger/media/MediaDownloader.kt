@@ -45,6 +45,8 @@ class MediaDownloader(
     private val prefs: DownloadPrefs,
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** After every downloaded-media scan (a filing, a removal, "Rescan now"): tells other apps' views to refresh. */
+    private val onChanged: () -> Unit = {},
 ) {
     /** Get, cancel and remove, one at a time. */
     private val ops = Mutex()
@@ -184,6 +186,7 @@ class MediaDownloader(
             scanner.scan()
             scannedUpTo = upTo
         }
+        runCatching { onChanged() }
     }
 
     /** [rescan], logging rather than throwing: for app start, finished files and removals. */

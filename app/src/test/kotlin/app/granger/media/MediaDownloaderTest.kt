@@ -135,6 +135,18 @@ class MediaDownloaderTest {
         d.onFileInstalled(installed(0))
     }
 
+    /** "Show in other apps": the Files app is told after a file is filed and after a removal, once the folder is gone. */
+    @Test fun otherAppsAreToldAfterFilingAndRemoval() = runTest {
+        val seen = mutableListOf<Boolean>()
+        val d = MediaDownloader(downloads, scanner, media, volumes, prefs, backgroundScope, onChanged = { seen += dir().exists() })
+        d.get(book)
+        arrive(0 until 2)
+        d.onFileInstalled(installed(1))
+        assertThat(seen).containsExactly(true)
+        d.remove(group)
+        assertThat(seen).containsExactly(true, false).inOrder()
+    }
+
     @Test fun removeForgetsEveryTrackOfTheBookKeepingStateAndBookmarks() = runTest {
         val d = downloader()
         d.get(book)
