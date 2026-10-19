@@ -79,6 +79,11 @@ fun ReadinessScreen(viewModel: ReadinessViewModel, onBack: () -> Unit) {
                 Check(row, viewModel::verify, viewModel::repair)
                 HorizontalDivider()
             }
+            if (ui.media.isNotEmpty()) item(key = "media") { Heading("Music & audiobooks") }
+            items(ui.media, key = { it.key }) { row ->
+                Check(row, viewModel::verify, viewModel::repair)
+                HorizontalDivider()
+            }
         }
     }
 }

@@ -149,4 +149,40 @@ class ReadinessViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.packs.single().status).isEqualTo(CheckStatus.MISSING)
     }
+
+    private val bookGroup = "media:librivox:817"
+    private val chapters = (1..13).map { n ->
+        record("$bookGroup/%03d".format(n), DownloadState.INSTALLED, kind = ItemKind.AUDIO, sizeBytes = 100L * n,
+            filePath = "/internal/audiobooks/librivox/817/%02d - Chapter.mp3".format(n), title = "Time Machine",
+            hashAlgorithm = app.granger.core.downloads.HashAlgorithm.SHA1).copy(groupId = bookGroup)
+    }
+
+    @Test fun mediaFilesShowAsOneRowPerItem() = runTest(main.dispatcher) {
+        downloads.list.value = chapters + med
+        val ui = viewModel().ui.value
+        val row = ui.media.single()
+        assertThat(row.key).isEqualTo("group:$bookGroup")
+        assertThat(row.title).isEqualTo("Time Machine")
+        assertThat(row.sizeBytes).isEqualTo(chapters.sumOf { it.sizeBytes })
+        assertThat(row.status).isEqualTo(CheckStatus.SIZE_OK)
+        assertThat(ui.packs.map { it.key }).containsExactly(key(med))
+    }
+
+    @Test fun verifyChecksEveryFileAndRepairFetchesOnlyTheDamagedOnes() = runTest(main.dispatcher) {
+        downloads.list.value = chapters
+        quick[chapters[4].itemId] = Integrity.MISSING
+        val vm = viewModel()
+        val row = vm.ui.value.media.single()
+        assertThat(row.status).isEqualTo(CheckStatus.MISSING)
+        assertThat(row.canRepair).isTrue()
+
+        fullResult.complete(Integrity.VERIFIED)
+        vm.verify(row.key)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls.filter { it.startsWith("check:") }).hasSize(13)
+
+        vm.repair(row.key)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls.filter { it.startsWith("repair:") }).containsExactly("repair:${chapters[4].itemId}")
+    }
 }

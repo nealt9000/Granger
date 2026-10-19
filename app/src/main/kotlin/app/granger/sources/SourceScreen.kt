@@ -245,6 +245,10 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
                     TextButton(onClick = onRetry) { Text("Retry") }
                 }
                 ItemStatus.Installed -> TextButton(onClick = onRemove) { Text("Remove") }
+                is ItemStatus.Partial -> Row {
+                    TextButton(onClick = onRemove) { Text("Remove") }
+                    TextButton(onClick = onGet) { Text("Get the rest") }
+                }
                 ItemStatus.NeedsMoreMemory -> Unit
             }
         },
@@ -273,6 +277,7 @@ internal fun ItemStatusText(status: ItemStatus) {
         ItemStatus.Installed -> Text("Installed", color = MaterialTheme.colorScheme.primary)
         ItemStatus.UpdateAvailable -> Text("A newer version is available")
         ItemStatus.NeedsMoreMemory -> Text("Needs a phone with more memory")
+        is ItemStatus.Partial -> Text("Partly downloaded: ${status.done} of ${status.total}")
         ItemStatus.NotInstalled -> Unit
     }
 }

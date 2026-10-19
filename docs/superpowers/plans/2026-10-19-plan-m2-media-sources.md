@@ -692,7 +692,15 @@ git commit -m "Media M2: item manifests as origin records; downloaded media file
       suspend fun remove(groupId: String)
       /** The runner's onInstalled for AUDIO records: one rescan at a time; never throws. */
       suspend fun onFileInstalled(record: DownloadRecord)
+      /** Every downloaded-media scan (start, finished file, removal, "Rescan now") runs through these, one at a time. */
+      suspend fun rescan()
+      suspend fun rescanQuietly()
   }
+  // As built: the cover's file id is always <groupId>/000 and the audio files <groupId>/001 on. Remove deletes the
+  // folder, rescans, then forgets (manifest track ids + chapters + item-keyed tracks), so an in-flight scan can't
+  // bring ghosts back. An item already on a mounted volume is completed there; one whose ledger rows point to an
+  // unmounted volume is refused ("<title> is on storage that isn't available right now. Put it back to finish it,
+  // or remove it first."). "Rescan now" is wired in GrangerNavHost's mediaSettings scanner lambda.
   // AppContainer gains: val librivoxClient: LibriVoxClient; val downloadedMedia: DownloadedMediaScanner; val mediaDownloader: MediaDownloader
   ```
 - Notices (exact): no volume → "No storage is available right now."; `NoSpace` → "Not enough space on <label> for <title>: free up <size>." Free space is the only check (no cap).

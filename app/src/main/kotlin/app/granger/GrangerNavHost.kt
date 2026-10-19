@@ -711,7 +711,11 @@ private fun mediaSettings(container: AppContainer, context: Context, scope: Coro
     grants = ResolverFolderGrants(context.contentResolver),
     prefs = container.playerPrefs,
     scanner = {
-        container.appScope.async { container.phoneScanner.scan() }.await()
+        container.appScope.async {
+            container.phoneScanner.scan()
+            // Granger's downloads too: "Rescan now" means everything.
+            container.mediaDownloader.rescan()
+        }.await()
         ScanSummary.of(container.media)
     },
     scope = scope,

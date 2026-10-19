@@ -276,6 +276,10 @@ private fun ArchiveResultRow(
                     TextButton(onClick = onRetry) { Text("Retry") }
                 }
                 ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
+                is ItemStatus.Partial -> Row {
+                    TextButton(onClick = onRemove) { Text("Remove") }
+                    TextButton(onClick = onGet) { Text("Get the rest") }
+                }
                 ItemStatus.NeedsMoreMemory -> Unit
             }
         },

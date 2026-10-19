@@ -21,6 +21,9 @@ sealed interface ItemStatus {
     data object Installed : ItemStatus
     data object UpdateAvailable : ItemStatus
 
+    /** A book or album with [done] of its [total] files in and none downloading (cancelled part-way): "Get the rest". */
+    data class Partial(val done: Int, val total: Int) : ItemStatus
+
     /** A model this phone doesn't have the memory to run (spec "Device tiers"). */
     data object NeedsMoreMemory : ItemStatus
 }
