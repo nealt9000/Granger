@@ -26,6 +26,12 @@ object Keywords {
             .distinct()
             .take(max)
 
+    /** A keyword word that also names a work by another title word: spellings of one work, and "gita" for the Bhagavad Gita. */
+    private val ALIASES = mapOf("quran" to "koran", "koran" to "quran", "gita" to "bhagavad")
+
+    /** [word], lowercased, and the title word it is an alias of, if any. */
+    fun alternatives(word: String): Set<String> = word.lowercase().let { w -> ALIASES[w]?.let { setOf(w, it) } ?: setOf(w) }
+
     fun isStopword(word: String): Boolean = word.lowercase() in STOPWORDS
 
     /** The words of a keyword phrase: the rewrite's phrases ("portia mercy") are matched word by word, in any order. */

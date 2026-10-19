@@ -82,4 +82,14 @@ class LexicalScoreTest {
         // 2/3, TITLE_BONUS for "bible" in the title, LEAD_BONUS for the opening passage.
         assertThat(LexicalScore.of(article, listOf("bible", "money", "evil"))).isWithin(1e-9).of(2.0 / 3 + 0.1 + 0.3)
     }
+
+    @Test fun titleCreditCountsOnce() {
+        val book = passage("nothing relevant", title = "Love and War")
+        assertThat(LexicalScore.of(book, listOf("love", "war", "peace"))).isWithin(1e-9).of(1.0 / 3 + 0.1)
+    }
+
+    @Test fun titleCreditHonoursAliases() {
+        val koran = passage("Charity is a duty.", title = "The Koran")
+        assertThat(LexicalScore.of(koran, listOf("quran", "charity"))).isWithin(1e-9).of(1.1)
+    }
 }

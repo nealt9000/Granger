@@ -104,7 +104,14 @@ class LibraryPassageFinder(
 
     private suspend fun books(words: List<String>, collections: Map<String, String>): List<Passage> =
         try {
-            val found = bookIndex.passages(words, limit = bookLimit) + namedBookPassages(words)
+            val named = try {
+                namedBookPassages(words)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                emptyList()
+            }
+            val found = bookIndex.passages(words, limit = bookLimit) + named
             found.distinctBy { Triple(it.book.id, it.href, it.text) }.map {
                 Passage(
                     kind = SourceKind.BOOK,
@@ -135,7 +142,7 @@ class LibraryPassageFinder(
         }
         val named = books.mapNotNull { book ->
             val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { it !in GENERIC_TITLE_WORDS && !Keywords.isStopword(it) }.toSet()
-            val naming = keywordWords.filter { word -> (ALIASES[word]?.let { setOf(word, it) } ?: setOf(word)).any { it in titleWords } }.toSet()
+            val naming = keywordWords.filter { word -> Keywords.alternatives(word).any { it in titleWords } }.toSet()
             if (naming.isEmpty()) null else book to naming
         }.sortedByDescending { it.second.size }.take(NAMED_BOOKS)
         return named.flatMap { (book, naming) ->
@@ -213,8 +220,5 @@ class LibraryPassageFinder(
             "book", "books", "complete", "works", "volume", "vol", "collected", "selected", "edition",
             "translated", "tr", "english", "version", "standard",
         )
-
-        /** A keyword word that also names a book by another title word: spellings of one work, and "gita" for the Bhagavad Gita. */
-        val ALIASES = mapOf("quran" to "koran", "koran" to "quran", "gita" to "bhagavad")
     }
 }

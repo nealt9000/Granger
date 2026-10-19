@@ -234,10 +234,25 @@ class LibraryPassageFinderTest {
         val koran = addBook("koran", "The Koran", "<p>charity is a duty</p>", "<p>nothing</p>")
         index.indexPending()
 
-        val found = finder(emptyList(), emptyMap(), books = listOf(koran), bookLimit = 1).find(listOf("quran", "charity", "duty"))
-        assertThat(found.filter { it.kind == SourceKind.BOOK }.map { it.text }).contains("charity is a duty")
-        val scoped = finder(emptyList(), emptyMap(), books = listOf(koran), bookLimit = 1).find(listOf("quran", "nothing"))
-        assertThat(scoped.filter { it.kind == SourceKind.BOOK }.map { it.text }).contains("nothing")
+        // bookLimit 0: only the scoped search inside the named book can find anything.
+        val found = finder(emptyList(), emptyMap(), books = listOf(koran), bookLimit = 0).find(listOf("quran", "charity", "duty"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("charity is a duty")
+    }
+
+    @Test fun gitaMatchesBhagavadTitle() = test {
+        val gita = addBook("gita", "The Bhagavad Gita", "<p>act without attachment</p>")
+        index.indexPending()
+
+        val found = finder(emptyList(), emptyMap(), books = listOf(gita), bookLimit = 0).find(listOf("gita", "attachment"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("act without attachment")
+    }
+
+    @Test fun aChunkFoundByBothSearchesAppearsOnce() = test {
+        val kjv = addBook("kjv", "The King James Bible", "<p>money is the root of evil</p>")
+        index.indexPending()
+
+        val found = finder(emptyList(), emptyMap(), books = listOf(kjv)).find(listOf("bible", "money", "evil"))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }).hasSize(1)
     }
 
     @Test fun genericTitleWordsDoNotName() = test {

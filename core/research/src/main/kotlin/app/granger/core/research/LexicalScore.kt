@@ -25,13 +25,14 @@ object LexicalScore {
         return { passage ->
             val text = body(passage)
             val present = patterns.filterValues { it.containsMatchIn(text) }.keys
-            val inTitle = groups.any { group -> group.all { patterns.getValue(it).containsMatchIn(passage.sourceTitle) } }
-            // A book's title is part of what it says ("bible, money" finds the King James text); an article's body already names it.
-            val titleWords = if (passage.kind == SourceKind.BOOK) {
-                patterns.filterValues { it.containsMatchIn(passage.sourceTitle) }.keys
-            } else emptySet()
-            val found = groups.sumOf { group ->
-                if (group.all { it in titleWords }) 1.0 else group.count { it in present }.toDouble() / group.size
+            val titleWords = Keywords.words(passage.sourceTitle).map { it.lowercase() }.toSet()
+            val inTitleGroups = groups.map { group -> group.all { w -> Keywords.alternatives(w).any { it in titleWords } } }
+            val inTitle = inTitleGroups.any { it }
+            // A book's title is part of what it says ("bible, money" finds the King James text), but it stands in for
+            // one keyword at most; an article's body already names it.
+            val credited = if (passage.kind == SourceKind.BOOK) inTitleGroups.indexOf(true) else -1
+            val found = groups.withIndex().sumOf { (i, group) ->
+                if (i == credited) 1.0 else group.count { it in present }.toDouble() / group.size
             }
             found / groups.size +
                 (if (inTitle) TITLE_BONUS else 0.0) +
