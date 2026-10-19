@@ -272,6 +272,7 @@ git commit -m "Media M2: download groups run one file at a time as one chain; AU
 **Files:**
 - Modify: `core/archive/src/main/kotlin/app/granger/core/archive/ArchiveQuery.kt` (`ArchiveKind`, shelves by kind, `build` with kind), `ArchiveModels.kt` (audio fields), `ArchiveOrgClient.kt` (parse them; `mediatype` in search fields), `ArchiveOffer.kt` (`isPublicDomainRecording`, shared `isUsable`)
 - Create: `core/archive/src/main/kotlin/app/granger/core/archive/PublicDomain.kt`, `ArchiveAudioOffer.kt`
+- Modify: `app/src/main/kotlin/app/granger/archive/ArchiveScreen.kt` (its shelf chips list `ArchiveShelf.of(ArchiveKind.TEXTS)`, not `entries`, so the books view doesn't gain the audio shelves before Task 8)
 - Test: `core/archive/src/test/kotlin/app/granger/core/archive/ArchiveQueryTest.kt`, `ArchiveOrgClientTest.kt`, `PublicDomainTest.kt`, `ArchiveAudioOfferTest.kt`
 
 **Interfaces:**
@@ -370,7 +371,7 @@ git commit -m "Media M2: download groups run one file at a time as one chain; AU
 - [ ] **Step 5: Commit**
 
 ```bash
-git add core/archive
+git add core/archive app/src/main/kotlin/app/granger/archive/ArchiveScreen.kt docs/superpowers/plans/2026-10-19-plan-m2-media-sources.md
 git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-domain filter, audio file choice"
 ```
 

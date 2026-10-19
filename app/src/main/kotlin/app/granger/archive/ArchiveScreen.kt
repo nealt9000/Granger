@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.core.archive.ArchiveKind
 import app.granger.core.archive.ArchiveShelf
 import app.granger.sources.ItemStatus
 import app.granger.sources.ItemStatusText
@@ -139,7 +140,7 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
                         Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        for (shelf in ArchiveShelf.entries) {
+                        for (shelf in ArchiveShelf.of(ArchiveKind.TEXTS)) {
                             FilterChip(
                                 selected = ui.shelf == shelf,
                                 onClick = { viewModel.selectShelf(shelf) },

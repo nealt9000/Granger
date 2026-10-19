@@ -63,6 +63,8 @@ class ArchiveOrgClient(
                 licenseUrl = meta["licenseurl"]?.firstString().orEmpty(),
                 restricted = meta["access-restricted-item"]?.asBool() == true,
                 files = (root["files"] as? JsonArray).orEmpty().map { it.jsonObject.toFile() },
+                mediatype = meta["mediatype"]?.firstString().orEmpty(),
+                collections = meta["collection"]?.allStrings().orEmpty(),
             )
         }
     }
@@ -103,6 +105,7 @@ class ArchiveOrgClient(
         formats = this["format"]?.allStrings().orEmpty(),
         restricted = this["access-restricted-item"]?.asBool() == true,
         downloads = this["downloads"]?.asLong() ?: 0L,
+        mediatype = this["mediatype"]?.firstString().orEmpty(),
     )
 
     private fun JsonObject.toFile() = ArchiveFile(
@@ -113,6 +116,11 @@ class ArchiveOrgClient(
         md5 = this["md5"]?.firstString()?.ifBlank { null },
         source = this["source"]?.firstString().orEmpty(),
         isPrivate = this["private"]?.asBool() == true,
+        title = this["title"]?.firstString().orEmpty(),
+        album = this["album"]?.firstString().orEmpty(),
+        creator = this["creator"]?.firstString().orEmpty(),
+        track = this["track"]?.firstString()?.let(::trackOf),
+        lengthMs = this["length"]?.firstString()?.let(::lengthMsOf),
     )
 
     private fun JsonElement.asInt(): Int? = (this as? JsonPrimitive)?.let { it.intOrNull ?: it.contentOrNull?.trim()?.toIntOrNull() }
@@ -130,6 +138,24 @@ class ArchiveOrgClient(
     /** The first run of exactly four digits, so "c1890", "[1890]" and "May 12, 1890" all give 1890. */
     private fun yearOf(date: String): Int? = YEAR.find(date)?.value?.toInt()
 
+    /** "01" → 1, "7" → 7, "1/13" → 1; anything else → null. */
+    private fun trackOf(track: String): Int? = TRACK.matchEntire(track.trim())?.groupValues?.get(1)?.toIntOrNull()
+
+    /** "373.16" → 373 160, "19:32" → 1 172 000, "1:02:03" → 3 723 000; anything else → null. */
+    private fun lengthMsOf(length: String): Long? {
+        val parts = length.trim().split(':')
+        if (parts.size > 3 || parts.any { it.isEmpty() }) return null
+        val seconds = parts.last().toBigDecimalOrNull()?.takeIf { it.signum() >= 0 } ?: return null
+        var total = seconds
+        var unit = 60L
+        for (part in parts.dropLast(1).reversed()) {
+            if (!part.all(Char::isDigit)) return null
+            total += part.toBigDecimal() * unit.toBigDecimal()
+            unit *= 60
+        }
+        return total.movePointRight(3).setScale(0, java.math.RoundingMode.HALF_UP).toLong()
+    }
+
     private fun stripHtml(text: String): String =
         text.replace(TAG, " ").replace(SPACES, " ").trim().take(MAX_DESCRIPTION)
 
@@ -144,7 +170,8 @@ class ArchiveOrgClient(
     }
 
     private companion object {
-        val SEARCH_FIELDS = listOf("identifier", "title", "creator", "year", "format", "access-restricted-item", "downloads")
+        val SEARCH_FIELDS = listOf("identifier", "title", "creator", "year", "format", "access-restricted-item", "downloads", "mediatype")
+        val TRACK = Regex("(\\d{1,4})(?:/\\d+)?")
         val TAG = Regex("<[^>]*>")
         val YEAR = Regex("(?<!\\d)\\d{4}(?!\\d)")
         val SPACES = Regex("\\s+")

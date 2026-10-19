@@ -1,5 +1,7 @@
 package app.granger.core.archive
 
+import java.time.LocalDate
+
 enum class TextKind { EPUB, TEXT, OCR_TEXT }
 
 sealed interface Offer {
@@ -51,17 +53,25 @@ object ArchiveOffers {
     /** Published 1930 or earlier. The uploader's licence tag is ignored: it isn't trusted (2026-10-17). */
     fun isPublicDomain(item: ArchiveItem): Boolean = item.year != null && item.year <= 1930
 
-    private fun isUsable(file: ArchiveFile): Boolean =
-        !file.isPrivate &&
-            !file.format.startsWith("LCP Encrypted") &&
-            (file.sha1 != null || file.md5 != null) &&
-            (file.sizeBytes ?: 0) > 0 &&
-            isSafeName(file.name)
-
-    /** Names come from remote metadata and go into a download URL. */
-    private fun isSafeName(name: String): Boolean =
-        !name.startsWith("/") && name.split("/").none { it.isEmpty() || it == "." || it == ".." }
+    /**
+     * Published before January 1 of (current year − 100), and not before the first recordings: archive.org's year 0
+     * and undated items fail. The same rule as the music search's rolling filter, checked again at Get.
+     */
+    fun isPublicDomainRecording(item: ArchiveItem, today: LocalDate): Boolean =
+        item.year != null && item.year in PublicDomain.EARLIEST_RECORDING_YEAR..PublicDomain.lastRecordingYear(today)
 
     private fun isTextOrPdf(file: ArchiveFile): Boolean = file.format != "Metadata" && (
         file.format in setOf("EPUB", "Text", "DjVuTXT") || file.format.contains("PDF") || file.name.endsWith(".epub") || file.name.endsWith(".txt"))
 }
+
+/** Shared by the book and audio offers: never private, never LCP, verifiable, non-empty, and a safe name. */
+internal fun isUsable(file: ArchiveFile): Boolean =
+    !file.isPrivate &&
+        !file.format.startsWith("LCP Encrypted") &&
+        (file.sha1 != null || file.md5 != null) &&
+        (file.sizeBytes ?: 0) > 0 &&
+        isSafeName(file.name)
+
+/** Names come from remote metadata and go into a download URL. */
+internal fun isSafeName(name: String): Boolean =
+    !name.startsWith("/") && name.split("/").none { it.isEmpty() || it == "." || it == ".." }

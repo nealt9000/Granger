@@ -154,4 +154,65 @@ class ArchiveOrgClientTest {
         assertThat(client.downloadUrl("x", "sub dir/My Book.epub")).isEqualTo("https://archive.org/download/x/sub%20dir/My%20Book.epub")
         assertThat(client.detailsUrl("x")).isEqualTo("https://archive.org/details/x")
     }
+
+    @Test fun itemParsesAudioFileFields() {
+        val item = item(HOLST, "item-holst-planets.json")
+        assertThat(item.mediatype).isEqualTo("audio")
+        assertThat(item.collections).containsExactly("hifidelity_potpourri", "hifidelity")
+        val mars = item.files.single { it.name.endsWith(".mp3") && "I. Mars" in it.name }
+        assertThat(mars.track).isEqualTo(1)
+        assertThat(mars.lengthMs).isEqualTo(373_160L)
+        assertThat(mars.format).isEqualTo("VBR MP3")
+        assertThat(mars.title).isEmpty()
+        assertThat(mars.album).isEmpty()
+        val filesXml = item.files.single { it.name == "${HOLST}_files.xml" }
+        assertThat(filesXml.sha1).isNull()
+        assertThat(filesXml.track).isNull()
+        assertThat(filesXml.lengthMs).isNull()
+    }
+
+    @Test fun lengthParsesSecondsAndClock() {
+        val item = item("time_machine_0805_librivox", "item-librivox-time-machine.json")
+        assertThat(item.collections).containsExactly("librivoxaudio", "audio_bookspoetry")
+        val low = item.files.single { it.name == "timemachinewells_01_ae_64kb.mp3" }
+        assertThat(low.lengthMs).isEqualTo(1_172_000L)
+        assertThat(low.track).isNull()
+        val vbr = item.files.single { it.name == "timemachinewells_01_ae.mp3" }
+        assertThat(vbr.track).isEqualTo(1)
+        assertThat(vbr.lengthMs).isEqualTo(1_172_320L)
+        assertThat(vbr.title).isEqualTo("Chapter 01")
+        assertThat(vbr.album).isEqualTo("The Time Machine")
+        assertThat(vbr.creator).isEqualTo("H.G. Wells")
+        assertThat(item.files.single { it.name == "timemachinewells_06.mp3" }.track).isEqualTo(7)
+        assertThat(item.files.single { it.name == "time_machine_0805_librivox_files.xml" }.sha1).isNull()
+    }
+
+    @Test fun trackAndLengthEdgeCases() {
+        fun file(fields: String): ArchiveFile {
+            server.bodies["/metadata/f"] = """{"metadata":{"identifier":"f","collection":"solo"},"files":[{"name":"a.mp3",$fields}]}"""
+            val item = kotlinx.coroutines.runBlocking { client.item("f") }
+            assertThat(item.collections).containsExactly("solo")
+            return item.files.single()
+        }
+        assertThat(file("\"track\":\"01\"").track).isEqualTo(1)
+        assertThat(file("\"track\":\"1/13\"").track).isEqualTo(1)
+        assertThat(file("\"track\":\"7\"").track).isEqualTo(7)
+        assertThat(file("\"track\":\"A1\"").track).isNull()
+        assertThat(file("\"track\":\"\"").track).isNull()
+        assertThat(file("\"length\":\"1:02:03\"").lengthMs).isEqualTo(3_723_000L)
+        assertThat(file("\"length\":\"19:32\"").lengthMs).isEqualTo(1_172_000L)
+        assertThat(file("\"length\":\"373.16\"").lengthMs).isEqualTo(373_160L)
+        assertThat(file("\"length\":\"1027\"").lengthMs).isEqualTo(1_027_000L)
+        assertThat(file("\"length\":\"abc\"").lengthMs).isNull()
+        assertThat(file("\"length\":\"1:2:3:4\"").lengthMs).isNull()
+    }
+
+    @Test fun searchAsksForAndParsesTheMediatype() = runTest {
+        server.fixture("/advancedsearch.php", "search-audio-music.json")
+        val page = client.search(ArchiveQuery.build("", ArchiveShelf.MUSIC_MOST_DOWNLOADED, true, ArchiveKind.MUSIC), 1, rows = 3)
+        assertThat(page.total).isEqualTo(52107)
+        assertThat(page.docs.map { it.mediatype }).containsExactly("audio", "audio", "audio")
+        assertThat(page.docs[0].year).isEqualTo(1904)
+        assertThat(server.requests.single().url.queryParameterValues("fl[]")).contains("mediatype")
+    }
 }

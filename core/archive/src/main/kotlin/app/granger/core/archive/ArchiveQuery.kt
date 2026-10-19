@@ -1,10 +1,33 @@
 package app.granger.core.archive
 
-enum class ArchiveShelf(val title: String, val clause: String) {
-    MOST_DOWNLOADED("Most downloaded", ""),
-    MANUALS("Technical manuals", "collection:manuals"),
-    SCIENCE("Science & engineering", "subject:(science OR engineering OR mechanics OR chemistry OR physics)"),
-    LITERATURE("Literature", "subject:(fiction OR literature OR poetry OR drama)"),
+import java.time.LocalDate
+
+/** What an archive.org view lists. [noun] names it in copy; [base] is its search clause. */
+enum class ArchiveKind(val noun: String, val base: String, val datedRecordings: Boolean) {
+    TEXTS("texts", "mediatype:texts", datedRecordings = false),
+    // archive.org dates spoken word by its text, so it has no usable recording date: nothing is searched before the waiver (Decisions).
+    SPOKEN_WORD("audiobooks", "mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio", datedRecordings = false),
+    MUSIC("music", "mediatype:audio AND collection:audio_music", datedRecordings = true),
+}
+
+enum class ArchiveShelf(val kind: ArchiveKind, val title: String, val clause: String) {
+    MOST_DOWNLOADED(ArchiveKind.TEXTS, "Most downloaded", ""),
+    MANUALS(ArchiveKind.TEXTS, "Technical manuals", "collection:manuals"),
+    SCIENCE(ArchiveKind.TEXTS, "Science & engineering", "subject:(science OR engineering OR mechanics OR chemistry OR physics)"),
+    LITERATURE(ArchiveKind.TEXTS, "Literature", "subject:(fiction OR literature OR poetry OR drama)"),
+    SPOKEN_MOST_DOWNLOADED(ArchiveKind.SPOKEN_WORD, "Most downloaded", ""),
+    SPOKEN_POETRY(ArchiveKind.SPOKEN_WORD, "Poetry", "subject:poetry"),
+    SPOKEN_DRAMA(ArchiveKind.SPOKEN_WORD, "Drama", "subject:(drama OR plays)"),
+    MUSIC_MOST_DOWNLOADED(ArchiveKind.MUSIC, "Most downloaded", ""),
+    MUSIC_78(ArchiveKind.MUSIC, "78 rpm records", "collection:78rpm"),
+    MUSIC_CLASSICAL(ArchiveKind.MUSIC, "Classical", "subject:classical"),
+    MUSIC_FOLK(ArchiveKind.MUSIC, "Folk & field recordings", "subject:(folk OR \"field recordings\")"),
+    ;
+
+    companion object {
+        fun of(kind: ArchiveKind): List<ArchiveShelf> = entries.filter { it.kind == kind }
+        fun first(kind: ArchiveKind): ArchiveShelf = of(kind).first()
+    }
 }
 
 object ArchiveQuery {
@@ -12,17 +35,32 @@ object ArchiveQuery {
      * Date only: published 1930 or earlier. Changed 2026-10-17 after the Pixel 6 walkthrough: uploader licence tags
      * are not trusted (modern books tagged public domain by their uploaders showed up in the filtered view).
      */
-    const val PUBLIC_DOMAIN = "year:[* TO 1930]"
+    const val PUBLIC_DOMAIN = "year:[* TO ${PublicDomain.LAST_BOOK_YEAR}]"
 
     private val identifier = Regex("[A-Za-z0-9._-]+")
 
-    fun build(text: String, shelf: ArchiveShelf?, filtered: Boolean): String {
+    /**
+     * Texts keep Plan 7's date-only filter. An audio kind is filtered by the rolling recording range for [today]; a
+     * filtered audio kind without [ArchiveKind.datedRecordings] (spoken word) has nothing it may show, so it throws,
+     * as does a [shelf] of another kind.
+     */
+    fun build(
+        text: String,
+        shelf: ArchiveShelf?,
+        filtered: Boolean,
+        kind: ArchiveKind = ArchiveKind.TEXTS,
+        today: LocalDate = LocalDate.now(),
+    ): String {
+        require(shelf == null || shelf.kind == kind) { "Shelf ${shelf?.name} isn't a ${kind.noun} shelf" }
+        require(!filtered || kind == ArchiveKind.TEXTS || kind.datedRecordings) {
+            "archive.org ${kind.noun} have no recording date to filter by"
+        }
         val cleaned = balance(text).trim()
         return buildString {
-            append("mediatype:texts")
+            append(kind.base)
             if (cleaned.isNotEmpty()) append(" AND (").append(cleaned).append(')')
             if (shelf != null && shelf.clause.isNotEmpty()) append(" AND ").append(shelf.clause)
-            if (filtered) append(" AND ").append(PUBLIC_DOMAIN)
+            if (filtered) append(" AND ").append(PublicDomain.clause(kind, today))
         }
     }
 
