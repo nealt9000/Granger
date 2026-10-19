@@ -9,4 +9,9 @@ class FeaturesTest {
         assertThat(BuildConfig.DEBUG).isTrue()
         assertThat(Features.RESEARCH).isTrue()
     }
+
+    @Test fun playerIsOnWithItsRailTool() {
+        assertThat(Features.PLAYER).isTrue()
+        assertThat(app.granger.shell.RailTool.PLAYER.shown).isTrue()
+    }
 }

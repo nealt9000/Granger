@@ -5,8 +5,8 @@ object Features {
     /** Research, the on-device librarian (Plan 8); also needs a phone of the ASK tier. Debug builds only until the eval passes. */
     val RESEARCH = BuildConfig.DEBUG
 
-    /** The audio/video player and its mini-player; after v1. */
-    const val PLAYER = false
+    /** The music and audiobook players, the mini-player and the Player tool (Plan M1). */
+    val PLAYER = true
 
     /** Importing the user's own books; Plan 10 adds the Pro gate. */
     const val IMPORT = true

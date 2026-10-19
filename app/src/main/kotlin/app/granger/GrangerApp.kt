@@ -3,6 +3,7 @@ package app.granger
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.provider.Settings
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
@@ -40,6 +41,10 @@ import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.MediaLibrary
+import app.granger.core.library.PlaybackDao
+import app.granger.core.player.MediaControllerPlayerHub
+import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.RoomBookshelf
 import app.granger.core.library.RoomLibrary
@@ -85,13 +90,22 @@ import java.io.File
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 
-class GrangerApp : Application(), DownloadsHost {
+open class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
 
     override fun onCreate() {
         super.onCreate()
-        // Phone scans wait for the players and the permission flow (Plan M1 Tasks 9 and 12).
-        if (Features.PLAYER) container.phoneMediaScans.start()
+        if (Features.PLAYER) startMedia()
+    }
+
+    /**
+     * The player hub is made here, not on first use: a playback service the system restarts on its own stops at once
+     * unless the hub has installed its dependencies. Then the phone scans start (without the audio permission they
+     * only mark phone items missing; nothing asks). JVM tests swap this out (`TestGrangerApp`).
+     */
+    protected open fun startMedia() {
+        container.playerHub
+        container.phoneMediaScans.start()
     }
 
     override val downloadRunner: DownloadRunner get() = container.downloadRunner
@@ -177,12 +191,11 @@ class AppContainer(context: Context) {
 
     /** Set by the first activity start in this process: the book scan and index pass run once per process. */
     val booksScannedThisProcess = AtomicBoolean(false)
-    /** Phone music and audiobooks; Task 9 wires the scanner and players to it. */
+    /** Phone music and audiobooks. */
     val media: MediaLibrary = RoomMediaLibrary(libraryDb)
 
     /** Reads the phone's music and audiobooks in place, read-only; started from [GrangerApp] behind Features.PLAYER. */
     val phoneScanner: PhoneScanner by lazy {
-        val playback = libraryDb.playbackDao()
         PhoneScanner(
             sources = listOf(MediaStoreSource(context), FolderSource(context, { playback.observeFolders().first() })),
             open = ContentResolverOpener(context.contentResolver),
@@ -193,6 +206,17 @@ class AppContainer(context: Context) {
         )
     }
     val phoneMediaScans: PhoneMediaScans by lazy { PhoneMediaScans(context, appScope, phoneScanner) }
+
+    /** Positions, bookmarks and the rest of the players' state. */
+    val playback: PlaybackDao = libraryDb.playbackDao()
+
+    /** The one way to the players (spec §8); made in [GrangerApp.onCreate], on the main thread. */
+    val playerHub: PlayerHub by lazy {
+        MediaControllerPlayerHub(context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate))
+    }
+
+    /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */
+    val playerPrefs: SharedPreferences = context.getSharedPreferences(PlayerSettingsKeys.PREFS, Context.MODE_PRIVATE)
     val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf, media)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)

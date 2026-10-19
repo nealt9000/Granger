@@ -22,11 +22,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +45,16 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import app.granger.player.MiniPlayerHeight
 import app.granger.theme.GrangerColors
+
+/**
+ * How far the shell has drawn something over the top of the content (the mini-player in a reader). A screen offsets
+ * its top bars by this, so they show below it.
+ */
+val LocalTopOverlayInset = compositionLocalOf { 0.dp }
+
+private val TopInsets @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
 
 /** The shell's own state, saved across rotation. */
 class ShellState(railVisible: Boolean = true, expanded: Boolean = false) {
@@ -66,7 +79,9 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * The app frame: the side rail beside every screen. The narrow rail sits in the layout; the expanded one is
  * drawn over the content with a scrim. An edge swipe (from x < 24 dp, calling [onEdgeSwipe]) or tapping the rail's background expands
  * it; tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
- * content column, pushing it down; it's the post-v1 player's slot and is null for now. With [railOverContent] the
+ * content column, pushing it down, and takes the status bar's inset for itself. With [miniPlayerOverContent] it's
+ * drawn over the top of the content instead (the reader: a middle tap mustn't reflow the page), beside the rail, and
+ * [LocalTopOverlayInset] tells the content how far to move its top bars down so nothing is covered. With [railOverContent] the
  * narrow rail is drawn over the content instead of beside it, so showing it doesn't narrow the content (the reader,
  * whose page would otherwise reflow on every middle tap). [showResearch] is false on phones below the ASK tier, which
  * hides the Research tool.
@@ -88,6 +103,7 @@ fun GrangerShell(
     showResearch: Boolean = false,
     railOverContent: Boolean = false,
     miniPlayer: (@Composable () -> Unit)? = null,
+    miniPlayerOverContent: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val open = expanded && railVisible
@@ -112,9 +128,30 @@ fun GrangerShell(
                     // The rail already pads for the start inset (landscape cutout); screens shouldn't again.
                     .then(if (railBeside) Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Start)) else Modifier),
             ) {
-                miniPlayer?.invoke()
-                Box(Modifier.weight(1f).fillMaxWidth()) { content() }
+                val pushing = miniPlayer != null && !miniPlayerOverContent
+                if (miniPlayer != null && !miniPlayerOverContent) {
+                    Box(Modifier.fillMaxWidth().background(GrangerColors.SurfaceVariant).windowInsetsPadding(TopInsets)) { miniPlayer() }
+                }
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        // The mini-player above already sits below the status bar; the screen's top bar shouldn't pad again.
+                        .then(if (pushing) Modifier.consumeWindowInsets(TopInsets) else Modifier),
+                ) {
+                    val inset = if (miniPlayer != null && miniPlayerOverContent) MiniPlayerHeight else 0.dp
+                    CompositionLocalProvider(LocalTopOverlayInset provides inset) { content() }
+                }
             }
+        }
+        if (miniPlayer != null && miniPlayerOverContent) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = if (railVisible && railOverContent) NarrowRailWidth else 0.dp)
+                    .background(GrangerColors.SurfaceVariant)
+                    .windowInsetsPadding(TopInsets),
+            ) { miniPlayer() }
         }
         if (railVisible && railOverContent) {
             NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat)

@@ -1,0 +1,70 @@
+package app.granger.player
+
+import app.granger.core.library.AudioBookmark
+import app.granger.core.library.Audiobook
+import app.granger.core.library.AudiobookChapter
+import app.granger.core.library.MediaOrigin
+import app.granger.core.library.PackStatus
+import app.granger.core.library.Track
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlaySource
+import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerUi
+import app.granger.core.player.SleepSetting
+import kotlinx.coroutines.flow.MutableStateFlow
+
+/** Records every call by name; [ui] and [queue] are set by the test. */
+class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
+    override val ui = MutableStateFlow(initial)
+    override val queue = MutableStateFlow<List<Track>>(emptyList())
+    val calls = mutableListOf<String>()
+
+    override fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource) { calls += "playTracks" }
+    override fun playAudiobook(id: String, at: AudioBookmark?) { calls += "playAudiobook:$id@${at?.positionMs}" }
+    override fun playPause() { calls += "playPause" }
+    override fun next() { calls += "next" }
+    override fun previous() { calls += "previous" }
+    override fun skipBack() { calls += "skipBack" }
+    override fun skipForward() { calls += "skipForward" }
+    override fun seekTo(positionMs: Long) { calls += "seekTo:$positionMs" }
+    override fun seekToChapter(ordinal: Int) { calls += "seekToChapter:$ordinal" }
+    override fun setShuffle(on: Boolean) { calls += "shuffle:$on" }
+    override fun cycleRepeat() { calls += "cycleRepeat" }
+    override fun moveInQueue(from: Int, to: Int) { calls += "move:$from>$to" }
+    override fun removeFromQueue(i: Int) { calls += "remove:$i" }
+    override fun playNext(trackIds: List<String>) { calls += "playNext" }
+    override fun addToQueue(trackIds: List<String>) { calls += "addToQueue" }
+    override fun setSpeed(speed: Float) { calls += "speed:$speed" }
+    override fun setSkipSilence(on: Boolean) { calls += "skipSilence:$on" }
+    override fun setVolumeBoost(mb: Int) { calls += "boost:$mb" }
+    override fun startSleepTimer(setting: SleepSetting) { calls += "sleep:$setting" }
+    override fun cancelSleepTimer() { calls += "cancelSleep" }
+    override suspend fun addBookmark(title: String): Long { calls += "bookmark:$title"; return 1L }
+}
+
+fun track(id: String, title: String = id, artists: String = "Artist", album: String = "Album") = Track(
+    id = "track:phone:$id", origin = MediaOrigin.PHONE, uri = "content://media/$id", folder = "Music",
+    title = title, album = album, albumKey = album, albumArtists = artists, artists = artists, composers = "",
+    genres = "", disc = null, trackNo = null, date = "", originalDate = "", releaseType = "", sortTitle = title,
+    sortAlbum = album, sortArtist = artists, sortAlbumArtist = artists, durationMs = 200_000L, rgTrackGain = null,
+    rgTrackPeak = null, rgAlbumGain = null, rgAlbumPeak = null, coverPath = null, audiobookId = null,
+    status = PackStatus.OK, addedAt = 0L,
+)
+
+fun audiobook(id: String, title: String = id, author: String = "Author", durationMs: Long = 0L) = Audiobook(
+    id = "audiobook:phone:$id", origin = MediaOrigin.PHONE, sourceRef = id, title = title, author = author,
+    narrator = "", description = "", coverPath = null, durationMs = durationMs, status = PackStatus.OK, addedAt = 0L,
+)
+
+fun chapter(book: Audiobook, ordinal: Int, durationMs: Long, title: String = "Chapter ${ordinal + 1}") =
+    AudiobookChapter(book.id, ordinal, title, trackId = "track:phone:${book.sourceRef}-f", startMs = 0L, durationMs = durationMs)
+
+fun musicUi(t: Track = track("a", "Song A"), positionMs: Long = 50_000L) = PlayerUi(
+    NowPlaying.Music(t, index = 0, queueSize = 3, shuffle = false, repeat = 0),
+    playing = true, positionMs = positionMs, durationMs = t.durationMs, sleepRemainingMs = null,
+)
+
+fun bookUi(book: Audiobook, chapter: AudiobookChapter, chapterCount: Int, positionMs: Long = 0L) = PlayerUi(
+    NowPlaying.Book(book, chapter, chapterCount, speed = 1f, skipSilence = false, volumeBoostMb = 0),
+    playing = false, positionMs = positionMs, durationMs = chapter.durationMs, sleepRemainingMs = null,
+)

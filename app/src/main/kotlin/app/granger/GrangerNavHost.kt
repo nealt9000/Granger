@@ -31,6 +31,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.archive.ArchiveScreen
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerSettingsKeys
+import app.granger.core.player.PlayerUi
+import app.granger.player.MiniPlayer
+import app.granger.player.MiniPlayerPlacement
+import app.granger.player.PlayerScreen
+import app.granger.player.PlayerViewModel
+import app.granger.player.miniPlayerPlacement
 import app.granger.archive.ArchiveViewModel
 import app.granger.core.library.BookIds
 import app.granger.core.library.ReadingTab
@@ -145,6 +153,21 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable object SettingsRoute
 @Serializable object ReadinessRoute
 
+/** The full-screen player, music or audiobook, whichever is loaded (spec §8). */
+@Serializable object PlayerRoute
+
+/**
+ * The Player tool: opens the full-screen player, or returns from it (to the mini-player) when it's on top. With the
+ * player further down the back stack it is brought back up rather than stacked a second time.
+ */
+fun NavController.togglePlayer() {
+    when {
+        currentBackStackEntry?.destination?.hasRoute<PlayerRoute>() == true -> popBackStack()
+        popBackStack<PlayerRoute>(inclusive = false) -> Unit
+        else -> navigate(PlayerRoute) { launchSingleTop = true }
+    }
+}
+
 /** How [route] is opened: [replacesChatOnTop] drops a Research chat on top first (its view model would otherwise stay). */
 internal data class ResearchOpening(val route: ResearchRoute, val replacesChatOnTop: Boolean)
 
@@ -207,6 +230,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         RailViewModel(container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id)
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
+    // One for the activity: the mini-player and the full-screen player share it.
+    val player = if (Features.PLAYER) {
+        viewModel {
+            PlayerViewModel(
+                container.playerHub,
+                chapters = container.media::chapters,
+                bookmarks = container.playback::observeBookmarks,
+                deleteBookmark = container.playback::deleteBookmark,
+                skipBackSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_BACK_S, PlayerViewModel.DEFAULT_SKIP_S) },
+                skipForwardSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, PlayerViewModel.DEFAULT_SKIP_S) },
+            )
+        }
+    } else {
+        null
+    }
+    val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
 
     val entry by nav.currentBackStackEntryAsState()
     val destination = entry?.destination
@@ -273,8 +312,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
         destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
             destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
+        destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
         else -> null
     }
+
+    val miniPlacement = miniPlayerPlacement(
+        loaded = playerUi.now != NowPlaying.Idle,
+        onPlayer = destination?.hasRoute<PlayerRoute>() == true,
+        reading = readerTabId != null,
+        railVisible = shell.railVisible,
+    )
 
     // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
     val showResearch = container.deviceTier >= DeviceTier.ASK
@@ -302,7 +349,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
-                RailTool.PLAYER -> Unit // Hidden behind Features.PLAYER.
+                RailTool.PLAYER -> nav.togglePlayer()
             }
         },
         onTab = ::showTab,
@@ -317,6 +364,21 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         showResearch = showResearch,
         // Over the page, so a middle tap doesn't narrow it and reflow the text.
         railOverContent = readerTabId != null,
+        miniPlayer = if (player == null || miniPlacement == MiniPlayerPlacement.HIDDEN) {
+            null
+        } else {
+            {
+                MiniPlayer(
+                    playerUi,
+                    onPlayPause = player::playPause,
+                    onSecondary = player::secondary,
+                    onOpen = { nav.togglePlayer() },
+                    skipBackS = player.skipBackS(),
+                )
+            }
+        },
+        // The reader's page mustn't reflow when its chrome (and the mini-player with it) comes up.
+        miniPlayerOverContent = miniPlacement == MiniPlayerPlacement.OVER,
     ) {
         NavHost(
             nav,
@@ -494,6 +556,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
                 )
+            }
+            if (player != null) {
+                composable<PlayerRoute> {
+                    PlayerScreen(player, onClose = { nav.popBackStack() })
+                }
             }
             composable<ReadinessRoute> {
                 ReadinessScreen(

@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
+import app.granger.shell.LocalTopOverlayInset
 import app.granger.shell.NarrowRailWidth
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -203,7 +204,8 @@ fun EbookReaderScreen(
         // The shell's rail is drawn over the reader's left edge while the chrome shows.
         AnimatedVisibility(
             visible = state.chromeVisible,
-            modifier = Modifier.padding(start = NarrowRailWidth).align(Alignment.TopCenter),
+            // Below the mini-player, which the shell draws over the page with the chrome.
+            modifier = Modifier.padding(start = NarrowRailWidth, top = LocalTopOverlayInset.current).align(Alignment.TopCenter),
             enter = fadeIn() + slideInVertically { -it },
             exit = fadeOut() + slideOutVertically { -it },
         ) {

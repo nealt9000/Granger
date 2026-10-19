@@ -80,6 +80,7 @@ import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
+import app.granger.shell.LocalTopOverlayInset
 import app.granger.shell.NarrowRailWidth
 import kotlinx.coroutines.launch
 
@@ -200,8 +201,8 @@ fun ReaderScreen(
         }
         AnimatedVisibility(
             visible = state.chromeVisible,
-            // The shell's rail is drawn over the reader's left edge while the chrome shows.
-            modifier = Modifier.padding(start = NarrowRailWidth),
+            // The shell's rail is drawn over the reader's left edge while the chrome shows, and the mini-player over its top.
+            modifier = Modifier.padding(start = NarrowRailWidth, top = LocalTopOverlayInset.current),
             enter = fadeIn() + slideInVertically { -it },
             exit = fadeOut() + slideOutVertically { -it },
         ) {
