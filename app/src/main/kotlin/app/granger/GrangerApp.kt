@@ -3,6 +3,7 @@ package app.granger
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.provider.Settings
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
@@ -39,15 +40,30 @@ import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.MediaLibrary
+import app.granger.core.library.PlaybackDao
+import app.granger.core.library.Playlists
+import app.granger.core.library.RoomPlaylists
+import app.granger.core.player.MediaControllerPlayerHub
+import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.RoomBookshelf
 import app.granger.core.library.RoomLibrary
+import app.granger.core.library.RoomMediaLibrary
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.RoomReadingSessions
 import app.granger.core.library.RoomResearchChats
 import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
+import app.granger.core.media.ContentResolverOpener
+import app.granger.core.media.FileTagReadGuard
+import app.granger.core.media.FolderSource
+import app.granger.core.media.MediaStoreSource
+import app.granger.core.media.PhoneScanner
+import app.granger.media.PhoneMediaScans
+import app.granger.media.hasAudioPermission
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.research.RankingConfig
 import app.granger.core.research.ResearchPipeline
@@ -77,8 +93,23 @@ import java.io.File
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 
-class GrangerApp : Application(), DownloadsHost {
+open class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        if (Features.PLAYER) startMedia()
+    }
+
+    /**
+     * The player hub is made here, not on first use: a playback service the system restarts on its own stops at once
+     * unless the hub has installed its dependencies. Then the phone scans start (without the audio permission they
+     * only mark phone items missing; nothing asks). JVM tests swap this out (`TestGrangerApp`).
+     */
+    protected open fun startMedia() {
+        container.playerHub
+        container.phoneMediaScans.start()
+    }
 
     override val downloadRunner: DownloadRunner get() = container.downloadRunner
 }
@@ -163,7 +194,37 @@ class AppContainer(context: Context) {
 
     /** Set by the first activity start in this process: the book scan and index pass run once per process. */
     val booksScannedThisProcess = AtomicBoolean(false)
-    val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf)
+    /** Phone music and audiobooks. */
+    val media: MediaLibrary = RoomMediaLibrary(libraryDb)
+
+    /** Reads the phone's music and audiobooks in place, read-only; started from [GrangerApp] behind Features.PLAYER. */
+    val phoneScanner: PhoneScanner by lazy {
+        PhoneScanner(
+            sources = listOf(MediaStoreSource(context), FolderSource(context, { playback.observeFolders().first() })),
+            open = ContentResolverOpener(context.contentResolver),
+            media = media,
+            playback = playback,
+            coversDir = File(context.filesDir, "media-covers"),
+            hasPermission = { hasAudioPermission(context) },
+            tagGuard = FileTagReadGuard(File(context.noBackupFilesDir, "media-scan")),
+        )
+    }
+    val phoneMediaScans: PhoneMediaScans by lazy { PhoneMediaScans(context, appScope, phoneScanner) }
+
+    /** Positions, bookmarks and the rest of the players' state. */
+    val playback: PlaybackDao = libraryDb.playbackDao()
+
+    /** The one way to the players (spec §8); made in [GrangerApp.onCreate], on the main thread. */
+    val playerHub: PlayerHub by lazy {
+        MediaControllerPlayerHub(context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate))
+    }
+
+    /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */
+    val playerPrefs: SharedPreferences = context.getSharedPreferences(PlayerSettingsKeys.PREFS, Context.MODE_PRIVATE)
+    val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf, media)
+
+    /** The user's music playlists. */
+    val playlists: Playlists = RoomPlaylists(libraryDb)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)
 

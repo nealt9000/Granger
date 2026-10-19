@@ -1,6 +1,6 @@
 package app.granger.ebook
 
-import app.granger.core.library.BookMark
+import app.granger.core.library.BookAnnotation
 import org.json.JSONObject
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.shared.publication.Locator
@@ -33,7 +33,7 @@ internal fun parseLocator(json: String): Locator? = try {
 /** Highlights drawn in the open book, and the ids of those whose chapter isn't in this edition. */
 internal data class Placed(val decorations: List<Decoration>, val unplaceable: Set<Long>)
 
-internal fun place(publication: Publication?, highlights: List<BookMark>): Placed {
+internal fun place(publication: Publication?, highlights: List<BookAnnotation>): Placed {
     if (publication == null) return Placed(emptyList(), emptySet())
     val decorations = mutableListOf<Decoration>()
     val lost = mutableSetOf<Long>()
@@ -70,7 +70,7 @@ data class BookSearchUi(
 
 internal object SearchRows {
     /** Marks whose text or note holds [query] (ignoring case) first, then the text [hits]. */
-    fun build(query: String, marks: List<BookMark>, hits: List<Locator>, toc: List<TocRow>): List<BookSearchRow> {
+    fun build(query: String, marks: List<BookAnnotation>, hits: List<Locator>, toc: List<TocRow>): List<BookSearchRow> {
         val own = marks.mapNotNull { mark ->
             val inNote = mark.note.contains(query, ignoreCase = true)
             val inText = mark.text.contains(query, ignoreCase = true)

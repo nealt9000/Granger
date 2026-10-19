@@ -12,7 +12,7 @@ import app.granger.MainDispatcherRule
 import app.granger.TrackingContainer
 import app.granger.book
 import app.granger.core.books.TextQuote
-import app.granger.core.library.BookMark
+import app.granger.core.library.BookAnnotation
 import app.granger.core.library.BookPosition
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingTab
@@ -259,7 +259,7 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.chromeVisible).isTrue()
     }
 
-    private fun bookmark(id: Long, href: String, position: Int, total: Double, createdAt: Long, title: String = "T") = BookMark(
+    private fun bookmark(id: Long, href: String, position: Int, total: Double, createdAt: Long, title: String = "T") = BookAnnotation(
         id, "b", MarkKind.BOOKMARK, locator(href, 0.1, total, title).copy(
             locations = Locator.Locations(progression = 0.1, position = position, totalProgression = total),
         ).toJSON().toString(), title, "", "", createdAt, createdAt,
@@ -362,7 +362,7 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.panel).isNull()
         // Nothing to place it by: the tap does nothing.
         val lost = Locator(Url("gone.xhtml")!!, MediaType.XHTML, locations = Locator.Locations(progression = 0.5))
-        vm.goToMark(BookMark(2, "b", MarkKind.BOOKMARK, lost.toJSON().toString(), "", "", "", 2, 2))
+        vm.goToMark(BookAnnotation(2, "b", MarkKind.BOOKMARK, lost.toJSON().toString(), "", "", "", 2, 2))
         advanceUntilIdle()
         assertThat(seen).hasSize(1)
     }

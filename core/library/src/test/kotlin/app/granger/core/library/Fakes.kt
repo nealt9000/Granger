@@ -92,8 +92,8 @@ class StubBookshelf(initial: List<Book> = emptyList()) : Bookshelf {
     override suspend fun remove(id: String): Boolean = true
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) = Unit
     override suspend fun position(bookId: String): BookPosition? = null
-    override fun marks(bookId: String): Flow<List<BookMark>> = state.map { emptyList() }
-    override suspend fun addMark(mark: BookMark): Long = 0
-    override suspend fun updateMark(mark: BookMark) = Unit
+    override fun marks(bookId: String): Flow<List<BookAnnotation>> = state.map { emptyList() }
+    override suspend fun addMark(mark: BookAnnotation): Long = 0
+    override suspend fun updateMark(mark: BookAnnotation) = Unit
     override suspend fun deleteMark(id: Long) = Unit
 }

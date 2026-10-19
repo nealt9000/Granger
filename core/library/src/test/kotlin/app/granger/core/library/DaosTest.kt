@@ -122,7 +122,7 @@ class DaosTest {
 
     @Test fun marksAreOldestFirstPerBook() = runTest {
         val dao = db.bookDao()
-        fun mark(bookId: String, at: Long) = BookMark(0, bookId, MarkKind.HIGHLIGHT, "{}", "t$at", "yellow", "", at, at)
+        fun mark(bookId: String, at: Long) = BookAnnotation(0, bookId, MarkKind.HIGHLIGHT, "{}", "t$at", "yellow", "", at, at)
         dao.insertMark(mark("a", 30L))
         dao.insertMark(mark("a", 10L))
         dao.insertMark(mark("b", 20L))

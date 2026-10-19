@@ -13,10 +13,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Pack::class, Bookmark::class, ReadingPosition::class,
         MediaType::class, ShelfCollection::class, Placement::class,
         ReadingTab::class, HistoryEntry::class, RecentSearch::class,
-        Book::class, BookPosition::class, BookMark::class, BookChunk::class,
+        Book::class, BookPosition::class, BookAnnotation::class, BookChunk::class,
         ResearchChat::class, ResearchTurn::class, ResearchPassage::class,
+        Track::class, Audiobook::class, AudiobookChapter::class, AudiobookState::class, AudioBookmark::class,
+        Playlist::class, PlaylistEntry::class, MusicState::class, RecentPlay::class, MediaFolder::class, ScanCacheEntry::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -28,6 +30,8 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
     abstract fun bookDao(): BookDao
     abstract fun researchDao(): ResearchDao
+    abstract fun mediaDao(): MediaDao
+    abstract fun playbackDao(): PlaybackDao
 
     companion object {
         /** Adds media types, collections, placements, reading tabs, history and recent searches. */
@@ -78,6 +82,30 @@ abstract class LibraryDatabase : RoomDatabase() {
         }
 
         /**
+         * Adds tracks, audiobooks, chapters, playback state, audio bookmarks, playlists, recent plays, media folders
+         * and the scan cache. Only creates tables: nothing existing is altered or dropped.
+         */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `tracks` (`id` TEXT NOT NULL, `origin` TEXT NOT NULL, `uri` TEXT NOT NULL, `folder` TEXT NOT NULL, `title` TEXT NOT NULL, `album` TEXT NOT NULL, `albumKey` TEXT NOT NULL, `albumArtists` TEXT NOT NULL, `artists` TEXT NOT NULL, `composers` TEXT NOT NULL, `genres` TEXT NOT NULL, `disc` INTEGER, `trackNo` INTEGER, `date` TEXT NOT NULL, `originalDate` TEXT NOT NULL, `releaseType` TEXT NOT NULL, `sortTitle` TEXT NOT NULL, `sortAlbum` TEXT NOT NULL, `sortArtist` TEXT NOT NULL, `sortAlbumArtist` TEXT NOT NULL, `durationMs` INTEGER NOT NULL, `rgTrackGain` REAL, `rgTrackPeak` REAL, `rgAlbumGain` REAL, `rgAlbumPeak` REAL, `coverPath` TEXT, `audiobookId` TEXT, `status` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tracks_albumKey` ON `tracks` (`albumKey`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tracks_audiobookId` ON `tracks` (`audiobookId`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `audiobooks` (`id` TEXT NOT NULL, `origin` TEXT NOT NULL, `sourceRef` TEXT NOT NULL, `title` TEXT NOT NULL, `author` TEXT NOT NULL, `narrator` TEXT NOT NULL, `description` TEXT NOT NULL, `coverPath` TEXT, `durationMs` INTEGER NOT NULL, `status` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `audiobook_chapters` (`audiobookId` TEXT NOT NULL, `ordinal` INTEGER NOT NULL, `title` TEXT NOT NULL, `trackId` TEXT NOT NULL, `startMs` INTEGER NOT NULL, `durationMs` INTEGER NOT NULL, PRIMARY KEY(`audiobookId`, `ordinal`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `audiobook_states` (`audiobookId` TEXT NOT NULL, `trackId` TEXT NOT NULL, `positionMs` INTEGER NOT NULL, `speed` REAL NOT NULL, `skipSilence` INTEGER NOT NULL, `volumeBoostMb` INTEGER NOT NULL, `finished` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`audiobookId`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `audio_bookmarks` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `audiobookId` TEXT NOT NULL, `trackId` TEXT NOT NULL, `positionMs` INTEGER NOT NULL, `title` TEXT NOT NULL, `note` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_audio_bookmarks_audiobookId` ON `audio_bookmarks` (`audiobookId`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `playlists` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `playlist_entries` (`playlistId` INTEGER NOT NULL, `ordinal` INTEGER NOT NULL, `trackId` TEXT NOT NULL, PRIMARY KEY(`playlistId`, `ordinal`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `music_state` (`id` INTEGER NOT NULL, `queue` TEXT NOT NULL, `index` INTEGER NOT NULL, `positionMs` INTEGER NOT NULL, `shuffle` INTEGER NOT NULL, `shuffledOrder` TEXT NOT NULL, `repeatMode` INTEGER NOT NULL, `sourceKey` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `recent_plays` (`key` TEXT NOT NULL, `title` TEXT NOT NULL, `playedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_recent_plays_playedAt` ON `recent_plays` (`playedAt`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `media_folders` (`uri` TEXT NOT NULL, `audiobooks` INTEGER NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`uri`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `scan_cache` (`uri` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `modifiedMs` INTEGER NOT NULL, `fingerprint` TEXT NOT NULL, PRIMARY KEY(`uri`))")
+            }
+        }
+
+        /**
          * Seeds the built-in media types and creates `book_text` on a fresh install. Every database builder
          * must add this: Room doesn't manage `book_text`, so only this callback and [MIGRATION_3_4] create it.
          */
@@ -102,7 +130,7 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         fun create(context: Context): LibraryDatabase =
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
-                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                 .addCallback(SeedCallback)
                 .build()
     }

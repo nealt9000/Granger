@@ -44,7 +44,7 @@ class BookshelfTest {
     private fun importFiles() = importDir.listFiles().orEmpty().map { it.name }
 
     private fun mark(bookId: String) =
-        BookMark(0, bookId, MarkKind.HIGHLIGHT, "{\"href\":\"c1\"}", "It is a truth", "yellow", "", 1L, 1L)
+        BookAnnotation(0, bookId, MarkKind.HIGHLIGHT, "{\"href\":\"c1\"}", "It is a truth", "yellow", "", 1L, 1L)
 
     @Test fun downloadedBookIsFiledUnderGrangerClassics() = test {
         val file = TestEpubs.build(grangerDir, "pride_2026-10-01.epub", title = "Pride and Prejudice",
@@ -60,7 +60,7 @@ class BookshelfTest {
         assertThat(File(book.coverPath!!).readBytes()).isEqualTo(TestEpubs.COVER_BYTES)
         assertThat(File(book.coverPath).parentFile).isEqualTo(coversDir)
 
-        val shelves = RoomShelves(db, StubLibrary(emptyList()), shelf)
+        val shelves = RoomShelves(db, StubLibrary(emptyList()), shelf, RoomMediaLibrary(db))
         val row = shelves.shelves.first().single().collections.single()
         assertThat(row.collection.defaultKey).isEqualTo("granger-classics")
         assertThat(row.collection.name).isEqualTo("Granger Classics")

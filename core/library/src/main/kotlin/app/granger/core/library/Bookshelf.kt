@@ -78,9 +78,9 @@ interface Bookshelf {
 
     suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String)
     suspend fun position(bookId: String): BookPosition?
-    fun marks(bookId: String): Flow<List<BookMark>>
-    suspend fun addMark(mark: BookMark): Long
-    suspend fun updateMark(mark: BookMark)
+    fun marks(bookId: String): Flow<List<BookAnnotation>>
+    suspend fun addMark(mark: BookAnnotation): Long
+    suspend fun updateMark(mark: BookAnnotation)
     suspend fun deleteMark(id: Long)
 }
 
@@ -291,11 +291,11 @@ class RoomBookshelf(
 
     override suspend fun position(bookId: String): BookPosition? = dao.position(bookId)
 
-    override fun marks(bookId: String): Flow<List<BookMark>> = dao.observeMarks(bookId)
+    override fun marks(bookId: String): Flow<List<BookAnnotation>> = dao.observeMarks(bookId)
 
-    override suspend fun addMark(mark: BookMark): Long = dao.insertMark(mark)
+    override suspend fun addMark(mark: BookAnnotation): Long = dao.insertMark(mark)
 
-    override suspend fun updateMark(mark: BookMark) = dao.updateMark(mark)
+    override suspend fun updateMark(mark: BookAnnotation) = dao.updateMark(mark)
 
     override suspend fun deleteMark(id: Long) = dao.deleteMarkById(id)
 

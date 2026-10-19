@@ -1,6 +1,6 @@
 package app.granger.core.library
 
-/** Decides where a pack or book is filed by default: which collection, named what, under which media type. */
+/** Decides where a pack, book, album or audiobook is filed by default: which collection, named what, under which media type. */
 object Filing {
     private class Rule(val matches: (String) -> Boolean, val key: String, val name: String)
 
@@ -53,6 +53,38 @@ object Filing {
     /** Every book is reading material. */
     @Suppress("UNUSED_PARAMETER")
     fun defaultMediaType(book: Book): String = "literature"
+
+    /** Identity of an album across re-scans: `album:<albumKey>`. */
+    fun albumKey(a: AlbumSummary): String = "album:${a.key}"
+
+    /** Identity of an audiobook across re-scans: its id (`audiobook:<origin>:<ref>`). */
+    fun audiobookKey(book: Audiobook): String = book.id
+
+    /** Albums and audiobooks are filed by origin; these are their collections' keys and names. */
+    private val MEDIA_COLLECTIONS = mapOf(
+        MediaOrigin.PHONE to ("on-this-phone" to "On this phone"),
+        MediaOrigin.LIBRIVOX to ("librivox" to "LibriVox"),
+        MediaOrigin.ARCHIVE_ORG to ("archive-org" to "Archive.org"),
+    )
+
+    fun defaultKey(origin: MediaOrigin): String = MEDIA_COLLECTIONS.getValue(origin).first
+
+    /** The name of the media collection with [key] ("On this phone" for `on-this-phone`). */
+    fun defaultName(key: String): String =
+        MEDIA_COLLECTIONS.values.firstOrNull { it.first == key }?.second ?: key
+
+    @Suppress("UNUSED_PARAMETER")
+    fun defaultMediaType(album: AlbumSummary): String = "music"
+
+    @Suppress("UNUSED_PARAMETER")
+    fun defaultMediaType(book: Audiobook): String = "audiobooks"
+
+    /**
+     * The stored `defaultKey` of a media collection. The same origin key ("on-this-phone") names a collection in
+     * both Music and Audiobooks, and stored default keys are unique, so the stored one is scoped by media type
+     * (`music:on-this-phone`, `audiobooks:on-this-phone`). No pack or book default key contains `:` except `pack:`.
+     */
+    fun mediaCollectionKey(mediaTypeId: String, key: String): String = "$mediaTypeId:$key"
 
     /** The old Classics ZIM, replaced by the Granger Classics books. Only reported; nothing is hidden or deleted here. */
     fun isSuperseded(pack: Pack): Boolean = pack.name == "granger_classics_en"

@@ -86,4 +86,11 @@ class LibraryViewModelTest {
         vm.dismissNotice()
         assertThat(vm.notice.value).isNull()
     }
+
+    @Test fun mediaSettingsHintNamesWhatIsMissing() {
+        assertThat(missingMediaText(listOf("zim"))).isEqualTo("No music or audiobooks yet")
+        assertThat(missingMediaText(listOf("music"))).isEqualTo("No audiobooks yet")
+        assertThat(missingMediaText(listOf("audiobooks", "zim"))).isEqualTo("No music yet")
+        assertThat(missingMediaText(listOf("music", "audiobooks"))).isNull()
+    }
 }

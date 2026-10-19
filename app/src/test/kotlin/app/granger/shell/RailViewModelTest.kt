@@ -12,6 +12,14 @@ import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
 import app.granger.pack
 import app.granger.research.FakeChats
+import app.granger.core.library.Audiobook
+import app.granger.core.library.MediaOrigin
+import app.granger.core.library.RecentPlay
+import app.granger.media.PlayResumer
+import app.granger.music.FakeMediaLibrary
+import app.granger.music.FakePlaylists
+import app.granger.music.song
+import app.granger.player.FakePlayerHub
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -26,6 +34,13 @@ class RailViewModelTest {
     private val bookshelf = FakeBookshelf()
     private val chats = FakeChats()
     private val current = MutableStateFlow<Long?>(null)
+    private val plays = MutableStateFlow<List<RecentPlay>>(emptyList())
+    private val media = FakeMediaLibrary()
+    private val playlists = FakePlaylists(media)
+    private val hub = FakePlayerHub()
+
+    private fun playsViewModel() =
+        RailViewModel(sessions, library, bookshelf, chats, current, plays, PlayResumer(media, playlists, hub))
 
     private fun tab(id: Long, packId: String, title: String, openedAt: Long = id) =
         ReadingTab(id, packId, title, title, openedAt, onRail = true)
@@ -107,5 +122,60 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma"), tab(5, "book:granger:gone", "Lost"))
         val ui = RailViewModel(sessions, library, bookshelf, chats, current).ui.first { it.tabs.size == 2 }
         assertThat(ui.tabs.map { it.available }).containsExactly(false, false)
+    }
+
+    @Test fun recentMixesPlaysWithSearchesAndChatsNewestFirst() = runTest(main.dispatcher) {
+        sessions.searchRows.value = listOf(RecentSearch("aspirin", 300))
+        chats.chats.value = listOf(ChatSummary(1, "Why tides?", 200))
+        plays.value = listOf(RecentPlay("album:artist|abbey road|music/", "Abbey Road", 400), RecentPlay("audiobook:phone:e", "Emma", 100))
+        val ui = playsViewModel().ui.first { it.recent.size == 4 }
+        assertThat(ui.recent).containsExactly(
+            RecentItem.Play("album:artist|abbey road|music/", "Abbey Road", 400),
+            RecentItem.Search("aspirin", 300),
+            RecentItem.Chat(1, "Why tides?", 200),
+            RecentItem.Play("audiobook:phone:e", "Emma", 100),
+        ).inOrder()
+    }
+
+    @Test fun recentPlayForRemovedSourceOpensLibraryWithNotice() = runTest(main.dispatcher) {
+        val vm = playsViewModel()
+        // The album is gone, the playlist was deleted, and the folder's only song is MISSING.
+        media.trackList.value = listOf(song("a", folder = "Old/", status = PackStatus.MISSING))
+        for (key in listOf("album:nobody|gone|music/", "playlist:42", "folder:Old/", "artist:Nobody", "audiobook:phone:gone", "nonsense")) {
+            val notice = vm.resume(RecentItem.Play(key, "Gone thing", 1))
+            assertThat(notice).isNotNull()
+            assertThat(notice).contains("Gone thing")
+        }
+        assertThat(hub.calls).isEmpty()
+    }
+
+    @Test fun recentPlayRebuildsTheListWithPlayableTracksOnly() = runTest(main.dispatcher) {
+        val one = song("1", title = "One", album = "Help", trackNo = 1)
+        val two = song("2", title = "Two", album = "Help", trackNo = 2, status = PackStatus.MISSING)
+        val three = song("3", title = "Three", album = "Help", trackNo = 3)
+        media.trackList.value = listOf(three, two, one)
+        val vm = playsViewModel()
+        assertThat(vm.resume(RecentItem.Play("album:${one.albumKey}", "Help", 1))).isNull()
+        assertThat(hub.plays.single()).isEqualTo(
+            FakePlayerHub.Play(listOf(one.id, three.id), 0, false, app.granger.core.player.PlaySource("album:${one.albumKey}", "Help")),
+        )
+        val id = playlists.create("Mix", listOf(three.id, two.id, one.id))
+        assertThat(vm.resume(RecentItem.Play("playlist:$id", "Mix", 1))).isNull()
+        assertThat(hub.plays.last().trackIds).containsExactly(three.id, one.id).inOrder()
+        assertThat(vm.resume(RecentItem.Play("songs", "All music", 1))).isNull()
+        assertThat(hub.plays.last().trackIds).containsExactly(one.id, three.id).inOrder()
+        assertThat(vm.resume(RecentItem.Play("folder:Music/", "Music", 1))).isNull()
+        assertThat(hub.plays.last().trackIds).containsExactly(one.id, three.id).inOrder()
+        assertThat(vm.resume(RecentItem.Play("artist:artist", "Artist", 1))).isNull()
+        assertThat(hub.plays.last().trackIds).containsExactly(one.id, three.id).inOrder()
+    }
+
+    @Test fun recentAudiobookResumesThroughTheHub() = runTest(main.dispatcher) {
+        media.bookList.value = listOf(
+            Audiobook("audiobook:phone:e", MediaOrigin.PHONE, "e", "Emma", "Jane Austen", "", "", null, 1_000L, PackStatus.OK, 0L),
+        )
+        val vm = playsViewModel()
+        assertThat(vm.resume(RecentItem.Play("audiobook:phone:e", "Emma", 1))).isNull()
+        assertThat(hub.bookPlays).containsExactly("audiobook:phone:e" to null)
     }
 }

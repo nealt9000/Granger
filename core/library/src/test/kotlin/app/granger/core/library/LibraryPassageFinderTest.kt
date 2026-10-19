@@ -51,6 +51,8 @@ class LibraryPassageFinderTest {
         override fun collection(id: String): Flow<CollectionRow?> = MutableStateFlow(rows.firstOrNull { it.collection.id == id })
         override suspend fun movePack(pack: Pack, toCollectionId: String) = Unit
         override suspend fun moveBook(book: Book, toCollectionId: String) = Unit
+        override suspend fun moveAlbum(album: AlbumSummary, toCollectionId: String) = Unit
+        override suspend fun moveAudiobook(book: Audiobook, toCollectionId: String) = Unit
         override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) = Unit
         override suspend fun createMediaType(name: String) = ""
         override suspend fun deleteMediaType(id: String) = true

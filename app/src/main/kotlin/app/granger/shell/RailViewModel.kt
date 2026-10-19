@@ -10,7 +10,13 @@ import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
+import app.granger.core.library.RecentPlay
 import app.granger.core.library.ResearchChats
+import app.granger.media.PlayResumer
+import app.granger.music.MusicSources
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -33,16 +39,19 @@ data class RailTabUi(
     val coverPath: String? = null,
 )
 
-/** A row in the rail's Recent section; [at] is when it was last searched or answered. */
+/** A row in the rail's Recent section; [at] is when it was last searched, answered or played. */
 sealed interface RecentItem {
     val at: Long
 
     data class Search(val query: String, override val at: Long) : RecentItem
 
     data class Chat(val chatId: Long, val title: String, override val at: Long) : RecentItem
+
+    /** Music or an audiobook; [key] is the `RecentPlay` key ("album:<albumKey>", "audiobook:<id>", "songs", …). */
+    data class Play(val key: String, val title: String, override val at: Long) : RecentItem
 }
 
-/** [recent] holds searches and Research chats together, newest first. */
+/** [recent] holds searches, Research chats and plays together, newest first. */
 data class RailUi(val tabs: List<RailTabUi>, val recent: List<RecentItem>)
 
 /** The rail's Bookmarks and Recent sections. [currentTabId] is the tab on screen, null off the reader. */
@@ -52,13 +61,35 @@ class RailViewModel(
     bookshelf: Bookshelf,
     chats: ResearchChats,
     currentTabId: StateFlow<Long?>,
+    /** Newest first, as `PlaybackDao.observeRecentPlays` gives them. */
+    plays: Flow<List<RecentPlay>> = flowOf(emptyList()),
+    private val resumer: PlayResumer? = null,
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
 
-    private val recent = combine(sessions.recentSearchRows(RECENT), chats.recent(RECENT)) { searches, chats ->
-        (searches.map { RecentItem.Search(it.query, it.searchedAt) } + chats.map { RecentItem.Chat(it.id, it.title, it.updatedAt) })
+    private val recent = combine(sessions.recentSearchRows(RECENT), chats.recent(RECENT), plays) { searches, chats, plays ->
+        (
+            searches.map { RecentItem.Search(it.query, it.searchedAt) } +
+                chats.map { RecentItem.Chat(it.id, it.title, it.updatedAt) } +
+                plays.map { RecentItem.Play(it.key, MusicSources.title(it.key, it.title), it.playedAt) }
+            )
             .sortedByDescending { it.at }
             .take(RECENT)
+    }
+
+    /**
+     * Plays [item] again. Null when it started; otherwise the notice the Library shows (the album, playlist or book is
+     * gone, or nothing in it can play now).
+     */
+    suspend fun resume(item: RecentItem.Play): String? {
+        val played = try {
+            resumer?.resume(item.key, item.title) == true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
+        return if (played) null else "\u201c${item.title}\u201d can't be played: it's no longer in the library, or none of its files are on the phone."
     }
 
     private val shelf = combine(library.packs, bookshelf.books, bookshelf.positions) { packs, books, positions ->
@@ -114,7 +145,7 @@ class RailViewModel(
 
     private fun initialOf(title: String): Char = title.firstOrNull { it.isLetterOrDigit() }?.uppercaseChar() ?: '#'
 
-    private companion object {
+    companion object {
         const val RECENT = 5
     }
 }

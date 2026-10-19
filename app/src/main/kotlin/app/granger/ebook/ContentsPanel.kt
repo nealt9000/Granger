@@ -38,7 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.granger.core.library.BookMark
+import app.granger.core.library.BookAnnotation
 import app.granger.shell.NarrowRailWidth
 import app.granger.theme.GrangerColors
 import org.json.JSONObject
@@ -50,7 +50,7 @@ internal fun highlightColor(name: String): Color = Color(HighlightColors.argb(na
 internal const val CANT_FIND = "Can't find this passage in the current edition"
 
 /** The stored locator's share of the book, as a percent; null when it can't be read. */
-internal fun markPercent(mark: BookMark): Int? = try {
+internal fun markPercent(mark: BookAnnotation): Int? = try {
     Locator.fromJSON(JSONObject(mark.locatorJson))?.locations?.totalProgression?.let { (it * 100).toInt().coerceIn(0, 100) }
 } catch (e: Exception) {
     null
@@ -69,7 +69,7 @@ internal val SidePanelInsets @Composable get() =
 fun ContentsPanel(
     state: EbookUi,
     onGoTo: (String) -> Unit,
-    onMark: (BookMark) -> Unit,
+    onMark: (BookAnnotation) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var tab by remember { mutableIntStateOf(0) }

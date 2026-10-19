@@ -23,11 +23,27 @@ class ShelvesTest {
     private val ifixit = named("i1", "ifixit_en_all")
 
     private val bookshelf = StubBookshelf()
+    private val media = RoomMediaLibrary(db)
 
     private fun shelves(vararg packs: Pack): Pair<RoomShelves, StubLibrary> {
         val library = StubLibrary(packs.toList())
-        return RoomShelves(db, library, bookshelf) to library
+        return RoomShelves(db, library, bookshelf, media) to library
     }
+
+    private val planets = listOf(
+        musicTrack("p1", album = "The Planets", albumArtist = "Holst", trackNo = 1),
+        musicTrack("p2", album = "The Planets", albumArtist = "Holst", trackNo = 2),
+    )
+
+    /** An audiobook with one file, one chapter. */
+    private fun scanned(ref: String, title: String = ref): Pair<ScannedAudiobook, Track> {
+        val book = phoneAudiobook(ref, title)
+        val file = musicTrack("$ref-1", album = title, albumArtist = "Author", audiobookId = book.id)
+        return ScannedAudiobook(book, listOf(file.id), listOf(file.id to ScannedChapter(title, 0L))) to file
+    }
+
+    private suspend fun sync(tracks: List<Track>, books: List<Pair<ScannedAudiobook, Track>> = emptyList()) =
+        media.sync(MediaOrigin.PHONE, ScanResult(tracks + books.map { it.second }, books.map { it.first }))
 
     @Test fun packsWithoutAPlacementAreFiledOnFirstRead() = runTest {
         val (s, _) = shelves(top, medicine, ifixit)
@@ -161,5 +177,92 @@ class ShelvesTest {
         assertThat(Filing.defaultKey(book("x", BookOrigin.ARCHIVE_ORG))).isEqualTo("archive-org")
         assertThat(Filing.isSuperseded(named("a", "granger_classics_en"))).isTrue()
         assertThat(Filing.isSuperseded(named("a", "gutenberg_en_all"))).isFalse()
+    }
+
+    @Test fun phoneAlbumsFileUnderMusicOnThisPhone() = runTest {
+        val (s, _) = shelves()
+        sync(planets + musicTrack("b1", album = "Goldberg Variations", albumArtist = "Bach"))
+        val shelf = s.shelves.first().single()
+        assertThat(shelf.mediaType.id).isEqualTo("music")
+        val row = shelf.collections.single()
+        assertThat(row.collection.name).isEqualTo("On this phone")
+        assertThat(row.collection.userCreated).isFalse()
+        assertThat(row.albums.map { it.title }).containsExactly("Goldberg Variations", "The Planets").inOrder()
+        assertThat(row.albums.map { it.trackCount }).containsExactly(1, 2).inOrder()
+        assertThat(row.packs).isEmpty()
+        assertThat(db.shelfDao().getPlacements().map { it.packKey })
+            .containsExactly("album:bach|goldberg variations", "album:holst|the planets")
+    }
+
+    @Test fun phoneAudiobooksFileUnderAudiobooksOnThisPhone() = runTest {
+        val (s, _) = shelves()
+        sync(planets, listOf(scanned("hobbit", "The Hobbit")))
+        val shelves = s.shelves.first()
+        assertThat(shelves.map { it.mediaType.id }).containsExactly("audiobooks", "music").inOrder()
+        val books = shelves[0].collections.single()
+        assertThat(books.collection.name).isEqualTo("On this phone")
+        assertThat(books.audiobooks.map { it.title }).containsExactly("The Hobbit")
+        // An audiobook's own files aren't music.
+        assertThat(books.albums).isEmpty()
+        val music = shelves[1].collections.single()
+        assertThat(music.collection.name).isEqualTo("On this phone")
+        assertThat(music.albums.map { it.title }).containsExactly("The Planets")
+        assertThat(music.collection.id).isNotEqualTo(books.collection.id)
+        assertThat(db.shelfDao().getPlacements().map { it.packKey }).contains("audiobook:phone:hobbit")
+    }
+
+    @Test fun movedAlbumStaysMovedAfterResync() = runTest {
+        val (s, _) = shelves()
+        sync(planets)
+        val album = s.shelves.first().single().collections.single().albums.single()
+        val classical = s.createCollection("Classical", "music")
+        s.moveAlbum(album, classical)
+        // A re-scan retitles one track and finds a third.
+        sync(listOf(planets[0].copy(title = "Mars"), planets[1], musicTrack("p3", album = "The Planets", albumArtist = "Holst", trackNo = 3)))
+        val row = s.shelves.first().single().collections.single()
+        assertThat(row.collection.id).isEqualTo(classical)
+        assertThat(row.albums.single().trackCount).isEqualTo(3)
+        assertThat(s.collection(classical).first()!!.albums.map { it.key }).containsExactly(album.key)
+        assertThat(db.shelfDao().getPlacements().single { it.packKey == Filing.albumKey(album) }.userSet).isTrue()
+    }
+
+    @Test fun movedAudiobookStaysMovedAfterResync() = runTest {
+        val (s, _) = shelves()
+        val hobbit = scanned("hobbit", "The Hobbit")
+        sync(emptyList(), listOf(hobbit))
+        val book = s.shelves.first().single().collections.single().audiobooks.single()
+        val tolkien = s.createCollection("Tolkien", "audiobooks")
+        s.moveAudiobook(book, tolkien)
+        sync(emptyList(), listOf(hobbit.first.copy(book = book.copy(narrator = "Andy Serkis")) to hobbit.second))
+        val row = s.shelves.first().single().collections.single()
+        assertThat(row.collection.id).isEqualTo(tolkien)
+        assertThat(row.audiobooks.single().narrator).isEqualTo("Andy Serkis")
+    }
+
+    @Test fun musicShelfHiddenWhenNoTracks() = runTest {
+        val (s, _) = shelves(top)
+        assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature")
+        // Audiobook files alone don't make a Music shelf.
+        sync(emptyList(), listOf(scanned("hobbit")))
+        assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature", "audiobooks").inOrder()
+    }
+
+    /** Music browsing hides MISSING tracks, so the Music shelf does too: counts are of present tracks only. */
+    @Test fun missingTracksLeaveTheMusicShelf() = runTest {
+        val (s, _) = shelves(top)
+        val gone = musicTrack("w1", album = "WhatsApp Audio", albumArtist = "")
+        sync(planets + gone)
+        assertThat(s.shelves.first().single { it.mediaType.id == "music" }.collections.single().albums).hasSize(2)
+
+        // A rescan finds the WhatsApp file and one of the Planets gone.
+        sync(listOf(planets[0]))
+        val albums = s.shelves.first().single { it.mediaType.id == "music" }.collections.single().albums
+        assertThat(albums.map { it.title }).containsExactly("The Planets")
+        assertThat(albums.single().trackCount).isEqualTo(1)
+
+        // Every track gone: no Music shelf at all (the rows are still in the db).
+        sync(emptyList())
+        assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature")
+        assertThat(db.mediaDao().tracksOf(MediaOrigin.PHONE)).hasSize(3)
     }
 }
