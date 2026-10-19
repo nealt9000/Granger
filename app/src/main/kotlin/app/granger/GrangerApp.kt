@@ -39,9 +39,11 @@ import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.MediaLibrary
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.RoomBookshelf
 import app.granger.core.library.RoomLibrary
+import app.granger.core.library.RoomMediaLibrary
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.RoomReadingSessions
 import app.granger.core.library.RoomResearchChats
@@ -163,7 +165,9 @@ class AppContainer(context: Context) {
 
     /** Set by the first activity start in this process: the book scan and index pass run once per process. */
     val booksScannedThisProcess = AtomicBoolean(false)
-    val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf)
+    /** Phone music and audiobooks; Task 9 wires the scanner and players to it. */
+    val media: MediaLibrary = RoomMediaLibrary(libraryDb)
+    val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf, media)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)
 

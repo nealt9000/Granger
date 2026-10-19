@@ -60,7 +60,7 @@ class BookshelfTest {
         assertThat(File(book.coverPath!!).readBytes()).isEqualTo(TestEpubs.COVER_BYTES)
         assertThat(File(book.coverPath).parentFile).isEqualTo(coversDir)
 
-        val shelves = RoomShelves(db, StubLibrary(emptyList()), shelf)
+        val shelves = RoomShelves(db, StubLibrary(emptyList()), shelf, RoomMediaLibrary(db))
         val row = shelves.shelves.first().single().collections.single()
         assertThat(row.collection.defaultKey).isEqualTo("granger-classics")
         assertThat(row.collection.name).isEqualTo("Granger Classics")

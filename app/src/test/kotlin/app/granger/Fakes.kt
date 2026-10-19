@@ -1,5 +1,8 @@
 package app.granger
 
+import app.granger.core.library.AlbumSummary
+import app.granger.core.library.Audiobook
+import app.granger.core.library.Filing
 import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.BookDetails
@@ -181,6 +184,8 @@ class FakeShelves : Shelves {
 
     override suspend fun movePack(pack: Pack, toCollectionId: String) { moves += pack.id to toCollectionId }
     override suspend fun moveBook(book: Book, toCollectionId: String) { moves += book.id to toCollectionId }
+    override suspend fun moveAlbum(album: AlbumSummary, toCollectionId: String) { moves += Filing.albumKey(album) to toCollectionId }
+    override suspend fun moveAudiobook(book: Audiobook, toCollectionId: String) { moves += book.id to toCollectionId }
     override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) {}
     override suspend fun createMediaType(name: String) = "new-${nextId++}"
     override suspend fun deleteMediaType(id: String) = false
