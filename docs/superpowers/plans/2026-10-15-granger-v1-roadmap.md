@@ -15,7 +15,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 7 | Archive.org source | Public-domain filter (1930 or earlier) until waiver, shelves + search, open-only downloads (EPUB, else text / OCR text) with sha1/md5 verify, filing, metadata | **Done:** `2026-10-17-plan-07-archive-org.md` |
 | 8 | Research (was Inquire & Abstract) | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats with threaded follow-ups | **Done:** `2026-10-17-plan-08-research.md` |
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | **Done, bar not reached:** `2026-10-18-plan-09-research-eval.md` (Research stays debug-only; see below) |
-| M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **In progress:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10) |
+| M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **Done:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10; parity `media-parity-checklist.md`: ✅ 39, ⏭ 4, ❌ 8) |
 | M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | Written after M1 merges (spec §3.2–§3.4, §4) |
 | M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | Written after M2 merges (spec §6/§7 Auto and widget rows, §9, §13) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources; non-commercial packs exempt) + import gating, onboarding, `:core:telemetry` | |
@@ -80,7 +80,7 @@ Deferred, low priority (from Plan 2):
 - Pixel 6 walkthrough, after unlock: moving Wikipedia into a new "Reference" media type and back, the Granger, Kiwix and Models source screens, and About all passed. Not checked on a device:
   - Reboot → Library: a reboot leaves the phone on a secure lock screen that adb can't pass. The unit tests cover BOOT_COUNT.
   - A small-pack download and remove: no uninstalled pack is under 50 MB; the next smallest is 272 MB.
-- The rail's edge swipe works only inside a 24 dp wide, 200 dp tall strip at the left-middle (Android's gesture-navigation exclusion limit), and, after the final review fix, also in the immersive reader, where it shows the chrome and rail. Judge its discoverability on a device; tapping the narrow rail's background is the other way to expand it.
+- The rail's edge swipe works only inside a 24 dp wide, 200 dp tall strip at the left-middle (Android's gesture-navigation exclusion limit), and, after the final review fix, also in the immersive reader, where it shows the chrome and rail. Judge its discoverability on a device; tapping the narrow rail's background is the other way to expand it, and since M1 so is tapping its recents, bookmarks or History.
 - On Kiwix main pages every tile is a link, and the reader's middle tap ignores links, so a tap on a tile navigates instead of summoning the chrome. By reading the code, the gaps between tiles still toggle it, but nothing else does (Back only goes back a page). Fixed in the final review (see below). On the device, the left-edge swipe brings up the chrome in the reader, and later readers still open immersive.
 - `PublishedCatalogTest` expected a four-item Starter preset; it has had five since the Classics entry was added (Plan 4). The assertion is now five.
 - The schema-migration check covered the end state only (the migrated database opens and reads). The first open after the upgrade was not reproduced.
@@ -127,7 +127,7 @@ Neal's calls (2026-10-17):
 - Items with no EPUB download their text: an uploaded `.txt` first, else archive.org's OCR text (`*_djvu.txt`), labelled "OCR text: may have errors" and converted to EPUB beside it. About 470k public-domain texts have an EPUB; about 9 million have only scans plus OCR text.
 - Browse is four fixed shelves: Most downloaded, Technical manuals (`collection:manuals`), Science & engineering, Literature.
 - **The public-domain filter is date only (published 1930 or earlier).** The spec's "or marked public domain / CC0" was dropped after the Pixel 6 walkthrough: uploader licence tags put Diary of a Wimpy Kid (2007), a modern surgery textbook and a 2009 solutions manual in the filtered view. Spec §5 and §14 are updated.
-- Later idea, not planned: data sources per library category, with archive.org under several (texts, audio, video).
+- ~~Later idea, not planned: data sources per library category, with archive.org under several (texts, audio, video).~~ Now planned: the Media spec's sources by media type (§3.4), built in M2. Video is still out.
 
 Builder's calls made while building:
 - Items archive.org restricts to lending are lend-only ("Borrow on archive.org") even if a file is served openly (spec §5 wording).
@@ -252,3 +252,80 @@ Still open:
   - iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.
 - The eval needs the phone: `tools/eval` runs over adb (Wi-Fi works), about 70 s a question. The held-out split stays unread by whoever tunes.
 
+
+## Carried forward from M1
+
+Built and measured (2026-10-19, on the Mac Studio; parity checklist: `media-parity-checklist.md`):
+- **1046 JVM tests pass** (`./gradlew testDebugUnitTest`; 835 before M1's code, after the rename below).
+- Device tests on the Pixel 6, which install only their own test APKs (`app.granger` stayed installed each time): `:core:taglib:connectedAndroidTest` **5/5** (`TagLibDeviceTest`: MP3, FLAC, Ogg, Opus, M4A, untagged, broken); `:core:player:connectedAndroidTest` **2/2** (`GaplessDeviceTest`: the LAME header gives encoder delay and padding; no run of silence over 5 ms at the boundary).
+- Pins: Media3 1.11.1, NDK 30.0.16248370, TagLib v2.3.2 (git submodule, built static). Library schema v7: 11 new tables, `MIGRATION_6_7`.
+- Parity with Auxio and Voice (spec §6, §7): 51 rows, ✅ 39, ⏭ 4 (Android Auto ×2, widget, Search: M3), ❌ 8 (listed below).
+
+Neal's calls (2026-10-19, during the walkthrough):
+- The Player has **Music | Audiobooks tabs**. Each shows its own saved state; only one plays at a time, and pressing play on the other tab switches to it. Each player links to its shelf at the bottom.
+- Music tabs run Albums, Artists, Songs, Genres, Playlists, Folders, and **Albums is the default** (the plan had Songs first).
+- In the narrow rail, tapping the recents, the bookmark tiles or History **opens the full rail**, where they have titles; only the tools go straight to their screens. A long press on a bookmark tile still offers to remove it.
+- **M2 requirement: an album downloaded from archive.org stays one album by its origin item** (the item's album and artist metadata), whatever its files' tags say. Test case: Holst, *The Planets*, LSO 1922–24. Its six untagged files group by folder and "Venus" carries its own title as its album, so on the phone it splits in two. A folder-merge rule for phone files was declined: it would merge unrelated singles in folders like `Download/`.
+
+Builder's calls and deviations from the plan:
+- `BookMark` was renamed `BookAnnotation` before any Media code: on a case-insensitive macOS volume `Bookmark` and `BookMark` overwrote each other's `.class` files. The table stays `book_marks`; the Room schema is unchanged.
+- An untagged album is named after its folder ("Unknown album" only when the folder is blank), not "Unknown album".
+- MISSING tracks are hidden from music browsing (the plan greyed them). Playlists still list them, dimmed; audiobooks are unchanged; nothing is deleted.
+- The phone scan leaves out everything under `Android/` and, on API 31+, recordings: MediaStore flagged 63 WhatsApp Business voice notes as music. A folder picked inside `Android/media` is still scanned.
+- Embedded covers are stored once, named by a hash of their bytes (not `<fingerprint>.jpg`). A file that crashed TagLib is never read for tags again.
+- Android's `c2.android.mp3.decoder` already drops the 529-sample MPEG decoder delay, so `ReplayGainProcessor` takes it off the encoder delay for that decoder.
+- The reader's mini-player is drawn over the page while the reader chrome shows (the spec says the slot pushes content down). Agreed with Neal.
+- Review fixes: a restored book keeps its finished mark until it's played; a saved book position whose file is lost is kept until the user picks a place; a queue where every item fails in a row stops instead of looping, and a failing book pauses; a rescan that dies with an `Error` ends as Failed; play pressed during a transient loss asks for focus again.
+
+Pixel 6 walkthrough (2026-10-19), after the fixes below; Neal listened for everything audible. Installing over the existing app kept his library (DB backed up first). The phone's music and audiobook appeared, and the 91 files under `Music/` and `Audiobooks/` were unchanged (size, mtime, md5). The audiobook resumed after a force-stop (killed at about 1:02 in chapter 2, reopened paused at 0:58). Audiobook → music → audiobook lost no position. *The Wall* (FLAC) played seamlessly. The mini-player was the same across Library, Search, Research and the reader. A phone call paused the book and the end of the call resumed it. The full players were readable, and the Player tabs, shelf links, Albums-first tabs and folder-named albums all passed. Skipped by Neal: deleting and restoring a file in the Files app (covered by `syncInsertsThenMarksAbsentRowsMissing` and `missingRowComingBackIsOkWithStateKept`). The short gap heard in *The Dark Side of the Moon*, "Brain Damage" → "Eclipse", is in the source: `Eclipse.mp3` starts with 2,950 zero samples (about 67 ms) after the decoder's skip.
+
+Fixed after the walkthrough: the players' icons and text were near-black on the dark background (`57350ab`); WhatsApp audio listed as music (`623faa5`), then showing greyed after the rescan (`3866dbb`); the end of a call didn't resume the book (`c41b868`: the system focus path is tested end to end, a delayed grant is accepted, a user pause cancels the resume, and every focus decision is logged under `GrangerFocus`; the first failure's cause wasn't reproduced); narrow-rail recents (`e995da9`) and bookmarks and History (`b9b15ec`) jumped straight in; a flaky restore test's shared clock (`337376b`). Then Neal's tabs build: `3ab5838`, `d873097`, `dff6f60`, `54cca7d`.
+
+Still open:
+
+Data and scanner:
+- Losing the audio permission marks items from picked folders MISSING too (the plan's rule), although SAF grants don't need it; and picked folders aren't scanned at all while the permission is denied (the scanner's gate; Settings says so).
+- A third-party SAF provider that returns a null cursor on a passing error leaves that folder's items MISSING until the next good scan (nothing is deleted).
+- A file moved within a single scan shows up once, under its new uri. Fine; noted only.
+- A playlist row's position is its entry ordinal, which is right only while every entry has a track row (true today: the scanner never deletes rows).
+- The artist list takes an artist sort tag only from single-artist tracks.
+- Orphaned cover files are never cleaned up (old `<fingerprint>.jpg` files and shared covers nothing uses).
+- The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.
+- Parity gaps, later: original dates are read and stored but not shown or sorted by; no way to exclude folders from the scan.
+
+Player and engine:
+- Parity gaps for M3, with the service work for Android Auto: tapping a queue row doesn't play it (`PlayerHub` has no play-at-index call); no `onPlaybackResumption`, so a headset play press after process death does nothing; a single-file book shows no next/previous in the notification, which shows the book's title, not the chapter's.
+- `MediaControllerPlayerHub` and `PlaybackService` have no automated test; they're covered only through `PlayerEngine`.
+- The focus content type (speech or music) isn't requested again when the mode switches while focus is held.
+- Pressing play in the mini-player on a book that just ended, without leaving it, hits the end again at once; reloading it from the book page restarts it.
+- A finished book restored after process death loads at the start, but the database says finished until the next save.
+- The chapter-lookup rule exists twice, in the app (`chapterAt`) and in the engine (`ChapterMap`, internal); keep them in step.
+- Worst-case position loss after process death is about 6 s (a 1 s tick on a 5 s interval).
+- ~~After play is refused mid-call, the end of the call doesn't resume.~~ Fixed in `c41b868` (`playDuringACallPlaysWhenTheCallEnds`).
+
+UI:
+- No signal when a book's saved place can't be found, or when a queue stops because every item failed.
+- Adding a bookmark gives no feedback beyond the list.
+- On the Player's inactive tab, starting music writes no Recent row; shuffle, repeat, speed, sleep timer and bookmarks can't be changed there; and a saved book's chapters are read again on each state change rather than live.
+- Album, artist, genre, playlist and folder pages aren't scoped to a collection (their routes carry no `collectionId`).
+- Playlists reorder through Move up / Move down only, no drag.
+- No "move audiobook to collection" from the shelf.
+- The "songs" Recent row replays all music by title (its key has no collection or sort).
+- Settings scrolls to Music & audiobooks by a fixed item index (5).
+- The music Compose screens have no UI tests (view model and DAO only).
+- Parity gaps, later: "Add to playlist" isn't in the full player or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
+
+Device checks still to do:
+- Deleting a file in the Files app, then restoring it (skipped in the walkthrough).
+- Resume after a reboot (M2's Done-means, with a LibriVox book; never `adb reboot`).
+- With nothing loaded, no media notification or foreground service appears (the hub binds the playback service at launch).
+- The media notification relies on Android 13+'s media-session exemption: `POST_NOTIFICATIONS` is only requested before downloads.
+- The notification and lock screen, Bluetooth and headset buttons, headset autoplay, ReplayGain, volume boost and an external equalizer haven't been tried one by one; nor the queue drag and the chapters, speed, sleep and bookmark sheets, nor the audiobook shelf and book page beyond the walkthrough's resume checks.
+- Gapless was checked only with `c2.android.mp3.decoder` and FLAC; the 529-sample fix is keyed to that one decoder, and other phones' decoders are untested.
+- If a call fails to resume again, read the `GrangerFocus` log.
+- SD cards (the Pixel 6 has no slot), as for packs.
+
+Environment:
+- Development is in `~/Developer/Granger/Granger`. The old copy on `~/Desktop` (perhaps iCloud-synced) is stale: it spawned "X 2" duplicate files in `build/` directories that broke dexing.
+- `gradle.properties` still has the Linux machine's limits (2 workers, 2 GB heap, in-process Kotlin); they could be raised on the Mac.
+- `:core:zim`'s androidTest assets now include `testdata/audio` (about 200 KB). Harmless.
