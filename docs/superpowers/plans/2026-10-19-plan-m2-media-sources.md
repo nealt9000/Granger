@@ -770,6 +770,7 @@ git commit -m "Media M2: media downloads as groups with origin manifests; filing
     - Row status comes from `MediaDownloads.statusOf`.
     - The Installed tab lists `media:archive-org:` groups whose files lie under `music/` (MUSIC) or `audiobooks/` (SPOKEN_WORD).
   - Texts behave exactly as before. Plan 7's tests pass unchanged.
+  - As built: `ArchiveRow` gains `audio: AudioOffer? = null` (the row preview) and `ItemSheet` gains `filesDone`/`filesTotal` ("Downloading: 3 of 7"); the view model also takes `now: () -> Long`. The screen's list, note and waiver dialog are `internal fun ArchiveContent(ui, …, onAcceptWaiver, onOpenLibriVox, …)`, which `ArchiveScreenTest` drives. A group's file count comes from the offer, else its manifest (read once), since a cancel drops unfinished records. `GrangerNavHost` passes `onOpenLibriVox = {}` until Task 9.
 
 - [ ] **Step 1: Write the failing tests.**
 

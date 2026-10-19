@@ -41,6 +41,7 @@ import app.granger.player.PlayerScreen
 import app.granger.player.PlayerViewModel
 import app.granger.player.miniPlayerPlacement
 import app.granger.archive.ArchiveViewModel
+import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.BookIds
 import app.granger.core.library.ReadingTab
 import app.granger.ebook.Dictionary
@@ -190,7 +191,8 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
-@Serializable object ArchiveRoute
+/** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
+@Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
 /** [media] opens it at the Music & audiobooks section. */
 @Serializable data class SettingsRoute(val media: Boolean = false)
 @Serializable object ReadinessRoute
@@ -480,7 +482,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         when (source) {
                             SourceLink.GRANGER -> nav.navigate(SourceRoute(CatalogScope.GRANGER))
                             SourceLink.KIWIX -> nav.navigate(SourceRoute(CatalogScope.KIWIX))
-                            SourceLink.ARCHIVE_ORG -> nav.navigate(ArchiveRoute)
+                            SourceLink.ARCHIVE_ORG -> nav.navigate(ArchiveRoute())
                         }
                     },
                     onSearch = { nav.navigate(SearchRoute()) },
@@ -655,16 +657,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<ArchiveRoute> {
+            composable<ArchiveRoute> { backStackEntry ->
+                val kind = backStackEntry.toRoute<ArchiveRoute>().kind
                 ArchiveScreen(
                     viewModel = viewModel {
                         ArchiveViewModel(
                             container.archiveClient, container.downloads, container.bookshelf, container.archivePrefs,
                             container.volumes, container.downloadPrefs, { container.archiveSidecarDir }, container.appScope,
+                            kind = kind, media = container.mediaDownloader,
                         )
                     },
                     detailsUrl = container.archiveClient::detailsUrl,
                     onBack = { nav.popBackStack() },
+                    // LibriVoxRoute arrives in Task 9, which wires this.
+                    onOpenLibriVox = {},
                 )
             }
             composable<SettingsRoute> { backStackEntry ->

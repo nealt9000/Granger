@@ -1,0 +1,144 @@
+{
+    "alternate_locations": {
+        "servers": [
+            {
+                "server": "dn721804.ca.archive.org",
+                "dir": "/0/items/rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm"
+            }
+        ],
+        "workable": [
+            {
+                "server": "dn721804.ca.archive.org",
+                "dir": "/0/items/rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm"
+            }
+        ]
+    },
+    "created": 1792443470,
+    "d1": "ia601604.us.archive.org",
+    "d2": "ia801604.us.archive.org",
+    "dir": "/10/items/rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm",
+    "files": [
+        {
+            "name": "__ia_thumb.jpg",
+            "source": "original",
+            "mtime": "1679428601",
+            "size": "3948",
+            "md5": "80797e81b2927d243132fbac356c7ea7",
+            "crc32": "4a9f83f2",
+            "sha1": "ae3044d446da5f95017bf8663721fb42bef845f6",
+            "format": "Item Tile",
+            "rotation": "0"
+        },
+        {
+            "name": "e67jafasqicpfdo-ADL3652183756.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "e67jafasqicpfdo-ADL3652183756.mp3",
+            "mtime": "1679428592",
+            "size": "11704",
+            "md5": "d94fe4c987c9f71d53e05744cfe2bbf7",
+            "crc32": "e4489d57",
+            "sha1": "a35fb9ca9a6bfe9d755c163845da750650934af0",
+            "private": "true"
+        },
+        {
+            "name": "e67jafasqicpfdo-ADL3652183756.mp3",
+            "source": "original",
+            "mtime": "1679428487",
+            "size": "1093905",
+            "md5": "24ac440bacf0dede921abb4e27751039",
+            "crc32": "5dc1e500",
+            "sha1": "43657b58415bc177614ed2ed32c3d2d282187587",
+            "format": "VBR MP3",
+            "length": "65.38",
+            "private": "true",
+            "title": "Install a Drop Ceiling",
+            "album": "The Money Pit\u2019s Calls & Answers",
+            "track": "01",
+            "genre": "Podcast"
+        },
+        {
+            "name": "e67jafasqicpfdo-ADL3652183756.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "e67jafasqicpfdo-ADL3652183756.mp3",
+            "mtime": "1679428565",
+            "size": "37964",
+            "md5": "6c911135dc6c69d2225378689b68f102",
+            "crc32": "05bf52aa",
+            "sha1": "988b6f14cb3e89bf22fc27c21030f21c6ba7afbc",
+            "private": "true"
+        },
+        {
+            "name": "e67jafasqicpfdo-ADL3652183756_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "e67jafasqicpfdo-ADL3652183756.mp3",
+            "mtime": "1679428580",
+            "size": "288777",
+            "md5": "e473eac1b8f35188c9cc01ba3d23877b",
+            "crc32": "29302638",
+            "sha1": "df6e3bb11e4de181e8dfb8a3718717498c894c22",
+            "private": "true"
+        },
+        {
+            "name": "rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm_files.xml",
+            "source": "original",
+            "format": "Metadata",
+            "md5": "bf8b9cd79291882cb2c32675e07fe048",
+            "summation": "md5"
+        },
+        {
+            "name": "rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm_meta.sqlite",
+            "source": "original",
+            "mtime": "1679428501",
+            "size": "20480",
+            "md5": "9f079d124ea18624f049531681e98a91",
+            "crc32": "79638b63",
+            "sha1": "3b4d8e654c3819bd071bc7781dd69ba827b8fc55",
+            "format": "Metadata"
+        },
+        {
+            "name": "rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm_meta.xml",
+            "source": "original",
+            "mtime": "1679428599",
+            "size": "1165",
+            "md5": "4be7a2ed49c4fada74443b226ea99dfc",
+            "crc32": "cb898d8c",
+            "sha1": "af94fee928016913dad749b5954a6cc2ea870eab",
+            "format": "Metadata"
+        }
+    ],
+    "files_count": 8,
+    "item_last_updated": 1679428602,
+    "item_size": 1457943,
+    "metadata": {
+        "identifier": "rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm",
+        "collection": [
+            "podcasts_mirror_bobarchives",
+            "podcasts_mirror"
+        ],
+        "creator": "The Money Pit's Calls &amp; Answers",
+        "date": "2011-03-25",
+        "description": "Get tips on how to get started installing an acoustic drop ceiling. Find different tile recommendations at Armstrong to help you chosse your ceiling tile.Learn more about your ad choices. Visit podcastchoices.com/adchoices",
+        "guid": "http://www.moneypit.com/node/8176",
+        "mediatype": "audio",
+        "podcastindexid": "558024",
+        "rssfeed": "https://feeds.megaphone.fm/ADL1733292693",
+        "scanner": "Internet Archive Python library 1.9.6",
+        "sessionid": "e67jafasqicpfdo-",
+        "subject": "Podcast",
+        "title": "Install a Drop Ceiling",
+        "uploadsoftware": "LifePod-Beta",
+        "uploader": "bobarchives123@gmail.com",
+        "publicdate": "2023-03-21 19:54:56",
+        "addeddate": "2023-03-21 19:54:56",
+        "access-restricted-item": "true"
+    },
+    "server": "ia801604.us.archive.org",
+    "uniq": 575802122,
+    "workable_servers": [
+        "ia801604.us.archive.org",
+        "ia601604.us.archive.org"
+    ]
+}
