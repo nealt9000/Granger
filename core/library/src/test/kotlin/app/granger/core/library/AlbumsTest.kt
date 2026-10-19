@@ -21,8 +21,42 @@ class AlbumsTest {
         val summaries = Albums.summaries(tracks)
         assertThat(summaries.map { it.key }).containsExactly("|unknown|Music/A", "|unknown|Music/B")
         assertThat(summaries.map { it.trackCount }).containsExactly(2, 1)
-        assertThat(summaries.map { it.title }.toSet()).containsExactly(Albums.UNKNOWN_ALBUM)
+        assertThat(summaries.map { it.title }).containsExactly("A", "B")
         assertThat(summaries.map { it.albumArtist }.toSet()).containsExactly(Albums.UNKNOWN_ARTIST)
+    }
+
+    @Test fun untaggedAlbumIsNamedAfterItsFolder() {
+        // The real case: six untagged Holst files in one folder.
+        val folder = "Music/Holst - The Planets (LSO 1922-24)/"
+        val holst = (1..6).map { musicTrack("h$it", album = "", albumArtist = "", folder = folder, trackNo = it) }
+        val summary = Albums.summaries(holst).single()
+        assertThat(summary.title).isEqualTo("Holst - The Planets (LSO 1922-24)")
+        assertThat(summary.key).isEqualTo("|unknown|$folder")          // the key is unchanged
+        assertThat(summary.albumArtist).isEqualTo(Albums.UNKNOWN_ARTIST)
+        assertThat(summary.trackCount).isEqualTo(6)
+        assertThat(Albums.title(holst[0])).isEqualTo("Holst - The Planets (LSO 1922-24)")
+        assertThat(Albums.untaggedTitle(summary.key)).isEqualTo("Holst - The Planets (LSO 1922-24)")
+        assertThat(Albums.title("", "Holst")).isEqualTo("Holst")         // a top-level folder
+    }
+
+    @Test fun untaggedAlbumInABlankFolderFallsBackToUnknownAlbum() {
+        assertThat(Albums.title("", "")).isEqualTo(Albums.UNKNOWN_ALBUM)
+        assertThat(Albums.title(" ", "/")).isEqualTo(Albums.UNKNOWN_ALBUM)
+        val summary = Albums.summaries(listOf(musicTrack("x", album = "", albumArtist = "", folder = ""))).single()
+        assertThat(summary.title).isEqualTo(Albums.UNKNOWN_ALBUM)
+    }
+
+    @Test fun taggedAlbumsKeepTheirTitleAndSortWithTheFolderNamedOnes() {
+        val tagged = musicTrack("t", album = " The Planets ", albumArtist = "", folder = "Music/Zzz/")
+        assertThat(Albums.title(tagged)).isEqualTo("The Planets")
+        assertThat(Albums.untaggedTitle(tagged.albumKey)).isNull()
+        assertThat(Albums.untaggedTitle("holst|the planets")).isNull()
+        // Same (unknown) album artist: sorted by title, the folder name standing in for the missing tag.
+        val untagged = listOf(
+            musicTrack("m", album = "", albumArtist = "", folder = "Music/Mars/"),
+            musicTrack("a", album = "", albumArtist = "", folder = "Music/Zzz/Apollo/"),
+        )
+        assertThat(Albums.summaries(untagged + tagged).map { it.title }).containsExactly("Apollo", "Mars", "The Planets").inOrder()
     }
 
     @Test fun orderedSortsByDiscThenTrack() {

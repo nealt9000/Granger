@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.R
+import app.granger.core.library.Albums
 import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
@@ -67,7 +68,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     color = GrangerColors.Flame, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    music.track.album, style = MaterialTheme.typography.bodyMedium,
+                    Albums.title(music.track), style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }

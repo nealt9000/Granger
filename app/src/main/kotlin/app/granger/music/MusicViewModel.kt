@@ -89,6 +89,13 @@ object MusicSources {
     fun folder(f: FolderPage) = PlaySource("$FOLDER${f.path}", f.name)
     fun songs(title: String) = PlaySource(SONGS, title)
 
+    /**
+     * What a `RecentPlay` row is called: its stored title, except an untagged album's, which follows [Albums.title]
+     * (rows saved before untagged albums were named after their folder say "Unknown album").
+     */
+    fun title(key: String, stored: String): String =
+        key.takeIf { it.startsWith(ALBUM) }?.let { Albums.untaggedTitle(it.removePrefix(ALBUM)) } ?: stored
+
     /** A playlist key's id; null for any other key. */
     fun playlistId(key: String): Long? = key.takeIf { it.startsWith(PLAYLIST) }?.removePrefix(PLAYLIST)?.toLongOrNull()
 }
@@ -129,9 +136,9 @@ object MusicCatalog {
         val comparator = when (sort) {
             SongSort.TITLE -> byTitle
             SongSort.ARTIST -> compareBy<Track>({ sortName(it.sortArtist, trackArtistsOf(it).joinToString(JOIN)) },
-                { sortName(it.sortAlbum, it.album) }, { it.albumKey }).then(inAlbum)
-            SongSort.ALBUM -> compareBy<Track>({ sortName(it.sortAlbum, it.album) }, { it.albumKey }).then(inAlbum)
-            SongSort.YEAR -> compareBy<Track>({ it.date.trim().ifEmpty { "￿" } }, { sortName(it.sortAlbum, it.album) },
+                { sortName(it.sortAlbum, Albums.title(it)) }, { it.albumKey }).then(inAlbum)
+            SongSort.ALBUM -> compareBy<Track>({ sortName(it.sortAlbum, Albums.title(it)) }, { it.albumKey }).then(inAlbum)
+            SongSort.YEAR -> compareBy<Track>({ it.date.trim().ifEmpty { "￿" } }, { sortName(it.sortAlbum, Albums.title(it)) },
                 { it.albumKey }).then(inAlbum)
             SongSort.DATE_ADDED -> compareByDescending<Track> { it.addedAt }.then(byTitle)
         }

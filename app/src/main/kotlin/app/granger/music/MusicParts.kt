@@ -60,7 +60,7 @@ data class MusicNav(
 /** Display names, with the "Unknown …" fallbacks applied here rather than stored. */
 internal fun trackTitle(t: Track) = t.title.ifBlank { t.uri.substringAfterLast('/') }
 internal fun trackArtist(t: Track) = MusicCatalog.trackArtistsOf(t).joinToString(", ")
-internal fun trackAlbum(t: Track) = t.album.ifBlank { Albums.UNKNOWN_ALBUM }
+internal fun trackAlbum(t: Track) = Albums.title(t)
 internal fun albumArtistNames(a: AlbumSummary): List<String> =
     a.albumArtist.split("; ").map { it.trim() }.filter { it.isNotEmpty() }.ifEmpty { listOf(Albums.UNKNOWN_ARTIST) }
 

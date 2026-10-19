@@ -12,6 +12,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.HandlerWrapper
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder
+import app.granger.core.library.Albums
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
 import app.granger.core.library.AudiobookState
@@ -655,7 +656,7 @@ class PlayerEngine(
         .setMediaMetadata(MediaMetadata.Builder()
             .setTitle(b?.title ?: t.title)
             .setArtist(b?.author ?: t.artists.replace("; ", ", "))
-            .setAlbumTitle(b?.title ?: t.album)
+            .setAlbumTitle(b?.title ?: Albums.title(t))
             .setArtworkUri((b?.coverPath ?: t.coverPath)?.let { Uri.fromFile(File(it)) })
             .build())
         .build()

@@ -13,6 +13,7 @@ import app.granger.core.library.ReadingSessions
 import app.granger.core.library.RecentPlay
 import app.granger.core.library.ResearchChats
 import app.granger.media.PlayResumer
+import app.granger.music.MusicSources
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -70,7 +71,7 @@ class RailViewModel(
         (
             searches.map { RecentItem.Search(it.query, it.searchedAt) } +
                 chats.map { RecentItem.Chat(it.id, it.title, it.updatedAt) } +
-                plays.map { RecentItem.Play(it.key, it.title, it.playedAt) }
+                plays.map { RecentItem.Play(it.key, MusicSources.title(it.key, it.title), it.playedAt) }
             )
             .sortedByDescending { it.at }
             .take(RECENT)

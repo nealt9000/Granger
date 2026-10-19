@@ -4,8 +4,8 @@ import java.text.Normalizer
 import java.util.Locale
 
 /**
- * An album as the library shows it, built from its present tracks (MISSING ones aren't part of it). [title] and
- * [albumArtist] already carry the "Unknown album" / "Unknown artist" fallbacks. [status] is OK while any track is OK.
+ * An album as the library shows it, built from its present tracks (MISSING ones aren't part of it). [title] is
+ * [Albums.title] (an untagged album is named after its folder) and [albumArtist] carries the "Unknown artist" fallback. [status] is OK while any track is OK.
  */
 data class AlbumSummary(
     val key: String,
@@ -33,8 +33,23 @@ object Albums {
     /** "<normalised album artist>|<normalised album>"; untitled albums: "|unknown|<folder>". Normalised = trimmed, lower-cased, NFKC. */
     fun key(albumArtist: String, album: String, folder: String): String {
         val title = normalise(album)
-        return if (title.isEmpty()) "|unknown|$folder" else "${normalise(albumArtist)}|$title"
+        return if (title.isEmpty()) "$UNTAGGED$folder" else "${normalise(albumArtist)}|$title"
     }
+
+    /**
+     * An album's title wherever it is shown: its tag, else (an untagged album, grouped by folder) the folder's name,
+     * "Music/Holst - The Planets (LSO 1922-24)/" → "Holst - The Planets (LSO 1922-24)"; [UNKNOWN_ALBUM] only when the
+     * folder is blank too. Display only: [key] is unchanged.
+     */
+    fun title(album: String, folder: String): String =
+        album.trim().ifEmpty { folder.trim().trimEnd('/').substringAfterLast('/').trim().ifEmpty { UNKNOWN_ALBUM } }
+
+    fun title(track: Track): String = title(track.album, track.folder)
+
+    /** For an untagged album's [key] ("|unknown|<folder>") its [title]; null for a tagged one (its key holds no title). */
+    fun untaggedTitle(key: String): String? = key.takeIf { it.startsWith(UNTAGGED) }?.let { title("", it.removePrefix(UNTAGGED)) }
+
+    private const val UNTAGGED = "|unknown|"
 
     /** Tracks the library shows: MISSING ones are left out (their rows stay, and come back when the file does). */
     fun present(tracks: List<Track>): List<Track> = tracks.filter { it.status != PackStatus.MISSING }
@@ -70,7 +85,7 @@ object Albums {
         val first = ordered.first()
         val summary = AlbumSummary(
             key = key,
-            title = ordered.firstOrNull { it.album.isNotBlank() }?.album?.trim() ?: UNKNOWN_ALBUM,
+            title = title(ordered.firstOrNull { it.album.isNotBlank() } ?: first),
             albumArtist = ordered.firstOrNull { it.albumArtists.isNotBlank() }?.albumArtists?.trim() ?: UNKNOWN_ARTIST,
             year = ordered.map { it.date.trim() }.filter { it.isNotEmpty() }.minOrNull()?.take(4).orEmpty(),
             releaseType = ordered.firstOrNull { it.releaseType.isNotBlank() }?.releaseType.orEmpty(),
