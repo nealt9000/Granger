@@ -279,4 +279,19 @@ class MediaDownloaderTest {
         assertThat(File(elsewhere, "keep.bin").isFile).isTrue()
         assertThat(File(internal, "audiobooks/.nomedia").isFile).isTrue()
     }
+
+    /** Cancelled before any audio file arrived: nothing worth keeping, so the folder (manifest, cover) and its rows go. */
+    @Test fun cancelBeforeAnyAudioArrivesLeavesNoFolder() = runTest {
+        val d = downloader()
+        d.get(book)
+        assertThat(book.cover).isNotNull()
+        File(dir(), MediaDownloads.COVER_NAME).writeBytes(byteArrayOf(0xFF.toByte(), 0xD8.toByte()))
+        downloads.list.update { list -> list.map { if (MediaDownloads.isCover(it)) it.copy(state = DownloadState.INSTALLED) else it } }
+
+        d.cancel(group)
+        assertThat(dir().exists()).isFalse()
+        assertThat(downloads.records.first().filter { it.groupId == group }).isEmpty()
+        assertThat(media.audiobook(bookId)).isNull()
+        assertThat(File(internal, "audiobooks/.nomedia").isFile).isTrue()
+    }
 }

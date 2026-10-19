@@ -3,6 +3,7 @@ package app.granger.media
 import app.granger.core.archive.ArchiveQuery
 import app.granger.core.archive.LibriVoxClient
 import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
 import app.granger.core.downloads.ItemKind
@@ -20,6 +21,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
@@ -137,10 +139,35 @@ class MediaDownloader(
         }
     }
 
-    /** Stops the group's unfinished files; the finished ones stay filed (decided with Neal). */
+    /**
+     * Stops the group's unfinished files; the finished ones stay filed (decided with Neal). With no audio file in yet
+     * there's nothing to keep: the group and the item folder (manifest, maybe the cover) go too, so no cover-only item
+     * shows in other apps.
+     */
     suspend fun cancel(groupId: String) {
-        ops.withLock { downloads.cancelGroup(groupId) }
+        ops.withLock {
+            downloads.cancelGroup(groupId)
+            val (source, ref) = sourceAndRef(groupId) ?: return@withLock
+            val records = downloads.records.first().filter { it.groupId == groupId }
+            if (records.any { it.state == DownloadState.INSTALLED && !MediaDownloads.isCover(it) }) return@withLock
+            val dirs = itemDirs(source, ref, records)
+            val audioOnDisk = withContext(io) {
+                dirs.any { d -> MediaManifests.read(d)?.files.orEmpty().any { File(d, it.name).isFile } }
+            }
+            if (audioOnDisk) return@withLock
+            downloads.removeGroup(groupId)
+            withContext(io) { dirs.forEach { deleteTree(it.toPath()) } }
+        }
         rescanQuietly()
+    }
+
+    /** The item's folders: under either media root on every mounted volume, and wherever its ledger rows point. */
+    private suspend fun itemDirs(source: String, ref: String, records: List<DownloadRecord>): List<File> {
+        val relativeDir = MEDIA_ROOTS.map { "$it/$source/$ref" }
+        return withContext(io) {
+            volumes.list().flatMap { v -> relativeDir.map { File(v.root, it) } }.filter { it.isDirectory } +
+                records.mapNotNull { r -> relativeDir.firstOrNull { "/$it/" in r.filePath }?.let { File(r.filePath).parentFile } }
+        }.distinct()
     }
 
     suspend fun retry(groupId: String) = downloads.retryGroup(groupId)
@@ -154,12 +181,8 @@ class MediaDownloader(
     suspend fun remove(groupId: String) {
         ops.withLock {
             val (source, ref) = sourceAndRef(groupId) ?: return@withLock
-            val relativeDir = listOf("music", "audiobooks").map { "$it/$source/$ref" }
             val records = downloads.records.first().filter { it.groupId == groupId }
-            val dirs = withContext(io) {
-                volumes.list().flatMap { v -> relativeDir.map { File(v.root, it) } }.filter { it.isDirectory } +
-                    records.mapNotNull { r -> relativeDir.firstOrNull { "/$it/" in r.filePath }?.let { File(r.filePath).parentFile } }
-            }.distinct()
+            val dirs = itemDirs(source, ref, records)
             val manifests = withContext(io) { dirs.mapNotNull { MediaManifests.read(it) } }
 
             downloads.removeGroup(groupId)
@@ -206,16 +229,22 @@ class MediaDownloader(
 
     private fun isLink(f: File) = Files.isSymbolicLink(f.toPath())
 
-    /** Deletes [root] and what's in it; a symlink inside is deleted as a link, never followed. */
+    /**
+     * Deletes [root] and what's in it, best effort (what can't be deleted stays); a symlink, [root] included, is deleted
+     * as a link, never followed.
+     */
     private fun deleteTree(root: Path) {
+        if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) return
         Files.walkFileTree(root, object : SimpleFileVisitor<Path>() {
             override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                Files.deleteIfExists(file)
+                runCatching { Files.deleteIfExists(file) }
                 return FileVisitResult.CONTINUE
             }
 
+            override fun visitFileFailed(file: Path, exc: IOException): FileVisitResult = FileVisitResult.CONTINUE
+
             override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
-                Files.deleteIfExists(dir)
+                runCatching { Files.deleteIfExists(dir) }
                 return FileVisitResult.CONTINUE
             }
         })
