@@ -31,7 +31,14 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
         calls += "playTracks"
         plays += Play(trackIds, startIndex, shuffle, source)
     }
-    override fun playAudiobook(id: String, at: AudioBookmark?) { calls += "playAudiobook:$id@${at?.positionMs}" }
+    /** Every [playAudiobook] call: the book and where it was asked to start (null: its saved position). */
+    val bookPlays = mutableListOf<Pair<String, AudioBookmark?>>()
+
+    override fun playAudiobook(id: String, at: AudioBookmark?) {
+        calls += "playAudiobook:$id@${at?.positionMs}"
+        bookPlays += id to at
+    }
+    override fun setFinished(audiobookId: String, finished: Boolean) { calls += "setFinished:$audiobookId=$finished" }
     override fun playPause() { calls += "playPause" }
     override fun next() { calls += "next" }
     override fun previous() { calls += "previous" }

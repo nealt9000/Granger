@@ -55,6 +55,10 @@ import app.granger.library.LibraryScreen
 import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
 import app.granger.library.SourceLink
+import app.granger.audiobooks.AudiobookScreen
+import app.granger.audiobooks.AudiobookShelfScreen
+import app.granger.audiobooks.AudiobooksViewModel
+import app.granger.audiobooks.DaoListening
 import app.granger.music.AlbumScreen
 import app.granger.music.ArtistScreen
 import app.granger.music.FolderScreen
@@ -111,6 +115,12 @@ import app.granger.research.ResearchViewModel
 
 private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumRoute>() || hasRoute<ArtistRoute>() ||
     hasRoute<GenreRoute>() || hasRoute<PlaylistRoute>() || hasRoute<FolderRoute>()
+
+/** The Audiobooks shelf for one Audiobooks collection; null is "All audiobooks" (not scoped). */
+@Serializable data class AudiobookShelfRoute(val collectionId: String? = null)
+@Serializable data class AudiobookRoute(val audiobookId: String)
+
+private fun NavDestination.isAudiobooks() = hasRoute<AudiobookShelfRoute>() || hasRoute<AudiobookRoute>()
 /** An article; [fragment] scrolls its first page to that section (a cited passage's heading). */
 @Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null)
 
@@ -328,7 +338,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     val selected = when {
         destination == null -> null
         destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
-            destination.hasRoute<ArchiveRoute>() || destination.isMusic() -> RailTool.LIBRARY
+            destination.hasRoute<ArchiveRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
         destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
         destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
         destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
@@ -428,6 +438,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },
+                    onOpenAudiobooks = { id -> nav.navigate(AudiobookShelfRoute(id)) },
                     onOpenSource = { source ->
                         when (source) {
                             SourceLink.GRANGER -> nav.navigate(SourceRoute(CatalogScope.GRANGER))
@@ -483,6 +494,25 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             }
             composable<FolderRoute> { backStackEntry ->
                 FolderScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<FolderRoute>().folder, musicNav)
+            }
+            // The book page isn't scoped to a collection: its route carries none.
+            fun audiobooksViewModel(collectionId: String?) = AudiobooksViewModel(
+                collectionId, container.media, container.shelves, DaoListening(container.playback), container.playerHub,
+            )
+            composable<AudiobookShelfRoute> { backStackEntry ->
+                val id = backStackEntry.toRoute<AudiobookShelfRoute>().collectionId
+                AudiobookShelfScreen(
+                    viewModel { audiobooksViewModel(id) },
+                    onBook = { nav.navigate(AudiobookRoute(it)) },
+                    onBack = { nav.popBackStack() },
+                )
+            }
+            composable<AudiobookRoute> { backStackEntry ->
+                AudiobookScreen(
+                    viewModel { audiobooksViewModel(null) },
+                    backStackEntry.toRoute<AudiobookRoute>().audiobookId,
+                    onBack = { nav.popBackStack() },
+                )
             }
             composable<ReaderRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<ReaderRoute>()

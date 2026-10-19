@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.audiobooks.ALL_AUDIOBOOKS
+import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 
@@ -60,6 +62,8 @@ fun LibraryScreen(
     onOpenCollection: (collectionId: String) -> Unit,
     /** A Music collection, or "All music" (null). */
     onOpenMusic: (collectionId: String?) -> Unit,
+    /** An Audiobooks collection's shelf, or "All audiobooks" (null). */
+    onOpenAudiobooks: (collectionId: String?) -> Unit,
     onOpenSource: (SourceLink) -> Unit,
     onSearch: () -> Unit,
     onHistory: () -> Unit,
@@ -146,14 +150,18 @@ fun LibraryScreen(
                         },
                     )
                 }
-                // Music opens its own tabs: "All music" first, then each collection scoped to its albums.
+                // Music opens its own tabs: "All music" first, then each collection scoped to its albums. Audiobooks
+                // does the same with its shelf: "All audiobooks", then each collection scoped to its audiobooks.
                 val music = id == MUSIC_TYPE_ID
-                if (open && music) {
-                    item(key = "all-music") {
+                val audiobooks = id == AUDIOBOOKS_TYPE_ID
+                if (open && (music || audiobooks)) {
+                    item(key = if (music) "all-music" else "all-audiobooks") {
                         ListItem(
-                            modifier = Modifier.clickable { onOpenMusic(null) }.padding(start = 16.dp),
-                            headlineContent = { Text(ALL_MUSIC) },
-                            supportingContent = { Text(countText(0, 0, shelf.collections.sumOf { it.albums.size })) },
+                            modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
+                            headlineContent = { Text(if (music) ALL_MUSIC else ALL_AUDIOBOOKS) },
+                            supportingContent = {
+                                Text(countText(0, 0, shelf.collections.sumOf { it.albums.size }, shelf.collections.sumOf { it.audiobooks.size }))
+                            },
                         )
                     }
                 }
@@ -161,10 +169,16 @@ fun LibraryScreen(
                     item(key = "collection:${row.collection.id}") {
                         ListItem(
                             modifier = Modifier
-                                .clickable { if (music) onOpenMusic(row.collection.id) else onOpenCollection(row.collection.id) }
+                                .clickable {
+                                    when {
+                                        music -> onOpenMusic(row.collection.id)
+                                        audiobooks -> onOpenAudiobooks(row.collection.id)
+                                        else -> onOpenCollection(row.collection.id)
+                                    }
+                                }
                                 .padding(start = 16.dp),
                             headlineContent = { Text(row.collection.name) },
-                            supportingContent = { Text(countText(row.packs.size, row.books.size, row.albums.size)) },
+                            supportingContent = { Text(countText(row.packs.size, row.books.size, row.albums.size, row.audiobooks.size)) },
                         )
                     }
                 }
@@ -187,10 +201,11 @@ private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
 )
 
-private fun countText(packs: Int, books: Int, albums: Int = 0): String = listOfNotNull(
+private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): String = listOfNotNull(
     if (packs > 0) (if (packs == 1) "1 pack" else "$packs packs") else null,
     if (books > 0) (if (books == 1) "1 book" else "$books books") else null,
     if (albums > 0) (if (albums == 1) "1 album" else "$albums albums") else null,
+    if (audiobooks > 0) (if (audiobooks == 1) "1 audiobook" else "$audiobooks audiobooks") else null,
 ).joinToString(" · ")
 
 /** The file's display name from the document provider, falling back to the last part of its URI. */

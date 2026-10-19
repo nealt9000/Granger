@@ -24,6 +24,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
 import app.granger.core.library.AudiobookChapter
+import app.granger.core.library.AudiobookState
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
@@ -428,6 +429,62 @@ class PlayerEngineTest {
         engine.playAudiobook(book.id, AudioBookmark(mark.id, book.id, mark.trackId, 2_000L, "Here", "", 0L))
         idle()
         assertThat(engine.player.currentPosition).isEqualTo(2_000L)
+    }
+
+    // ---- finished books (Task 11) ----
+
+    @Test fun finishedBookResumesFromTheStartAndIsUnfinishedOncePlaying() {
+        val book = fakeBook("done", 30_000, 30_000)
+        runBlocking {
+            playback.upsertAudiobookState(AudiobookState(book.id, "track:phone:done-1", 30_000L, 1.5f, false, 0, finished = true, updatedAt = 5L))
+        }
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilState(Player.STATE_READY)
+        idle()
+        assertThat(engine.player.currentMediaItemIndex).isEqualTo(0)
+        assertThat(engine.player.currentPosition).isAtMost(20L)
+        val saved = bookState(book.id)!!
+        assertThat(saved.finished).isFalse()
+        assertThat(saved.trackId).isEqualTo("track:phone:done-0")
+        assertThat(saved.speed).isEqualTo(1.5f)                  // its own settings are kept
+    }
+
+    @Test fun finishedMarkOnTheLoadedBookSurvivesItsNextSave() {
+        val book = fakeBook("marked", 3_000, 3_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 1_000)
+
+        // The book page writes the row, then tells the hub; the engine's next save keeps the mark.
+        runBlocking { playback.upsertAudiobookState(bookState(book.id)!!.copy(finished = true)) }
+        engine.setFinished(book.id, true)
+        idle()
+        engine.playPause()
+        idle()
+        assertThat(bookState(book.id)!!.finished).isTrue()
+
+        // Played to the end it's finished; marked unfinished there, the loaded book goes back to its start.
+        engine.setFinished(book.id, false)
+        engine.playPause()
+        idle()
+        run(engine.player).untilState(Player.STATE_ENDED)
+        idle()
+        assertThat(bookState(book.id)!!.finished).isTrue()
+        engine.setFinished(book.id, false)
+        idle()
+        assertThat(engine.player.currentMediaItemIndex).isEqualTo(0)
+        assertThat(engine.player.currentPosition).isEqualTo(0L)
+        val saved = bookState(book.id)!!
+        assertThat(saved.finished).isFalse()
+        assertThat(saved.trackId).isEqualTo("track:phone:marked-0")
+
+        // Another book's mark leaves the loaded one alone.
+        engine.setFinished("audiobook:phone:other", true)
+        idle()
+        assertThat(bookState(book.id)!!.finished).isFalse()
     }
 }
 

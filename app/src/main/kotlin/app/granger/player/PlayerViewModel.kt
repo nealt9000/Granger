@@ -39,6 +39,38 @@ fun bookProgress(chapters: List<AudiobookChapter>, chapter: AudiobookChapter, in
 }
 
 /**
+ * The chapter a saved position ([trackId], [positionMs] into that file) falls in, and the ms into it, by the
+ * player's own rule (core:player's `ChapterMap.chapterAt`/`inChapter`, internal there): files in the order the
+ * chapters first name them; the last chapter starting at or before the position, counting every chapter of earlier
+ * files; a file the book doesn't hold counts as its first file at 0. Null with no chapters.
+ */
+fun chapterAt(chapters: List<AudiobookChapter>, trackId: String, positionMs: Long): Pair<AudiobookChapter, Long>? {
+    val ordered = chapters.sortedBy { it.ordinal }.ifEmpty { return null }
+    val files = ordered.map { it.trackId }.distinct()
+    val file = files.indexOf(trackId)
+    var found = ordered.first()
+    for (c in ordered) {
+        val f = files.indexOf(c.trackId)
+        if (f < file || (f == file && c.startMs <= positionMs)) found = c else if (f > file) break
+    }
+    val inChapter = if (found.trackId == trackId) (positionMs - found.startMs).coerceAtLeast(0L) else 0L
+    return found to inChapter
+}
+
+/** Book-wide progress for a saved position, through [bookProgress] so the shelf and the player agree. A [finished] book is complete. */
+fun bookProgressAt(
+    chapters: List<AudiobookChapter>,
+    trackId: String,
+    positionMs: Long,
+    bookDurationMs: Long,
+    finished: Boolean = false,
+): BookProgress {
+    val at = chapterAt(chapters, trackId, positionMs)
+    val progress = if (at == null) BookProgress(0L, bookDurationMs) else bookProgress(chapters, at.first, at.second, bookDurationMs)
+    return if (finished) progress.copy(positionMs = progress.durationMs) else progress
+}
+
+/**
  * The mini-player and both full-screen players. Everything goes through [hub]; [chapters] and [bookmarks] read the
  * library for the loaded audiobook, and [skipBackSeconds]/[skipForwardSeconds] are the audiobook skip settings (for
  * the buttons' labels).

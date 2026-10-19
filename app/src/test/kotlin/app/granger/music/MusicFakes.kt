@@ -13,18 +13,21 @@ import app.granger.core.library.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
-/** Serves [trackList] as the music catalog; sync is not supported. */
+/** Serves [trackList] as the music catalog, [bookList] and [chapterList] as the audiobooks; sync is not supported. */
 class FakeMediaLibrary(tracks: List<Track> = emptyList()) : MediaLibrary {
     val trackList = MutableStateFlow(tracks)
+    val bookList = MutableStateFlow<List<Audiobook>>(emptyList())
+    val chapterList = MutableStateFlow<List<AudiobookChapter>>(emptyList())
     override val tracks: Flow<List<Track>> = trackList
-    override val audiobooks: Flow<List<Audiobook>> = flowOf(emptyList())
-    override fun chapters(audiobookId: String): Flow<List<AudiobookChapter>> = flowOf(emptyList())
+    override val audiobooks: Flow<List<Audiobook>> = bookList.map { all -> all.sortedBy { it.title.lowercase() } }
+    override val allChapters: Flow<List<AudiobookChapter>> = chapterList
+    override fun chapters(audiobookId: String): Flow<List<AudiobookChapter>> =
+        chapterList.map { all -> all.filter { it.audiobookId == audiobookId }.sortedBy { it.ordinal } }
     override suspend fun track(id: String): Track? = trackList.value.firstOrNull { it.id == id }
-    override suspend fun audiobook(id: String): Audiobook? = null
+    override suspend fun audiobook(id: String): Audiobook? = bookList.value.firstOrNull { it.id == id }
     override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) = error("not in tests")
     override suspend fun markAllMissing(origin: MediaOrigin) = error("not in tests")
 }

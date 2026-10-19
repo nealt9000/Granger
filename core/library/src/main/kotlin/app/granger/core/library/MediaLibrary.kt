@@ -17,6 +17,9 @@ interface MediaLibrary {
     val tracks: Flow<List<Track>>
     val audiobooks: Flow<List<Audiobook>>
     fun chapters(audiobookId: String): Flow<List<AudiobookChapter>>
+
+    /** Every audiobook's chapters, by book then ordinal (the shelf's progress bars). */
+    val allChapters: Flow<List<AudiobookChapter>>
     suspend fun track(id: String): Track?
     suspend fun audiobook(id: String): Audiobook?
 
@@ -43,6 +46,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
     override val tracks: Flow<List<Track>> = dao.observeMusic()
     override val audiobooks: Flow<List<Audiobook>> = dao.observeAudiobooks()
     override fun chapters(audiobookId: String): Flow<List<AudiobookChapter>> = dao.observeChapters(audiobookId)
+    override val allChapters: Flow<List<AudiobookChapter>> = dao.observeAllChapters()
     override suspend fun track(id: String): Track? = dao.track(id)
     override suspend fun audiobook(id: String): Audiobook? = dao.audiobook(id)
 

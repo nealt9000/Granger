@@ -302,6 +302,20 @@ class PlayerEngine(
         if (loadBook(id, at, play = true)) playback.upsertRecentPlay(RecentPlay(b.id, b.title, now()))
     }
 
+    override fun setFinished(audiobookId: String, finished: Boolean) = submit {
+        if (mode != Mode.BOOK || book?.id != audiobookId) return@submit
+        val m = map ?: return@submit
+        this.finished = finished
+        if (!finished && player.playbackState == Player.STATE_ENDED) {
+            // Left at its end, the book would end again at once: back to its first chapter, paused.
+            player.pause()
+            val first = m.start(m.chapters.first().ordinal)
+            player.seekTo(first.fileIndex, first.positionMs)
+        }
+        saver.onEvent(SaveReason.STOP)
+        refresh()
+    }
+
     override fun playPause() = submit { if (player.playWhenReady) player.pause() else resume() }
 
     /** Play (from the session: notification, Bluetooth, lock screen). */
@@ -506,7 +520,7 @@ class PlayerEngine(
         pausedAt = 0L
     }
 
-    /** Loads [id] at [at], or its saved position, or the start; true when it loaded. */
+    /** Loads [id] at [at], or its saved position (the start if it was finished), or the start; true when it loaded. */
     private suspend fun loadBook(id: String, at: AudioBookmark?, play: Boolean): Boolean {
         val b = media.audiobook(id) ?: return false
         val chapters = media.chapters(id).first()
@@ -514,9 +528,16 @@ class PlayerEngine(
         val m = ChapterMap(chapters)
         val files = m.files.map { media.track(it) ?: return false }
         val state = playback.audiobookState(id)
-        val startTrack = at?.trackId ?: state?.trackId
+        // A finished book plays again from its first chapter (as in Voice); a bookmark or chapter starts where it says.
+        val restart = at == null && state?.finished == true
+        val first = m.start(m.chapters.first().ordinal)
+        val startTrack = if (restart) m.files[first.fileIndex] else at?.trackId ?: state?.trackId
         val fileIndex = startTrack?.let { m.files.indexOf(it) }?.takeIf { it >= 0 }
-        val position = if (fileIndex == null) 0L else (at?.positionMs ?: state?.positionMs ?: 0L)
+        val position = when {
+            fileIndex == null -> 0L
+            restart -> first.positionMs
+            else -> at?.positionMs ?: state?.positionMs ?: 0L
+        }
 
         val lastPaused = prefs.getLong(PlayerSettingsKeys.PAUSED_AT, 0L)
         val sameBook = prefs.getString(PlayerSettingsKeys.LAST_AUDIOBOOK, null) == id
@@ -525,7 +546,8 @@ class PlayerEngine(
         speed = state?.speed ?: 1f
         skipSilence = state?.skipSilence ?: false
         boostMb = state?.volumeBoostMb ?: 0
-        finished = state?.finished ?: false
+        // Loading a book means listening to it again: it's no longer finished once its next save is written.
+        finished = false
         musicQueue = null; tracks = emptyMap()
         mode = Mode.BOOK
         prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_BOOK).putString(PlayerSettingsKeys.LAST_AUDIOBOOK, id).apply()
@@ -547,7 +569,7 @@ class PlayerEngine(
 
         // When it was last paused, for auto-rewind: the recorded pause if it was this book, else its last save.
         pausedAt = when {
-            at != null -> 0L
+            at != null || restart -> 0L
             sameBook && lastPaused > 0 -> lastPaused
             else -> state?.updatedAt ?: 0L
         }

@@ -22,6 +22,9 @@ interface MediaDao {
     @Query("SELECT * FROM audiobook_chapters WHERE audiobookId = :audiobookId ORDER BY ordinal")
     fun observeChapters(audiobookId: String): Flow<List<AudiobookChapter>>
 
+    @Query("SELECT * FROM audiobook_chapters ORDER BY audiobookId, ordinal")
+    fun observeAllChapters(): Flow<List<AudiobookChapter>>
+
     @Query("SELECT * FROM tracks WHERE id = :id")
     suspend fun track(id: String): Track?
 
@@ -67,6 +70,9 @@ interface PlaybackDao {
 
     @Upsert
     suspend fun upsertAudiobookState(state: AudiobookState)
+
+    @Query("SELECT * FROM audiobook_states")
+    fun observeAudiobookStates(): Flow<List<AudiobookState>>
 
     @Query("SELECT * FROM music_state WHERE id = 0")
     suspend fun musicState(): MusicState?

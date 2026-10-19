@@ -95,6 +95,7 @@ class MediaControllerPlayerHub(
     override fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource) =
         send { it.playTracks(trackIds, startIndex, shuffle, source) }
     override fun playAudiobook(id: String, at: AudioBookmark?) = send { it.playAudiobook(id, at) }
+    override fun setFinished(audiobookId: String, finished: Boolean) = send { it.setFinished(audiobookId, finished) }
     override fun playPause() = send { it.playPause() }
     override fun next() = send { it.next() }
     override fun previous() = send { it.previous() }

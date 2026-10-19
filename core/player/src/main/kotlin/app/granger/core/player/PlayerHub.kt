@@ -41,7 +41,18 @@ interface PlayerHub {
     val queue: StateFlow<List<Track>>
 
     fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource)
+    /**
+     * Plays the audiobook from [at], else from its saved position. A book whose state is finished starts from its
+     * first chapter instead; playing a book un-finishes it (its next save writes `finished = false`).
+     */
     fun playAudiobook(id: String, at: AudioBookmark? = null)
+
+    /**
+     * The book page has just written [finished] into [audiobookId]'s state. If that book is loaded, the player adopts
+     * it (so its next save doesn't undo it) and saves; unfinished while at the end, it goes back to the first chapter.
+     * Otherwise nothing happens: the row is the library's.
+     */
+    fun setFinished(audiobookId: String, finished: Boolean)
     fun playPause(); fun next(); fun previous()
 
     /** Audiobooks: ± the skip interval; music: no-op. */
