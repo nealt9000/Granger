@@ -405,6 +405,7 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
       private val client: OkHttpClient, private val userAgent: String,
       private val baseUrl: String = "https://librivox.org", private val minGapMs: Long = 1_000,
       private val clock: () -> Long = System::currentTimeMillis,
+      private val sleep: suspend (Long) -> Unit = { delay(it) },   // injected with clock so tests never wait (Task 4 addition)
   ) {
       suspend fun search(query: LibriVoxQuery, offset: Int, limit: Int = 50): LibriVoxPage
       suspend fun book(id: String): LibriVoxBook          // ?id=&extended=1&coverart=1
@@ -421,12 +422,13 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
   object LibriVoxOffers { fun choose(book: LibriVoxBook, item: ArchiveItem): LibriVoxOffer }
   ```
 - Behaviour:
-  - `Text` sends two requests, `title=<text>` and `author=<last word of text>`, merged with title matches first and duplicates dropped. `hasMore` is true when either request returned `limit` rows.
+  - `Text` sends two requests, `title=<text>` and `author=<last word of text>`, merged with title matches first and duplicates dropped. `hasMore` is true when either request returned `limit` rows. A leading "The", "A" or "An" is dropped from the title request, since LibriVox titles drop it ("The Time Machine" asks `title=Time Machine`).
   - Search asks only for `fields={id,title,authors,language,totaltime,totaltimesecs,num_sections}`, without `extended=1`, so search results have empty `genres` (only `book(id)` fills them).
   - `url_iarchive` "" gives `archiveIdentifier` null (→ `NotOnArchive`); `totaltime` "" with `totaltimesecs` 0 gives `totalTimeMs` 0.
   - A 404 whose body says "could not be found" is an empty page.
   - A 429 throws `LibriVoxError("LibriVox is busy right now. Try again in a minute.")`. Another non-2xx throws `LibriVoxError("LibriVox answered <code>")`. An `IOException` throws `LibriVoxError("Couldn't reach LibriVox")`.
-  - Requests run on `Dispatchers.IO`, at least `minGapMs` apart (one `Mutex`, then `delay` until the gap has passed).
+  - Requests run on `Dispatchers.IO`, at least `minGapMs` apart, send to send (one `Mutex`, then `sleep` until the gap has passed; `sleep` is `delay` in production).
+  - As built: the GET itself (user agent, `Dispatchers.IO`, `IOException` mapping) is shared with `ArchiveOrgClient` through `internal suspend fun OkHttpClient.getText` in `Http.kt`; `book(id)` for an unknown id (404 "could not be found", or no matching book) throws `LibriVoxError("Not found on LibriVox")`; a book with no sections is `NotOnArchive`.
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -451,7 +453,7 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
 ```
 
 - [ ] **Step 2: Run to verify they fail.** Run: `./gradlew :core:archive:testDebugUnitTest :app:testDebugUnitTest --tests 'app.granger.archive.ArchiveUserAgentTest'`. Expected: compile failure, then FAIL.
-- [ ] **Step 3: Implement.** Share `ArchiveOrgClient`'s JSON helpers (`allStrings`, `firstString`, `stripHtml`) by moving them to `internal` functions in a new `core/archive/src/main/kotlin/app/granger/core/archive/Json.kt`. `ArchiveUserAgent` keeps its name and gains `|| host == "librivox.org" || host.endsWith(".librivox.org")`.
+- [ ] **Step 3: Implement.** Share `ArchiveOrgClient`'s JSON helpers (`allStrings`, `firstString`, `stripHtml`) by moving them to `internal` functions in a new `core/archive/src/main/kotlin/app/granger/core/archive/Json.kt` (with `asInt`/`asLong`/`asBool`), and its request code to `Http.kt` (`getText`). `ArchiveUserAgent` keeps its name and gains `|| host == "librivox.org" || host.endsWith(".librivox.org")`.
 - [ ] **Step 4: Run to verify they pass.** Same command. Expected: PASS.
 - [ ] **Step 5: Commit**
 
