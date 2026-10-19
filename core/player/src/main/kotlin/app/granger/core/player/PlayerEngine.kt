@@ -135,6 +135,8 @@ class PlayerEngine(
         }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            // Who paused or played (reason: 1 us or a controller, 3 headphones unplugged): for reading a device test.
+            Log.i(FOCUS_TAG, "playWhenReady=$playWhenReady reason=$reason pausedForFocus=$pausedForFocus")
             // The pause time (for auto-rewind) is kept for audiobooks only, so it survives the process.
             if (playWhenReady) {
                 pausedAt = 0L
@@ -179,6 +181,7 @@ class PlayerEngine(
             // broken files would loop forever). Otherwise, and for an audiobook, stay where it is, paused, so play
             // tries again.
             errorRun++
+            Log.i(FOCUS_TAG, "playback error ${error.errorCodeName}")
             if (mode == Mode.MUSIC && player.hasNextMediaItem() && errorRun < player.mediaItemCount) {
                 player.seekToNextMediaItem()
                 player.prepare()
@@ -193,15 +196,21 @@ class PlayerEngine(
         }
     }
 
+    // pausedForFocus: we paused for a transient loss (or play was pressed during one), so GAIN plays. A user pause
+    // in the meantime clears it; so does a permanent loss.
     private val focusListener = object : FocusPolicy.Listener {
         override fun onTransientLoss() {
             if (player.playWhenReady) {
+                Log.i(FOCUS_TAG, "transient loss: pausing, will resume on gain")
                 pausedForFocus = true
                 player.pause()
+            } else {
+                Log.i(FOCUS_TAG, "transient loss: not playing, nothing to resume" + if (pausedForFocus) " (still resuming)" else "")
             }
         }
 
         override fun onLoss() {
+            Log.i(FOCUS_TAG, "loss: pausing, staying paused")
             pausedForFocus = false
             player.pause()
         }
@@ -210,14 +219,18 @@ class PlayerEngine(
             duck = 1f
             applyVolume()
             if (pausedForFocus) {
+                Log.i(FOCUS_TAG, "gain: resuming (volume ${player.volume})")
                 pausedForFocus = false
                 resume()
+            } else {
+                Log.i(FOCUS_TAG, "gain: not paused for focus, playWhenReady=${player.playWhenReady} (volume ${player.volume})")
             }
         }
 
         override fun onDuck() {
             duck = DUCK_VOLUME
             applyVolume()
+            Log.i(FOCUS_TAG, "duck: volume ${player.volume}")
         }
     }
 
@@ -335,12 +348,19 @@ class PlayerEngine(
         refresh()
     }
 
-    override fun playPause() = submit { if (player.playWhenReady) player.pause() else resume() }
+    override fun playPause() = submit { if (player.playWhenReady) userPause() else resume() }
 
     /** Play (from the session: notification, Bluetooth, lock screen). */
     fun play() = submit { resume() }
 
-    fun pause() = submit { player.pause() }
+    fun pause() = submit { userPause() }
+
+    /** The user's pause (app, notification, lock screen, Bluetooth): a call ending afterwards doesn't play. */
+    private fun userPause() {
+        if (pausedForFocus) Log.i(FOCUS_TAG, "user pause during a focus loss: won't resume on gain")
+        pausedForFocus = false
+        player.pause()
+    }
 
     override fun next() = submit {
         when (mode) {
@@ -623,7 +643,12 @@ class PlayerEngine(
     private fun resume() {
         if (!loaded) return
         if (sleep.expired()) cancelSleep()
-        if (!focus.request(speech = mode == Mode.BOOK)) return
+        if (!focus.request(speech = mode == Mode.BOOK)) {
+            // A call still has focus. Accepted as delayed, its end (GAIN) plays; refused, play stays the only way.
+            if (focus.suspended) pausedForFocus = true
+            Log.i(FOCUS_TAG, "play refused: focus ${if (focus.suspended) "delayed, will play on gain" else "not granted"}")
+            return
+        }
         pausedForFocus = false
         errorRun = 0
         if (mode == Mode.BOOK) finished = false
@@ -888,6 +913,7 @@ class PlayerEngine(
 
     private companion object {
         const val TAG = "PlayerEngine"
+        const val FOCUS_TAG = FocusPolicy.TAG
         const val MODE_MUSIC = "music"
         const val MODE_BOOK = "audiobook"
         const val TICK_MS = 1_000L

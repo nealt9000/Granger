@@ -3,6 +3,7 @@ package app.granger.core.player
 import android.content.Context
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.C
 import androidx.media3.common.Format
@@ -14,6 +15,7 @@ import androidx.media3.exoplayer.drm.DrmSessionManagerProvider
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
+import androidx.media3.session.MediaSession
 import androidx.media3.test.utils.FakeClock
 import androidx.media3.test.utils.FakeMediaSource
 import androidx.media3.test.utils.FakeTimeline
@@ -129,10 +131,10 @@ class PlayerEngineTest {
         return book
     }
 
-    private fun newEngine(replayGain: ReplayGainProcessor? = null): PlayerEngine {
+    private fun newEngine(replayGain: ReplayGainProcessor? = null, requester: FocusRequester = focus): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()
         return PlayerEngine(
-            player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(focus),
+            player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(requester),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), writer = Dispatchers.Unconfined,
             random = Random(7), replayGain = replayGain,
         ).also { engines += it }
@@ -252,6 +254,94 @@ class PlayerEngineTest {
         focus.change(AudioManager.AUDIOFOCUS_GAIN)
         assertThat(engine.player.playWhenReady).isTrue()
         assertThat(engine.player.currentPosition).isEqualTo(paused - 3_000)
+    }
+
+    // ---- focus through the real SystemFocusRequester (only AudioManager is Robolectric's) ----
+
+    private val audio get() = shadowOf(context.getSystemService(AudioManager::class.java))
+
+    /** A focus change as AudioManager delivers it: to the listener of our last request, posted on the main looper. */
+    private fun systemFocusChange(engine: PlayerEngine, change: Int) {
+        val listener = audio.lastAudioFocusRequest.listener
+        Handler(Looper.getMainLooper()).post { listener.onAudioFocusChange(change) }
+        run(engine.player).untilPendingCommandsAreFullyHandled()
+    }
+
+    /** The walkthrough's phone call: -2 as it rang, then 1 about 5 s later; the notification and Bluetooth path too. */
+    @Test fun phoneCallThroughTheSystemFocusPathResumes() {
+        val book = fakeBook("ring", 60_000)
+        val engine = newEngine(requester = SystemFocusRequester(context))
+        val session = MediaSession.Builder(context, SessionPlayer(engine.player, engine)).build()
+        try {
+            engine.playAudiobook(book.id)
+            idle()
+            run(engine.player).untilPosition(0, 20_000)
+
+            systemFocusChange(engine, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)
+            assertThat(engine.player.playWhenReady).isFalse()
+            val paused = engine.player.currentPosition
+            clock.advanceTime(5_000)
+
+            systemFocusChange(engine, AudioManager.AUDIOFOCUS_GAIN)
+            assertThat(engine.player.playWhenReady).isTrue()
+            assertThat(engine.player.currentPosition).isAtLeast(paused - 20)   // paused under 10 s: no rewind
+        } finally {
+            session.release()
+        }
+    }
+
+    /** Pause pressed (notification, lock screen, Bluetooth) during a call: the end of the call doesn't play. */
+    @Test fun userPauseDuringATransientLossCancelsTheResume() {
+        val book = fakeBook("hush", 60_000)
+        val engine = newEngine(requester = SystemFocusRequester(context))
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 5_000)
+
+        systemFocusChange(engine, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)
+        SessionPlayer(engine.player, engine).pause()
+        idle()
+        systemFocusChange(engine, AudioManager.AUDIOFOCUS_GAIN)
+        assertThat(engine.player.playWhenReady).isFalse()
+    }
+
+    /**
+     * Play pressed while a call holds focus: the system answers DELAYED (we accept a delayed gain), it stays paused,
+     * and the end of the call (GAIN on that request) plays. Before, the refused request had replaced the one the GAIN
+     * would have come to, so nothing resumed.
+     */
+    @Test fun playDuringACallPlaysWhenTheCallEnds() {
+        val book = fakeBook("hold", 60_000)
+        val engine = newEngine(requester = SystemFocusRequester(context))
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 5_000)
+
+        systemFocusChange(engine, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)
+        audio.setNextFocusRequestResponse(AudioManager.AUDIOFOCUS_REQUEST_DELAYED)
+        engine.playPause()
+        idle()
+        assertThat(audio.lastAudioFocusRequest.audioFocusRequest.acceptsDelayedFocusGain()).isTrue()
+        assertThat(engine.player.playWhenReady).isFalse()
+
+        systemFocusChange(engine, AudioManager.AUDIOFOCUS_GAIN)
+        assertThat(engine.player.playWhenReady).isTrue()
+    }
+
+    /** A notification talks over us (-3, then 1): the volume drops, then comes back, and playback never stops. */
+    @Test fun duckThroughTheSystemFocusPathRestoresTheVolume() {
+        val ids = musicFixtures()
+        val engine = newEngine(requester = SystemFocusRequester(context))
+        engine.playTracks(ids, 0, false, PlaySource("songs", "Songs"))
+        idle()
+        run(engine.player).untilPosition(0, 500)
+
+        systemFocusChange(engine, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK)
+        assertThat(engine.player.volume).isLessThan(1f)
+        assertThat(engine.player.playWhenReady).isTrue()
+        systemFocusChange(engine, AudioManager.AUDIOFOCUS_GAIN)
+        assertThat(engine.player.volume).isEqualTo(1f)
+        assertThat(engine.player.playWhenReady).isTrue()
     }
 
     /** Play pressed during a call asks the system again; refused, it stays paused instead of playing over the call. */
@@ -697,11 +787,11 @@ class FakeFocusRequester : FocusRequester {
         private set
     private var onChange: ((Int) -> Unit)? = null
 
-    override fun request(speech: Boolean, onChange: (Int) -> Unit): Boolean {
+    override fun request(speech: Boolean, onChange: (Int) -> Unit): FocusRequester.Result {
         requests++
         this.onChange = onChange
         held = grant
-        return grant
+        return if (grant) FocusRequester.Result.GRANTED else FocusRequester.Result.FAILED
     }
 
     override fun abandon() {
