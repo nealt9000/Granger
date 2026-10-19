@@ -20,6 +20,8 @@ import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
 import app.granger.music.FakeMediaLibrary
 import app.granger.player.FakePlayerHub
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerUi
 import app.granger.player.bookProgress
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
@@ -156,6 +158,35 @@ class AudiobooksViewModelTest {
         assertThat(page.progress.positionMs).isEqualTo(110_000L)
         assertThat(page.currentChapter).isEqualTo(2)
         assertThat(page.playLabel).isEqualTo("Resume")
+    }
+
+    @Test fun theBookInThePlayerPausesAndCarriesOnInPlace() = runTest(main.dispatcher) {
+        val b = book("loaded", durationMs = 150_000L)
+        val chapters = chaptersOf(b, 100_000L, 50_000L)
+        add(b, chapters)
+        listening.stateList.value = listOf(state(b, "track:phone:loaded-0", 20_000L, updatedAt = 5L))
+        val playingBook = PlayerUi(NowPlaying.Book(b, chapters[0], 2, 1f, false, 0), playing = true, 30_000L, 100_000L, null)
+        hub.ui.value = playingBook
+        val vm = vm()
+
+        assertThat(vm.book(b.id).filterNotNull().first().playLabel).isEqualTo("Pause")
+        vm.play(b.id)
+        advanceUntilIdle()
+        // No reload from the saved position (20 s, behind the player's 30 s): only a pause.
+        assertThat(hub.calls).containsExactly("playPause")
+
+        hub.ui.value = playingBook.copy(playing = false)
+        assertThat(vm.book(b.id).filterNotNull().first { !it.playing }.playLabel).isEqualTo("Resume")
+        vm.play(b.id)
+        advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("playPause", "playPause")
+        assertThat(hub.bookPlays).isEmpty()
+
+        // Not in the player: it loads from its saved position, as before.
+        hub.ui.value = PlayerUi.IDLE
+        vm.play(b.id)
+        advanceUntilIdle()
+        assertThat(hub.bookPlays.single()).isEqualTo(b.id to null)
     }
 
     @Test fun markFinishedThenResumeStartsFromBeginning() = runTest(main.dispatcher) {

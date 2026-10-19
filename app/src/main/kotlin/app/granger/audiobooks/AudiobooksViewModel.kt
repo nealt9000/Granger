@@ -10,7 +10,9 @@ import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PackStatus
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Shelves
+import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerUi
 import app.granger.player.BookProgress
 import app.granger.player.bookProgressAt
 import app.granger.player.chapterAt
@@ -75,7 +77,7 @@ data class AudiobookShelfUi(val title: String, val books: List<ShelfBook>)
 /**
  * [currentChapter]: the ordinal the listener is in, while part-way. [bookmarks] are in book order. A downloaded book
  * (LibriVox, archive.org) has its [download] state, its files in ([filesDone]) of [filesTotal], and [onRemoveDownload];
- * phone media has neither (null).
+ * phone media has neither (null). [inPlayer]: the player has this book loaded, [playing] or paused.
  */
 data class AudiobookPage(
     val book: Audiobook,
@@ -88,14 +90,17 @@ data class AudiobookPage(
     val filesDone: Int = 0,
     val filesTotal: Int = 0,
     val onRemoveDownload: (() -> Unit)? = null,
+    val inPlayer: Boolean = false,
+    val playing: Boolean = false,
 ) {
     val missing: Boolean get() = book.status != PackStatus.OK
     val playable: Boolean get() = !missing && chapters.isNotEmpty()
     val fraction: Float get() = fractionOf(progress)
     val playLabel: String get() = when {
         missing -> "Missing"
+        inPlayer && playing -> "Pause"
         listening == Listening.FINISHED -> "Play from start"
-        listening == Listening.IN_PROGRESS -> "Resume"
+        listening == Listening.IN_PROGRESS || inPlayer -> "Resume"
         else -> "Play"
     }
 }
@@ -185,7 +190,13 @@ class AudiobooksViewModel(
     }.flowOn(compute).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Null while loading, or if there's no such book. */
-    fun book(id: String): Flow<AudiobookPage?> = combine(
+    fun book(id: String): Flow<AudiobookPage?> = combine(page(id), hub.ui.map { inPlayer(it, id) to it.playing }.distinctUntilChanged()) { page, (loaded, playing) ->
+        page?.copy(inPlayer = loaded, playing = loaded && playing)
+    }
+
+    private fun inPlayer(ui: PlayerUi, id: String) = (ui.now as? NowPlaying.Book)?.book?.id == id
+
+    private fun page(id: String): Flow<AudiobookPage?> = combine(
         media.audiobooks.map { all -> all.firstOrNull { it.id == id } }.distinctUntilChanged(),
         media.chapters(id),
         listening.states.map { all -> all.firstOrNull { it.audiobookId == id } }.distinctUntilChanged(),
@@ -211,10 +222,18 @@ class AudiobooksViewModel(
         )
     }.flowOn(compute)
 
-    /** Play or resume; a finished book starts again from its first chapter. A MISSING book doesn't play. */
+    /**
+     * Play or resume; a finished book starts again from its first chapter. A MISSING book doesn't play. The book already
+     * in the player pauses or carries on where it is, rather than reloading from its last saved position.
+     */
     fun play(audiobookId: String) = act("play $audiobookId") {
         val book = playableBook(audiobookId) ?: return@act
         val state = listening.state(audiobookId)
+        val ui = hub.ui.value
+        if (inPlayer(ui, audiobookId) && (ui.playing || state?.finished != true)) {
+            hub.playPause()
+            return@act
+        }
         if (state?.finished == true) {
             val start = AudiobookShelf.startOf(book, media.chapters(audiobookId).first(), now()) ?: return@act
             hub.playAudiobook(audiobookId, start)
