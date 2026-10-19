@@ -112,6 +112,7 @@ class PlayerEngine(
     // left alone until the user picks a place (seek, skip, chapter, bookmark) or plays the book to its end.
     private var restoreUnresolved = false
 
+    private var errorRun = 0              // playback errors since an item last got ready: stops a queue of broken files
     private var pausedAt = 0L
     private var pausedForFocus = false
     private var duck = 1f
@@ -124,6 +125,7 @@ class PlayerEngine(
 
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(state: Int) {
+            if (state == Player.STATE_READY) errorRun = 0
             if (state == Player.STATE_READY && awaitingReady) {
                 awaitingReady = false
                 if (saveWhenReady) { saveWhenReady = false; save(SaveReason.TRACK) }
@@ -173,10 +175,15 @@ class PlayerEngine(
 
         override fun onPlayerError(error: PlaybackException) {
             Log.w(TAG, "Playback error", error)
-            // A missing or broken song: go on with the next one. An audiobook stays where it is.
-            if (mode == Mode.MUSIC && player.hasNextMediaItem()) {
+            // A missing or broken song: go on with the next one, unless every item has failed in a row (repeat all over
+            // broken files would loop forever). Otherwise, and for an audiobook, stay where it is, paused, so play
+            // tries again.
+            errorRun++
+            if (mode == Mode.MUSIC && player.hasNextMediaItem() && errorRun < player.mediaItemCount) {
                 player.seekToNextMediaItem()
                 player.prepare()
+            } else {
+                player.pause()
             }
         }
 
@@ -618,6 +625,7 @@ class PlayerEngine(
         if (sleep.expired()) cancelSleep()
         if (!focus.request(speech = mode == Mode.BOOK)) return
         pausedForFocus = false
+        errorRun = 0
         if (mode == Mode.BOOK) finished = false
         if (mode == Mode.BOOK && pausedAt > 0L) {
             val rewind = AutoRewind.rewindMs(now() - pausedAt)

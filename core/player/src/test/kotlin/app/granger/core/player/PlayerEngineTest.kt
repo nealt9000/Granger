@@ -18,6 +18,7 @@ import androidx.media3.test.utils.FakeClock
 import androidx.media3.test.utils.FakeMediaSource
 import androidx.media3.test.utils.FakeTimeline
 import androidx.media3.test.utils.TestExoPlayerBuilder
+import androidx.media3.test.utils.robolectric.RobolectricUtil.runMainLooperUntil
 import androidx.media3.test.utils.robolectric.TestPlayerRunHelper.run
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -460,16 +461,17 @@ class PlayerEngineTest {
 
         // The book page writes the row, then tells the hub; the engine's next save keeps the mark.
         runBlocking { playback.upsertAudiobookState(bookState(book.id)!!.copy(finished = true)) }
+        // No idle() while it plays: idling the looper then would let the fake clock race ahead and trip ExoPlayer's
+        // stuck-player check (a playback error, which pauses the engine).
         engine.setFinished(book.id, true)
-        idle()
         engine.playPause()
         idle()
+        assertThat(engine.player.playWhenReady).isFalse()
         assertThat(bookState(book.id)!!.finished).isTrue()
 
         // Played to the end it's finished; marked unfinished there, the loaded book goes back to its start.
         engine.setFinished(book.id, false)
         engine.playPause()
-        idle()
         run(engine.player).untilState(Player.STATE_ENDED)
         idle()
         assertThat(bookState(book.id)!!.finished).isTrue()
@@ -518,7 +520,6 @@ class PlayerEngineTest {
         run(second.player).untilState(Player.STATE_READY)
         idle()
         second.playPause()
-        idle()
         run(second.player).untilPosition(0, 1_000)
         second.playPause()
         idle()
@@ -562,6 +563,64 @@ class PlayerEngineTest {
         val saved = bookState(book.id)!!
         assertThat(saved.trackId).isEqualTo("track:phone:lost-1")
         assertThat(saved.positionMs).isEqualTo(0L)
+    }
+
+    // ---- playback errors ----
+
+    private fun missing(ref: String, audiobookId: String? = null) =
+        track(ref, Uri.fromFile(File("/nonexistent/$ref.mp3")).toString(), 2_500, audiobookId = audiobookId)
+
+    private fun countErrors(engine: PlayerEngine): () -> Int {
+        var errors = 0
+        engine.player.addListener(object : Player.Listener {
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) { errors++ }
+        })
+        return { errors }
+    }
+
+    /** Repeat all over songs that all fail: it tries each once, then stops on one, paused, instead of spinning. */
+    @Test fun queueWhereEverySongFailsStopsInsteadOfLooping() {
+        val tracks = (1..3).map { missing("missing$it") }
+        runBlocking { db.mediaDao().upsertTracks(tracks) }
+        val engine = newEngine()
+        val errors = countErrors(engine)
+        engine.playTracks(tracks.map { it.id }, 0, false, PlaySource("songs", "Songs"))
+        engine.cycleRepeat()                             // off → all
+        runMainLooperUntil { !engine.player.playWhenReady || errors() > 10 }
+        idle()
+        assertThat(engine.player.repeatMode).isEqualTo(Player.REPEAT_MODE_ALL)
+        assertThat(errors()).isEqualTo(3)
+        assertThat(engine.player.playWhenReady).isFalse()
+        assertThat(engine.ui.value.playing).isFalse()
+    }
+
+    /** One broken song in a repeating queue is skipped every time round: a song that plays resets the count. */
+    @Test fun brokenSongInARepeatingQueueIsSkippedEveryTime() {
+        val ids = musicFixtures().take(2)
+        val broken = missing("broken")
+        runBlocking { db.mediaDao().upsertTracks(listOf(broken)) }
+        val engine = newEngine()
+        val errors = countErrors(engine)
+        engine.playTracks(listOf(ids[0], broken.id, ids[1]), 0, false, PlaySource("songs", "Songs"))
+        engine.cycleRepeat()
+        runMainLooperUntil { errors() >= 4 || !engine.player.playWhenReady }
+        assertThat(errors()).isEqualTo(4)
+        assertThat(engine.player.playWhenReady).isTrue()
+    }
+
+    /** A book whose file fails stays where it is, paused (so play tries again), not "playing" in silence. */
+    @Test fun failingBookPauses() {
+        val id = "audiobook:phone:broken"
+        val file = missing("broken-book", audiobookId = id)
+        val book = saveBook(id, "broken", listOf(file), listOf(AudiobookChapter(id, 0, "One", file.id, 0L, 2_500L)))
+        val engine = newEngine()
+        val errors = countErrors(engine)
+        engine.playAudiobook(book.id)
+        runMainLooperUntil { errors() >= 1 }
+        idle()
+        assertThat(engine.player.playWhenReady).isFalse()
+        assertThat(engine.ui.value.playing).isFalse()
+        assertThat(bookState(book.id)).isNull()          // nothing confirmed, nothing saved
     }
 
     @Test fun replayGainModeChangeAppliesToThePlayingQueue() {
