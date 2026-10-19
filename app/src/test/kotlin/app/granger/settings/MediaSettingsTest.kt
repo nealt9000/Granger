@@ -57,10 +57,12 @@ class MediaSettingsTest {
     private val grants = FakeGrants()
     private var scans = 0
     private var scanFails = false
+    private var scanError: Throwable? = null
 
     private fun TestScope.settings(): MediaSettings {
         val s = MediaSettings(folders, grants, prefs, scanner = {
             scans++
+            scanError?.let { throw it }
             if (scanFails) error("no")
             ScanSummary(songs = 12, audiobooks = 2)
         }, scope = backgroundScope, work = this, now = { 77L })
@@ -85,6 +87,21 @@ class MediaSettingsTest {
         assertThat(folders.list.value).containsExactly(MediaFolder(musicTree, audiobooks = false, addedAt = 77L))
         assertThat(scans).isEqualTo(1)
         assertThat(s.ui.value.folders.single().name).isEqualTo("Music/Rock")
+        assertThat(s.ui.value.scan).isEqualTo(RescanState.Done(ScanSummary(12, 2)))
+    }
+
+    /** A scan that dies with an Error (out of memory, a native-library link error) still ends as Failed, not Running. */
+    @Test fun rescanEndingInAnErrorShowsFailedNotRunning() = runTest {
+        scanError = StackOverflowError("deep")
+        val s = settings()
+        s.rescan()
+        settle()
+        assertThat(s.ui.value.scan).isEqualTo(RescanState.Failed)
+
+        // And the button works again.
+        scanError = null
+        s.rescan()
+        settle()
         assertThat(s.ui.value.scan).isEqualTo(RescanState.Done(ScanSummary(12, 2)))
     }
 

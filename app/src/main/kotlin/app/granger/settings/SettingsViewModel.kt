@@ -235,7 +235,8 @@ class MediaSettings(
         } catch (e: CancellationException) {
             scan.value = RescanState.Idle
             throw e
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Errors too (out of memory, a native library that won't link): the button must never stay on Running.
             android.util.Log.e("Granger", "Rescan failed", e)
             RescanState.Failed
         }
