@@ -12,8 +12,9 @@ class LexicalScoreTest {
             .isWithin(1e-9).of(0.5)
 
     @Test fun titleBonus() {
-        // An article's title is only a bonus; a book's title also stands in for the body (see bookTitleSatisfiesTheKeywordThatNamesIt).
+        // A title is only a bonus, for books and articles alike.
         assertThat(LexicalScore.of(passage("nothing here", title = "Steam engine", kind = SourceKind.ARTICLE), listOf("steam"))).isWithin(1e-9).of(0.1)
+        assertThat(LexicalScore.of(passage("nothing here", title = "Steam engine"), listOf("steam"))).isWithin(1e-9).of(0.1)
         assertThat(LexicalScore.of(passage("steam power", title = "Steam engine"), listOf("steam"))).isWithin(1e-9).of(1.1)
     }
 
@@ -72,9 +73,12 @@ class LexicalScoreTest {
 
     @Test fun noKeywordsScoresZero() = assertThat(LexicalScore.of(passage("text"), emptyList())).isEqualTo(0.0)
 
-    @Test fun bookTitleSatisfiesTheKeywordThatNamesIt() {
+    @Test fun bookTitleIsOnlyABonus() {
+        // tune-4: crediting a title as a keyword let "sister" pass every passage of Sister Carrie.
         val kjv = passage("For the love of money is the root of all evil.", title = "The King James Bible")
-        assertThat(LexicalScore.of(kjv, listOf("bible", "money", "evil"))).isWithin(1e-9).of(1.1)
+        assertThat(LexicalScore.of(kjv, listOf("bible", "money", "evil"))).isWithin(1e-9).of(2.0 / 3 + 0.1)
+        val carrie = passage("She walked to the station.", title = "Sister Carrie")
+        assertThat(LexicalScore.of(carrie, listOf("sister", "phone number"))).isWithin(1e-9).of(0.1)
     }
 
     @Test fun articleTitleDoesNotCountAsBody() {
@@ -83,13 +87,8 @@ class LexicalScoreTest {
         assertThat(LexicalScore.of(article, listOf("bible", "money", "evil"))).isWithin(1e-9).of(2.0 / 3 + 0.1 + 0.3)
     }
 
-    @Test fun titleCreditCountsOnce() {
-        val book = passage("nothing relevant", title = "Love and War")
-        assertThat(LexicalScore.of(book, listOf("love", "war", "peace"))).isWithin(1e-9).of(1.0 / 3 + 0.1)
-    }
-
-    @Test fun titleCreditHonoursAliases() {
+    @Test fun titleBonusHonoursAliases() {
         val koran = passage("Charity is a duty.", title = "The Koran")
-        assertThat(LexicalScore.of(koran, listOf("quran", "charity"))).isWithin(1e-9).of(1.1)
+        assertThat(LexicalScore.of(koran, listOf("quran", "charity"))).isWithin(1e-9).of(0.5 + 0.1)
     }
 }
