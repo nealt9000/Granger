@@ -97,7 +97,10 @@ private fun RecentItem.Play.painter(): Painter = when {
     else -> painterResource(R.drawable.ic_music_note) // album:, genre:, songs
 }
 
-/** The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent search, chat and play icons, Settings. */
+/**
+ * The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent search, chat and play icons, Settings.
+ * Tapping the recents (or the rail's background) calls [onExpand]; everything else goes straight to its screen.
+ */
 @Composable
 internal fun NarrowRail(
     rail: RailUi,
@@ -108,9 +111,6 @@ internal fun NarrowRail(
     onTab: (Long) -> Unit,
     onCloseTab: (Long) -> Unit,
     onHistory: () -> Unit,
-    onRecentSearch: (String) -> Unit,
-    onRecentChat: (Long) -> Unit,
-    onRecentPlay: (RecentItem.Play) -> Unit,
 ) {
     Column(
         Modifier
@@ -135,32 +135,26 @@ internal fun NarrowRail(
             IconButton(onClick = onHistory) {
                 Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = GrangerColors.OnSurfaceVariant)
             }
-            if (rail.recent.isNotEmpty()) RailDivider(Modifier.width(32.dp))
-            rail.recent.forEach { item ->
-                when (item) {
-                    is RecentItem.Search -> IconButton(onClick = { onRecentSearch(item.query) }) {
-                        Icon(
-                            Icons.Filled.Search,
-                            contentDescription = "Recent search: ${item.query}",
-                            tint = GrangerColors.Outline,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    }
-                    is RecentItem.Chat -> IconButton(onClick = { onRecentChat(item.chatId) }) {
-                        Icon(
-                            painterResource(R.drawable.ic_research),
-                            contentDescription = "Research chat: ${item.title}",
-                            tint = GrangerColors.Outline,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    }
-                    is RecentItem.Play -> IconButton(onClick = { onRecentPlay(item) }) {
-                        Icon(
-                            item.painter(),
-                            contentDescription = "Play again: ${item.title}",
-                            tint = GrangerColors.Outline,
-                            modifier = Modifier.size(18.dp),
-                        )
+            if (rail.recent.isNotEmpty()) {
+                RailDivider(Modifier.width(32.dp))
+                // The recents are bare icons here, too little to tell apart: a tap anywhere on them opens the full rail,
+                // where they have titles, rather than jumping into one unseen.
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClickLabel = "Show recents", onClick = onExpand),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    rail.recent.forEach { item ->
+                        val (painter, description) = when (item) {
+                            is RecentItem.Search -> rememberVectorPainter(Icons.Filled.Search) to "Recent search: ${item.query}"
+                            is RecentItem.Chat -> painterResource(R.drawable.ic_research) to "Research chat: ${item.title}"
+                            is RecentItem.Play -> item.painter() to "Play again: ${item.title}"
+                        }
+                        Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                            Icon(painter, contentDescription = description, tint = GrangerColors.Outline, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
             }

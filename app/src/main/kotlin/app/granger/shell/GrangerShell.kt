@@ -77,8 +77,8 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
 
 /**
  * The app frame: the side rail beside every screen. The narrow rail sits in the layout; the expanded one is
- * drawn over the content with a scrim. An edge swipe (from x < 24 dp, calling [onEdgeSwipe]) or tapping the rail's background expands
- * it; tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
+ * drawn over the content with a scrim. An edge swipe (from x < 24 dp, calling [onEdgeSwipe]) or tapping the rail's background or
+ * its recents expands it (the recent callbacks are only reached from the expanded rail); tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
  * content column, pushing it down, and takes the status bar's inset for itself. With [miniPlayerOverContent] it's
  * drawn over the top of the content instead (the reader: a middle tap mustn't reflow the page), beside the rail, and
  * [LocalTopOverlayInset] tells the content how far to move its top bars down so nothing is covered. With [railOverContent] the
@@ -120,7 +120,7 @@ fun GrangerShell(
         val railBeside = railVisible && !railOverContent
         Row(Modifier.fillMaxSize()) {
             if (railBeside) {
-                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat, onRecentPlay)
+                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory)
             }
             Column(
                 Modifier
@@ -155,7 +155,7 @@ fun GrangerShell(
             ) { miniPlayer() }
         }
         if (railVisible && railOverContent) {
-            NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory, onRecentSearch, onRecentChat, onRecentPlay)
+            NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onTab, onCloseTab, onHistory)
         }
         if (edgeSwipeActive) {
             // Gesture navigation claims the left edge for Back; Android lets an app take back up to 200 dp of it.
