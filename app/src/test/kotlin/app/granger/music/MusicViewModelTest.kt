@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -204,5 +205,32 @@ class MusicViewModelTest {
         vm.moveAlbum(album, "c-mine")
         main.dispatcher.scheduler.advanceUntilIdle()
         assertThat(shelves.moves).containsExactly("album:${album.key}" to "c-mine")
+    }
+
+    /**
+     * A removed download's track row is gone, so its entry has no row: the rows below it are no longer at their entry
+     * ordinals. Moves and removes go by each row's own ordinal.
+     */
+    @Test fun playlistRowsUseEntryOrdinals() = runTest(main.dispatcher) {
+        media.trackList.value = listOf(song("a"), song("c"), song("d"))
+        val mix = playlists.create("Mix", listOf("track:phone:a", "track:archive-org:gone", "track:phone:c", "track:phone:d"))
+        val vm = vm()
+        val page = vm.playlist(mix).filterNotNull().first()
+        assertThat(page.items.map { it.ordinal to it.track.id })
+            .containsExactly(0 to "track:phone:a", 2 to "track:phone:c", 3 to "track:phone:d").inOrder()
+        assertThat(page.tracks.map { it.id }).containsExactly("track:phone:a", "track:phone:c", "track:phone:d").inOrder()
+
+        // "Move up" on c swaps it with a, the row above it.
+        vm.moveInPlaylist(mix, page.items[1].ordinal, page.items[0].ordinal)
+        advanceUntilIdle()
+        assertThat(playlists.entries.value.getValue(mix))
+            .containsExactly("track:phone:c", "track:phone:a", "track:archive-org:gone", "track:phone:d").inOrder()
+
+        // "Remove from playlist" on d removes d, not the entry at d's row position.
+        val moved = vm.playlist(mix).filterNotNull().first()
+        vm.removeFromPlaylist(mix, moved.items[2].ordinal)
+        advanceUntilIdle()
+        assertThat(playlists.entries.value.getValue(mix))
+            .containsExactly("track:phone:c", "track:phone:a", "track:archive-org:gone").inOrder()
     }
 }

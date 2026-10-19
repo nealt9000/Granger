@@ -34,11 +34,21 @@ interface MediaLibrary {
 
     /** Sets every [origin] row MISSING (permission lost). */
     suspend fun markAllMissing(origin: MediaOrigin)
+
+    /**
+     * Deletes these catalog rows (tracks, audiobooks, and the audiobooks' chapters). Audiobook states, bookmarks, playlist
+     * entries and placements stay, so the same ids coming back (a re-download) find them again.
+     *
+     * For removed downloads only (LIBRIVOX, ARCHIVE_ORG): a PHONE id is ignored, since phone files are never Granger's to
+     * remove. An audiobook's file tracks go only if they're named in [trackIds] too.
+     */
+    suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>)
 }
 
 /**
  * [now] stamps `addedAt` on rows new to the library; a row already there keeps its own. A re-synced audiobook's
- * chapters are replaced (they come from the files); nothing else is ever deleted.
+ * chapters are replaced (they come from the files). Otherwise [sync] deletes nothing, for any origin; only [forget]
+ * deletes catalog rows, and only downloaded ones.
  */
 class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> Long = System::currentTimeMillis) : MediaLibrary {
     private val dao = db.mediaDao()
@@ -99,6 +109,17 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
         }
     }
 
+    override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) {
+        if (trackIds.isEmpty() && audiobookIds.isEmpty()) return
+        db.withTransaction {
+            for (ids in audiobookIds.distinct().chunked(MAX_IDS)) {
+                dao.deleteChaptersOf(ids)
+                dao.deleteAudiobooks(ids)
+            }
+            for (ids in trackIds.distinct().chunked(MAX_IDS)) dao.deleteTracks(ids)
+        }
+    }
+
     /** A chapter runs to the next chapter in the same file, or to the end of the file. */
     private suspend fun chapterRows(scanned: ScannedAudiobook, tracks: Map<String, Track>): List<AudiobookChapter> =
         scanned.chapters.mapIndexed { ordinal, (trackId, chapter) ->
@@ -107,3 +128,6 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
             AudiobookChapter(scanned.book.id, ordinal, chapter.title, trackId, chapter.startMs, (end - chapter.startMs).coerceAtLeast(0L))
         }
 }
+
+/** Ids per delete statement: under SQLite's 999-variable limit on API 29. */
+private const val MAX_IDS = 900

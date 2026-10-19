@@ -172,4 +172,93 @@ class MediaLibraryTest {
         assertThat(library.audiobook(book.id)!!.title).isEqualTo("The Hobbit")
         assertThat(playback.audiobookState(book.id)).isEqualTo(state)
     }
+
+    /** Remove on a download: its catalog rows go (no MISSING ghost), music and audiobook alike. */
+    @Test fun forgetDeletesCatalogRowsOnly() = runTest {
+        val (scanned, files) = book("odyssey", listOf("o1", "o2"), MediaOrigin.LIBRIVOX)
+        val song = track("x", MediaOrigin.LIBRIVOX)
+        library.sync(MediaOrigin.LIBRIVOX, ScanResult(listOf(song) + files, listOf(scanned)))
+        assertThat(library.chapters(scanned.book.id).first()).hasSize(2)
+
+        library.forget(listOf(song.id) + files.map { it.id }, listOf(scanned.book.id))
+
+        assertThat(db.mediaDao().tracksOf(MediaOrigin.LIBRIVOX)).isEmpty()
+        assertThat(db.mediaDao().audiobooksOf(MediaOrigin.LIBRIVOX)).isEmpty()
+        assertThat(library.chapters(scanned.book.id).first()).isEmpty()
+        assertThat(library.tracks.first()).isEmpty()
+        assertThat(library.audiobooks.first()).isEmpty()
+        // Forgetting what isn't there is a no-op.
+        library.forget(listOf(song.id), listOf(scanned.book.id))
+        library.forget(emptyList(), emptyList())
+    }
+
+    /** Remove, then get again: the same ids find their position, bookmarks and playlist entries waiting. */
+    @Test fun forgetKeepsStatesBookmarksAndPlaylistEntries() = runTest {
+        val (scanned, files) = book("odyssey", listOf("o1", "o2"), MediaOrigin.LIBRIVOX)
+        val song = track("x", MediaOrigin.LIBRIVOX)
+        val full = ScanResult(listOf(song) + files, listOf(scanned))
+        library.sync(MediaOrigin.LIBRIVOX, full)
+        val state = AudiobookState(scanned.book.id, files[1].id, 42_000L, 1.25f, true, 300, false, 5L)
+        playback.upsertAudiobookState(state)
+        val markId = playback.insertBookmark(AudioBookmark(0, scanned.book.id, files[0].id, 40_000L, "Sirens", "", 6L))
+        val listId = playback.insertPlaylist(Playlist(0, "Mix", 7L, 7L))
+        playback.insertEntries(listOf(PlaylistEntry(listId, 0, song.id)))
+
+        library.forget(listOf(song.id) + files.map { it.id }, listOf(scanned.book.id))
+        assertThat(library.track(song.id)).isNull()
+        assertThat(library.audiobook(scanned.book.id)).isNull()
+        assertThat(playback.audiobookState(scanned.book.id)).isEqualTo(state)
+        assertThat(playback.observeBookmarks(scanned.book.id).first().map { it.id }).containsExactly(markId)
+        assertThat(playback.entries(listId).map { it.trackId }).containsExactly(song.id)
+        assertThat(playback.observePlaylistTracks(listId).first()).isEmpty()
+
+        clock = 9_000L
+        library.sync(MediaOrigin.LIBRIVOX, full)
+        assertThat(statusOf(song.id)).isEqualTo(PackStatus.OK)
+        assertThat(library.audiobook(scanned.book.id)!!.status).isEqualTo(PackStatus.OK)
+        assertThat(library.chapters(scanned.book.id).first().map { it.trackId }).containsExactly(files[0].id, files[1].id).inOrder()
+        assertThat(playback.audiobookState(scanned.book.id)).isEqualTo(state)
+        assertThat(playback.observeBookmarks(scanned.book.id).first().map { it.id }).containsExactly(markId)
+        assertThat(playback.observePlaylistTracks(listId).first().map { it.id }).containsExactly(song.id)
+    }
+
+    /** Forget is for removed downloads: phone rows (and other downloaded origins' rows) are never touched, even by id. */
+    @Test fun forgetLeavesOtherOriginsAlone() = runTest {
+        val (phoneBook, phoneFiles) = book("hobbit", listOf("h1"))
+        library.sync(MediaOrigin.PHONE, ScanResult(listOf(track("a")) + phoneFiles, listOf(phoneBook)))
+        val (lvBook, lvFiles) = book("odyssey", listOf("o1"), MediaOrigin.LIBRIVOX)
+        library.sync(MediaOrigin.LIBRIVOX, ScanResult(lvFiles, listOf(lvBook)))
+        val (iaBook, iaFiles) = book("iliad", listOf("i1"), MediaOrigin.ARCHIVE_ORG)
+        val iaSong = track("s", MediaOrigin.ARCHIVE_ORG)
+        library.sync(MediaOrigin.ARCHIVE_ORG, ScanResult(iaFiles + iaSong, listOf(iaBook)))
+
+        library.forget(listOf("track:phone:a", "track:phone:h1", iaSong.id), listOf(phoneBook.book.id, iaBook.book.id))
+
+        // Phone rows stay, chapters and all.
+        assertThat(statusOf("track:phone:a")).isEqualTo(PackStatus.OK)
+        assertThat(statusOf("track:phone:h1")).isEqualTo(PackStatus.OK)
+        assertThat(library.audiobook(phoneBook.book.id)!!.status).isEqualTo(PackStatus.OK)
+        assertThat(library.chapters(phoneBook.book.id).first()).hasSize(1)
+        // LibriVox wasn't asked for.
+        assertThat(library.audiobook(lvBook.book.id)).isNotNull()
+        assertThat(library.chapters(lvBook.book.id).first()).hasSize(1)
+        assertThat(library.track(lvFiles.single().id)).isNotNull()
+        // Archive.org: only what was named. The book's own file track wasn't, so it stays.
+        assertThat(library.track(iaSong.id)).isNull()
+        assertThat(library.audiobook(iaBook.book.id)).isNull()
+        assertThat(library.chapters(iaBook.book.id).first()).isEmpty()
+        assertThat(library.track(iaFiles.single().id)).isNotNull()
+    }
+
+    /** A download's files going absent (an unmounted SD card) marks rows MISSING; only [MediaLibrary.forget] deletes. */
+    @Test fun syncNeverDeletesForAnyOrigin() = runTest {
+        for (origin in MediaOrigin.entries) {
+            val (scanned, files) = book("b", listOf("f1"), origin)
+            library.sync(origin, ScanResult(listOf(track("t", origin)) + files, listOf(scanned)))
+            library.sync(origin, ScanResult(emptyList(), emptyList()))
+            assertThat(db.mediaDao().tracksOf(origin).map { it.status }).containsExactly(PackStatus.MISSING, PackStatus.MISSING)
+            assertThat(db.mediaDao().audiobooksOf(origin).map { it.status }).containsExactly(PackStatus.MISSING)
+            assertThat(library.chapters(scanned.book.id).first()).hasSize(1)
+        }
+    }
 }

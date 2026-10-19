@@ -7,6 +7,7 @@ import app.granger.core.library.MediaLibrary
 import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Playlist
+import app.granger.core.library.PlaylistItem
 import app.granger.core.library.Playlists
 import app.granger.core.library.ScanResult
 import app.granger.core.library.Track
@@ -30,6 +31,7 @@ class FakeMediaLibrary(tracks: List<Track> = emptyList()) : MediaLibrary {
     override suspend fun audiobook(id: String): Audiobook? = bookList.value.firstOrNull { it.id == id }
     override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) = error("not in tests")
     override suspend fun markAllMissing(origin: MediaOrigin) = error("not in tests")
+    override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = error("not in tests")
 }
 
 /** In-memory [Playlists] over [media]'s tracks. */
@@ -41,6 +43,9 @@ class FakePlaylists(private val media: FakeMediaLibrary) : Playlists {
     override val all: Flow<List<Playlist>> = lists.map { all -> all.sortedBy { it.name.lowercase() } }
     override fun tracks(playlistId: Long): Flow<List<Track>> = combine(entries, media.trackList) { e, tracks ->
         e[playlistId].orEmpty().mapNotNull { id -> tracks.firstOrNull { it.id == id } }
+    }
+    override fun items(playlistId: Long): Flow<List<PlaylistItem>> = combine(entries, media.trackList) { e, tracks ->
+        e[playlistId].orEmpty().mapIndexedNotNull { i, id -> tracks.firstOrNull { it.id == id }?.let { PlaylistItem(i, it) } }
     }
 
     override suspend fun create(name: String, trackIds: List<String>): Long {
