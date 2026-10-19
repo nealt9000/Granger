@@ -4,8 +4,8 @@ import java.text.Normalizer
 import java.util.Locale
 
 /**
- * An album as the library shows it, built from its tracks. [title] and [albumArtist] already carry the
- * "Unknown album" / "Unknown artist" fallbacks. [status] is OK while any track is OK.
+ * An album as the library shows it, built from its present tracks (MISSING ones aren't part of it). [title] and
+ * [albumArtist] already carry the "Unknown album" / "Unknown artist" fallbacks. [status] is OK while any track is OK.
  */
 data class AlbumSummary(
     val key: String,
@@ -36,9 +36,15 @@ object Albums {
         return if (title.isEmpty()) "|unknown|$folder" else "${normalise(albumArtist)}|$title"
     }
 
-    /** One summary per album key, sorted by sortAlbumArtist then year then sortAlbum. Takes music tracks of any status. */
+    /** Tracks the library shows: MISSING ones are left out (their rows stay, and come back when the file does). */
+    fun present(tracks: List<Track>): List<Track> = tracks.filter { it.status != PackStatus.MISSING }
+
+    /**
+     * One summary per album key, sorted by sortAlbumArtist then year then sortAlbum. Takes music tracks of any status
+     * and counts only [present] ones, so an album whose tracks are all MISSING isn't there.
+     */
     fun summaries(tracks: List<Track>): List<AlbumSummary> =
-        tracks.groupBy { it.albumKey }
+        present(tracks).groupBy { it.albumKey }
             .map { (key, group) -> summary(key, ordered(group)) }
             .sortedWith(compareBy<Pair<AlbumSummary, Track>>(
                 { sortName(it.second.sortAlbumArtist, it.first.albumArtist) },

@@ -37,16 +37,16 @@ class AlbumsTest {
             .containsExactly("d1t1", "d1t2", "d1tNull-a", "d1tNull-b", "d2t1").inOrder()
     }
 
-    @Test fun summaryTakesYearCoverAndStatusFromItsTracks() {
+    @Test fun summaryTakesYearAndCoverFromItsTracks() {
         val planets = listOf(
-            musicTrack("p2", album = "The Planets", albumArtist = "Holst", trackNo = 2, date = "1961-05-01", coverPath = "/c/2.jpg", status = PackStatus.MISSING),
-            musicTrack("p1", album = "The Planets", albumArtist = "Holst", trackNo = 1, date = "1999", status = PackStatus.MISSING),
+            musicTrack("p2", album = "The Planets", albumArtist = "Holst", trackNo = 2, date = "1961-05-01", coverPath = "/c/2.jpg"),
+            musicTrack("p1", album = "The Planets", albumArtist = "Holst", trackNo = 1, date = "1999"),
             musicTrack("p3", album = "The Planets", albumArtist = "Holst", trackNo = 3, date = "", durationMs = 1_000L),
         )
-        val gone = musicTrack("g1", album = "Gone", albumArtist = "Bach", status = PackStatus.MISSING)
-        val summaries = Albums.summaries(planets + gone)
+        val bach = musicTrack("b1", album = "Goldberg Variations", albumArtist = "Bach")
+        val summaries = Albums.summaries(planets + bach)
         // Sorted by album artist: Bach before Holst.
-        assertThat(summaries.map { it.title }).containsExactly("Gone", "The Planets").inOrder()
+        assertThat(summaries.map { it.title }).containsExactly("Goldberg Variations", "The Planets").inOrder()
         val p = summaries[1]
         assertThat(p.key).isEqualTo("holst|the planets")
         assertThat(p.albumArtist).isEqualTo("Holst")
@@ -55,6 +55,21 @@ class AlbumsTest {
         assertThat(p.trackCount).isEqualTo(3)
         assertThat(p.durationMs).isEqualTo(121_000L)
         assertThat(p.status).isEqualTo(PackStatus.OK)
-        assertThat(summaries[0].status).isEqualTo(PackStatus.MISSING)
+    }
+
+    /** A MISSING track isn't part of its album; an album whose tracks are all MISSING isn't there at all. */
+    @Test fun summariesCountOnlyPresentTracks() {
+        val planets = listOf(
+            musicTrack("p1", album = "The Planets", albumArtist = "Holst", trackNo = 1, date = "1999"),
+            musicTrack("p2", album = "The Planets", albumArtist = "Holst", trackNo = 2, date = "1961", coverPath = "/c/2.jpg", status = PackStatus.MISSING),
+        )
+        val gone = musicTrack("g1", album = "Gone", albumArtist = "Bach", status = PackStatus.MISSING)
+        val summaries = Albums.summaries(planets + gone)
+        assertThat(summaries.map { it.title }).containsExactly("The Planets")
+        val p = summaries.single()
+        assertThat(p.trackCount).isEqualTo(1)
+        assertThat(p.durationMs).isEqualTo(planets[0].durationMs)
+        assertThat(p.year).isEqualTo("1999")
+        assertThat(p.coverPath).isNull()
     }
 }

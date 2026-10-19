@@ -93,7 +93,7 @@ object MusicSources {
     fun playlistId(key: String): Long? = key.takeIf { it.startsWith(PLAYLIST) }?.removePrefix(PLAYLIST)?.toLongOrNull()
 }
 
-/** Pure browsing logic over music tracks (any status). */
+/** Pure browsing logic over music tracks (any status; [MusicViewModel] browses present ones, playlists any). */
 object MusicCatalog {
     private const val JOIN = "; "
 
@@ -255,6 +255,10 @@ object MusicCatalog {
  * Music browsing: the Auxio-style tabs for [collectionId]'s albums, or for all music when it's null (the detail
  * pages are built with null: their routes aren't scoped). A collection's songs, albums, artists, genres and folders
  * are those of the albums placed in it ([Shelves.collection]'s `albums`); playlists are global.
+ *
+ * Browsing shows present tracks only ([Albums.present]): a MISSING track is in no tab or page, and an album, artist,
+ * genre or folder with nothing else goes with it. Playlists keep their MISSING songs, dimmed, so the user sees what's
+ * gone; nothing is deleted, and a track that returns is back everywhere.
  */
 class MusicViewModel(
     private val collectionId: String?,
@@ -268,11 +272,13 @@ class MusicViewModel(
 
     private data class Scope(val title: String, val tracks: List<Track>)
 
+    private val present: Flow<List<Track>> = media.tracks.map(Albums::present)
+
     private val scope: Flow<Scope> =
         if (collectionId == null) {
-            media.tracks.map { Scope(ALL_MUSIC, it) }
+            present.map { Scope(ALL_MUSIC, it) }
         } else {
-            combine(media.tracks, shelves.collection(collectionId)) { tracks, row ->
+            combine(present, shelves.collection(collectionId)) { tracks, row ->
                 val keys = row?.albums.orEmpty().mapTo(HashSet()) { it.key }
                 Scope(row?.collection?.name.orEmpty(), tracks.filter { it.albumKey in keys })
             }

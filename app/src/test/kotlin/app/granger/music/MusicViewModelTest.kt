@@ -97,28 +97,66 @@ class MusicViewModelTest {
         assertThat(dee.appearsOn).isEmpty()
     }
 
-    @Test fun missingTracksAreSkippedWhenPlayingAnAlbum() = runTest(main.dispatcher) {
+    /**
+     * The walkthrough's WhatsApp rows: MISSING tracks aren't in any tab or page, and an album, artist, genre or folder
+     * that only had MISSING tracks is gone. A playlist still lists its MISSING songs (dimmed in place).
+     */
+    @Test fun missingTracksAreHiddenFromBrowsingButNotFromPlaylists() = runTest(main.dispatcher) {
+        val whatsapp = song("w1", album = "", albumArtists = "", artists = "WhatsApp", genres = "Voice", folder = "WhatsApp/", status = PackStatus.MISSING)
+        media.trackList.value = listOf(
+            song("1", album = "Album", trackNo = 1, genres = "Rock", folder = "Music/"),
+            song("2", album = "Album", trackNo = 2, genres = "Rock", folder = "Music/", status = PackStatus.MISSING),
+            whatsapp,
+        )
+        val mix = playlists.create("Mix", listOf("track:phone:w1", "track:phone:1", "track:phone:2"))
+        val vm = vm()
+        val ui = vm.ui.filterNotNull().first()
+        assertThat(ui.songs.map { it.id }).containsExactly("track:phone:1")
+        assertThat(ui.albums.map { it.title to it.trackCount }).containsExactly("Album" to 1)
+        assertThat(ui.artists.map { it.name to it.songCount }).containsExactly("Artist" to 1)
+        assertThat(ui.genres.map { it.name to it.songCount }).containsExactly("Rock" to 1)
+        assertThat(ui.folders.map { it.path to it.songCount }).containsExactly("Music/" to 1)
+
+        assertThat(vm.album(Albums.key("Artist", "Album", "Music/")).first()!!.tracks.map { it.id }).containsExactly("track:phone:1")
+        assertThat(vm.album(whatsapp.albumKey).first()).isNull()
+        assertThat(vm.artist("WhatsApp").first()).isNull()
+        assertThat(vm.genre("Voice").first().songs).isEmpty()
+        assertThat(vm.folder("WhatsApp/").first().songs).isEmpty()
+
+        val playlist = vm.playlist(mix).filterNotNull().first()
+        assertThat(playlist.tracks.map { it.id }).containsExactly("track:phone:w1", "track:phone:1", "track:phone:2").inOrder()
+    }
+
+    /** A MISSING track is never played: a playlist's dimmed songs are left out of the queue. */
+    @Test fun missingTracksAreSkippedWhenPlaying() = runTest(main.dispatcher) {
         media.trackList.value = listOf(
             song("1", album = "Album", trackNo = 1),
             song("2", album = "Album", trackNo = 2, status = PackStatus.MISSING),
             song("3", album = "Album", trackNo = 3),
         )
+        val mix = playlists.create("Mix", listOf("track:phone:1", "track:phone:2", "track:phone:3"))
         val vm = vm()
-        val page = vm.album(Albums.key("Artist", "Album", "Music/")).filterNotNull().first()
+        val page = vm.playlist(mix).filterNotNull().first()
         assertThat(page.tracks.map { it.id }).containsExactly("track:phone:1", "track:phone:2", "track:phone:3").inOrder()
 
-        vm.play(page.tracks, tapped = 2, source = MusicSources.album(page.album))
+        vm.play(page.tracks, tapped = 2, source = MusicSources.playlist(page.playlist))
         assertThat(hub.plays.single()).isEqualTo(
-            FakePlayerHub.Play(listOf("track:phone:1", "track:phone:3"), 1, false, PlaySource("album:${page.album.key}", "Album")),
+            FakePlayerHub.Play(listOf("track:phone:1", "track:phone:3"), 1, false, PlaySource("playlist:$mix", "Mix")),
         )
 
-        vm.play(page.tracks, tapped = 1, source = MusicSources.album(page.album)) // the missing one: nothing plays
+        vm.play(page.tracks, tapped = 1, source = MusicSources.playlist(page.playlist)) // the missing one: nothing plays
         assertThat(hub.plays).hasSize(1)
 
         vm.addToQueue(page.tracks)
         vm.playNext(page.tracks)
         assertThat(hub.queued.single()).containsExactly("track:phone:1", "track:phone:3").inOrder()
         assertThat(hub.nexts.single()).containsExactly("track:phone:1", "track:phone:3").inOrder()
+
+        // Browsing never offers it: the album page plays what it lists.
+        val album = vm.album(Albums.key("Artist", "Album", "Music/")).filterNotNull().first()
+        vm.play(album.tracks, tapped = 1, source = MusicSources.album(album.album))
+        assertThat(hub.plays.last().trackIds).containsExactly("track:phone:1", "track:phone:3").inOrder()
+        assertThat(hub.plays.last().startIndex).isEqualTo(1)
     }
 
     @Test fun albumShuffleAndPlayAllStartAtTheFirstPlayableTrack() = runTest(main.dispatcher) {

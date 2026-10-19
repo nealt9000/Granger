@@ -246,4 +246,23 @@ class ShelvesTest {
         sync(emptyList(), listOf(scanned("hobbit")))
         assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature", "audiobooks").inOrder()
     }
+
+    /** Music browsing hides MISSING tracks, so the Music shelf does too: counts are of present tracks only. */
+    @Test fun missingTracksLeaveTheMusicShelf() = runTest {
+        val (s, _) = shelves(top)
+        val gone = musicTrack("w1", album = "WhatsApp Audio", albumArtist = "")
+        sync(planets + gone)
+        assertThat(s.shelves.first().single { it.mediaType.id == "music" }.collections.single().albums).hasSize(2)
+
+        // A rescan finds the WhatsApp file and one of the Planets gone.
+        sync(listOf(planets[0]))
+        val albums = s.shelves.first().single { it.mediaType.id == "music" }.collections.single().albums
+        assertThat(albums.map { it.title }).containsExactly("The Planets")
+        assertThat(albums.single().trackCount).isEqualTo(1)
+
+        // Every track gone: no Music shelf at all (the rows are still in the db).
+        sync(emptyList())
+        assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature")
+        assertThat(db.mediaDao().tracksOf(MediaOrigin.PHONE)).hasSize(3)
+    }
 }
