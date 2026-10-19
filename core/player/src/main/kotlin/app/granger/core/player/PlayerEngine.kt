@@ -57,7 +57,8 @@ import kotlinx.coroutines.withTimeoutOrNull
  *
  * Position safety: [PositionSaver] (books every 5 s, music every 15 s, plus pause, seek, chapter, track and stop).
  * Nothing is saved while a mode is loading or before the restored seek is confirmed (first READY), so a save can
- * never put 0 over a real position.
+ * never put 0 over a real position. A saved book position whose file can't be found isn't overwritten by the fallback
+ * start either: saves wait until the user seeks, picks a chapter or bookmark, or plays the book to its end.
  */
 class PlayerEngine(
     val player: ExoPlayer,
@@ -107,6 +108,9 @@ class PlayerEngine(
     private var boostMb = 0
     private var finished = false
     private var lastChapter = -1
+    // The saved position names a file the book no longer has, so it played from a fallback start: the saved row is
+    // left alone until the user picks a place (seek, skip, chapter, bookmark) or plays the book to its end.
+    private var restoreUnresolved = false
 
     private var pausedAt = 0L
     private var pausedForFocus = false
@@ -124,7 +128,7 @@ class PlayerEngine(
                 awaitingReady = false
                 if (saveWhenReady) { saveWhenReady = false; save(SaveReason.TRACK) }
             }
-            if (state == Player.STATE_ENDED && mode == Mode.BOOK) { finished = true; save(SaveReason.STOP) }
+            if (state == Player.STATE_ENDED && mode == Mode.BOOK) { finished = true; restoreUnresolved = false; save(SaveReason.STOP) }
             refresh()
         }
 
@@ -338,7 +342,7 @@ class PlayerEngine(
                 val target = player.nextMediaItemIndex
                 if (target != C.INDEX_UNSET) player.seekTo(target, 0L)
             }
-            Mode.BOOK -> chapterStep(+1)
+            Mode.BOOK -> { userMoved(); chapterStep(+1) }
             Mode.NONE -> Unit
         }
     }
@@ -349,17 +353,21 @@ class PlayerEngine(
                 val q = musicQueue ?: return@submit
                 player.seekTo(q.previous(player.currentPosition), 0L)
             }
-            Mode.BOOK -> chapterStep(-1)
+            Mode.BOOK -> { userMoved(); chapterStep(-1) }
             Mode.NONE -> Unit
         }
     }
 
     override fun skipBack() = submit {
-        if (mode == Mode.BOOK) seekBookBy(-prefs.getInt(PlayerSettingsKeys.SKIP_BACK_S, DEFAULT_SKIP_S) * 1_000L)
+        if (mode != Mode.BOOK) return@submit
+        userMoved()
+        seekBookBy(-prefs.getInt(PlayerSettingsKeys.SKIP_BACK_S, DEFAULT_SKIP_S) * 1_000L)
     }
 
     override fun skipForward() = submit {
-        if (mode == Mode.BOOK) seekBookBy(prefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, DEFAULT_SKIP_S) * 1_000L)
+        if (mode != Mode.BOOK) return@submit
+        userMoved()
+        seekBookBy(prefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, DEFAULT_SKIP_S) * 1_000L)
     }
 
     override fun seekTo(positionMs: Long) = submit {
@@ -368,6 +376,7 @@ class PlayerEngine(
             Mode.BOOK -> {
                 val m = map ?: return@submit
                 val c = m.chapterAt(player.currentMediaItemIndex, player.currentPosition)
+                userMoved()
                 player.seekTo(m.fileIndexOf(c), c.startMs + positionMs.coerceIn(0L, c.durationMs.takeIf { it > 0 } ?: Long.MAX_VALUE))
                 retargetSleep()
             }
@@ -379,6 +388,7 @@ class PlayerEngine(
         val m = map ?: return@submit
         if (mode != Mode.BOOK) return@submit
         val at = m.start(ordinal)
+        userMoved()
         player.seekTo(at.fileIndex, at.positionMs)
         retargetSleep()
     }
@@ -541,6 +551,8 @@ class PlayerEngine(
         val first = m.start(m.chapters.first().ordinal)
         val startTrack = if (restart) m.files[first.fileIndex] else at?.trackId ?: state?.trackId
         val fileIndex = startTrack?.let { m.files.indexOf(it) }?.takeIf { it >= 0 }
+        // A saved row whose file can't be found: kept as it is until the user picks a place.
+        restoreUnresolved = fileIndex == null && state != null
         val position = when {
             fileIndex == null -> 0L
             restart -> first.positionMs
@@ -622,6 +634,9 @@ class PlayerEngine(
         }
         player.play()
     }
+
+    /** The user picked a place in the book: its position is theirs to save again, even after an unresolved restore. */
+    private fun userMoved() { restoreUnresolved = false }
 
     /** Moves an audiobook by [deltaMs], across file boundaries. */
     private fun seekBookBy(deltaMs: Long) {
@@ -735,6 +750,7 @@ class PlayerEngine(
         val position = player.currentPosition.coerceAtLeast(0L)
         return when (mode) {
             Mode.BOOK -> {
+                if (restoreUnresolved) return null
                 val b = book ?: return null
                 val m = map ?: return null
                 val file = m.files.getOrNull(player.currentMediaItemIndex) ?: return null

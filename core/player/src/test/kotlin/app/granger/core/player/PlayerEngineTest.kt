@@ -527,6 +527,43 @@ class PlayerEngineTest {
         assertThat(saved.trackId).isEqualTo("track:phone:restored-done-0")
     }
 
+    /**
+     * A saved position whose file the book no longer has (its id changed) can't be restored; the book plays from the
+     * start, but the old row is kept until the user picks a place (seek, chapter or bookmark).
+     */
+    @Test fun unresolvedSavedTrackIsNotOverwrittenUntilTheUserPicksAPlace() {
+        val book = fakeBook("lost", 30_000, 30_000)
+        val old = AudiobookState(book.id, "track:phone:gone", 12_000L, 1f, false, 0, finished = false, updatedAt = 5L)
+        runBlocking { playback.upsertAudiobookState(old) }
+
+        val first = newEngine()
+        first.playAudiobook(book.id)
+        idle()
+        run(first.player).untilPosition(0, 7_000)      // past a tick save
+        first.playPause()
+        idle()
+        assertThat(first.player.playWhenReady).isFalse()
+        assertThat(bookState(book.id)).isEqualTo(old)
+        first.release(save = true)
+        assertThat(bookState(book.id)).isEqualTo(old)
+
+        // Restored: still the fallback start, still nothing written.
+        val second = newEngine()
+        second.restore()
+        idle()
+        run(second.player).untilState(Player.STATE_READY)
+        idle()
+        second.saveNow()
+        assertThat(bookState(book.id)).isEqualTo(old)
+
+        // The user picks a chapter: from now on the engine saves as usual.
+        second.seekToChapter(1)
+        idle()
+        val saved = bookState(book.id)!!
+        assertThat(saved.trackId).isEqualTo("track:phone:lost-1")
+        assertThat(saved.positionMs).isEqualTo(0L)
+    }
+
     @Test fun replayGainModeChangeAppliesToThePlayingQueue() {
         val ids = musicFixtures()
         runBlocking { db.mediaDao().upsertTracks(listOf(media.track(ids[0])!!.copy(rgTrackGain = -6.0206f, rgTrackPeak = null))) }
