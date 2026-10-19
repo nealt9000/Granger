@@ -844,6 +844,7 @@ git commit -m "Media M2: archive.org spoken word and music: rolling filter, waiv
   - `Incomplete` gives the notice "This book's files aren't all on archive.org." and `NotOnArchive` gives "This book isn't on archive.org yet."
   - The sheet shows the cover (once downloaded), title, authors, readers (first 3, then "and N more"), language, total time, genres, description (6 lines), "<n> chapters · <size>", **Get**/Cancel/Retry/Remove/**Get the rest**, and **View on LibriVox** (`pageUrl` in the browser).
   - The footer is the LibriVox copy from Global Constraints.
+  - As built: `LibriVoxSheet` gains defaulted `filesDone`/`filesTotal` ("Downloading: 3 of 13 chapters") and `coverPath` (the installed `000` record's file). `GrangerNavHost` adds `fun NavController.openLibriVox()` (Task 10's LIBRIVOX link uses it) and `internal fun railToolOf(destination)`, which puts `LibriVoxRoute` under LIBRARY. Titles, authors, readers, genres and descriptions are shown through `decodeEntities` (`LibriVoxSheet.kt`), since the client strips tags but leaves entities. A row's Get doesn't know the offer: it fetches book and item and says why when the book can't be got. Extra tests: `LibriVoxSheetTest` (entities, readers, durations), `LibriVoxRouteTest` (the spoken-word note's **LibriVox** opens `LibriVoxRoute`), `bookNotOnArchiveIsNotQueued`, `cancelRetryAndRemoveGoToTheGroup`.
 
 - [ ] **Step 1: Write the failing tests.**
 

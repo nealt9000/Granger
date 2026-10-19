@@ -41,6 +41,8 @@ import app.granger.player.PlayerScreen
 import app.granger.player.PlayerViewModel
 import app.granger.player.miniPlayerPlacement
 import app.granger.archive.ArchiveViewModel
+import app.granger.librivox.LibriVoxScreen
+import app.granger.librivox.LibriVoxViewModel
 import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.BookIds
 import app.granger.core.library.ReadingTab
@@ -193,9 +195,25 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable data class SourceRoute(val scope: CatalogScope)
 /** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
 @Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
+/** The LibriVox source: Recently added, six genres and search (Plan M2). */
+@Serializable object LibriVoxRoute
+
+fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = true }
 /** [media] opens it at the Music & audiobooks section. */
 @Serializable data class SettingsRoute(val media: Boolean = false)
 @Serializable object ReadinessRoute
+
+/** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
+internal fun railToolOf(destination: NavDestination): RailTool? = when {
+    destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
+        destination.hasRoute<LibriVoxRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
+    destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
+    destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
+        destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
+    else -> null
+}
 
 /** The full-screen player, music or audiobook, whichever is loaded (spec §8). */
 @Serializable object PlayerRoute
@@ -367,17 +385,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         return true
     }
 
-    val selected = when {
-        destination == null -> null
-        destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
-            destination.hasRoute<ArchiveRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
-        destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
-        destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-        destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
-            destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
-        destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
-        else -> null
-    }
+    val selected = destination?.let(::railToolOf)
 
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
@@ -669,8 +677,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     },
                     detailsUrl = container.archiveClient::detailsUrl,
                     onBack = { nav.popBackStack() },
-                    // LibriVoxRoute arrives in Task 9, which wires this.
-                    onOpenLibriVox = {},
+                    onOpenLibriVox = { nav.openLibriVox() },
+                )
+            }
+            composable<LibriVoxRoute> {
+                LibriVoxScreen(
+                    viewModel = viewModel {
+                        LibriVoxViewModel(
+                            container.librivoxClient, container.archiveClient, container.mediaDownloader, container.downloads,
+                            container.appScope,
+                        )
+                    },
+                    onBack = { nav.popBackStack() },
                 )
             }
             composable<SettingsRoute> { backStackEntry ->
