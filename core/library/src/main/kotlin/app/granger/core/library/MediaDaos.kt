@@ -80,6 +80,13 @@ interface PlaybackDao {
     @Upsert
     suspend fun upsertScanCache(entry: ScanCacheEntry)
 
+    @Query("SELECT uri FROM scan_cache")
+    suspend fun scanCacheUris(): List<String>
+
+    /** Keep [uris] under SQLite's 999-variable limit (API 29); callers chunk. */
+    @Query("DELETE FROM scan_cache WHERE uri IN (:uris)")
+    suspend fun deleteScanCache(uris: List<String>)
+
     @Query("SELECT * FROM audio_bookmarks WHERE audiobookId = :audiobookId ORDER BY createdAt, id")
     fun observeBookmarks(audiobookId: String): Flow<List<AudioBookmark>>
 

@@ -23,8 +23,11 @@ interface MediaLibrary {
     /**
      * Replaces [origin]'s catalog with [result]: new rows inserted, changed rows updated, absent rows set MISSING.
      * Never deletes rows, states, bookmarks or playlist entries. A MISSING row that reappears goes back to OK.
+     *
+     * An absent track whose uri [keep] accepts is left exactly as it is (its source couldn't be listed, so it's
+     * unknown, not gone), and so is an absent audiobook with any such track.
      */
-    suspend fun sync(origin: MediaOrigin, result: ScanResult)
+    suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean = { false })
 
     /** Sets every [origin] row MISSING (permission lost). */
     suspend fun markAllMissing(origin: MediaOrigin)
@@ -43,7 +46,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
     override suspend fun track(id: String): Track? = dao.track(id)
     override suspend fun audiobook(id: String): Audiobook? = dao.audiobook(id)
 
-    override suspend fun sync(origin: MediaOrigin, result: ScanResult) {
+    override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) {
         require(result.tracks.all { it.origin == origin }) { "Scan for $origin holds tracks of another origin" }
         require(result.audiobooks.all { it.book.origin == origin }) { "Scan for $origin holds audiobooks of another origin" }
         db.withTransaction {
@@ -56,8 +59,13 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
                 val merged = track.copy(addedAt = old?.addedAt ?: at)
                 merged.takeIf { it != old }
             })
+            val kept = oldTracks.values.filter { it.id !in newTracks && keep(it.uri) }
+            val keptIds = kept.mapTo(HashSet()) { it.id }
+            val keptBooks = kept.mapNotNullTo(HashSet()) { it.audiobookId }
             for (old in oldTracks.values) {
-                if (old.id !in newTracks && old.status != PackStatus.MISSING) dao.setTrackStatus(old.id, PackStatus.MISSING)
+                if (old.id !in newTracks && old.id !in keptIds && old.status != PackStatus.MISSING) {
+                    dao.setTrackStatus(old.id, PackStatus.MISSING)
+                }
             }
 
             val oldBooks = dao.audiobooksOf(origin).associateBy { it.id }
@@ -68,7 +76,9 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
                 merged.takeIf { it != old }
             })
             for (old in oldBooks.values) {
-                if (old.id !in newBooks && old.status != PackStatus.MISSING) dao.setAudiobookStatus(old.id, PackStatus.MISSING)
+                if (old.id !in newBooks && old.id !in keptBooks && old.status != PackStatus.MISSING) {
+                    dao.setAudiobookStatus(old.id, PackStatus.MISSING)
+                }
             }
 
             for (scanned in newBooks.values) {

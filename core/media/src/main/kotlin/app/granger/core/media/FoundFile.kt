@@ -21,4 +21,10 @@ data class FoundFile(
 /** Lists audio files. Throws when it can't tell what's there, so a failure is never mistaken for an empty source. */
 interface AudioSource {
     suspend fun list(): List<FoundFile>
+
+    /** Whether a file at [uri] would come from this source; when a listing fails, the rows it owns are left alone. */
+    fun owns(uri: String): Boolean
+
+    /** Pieces that are listed, and can fail, on their own (one per picked folder). By default the source is one piece. */
+    suspend fun parts(): List<AudioSource> = listOf(this)
 }

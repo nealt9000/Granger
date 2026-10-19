@@ -12,6 +12,8 @@ import kotlinx.coroutines.withContext
  * Ringtones, alarms, notifications and recordings are left out. Needs the audio permission; only queries.
  */
 class MediaStoreSource(private val context: Context) : AudioSource {
+    override fun owns(uri: String): Boolean = uri.startsWith("content://${MediaStore.AUTHORITY}/")
+
     override suspend fun list(): List<FoundFile> = withContext(Dispatchers.IO) {
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(

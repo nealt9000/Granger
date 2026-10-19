@@ -68,7 +68,9 @@ class PhoneScannerTest {
 
     @After fun close() = db.close()
 
-    private class FakeSource(var files: List<FoundFile>) : AudioSource {
+    /** Owns the uris under [prefix]. */
+    private class FakeSource(var files: List<FoundFile>, private val prefix: String = "content://media/") : AudioSource {
+        override fun owns(uri: String) = uri.startsWith(prefix)
         var calls = 0
         var error: Exception? = null
         var gate: CompletableDeferred<Unit>? = null
@@ -242,27 +244,38 @@ class PhoneScannerTest {
     /** SAF trees in memory: each tree holds files directly under its root. */
     private class FakeTree : DocumentTree {
         val granted = mutableSetOf<Uri>()
+        /** A tree missing here is gone: the provider says its top folder no longer exists. */
         val roots = mutableMapOf<Uri, DocumentTree.Document>()
         val children = mutableMapOf<String, List<DocumentTree.Document>>()
+        /** Folders whose provider fails when asked for their children. */
+        val failing = mutableSetOf<String>()
         override fun isGranted(treeUri: Uri) = treeUri in granted
-        override fun root(treeUri: Uri) = roots.getValue(treeUri)
-        override fun children(treeUri: Uri, documentId: String) = children[documentId].orEmpty()
+        override fun root(treeUri: Uri) = roots[treeUri]
+        override fun children(treeUri: Uri, documentId: String): List<DocumentTree.Document> {
+            if (documentId in failing) throw IOException("provider died")
+            return children[documentId].orEmpty()
+        }
     }
 
     private val authority = "com.android.externalstorage.documents"
 
-    /** Adds a granted tree [rootId] named [name] holding [files] (name to bytes), and returns its uri. */
+    /** Adds a granted tree [rootId] named [name] holding [files], and returns its uri. */
     private fun FakeTree.tree(rootId: String, name: String, files: List<String>): Uri {
         val tree = DocumentsContract.buildTreeDocumentUri(authority, rootId)
         granted += tree
         roots[tree] = DocumentTree.Document(rootId, name, DocumentsContract.Document.MIME_TYPE_DIR, 0L, 0L)
-        children[rootId] = files.map { file ->
+        children[rootId] = emptyList()
+        addFiles(tree, rootId, files)
+        return tree
+    }
+
+    private fun FakeTree.addFiles(tree: Uri, rootId: String, files: List<String>) {
+        children[rootId] = children[rootId].orEmpty() + files.map { file ->
             val id = "$rootId/$file"
             val bytes = Random(nextSeed++).nextBytes(50_000)
             disk[DocumentsContract.buildDocumentUriUsingTree(tree, id).toString()] = tmp.newFile().apply { writeBytes(bytes) }
             DocumentTree.Document(id, file, if (file.endsWith(".jpg")) "image/jpeg" else "audio/mpeg", bytes.size.toLong(), 5_000L)
         }
-        return tree
     }
 
     @Test fun folderGrantLostMarksOnlyThatFoldersItemsMissing() = runTest {
@@ -288,19 +301,83 @@ class PhoneScannerTest {
         assertThat(phoneBooks().single().status).isEqualTo(PackStatus.OK)
     }
 
-    @Test fun failingSourceLeavesTheLibraryAsItWas() = runTest {
+    @Test fun failingSourceKeepsItsItemsWhileOthersSync() = runTest {
         val store = FakeSource(listOf(found("content://media/1", "Mars.mp3")))
-        val other = FakeSource(listOf(found("content://other/1", "Venus.mp3")))
+        val other = FakeSource(listOf(found("content://other/1", "Venus.mp3")), prefix = "content://other/")
+        val scanner = scanner(store, other)
+        scanner.scan()
+        val venus = phoneTracks().single { it.title == "Venus" }
+
+        // The other source fails: unknown, not empty. Its item stays exactly as it was; the store syncs as usual.
+        other.error = IOException("provider died")
+        store.files = listOf(found("content://media/2", "Jupiter.mp3"))
+        assertThat(scanner.scan()).isEqualTo(1)
+        assertThat(phoneTracks().single { it.title == "Venus" }).isEqualTo(venus)
+        assertThat(phoneTracks().associate { it.title to it.status }).containsExactly(
+            "Mars", PackStatus.MISSING, "Jupiter", PackStatus.OK, "Venus", PackStatus.OK,
+        )
+        // Its cache entry is kept too, so it isn't reopened when the source comes back.
+        assertThat(playback.scanCacheUris()).containsExactly("content://media/2", "content://other/1")
+        other.error = null
+        opened.clear()
+        scanner.scan()
+        assertThat(opened).isEmpty()
+    }
+
+    @Test fun everySourceFailingChangesNothing() = runTest {
+        val store = FakeSource(listOf(found("content://media/1", "Mars.mp3")))
+        val other = FakeSource(listOf(found("content://other/1", "Venus.mp3")), prefix = "content://other/")
         val scanner = scanner(store, other)
         scanner.scan()
         val before = phoneTracks()
-        assertThat(before.map { it.status }.distinct()).containsExactly(PackStatus.OK)
 
-        // A source that throws is unknown, not empty: nothing is synced, so nothing goes MISSING.
+        store.error = IOException("MediaStore unavailable")
         other.error = IOException("provider died")
-        store.files = emptyList()
         assertThat(scanner.scan()).isEqualTo(0)
         assertThat(phoneTracks()).isEqualTo(before)
+        assertThat(playback.scanCacheUris()).hasSize(2)
+    }
+
+    @Test fun deletedFolderItemsGoMissing() = runTest {
+        val fakeTree = FakeTree()
+        val stories = fakeTree.tree("primary:Stories", "Stories", listOf("1.mp3"))
+        val tapes = fakeTree.tree("primary:Tapes", "Tapes", listOf("side-a.mp3"))
+        val folders = listOf(MediaFolder(stories.toString(), true, 1L), MediaFolder(tapes.toString(), false, 2L))
+        val scanner = scanner(FolderSource(ApplicationProvider.getApplicationContext(), { folders }, fakeTree))
+        scanner.scan()
+
+        fakeTree.roots.remove(tapes) // deleted on the phone, or its SD card taken out: gone, not unknown
+        scanner.scan()
+        assertThat(phoneTracks().associate { it.title to it.status }).containsExactly("1", PackStatus.OK, "side-a", PackStatus.MISSING)
+        assertThat(playback.scanCacheUris()).containsExactly(DocumentsContract.buildDocumentUriUsingTree(stories, "primary:Stories/1.mp3").toString())
+    }
+
+    @Test fun failingFolderIsIsolatedFromOtherFolders() = runTest {
+        val fakeTree = FakeTree()
+        val stories = fakeTree.tree("primary:Stories", "Stories", listOf("1.mp3"))
+        val tapes = fakeTree.tree("primary:Tapes", "Tapes", listOf("side-a.mp3"))
+        val folders = listOf(MediaFolder(stories.toString(), true, 1L), MediaFolder(tapes.toString(), false, 2L))
+        val scanner = scanner(FolderSource(ApplicationProvider.getApplicationContext(), { folders }, fakeTree))
+        scanner.scan()
+        val sideA = phoneTracks().single { it.title == "side-a" }
+
+        fakeTree.failing += "primary:Tapes"
+        fakeTree.addFiles(stories, "primary:Stories", listOf("2.mp3"))
+        scanner.scan()
+        assertThat(phoneTracks().single { it.title == "side-a" }).isEqualTo(sideA)
+        assertThat(phoneTracks().filter { it.title != "side-a" }.map { it.title to it.status })
+            .containsExactly("1" to PackStatus.OK, "2" to PackStatus.OK)
+    }
+
+    @Test fun scanCacheDropsVanishedFiles() = runTest {
+        val source = FakeSource(listOf(found("content://media/1", "Mars.mp3"), found("content://media/2", "Venus.mp3")))
+        val scanner = scanner(source)
+        scanner.scan()
+        assertThat(playback.scanCacheUris()).containsExactly("content://media/1", "content://media/2")
+
+        source.files = source.files.take(1)
+        scanner.scan()
+        assertThat(playback.scanCacheUris()).containsExactly("content://media/1")
     }
 
     @Test fun scannerNeverOpensForWrite() = runTest {

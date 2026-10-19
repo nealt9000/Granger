@@ -23,16 +23,17 @@ interface DocumentTree {
     /** Whether Granger still holds a persisted read grant on [treeUri]. */
     fun isGranted(treeUri: Uri): Boolean
 
-    /** The tree's top folder. Throws if the provider can't answer. */
-    fun root(treeUri: Uri): Document
+    /** The tree's top folder; null if the provider says it no longer exists. Throws if the provider can't answer. */
+    fun root(treeUri: Uri): Document?
 
     /** A folder's direct children. Throws if the provider can't answer. */
     fun children(treeUri: Uri, documentId: String): List<Document>
 }
 
 /**
- * Folders the user picked (Voice's model), walked recursively. A folder whose grant is gone contributes nothing, so
- * only its items go MISSING; a provider that fails mid-walk throws, so the scan doesn't mistake it for an empty folder.
+ * Folders the user picked (Voice's model), walked recursively, each one a [parts] piece of its own. A folder whose
+ * grant is gone, or whose top folder the provider says no longer exists, lists empty, so its items go MISSING. A
+ * provider that fails mid-walk throws, so the scan treats that folder as unknown rather than empty.
  */
 class FolderSource(
     context: Context,
@@ -40,16 +41,30 @@ class FolderSource(
     private val tree: DocumentTree = SafDocumentTree(context.contentResolver),
 ) : AudioSource {
 
-    override suspend fun list(): List<FoundFile> {
-        val picked = folders()
-        return withContext(Dispatchers.IO) {
-            picked.flatMap { folder ->
-                val treeUri = Uri.parse(folder.uri)
-                if (!tree.isGranted(treeUri)) return@flatMap emptyList()
-                val root = tree.root(treeUri)
-                buildList { walk(treeUri, root, "${root.name}/", folder.audiobooks, depth = 0) }
-            }
+    override suspend fun list(): List<FoundFile> = parts().flatMap { it.list() }
+
+    /** Any document in any picked tree; the folder list itself is unknown when it can't be read. */
+    override fun owns(uri: String): Boolean = DocumentsContract.isTreeUri(Uri.parse(uri))
+
+    override suspend fun parts(): List<AudioSource> = folders().map { Folder(it) }
+
+    private inner class Folder(private val folder: MediaFolder) : AudioSource {
+        private val treeUri = Uri.parse(folder.uri)
+
+        override fun owns(uri: String): Boolean = sameTree(Uri.parse(uri), treeUri)
+
+        override suspend fun list(): List<FoundFile> = withContext(Dispatchers.IO) {
+            if (!tree.isGranted(treeUri)) return@withContext emptyList()
+            val root = tree.root(treeUri) ?: return@withContext emptyList()
+            buildList { walk(treeUri, root, "${root.name}/", folder.audiobooks, depth = 0) }
         }
+    }
+
+    private fun sameTree(a: Uri, b: Uri): Boolean = try {
+        DocumentsContract.isTreeUri(a) && a.authority == b.authority &&
+            DocumentsContract.getTreeDocumentId(a) == DocumentsContract.getTreeDocumentId(b)
+    } catch (e: IllegalArgumentException) {
+        false
     }
 
     private fun MutableList<FoundFile>.walk(treeUri: Uri, dir: DocumentTree.Document, path: String, audiobooks: Boolean, depth: Int) {
@@ -94,9 +109,16 @@ class SafDocumentTree(private val resolver: ContentResolver) : DocumentTree {
     override fun isGranted(treeUri: Uri): Boolean =
         resolver.persistedUriPermissions.any { it.uri == treeUri && it.isReadPermission }
 
-    override fun root(treeUri: Uri): DocumentTree.Document {
+    override fun root(treeUri: Uri): DocumentTree.Document? {
         val uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri))
-        return query(uri).firstOrNull() ?: throw IOException("No root document for $treeUri")
+        // No provider to ask (not installed, or not answering): unknown.
+        val client = resolver.acquireUnstableContentProviderClient(uri) ?: throw IOException("No provider for $treeUri")
+        return client.use {
+            // A DocumentsProvider answers a document that's gone (FileNotFoundException, e.g. a deleted folder or an
+            // SD card taken out) with a null cursor; a provider that dies or fails otherwise throws.
+            val cursor = it.query(uri, columns, null, null, null) ?: return null
+            cursor.use { c -> if (c.moveToFirst()) c.document() else null }
+        }
     }
 
     override fun children(treeUri: Uri, documentId: String): List<DocumentTree.Document> =

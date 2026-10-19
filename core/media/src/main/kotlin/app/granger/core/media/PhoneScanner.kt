@@ -34,7 +34,8 @@ import kotlinx.coroutines.withContext
  * - A file's id is its [Fingerprint], so a moved or renamed file keeps its id, position and playlist entries.
  * - An unchanged file (same uri, size and date as in the scan cache) isn't opened: its row in [media] is reused.
  * - Without [hasPermission], every phone item goes MISSING (kept, with its state) and no source is asked.
- * - A source that throws means "unknown", not "empty": the scan syncs nothing rather than mark items MISSING.
+ * - A source (or one picked folder) that throws means "unknown", not "empty": the items it owns are left exactly as
+ *   they are while the other sources sync. If nothing could be listed, nothing changes.
  * - A file that can't be opened or read is skipped; one TagLib can't parse still becomes a track named from its file.
  */
 class PhoneScanner(
@@ -85,17 +86,26 @@ class PhoneScanner(
             media.markAllMissing(MediaOrigin.PHONE)
             return 0
         }
-        val found = try {
-            sources.flatMap { it.list() }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            return 0
+        // Each piece is listed on its own; a failed one (null) is unknown, and the rows it owns are left as they are.
+        val listings: List<Pair<AudioSource, List<FoundFile>?>> = sources.flatMap { source ->
+            val parts = attempt { source.parts() } ?: return@flatMap listOf(source to null)
+            parts.map { part -> part to attempt { part.list() } }
         }
-        return withContext(Dispatchers.IO) { readAndSync(found) }
+        if (listings.none { it.second != null }) return 0
+        val failed = listings.filter { it.second == null }.map { it.first }
+        val found = listings.flatMap { it.second.orEmpty() }
+        return withContext(Dispatchers.IO) { readAndSync(found) { uri -> failed.any { it.owns(uri) } } }
     }
 
-    private suspend fun readAndSync(found: List<FoundFile>): Int {
+    private suspend fun <T> attempt(block: suspend () -> T): T? = try {
+        block()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        null
+    }
+
+    private suspend fun readAndSync(found: List<FoundFile>, unknown: (String) -> Boolean): Int {
         val storedChapters = mutableMapOf<String, List<AudiobookChapter>>()
         val folderCovers = mutableMapOf<String, String?>()
         val entries = found.distinctBy { it.uri }.mapNotNull { file ->
@@ -117,10 +127,15 @@ class PhoneScanner(
             .map { files -> audiobook(files.map(entryOf::getValue)) }
 
         val tracks = musicEntries.map { track(it, audiobookId = null) } + books.flatMap { it.second }
-        media.sync(MediaOrigin.PHONE, ScanResult(tracks, books.map { it.first }))
+        media.sync(MediaOrigin.PHONE, ScanResult(tracks, books.map { it.first }), keep = unknown)
 
         val read = entries.filter { it.wasRead }
         for (e in read) playback.upsertScanCache(ScanCacheEntry(e.file.uri, e.file.sizeBytes, e.file.modifiedMs, e.fingerprint))
+        // Files no longer listed drop out of the cache, except those of a piece that couldn't be listed this time.
+        val seen = found.mapTo(HashSet()) { it.uri }
+        playback.scanCacheUris().filter { it !in seen && !unknown(it) }
+            .chunked(CACHE_DELETE_BATCH)
+            .forEach { playback.deleteScanCache(it) }
         return read.size
     }
 
@@ -238,6 +253,8 @@ class PhoneScanner(
     private companion object {
         /** How [Track] joins multi-valued tags (see its doc). TagParser splits on ";", so no value contains it. */
         const val JOIN = "; "
+        /** Under SQLite's 999 bound variables on API 29. */
+        const val CACHE_DELETE_BATCH = 500
         val NO_REPLAY_GAIN = ReplayGain(null, null, null, null)
     }
 }

@@ -67,6 +67,23 @@ class MediaLibraryTest {
         assertThat(library.chapters(scanned.book.id).first()).hasSize(2)
     }
 
+    /** A source that couldn't be listed: its rows are unknown, so they stay exactly as they were. */
+    @Test fun syncLeavesKeptRowsAsTheyAre() = runTest {
+        val (scanned, files) = book("hobbit", listOf("h1", "h2"))
+        library.sync(MediaOrigin.PHONE, ScanResult(listOf(track("a"), track("b")) + files, listOf(scanned)))
+        val before = allTracks().associateBy { it.id }
+
+        val keep = { uri: String -> uri == "content://media/b" || uri == "content://media/h1" }
+        library.sync(MediaOrigin.PHONE, ScanResult(listOf(track("a"), track("c")), emptyList()), keep)
+        assertThat(library.track("track:phone:b")).isEqualTo(before.getValue("track:phone:b"))
+        assertThat(library.track("track:phone:h1")).isEqualTo(before.getValue("track:phone:h1"))
+        assertThat(statusOf("track:phone:h2")).isEqualTo(PackStatus.MISSING)
+        assertThat(statusOf("track:phone:c")).isEqualTo(PackStatus.OK)
+        // The book has a kept file, so it isn't marked missing either.
+        assertThat(library.audiobook(scanned.book.id)!!.status).isEqualTo(PackStatus.OK)
+        assertThat(library.chapters(scanned.book.id).first()).hasSize(2)
+    }
+
     @Test fun missingRowComingBackIsOkWithStateKept() = runTest {
         val (scanned, files) = book("hobbit", listOf("h1"))
         val full = ScanResult(listOf(track("a")) + files, listOf(scanned))
