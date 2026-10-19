@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":core:downloads"))
     implementation(project(":core:books"))
     implementation(project(":core:research"))
+    implementation(project(":core:media"))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

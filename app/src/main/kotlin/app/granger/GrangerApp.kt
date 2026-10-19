@@ -50,6 +50,12 @@ import app.granger.core.library.RoomResearchChats
 import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
+import app.granger.core.media.ContentResolverOpener
+import app.granger.core.media.FolderSource
+import app.granger.core.media.MediaStoreSource
+import app.granger.core.media.PhoneScanner
+import app.granger.media.PhoneMediaScans
+import app.granger.media.hasAudioPermission
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.research.RankingConfig
 import app.granger.core.research.ResearchPipeline
@@ -81,6 +87,12 @@ import java.util.concurrent.TimeUnit
 
 class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        // Phone scans wait for the players and the permission flow (Plan M1 Tasks 9 and 12).
+        if (Features.PLAYER) container.phoneMediaScans.start()
+    }
 
     override val downloadRunner: DownloadRunner get() = container.downloadRunner
 }
@@ -167,6 +179,20 @@ class AppContainer(context: Context) {
     val booksScannedThisProcess = AtomicBoolean(false)
     /** Phone music and audiobooks; Task 9 wires the scanner and players to it. */
     val media: MediaLibrary = RoomMediaLibrary(libraryDb)
+
+    /** Reads the phone's music and audiobooks in place, read-only; started from [GrangerApp] behind Features.PLAYER. */
+    val phoneScanner: PhoneScanner by lazy {
+        val playback = libraryDb.playbackDao()
+        PhoneScanner(
+            sources = listOf(MediaStoreSource(context), FolderSource(context, { playback.observeFolders().first() })),
+            open = ContentResolverOpener(context.contentResolver),
+            media = media,
+            playback = playback,
+            coversDir = File(context.filesDir, "media-covers"),
+            hasPermission = { hasAudioPermission(context) },
+        )
+    }
+    val phoneMediaScans: PhoneMediaScans by lazy { PhoneMediaScans(context, appScope, phoneScanner) }
     val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf, media)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)

@@ -3,6 +3,7 @@ package app.granger.core.media
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.RandomAccessFile
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +41,14 @@ class ChapterReaderTest {
         assertThat(chapters).hasSize(3)
         assertThat(chapters[1].startMs).isGreaterThan(0)
         assertThat(chapters).containsExactly(Chapter("One", 0), Chapter("Two", 1000), Chapter("Three", 2000)).inOrder()
+    }
+
+    /** The scanner reads through a content resolver's read-only fd, as a channel. */
+    @Test fun readsTheSameChaptersFromAChannel() {
+        listOf("chapters.m4b", "chapters.mp3", "tagged.mp3").forEach { name ->
+            val fromChannel = FileInputStream(fixture(name)).use { ChapterReader.read(it.channel) }
+            assertThat(fromChannel).isEqualTo(read(name))
+        }
     }
 
     @Test fun noChaptersIsEmpty() {

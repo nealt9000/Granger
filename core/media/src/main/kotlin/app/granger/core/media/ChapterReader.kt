@@ -1,6 +1,8 @@
 package app.granger.core.media
 
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 
 /** One chapter: its title ("" if the file has none) and start time. Durations follow from the next start. */
 data class Chapter(val title: String, val startMs: Long)
@@ -25,8 +27,16 @@ object ChapterReader {
     private const val MAX_TEXT_SAMPLE_BYTES = 4 shl 10
     private const val MAX_BOXES_PER_LEVEL = 100_000
 
-    fun read(file: RandomAccessFile): List<Chapter> = try {
-        val src = FileSource(file)
+    fun read(file: RandomAccessFile): List<Chapter> = read { FileSource(file) }
+
+    /**
+     * The same, from a channel (e.g. `FileInputStream(pfd.fileDescriptor).channel` for a file opened read-only through
+     * a content resolver). Reads are positional, so the channel's position is neither used nor changed.
+     */
+    fun read(channel: FileChannel): List<Chapter> = read { ChannelSource(channel) }
+
+    private fun read(open: () -> Source): List<Chapter> = try {
+        val src = open()
         val head = src.read(0, 8)
         when {
             head.size >= 3 && head[0] == 'I'.code.toByte() && head[1] == 'D'.code.toByte() && head[2] == '3'.code.toByte() ->
@@ -56,6 +66,18 @@ object ChapterReader {
             file.seek(pos)
             file.readFully(out)
             return out
+        }
+    }
+
+    private class ChannelSource(private val channel: FileChannel) : Source {
+        override val length = channel.size()
+        override fun read(pos: Long, n: Int): ByteArray {
+            if (pos < 0 || pos >= length || n <= 0) return ByteArray(0)
+            val out = ByteBuffer.allocate(minOf(n.toLong(), length - pos).toInt())
+            while (out.hasRemaining()) {
+                if (channel.read(out, pos + out.position()) < 0) break
+            }
+            return if (out.hasRemaining()) out.array().copyOf(out.position()) else out.array()
         }
     }
 
