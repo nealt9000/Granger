@@ -94,7 +94,7 @@ fun AudiobookPlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = viewModel::previousChapter) {
+                    IconButton(onClick = viewModel::previousChapter, enabled = book.chapter.ordinal > 0) {
                         Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous chapter")
                     }
                     IconButton(onClick = viewModel::skipBack, modifier = Modifier.size(64.dp)) {
@@ -104,7 +104,7 @@ fun AudiobookPlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
                     IconButton(onClick = viewModel::skipForward, modifier = Modifier.size(64.dp)) {
                         Icon(painterResource(R.drawable.ic_forward), contentDescription = "Forward $forward seconds", modifier = Modifier.size(40.dp))
                     }
-                    IconButton(onClick = viewModel::nextChapter) {
+                    IconButton(onClick = viewModel::nextChapter, enabled = book.chapter.ordinal < book.chapterCount - 1) {
                         Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next chapter")
                     }
                 }

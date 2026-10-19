@@ -1,6 +1,5 @@
 package app.granger.player
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,7 +37,13 @@ import app.granger.theme.GrangerColors
 @Composable
 fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // A Surface, like the Scaffold every other screen sits in: it provides onBackground as LocalContentColor, without
+    // which every untinted Icon and uncoloured Text here falls back to black on the dark background.
+    Surface(
+        Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+    ) {
         when (ui.now) {
             is NowPlaying.Music -> MusicPlayerScreen(viewModel, onClose)
             is NowPlaying.Book -> AudiobookPlayerScreen(viewModel, onClose)
