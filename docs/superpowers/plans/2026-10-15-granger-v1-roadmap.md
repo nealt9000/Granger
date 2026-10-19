@@ -15,9 +15,22 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 7 | Archive.org source | Public-domain filter (1930 or earlier) until waiver, shelves + search, open-only downloads (EPUB, else text / OCR text) with sha1/md5 verify, filing, metadata | **Done:** `2026-10-17-plan-07-archive-org.md` |
 | 8 | Research (was Inquire & Abstract) | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats with threaded follow-ups | **Done:** `2026-10-17-plan-08-research.md` |
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | **Done, bar not reached:** `2026-10-18-plan-09-research-eval.md` (Research stays debug-only; see below) |
+| M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **In progress:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10) |
+| M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | Written after M1 merges (spec §3.2–§3.4, §4) |
+| M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | Written after M2 merges (spec §6/§7 Auto and widget rows, §9, §13) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources; non-commercial packs exempt) + import gating, onboarding, `:core:telemetry` | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
-| — | After v1: Media | Player, mini-player, audiobooks/music/video, read-aloud + mix, then the PDF pass | |
+
+Media spec (2026-10-19): `docs/superpowers/specs/2026-10-19-media-design.md` replaces the old "After v1: Media" row. Media (M1–M3) is built before Plans 10 and 11. It is the first of four projects, in this order (spec §1):
+
+1. **Media**: music and audiobook players, mini-player, phone media, LibriVox and archive.org audio, media in Search and Research retrieval.
+2. **Research deep links + knowing your library**: results open at the exact passage, track or section; grounding quality (Plan 9 ended at 37% grounded); how Research becomes expert on any user's library.
+3. **The voice**: one on-device speech engine for read-aloud in both readers and for Research answers; music/voice mix.
+4. **Actions**: Research builds reading plans and playlists, and opens, reads aloud or plays things.
+
+Video and the PDF pass, from the old row, are not part of these four projects (spec §2 non-goals).
+
+Development moved to Neal's Mac Studio with M1 (setup: `tools/dev/MAC-SETUP.md`).
 
 Library redesign spec (2026-10-16): `docs/superpowers/specs/2026-10-16-library-redesign-design.md` amends the v1 spec and set this order.
 
