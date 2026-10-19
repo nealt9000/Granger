@@ -1,0 +1,3 @@
+[submodule "core/taglib/src/main/cpp/taglib"]
+	path = core/taglib/src/main/cpp/taglib
+	url = https://github.com/taglib/taglib.git
