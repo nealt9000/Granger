@@ -77,6 +77,15 @@ class MusicQueue(ids: List<String>, index: Int, private val random: Random) {
     }
 
     /**
+     * Makes the item at [index] in [ids] current without changing either order. The engine calls it when the player
+     * has moved on by itself (a transition, a Next press), so the queue follows the player.
+     */
+    fun select(index: Int) {
+        require(index in _ids.indices) { "select($index) outside 0..${_ids.lastIndex}" }
+        pos = order.indexOf(index)
+    }
+
+    /**
      * On: the current track stays current and goes first in the play order; the rest follow in a random order drawn
      * from [random]. Turning it on again re-shuffles. Off: back to the original order, at the current track.
      */

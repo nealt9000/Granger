@@ -5,7 +5,10 @@ plugins {
 android {
     namespace = "app.granger.core.player"
     compileSdk = 37
-    defaultConfig { minSdk = 29 }
+    defaultConfig {
+        minSdk = 29
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -13,6 +16,7 @@ android {
     sourceSets {
         // The shared audio fixtures, read in place (see tools/dev/make-audio-fixtures.sh).
         getByName("test") { resources.directories.add(rootProject.file("testdata/audio").path) }
+        getByName("androidTest") { assets.directories.add(rootProject.file("testdata/audio").path) }
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
@@ -38,4 +42,8 @@ dependencies {
     testImplementation(libs.androidx.room.runtime)
     testImplementation(libs.media3.test.utils)
     testImplementation(libs.media3.test.utils.robolectric)
+
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.truth)
 }

@@ -19,6 +19,17 @@ class MusicQueueTest {
         assertThat(q.index).isEqualTo(2)
     }
 
+    /** The engine follows the player: whatever item ExoPlayer moved to becomes current, in either order. */
+    @Test fun selectMakesAnIdsIndexCurrent() {
+        val q = queue(index = 0)
+        q.setShuffle(true)
+        val order = q.playOrder
+        q.select(order[5])
+        assertThat(q.index).isEqualTo(order[5])
+        assertThat(q.next()).isEqualTo(order[6])
+        assertThat(q.playOrder).isEqualTo(order)
+    }
+
     @Test fun shuffleKeepsCurrentTrackFirst() {
         val q = queue(index = 4)
         q.setShuffle(true)
