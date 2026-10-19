@@ -242,7 +242,7 @@ class DownloadManagerTest {
         val file = File(internal, "models/e2b.litertlm").apply { parentFile!!.mkdirs(); writeText("old model") }
         installed(packEntry(sha256 = SHA_1), file.path)
         dao.upsert(
-            DownloadRecord("med", SHA_2, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf("https://a.test/x"), 9, file.path, "", true,
+            DownloadRecord("med", SHA_2, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf("https://a.test/x"), 9, file.path, "", null, true,
                 DownloadState.QUEUED, 0, createdAt = 2, updatedAt = 2),
         )
         manager.cancel("med")
@@ -281,5 +281,162 @@ class DownloadManagerTest {
         assertThat(records().single().verifiedAt).isEqualTo(7L)
         manager.recordCheck("med", SHA_1, verified = false)
         assertThat(records().single().verifiedAt).isNull()
+    }
+
+    // Download groups
+
+    private fun member(n: Int, size: Long = 100, group: String = "g") = DownloadSpec(
+        itemId = "$group/%03d".format(n), kind = ItemKind.AUDIO, title = "Album", urls = listOf("https://archive.org/download/x/$n.mp3"),
+        sizeBytes = size, hash = n.toString().repeat(40).take(40), hashAlgorithm = HashAlgorithm.SHA1,
+        relativePath = "music/archive-org/$group/%02d.mp3".format(n), snapshotDate = "", capped = false, groupId = group,
+    )
+
+    private fun fileOf(spec: DownloadSpec, root: File = internal) = File(root, spec.relativePath)
+
+    private suspend fun installedMember(spec: DownloadSpec, root: File = internal) {
+        val file = fileOf(spec, root).apply { parentFile!!.mkdirs(); writeText("done") }
+        dao.upsert(
+            DownloadRecord(
+                itemId = spec.itemId, hash = spec.hash, hashAlgorithm = spec.hashAlgorithm, kind = spec.kind, title = spec.title,
+                urls = spec.urls, sizeBytes = spec.sizeBytes, filePath = file.path, snapshotDate = "", groupId = spec.groupId,
+                wifiOnly = true, state = DownloadState.INSTALLED, bytesDone = spec.sizeBytes, createdAt = 1, updatedAt = 1,
+            ),
+        )
+    }
+
+    @Test fun groupIsQueuedInOrderAsOneChain() = test {
+        val specs = listOf(member(0), member(1), member(2))
+        assertThat(manager.enqueueGroup("g", specs, internal, wifiOnly = true)).isEqualTo(EnqueueResult.Queued)
+        val (group, records, replace) = scheduler.groups.single()
+        assertThat(group).isEqualTo("g")
+        assertThat(records.map { it.itemId }).containsExactly("g/000", "g/001", "g/002").inOrder()
+        assertThat(replace).isFalse()
+        assertThat(records().map { it.groupId }.distinct()).containsExactly("g")
+        assertThat(records().map { it.kind }.distinct()).containsExactly(ItemKind.AUDIO)
+        assertThat(records().map { it.state }.distinct()).containsExactly(DownloadState.QUEUED)
+        assertThat(records().first { it.itemId == "g/001" }.filePath).isEqualTo(fileOf(specs[1]).path)
+        assertThat(scheduler.scheduled).isEmpty()
+        assertThat(dao.forGroup("g").map { it.itemId }).containsExactly("g/000", "g/001", "g/002").inOrder()
+    }
+
+    @Test fun groupThatDoesNotFitQueuesNothing() = test {
+        free[internal.path] = QueuePolicy.RESERVE_BYTES + 250
+        val specs = listOf(member(0), member(1), member(2))
+        assertThat(manager.enqueueGroup("g", specs, internal, true)).isEqualTo(EnqueueResult.NoSpace(50))
+        assertThat(records()).isEmpty()
+        assertThat(scheduler.groups).isEmpty()
+        assertThat(scheduler.scheduled).isEmpty()
+    }
+
+    @Test fun groupSpaceCheckCountsOtherQueuedDownloadsOnTheVolume() = test {
+        free[internal.path] = QueuePolicy.RESERVE_BYTES + 1_150
+        manager.enqueue(packEntry(size = 1_000), internal, true)
+        assertThat(manager.enqueueGroup("g", listOf(member(0), member(1)), internal, true)).isEqualTo(EnqueueResult.NoSpace(50))
+        assertThat(manager.enqueueGroup("g", listOf(member(0)), internal, true)).isEqualTo(EnqueueResult.Queued)
+    }
+
+    @Test fun groupIgnoresTheStorageCap() = test {
+        cap = 10
+        installedPackBytes = 1_000
+        assertThat(manager.enqueueGroup("g", listOf(member(0), member(1)), internal, true)).isEqualTo(EnqueueResult.Queued)
+    }
+
+    @Test fun groupSkipsFilesAlreadyInstalled() = test {
+        val specs = listOf(member(0), member(1), member(2))
+        installedMember(specs[1])
+        free[internal.path] = QueuePolicy.RESERVE_BYTES + 200
+        assertThat(manager.enqueueGroup("g", specs, internal, true)).isEqualTo(EnqueueResult.Queued)
+        assertThat(scheduler.groups.single().second.map { it.itemId }).containsExactly("g/000", "g/002").inOrder()
+        assertThat(records().first { it.itemId == "g/001" }.state).isEqualTo(DownloadState.INSTALLED)
+    }
+
+    @Test fun groupLeavesActiveFilesAsTheyAre() = test {
+        manager.enqueueGroup("g", listOf(member(0), member(1)), internal, true)
+        dao.setState("g/001", member(1).hash, DownloadState.FAILED, "boom", 0, 0, 9)
+        assertThat(manager.enqueueGroup("g", listOf(member(0), member(1), member(2)), internal, true)).isEqualTo(EnqueueResult.Queued)
+        assertThat(scheduler.groups.last().second.map { it.itemId }).containsExactly("g/002")
+        assertThat(records().first { it.itemId == "g/001" }.state).isEqualTo(DownloadState.FAILED)
+    }
+
+    @Test fun groupWithNothingLeftToFetch() = test {
+        val specs = listOf(member(0), member(1))
+        installedMember(specs[0])
+        installedMember(specs[1])
+        assertThat(manager.enqueueGroup("g", specs, internal, true)).isEqualTo(EnqueueResult.AlreadyInstalled)
+        manager.enqueueGroup("h", listOf(member(0, group = "h")), internal, true)
+        assertThat(manager.enqueueGroup("h", listOf(member(0, group = "h")), internal, true)).isEqualTo(EnqueueResult.AlreadyActive)
+        assertThat(scheduler.groups.map { it.first }).containsExactly("h")
+    }
+
+    @Test fun cancelGroupKeepsInstalledFiles() = test {
+        val a = member(0)
+        val b = member(1)
+        installedMember(a)
+        manager.enqueueGroup("g", listOf(a, b), internal, true)
+        dao.setState(b.itemId, b.hash, DownloadState.RUNNING, null, 2, 0, 9)
+        val part = dao.get(b.itemId, b.hash)!!.partFile.apply { parentFile!!.mkdirs(); writeText("ha") }
+        manager.cancelGroup("g")
+        assertThat(records().map { it.itemId to it.state }).containsExactly(a.itemId to DownloadState.INSTALLED)
+        assertThat(fileOf(a).exists()).isTrue()
+        assertThat(part.exists()).isFalse()
+        assertThat(scheduler.cancelledGroups).containsExactly("g")
+    }
+
+    @Test fun removeGroupDeletesEveryFile() = test {
+        val a = member(0)
+        val b = member(1)
+        installedMember(a)
+        manager.enqueueGroup("g", listOf(a, b), internal, true)
+        val part = dao.get(b.itemId, b.hash)!!.partFile.apply { parentFile!!.mkdirs(); writeText("ha") }
+        val other = member(0, group = "h")
+        installedMember(other)
+        manager.removeGroup("g")
+        assertThat(records().map { it.itemId }).containsExactly(other.itemId)
+        assertThat(fileOf(a).exists()).isFalse()
+        assertThat(part.exists()).isFalse()
+        assertThat(fileOf(other).exists()).isTrue()
+        assertThat(scheduler.cancelledGroups).containsExactly("g")
+    }
+
+    @Test fun retryGroupRequeuesFailedInOrder() = test {
+        val specs = listOf(member(0), member(1), member(2))
+        installedMember(specs[0])
+        manager.enqueueGroup("g", specs, internal, true)
+        dao.setState("g/002", specs[2].hash, DownloadState.FAILED, "boom", 0, 2, 9)
+        dao.setState("g/001", specs[1].hash, DownloadState.FAILED, "boom", 0, 1, 9)
+        manager.retryGroup("g")
+        val (group, records, replace) = scheduler.groups.last()
+        assertThat(group).isEqualTo("g")
+        assertThat(records.map { it.itemId }).containsExactly("g/001", "g/002").inOrder()
+        assertThat(replace).isFalse()
+        val after = records().filter { it.itemId != "g/000" }
+        assertThat(after.map { it.state }.distinct()).containsExactly(DownloadState.QUEUED)
+        assertThat(after.map { it.error }.distinct()).containsExactly(null)
+        assertThat(after.map { it.hashFailures }.distinct()).containsExactly(0)
+    }
+
+    @Test fun wifiOnlyChangeReschedulesGroupsAsChains() = test {
+        val specs = listOf(member(0), member(1), member(2))
+        manager.enqueueGroup("g", specs, internal, wifiOnly = true)
+        dao.setState("g/000", specs[0].hash, DownloadState.RUNNING, null, 0, 0, 9)
+        dao.setState("g/001", specs[1].hash, DownloadState.FAILED, "boom", 0, 0, 9)
+        manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
+        manager.setWifiOnly(false)
+        val (group, records, replace) = scheduler.groups.last()
+        assertThat(group).isEqualTo("g")
+        assertThat(records.map { it.itemId }).containsExactly("g/000", "g/002").inOrder()
+        assertThat(records.map { it.wifiOnly }.distinct()).containsExactly(false)
+        assertThat(replace).isTrue()
+        assertThat(scheduler.groups).hasSize(2)
+        assertThat(scheduler.scheduled.filter { it.second }.map { it.first.itemId }).containsExactly("a")
+    }
+
+    @Test fun retryOfOneGroupedFileJoinsItsChain() = test {
+        val specs = listOf(member(0), member(1))
+        manager.enqueueGroup("g", specs, internal, true)
+        dao.setState("g/001", specs[1].hash, DownloadState.FAILED, "boom", 0, 0, 9)
+        manager.retry("g/001")
+        assertThat(scheduler.groups.last().let { it.first to it.second.map { r -> r.itemId } }).isEqualTo("g" to listOf("g/001"))
+        assertThat(scheduler.scheduled).isEmpty()
     }
 }

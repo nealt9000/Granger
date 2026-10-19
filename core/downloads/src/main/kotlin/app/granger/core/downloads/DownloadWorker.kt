@@ -14,6 +14,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -35,6 +36,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
     override suspend fun doWork(): Result {
         val itemId = inputData.getString(KEY_ITEM_ID) ?: return Result.failure()
         val hash = (inputData.getString(KEY_HASH) ?: inputData.getString(LEGACY_KEY_SHA256)) ?: return Result.failure()
+        val grouped = inputData.getString(KEY_GROUP) != null
         val runner = (applicationContext as DownloadsHost).downloadRunner
         try {
             setForeground(notifications.foregroundInfo(itemId, title, 0, 0))
@@ -53,9 +55,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
             if (outcome == RunOutcome.RETRY && isLastAttempt(runAttemptCount)) {
                 // WorkManager retries forever; stop and show the last error with a Retry button.
                 runner.giveUp(itemId, hash)
-                return Result.failure()
+                return RunOutcome.FAILED.toWorkResult(grouped)
             }
-            return outcome.toWorkResult()
+            return outcome.toWorkResult(grouped)
         } finally {
             // Also removes a progress notification posted when setForeground was refused.
             notifications.cancel(itemId)
@@ -65,6 +67,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
     companion object {
         const val KEY_ITEM_ID = "itemId"
         const val KEY_HASH = "hash"
+
+        /** Set on work that belongs to a download group's chain. */
+        const val KEY_GROUP = "group"
 
         /** Work queued by the version before Plan 7 carries the checksum under this key. */
         private const val LEGACY_KEY_SHA256 = "sha256"
@@ -79,37 +84,65 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
     }
 }
 
-fun RunOutcome.toWorkResult(): ListenableWorker.Result = when (this) {
+/**
+ * A [grouped] file's failure still reports success, so the rest of its group's chain runs; its record holds the
+ * failure and offers Retry. [RunOutcome.RETRY] stays a retry, so the chain waits and keeps one file at a time.
+ */
+fun RunOutcome.toWorkResult(grouped: Boolean = false): ListenableWorker.Result = when (this) {
     RunOutcome.INSTALLED, RunOutcome.GONE -> ListenableWorker.Result.success()
     RunOutcome.RETRY -> ListenableWorker.Result.retry()
-    RunOutcome.FAILED -> ListenableWorker.Result.failure()
+    RunOutcome.FAILED -> if (grouped) ListenableWorker.Result.success() else ListenableWorker.Result.failure()
 }
 
 class WorkManagerScheduler(context: Context) : DownloadScheduler {
     private val work = WorkManager.getInstance(context)
 
     override fun schedule(record: DownloadRecord, replace: Boolean) {
-        val network = if (record.wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
-        val request = OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setInputData(
-                workDataOf(
-                    DownloadWorker.KEY_ITEM_ID to record.itemId,
-                    DownloadWorker.KEY_HASH to record.hash,
-                    DownloadWorker.KEY_TITLE to record.title,
-                ),
-            )
-            .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
-            .build()
         val policy = if (replace) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP
-        work.enqueueUniqueWork(name(record.itemId), policy, request)
+        work.enqueueUniqueWork(name(record.itemId), policy, request(record, groupId = null))
     }
 
     override fun cancel(itemId: String) {
         work.cancelUniqueWork(name(itemId))
     }
 
+    /**
+     * Each record is appended to the group's one unique chain, so its files run one at a time, in order.
+     * APPEND_OR_REPLACE starts a fresh chain when the old one was cancelled; [replace] starts afresh regardless.
+     */
+    override fun scheduleGroup(groupId: String, records: List<DownloadRecord>, replace: Boolean) {
+        records.forEachIndexed { i, record ->
+            val policy = when {
+                replace && i == 0 -> ExistingWorkPolicy.REPLACE
+                replace -> ExistingWorkPolicy.APPEND
+                else -> ExistingWorkPolicy.APPEND_OR_REPLACE
+            }
+            work.enqueueUniqueWork(groupName(groupId), policy, request(record, groupId))
+        }
+    }
+
+    override fun cancelGroup(groupId: String) {
+        work.cancelUniqueWork(groupName(groupId))
+    }
+
+    private fun request(record: DownloadRecord, groupId: String?): OneTimeWorkRequest {
+        val network = if (record.wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val data = listOfNotNull(
+            DownloadWorker.KEY_ITEM_ID to record.itemId,
+            DownloadWorker.KEY_HASH to record.hash,
+            DownloadWorker.KEY_TITLE to record.title,
+            groupId?.let { DownloadWorker.KEY_GROUP to it },
+        )
+        return OneTimeWorkRequestBuilder<DownloadWorker>()
+            .setInputData(workDataOf(*data.toTypedArray()))
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+    }
+
     private fun name(itemId: String) = "download-$itemId"
+
+    private fun groupName(groupId: String) = "download-group-$groupId"
 }
 
 internal class DownloadNotifications(private val context: Context) {

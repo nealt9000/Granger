@@ -182,7 +182,7 @@ class DownloadRunnerTest {
     @Test fun updateDeletesTheOldFileOnlyAfterVerifying() = runTest {
         val oldFile = File(root, "packs/med_2026-09-01.zim").apply { parentFile!!.mkdirs(); writeText("old snapshot") }
         dao.upsert(
-            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", true,
+            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", null, true,
                 DownloadState.INSTALLED, 12, createdAt = 1, updatedAt = 1),
         )
         server.files[url] = content
@@ -197,7 +197,7 @@ class DownloadRunnerTest {
     @Test fun failedUpdateKeepsTheOldVersion() = runTest {
         val oldFile = File(root, "packs/med_2026-09-01.zim").apply { parentFile!!.mkdirs(); writeText("old snapshot") }
         dao.upsert(
-            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", true,
+            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.PACK, "WikiMed", listOf(url), 12, oldFile.path, "2026-09-01", null, true,
                 DownloadState.INSTALLED, 12, createdAt = 1, updatedAt = 1),
         )
         server.files[url] = Random(2).nextBytes(content.size)
@@ -211,7 +211,7 @@ class DownloadRunnerTest {
         val path = "models/e2b.litertlm"
         val file = File(root, path).apply { parentFile!!.mkdirs(); writeText("old model") }
         dao.upsert(
-            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.MODEL, "E2B", listOf(url), 9, file.path, "", true,
+            DownloadRecord("med", SHA_1, HashAlgorithm.SHA256, ItemKind.MODEL, "E2B", listOf(url), 9, file.path, "", null, true,
                 DownloadState.INSTALLED, 9, createdAt = 1, updatedAt = 1),
         )
         server.files[url] = content

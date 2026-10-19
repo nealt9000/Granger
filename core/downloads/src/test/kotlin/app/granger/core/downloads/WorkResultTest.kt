@@ -17,6 +17,20 @@ class WorkResultTest {
         assertThat(RunOutcome.FAILED.toWorkResult()).isEqualTo(ListenableWorker.Result.failure())
     }
 
+    @Test fun failedFileInAGroupLetsTheRestContinue() {
+        assertThat(RunOutcome.FAILED.toWorkResult(grouped = true)).isEqualTo(ListenableWorker.Result.success())
+    }
+
+    @Test fun ungroupedFailureStillFails() {
+        assertThat(RunOutcome.FAILED.toWorkResult(grouped = false)).isEqualTo(ListenableWorker.Result.failure())
+    }
+
+    @Test fun aGroupedRetryStillWaitsSoTheChainRunsOneFileAtATime() {
+        assertThat(RunOutcome.RETRY.toWorkResult(grouped = true)).isEqualTo(ListenableWorker.Result.retry())
+        assertThat(RunOutcome.INSTALLED.toWorkResult(grouped = true)).isEqualTo(ListenableWorker.Result.success())
+        assertThat(RunOutcome.GONE.toWorkResult(grouped = true)).isEqualTo(ListenableWorker.Result.success())
+    }
+
     @Test fun theTenthAttemptIsTheLast() {
         // runAttemptCount starts at 0, so attempt 10 has a count of 9.
         assertThat(DownloadWorker.isLastAttempt(8)).isFalse()

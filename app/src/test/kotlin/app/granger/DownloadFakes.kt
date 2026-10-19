@@ -133,6 +133,32 @@ class FakeDownloads : Downloads {
     override suspend fun repair(itemId: String) { calls += "repair:$itemId" }
     override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) { calls += "check:$itemId:$verified" }
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
+
+    /** Each enqueueGroup call: the group id, its specs in order, and the volume. */
+    val enqueuedGroups = mutableListOf<Triple<String, List<DownloadSpec>, File>>()
+
+    override suspend fun enqueueGroup(groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+        specs.forEach(onEnqueue)
+        enqueuedGroups += Triple(groupId, specs, volumeRoot)
+        calls += "enqueueGroup:$groupId"
+        val result = nextResult
+        if (result == EnqueueResult.Queued) {
+            list.update {
+                it + specs.map { spec ->
+                    record(
+                        spec.itemId, DownloadState.QUEUED, sha256 = spec.hash, kind = spec.kind,
+                        filePath = File(volumeRoot, spec.relativePath).path, sizeBytes = spec.sizeBytes, wifiOnly = wifiOnly,
+                        title = spec.title, hashAlgorithm = spec.hashAlgorithm,
+                    ).copy(groupId = groupId)
+                }
+            }
+        }
+        return result
+    }
+
+    override suspend fun cancelGroup(groupId: String) { calls += "cancelGroup:$groupId" }
+    override suspend fun removeGroup(groupId: String) { calls += "removeGroup:$groupId" }
+    override suspend fun retryGroup(groupId: String) { calls += "retryGroup:$groupId" }
 }
 
 class FakeVolumes(var volumes: List<Volume>) : VolumeSource {
