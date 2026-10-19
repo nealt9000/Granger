@@ -29,6 +29,8 @@ class FakeMediaLibrary(tracks: List<Track> = emptyList()) : MediaLibrary {
         chapterList.map { all -> all.filter { it.audiobookId == audiobookId }.sortedBy { it.ordinal } }
     override suspend fun track(id: String): Track? = trackList.value.firstOrNull { it.id == id }
     override suspend fun audiobook(id: String): Audiobook? = bookList.value.firstOrNull { it.id == id }
+    override suspend fun coverPaths(): Set<String> =
+        (trackList.value.mapNotNull { it.coverPath } + bookList.value.mapNotNull { it.coverPath }).toSet()
     override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) = error("not in tests")
     override suspend fun markAllMissing(origin: MediaOrigin) = error("not in tests")
     override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = error("not in tests")

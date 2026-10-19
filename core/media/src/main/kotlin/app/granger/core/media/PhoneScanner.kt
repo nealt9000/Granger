@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
  * - A file whose tags crashed the app (native TagLib) during an earlier scan is never read for tags again, see
  *   [TagReadGuard]: it becomes a track named from its file.
  * - After a scan in which every source listed, covers in [coversDir] that no row names are deleted ([CoverSweep]).
+ *   A cache hit whose cover file is gone is read again, so its art comes back.
  * - Only PHONE rows are synced: downloaded media (LIBRIVOX, ARCHIVE_ORG) belong to [DownloadedMediaScanner].
  */
 class PhoneScanner(
@@ -113,13 +114,8 @@ class PhoneScanner(
      */
     private suspend fun sweepCovers() {
         try {
-            val referenced = HashSet<String>()
-            media.tracks.first().mapNotNullTo(referenced) { it.coverPath }
-            media.audiobooks.first().mapNotNullTo(referenced) { it.coverPath }
-            // Audiobook files aren't in [MediaLibrary.tracks]; every one of them has a chapter.
-            media.allChapters.first().mapTo(HashSet()) { it.trackId }
-                .forEach { id -> media.track(id)?.coverPath?.let(referenced::add) }
-            CoverSweep.sweep(coversDir, referenced)
+            // Straight from the rows: a book file that went MISSING has no chapter, but its row still names its cover.
+            CoverSweep.sweep(coversDir, media.coverPaths())
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -178,6 +174,8 @@ class PhoneScanner(
         val audiobook = MediaClassifier.isAudiobook(file)
         // Filed as music before: its chapters were never stored, so read them now.
         if (audiobook && track.audiobookId == null) return null
+        // Its cover file is gone (deleted by hand, or swept): read the file again, so its art comes back.
+        if (track.coverPath != null && !File(track.coverPath).exists()) return null
         val chapters = track.audiobookId?.let { id -> storedChapters.getOrPut(id) { media.chapters(id).first() } }
             .orEmpty()
             .filter { it.trackId == track.id }

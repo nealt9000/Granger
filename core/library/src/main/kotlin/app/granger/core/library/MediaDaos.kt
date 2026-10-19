@@ -34,6 +34,10 @@ interface MediaDao {
     @Query("SELECT * FROM audiobooks WHERE id = :id")
     suspend fun audiobook(id: String): Audiobook?
 
+    /** Every cover any track or audiobook row names: any origin, any status, audiobook files included. */
+    @Query("SELECT coverPath FROM tracks WHERE coverPath IS NOT NULL UNION SELECT coverPath FROM audiobooks WHERE coverPath IS NOT NULL")
+    suspend fun coverPaths(): List<String>
+
     @Query("SELECT * FROM tracks WHERE origin = :origin")
     suspend fun tracksOf(origin: MediaOrigin): List<Track>
 

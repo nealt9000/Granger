@@ -23,6 +23,9 @@ interface MediaLibrary {
     suspend fun track(id: String): Track?
     suspend fun audiobook(id: String): Audiobook?
 
+    /** Every cover path any row names (tracks, audiobook files and audiobooks; any origin, any status). */
+    suspend fun coverPaths(): Set<String>
+
     /**
      * Replaces [origin]'s catalog with [result]: new rows inserted, changed rows updated, absent rows set MISSING.
      * Never deletes rows, states, bookmarks or playlist entries. A MISSING row that reappears goes back to OK.
@@ -59,6 +62,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
     override val allChapters: Flow<List<AudiobookChapter>> = dao.observeAllChapters()
     override suspend fun track(id: String): Track? = dao.track(id)
     override suspend fun audiobook(id: String): Audiobook? = dao.audiobook(id)
+    override suspend fun coverPaths(): Set<String> = dao.coverPaths().toSet()
 
     override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) {
         require(result.tracks.all { it.origin == origin }) { "Scan for $origin holds tracks of another origin" }
