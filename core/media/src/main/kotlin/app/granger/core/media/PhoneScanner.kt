@@ -170,13 +170,13 @@ class PhoneScanner(
             return null
         }
         val tags = TagParser.parse(read.raw, file.displayName, file.durationMs)
-        val cover = read.raw?.cover?.let { embeddedCover(fingerprint, it) }
+        val cover = read.raw?.cover?.let { embeddedCover(it) }
             ?: file.folderCoverUri?.let { uri -> folderCovers.getOrPut(uri) { folderCover(uri) } }
         return Entry(file, fingerprint, tags, read.chapters, cover, MediaClassifier.isAudiobook(file), wasRead = true)
     }
 
-    /** `coversDir/<fingerprint>.jpg`; written once. */
-    private fun embeddedCover(fingerprint: String, bytes: ByteArray): String? = save(File(coversDir, "$fingerprint.jpg")) { bytes }
+    /** `coversDir/<sha1 of the image>.jpg`: an album's art embedded in every track is stored once, and shared. */
+    private fun embeddedCover(bytes: ByteArray): String? = save(File(coversDir, "${sha1(bytes)}.jpg")) { bytes }
 
     /** A folder's `folder.jpg`/`cover.jpg`, copied once per image (not per track), named by its uri. */
     private fun folderCover(uri: String): String? = save(File(coversDir, "folder-${sha1(uri)}.jpg")) {
@@ -247,8 +247,10 @@ class PhoneScanner(
 
     private fun trackId(fingerprint: String) = "track:phone:$fingerprint"
 
-    private fun sha1(s: String) =
-        MessageDigest.getInstance("SHA-1").digest(s.toByteArray()).joinToString("") { "%02x".format(it) }.take(16)
+    private fun sha1(s: String) = sha1(s.toByteArray())
+
+    private fun sha1(bytes: ByteArray) =
+        MessageDigest.getInstance("SHA-1").digest(bytes).joinToString("") { "%02x".format(it) }.take(16)
 
     private companion object {
         /** How [Track] joins multi-valued tags (see its doc). TagParser splits on ";", so no value contains it. */

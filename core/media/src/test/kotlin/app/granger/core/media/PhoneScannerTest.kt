@@ -397,7 +397,32 @@ class PhoneScannerTest {
         val covers = phoneTracks().associate { it.title to it.coverPath }
         assertThat(File(covers.getValue("embedded")!!).readBytes()).isEqualTo(byteArrayOf(9, 9, 9))
         assertThat(File(covers.getValue("bare")!!).parentFile).isEqualTo(coversDir)
-        assertThat(File(covers.getValue("embedded")!!).name).isEqualTo("${fingerprintOf("content://media/1")}.jpg")
+    }
+
+    /** An album's art embedded in each of its tracks is stored once, named by its bytes, and shared by every track. */
+    @Test fun embeddedCoverIsStoredOncePerImage() = runTest {
+        val art = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 7, 7, 7)
+        val other = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 8, 8)
+        for (n in 1..3) tags["$n.mp3"] = FileTags(raw("$n", album = "Planets", cover = art.copyOf()), emptyList())
+        tags["4.mp3"] = FileTags(raw("4", album = "Other", cover = other), emptyList())
+        val source = FakeSource((1..4).map { found("content://media/$it", "$it.mp3", "Music/Holst/") })
+        val scanner = scanner(source)
+        scanner.scan()
+
+        val covers = phoneTracks().associate { it.title to it.coverPath }
+        assertThat(covers.getValue("1")).isNotNull()
+        assertThat(setOf(covers.getValue("1"), covers.getValue("2"), covers.getValue("3"))).hasSize(1)
+        assertThat(covers.getValue("4")).isNotEqualTo(covers.getValue("1"))
+        assertThat(coversDir.listFiles()!!.map { it.name }).hasSize(2)
+        val sha1 = java.security.MessageDigest.getInstance("SHA-1").digest(art).joinToString("") { "%02x".format(it) }.take(16)
+        assertThat(File(covers.getValue("1")!!).name).isEqualTo("$sha1.jpg")
+        assertThat(File(covers.getValue("1")!!).readBytes()).isEqualTo(art)
+
+        // Cache hits keep pointing at the shared file.
+        opened.clear()
+        scanner.scan()
+        assertThat(opened).isEmpty()
+        assertThat(phoneTracks().associate { it.title to it.coverPath }).isEqualTo(covers)
     }
 
     @Test fun concurrentScanIsJoinedNotRepeated() = runTest {
