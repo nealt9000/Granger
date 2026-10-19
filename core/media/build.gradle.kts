@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -28,6 +29,8 @@ dependencies {
     api(project(":core:library"))
     // Public: MediaLibrary and PhoneScanner are suspend/Flow APIs.
     api(libs.kotlinx.coroutines.android)
+    // The item manifests (.granger-item.json), as :core:archive reads archive.org's JSON.
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.truth)

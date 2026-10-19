@@ -492,4 +492,46 @@ class PhoneScannerTest {
         scanner(a, b).scan()
         assertThat(phoneTracks().map { it.uri }).containsExactly("content://media/1")
     }
+
+    /** The covers dir after a scan: covers of rows of every status kept, anything no row names deleted. */
+    @Test fun unreferencedCoversAreDeletedAfterAScan() = runTest {
+        tags["song.mp3"] = FileTags(raw("song", album = "A", cover = byteArrayOf(1, 1)), emptyList())
+        tags["chapter.mp3"] = FileTags(raw("chapter", album = "Book", cover = byteArrayOf(2, 2)), emptyList())
+        tags["chapter2.mp3"] = FileTags(raw("chapter2", album = "Book", cover = byteArrayOf(4, 4)), emptyList())
+        tags["gone.mp3"] = FileTags(raw("gone", album = "C", cover = byteArrayOf(3, 3)), emptyList())
+        val song = found("content://media/1", "song.mp3", "Music/A/")
+        val chapter = found("content://media/2", "chapter.mp3", "Audiobooks/Book/", inAudiobookFolder = true)
+        val chapter2 = found("content://media/4", "chapter2.mp3", "Audiobooks/Book/", inAudiobookFolder = true)
+        val gone = found("content://media/3", "gone.mp3", "Music/C/")
+        val source = FakeSource(listOf(song, chapter, chapter2, gone))
+        val scanner = scanner(source)
+        scanner.scan()
+        val kept = coversDir.listFiles()!!.map { it.name }.toSet()
+        assertThat(kept).hasSize(4)
+
+        // An orphan (a cover no row names any more) and a file that isn't a cover.
+        File(coversDir, "0123456789abcdef.jpg").writeBytes(byteArrayOf(5))
+        File(coversDir, "notes.txt").writeText("x")
+        source.files = listOf(song, chapter, chapter2)   // "gone" goes MISSING: its row, and so its cover, stay
+        scanner.scan()
+        assertThat(phoneTracks().single { it.title == "gone" }.status).isEqualTo(PackStatus.MISSING)
+        assertThat(coversDir.listFiles()!!.map { it.name }.toSet()).isEqualTo(kept + "notes.txt")
+    }
+
+    @Test fun sweepIsSkippedWhenASourceFailed() = runTest {
+        val good = FakeSource(listOf(found("content://media/1", "Mars.mp3")))
+        val bad = FakeSource(emptyList(), prefix = "content://tree/").apply { error = IOException("gone") }
+        val orphan = File(coversDir, "0123456789abcdef.jpg").apply { writeBytes(byteArrayOf(5)) }
+        scanner(good, bad).scan()
+        assertThat(orphan.exists()).isTrue()
+
+        // Nor without the permission, when nothing is listed at all.
+        permission = false
+        scanner(good).scan()
+        assertThat(orphan.exists()).isTrue()
+
+        permission = true
+        scanner(good).scan()
+        assertThat(orphan.exists()).isFalse()
+    }
 }

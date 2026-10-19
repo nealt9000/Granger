@@ -533,7 +533,7 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
 - Produces:
   ```kotlin
   @Serializable data class CachedTags(val title: String, val durationMs: Long, val rgTrackGain: Float?, val rgTrackPeak: Float?,
-      val rgAlbumGain: Float?, val rgAlbumPeak: Float?, val embeddedCover: String? /* local file name, e.g. ".cover-01.jpg" */)
+      val rgAlbumGain: Float?, val rgAlbumPeak: Float?, val embeddedCover: String? /* local file name, ".cover-<16 hex of sha1(image)>.jpg" */)
   @Serializable data class ManifestFile(
       val name: String /* local */, val remoteName: String, val url: String, val sizeBytes: Long, val hash: String,
       val hashAlgorithm: String /* HashAlgorithm name */, val title: String = "", val trackNo: Int? = null,
@@ -555,10 +555,10 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
       /** "<NN> - <title or remote stem>.<remote ext>", NN at least two digits, FAT-safe, ≤ 120 chars. */
       fun localName(ordinal: Int, title: String, remoteName: String): String
       /**
-       * The title to show. A [title] equal to [identifier] (or with no spaces and only [-_] separators) is a slug, and becomes the
+       * The title to show. A [title] equal to [identifier] (or blank) is a slug, and becomes the
        * longest common prefix of [fileNames] (the audio files' remote names): extensions dropped, cut back so it never ends inside a
        * word, trailing " ", "_", "-", ":", "." trimmed. The prefix is used when there are at least two names and it is at least
-       * 3 words or 12 characters; otherwise the slug reads as words, each capitalised. Any other title is returned unchanged.
+       * 3 words or 12 characters; otherwise the identifier reads as words, each capitalised. Any other title (even a slug-shaped one) is returned unchanged.
        */
       fun displayTitle(title: String, identifier: String, fileNames: List<String>): String
       /** [displayTitle] for [m]: its title, its ref, and its files' remote names (the cover not included). */
@@ -579,16 +579,18 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
       suspend fun scan(): Int
       /** Every item folder with a readable manifest, on every mounted volume. */
       suspend fun items(): List<Pair<File, MediaManifest>>
+      /** Item folders whose manifest couldn't be read (torn, not JSON, another folder's, unsafe names) at the last scan. */
+      val lastUnreadable: List<File>
   }
   object CoverSweep { fun sweep(coversDir: File, referenced: Set<String>): Int }   // deletes unreferenced *.jpg; returns how many
   ```
 - Filing rules:
   - A file is **present** when `<dir>/<name>` exists and its length equals `sizeBytes`. `*.part` files never count.
-  - Present files missing `tags` are opened read-only (`ParcelFileDescriptor.open(file, MODE_READ_ONLY)`), read with `tagReader` under `tagGuard`, and their `CachedTags` are written back to the manifest. An embedded cover is saved as `.cover-NN.jpg` in the item folder.
+  - Present files missing `tags` are opened read-only (`ParcelFileDescriptor.open(file, MODE_READ_ONLY)`), read with `tagReader` under `tagGuard`, and their `CachedTags` are written back to the manifest. An embedded cover is saved as `.cover-<16 hex of sha1(image)>.jpg` in the item folder, so art embedded in every track is stored once.
   - Track fields:
     - `uri` is `Uri.fromFile(file).toString()`, and `folder` is `relativeDir + "/"`.
     - `album` is `displayTitle(m)`, `albumKey` is `Albums.itemKey(source, ref)`, and `albumArtists` is the creators joined `"; "`.
-    - `title` is the file's archive.org title, else the tag title, else the file stem.
+    - `title` is the file's archive.org title, else the tag title, else the remote file name's stem (not the local "NN - " name).
     - `trackNo` is the manifest's, else the file's position plus one.
     - `artists` is the section readers (LibriVox), else the creators. `genres` is the manifest's.
     - `durationMs` is the tags' value, else the manifest's, else 0.
@@ -598,7 +600,7 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
     - `author` = creators, `narrator` = distinct readers, `description`, cover, and `durationMs` = the sum of the present files.
     - Its chapters are the present files in order, one chapter each, titled like the track.
   - Then `media.sync(LIBRIVOX, …)` and `media.sync(ARCHIVE_ORG, …)`, each with every item of that origin found on any volume. An item on an unmounted volume is absent, so its rows go MISSING with their state kept.
-  - A manifest that can't be read skips only its item.
+  - A manifest that can't be read skips only its item: its rows are left as they are (unknown, not gone) and its folder is listed in `lastUnreadable`.
 - `PhoneScanner`: after `media.sync(PHONE, …)`, when no source failed, `CoverSweep.sweep(coversDir, every coverPath in tracks and audiobooks)`.
 
 - [ ] **Step 1: Write the failing tests.**

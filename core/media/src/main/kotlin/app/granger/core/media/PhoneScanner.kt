@@ -39,6 +39,8 @@ import kotlinx.coroutines.withContext
  * - A file that can't be opened or read is skipped; one TagLib can't parse still becomes a track named from its file.
  * - A file whose tags crashed the app (native TagLib) during an earlier scan is never read for tags again, see
  *   [TagReadGuard]: it becomes a track named from its file.
+ * - After a scan in which every source listed, covers in [coversDir] that no row names are deleted ([CoverSweep]).
+ * - Only PHONE rows are synced: downloaded media (LIBRIVOX, ARCHIVE_ORG) belong to [DownloadedMediaScanner].
  */
 class PhoneScanner(
     private val sources: List<AudioSource>,
@@ -97,7 +99,32 @@ class PhoneScanner(
         if (listings.none { it.second != null }) return 0
         val failed = listings.filter { it.second == null }.map { it.first }
         val found = listings.flatMap { it.second.orEmpty() }
-        return withContext(Dispatchers.IO) { readAndSync(found) { uri -> failed.any { it.owns(uri) } } }
+        return withContext(Dispatchers.IO) {
+            val read = readAndSync(found) { uri -> failed.any { it.owns(uri) } }
+            // Only after a complete listing: a source that failed may own rows whose covers would look unreferenced.
+            if (failed.isEmpty()) sweepCovers()
+            read
+        }
+    }
+
+    /**
+     * Deletes covers in [coversDir] that no row (of any status) names. Downloaded media keep their covers in their own
+     * item folders, so only phone rows name files here. Never fails the scan.
+     */
+    private suspend fun sweepCovers() {
+        try {
+            val referenced = HashSet<String>()
+            media.tracks.first().mapNotNullTo(referenced) { it.coverPath }
+            media.audiobooks.first().mapNotNullTo(referenced) { it.coverPath }
+            // Audiobook files aren't in [MediaLibrary.tracks]; every one of them has a chapter.
+            media.allChapters.first().mapTo(HashSet()) { it.trackId }
+                .forEach { id -> media.track(id)?.coverPath?.let(referenced::add) }
+            CoverSweep.sweep(coversDir, referenced)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // A cover left behind costs a little space; the next complete scan tries again.
+        }
     }
 
     private suspend fun <T> attempt(block: suspend () -> T): T? = try {
