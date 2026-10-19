@@ -131,7 +131,11 @@ class PlayerEngineTest {
         return book
     }
 
-    private fun newEngine(replayGain: ReplayGainProcessor? = null, requester: FocusRequester = focus): PlayerEngine {
+    private fun newEngine(
+        replayGain: ReplayGainProcessor? = null,
+        requester: FocusRequester = focus,
+        clock: FakeClock = this.clock,
+    ): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()
         return PlayerEngine(
             player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(requester),
@@ -627,7 +631,9 @@ class PlayerEngineTest {
 
         // Restored again and played: no longer finished.
         prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, "audiobook").commit()
-        val second = newEngine()
+        // Its own clock: a FakeClock shared with a released player can stop auto-advancing (its last message went to a
+        // dead playback thread), which left this one buffering for ever now and then.
+        val second = newEngine(clock = FakeClock(clock.currentTimeMillis(), true))
         second.restore()
         idle()
         run(second.player).untilState(Player.STATE_READY)
