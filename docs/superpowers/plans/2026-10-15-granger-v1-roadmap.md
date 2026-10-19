@@ -43,6 +43,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Kiwix's Gutenberg packs (`gutenberg_en_lcc-b`, `lcc-pr`) have no full-text index (`hasFulltextIndex: false`, checked 2026-10-16), so Ask can't search them; Granger Classics (Plan 4, built with the index on) covers that ground.
 - Plan 6's `ModelManager` finds installed models through the `downloads` ledger: an `INSTALLED` record of kind `MODEL`, file at `filePath`.
 - Plan 8 replaces `capBytes = { Long.MAX_VALUE }` in `AppContainer` with `:core:billing`'s cap, and shows the Pro upsell for `EnqueueResult.OverCap`.
+- No longer planned (2026-10-19): Neal dropped the storage cap, so there's no limit but the phone's storage. `capBytes` stays `Long.MAX_VALUE` until the unused cap plumbing is removed (left for later in `2026-10-19-plan-m2-media-sources.md`).
 - SD cards were tested only in JVM tests (the Pixel 6 has no slot). Try a phone with one before the beta.
 - Android 15 limits `dataSync` foreground services to 6 hours a day; a very slow multi-GB download pauses at the limit and resumes when WorkManager next runs it.
 - The Ray Charles sample pack's main page (`index`) renders blank: the ZIM's own `_res_/script.js` throws `$ is not defined` because the page never loads jQuery, so its masonry article list never lays out. Articles open and render fine. Reader item for a later plan (Kiwix injects jQuery for such main pages).
