@@ -30,12 +30,15 @@ M3 is written after M2 merges, against the code M2 actually produced. M2 schedul
 The repo had no notes or fixtures about LibriVox. This plan is designed against the following, which a quick read-only look at the live APIs confirmed. Task 1 records them as fixtures before any code is written. If a recording differs, fix this section and the affected task before going on.
 
 - **LibriVox catalog:** `GET https://librivox.org/api/feed/audiobooks/?format=json` with `id=<digits>`, `title=<text>` (`^` anchors at the start; LibriVox drops leading articles, so `^time machine` finds *Time Machine* and `^the time machine` finds nothing), `author=<last name>`, `genre=<name>`, `extended=1` (sections and readers), `coverart=1`, `limit`, `offset`, `fields={a,b}`, `sort_field=id&sort_order=desc` (newest first; `since=` does *not* sort by date).
+  - `genres`, `url_iarchive`, `coverart_*` and `sections` come only with `extended=1`. A `fields` list that names `genres` without `extended=1` silently returns none (recorded 2026-10-19), so search results carry no genres.
+  - An unknown `genre=` name is HTTP 500 with an empty body, not a 404. The six genre names in Builder's calls all answer 200.
+  - The newest books can be catalogued before their archive.org item exists: `url_iarchive` "", `totaltime` "", `totaltimesecs` 0 (ids 23006–23008 on 2026-10-19). They read as `NotOnArchive`.
   - Book: `id`, `title`, `description` (HTML), `language`, `copyright_year`, `num_sections`, `totaltime` ("4:09:29"), `totaltimesecs` (number), `authors[{first_name,last_name}]`, `genres[{name}]`, `url_librivox`, `url_iarchive` (`https://www.archive.org/details/<identifier>`), `url_zip_file`, `coverart_jpg`/`coverart_thumbnail` (in a *separate* `LibrivoxCdCoverArt*` item), and `sections[]`.
   - Section: `id`, `section_number` (may start at 0), `title`, `listen_url` (`https://www.archive.org/download/<identifier>/<name>_64kb.mp3`), `playtime` (seconds, as a string), `file_name` (often null), `readers[{display_name}]`.
   - **No results is HTTP 404** with `{"error":"Audiobooks could not be found"}`. It must read as an empty page, not an error. Busy is HTTP 429 (spec §12).
-- **A LibriVox book's archive.org item** (e.g. `time_machine_0805_librivox`): formats `64Kbps MP3` (derivative, `length` "19:32"), `VBR MP3` (the ~128 kbps originals, `length` "1172.32", `track` "1/13"), `Ogg Vorbis`, plus one `JPEG` cover (`Time_Machine_1112.jpg`) and an `Item Tile`. Every file has `sha1`, `md5` and `size`.
+- **A LibriVox book's archive.org item** (e.g. `time_machine_0805_librivox`): formats `64Kbps MP3` (derivative, `length` "19:32"), `VBR MP3` (the ~128 kbps originals, `length` "1172.32", `track` "1/13"), `Ogg Vorbis`, plus one `JPEG` cover (`Time_Machine_1112.jpg`) and an `Item Tile`. The VBR MP3s also carry a per-file `title` ("Chapter 01") and `album` ("The Time Machine"), and one `track` is a bare "7". Every file but `<identifier>_files.xml` has `sha1`, `md5` and `size`.
 - **Archive.org audio items** (e.g. the Holst item): `mediatype` "audio", `collection` a string or a list, `files[]` with `format` ("VBR MP3", "Ogg Vorbis", "Flac", "<n>Kbps MP3", "PNG" waveforms, "Spectrogram", "Columbia Peaks"), `track` ("01", "1/13"), `length` (seconds or "mm:ss"), and sometimes `title`/`album`/`creator`. The Holst item's seven MP3 files have `track` 01–07 and **no `title` or `album`**. The item's title is its identifier, and its `date` is the 2025 upload date.
-- **Archive.org search for audio:** music is `mediatype:audio AND collection:audio_music` (52,199 items with `year:[* TO 1925]`). Spoken word is `mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio` (428 with the filter, 53,721 without). Some items have **`year` 0** (e.g. `BennyBell`), which `[* TO 1925]` lets through.
+- **Archive.org search for audio:** music is `mediatype:audio AND collection:audio_music` (52,199 items with `year:[* TO 1925]`, 52,107 with `year:[1860 TO 1925]`). Spoken word is `mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio` (428 with the filter, 53,721 without). Some items have **`year` 0** (e.g. `BennyBell`), which `[* TO 1925]` lets through.
 
 ## Decisions made with Neal (2026-10-19)
 
@@ -56,7 +59,7 @@ The repo had no notes or fixtures about LibriVox. This plan is designed against 
 ## Builder's calls in this plan (for Neal's review)
 
 - **LibriVox code lives in `:core:archive`** (`LibriVoxClient.kt`, `LibriVoxModels.kt`, `LibriVoxOffers.kt`), not a new module. Every LibriVox download is an archive.org item, so it shares the item client, the file checks and the JSON helpers.
-- **LibriVox browsing:** a search box plus fixed shelves, as in Plan 7 (decided with Neal: no "Most downloaded"). The shelves are Recently added (`sort_field=id&sort_order=desc`), Fiction (`genre=General Fiction`), Poetry, Children's (`Children's Fiction`), Science fiction, Mystery & detective (`Detective Fiction`) and Philosophy. Task 1 checks each genre name against the API. The search box asks by title (`title=<text>`) and by author (`author=<last word>`), then merges, title matches first, deduplicated by id.
+- **LibriVox browsing:** a search box plus fixed shelves, as in Plan 7 (decided with Neal: no "Most downloaded"). The shelves are Recently added (`sort_field=id&sort_order=desc`), Fiction (`genre=General Fiction`), Poetry, Children's (`Children's Fiction`), Science fiction, Mystery & detective (`Detective Fiction`) and Philosophy. Task 1 checked each genre name against the API: all six answer HTTP 200. The search box asks by title (`title=<text>`) and by author (`author=<last word>`), then merges, title matches first, deduplicated by id.
 - **LibriVox requests are paced** at least 1 s apart (one `Mutex` in the client). A 429 shows "LibriVox is busy right now. Try again in a minute." with Retry. The user agent goes to `librivox.org` as well as archive.org hosts (`ArchiveUserAgent.isArchiveHost` is extended).
 - **LibriVox files** (64 kbps, decided with Neal): each section's file is the basename of its `listen_url`, which must be a usable file in the item named by `url_iarchive` (verified by its sha1, else md5). If any section's file is missing there, the book isn't offered ("This book's files aren't all on archive.org."). The cover is the largest usable `JPEG` in that item, else its `Item Tile`. `coverart_jpg` is not used: it lives in another item and would need a second metadata fetch to verify.
 - **Archive.org queries by media type** (`ArchiveKind`): texts as today; spoken word `mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio` (LibriVox books have their own source, so they aren't listed twice); music `mediatype:audio AND collection:audio_music`. The shelves:
@@ -162,7 +165,7 @@ Left for M3 or later, with the reason:
 - Produces: the fixtures that Tasks 3, 4, 7, 8 and 9 read. Later tasks copy the ones they need into `app/src/test/resources/archive/`, as Plan 7 did.
 
 - [ ] **Step 1: Record the LibriVox fixtures with curl.** Send Granger's user agent, `-A "Granger/<versionName> (+https://github.com/nealt9000/Granger)"`, and wait 1 s between calls.
-  - `librivox-search-time-machine.json`: `https://librivox.org/api/feed/audiobooks/?title=%5Etime%20machine&format=json&limit=5&fields=%7Bid,title,authors,language,totaltime,totaltimesecs,num_sections,genres%7D`
+  - `librivox-search-time-machine.json`: `https://librivox.org/api/feed/audiobooks/?title=%5Etime%20machine&format=json&limit=5&fields=%7Bid,title,authors,language,totaltime,totaltimesecs,num_sections%7D`
   - `librivox-book-817.json`: `…/?id=817&extended=1&coverart=1&format=json`
   - `librivox-recent.json`: `…/?format=json&limit=3&sort_field=id&sort_order=desc&fields=%7Bid,title,authors,totaltimesecs%7D`
   - `librivox-not-found.json`: `…/?title=%5Ezzzqqq&format=json`. Write the body; note the status (expected 404).
@@ -170,7 +173,7 @@ Left for M3 or later, with the reason:
 - [ ] **Step 2: Record the archive.org fixtures.**
   - `item-librivox-time-machine.json`: `https://archive.org/metadata/time_machine_0805_librivox`
   - `item-holst-planets.json`: `https://archive.org/metadata/holst-the-planets-holst-london-symphony-orchestra-1922-1924`
-  - `search-audio-music.json` and `search-audio-spoken.json`: `advancedsearch.php` with the Task 3 queries (filtered, `rows=3`, the `fl[]` fields `ArchiveOrgClient.search` sends, plus `mediatype`).
+  - `search-audio-music.json` and `search-audio-spoken.json`: `advancedsearch.php` with the Task 3 queries (music filtered; spoken word unfiltered, the only way it's searched, Task 8; `rows=3`, the `fl[]` fields `ArchiveOrgClient.search` sends, plus `mediatype`).
   - `item-audio-lending.json`: the first result of `mediatype:audio AND access-restricted-item:true` (`rows=1`), then its `/metadata/<id>`.
 - [ ] **Step 3: Check the assumptions.** Run `python3 -m json.tool` on each file. Then confirm by eye against "API assumptions":
   - the 13 sections of book 817 and the 13 `*_64kb.mp3` files in its item;
@@ -317,7 +320,7 @@ git commit -m "Media M2: download groups run one file at a time as one chain; AU
   }
   ```
 - Parsing rules:
-  - `track`: "01" → 1, "1/13" → 1, anything else → null.
+  - `track`: "01" → 1, "7" → 7, "1/13" → 1, anything else → null.
   - `length`: "373.16" → 373_160 ms, "19:32" → 1_172_000, "1:02:03" → 3_723_000, anything else → null.
   - `collection` can be a string or a list.
 - `build` for an audio kind: `<kind.base>`, then ` AND (<text>)`, then ` AND <shelf clause>`, then, when filtered, ` AND <PublicDomain.clause>`. A filtered audio kind without `datedRecordings` (spoken word) has nothing it may show, so `build` throws `IllegalArgumentException`: the view model never searches it before the waiver (Task 8). A shelf of another kind throws `IllegalArgumentException` too. `datedRecordings` is read only for audio kinds; texts keep Plan 7's filter.
@@ -418,7 +421,8 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
   ```
 - Behaviour:
   - `Text` sends two requests, `title=<text>` and `author=<last word of text>`, merged with title matches first and duplicates dropped. `hasMore` is true when either request returned `limit` rows.
-  - Search asks only for `fields={id,title,authors,language,totaltime,totaltimesecs,num_sections,genres}`.
+  - Search asks only for `fields={id,title,authors,language,totaltime,totaltimesecs,num_sections}`, without `extended=1`, so search results have empty `genres` (only `book(id)` fills them).
+  - `url_iarchive` "" gives `archiveIdentifier` null (→ `NotOnArchive`); `totaltime` "" with `totaltimesecs` 0 gives `totalTimeMs` 0.
   - A 404 whose body says "could not be found" is an empty page.
   - A 429 throws `LibriVoxError("LibriVox is busy right now. Try again in a minute.")`. Another non-2xx throws `LibriVoxError("LibriVox answered <code>")`. An `IOException` throws `LibriVoxError("Couldn't reach LibriVox")`.
   - Requests run on `Dispatchers.IO`, at least `minGapMs` apart (one `Mutex`, then `delay` until the gap has passed).

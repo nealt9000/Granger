@@ -1,0 +1,46 @@
+{
+    "books": [
+        {
+            "id": "23008",
+            "title": "Spot",
+            "totaltimesecs": 0,
+            "authors": [
+                {
+                    "id": "92",
+                    "first_name": "Thomas",
+                    "last_name": "Hardy",
+                    "dob": "1840",
+                    "dod": "1928"
+                }
+            ]
+        },
+        {
+            "id": "23007",
+            "title": "Complete Essays of Charles Dudley Warner",
+            "totaltimesecs": 0,
+            "authors": [
+                {
+                    "id": "1030",
+                    "first_name": "Charles Dudley",
+                    "last_name": "Warner",
+                    "dob": "1829",
+                    "dod": "1900"
+                }
+            ]
+        },
+        {
+            "id": "23006",
+            "title": "San Kuo, or Romance of the Three Kingdoms",
+            "totaltimesecs": 0,
+            "authors": [
+                {
+                    "id": "19360",
+                    "first_name": "Guanzhong",
+                    "last_name": "Luo \u7f85\u8cab\u4e2d",
+                    "dob": "c. 1330",
+                    "dod": "1400"
+                }
+            ]
+        }
+    ]
+}
