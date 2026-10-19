@@ -82,4 +82,9 @@ class RewriteTest {
     @Test fun keywordWithMetaInsideKeepsTheRest() {
         assertThat(Rewrite.parse("keywords: granny knot problems")!!.keywords).containsExactly("granny knot")
     }
+
+    @Test fun rewriteDropsSourceMetaWords() {
+        assertThat(Rewrite.parse("keywords: bible, money, evil, scripture")!!.keywords).containsExactly("bible", "money", "evil").inOrder()
+        assertThat(Rewrite.parse("keywords: hamlet quotes, verse, passages")!!.keywords).containsExactly("hamlet", "verse").inOrder()
+    }
 }

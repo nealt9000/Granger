@@ -107,7 +107,14 @@ class BookIndex(
      * the sum of its BM25 over every keyword it matches, so chunks matching several keywords, or rare ones, rise. At
      * most [perBook] come from one book and [limit] in all; a bad query gives none.
      */
-    suspend fun passages(keywords: List<String>, limit: Int = 40, perBook: Int = 4): List<BookPassage> {
+    suspend fun passages(keywords: List<String>, limit: Int = 40, perBook: Int = 4): List<BookPassage> =
+        rankedPassages(keywords, bookId = null, limit = limit, perBook = perBook)
+
+    /** [passages] within one book, with no per-book cap: the best [limit] chunks of [bookId], best first. */
+    suspend fun passagesIn(bookId: String, keywords: List<String>, limit: Int = 8): List<BookPassage> =
+        rankedPassages(keywords, bookId = bookId, limit = limit, perBook = Int.MAX_VALUE)
+
+    private suspend fun rankedPassages(keywords: List<String>, bookId: String?, limit: Int, perBook: Int): List<BookPassage> {
         // Each word quoted, so query syntax (OR, NEAR, -) inside a keyword is just words; spaces AND them.
         val matches = keywords.map { k -> Keywords.words(k) }.filter { it.isNotEmpty() }.distinct()
             .map { words -> words.joinToString(" ") { "\"$it\"" } }
@@ -115,13 +122,14 @@ class BookIndex(
         return withContext(io) {
             val scores = HashMap<Long, Double>()
             val sql = db.openHelper.readableDatabase
+            val scope = if (bookId == null) "" else " AND docid IN (SELECT id FROM book_chunks WHERE bookId = ?)"
             for (match in matches) {
                 try {
                     // Rows come in docid order, so a word matching more than 3000 chunks scores only its first 3000.
                     sql.query(
                         SimpleSQLiteQuery(
-                            "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ? LIMIT 3000",
-                            arrayOf<Any>(match),
+                            "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ?$scope LIMIT 3000",
+                            if (bookId == null) arrayOf<Any>(match) else arrayOf<Any>(match, bookId),
                         ),
                     ).use { c ->
                         while (c.moveToNext()) scores.merge(c.getLong(0), bm25(c.getBlob(1)), Double::plus)
@@ -148,8 +156,8 @@ class BookIndex(
                 }
             }
             val texts = HashMap<Long, BookPassage>()
-            chunks.groupBy { it.bookId }.forEach { (bookId, hits) ->
-                val book = dao.get(bookId) ?: return@forEach
+            chunks.groupBy { it.bookId }.forEach { (id, hits) ->
+                val book = dao.get(id) ?: return@forEach
                 // One damaged book drops only its own passages.
                 val read = try {
                     chunkTexts(book.filePath, hits)

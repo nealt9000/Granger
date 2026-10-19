@@ -11,7 +11,7 @@ object Rewrite {
     private const val MAX_KEYWORDS = 6
     private val SPACES = Regex("\\s+")
     private val META_WORDS = Regex(
-        "\\b(definitions?|meanings?|etymology|origins?|history|facts|references?|problems|explanation|overview|information|info)\\b",
+        "\\b(definitions?|meanings?|etymology|origins?|history|facts|references?|problems|explanation|overview|information|info|scriptures?|teachings|texts?|passages?|quotes?|quotations?|excerpts?)\\b",
         RegexOption.IGNORE_CASE,
     )
 

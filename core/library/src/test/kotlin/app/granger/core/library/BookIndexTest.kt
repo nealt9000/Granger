@@ -276,4 +276,16 @@ class BookIndexTest {
         assertThat(index.passages(listOf("bible", "tattoo"), limit = 3, perBook = 3).first().text).isEqualTo("bible tattoo")
         assertThat(index.passages(listOf("bible tattoo", "bible"), limit = 3, perBook = 3).first().text).isEqualTo("bible tattoo")
     }
+
+    @Test fun passagesInSearchesOnlyThatBook() = test {
+        add("a", "<p>money evil money evil</p>", "<p>money</p>")
+        val b = add("b", "<p>money</p>", "<p>money and evil</p>", "<p>evil</p>", "<p>money evil money evil money evil</p>")
+        index.indexPending()
+
+        val found = index.passagesIn(b.id, listOf("money evil"))
+        assertThat(found.map { it.book.id }.toSet()).containsExactly(b.id)
+        assertThat(found.map { it.text }).containsExactly("money evil money evil money evil", "money and evil").inOrder()
+        assertThat(index.passagesIn(b.id, listOf("money"), limit = 2)).hasSize(2)
+        assertThat(index.passagesIn(b.id, emptyList())).isEmpty()
+    }
 }

@@ -4,15 +4,16 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class LexicalScoreTest {
-    private fun passage(text: String, title: String = "Untitled", heading: String = "") =
-        Passage(SourceKind.BOOK, "id", title, heading = heading, text = text)
+    private fun passage(text: String, title: String = "Untitled", heading: String = "", kind: SourceKind = SourceKind.BOOK) =
+        Passage(kind, "id", title, heading = heading, text = text)
 
     @Test fun fractionOfKeywordsPresent() =
         assertThat(LexicalScore.of(passage("Steam drives the piston in a boiler."), listOf("steam", "piston", "gauge", "valve")))
             .isWithin(1e-9).of(0.5)
 
     @Test fun titleBonus() {
-        assertThat(LexicalScore.of(passage("nothing here", title = "Steam engine"), listOf("steam"))).isWithin(1e-9).of(0.1)
+        // An article's title is only a bonus; a book's title also stands in for the body (see bookTitleSatisfiesTheKeywordThatNamesIt).
+        assertThat(LexicalScore.of(passage("nothing here", title = "Steam engine", kind = SourceKind.ARTICLE), listOf("steam"))).isWithin(1e-9).of(0.1)
         assertThat(LexicalScore.of(passage("steam power", title = "Steam engine"), listOf("steam"))).isWithin(1e-9).of(1.1)
     }
 
@@ -25,7 +26,7 @@ class LexicalScoreTest {
     @Test fun aPhraseCountsWhenAllItsWordsArePresent() {
         val portia = passage("The quality of mercy is not strained, said Portia.")
         assertThat(LexicalScore.of(portia, listOf("portia mercy", "quality mercy"))).isWithin(1e-9).of(1.0)
-        assertThat(LexicalScore.of(passage("text", title = "Mercy and Portia"), listOf("portia mercy"))).isWithin(1e-9).of(0.1)
+        assertThat(LexicalScore.of(passage("text", title = "Mercy and Portia", kind = SourceKind.ARTICLE), listOf("portia mercy"))).isWithin(1e-9).of(0.1)
     }
 
     @Test fun aPhraseGetsTheShareOfItsWordsPresent() {
@@ -70,4 +71,15 @@ class LexicalScoreTest {
     }
 
     @Test fun noKeywordsScoresZero() = assertThat(LexicalScore.of(passage("text"), emptyList())).isEqualTo(0.0)
+
+    @Test fun bookTitleSatisfiesTheKeywordThatNamesIt() {
+        val kjv = passage("For the love of money is the root of all evil.", title = "The King James Bible")
+        assertThat(LexicalScore.of(kjv, listOf("bible", "money", "evil"))).isWithin(1e-9).of(1.1)
+    }
+
+    @Test fun articleTitleDoesNotCountAsBody() {
+        val article = passage("For the love of money is the root of all evil.", title = "Bible", kind = SourceKind.ARTICLE)
+        // 2/3, TITLE_BONUS for "bible" in the title, LEAD_BONUS for the opening passage.
+        assertThat(LexicalScore.of(article, listOf("bible", "money", "evil"))).isWithin(1e-9).of(2.0 / 3 + 0.1 + 0.3)
+    }
 }
