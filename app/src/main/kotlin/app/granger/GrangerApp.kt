@@ -42,6 +42,8 @@ import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
+import app.granger.core.library.Playlists
+import app.granger.core.library.RoomPlaylists
 import app.granger.core.player.MediaControllerPlayerHub
 import app.granger.core.player.PlayerHub
 import app.granger.core.player.PlayerSettingsKeys
@@ -218,6 +220,9 @@ class AppContainer(context: Context) {
     /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */
     val playerPrefs: SharedPreferences = context.getSharedPreferences(PlayerSettingsKeys.PREFS, Context.MODE_PRIVATE)
     val shelves: Shelves = RoomShelves(libraryDb, library, bookshelf, media)
+
+    /** The user's music playlists. */
+    val playlists: Playlists = RoomPlaylists(libraryDb)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)
 

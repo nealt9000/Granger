@@ -26,15 +26,19 @@ private sealed interface MoveChoice {
     data object NewMediaType : MoveChoice
 }
 
-/** Move a pack to a collection, to a new collection under a media type, or to a new media type. */
+/**
+ * Move a pack (or book, or album) to a collection, to a new collection under a media type, or to a new media type.
+ * [allowNewMediaType] false leaves the last choice out (an album stays in Music).
+ */
 @Composable
 fun MovePackDialog(
     shelves: List<Shelf>,
-    currentCollectionId: String,
+    currentCollectionId: String?,
     onMove: (collectionId: String) -> Unit,
     onMoveToNewCollection: (mediaTypeId: String, name: String) -> Unit,
     onMoveToNewMediaType: (mediaType: String, collection: String) -> Unit,
     onDismiss: () -> Unit,
+    allowNewMediaType: Boolean = true,
 ) {
     var newIn by rememberSaveable { mutableStateOf<String?>(null) }
     var newMediaType by rememberSaveable { mutableStateOf(false) }
@@ -45,7 +49,7 @@ fun MovePackDialog(
                 .forEach { add(MoveChoice.Existing(it.collection.id, it.collection.name)) }
             add(MoveChoice.NewCollection(shelf.mediaType.id, shelf.mediaType.name))
         }
-        add(MoveChoice.NewMediaType)
+        if (allowNewMediaType) add(MoveChoice.NewMediaType)
     }
     when {
         newIn != null -> NameDialog(

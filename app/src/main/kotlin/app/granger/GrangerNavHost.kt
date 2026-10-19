@@ -55,6 +55,14 @@ import app.granger.library.LibraryScreen
 import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
 import app.granger.library.SourceLink
+import app.granger.music.AlbumScreen
+import app.granger.music.ArtistScreen
+import app.granger.music.FolderScreen
+import app.granger.music.GenreScreen
+import app.granger.music.MusicNav
+import app.granger.music.MusicScreen
+import app.granger.music.MusicViewModel
+import app.granger.music.PlaylistScreen
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
 import app.granger.readiness.ReadinessScreen
@@ -90,6 +98,19 @@ import app.granger.research.ResearchViewModel
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
 @Serializable data class CollectionRoute(val collectionId: String)
+
+/** Music's tabs for one Music collection; null is "All music" (not scoped). */
+@Serializable data class MusicRoute(val collectionId: String? = null)
+@Serializable data class AlbumRoute(val albumKey: String)
+@Serializable data class ArtistRoute(val name: String)
+@Serializable data class GenreRoute(val name: String)
+@Serializable data class PlaylistRoute(val playlistId: Long)
+
+/** [folder] is a track's stored folder, as `Track.folder` holds it. */
+@Serializable data class FolderRoute(val folder: String)
+
+private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumRoute>() || hasRoute<ArtistRoute>() ||
+    hasRoute<GenreRoute>() || hasRoute<PlaylistRoute>() || hasRoute<FolderRoute>()
 /** An article; [fragment] scrolls its first page to that section (a cited passage's heading). */
 @Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null)
 
@@ -307,7 +328,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     val selected = when {
         destination == null -> null
         destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
-            destination.hasRoute<ArchiveRoute>() -> RailTool.LIBRARY
+            destination.hasRoute<ArchiveRoute>() || destination.isMusic() -> RailTool.LIBRARY
         destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
         destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
         destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
@@ -406,6 +427,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
+                    onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },
                     onOpenSource = { source ->
                         when (source) {
                             SourceLink.GRANGER -> nav.navigate(SourceRoute(CatalogScope.GRANGER))
@@ -431,6 +453,36 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onGetBooks = { nav.navigate(SourceRoute(CatalogScope.GRANGER)) },
                     onBack = { nav.popBackStack() },
                 )
+            }
+            val musicNav = MusicNav(
+                onAlbum = { nav.navigate(AlbumRoute(it)) },
+                onArtist = { nav.navigate(ArtistRoute(it)) },
+                onGenre = { nav.navigate(GenreRoute(it)) },
+                onPlaylist = { nav.navigate(PlaylistRoute(it)) },
+                onFolder = { nav.navigate(FolderRoute(it)) },
+                onBack = { nav.popBackStack() },
+            )
+            // The detail pages aren't scoped to a collection: their routes carry none.
+            fun musicViewModel(collectionId: String?) =
+                MusicViewModel(collectionId, container.media, container.shelves, container.playlists, container.playerHub)
+            composable<MusicRoute> { backStackEntry ->
+                val id = backStackEntry.toRoute<MusicRoute>().collectionId
+                MusicScreen(viewModel { musicViewModel(id) }, musicNav)
+            }
+            composable<AlbumRoute> { backStackEntry ->
+                AlbumScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<AlbumRoute>().albumKey, musicNav)
+            }
+            composable<ArtistRoute> { backStackEntry ->
+                ArtistScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<ArtistRoute>().name, musicNav)
+            }
+            composable<GenreRoute> { backStackEntry ->
+                GenreScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<GenreRoute>().name, musicNav)
+            }
+            composable<PlaylistRoute> { backStackEntry ->
+                PlaylistScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<PlaylistRoute>().playlistId, musicNav)
+            }
+            composable<FolderRoute> { backStackEntry ->
+                FolderScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<FolderRoute>().folder, musicNav)
             }
             composable<ReaderRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<ReaderRoute>()

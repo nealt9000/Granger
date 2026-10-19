@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.music.ALL_MUSIC
+import app.granger.music.MUSIC_TYPE_ID
 
 /** "Media" (media types, each expanding to its collections) and "Archive sources". */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +58,8 @@ fun LibraryScreen(
     /** Shown once as a snackbar, e.g. why the app didn't resume reading. */
     notice: String?,
     onOpenCollection: (collectionId: String) -> Unit,
+    /** A Music collection, or "All music" (null). */
+    onOpenMusic: (collectionId: String?) -> Unit,
     onOpenSource: (SourceLink) -> Unit,
     onSearch: () -> Unit,
     onHistory: () -> Unit,
@@ -142,12 +146,25 @@ fun LibraryScreen(
                         },
                     )
                 }
+                // Music opens its own tabs: "All music" first, then each collection scoped to its albums.
+                val music = id == MUSIC_TYPE_ID
+                if (open && music) {
+                    item(key = "all-music") {
+                        ListItem(
+                            modifier = Modifier.clickable { onOpenMusic(null) }.padding(start = 16.dp),
+                            headlineContent = { Text(ALL_MUSIC) },
+                            supportingContent = { Text(countText(0, 0, shelf.collections.sumOf { it.albums.size })) },
+                        )
+                    }
+                }
                 if (open) for (row in shelf.collections) {
                     item(key = "collection:${row.collection.id}") {
                         ListItem(
-                            modifier = Modifier.clickable { onOpenCollection(row.collection.id) }.padding(start = 16.dp),
+                            modifier = Modifier
+                                .clickable { if (music) onOpenMusic(row.collection.id) else onOpenCollection(row.collection.id) }
+                                .padding(start = 16.dp),
                             headlineContent = { Text(row.collection.name) },
-                            supportingContent = { Text(countText(row.packs.size, row.books.size)) },
+                            supportingContent = { Text(countText(row.packs.size, row.books.size, row.albums.size)) },
                         )
                     }
                 }
@@ -170,9 +187,10 @@ private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
 )
 
-private fun countText(packs: Int, books: Int): String = listOfNotNull(
+private fun countText(packs: Int, books: Int, albums: Int = 0): String = listOfNotNull(
     if (packs > 0) (if (packs == 1) "1 pack" else "$packs packs") else null,
     if (books > 0) (if (books == 1) "1 book" else "$books books") else null,
+    if (albums > 0) (if (albums == 1) "1 album" else "$albums albums") else null,
 ).joinToString(" · ")
 
 /** The file's display name from the document provider, falling back to the last part of its URI. */

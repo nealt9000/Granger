@@ -117,6 +117,25 @@ interface PlaybackDao {
     @Insert
     suspend fun insertEntries(entries: List<PlaylistEntry>)
 
+    @Query("UPDATE playlists SET name = :name, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun renamePlaylist(id: Long, name: String, updatedAt: Long)
+
+    @Query("UPDATE playlists SET updatedAt = :updatedAt WHERE id = :id")
+    suspend fun touchPlaylist(id: Long, updatedAt: Long)
+
+    @Query("DELETE FROM playlists WHERE id = :id")
+    suspend fun deletePlaylist(id: Long)
+
+    @Query("DELETE FROM playlist_entries WHERE playlistId = :playlistId")
+    suspend fun deleteEntries(playlistId: Long)
+
+    /** The playlist's tracks in entry order, MISSING ones included; an entry whose track row doesn't exist is left out. */
+    @Query(
+        "SELECT tracks.* FROM playlist_entries INNER JOIN tracks ON tracks.id = playlist_entries.trackId " +
+            "WHERE playlist_entries.playlistId = :playlistId ORDER BY playlist_entries.ordinal",
+    )
+    fun observePlaylistTracks(playlistId: Long): Flow<List<Track>>
+
     @Upsert
     suspend fun upsertRecentPlay(play: RecentPlay)
 

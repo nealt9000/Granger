@@ -117,7 +117,7 @@ data class MusicState(
     val updatedAt: Long,
 )
 
-/** [key]: "album:<albumKey>", "audiobook:<id>", "playlist:<id>", "artist:<name>", "genre:<name>", "songs". */
+/** [key]: "album:<albumKey>", "audiobook:<id>", "playlist:<id>", "artist:<name>", "genre:<name>", "folder:<path>", "songs". */
 @Entity(tableName = "recent_plays", indices = [Index("playedAt")])
 data class RecentPlay(@PrimaryKey val key: String, val title: String, val playedAt: Long)
 

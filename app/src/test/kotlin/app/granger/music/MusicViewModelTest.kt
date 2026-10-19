@@ -1,0 +1,170 @@
+package app.granger.music
+
+import app.granger.FakeShelves
+import app.granger.MainDispatcherRule
+import app.granger.core.library.Albums
+import app.granger.core.library.CollectionRow
+import app.granger.core.library.MediaType
+import app.granger.core.library.PackStatus
+import app.granger.core.library.Shelf
+import app.granger.core.library.ShelfCollection
+import app.granger.core.library.Track
+import app.granger.core.player.PlaySource
+import app.granger.player.FakePlayerHub
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+import org.junit.Test
+
+class MusicViewModelTest {
+    @get:Rule val main = MainDispatcherRule()
+    private val media = FakeMediaLibrary()
+    private val shelves = FakeShelves()
+    private val playlists = FakePlaylists(media)
+    private val hub = FakePlayerHub()
+
+    private fun TestScope.vm(collectionId: String? = null): MusicViewModel {
+        val vm = MusicViewModel(collectionId, media, shelves, playlists, hub)
+        backgroundScope.launch { vm.ui.collect {} }
+        return vm
+    }
+
+    private fun row(id: String, name: String, tracks: List<Track>) = CollectionRow(
+        ShelfCollection(id, name, "music", userCreated = false, defaultKey = id), packs = emptyList(),
+        albums = Albums.summaries(tracks),
+    )
+
+    private val music = MediaType("music", "Music", true, 1)
+
+    @Test fun allMusicIgnoresCollectionsButCollectionScopes() = runTest(main.dispatcher) {
+        val jazz = listOf(song("j1", album = "Kind of Blue", albumArtists = "Miles", genres = "Jazz", folder = "Jazz/"))
+        val rock = listOf(
+            song("r1", album = "Abbey Road", albumArtists = "Beatles", genres = "Rock", folder = "Rock/"),
+            song("r2", album = "Abbey Road", albumArtists = "Beatles", genres = "Rock", folder = "Rock/"),
+        )
+        media.trackList.value = jazz + rock
+        shelves.shelfList.value = listOf(Shelf(music, listOf(row("c-jazz", "Jazz shelf", jazz), row("c-rock", "Rock shelf", rock))))
+        val mix = playlists.create("Mix", listOf("track:phone:j1", "track:phone:r1"))
+
+        val all = vm(null).ui.filterNotNull().first()
+        assertThat(all.title).isEqualTo("All music")
+        assertThat(all.songs.map { it.id }).containsExactly("track:phone:j1", "track:phone:r1", "track:phone:r2")
+        assertThat(all.albums.map { it.title }).containsExactly("Kind of Blue", "Abbey Road")
+        assertThat(all.playlists.map { it.id }).containsExactly(mix)
+
+        val scoped = vm("c-rock").ui.filterNotNull().first()
+        assertThat(scoped.title).isEqualTo("Rock shelf")
+        assertThat(scoped.songs.map { it.id }).containsExactly("track:phone:r1", "track:phone:r2")
+        assertThat(scoped.albums.map { it.title }).containsExactly("Abbey Road")
+        assertThat(scoped.artists.map { it.name }).containsExactly("Beatles")
+        assertThat(scoped.genres.map { it.name }).containsExactly("Rock")
+        assertThat(scoped.folders.map { it.path }).containsExactly("Rock/")
+        // Playlists are global: every playlist shows inside any collection.
+        assertThat(scoped.playlists.map { it.id }).containsExactly(mix)
+    }
+
+    @Test fun artistsMergeAlbumArtistsAndTrackArtists() = runTest(main.dispatcher) {
+        media.trackList.value = listOf(
+            song("a1", album = "Alpha", albumArtists = "Ann", artists = "Ann; Bob"),
+            song("a2", album = "Alpha", albumArtists = "Ann", artists = "Ann"),
+            song("b1", album = "Beta", albumArtists = "", artists = "Cal"), // no album artist: the track artist stands in
+            song("g1", album = "Gamma", albumArtists = "Dee", artists = "bob", releaseType = "ep"),
+            song("d1", album = "Delta", albumArtists = "Dee", artists = "Dee", releaseType = "album; live"),
+            song("e1", album = "Epsilon", albumArtists = "Dee", artists = "Dee"),
+        )
+        val vm = vm()
+        val ui = vm.ui.filterNotNull().first()
+        assertThat(ui.artists.map { it.name }).containsExactly("Ann", "Bob", "Cal", "Dee").inOrder()
+
+        val bob = vm.artist("BOB").filterNotNull().first()
+        assertThat(bob.sections).isEmpty()
+        assertThat(bob.appearsOn.map { it.title }).containsExactly("Alpha", "Gamma")
+        assertThat(bob.songs.map { it.id }).containsExactly("track:phone:a1", "track:phone:g1")
+
+        val cal = vm.artist("Cal").filterNotNull().first()
+        assertThat(cal.sections.map { it.group to it.albums.map { a -> a.title } }).containsExactly(ReleaseGroup.ALBUMS to listOf("Beta"))
+
+        val dee = vm.artist("Dee").filterNotNull().first()
+        assertThat(dee.sections.map { it.group to it.albums.map { a -> a.title } }).containsExactly(
+            ReleaseGroup.ALBUMS to listOf("Epsilon"),
+            ReleaseGroup.EPS to listOf("Gamma"),
+            ReleaseGroup.LIVE to listOf("Delta"),
+        ).inOrder()
+        assertThat(dee.appearsOn).isEmpty()
+    }
+
+    @Test fun missingTracksAreSkippedWhenPlayingAnAlbum() = runTest(main.dispatcher) {
+        media.trackList.value = listOf(
+            song("1", album = "Album", trackNo = 1),
+            song("2", album = "Album", trackNo = 2, status = PackStatus.MISSING),
+            song("3", album = "Album", trackNo = 3),
+        )
+        val vm = vm()
+        val page = vm.album(Albums.key("Artist", "Album", "Music/")).filterNotNull().first()
+        assertThat(page.tracks.map { it.id }).containsExactly("track:phone:1", "track:phone:2", "track:phone:3").inOrder()
+
+        vm.play(page.tracks, tapped = 2, source = MusicSources.album(page.album))
+        assertThat(hub.plays.single()).isEqualTo(
+            FakePlayerHub.Play(listOf("track:phone:1", "track:phone:3"), 1, false, PlaySource("album:${page.album.key}", "Album")),
+        )
+
+        vm.play(page.tracks, tapped = 1, source = MusicSources.album(page.album)) // the missing one: nothing plays
+        assertThat(hub.plays).hasSize(1)
+
+        vm.addToQueue(page.tracks)
+        vm.playNext(page.tracks)
+        assertThat(hub.queued.single()).containsExactly("track:phone:1", "track:phone:3").inOrder()
+        assertThat(hub.nexts.single()).containsExactly("track:phone:1", "track:phone:3").inOrder()
+    }
+
+    @Test fun albumShuffleAndPlayAllStartAtTheFirstPlayableTrack() = runTest(main.dispatcher) {
+        media.trackList.value = listOf(
+            song("1", trackNo = 1, status = PackStatus.MISSING),
+            song("2", trackNo = 2),
+        )
+        val vm = vm()
+        val page = vm.album(Albums.key("Artist", "Album", "Music/")).filterNotNull().first()
+        vm.play(page.tracks, tapped = null, source = MusicSources.album(page.album), shuffle = true)
+        assertThat(hub.plays.single().trackIds).containsExactly("track:phone:2")
+        assertThat(hub.plays.single().startIndex).isEqualTo(0)
+        assertThat(hub.plays.single().shuffle).isTrue()
+    }
+
+    @Test fun songsSortByTheChosenKeyUsingSortTags() = runTest(main.dispatcher) {
+        media.trackList.value = listOf(
+            song("x", title = "The Zebra", date = "1999", addedAt = 3L).copy(sortTitle = "Zebra"),
+            song("y", title = "Apple", date = "2005", addedAt = 1L),
+            song("z", title = "Mango", date = "1970", addedAt = 2L),
+        )
+        val vm = vm()
+        assertThat(vm.ui.filterNotNull().first().songs.map { it.title }).containsExactly("Apple", "Mango", "The Zebra").inOrder()
+        vm.setSort(SongSort.YEAR)
+        assertThat(vm.ui.filterNotNull().first { it.sort == SongSort.YEAR }.songs.map { it.title })
+            .containsExactly("Mango", "The Zebra", "Apple").inOrder()
+        vm.setSort(SongSort.DATE_ADDED)
+        assertThat(vm.ui.filterNotNull().first { it.sort == SongSort.DATE_ADDED }.songs.map { it.title })
+            .containsExactly("The Zebra", "Mango", "Apple").inOrder()
+    }
+
+    @Test fun moveTargetsAreMusicCollectionsOnly() = runTest(main.dispatcher) {
+        val tracks = listOf(song("1"))
+        media.trackList.value = tracks
+        val books = MediaType("literature", "Literature", true, 0)
+        shelves.shelfList.value = listOf(
+            Shelf(books, listOf(CollectionRow(ShelfCollection("c-lit", "Lit", "literature", false, "lit"), emptyList()))),
+            Shelf(music, listOf(row("c-phone", "On this phone", tracks), row("c-mine", "Mine", emptyList()))),
+        )
+        val vm = vm()
+        backgroundScope.launch { vm.moveTargets.collect {} }
+        assertThat(vm.moveTargets.first { it.isNotEmpty() }.map { it.mediaType.id }).containsExactly("music")
+        val album = vm.ui.filterNotNull().first().albums.single()
+        assertThat(vm.collectionOf(album)).isEqualTo("c-phone")
+        vm.moveAlbum(album, "c-mine")
+        main.dispatcher.scheduler.advanceUntilIdle()
+        assertThat(shelves.moves).containsExactly("album:${album.key}" to "c-mine")
+    }
+}

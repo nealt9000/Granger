@@ -19,7 +19,18 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
     override val queue = MutableStateFlow<List<Track>>(emptyList())
     val calls = mutableListOf<String>()
 
-    override fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource) { calls += "playTracks" }
+    /** Every [playTracks] call with its arguments. */
+    data class Play(val trackIds: List<String>, val startIndex: Int, val shuffle: Boolean, val source: PlaySource)
+    val plays = mutableListOf<Play>()
+
+    /** The ids handed to [playNext] and [addToQueue], call by call. */
+    val nexts = mutableListOf<List<String>>()
+    val queued = mutableListOf<List<String>>()
+
+    override fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource) {
+        calls += "playTracks"
+        plays += Play(trackIds, startIndex, shuffle, source)
+    }
     override fun playAudiobook(id: String, at: AudioBookmark?) { calls += "playAudiobook:$id@${at?.positionMs}" }
     override fun playPause() { calls += "playPause" }
     override fun next() { calls += "next" }
@@ -32,8 +43,8 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
     override fun cycleRepeat() { calls += "cycleRepeat" }
     override fun moveInQueue(from: Int, to: Int) { calls += "move:$from>$to" }
     override fun removeFromQueue(i: Int) { calls += "remove:$i" }
-    override fun playNext(trackIds: List<String>) { calls += "playNext" }
-    override fun addToQueue(trackIds: List<String>) { calls += "addToQueue" }
+    override fun playNext(trackIds: List<String>) { calls += "playNext"; nexts += trackIds }
+    override fun addToQueue(trackIds: List<String>) { calls += "addToQueue"; queued += trackIds }
     override fun setSpeed(speed: Float) { calls += "speed:$speed" }
     override fun setSkipSilence(on: Boolean) { calls += "skipSilence:$on" }
     override fun setVolumeBoost(mb: Int) { calls += "boost:$mb" }
