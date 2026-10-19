@@ -254,6 +254,29 @@ class PlayerEngineTest {
         assertThat(engine.player.currentPosition).isEqualTo(paused - 3_000)
     }
 
+    /** Play pressed during a call asks the system again; refused, it stays paused instead of playing over the call. */
+    @Test fun playDuringATransientLossAsksForFocusAgain() {
+        val book = fakeBook("midcall", 60_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 5_000)
+
+        focus.change(AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)
+        assertThat(engine.player.playWhenReady).isFalse()
+        val before = focus.requests
+        focus.grant = false                          // the call is still on
+        engine.playPause()
+        idle()
+        assertThat(focus.requests).isEqualTo(before + 1)
+        assertThat(engine.player.playWhenReady).isFalse()
+
+        focus.grant = true                           // the call ended (or the other app let go)
+        engine.playPause()
+        assertThat(focus.requests).isEqualTo(before + 2)
+        assertThat(engine.player.playWhenReady).isTrue()
+    }
+
     @Test fun permanentFocusLossStaysPaused() {
         val book = fakeBook("other", 60_000)
         val engine = newEngine()
@@ -665,16 +688,20 @@ private class TestSources(context: Context) : MediaSource.Factory {
     }
 }
 
-/** Grants focus and lets the test deliver focus changes. */
+/** Grants focus (unless [grant] is false, as the system does during a call) and lets the test deliver focus changes. */
 class FakeFocusRequester : FocusRequester {
     var held = false
+        private set
+    var grant = true
+    var requests = 0
         private set
     private var onChange: ((Int) -> Unit)? = null
 
     override fun request(speech: Boolean, onChange: (Int) -> Unit): Boolean {
+        requests++
         this.onChange = onChange
-        held = true
-        return true
+        held = grant
+        return grant
     }
 
     override fun abandon() {

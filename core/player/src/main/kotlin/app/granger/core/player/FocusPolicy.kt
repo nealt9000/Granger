@@ -63,25 +63,34 @@ class FocusPolicy(private val requester: FocusRequester) {
     var held = false
         private set
 
-    /** True when focus is held (already, or granted now). */
+    /** Held, but lost for now (a call): until [Listener.onGain], having it doesn't mean we may play. */
+    private var suspended = false
+
+    /**
+     * True when focus is held (already, or granted now). During a transient loss the system is asked again, so play
+     * pressed mid-call doesn't play over the call: it's refused there, and focus counts as not held. (Refused, the
+     * old request is gone too, so the end of the call no longer resumes on its own; play does.)
+     */
     fun request(speech: Boolean): Boolean {
-        if (held) return true
+        if (held && !suspended) return true
         held = requester.request(speech, ::onChange)
+        suspended = false
         return held
     }
 
     fun abandon() {
         if (!held) return
         held = false
+        suspended = false
         requester.abandon()
     }
 
     private fun onChange(change: Int) {
         val l = listener ?: return
         when (change) {
-            AudioManager.AUDIOFOCUS_GAIN -> l.onGain()
-            AudioManager.AUDIOFOCUS_LOSS -> { held = false; requester.abandon(); l.onLoss() }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> l.onTransientLoss()
+            AudioManager.AUDIOFOCUS_GAIN -> { suspended = false; l.onGain() }
+            AudioManager.AUDIOFOCUS_LOSS -> { held = false; suspended = false; requester.abandon(); l.onLoss() }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> { suspended = true; l.onTransientLoss() }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> l.onDuck()
         }
     }
