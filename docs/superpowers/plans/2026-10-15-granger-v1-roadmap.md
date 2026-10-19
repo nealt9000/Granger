@@ -232,5 +232,10 @@ Still open:
 - Latency is 14 s to the first words against the 9 s target. With both Best guess models in use the next question reloads E2B (21.6 s).
 - Plan 10: packs marked non-commercial (spec §10a) never count toward the Free cap.
 - Plan 11: the Play policy check covers non-commercial packs as well as the archive.org source.
+- Minor findings from the final review (Research ones are debug-only):
+  - `Citations` treats a first sentence like "The ruins were not found until 1911 [1]." as a decline; skip the decline phrases when the sentence carries a citation.
+  - The wider medical lexicon flags "Doctor Zhivago", "computer virus" and "Tropic of Cancer", which then get the banner and no Best guess.
+  - `AnswerText` italicises the middle of "2*3*4" and drops the asterisks.
+  - iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.
 - The eval needs the phone: `tools/eval` runs over adb (Wi-Fi works), about 70 s a question. The held-out split stays unread by whoever tunes.
 
