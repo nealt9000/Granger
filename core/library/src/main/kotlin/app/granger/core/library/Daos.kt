@@ -216,16 +216,16 @@ interface BookDao {
     fun observePositions(): Flow<List<BookPosition>>
 
     @Query("SELECT * FROM book_marks WHERE bookId = :bookId ORDER BY createdAt, id")
-    fun observeMarks(bookId: String): Flow<List<BookMark>>
+    fun observeMarks(bookId: String): Flow<List<BookAnnotation>>
 
     @Insert
-    suspend fun insertMark(mark: BookMark): Long
+    suspend fun insertMark(mark: BookAnnotation): Long
 
     @Update
-    suspend fun updateMark(mark: BookMark)
+    suspend fun updateMark(mark: BookAnnotation)
 
     @Delete
-    suspend fun deleteMark(mark: BookMark)
+    suspend fun deleteMark(mark: BookAnnotation)
 
     @Query("DELETE FROM book_marks WHERE id = :id")
     suspend fun deleteMarkById(id: Long)

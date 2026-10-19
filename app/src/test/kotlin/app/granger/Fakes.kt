@@ -1,7 +1,7 @@
 package app.granger
 
 import app.granger.core.library.Book
-import app.granger.core.library.BookMark
+import app.granger.core.library.BookAnnotation
 import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.BookPosition
@@ -221,15 +221,15 @@ class FakeBookshelf : Bookshelf {
 
     override suspend fun position(bookId: String): BookPosition? = positionMap.value[bookId]
     /** Oldest first, like the DAO. */
-    val markList = MutableStateFlow<List<BookMark>>(emptyList())
+    val markList = MutableStateFlow<List<BookAnnotation>>(emptyList())
     private var nextMarkId = 1L
-    override fun marks(bookId: String): Flow<List<BookMark>> = markList.map { all -> all.filter { it.bookId == bookId } }
-    override suspend fun addMark(mark: BookMark): Long {
+    override fun marks(bookId: String): Flow<List<BookAnnotation>> = markList.map { all -> all.filter { it.bookId == bookId } }
+    override suspend fun addMark(mark: BookAnnotation): Long {
         val id = nextMarkId++
         markList.update { it + mark.copy(id = id) }
         return id
     }
-    override suspend fun updateMark(mark: BookMark) { markList.update { all -> all.map { if (it.id == mark.id) mark else it } } }
+    override suspend fun updateMark(mark: BookAnnotation) { markList.update { all -> all.map { if (it.id == mark.id) mark else it } } }
     override suspend fun deleteMark(id: Long) { markList.update { all -> all.filterNot { it.id == id } } }
 }
 

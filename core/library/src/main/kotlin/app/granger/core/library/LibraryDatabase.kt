@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Pack::class, Bookmark::class, ReadingPosition::class,
         MediaType::class, ShelfCollection::class, Placement::class,
         ReadingTab::class, HistoryEntry::class, RecentSearch::class,
-        Book::class, BookPosition::class, BookMark::class, BookChunk::class,
+        Book::class, BookPosition::class, BookAnnotation::class, BookChunk::class,
         ResearchChat::class, ResearchTurn::class, ResearchPassage::class,
     ],
     version = 6,

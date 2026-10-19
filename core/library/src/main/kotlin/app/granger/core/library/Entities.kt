@@ -147,7 +147,7 @@ enum class MarkKind { BOOKMARK, HIGHLIGHT }
 
 /** A bookmark or highlight. [color] is "yellow", "green", "blue" or "pink"; blank for bookmarks. */
 @Entity(tableName = "book_marks", indices = [Index("bookId")])
-data class BookMark(
+data class BookAnnotation(
     @PrimaryKey(autoGenerate = true) val id: Long,
     val bookId: String,
     val kind: MarkKind,

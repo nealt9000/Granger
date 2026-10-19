@@ -33,7 +33,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.granger.core.library.BookMark
+import app.granger.core.library.BookAnnotation
 import app.granger.theme.GrangerColors
 
 /**
@@ -43,9 +43,9 @@ import app.granger.theme.GrangerColors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HighlightSheet(
-    mark: BookMark,
+    mark: BookAnnotation,
     focusNote: Boolean,
-    onChange: (BookMark) -> Unit,
+    onChange: (BookAnnotation) -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {

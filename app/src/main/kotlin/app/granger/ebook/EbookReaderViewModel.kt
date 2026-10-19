@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
-import app.granger.core.library.BookMark
+import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
@@ -59,8 +59,8 @@ data class EbookUi(
     /** Pages in the book; 0 until Readium has counted them, and the label shows percent meanwhile. */
     val positionsCount: Int = 0,
     /** Newest first. */
-    val bookmarks: List<BookMark> = emptyList(),
-    val highlights: List<BookMark> = emptyList(),
+    val bookmarks: List<BookAnnotation> = emptyList(),
+    val highlights: List<BookAnnotation> = emptyList(),
     val isBookmarkedHere: Boolean = false,
     val panel: Panel? = null,
     /** The highlights drawn on the page; the screen applies them to the navigator whenever they change. */
@@ -242,12 +242,12 @@ class EbookReaderViewModel(
     private fun flatten(links: List<Link>, depth: Int): List<TocRow> =
         links.flatMap { listOf(TocRow(it.title.orEmpty().trim(), it.href.toString(), depth)) + flatten(it.children, depth + 1) }
 
-    private fun onMarks(marks: List<BookMark>) {
+    private fun onMarks(marks: List<BookAnnotation>) {
         _state.update {
             val highlights = marks.filter { m -> m.kind == MarkKind.HIGHLIGHT }
             val placed = place(it.publication, highlights)
             it.copy(
-                bookmarks = marks.filter { m -> m.kind == MarkKind.BOOKMARK }.sortedWith(compareByDescending<BookMark> { m -> m.createdAt }.thenByDescending { m -> m.id }),
+                bookmarks = marks.filter { m -> m.kind == MarkKind.BOOKMARK }.sortedWith(compareByDescending<BookAnnotation> { m -> m.createdAt }.thenByDescending { m -> m.id }),
                 highlights = highlights,
                 decorations = placed.decorations,
                 unplaceable = placed.unplaceable,
@@ -282,7 +282,7 @@ class EbookReaderViewModel(
                 } else {
                     val now = System.currentTimeMillis()
                     bookshelf.addMark(
-                        BookMark(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), here.title.orEmpty(), "", "", now, now),
+                        BookAnnotation(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), here.title.orEmpty(), "", "", now, now),
                     )
                 }
             }
@@ -315,7 +315,7 @@ class EbookReaderViewModel(
     }
 
     /** A bookmark or highlight. One whose chapter a re-release renamed is placed as [StartLocator.repair] does; unplaceable: ignored. */
-    fun goToMark(mark: BookMark) {
+    fun goToMark(mark: BookAnnotation) {
         if (mark.id in _state.value.unplaceable) return
         val opened = _state.value.publication ?: return
         val stored = parse(mark.locatorJson) ?: return
@@ -333,7 +333,7 @@ class EbookReaderViewModel(
             highlightLock.withLock {
                 val now = System.currentTimeMillis()
                 bookshelf.addMark(
-                    BookMark(0, id, MarkKind.HIGHLIGHT, locator.toJSON().toString(), text, color, "", now, now),
+                    BookAnnotation(0, id, MarkKind.HIGHLIGHT, locator.toJSON().toString(), text, color, "", now, now),
                 )
             }
         }.await()
@@ -351,7 +351,7 @@ class EbookReaderViewModel(
     }
 
     /** Saves a changed colour or note. */
-    fun updateHighlight(mark: BookMark) {
+    fun updateHighlight(mark: BookAnnotation) {
         appScope.launch {
             highlightLock.withLock { bookshelf.updateMark(mark.copy(updatedAt = System.currentTimeMillis())) }
         }

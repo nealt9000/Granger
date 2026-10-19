@@ -44,7 +44,7 @@ class BookshelfTest {
     private fun importFiles() = importDir.listFiles().orEmpty().map { it.name }
 
     private fun mark(bookId: String) =
-        BookMark(0, bookId, MarkKind.HIGHLIGHT, "{\"href\":\"c1\"}", "It is a truth", "yellow", "", 1L, 1L)
+        BookAnnotation(0, bookId, MarkKind.HIGHLIGHT, "{\"href\":\"c1\"}", "It is a truth", "yellow", "", 1L, 1L)
 
     @Test fun downloadedBookIsFiledUnderGrangerClassics() = test {
         val file = TestEpubs.build(grangerDir, "pride_2026-10-01.epub", title = "Pride and Prejudice",

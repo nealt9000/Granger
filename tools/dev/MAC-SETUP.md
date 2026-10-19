@@ -72,15 +72,10 @@ Connect the Pixel 6 over USB and run `adb devices`. On the first connection it l
 
 Device-test rules (from the plan's Global Constraints): never run `:app:connectedDebugAndroidTest` (it wipes the library), never `adb reboot`, and after any library-module device test check `adb shell pm list packages app.granger`.
 
-## Known issue: case-insensitive file system
+## Case-insensitive file system
 
-macOS volumes are case-insensitive by default. `core/library/.../Entities.kt` declares both `Bookmark` and `BookMark` in `app.granger.core.library`, so `Bookmark.class` and `BookMark.class` overwrite each other in `build/`. Then `:app:compileDebugKotlin` and `:core:library:compileDebugUnitTestKotlin` fail with `Unresolved reference 'BookMark'`. The fix is to rename one of the classes (for example to `BookAnnotation`); until then the build only works from a case-sensitive volume, for example:
+macOS volumes are case-insensitive by default, so two classes in one package whose names differ only in case overwrite each other's `.class` files in `build/`. `core/library` had both `Bookmark` and `BookMark`. `BookMark` is now `BookAnnotation` (its table is still `book_marks`, so the schema didn't change), and the build runs from the normal checkout. Don't reintroduce names that differ only in case.
 
-```bash
-hdiutil create -size 30g -fs "Case-sensitive APFS" -type SPARSE -volname GrangerCS ~/GrangerCS.sparseimage
-hdiutil attach ~/GrangerCS.sparseimage   # mounts at /Volumes/GrangerCS
-```
-
-Baseline on 2026-10-19 (commit `80b20e9`, from a case-sensitive volume): `./gradlew testDebugUnitTest` BUILD SUCCESSFUL, 835 tests, 0 failures, 0 skipped (`:app` 409, `:core:library` 154, `:core:downloads` 79, `:core:books` 54, `:core:ai` 52, `:core:archive` 38, `:core:catalog` 28, `:core:zim` 21). No Linux test count was recorded to compare against.
+Baseline on 2026-10-19 (commit `80b20e9` from a case-sensitive volume, then again after the rename from the normal checkout): `./gradlew testDebugUnitTest` BUILD SUCCESSFUL, 835 tests, 0 failures, 0 skipped (`:app` 409, `:core:library` 154, `:core:downloads` 79, `:core:books` 54, `:core:ai` 52, `:core:archive` 38, `:core:catalog` 28, `:core:zim` 21). No Linux test count was recorded to compare against.
 
 `gradle.properties` still has the Linux machine's limits (`org.gradle.workers.max=2`, `-Xmx2g`, in-process Kotlin). They work on the Mac but are slower than they need to be.
