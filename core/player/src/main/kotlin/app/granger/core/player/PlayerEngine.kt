@@ -554,8 +554,9 @@ class PlayerEngine(
         speed = state?.speed ?: 1f
         skipSilence = state?.skipSilence ?: false
         boostMb = state?.volumeBoostMb ?: 0
-        // Loading a book means listening to it again: it's no longer finished once its next save is written.
-        finished = false
+        // Playing a book means listening to it again: it's no longer finished once its next save is written. A load
+        // that doesn't play (a restore) keeps the stored mark until the user plays (see [resume]).
+        finished = !play && state?.finished == true
         musicQueue = null; tracks = emptyMap()
         mode = Mode.BOOK
         prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_BOOK).putString(PlayerSettingsKeys.LAST_AUDIOBOOK, id).apply()
@@ -605,6 +606,7 @@ class PlayerEngine(
         if (sleep.expired()) cancelSleep()
         if (!focus.request(speech = mode == Mode.BOOK)) return
         pausedForFocus = false
+        if (mode == Mode.BOOK) finished = false
         if (mode == Mode.BOOK && pausedAt > 0L) {
             val rewind = AutoRewind.rewindMs(now() - pausedAt)
             pausedAt = 0L

@@ -487,6 +487,46 @@ class PlayerEngineTest {
         assertThat(bookState(book.id)!!.finished).isFalse()
     }
 
+    /** Restored (not played), a finished book stays finished through its next saves; playing it un-finishes it. */
+    @Test fun restoredFinishedBookStaysFinishedUntilPlayed() {
+        val ids = musicFixtures()
+        val book = fakeBook("restored-done", 30_000, 30_000)
+        runBlocking {
+            playback.upsertAudiobookState(AudiobookState(book.id, "track:phone:restored-done-1", 30_000L, 1f, false, 0, finished = true, updatedAt = 5L))
+        }
+        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, "audiobook").putString(PlayerSettingsKeys.LAST_AUDIOBOOK, book.id).commit()
+
+        val first = newEngine()
+        first.restore()
+        idle()
+        run(first.player).untilState(Player.STATE_READY)
+        idle()
+        first.saveNow()                                  // swiped away
+        assertThat(bookState(book.id)!!.finished).isTrue()
+
+        // Music started from the restored book: the STOP save keeps the mark.
+        first.playTracks(ids, 0, false, PlaySource("songs", "Songs"))
+        idle()
+        assertThat(bookState(book.id)!!.finished).isTrue()
+        first.release(save = false)
+
+        // Restored again and played: no longer finished.
+        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, "audiobook").commit()
+        val second = newEngine()
+        second.restore()
+        idle()
+        run(second.player).untilState(Player.STATE_READY)
+        idle()
+        second.playPause()
+        idle()
+        run(second.player).untilPosition(0, 1_000)
+        second.playPause()
+        idle()
+        val saved = bookState(book.id)!!
+        assertThat(saved.finished).isFalse()
+        assertThat(saved.trackId).isEqualTo("track:phone:restored-done-0")
+    }
+
     @Test fun replayGainModeChangeAppliesToThePlayingQueue() {
         val ids = musicFixtures()
         runBlocking { db.mediaDao().upsertTracks(listOf(media.track(ids[0])!!.copy(rgTrackGain = -6.0206f, rgTrackPeak = null))) }
