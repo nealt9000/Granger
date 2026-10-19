@@ -50,14 +50,22 @@ import app.granger.core.library.Playlist
 import app.granger.library.ConfirmDialog
 import app.granger.library.NameDialog
 
-enum class MusicTab(val title: String) { SONGS("Songs"), ALBUMS("Albums"), ARTISTS("Artists"), GENRES("Genres"), PLAYLISTS("Playlists"), FOLDERS("Folders") }
+/** In tab order. */
+enum class MusicTab(val title: String) {
+    ALBUMS("Albums"), ARTISTS("Artists"), SONGS("Songs"), GENRES("Genres"), PLAYLISTS("Playlists"), FOLDERS("Folders");
+
+    companion object {
+        /** The tab Music opens on. */
+        val DEFAULT = ALBUMS
+    }
+}
 
 /** The Auxio-style tabs for one Music collection, or for "All music". */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicScreen(vm: MusicViewModel, nav: MusicNav) {
     val loaded by vm.ui.collectAsStateWithLifecycle()
-    var tab by rememberSaveable { mutableStateOf(MusicTab.SONGS) }
+    var tab by rememberSaveable { mutableStateOf(MusicTab.DEFAULT) }
     val dialogs = remember { MusicDialogs() }
     Scaffold(
         topBar = {
