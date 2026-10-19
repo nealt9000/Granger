@@ -497,6 +497,13 @@ class ResearchViewModel(
     }
 }
 
+/**
+ * What "Search instead" searches for: the first rewrite keyword, else the question. The library's Search
+ * matches whole phrases, so every keyword joined ("world cup 2031 football soccer") found nothing.
+ */
+internal fun searchInsteadQuery(keywords: List<String>, question: String): String =
+    keywords.firstOrNull { it.isNotBlank() }?.trim() ?: question
+
 /** [text] cut to at most [max] characters, at the last space when there is one. */
 internal fun cutAtWord(text: String, max: Int): String {
     if (text.length <= max) return text

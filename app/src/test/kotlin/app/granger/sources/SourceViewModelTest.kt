@@ -17,6 +17,7 @@ import app.granger.core.catalog.Preset
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
 import app.granger.modelEntry
+import app.granger.core.catalog.ModelRole
 import app.granger.pack
 import app.granger.packEntry
 import app.granger.record
@@ -93,6 +94,18 @@ class SourceViewModelTest {
     @Test fun modelsScopeListsTheModelsSection() = runTest(main.dispatcher) {
         val ui = viewModel(CatalogScope.MODELS).ui.value
         assertThat(ui.sections.map { it.title }).containsExactly("AI models")
+    }
+
+    @Test fun unusedEmbedderSaysNotUsedYet() = runTest(main.dispatcher) {
+        val vm = SourceViewModel(
+            CatalogScope.MODELS, FakeCatalogSource(catalogOf(models = listOf(e2b, modelEntry("gemma-embed", ModelRole.EMBEDDER)))),
+            downloads, library, bookshelf, volumes, prefs, DeviceTier.THINK_DEEPER, appScope = this, io = main.dispatcher,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        assertThat(rows.getValue("gemma-embed").description).isEqualTo("Not used yet")
+        assertThat(rows.getValue("e2b").description).isEmpty()
     }
 
     @Test fun onlyItemsInScopeAreListed() = runTest(main.dispatcher) {

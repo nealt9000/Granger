@@ -35,7 +35,7 @@ Governing rule: **knowledge lives in files, not in model weights.** The model is
 | Retrieval | LLM query rewrite → ZIM built-in full-text index → passage chunking → embedding rerank → threshold or decline |
 | Medical | Detect medical questions → fixed safety banner → answer stays close to quoted source |
 | Monetization | Free/Pro, one-time Play IAP, cheap. Pro = **unlimited library** (Free caps installed packs at 10 GB; models excluded; all volumes incl. SD count) **+ import your own books**. |
-| Content | Public domain or commercially redistributable licenses only. US public-domain line: published 1930 or earlier (as of 2026). |
+| Content | Public domain or commercially redistributable licenses only for content Granger builds or hosts; packs Granger only links to may be non-commercial (see the research-eval spec §10a). US public-domain line: published 1930 or earlier (as of 2026). |
 | License | GPLv3, public repo from day one, libzim/libkiwix via Kiwix's published Android bindings |
 | Channels | Google Play (paid Pro) and F-Droid/direct APK (**uncapped**, "support development" link) |
 | Hosting | We host only a signed catalog JSON; packs from Kiwix mirrors, models from Hugging Face. Packs Granger builds itself (Granger Classics) are GitHub release assets on `nealt9000/Granger`. |
@@ -226,7 +226,7 @@ Events are queued locally; a screen shows the exact pending payload; upload happ
 ## 7. Open items (not blocking the plan)
 
 - Trademark search for "Granger".
-- Lawyer review of GPLv3 + Play IAP approach before public launch.
+- Lawyer review of GPLv3 + Play IAP approach before public launch, including linking to non-commercial (CC BY-NC-SA) Kiwix packs from an app with a paid tier (research-eval spec §10a).
 - Exact Pro price (tested in beta).
 - Hugging Face gating: Gemma 4 LiteRT files and EmbeddingGemma 2 Text 270M (`litert-community/embeddinggemma-2-text-270m-litert-lm`) are **not** gated and are Apache-2.0 (checked 2026-10-15). The original EmbeddingGemma 300M is gated under the Gemma Terms of Use, so it was replaced.
 - Confirm the curated Wikipedia core and WikiMed sizes for the Starter preset.

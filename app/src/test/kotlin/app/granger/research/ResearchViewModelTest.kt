@@ -88,6 +88,12 @@ class ResearchViewModelTest {
 
     private fun ResearchViewModel.clear() = ViewModelStore().also { it.put("vm", this) }.clear()
 
+    @Test fun searchInsteadUsesTheFirstKeyword() {
+        assertThat(searchInsteadQuery(listOf("world cup", "2031", "football"), "Who won the 2031 World Cup?")).isEqualTo("world cup")
+        assertThat(searchInsteadQuery(listOf(" ", ""), "Who won the 2031 World Cup?")).isEqualTo("Who won the 2031 World Cup?")
+        assertThat(searchInsteadQuery(emptyList(), "Why is the sky green?")).isEqualTo("Why is the sky green?")
+    }
+
     @Test fun firstSendCreatesTheChatTitledFromTheQuestion() = runTest(main.dispatcher) {
         val vm = vm()
         vm.ask("  How do plants make their food from light, water and air in their leaves?  ")

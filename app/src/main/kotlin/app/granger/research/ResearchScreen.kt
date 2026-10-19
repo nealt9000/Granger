@@ -301,7 +301,7 @@ fun ResearchScreen(
                         ui = row.turn,
                         running = state.running,
                         onCite = { n -> cite(row.turn.turn.id, n) },
-                        onSearch = { onSearch(row.turn.turn.keywords.joinToString(" ").ifBlank { row.turn.turn.question }) },
+                        onSearch = { onSearch(searchInsteadQuery(row.turn.turn.keywords, row.turn.turn.question)) },
                         onRetry = { viewModel.retry(row.turn.turn.id) },
                         onGuess = { viewModel.bestGuess(row.turn.turn.id) },
                         onReadiness = onReadiness,

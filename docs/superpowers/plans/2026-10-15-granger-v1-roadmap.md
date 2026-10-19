@@ -14,9 +14,9 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 6 | E-book reader + Classics EPUBs | Readium reader (pagination, text settings, highlights, notes, dictionary, in-book search), `:core:books` (EPUB/TXT/MD, DRM detection; search index is contentless FTS4), My books, pack-builder EPUB output, Classics re-release, Search over e-books | **Done:** `2026-10-17-plan-06-ebook-reader-classics.md` (the 347-book "Download all" not yet run on a device) |
 | 7 | Archive.org source | Public-domain filter (1930 or earlier) until waiver, shelves + search, open-only downloads (EPUB, else text / OCR text) with sha1/md5 verify, filing, metadata | **Done:** `2026-10-17-plan-07-archive-org.md` |
 | 8 | Research (was Inquire & Abstract) | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats with threaded follow-ups | **Done:** `2026-10-17-plan-08-research.md` |
-| 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | |
-| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources) + import gating, onboarding, `:core:telemetry` | |
-| 11 | Beta | Release config, signing, Play listing (incl. archive.org policy check), internal track | |
+| 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | **Done, bar not reached:** `2026-10-18-plan-09-research-eval.md` (Research stays debug-only; see below) |
+| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), cap (all sources; non-commercial packs exempt) + import gating, onboarding, `:core:telemetry` | |
+| 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 | — | After v1: Media | Player, mini-player, audiobooks/music/video, read-aloud + mix, then the PDF pass | |
 
 Library redesign spec (2026-10-16): `docs/superpowers/specs/2026-10-16-library-redesign-design.md` amends the v1 spec and set this order.
@@ -157,7 +157,7 @@ Builder's calls made while building:
 - Book and pack catalogue cards are passages, so metadata questions can be cited; at most 3 passages per source reach ranking.
 - **Rerank is off** (`RERANK_WITH_EMBEDDER = false`, `EMBEDDER_BACKEND = GPU` for when it comes back): the rule was "on only if a query plus 12 passages embeds in ≤ 3,000 ms on the faster backend".
 - A rewrite keyword phrase ("portia mercy") matches its words in any order, in book chunks, ZIM full text (one search per keyword) and catalogue cards. Before this, phrases had to occur verbatim and most questions found nothing.
-- **Lexical scoring (ruled 2026-10-17, Task 9 fix round 1):** each keyword gets partial credit, the share of its words present as whole words; stopwords don't count. Over the passages a search found, words are weighted by a smoothed idf (`ln((N+1)/(df+1)) + 1`) and each keyword by the weight of its words, so keywords about the question's form ("literature analysis") count for little. The title bonus stays. `lexicalThreshold` is **0.32**. Partial credit alone left the two sets overlapping (Wi-Fi 0.50, Portia 0.50).
+- **Lexical scoring (ruled 2026-10-17, Task 9 fix round 1; replaced in Plan 9, see below):** each keyword gets partial credit, the share of its words present as whole words; stopwords don't count. Over the passages a search found, words are weighted by a smoothed idf (`ln((N+1)/(df+1)) + 1`) and each keyword by the weight of its words, so keywords about the question's form ("literature analysis") count for little. The title bonus stays. `lexicalThreshold` is **0.32**. Partial credit alone left the two sets overlapping (Wi-Fi 0.50, Portia 0.50).
 - When the rewrite is cut off before its `medical:` line, the medical lexicon decides. A reply containing `NOT IN LIBRARY` anywhere is a decline.
 
 Pixel 6 measurements (2026-10-17; `ResearchBenchmarkActivity`, debug only, `adb shell am start -n app.granger/.research.ResearchBenchmarkActivity`, logcat tag `Granger`, lines `Research:`):
@@ -171,7 +171,7 @@ Pixel 6 walkthrough (2026-10-17): the Research tool and empty screen; "Who wrote
 
 Fixed after the walkthrough: the phrase matching, lexical scoring, medical and decline fixes above; preselect scored every passage inside its sort comparator, compiling regexes on each comparison (5–17 s of ranking with about 200 candidates; now under 0.1 s); the last scroll after a turn ran before the stored answer and its cards arrived, leaving the list above the new answer.
 
-For Plan 9:
+For Plan 9 (all done in Plan 9 except the SD-card measurement, which is carried forward below):
 - Lexical ranking reaches the model on the right questions but sometimes with off-topic passages: "Tell me about the life of Ray Charles" was answered from the Hank Crawford article's references, and the Hamlet follow-up from a Ben Jonson introduction. "Why was Ray banned from playing in Georgia?" got a misread rewrite (`ray turner, georgia baseball, ban reason…`) and the model declined it. Rewrite quality and passage choice are for the eval.
 - Tune `lexicalThreshold` (0.32) and `cosineThreshold` (0.40) on the eval set; the rerank decision above; the 9 s target is met only with lexical ranking (6.4–7 s to the first words for "Who wrote Hamlet?" after this change, once the benchmark's own recording time is taken off).
 - Models are still `evalPassed: false`.
@@ -191,3 +191,46 @@ For Plan 9:
 - `deleteChat` and the Room `turns`/`recent` flows behind `stateIn` still have no error guard; a storage failure there can crash the app.
 - No JVM tests for the citation tab-lookup catch or the card-matching dispatcher move.
 - Minor polish deferred from the reviews: no `--release 17` on `:core:research`; `HtmlPassages` doesn't split on no-break spaces; `Rewrite.parse` doesn't cap at 6 keywords or reject an echoed placeholder; `Keywords` drops apostrophes (O'Brien → obrien) that passage text keeps; the question is capped at 1,000 characters, but the prompt header isn't length-capped; `Ranking.cosine` doesn't check vector sizes; `Citations.strip` eats newlines before a group; `ModelManager` closes the resident model before checking the requested file exists and doesn't enforce the tier; a large-model reload failure mid-answer fails the turn instead of falling back; `BookIndex.passages` takes its rows without `ORDER BY` and one damaged book drops all book passages; a citation to a vanished reading tab does nothing; `ZimUrls.forEntry` doesn't encode the fragment.
+
+## Carried forward from Plan 9
+
+Results (Pixel 6, Neal's library, graded against `tools/eval/RUBRIC.md`; full notes in `tools/eval/runs/checkpoints/`):
+
+| Metric | Baseline | Tuned (tuning split) | Held-out | Bar |
+| --- | --- | --- | --- | --- |
+| Unanswerable declined | 89% | 91% | **92%** | ≥ 90% ✅ |
+| Answerable grounded | 36% | 45% | **37%** | ≥ 80% ❌ |
+| Medical flag recall | 57% | 98% | 95% | 95% |
+| Think deeper grounded (multi-step) | — | 3/12 | 0/7 | ≥ 80% ❌ |
+| Best guess confidently wrong, E2B / E4B | 14% / 11% | — | 20% / 13% | ≤ 10% ❌ |
+| Send to first words, median | 21.8 s | 14.0 s | — | 9 s ❌ |
+
+Decisions (the plan's stop path):
+- `evalPassed` stays false for both models; the catalog was not re-signed.
+- `Features.RESEARCH = BuildConfig.DEBUG`: Research is in debug builds only.
+- `BEST_GUESS_USES_LARGE = true`: neither model meets the good-enough bar, and E4B is closer.
+- Rerank stays off (`RERANK_WITH_EMBEDDER = false`); Settings → Models labels EmbeddingGemma "Not used yet".
+
+What Plan 9 changed in Research:
+- Greedy decoding (`topK = 1`): runs are reproducible, and the rewrite takes about 2.7 s instead of 9.9 s.
+- Ranking: every keyword word weighs 1 (the idf over retrieved passages was removed), an article's opening passage gets `LEAD_BONUS` 0.3 when it matches, the cap is 3 passages per article or chapter (`perDocument`), and `lexicalThreshold` is 0.6. A book's title is only the `TITLE_BONUS` 0.1.
+- Book search is BM25 over FTS4 `matchinfo`, at most 4 passages per book; a question that names a book also searches inside it.
+- Personal medical questions decline before the search; the medical lexicon matches at word starts.
+- The answer prompt answers first, may combine facts, and declines on passages about a different person, year, place or event; prose declines ("the passages do not say…") count as declines.
+- Bibliography sections give no passages; the rewrite drops source meta-words (definition, scripture, quote…).
+- Startup bug fixed: Research right after launch could say the model won't load, because the installed-models list was still empty.
+
+Why it stops short, and the options for the next planning session (Neal, 2026-10-19: brought there together with how the models become expert on each user's own library, likely trying more model variants from Hugging Face):
+- Keyword search can't bridge vocabulary gaps (alcohol ↔ wine, taxes ↔ tribute); options: EmbeddingGemma rerank (test offline first on the recorded `found.jsonl` corpora) and source-vocabulary expansion for named works.
+- E2B rarely combines facts across passages; options: E4B as the answerer (unmeasured), other models, fine-tuning.
+- Or re-scope the bar to "the answer passage is shown".
+
+Still open:
+- Measure the per-keyword ZIM search cost on a full Wikipedia on an SD card before the beta.
+- iFixit (`ifixit_en_all`) has no full-text index, so Research can't search it.
+- A personal medical decline shows "Not in your library."; it should say to ask a professional.
+- Latency is 14 s to the first words against the 9 s target. With both Best guess models in use the next question reloads E2B (21.6 s).
+- Plan 10: packs marked non-commercial (spec §10a) never count toward the Free cap.
+- Plan 11: the Play policy check covers non-commercial packs as well as the archive.org source.
+- The eval needs the phone: `tools/eval` runs over adb (Wi-Fi works), about 70 s a question. The held-out split stays unread by whoever tunes.
+

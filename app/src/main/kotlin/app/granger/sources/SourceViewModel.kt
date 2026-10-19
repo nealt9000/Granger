@@ -5,12 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.RERANK_WITH_EMBEDDER
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.CatalogState
 import app.granger.core.catalog.ModelEntry
+import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
@@ -270,7 +272,8 @@ class SourceViewModel(
             val description = when (item) {
                 is PackEntry -> item.description
                 is BookEntry -> item.description
-                is ModelEntry -> ""
+                // Rerank is off (Plan 9 eval), so the embedder downloads but nothing uses it.
+                is ModelEntry -> if (item.role == ModelRole.EMBEDDER && !RERANK_WITH_EMBEDDER) "Not used yet" else ""
             }
             return ItemRow(item.id, item.title, details, description, item.sizeBytes, statusOf(item, records, packs, tier), packId)
         }
