@@ -257,7 +257,7 @@ private fun BookRow(
                     TextButton(onClick = onRemove) { Text("Remove") }
                     TextButton(onClick = onGet) { Text("Get the rest") }
                 }
-                ItemStatus.NeedsMoreMemory -> Unit
+                ItemStatus.NeedsMoreMemory, is ItemStatus.InLibrary -> Unit
             }
         },
     )

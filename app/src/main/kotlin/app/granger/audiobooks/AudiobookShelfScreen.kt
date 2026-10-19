@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.library.SourceLink
+import app.granger.music.EmptyMedia
 import app.granger.shell.rememberRailCover
 import app.granger.theme.GrangerColors
 
@@ -65,7 +67,14 @@ fun AudiobookCover(path: String?, modifier: Modifier = Modifier) {
 /** Voice-style shelf: covers with progress, part-way books first by last played, then unplayed, then finished. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AudiobookShelfScreen(vm: AudiobooksViewModel, onBook: (audiobookId: String) -> Unit, onBack: () -> Unit) {
+fun AudiobookShelfScreen(
+    vm: AudiobooksViewModel,
+    onBook: (audiobookId: String) -> Unit,
+    onBack: () -> Unit,
+    /** An empty shelf's links: LibriVox and archive.org, and Settings → Music & audiobooks. Null: not offered. */
+    onOpenSource: ((SourceLink) -> Unit)? = null,
+    onMediaSettings: (() -> Unit)? = null,
+) {
     val loaded by vm.shelf.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
@@ -77,10 +86,14 @@ fun AudiobookShelfScreen(vm: AudiobooksViewModel, onBook: (audiobookId: String) 
     ) { padding ->
         val ui = loaded ?: return@Scaffold
         if (ui.books.isEmpty()) {
-            Text(
-                "No audiobooks here yet", style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(padding).padding(24.dp),
-            )
+            Box(Modifier.padding(padding)) {
+                EmptyMedia(
+                    "No audiobooks yet",
+                    links = listOf(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN),
+                    onOpenSource = onOpenSource,
+                    onMediaSettings = onMediaSettings,
+                )
+            }
             return@Scaffold
         }
         LazyVerticalGrid(

@@ -13,6 +13,9 @@ import app.granger.core.downloads.DownloadSpec
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.HashAlgorithm
 import app.granger.core.downloads.ItemKind
+import app.granger.core.library.Albums
+import app.granger.core.library.Audiobook
+import app.granger.core.library.MediaOrigin
 import app.granger.core.media.ManifestFile
 import app.granger.core.media.MediaManifest
 import app.granger.core.media.MediaManifests
@@ -157,5 +160,39 @@ object MediaDownloads {
             installed > 0 -> ItemStatus.Partial(installed, fileCount)
             else -> ItemStatus.NotInstalled
         }
+    }
+
+    /** A download group's state for a book or album page: its [status], and its audio files in ([done]) and in all. */
+    data class Progress(val status: ItemStatus, val done: Int, val total: Int)
+
+    /** The group a downloaded audiobook came from; null for phone media. */
+    fun groupOf(book: Audiobook): String? = when (book.origin) {
+        MediaOrigin.PHONE -> null
+        MediaOrigin.LIBRIVOX -> groupId(MediaManifest.LIBRIVOX, book.sourceRef)
+        MediaOrigin.ARCHIVE_ORG -> groupId(MediaManifest.ARCHIVE_ORG, book.sourceRef)
+    }
+
+    /** The group a downloaded album came from ([Albums.itemKey]); null for a phone album. */
+    fun groupOfAlbum(albumKey: String): String? = listOf(MediaManifest.ARCHIVE_ORG, MediaManifest.LIBRIVOX).firstNotNullOfOrNull { source ->
+        val prefix = Albums.itemKey(source, "")
+        albumKey.takeIf { it.startsWith(prefix) }?.removePrefix(prefix)?.takeIf { it.isNotEmpty() }?.let { groupId(source, it) }
+    }
+
+    /** The number of audio files [groupId]'s manifest lists, read beside its records; null when none can be read. Reads the disk. */
+    fun manifestFileCount(groupId: String, records: List<DownloadRecord>): Int? = records.asSequence()
+        .filter { it.groupId == groupId }
+        .firstNotNullOfOrNull { r -> File(r.filePath).parentFile?.let(MediaManifests::read)?.files?.size }
+
+    /**
+     * How far [groupId] is, out of [fileCount] audio files (from [manifestFileCount]: the ledger drops a cancelled
+     * file's record), else as many as it has records. An item filed from disk with no records at all is in.
+     */
+    fun progress(groupId: String, records: List<DownloadRecord>, fileCount: Int?): Progress {
+        val mine = records.filter { it.groupId == groupId }
+        if (mine.isEmpty()) return Progress(ItemStatus.Installed, 0, 0)
+        val audio = mine.filterNot(::isCover)
+        val done = audio.filter { it.state == DownloadState.INSTALLED }.map { it.itemId }.distinct().size
+        val total = fileCount ?: audio.map { it.itemId }.distinct().size
+        return Progress(statusOf(groupId, total, records), done, total)
     }
 }

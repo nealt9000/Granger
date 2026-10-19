@@ -76,10 +76,17 @@ internal fun filterNote(ui: ArchiveUi): String = when {
 
 /**
  * Browse and search archive.org texts, spoken word or music (public domain until the waiver), with an item sheet to
- * Get, Borrow or View. [onOpenLibriVox] is the spoken-word note's way to LibriVox.
+ * Get, Borrow or View. [onOpenLibriVox] is the spoken-word note's way to LibriVox. [onOpenInLibrary] opens an audio
+ * item got from the other audio view where it is (its album or its book).
  */
 @Composable
-fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, onBack: () -> Unit, onOpenLibriVox: () -> Unit) {
+fun ArchiveScreen(
+    viewModel: ArchiveViewModel,
+    detailsUrl: (String) -> String,
+    onBack: () -> Unit,
+    onOpenLibriVox: () -> Unit,
+    onOpenInLibrary: (identifier: String) -> Unit = {},
+) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(ui.notice) {
@@ -128,6 +135,7 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
         onAcceptWaiver = viewModel::acceptWaiver,
         onOpenLibriVox = onOpenLibriVox,
         onBack = onBack,
+        onOpenInLibraryRow = onOpenInLibrary,
     )
 
     ui.sheet?.let { sheet ->
@@ -143,6 +151,10 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
             onRemove = { confirmRemove = sheet.identifier to (sheet.item?.title?.ifBlank { null } ?: sheet.identifier) },
             onOpenInBrowser = { openInBrowser(sheet.identifier) },
             onDismiss = viewModel::closeItem,
+            onOpenInLibrary = {
+                viewModel.closeItem()
+                onOpenInLibrary(sheet.identifier)
+            },
         )
     }
 
@@ -187,6 +199,8 @@ internal fun ArchiveContent(
     onAcceptWaiver: () -> Unit,
     onOpenLibriVox: () -> Unit,
     onBack: () -> Unit,
+    /** An item got from the other audio view ([ItemStatus.InLibrary]): open it there. */
+    onOpenInLibraryRow: (String) -> Unit = {},
 ) {
     var showWaiver by rememberSaveable { mutableStateOf(false) }
     // Spoken word before the waiver shows nothing of archive.org's results, only the note (Decisions, Plan M2).
@@ -282,6 +296,7 @@ internal fun ArchiveContent(
                     onCancel = { onCancelRow(row.identifier) },
                     onRetry = { onRetryRow(row.identifier) },
                     onRemove = { onRemoveRow(row) },
+                    onOpenInLibrary = { onOpenInLibraryRow(row.identifier) },
                 )
                 HorizontalDivider()
             }
@@ -325,6 +340,7 @@ private fun ArchiveResultRow(
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     onRemove: () -> Unit,
+    onOpenInLibrary: () -> Unit,
 ) {
     ListItem(
         modifier = Modifier.clickable(onClick = onOpen),
@@ -351,6 +367,7 @@ private fun ArchiveResultRow(
                     TextButton(onClick = onRemove) { Text("Remove") }
                     TextButton(onClick = onGet) { Text("Get the rest") }
                 }
+                is ItemStatus.InLibrary -> TextButton(onClick = onOpenInLibrary) { Text("Open") }
                 ItemStatus.NeedsMoreMemory -> Unit
             }
         },

@@ -898,6 +898,12 @@ git commit -m "Media M2: LibriVox source: shelves, search, book sheet, chapter d
   - ARCHIVE_ORG opens `ArchiveRoute(TEXTS)`, ARCHIVE_ORG_SPOKEN `ArchiveRoute(SPOKEN_WORD)` and ARCHIVE_ORG_MUSIC `ArchiveRoute(MUSIC)`.
   - LIBRIVOX opens `LibriVoxRoute`.
 - **Remove download** asks first: "Remove <title>? This deletes the downloaded files. Your place and bookmarks are kept." Phone media never shows it.
+- As built:
+  - `AudiobookPage` and `AlbumPage` gain `download: ItemStatus?`, `filesDone`/`filesTotal` and `onRemoveDownload: (() -> Unit)?` (all null/0 for phone media). A downloaded item with no ledger rows (filed from disk) reads `Installed`. The group comes from `MediaDownloads.groupOf(audiobook)` / `groupOfAlbum(albumKey)`, and the counts from `MediaDownloads.progress(groupId, records, manifestFileCount(...))`, the manifest read once per group. The page shows it through `media/DownloadControls.kt`.
+  - `GrangerNavHost` gains `internal fun routeOf(SourceLink)`, `NavController.openSource(link)` and `internal fun inLibraryRoute(kind, identifier)` (`SourceRoutesTest`).
+  - The Library's media hint row (still gated on `onMediaSettings`) offers the missing types' download sources as buttons ("LibriVox", "Archive.org audiobooks", "Archive.org music": `mediaHintLinks`, `hintLabel`) beside **Settings** (`MediaHintRow`, `LibraryScreenTest`).
+  - Task 8 gap fixed: one archive.org item is one group whichever view got it. The other audio view shows it as `ItemStatus.InLibrary("Music" | "Audiobooks")`, "In your Music", with **Open** (its album, or its book). Its Get answers "This is already in your Music." without calling `MediaDownloader.get`, by `MediaDownloader.mediaRootOf(groupId)` (ledger rows, else the manifest on a mounted volume). Pinned by `itemGotUnderMusicShowsAsInYourMusicInTheAudiobooksView`, `itemGotUnderAudiobooksShowsAsInYourAudiobooksInTheMusicView`, `getFindsTheOtherViewsFolderWithoutLedgerRows` and `ArchiveScreenTest.anItemInTheOtherShelfOffersOpen`.
+  - Settings' scroll by key stays with Task 11, as scheduled.
 
 - [ ] **Step 1: Write the failing tests.**
 

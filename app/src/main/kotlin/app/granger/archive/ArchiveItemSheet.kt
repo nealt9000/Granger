@@ -66,6 +66,8 @@ internal fun ArchiveItemSheet(
     onRemove: () -> Unit,
     onOpenInBrowser: () -> Unit,
     onDismiss: () -> Unit,
+    /** An item got from the other audio view ([ItemStatus.InLibrary]): open it there. */
+    onOpenInLibrary: () -> Unit = {},
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
@@ -105,7 +107,7 @@ internal fun ArchiveItemSheet(
             }
             ItemStatusText(sheet.status)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                SheetButtons(sheet, audio, onGet, onCancel, onRetry, onRemove, onOpenInBrowser)
+                SheetButtons(sheet, audio, onGet, onCancel, onRetry, onRemove, onOpenInBrowser, onOpenInLibrary)
             }
             val offer = sheet.offer
             if (offer is Offer.Download && offer.alsoPdf) {
@@ -126,6 +128,7 @@ private fun SheetButtons(
     onRetry: () -> Unit,
     onRemove: () -> Unit,
     onOpenInBrowser: () -> Unit,
+    onOpenInLibrary: () -> Unit,
 ) {
     // The ledger decides first: something installed or in flight is managed whatever the metadata offers now.
     when (sheet.status) {
@@ -139,6 +142,7 @@ private fun SheetButtons(
             TextButton(onClick = onRemove) { Text("Remove") }
             Button(onClick = onGet) { Text("Get the rest") }
         }
+        is ItemStatus.InLibrary -> Button(onClick = onOpenInLibrary) { Text("Open") }
         else -> when {
             audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text("Get") }
             audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }

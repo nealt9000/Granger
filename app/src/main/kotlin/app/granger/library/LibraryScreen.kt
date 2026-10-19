@@ -13,6 +13,10 @@ import androidx.compose.material3.DropdownMenuItem
 import app.granger.Features
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -189,29 +193,64 @@ fun LibraryScreen(
                 }
                 item(key = "divider:$id") { HorizontalDivider() }
             }
-            val missing = missingMediaText(loaded.media.map { it.mediaType.id })
+            val shownTypes = loaded.media.map { it.mediaType.id }
+            val missing = missingMediaText(shownTypes)
             if (onMediaSettings != null && missing != null) {
                 item(key = "media-hint") {
-                    ListItem(
-                        modifier = Modifier.clickable(onClick = onMediaSettings),
-                        headlineContent = { Text(missing) },
-                        supportingContent = { Text("Find them on this phone or add a folder in Settings") },
-                        trailingContent = { Icon(painterResource(R.drawable.ic_music_note), contentDescription = null) },
-                    )
+                    MediaHintRow(missing, mediaHintLinks(shownTypes), onOpenSource, onMediaSettings)
                     HorizontalDivider()
                 }
             }
             item { SectionHeader("Archive sources") }
-            for (source in loaded.sources) {
-                item(key = "source:${source.name}") {
-                    ListItem(
-                        modifier = Modifier.clickable { onOpenSource(source) },
-                        headlineContent = { Text(source.title) },
-                    )
+            for (group in loaded.sources) {
+                item(key = "source-group:${group.title}") { GroupHeader(group.title) }
+                for (source in group.links) {
+                    item(key = "source:${source.name}") {
+                        ListItem(
+                            modifier = Modifier.clickable { onOpenSource(source) }.padding(start = 16.dp),
+                            headlineContent = { Text(source.title) },
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * The row that says Music or Audiobooks has nothing yet: links to the missing types' download sources and to
+ * Settings → Music & audiobooks (phone media). Tapping the row itself opens Settings, as before.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun MediaHintRow(text: String, links: List<SourceLink>, onOpenSource: (SourceLink) -> Unit, onMediaSettings: () -> Unit) {
+    ListItem(
+        modifier = Modifier.clickable(onClick = onMediaSettings),
+        headlineContent = { Text(text) },
+        supportingContent = {
+            Column {
+                Text("Download them, or find them on this phone or add a folder in Settings")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (link in links) OutlinedButton(onClick = { onOpenSource(link) }) { Text(hintLabel(link)) }
+                    TextButton(onClick = onMediaSettings) { Text("Settings") }
+                }
+            }
+        },
+        trailingContent = { Icon(painterResource(R.drawable.ic_music_note), contentDescription = null) },
+    )
+}
+
+/** The download sources of the media types not on the shelves: Audiobooks' first, then Music's. */
+internal fun mediaHintLinks(shownTypeIds: List<String>): List<SourceLink> = buildList {
+    if (AUDIOBOOKS_TYPE_ID !in shownTypeIds) addAll(SOURCE_GROUPS.first { it.title == "Audiobooks" }.links)
+    if (MUSIC_TYPE_ID !in shownTypeIds) addAll(SOURCE_GROUPS.first { it.title == "Music" }.links)
+}
+
+/** A source's name where it stands without its header, as in the hint row's buttons. */
+internal fun hintLabel(link: SourceLink): String = when (link) {
+    SourceLink.ARCHIVE_ORG_SPOKEN -> "Archive.org audiobooks"
+    SourceLink.ARCHIVE_ORG_MUSIC -> "Archive.org music"
+    else -> link.title
 }
 
 /** What the media-settings row says, given the media types on the shelves; null when Music and Audiobooks both show. */
@@ -247,6 +286,16 @@ fun displayNameOf(context: Context, uri: Uri): String {
         null
     }
     return queried?.takeIf { it.isNotBlank() } ?: uri.lastPathSegment.orEmpty()
+}
+
+@Composable
+private fun GroupHeader(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp),
+    )
 }
 
 @Composable

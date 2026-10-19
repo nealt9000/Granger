@@ -24,6 +24,12 @@ sealed interface ItemStatus {
     /** A book or album with [done] of its [total] files in and none downloading (cancelled part-way): "Get the rest". */
     data class Partial(val done: Int, val total: Int) : ItemStatus
 
+    /**
+     * An archive.org audio item got from the other audio view: one item is one download, so it's on the [shelf]
+     * ("Music" or "Audiobooks") it was got for. It offers Open (there), never Get or Remove here.
+     */
+    data class InLibrary(val shelf: String) : ItemStatus
+
     /** A model this phone doesn't have the memory to run (spec "Device tiers"). */
     data object NeedsMoreMemory : ItemStatus
 }

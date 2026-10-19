@@ -75,4 +75,25 @@ class ArchiveScreenTest {
         compose.onNodeWithText("Show everything").assertExists()
         compose.onNodeWithText("LibriVox").assertDoesNotExist()
     }
+
+    @Test fun anItemInTheOtherShelfOffersOpen() {
+        val opened = mutableListOf<String>()
+        val ui = ArchiveUi(
+            kind = ArchiveKind.SPOKEN_WORD, shelf = ArchiveShelf.SPOKEN_MOST_DOWNLOADED, filtered = false, loading = false,
+            rows = listOf(ArchiveRow("holst", "The Planets", "", null, ItemStatus.InLibrary("Music"), AudioOffer.Tracks(emptyList(), "VBR MP3", null, 0))),
+        )
+        compose.setContent {
+            ArchiveContent(
+                ui = ui, searchText = "", snackbar = SnackbarHostState(),
+                onQuery = {}, onTab = {}, onShelf = {}, onRetry = {}, onLoadMore = {},
+                onOpenRow = {}, onGetRow = { opened += "get:$it" }, onCancelRow = {}, onRetryRow = {}, onRemoveRow = {},
+                onAcceptWaiver = {}, onOpenLibriVox = {}, onBack = {}, onOpenInLibraryRow = { opened += it },
+            )
+        }
+        compose.onNodeWithText("In your Music").assertExists()
+        compose.onNodeWithText("Get").assertDoesNotExist()
+        compose.onNodeWithText("Remove").assertDoesNotExist()
+        compose.onNodeWithText("Open").performClick()
+        assertThat(opened).containsExactly("holst")
+    }
 }

@@ -1,6 +1,12 @@
 package app.granger.audiobooks
 
 import app.granger.FakeShelves
+import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadState
+import app.granger.core.downloads.ItemKind
+import app.granger.media.MediaDownloads
+import app.granger.record
+import app.granger.sources.ItemStatus
 import app.granger.MainDispatcherRule
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
@@ -55,8 +61,14 @@ class AudiobooksViewModelTest {
     private val listening = FakeListening()
     private val hub = FakePlayerHub()
 
+    private val records = MutableStateFlow<List<DownloadRecord>>(emptyList())
+    private val removed = mutableListOf<String>()
+
     private fun TestScope.vm(collectionId: String? = null): AudiobooksViewModel {
-        val vm = AudiobooksViewModel(collectionId, media, shelves, listening, hub, now = { 1_000L }, compute = main.dispatcher)
+        val vm = AudiobooksViewModel(
+            collectionId, media, shelves, listening, hub, now = { 1_000L }, compute = main.dispatcher,
+            downloads = records, remover = { removed += it },
+        )
         backgroundScope.launch { vm.shelf.collect {} }
         return vm
     }
@@ -252,5 +264,53 @@ class AudiobooksViewModelTest {
         vm.playBookmark(mark)
         advanceUntilIdle()
         assertThat(hub.bookPlays).isEmpty()
+    }
+
+    // --- Downloaded books (Plan M2, Task 10) ---
+
+    private val group = "media:librivox:817"
+
+    private fun librivoxBook() = Audiobook(
+        id = "audiobook:librivox:817", origin = MediaOrigin.LIBRIVOX, sourceRef = "817", title = "Time Machine", author = "H. G. Wells",
+        narrator = "", description = "", coverPath = null, durationMs = 100_000L, status = PackStatus.OK, addedAt = 0L,
+    )
+
+    /** File [n] of the 13-chapter book (the cover is 000), in [state]. */
+    private fun file(n: Int, state: DownloadState) = record(
+        MediaDownloads.fileItemId(group, n), state, kind = ItemKind.AUDIO,
+        filePath = "/nowhere/audiobooks/librivox/817/%02d - Chapter.mp3".format(n), sizeBytes = 100,
+        bytesDone = if (state == DownloadState.INSTALLED) 100 else 10, title = "Time Machine",
+    ).copy(groupId = group)
+
+    @Test fun downloadingBookShowsChaptersSoFar() = runTest(main.dispatcher) {
+        val b = librivoxBook()
+        add(b, (0 until 3).map { AudiobookChapter(b.id, it, "Chapter ${it + 1}", "track:librivox:817:$it", 0L, 10_000L) })
+        records.value = (1..13).map { n ->
+            file(n, when { n <= 3 -> DownloadState.INSTALLED; n == 4 -> DownloadState.RUNNING; else -> DownloadState.QUEUED })
+        }
+        val page = vm().book(b.id).filterNotNull().first()
+        assertThat(page.download).isInstanceOf(ItemStatus.Downloading::class.java)
+        assertThat(page.chapters).hasSize(3)
+        assertThat(page.filesDone).isEqualTo(3)
+        assertThat(page.filesTotal).isEqualTo(13)
+        assertThat(page.onRemoveDownload).isNotNull()
+    }
+
+    @Test fun phoneBookHasNoRemoveDownload() = runTest(main.dispatcher) {
+        val b = book("mine")
+        add(b, chaptersOf(b, 100_000L))
+        val page = vm().book(b.id).filterNotNull().first()
+        assertThat(page.download).isNull()
+        assertThat(page.onRemoveDownload).isNull()
+    }
+
+    @Test fun removeDownloadCallsTheRemoverWithTheGroup() = runTest(main.dispatcher) {
+        val b = librivoxBook()
+        add(b, listOf(AudiobookChapter(b.id, 0, "One", "track:librivox:817:0", 0L, 10_000L)))
+        // Filed from disk with no ledger rows (the ledger was cleared): still a download, shown as in.
+        val page = vm().book(b.id).filterNotNull().first()
+        assertThat(page.download).isEqualTo(ItemStatus.Installed)
+        page.onRemoveDownload!!()
+        assertThat(removed).containsExactly(group)
     }
 }

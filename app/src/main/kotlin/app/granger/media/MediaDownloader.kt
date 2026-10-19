@@ -111,6 +111,22 @@ class MediaDownloader(
         File(mediaRoot, ".nomedia").let { if (!it.exists()) it.createNewFile() }
     }
 
+    /**
+     * The media root, "music" or "audiobooks", that holds [groupId]'s item: by its ledger rows, else its manifest on a
+     * mounted volume. Null when it's in neither. One archive.org item is one group whichever view got it, so the views
+     * ask this before a Get: an item in the other root is opened there, never got again.
+     */
+    suspend fun mediaRootOf(groupId: String): String? {
+        val (source, ref) = sourceAndRef(groupId) ?: return null
+        val roots = listOf("music", "audiobooks")
+        val records = downloads.records.first().filter { it.groupId == groupId }
+        roots.firstOrNull { root -> records.any { "/$root/$source/$ref/" in it.filePath } }?.let { return it }
+        return withContext(io) {
+            val all = volumes.list()
+            roots.firstOrNull { root -> all.any { File(it.root, "$root/$source/$ref/${MediaManifests.FILE_NAME}").isFile } }
+        }
+    }
+
     /** Stops the group's unfinished files; the finished ones stay filed (decided with Neal). */
     suspend fun cancel(groupId: String) {
         ops.withLock { downloads.cancelGroup(groupId) }

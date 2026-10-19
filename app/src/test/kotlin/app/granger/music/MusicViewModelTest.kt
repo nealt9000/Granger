@@ -4,7 +4,10 @@ import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
 import app.granger.core.library.Albums
 import app.granger.core.library.CollectionRow
+import app.granger.core.library.MediaOrigin
 import app.granger.core.library.MediaType
+import app.granger.sources.ItemStatus
+import kotlinx.coroutines.flow.flowOf
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
@@ -28,8 +31,10 @@ class MusicViewModelTest {
     private val playlists = FakePlaylists(media)
     private val hub = FakePlayerHub()
 
+    private val removed = mutableListOf<String>()
+
     private fun TestScope.vm(collectionId: String? = null): MusicViewModel {
-        val vm = MusicViewModel(collectionId, media, shelves, playlists, hub)
+        val vm = MusicViewModel(collectionId, media, shelves, playlists, hub, downloads = flowOf(emptyList()), remover = { removed += it })
         backgroundScope.launch { vm.ui.collect {} }
         return vm
     }
@@ -232,5 +237,24 @@ class MusicViewModelTest {
         advanceUntilIdle()
         assertThat(playlists.entries.value.getValue(mix))
             .containsExactly("track:phone:c", "track:phone:a", "track:archive-org:gone").inOrder()
+    }
+
+    @Test fun downloadedAlbumOffersRemoveDownload() = runTest(main.dispatcher) {
+        val id = "holst-the-planets"
+        val key = Albums.itemKey("archive-org", id)
+        val holst = listOf("mars", "venus").map {
+            song(it, album = "The Planets").copy(id = "track:archive-org:$id:$it", origin = MediaOrigin.ARCHIVE_ORG, albumKey = key)
+        }
+        val phone = listOf(song("p1", album = "Abbey Road"))
+        media.trackList.value = holst + phone
+        val vm = vm()
+        val page = vm.album(key).filterNotNull().first()
+        assertThat(page.download).isEqualTo(ItemStatus.Installed)
+        page.onRemoveDownload!!()
+        assertThat(removed).containsExactly("media:archive-org:$id")
+
+        val phonePage = vm.album(phone.single().albumKey).filterNotNull().first()
+        assertThat(phonePage.download).isNull()
+        assertThat(phonePage.onRemoveDownload).isNull()
     }
 }

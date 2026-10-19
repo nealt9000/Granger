@@ -1,5 +1,6 @@
 package app.granger.music
 
+import app.granger.library.SourceLink
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,6 +56,9 @@ data class MusicNav(
     val onPlaylist: (id: Long) -> Unit,
     val onFolder: (folder: String) -> Unit,
     val onBack: () -> Unit,
+    /** An empty Music page's links: a download source, and Settings → Music & audiobooks. Null: not offered. */
+    val onOpenSource: ((SourceLink) -> Unit)? = null,
+    val onMediaSettings: (() -> Unit)? = null,
 )
 
 /** Display names, with the "Unknown …" fallbacks applied here rather than stored. */

@@ -389,6 +389,8 @@ class ArchiveViewModel(
     private suspend fun fetchAndGetAudio(identifier: String): String? {
         if (!prefs.waiverAccepted.value && !kind.datedRecordings) return SPOKEN_WORD_GET
         if (!ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
+        // Got from the other view: it lives on that shelf, and getting it here would make a second copy of one group.
+        if (media!!.mediaRootOf(groupOf(identifier)) == otherRoot) return "This is already in your $otherShelf."
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier) return NOTHING_TO_DOWNLOAD
         val offer = ArchiveAudioOffers.choose(item) as? AudioOffer.Tracks ?: return NOTHING_TO_DOWNLOAD
@@ -420,6 +422,11 @@ class ArchiveViewModel(
 
     /** This view's media folder: an item got from Music lives under `music/`, one from Audiobooks under `audiobooks/`. */
     private val mediaFolder = "/" + (if (kind == ArchiveKind.MUSIC) "music" else "audiobooks") + "/${MediaManifest.ARCHIVE_ORG}/"
+
+    /** The other audio view's media root and shelf name: where an item got from there lives. */
+    private val otherRoot = if (kind == ArchiveKind.MUSIC) "audiobooks" else "music"
+    private val otherShelf = if (kind == ArchiveKind.MUSIC) "Audiobooks" else "Music"
+    private val otherFolder = "/$otherRoot/${MediaManifest.ARCHIVE_ORG}/"
 
     private fun buildAudioUi(s: State, records: List<DownloadRecord>): ArchiveUi {
         val ours = records.filter { it.groupId?.startsWith(MediaDownloads.groupId(MediaManifest.ARCHIVE_ORG, "")) == true }
@@ -491,6 +498,8 @@ class ArchiveViewModel(
         val group = groupOf(identifier)
         val mine = records.filter { it.groupId == group }
         if (mine.isEmpty()) return ItemStatus.NotInstalled
+        // Got from the other view (its files are under the other root): it's on that shelf, not a download of this view.
+        if (mine.any { otherFolder in it.filePath }) return ItemStatus.InLibrary(otherShelf)
         val count = offerFiles ?: fileCounts[group]
             ?: mine.firstNotNullOfOrNull { r -> File(r.filePath).parentFile?.let(MediaManifests::read)?.files?.size }
                 ?.also { fileCounts[group] = it }

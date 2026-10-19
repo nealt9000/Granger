@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.PackStatus
+import app.granger.media.DownloadControls
 import app.granger.player.formatTime
 
 /** One album: cover, details, Play/Shuffle, and its tracks in disc/track order. */
@@ -73,6 +74,13 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav) {
                         val details = listOfNotNull(album.year.ifBlank { null }, songCount(album.trackCount), formatTime(album.durationMs))
                         Text(details.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
+                }
+            }
+            val download = loaded.download
+            val remove = loaded.onRemoveDownload
+            if (download != null && remove != null) {
+                item(key = "download") {
+                    DownloadControls(album.title, download, loaded.filesDone, loaded.filesTotal, "tracks", onRemove = remove)
                 }
             }
             item {

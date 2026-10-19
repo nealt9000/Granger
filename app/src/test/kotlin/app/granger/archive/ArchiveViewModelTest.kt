@@ -13,6 +13,7 @@ import app.granger.core.archive.ArchiveShelf
 import app.granger.core.archive.AudioOffer
 import app.granger.core.archive.Offer
 import app.granger.core.archive.TextKind
+import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
 import app.granger.core.downloads.ItemKind
@@ -753,6 +754,79 @@ class ArchiveViewModelTest {
         spoken.setTab(ArchiveTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         assertThat(spoken.ui.value.rows).isEmpty()
+    }
+
+    /** The Holst album's files as ledger rows, all [state], under [folder] ("music" or "audiobooks"). */
+    private fun holstRecords(folder: String, state: DownloadState = DownloadState.INSTALLED): List<DownloadRecord> {
+        val manifest = MediaFixtures.holst().let { if (folder == "music") it else it.copy(kind = MediaManifest.AUDIOBOOK) }
+        val dir = File(mediaRoot, MediaManifests.relativeDir(manifest))
+        assertThat(dir.path).contains("/$folder/archive-org/")
+        MediaManifests.write(dir, manifest)
+        return MediaDownloads.specs(manifest).map { spec ->
+            record(
+                spec.itemId, state, kind = ItemKind.AUDIO, filePath = File(mediaRoot, spec.relativePath).path,
+                sizeBytes = 100, bytesDone = 100, title = spec.title,
+            ).copy(groupId = holstGroup)
+        }
+    }
+
+    /**
+     * One archive.org item is one group whichever view got it, so an album got under Music must not show as this
+     * audiobook view's download (nor its Get be refused as "storage that isn't available"): it says where it is and
+     * opens it there, and Get never reaches the downloader.
+     */
+    @Test fun itemGotUnderMusicShowsAsInYourMusicInTheAudiobooksView() = runTest(main.dispatcher) {
+        prefs.accept()
+        searchBody = { _, _ -> audioSearchJson(1, HOLST) }
+        downloads.list.value = holstRecords("music")
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        settle { vm.ui.value.rows.isNotEmpty() }
+        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary("Music"))
+        vm.openItem(HOLST)
+        settle { vm.ui.value.sheet?.loading == false }
+        assertThat(vm.ui.value.sheet!!.status).isEqualTo(ItemStatus.InLibrary("Music"))
+
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This is already in your Music.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+        assertThat(File(mediaRoot, "audiobooks/archive-org/$HOLST").exists()).isFalse()
+        // The Installed tab still lists only this view's own downloads.
+        vm.setTab(ArchiveTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.rows).isEmpty()
+
+        // The Music view, where it was got, manages it as before.
+        val music = audioViewModel(ArchiveKind.MUSIC)
+        settle { music.ui.value.rows.isNotEmpty() }
+        assertThat(music.ui.value.rows.single().status).isEqualTo(ItemStatus.Installed)
+    }
+
+    @Test fun itemGotUnderAudiobooksShowsAsInYourAudiobooksInTheMusicView() = runTest(main.dispatcher) {
+        prefs.accept()
+        searchBody = { _, _ -> audioSearchJson(1, HOLST) }
+        // Still downloading there: it's theirs all the same.
+        downloads.list.value = holstRecords("audiobooks", DownloadState.QUEUED)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        settle { vm.ui.value.rows.isNotEmpty() }
+        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary("Audiobooks"))
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This is already in your Audiobooks.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+        assertThat(File(mediaRoot, "music/archive-org/$HOLST").exists()).isFalse()
+    }
+
+    /** With no ledger rows (cleared), the other view's folder on disk still says where the item is. */
+    @Test fun getFindsTheOtherViewsFolderWithoutLedgerRows() = runTest(main.dispatcher) {
+        prefs.accept()
+        searchBody = { _, _ -> audioSearchJson(1, HOLST) }
+        holstRecords("music")
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This is already in your Music.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
     @Test fun audioCancelRetryAndRemoveGoToTheGroup() = runTest(main.dispatcher) {

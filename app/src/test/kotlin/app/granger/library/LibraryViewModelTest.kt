@@ -49,10 +49,17 @@ class LibraryViewModelTest {
         },
     )
 
-    @Test fun archiveSourcesListArchiveOrgLast() = runTest(main.dispatcher) {
+    @Test fun sourcesAreGroupedByMediaType() = runTest(main.dispatcher) {
         val vm = vm()
         val ui = vm.ui.filterNotNull().first()
-        assertThat(ui.sources).containsExactly(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG).inOrder()
+        assertThat(ui.sources).containsExactly(
+            SourceGroup("Literature", listOf(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG)),
+            SourceGroup("Audiobooks", listOf(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN)),
+            SourceGroup("Music", listOf(SourceLink.ARCHIVE_ORG_MUSIC)),
+        ).inOrder()
+        // Every audio source is named for what it is: "Archive.org" under each header.
+        assertThat(SourceLink.ARCHIVE_ORG_SPOKEN.title).isEqualTo("Archive.org")
+        assertThat(SourceLink.ARCHIVE_ORG_MUSIC.title).isEqualTo("Archive.org")
     }
 
     @Test fun refreshRescansTheLibrary() = runTest(main.dispatcher) {
@@ -68,14 +75,14 @@ class LibraryViewModelTest {
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.media.map { it.mediaType.name }).containsExactly("Literature")
         assertThat(ui.media.single().collections.map { it.packs.size }).containsExactly(3, 1).inOrder()
-        assertThat(ui.sources).containsExactly(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG).inOrder()
+        assertThat(ui.sources.map { it.title }).containsExactly("Literature", "Audiobooks", "Music").inOrder()
         assertThat(ui.emptyLibrary).isFalse()
     }
 
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.emptyLibrary).isTrue()
-        assertThat(ui.sources).hasSize(3)
+        assertThat(ui.sources.flatMap { it.links }).hasSize(SourceLink.entries.size)
     }
 
     @Test fun importSummaryIsShown() = runTest(main.dispatcher) {
@@ -92,5 +99,17 @@ class LibraryViewModelTest {
         assertThat(missingMediaText(listOf("music"))).isEqualTo("No audiobooks yet")
         assertThat(missingMediaText(listOf("audiobooks", "zim"))).isEqualTo("No music yet")
         assertThat(missingMediaText(listOf("music", "audiobooks"))).isNull()
+    }
+
+    @Test fun mediaHintOffersTheMissingTypesSources() {
+        assertThat(mediaHintLinks(listOf("zim")))
+            .containsExactly(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN, SourceLink.ARCHIVE_ORG_MUSIC).inOrder()
+        assertThat(mediaHintLinks(listOf("music"))).containsExactly(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN).inOrder()
+        assertThat(mediaHintLinks(listOf("audiobooks"))).containsExactly(SourceLink.ARCHIVE_ORG_MUSIC)
+        assertThat(mediaHintLinks(listOf("music", "audiobooks"))).isEmpty()
+        // The hint's buttons sit side by side, so the two archive.org views say which they are.
+        assertThat(hintLabel(SourceLink.ARCHIVE_ORG_SPOKEN)).isEqualTo("Archive.org audiobooks")
+        assertThat(hintLabel(SourceLink.ARCHIVE_ORG_MUSIC)).isEqualTo("Archive.org music")
+        assertThat(hintLabel(SourceLink.LIBRIVOX)).isEqualTo("LibriVox")
     }
 }
