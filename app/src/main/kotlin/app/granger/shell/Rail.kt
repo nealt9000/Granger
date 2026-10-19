@@ -99,7 +99,9 @@ private fun RecentItem.Play.painter(): Painter = when {
 
 /**
  * The always-there 56 dp rail: tool icons, bookmark letter tiles, History, recent search, chat and play icons, Settings.
- * Tapping the recents (or the rail's background) calls [onExpand]; everything else goes straight to its screen.
+ * Only the tools go straight to their screens. The bookmark tiles, History and the recents are bare icons here, too
+ * little to tell apart, so tapping them (or the rail's background) calls [onExpand]: the full rail, where they have
+ * titles and open. A long press on a bookmark tile still offers to remove it.
  */
 @Composable
 internal fun NarrowRail(
@@ -108,9 +110,7 @@ internal fun NarrowRail(
     showResearch: Boolean,
     onExpand: () -> Unit,
     onTool: (RailTool) -> Unit,
-    onTab: (Long) -> Unit,
     onCloseTab: (Long) -> Unit,
-    onHistory: () -> Unit,
 ) {
     Column(
         Modifier
@@ -131,14 +131,13 @@ internal fun NarrowRail(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            rail.tabs.forEach { tab -> TabTile(tab, onTab, onCloseTab) }
-            IconButton(onClick = onHistory) {
+            rail.tabs.forEach { tab -> TabTile(tab, onExpand, onCloseTab) }
+            IconButton(onClick = onExpand) {
                 Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = GrangerColors.OnSurfaceVariant)
             }
             if (rail.recent.isNotEmpty()) {
                 RailDivider(Modifier.width(32.dp))
-                // The recents are bare icons here, too little to tell apart: a tap anywhere on them opens the full rail,
-                // where they have titles, rather than jumping into one unseen.
+                // A tap anywhere on the recents opens the full rail rather than jumping into one unseen.
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -291,6 +290,9 @@ private fun TabTarget(
     onTab: (Long) -> Unit,
     onCloseTab: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    onClickLabel: String? = null,
+    /** False in the narrow rail, where a tap only opens the full rail (which says if the tab is unavailable). */
+    checkAvailable: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
@@ -298,8 +300,9 @@ private fun TabTarget(
     Box(modifier) {
         Box(
             Modifier.combinedClickable(
+                onClickLabel = onClickLabel,
                 onClick = {
-                    if (tab.available) onTab(tab.tabId)
+                    if (tab.available || !checkAvailable) onTab(tab.tabId)
                     else Toast.makeText(context, UNAVAILABLE_MESSAGE, Toast.LENGTH_LONG).show()
                 },
                 onLongClick = { menu = true },
@@ -319,9 +322,11 @@ private fun TabTarget(
 }
 
 @Composable
-private fun TabTile(tab: RailTabUi, onTab: (Long) -> Unit, onCloseTab: (Long) -> Unit) {
+private fun TabTile(tab: RailTabUi, onExpand: () -> Unit, onCloseTab: (Long) -> Unit) {
     val description = if (tab.available) tab.title else "${tab.title}, not available"
-    TabTarget(tab, onTab, onCloseTab, Modifier.semantics { contentDescription = description }) { LetterTile(tab) }
+    TabTarget(tab, { onExpand() }, onCloseTab, Modifier.semantics { contentDescription = description }, onClickLabel = "Show bookmarks", checkAvailable = false) {
+        LetterTile(tab)
+    }
 }
 
 @Composable
