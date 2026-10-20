@@ -19,6 +19,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | **Done:** `2026-10-19-plan-m2-media-sources.md` (2026-10-19; 1236 JVM tests; Pixel 6 walkthrough in `media-parity-checklist.md`) |
 | M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | **Done:** `2026-10-19-plan-m3-media-search-research-auto.md` (2026-10-20; 1512 JVM tests; eval and walkthrough below and in `media-parity-checklist.md`: ✅ 43, ⏭ 0, ❌ 8). **The Media project is done.** |
 | P1 | Polish | Wiki Back within the tab, the new wiki top bar, one rail list with pins, the toolbar on the left or right; library v9. The logo and full screen are held back (see "Carried forward from P1") | **Done (partly):** `2026-10-20-plan-p1-polish.md` (2026-10-20; 1593 JVM tests; Pixel 6 walkthrough all PASS) |
+| K1 | The full Kiwix catalog (English) | Family table with licenses, bulk generator with a report, Recommended + folded categories on the Kiwix screen, filing for new families, 16 MB catalog cap; Wi-Fi installs (`tools/dev/phone-wifi.sh`) | **Done:** `2026-10-20-plan-k1-kiwix-catalog.md` (2026-10-20; 927 packs published; 1602 JVM tests; Pixel 6 walkthrough all PASS). Follow-ups in K2 |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
@@ -490,3 +491,33 @@ Still open:
 - Build setup: Java and the Android SDK aren't on the agent shells' PATH. Use `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` and `ANDROID_HOME=/opt/homebrew/share/android-commandlinetools`. A new worktree needs `local.properties` copied in and `git submodule update --init --recursive`.
 - Robolectric's WebView doesn't fire page callbacks. The step that clears the WebView's history after loading from the stored stack is covered only by the device walkthrough.
 - The rail's scroll position resets when the side is switched (expected).
+
+
+## Carried forward from K1
+
+Built and published (2026-10-20, on the Mac Studio):
+- **The catalog lists 927 Kiwix packs**: the 18 curated ones under Recommended, plus 909 more from 1,311 English entries. It is 0.92 MB, re-signed and live. 384 video packs are held back. `catalog/kiwix-report.txt` lists every family kept or held.
+- The family table is `tools/catalog-gen/kiwix_families.json`: 182 families, each license checked at the source page that states it, with that URL. Neal's calls (2026-10-20): DevDocs is in; families with no stated license are listed as "Not stated by the source"; WikEM is CC BY-SA 4.0.
+- **1602 JVM tests pass**, and 28 catalog-gen tests (pytest in a scratch venv; `tools/dev` still doesn't say how to make one).
+- The catalog signing key is now on the Mac (`~/.config/granger/catalog-signing.key`, mode 600). It was copied from the Linux machine and checked against `catalog/public-key.txt`.
+- Builds go to the Pixel over Wi-Fi: `tools/dev/phone-wifi.sh install` (paired 2026-10-20; MAC-SETUP.md, "Wi-Fi installs").
+
+Pixel 6 walkthrough (2026-10-20), installed over Wi-Fi with both databases backed up first; **all PASS**:
+- The Kiwix screen: Recommended, categories, Show all / Show fewer, search, scrolling during a download, Installed and Updates.
+- A Stack Exchange site, a maps pack, two DevDocs packs and a community wiki downloaded and opened. Neal: the maps work "impressively well out of the box, full screen or no".
+
+Raised in the walkthrough (planned in K2):
+- The Kiwix list needs a category filter at the top.
+- DevDocs packs: the pack's own left nav bar takes half the page in portrait (fine in landscape).
+- The Library: every Kiwix pack goes in a Kiwix folder, so the top level stays clean. Maps get their own media type (Neal, 2026-10-20).
+
+Still open:
+- **Video:** the held families are in `catalog/kiwix-report.txt` (TED alone has 357 packs; also CrashCourse, Khan Academy, VOA, the YouTube channels). To list them:
+  - remove their `hold`;
+  - check on the Pixel that the WebView plays their HTML5 video (TED packs use video.js with `.webm`);
+  - have `Filing.defaultMediaType` return the video type for them.
+  
+  Kiwix's `_videos:yes` tag can't be trusted (most packs carry it), so the family table decides.
+- Kiwix's content server (library.kiwix.org) puts an anti-crawler confirmation in front of pages, so packs can't be inspected online. Download a pack and read it with python-libzim instead.
+- The catalog has to be regenerated monthly (Kiwix retires snapshots). The build takes about 5 minutes.
+

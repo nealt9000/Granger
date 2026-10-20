@@ -106,7 +106,7 @@ Each source screen has search, browse, and **Installed** / **Updates** views (Up
 Lists Granger Classics (whole collection or single books) and the Starter/Full presets. Comes from the signed catalog.
 
 ### Kiwix
-v1 lists the curated Kiwix packs from the signed catalog, searchable. *Builder's call: browsing Kiwix's whole OPDS catalog beyond the curated list is out of v1 unless Neal says otherwise (see §11).*
+~~v1 lists the curated Kiwix packs from the signed catalog, searchable.~~ **Changed (Neal, 2026-10-20):** the Kiwix source lists Kiwix's whole English catalog, with the curated packs under Recommended, video held back, and licenses from a family table. See `plans/2026-10-20-plan-k1-kiwix-catalog.md`.
 
 ### Archive.org
 For **old books, technical manuals and, after v1, public-domain audiobooks**. Granger behaves like a web browser built for one site: it searches and browses archive.org's public API and downloads files archive.org serves openly.
@@ -226,7 +226,7 @@ The rest of the roadmap reorders like this (Plans 1–4 are done):
 - **The Free 10 GB cap still applies** to everything downloaded from them: ZIM packs, Classics e-books and archive.org books all count. Queueing the whole Classics collection is checked as one group against the cap.
 - Imports of your own files stay Pro-only and outside the cap, as in the v1 spec.
 - Models stay excluded from the cap.
-- Kiwix catalog breadth stays the curated list in v1 (§5).
+- ~~Kiwix catalog breadth stays the curated list in v1 (§5).~~ The whole English catalog (Plan K1, 2026-10-20).
 
 ## 14. Builder's calls made in this document (for Neal's review)
 
