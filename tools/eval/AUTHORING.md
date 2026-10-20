@@ -195,3 +195,34 @@ newest snapshot is Chemistry's, 2026-10-15. If a later pack update moves that da
 
   It must report 0 problems. It scans every entry of a ZIM for each article answer, so it takes a few minutes.
 - Write no questions that can only be sourced from a pack you don't have on disk yet. Add them once that pack is in.
+
+## The media set
+
+`dataset/media.json` (split `"media"`, Plan M3) checks that Research cites the user's music and audiobooks when a question
+is about them, and doesn't when it isn't. It is written against what is on Neal's phone, not against the packs, and is
+separate from the tuning and held-out splits: never copy a tuning or held-out question or its wording into it.
+
+- **Groups.** `media`: the question should cite an album or audiobook. `media-control`: an ordinary question whose words
+  happen to name something in the music library (Mars, the Moon, Venus); it must cite no media. Ids are
+  `media-NNN` and `media-control-NNN`.
+- **Answers.** A `media` item's `source` is the Research media card's sourceId: `album:<albumKey>` for an album, the
+  audiobook's id (`audiobook:<origin>:<ref>`) for a book. `location` and `quote` are `""`: a card has no place inside it,
+  so media answers match by source alone. List every album that would do (the two Holst albums).
+- **Controls** are `answerable: true` with `"answers": []` (they are answered from the packs; only a media control may
+  have no answers) and `notes` starting "must not cite media". Give them a `reference` so the answer can still be graded.
+- **Metrics** (`metrics.py`, shown in the report only when a run has media items): *media cited*, a `media` item whose
+  reply cites one of its expected sources (bar: 8 of 10); *media intrusion*, a `media-control` item whose reply cites
+  any media passage (bar: 0). Grounded is reported for the media set but not barred. Retrieval recall leaves the
+  controls out.
+- **Album keys and audiobook ids come from the phone**, never by hand. Copy the library database into a new, empty folder
+  (reading it doesn't touch the app's screen), export it, and validate:
+
+  ```
+  for f in library.db library.db-wal library.db-shm; do adb exec-out run-as app.granger cat databases/$f > DIR/$f; done
+  python3 -I media_library.py DIR/library.db -o dataset/media-library.json
+  python3 eval.py validate dataset/media.json --media dataset/media-library.json
+  ```
+
+  It must report 0 problems. `dataset/media-library.json` is the export the set was written against (2026-10-20). Before
+  committing a new export, check it lists only what the set needs: it holds every present album and audiobook title on
+  the phone. If the library changes (an album re-tagged changes its key), re-export and fix the sources.

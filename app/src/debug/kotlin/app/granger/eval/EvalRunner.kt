@@ -11,6 +11,7 @@ import app.granger.core.research.ResearchEvent
 import app.granger.core.research.ResearchModels
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.ResearchRequest
+import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
 import app.granger.core.research.TextGenerator
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,14 @@ import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import org.json.JSONArray
 import org.json.JSONObject
+
+/**
+ * The `source` a record gives a passage, as `tools/eval` datasets name it: an article's pack by its ZIM name (its id when
+ * the pack has none); anything else by its sourceId (a book's `book:granger:<ref>`, a media card's `album:<albumKey>` or
+ * audiobook id).
+ */
+fun evalSourceName(packNames: Map<String, String>): (Passage) -> String =
+    { p -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
 
 /** Wraps the real finder and keeps the last call's keywords and passages, for the record's `found` list. */
 class RecordingFinder(private val inner: PassageFinder) : PassageFinder {

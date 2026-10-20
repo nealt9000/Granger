@@ -54,3 +54,16 @@ def test_prompts_render_escaped():
 def test_index_links_to_block_anchor():
     html = trace_html()
     assert '<a href="#q-q2">q2</a>' in html and 'id="q-q2"' in html
+
+
+def test_media_metrics_show_only_for_a_media_run():
+    item = {"id": "media-001", "group": "media", "split": "media", "answerable": True, "medical": False, "question": "Holst?",
+            "reference": "", "answers": [{"source": "album:holst", "location": "", "quote": ""}]}
+    control = {"id": "media-control-001", "group": "media-control", "split": "media", "answerable": True, "medical": False,
+               "question": "Mars?", "reference": "", "answers": []}
+    alb = {"kind": "MEDIA", "source": "album:holst", "title": "The Planets", "location": "", "heading": "", "text": "Album: The Planets"}
+    recs = [{"id": "media-001", "outcome": "answered", "reply": "Yes [1]", "cited": [1], "chosen": [alb], "found": [alb]},
+            {"id": "media-control-001", "outcome": "answered", "reply": "Far [1]", "cited": [1], "chosen": [alb], "found": [alb]}]
+    text = report.totals_text(report.M.compute([item, control], recs, {}))
+    assert "Media cited (1 of 1)" in text and "Media intrusion on controls (1 of 1)" in text
+    assert "Media" not in report.totals_text(report.M.compute(ITEMS, RECS, {}))

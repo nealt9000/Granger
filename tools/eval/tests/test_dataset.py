@@ -71,3 +71,39 @@ def test_article_location_must_be_the_exact_entry_path(tmp_path):
     # a fragment on either side is ignored, and the match is case-insensitive
     frag = item(id="s-2", answers=[{"source": "granger-test", "location": "photosynthesis#Light", "quote": "green plants"}])
     assert dataset.validate_answers([frag], packs=tmp_path) == []
+
+
+def media_item(**kw):
+    base = item(id="media-001", group="media", split="media", answers=[{"source": "album:pink floyd|the wall", "location": "", "quote": ""}])
+    base.update(kw)
+    return base
+
+
+def test_media_split_loads_and_media_sources_match_by_source_only(tmp_path):
+    control = media_item(id="media-control-001", group="media-control", answers=[], notes="must not cite media")
+    book = media_item(id="media-002", answers=[{"source": "audiobook:PHONE:jungle", "location": "", "quote": ""}])
+    f = tmp_path / "media.json"
+    f.write_text(__import__("json").dumps([media_item(), book, control]))
+    assert [i["id"] for i in dataset.load(f)] == ["media-001", "media-002", "media-control-001"]
+    # an empty location is fine for a media source, but not for an article or a book
+    with pytest.raises(ValueError, match="a-1"):
+        dataset.check([item(answers=[{"source": "book:granger:x", "location": "", "quote": ""}])])
+    # only a media control may be answerable with no answers
+    with pytest.raises(ValueError, match="media-003"):
+        dataset.check([media_item(id="media-003", answers=[])])
+    assert dataset.is_media("album:x") and dataset.is_media("audiobook:PHONE:x") and not dataset.is_media("book:granger:x")
+    assert dataset.location_matches("album:x", "", "") and dataset.location_matches("album:x", "", "anything")
+    assert not dataset.location_matches("granger-test", "", "Photosynthesis")
+
+
+def test_validate_checks_media_sources_against_the_library_export(tmp_path):
+    export = {"albums": {"pink floyd|the wall": "The Wall"}, "audiobooks": {"audiobook:PHONE:jungle": "The Jungle Book"}}
+    ok = [media_item(), media_item(id="media-002", answers=[{"source": "audiobook:PHONE:jungle", "location": "", "quote": ""}])]
+    assert dataset.validate_answers(ok, media=export) == []
+    gone_album = media_item(id="media-003", answers=[{"source": "album:pink floyd|animals", "location": "", "quote": ""}])
+    gone_book = media_item(id="media-004", answers=[{"source": "audiobook:PHONE:wicked", "location": "", "quote": ""}])
+    with_location = media_item(id="media-005", answers=[{"source": "album:pink floyd|the wall", "location": "x", "quote": ""}])
+    problems = dataset.validate_answers(ok + [gone_album, gone_book, with_location], media=export)
+    assert len(problems) == 3 and "media-003" in problems[0] and "media-004" in problems[1] and "media-005" in problems[2]
+    # without an export, media sources are skipped like books without a books folder
+    assert dataset.validate_answers([gone_album]) == []

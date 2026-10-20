@@ -1,0 +1,249 @@
+[
+ {
+  "id": "media-001",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Who composed the music for The Secret of NIMH?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:jerry goldsmith|the secret of nimh (original mgm motion picture soundtrack)",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "Jerry Goldsmith: the album The Secret Of NIMH (Original MGM Motion Picture Soundtrack) in your music is his.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "media-002",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Which Pink Floyd album has Comfortably Numb on it?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:pink floyd|the wall",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "The Wall (Pink Floyd, 1979).",
+  "goodGuess": null,
+  "notes": "The song is a track title only; the question names the band."
+ },
+ {
+  "id": "media-003",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What songs are on The Dark Side of the Moon?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:pink floyd|the dark side of the moon",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "Speak to Me, Breathe (In the Air), On the Run, Time, The Great Gig in the Sky, Money, Us and Them, Any Colour You Like, Brain Damage and Eclipse (Pink Floyd, 1973).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "media-004",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Do I have any Holst?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:|unknown|Music/Holst - The Planets (LSO 1922-24)/",
+    "location": "",
+    "quote": ""
+   },
+   {
+    "source": "album:release - topic|the planets op. 32, h. 125: ii. venus, the bringer of peace",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "Yes: Holst - The Planets (LSO 1922-24), six movements of The Planets, and the single-track album The Planets Op. 32, H. 125: II. Venus, The Bringer of Peace.",
+  "goodGuess": null,
+  "notes": "Either album counts. The folder-named album has no tags at all, so only its folder name and track titles say Holst; the Venus album's tags don't name him either (its artist is \"Release - Topic\")."
+ },
+ {
+  "id": "media-005",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Which album is the song Money from?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:pink floyd|the dark side of the moon",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "The Dark Side of the Moon (Pink Floyd, 1973).",
+  "goodGuess": null,
+  "notes": "\"Money\" is also an ordinary word: a track-title match."
+ },
+ {
+  "id": "media-006",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Is there an audiobook of The Jungle Book in my library?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "audiobook:phone:abca8d40673ebebe",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "Yes: The Jungle Book by Rudyard Kipling, an audiobook on your phone.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "media-007",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Who wrote Wicked?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "audiobook:archive-org:10_20241212_20241212",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "Gregory Maguire (Wicked: The Life and Times of the Wicked Witch of the West, the archive.org audiobook in your library).",
+  "goodGuess": null,
+  "notes": "No book or article in the packs is expected to beat the audiobook card here, but citing one that says Gregory Maguire is still grounded; only the media-cited metric needs the card."
+ },
+ {
+  "id": "media-008",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What is the Wicked audiobook about?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "audiobook:archive-org:10_20241212_20241212",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "The life and times of the Wicked Witch of the West, in the world of Oz; the description says it is narrated by John McDonough.",
+  "goodGuess": null,
+  "notes": "From the audiobook's archive.org description and title."
+ },
+ {
+  "id": "media-009",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Which album has Another Brick in the Wall?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:pink floyd|the wall",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "The Wall (Pink Floyd), which has Another Brick in the Wall, Parts 1, 2 and 3.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "media-010",
+  "group": "media",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What Jerry Goldsmith music do I have?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "album:jerry goldsmith|the secret of nimh (original mgm motion picture soundtrack)",
+    "location": "",
+    "quote": ""
+   }
+  ],
+  "reference": "The Secret Of NIMH (Original MGM Motion Picture Soundtrack), 25 tracks.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "media-control-001",
+  "group": "media-control",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "How far is Mars from the Sun?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": "On average about 228 million km (1.52 AU), varying between about 207 and 249 million km.",
+  "goodGuess": null,
+  "notes": "must not cite media. Trap: Holst's \"Mars, The Bringer of War\" is a track of the folder-named Planets album."
+ },
+ {
+  "id": "media-control-002",
+  "group": "media-control",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Why do we always see the same side of the Moon?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": "The Moon is tidally locked to Earth: it turns once on its axis in the time it takes to orbit Earth.",
+  "goodGuess": null,
+  "notes": "must not cite media. Trap: Pink Floyd's The Dark Side of the Moon."
+ },
+ {
+  "id": "media-control-003",
+  "group": "media-control",
+  "split": "media",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Who was Venus in Roman religion?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": "The Roman goddess of love, beauty, desire and fertility, identified with the Greek Aphrodite.",
+  "goodGuess": null,
+  "notes": "must not cite media. Trap: the album The Planets Op. 32, H. 125: II. Venus, The Bringer of Peace."
+ }
+]
