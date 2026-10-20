@@ -7,7 +7,8 @@ import java.util.Locale
 object MediaCues {
     private val CUES = setOf(
         "music", "album", "albums", "song", "songs", "track", "tracks", "listen", "listening", "recording", "recordings",
-        "record", "records", "soundtrack", "score", "symphony", "composer", "composed", "band", "singer",
+        // Not "score": "the score of the dodgers game" lifted a film score's card (m3-tune-1, unanswerable-031 and -033).
+        "record", "records", "soundtrack", "symphony", "composer", "composed", "band", "singer",
         "audiobook", "audiobooks", "narrator", "narrated",
     )
     private val WORD = Regex("[\\p{L}\\p{N}]+")
