@@ -18,6 +18,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **Done:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10; parity `media-parity-checklist.md`: ✅ 39, ⏭ 4, ❌ 8) |
 | M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | **Done:** `2026-10-19-plan-m2-media-sources.md` (2026-10-19; 1236 JVM tests; Pixel 6 walkthrough in `media-parity-checklist.md`) |
 | M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | **Done:** `2026-10-19-plan-m3-media-search-research-auto.md` (2026-10-20; 1512 JVM tests; eval and walkthrough below and in `media-parity-checklist.md`: ✅ 43, ⏭ 0, ❌ 8). **The Media project is done.** |
+| P1 | Polish | Wiki Back within the tab, the new wiki top bar, one rail list with pins, the toolbar on the left or right; library v9. The logo and full screen are held back (see "Carried forward from P1") | **Done (partly):** `2026-10-20-plan-p1-polish.md` (2026-10-20; 1593 JVM tests; Pixel 6 walkthrough all PASS) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
@@ -460,3 +461,32 @@ Device checks still to do:
 - Deleting a phone file in the Files app, then restoring it (skipped in M1, M2 and M3).
 - The Play policy check for LibriVox and archive.org audio (Plan 11).
 
+
+## Carried forward from P1
+
+Built and measured (2026-10-20, on the Mac Studio):
+- **1593 JVM tests pass** (`./gradlew testDebugUnitTest` plus `./gradlew :core:research:test`). No new device tests.
+- Library schema v9: `rail_pins`, and `reading_tabs.backStack` (`MIGRATION_8_9`). On the Pixel 6 the real library went from v8 to v9 on first open; both databases were backed up first.
+- Built: Task 2 (library v9), Task 3 (wiki Back within the tab), Task 4 (the wiki top bar), Task 5 (one rail list with pins), Task 6 (the toolbar on the left or right).
+
+Pixel 6 walkthrough (2026-10-20), installed over the app (`firstInstallTime` still 2026-10-16). Neal did every step; **all PASS**:
+- Back with ← and system Back steps back one article at a time, then leaves the reader. This also holds after a rail switch, after a link to a section of the same article, and after the app is swiped away.
+- The wiki top bar: ←, Home, "Search Wikipedia…", ☆, ⋯ (Random article, Find in page), with no page title; it fits beside the rail.
+- The rail: one list newest first, pin with the flame dot and the "Pinned" label, the pin survives a dozen newer items, Unpin and Remove for each kind (a removed article stays in History).
+- The toolbar on the right: it moves at once, the right-edge swipe opens it, the left edge is still Back, landscape, both readers, and it is kept after a restart.
+
+Builder's calls and deviations (see the plan and its task reports):
+- Home sits in the wiki bar itself, not under ⋯. The search box shows while a page loads, so the bar keeps its shape.
+- A 7th pin shows a notice ("6 items are pinned already. Unpin one first.") rather than asking which to unpin.
+- Remove works for every kind of item. A removed chat or play is hidden (`SharedRailHidden`, SharedPreferences) until it is used again.
+- A pinned play is dropped only when its play record is gone, not when its album is; tapping one whose album is gone shows the "can't be played" notice.
+- Start/End insets stand for left/right because the app has no `supportsRtl`. Revisit this if RTL is ever added.
+
+Held back:
+- **Logo (Task 1):** a draft is on the unmerged branch `p1-brand`: the traced Vitruvian Man in the Neural Flame, the launcher glyph, monochrome, About mark, the 512 px Play icon and `tools/brand/`. Neal is continuing the design in Claude Design. The 6.1 MB Commons scan is not in git (it is ignored; `build_mark.py fetch` downloads it again). Claude's review of the draft: the glyph works at 48 px, but a figure with spread legs in a circle can read as a peace sign. The full mark's trace is scratchy next to the clean lines, the fire sits between the legs rather than under the figure, and the open circle reads as a light bulb. At About's 56 dp it is too busy.
+- **Full screen (Task 7):** on hold; Neal is thinking it over. The plan keeps the overlay proposal as a draft. Toggling full screen still reflows the page.
+
+Still open:
+- Build setup: Java and the Android SDK aren't on the agent shells' PATH. Use `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` and `ANDROID_HOME=/opt/homebrew/share/android-commandlinetools`. A new worktree needs `local.properties` copied in and `git submodule update --init --recursive`.
+- Robolectric's WebView doesn't fire page callbacks. The step that clears the WebView's history after loading from the stored stack is covered only by the device walkthrough.
+- The rail's scroll position resets when the side is switched (expected).

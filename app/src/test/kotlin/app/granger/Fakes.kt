@@ -14,6 +14,11 @@ import app.granger.core.library.Bookmark
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.HistoryEntry
 import app.granger.core.library.Library
+import app.granger.core.library.MAX_BACK_STACK
+import app.granger.core.library.MAX_RAIL_PINS
+import app.granger.core.library.PinResult
+import app.granger.core.library.RailPin
+import app.granger.core.library.RailPins
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
@@ -26,6 +31,9 @@ import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimItem
 import app.granger.core.zim.ZimMetadata
 import app.granger.ebook.BookOpener
+import app.granger.settings.AppearancePrefs
+import app.granger.settings.RailSide
+import app.granger.shell.RailHidden
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.publication.Metadata
@@ -39,6 +47,7 @@ import org.readium.r2.shared.util.resource.Resource
 import org.readium.r2.shared.util.mediatype.MediaType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -148,12 +157,33 @@ class FakeReadingSessions : ReadingSessions {
             return existing.id
         }
         val id = (tabs.value.maxOfOrNull { it.id } ?: 0L) + 1
-        tabs.update { it + ReadingTab(id, packId, path, title, time, onRail = true) }
+        tabs.update { it + ReadingTab(id, packId, path, title, time, onRail = true, backStack = path) }
         return id
     }
 
     override suspend fun showInTab(tabId: Long, packId: String, path: String, title: String) {
         tabs.update { list -> list.map { if (it.id == tabId) it.copy(packId = packId, path = path, title = title) else it } }
+    }
+
+    /** As the Room version: the stack is `\n`-joined, oldest first, with the shown page not repeated. */
+    override suspend fun pushPath(tabId: Long, path: String, title: String) {
+        tabs.update { list ->
+            list.map { tab ->
+                if (tab.id != tabId) return@map tab
+                val stack = tab.backStack.split('\n').filter { it.isNotEmpty() }
+                val pushed = if (stack.lastOrNull() == path) stack else (stack + path).takeLast(MAX_BACK_STACK)
+                tab.copy(path = path, title = title, backStack = pushed.joinToString("\n"))
+            }
+        }
+    }
+
+    override suspend fun popPath(tabId: Long): String? {
+        val tab = tab(tabId) ?: return null
+        val stack = tab.backStack.split('\n').filter { it.isNotEmpty() }
+        if (stack.size < 2) return null
+        val left = stack.dropLast(1)
+        tabs.update { list -> list.map { if (it.id == tabId) it.copy(backStack = left.joinToString("\n")) else it } }
+        return left.last()
     }
 
     override suspend fun closeTab(tabId: Long) {
@@ -168,6 +198,12 @@ class FakeReadingSessions : ReadingSessions {
     override suspend fun recordSearch(query: String) {
         val trimmed = query.trim()
         if (trimmed.isNotEmpty()) searches.update { listOf(trimmed) + (it - trimmed) }
+    }
+
+    override suspend fun forgetSearch(query: String) {
+        val trimmed = query.trim()
+        searches.update { it - trimmed }
+        searchRows.update { rows -> rows.filterNot { it.query == trimmed } }
     }
 }
 
@@ -277,4 +313,42 @@ class FakeBookOpener(var publication: Publication? = testPublication()) : BookOp
         opened += file
         return publication
     }
+}
+
+/** [RailPins] in memory, with the Room version's rules; [clock] stamps each pin. */
+class FakeRailPins : RailPins {
+    val pinList = MutableStateFlow<List<RailPin>>(emptyList())
+    val dropped = mutableListOf<String>()
+    private var clock = 1_000L
+
+    override val pins: Flow<List<RailPin>> = pinList.map { list -> list.sortedByDescending { it.pinnedAt } }
+
+    override suspend fun pin(key: String): PinResult = when {
+        pinList.value.any { it.key == key } -> PinResult.ALREADY_PINNED
+        pinList.value.size >= MAX_RAIL_PINS -> PinResult.FULL
+        else -> {
+            pinList.update { it + RailPin(key, ++clock) }
+            PinResult.PINNED
+        }
+    }
+
+    override suspend fun unpin(key: String) = pinList.update { list -> list.filterNot { it.key == key } }
+
+    override suspend fun dropMissing(keys: Collection<String>) {
+        dropped += keys
+        pinList.update { list -> list.filterNot { it.key in keys } }
+    }
+}
+
+/** [RailHidden] in memory. */
+class FakeRailHidden : RailHidden {
+    override val hidden = MutableStateFlow<Map<String, Long>>(emptyMap())
+    override fun hide(key: String, at: Long) = hidden.update { it + (key to at) }
+}
+
+/** [AppearancePrefs] in memory. */
+class FakeAppearancePrefs(side: RailSide = RailSide.LEFT) : AppearancePrefs {
+    private val state = MutableStateFlow(side)
+    override val railSide: StateFlow<RailSide> = state
+    override fun setRailSide(side: RailSide) { state.value = side }
 }

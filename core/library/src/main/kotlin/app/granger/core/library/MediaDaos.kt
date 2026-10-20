@@ -184,6 +184,9 @@ interface PlaybackDao {
     @Query("SELECT * FROM recent_plays ORDER BY playedAt DESC, `key` LIMIT :limit")
     fun observeRecentPlays(limit: Int): Flow<List<RecentPlay>>
 
+    @Query("SELECT * FROM recent_plays WHERE `key` = :key")
+    suspend fun recentPlay(key: String): RecentPlay?
+
     /** A folder already added keeps its first [MediaFolder.addedAt]. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFolder(folder: MediaFolder)

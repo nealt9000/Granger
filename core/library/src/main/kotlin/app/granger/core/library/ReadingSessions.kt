@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.map
 /** How many tabs the side rail shows. */
 const val RAIL_LIMIT = 8
 
+/** How many pages a tab's [ReadingTab.backStack] keeps; the oldest drop off. */
+const val MAX_BACK_STACK = 50
+
 /** Open reading tabs (the rail's Bookmarks section), history and recent searches. */
 interface ReadingSessions {
     /** On-rail tabs, newest first. Tabs beyond [limit] drop off the rail view but stay stored. */
@@ -27,6 +30,15 @@ interface ReadingSessions {
     /** Navigation within a tab (following a link): updates that tab instead of adding a rail spot. */
     suspend fun showInTab(tabId: Long, packId: String, path: String, title: String)
 
+    /**
+     * The tab now shows [path] in its own pack: [showInTab], and [path] goes on the tab's back stack. Showing the
+     * page already on top (a reload, or the page Back went to) doesn't add it again.
+     */
+    suspend fun pushPath(tabId: Long, path: String, title: String)
+
+    /** Takes the current page off the tab's back stack and returns the one before it, or null at the first page. */
+    suspend fun popPath(tabId: Long): String?
+
     /** Takes the tab off the rail for good; history keeps the article. */
     suspend fun closeTab(tabId: Long)
 
@@ -37,6 +49,9 @@ interface ReadingSessions {
 
     /** Trims [query]; blanks are ignored. Keeps the newest 50. */
     suspend fun recordSearch(query: String)
+
+    /** Deletes the recent search for [query] (trimmed). */
+    suspend fun forgetSearch(query: String)
 }
 
 class RoomReadingSessions(
@@ -62,7 +77,7 @@ class RoomReadingSessions(
             dao.updateTab(existing.copy(title = title, openedAt = time))
             existing.id
         } else {
-            dao.insertTab(ReadingTab(0, packId, path, title, time, onRail = true))
+            dao.insertTab(ReadingTab(0, packId, path, title, time, onRail = true, backStack = stackOf(listOf(path))))
         }
     }
 
@@ -73,6 +88,26 @@ class RoomReadingSessions(
             dao.updateTab(tab.copy(packId = packId, path = path, title = title, openedAt = time))
             dao.upsertHistory(HistoryEntry(packId, path, title, time))
         }
+    }
+
+    override suspend fun pushPath(tabId: Long, path: String, title: String) {
+        db.withTransaction {
+            val time = now()
+            val tab = dao.tab(tabId) ?: return@withTransaction
+            val stack = pathsOf(tab.backStack)
+            val pushed = if (stack.lastOrNull() == path) stack else (stack + path).takeLast(MAX_BACK_STACK)
+            dao.updateTab(tab.copy(path = path, title = title, openedAt = time, backStack = stackOf(pushed)))
+            dao.upsertHistory(HistoryEntry(tab.packId, path, title, time))
+        }
+    }
+
+    override suspend fun popPath(tabId: Long): String? = db.withTransaction {
+        val tab = dao.tab(tabId) ?: return@withTransaction null
+        val stack = pathsOf(tab.backStack)
+        if (stack.size < 2) return@withTransaction null
+        val left = stack.dropLast(1)
+        dao.updateTab(tab.copy(backStack = stackOf(left)))
+        left.last()
     }
 
     override suspend fun closeTab(tabId: Long) {
@@ -93,7 +128,14 @@ class RoomReadingSessions(
         }
     }
 
+    override suspend fun forgetSearch(query: String) = dao.deleteRecentSearch(query.trim())
+
     private companion object {
         const val MAX_RECENT_SEARCHES = 50
+
+        fun pathsOf(stack: String): List<String> = if (stack.isEmpty()) emptyList() else stack.split('\n')
+
+        /** A path with a line break (never seen in a ZIM) can't be kept in the joined stack, so it's left out. */
+        fun stackOf(paths: List<String>): String = paths.filterNot { '\n' in it }.joinToString("\n")
     }
 }

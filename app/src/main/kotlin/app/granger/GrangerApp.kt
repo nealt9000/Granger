@@ -33,6 +33,8 @@ import app.granger.core.library.BookOrigin
 import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
 import app.granger.archive.SharedArchivePrefs
+import app.granger.settings.AppearancePrefs
+import app.granger.settings.SharedAppearancePrefs
 import app.granger.archive.ArchiveUserAgent
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.ArchiveQuery
@@ -56,6 +58,10 @@ import app.granger.core.library.RoomMediaLibrary
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.RoomReadingSessions
 import app.granger.core.library.RoomResearchChats
+import app.granger.core.library.RailPins
+import app.granger.core.library.RoomRailPins
+import app.granger.shell.RailHidden
+import app.granger.shell.SharedRailHidden
 import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
@@ -314,6 +320,7 @@ class AppContainer(context: Context) {
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
+    val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
     val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")
@@ -371,6 +378,12 @@ class AppContainer(context: Context) {
     }
 
     val researchChats: ResearchChats = RoomResearchChats(libraryDb)
+
+    /** Items pinned to the top of the rail's list. */
+    val railPins: RailPins = RoomRailPins(libraryDb)
+
+    /** Chats and plays taken off the rail until they're used again. */
+    val railHidden: RailHidden = SharedRailHidden(context)
 
     /** Set by the first activity start in this process: turns left PENDING by a dead process are settled once. */
     val chatsSettledThisProcess = AtomicBoolean(false)
