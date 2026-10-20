@@ -117,12 +117,11 @@ class SearchViewModel(
                     return@collectLatest
                 }
                 _state.update { it.copy(searching = true, expanded = emptySet(), capped = emptySet()) }
-                fun cap(group: SearchGroup, count: Int) {
-                    if (count >= group.fetch) _state.update { it.copy(capped = it.capped + group) }
-                }
+                // Each group's results land with its cap, so its Show all label is right from the first frame.
                 val titles = search.titles(q)
-                _state.update { it.copy(titles = titles) }
-                cap(SearchGroup.TITLES, titles.size)
+                _state.update {
+                    it.copy(titles = titles.hits, capped = it.capped.cap(SearchGroup.TITLES, titles.hits.size, titles.more))
+                }
                 // The media index is in memory and quick; a failure there must not cost the article and book results.
                 val found = try {
                     media.search(q)
@@ -131,19 +130,22 @@ class SearchViewModel(
                 } catch (e: Exception) {
                     MediaResults()
                 }
-                _state.update { it.copy(media = found) }
-                cap(SearchGroup.ARTISTS, found.artists.size)
-                cap(SearchGroup.ALBUMS, found.albums.size)
-                cap(SearchGroup.SONGS, found.songs.size)
-                cap(SearchGroup.AUDIOBOOKS, found.audiobooks.size)
-                val shown = titles.map { it.packId to it.path }.toSet()
+                _state.update {
+                    val capped = it.capped.cap(SearchGroup.ARTISTS, found.artists.size).cap(SearchGroup.ALBUMS, found.albums.size)
+                        .cap(SearchGroup.SONGS, found.songs.size).cap(SearchGroup.AUDIOBOOKS, found.audiobooks.size)
+                    it.copy(media = found, capped = capped)
+                }
+                val shown = titles.hits.map { it.packId to it.path }.toSet()
                 // Counted before the titles are taken out: the search stopped at its limit either way.
                 val allText = search.fullText(q)
-                _state.update { it.copy(fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown }) }
-                cap(SearchGroup.FULL_TEXT, allText.size)
+                _state.update {
+                    it.copy(
+                        fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown },
+                        capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),
+                    )
+                }
                 val books = search.books(q)
-                _state.update { it.copy(books = books, searching = false) }
-                cap(SearchGroup.BOOKS, books.size)
+                _state.update { it.copy(books = books, searching = false, capped = it.capped.cap(SearchGroup.BOOKS, books.size)) }
             }
         }
     }
@@ -175,6 +177,10 @@ class SearchViewModel(
         sessions.recordSearch(query.value)
         return sessions.openTab(hit.bookId, "", hit.bookTitle) to BookTarget(hit.href, hit.progression, hit.quote)
     }
+
+    /** These groups, with [group] added when its [count] reaches its fetch or its search said it had [more]. */
+    private fun Set<SearchGroup>.cap(group: SearchGroup, count: Int, more: Boolean = false) =
+        if (more || count >= group.fetch) this + group else this
 
     companion object {
         const val DEBOUNCE_MS = 250L

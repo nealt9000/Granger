@@ -53,16 +53,44 @@ class ZimLibrarySearchTest {
     }
 
     @Test fun titlesComeFromEveryPackWithPackNames() = test {
-        val hits = search.titles("as")
+        val hits = search.titles("as").hits
         assertThat(hits.map { it.title }).containsExactly("Aspirin", "Asthma", "As You Like It")
         assertThat(hits.first { it.path == "As_You_Like_It" }.packTitle).isEqualTo("Classics")
         assertThat(hits.first { it.path == "Aspirin" }.packId).isEqualTo("u-med")
     }
 
-    @Test fun titlesStopAtTheLimitOverEveryPack() = test {
-        val capped = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 2, titleLimit = 2)
-        // Pack order holds, so the cap is taken from the end.
-        assertThat(capped.titles("as")).hasSize(2)
+    private fun big(id: String, count: Int) =
+        FakeZimArchive(id, id, suggestions = (1..count).map { ZimHit("${id}_$it", "$id $it") })
+
+    @Test fun titlesTakeTurnsAcrossPacks() = test {
+        val hits = ZimLibrarySearch(library, io = dispatcher).titles("as").hits
+        // Each pack's best comes first, whichever pack the library lists first; each pack keeps its own order.
+        assertThat(hits.take(2).map { it.packId }).containsExactly("u-med", "u-cls")
+        assertThat(hits.filter { it.packId == "u-med" }.map { it.title }).containsExactly("Aspirin", "Asthma", "Ash").inOrder()
+    }
+
+    @Test fun aBigPackDoesNotHideTheOthers() = test {
+        install("big.zim", big("u-big", 200))
+        install("big2.zim", big("u-big2", 200))
+        install("big3.zim", big("u-big3", 200))
+        library.refresh()
+        val found = ZimLibrarySearch(library, io = dispatcher).titles("as")
+        assertThat(found.hits.take(8).map { it.packId }.toSet()).containsExactly("u-med", "u-cls", "u-big", "u-big2", "u-big3")
+        assertThat(found.hits.map { it.title }).containsAtLeast("Aspirin", "Asthma", "Ash", "As You Like It")
+        assertThat(found.hits).hasSize(ZimLibrarySearch.TITLE_LIMIT)
+        assertThat(found.more).isTrue()
+    }
+
+    @Test fun titlesSayWhenAPackMayHaveMore() = test {
+        // One pack filling its share may hold more, even when the total is under the limit.
+        install("big.zim", big("u-big", 200))
+        library.refresh()
+        val found = ZimLibrarySearch(library, io = dispatcher).titles("as")
+        assertThat(found.hits.size).isLessThan(ZimLibrarySearch.TITLE_LIMIT)
+        assertThat(found.more).isTrue()
+        File(dir, "big.zim").delete()
+        library.refresh()
+        assertThat(ZimLibrarySearch(library, io = dispatcher).titles("as").more).isFalse()
     }
 
     @Test fun fullTextIsMergedByScoreAndLimited() = test {
@@ -83,18 +111,18 @@ class ZimLibrarySearchTest {
             ),
         ))
         library.refresh()
-        val hits = search.titles("georgia").filter { it.packId == "u-mus" }
+        val hits = search.titles("georgia").hits.filter { it.packId == "u-mus" }
         assertThat(hits.map { it.path }).containsExactly("Georgia_on_My_Mind")
     }
 
     @Test fun blankQueriesSearchNothing() = test {
-        assertThat(search.titles("  ")).isEmpty()
+        assertThat(search.titles("  ").hits).isEmpty()
         assertThat(search.fullText("")).isEmpty()
     }
 
     @Test fun oneFailingPackDoesNotHideOthers() = test {
         med.failSearch = true
-        assertThat(search.titles("as").map { it.packId }).containsExactly("u-cls")
+        assertThat(search.titles("as").hits.map { it.packId }).containsExactly("u-cls")
         assertThat(search.fullText("x").map { it.packId }).containsExactly("u-cls", "u-cls")
     }
 
@@ -109,7 +137,7 @@ class ZimLibrarySearchTest {
         File(dir, "med.zim").delete()
         File(dir, "broken.zim").writeText("garbage")
         library.refresh()
-        assertThat(search.titles("as").map { it.packId }).containsExactly("u-cls")
+        assertThat(search.titles("as").hits.map { it.packId }).containsExactly("u-cls")
     }
 
     @Test fun booksDelegatesToIndex() = test {
