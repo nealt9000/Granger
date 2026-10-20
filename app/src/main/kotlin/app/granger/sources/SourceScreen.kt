@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
@@ -41,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,7 +53,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import app.granger.formatBytes
+
+private fun sectionKey(index: Int, section: Section) = "section-$index-${section.title}"
+private fun moreKey(index: Int, section: Section) = "more-$index-${section.title}"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +86,19 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
     }
 
     var confirmRemove by remember { mutableStateOf<ItemRow?>(null) }
+    val list = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    /** Show all or Show fewer; folding a section the list has scrolled into brings its heading back. */
+    fun toggle(index: Int, section: Section) {
+        val folding = section.rows.size == section.total
+        viewModel.toggleSection(section.title)
+        if (!folding) return
+        val heading = list.layoutInfo.visibleItemsInfo.firstOrNull { it.key == sectionKey(index, section) }
+        if (heading == null) {
+            val foot = list.layoutInfo.visibleItemsInfo.firstOrNull { it.key == moreKey(index, section) } ?: return
+            scope.launch { list.scrollToItem((foot.index - section.rows.size - 1).coerceAtLeast(0)) }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -96,7 +116,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).fillMaxSize()) {
+        LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
             item(key = "search") {
                 OutlinedTextField(
                     value = viewModel.searchText,
@@ -152,7 +172,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
             }
             for ((index, section) in ui.sections.withIndex()) {
                 // Indexed: a pack category and a book category can share a name.
-                item(key = "section-$index-${section.title}") {
+                item(key = sectionKey(index, section)) {
                     Text(
                         section.title,
                         style = MaterialTheme.typography.titleSmall,
@@ -172,6 +192,16 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
                         onRemove = { confirmRemove = row },
                     )
                     HorizontalDivider()
+                }
+                if (section.foldable) {
+                    item(key = moreKey(index, section)) {
+                        val text = if (section.rows.size < section.total) "Show all ${section.total} packs" else "Show fewer packs"
+                        ListItem(
+                            modifier = Modifier.clickable { toggle(index, section) },
+                            headlineContent = { Text(text, color = MaterialTheme.colorScheme.primary) },
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         }

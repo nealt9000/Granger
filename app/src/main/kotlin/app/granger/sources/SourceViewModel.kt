@@ -63,7 +63,11 @@ data class ItemRow(
     val packId: String?,
 )
 
-data class Section(val title: String, val rows: List<ItemRow>)
+/**
+ * A heading and the rows shown under it. A [foldable] section shows its first [SourceViewModel.FOLDED_ROWS] rows until
+ * Show all; [total] counts all of them.
+ */
+data class Section(val title: String, val rows: List<ItemRow>, val total: Int = rows.size, val foldable: Boolean = false)
 
 data class PresetRow(val id: String, val title: String, val itemCount: Int, val remainingCount: Int, val remainingBytes: Long)
 
@@ -122,6 +126,7 @@ class SourceViewModel(
         val notice: String?,
         val tab: SourceTab,
         val query: String,
+        val expanded: Set<String>,
     )
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
@@ -130,6 +135,8 @@ class SourceViewModel(
     private val notice = MutableStateFlow<String?>(null)
     private val tab = MutableStateFlow(SourceTab.BROWSE)
     private val query = MutableStateFlow("")
+    /** Sections opened with Show all, by title; closed again by a new query. */
+    private val expanded = MutableStateFlow<Set<String>>(emptySet())
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -142,7 +149,8 @@ class SourceViewModel(
         combine(volumeList, selectedPath, wifiOnly, notice, ::Choices),
         tab,
         query,
-    ) { c, tab, query -> Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query) }
+        expanded,
+    ) { c, tab, query, expanded -> Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded) }
 
     val ui: StateFlow<SourceUi> =
         combine(catalog.state, downloads.records, library.packs, settings, ::buildUi)
@@ -227,6 +235,12 @@ class SourceViewModel(
     fun setQuery(value: String) {
         searchText = value
         query.value = value
+        expanded.value = emptySet()
+    }
+
+    /** Show all, or Show fewer, for the section titled [title]. */
+    fun toggleSection(title: String) {
+        expanded.value = expanded.value.let { if (title in it) it - title else it + title }
     }
 
     fun dismissNotice() {
@@ -259,6 +273,11 @@ class SourceViewModel(
     private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): SourceUi {
         val current = state.catalog
         val volumeRows = volumeRows(s.volumes, records)
+        // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
+        val recordsById = records.groupBy { it.itemId }
+        val statuses = HashMap<String, ItemStatus>()
+        fun status(item: CatalogItem): ItemStatus =
+            statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
                 is PackEntry -> listOf(
@@ -268,47 +287,56 @@ class SourceViewModel(
                 is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")
-            val packId = (item as? PackEntry)?.let { installedPackId(it, records, packs) }
+            val packId = (item as? PackEntry)?.let { installedPackId(it, recordsById[it.id].orEmpty(), packs) }
             val description = when (item) {
                 is PackEntry -> item.description
                 is BookEntry -> item.description
                 // Rerank is off (Plan 9 eval), so the embedder downloads but nothing uses it.
                 is ModelEntry -> if (item.role == ModelRole.EMBEDDER && !RERANK_WITH_EMBEDDER) "Not used yet" else ""
             }
-            return ItemRow(item.id, item.title, details, description, item.sizeBytes, statusOf(item, records, packs, tier), packId)
+            return ItemRow(item.id, item.title, details, description, item.sizeBytes, status(item), packId)
         }
         val needle = s.query.trim()
         fun shown(item: CatalogItem): Boolean {
             if (scopeOf(item) != scope) return false
-            val status = statusOf(item, records, packs, tier)
+            val status = status(item)
             val inTab = when (s.tab) {
                 SourceTab.BROWSE -> true
                 SourceTab.INSTALLED -> status == ItemStatus.Installed || status == ItemStatus.UpdateAvailable ||
-                    records.any { it.itemId == item.id && it.isActive }
+                    recordsById[item.id].orEmpty().any { it.isActive }
                 SourceTab.UPDATES -> status == ItemStatus.UpdateAvailable
             }
-            val description = when (item) {
-                is PackEntry -> item.description
-                is BookEntry -> item.description
-                else -> ""
+            val texts = when (item) {
+                // The ZIM name too, so "stackoverflow" finds Stack Overflow.
+                is PackEntry -> listOf(item.title, item.description, item.zimName)
+                is BookEntry -> listOf(item.title, item.description)
+                else -> listOf(item.title)
             }
-            return inTab && (needle.isEmpty() || item.title.contains(needle, ignoreCase = true) ||
-                description.contains(needle, ignoreCase = true))
+            return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
+        }
+        // The Kiwix screen lists the whole catalog, so its categories fold until Show all, except while searching.
+        val folds = scope == CatalogScope.KIWIX && needle.isEmpty()
+        fun section(title: String, entries: List<CatalogItem>): Section {
+            val open = !folds || title in s.expanded || entries.size <= FOLDED_ROWS
+            val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::row)
+            return Section(title, rows, entries.size, foldable = folds && entries.size > FOLDED_ROWS)
         }
         val sections = if (current == null) emptyList() else buildList {
             val models = current.models.filter(::shown)
             if (models.isNotEmpty()) add(Section("AI models", models.map(::row)))
-            current.packs.filter(::shown).groupBy { it.category }
+            val (featured, rest) = current.packs.filter(::shown).partition { scope == CatalogScope.KIWIX && it.featured }
+            if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
+            rest.groupBy { it.category }
                 .toList()
                 .sortedWith(compareBy({ categoryRank(it.first) }, { it.first }))
-                .forEach { (category, entries) -> add(Section(category, entries.map(::row))) }
+                .forEach { (category, entries) -> add(section(category, entries)) }
             // Books come after the packs, grouped by category in catalog order.
             current.books.filter(::shown).groupBy { it.category }
                 .forEach { (category, entries) -> add(Section(category, entries.map(::row))) }
         }
         val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
-            val todo = items.filter { wanted(statusOf(it, records, packs, tier)) }
+            val todo = items.filter { wanted(status(it)) }
             PresetRow(preset.id, preset.title, items.size, todo.size, todo.sumOf { it.sizeBytes })
         }
         return SourceUi(
@@ -339,13 +367,18 @@ class SourceViewModel(
         }
     }
 
-    private companion object {
-        const val CLASSICS_PRESET = "granger-classics"
+    companion object {
+        /** Rows a folded section shows before Show all. */
+        const val FOLDED_ROWS = 8
+        const val RECOMMENDED = "Recommended"
+        private const val CLASSICS_PRESET = "granger-classics"
 
-        val CATEGORY_ORDER = listOf(
-            "Medical", "Reference", "Religion & Philosophy", "Literature & Drama", "Science", "Repair", "Regional",
+        /** The family table's categories (tools/catalog-gen/kiwix_families.json); any other sorts after, by name. */
+        private val CATEGORY_ORDER = listOf(
+            "Medical", "Reference", "Religion & Philosophy", "Literature & Drama", "Science & Math", "How-to",
+            "Regional", "Q&A", "Maps", "Programming", "Games & Hobbies", "Other",
         )
 
-        fun categoryRank(category: String) = CATEGORY_ORDER.indexOf(category).let { if (it < 0) Int.MAX_VALUE else it }
+        private fun categoryRank(category: String) = CATEGORY_ORDER.indexOf(category).let { if (it < 0) Int.MAX_VALUE else it }
     }
 }
