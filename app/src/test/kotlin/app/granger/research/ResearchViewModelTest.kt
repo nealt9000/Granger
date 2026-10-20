@@ -17,6 +17,9 @@ import app.granger.core.ai.ModelManager
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.ai.TextEmbedderFactory
 import app.granger.core.books.TextQuote
+import app.granger.core.library.Audiobook
+import app.granger.core.library.MediaIndex
+import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.TurnOutcome
@@ -24,6 +27,8 @@ import app.granger.core.research.Passage
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
+import app.granger.music.FakeMediaLibrary
+import app.granger.music.song
 import app.granger.pack
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -48,6 +53,7 @@ class ResearchViewModelTest {
     private val sessions = FakeReadingSessions()
     private val library = FakeLibrary()
     private val bookshelf = FakeBookshelf()
+    private val mediaLibrary = FakeMediaLibrary()
     private val installed = MutableStateFlow(InstalledModels(small = File("small"), large = File("large")))
 
     private val quote = Passage(
@@ -64,8 +70,8 @@ class ResearchViewModelTest {
         sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
     ): ResearchViewModel {
         return ResearchViewModel(
-            chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf, backgroundScope,
-            savedState, cpu,
+            chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf,
+            MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
         )
     }
 
@@ -754,6 +760,52 @@ class ResearchViewModelTest {
         assertThat(selection.at).isNull()
         val placed = vm.open(passage.copy(kind = SourceKind.SELECTION)) as CitationTarget.Book
         assertThat(placed.at?.href).isEqualTo("ch1.xhtml")
+    }
+
+    @Test fun mediaAlbumCitationOpensTheAlbum() = runTest(main.dispatcher) {
+        val planets = song("mars", "Mars", album = "The Planets", albumArtists = "Gustav Holst")
+        mediaLibrary.trackList.value = listOf(planets)
+        val target = vm().open(media(1, planets.albumKey))
+        assertThat(target).isEqualTo(CitationTarget.Album(planets.albumKey))
+        assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    @Test fun mediaAudiobookCitationOpensTheBook() = runTest(main.dispatcher) {
+        val id = "audiobook:phone:jungle"
+        mediaLibrary.bookList.value = listOf(
+            Audiobook(id, MediaOrigin.PHONE, "jungle", "The Jungle Book", "Rudyard Kipling", "", "", null, 0L, PackStatus.OK, 0L),
+        )
+        val target = vm().open(mediaBook(id, "The Jungle Book", "Rudyard Kipling"))
+        assertThat(target).isEqualTo(CitationTarget.Audiobook(id))
+        assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    @Test fun removedMediaCitationIsGone() = runTest(main.dispatcher) {
+        val planets = song("mars", "Mars", album = "The Planets", albumArtists = "Gustav Holst", status = PackStatus.MISSING)
+        mediaLibrary.trackList.value = listOf(planets)
+        val id = "audiobook:phone:jungle"
+        mediaLibrary.bookList.value = listOf(
+            Audiobook(id, MediaOrigin.PHONE, "jungle", "The Jungle Book", "Rudyard Kipling", "", "", null, 0L, PackStatus.MISSING, 0L),
+        )
+        val vm = vm()
+        assertThat(vm.open(media(1, planets.albumKey))).isEqualTo(CitationTarget.Gone)
+        assertThat(vm.open(mediaBook(id))).isEqualTo(CitationTarget.Gone)
+        assertThat(vm.open(media(2, "never-there"))).isEqualTo(CitationTarget.Gone)
+    }
+
+    @Test fun mediaIsNeverTreatedAsAPack() = runTest(main.dispatcher) {
+        // A pack whose id is the media card's sourceId: the citation still isn't opened as an article.
+        library.packList.value = listOf(pack("album:key1"))
+        val vm = vm()
+        assertThat(vm.open(media(1))).isEqualTo(CitationTarget.Gone)
+        assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    @Test fun mediaSourceCardBylineSaysAlbumOrAudiobook() {
+        assertThat(sourceByline(media(1))).isEqualTo("Artist 1 · Album")
+        assertThat(sourceByline(mediaBook("audiobook:phone:x", author = "Rudyard Kipling"))).isEqualTo("Rudyard Kipling · Audiobook")
+        assertThat(sourceByline(mediaBook("audiobook:phone:x", author = ""))).isEqualTo("Your audiobooks · Audiobook")
+        assertThat(sourceByline(article(1))).isEqualTo("Pack 1")
     }
 
     @Test fun deletingTheChatRemovesIt() = runTest(main.dispatcher) {

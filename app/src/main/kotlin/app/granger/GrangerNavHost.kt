@@ -658,7 +658,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         ResearchViewModel(
                             route.chatId.takeIf { it != 0L }, route.quotePassage(),
                             container.researchChats, container.research, container.modelManager, container.sessions,
-                            container.library, container.bookshelf, container.appScope,
+                            container.library, container.bookshelf, container.mediaIndex, container.appScope,
                             savedState = createSavedStateHandle(),
                         )
                     },
@@ -669,13 +669,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                             val tabId = when (target) {
                                 is CitationTarget.Article -> target.tabId
                                 is CitationTarget.Book -> target.tabId
+                                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey))
+                                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId))
                                 CitationTarget.Gone -> return@launch
                             }
                             val tab = citationTab(container.sessions, tabId) ?: return@launch
                             when (target) {
                                 is CitationTarget.Article -> nav.showTab(tab, fragment = target.fragment)
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)
-                                CitationTarget.Gone -> Unit
+                                is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
                             }
                         }
                     },

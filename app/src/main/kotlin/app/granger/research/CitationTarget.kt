@@ -13,7 +13,13 @@ sealed interface CitationTarget {
     /** A book in its rail tab, at [at]; null opens the book where it was left. */
     data class Book(val tabId: Long, val at: BookTarget?) : CitationTarget
 
-    /** The pack or book is no longer in the library (removed, missing or damaged). */
+    /** A music album's page ([albumKey] without the "album:" prefix of a media card's sourceId). */
+    data class Album(val albumKey: String) : CitationTarget
+
+    /** An audiobook's page. */
+    data class Audiobook(val audiobookId: String) : CitationTarget
+
+    /** The pack, book, album or audiobook is no longer in the library (removed, missing or damaged). */
     data object Gone : CitationTarget
 }
 

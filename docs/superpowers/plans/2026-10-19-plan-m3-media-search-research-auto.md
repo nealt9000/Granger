@@ -335,7 +335,7 @@ git commit -m "Media M3: media catalogue cards in Research, capped so they don't
 ### Task 4: Media citations open their pages
 
 **Files:**
-- Modify: `app/src/main/kotlin/app/granger/research/CitationTarget.kt` (`Album`, `Audiobook`), `ResearchViewModel.kt` (`target()` for MEDIA; constructor gets `MediaLibrary`), `ResearchScreen.kt` (source card byline for MEDIA)
+- Modify: `app/src/main/kotlin/app/granger/research/CitationTarget.kt` (`Album`, `Audiobook`), `ResearchViewModel.kt` (`target()` for MEDIA; constructor gets `MediaIndex`, whose `work(id)` is null for a gone or MISSING item), `ResearchScreen.kt` (source card byline for MEDIA)
 - Modify: `app/src/main/kotlin/app/granger/GrangerNavHost.kt` (`onOpenCitation` navigates to `AlbumRoute` / `AudiobookRoute`)
 - Test: `app/src/test/kotlin/app/granger/research/ResearchViewModelTest.kt`, `ResearchFakes.kt` (a `media(n)` passage helper)
 

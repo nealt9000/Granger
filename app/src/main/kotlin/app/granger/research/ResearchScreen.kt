@@ -491,7 +491,7 @@ private fun QuoteCard(passage: Passage, modifier: Modifier = Modifier) {
 @Composable
 private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> Unit) {
     val shape = RoundedCornerShape(8.dp)
-    val byline = listOf(passage.meta.author.ifBlank { passage.packTitle }, passage.heading).filter { it.isNotBlank() }
+    val byline = sourceByline(passage)
     Column(
         Modifier
             .padding(horizontal = 16.dp)
@@ -510,7 +510,7 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
         )
         if (byline.isNotEmpty()) {
             Text(
-                byline.joinToString(" · "),
+                byline,
                 style = MaterialTheme.typography.labelMedium,
                 color = GrangerColors.Outline,
                 maxLines = 1,
