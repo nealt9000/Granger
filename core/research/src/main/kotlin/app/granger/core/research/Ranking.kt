@@ -65,6 +65,18 @@ object Ranking {
         return passages.filter { it.kind != SourceKind.MEDIA || ++media <= cap }
     }
 
+    /**
+     * When the question asks about media ([asked]), the best media passage of [found] (preselect's order: the finder's
+     * lexical best) goes first in [ranked], whether or not ranking kept it. Otherwise a card for the very album or book
+     * the question names loses to the encyclopedia article about it (m3-media-1: media cited on 3 of 10).
+     * Otherwise [ranked] is returned as it is.
+     */
+    fun liftMedia(ranked: List<Passage>, found: List<Passage>, asked: Boolean): List<Passage> {
+        if (!asked) return ranked
+        val best = found.firstOrNull { it.kind == SourceKind.MEDIA } ?: return ranked
+        return listOf(best) + ranked.filter { it != best }
+    }
+
     /** [vectors] lines up with [candidates]. At most [limit] are kept. */
     fun byEmbedding(
         candidates: List<Passage>,

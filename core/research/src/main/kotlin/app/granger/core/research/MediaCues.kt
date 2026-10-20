@@ -13,10 +13,13 @@ object MediaCues {
     private val WORD = Regex("[\\p{L}\\p{N}]+")
     private val MARKS = Regex("\\p{M}+")
 
-    /** A cue word as a whole word (accents and case folded), or the phrase "read by". */
+    /** Phrases that ask what's on the phone: "Do I have any Holst?" names no media word. */
+    private val PHRASES = listOf(listOf("read", "by"), listOf("do", "i", "have"), listOf("have", "i", "got"))
+
+    /** A cue word as a whole word (accents and case folded), or one of the [PHRASES]. */
     fun asked(question: String): Boolean {
         val folded = MARKS.replace(Normalizer.normalize(question, Normalizer.Form.NFKD), "").lowercase(Locale.ROOT)
         val words = WORD.findAll(folded).map { it.value }.toList()
-        return words.any { it in CUES } || words.zipWithNext().any { (a, b) -> a == "read" && b == "by" }
+        return words.any { it in CUES } || PHRASES.any { p -> words.windowed(p.size).any { it == p } }
     }
 }

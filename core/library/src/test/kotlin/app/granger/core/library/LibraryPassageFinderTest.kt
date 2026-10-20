@@ -107,7 +107,21 @@ class LibraryPassageFinderTest {
         // One keyword's words must all be there; another keyword that doesn't match doesn't stop it.
         assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("gustav holst", "steam engine")).map { it.kind })
             .containsExactly(SourceKind.MEDIA)
-        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("hol", "holst steam"))).isEmpty()
+        // Whole words only: "hol" is no prefix match.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("hol"))).isEmpty()
+    }
+
+    @Test fun aKeywordThatMatchesNoWorkIsTriedWordByWord() = test {
+        media.trackList.value = planets() + musicTrack("m1", album = "The Dark Side of the Moon", albumArtist = "Pink Floyd", title = "Money")
+        val index = mediaIndex()
+        // "from" is a stopword; "money" finds the song's album.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("money from")).map { it.sourceTitle })
+            .containsExactly("The Dark Side of the Moon")
+        // "pink floyd money" matches as a whole; "holst steam" doesn't, so its words are tried and "holst" finds The Planets.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("pink floyd money", "holst steam")).map { it.sourceTitle })
+            .containsExactly("The Dark Side of the Moon", "The Planets")
+        // One word is never split further, and a stopword alone finds nothing.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("steamboat", "from with"))).isEmpty()
     }
 
     @Test fun noMediaIndexMeansNoMediaPassages() = test {

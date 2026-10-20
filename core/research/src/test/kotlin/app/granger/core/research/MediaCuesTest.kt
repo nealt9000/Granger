@@ -10,6 +10,8 @@ class MediaCuesTest {
         assertThat(MediaCues.asked("Which version of The Jungle Book is read by a woman?")).isTrue()
         assertThat(MediaCues.asked("Who wrote the SYMPHONY?")).isTrue()
         assertThat(MediaCues.asked("Which AUDIOBOOKS do I have?")).isTrue()
+        assertThat(MediaCues.asked("Do I have any Holst?")).isTrue()
+        assertThat(MediaCues.asked("Have I got anything by Pink Floyd?")).isTrue()
     }
 
     @Test fun ordinaryQuestionsAreNot() {
@@ -17,6 +19,7 @@ class MediaCuesTest {
         assertThat(MediaCues.asked("Who invented the recorder?")).isFalse()
         assertThat(MediaCues.asked("Who was the first to read it by candlelight?")).isFalse()
         assertThat(MediaCues.asked("What is a bandwidth?")).isFalse()
+        assertThat(MediaCues.asked("I have a cold; do colds last long?")).isFalse()
         assertThat(MediaCues.asked("")).isFalse()
     }
 }

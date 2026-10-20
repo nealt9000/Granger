@@ -49,13 +49,20 @@ class LibraryPassageFinder(
 
     /**
      * Albums and audiobooks that hold every word of some keyword as whole words (the cards' rule), best by the
-     * keywords' lexical score, at most [mediaCards].
+     * keywords' lexical score, at most [mediaCards]. A keyword of several words that matches nothing is tried word by
+     * word, stopwords left out: the rewrite's "money from" still finds the song *Money*.
      */
     private suspend fun mediaCards(words: List<String>): List<Passage> {
         val index = media ?: return emptyList()
         if (mediaCards <= 0) return emptyList()
         return try {
-            val works = words.flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }.distinctBy { it.id }
+            val works = words.flatMap { keyword ->
+                index.works(listOf(keyword), MEDIA_PER_KEYWORD).ifEmpty {
+                    val parts = Keywords.words(keyword)
+                    if (parts.size < 2) emptyList()
+                    else parts.filterNot(Keywords::isStopword).flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }
+                }
+            }.distinctBy { it.id }
             val score = LexicalScore.scorer(words)
             // Stable: equal scores keep the index's order.
             works.map(MediaCards::passage).map { it to score(it) }.sortedByDescending { it.second }.take(mediaCards).map { it.first }

@@ -342,6 +342,21 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun mediaQuestionPutsTheMediaCardFirstEvenWhenRankingDropsIt() = runTest {
+        fun book(n: Int) = passage("S$n", "Water boils, entry $n.", "Water $n")
+        // No keyword word in the card: lexical ranking drops it.
+        val card = Passage(SourceKind.MEDIA, "album:a", "Handel", packTitle = "Your music", text = "Album: Handel")
+        val found = (1..10).map { book(it) } + card
+        suspend fun passages(question: String): List<Passage> {
+            val events = ResearchPipeline(FakeFinder(found), FakeModels(FakeGenerator(), embedder = null))
+                .run(ResearchRequest(question)).toList()
+            return (outcome(events) as Outcome.Answered).passages
+        }
+        assertThat(passages("Which album has water boils on it?").first()).isEqualTo(card)
+        assertThat(passages("At what temperature does water boil?")).doesNotContain(card)
+    }
+
+    @Test
     fun followUpRewriteSeesPreviousQuestion() = runTest {
         val gen = FakeGenerator()
         ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder))

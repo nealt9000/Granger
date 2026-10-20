@@ -148,6 +148,7 @@ class ResearchPipeline(
         val medical: Boolean
         val keywords: List<String>
         val ranked: List<Passage>
+        val asked = MediaCues.asked(request.question)
         if (request.deeperFrom != null) {
             medical = request.medicalHint
             if (medical) emit(ResearchEvent.Medical)
@@ -176,7 +177,7 @@ class ResearchPipeline(
             val found = Ranking.preselect(all, keywords, config)
             emit(ResearchEvent.Progress(Stage.RANKING))
             ranked = try {
-                rank(request.question, found, keywords)
+                Ranking.liftMedia(rank(request.question, found, keywords), found, asked)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -188,7 +189,7 @@ class ResearchPipeline(
 
         val quote = request.quote
         // The media cap is applied before the cut, so a dropped media passage gives its place to the next one.
-        val capped = Ranking.capMedia(ranked, MediaCues.asked(request.question), config)
+        val capped = Ranking.capMedia(ranked, asked, config)
         if (quote == null && capped.isEmpty()) {
             emit(ResearchEvent.Done(Outcome.Declined(medical, keywords)))
             return@flow

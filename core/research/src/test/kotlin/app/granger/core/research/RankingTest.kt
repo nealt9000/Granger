@@ -131,6 +131,21 @@ class RankingTest {
         assertThat(Ranking.capMedia(ranked, asked = false, config)).isEqualTo(ranked)
     }
 
+    @Test fun liftMediaPutsTheBestFoundMediaFirstWhenAsked() {
+        // Ranking dropped both media passages; preselect's order says media(2) is the better one.
+        val found = listOf(book(1), media(2), book(2), media(1))
+        val ranked = listOf(book(1), book(2))
+        assertThat(Ranking.liftMedia(ranked, found, asked = true)).containsExactly(media(2), book(1), book(2)).inOrder()
+        // Already ranked: moved to the front, not repeated.
+        assertThat(Ranking.liftMedia(listOf(book(1), media(2)), found, asked = true)).containsExactly(media(2), book(1)).inOrder()
+    }
+
+    @Test fun liftMediaChangesNothingUnlessAskedAndFound() {
+        val ranked = listOf(book(1), book(2))
+        assertThat(Ranking.liftMedia(ranked, listOf(media(1)) + ranked, asked = false)).isEqualTo(ranked)
+        assertThat(Ranking.liftMedia(ranked, ranked, asked = true)).isEqualTo(ranked)
+    }
+
     @Test fun mediaNeverTakesPreselectSlots() {
         val strong = (1..12).map { passage("S$it", "steam engine", it) }
         val weaker = (13..15).map { passage("S$it", "steam", it) }
