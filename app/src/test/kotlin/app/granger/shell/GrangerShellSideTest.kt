@@ -47,7 +47,7 @@ class GrangerShellSideTest {
         view = LocalView.current
         density = LocalDensity.current
         GrangerShell(
-            rail = RailUi(emptyList(), emptyList()),
+            rail = RailUi(emptyList()),
             expanded = expanded,
             railVisible = true,
             selected = null,
@@ -55,9 +55,8 @@ class GrangerShellSideTest {
             onEdgeSwipe = { swipes++ },
             onTool = {},
             onTab = {},
-            onCloseTab = {},
             onHistory = {},
-            onRecentSearch = {},
+            onSearch = {},
             side = side,
             reading = reading,
         ) {

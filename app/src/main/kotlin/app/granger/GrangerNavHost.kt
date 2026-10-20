@@ -1,6 +1,7 @@
 package app.granger
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -97,6 +98,7 @@ import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
 import app.granger.shell.HistoryViewModel
+import app.granger.shell.RailEntryActions
 import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
@@ -340,7 +342,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val railViewModel = viewModel {
         RailViewModel(
             container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id,
-            plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.RECENT) else flowOf(emptyList()),
+            container.railPins, container.railHidden,
+            plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
+            recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) PlayResumer(container.media, container.playlists, container.playerHub) else null,
         )
     }
@@ -465,20 +469,32 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
         },
         onTab = ::showTab,
-        onCloseTab = railViewModel::closeTab,
         onHistory = { nav.navigate(HistoryRoute) { launchSingleTop = true } },
-        onRecentSearch = { query ->
+        onSearch = { query ->
             // Replace a Search that is on top; otherwise push, so Back returns to the article it was opened from.
             val searchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<SearchRoute>() == true
             nav.navigate(SearchRoute(query)) { if (searchOnTop) popUpTo<SearchRoute> { inclusive = true } }
         },
-        onRecentChat = { chatId -> openResearch(ResearchRoute(chatId)) },
-        onRecentPlay = { item ->
+        onChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+        onPlay = { item ->
             scope.launch {
                 // Gone or unplayable: the Library, with a notice saying so (it replaces the Library on the stack).
                 val notice = railViewModel.resume(item) ?: return@launch
                 nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
             }
+        },
+        actions = remember(railViewModel) {
+            RailEntryActions(
+                onPin = { entry ->
+                    scope.launch {
+                        // All six are taken: say to unpin one first.
+                        val notice = railViewModel.pin(entry) ?: return@launch
+                        Toast.makeText(appContext, notice, Toast.LENGTH_LONG).show()
+                    }
+                },
+                onUnpin = railViewModel::unpin,
+                onRemove = railViewModel::remove,
+            )
         },
         side = railSide,
         showResearch = showResearch,

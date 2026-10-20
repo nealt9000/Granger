@@ -30,7 +30,7 @@ class ShellMiniPlayerTest {
     @Composable
     private fun Shell(miniPlayer: Boolean, railVisible: Boolean = true, reading: Boolean = false) {
         GrangerShell(
-            rail = RailUi(emptyList(), emptyList()),
+            rail = RailUi(emptyList()),
             expanded = false,
             railVisible = railVisible,
             selected = null,
@@ -38,9 +38,8 @@ class ShellMiniPlayerTest {
             onEdgeSwipe = {},
             onTool = {},
             onTab = {},
-            onCloseTab = {},
             onHistory = {},
-            onRecentSearch = {},
+            onSearch = {},
             reading = reading,
             miniPlayer = if (miniPlayer) {
                 { Box(Modifier.fillMaxWidth().height(MiniPlayerHeight).testTag("mini")) }
