@@ -2,6 +2,7 @@ package app.granger.core.player
 
 import android.content.ComponentName
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -10,6 +11,7 @@ import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Track
 import com.google.common.util.concurrent.ListenableFuture
+import java.io.File
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,13 +39,15 @@ class MediaControllerPlayerHub(
     media: MediaLibrary,
     playback: PlaybackDao,
     private val scope: CoroutineScope,
+    /** A cover path as the session items' artwork URI; see [PlaybackService.Dependencies]. */
+    artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
 ) : PlayerHub {
     private val app = context.applicationContext
     private var controller: ListenableFuture<MediaController>? = null
     private val pending = ArrayDeque<(PlayerEngine) -> Unit>()
 
     init {
-        PlaybackService.install(PlaybackService.Dependencies(media, playback))
+        PlaybackService.install(PlaybackService.Dependencies(media, playback, artwork))
         connect()
         scope.launch {
             PlaybackService.engine.filterNotNull().collect { engine ->

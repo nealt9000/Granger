@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.provider.Settings
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
@@ -63,6 +64,7 @@ import app.granger.core.media.FileTagReadGuard
 import app.granger.core.media.FolderSource
 import app.granger.core.media.MediaStoreSource
 import app.granger.core.media.PhoneScanner
+import app.granger.media.Artwork
 import app.granger.media.MediaDownloader
 import app.granger.media.MediaSharing
 import app.granger.media.PhoneMediaScans
@@ -224,9 +226,16 @@ class AppContainer(context: Context) {
     /** Positions, bookmarks and the rest of the players' state. */
     val playback: PlaybackDao = libraryDb.playbackDao()
 
+    /** Cover art as content:// URIs ([ArtworkProvider]), for the session's items, Android Auto and the widget. */
+    val artwork: Artwork = Artwork.forContext(context)
+
     /** The one way to the players (spec §8); made in [GrangerApp.onCreate], on the main thread. */
     val playerHub: PlayerHub by lazy {
-        MediaControllerPlayerHub(context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate))
+        MediaControllerPlayerHub(
+            context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+            // A cover outside the provider's roots keeps its file:// URI, which the in-process notification can still read.
+            artwork = { path -> artwork.uri(path) ?: Uri.fromFile(File(path)) },
+        )
     }
 
     /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */

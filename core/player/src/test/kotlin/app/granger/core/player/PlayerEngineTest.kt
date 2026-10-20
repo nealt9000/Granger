@@ -137,12 +137,13 @@ class PlayerEngineTest {
         replayGain: ReplayGainProcessor? = null,
         requester: FocusRequester = focus,
         clock: FakeClock = this.clock,
+        artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
     ): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()
         return PlayerEngine(
             player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(requester),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), writer = Dispatchers.Unconfined,
-            random = Random(7), replayGain = replayGain,
+            random = Random(7), replayGain = replayGain, artwork = artwork,
         ).also { engines += it }
     }
 
@@ -1000,6 +1001,18 @@ class PlayerEngineTest {
         assertThat(done).isTrue()
         assertThat(result).isNull()
         assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+    }
+
+    /** Items carry the artwork the service was given (the provider's content:// URI), not a file:// path. */
+    @Test fun itemsUseTheGivenArtworkUri() {
+        val cover = "/data/covers/abc.jpg"
+        val song = track("covered", fixture("gapless-1.mp3"), 2_500).copy(coverPath = cover)
+        runBlocking { db.mediaDao().upsertTracks(listOf(song)) }
+        val engine = newEngine(artwork = { Uri.parse("content://app.granger.artwork/" + it.length) })
+        engine.playTracks(listOf(song.id), 0, false, PlaySource("songs", "Songs"))
+        idle()
+        assertThat(engine.player.currentMediaItem!!.mediaMetadata.artworkUri)
+            .isEqualTo(Uri.parse("content://app.granger.artwork/${cover.length}"))
     }
 }
 

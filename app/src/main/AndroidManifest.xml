@@ -48,5 +48,11 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
+        <!-- Cover art for Android Auto, the widget and the session, read-only (images under the media roots only). -->
+        <provider
+            android:name=".media.ArtworkProvider"
+            android:authorities="app.granger.artwork"
+            android:exported="true"
+            android:grantUriPermissions="false" />
     </application>
 </manifest>

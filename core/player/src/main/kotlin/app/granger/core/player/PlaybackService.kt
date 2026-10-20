@@ -2,6 +2,7 @@ package app.granger.core.player
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -31,6 +32,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
+import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,8 +55,15 @@ import kotlinx.coroutines.launch
  * On creation (including a restart by the system) the engine restores the last active player, paused.
  */
 class PlaybackService : MediaLibraryService() {
-    /** What the service needs from the app; installed by the hub before it connects. */
-    data class Dependencies(val media: MediaLibrary, val playback: PlaybackDao)
+    /**
+     * What the service needs from the app; installed by the hub before it connects. [artwork] turns a cover path into
+     * the URI the session's items carry (the app's artwork provider, which Android Auto and the launcher can read).
+     */
+    data class Dependencies(
+        val media: MediaLibrary,
+        val playback: PlaybackDao,
+        val artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
+    )
 
     companion object {
         private const val TAG = "PlaybackService"
@@ -92,6 +101,7 @@ class PlaybackService : MediaLibraryService() {
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
             effects = EffectsSession(this),
             replayGain = replayGain,
+            artwork = deps.artwork,
         )
         engine = e
         session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope))

@@ -77,6 +77,8 @@ class PlayerEngine(
     private val replayGain: ReplayGainProcessor? = null,
     writer: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
     private val random: Random = Random.Default,
+    /** A cover path as the items' artwork URI (the app passes its artwork provider's content:// URI). */
+    private val artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
 ) : PlayerHub {
     private enum class Mode { NONE, MUSIC, BOOK }
 
@@ -724,7 +726,7 @@ class PlayerEngine(
             .setTitle(if (b == null) t.title else chapterTitle(b, chapter))
             .setArtist(b?.author ?: t.artists.replace("; ", ", "))
             .setAlbumTitle(b?.title ?: Albums.title(t))
-            .setArtworkUri((b?.coverPath ?: t.coverPath)?.let { Uri.fromFile(File(it)) })
+            .setArtworkUri((b?.coverPath ?: t.coverPath)?.let(artwork))
             .build())
         .build()
 
