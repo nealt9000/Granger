@@ -129,6 +129,9 @@ class MediaDownloadsTest {
         // Pixel 6: Wi-Fi lost mid-file requeues it with its bytes kept; the page said "Downloading" throughout.
         val stopped = five + file(6, DownloadState.QUEUED, bytesDone = 50).copy(wifiOnly = true)
         assertThat(MediaDownloads.statusOf(group, 13, stopped)).isEqualTo(ItemStatus.Queued(wifiOnly = true))
+        // The rest of the group is queued too, in any order (Pixel 6: file 4 listed first, so it still said "Downloading").
+        val behind = five + (7..13).map { file(it, DownloadState.QUEUED).copy(wifiOnly = true) } + file(6, DownloadState.QUEUED, bytesDone = 50).copy(wifiOnly = true)
+        assertThat(MediaDownloads.statusOf(group, 13, behind)).isEqualTo(ItemStatus.Queued(wifiOnly = true))
         val retrying = five + file(6, DownloadState.QUEUED).copy(wifiOnly = true, error = "a.test answered 503")
         assertThat(MediaDownloads.statusOf(group, 13, retrying)).isEqualTo(ItemStatus.Queued(wifiOnly = true, lastError = "a.test answered 503"))
         // The next file, queued between two: still downloading, no "Waiting" flash.

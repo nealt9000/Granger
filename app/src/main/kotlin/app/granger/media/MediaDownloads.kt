@@ -149,7 +149,9 @@ object MediaDownloads {
         val group = records.filter { it.groupId == groupId }
         if (group.isEmpty()) return ItemStatus.NotInstalled
         val running = group.any { it.state == DownloadState.RUNNING }
-        val queued = group.firstOrNull { it.state == DownloadState.QUEUED }
+        // The whole rest of the group is queued behind the current file: the one that stopped (bytes or an error) speaks for it.
+        val waiting = group.filter { it.state == DownloadState.QUEUED }
+        val queued = waiting.firstOrNull { it.bytesDone > 0 || it.error != null } ?: waiting.firstOrNull()
         if (running || queued != null) {
             if (running) return ItemStatus.Downloading(fractionOf(group))
             val stalled = queued!!.bytesDone > 0 || queued.error != null
