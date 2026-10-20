@@ -60,30 +60,6 @@ class ReaderWebView(
         webViewClient = client
     }
 
-    /** Where the top of this view was in the window at the last layout; null before the first. */
-    private var lastTop: Int? = null
-    private val location = IntArray(2)
-
-    private fun topInWindow(): Int {
-        getLocationInWindow(location)
-        return location[1]
-    }
-
-    /**
-     * The toolbar coming up (or going) moves the page's top and changes its size. Before the new size reaches the
-     * page (super), tell the page script how far the top moved, so it keeps the line being read at the same height
-     * on screen. (The parents are in their new places already: layout goes from the top down.)
-     */
-    override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
-        ReaderPageScript.spotShift(lastTop, topInWindow(), resized = ow > 0 && oh > 0)?.let { evaluateJavascript(it, null) }
-        super.onSizeChanged(w, h, ow, oh)
-    }
-
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-        lastTop = topInWindow()
-    }
-
     /** 0 at the top, 1 at the bottom; 0 when the page does not scroll. */
     fun scrollFraction(): Float {
         val range = computeVerticalScrollRange() - height
