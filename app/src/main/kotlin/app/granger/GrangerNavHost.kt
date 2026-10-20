@@ -6,7 +6,6 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -430,6 +429,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
         onPlayer = destination?.hasRoute<PlayerRoute>() == true,
+        reading = readerTabId != null,
+        railVisible = shell.railVisible,
     )
 
     // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
@@ -479,8 +480,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         },
         showResearch = showResearch,
         reading = readerTabId != null,
-        // A book's margins are its page colour (white, sepia), and so is the rail's place while it's hidden.
-        background = shell.pageColor?.takeIf { destination?.hasRoute<BookRoute>() == true } ?: MaterialTheme.colorScheme.background,
         miniPlayer = if (player == null || miniPlacement == MiniPlayerPlacement.HIDDEN) {
             null
         } else {
@@ -629,7 +628,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
                     showChromeRequest = showChromeRequest,
-                    onPageColorChange = { shell.pageColor = it },
                     dictionary = dictionary,
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onResearch = { text, bookId, title, href, progression ->

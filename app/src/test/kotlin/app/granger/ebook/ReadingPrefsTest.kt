@@ -20,14 +20,6 @@ class ReadingPrefsTest {
     private val shared = ApplicationProvider.getApplicationContext<Context>()
         .getSharedPreferences("reading-test", Context.MODE_PRIVATE)
 
-    @Test fun pageColourMatchesWhatReadiumPaintsForEachTheme() {
-        // The reader's margins (and the rail's place while hidden) take this, so full screen shows no strips.
-        assertThat(ReadingTheme.DAY.pageColor.toArgb()).isEqualTo(0xFFFFFFFF.toInt())
-        assertThat(ReadingTheme.SEPIA.pageColor.toArgb()).isEqualTo(0xFFFAF4E8.toInt())
-        assertThat(ReadingTheme.NIGHT.pageColor).isEqualTo(GrangerColors.Background)
-        assertThat(ReadingPrefs(theme = ReadingTheme.NIGHT).toEpub().backgroundColor).isEqualTo(Color(ReadingTheme.NIGHT.pageColor.toArgb()))
-    }
-
     @Test fun toEpubOverridesPublisherStylesAndPaginates() {
         val epub = ReadingPrefs(
             typeface = Typeface.SANS, fontScale = 1.25, lineHeight = 1.8, margins = 1.5,

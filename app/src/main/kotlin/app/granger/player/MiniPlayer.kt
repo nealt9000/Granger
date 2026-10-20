@@ -50,11 +50,14 @@ enum class MiniPlayerPlacement {
 }
 
 /**
- * Nothing loaded, or the full-screen player showing: hidden. Otherwise it has its slot, pushing the screen down; in a
- * reader the slot stays while the chrome is hidden (the shell just doesn't draw it there), so the page never moves.
+ * Nothing loaded, or the full-screen player showing: hidden. In a reader it follows the reader's chrome (the rail's
+ * visibility); whenever it shows it pushes the screen (the reader's page too) down.
  */
-fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean): MiniPlayerPlacement =
-    if (!loaded || onPlayer) MiniPlayerPlacement.HIDDEN else MiniPlayerPlacement.PUSH
+fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean, railVisible: Boolean): MiniPlayerPlacement = when {
+    !loaded || onPlayer -> MiniPlayerPlacement.HIDDEN
+    reading -> if (railVisible) MiniPlayerPlacement.PUSH else MiniPlayerPlacement.HIDDEN
+    else -> MiniPlayerPlacement.PUSH
+}
 
 /**
  * One mini-player for both players: cover, title and subtitle, play/pause, one secondary button and a progress line.

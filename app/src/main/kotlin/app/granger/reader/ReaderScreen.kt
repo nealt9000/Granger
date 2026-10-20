@@ -9,6 +9,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +21,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -80,8 +84,6 @@ import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
-import app.granger.shell.BarsAndCutoutIgnoringVisibility
-import app.granger.shell.ChromeSlot
 import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.launch
 
@@ -153,11 +155,11 @@ fun ReaderScreen(
     }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // The page keeps one size: below the top bar's place and above the navigation bar's, beside the rail's (the
-        // shell keeps the rail's and the mini-player's places). A middle tap only shows or hides the bars over those
-        // margins, so the text never reflows; hidden, the margins show the page's background.
+        // With the chrome up the page is laid out below the top bar and above the navigation bar, like any other
+        // screen (the shell puts the rail and the mini-player beside and above it); hidden, it fills the screen.
         Column(Modifier.fillMaxSize()) {
-            ChromeSlot(state.chromeVisible) {
+            // Fades only, so the page is resized once per tap rather than on every frame of a slide.
+            AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
                 if (findQuery != null) {
                     FindBar(
                         query = findQuery,
@@ -192,7 +194,7 @@ fun ReaderScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .testTag(ReaderTags.PAGE)
-                    .windowInsetsPadding(readerPageInsets(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
+                    .windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
             ) {
                 val error = state.error
                 val startUrl = state.url
@@ -446,12 +448,13 @@ internal object BarsHideRequests {
 }
 
 /**
- * What a reader's page keeps clear of on [sides] (the top bar takes the top, and the e-book's bottom bar its bottom):
- * the system bars' places and the cutout, whether the bars show or not, and not the keyboard, so the page keeps one
- * size in both states and never reflows.
+ * What a reader's page keeps clear of. With the chrome up: the bars' places on [sides] (the top bar takes the top,
+ * and the e-book's bottom bar its bottom). In full screen: only a camera cutout. Both ignore whether the system bars
+ * are showing, so the page is laid out once per middle tap, not along the bars' animation.
  */
 @Composable
-internal fun readerPageInsets(sides: WindowInsetsSides): WindowInsets = BarsAndCutoutIgnoringVisibility.only(sides)
+internal fun readerPageInsets(chromeVisible: Boolean, sides: WindowInsetsSides): WindowInsets =
+    if (chromeVisible) SafeDrawingIgnoringBars.only(sides) else WindowInsets.displayCutout
 
 /** A reader's top bar: below the status bar's place (or the pushing mini-player) even while the bars animate. */
 internal val ReaderTopBarInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
