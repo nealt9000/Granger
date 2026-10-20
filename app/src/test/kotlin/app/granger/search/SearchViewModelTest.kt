@@ -198,4 +198,49 @@ class SearchViewModelTest {
         assertThat(sessions.searches.value).containsExactly("holst")
         assertThat(sessions.tabs.value).isEmpty()
     }
+
+    private fun hits(n: Int, prefix: String = "T") = (1..n).map { SearchHit("p", "Pack", "$prefix$it", "$prefix $it") }
+
+    @Test fun aGroupShowsItsPreviewUntilShowAll() = runTest(main.dispatcher) {
+        search.titles = hits(12)
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.advanceUntilIdle()
+        val state = vm.state.value
+        assertThat(state.shown(SearchGroup.TITLES, state.titles)).hasSize(SearchGroup.TITLES.preview)
+        vm.toggle(SearchGroup.TITLES)
+        assertThat(vm.state.value.let { it.shown(SearchGroup.TITLES, it.titles) }).hasSize(12)
+        // Other groups stay at their preview.
+        assertThat(vm.state.value.expanded).containsExactly(SearchGroup.TITLES)
+        vm.toggle(SearchGroup.TITLES)
+        assertThat(vm.state.value.let { it.shown(SearchGroup.TITLES, it.titles) }).hasSize(SearchGroup.TITLES.preview)
+    }
+
+    @Test fun aNewQueryCollapsesExpandedGroups() = runTest(main.dispatcher) {
+        search.titles = hits(12)
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.advanceUntilIdle()
+        vm.toggle(SearchGroup.TITLES)
+        vm.toggle(SearchGroup.SONGS)
+        vm.onQueryChange("photos")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.expanded).isEmpty()
+        vm.toggle(SearchGroup.TITLES)
+        vm.onQueryChange("")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.expanded).isEmpty()
+    }
+
+    @Test fun groupsThatFillTheirFetchAreMarkedCapped() = runTest(main.dispatcher) {
+        search.titles = hits(SearchGroup.TITLES.fetch)
+        // Every full-text hit counts towards the cap, including those hidden as duplicates of a title.
+        search.fullText = hits(SearchGroup.FULL_TEXT.fetch)
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.fullText).isEmpty()
+        assertThat(vm.state.value.capped).containsExactly(SearchGroup.TITLES, SearchGroup.FULL_TEXT)
+        search.titles = hits(SearchGroup.TITLES.fetch - 1)
+        vm.onQueryChange("photos")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.capped).doesNotContain(SearchGroup.TITLES)
+    }
 }
