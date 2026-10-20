@@ -6,9 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.unit.dp
 import app.granger.FakeLibrary
 import app.granger.FakeReadingSessions
 import app.granger.FakeZimArchive
@@ -52,12 +52,21 @@ class ReaderScreenChromeTest {
         }
     }
 
+    private fun page() = compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot()
+
     private fun assertChromeShowing() {
         compose.onNodeWithContentDescription("Back").assertIsDisplayed()
         assertThat(railVisible.last()).isTrue()
         // The page is laid out below the top bar, not drawn under it.
         val bar = compose.onNodeWithContentDescription("Back").getBoundsInRoot()
-        assertThat(compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot().top).isAtLeast(bar.bottom)
+        assertThat(page().top).isAtLeast(bar.bottom)
+    }
+
+    /** The bar keeps its place in the layout but isn't drawn, and so takes no taps. */
+    private fun assertChromeHidden() {
+        val back = compose.onAllNodesWithContentDescription("Back").fetchSemanticsNodes()
+        assertThat(back.none { it.layoutInfo.isPlaced }).isTrue()
+        assertThat(railVisible.last()).isFalse()
     }
 
     @Test fun opensWithTheToolbarAndTheRailShowing() {
@@ -71,12 +80,24 @@ class ReaderScreenChromeTest {
         compose.waitForIdle()
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("Back").assertDoesNotExist()
-        assertThat(railVisible.last()).isFalse()
-        assertThat(compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot().top).isEqualTo(0.dp)
+        assertChromeHidden()
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
         assertChromeShowing()
+    }
+
+    @Test fun goingFullScreenNeitherMovesNorResizesThePage() {
+        // Full screen is distraction-free, not bigger: the bars hide over the page's margins, so the text never reflows.
+        show()
+        compose.waitForIdle()
+        val withChrome = page()
+        compose.runOnIdle { viewModel.toggleChrome() }
+        compose.waitForIdle()
+        assertChromeHidden()
+        assertThat(page()).isEqualTo(withChrome)
+        compose.runOnIdle { viewModel.toggleChrome() }
+        compose.waitForIdle()
+        assertThat(page()).isEqualTo(withChrome)
     }
 
     @Test fun returningToTheTabShowsTheToolbarAgain() {
@@ -84,7 +105,7 @@ class ReaderScreenChromeTest {
         compose.waitForIdle()
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("Back").assertDoesNotExist()
+        assertChromeHidden()
         // Another screen on top, then back to the tab (its view model kept on the back stack).
         compose.runOnIdle { shown = false }
         compose.waitForIdle()

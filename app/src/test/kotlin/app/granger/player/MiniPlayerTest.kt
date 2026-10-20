@@ -102,15 +102,13 @@ class MiniPlayerTest {
         }
     }
 
-    @Test fun miniPlayerPlacementFollowsTheReaderChrome() {
-        // Non-reading screens: always there when something is loaded, pushing the screen down.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.PUSH)
-        // Reading: only with the reader's chrome (and the rail), and then it pushes the page down like anywhere else.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, railVisible = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, railVisible = true)).isEqualTo(MiniPlayerPlacement.PUSH)
+    @Test fun miniPlayerPlacementKeepsItsSlotInAReader() {
+        // Wherever something is loaded the mini-player has its slot, pushing the screen down. In a reader the slot
+        // stays while the chrome is hidden (the shell just doesn't draw it), so the page never moves.
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false)).isEqualTo(MiniPlayerPlacement.PUSH)
         // Nothing loaded, or the full-screen player showing instead.
-        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
     }
 
     @Test fun seekBarSeeksOnReleaseNotWhileDragging() {

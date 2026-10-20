@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -69,13 +73,21 @@ class ShellMiniPlayerTest {
         assertThat(content.top).isEqualTo(mini.bottom)
     }
 
-    @Test fun fullScreenReaderGetsTheWholeScreen() {
-        // The chrome hidden by a middle tap: no rail, no mini-player, the page from edge to edge.
-        compose.setContent { Shell(miniPlayer = false, railVisible = false, reading = true) }
-        compose.onNodeWithTag("mini").assertDoesNotExist()
-        val content = compose.onNodeWithTag("content").getBoundsInRoot()
-        assertThat(content.top).isEqualTo(0.dp)
-        assertThat(content.left).isEqualTo(0.dp)
+    @Test fun fullScreenReaderKeepsThePageWhereItWas() {
+        // The chrome hidden by a middle tap: the rail and the mini-player aren't drawn but keep their places, so the
+        // page neither moves nor changes size.
+        var railVisible by mutableStateOf(true)
+        compose.setContent { Shell(miniPlayer = true, railVisible = railVisible, reading = true) }
+        val withChrome = compose.onNodeWithTag("content").getBoundsInRoot()
+        compose.runOnIdle { railVisible = false }
+        compose.waitForIdle()
+        assertThat(compose.onNodeWithTag("content").getBoundsInRoot()).isEqualTo(withChrome)
+        assertThat(compose.onAllNodesWithTag("mini").fetchSemanticsNodes().none { it.layoutInfo.isPlaced }).isTrue()
+    }
+
+    @Test fun otherScreensStillLoseTheRailWhenItIsHidden() {
+        compose.setContent { Shell(miniPlayer = false, railVisible = false, reading = false) }
+        assertThat(compose.onNodeWithTag("content").getBoundsInRoot().left).isEqualTo(0.dp)
     }
 
     @Test fun jvmTestsRunOnTheTestAppWhichSkipsTheEagerPlayerStart() {

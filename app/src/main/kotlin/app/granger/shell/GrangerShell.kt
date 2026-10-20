@@ -2,6 +2,7 @@ package app.granger.shell
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -44,6 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -54,9 +58,13 @@ import app.granger.theme.GrangerColors
  * hidden. A reader hides them for full-screen reading; layouts padded by this don't follow the bars' show and hide
  * animation frame by frame, so a middle tap lays the page out once. Wherever the bars show it equals safeDrawing.
  */
-@OptIn(ExperimentalLayoutApi::class)
 val SafeDrawingIgnoringBars: WindowInsets
-    @Composable get() = WindowInsets.systemBarsIgnoringVisibility.union(WindowInsets.displayCutout).union(WindowInsets.ime)
+    @Composable get() = BarsAndCutoutIgnoringVisibility.union(WindowInsets.ime)
+
+/** The system bars' places (shown or not) and the camera cutout: [SafeDrawingIgnoringBars] without the keyboard. */
+@OptIn(ExperimentalLayoutApi::class)
+val BarsAndCutoutIgnoringVisibility: WindowInsets
+    @Composable get() = WindowInsets.systemBarsIgnoringVisibility.union(WindowInsets.displayCutout)
 
 private val TopInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Top)
 
@@ -64,6 +72,9 @@ private val TopInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowIns
 class ShellState(railVisible: Boolean = true, expanded: Boolean = false) {
     /** Non-reader screens force this on; the reader sets it through a callback (off for full-screen reading). */
     var railVisible by mutableStateOf(railVisible)
+
+    /** The open book's page colour, which the shell paints behind it (the rail's place while hidden); null elsewhere. */
+    var pageColor by mutableStateOf<Color?>(null)
 
     /** The 200 dp rail is open over the content. */
     var expanded by mutableStateOf(expanded)
@@ -84,8 +95,9 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * drawn over the content with a scrim. An edge swipe (from x < 24 dp, calling [onEdgeSwipe]) or tapping the rail's background,
  * its bookmark tiles, History or its recents expands it (only the tools go straight to their screens from the narrow rail;
  * [onTab], [onHistory] and the recent callbacks are reached from the expanded one); tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
- * content column, pushing it down, and takes the status bar's inset for itself. In a reader ([reading]) the rail can
- * be hidden for full-screen reading; the edge swipe then stays live, as the way back to the chrome. [showResearch] is
+ * content column, pushing it down, and takes the status bar's inset for itself. In a reader ([reading]) the rail and
+ * the mini-player can be hidden for full-screen reading: they keep their places (the page doesn't move or reflow) and
+ * just aren't drawn, and the edge swipe stays live as the way back to the chrome. [showResearch] is
  * false on phones below the ASK tier, which hides the Research tool.
  */
 @Composable
@@ -105,6 +117,8 @@ fun GrangerShell(
     onRecentPlay: (RecentItem.Play) -> Unit = {},
     showResearch: Boolean = false,
     reading: Boolean = false,
+    /** What shows behind the screen, and where a reader's hidden rail and mini-player keep their places. */
+    background: Color = MaterialTheme.colorScheme.background,
     miniPlayer: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -115,22 +129,29 @@ fun GrangerShell(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(background)
             .then(if (edgeSwipeActive) Modifier.edgeSwipe(onEdgeSwipe) else Modifier),
     ) {
+        // In a reader the rail and the mini-player keep their places while its chrome is hidden, so the page never
+        // moves; elsewhere a hidden rail gives its width to the screen.
+        val railPlace = railVisible || reading
         Row(Modifier.fillMaxSize()) {
-            if (railVisible) {
-                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onCloseTab)
+            if (railPlace) {
+                ChromeSlot(railVisible, Modifier.fillMaxHeight()) {
+                    NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onCloseTab)
+                }
             }
             Column(
                 Modifier
                     .weight(1f)
                     .fillMaxHeight()
                     // The rail already pads for the start inset (landscape cutout); screens shouldn't again.
-                    .then(if (railVisible) Modifier.consumeWindowInsets(SafeDrawingIgnoringBars.only(WindowInsetsSides.Start)) else Modifier),
+                    .then(if (railPlace) Modifier.consumeWindowInsets(SafeDrawingIgnoringBars.only(WindowInsetsSides.Start)) else Modifier),
             ) {
                 if (miniPlayer != null) {
-                    Box(Modifier.fillMaxWidth().background(GrangerColors.SurfaceVariant).windowInsetsPadding(TopInsets)) { miniPlayer() }
+                    ChromeSlot(railVisible || !reading) {
+                        Box(Modifier.fillMaxWidth().background(GrangerColors.SurfaceVariant).windowInsetsPadding(TopInsets)) { miniPlayer() }
+                    }
                 }
                 Box(
                     Modifier
@@ -200,6 +221,24 @@ private fun Modifier.edgeSwipe(onSwipe: () -> Unit): Modifier = composed {
                 }
                 if (fired) change.consume()
             }
+        }
+    }
+}
+
+/**
+ * A reader's bar (or the rail, or the mini-player, in a reader) that keeps its place in the layout while hidden: the
+ * content is always measured, so the slot's size never changes and the page beside it never moves or reflows. Hidden,
+ * it fades out and is then left unplaced, so it is neither drawn nor tapped; what shows there is the background.
+ */
+@Composable
+fun ChromeSlot(visible: Boolean, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, label = "chrome")
+    Layout(content, modifier.graphicsLayer { this.alpha = alpha }) { measurables, constraints ->
+        val placeables = measurables.map { it.measure(constraints) }
+        val width = placeables.maxOfOrNull { it.width } ?: constraints.minWidth
+        val height = placeables.maxOfOrNull { it.height } ?: constraints.minHeight
+        layout(width, height) {
+            if (visible || alpha > 0f) placeables.forEach { it.place(0, 0) }
         }
     }
 }

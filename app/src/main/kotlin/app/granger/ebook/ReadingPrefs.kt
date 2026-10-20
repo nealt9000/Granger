@@ -2,6 +2,7 @@ package app.granger.ebook
 
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color as ComposeColor
 import app.granger.theme.GrangerColors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,17 @@ import org.readium.r2.navigator.preferences.Theme
 import kotlin.math.roundToInt
 
 enum class ReadingTheme { DAY, SEPIA, NIGHT }
+
+/**
+ * The colour Readium paints the page in this theme (ReadiumCSS's day and sepia backgrounds; night is ours). The
+ * reader's margins take it, so the bars hide over the page's own colour rather than leave strips.
+ */
+val ReadingTheme.pageColor: ComposeColor
+    get() = when (this) {
+        ReadingTheme.DAY -> ComposeColor(0xFFFFFFFF)
+        ReadingTheme.SEPIA -> ComposeColor(0xFFFAF4E8)
+        ReadingTheme.NIGHT -> GrangerColors.Background
+    }
 
 enum class Typeface { SERIF, SANS }
 
@@ -41,7 +53,7 @@ data class ReadingPrefs(
             ReadingTheme.SEPIA -> Theme.SEPIA
             ReadingTheme.NIGHT -> Theme.DARK
         },
-        backgroundColor = if (theme == ReadingTheme.NIGHT) Color(GrangerColors.Background.toArgb()) else null,
+        backgroundColor = if (theme == ReadingTheme.NIGHT) Color(theme.pageColor.toArgb()) else null,
         textColor = if (theme == ReadingTheme.NIGHT) Color(GrangerColors.OnSurface.toArgb()) else null,
         fontFamily = when (typeface) {
             Typeface.SERIF -> FontFamily.SERIF

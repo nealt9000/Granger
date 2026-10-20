@@ -8,9 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -35,6 +31,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,6 +43,7 @@ import app.granger.reader.ChromeBackOnReturn
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
 import app.granger.reader.readerPageInsets
+import app.granger.shell.ChromeSlot
 import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -71,6 +69,8 @@ fun EbookReaderScreen(
     viewModel: EbookReaderViewModel,
     onChromeVisibleChange: (Boolean) -> Unit,
     showChromeRequest: Int = 0,
+    /** The page's colour in the reading theme, for the shell to paint the rail's place in while it's hidden. */
+    onPageColorChange: (Color) -> Unit = {},
     /** How Define works. */
     dictionary: DictionaryChoice = DictionaryChoice.None,
     onSearchText: (String) -> Unit = {},
@@ -101,6 +101,8 @@ fun EbookReaderScreen(
     LaunchedEffect(showChromeRequest) { if (isNewChromeRequest(requestAtEntry, showChromeRequest)) viewModel.showChrome() }
     LaunchedEffect(state.chromeVisible) { onChromeVisibleChange(state.chromeVisible) }
     SystemBarsHidden(!state.chromeVisible)
+    val pageColor = state.prefs.theme.pageColor
+    LaunchedEffect(pageColor) { onPageColorChange(pageColor) }
     ChromeBackOnReturn(viewModel::onScreenLeft)
     // Backgrounded, or the screen left: write the place now rather than after the debounce.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
@@ -175,12 +177,12 @@ fun EbookReaderScreen(
         navigator?.submitPreferences(state.prefs.toEpub())
     }
 
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // With the chrome up the page is laid out between the top and bottom bars, like any other screen (the shell
-        // puts the rail and the mini-player beside and above it); hidden, it fills the screen. Fades only, so the
-        // page is laid out again once per tap rather than on every frame of a slide.
+    Box(Modifier.fillMaxSize().background(pageColor)) {
+        // The page keeps one size: between the top and bottom bars' places, beside the rail's (the shell keeps the
+        // rail's and the mini-player's places). A middle tap only shows or hides the bars over those margins, so
+        // Readium never re-paginates; hidden, the margins show the page's background.
         Column(Modifier.fillMaxSize()) {
-            AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
+            ChromeSlot(state.chromeVisible) {
                 EbookTopBar(
                     title = state.title,
                     onBack = onBack,
@@ -189,7 +191,7 @@ fun EbookReaderScreen(
                 )
             }
             // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
-            Box(Modifier.weight(1f).fillMaxWidth().windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Horizontal))) {
+            Box(Modifier.weight(1f).fillMaxWidth().windowInsetsPadding(readerPageInsets(WindowInsetsSides.Horizontal))) {
                 val error = state.error
                 val factory = viewModel.navigatorFactory
                 val bookId = viewModel.bookId
@@ -226,7 +228,7 @@ fun EbookReaderScreen(
                 }
             }
             if (state.error == null) {
-                AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
+                ChromeSlot(state.chromeVisible) {
                     EbookBottomBar(
                         locator = state.locator ?: state.initial,
                         positionsCount = state.positionsCount,
