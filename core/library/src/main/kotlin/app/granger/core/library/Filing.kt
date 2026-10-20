@@ -13,8 +13,19 @@ object Filing {
         Rule({ it.startsWith("gutenberg_") }, "gutenberg", "Gutenberg"),
         Rule({ it.startsWith("granger_classics") }, "granger-classics", "Granger Classics"),
         Rule({ it.startsWith("ifixit_") }, "ifixit", "iFixit"),
-        Rule({ "stackexchange" in it || "stackoverflow" in it }, "stack-exchange", "Stack Exchange"),
+        Rule({ it.startsWith("wikivoyage_") }, "wikivoyage", "Wikivoyage"),
+        Rule({ it.startsWith("wikibooks_") }, "wikibooks", "Wikibooks"),
+        Rule({ it.startsWith("wikiquote_") }, "wikiquote", "Wikiquote"),
+        Rule({ it.startsWith("wikiversity_") }, "wikiversity", "Wikiversity"),
+        Rule({ it.startsWith("phet_") }, "phet", "PhET"),
+        Rule({ it.startsWith("maps_") }, "maps", "Maps"),
+        Rule({ it.startsWith("devdocs_") }, "devdocs", "DevDocs"),
+        Rule({ "stackexchange" in it || "stackoverflow" in it || it.substringBefore('_') in STACK_EXCHANGE_SITES },
+            "stack-exchange", "Stack Exchange"),
     )
+
+    /** The Stack Exchange sites whose ZIM names don't say so (Kiwix's catalog, 2026-10-20). */
+    private val STACK_EXCHANGE_SITES = setOf("mathoverflow.net", "stackapps.com", "serverfault.com", "superuser.com", "askubuntu.com")
 
     /** Identity of a pack across updates: its ZIM `Name`, else its id. */
     fun packKey(pack: Pack): String = pack.name.ifBlank { pack.id }
