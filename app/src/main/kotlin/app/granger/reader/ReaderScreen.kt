@@ -16,7 +16,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.imePadding
@@ -33,6 +39,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
@@ -45,6 +52,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -60,6 +68,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -67,6 +76,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
@@ -85,6 +97,7 @@ import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
 import app.granger.shell.SafeDrawingIgnoringBars
+import app.granger.theme.GrangerColors
 import kotlinx.coroutines.launch
 
 /** Find-in-page results: [active] is 0-based. */
@@ -191,7 +204,8 @@ fun ReaderScreen(
                     )
                 } else {
                     ReaderTopBar(
-                        title = state.page?.title.orEmpty(),
+                        pageTitle = state.page?.title.orEmpty(),
+                        packTitle = state.packTitle,
                         showPageActions = state.page != null,
                         bookmarked = state.bookmarked,
                         showMenu = state.error == null,
@@ -290,10 +304,16 @@ fun ReaderScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * The reader's top bar, in order: ← (Back within the tab), Home when the pack has a main page, the pack's search box,
+ * the bookmark star and ⋯ with Random article and Find in page. It shows no page title: [pageTitle] is what TalkBack
+ * reads for the bar. With an error ([showMenu] false) only ← is left. The star and Find wait for a page
+ * ([showPageActions]).
+ */
 @Composable
-private fun ReaderTopBar(
-    title: String,
+internal fun ReaderTopBar(
+    pageTitle: String,
+    packTitle: String?,
     showPageActions: Boolean,
     bookmarked: Boolean,
     showMenu: Boolean,
@@ -306,15 +326,26 @@ private fun ReaderTopBar(
     onToggleBookmark: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
-    TopAppBar(
-        windowInsets = ReaderTopBarInsets,
-        title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) },
-        navigationIcon = {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(ReaderTopBarInsets)
+                .height(64.dp)
+                .padding(horizontal = 4.dp)
+                .semantics { if (pageTitle.isNotEmpty()) contentDescription = pageTitle },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
-        },
-        actions = {
+            if (showMenu && hasHome) {
+                IconButton(onClick = onHome) { Icon(Icons.Filled.Home, contentDescription = "Home") }
+            }
+            if (showMenu) {
+                PackSearchBox(searchLabel(packTitle), onSearchPack, Modifier.weight(1f).padding(horizontal = 4.dp))
+            } else {
+                Spacer(Modifier.weight(1f))
+            }
             if (showPageActions) {
-                IconButton(onClick = onSearchPack) { Icon(Icons.Filled.Search, contentDescription = "Search this pack") }
                 IconButton(onClick = onToggleBookmark) {
                     if (bookmarked) {
                         Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = MaterialTheme.colorScheme.primary)
@@ -326,18 +357,42 @@ private fun ReaderTopBar(
             if (showMenu) Box {
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    if (hasHome) {
-                        DropdownMenuItem(text = { Text("Home") }, onClick = { menuOpen = false; onHome() })
-                    }
                     DropdownMenuItem(text = { Text("Random article") }, onClick = { menuOpen = false; onRandom() })
                     if (showPageActions) {
                         DropdownMenuItem(text = { Text("Find in page") }, onClick = { menuOpen = false; onFind() })
                     }
                 }
             }
-        },
-    )
+        }
+    }
 }
+
+/** "Search <pack>" in a rounded box; read-only, a tap opens the pack search (see [PackSearchPanel]). */
+@Composable
+private fun PackSearchBox(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .height(40.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(GrangerColors.SurfaceHigh)
+            .clickable(onClickLabel = "Search", role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Filled.Search, contentDescription = null, Modifier.size(20.dp), tint = GrangerColors.OnSurfaceVariant)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge,
+            color = GrangerColors.OnSurfaceVariant,
+        )
+    }
+}
+
+/** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
+private fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"
 
 /** The search field in place of the top bar, with the results listed under it. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -359,7 +414,7 @@ private fun PackSearchPanel(
                     value = search.query,
                     onValueChange = onQueryChange,
                     modifier = Modifier.fillMaxWidth().focusRequester(focus),
-                    placeholder = { Text(if (packTitle != null) "Search $packTitle" else "Search this pack", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    placeholder = { Text(searchLabel(packTitle), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
