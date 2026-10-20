@@ -103,6 +103,8 @@ class MediaControllerPlayerHub(
     override fun playAudiobook(id: String, at: AudioBookmark?) = send { it.playAudiobook(id, at) }
     override fun activate(mode: PlayerMode) = send { it.activate(mode) }
     override fun setFinished(audiobookId: String, finished: Boolean) = send { it.setFinished(audiobookId, finished) }
+    // No service running, nothing loaded: don't start one just to empty it.
+    override fun unload(audiobookId: String, trackIds: Set<String>) { PlaybackService.engine.value?.unload(audiobookId, trackIds) }
     override fun playPause() = send { it.playPause() }
     override fun next() = send { it.next() }
     override fun previous() = send { it.previous() }

@@ -62,7 +62,11 @@ import app.granger.core.media.FileTagReadGuard
 import app.granger.core.media.FolderSource
 import app.granger.core.media.MediaStoreSource
 import app.granger.core.media.PhoneScanner
+import app.granger.media.MediaDownloader
+import app.granger.media.MediaSharing
 import app.granger.media.PhoneMediaScans
+import app.granger.core.archive.LibriVoxClient
+import app.granger.core.media.DownloadedMediaScanner
 import app.granger.media.hasAudioPermission
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.research.RankingConfig
@@ -109,6 +113,8 @@ open class GrangerApp : Application(), DownloadsHost {
     protected open fun startMedia() {
         container.playerHub
         container.phoneMediaScans.start()
+        // Granger's own downloads: no permission needed. Quiet, on the app scope: a failure never crashes the start.
+        container.appScope.launch { container.mediaDownloader.rescanQuietly() }
     }
 
     override val downloadRunner: DownloadRunner get() = container.downloadRunner
@@ -262,6 +268,7 @@ class AppContainer(context: Context) {
     )
 
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
+    val librivoxClient = LibriVoxClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
@@ -294,9 +301,30 @@ class AppContainer(context: Context) {
                 library.refresh()
             } else if (record.kind == ItemKind.BOOK) {
                 fileBookRecord(bookshelf, archiveSidecarDir, record) { appScope.launch { bookIndex.indexPending() } }
+            } else if (record.kind == ItemKind.AUDIO) {
+                mediaDownloader.onFileInstalled(record)
             }
         },
     )
+
+    /** Files Granger's downloaded music and audiobooks from their item folders' manifests (no audio permission). */
+    val downloadedMedia: DownloadedMediaScanner by lazy {
+        DownloadedMediaScanner(
+            { context.getExternalFilesDirs(null).filterNotNull() }, media,
+            tagGuard = FileTagReadGuard(File(context.noBackupFilesDir, "media-downloads")),
+        )
+    }
+
+    /** Gets, cancels and removes LibriVox and archive.org audio; every downloaded-media scan runs through it. */
+    val mediaDownloader: MediaDownloader by lazy {
+        MediaDownloader(
+            downloads, downloadedMedia, media, volumes, downloadPrefs, appScope,
+            // The Files app refreshes "Show in other apps" after each filing or removal.
+            onChanged = { MediaSharing.notifyChanged(context) },
+            // Removing what's playing empties the player instead of leaving it there, unplayable (Pixel 6, M2).
+            onRemoving = { audiobookId, trackIds -> playerHub.unload(audiobookId, trackIds) },
+        )
+    }
 
     val researchChats: ResearchChats = RoomResearchChats(libraryDb)
 

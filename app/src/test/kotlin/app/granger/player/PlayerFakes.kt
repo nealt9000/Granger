@@ -44,6 +44,7 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
         bookPlays += id to at
     }
     override fun setFinished(audiobookId: String, finished: Boolean) { calls += "setFinished:$audiobookId=$finished" }
+    override fun unload(audiobookId: String, trackIds: Set<String>) { calls += "unload:$audiobookId" }
     override fun playPause() { calls += "playPause" }
     override fun next() { calls += "next" }
     override fun previous() { calls += "previous" }

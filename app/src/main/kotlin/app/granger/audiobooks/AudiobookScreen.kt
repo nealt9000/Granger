@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.AudioBookmark
 import app.granger.library.ConfirmDialog
+import app.granger.media.DownloadControls
 import app.granger.player.formatTime
 
 /**
@@ -105,6 +106,13 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                     OutlinedButton(onClick = { vm.setFinished(book.id, !finished) }, enabled = loaded.chapters.isNotEmpty()) {
                         Text(if (finished) "Mark as unfinished" else "Mark as finished")
                     }
+                }
+            }
+            val download = loaded.download
+            val remove = loaded.onRemoveDownload
+            if (download != null && remove != null) {
+                item(key = "download") {
+                    DownloadControls(book.title, download, loaded.filesDone, loaded.filesTotal, "chapters", onRemove = remove)
                 }
             }
             if (book.description.isNotBlank()) item { Description(book.description) }

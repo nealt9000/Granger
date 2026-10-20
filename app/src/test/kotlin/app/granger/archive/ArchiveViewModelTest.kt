@@ -6,20 +6,33 @@ import app.granger.FakePrefs
 import app.granger.FakeVolumes
 import app.granger.MainDispatcherRule
 import app.granger.core.archive.ArchiveItem
+import app.granger.core.archive.ArchiveKind
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.ArchiveQuery
 import app.granger.core.archive.ArchiveShelf
+import app.granger.core.archive.AudioOffer
 import app.granger.core.archive.Offer
 import app.granger.core.archive.TextKind
+import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
 import app.granger.core.downloads.ItemKind
+import app.granger.core.media.DownloadedMediaScanner
+import app.granger.core.media.FileTags
+import app.granger.core.media.MediaManifest
+import app.granger.core.media.MediaManifests
+import app.granger.core.media.TagReader
+import app.granger.media.MediaDownloader
+import app.granger.media.MediaDownloads
+import app.granger.media.MediaFixtures
+import app.granger.music.FakeMediaLibrary
 import app.granger.record
 import app.granger.sources.ItemStatus
 import app.granger.volume
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.io.IOException
+import java.time.LocalDate
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -56,6 +69,8 @@ class ArchiveViewModelTest {
             lendingId -> resource("item-lending.json")
             MODERN -> MODERN_JSON
             TAGGED -> TAGGED_JSON
+            HOLST -> resource("item-holst-planets.json")
+            AUDIO_LENDING -> resource("item-audio-lending.json")
             else -> "{}"
         }
     }
@@ -514,6 +529,330 @@ class ArchiveViewModelTest {
         assertThat(bookshelf.removed).containsExactly("book:archive-org:$epubId")
     }
 
+    // --- Archive.org audio (Plan M2, Task 8) ---
+
+    private val mediaRoot by lazy { tmp.newFolder("media") }
+    private val mediaVolumes by lazy { FakeVolumes(listOf(volume(mediaRoot.path, "Internal storage"))) }
+    private val today = LocalDate.of(2026, 10, 19)
+
+    private fun TestScope.mediaDownloader(): MediaDownloader {
+        val library = FakeMediaLibrary()
+        val scanner = DownloadedMediaScanner({ listOf(mediaRoot) }, library, TagReader { _, _ -> FileTags(null, emptyList()) })
+        return MediaDownloader(downloads, scanner, library, mediaVolumes, downloadPrefs, backgroundScope, io = main.dispatcher)
+    }
+
+    private fun TestScope.audioViewModel(kind: ArchiveKind, settle: Boolean = true): ArchiveViewModel {
+        val vm = ArchiveViewModel(
+            client, downloads, bookshelf, prefs, volumes, downloadPrefs, sidecarDir = { sidecars },
+            appScope = this, io = main.dispatcher, kind = kind, media = mediaDownloader(), today = { today },
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        if (settle) settle { !vm.ui.value.loading && (searches().isNotEmpty() || vm.ui.value.waiverNeeded) }
+        return vm
+    }
+
+    private fun audioSearch(kind: ArchiveKind) {
+        searchBody = { q, _ ->
+            when {
+                HOLST in q -> audioSearchJson(1, HOLST)
+                kind == ArchiveKind.MUSIC -> resource("search-audio-music.json")
+                else -> resource("search-audio-spoken.json")
+            }
+        }
+    }
+
+    private fun itemFetches() = requests.count { it.encodedPath.startsWith("/metadata/") }
+
+    private val holstGroup = "media:archive-org:$HOLST"
+
+    @Test fun musicStartsOnItsMostDownloadedShelfFiltered() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        assertThat(searches().single().queryParameter("q"))
+            .isEqualTo(ArchiveQuery.build("", ArchiveShelf.MUSIC_MOST_DOWNLOADED, true, ArchiveKind.MUSIC, today))
+        val ui = vm.ui.value
+        assertThat(ui.kind).isEqualTo(ArchiveKind.MUSIC)
+        assertThat(ui.shelf).isEqualTo(ArchiveShelf.MUSIC_MOST_DOWNLOADED)
+        assertThat(ui.filtered).isTrue()
+        assertThat(ui.filterYear).isEqualTo(1926)
+        assertThat(ui.waiverNeeded).isFalse()
+        assertThat(ui.rows).isNotEmpty()
+        // Rows preview from the search formats: AlessandroMoreschi lists Ogg Vorbis and 64Kbps MP3.
+        assertThat((ui.rows.first().audio as AudioOffer.Tracks).format).isEqualTo("Ogg Vorbis")
+        // Clearing the box goes back to the kind's own first shelf.
+        vm.setQuery("caruso")
+        settle { searches().size == 2 && !vm.ui.value.loading }
+        vm.setQuery("")
+        settle { searches().size == 3 && !vm.ui.value.loading }
+        assertThat(vm.ui.value.shelf).isEqualTo(ArchiveShelf.MUSIC_MOST_DOWNLOADED)
+    }
+
+    @Test fun acceptingTheWaiverLiftsTheAudioFilter() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        vm.acceptWaiver()
+        settle { searches().size == 2 && !vm.ui.value.loading }
+        val q = searches().last().queryParameter("q")!!
+        assertThat(q).doesNotContain("year:[")
+        assertThat(q).isEqualTo(ArchiveQuery.build("", ArchiveShelf.MUSIC_MOST_DOWNLOADED, false, ArchiveKind.MUSIC, today))
+        assertThat(vm.ui.value.filtered).isFalse()
+    }
+
+    @Test fun filteredAudioGetRefusesARecordingAfterTheCutoff() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This recording wasn't published before 1926. Show everything to download it.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+        assertThat(File(mediaRoot, "music/archive-org/$HOLST").exists()).isFalse()
+    }
+
+    @Test fun waiverWithdrawnAfterBrowsingStillRefusesAtGet() = runTest(main.dispatcher) {
+        prefs.accept()
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        vm.openItem(HOLST)
+        settle { vm.ui.value.sheet?.loading == false }
+        assertThat(vm.ui.value.sheetAudio).isInstanceOf(AudioOffer.Tracks::class.java)
+        prefs.withdraw()
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This recording wasn't published before 1926. Show everything to download it.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+    }
+
+    @Test fun unfilteredAudioGetQueuesOneGroup() = runTest(main.dispatcher) {
+        prefs.accept()
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        vm.get(HOLST)
+        settle { downloads.enqueuedGroups.isNotEmpty() }
+        val (group, specs, root) = downloads.enqueuedGroups.single()
+        assertThat(group).isEqualTo(holstGroup)
+        assertThat(specs).hasSize(8)
+        assertThat(specs.all { it.kind == ItemKind.AUDIO && it.relativePath.startsWith("music/archive-org/$HOLST/") }).isTrue()
+        assertThat(root).isEqualTo(mediaRoot)
+        assertThat(MediaManifests.read(File(mediaRoot, "music/archive-org/$HOLST"))!!.kind).isEqualTo(MediaManifest.ALBUM)
+        settle { vm.ui.value.rows.isNotEmpty() }
+        assertThat(vm.ui.value.notice).isNull()
+    }
+
+    @Test fun spokenWordBeforeTheWaiverShowsOnlyTheNote() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.SPOKEN_WORD)
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        // Typing, a shelf, Load more and Retry send nothing either.
+        vm.setQuery("poems")
+        testScheduler.advanceTimeBy(500)
+        vm.selectShelf(ArchiveShelf.SPOKEN_POETRY)
+        vm.loadMore()
+        vm.retry()
+        settle { false }
+        assertThat(requests).isEmpty()
+        val ui = vm.ui.value
+        assertThat(ui.waiverNeeded).isTrue()
+        assertThat(ui.filtered).isTrue()
+        assertThat(ui.rows).isEmpty()
+        assertThat(ui.loading).isFalse()
+        assertThat(ui.error).isNull()
+        assertThat(ui.canLoadMore).isFalse()
+    }
+
+    @Test fun acceptingTheWaiverRevealsSpokenWordResults() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.SPOKEN_WORD)
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        assertThat(requests).isEmpty()
+        vm.acceptWaiver()
+        settle { searches().isNotEmpty() && !vm.ui.value.loading }
+        assertThat(searches().single().queryParameter("q"))
+            .isEqualTo(ArchiveQuery.build("", ArchiveShelf.SPOKEN_MOST_DOWNLOADED, false, ArchiveKind.SPOKEN_WORD))
+        val ui = vm.ui.value
+        assertThat(ui.waiverNeeded).isFalse()
+        assertThat(ui.rows.first().identifier).isEqualTo("nguyenngocnganfull")
+        assertThat(ui.total).isEqualTo(53_721)
+    }
+
+    @Test fun filteredSpokenWordGetIsRefused() = runTest(main.dispatcher) {
+        prefs.accept()
+        audioSearch(ArchiveKind.SPOKEN_WORD)
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        assertThat(vm.ui.value.rows).isNotEmpty()
+        val id = vm.ui.value.rows.first().identifier
+        prefs.withdraw()
+        settle { vm.ui.value.waiverNeeded }
+        val sent = requests.size
+        vm.get(id)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("Show everything to download archive.org spoken word.")
+        assertThat(requests).hasSize(sent)
+        assertThat(itemFetches()).isEqualTo(0)
+        assertThat(downloads.enqueuedGroups).isEmpty()
+        assertThat(vm.ui.value.rows).isEmpty()
+    }
+
+    @Test fun spokenWordGetMakesAnAudiobookManifest() = runTest(main.dispatcher) {
+        prefs.accept()
+        audioSearch(ArchiveKind.SPOKEN_WORD)
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        vm.get(HOLST)
+        settle { downloads.enqueuedGroups.isNotEmpty() }
+        val dir = File(mediaRoot, "audiobooks/archive-org/$HOLST")
+        val manifest = MediaManifests.read(dir)!!
+        assertThat(manifest.kind).isEqualTo(MediaManifest.AUDIOBOOK)
+        assertThat(MediaManifests.relativeDir(manifest)).isEqualTo("audiobooks/archive-org/$HOLST")
+        assertThat(downloads.enqueuedGroups.single().second.all { it.relativePath.startsWith("audiobooks/archive-org/$HOLST/") }).isTrue()
+        assertThat(File(mediaRoot, "music/archive-org/$HOLST").exists()).isFalse()
+    }
+
+    @Test fun lendingAudioOffersBorrowOnly() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        vm.openItem(AUDIO_LENDING)
+        settle { vm.ui.value.sheet?.loading == false }
+        assertThat(vm.ui.value.sheetAudio).isEqualTo(AudioOffer.LendOnly)
+        assertThat(vm.ui.value.sheet!!.offer).isNull()
+        vm.get(AUDIO_LENDING)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("Nothing on this item can be downloaded.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+    }
+
+    @Test fun audioRowStatusFollowsTheGroup() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.MUSIC)
+        searchBody = { _, _ -> audioSearchJson(2, HOLST, "other") }
+        val manifest = MediaFixtures.holst()
+        val dir = File(mediaRoot, MediaManifests.relativeDir(manifest))
+        MediaManifests.write(dir, manifest)
+        val specs = MediaDownloads.specs(manifest)
+        fun rec(i: Int, state: DownloadState) = record(
+            specs[i].itemId, state, kind = ItemKind.AUDIO, filePath = File(mediaRoot, specs[i].relativePath).path,
+            sizeBytes = 100, bytesDone = if (state == DownloadState.INSTALLED) 100 else 0, title = specs[i].title,
+        ).copy(groupId = holstGroup)
+        // The cover and two tracks in (3 of 8 files), the next running, the rest queued.
+        downloads.list.value = (0..7).map { i ->
+            rec(i, when { i < 3 -> DownloadState.INSTALLED; i == 3 -> DownloadState.RUNNING; else -> DownloadState.QUEUED })
+        }
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        assertThat(vm.ui.value.rows.first { it.identifier == HOLST }.status).isInstanceOf(ItemStatus.Downloading::class.java)
+        assertThat(vm.ui.value.rows.first { it.identifier == "other" }.status).isEqualTo(ItemStatus.NotInstalled)
+        // Cancelled part-way: the unfinished records go, and the manifest still says seven tracks.
+        downloads.list.value = (0..2).map { rec(it, DownloadState.INSTALLED) }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.rows.first { it.identifier == HOLST }.status).isEqualTo(ItemStatus.Partial(2, 7))
+        vm.openItem(HOLST)
+        settle { vm.ui.value.sheet?.loading == false }
+        assertThat(vm.ui.value.sheet!!.status).isEqualTo(ItemStatus.Partial(2, 7))
+        assertThat(vm.ui.value.sheet!!.sizeBytes).isEqualTo((vm.ui.value.sheetAudio as AudioOffer.Tracks).totalBytes)
+        // The Installed tab lists the album from the ledger: Music shows it, Audiobooks doesn't.
+        vm.setTab(ArchiveTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        val row = vm.ui.value.rows.single()
+        assertThat(row.identifier).isEqualTo(HOLST)
+        assertThat(row.title).isEqualTo("The Planets Op. 32, H. 125")
+        assertThat(row.status).isEqualTo(ItemStatus.Partial(2, 7))
+        val spoken = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        spoken.setTab(ArchiveTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        assertThat(spoken.ui.value.rows).isEmpty()
+    }
+
+    /** The Holst album's files as ledger rows, all [state], under [folder] ("music" or "audiobooks"). */
+    private fun holstRecords(folder: String, state: DownloadState = DownloadState.INSTALLED): List<DownloadRecord> {
+        val manifest = MediaFixtures.holst().let { if (folder == "music") it else it.copy(kind = MediaManifest.AUDIOBOOK) }
+        val dir = File(mediaRoot, MediaManifests.relativeDir(manifest))
+        assertThat(dir.path).contains("/$folder/archive-org/")
+        MediaManifests.write(dir, manifest)
+        return MediaDownloads.specs(manifest).map { spec ->
+            record(
+                spec.itemId, state, kind = ItemKind.AUDIO, filePath = File(mediaRoot, spec.relativePath).path,
+                sizeBytes = 100, bytesDone = 100, title = spec.title,
+            ).copy(groupId = holstGroup)
+        }
+    }
+
+    /**
+     * One archive.org item is one group whichever view got it, so an album got under Music must not show as this
+     * audiobook view's download (nor its Get be refused as "storage that isn't available"): it says where it is and
+     * opens it there, and Get never reaches the downloader.
+     */
+    @Test fun itemGotUnderMusicShowsAsInYourMusicInTheAudiobooksView() = runTest(main.dispatcher) {
+        prefs.accept()
+        searchBody = { _, _ -> audioSearchJson(1, HOLST) }
+        downloads.list.value = holstRecords("music")
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        settle { vm.ui.value.rows.isNotEmpty() }
+        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary("Music"))
+        vm.openItem(HOLST)
+        settle { vm.ui.value.sheet?.loading == false }
+        assertThat(vm.ui.value.sheet!!.status).isEqualTo(ItemStatus.InLibrary("Music"))
+
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This is already in your Music.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+        assertThat(File(mediaRoot, "audiobooks/archive-org/$HOLST").exists()).isFalse()
+        // The Installed tab still lists only this view's own downloads.
+        vm.setTab(ArchiveTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.rows).isEmpty()
+
+        // The Music view, where it was got, manages it as before.
+        val music = audioViewModel(ArchiveKind.MUSIC)
+        settle { music.ui.value.rows.isNotEmpty() }
+        assertThat(music.ui.value.rows.single().status).isEqualTo(ItemStatus.Installed)
+    }
+
+    @Test fun itemGotUnderAudiobooksShowsAsInYourAudiobooksInTheMusicView() = runTest(main.dispatcher) {
+        prefs.accept()
+        searchBody = { _, _ -> audioSearchJson(1, HOLST) }
+        // Still downloading there: it's theirs all the same.
+        downloads.list.value = holstRecords("audiobooks", DownloadState.QUEUED)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        settle { vm.ui.value.rows.isNotEmpty() }
+        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary("Audiobooks"))
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This is already in your Audiobooks.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+        assertThat(File(mediaRoot, "music/archive-org/$HOLST").exists()).isFalse()
+    }
+
+    /** With no ledger rows (cleared), the other view's folder on disk still says where the item is. */
+    @Test fun getFindsTheOtherViewsFolderWithoutLedgerRows() = runTest(main.dispatcher) {
+        prefs.accept()
+        searchBody = { _, _ -> audioSearchJson(1, HOLST) }
+        holstRecords("music")
+        val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
+        vm.get(HOLST)
+        settle { vm.ui.value.notice != null }
+        assertThat(vm.ui.value.notice).isEqualTo("This is already in your Music.")
+        assertThat(downloads.enqueuedGroups).isEmpty()
+    }
+
+    @Test fun audioCancelRetryAndRemoveGoToTheGroup() = runTest(main.dispatcher) {
+        audioSearch(ArchiveKind.MUSIC)
+        val vm = audioViewModel(ArchiveKind.MUSIC)
+        vm.cancel(HOLST)
+        vm.retryDownload(HOLST)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsAtLeast("cancelGroup:$holstGroup", "retryGroup:$holstGroup").inOrder()
+        assertThat(downloads.calls.none { it.startsWith("cancel:") || it.startsWith("retry:") }).isTrue()
+        assertThat(sidecars.listFiles()!!.toList()).isEmpty()
+    }
+
+    @Test fun textsAreUnchanged() = runTest(main.dispatcher) {
+        val vm = viewModel()
+        assertThat(searches().single().queryParameter("q")).isEqualTo(ArchiveQuery.build("", ArchiveShelf.MOST_DOWNLOADED, true))
+        val ui = vm.ui.value
+        assertThat(ui.kind).isEqualTo(ArchiveKind.TEXTS)
+        assertThat(ui.waiverNeeded).isFalse()
+        assertThat(ui.rows.all { it.audio == null }).isTrue()
+        vm.openItem(epubId)
+        settle { vm.ui.value.sheet?.loading == false }
+        assertThat(vm.ui.value.sheetAudio).isNull()
+        assertThat(vm.ui.value.sheet!!.offer).isInstanceOf(Offer.Download::class.java)
+    }
+
     private class FakeArchivePrefs : ArchivePrefs {
         private val state = MutableStateFlow(false)
         override val waiverAccepted: StateFlow<Boolean> = state
@@ -522,6 +861,14 @@ class ArchiveViewModelTest {
     }
 
     private companion object {
+        const val HOLST = MediaFixtures.HOLST
+        const val AUDIO_LENDING = "rvji2imcowl7mslliunbjf94m7meqr7isqpghxlm"
+
+        fun audioSearchJson(total: Int, vararg ids: String) =
+            """{"response":{"numFound":$total,"docs":[""" +
+                ids.joinToString(",") { """{"identifier":"$it","title":"Title $it","creator":"C","year":1920,"mediatype":"audio","format":["VBR MP3","Item Tile"]}""" } +
+                "]}}"
+
         const val MODERN = "modern1950"
         val MODERN_JSON = """
             {"metadata":{"identifier":"$MODERN","title":"A Modern Book","creator":"Someone","date":"1950","mediatype":"texts"},

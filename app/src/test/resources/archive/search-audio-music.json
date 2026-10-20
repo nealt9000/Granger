@@ -1,0 +1,80 @@
+{
+    "responseHeader": {
+        "status": 0,
+        "QTime": 245,
+        "params": {
+            "query": "mediatype:audio AND collection:audio_music AND year:[1860 TO 1925]",
+            "qin": "mediatype:audio AND collection:audio_music AND year:[1860 TO 1925]",
+            "fields": "identifier,title,creator,year,format,access-restricted-item,downloads,mediatype",
+            "wt": "json",
+            "sort": "downloads desc",
+            "rows": 3,
+            "start": 0
+        }
+    },
+    "response": {
+        "numFound": 52107,
+        "start": 0,
+        "docs": [
+            {
+                "creator": "Alessandro Moreschi",
+                "downloads": 246995,
+                "format": [
+                    "64Kbps MP3",
+                    "Archive BitTorrent",
+                    "Item Tile",
+                    "Metadata",
+                    "Ogg Vorbis",
+                    "PNG"
+                ],
+                "identifier": "AlessandroMoreschi",
+                "mediatype": "audio",
+                "title": "Ave Maria",
+                "year": 1904
+            },
+            {
+                "creator": "American Symphony Orchestra",
+                "downloads": 174266,
+                "format": [
+                    "96Kbps MP3",
+                    "Archive BitTorrent",
+                    "Item Tile",
+                    "Metadata",
+                    "PNG",
+                    "Unknown"
+                ],
+                "identifier": "EDIS-SRP-0197-06",
+                "mediatype": "audio",
+                "title": "Ride of the Valkyries - from \"Die Valkyrie\"",
+                "year": 1921
+            },
+            {
+                "creator": "Paul Whiteman and George Gershwin",
+                "downloads": 138476,
+                "format": [
+                    "64Kbps M3U",
+                    "64Kbps MP3",
+                    "64Kbps MP3 ZIP",
+                    "Archive BitTorrent",
+                    "Columbia Peaks",
+                    "Essentia High GZ",
+                    "Essentia Low GZ",
+                    "Flac",
+                    "Flac ZIP",
+                    "Item Tile",
+                    "Metadata",
+                    "Ogg Vorbis",
+                    "PNG",
+                    "Spectrogram",
+                    "VBR M3U",
+                    "VBR MP3",
+                    "VBR ZIP"
+                ],
+                "identifier": "rhapblue11924",
+                "mediatype": "audio",
+                "title": "Rhapsody In Blue Part 1",
+                "year": 1924
+            }
+        ]
+    }
+}

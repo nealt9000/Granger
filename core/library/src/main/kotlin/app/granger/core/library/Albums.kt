@@ -30,11 +30,23 @@ object Albums {
     private fun normalise(s: String): String =
         Normalizer.normalize(s, Normalizer.Form.NFKC).replace(WHITESPACE, " ").trim().lowercase(Locale.ROOT)
 
-    /** "<normalised album artist>|<normalised album>"; untitled albums: "|unknown|<folder>". Normalised = trimmed, lower-cased, NFKC. */
+    /**
+     * "<normalised album artist>|<normalised album>"; untitled albums: "|unknown|<folder>". Normalised = trimmed, lower-cased, NFKC.
+     * A tagged key that would start with [itemKey]'s prefix (no album artist, an album tag "item|...") gets a leading
+     * space, which no other key has, so a phone album can never join a downloaded one.
+     */
     fun key(albumArtist: String, album: String, folder: String): String {
         val title = normalise(album)
-        return if (title.isEmpty()) "$UNTAGGED$folder" else "${normalise(albumArtist)}|$title"
+        if (title.isEmpty()) return "$UNTAGGED$folder"
+        val key = "${normalise(albumArtist)}|$title"
+        return if (key.startsWith(ITEM)) " $key" else key
     }
+
+    /**
+     * An album that is one origin item, whatever its files' tags: "|item|<source>:<ref>" ("|item|archive-org:<identifier>").
+     * Never equal to a [key] result. Downloaded albums are grouped by this alone: their tags never split or merge them.
+     */
+    fun itemKey(source: String, ref: String): String = "$ITEM$source:$ref"
 
     /**
      * An album's title wherever it is shown: its tag, else (an untagged album, grouped by folder) the folder's name,
@@ -50,6 +62,7 @@ object Albums {
     fun untaggedTitle(key: String): String? = key.takeIf { it.startsWith(UNTAGGED) }?.let { title("", it.removePrefix(UNTAGGED)) }
 
     private const val UNTAGGED = "|unknown|"
+    private const val ITEM = "|item|"
 
     /** Tracks the library shows: MISSING ones are left out (their rows stay, and come back when the file does). */
     fun present(tracks: List<Track>): List<Track> = tracks.filter { it.status != PackStatus.MISSING }

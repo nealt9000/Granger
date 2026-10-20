@@ -1,0 +1,89 @@
+{
+    "books": [
+        {
+            "id": "817",
+            "title": "Time Machine",
+            "language": "English",
+            "num_sections": "13",
+            "totaltime": "4:09:29",
+            "totaltimesecs": 14969,
+            "authors": [
+                {
+                    "id": "146",
+                    "first_name": "H. G.",
+                    "last_name": "Wells",
+                    "dob": "1866",
+                    "dod": "1946"
+                }
+            ]
+        },
+        {
+            "id": "5040",
+            "title": "Time Machine (Version 4)",
+            "language": "English",
+            "num_sections": "13",
+            "totaltime": "3:47:21",
+            "totaltimesecs": 13641,
+            "authors": [
+                {
+                    "id": "146",
+                    "first_name": "H. G.",
+                    "last_name": "Wells",
+                    "dob": "1866",
+                    "dod": "1946"
+                }
+            ]
+        },
+        {
+            "id": "5618",
+            "title": "Time Machine (Version 3)",
+            "language": "English",
+            "num_sections": "12",
+            "totaltime": "3:39:41",
+            "totaltimesecs": 13181,
+            "authors": [
+                {
+                    "id": "146",
+                    "first_name": "H. G.",
+                    "last_name": "Wells",
+                    "dob": "1866",
+                    "dod": "1946"
+                }
+            ]
+        },
+        {
+            "id": "5630",
+            "title": "Time Machine (Version 2)",
+            "language": "English",
+            "num_sections": "12",
+            "totaltime": "3:39:09",
+            "totaltimesecs": 13149,
+            "authors": [
+                {
+                    "id": "146",
+                    "first_name": "H. G.",
+                    "last_name": "Wells",
+                    "dob": "1866",
+                    "dod": "1946"
+                }
+            ]
+        },
+        {
+            "id": "13949",
+            "title": "Time Machine (Version 6)",
+            "language": "English",
+            "num_sections": "17",
+            "totaltime": "03:27:44",
+            "totaltimesecs": 12464,
+            "authors": [
+                {
+                    "id": "146",
+                    "first_name": "H. G.",
+                    "last_name": "Wells",
+                    "dob": "1866",
+                    "dod": "1946"
+                }
+            ]
+        }
+    ]
+}

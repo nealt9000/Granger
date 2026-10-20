@@ -25,10 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.PackStatus
+import app.granger.core.library.PlaylistItem
 
 /**
- * One playlist, in order; MISSING songs stay in place, dimmed. A song's menu moves it up or down or removes it (by
- * its position, which is its entry ordinal: track rows are never deleted, so every entry shows).
+ * One playlist, in order; MISSING songs stay in place, dimmed. A song's menu moves it up or down past the row next to
+ * it, or removes it, by its entry ordinal ([PlaylistItem.ordinal]), not its row position: a removed download's track
+ * row is deleted while its entry stays (for a re-download), and such an entry shows no row.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,12 +73,13 @@ fun PlaylistScreen(vm: MusicViewModel, playlistId: Long, nav: MusicNav) {
                 )
             }
             if (tracks.isEmpty()) item { Empty("No songs yet. Long-press a song or album to add it.") }
-            // A song can be in a playlist twice, so rows are keyed by position.
-            itemsIndexed(tracks, key = { i, t -> "$i:${t.id}" }) { i, track ->
-                SongRow(track, vm, dialogs, nav, onPlay = { vm.play(tracks, i, source) }) { close ->
-                    if (i > 0) DropdownMenuItem(text = { Text("Move up") }, onClick = { close(); vm.moveInPlaylist(playlistId, i, i - 1) })
-                    if (i < tracks.lastIndex) DropdownMenuItem(text = { Text("Move down") }, onClick = { close(); vm.moveInPlaylist(playlistId, i, i + 1) })
-                    DropdownMenuItem(text = { Text("Remove from playlist") }, onClick = { close(); vm.removeFromPlaylist(playlistId, i) })
+            // A song can be in a playlist twice, so rows are keyed by entry ordinal.
+            val items = loaded.items
+            itemsIndexed(items, key = { _, item -> "${item.ordinal}:${item.track.id}" }) { i, item ->
+                SongRow(item.track, vm, dialogs, nav, onPlay = { vm.play(tracks, i, source) }) { close ->
+                    if (i > 0) DropdownMenuItem(text = { Text("Move up") }, onClick = { close(); vm.moveInPlaylist(playlistId, item.ordinal, items[i - 1].ordinal) })
+                    if (i < items.lastIndex) DropdownMenuItem(text = { Text("Move down") }, onClick = { close(); vm.moveInPlaylist(playlistId, item.ordinal, items[i + 1].ordinal) })
+                    DropdownMenuItem(text = { Text("Remove from playlist") }, onClick = { close(); vm.removeFromPlaylist(playlistId, item.ordinal) })
                 }
             }
         }

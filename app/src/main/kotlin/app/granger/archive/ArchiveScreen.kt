@@ -54,16 +54,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.core.archive.ArchiveKind
 import app.granger.core.archive.ArchiveShelf
+import app.granger.core.archive.AudioOffer
+import app.granger.core.archive.Offer
 import app.granger.sources.ItemStatus
 import app.granger.sources.ItemStatusText
 
 private const val DISCLAIMER = "Archive.org content is provided by the Internet Archive. Granger doesn't host or vouch for it."
+private const val UNFILTERED_NOTE = "Showing everything archive.org serves openly. You're responsible for what you download."
+private const val SPOKEN_WORD_NOTE = "Archive.org dates spoken-word recordings by their text, not the recording, so Granger can't tell " +
+    "which are in the public domain. LibriVox recordings all are."
 
-/** Browse and search archive.org texts (public domain until the waiver), with an item sheet to Get, Borrow or View. */
-@OptIn(ExperimentalMaterial3Api::class)
+/** The filter note for [ui]'s view: public-domain texts, public-domain recordings, or the spoken-word note before the waiver. */
+internal fun filterNote(ui: ArchiveUi): String = when {
+    !ui.filtered -> UNFILTERED_NOTE
+    ui.waiverNeeded -> SPOKEN_WORD_NOTE
+    ui.kind == ArchiveKind.TEXTS -> "Showing public-domain texts only: published 1930 or earlier."
+    else -> "Showing public-domain recordings only: published before ${ui.filterYear}."
+}
+
+/**
+ * Browse and search archive.org texts, spoken word or music (public domain until the waiver), with an item sheet to
+ * Get, Borrow or View. [onOpenLibriVox] is the spoken-word note's way to LibriVox. [onOpenInLibrary] opens an audio
+ * item got from the other audio view where it is (its album or its book).
+ */
 @Composable
-fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, onBack: () -> Unit) {
+fun ArchiveScreen(
+    viewModel: ArchiveViewModel,
+    detailsUrl: (String) -> String,
+    onBack: () -> Unit,
+    onOpenLibriVox: () -> Unit,
+    onOpenInLibrary: (identifier: String) -> Unit = {},
+) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(ui.notice) {
@@ -91,7 +114,97 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
     }
 
     var confirmRemove by remember { mutableStateOf<Pair<String, String>?>(null) }
+
+    ArchiveContent(
+        ui = ui,
+        searchText = viewModel.searchText,
+        snackbar = snackbar,
+        onQuery = viewModel::setQuery,
+        onTab = viewModel::setTab,
+        onShelf = viewModel::selectShelf,
+        onRetry = viewModel::retry,
+        onLoadMore = viewModel::loadMore,
+        onOpenRow = viewModel::openItem,
+        onGetRow = {
+            beforeDownload()
+            viewModel.get(it)
+        },
+        onCancelRow = viewModel::cancel,
+        onRetryRow = viewModel::retryDownload,
+        onRemoveRow = { confirmRemove = it.identifier to it.title },
+        onAcceptWaiver = viewModel::acceptWaiver,
+        onOpenLibriVox = onOpenLibriVox,
+        onBack = onBack,
+        onOpenInLibraryRow = onOpenInLibrary,
+    )
+
+    ui.sheet?.let { sheet ->
+        ArchiveItemSheet(
+            sheet,
+            audio = ui.sheetAudio,
+            onGet = {
+                beforeDownload()
+                viewModel.get(sheet.identifier)
+            },
+            onCancel = { viewModel.cancel(sheet.identifier) },
+            onRetry = { viewModel.retryDownload(sheet.identifier) },
+            onRemove = { confirmRemove = sheet.identifier to (sheet.item?.title?.ifBlank { null } ?: sheet.identifier) },
+            onOpenInBrowser = { openInBrowser(sheet.identifier) },
+            onDismiss = viewModel::closeItem,
+            onOpenInLibrary = {
+                viewModel.closeItem()
+                onOpenInLibrary(sheet.identifier)
+            },
+        )
+    }
+
+    confirmRemove?.let { (identifier, title) ->
+        AlertDialog(
+            onDismissRequest = { confirmRemove = null },
+            title = { Text("Remove $title?") },
+            text = {
+                Text(
+                    if (ui.kind == ArchiveKind.TEXTS) "This deletes the file. Your place and highlights are kept."
+                    else "This deletes its files. Your place and bookmarks are kept.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.remove(identifier)
+                    confirmRemove = null
+                }) { Text("Remove") }
+            },
+            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text("Keep") } },
+        )
+    }
+}
+
+/** The screen without its view model: the list, the filter note and the waiver dialog. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ArchiveContent(
+    ui: ArchiveUi,
+    searchText: String,
+    snackbar: SnackbarHostState,
+    onQuery: (String) -> Unit,
+    onTab: (ArchiveTab) -> Unit,
+    onShelf: (ArchiveShelf) -> Unit,
+    onRetry: () -> Unit,
+    onLoadMore: () -> Unit,
+    onOpenRow: (String) -> Unit,
+    onGetRow: (String) -> Unit,
+    onCancelRow: (String) -> Unit,
+    onRetryRow: (String) -> Unit,
+    onRemoveRow: (ArchiveRow) -> Unit,
+    onAcceptWaiver: () -> Unit,
+    onOpenLibriVox: () -> Unit,
+    onBack: () -> Unit,
+    /** An item got from the other audio view ([ItemStatus.InLibrary]): open it there. */
+    onOpenInLibraryRow: (String) -> Unit = {},
+) {
     var showWaiver by rememberSaveable { mutableStateOf(false) }
+    // Spoken word before the waiver shows nothing of archive.org's results, only the note (Decisions, Plan M2).
+    val hidingResults = ui.waiverNeeded && ui.tab == ArchiveTab.BROWSE
 
     Scaffold(
         topBar = {
@@ -107,9 +220,9 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             item(key = "search") {
                 OutlinedTextField(
-                    value = viewModel.searchText,
-                    onValueChange = viewModel::setQuery,
-                    placeholder = { Text("Search archive.org texts") },
+                    value = searchText,
+                    onValueChange = onQuery,
+                    placeholder = { Text("Search archive.org ${ui.kind.noun}") },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -118,31 +231,37 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in ArchiveTab.entries) {
-                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(tab.title) })
+                        Tab(selected = ui.tab == tab, onClick = { onTab(tab) }, text = { Text(tab.title) })
                     }
                 }
             }
             item(key = "note") {
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(
-                        if (ui.filtered) "Showing public-domain texts only: published 1930 or earlier."
-                        else "Showing everything archive.org serves openly. You're responsible for what you download.",
+                        filterNote(ui),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    if (ui.filtered) OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
+                    if (ui.waiverNeeded) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = onOpenLibriVox) { Text("LibriVox") }
+                            OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
+                        }
+                    } else if (ui.filtered) {
+                        OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
+                    }
                 }
             }
-            if (ui.tab == ArchiveTab.BROWSE && ui.query.isBlank()) {
+            if (ui.tab == ArchiveTab.BROWSE && ui.query.isBlank() && !hidingResults) {
                 item(key = "shelves") {
                     Row(
                         Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        for (shelf in ArchiveShelf.entries) {
+                        for (shelf in ArchiveShelf.of(ui.kind)) {
                             FilterChip(
                                 selected = ui.shelf == shelf,
-                                onClick = { viewModel.selectShelf(shelf) },
+                                onClick = { onShelf(shelf) },
                                 label = { Text(shelf.title) },
                             )
                         }
@@ -153,11 +272,11 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
                 item(key = "problem") {
                     Column(Modifier.padding(16.dp)) {
                         Text(problem, color = MaterialTheme.colorScheme.error)
-                        TextButton(onClick = viewModel::retry) { Text("Retry") }
+                        TextButton(onClick = onRetry) { Text("Retry") }
                     }
                 }
             }
-            if (!ui.loading && ui.error == null && ui.rows.isEmpty()) {
+            if (!ui.loading && ui.error == null && ui.rows.isEmpty() && !hidingResults) {
                 item(key = "empty") {
                     Text(
                         when {
@@ -169,17 +288,15 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
                     )
                 }
             }
-            items(ui.rows, key = { "row-${it.identifier}" }) { row ->
+            items(if (hidingResults) emptyList() else ui.rows, key = { "row-${it.identifier}" }) { row ->
                 ArchiveResultRow(
                     row,
-                    onOpen = { viewModel.openItem(row.identifier) },
-                    onGet = {
-                        beforeDownload()
-                        viewModel.get(row.identifier)
-                    },
-                    onCancel = { viewModel.cancel(row.identifier) },
-                    onRetry = { viewModel.retryDownload(row.identifier) },
-                    onRemove = { confirmRemove = row.identifier to row.title },
+                    onOpen = { onOpenRow(row.identifier) },
+                    onGet = { onGetRow(row.identifier) },
+                    onCancel = { onCancelRow(row.identifier) },
+                    onRetry = { onRetryRow(row.identifier) },
+                    onRemove = { onRemoveRow(row) },
+                    onOpenInLibrary = { onOpenInLibraryRow(row.identifier) },
                 )
                 HorizontalDivider()
             }
@@ -190,7 +307,7 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
             }
             if (ui.canLoadMore) {
                 item(key = "more") {
-                    TextButton(onClick = viewModel::loadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("Load more") }
+                    TextButton(onClick = onLoadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("Load more") }
                 }
             }
             item(key = "disclaimer") {
@@ -204,40 +321,10 @@ fun ArchiveScreen(viewModel: ArchiveViewModel, detailsUrl: (String) -> String, o
         }
     }
 
-    ui.sheet?.let { sheet ->
-        ArchiveItemSheet(
-            sheet,
-            onGet = {
-                beforeDownload()
-                viewModel.get(sheet.identifier)
-            },
-            onCancel = { viewModel.cancel(sheet.identifier) },
-            onRetry = { viewModel.retryDownload(sheet.identifier) },
-            onRemove = { confirmRemove = sheet.identifier to (sheet.item?.title?.ifBlank { null } ?: sheet.identifier) },
-            onOpenInBrowser = { openInBrowser(sheet.identifier) },
-            onDismiss = viewModel::closeItem,
-        )
-    }
-
-    confirmRemove?.let { (identifier, title) ->
-        AlertDialog(
-            onDismissRequest = { confirmRemove = null },
-            title = { Text("Remove $title?") },
-            text = { Text("This deletes the file. Your place and highlights are kept.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.remove(identifier)
-                    confirmRemove = null
-                }) { Text("Remove") }
-            },
-            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text("Keep") } },
-        )
-    }
-
     if (showWaiver) {
         WaiverDialog(
             onAccept = {
-                viewModel.acceptWaiver()
+                onAcceptWaiver()
                 showWaiver = false
             },
             onDismiss = { showWaiver = false },
@@ -253,6 +340,7 @@ private fun ArchiveResultRow(
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     onRemove: () -> Unit,
+    onOpenInLibrary: () -> Unit,
 ) {
     ListItem(
         modifier = Modifier.clickable(onClick = onOpen),
@@ -260,13 +348,13 @@ private fun ArchiveResultRow(
         supportingContent = {
             Column {
                 if (row.details.isNotBlank()) Text(row.details, style = MaterialTheme.typography.bodySmall)
-                offerLabel(row.preview)?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                (audioLabel(row.audio) ?: offerLabel(row.preview))?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(row.status)
             }
         },
         trailingContent = {
             when (row.status) {
-                ItemStatus.NotInstalled -> if (row.preview is app.granger.core.archive.Offer.Download) {
+                ItemStatus.NotInstalled -> if (row.preview is Offer.Download || row.audio is AudioOffer.Tracks) {
                     TextButton(onClick = onGet) { Text("Get") }
                 }
                 is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
@@ -275,6 +363,11 @@ private fun ArchiveResultRow(
                     TextButton(onClick = onRetry) { Text("Retry") }
                 }
                 ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
+                is ItemStatus.Partial -> Row {
+                    TextButton(onClick = onRemove) { Text("Remove") }
+                    TextButton(onClick = onGet) { Text("Get the rest") }
+                }
+                is ItemStatus.InLibrary -> TextButton(onClick = onOpenInLibrary) { Text("Open") }
                 ItemStatus.NeedsMoreMemory -> Unit
             }
         },

@@ -1,22 +1,12 @@
 package app.granger.core.archive
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.longOrNull
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.IOException
 
 class ArchiveOrgClient(
     private val client: OkHttpClient,
@@ -63,6 +53,8 @@ class ArchiveOrgClient(
                 licenseUrl = meta["licenseurl"]?.firstString().orEmpty(),
                 restricted = meta["access-restricted-item"]?.asBool() == true,
                 files = (root["files"] as? JsonArray).orEmpty().map { it.jsonObject.toFile() },
+                mediatype = meta["mediatype"]?.firstString().orEmpty(),
+                collections = meta["collection"]?.allStrings().orEmpty(),
             )
         }
     }
@@ -72,19 +64,10 @@ class ArchiveOrgClient(
 
     fun detailsUrl(identifier: String): String = "$baseUrl/details/$identifier"
 
-    private suspend fun fetch(url: HttpUrl): JsonObject = withContext(Dispatchers.IO) {
-        val request = Request.Builder().url(url).header("User-Agent", userAgent).build()
-        val body = try {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw ArchiveError("archive.org answered ${response.code}")
-                response.body?.string().orEmpty()
-            }
-        } catch (e: ArchiveError) {
-            throw e
-        } catch (e: IOException) {
-            throw ArchiveError("Couldn't reach archive.org")
-        }
-        parse { json.parseToJsonElement(body).jsonObject }
+    private suspend fun fetch(url: HttpUrl): JsonObject {
+        val reply = client.getText(url, userAgent) { ArchiveError("Couldn't reach archive.org") }
+        if (!reply.isSuccessful) throw ArchiveError("archive.org answered ${reply.code}")
+        return parse { json.parseToJsonElement(reply.body).jsonObject }
     }
 
     private inline fun <T> parse(block: () -> T): T = try {
@@ -103,6 +86,7 @@ class ArchiveOrgClient(
         formats = this["format"]?.allStrings().orEmpty(),
         restricted = this["access-restricted-item"]?.asBool() == true,
         downloads = this["downloads"]?.asLong() ?: 0L,
+        mediatype = this["mediatype"]?.firstString().orEmpty(),
     )
 
     private fun JsonObject.toFile() = ArchiveFile(
@@ -113,25 +97,33 @@ class ArchiveOrgClient(
         md5 = this["md5"]?.firstString()?.ifBlank { null },
         source = this["source"]?.firstString().orEmpty(),
         isPrivate = this["private"]?.asBool() == true,
+        title = this["title"]?.firstString().orEmpty(),
+        album = this["album"]?.firstString().orEmpty(),
+        creator = this["creator"]?.firstString().orEmpty(),
+        track = this["track"]?.firstString()?.let(::trackOf),
+        lengthMs = this["length"]?.firstString()?.let(::lengthMsOf),
     )
-
-    private fun JsonElement.asInt(): Int? = (this as? JsonPrimitive)?.let { it.intOrNull ?: it.contentOrNull?.trim()?.toIntOrNull() }
-    private fun JsonElement.asLong(): Long? = (this as? JsonPrimitive)?.let { it.longOrNull ?: it.contentOrNull?.trim()?.toLongOrNull() }
-    private fun JsonElement.asBool(): Boolean? = (this as? JsonPrimitive)?.let { it.booleanOrNull ?: it.contentOrNull?.trim()?.lowercase()?.toBooleanStrictOrNull() }
-
-    private fun JsonElement.allStrings(): List<String> = when (this) {
-        is JsonArray -> mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
-        is JsonPrimitive -> listOfNotNull(contentOrNull)
-        else -> emptyList()
-    }
-
-    private fun JsonElement.firstString(): String? = allStrings().firstOrNull()
 
     /** The first run of exactly four digits, so "c1890", "[1890]" and "May 12, 1890" all give 1890. */
     private fun yearOf(date: String): Int? = YEAR.find(date)?.value?.toInt()
 
-    private fun stripHtml(text: String): String =
-        text.replace(TAG, " ").replace(SPACES, " ").trim().take(MAX_DESCRIPTION)
+    /** "01" → 1, "7" → 7, "1/13" → 1; anything else → null. */
+    private fun trackOf(track: String): Int? = TRACK.matchEntire(track.trim())?.groupValues?.get(1)?.toIntOrNull()
+
+    /** "373.16" → 373 160, "19:32" → 1 172 000, "1:02:03" → 3 723 000; anything else → null. */
+    private fun lengthMsOf(length: String): Long? {
+        val parts = length.trim().split(':')
+        if (parts.size > 3 || parts.any { it.isEmpty() }) return null
+        val seconds = parts.last().toBigDecimalOrNull()?.takeIf { it.signum() >= 0 } ?: return null
+        var total = seconds
+        var unit = 60L
+        for (part in parts.dropLast(1).reversed()) {
+            if (!part.all(Char::isDigit)) return null
+            total += part.toBigDecimal() * unit.toBigDecimal()
+            unit *= 60
+        }
+        return total.movePointRight(3).setScale(0, java.math.RoundingMode.HALF_UP).toLong()
+    }
 
     private fun encodeSegment(segment: String): String {
         val out = StringBuilder()
@@ -144,10 +136,8 @@ class ArchiveOrgClient(
     }
 
     private companion object {
-        val SEARCH_FIELDS = listOf("identifier", "title", "creator", "year", "format", "access-restricted-item", "downloads")
-        val TAG = Regex("<[^>]*>")
+        val SEARCH_FIELDS = listOf("identifier", "title", "creator", "year", "format", "access-restricted-item", "downloads", "mediatype")
+        val TRACK = Regex("(\\d{1,4})(?:/\\d+)?")
         val YEAR = Regex("(?<!\\d)\\d{4}(?!\\d)")
-        val SPACES = Regex("\\s+")
-        const val MAX_DESCRIPTION = 2000
     }
 }

@@ -41,7 +41,12 @@ import app.granger.player.PlayerScreen
 import app.granger.player.PlayerViewModel
 import app.granger.player.miniPlayerPlacement
 import app.granger.archive.ArchiveViewModel
+import app.granger.librivox.LibriVoxScreen
+import app.granger.librivox.LibriVoxViewModel
+import app.granger.core.archive.ArchiveKind
+import app.granger.core.library.Albums
 import app.granger.core.library.BookIds
+import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
 import app.granger.ebook.Dictionary
 import app.granger.ebook.DictionaryChoice
@@ -76,6 +81,7 @@ import app.granger.search.SearchScreen
 import app.granger.search.SearchViewModel
 import android.content.Context
 import app.granger.media.PlayResumer
+import app.granger.settings.ComponentOtherAppsSharing
 import app.granger.settings.DaoMediaFolders
 import app.granger.settings.MediaSettings
 import app.granger.settings.ResolverFolderGrants
@@ -190,10 +196,49 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 @Serializable data class SourceRoute(val scope: CatalogScope)
-@Serializable object ArchiveRoute
+/** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
+@Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
+/** The LibriVox source: Recently added, six genres and search (Plan M2). */
+@Serializable object LibriVoxRoute
+
+fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = true }
+
+/** Where each Library source link goes (spec §3.4): the archive.org links open its texts, spoken-word or music view. */
+internal fun routeOf(link: SourceLink): Any = when (link) {
+    SourceLink.GRANGER -> SourceRoute(CatalogScope.GRANGER)
+    SourceLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
+    SourceLink.ARCHIVE_ORG -> ArchiveRoute(ArchiveKind.TEXTS)
+    SourceLink.ARCHIVE_ORG_SPOKEN -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
+    SourceLink.ARCHIVE_ORG_MUSIC -> ArchiveRoute(ArchiveKind.MUSIC)
+    SourceLink.LIBRIVOX -> LibriVoxRoute
+}
+
+fun NavController.openSource(link: SourceLink) {
+    if (link == SourceLink.LIBRIVOX) openLibriVox() else navigate(routeOf(link))
+}
+
+/**
+ * An archive.org item seen in the [kind] view but got from the other one, where it lives: an album (got from Music)
+ * or a book (got from Audiobooks), by its origin ids.
+ */
+internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
+    if (kind == ArchiveKind.MUSIC) AudiobookRoute("audiobook:${MediaManifest.ARCHIVE_ORG}:$identifier")
+    else AlbumRoute(Albums.itemKey(MediaManifest.ARCHIVE_ORG, identifier))
 /** [media] opens it at the Music & audiobooks section. */
 @Serializable data class SettingsRoute(val media: Boolean = false)
 @Serializable object ReadinessRoute
+
+/** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
+internal fun railToolOf(destination: NavDestination): RailTool? = when {
+    destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
+        destination.hasRoute<LibriVoxRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
+    destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
+    destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
+        destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
+    else -> null
+}
 
 /** The full-screen player, music or audiobook, whichever is loaded (spec §8). */
 @Serializable object PlayerRoute
@@ -365,17 +410,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         return true
     }
 
-    val selected = when {
-        destination == null -> null
-        destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
-            destination.hasRoute<ArchiveRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
-        destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
-        destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-        destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
-            destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
-        destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
-        else -> null
-    }
+    val selected = destination?.let(::railToolOf)
 
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
@@ -476,13 +511,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },
                     onOpenAudiobooks = { id -> nav.navigate(AudiobookShelfRoute(id)) },
-                    onOpenSource = { source ->
-                        when (source) {
-                            SourceLink.GRANGER -> nav.navigate(SourceRoute(CatalogScope.GRANGER))
-                            SourceLink.KIWIX -> nav.navigate(SourceRoute(CatalogScope.KIWIX))
-                            SourceLink.ARCHIVE_ORG -> nav.navigate(ArchiveRoute)
-                        }
-                    },
+                    onOpenSource = nav::openSource,
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
@@ -510,10 +539,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                 onPlaylist = { nav.navigate(PlaylistRoute(it)) },
                 onFolder = { nav.navigate(FolderRoute(it)) },
                 onBack = { nav.popBackStack() },
+                onOpenSource = nav::openSource,
+                onMediaSettings = { nav.navigate(SettingsRoute(media = true)) },
             )
+            val removeDownload: (String) -> Unit = { group -> container.appScope.launch { container.mediaDownloader.remove(group) } }
             // The detail pages aren't scoped to a collection: their routes carry none.
             fun musicViewModel(collectionId: String?) =
-                MusicViewModel(collectionId, container.media, container.shelves, container.playlists, container.playerHub)
+                MusicViewModel(
+                    collectionId, container.media, container.shelves, container.playlists, container.playerHub,
+                    downloads = container.downloads.records, remover = removeDownload,
+                )
             composable<MusicRoute> { backStackEntry ->
                 val id = backStackEntry.toRoute<MusicRoute>().collectionId
                 MusicScreen(viewModel { musicViewModel(id) }, musicNav)
@@ -536,6 +571,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             // The book page isn't scoped to a collection: its route carries none.
             fun audiobooksViewModel(collectionId: String?) = AudiobooksViewModel(
                 collectionId, container.media, container.shelves, DaoListening(container.playback), container.playerHub,
+                downloads = container.downloads.records, remover = removeDownload,
             )
             composable<AudiobookShelfRoute> { backStackEntry ->
                 val id = backStackEntry.toRoute<AudiobookShelfRoute>().collectionId
@@ -543,6 +579,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     viewModel { audiobooksViewModel(id) },
                     onBook = { nav.navigate(AudiobookRoute(it)) },
                     onBack = { nav.popBackStack() },
+                    onOpenSource = nav::openSource,
+                    onMediaSettings = { nav.navigate(SettingsRoute(media = true)) },
                 )
             }
             composable<AudiobookRoute> { backStackEntry ->
@@ -655,15 +693,30 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<ArchiveRoute> {
+            composable<ArchiveRoute> { backStackEntry ->
+                val kind = backStackEntry.toRoute<ArchiveRoute>().kind
                 ArchiveScreen(
                     viewModel = viewModel {
                         ArchiveViewModel(
                             container.archiveClient, container.downloads, container.bookshelf, container.archivePrefs,
                             container.volumes, container.downloadPrefs, { container.archiveSidecarDir }, container.appScope,
+                            kind = kind, media = container.mediaDownloader,
                         )
                     },
                     detailsUrl = container.archiveClient::detailsUrl,
+                    onBack = { nav.popBackStack() },
+                    onOpenLibriVox = { nav.openLibriVox() },
+                    onOpenInLibrary = { identifier -> nav.navigate(inLibraryRoute(kind, identifier)) },
+                )
+            }
+            composable<LibriVoxRoute> {
+                LibriVoxScreen(
+                    viewModel = viewModel {
+                        LibriVoxViewModel(
+                            container.librivoxClient, container.archiveClient, container.mediaDownloader, container.downloads,
+                            container.appScope,
+                        )
+                    },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -710,8 +763,13 @@ private fun mediaSettings(container: AppContainer, context: Context, scope: Coro
     folders = DaoMediaFolders(container.playback),
     grants = ResolverFolderGrants(context.contentResolver),
     prefs = container.playerPrefs,
+    sharing = ComponentOtherAppsSharing(context),
     scanner = {
-        container.appScope.async { container.phoneScanner.scan() }.await()
+        container.appScope.async {
+            container.phoneScanner.scan()
+            // Granger's downloads too: "Rescan now" means everything.
+            container.mediaDownloader.rescan()
+        }.await()
         ScanSummary.of(container.media)
     },
     scope = scope,

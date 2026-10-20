@@ -6,6 +6,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import app.granger.library.SourceLink
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -82,6 +85,16 @@ fun MusicScreen(vm: MusicViewModel, nav: MusicNav) {
     ) { padding ->
         val ui = loaded ?: return@Scaffold
         Box(Modifier.padding(padding).fillMaxSize()) {
+            // Nothing in this scope at all: say so once, with where to get some (playlists still work).
+            if (ui.songs.isEmpty() && tab != MusicTab.PLAYLISTS) {
+                EmptyMedia(
+                    "No music yet",
+                    links = listOf(SourceLink.ARCHIVE_ORG_MUSIC),
+                    onOpenSource = nav.onOpenSource,
+                    onMediaSettings = nav.onMediaSettings,
+                )
+                return@Box
+            }
             when (tab) {
                 MusicTab.SONGS -> SongsTab(ui, vm, dialogs, nav)
                 MusicTab.ALBUMS -> AlbumGrid(ui.albums, vm, dialogs, nav)
@@ -120,6 +133,22 @@ fun MusicScreen(vm: MusicViewModel, nav: MusicNav) {
         }
     }
     MusicDialogHost(vm, dialogs)
+}
+
+/**
+ * An empty Music page or Audiobooks shelf: [text], then buttons for its download [links] and Settings → Music &
+ * audiobooks, each shown only when its callback is given.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun EmptyMedia(text: String, links: List<SourceLink>, onOpenSource: ((SourceLink) -> Unit)?, onMediaSettings: (() -> Unit)?) {
+    Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (onOpenSource != null) for (link in links) OutlinedButton(onClick = { onOpenSource(link) }) { Text(link.title) }
+            if (onMediaSettings != null) TextButton(onClick = onMediaSettings) { Text("Music & audiobooks settings") }
+        }
+    }
 }
 
 @Composable

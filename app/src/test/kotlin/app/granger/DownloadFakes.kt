@@ -18,6 +18,7 @@ import app.granger.core.downloads.HashAlgorithm
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
+import app.granger.core.downloads.isActive
 import app.granger.sources.DownloadPrefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -133,6 +134,41 @@ class FakeDownloads : Downloads {
     override suspend fun repair(itemId: String) { calls += "repair:$itemId" }
     override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) { calls += "check:$itemId:$verified" }
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
+
+    /** Each enqueueGroup call: the group id, its specs in order, and the volume. */
+    val enqueuedGroups = mutableListOf<Triple<String, List<DownloadSpec>, File>>()
+
+    override suspend fun enqueueGroup(groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+        specs.forEach(onEnqueue)
+        enqueuedGroups += Triple(groupId, specs, volumeRoot)
+        calls += "enqueueGroup:$groupId"
+        val result = nextResult
+        if (result == EnqueueResult.Queued) {
+            list.update {
+                it + specs.map { spec ->
+                    record(
+                        spec.itemId, DownloadState.QUEUED, sha256 = spec.hash, kind = spec.kind,
+                        filePath = File(volumeRoot, spec.relativePath).path, sizeBytes = spec.sizeBytes, wifiOnly = wifiOnly,
+                        title = spec.title, hashAlgorithm = spec.hashAlgorithm,
+                    ).copy(groupId = groupId)
+                }
+            }
+        }
+        return result
+    }
+
+    /** As the real one: the group's unfinished records go, the installed ones stay. */
+    override suspend fun cancelGroup(groupId: String) {
+        calls += "cancelGroup:$groupId"
+        list.update { all -> all.filterNot { it.groupId == groupId && it.isActive } }
+    }
+
+    /** As the real one: every record of the group goes. */
+    override suspend fun removeGroup(groupId: String) {
+        calls += "removeGroup:$groupId"
+        list.update { all -> all.filterNot { it.groupId == groupId } }
+    }
+    override suspend fun retryGroup(groupId: String) { calls += "retryGroup:$groupId" }
 }
 
 class FakeVolumes(var volumes: List<Volume>) : VolumeSource {

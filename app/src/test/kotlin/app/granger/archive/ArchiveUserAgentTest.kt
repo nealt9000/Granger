@@ -35,4 +35,12 @@ class ArchiveUserAgentTest {
         assertThat(userAgentSentTo("https://notarchive.org/x.epub")).isNull()
         assertThat(userAgentSentTo("https://archive.org.evil.example/x.epub")).isNull()
     }
+
+    @Test fun librivoxGetsTheUserAgent() {
+        assertThat(ArchiveUserAgent.isArchiveHost("librivox.org")).isTrue()
+        assertThat(ArchiveUserAgent.isArchiveHost("www.librivox.org")).isTrue()
+        assertThat(ArchiveUserAgent.isArchiveHost("librivox.org.evil.test")).isFalse()
+        assertThat(ArchiveUserAgent.isArchiveHost("notlibrivox.org")).isFalse()
+        assertThat(userAgentSentTo("https://librivox.org/api/feed/audiobooks/?format=json")).isEqualTo(ua)
+    }
 }

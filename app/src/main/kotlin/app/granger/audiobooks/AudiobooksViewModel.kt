@@ -10,11 +10,17 @@ import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PackStatus
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Shelves
+import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerUi
 import app.granger.player.BookProgress
 import app.granger.player.bookProgressAt
 import app.granger.player.chapterAt
+import app.granger.core.downloads.DownloadRecord
+import app.granger.media.MediaDownloads
+import app.granger.sources.ItemStatus
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -67,7 +74,11 @@ data class ShelfBook(val book: Audiobook, val listening: Listening, val progress
 
 data class AudiobookShelfUi(val title: String, val books: List<ShelfBook>)
 
-/** [currentChapter]: the ordinal the listener is in, while part-way. [bookmarks] are in book order. */
+/**
+ * [currentChapter]: the ordinal the listener is in, while part-way. [bookmarks] are in book order. A downloaded book
+ * (LibriVox, archive.org) has its [download] state, its files in ([filesDone]) of [filesTotal], and [onRemoveDownload];
+ * phone media has neither (null). [inPlayer]: the player has this book loaded, [playing] or paused.
+ */
 data class AudiobookPage(
     val book: Audiobook,
     val listening: Listening,
@@ -75,14 +86,21 @@ data class AudiobookPage(
     val chapters: List<AudiobookChapter>,
     val currentChapter: Int?,
     val bookmarks: List<AudioBookmark>,
+    val download: ItemStatus? = null,
+    val filesDone: Int = 0,
+    val filesTotal: Int = 0,
+    val onRemoveDownload: (() -> Unit)? = null,
+    val inPlayer: Boolean = false,
+    val playing: Boolean = false,
 ) {
     val missing: Boolean get() = book.status != PackStatus.OK
     val playable: Boolean get() = !missing && chapters.isNotEmpty()
     val fraction: Float get() = fractionOf(progress)
     val playLabel: String get() = when {
         missing -> "Missing"
+        inPlayer && playing -> "Pause"
         listening == Listening.FINISHED -> "Play from start"
-        listening == Listening.IN_PROGRESS -> "Resume"
+        listening == Listening.IN_PROGRESS || inPlayer -> "Resume"
         else -> "Play"
     }
 }
@@ -143,7 +161,17 @@ class AudiobooksViewModel(
     private val hub: PlayerHub,
     private val now: () -> Long = System::currentTimeMillis,
     private val compute: CoroutineDispatcher = Dispatchers.Default,
+    /** The downloads ledger: a downloaded book's progress. */
+    private val downloads: Flow<List<DownloadRecord>> = flowOf(emptyList()),
+    /** Removes a downloaded book's files by its group (`MediaDownloader.remove`, run in the app scope). */
+    private val remover: (groupId: String) -> Unit = {},
 ) : ViewModel() {
+    /** Groups' file counts from their manifests, read once (on [compute]). */
+    private val fileCounts = ConcurrentHashMap<String, Int>()
+
+    private val mediaRecords: Flow<List<DownloadRecord>> =
+        downloads.map { all -> all.filter { it.groupId?.startsWith(MediaDownloads.PREFIX) == true } }.distinctUntilChanged()
+
     private val scope: Flow<Pair<String, List<Audiobook>>> =
         if (collectionId == null) {
             media.audiobooks.map { ALL_AUDIOBOOKS to it }
@@ -162,26 +190,50 @@ class AudiobooksViewModel(
     }.flowOn(compute).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Null while loading, or if there's no such book. */
-    fun book(id: String): Flow<AudiobookPage?> = combine(
+    fun book(id: String): Flow<AudiobookPage?> = combine(page(id), hub.ui.map { inPlayer(it, id) to it.playing }.distinctUntilChanged()) { page, (loaded, playing) ->
+        page?.copy(inPlayer = loaded, playing = loaded && playing)
+    }
+
+    private fun inPlayer(ui: PlayerUi, id: String) = (ui.now as? NowPlaying.Book)?.book?.id == id
+
+    private fun page(id: String): Flow<AudiobookPage?> = combine(
         media.audiobooks.map { all -> all.firstOrNull { it.id == id } }.distinctUntilChanged(),
         media.chapters(id),
         listening.states.map { all -> all.firstOrNull { it.audiobookId == id } }.distinctUntilChanged(),
         listening.bookmarks(id),
-    ) { book, chapters, state, bookmarks ->
+        mediaRecords,
+    ) { book, chapters, state, bookmarks, records ->
         book ?: return@combine null
         val ordered = chapters.sortedBy { it.ordinal }
         val l = AudiobookShelf.listening(state)
         val current = if (l == Listening.IN_PROGRESS && state != null) chapterAt(ordered, state.trackId, state.positionMs)?.first?.ordinal else null
+        val group = MediaDownloads.groupOf(book)
+        val download = group?.let { g ->
+            val count = fileCounts[g] ?: MediaDownloads.manifestFileCount(g, records)?.also { fileCounts[g] = it }
+            MediaDownloads.progress(g, records, count)
+        }
         AudiobookPage(
             book, l, AudiobookShelf.progress(book, ordered, state), ordered, current,
             bookmarks.sortedWith(compareBy({ bookProgressAt(ordered, it.trackId, it.positionMs, book.durationMs).positionMs }, { it.id })),
+            download = download?.status,
+            filesDone = download?.done ?: 0,
+            filesTotal = download?.total ?: 0,
+            onRemoveDownload = group?.let { g -> { fileCounts.remove(g); remover(g) } },
         )
     }.flowOn(compute)
 
-    /** Play or resume; a finished book starts again from its first chapter. A MISSING book doesn't play. */
+    /**
+     * Play or resume; a finished book starts again from its first chapter. A MISSING book doesn't play. The book already
+     * in the player pauses or carries on where it is, rather than reloading from its last saved position.
+     */
     fun play(audiobookId: String) = act("play $audiobookId") {
         val book = playableBook(audiobookId) ?: return@act
         val state = listening.state(audiobookId)
+        val ui = hub.ui.value
+        if (inPlayer(ui, audiobookId) && (ui.playing || state?.finished != true)) {
+            hub.playPause()
+            return@act
+        }
         if (state?.finished == true) {
             val start = AudiobookShelf.startOf(book, media.chapters(audiobookId).first(), now()) ?: return@act
             hub.playAudiobook(audiobookId, start)

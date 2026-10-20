@@ -102,4 +102,36 @@ class PlaylistsTest {
         val list = playlists.create("Mix", listOf(id("a"), id("never-scanned")))
         assertThat(playlists.tracks(list).first().map { it.id }).containsExactly(id("a"))
     }
+
+    private fun downloaded(ref: String) =
+        musicTrack(ref).copy(id = "track:archive-org:$ref", origin = MediaOrigin.ARCHIVE_ORG, uri = "file:///music/$ref.mp3")
+
+    /** A removed download's track row is deleted, so a playlist row's position is no longer its entry ordinal. */
+    @Test fun itemsKeepEntryOrdinalsWhenATrackRowIsGone() = runTest {
+        val tracks = listOf(downloaded("a"), downloaded("b"), downloaded("c"))
+        media.sync(MediaOrigin.ARCHIVE_ORG, ScanResult(tracks, emptyList()))
+        val list = playlists.create("Mix", tracks.map { it.id })
+        assertThat(playlists.items(list).first().map { it.ordinal }).containsExactly(0, 1, 2).inOrder()
+
+        media.forget(listOf(tracks[1].id), emptyList())
+        val items = playlists.items(list).first()
+        assertThat(items.map { it.ordinal }).containsExactly(0, 2).inOrder()
+        assertThat(items.map { it.track.id }).containsExactly(tracks[0].id, tracks[2].id).inOrder()
+        assertThat(playlists.tracks(list).first().map { it.id }).containsExactly(tracks[0].id, tracks[2].id).inOrder()
+
+        // Moving the last row up a place swaps it with the row above it, past the hidden entry.
+        playlists.move(list, from = items[1].ordinal, to = items[0].ordinal)
+        assertThat(dao.entries(list).map { it.trackId }).containsExactly(tracks[2].id, tracks[0].id, tracks[1].id).inOrder()
+        assertThat(playlists.items(list).first().map { it.ordinal to it.track.id })
+            .containsExactly(0 to tracks[2].id, 1 to tracks[0].id).inOrder()
+
+        // Removing a row removes its own entry; the hidden one stays for when the download comes back.
+        playlists.move(list, from = 0, to = 2) // back to a, b, c
+        playlists.remove(list, playlists.items(list).first()[1].ordinal)
+        assertThat(dao.entries(list).map { it.trackId }).containsExactly(tracks[0].id, tracks[1].id).inOrder()
+
+        media.sync(MediaOrigin.ARCHIVE_ORG, ScanResult(tracks, emptyList()))
+        assertThat(playlists.items(list).first().map { it.ordinal to it.track.id })
+            .containsExactly(0 to tracks[0].id, 1 to tracks[1].id).inOrder()
+    }
 }

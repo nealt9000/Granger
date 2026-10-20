@@ -106,4 +106,31 @@ class AlbumsTest {
         assertThat(p.year).isEqualTo("1999")
         assertThat(p.coverPath).isNull()
     }
+
+    @Test fun itemKeyNeverCollidesWithATagKey() {
+        val item = Albums.itemKey("archive-org", "x")
+        assertThat(item).isEqualTo("|item|archive-org:x")
+        assertThat(item).isNotEqualTo(Albums.key("archive-org", "x", ""))
+        // A tagged album with no album artist whose title spells an item key still gets a key of its own.
+        assertThat(Albums.key("", "item|archive-org:x", "")).isNotEqualTo(item)
+        assertThat(Albums.key(" ", "Item|Archive-Org:X", "Music/")).isNotEqualTo(item)
+        assertThat(Albums.untaggedTitle(item)).isNull()
+    }
+
+    /** Downloaded tracks are grouped by their origin item alone: folders and tags don't split or merge them. */
+    @Test fun oneItemKeyIsOneAlbum() {
+        val key = Albums.itemKey("archive-org", "holst-the-planets-holst-london-symphony-orchestra-1922-1924")
+        val planets = (1..3).map { n ->
+            musicTrack("h$n", album = "The Planets", albumArtist = "Gustav Holst", folder = "music/archive-org/holst/", trackNo = n)
+                .copy(albumKey = key, origin = MediaOrigin.ARCHIVE_ORG)
+        }
+        // A phone album with the same tags is a different album.
+        val phone = musicTrack("p1", album = "The Planets", albumArtist = "Gustav Holst")
+        val summaries = Albums.summaries(planets + phone)
+        assertThat(summaries).hasSize(2)
+        val item = summaries.single { it.key == key }
+        assertThat(item.trackCount).isEqualTo(3)
+        assertThat(item.title).isEqualTo("The Planets")
+        assertThat(item.albumArtist).isEqualTo("Gustav Holst")
+    }
 }

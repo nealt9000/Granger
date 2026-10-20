@@ -377,6 +377,17 @@ class PlayerEngine(
         refresh()
     }
 
+    override fun unload(audiobookId: String, trackIds: Set<String>) = submit {
+        val loadedHere = when (mode) {
+            Mode.BOOK -> book?.id == audiobookId
+            Mode.MUSIC -> musicQueue?.ids?.any { it in trackIds } == true
+            Mode.NONE -> false
+        }
+        if (!loadedHere) return@submit
+        stopCurrent()
+        refresh()
+    }
+
     override fun playPause() = submit { if (player.playWhenReady) userPause() else resume() }
 
     /** Play (from the session: notification, Bluetooth, lock screen). */

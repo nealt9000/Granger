@@ -7,13 +7,18 @@ import app.granger.core.library.Albums
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Playlist
+import app.granger.core.library.PlaylistItem
 import app.granger.core.library.Playlists
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
 import app.granger.core.library.Track
 import app.granger.core.player.PlaySource
 import app.granger.core.player.PlayerHub
+import app.granger.core.downloads.DownloadRecord
+import app.granger.media.MediaDownloads
+import app.granger.sources.ItemStatus
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -53,13 +59,27 @@ data class FolderSummary(val path: String, val name: String, val songCount: Int)
 
 data class AlbumSection(val group: ReleaseGroup, val albums: List<AlbumSummary>)
 
-data class AlbumPage(val album: AlbumSummary, val tracks: List<Track>)
+/**
+ * A downloaded album (archive.org) has its [download] state, its files in ([filesDone]) of [filesTotal], and
+ * [onRemoveDownload]; a phone album has neither (null).
+ */
+data class AlbumPage(
+    val album: AlbumSummary,
+    val tracks: List<Track>,
+    val download: ItemStatus? = null,
+    val filesDone: Int = 0,
+    val filesTotal: Int = 0,
+    val onRemoveDownload: (() -> Unit)? = null,
+)
 
 /** [sections]: albums they're an album artist of, by release type; [appearsOn]: albums they're only a track artist on. */
 data class ArtistPage(val name: String, val sections: List<AlbumSection>, val appearsOn: List<AlbumSummary>, val songs: List<Track>)
 data class GenrePage(val name: String, val albums: List<AlbumSummary>, val songs: List<Track>)
 data class FolderPage(val path: String, val name: String, val songs: List<Track>)
-data class PlaylistPage(val playlist: Playlist, val tracks: List<Track>)
+/** [items] carry their entry ordinals, which [MusicViewModel.moveInPlaylist] and [MusicViewModel.removeFromPlaylist] take. */
+data class PlaylistPage(val playlist: Playlist, val items: List<PlaylistItem>) {
+    val tracks: List<Track> get() = items.map { it.track }
+}
 
 data class MusicUi(
     val title: String,
@@ -274,7 +294,17 @@ class MusicViewModel(
     private val playlists: Playlists,
     private val hub: PlayerHub,
     private val compute: CoroutineDispatcher = Dispatchers.Default,
+    /** The downloads ledger: a downloaded album's progress. */
+    downloads: Flow<List<DownloadRecord>> = flowOf(emptyList()),
+    /** Removes a downloaded album's files by its group (`MediaDownloader.remove`, run in the app scope). */
+    private val remover: (groupId: String) -> Unit = {},
 ) : ViewModel() {
+    /** Groups' file counts from their manifests, read once (on [compute]). */
+    private val fileCounts = ConcurrentHashMap<String, Int>()
+
+    private val mediaRecords: Flow<List<DownloadRecord>> =
+        downloads.map { all -> all.filter { it.groupId?.startsWith(MediaDownloads.PREFIX) == true } }.distinctUntilChanged()
+
     private val sort = MutableStateFlow(SongSort.TITLE)
 
     private data class Scope(val title: String, val tracks: List<Track>)
@@ -318,9 +348,21 @@ class MusicViewModel(
 
     fun setSort(order: SongSort) { sort.value = order }
 
-    fun album(key: String): Flow<AlbumPage?> = tracks.map { all ->
-        val group = MusicCatalog.albumTracks(key, all)
-        MusicCatalog.albums(group).firstOrNull()?.let { AlbumPage(it, group) }
+    fun album(key: String): Flow<AlbumPage?> = combine(tracks, mediaRecords) { all, records ->
+        val tracksOf = MusicCatalog.albumTracks(key, all)
+        val album = MusicCatalog.albums(tracksOf).firstOrNull() ?: return@combine null
+        val group = MediaDownloads.groupOfAlbum(album.key)
+        val download = group?.let { g ->
+            val count = fileCounts[g] ?: MediaDownloads.manifestFileCount(g, records)?.also { fileCounts[g] = it }
+            MediaDownloads.progress(g, records, count)
+        }
+        AlbumPage(
+            album, tracksOf,
+            download = download?.status,
+            filesDone = download?.done ?: 0,
+            filesTotal = download?.total ?: 0,
+            onRemoveDownload = group?.let { g -> { fileCounts.remove(g); remover(g) } },
+        )
     }.flowOn(compute)
 
     fun artist(name: String): Flow<ArtistPage?> = tracks.map { MusicCatalog.artistPage(name, it) }.flowOn(compute)
@@ -328,8 +370,8 @@ class MusicViewModel(
     fun folder(path: String): Flow<FolderPage> = tracks.map { MusicCatalog.folderPage(path, it) }.flowOn(compute)
 
     /** Null once the playlist is deleted. */
-    fun playlist(id: Long): Flow<PlaylistPage?> = combine(playlists.all, playlists.tracks(id)) { lists, t ->
-        lists.firstOrNull { it.id == id }?.let { PlaylistPage(it, t) }
+    fun playlist(id: Long): Flow<PlaylistPage?> = combine(playlists.all, playlists.items(id)) { lists, items ->
+        lists.firstOrNull { it.id == id }?.let { PlaylistPage(it, items) }
     }
 
     /** Plays [tracks] from [tapped] (null: the first playable one), leaving MISSING tracks out of the queue. */
@@ -382,6 +424,7 @@ class MusicViewModel(
     }
 
     fun deletePlaylist(id: Long) { viewModelScope.launch { playlists.delete(id) } }
+    /** [from], [to] and [ordinal] are entry ordinals ([PlaylistItem.ordinal]), not row positions. */
     fun moveInPlaylist(id: Long, from: Int, to: Int) { viewModelScope.launch { playlists.move(id, from, to) } }
     fun removeFromPlaylist(id: Long, ordinal: Int) { viewModelScope.launch { playlists.remove(id, ordinal) } }
 

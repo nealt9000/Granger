@@ -100,6 +100,12 @@ interface PlayerHub {
      * Otherwise nothing happens: the row is the library's.
      */
     fun setFinished(audiobookId: String, finished: Boolean)
+
+    /**
+     * Their download is being removed: if the loaded book is [audiobookId], or the music queue holds any of
+     * [trackIds], the player saves its place and empties, rather than sitting there unplayable.
+     */
+    fun unload(audiobookId: String, trackIds: Set<String>)
     fun playPause(); fun next(); fun previous()
 
     /** Audiobooks: ± the skip interval; music: no-op. */

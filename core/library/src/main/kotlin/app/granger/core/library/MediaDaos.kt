@@ -9,7 +9,10 @@ import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
-/** The media catalog: tracks, audiobooks and chapters. Written only by [RoomMediaLibrary.sync]. */
+/**
+ * The media catalog: tracks, audiobooks and chapters. Written only by [RoomMediaLibrary.sync], and deleted from only by
+ * [RoomMediaLibrary.forget] (removed downloads; never a PHONE row).
+ */
 @Dao
 interface MediaDao {
     /** Music only: audiobook files are left out. */
@@ -30,6 +33,10 @@ interface MediaDao {
 
     @Query("SELECT * FROM audiobooks WHERE id = :id")
     suspend fun audiobook(id: String): Audiobook?
+
+    /** Every cover any track or audiobook row names: any origin, any status, audiobook files included. */
+    @Query("SELECT coverPath FROM tracks WHERE coverPath IS NOT NULL UNION SELECT coverPath FROM audiobooks WHERE coverPath IS NOT NULL")
+    suspend fun coverPaths(): List<String>
 
     @Query("SELECT * FROM tracks WHERE origin = :origin")
     suspend fun tracksOf(origin: MediaOrigin): List<Track>
@@ -60,6 +67,18 @@ interface MediaDao {
 
     @Insert
     suspend fun insertChapters(chapters: List<AudiobookChapter>)
+
+    /** Downloaded rows only: a PHONE row is never deleted, whatever its id. Keep [ids] under 999 variables; callers chunk. */
+    @Query("DELETE FROM tracks WHERE id IN (:ids) AND origin != 'PHONE'")
+    suspend fun deleteTracks(ids: List<String>)
+
+    /** The chapters of these downloaded audiobooks (none of a PHONE one). Run before [deleteAudiobooks]; callers chunk. */
+    @Query("DELETE FROM audiobook_chapters WHERE audiobookId IN (SELECT id FROM audiobooks WHERE id IN (:ids) AND origin != 'PHONE')")
+    suspend fun deleteChaptersOf(ids: List<String>)
+
+    /** Downloaded rows only, as [deleteTracks]. Their chapters go first ([deleteChaptersOf]); callers chunk. */
+    @Query("DELETE FROM audiobooks WHERE id IN (:ids) AND origin != 'PHONE'")
+    suspend fun deleteAudiobooks(ids: List<String>)
 }
 
 /** What the listener made: positions, bookmarks, playlists, the music queue, recent plays, plus scan settings. */

@@ -1,0 +1,442 @@
+{
+    "alternate_locations": {
+        "servers": [
+            {
+                "server": "dn721502.ca.archive.org",
+                "dir": "/0/items/holst-the-planets-holst-london-symphony-orchestra-1922-1924"
+            }
+        ],
+        "workable": [
+            {
+                "server": "dn721502.ca.archive.org",
+                "dir": "/0/items/holst-the-planets-holst-london-symphony-orchestra-1922-1924"
+            }
+        ]
+    },
+    "created": 1792443452,
+    "d1": "ia601803.us.archive.org",
+    "d2": "ia801803.us.archive.org",
+    "dir": "/18/items/holst-the-planets-holst-london-symphony-orchestra-1922-1924",
+    "files": [
+        {
+            "name": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War.mp3",
+            "mtime": "1736970174",
+            "size": "85840",
+            "md5": "1a0fc2ccc20af7ab6773f4cb012ac87b",
+            "crc32": "f0ebb29e",
+            "sha1": "21907a93d1e7a2e604d8c4efc6d542b5229fdfe3"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War.mp3",
+            "source": "original",
+            "mtime": "1736965469",
+            "size": "8956584",
+            "md5": "93331f6ada3c17d89d3584b8dbbdbc66",
+            "crc32": "0226d83b",
+            "sha1": "2d8ce7ff14ca84e70044d11450ce3d0907057967",
+            "format": "VBR MP3",
+            "length": "373.16",
+            "track": "01"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War.mp3",
+            "mtime": "1736966381",
+            "size": "36644",
+            "md5": "223ab3f66b1bbd4917dcf075a90cd0b4",
+            "crc32": "166495c7",
+            "sha1": "08464365033b63d38b9774d715bc3dc27cf9ddd4"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ I. Mars, The Bringer of War.mp3",
+            "mtime": "1736969229",
+            "size": "225452",
+            "md5": "37cf4f267deb2759293f7c68ba429256",
+            "crc32": "6348dbca",
+            "sha1": "f0b620326f11daa76ee908f90c258ff29d1cf039"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4].afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4].mp3",
+            "mtime": "1736969691",
+            "size": "113944",
+            "md5": "584ca35e57253080c1f1a077a531814c",
+            "crc32": "c45e692e",
+            "sha1": "fbb4b89038d92800d62a00ce2d5afdc21cdc5326"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4].mp3",
+            "source": "original",
+            "mtime": "1736965428",
+            "size": "4690845",
+            "md5": "b40be78f48dda29ff55c3b2d8b18badc",
+            "crc32": "8c7928e9",
+            "sha1": "11917562e24feab73572802f72f3f08f3671aaac",
+            "format": "VBR MP3",
+            "length": "485.02",
+            "track": "02"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4].png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4].mp3",
+            "mtime": "1736966656",
+            "size": "34166",
+            "md5": "23a59b579ce845c4ece07db220fbc109",
+            "crc32": "1a938014",
+            "sha1": "9213daf3c731422be698dd0d34b852ad018c85b9"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4]_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ II. Venus, The Bringer of Peace [B09zijg_gQ4].mp3",
+            "mtime": "1736969295",
+            "size": "218892",
+            "md5": "68577690bde56f1ca944bb29e8bc1ded",
+            "crc32": "70188117",
+            "sha1": "035a10cba763fb55605d8ccc720bee14c69edd63"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger.mp3",
+            "mtime": "1736969949",
+            "size": "45208",
+            "md5": "9a8e04aab0e0a698f58cd0a869fcc2e4",
+            "crc32": "850b5ff5",
+            "sha1": "f05d57e52df05b3902a879b59f670b00ff6fc5f9"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger.mp3",
+            "source": "original",
+            "mtime": "1736965425",
+            "size": "5187428",
+            "md5": "ad4765ad28e26e87055cae4ca111a207",
+            "crc32": "f33b2e7b",
+            "sha1": "049f777a1a4b3267e6db110b3f20f6b4a9292974",
+            "format": "VBR MP3",
+            "length": "216.11",
+            "track": "03"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger.mp3",
+            "mtime": "1736966810",
+            "size": "27366",
+            "md5": "3ce6436c042410256818dc1893c3c669",
+            "crc32": "3f78c9bf",
+            "sha1": "68a087d5b964925ab34359c95387160b8c1c19a7"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ III. Mercury, The Winged Messenger.mp3",
+            "mtime": "1736969322",
+            "size": "236917",
+            "md5": "65df9c5d2f5407caece8a3028a2aca97",
+            "crc32": "3d6bb638",
+            "sha1": "4191c1a1ecce7adbf9c36bd3405992d30bf8bb0d"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity.mp3",
+            "mtime": "1736969847",
+            "size": "87872",
+            "md5": "b1770e23e8f3e09cab749c6c88d6d363",
+            "crc32": "e9c258fc",
+            "sha1": "c85a0abaf80ca159900043f1b8162cc05af4f147"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity.mp3",
+            "source": "original",
+            "mtime": "1736965421",
+            "size": "10179115",
+            "md5": "15720e637ed67556dd45bec6edd0bd1c",
+            "crc32": "f8e480cd",
+            "sha1": "8cfa76deed8571bb441927b33e73d61df720149d",
+            "format": "VBR MP3",
+            "length": "424.1",
+            "track": "04"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity.mp3",
+            "mtime": "1736967368",
+            "size": "34905",
+            "md5": "6c7069b4d67c0d915e3e456ab78af987",
+            "crc32": "62c09220",
+            "sha1": "ec0d2aafc08b9fb7946ca89f17f5a9a15b5c1618"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ IV. Jupiter, The Bringer of Jollity.mp3",
+            "mtime": "1736968515",
+            "size": "228279",
+            "md5": "7ae2b39b2798a97e82e0d6c62242c4ea",
+            "crc32": "fadd7009",
+            "sha1": "6cb7477216d8fe950f9b088c4ca8ec3f57a32aed"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age.mp3",
+            "mtime": "1736969574",
+            "size": "111608",
+            "md5": "375d54449305fa434ad4fe9a09275498",
+            "crc32": "344ac5e3",
+            "sha1": "9fc4c74d0b442030b8eae8f477d791ba9ea311e1"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age.mp3",
+            "source": "original",
+            "mtime": "1736965399",
+            "size": "10083193",
+            "md5": "042b986e4c8f5587a76eeefcb22b8cdf",
+            "crc32": "0164f69f",
+            "sha1": "cbce5d29907a56d83084496d4233df052fa488a3",
+            "format": "VBR MP3",
+            "length": "420.1",
+            "track": "05"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age.mp3",
+            "mtime": "1736966547",
+            "size": "31782",
+            "md5": "7bba2cd10179d86e7d94a91453282aed",
+            "crc32": "17e108d5",
+            "sha1": "287e063ff1f99f700eab6387372c6e8d3648f0a7"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ V. Saturn, The Bringer of Old Age.mp3",
+            "mtime": "1736968268",
+            "size": "214091",
+            "md5": "34adde11fe0eef3aa77c5571e671069c",
+            "crc32": "b135a159",
+            "sha1": "62c0de178909bdd695d3cf19c3b9cbce9c554203"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician.mp3",
+            "mtime": "1736970022",
+            "size": "84728",
+            "md5": "b96eea53f380a21c7a8d8962d3441d1d",
+            "crc32": "fdbe800b",
+            "sha1": "49a8290b02781d24b37dc7094b5274c70eb5bb39"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician.mp3",
+            "source": "original",
+            "mtime": "1736965362",
+            "size": "8787310",
+            "md5": "88cce9da655801e9243c060d49bffeb8",
+            "crc32": "1514d842",
+            "sha1": "145e3e05e32ef1b197bf2c7ad09d6988ac88fa60",
+            "format": "VBR MP3",
+            "length": "366.11",
+            "track": "06"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician.mp3",
+            "mtime": "1736965844",
+            "size": "33631",
+            "md5": "3bf864cc1cd109922caf607d08377743",
+            "crc32": "79fbb195",
+            "sha1": "48cb73e5ecdea5e2bcaac4954c670ecc7fa578e6"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ VI. Uranus, The Magician.mp3",
+            "mtime": "1736968194",
+            "size": "228053",
+            "md5": "b96f5e3bd74e8b50cebacab53b07d1aa",
+            "crc32": "6e94616e",
+            "sha1": "136218963c21025b1651cbb3713fb0f7cc9baaff"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic.afpk",
+            "source": "derivative",
+            "format": "Columbia Peaks",
+            "original": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic.mp3",
+            "mtime": "1736970124",
+            "size": "78808",
+            "md5": "ab920a06099524e6aaf6c70db238666b",
+            "crc32": "f4c080d6",
+            "sha1": "79262801fbffa482d702cdbea2d501aaf09429cf"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic.mp3",
+            "source": "original",
+            "mtime": "1736965320",
+            "size": "7947213",
+            "md5": "a2c80e6fee58677c49a411eb3ce29565",
+            "crc32": "08d76f7c",
+            "sha1": "7799b48b67949c3598ef84c7728dcf8ef454835d",
+            "format": "VBR MP3",
+            "length": "331.1",
+            "track": "07"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic.png",
+            "source": "derivative",
+            "format": "PNG",
+            "original": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic.mp3",
+            "mtime": "1736966175",
+            "size": "29533",
+            "md5": "c5c6dd461e8614efb1b25a606a8b1ec1",
+            "crc32": "683a1d26",
+            "sha1": "50926294f450a3fa44d901bae7df1db4c16aeb7a"
+        },
+        {
+            "name": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic_spectrogram.png",
+            "source": "derivative",
+            "format": "Spectrogram",
+            "original": "The Planets Op. 32, H. 125_ VII. Neptune, The Mystic.mp3",
+            "mtime": "1736968696",
+            "size": "220438",
+            "md5": "d36b6ce54748d8ce51abee753718791e",
+            "crc32": "e6d148a8",
+            "sha1": "77c3fb283284141a837a993eb0c24e2f87b43af1"
+        },
+        {
+            "name": "__ia_thumb.jpg",
+            "source": "original",
+            "mtime": "1736965358",
+            "size": "19932",
+            "md5": "efd29142515caccb5b9fca86a7b60b2c",
+            "crc32": "bfb4ab2e",
+            "sha1": "16039a1db6e2668f40f5b836ed605de8b7fb1a90",
+            "format": "Item Tile"
+        },
+        {
+            "name": "holst-the-planets-holst-london-symphony-orchestra-1922-1924.jpg",
+            "source": "original",
+            "mtime": "1736965278",
+            "size": "84689",
+            "md5": "984641467346ece548d57773ca1c7324",
+            "crc32": "05f68516",
+            "sha1": "a3ea81f578438e20f3c6ad61fb601eecc3bafb66",
+            "format": "JPEG"
+        },
+        {
+            "name": "holst-the-planets-holst-london-symphony-orchestra-1922-1924_archive.torrent",
+            "source": "metadata",
+            "btih": "2750dedca4223744c5784a83b277cb7b387891ab",
+            "mtime": "1782165071",
+            "size": "10945",
+            "md5": "309257b6419b7d70246fbe68586a68b0",
+            "crc32": "ad022d63",
+            "sha1": "c61281ff114d0a030514c4dd4d99d060455e1310",
+            "format": "Archive BitTorrent"
+        },
+        {
+            "name": "holst-the-planets-holst-london-symphony-orchestra-1922-1924_files.xml",
+            "source": "original",
+            "format": "Metadata",
+            "md5": "4feba63eb01ebe70fbf24f82d0f8eb26",
+            "summation": "md5"
+        },
+        {
+            "name": "holst-the-planets-holst-london-symphony-orchestra-1922-1924_meta.sqlite",
+            "source": "original",
+            "mtime": "1736965495",
+            "size": "53248",
+            "md5": "2095155f630e2b7b8ac6f9168eb5a073",
+            "crc32": "0f64eec3",
+            "sha1": "b4fc3d6faf1aafe8169b060b5766a740518783a3",
+            "format": "Metadata"
+        },
+        {
+            "name": "holst-the-planets-holst-london-symphony-orchestra-1922-1924_meta.xml",
+            "source": "original",
+            "mtime": "1782165068",
+            "size": "1281",
+            "md5": "5a9b06f6e41577045d86f78faaef3b81",
+            "crc32": "72965246",
+            "sha1": "214f517bca2f38cc1791bc0e444c13ff7bc68693",
+            "format": "Metadata"
+        },
+        {
+            "name": "holst-the-planets-holst-london-symphony-orchestra-1922-1924_thumb.jpg",
+            "source": "derivative",
+            "format": "JPEG Thumb",
+            "original": "holst-the-planets-holst-london-symphony-orchestra-1922-1924.jpg",
+            "mtime": "1736965748",
+            "size": "11096",
+            "md5": "26f5947bf3129a6ae7b260e0af42ad3e",
+            "crc32": "75933a89",
+            "sha1": "50080ff386a3faf177aff42591c6a7c4ef41f3d2"
+        }
+    ],
+    "files_count": 35,
+    "item_last_updated": 1782165071,
+    "item_size": 58421036,
+    "metadata": {
+        "identifier": "holst-the-planets-holst-london-symphony-orchestra-1922-1924",
+        "mediatype": "audio",
+        "collection": [
+            "hifidelity_potpourri",
+            "hifidelity"
+        ],
+        "creator": "Gustav Holst",
+        "date": "2025-01-15",
+        "description": "<font style=\"vertical-align:inherit;\"><font style=\"vertical-align:inherit;\">Grabaciones originales de la Suite orquestal The Planets de Gustav Holst grabadas entre 1922 y 1924 dirigidas por \u00e9l mismo.</font></font>",
+        "language": "eng",
+        "licenseurl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "scanner": "Internet Archive HTML5 Uploader 1.7.0",
+        "subject": [
+            "planets",
+            "gustav",
+            "holst",
+            "suite"
+        ],
+        "title": "holst-the-planets-holst-london-symphony-orchestra-1922-1924",
+        "uploader": "andsul2012@Gmail.com",
+        "publicdate": "2025-01-15 18:21:42",
+        "addeddate": "2025-01-15 18:21:42",
+        "curation": "[curator]validator@archive.org[/curator][date]20250115182254[/date][comment]checked for malware[/comment]",
+        "year": "2025",
+        "collection_added": "hifidelity"
+    },
+    "server": "ia601803.us.archive.org",
+    "uniq": 1122865785,
+    "workable_servers": [
+        "ia601803.us.archive.org",
+        "ia801803.us.archive.org"
+    ]
+}

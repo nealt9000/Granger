@@ -2,6 +2,10 @@ package app.granger.core.library
 
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+
+/** A playlist row: a track and the [ordinal] of its entry, which [Playlists.move] and [Playlists.remove] take. */
+data class PlaylistItem(val ordinal: Int, val track: Track)
 
 /**
  * The user's music playlists: the app-level function surface later projects call (spec §10). Entries refer to track
@@ -14,6 +18,12 @@ interface Playlists {
 
     /** The playlist's tracks in order, MISSING ones included; entries whose track row doesn't exist are skipped. */
     fun tracks(playlistId: Long): Flow<List<Track>>
+
+    /**
+     * The playlist's entries that have a track row, with their entry ordinals (which [move] and [remove] take). A
+     * removed download's track row is deleted while its entry stays, so a row's position isn't always its ordinal.
+     */
+    fun items(playlistId: Long): Flow<List<PlaylistItem>>
 
     /** Returns the new playlist's id. */
     suspend fun create(name: String, trackIds: List<String> = emptyList()): Long
@@ -33,6 +43,13 @@ class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long
     override val all: Flow<List<Playlist>> = dao.observePlaylists()
 
     override fun tracks(playlistId: Long): Flow<List<Track>> = dao.observePlaylistTracks(playlistId)
+
+    /** The entries, paired by track id with the rows [tracks] found (one row per distinct id is enough). */
+    override fun items(playlistId: Long): Flow<List<PlaylistItem>> =
+        combine(dao.observeEntries(playlistId), dao.observePlaylistTracks(playlistId)) { entries, tracks ->
+            val byId = tracks.associateBy { it.id }
+            entries.mapNotNull { entry -> byId[entry.trackId]?.let { PlaylistItem(entry.ordinal, it) } }
+        }
 
     override suspend fun create(name: String, trackIds: List<String>): Long = db.withTransaction {
         val at = now()

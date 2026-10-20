@@ -8,12 +8,16 @@ import androidx.lifecycle.viewModelScope
 import app.granger.core.archive.ArchiveDoc
 import app.granger.core.archive.ArchiveError
 import app.granger.core.archive.ArchiveFile
+import app.granger.core.archive.ArchiveAudioOffers
 import app.granger.core.archive.ArchiveItem
+import app.granger.core.archive.ArchiveKind
 import app.granger.core.archive.ArchiveOffers
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.ArchiveQuery
 import app.granger.core.archive.ArchiveShelf
+import app.granger.core.archive.AudioOffer
 import app.granger.core.archive.Offer
+import app.granger.core.archive.PublicDomain
 import app.granger.core.archive.TextKind
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
@@ -24,10 +28,15 @@ import app.granger.core.downloads.isActive
 import app.granger.core.library.BookIds
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
+import app.granger.core.media.MediaManifest
+import app.granger.core.media.MediaManifests
 import app.granger.formatBytes
+import app.granger.media.MediaDownloader
+import app.granger.media.MediaDownloads
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.ItemStatus
 import java.io.File
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -57,6 +66,8 @@ data class ArchiveRow(
     /** A guess from the search formats (or the file extension): its file is a placeholder, never downloaded. */
     val preview: Offer?,
     val status: ItemStatus,
+    /** An audio view's guess from the search formats (its files are empty), or null; texts leave it null. */
+    val audio: AudioOffer? = null,
 )
 
 data class ItemSheet(
@@ -67,6 +78,9 @@ data class ItemSheet(
     val sizeBytes: Long?,
     val error: String?,
     val status: ItemStatus,
+    /** An audio item's files in and in all ("Downloading: 3 of 7"); 0 and 0 for texts or before the item is known. */
+    val filesDone: Int = 0,
+    val filesTotal: Int = 0,
 )
 
 data class ArchiveUi(
@@ -81,9 +95,21 @@ data class ArchiveUi(
     val error: String? = null,
     val sheet: ItemSheet? = null,
     val notice: String? = null,
+    val kind: ArchiveKind = ArchiveKind.TEXTS,
+    /** The first year the audio filter leaves out: 1926 in 2026. */
+    val filterYear: Int = PublicDomain.lastRecordingYear(LocalDate.now()) + 1,
+    /** What the open audio item offers (texts use [ItemSheet.offer]). */
+    val sheetAudio: AudioOffer? = null,
+    /** Filtered, for a kind with no usable recording date (spoken word before the waiver): nothing is searched or shown. */
+    val waiverNeeded: Boolean = false,
 )
 
-/** The archive.org source: shelves and search (public domain only until the waiver), item details and Get. */
+/**
+ * The archive.org source: shelves and search (public domain only until the waiver), item details and Get. [kind] picks
+ * the view: texts (Plan 7, unchanged), or spoken word or music, whose items download through [media] as one group each,
+ * an audiobook or an album after the view they were got from. Spoken word has no usable recording date, so before the
+ * waiver it searches nothing (Decisions, Plan M2).
+ */
 class ArchiveViewModel(
     private val client: ArchiveOrgClient,
     private val downloads: Downloads,
@@ -95,8 +121,26 @@ class ArchiveViewModel(
     private val sidecarDir: () -> File,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val kind: ArchiveKind = ArchiveKind.TEXTS,
+    /** Required for an audio [kind]. */
+    private val media: MediaDownloader? = null,
+    private val today: () -> LocalDate = LocalDate::now,
+    private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
-    private data class Sheet(val identifier: String, val loading: Boolean, val item: ArchiveItem?, val offer: Offer?, val error: String?)
+    init {
+        require(kind == ArchiveKind.TEXTS || media != null) { "An archive.org ${kind.noun} view needs a MediaDownloader" }
+    }
+
+    private val audio = kind != ArchiveKind.TEXTS
+
+    private data class Sheet(
+        val identifier: String,
+        val loading: Boolean,
+        val item: ArchiveItem?,
+        val offer: Offer?,
+        val error: String?,
+        val audio: AudioOffer? = null,
+    )
 
     private data class State(
         val tab: ArchiveTab = ArchiveTab.BROWSE,
@@ -104,7 +148,7 @@ class ArchiveViewModel(
         val query: String = "",
         /** The text the shown results are for: [search] reads this and [shelf], never [query]. */
         val searchedQuery: String = "",
-        val shelf: ArchiveShelf? = ArchiveShelf.MOST_DOWNLOADED,
+        val shelf: ArchiveShelf?,
         val filtered: Boolean = true,
         val docs: List<ArchiveDoc> = emptyList(),
         val total: Int = 0,
@@ -115,7 +159,7 @@ class ArchiveViewModel(
         val notice: String? = null,
     )
 
-    private val state = MutableStateFlow(State(filtered = !prefs.waiverAccepted.value))
+    private val state = MutableStateFlow(State(shelf = ArchiveShelf.first(kind), filtered = !prefs.waiverAccepted.value))
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -133,10 +177,13 @@ class ArchiveViewModel(
     /** Installed items' [TextKind]s read from their sidecars on [io]; a missing sidecar isn't cached, so a later one is seen. */
     private val sidecarKinds = ConcurrentHashMap<String, TextKind>()
 
+    /** Audio groups' file counts, read once from their manifests on [io]: the ledger drops a cancelled file's record. */
+    private val fileCounts = ConcurrentHashMap<String, Int>()
+
     // Built on [io]: the Installed tab reads sidecars from disk.
     val ui: StateFlow<ArchiveUi> = combine(state, downloads.records, ::buildUi)
         .flowOn(io)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ArchiveUi(filtered = !prefs.waiverAccepted.value))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), initialUi())
 
     init {
         // The first value starts the screen on Most downloaded; every later change reruns the current search in the other view.
@@ -156,7 +203,7 @@ class ArchiveViewModel(
         queryJob = viewModelScope.launch {
             delay(DEBOUNCE_MS)
             state.update {
-                it.copy(searchedQuery = value, shelf = if (value.isBlank()) ArchiveShelf.MOST_DOWNLOADED else null)
+                it.copy(searchedQuery = value, shelf = if (value.isBlank()) ArchiveShelf.first(kind) else null)
             }
             search(reset = true)
         }
@@ -190,7 +237,8 @@ class ArchiveViewModel(
         sheetJob = viewModelScope.launch {
             val sheet = try {
                 val item = client.item(identifier)
-                Sheet(identifier, loading = false, item = item, offer = ArchiveOffers.choose(item), error = null)
+                if (audio) Sheet(identifier, loading = false, item = item, offer = null, error = null, audio = ArchiveAudioOffers.choose(item))
+                else Sheet(identifier, loading = false, item = item, offer = ArchiveOffers.choose(item), error = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -208,7 +256,7 @@ class ArchiveViewModel(
     fun get(identifier: String) {
         appScope.launch {
             val notice = try {
-                fetchAndEnqueue(identifier)
+                if (audio) fetchAndGetAudio(identifier) else fetchAndEnqueue(identifier)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -219,6 +267,10 @@ class ArchiveViewModel(
     }
 
     fun cancel(identifier: String) {
+        if (audio) {
+            appScope.launch { media!!.cancel(groupOf(identifier)) }
+            return
+        }
         appScope.launch {
             downloads.cancel(ArchiveDownloads.itemId(identifier))
             withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
@@ -226,6 +278,10 @@ class ArchiveViewModel(
     }
 
     fun retryDownload(identifier: String) {
+        if (audio) {
+            appScope.launch { media!!.retry(groupOf(identifier)) }
+            return
+        }
         appScope.launch { downloads.retry(ArchiveDownloads.itemId(identifier)) }
     }
 
@@ -234,6 +290,14 @@ class ArchiveViewModel(
      * later re-download.
      */
     fun remove(identifier: String) {
+        if (audio) {
+            appScope.launch {
+                val group = groupOf(identifier)
+                media!!.remove(group)
+                fileCounts.remove(group)
+            }
+            return
+        }
         appScope.launch {
             downloads.remove(ArchiveDownloads.itemId(identifier))
             bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier))
@@ -253,8 +317,13 @@ class ArchiveViewModel(
     private fun search(reset: Boolean) {
         val gen = ++generation
         val s = state.value
+        if (waiverNeeded(s.filtered)) {
+            // Nothing may be shown, so nothing is asked (Decisions, Plan M2): ArchiveQuery.build refuses it too.
+            state.update { it.copy(loading = false, error = null, docs = emptyList(), total = 0, page = 0) }
+            return
+        }
         val page = if (reset) 1 else s.page + 1
-        val query = ArchiveQuery.build(s.searchedQuery, s.shelf, s.filtered)
+        val query = ArchiveQuery.build(s.searchedQuery, s.shelf, s.filtered, kind, today())
         state.update {
             if (reset) it.copy(loading = true, error = null, docs = emptyList(), total = 0, page = 0)
             else it.copy(loading = true, error = null)
@@ -313,7 +382,132 @@ class ArchiveViewModel(
         }
     }
 
-    private fun buildUi(s: State, records: List<DownloadRecord>): ArchiveUi {
+    /**
+     * Gets an audio item as one group, an album (Music) or an audiobook (Audiobooks). Every check reads the live
+     * preference, not the screen's: the waiver may have been withdrawn since this item was reached.
+     */
+    private suspend fun fetchAndGetAudio(identifier: String): String? {
+        if (!prefs.waiverAccepted.value && !kind.datedRecordings) return SPOKEN_WORD_GET
+        if (!ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
+        // Got from the other view: it lives on that shelf, and getting it here would make a second copy of one group.
+        if (media!!.mediaRootOf(groupOf(identifier)) == otherRoot) return "This is already in your $otherShelf."
+        val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
+        if (item.identifier != identifier) return NOTHING_TO_DOWNLOAD
+        val offer = ArchiveAudioOffers.choose(item) as? AudioOffer.Tracks ?: return NOTHING_TO_DOWNLOAD
+        if (offer.files.isEmpty()) return NOTHING_TO_DOWNLOAD
+        if (!prefs.waiverAccepted.value && !ArchiveOffers.isPublicDomainRecording(item, today())) {
+            return "This recording wasn't published before ${filterYear()}. Show everything to download it."
+        }
+        val manifest = MediaDownloads.albumManifest(item, offer, kind, client, now())
+        fileCounts[groupOf(identifier)] = manifest.files.size
+        return media!!.get(manifest)
+    }
+
+    private fun waiverNeeded(filtered: Boolean) = audio && filtered && !kind.datedRecordings
+
+    private fun filterYear() = PublicDomain.lastRecordingYear(today()) + 1
+
+    private fun groupOf(identifier: String) = MediaDownloads.groupId(MediaManifest.ARCHIVE_ORG, identifier)
+
+    private fun initialUi(): ArchiveUi {
+        val filtered = !prefs.waiverAccepted.value
+        return ArchiveUi(
+            shelf = ArchiveShelf.first(kind), filtered = filtered, kind = kind, filterYear = filterYear(),
+            waiverNeeded = waiverNeeded(filtered), loading = !waiverNeeded(filtered),
+        )
+    }
+
+    private fun buildUi(s: State, records: List<DownloadRecord>): ArchiveUi =
+        if (audio) buildAudioUi(s, records) else buildTextsUi(s, records)
+
+    /** This view's media folder: an item got from Music lives under `music/`, one from Audiobooks under `audiobooks/`. */
+    private val mediaFolder = "/" + (if (kind == ArchiveKind.MUSIC) "music" else "audiobooks") + "/${MediaManifest.ARCHIVE_ORG}/"
+
+    /** The other audio view's media root and shelf name: where an item got from there lives. */
+    private val otherRoot = if (kind == ArchiveKind.MUSIC) "audiobooks" else "music"
+    private val otherShelf = if (kind == ArchiveKind.MUSIC) "Audiobooks" else "Music"
+    private val otherFolder = "/$otherRoot/${MediaManifest.ARCHIVE_ORG}/"
+
+    private fun buildAudioUi(s: State, records: List<DownloadRecord>): ArchiveUi {
+        val ours = records.filter { it.groupId?.startsWith(MediaDownloads.groupId(MediaManifest.ARCHIVE_ORG, "")) == true }
+        val rows = when (s.tab) {
+            ArchiveTab.BROWSE -> s.docs.map { doc ->
+                ArchiveRow(
+                    identifier = doc.identifier,
+                    title = doc.title.ifBlank { doc.identifier },
+                    details = listOfNotNull(doc.creator.ifBlank { null }, doc.year?.toString()).joinToString(" · "),
+                    preview = null,
+                    status = audioStatus(doc.identifier, ours, offerFiles = null),
+                    audio = ArchiveAudioOffers.preview(doc),
+                )
+            }
+            // Built from the ledger alone, so it works offline: the groups whose files lie in this view's folder.
+            ArchiveTab.INSTALLED -> ours.filter { mediaFolder in it.filePath }.groupBy { it.groupId!! }.mapNotNull { (group, files) ->
+                val identifier = MediaDownloads.refOf(group, MediaManifest.ARCHIVE_ORG) ?: return@mapNotNull null
+                ArchiveRow(
+                    identifier = identifier,
+                    title = files.first().title.ifBlank { identifier },
+                    details = formatBytes(files.sumOf { it.sizeBytes }),
+                    preview = null,
+                    status = audioStatus(identifier, ours, offerFiles = null),
+                )
+            }
+        }
+        val browsing = s.tab == ArchiveTab.BROWSE
+        val needed = waiverNeeded(s.filtered)
+        return ArchiveUi(
+            tab = s.tab,
+            query = s.query,
+            shelf = s.shelf,
+            filtered = s.filtered,
+            rows = rows,
+            total = if (browsing) s.total else rows.size,
+            loading = browsing && s.loading && !needed,
+            canLoadMore = browsing && !s.loading && !needed && s.docs.size < s.total,
+            error = if (browsing && !needed) s.error else null,
+            sheet = s.sheet?.let { sheet ->
+                val tracks = sheet.audio as? AudioOffer.Tracks
+                val group = groupOf(sheet.identifier)
+                val total = tracks?.files?.size ?: fileCounts[group] ?: 0
+                ItemSheet(
+                    identifier = sheet.identifier,
+                    loading = sheet.loading,
+                    item = sheet.item,
+                    offer = null,
+                    sizeBytes = tracks?.totalBytes,
+                    error = sheet.error,
+                    status = audioStatus(sheet.identifier, ours, offerFiles = tracks?.files?.size),
+                    filesDone = filesDone(group, ours),
+                    filesTotal = total,
+                )
+            },
+            notice = s.notice,
+            kind = kind,
+            filterYear = filterYear(),
+            sheetAudio = s.sheet?.audio,
+            waiverNeeded = needed,
+        )
+    }
+
+    private fun filesDone(group: String, records: List<DownloadRecord>): Int = records
+        .filter { it.groupId == group && it.state == DownloadState.INSTALLED && !MediaDownloads.isCover(it) }
+        .map { it.itemId }.distinct().size
+
+    /** By [MediaDownloads.statusOf], counting the files from the offer, else the item's manifest, else its records. */
+    private fun audioStatus(identifier: String, records: List<DownloadRecord>, offerFiles: Int?): ItemStatus {
+        val group = groupOf(identifier)
+        val mine = records.filter { it.groupId == group }
+        if (mine.isEmpty()) return ItemStatus.NotInstalled
+        // Got from the other view (its files are under the other root): it's on that shelf, not a download of this view.
+        if (mine.any { otherFolder in it.filePath }) return ItemStatus.InLibrary(otherShelf)
+        val count = offerFiles ?: fileCounts[group]
+            ?: mine.firstNotNullOfOrNull { r -> File(r.filePath).parentFile?.let(MediaManifests::read)?.files?.size }
+                ?.also { fileCounts[group] = it }
+            ?: mine.filterNot(MediaDownloads::isCover).map { it.itemId }.distinct().size
+        return MediaDownloads.statusOf(group, count, records)
+    }
+
+    private fun buildTextsUi(s: State, records: List<DownloadRecord>): ArchiveUi {
         val ours = records.filter { it.itemId.startsWith(ArchiveDownloads.PREFIX) }
         val rows = when (s.tab) {
             ArchiveTab.BROWSE -> s.docs.map { doc ->
@@ -396,6 +590,7 @@ class ArchiveViewModel(
         const val DEBOUNCE_MS = 400L
         const val NOTHING_TO_DOWNLOAD = "Nothing on this item can be downloaded."
         const val NOT_PUBLIC_DOMAIN = "This item wasn't published in 1930 or earlier. Show everything to download it."
+        const val SPOKEN_WORD_GET = "Show everything to download archive.org spoken word."
         const val OFFLINE = "Couldn't reach archive.org. Check your connection and try again."
         val PLACEHOLDER = ArchiveFile(name = "", format = "", sizeBytes = null, sha1 = null, md5 = null, source = "", isPrivate = false)
     }

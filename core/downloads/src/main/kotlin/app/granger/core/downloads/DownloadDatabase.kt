@@ -28,6 +28,9 @@ interface DownloadDao {
     @Query("SELECT * FROM downloads WHERE itemId = :itemId AND hash = :hash")
     suspend fun get(itemId: String, hash: String): DownloadRecord?
 
+    @Query("SELECT * FROM downloads WHERE groupId = :groupId ORDER BY itemId")
+    suspend fun forGroup(groupId: String): List<DownloadRecord>
+
     @Upsert
     suspend fun upsert(record: DownloadRecord)
 
@@ -85,9 +88,13 @@ class Converters {
 
 @Database(
     entities = [DownloadRecord::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2, spec = DownloadDatabase.Rename1To2::class)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2, spec = DownloadDatabase.Rename1To2::class),
+        // Adds the nullable groupId column only; every existing record keeps its row and gets no group.
+        AutoMigration(from = 2, to = 3),
+    ],
 )
 @TypeConverters(Converters::class)
 abstract class DownloadDatabase : RoomDatabase() {

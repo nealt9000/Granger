@@ -30,12 +30,15 @@ M3 is written after M2 merges, against the code M2 actually produced. M2 schedul
 The repo had no notes or fixtures about LibriVox. This plan is designed against the following, which a quick read-only look at the live APIs confirmed. Task 1 records them as fixtures before any code is written. If a recording differs, fix this section and the affected task before going on.
 
 - **LibriVox catalog:** `GET https://librivox.org/api/feed/audiobooks/?format=json` with `id=<digits>`, `title=<text>` (`^` anchors at the start; LibriVox drops leading articles, so `^time machine` finds *Time Machine* and `^the time machine` finds nothing), `author=<last name>`, `genre=<name>`, `extended=1` (sections and readers), `coverart=1`, `limit`, `offset`, `fields={a,b}`, `sort_field=id&sort_order=desc` (newest first; `since=` does *not* sort by date).
+  - `genres`, `url_iarchive`, `coverart_*` and `sections` come only with `extended=1`. A `fields` list that names `genres` without `extended=1` silently returns none (recorded 2026-10-19), so search results carry no genres.
+  - An unknown `genre=` name is HTTP 500 with an empty body, not a 404. The six genre names in Builder's calls all answer 200.
+  - The newest books can be catalogued before their archive.org item exists: `url_iarchive` "", `totaltime` "", `totaltimesecs` 0 (ids 23006–23008 on 2026-10-19). They read as `NotOnArchive`.
   - Book: `id`, `title`, `description` (HTML), `language`, `copyright_year`, `num_sections`, `totaltime` ("4:09:29"), `totaltimesecs` (number), `authors[{first_name,last_name}]`, `genres[{name}]`, `url_librivox`, `url_iarchive` (`https://www.archive.org/details/<identifier>`), `url_zip_file`, `coverart_jpg`/`coverart_thumbnail` (in a *separate* `LibrivoxCdCoverArt*` item), and `sections[]`.
   - Section: `id`, `section_number` (may start at 0), `title`, `listen_url` (`https://www.archive.org/download/<identifier>/<name>_64kb.mp3`), `playtime` (seconds, as a string), `file_name` (often null), `readers[{display_name}]`.
   - **No results is HTTP 404** with `{"error":"Audiobooks could not be found"}`. It must read as an empty page, not an error. Busy is HTTP 429 (spec §12).
-- **A LibriVox book's archive.org item** (e.g. `time_machine_0805_librivox`): formats `64Kbps MP3` (derivative, `length` "19:32"), `VBR MP3` (the ~128 kbps originals, `length` "1172.32", `track` "1/13"), `Ogg Vorbis`, plus one `JPEG` cover (`Time_Machine_1112.jpg`) and an `Item Tile`. Every file has `sha1`, `md5` and `size`.
+- **A LibriVox book's archive.org item** (e.g. `time_machine_0805_librivox`): formats `64Kbps MP3` (derivative, `length` "19:32"), `VBR MP3` (the ~128 kbps originals, `length` "1172.32", `track` "1/13"), `Ogg Vorbis`, plus one `JPEG` cover (`Time_Machine_1112.jpg`) and an `Item Tile`. The VBR MP3s also carry a per-file `title` ("Chapter 01") and `album` ("The Time Machine"), and one `track` is a bare "7". Every file but `<identifier>_files.xml` has `sha1`, `md5` and `size`.
 - **Archive.org audio items** (e.g. the Holst item): `mediatype` "audio", `collection` a string or a list, `files[]` with `format` ("VBR MP3", "Ogg Vorbis", "Flac", "<n>Kbps MP3", "PNG" waveforms, "Spectrogram", "Columbia Peaks"), `track` ("01", "1/13"), `length` (seconds or "mm:ss"), and sometimes `title`/`album`/`creator`. The Holst item's seven MP3 files have `track` 01–07 and **no `title` or `album`**. The item's title is its identifier, and its `date` is the 2025 upload date.
-- **Archive.org search for audio:** music is `mediatype:audio AND collection:audio_music` (52,199 items with `year:[* TO 1925]`). Spoken word is `mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio` (428 with the filter, 53,721 without). Some items have **`year` 0** (e.g. `BennyBell`), which `[* TO 1925]` lets through.
+- **Archive.org search for audio:** music is `mediatype:audio AND collection:audio_music` (52,199 items with `year:[* TO 1925]`, 52,107 with `year:[1860 TO 1925]`). Spoken word is `mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio` (428 with the filter, 53,721 without). Some items have **`year` 0** (e.g. `BennyBell`), which `[* TO 1925]` lets through.
 
 ## Decisions made with Neal (2026-10-19)
 
@@ -56,7 +59,7 @@ The repo had no notes or fixtures about LibriVox. This plan is designed against 
 ## Builder's calls in this plan (for Neal's review)
 
 - **LibriVox code lives in `:core:archive`** (`LibriVoxClient.kt`, `LibriVoxModels.kt`, `LibriVoxOffers.kt`), not a new module. Every LibriVox download is an archive.org item, so it shares the item client, the file checks and the JSON helpers.
-- **LibriVox browsing:** a search box plus fixed shelves, as in Plan 7 (decided with Neal: no "Most downloaded"). The shelves are Recently added (`sort_field=id&sort_order=desc`), Fiction (`genre=General Fiction`), Poetry, Children's (`Children's Fiction`), Science fiction, Mystery & detective (`Detective Fiction`) and Philosophy. Task 1 checks each genre name against the API. The search box asks by title (`title=<text>`) and by author (`author=<last word>`), then merges, title matches first, deduplicated by id.
+- **LibriVox browsing:** a search box plus fixed shelves, as in Plan 7 (decided with Neal: no "Most downloaded"). The shelves are Recently added (`sort_field=id&sort_order=desc`), Fiction (`genre=General Fiction`), Poetry, Children's (`Children's Fiction`), Science fiction, Mystery & detective (`Detective Fiction`) and Philosophy. Task 1 checked each genre name against the API: all six answer HTTP 200. The search box asks by title (`title=<text>`) and by author (`author=<last word>`), then merges, title matches first, deduplicated by id.
 - **LibriVox requests are paced** at least 1 s apart (one `Mutex` in the client). A 429 shows "LibriVox is busy right now. Try again in a minute." with Retry. The user agent goes to `librivox.org` as well as archive.org hosts (`ArchiveUserAgent.isArchiveHost` is extended).
 - **LibriVox files** (64 kbps, decided with Neal): each section's file is the basename of its `listen_url`, which must be a usable file in the item named by `url_iarchive` (verified by its sha1, else md5). If any section's file is missing there, the book isn't offered ("This book's files aren't all on archive.org."). The cover is the largest usable `JPEG` in that item, else its `Item Tile`. `coverart_jpg` is not used: it lives in another item and would need a second metadata fetch to verify.
 - **Archive.org queries by media type** (`ArchiveKind`): texts as today; spoken word `mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio` (LibriVox books have their own source, so they aren't listed twice); music `mediatype:audio AND collection:audio_music`. The shelves:
@@ -162,7 +165,7 @@ Left for M3 or later, with the reason:
 - Produces: the fixtures that Tasks 3, 4, 7, 8 and 9 read. Later tasks copy the ones they need into `app/src/test/resources/archive/`, as Plan 7 did.
 
 - [ ] **Step 1: Record the LibriVox fixtures with curl.** Send Granger's user agent, `-A "Granger/<versionName> (+https://github.com/nealt9000/Granger)"`, and wait 1 s between calls.
-  - `librivox-search-time-machine.json`: `https://librivox.org/api/feed/audiobooks/?title=%5Etime%20machine&format=json&limit=5&fields=%7Bid,title,authors,language,totaltime,totaltimesecs,num_sections,genres%7D`
+  - `librivox-search-time-machine.json`: `https://librivox.org/api/feed/audiobooks/?title=%5Etime%20machine&format=json&limit=5&fields=%7Bid,title,authors,language,totaltime,totaltimesecs,num_sections%7D`
   - `librivox-book-817.json`: `…/?id=817&extended=1&coverart=1&format=json`
   - `librivox-recent.json`: `…/?format=json&limit=3&sort_field=id&sort_order=desc&fields=%7Bid,title,authors,totaltimesecs%7D`
   - `librivox-not-found.json`: `…/?title=%5Ezzzqqq&format=json`. Write the body; note the status (expected 404).
@@ -170,7 +173,7 @@ Left for M3 or later, with the reason:
 - [ ] **Step 2: Record the archive.org fixtures.**
   - `item-librivox-time-machine.json`: `https://archive.org/metadata/time_machine_0805_librivox`
   - `item-holst-planets.json`: `https://archive.org/metadata/holst-the-planets-holst-london-symphony-orchestra-1922-1924`
-  - `search-audio-music.json` and `search-audio-spoken.json`: `advancedsearch.php` with the Task 3 queries (filtered, `rows=3`, the `fl[]` fields `ArchiveOrgClient.search` sends, plus `mediatype`).
+  - `search-audio-music.json` and `search-audio-spoken.json`: `advancedsearch.php` with the Task 3 queries (music filtered; spoken word unfiltered, the only way it's searched, Task 8; `rows=3`, the `fl[]` fields `ArchiveOrgClient.search` sends, plus `mediatype`).
   - `item-audio-lending.json`: the first result of `mediatype:audio AND access-restricted-item:true` (`rows=1`), then its `/metadata/<id>`.
 - [ ] **Step 3: Check the assumptions.** Run `python3 -m json.tool` on each file. Then confirm by eye against "API assumptions":
   - the 13 sections of book 817 and the 13 `*_64kb.mp3` files in its item;
@@ -269,6 +272,7 @@ git commit -m "Media M2: download groups run one file at a time as one chain; AU
 **Files:**
 - Modify: `core/archive/src/main/kotlin/app/granger/core/archive/ArchiveQuery.kt` (`ArchiveKind`, shelves by kind, `build` with kind), `ArchiveModels.kt` (audio fields), `ArchiveOrgClient.kt` (parse them; `mediatype` in search fields), `ArchiveOffer.kt` (`isPublicDomainRecording`, shared `isUsable`)
 - Create: `core/archive/src/main/kotlin/app/granger/core/archive/PublicDomain.kt`, `ArchiveAudioOffer.kt`
+- Modify: `app/src/main/kotlin/app/granger/archive/ArchiveScreen.kt` (its shelf chips list `ArchiveShelf.of(ArchiveKind.TEXTS)`, not `entries`, so the books view doesn't gain the audio shelves before Task 8)
 - Test: `core/archive/src/test/kotlin/app/granger/core/archive/ArchiveQueryTest.kt`, `ArchiveOrgClientTest.kt`, `PublicDomainTest.kt`, `ArchiveAudioOfferTest.kt`
 
 **Interfaces:**
@@ -317,7 +321,7 @@ git commit -m "Media M2: download groups run one file at a time as one chain; AU
   }
   ```
 - Parsing rules:
-  - `track`: "01" → 1, "1/13" → 1, anything else → null.
+  - `track`: "01" → 1, "7" → 7, "1/13" → 1, anything else → null.
   - `length`: "373.16" → 373_160 ms, "19:32" → 1_172_000, "1:02:03" → 3_723_000, anything else → null.
   - `collection` can be a string or a list.
 - `build` for an audio kind: `<kind.base>`, then ` AND (<text>)`, then ` AND <shelf clause>`, then, when filtered, ` AND <PublicDomain.clause>`. A filtered audio kind without `datedRecordings` (spoken word) has nothing it may show, so `build` throws `IllegalArgumentException`: the view model never searches it before the waiver (Task 8). A shelf of another kind throws `IllegalArgumentException` too. `datedRecordings` is read only for audio kinds; texts keep Plan 7's filter.
@@ -367,7 +371,7 @@ git commit -m "Media M2: download groups run one file at a time as one chain; AU
 - [ ] **Step 5: Commit**
 
 ```bash
-git add core/archive
+git add core/archive app/src/main/kotlin/app/granger/archive/ArchiveScreen.kt docs/superpowers/plans/2026-10-19-plan-m2-media-sources.md
 git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-domain filter, audio file choice"
 ```
 
@@ -401,6 +405,7 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
       private val client: OkHttpClient, private val userAgent: String,
       private val baseUrl: String = "https://librivox.org", private val minGapMs: Long = 1_000,
       private val clock: () -> Long = System::currentTimeMillis,
+      private val sleep: suspend (Long) -> Unit = { delay(it) },   // injected with clock so tests never wait (Task 4 addition)
   ) {
       suspend fun search(query: LibriVoxQuery, offset: Int, limit: Int = 50): LibriVoxPage
       suspend fun book(id: String): LibriVoxBook          // ?id=&extended=1&coverart=1
@@ -417,11 +422,13 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
   object LibriVoxOffers { fun choose(book: LibriVoxBook, item: ArchiveItem): LibriVoxOffer }
   ```
 - Behaviour:
-  - `Text` sends two requests, `title=<text>` and `author=<last word of text>`, merged with title matches first and duplicates dropped. `hasMore` is true when either request returned `limit` rows.
-  - Search asks only for `fields={id,title,authors,language,totaltime,totaltimesecs,num_sections,genres}`.
+  - `Text` sends two requests, `title=<text>` and `author=<last word of text>`, merged with title matches first and duplicates dropped. `hasMore` is true when either request returned `limit` rows. A leading "The", "A" or "An" is dropped from the title request, since LibriVox titles drop it ("The Time Machine" asks `title=Time Machine`).
+  - Search asks only for `fields={id,title,authors,language,totaltime,totaltimesecs,num_sections}`, without `extended=1`, so search results have empty `genres` (only `book(id)` fills them).
+  - `url_iarchive` "" gives `archiveIdentifier` null (→ `NotOnArchive`); `totaltime` "" with `totaltimesecs` 0 gives `totalTimeMs` 0.
   - A 404 whose body says "could not be found" is an empty page.
   - A 429 throws `LibriVoxError("LibriVox is busy right now. Try again in a minute.")`. Another non-2xx throws `LibriVoxError("LibriVox answered <code>")`. An `IOException` throws `LibriVoxError("Couldn't reach LibriVox")`.
-  - Requests run on `Dispatchers.IO`, at least `minGapMs` apart (one `Mutex`, then `delay` until the gap has passed).
+  - Requests run on `Dispatchers.IO`, at least `minGapMs` apart, send to send (one `Mutex`, then `sleep` until the gap has passed; `sleep` is `delay` in production).
+  - As built: the GET itself (user agent, `Dispatchers.IO`, `IOException` mapping) is shared with `ArchiveOrgClient` through `internal suspend fun OkHttpClient.getText` in `Http.kt`; `book(id)` for an unknown id (404 "could not be found", or no matching book) throws `LibriVoxError("Not found on LibriVox")`; a book with no sections is `NotOnArchive`.
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -446,7 +453,7 @@ git commit -m "Media M2: archive.org audio kinds and shelves, rolling public-dom
 ```
 
 - [ ] **Step 2: Run to verify they fail.** Run: `./gradlew :core:archive:testDebugUnitTest :app:testDebugUnitTest --tests 'app.granger.archive.ArchiveUserAgentTest'`. Expected: compile failure, then FAIL.
-- [ ] **Step 3: Implement.** Share `ArchiveOrgClient`'s JSON helpers (`allStrings`, `firstString`, `stripHtml`) by moving them to `internal` functions in a new `core/archive/src/main/kotlin/app/granger/core/archive/Json.kt`. `ArchiveUserAgent` keeps its name and gains `|| host == "librivox.org" || host.endsWith(".librivox.org")`.
+- [ ] **Step 3: Implement.** Share `ArchiveOrgClient`'s JSON helpers (`allStrings`, `firstString`, `stripHtml`) by moving them to `internal` functions in a new `core/archive/src/main/kotlin/app/granger/core/archive/Json.kt` (with `asInt`/`asLong`/`asBool`), and its request code to `Http.kt` (`getText`). `ArchiveUserAgent` keeps its name and gains `|| host == "librivox.org" || host.endsWith(".librivox.org")`.
 - [ ] **Step 4: Run to verify they pass.** Same command. Expected: PASS.
 - [ ] **Step 5: Commit**
 
@@ -526,7 +533,7 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
 - Produces:
   ```kotlin
   @Serializable data class CachedTags(val title: String, val durationMs: Long, val rgTrackGain: Float?, val rgTrackPeak: Float?,
-      val rgAlbumGain: Float?, val rgAlbumPeak: Float?, val embeddedCover: String? /* local file name, e.g. ".cover-01.jpg" */)
+      val rgAlbumGain: Float?, val rgAlbumPeak: Float?, val embeddedCover: String? /* local file name, ".cover-<16 hex of sha1(image)>.jpg" */)
   @Serializable data class ManifestFile(
       val name: String /* local */, val remoteName: String, val url: String, val sizeBytes: Long, val hash: String,
       val hashAlgorithm: String /* HashAlgorithm name */, val title: String = "", val trackNo: Int? = null,
@@ -548,10 +555,10 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
       /** "<NN> - <title or remote stem>.<remote ext>", NN at least two digits, FAT-safe, ≤ 120 chars. */
       fun localName(ordinal: Int, title: String, remoteName: String): String
       /**
-       * The title to show. A [title] equal to [identifier] (or with no spaces and only [-_] separators) is a slug, and becomes the
+       * The title to show. A [title] equal to [identifier] (or blank) is a slug, and becomes the
        * longest common prefix of [fileNames] (the audio files' remote names): extensions dropped, cut back so it never ends inside a
        * word, trailing " ", "_", "-", ":", "." trimmed. The prefix is used when there are at least two names and it is at least
-       * 3 words or 12 characters; otherwise the slug reads as words, each capitalised. Any other title is returned unchanged.
+       * 3 words or 12 characters; otherwise the identifier reads as words, each capitalised. Any other title (even a slug-shaped one) is returned unchanged.
        */
       fun displayTitle(title: String, identifier: String, fileNames: List<String>): String
       /** [displayTitle] for [m]: its title, its ref, and its files' remote names (the cover not included). */
@@ -572,16 +579,18 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
       suspend fun scan(): Int
       /** Every item folder with a readable manifest, on every mounted volume. */
       suspend fun items(): List<Pair<File, MediaManifest>>
+      /** Item folders whose manifest couldn't be read (torn, not JSON, another folder's, unsafe names) at the last scan. */
+      val lastUnreadable: List<File>
   }
   object CoverSweep { fun sweep(coversDir: File, referenced: Set<String>): Int }   // deletes unreferenced *.jpg; returns how many
   ```
 - Filing rules:
   - A file is **present** when `<dir>/<name>` exists and its length equals `sizeBytes`. `*.part` files never count.
-  - Present files missing `tags` are opened read-only (`ParcelFileDescriptor.open(file, MODE_READ_ONLY)`), read with `tagReader` under `tagGuard`, and their `CachedTags` are written back to the manifest. An embedded cover is saved as `.cover-NN.jpg` in the item folder.
+  - Present files missing `tags` are opened read-only (`ParcelFileDescriptor.open(file, MODE_READ_ONLY)`), read with `tagReader` under `tagGuard`, and their `CachedTags` are written back to the manifest. An embedded cover is saved as `.cover-<16 hex of sha1(image)>.jpg` in the item folder, so art embedded in every track is stored once.
   - Track fields:
     - `uri` is `Uri.fromFile(file).toString()`, and `folder` is `relativeDir + "/"`.
     - `album` is `displayTitle(m)`, `albumKey` is `Albums.itemKey(source, ref)`, and `albumArtists` is the creators joined `"; "`.
-    - `title` is the file's archive.org title, else the tag title, else the file stem.
+    - `title` is the file's archive.org title, else the tag title, else the remote file name's stem (not the local "NN - " name).
     - `trackNo` is the manifest's, else the file's position plus one.
     - `artists` is the section readers (LibriVox), else the creators. `genres` is the manifest's.
     - `durationMs` is the tags' value, else the manifest's, else 0.
@@ -591,7 +600,7 @@ git commit -m "Media M2: one-item album keys, forget removed downloads keeping t
     - `author` = creators, `narrator` = distinct readers, `description`, cover, and `durationMs` = the sum of the present files.
     - Its chapters are the present files in order, one chapter each, titled like the track.
   - Then `media.sync(LIBRIVOX, …)` and `media.sync(ARCHIVE_ORG, …)`, each with every item of that origin found on any volume. An item on an unmounted volume is absent, so its rows go MISSING with their state kept.
-  - A manifest that can't be read skips only its item.
+  - A manifest that can't be read skips only its item: its rows are left as they are (unknown, not gone) and its folder is listed in `lastUnreadable`.
 - `PhoneScanner`: after `media.sync(PHONE, …)`, when no source failed, `CoverSweep.sweep(coversDir, every coverPath in tracks and audiobooks)`.
 
 - [ ] **Step 1: Write the failing tests.**
@@ -683,7 +692,15 @@ git commit -m "Media M2: item manifests as origin records; downloaded media file
       suspend fun remove(groupId: String)
       /** The runner's onInstalled for AUDIO records: one rescan at a time; never throws. */
       suspend fun onFileInstalled(record: DownloadRecord)
+      /** Every downloaded-media scan (start, finished file, removal, "Rescan now") runs through these, one at a time. */
+      suspend fun rescan()
+      suspend fun rescanQuietly()
   }
+  // As built: the cover's file id is always <groupId>/000 and the audio files <groupId>/001 on. Remove deletes the
+  // folder, rescans, then forgets (manifest track ids + chapters + item-keyed tracks), so an in-flight scan can't
+  // bring ghosts back. An item already on a mounted volume is completed there; one whose ledger rows point to an
+  // unmounted volume is refused ("<title> is on storage that isn't available right now. Put it back to finish it,
+  // or remove it first."). "Rescan now" is wired in GrangerNavHost's mediaSettings scanner lambda.
   // AppContainer gains: val librivoxClient: LibriVoxClient; val downloadedMedia: DownloadedMediaScanner; val mediaDownloader: MediaDownloader
   ```
 - Notices (exact): no volume → "No storage is available right now."; `NoSpace` → "Not enough space on <label> for <title>: free up <size>." Free space is the only check (no cap).
@@ -753,6 +770,7 @@ git commit -m "Media M2: media downloads as groups with origin manifests; filing
     - Row status comes from `MediaDownloads.statusOf`.
     - The Installed tab lists `media:archive-org:` groups whose files lie under `music/` (MUSIC) or `audiobooks/` (SPOKEN_WORD).
   - Texts behave exactly as before. Plan 7's tests pass unchanged.
+  - As built: `ArchiveRow` gains `audio: AudioOffer? = null` (the row preview) and `ItemSheet` gains `filesDone`/`filesTotal` ("Downloading: 3 of 7"); the view model also takes `now: () -> Long`. The screen's list, note and waiver dialog are `internal fun ArchiveContent(ui, …, onAcceptWaiver, onOpenLibriVox, …)`, which `ArchiveScreenTest` drives. A group's file count comes from the offer, else its manifest (read once), since a cancel drops unfinished records. `GrangerNavHost` passes `onOpenLibriVox = {}` until Task 9.
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -826,6 +844,7 @@ git commit -m "Media M2: archive.org spoken word and music: rolling filter, waiv
   - `Incomplete` gives the notice "This book's files aren't all on archive.org." and `NotOnArchive` gives "This book isn't on archive.org yet."
   - The sheet shows the cover (once downloaded), title, authors, readers (first 3, then "and N more"), language, total time, genres, description (6 lines), "<n> chapters · <size>", **Get**/Cancel/Retry/Remove/**Get the rest**, and **View on LibriVox** (`pageUrl` in the browser).
   - The footer is the LibriVox copy from Global Constraints.
+  - As built: `LibriVoxSheet` gains defaulted `filesDone`/`filesTotal` ("Downloading: 3 of 13 chapters") and `coverPath` (the installed `000` record's file). `GrangerNavHost` adds `fun NavController.openLibriVox()` (Task 10's LIBRIVOX link uses it) and `internal fun railToolOf(destination)`, which puts `LibriVoxRoute` under LIBRARY. Titles, authors, readers, genres and descriptions are shown through `decodeEntities` (`LibriVoxSheet.kt`), since the client strips tags but leaves entities. A row's Get doesn't know the offer: it fetches book and item and says why when the book can't be got. Extra tests: `LibriVoxSheetTest` (entities, readers, durations), `LibriVoxRouteTest` (the spoken-word note's **LibriVox** opens `LibriVoxRoute`), `bookNotOnArchiveIsNotQueued`, `cancelRetryAndRemoveGoToTheGroup`.
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -879,6 +898,12 @@ git commit -m "Media M2: LibriVox source: shelves, search, book sheet, chapter d
   - ARCHIVE_ORG opens `ArchiveRoute(TEXTS)`, ARCHIVE_ORG_SPOKEN `ArchiveRoute(SPOKEN_WORD)` and ARCHIVE_ORG_MUSIC `ArchiveRoute(MUSIC)`.
   - LIBRIVOX opens `LibriVoxRoute`.
 - **Remove download** asks first: "Remove <title>? This deletes the downloaded files. Your place and bookmarks are kept." Phone media never shows it.
+- As built:
+  - `AudiobookPage` and `AlbumPage` gain `download: ItemStatus?`, `filesDone`/`filesTotal` and `onRemoveDownload: (() -> Unit)?` (all null/0 for phone media). A downloaded item with no ledger rows (filed from disk) reads `Installed`. The group comes from `MediaDownloads.groupOf(audiobook)` / `groupOfAlbum(albumKey)`, and the counts from `MediaDownloads.progress(groupId, records, manifestFileCount(...))`, the manifest read once per group. The page shows it through `media/DownloadControls.kt`.
+  - `GrangerNavHost` gains `internal fun routeOf(SourceLink)`, `NavController.openSource(link)` and `internal fun inLibraryRoute(kind, identifier)` (`SourceRoutesTest`).
+  - The Library's media hint row (still gated on `onMediaSettings`) offers the missing types' download sources as buttons ("LibriVox", "Archive.org audiobooks", "Archive.org music": `mediaHintLinks`, `hintLabel`) beside **Settings** (`MediaHintRow`, `LibraryScreenTest`).
+  - Task 8 gap fixed: one archive.org item is one group whichever view got it. The other audio view shows it as `ItemStatus.InLibrary("Music" | "Audiobooks")`, "In your Music", with **Open** (its album, or its book). Its Get answers "This is already in your Music." without calling `MediaDownloader.get`, by `MediaDownloader.mediaRootOf(groupId)` (ledger rows, else the manifest on a mounted volume). Pinned by `itemGotUnderMusicShowsAsInYourMusicInTheAudiobooksView`, `itemGotUnderAudiobooksShowsAsInYourAudiobooksInTheMusicView`, `getFindsTheOtherViewsFolderWithoutLedgerRows` and `ArchiveScreenTest.anItemInTheOtherShelfOffersOpen`.
+  - Settings' scroll by key stays with Task 11, as scheduled.
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -933,6 +958,12 @@ git commit -m "Media M2: archive sources grouped by media type; download progres
       fun setEnabled(context: Context, on: Boolean)    // setComponentEnabledSetting(…, DONT_KILL_APP); also notifyChange on the roots URI
       fun isEnabled(context: Context): Boolean
   }
+  // As built: MediaSettings gains `sharing: OtherAppsSharing` (isEnabled/setEnabled; ComponentOtherAppsSharing wraps
+  // MediaSharing). The component's enabled state is the setting itself, no pref. MediaDownloader gains a last,
+  // defaulted `onChanged: () -> Unit`, run after every downloaded-media scan; AppContainer passes
+  // MediaSharing.notifyChanged (roots, root/music/audiobooks children, and the authority). A file id resolves only
+  // inside an item folder with a readable manifest; `*.tmp` files are hidden as well as dotfiles and `*.part`.
+  // Settings computes the media section's index from LEADING_KEYS (the rows above it, emitted from that same list).
   ```
 - Manifest:
   ```xml

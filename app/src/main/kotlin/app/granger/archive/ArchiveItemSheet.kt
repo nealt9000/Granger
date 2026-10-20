@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.granger.core.archive.AudioOffer
 import app.granger.core.archive.Offer
 import app.granger.formatBytes
 import app.granger.sources.ItemStatus
@@ -40,17 +41,33 @@ internal fun offerLabel(offer: Offer?): String? = when (offer) {
     null -> null
 }
 
-/** An item's details with Get, Borrow or View, and Remove. [onGet] already asked for notifications. */
+/** The label for what an audio item offers: its format on a row, "7 tracks · VBR MP3" once its files are known. */
+internal fun audioLabel(offer: AudioOffer?): String? = when (offer) {
+    is AudioOffer.Tracks ->
+        if (offer.files.isEmpty()) offer.format
+        else "${offer.files.size} ${if (offer.files.size == 1) "track" else "tracks"} · ${offer.format}"
+    AudioOffer.LendOnly -> "Borrow on archive.org"
+    AudioOffer.Nothing -> "No downloadable audio"
+    null -> null
+}
+
+/**
+ * An item's details with Get, Borrow or View, and Remove. [onGet] already asked for notifications. [audio] is what an
+ * audio item offers (texts pass null and use [ItemSheet.offer]).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ArchiveItemSheet(
     sheet: ItemSheet,
+    audio: AudioOffer?,
     onGet: () -> Unit,
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     onRemove: () -> Unit,
     onOpenInBrowser: () -> Unit,
     onDismiss: () -> Unit,
+    /** An item got from the other audio view ([ItemStatus.InLibrary]): open it there. */
+    onOpenInLibrary: () -> Unit = {},
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
@@ -76,7 +93,7 @@ internal fun ArchiveItemSheet(
                 if (item.description.isNotBlank()) {
                     Text(item.description, maxLines = 6, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
                 }
-                val label = offerLabel(sheet.offer)
+                val label = audioLabel(audio) ?: offerLabel(sheet.offer)
                 if (label != null) {
                     Text(
                         listOfNotNull(label, sheet.sizeBytes?.let { formatBytes(it) }).joinToString(" · "),
@@ -84,9 +101,13 @@ internal fun ArchiveItemSheet(
                     )
                 }
             }
+            val downloading = sheet.status is ItemStatus.Queued || sheet.status is ItemStatus.Downloading
+            if (downloading && sheet.filesTotal > 0) {
+                Text("Downloading: ${sheet.filesDone} of ${sheet.filesTotal}", style = MaterialTheme.typography.bodyMedium)
+            }
             ItemStatusText(sheet.status)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                SheetButtons(sheet, onGet, onCancel, onRetry, onRemove, onOpenInBrowser)
+                SheetButtons(sheet, audio, onGet, onCancel, onRetry, onRemove, onOpenInBrowser, onOpenInLibrary)
             }
             val offer = sheet.offer
             if (offer is Offer.Download && offer.alsoPdf) {
@@ -101,11 +122,13 @@ internal fun ArchiveItemSheet(
 @Composable
 private fun SheetButtons(
     sheet: ItemSheet,
+    audio: AudioOffer?,
     onGet: () -> Unit,
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     onRemove: () -> Unit,
     onOpenInBrowser: () -> Unit,
+    onOpenInLibrary: () -> Unit,
 ) {
     // The ledger decides first: something installed or in flight is managed whatever the metadata offers now.
     when (sheet.status) {
@@ -115,9 +138,16 @@ private fun SheetButtons(
             Button(onClick = onRetry) { Text("Retry") }
         }
         ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
-        else -> when (sheet.offer) {
-            is Offer.Download -> Button(onClick = onGet) { Text("Get") }
-            Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
+        is ItemStatus.Partial -> {
+            TextButton(onClick = onRemove) { Text("Remove") }
+            Button(onClick = onGet) { Text("Get the rest") }
+        }
+        is ItemStatus.InLibrary -> Button(onClick = onOpenInLibrary) { Text("Open") }
+        else -> when {
+            audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text("Get") }
+            audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
+            sheet.offer is Offer.Download -> Button(onClick = onGet) { Text("Get") }
+            sheet.offer == Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
             else -> Unit
         }
     }

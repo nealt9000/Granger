@@ -265,4 +265,97 @@ class ShelvesTest {
         assertThat(s.shelves.first().map { it.mediaType.id }).containsExactly("literature")
         assertThat(db.mediaDao().tracksOf(MediaOrigin.PHONE)).hasSize(3)
     }
+
+    /** A downloaded album: every track keyed by its origin item, as the downloaded-media scanner files them. */
+    private fun itemAlbum(identifier: String, title: String, count: Int = 2) = (1..count).map { n ->
+        musicTrack("$identifier-$n", album = title, albumArtist = "Gustav Holst", folder = "music/archive-org/$identifier/", trackNo = n)
+            .copy(id = "track:archive-org:$identifier:$n", origin = MediaOrigin.ARCHIVE_ORG, uri = "file:///music/$identifier/$n.mp3",
+                albumKey = Albums.itemKey("archive-org", identifier))
+    }
+
+    /** A downloaded audiobook of [origin] with one file. */
+    private fun downloadedBook(origin: MediaOrigin, ref: String, title: String): Pair<ScannedAudiobook, Track> {
+        val source = if (origin == MediaOrigin.LIBRIVOX) "librivox" else "archive-org"
+        val book = phoneAudiobook(ref, title).copy(id = "audiobook:$source:$ref", origin = origin)
+        val file = musicTrack("$ref-1", album = title, albumArtist = "Author", audiobookId = book.id)
+            .copy(id = "track:$source:$ref:1", origin = origin, uri = "file:///audiobooks/$ref/1.mp3")
+        return ScannedAudiobook(book, listOf(file.id), listOf(file.id to ScannedChapter(title, 0L))) to file
+    }
+
+    private suspend fun syncDownloads(origin: MediaOrigin, tracks: List<Track>, books: List<Pair<ScannedAudiobook, Track>> = emptyList()) =
+        media.sync(origin, ScanResult(tracks + books.map { it.second }, books.map { it.first }))
+
+    @Test fun librivoxBooksFileUnderAudiobooksLibriVox() = runTest {
+        val (s, _) = shelves()
+        syncDownloads(MediaOrigin.LIBRIVOX, emptyList(), listOf(downloadedBook(MediaOrigin.LIBRIVOX, "817", "Time Machine")))
+        val shelf = s.shelves.first().single()
+        assertThat(shelf.mediaType.id).isEqualTo("audiobooks")
+        val row = shelf.collections.single()
+        assertThat(row.collection.name).isEqualTo("LibriVox")
+        assertThat(row.collection.defaultKey).isEqualTo("audiobooks:librivox")
+        assertThat(row.audiobooks.map { it.id }).containsExactly("audiobook:librivox:817")
+        assertThat(row.albums).isEmpty()
+    }
+
+    @Test fun archiveAlbumsFileUnderMusicArchiveOrgAndSpokenWordUnderAudiobooks() = runTest {
+        val (s, _) = shelves()
+        syncDownloads(MediaOrigin.ARCHIVE_ORG, itemAlbum("holst", "The Planets", count = 3),
+            listOf(downloadedBook(MediaOrigin.ARCHIVE_ORG, "odyssey_reading", "The Odyssey")))
+        val shelves = s.shelves.first()
+        assertThat(shelves.map { it.mediaType.id }).containsExactly("audiobooks", "music").inOrder()
+        val books = shelves[0].collections.single()
+        assertThat(books.collection.name).isEqualTo("Archive.org")
+        assertThat(books.collection.defaultKey).isEqualTo("audiobooks:archive-org")
+        assertThat(books.audiobooks.map { it.title }).containsExactly("The Odyssey")
+        val music = shelves[1].collections.single()
+        assertThat(music.collection.name).isEqualTo("Archive.org")
+        assertThat(music.collection.defaultKey).isEqualTo("music:archive-org")
+        assertThat(music.albums.map { it.title to it.trackCount }).containsExactly("The Planets" to 3)
+        assertThat(music.albums.single().key).isEqualTo(Albums.itemKey("archive-org", "holst"))
+    }
+
+    @Test fun archiveBooksAndArchiveAudioGetSeparateCollections() = runTest {
+        val (s, _) = shelves()
+        bookshelf.state.value = listOf(book("ia1", BookOrigin.ARCHIVE_ORG))
+        syncDownloads(MediaOrigin.ARCHIVE_ORG, itemAlbum("holst", "The Planets"),
+            listOf(downloadedBook(MediaOrigin.ARCHIVE_ORG, "odyssey_reading", "The Odyssey")))
+        val rows = s.shelves.first().flatMap { shelf -> shelf.collections.map { shelf.mediaType.id to it } }
+        assertThat(rows.map { (type, row) -> type to row.collection.defaultKey }).containsExactly(
+            "literature" to "archive-org", "audiobooks" to "audiobooks:archive-org", "music" to "music:archive-org",
+        )
+        assertThat(rows.map { it.second.collection.id }.toSet()).hasSize(3)
+        assertThat(rows.map { it.second.collection.name }.toSet()).containsExactly("Archive.org")
+        val literature = rows.single { it.first == "literature" }.second
+        assertThat(literature.books.map { it.sourceRef }).containsExactly("ia1")
+        assertThat(literature.albums).isEmpty()
+        assertThat(literature.audiobooks).isEmpty()
+    }
+
+    /** Remove forgets the rows but not the user's placement: getting it again puts it back where they moved it. */
+    @Test fun movedDownloadedAlbumStaysMovedAfterRemoveAndGetAgain() = runTest {
+        val (s, _) = shelves()
+        val holst = itemAlbum("holst", "The Planets")
+        val odyssey = downloadedBook(MediaOrigin.ARCHIVE_ORG, "odyssey_reading", "The Odyssey")
+        syncDownloads(MediaOrigin.ARCHIVE_ORG, holst, listOf(odyssey))
+        val shelves = s.shelves.first()
+        val album = shelves.single { it.mediaType.id == "music" }.collections.single().albums.single()
+        val book = shelves.single { it.mediaType.id == "audiobooks" }.collections.single().audiobooks.single()
+        val classical = s.createCollection("Classical", "music")
+        val homer = s.createCollection("Homer", "audiobooks")
+        s.moveAlbum(album, classical)
+        s.moveAudiobook(book, homer)
+
+        media.forget(holst.map { it.id } + odyssey.second.id, listOf(odyssey.first.book.id))
+        // No ghost: nothing is left on either shelf, though the placements stay.
+        assertThat(s.shelves.first().flatMap { it.collections }.flatMap { it.albums + it.audiobooks }).isEmpty()
+        assertThat(db.shelfDao().getPlacements().filter { it.userSet }.map { it.packKey })
+            .containsExactly(Filing.albumKey(album), Filing.audiobookKey(book))
+
+        syncDownloads(MediaOrigin.ARCHIVE_ORG, holst, listOf(odyssey))
+        assertThat(s.collection(classical).first()!!.albums.map { it.key }).containsExactly(album.key)
+        assertThat(s.collection(homer).first()!!.audiobooks.map { it.id }).containsExactly(book.id)
+        val after = s.shelves.first()
+        assertThat(after.single { it.mediaType.id == "music" }.collections.map { it.collection.id }).containsExactly(classical)
+        assertThat(after.single { it.mediaType.id == "audiobooks" }.collections.map { it.collection.id }).containsExactly(homer)
+    }
 }

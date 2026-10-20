@@ -1,6 +1,12 @@
 package app.granger.audiobooks
 
 import app.granger.FakeShelves
+import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadState
+import app.granger.core.downloads.ItemKind
+import app.granger.media.MediaDownloads
+import app.granger.record
+import app.granger.sources.ItemStatus
 import app.granger.MainDispatcherRule
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
@@ -14,6 +20,8 @@ import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
 import app.granger.music.FakeMediaLibrary
 import app.granger.player.FakePlayerHub
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerUi
 import app.granger.player.bookProgress
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
@@ -55,8 +63,14 @@ class AudiobooksViewModelTest {
     private val listening = FakeListening()
     private val hub = FakePlayerHub()
 
+    private val records = MutableStateFlow<List<DownloadRecord>>(emptyList())
+    private val removed = mutableListOf<String>()
+
     private fun TestScope.vm(collectionId: String? = null): AudiobooksViewModel {
-        val vm = AudiobooksViewModel(collectionId, media, shelves, listening, hub, now = { 1_000L }, compute = main.dispatcher)
+        val vm = AudiobooksViewModel(
+            collectionId, media, shelves, listening, hub, now = { 1_000L }, compute = main.dispatcher,
+            downloads = records, remover = { removed += it },
+        )
         backgroundScope.launch { vm.shelf.collect {} }
         return vm
     }
@@ -144,6 +158,35 @@ class AudiobooksViewModelTest {
         assertThat(page.progress.positionMs).isEqualTo(110_000L)
         assertThat(page.currentChapter).isEqualTo(2)
         assertThat(page.playLabel).isEqualTo("Resume")
+    }
+
+    @Test fun theBookInThePlayerPausesAndCarriesOnInPlace() = runTest(main.dispatcher) {
+        val b = book("loaded", durationMs = 150_000L)
+        val chapters = chaptersOf(b, 100_000L, 50_000L)
+        add(b, chapters)
+        listening.stateList.value = listOf(state(b, "track:phone:loaded-0", 20_000L, updatedAt = 5L))
+        val playingBook = PlayerUi(NowPlaying.Book(b, chapters[0], 2, 1f, false, 0), playing = true, 30_000L, 100_000L, null)
+        hub.ui.value = playingBook
+        val vm = vm()
+
+        assertThat(vm.book(b.id).filterNotNull().first().playLabel).isEqualTo("Pause")
+        vm.play(b.id)
+        advanceUntilIdle()
+        // No reload from the saved position (20 s, behind the player's 30 s): only a pause.
+        assertThat(hub.calls).containsExactly("playPause")
+
+        hub.ui.value = playingBook.copy(playing = false)
+        assertThat(vm.book(b.id).filterNotNull().first { !it.playing }.playLabel).isEqualTo("Resume")
+        vm.play(b.id)
+        advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("playPause", "playPause")
+        assertThat(hub.bookPlays).isEmpty()
+
+        // Not in the player: it loads from its saved position, as before.
+        hub.ui.value = PlayerUi.IDLE
+        vm.play(b.id)
+        advanceUntilIdle()
+        assertThat(hub.bookPlays.single()).isEqualTo(b.id to null)
     }
 
     @Test fun markFinishedThenResumeStartsFromBeginning() = runTest(main.dispatcher) {
@@ -252,5 +295,53 @@ class AudiobooksViewModelTest {
         vm.playBookmark(mark)
         advanceUntilIdle()
         assertThat(hub.bookPlays).isEmpty()
+    }
+
+    // --- Downloaded books (Plan M2, Task 10) ---
+
+    private val group = "media:librivox:817"
+
+    private fun librivoxBook() = Audiobook(
+        id = "audiobook:librivox:817", origin = MediaOrigin.LIBRIVOX, sourceRef = "817", title = "Time Machine", author = "H. G. Wells",
+        narrator = "", description = "", coverPath = null, durationMs = 100_000L, status = PackStatus.OK, addedAt = 0L,
+    )
+
+    /** File [n] of the 13-chapter book (the cover is 000), in [state]. */
+    private fun file(n: Int, state: DownloadState) = record(
+        MediaDownloads.fileItemId(group, n), state, kind = ItemKind.AUDIO,
+        filePath = "/nowhere/audiobooks/librivox/817/%02d - Chapter.mp3".format(n), sizeBytes = 100,
+        bytesDone = if (state == DownloadState.INSTALLED) 100 else 10, title = "Time Machine",
+    ).copy(groupId = group)
+
+    @Test fun downloadingBookShowsChaptersSoFar() = runTest(main.dispatcher) {
+        val b = librivoxBook()
+        add(b, (0 until 3).map { AudiobookChapter(b.id, it, "Chapter ${it + 1}", "track:librivox:817:$it", 0L, 10_000L) })
+        records.value = (1..13).map { n ->
+            file(n, when { n <= 3 -> DownloadState.INSTALLED; n == 4 -> DownloadState.RUNNING; else -> DownloadState.QUEUED })
+        }
+        val page = vm().book(b.id).filterNotNull().first()
+        assertThat(page.download).isInstanceOf(ItemStatus.Downloading::class.java)
+        assertThat(page.chapters).hasSize(3)
+        assertThat(page.filesDone).isEqualTo(3)
+        assertThat(page.filesTotal).isEqualTo(13)
+        assertThat(page.onRemoveDownload).isNotNull()
+    }
+
+    @Test fun phoneBookHasNoRemoveDownload() = runTest(main.dispatcher) {
+        val b = book("mine")
+        add(b, chaptersOf(b, 100_000L))
+        val page = vm().book(b.id).filterNotNull().first()
+        assertThat(page.download).isNull()
+        assertThat(page.onRemoveDownload).isNull()
+    }
+
+    @Test fun removeDownloadCallsTheRemoverWithTheGroup() = runTest(main.dispatcher) {
+        val b = librivoxBook()
+        add(b, listOf(AudiobookChapter(b.id, 0, "One", "track:librivox:817:0", 0L, 10_000L)))
+        // Filed from disk with no ledger rows (the ledger was cleared): still a download, shown as in.
+        val page = vm().book(b.id).filterNotNull().first()
+        assertThat(page.download).isEqualTo(ItemStatus.Installed)
+        page.onRemoveDownload!!()
+        assertThat(removed).containsExactly(group)
     }
 }

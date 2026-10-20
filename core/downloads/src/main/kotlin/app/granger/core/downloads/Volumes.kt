@@ -12,12 +12,14 @@ data class Volume(
     val removable: Boolean,
     val freeBytes: Long,
     val totalBytes: Long,
-    /** Bytes in Granger's `packs`, `models` and `books` folders on this volume. */
+    /** Bytes in Granger's `packs`, `models`, `books`, `music` and `audiobooks` folders on this volume. */
     val grangerBytes: Long,
 ) {
     val packsDir: File get() = File(root, "packs")
     val modelsDir: File get() = File(root, "models")
     val booksDir: File get() = File(root, "books")
+    val musicDir: File get() = File(root, "music")
+    val audiobooksDir: File get() = File(root, "audiobooks")
 }
 
 fun interface VolumeSource {
@@ -44,10 +46,14 @@ class AndroidVolumes(private val context: Context) : VolumeSource {
             removable = removable,
             freeBytes = root.usableSpace,
             totalBytes = root.totalSpace,
-            grangerBytes = sizeOf(File(root, "packs")) + sizeOf(File(root, "models")) + sizeOf(File(root, "books")),
+            grangerBytes = GRANGER_DIRS.sumOf { sizeOf(File(root, it)) },
         )
     }
 
-    /** Books live in subfolders (`books/granger`), so this counts recursively. */
+    /** Books and media live in subfolders (`books/granger`, `music/archive-org/<id>`), so this counts recursively. */
     private fun sizeOf(dir: File): Long = dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+
+    private companion object {
+        val GRANGER_DIRS = listOf("packs", "models", "books", "music", "audiobooks")
+    }
 }

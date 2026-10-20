@@ -40,4 +40,12 @@ class FakeScheduler : DownloadScheduler {
     val cancelled = mutableListOf<String>()
     override fun schedule(record: DownloadRecord, replace: Boolean) { scheduled += record to replace }
     override fun cancel(itemId: String) { cancelled += itemId }
+
+    /** Each scheduleGroup call: the group, its records in order, and whether it replaced the chain. */
+    val groups = mutableListOf<Triple<String, List<DownloadRecord>, Boolean>>()
+    val cancelledGroups = mutableListOf<String>()
+    override fun scheduleGroup(groupId: String, records: List<DownloadRecord>, replace: Boolean) {
+        groups += Triple(groupId, records, replace)
+    }
+    override fun cancelGroup(groupId: String) { cancelledGroups += groupId }
 }

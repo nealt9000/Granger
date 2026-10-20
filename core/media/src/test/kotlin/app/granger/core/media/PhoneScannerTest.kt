@@ -492,4 +492,90 @@ class PhoneScannerTest {
         scanner(a, b).scan()
         assertThat(phoneTracks().map { it.uri }).containsExactly("content://media/1")
     }
+
+    /** The covers dir after a scan: covers of rows of every status kept, anything no row names deleted. */
+    @Test fun unreferencedCoversAreDeletedAfterAScan() = runTest {
+        tags["song.mp3"] = FileTags(raw("song", album = "A", cover = byteArrayOf(1, 1)), emptyList())
+        tags["chapter.mp3"] = FileTags(raw("chapter", album = "Book", cover = byteArrayOf(2, 2)), emptyList())
+        tags["chapter2.mp3"] = FileTags(raw("chapter2", album = "Book", cover = byteArrayOf(4, 4)), emptyList())
+        tags["gone.mp3"] = FileTags(raw("gone", album = "C", cover = byteArrayOf(3, 3)), emptyList())
+        val song = found("content://media/1", "song.mp3", "Music/A/")
+        val chapter = found("content://media/2", "chapter.mp3", "Audiobooks/Book/", inAudiobookFolder = true)
+        val chapter2 = found("content://media/4", "chapter2.mp3", "Audiobooks/Book/", inAudiobookFolder = true)
+        val gone = found("content://media/3", "gone.mp3", "Music/C/")
+        val source = FakeSource(listOf(song, chapter, chapter2, gone))
+        val scanner = scanner(source)
+        scanner.scan()
+        val kept = coversDir.listFiles()!!.map { it.name }.toSet()
+        assertThat(kept).hasSize(4)
+
+        // An orphan (a cover no row names any more) and a file that isn't a cover.
+        File(coversDir, "0123456789abcdef.jpg").writeBytes(byteArrayOf(5))
+        File(coversDir, "notes.txt").writeText("x")
+        source.files = listOf(song, chapter, chapter2)   // "gone" goes MISSING: its row, and so its cover, stay
+        scanner.scan()
+        assertThat(phoneTracks().single { it.title == "gone" }.status).isEqualTo(PackStatus.MISSING)
+        assertThat(coversDir.listFiles()!!.map { it.name }.toSet()).isEqualTo(kept + "notes.txt")
+    }
+
+    /**
+     * A book file that went MISSING while its book re-synced has no chapter row any more, yet its row still names its
+     * cover: the sweep keeps it.
+     */
+    @Test fun sweepKeepsTheCoverOfAMissingBookFileWithoutAChapter() = runTest {
+        // Numbered, so the first file (whose fingerprint is the book's id) stays and the book re-syncs in place.
+        tags["chapter.mp3"] = FileTags(raw("chapter", album = "Book", track = 1, cover = byteArrayOf(2, 2)), emptyList())
+        tags["chapter2.mp3"] = FileTags(raw("chapter2", album = "Book", track = 2, cover = byteArrayOf(4, 4)), emptyList())
+        val chapter = found("content://media/2", "chapter.mp3", "Audiobooks/Book/", inAudiobookFolder = true)
+        val chapter2 = found("content://media/4", "chapter2.mp3", "Audiobooks/Book/", inAudiobookFolder = true)
+        val source = FakeSource(listOf(chapter, chapter2))
+        val scanner = scanner(source)
+        scanner.scan()
+        val bookId = phoneBooks().single().id
+        val cover2 = phoneTracks().single { it.title == "chapter2" }.coverPath!!
+
+        source.files = listOf(chapter)
+        scanner.scan()
+        val missing = phoneTracks().single { it.title == "chapter2" }
+        assertThat(missing.status).isEqualTo(PackStatus.MISSING)
+        assertThat(phoneBooks().single().id).isEqualTo(bookId)
+        assertThat(media.allChapters.first().map { it.trackId }).doesNotContain(missing.id)
+        assertThat(missing.coverPath).isEqualTo(cover2)
+        assertThat(File(cover2).exists()).isTrue()
+    }
+
+    /** A cache hit whose cover file is gone reads the file again, so its art comes back. */
+    @Test fun cacheHitWithAVanishedCoverReadsTheCoverAgain() = runTest {
+        val art = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 9, 9)
+        tags["Mars.mp3"] = FileTags(raw("Mars", album = "Planets", cover = art), emptyList())
+        val source = FakeSource(listOf(found("content://media/1", "Mars.mp3")))
+        val scanner = scanner(source)
+        scanner.scan()
+        val cover = File(phoneTracks().single().coverPath!!)
+        assertThat(cover.delete()).isTrue()
+
+        opened.clear()
+        scanner.scan()
+        assertThat(opened).contains("content://media/1")
+        val healed = phoneTracks().single().coverPath
+        assertThat(healed).isNotNull()
+        assertThat(File(healed!!).readBytes()).isEqualTo(art)
+    }
+
+    @Test fun sweepIsSkippedWhenASourceFailed() = runTest {
+        val good = FakeSource(listOf(found("content://media/1", "Mars.mp3")))
+        val bad = FakeSource(emptyList(), prefix = "content://tree/").apply { error = IOException("gone") }
+        val orphan = File(coversDir, "0123456789abcdef.jpg").apply { writeBytes(byteArrayOf(5)) }
+        scanner(good, bad).scan()
+        assertThat(orphan.exists()).isTrue()
+
+        // Nor without the permission, when nothing is listed at all.
+        permission = false
+        scanner(good).scan()
+        assertThat(orphan.exists()).isTrue()
+
+        permission = true
+        scanner(good).scan()
+        assertThat(orphan.exists()).isFalse()
+    }
 }

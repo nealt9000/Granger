@@ -53,6 +53,8 @@ data class ReadinessUi(
     val volumes: List<VolumeRow> = emptyList(),
     val models: List<CheckRow> = emptyList(),
     val packs: List<CheckRow> = emptyList(),
+    /** One row per downloaded book or album (its files' sizes summed). */
+    val media: List<CheckRow> = emptyList(),
 )
 
 class ReadinessViewModel(
@@ -88,37 +90,64 @@ class ReadinessViewModel(
     }
 
     /** Re-hashes the whole file. Runs while the screen is open; leaving it stops the check. */
+    /** Re-hashes the whole file (every file of a media item, one after another). Runs while the screen is open; leaving it stops the check. */
     fun verify(key: String) {
         if (checks[key]?.isActive == true) return
         checks[key] = viewModelScope.launch {
-            val record = downloads.records.first().firstOrNull { keyOf(it) == key } ?: return@launch
+            val files = filesOf(key)
+            if (files.isEmpty()) return@launch
             progress.update { it + (key to 0f) }
             try {
                 var shown = 0f
-                val result = try {
-                    full(record) { p ->
-                        if (p - shown >= 0.01f || p >= 1f) {
-                            shown = p
-                            progress.update { it + (key to p) }
+                for ((i, record) in files.withIndex()) {
+                    val result = try {
+                        full(record) { p ->
+                            val overall = (i + p) / files.size
+                            if (overall - shown >= 0.01f || overall >= 1f) {
+                                shown = overall
+                                progress.update { it + (key to overall) }
+                            }
                         }
+                    } catch (e: IOException) {
+                        // The file vanished or the card was pulled mid-check.
+                        withContext(io) { quick(record) }
                     }
-                } catch (e: IOException) {
-                    // The file vanished or the card was pulled mid-check.
-                    withContext(io) { quick(record) }
+                    results.update { it + (keyOf(record) to result) }
+                    downloads.recordCheck(record.itemId, record.hash, result == Integrity.VERIFIED)
                 }
-                results.update { it + (key to result) }
-                downloads.recordCheck(record.itemId, record.hash, result == Integrity.VERIFIED)
             } finally {
                 progress.update { it - key }
             }
         }
     }
 
+    /** Downloads the file again; for a media item, only its damaged files. */
     fun repair(key: String) {
         appScope.launch {
-            val record = downloads.records.first().firstOrNull { keyOf(it) == key } ?: return@launch
-            results.update { it - key }
-            downloads.repair(record.itemId)
+            val files = filesOf(key)
+            val damaged = if (key.startsWith(GROUP)) {
+                val res = results.value
+                withContext(io) {
+                    files.filter { r -> res[keyOf(r)] == Integrity.CORRUPTED || quick(r).let { it == Integrity.MISSING || it == Integrity.INCOMPLETE } }
+                }
+            } else {
+                files
+            }
+            for (record in damaged) {
+                results.update { it - keyOf(record) }
+                downloads.repair(record.itemId)
+            }
+        }
+    }
+
+    /** The installed files a row stands for: one, or every file of a media group. */
+    private suspend fun filesOf(key: String): List<DownloadRecord> {
+        val records = downloads.records.first()
+        return if (key.startsWith(GROUP)) {
+            val group = key.removePrefix(GROUP)
+            records.filter { it.groupId == group && it.state == DownloadState.INSTALLED }
+        } else {
+            listOfNotNull(records.firstOrNull { keyOf(it) == key })
         }
     }
 
@@ -129,7 +158,9 @@ class ReadinessViewModel(
         prog: Map<String, Float>,
         res: Map<String, Integrity>,
     ): ReadinessUi {
-        val installed = records.filter { it.state == DownloadState.INSTALLED }
+        val all = records.filter { it.state == DownloadState.INSTALLED }
+        val (grouped, installed) = all.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
+        val media = grouped.groupBy { it.groupId!! }.map { (group, files) -> groupRow(group, files, prog, res) }
         val packByPath = packs.associateBy { it.filePath }
         val rows = installed.map { record ->
             val key = keyOf(record)
@@ -155,7 +186,7 @@ class ReadinessViewModel(
                 canRepair = status in REPAIRABLE,
             )
         }
-        val recordedPaths = installed.mapTo(HashSet()) { it.filePath }
+        val recordedPaths = all.mapTo(HashSet()) { it.filePath }
         val byHand = packs.filter { it.filePath !in recordedPaths }.map { pack ->
             CheckRow(
                 key = "pack:${pack.id}",
@@ -181,6 +212,32 @@ class ReadinessViewModel(
             volumes = vols.map { VolumeRow(it.root.path, it.label, it.removable, it.freeBytes, it.totalBytes, it.grangerBytes, 0) },
             models = rows.filter { it.isModel },
             packs = rows.filterNot { it.isModel } + byHand,
+            media = media.sortedBy { it.title.lowercase() },
+        )
+    }
+
+    /** A media item's row: its worst file decides (a corrupted file, then a missing one, then one of the wrong size). */
+    private fun groupRow(group: String, files: List<DownloadRecord>, prog: Map<String, Float>, res: Map<String, Integrity>): CheckRow {
+        val key = GROUP + group
+        val statuses = files.map { record ->
+            val live = quick(record)
+            when {
+                live == Integrity.MISSING || live == Integrity.INCOMPLETE -> live.toStatus()
+                else -> (res[keyOf(record)] ?: live).toStatus()
+            }
+        }
+        val status = WORST_FIRST.firstOrNull { it in statuses } ?: CheckStatus.VERIFIED
+        return CheckRow(
+            key = key,
+            title = files.first().title,
+            isModel = false,
+            snapshotDate = "",
+            sizeBytes = files.sumOf { it.sizeBytes },
+            status = status,
+            verifiedAt = if (files.all { it.verifiedAt != null }) files.minOf { it.verifiedAt!! } else null,
+            progress = prog[key],
+            canVerify = statuses.any { it != CheckStatus.MISSING } && key !in prog,
+            canRepair = status in REPAIRABLE,
         )
     }
 
@@ -196,5 +253,10 @@ class ReadinessViewModel(
         val REPAIRABLE = setOf(CheckStatus.INCOMPLETE, CheckStatus.CORRUPTED, CheckStatus.DAMAGED, CheckStatus.MISSING)
 
         fun keyOf(record: DownloadRecord) = "${record.itemId}@${record.hash}"
+
+        /** A media group's row key: `group:<groupId>`. */
+        const val GROUP = "group:"
+
+        val WORST_FIRST = listOf(CheckStatus.CORRUPTED, CheckStatus.MISSING, CheckStatus.INCOMPLETE, CheckStatus.SIZE_OK, CheckStatus.VERIFIED)
     }
 }
