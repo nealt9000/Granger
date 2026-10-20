@@ -1,6 +1,7 @@
 package app.granger.player
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,8 +52,8 @@ private data class QueueItem(val key: Int, val track: Track)
 
 /**
  * The music queue in play order. Long-press a song and drag to move it ([onMove] with play-order positions, once, on
- * release); the cross removes it ([onRemove]), except the last song. [current] is the playing song's position.
- * Not [editable] (the saved queue of the inactive tab): just the list.
+ * release); the cross removes it ([onRemove]), except the last song; a tap plays it ([onPlay]). [current] is the
+ * playing song's position. Not [editable] (the saved queue of the inactive tab): just the list.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,17 +64,20 @@ fun QueueSheet(
     onRemove: (Int) -> Unit,
     onDismiss: () -> Unit,
     editable: Boolean = true,
+    onPlay: (Int) -> Unit = {},
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding()) {
             Text("Queue", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-            if (editable) ReorderableQueue(queue, current, onMove, onRemove) else ReadOnlyQueue(queue, current)
+            if (editable) ReorderableQueue(queue, current, onMove, onRemove, onPlay) else ReadOnlyQueue(queue, current)
         }
     }
 }
 
 @Composable
-private fun ReorderableQueue(queue: List<Track>, current: Int, onMove: (Int, Int) -> Unit, onRemove: (Int) -> Unit) {
+private fun ReorderableQueue(
+    queue: List<Track>, current: Int, onMove: (Int, Int) -> Unit, onRemove: (Int) -> Unit, onPlay: (Int) -> Unit,
+) {
     var items by remember { mutableStateOf(queue.mapIndexed { i, t -> QueueItem(i, t) }) }
     var dragKey by remember { mutableStateOf<Int?>(null) }
     var dragFrom by remember { mutableStateOf(-1) }
@@ -137,6 +141,7 @@ private fun ReorderableQueue(queue: List<Track>, current: Int, onMove: (Int, Int
                 canMoveDown = index < items.size - 1,
                 onMoveBy = { by -> move(index, index + by) },
                 onRemove = { onRemove(index) },
+                onPlay = { if (dragKey == null) onPlay(index) },
                 modifier = Modifier
                     .then(if (dragging) Modifier.zIndex(1f).graphicsLayer { translationY = dragOffset } else Modifier.animateItem())
                     .background(if (dragging) GrangerColors.SurfaceHigh else MaterialTheme.colorScheme.surfaceContainerLow),
@@ -171,10 +176,12 @@ private fun QueueRow(
     onMoveBy: (Int) -> Unit,
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
+    onPlay: (() -> Unit)? = null,
 ) {
     Row(
         modifier
             .fillMaxWidth()
+            .then(if (onPlay != null) Modifier.clickable(onClickLabel = "Play", onClick = onPlay) else Modifier)
             .testTag(PlayerTags.QUEUE_ROW)
             .semantics {
                 // Dragging has no screen-reader equivalent; these do the same one step at a time.

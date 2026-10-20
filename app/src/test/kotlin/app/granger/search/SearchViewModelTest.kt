@@ -6,8 +6,11 @@ import app.granger.BookTarget
 import app.granger.core.books.TextQuote
 import app.granger.core.library.BookHit
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.ArtistHit
+import app.granger.core.library.MediaResults
 import app.granger.core.library.SearchHit
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -24,7 +27,9 @@ class SearchViewModelTest {
         )
 
         override suspend fun titles(query: String): List<SearchHit> { titleQueries += query; return titles }
-        override suspend fun fullText(query: String) = fullText
+        /** Completed by a test that wants to look at the state while full text is still being searched. */
+        var fullTextGate: CompletableDeferred<Unit>? = null
+        override suspend fun fullText(query: String): List<SearchHit> { fullTextGate?.await(); return fullText }
         var bookHits = listOf(BookHit("import:abc", "Emma", "Jane Austen", "OEBPS/ch2.xhtml", 0.25, "a <b>photo</b> of", TextQuote("a ", "photo", " of")))
         override suspend fun books(query: String) = bookHits
     }
@@ -145,5 +150,52 @@ class SearchViewModelTest {
         assertThat(tab.id).isEqualTo(id)
         assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("import:abc", "", "Emma").inOrder()
         assertThat(target).isEqualTo(BookTarget("OEBPS/ch2.xhtml", 0.25, TextQuote("a ", "photo", " of")))
+    }
+
+    private val holst = MediaResults(artists = listOf(ArtistHit("Gustav Holst", 2, null)))
+
+    @Test fun mediaResultsArriveBeforeArticleText() = runTest(main.dispatcher) {
+        val gate = CompletableDeferred<Unit>().also { search.fullTextGate = it }
+        val vm = SearchViewModel(search, sessions, "", MediaSearch { holst })
+        vm.onQueryChange("holst")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.media).isEqualTo(holst)
+        assertThat(vm.state.value.fullText).isEmpty()
+        assertThat(vm.state.value.searching).isTrue()
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.fullText.map { it.path }).containsExactly("Leaf")
+        assertThat(vm.state.value.media).isEqualTo(holst)
+    }
+
+    @Test fun blankQueryClearsMedia() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "", MediaSearch { holst })
+        vm.onQueryChange("holst")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.media.isEmpty).isFalse()
+        vm.onQueryChange("")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.media.isEmpty).isTrue()
+    }
+
+    @Test fun mediaFailureLeavesTheOtherGroups() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "", MediaSearch { error("index broke") })
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        val state = vm.state.value
+        assertThat(state.media.isEmpty).isTrue()
+        assertThat(state.titles.map { it.path }).containsExactly("Photosynthesis")
+        assertThat(state.fullText.map { it.path }).containsExactly("Leaf")
+        assertThat(state.books.map { it.bookTitle }).containsExactly("Emma")
+        assertThat(state.searching).isFalse()
+    }
+
+    @Test fun openingAMediaResultRecordsTheSearch() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "", MediaSearch { holst })
+        vm.onQueryChange(" holst ")
+        testScheduler.advanceUntilIdle()
+        vm.recordSearch()
+        assertThat(sessions.searches.value).containsExactly("holst")
+        assertThat(sessions.tabs.value).isEmpty()
     }
 }

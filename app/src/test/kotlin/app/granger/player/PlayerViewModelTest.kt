@@ -75,6 +75,13 @@ class PlayerViewModelTest {
         assertThat(hub.calls).containsExactly("seekToChapter:1")
     }
 
+    @Test fun tappingAQueueRowPlaysIt() = runTest(main.dispatcher) {
+        val hub = FakePlayerHub(musicUi())
+        val vm = PlayerViewModel(hub)
+        vm.playQueueItem(2)
+        assertThat(hub.calls).containsExactly("playQueueItem:2")
+    }
+
     @Test fun queueAndBookActionsGoToTheHub() = runTest(main.dispatcher) {
         val hub = FakePlayerHub(musicUi())
         val vm = PlayerViewModel(hub)

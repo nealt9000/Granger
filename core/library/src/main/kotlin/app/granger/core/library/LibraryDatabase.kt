@@ -17,8 +17,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ResearchChat::class, ResearchTurn::class, ResearchPassage::class,
         Track::class, Audiobook::class, AudiobookChapter::class, AudiobookState::class, AudioBookmark::class,
         Playlist::class, PlaylistEntry::class, MusicState::class, RecentPlay::class, MediaFolder::class, ScanCacheEntry::class,
+        AlbumNote::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -105,6 +106,13 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds album notes (a downloaded album's description). Only creates a table. */
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `album_notes` (`albumKey` TEXT NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`albumKey`))")
+            }
+        }
+
         /**
          * Seeds the built-in media types and creates `book_text` on a fresh install. Every database builder
          * must add this: Room doesn't manage `book_text`, so only this callback and [MIGRATION_3_4] create it.
@@ -130,7 +138,7 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         fun create(context: Context): LibraryDatabase =
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
-                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                 .addCallback(SeedCallback)
                 .build()
     }

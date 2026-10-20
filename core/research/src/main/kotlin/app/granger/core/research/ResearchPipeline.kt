@@ -148,6 +148,7 @@ class ResearchPipeline(
         val medical: Boolean
         val keywords: List<String>
         val ranked: List<Passage>
+        val asked = MediaCues.asked(request.question)
         if (request.deeperFrom != null) {
             medical = request.medicalHint
             if (medical) emit(ResearchEvent.Medical)
@@ -176,7 +177,7 @@ class ResearchPipeline(
             val found = Ranking.preselect(all, keywords, config)
             emit(ResearchEvent.Progress(Stage.RANKING))
             ranked = try {
-                rank(request.question, found, keywords)
+                Ranking.liftMedia(rank(request.question, found, keywords), found, asked)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -187,11 +188,13 @@ class ResearchPipeline(
         }
 
         val quote = request.quote
-        if (quote == null && ranked.isEmpty()) {
+        // The media cap is applied before the cut, so a dropped media passage gives its place to the next one.
+        val capped = Ranking.capMedia(ranked, asked, config)
+        if (quote == null && capped.isEmpty()) {
             emit(ResearchEvent.Done(Outcome.Declined(medical, keywords)))
             return@flow
         }
-        val pool = (listOfNotNull(quote) + ranked.filter { it != quote }).take(config.large)
+        val pool = (listOfNotNull(quote) + capped.filter { it != quote }).take(config.large)
         /** The passages that fit the prompt for the large or the small model; the rest stay candidates for Think deeper. */
         fun fit(large: Boolean): Pair<List<Passage>, List<Passage>> {
             val wanted = pool.take(if (large) config.large else config.small)
@@ -339,10 +342,11 @@ class ResearchPipeline(
 
     private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>): List<Passage> {
         if (candidates.isEmpty()) return emptyList()
-        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config)
+        // Every candidate that passes is kept: the pool is cut to `large` after the media cap.
+        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size)
         val query = embedder.embed(listOf(question), isQuery = true).single()
         val vectors = embedder.embed(candidates.map { it.text }, isQuery = false)
-        return Ranking.byEmbedding(candidates, query, vectors, config)
+        return Ranking.byEmbedding(candidates, query, vectors, config, limit = candidates.size)
     }
 
     private companion object {

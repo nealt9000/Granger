@@ -3,6 +3,7 @@ package app.granger.core.media
 import android.net.Uri
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.granger.core.library.AlbumNote
 import app.granger.core.library.Albums
 import app.granger.core.library.AudiobookState
 import app.granger.core.library.LibraryDatabase
@@ -108,6 +109,25 @@ class DownloadedMediaScannerTest {
         assertThat(ordered.first().uri).isEqualTo(Uri.fromFile(File(internal, "music/archive-org/$HOLST/${holst.files[0].name}")).toString())
         assertThat(ordered.first().id).isEqualTo(DownloadedIds.trackId(holst, holst.files[0]))
         assertThat(booksOf(MediaOrigin.ARCHIVE_ORG)).isEmpty()
+    }
+
+    @Test fun albumManifestDescriptionBecomesAnAlbumNote() = runTest {
+        roots = listOf(internal)
+        install(internal, ManifestFixtures.holst().copy(description = "  The London Symphony Orchestra, conducted by the composer, 1922–24. "))
+        install(internal, ManifestFixtures.timeMachine())
+        scanner().scan()
+
+        // The album's note is its description; an audiobook's description stays on the audiobook, not in a note.
+        assertThat(media.albumNotes.first()).containsExactly(
+            AlbumNote(Albums.itemKey("archive-org", HOLST), "The London Symphony Orchestra, conducted by the composer, 1922–24."),
+        )
+    }
+
+    @Test fun albumWithoutADescriptionHasNoNote() = runTest {
+        roots = listOf(internal)
+        install(internal, ManifestFixtures.holst())
+        scanner().scan()
+        assertThat(media.albumNotes.first()).isEmpty()
     }
 
     @Test fun librivoxBookHasOneChapterPerSectionWithReaders() = runTest {

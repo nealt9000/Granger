@@ -48,12 +48,12 @@
 - **The media index is in memory, not a new FTS table.** A phone library is thousands of rows of short metadata; matching them in memory takes milliseconds, needs no triggers to keep it in step with every sync, and can be shared by Search, Research and Auto. It is rebuilt (on `Dispatchers.Default`) whenever the media rows change. If a library ever reaches ~50,000 tracks and the index shows in a profile, an FTS4 table like `book_text` is the fallback.
 - **Matching:** text is folded (NFKD, combining marks dropped, `lowercase(Locale.ROOT)`) and split into words (`[\p{L}\p{N}]+`). Every query word must match a word of the item: whole word, except the last query word, which may be a prefix ("plan" finds *Planets*), as `BookIndex` does. **Score:** per query word, the best field it matched, weighted title 3, album / artist / album artist / composer / author / narrator 2, track titles and genres 1, description 0.5; plus 2 when the whole query appears in the title as written (after folding). Ties by title, then id. MISSING items are left out.
 - **Groups and limits:** a **Music** group (artists first, up to 3; then albums, up to 5; then songs, up to 8) and an **Audiobooks** group (up to 5). They show **after Titles and before "In article text"**, because they're the quickest results and a name like "Holst" is most likely a person or work.
-- **Tapping a song plays its album from that song** (`PlaySource` of the album), as Auxio does from an album list, so the music carries on; the shuffle and repeat state are unchanged. Tapping an artist opens the artist page; an album, the album page; an audiobook, the book page (a page, not autoplay; spec §9).
+- **Tapping a song plays its album from that song** (`PlaySource` of the album), as Auxio does from an album list, so the music carries on. It starts a new queue, unshuffled, exactly as tapping a song on the album page does. Tapping an artist opens the artist page; an album, the album page; an audiobook, the book page (a page, not autoplay; spec §9).
 - **Downloaded album descriptions are kept** (library v8, `album_notes(albumKey, description)`), written by the downloaded-media sync and deleted with `forget`. Phone albums have none.
 
 **Research**
-- **One media card per album or audiobook, never per song.** The card's text: `Album:` / `Audiobook:`, `Artist:` / `Author:`, `Composer:`, `Narrator:`, `Genre:`, `Year:`, `Tracks:` (song or chapter titles, joined by "; ", cut at 400 characters), `About:` (the description, cut at 600), and `In your library as: Music album` or `Audiobook`. `sourceId` is `album:<albumKey>` or the audiobook id; `sourceTitle` the album or book title; `packTitle` "Your music" or "Your audiobooks"; `meta.author` the artist or author; `location` "". Gate: the cards' existing `mentions` rule. At most 2 media cards per `find`.
-- **The media cap:** `RankingConfig.mediaCap = 1`. When the question asks about media, it's 2. "Asks about media" means its words include one of: music, album, albums, song, songs, track, tracks, listen, listening, recording, recordings, record, records, soundtrack, score, symphony, composer, composed, band, singer, audiobook, audiobooks, narrator, narrated, "read by". Applied after ranking, before the pool is cut to `large`; a capped media passage gives its place to the next non-media passage. Why a cap and not a weight: Plan 9's lexical threshold is tuned; a cap leaves every non-media score as it was, so the tuning split can only move by the slots media takes.
+- **One media card per album or audiobook, never per song.** The card's text: `Album:` / `Audiobook:`, `Artist:` / `Author:`, `Composer:`, `Narrator:`, `Genre:`, `Year:`, `Tracks:` / `Chapters:` (song titles for an album, chapter titles for an audiobook, joined by "; ", cut at 400 characters), `About:` (the description, cut at 600), and `In your library as: Music album` or `Audiobook`. `sourceId` is `album:<albumKey>` or the audiobook id; `sourceTitle` the album or book title; `packTitle` "Your music" or "Your audiobooks"; `meta.author` the artist or author; `location` "". Gate: the cards' existing `mentions` rule. At most 2 media cards per `find`.
+- **The media cap:** `RankingConfig.mediaCap = 1`. When the question asks about media, it's 2. "Asks about media" means its words include one of: music, album, albums, song, songs, track, tracks, listen, listening, recording, recordings, record, records, soundtrack, symphony, composer, composed, band, singer, audiobook, audiobooks, narrator, narrated, "read by", "do I have", "have I got" (Task 10 dropped "score" and added the last two). Applied after ranking, before the pool is cut to `large`; a capped media passage gives its place to the next non-media passage. Media passages also never take one of preselect's 12 slots: the other passages are preselected exactly as before and the media ones (at most 2) are carried alongside. Why a cap and not a weight: Plan 9's lexical threshold is tuned; a cap leaves every non-media score as it was, so the tuning split can only move by the slots media takes. **Task 10 added a lift:** on a media question, the finder's best media card goes first (m3-media-1 cited media on 3 of 10 without it; see `tools/eval/runs/checkpoints/m3/NOTES.md`).
 - **A media citation opens the album or audiobook page** (`CitationTarget.Album(albumKey)`, `CitationTarget.Audiobook(id)`); if the item is gone it's `Gone`, as for books. The source card's byline is the artist or author, then "Album" or "Audiobook".
 
 **Eval**
@@ -322,7 +322,7 @@ git commit -m "Media M3: Music and Audiobooks groups in Search; a song plays its
 @Test fun mediaPassagesRoundTrip()
 ```
 
-- [ ] **Step 2: Run to verify they fail.** Run: `./gradlew :core:research:testDebugUnitTest :core:library:testDebugUnitTest`. Expected: compile failure.
+- [ ] **Step 2: Run to verify they fail.** Run: `./gradlew :core:research:test :core:library:testDebugUnitTest`. Expected: compile failure. (`:core:research` is a plain JVM module: its task is `test`, and `testDebugUnitTest` does not run it.)
 - [ ] **Step 3: Implement.** In `ResearchPipeline.run`, after `rank()` and before `.take(config.large)`, apply `Ranking.capMedia(ranked, MediaCues.asked(request.question), config)`. Check every `SourceKind` use the survey listed (`AnswerPrompt.kt:58`, `LexicalScore.kt:40`, `ResearchViewModel.kt:241, 320, 330, 482`, `ResearchScreen.kt:139`, `GrangerNavHost.kt:293`, `EvalActivity.kt:86`) and say in the commit message which needed a change.
 - [ ] **Step 4: Run to verify they pass.** Same command. Expected: PASS.
 - [ ] **Step 5: Commit**
@@ -335,7 +335,7 @@ git commit -m "Media M3: media catalogue cards in Research, capped so they don't
 ### Task 4: Media citations open their pages
 
 **Files:**
-- Modify: `app/src/main/kotlin/app/granger/research/CitationTarget.kt` (`Album`, `Audiobook`), `ResearchViewModel.kt` (`target()` for MEDIA; constructor gets `MediaLibrary`), `ResearchScreen.kt` (source card byline for MEDIA)
+- Modify: `app/src/main/kotlin/app/granger/research/CitationTarget.kt` (`Album`, `Audiobook`), `ResearchViewModel.kt` (`target()` for MEDIA; constructor gets `MediaIndex`, whose `work(id)` is null for a gone or MISSING item), `ResearchScreen.kt` (source card byline for MEDIA)
 - Modify: `app/src/main/kotlin/app/granger/GrangerNavHost.kt` (`onOpenCitation` navigates to `AlbumRoute` / `AudiobookRoute`)
 - Test: `app/src/test/kotlin/app/granger/research/ResearchViewModelTest.kt`, `ResearchFakes.kt` (a `media(n)` passage helper)
 
@@ -519,7 +519,7 @@ git commit -m "Media M3: a read-only artwork provider for the session, Android A
 
 **Files:**
 - Create: `core/player/src/main/kotlin/app/granger/core/player/MediaBrowseTree.kt` (interface)
-- Modify: `core/player/src/main/kotlin/app/granger/core/player/PlaybackService.kt` (`LibraryCallback`: `onGetLibraryRoot`, `onGetChildren`, `onGetItem`, `onSearch`, `onGetSearchResult`, `onSetMediaItems`, `onAddMediaItems`; `SessionPlayer.setMediaItems`/`addMediaItems` no-op for the engine's own items; `Dependencies` gains `browse: MediaBrowseTree?`)
+- Modify: `core/player/src/main/kotlin/app/granger/core/player/PlaybackService.kt` (`LibraryCallback`: `onGetLibraryRoot`, `onGetChildren`, `onGetItem`, `onSearch`, `onGetSearchResult`, `onSetMediaItems`, `onAddMediaItems`; `SessionPlayer.addMediaItems` no-op for the engine's own items (Task 6 already made `setMediaItems`/`setMediaItem` no-ops for them, for resumption); `LibraryCallback` is already an `internal class LibraryCallback(engine, scope)` with `onPlaybackResumption` (Task 6), so it gains the tree as a constructor argument; `Dependencies` gains `browse: MediaBrowseTree?`)
 - Create: `app/src/main/kotlin/app/granger/media/AutoBrowseTree.kt`
 - Create: `app/src/main/res/xml/automotive_app_desc.xml`; Modify: `app/src/main/AndroidManifest.xml` (car meta-data)
 - Modify: `app/src/main/kotlin/app/granger/GrangerApp.kt` (`MediaControllerPlayerHub` installs the tree)
@@ -536,6 +536,8 @@ git commit -m "Media M3: a read-only artwork provider for the session, Android A
       suspend fun search(query: String): List<MediaItem>
       /** Starts what [id] names through the hub (an empty id with [searchQuery] plays the best hit). False if nothing plays. */
       suspend fun play(id: String, searchQuery: String? = null): Boolean
+      /** Appends what [id] names to the music queue (an audiobook or recent, or anything with no music loaded, plays instead). */
+      suspend fun add(id: String): Boolean   // added in review: Auto's add appends
   }
   class AutoBrowseTree(
       media: MediaLibrary, playlists: Playlists, playback: PlaybackDao, index: MediaIndex,
@@ -543,7 +545,7 @@ git commit -m "Media M3: a read-only artwork provider for the session, Android A
   ) : MediaBrowseTree
   ```
 - Items: browsable folders set `isBrowsable = true, isPlayable = false, mediaType` (`MEDIA_TYPE_FOLDER_ALBUMS`, `_ARTISTS`, `_PLAYLISTS`, `_AUDIO_BOOKS`); albums and audiobooks get `MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE/PLAYABLE = CONTENT_STYLE_GRID`; every item with a cover sets `artworkUri` from `Artwork.uri`.
-- `onSetMediaItems(session, controller, items, startIndex, startPositionMs)`: `browse.play(items[startIndex].mediaId, items[startIndex].requestMetadata.searchQuery)`, then waits (at most 5 s) until the engine's `ui` shows the requested item loaded, and returns the engine's items, index and position. On failure, a failed future (`SessionError.ERROR_BAD_VALUE`).
+- `onSetMediaItems(session, controller, items, startIndex, startPositionMs)`: `browse.play(items[startIndex].mediaId, items[startIndex].requestMetadata.searchQuery)`, then waits (at most 5 s) until the engine's `ui` shows the requested item loaded, and returns the engine's items, index and position. On failure, a failed future (`SessionError.ERROR_BAD_VALUE`). *(As built: the wait is `PlayerEngine.loadedItems()`, a call that runs in turn after the hub call the tree made and answers with the engine's items, index and position, under a 5 s timeout; a failure is a failed future. `MediaControllerPlayerHub` takes the tree as a provider, `browse: (() -> MediaBrowseTree)?`, to break the hub ↔ tree cycle; `Dependencies.browse` stays `MediaBrowseTree?`.)*
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -661,10 +663,10 @@ git commit -m "Media M3: eval on the Pixel 6: media set and the tuning-split reg
 - [ ] **Step 3: Walk spec §13 and M3's items, with Neal present for anything audible.** Check that Granger is the app in front first. Record pass or fail for each.
   1. **Search:** "Holst" shows the Music group (artist, albums); "comfortably" shows the song, and tapping it plays *The Wall* from "Comfortably Numb"; tapping an album or artist opens its page; "wicked" shows the audiobook and opens its page.
   2. **Research** (debug build): "Do I have any Holst?" cites the Holst album, and tapping the citation opens it; "How far is Mars from the Sun?" cites no media.
-  3. **Notification and lock screen:** a book's chapter title shows and changes at the chapter boundary with no break in sound; next and previous step chapters, on a single-file book too if Neal has one (else covered by tests); music shows the track.
+  3. **Notification and lock screen:** a book's chapter title shows and changes at the chapter boundary with no break in sound (Neal listens across a file change in a multi-file book too; the title change replaces the current item, which tests pin only for a single file); next and previous step chapters, on a single-file book too if Neal has one (else covered by tests); music shows the track.
   4. **Queue:** tapping a queue row plays it.
   5. **Resumption:** force-stop Granger, then press play on Bluetooth headphones or a headset (or `adb shell input keyevent KEYCODE_MEDIA_PLAY` with Neal's OK): the last player resumes at its place.
-  6. **Widget:** add "Granger player" to the home screen; resize it small → large; it shows the current player, play/pause and the secondary button work, switching players updates it, and after a force-stop its play button resumes.
+  6. **Widget:** add "Granger player" to the home screen; resize it small → large; it shows the current player, play/pause and the secondary button work, switching players updates it, and after the process is killed (swipe Granger away from Recents, or `adb shell am kill app.granger` with it in the background; not a force-stop, which disables the package's PendingIntents until the app runs again) its play button resumes at the saved place. Also check that the widget picker shows a usable preview.
   7. **Android Auto on the DHU:** Recent, Music and Audiobooks with covers; play an album, a playlist and an audiobook (it resumes at its place); next/previous; the queue; search "holst" and play the hit; switching music ↔ audiobook loses no position.
   8. **The rest of spec §13, once more on this build:** phone media unchanged (md5 of the 91 files), a LibriVox book plays by chapter and resumes after a force-stop, an archive.org album plays gaplessly, audiobook → music → audiobook keeps its place, the mini-player the same everywhere, "Show in other apps" read-only in the system file browser.
 - [ ] **Step 4: Fix what fails** (systematic-debugging, each fix with a test), then commit each fix.

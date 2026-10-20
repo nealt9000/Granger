@@ -15,6 +15,7 @@ import app.granger.core.library.Bookshelf
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.ChatTurn
 import app.granger.core.library.Library
+import app.granger.core.library.MediaIndex
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ResearchChats
@@ -70,6 +71,8 @@ class ResearchViewModel(
     private val sessions: ReadingSessions,
     private val library: Library,
     private val bookshelf: Bookshelf,
+    /** Says whether a cited album or audiobook is still present (a media citation opens its page). */
+    private val media: MediaIndex,
     /** Settles a turn cut short when this view model is gone. */
     private val appScope: CoroutineScope,
     /** Survives process death with the route: the chat this one became, and that the route's [quote] was asked. */
@@ -313,6 +316,11 @@ class ResearchViewModel(
     }
 
     private suspend fun target(passage: Passage): CitationTarget {
+        // Checked first: a media card's sourceId is neither a book nor a pack.
+        if (passage.kind == SourceKind.MEDIA) {
+            val work = media.work(passage.sourceId) ?: return CitationTarget.Gone
+            return if (work.isAlbum) CitationTarget.Album(work.id.removePrefix(ALBUM_SOURCE)) else CitationTarget.Audiobook(work.id)
+        }
         if (!BookIds.isBook(passage.sourceId)) {
             val pack = library.packs.first().firstOrNull { it.id == passage.sourceId }
             if (pack == null || pack.status != PackStatus.OK) return CitationTarget.Gone
@@ -495,6 +503,20 @@ class ResearchViewModel(
         private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED, TurnOutcome.SEARCH_FAILED)
         private val FALLBACK_SHOWN = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED, TurnOutcome.DECLINED)
     }
+}
+
+/** A media card's sourceId for an album: "album:<albumKey>" (an audiobook's is its id). */
+internal const val ALBUM_SOURCE = "album:"
+
+/**
+ * A source card's second line: the author (or the pack, for an article without one) and the heading; for an album or
+ * audiobook, the artist or author (else "Your music" / "Your audiobooks") and "Album" or "Audiobook".
+ */
+internal fun sourceByline(passage: Passage): String {
+    val who = passage.meta.author.ifBlank { passage.packTitle }
+    val what = if (passage.kind != SourceKind.MEDIA) passage.heading
+    else if (passage.sourceId.startsWith(ALBUM_SOURCE)) "Album" else "Audiobook"
+    return listOf(who, what).filter { it.isNotBlank() }.joinToString(" · ")
 }
 
 /**

@@ -10,6 +10,7 @@ import app.granger.core.research.PassageEmbedder
 import app.granger.core.research.PassageFinder
 import app.granger.core.research.ResearchModels
 import app.granger.core.research.SourceKind
+import app.granger.core.research.SourceMeta
 import app.granger.core.research.TextGenerator
 import kotlin.coroutines.ContinuationInterceptor
 import kotlinx.coroutines.CompletableDeferred
@@ -24,6 +25,20 @@ import kotlinx.coroutines.flow.update
 fun article(n: Int) = Passage(
     SourceKind.ARTICLE, "pack$n", "Article $n", packTitle = "Pack $n", location = "A/Art$n", anchor = "sec$n",
     text = "Photosynthesis turns light into sugar in plants, part $n.",
+)
+
+/** A media catalogue card for the album "album:[albumKey]" (as `MediaCards` writes it), its title "Album [n]". */
+fun media(n: Int, albumKey: String = "key$n") = Passage(
+    SourceKind.MEDIA, "album:$albumKey", "Album $n", packTitle = "Your music", location = "",
+    text = "Album: Album $n\nArtist: Artist $n\nIn your library as: Music album",
+    meta = SourceMeta(author = "Artist $n"),
+)
+
+/** A media catalogue card for the audiobook [id]. */
+fun mediaBook(id: String, title: String = "Book", author: String = "Author") = Passage(
+    SourceKind.MEDIA, id, title, packTitle = "Your audiobooks", location = "",
+    text = "Audiobook: $title\nAuthor: $author\nIn your library as: Audiobook",
+    meta = SourceMeta(author = author),
 )
 
 /** In-memory [ResearchChats]. [failure], when set, is thrown by every call that reads or writes one chat. */

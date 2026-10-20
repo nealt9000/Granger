@@ -56,6 +56,16 @@ class ResearchChatsTest {
         )
     }
 
+    @Test fun mediaPassagesRoundTrip() = runTest {
+        val chatId = chats.create("Who composed The Planets?")
+        val turnId = chats.startTurn(chatId, "Who composed The Planets?", askedDeeper = false, quote = null)
+        val media = passage(SourceKind.MEDIA, 1).copy(sourceId = "album:gustav holst|the planets", location = "", packTitle = "Your music")
+        chats.finishTurn(turnId, TurnOutcome.ANSWERED, "Holst [1].", false, false, listOf("planets"), listOf(media), listOf(passage(SourceKind.MEDIA, 2)))
+        val turn = chats.turns(chatId).first().single()
+        assertThat(turn.shown).containsExactly(media)
+        assertThat(turn.candidates.single().kind).isEqualTo(SourceKind.MEDIA)
+    }
+
     @Test fun emptyKeywordsRoundTripAsEmpty() = runTest {
         val chatId = chats.create("q")
         val turnId = chats.startTurn(chatId, "q", false, null)

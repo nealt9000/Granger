@@ -27,6 +27,7 @@ readium = "3.4.0"
 fragmentCompose = "1.9.0"
 desugarJdkLibs = "2.1.5"
 media3 = "1.11.1"
+glance = "1.2.0"
 ndk = "30.0.16248370"
 
 [libraries]
@@ -72,6 +73,8 @@ media3-session = { module = "androidx.media3:media3-session", version.ref = "med
 media3-common = { module = "androidx.media3:media3-common", version.ref = "media3" }
 media3-test-utils = { module = "androidx.media3:media3-test-utils", version.ref = "media3" }
 media3-test-utils-robolectric = { module = "androidx.media3:media3-test-utils-robolectric", version.ref = "media3" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+androidx-glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "glance" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

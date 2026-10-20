@@ -18,9 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import app.granger.GrangerApp
-import app.granger.core.research.Passage
 import app.granger.core.research.ResearchPipeline
-import app.granger.core.research.SourceKind
 import app.granger.research.ModelsAdapter
 import java.io.File
 import kotlinx.coroutines.flow.first
@@ -83,7 +81,7 @@ class EvalActivity : ComponentActivity() {
             c.catalog.load()
             val items = EvalSession.loadItems(root, ids, groups)
             val packNames = c.library.packs.first().associate { it.id to it.name }
-            val sourceName = { p: Passage -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
+            val sourceName = evalSourceName(packNames)
             val finder = RecordingFinder(c.passageFinder)
             val prompts = PromptRecorder(ModelsAdapter(c.modelManager))
             val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig)

@@ -1,15 +1,19 @@
 """Metrics for one run: the pass-bar numbers, retrieval recall, medical flag, Best guess grades and timings.
 
 `compute(items, records, grades)` -> dict. `items` are dataset items, `records` result records, `grades` from grading.load_grades.
-Only items that have a record count. `apply_threshold` re-decides outcomes from the recorded `found` scores, for sweeps.
+Only items that have a record count. A run with media items (group `media` or `media-control`) also gets `media`:
+`cited` (a `media` item cited one of its expected media sources) and `intrusion` (a `media-control` item cited any
+media passage), with their bars in `pass`; without media items neither appears. `apply_threshold` re-decides outcomes from the recorded `found` scores, for sweeps.
 """
 import copy
 import math
 
-from dataset import location_matches
+from dataset import MEDIA_CONTROL, is_media, location_matches
 from grading import current_grade, replies
 
-BAR = {"unanswerable": 0.90, "answerable": 0.80, "guessWrongMax": 0.10, "guessGoodMin": 0.60}
+BAR = {"unanswerable": 0.90, "answerable": 0.80, "guessWrongMax": 0.10, "guessGoodMin": 0.60,
+       "mediaCited": 0.80, "mediaIntrusionMax": 0}
+MEDIA = "media"
 
 
 def _rate(a, b):
@@ -33,6 +37,27 @@ def median(values):
     s = sorted(values)
     m = len(s) // 2
     return s[m] if len(s) % 2 else (s[m - 1] + s[m]) / 2
+
+
+def cited_passages(record):
+    """The chosen passages the reply cited (`cited` numbers them from 1)."""
+    chosen = record.get("chosen", [])
+    return [chosen[n - 1] for n in record.get("cited", []) if isinstance(n, int) and 0 < n <= len(chosen)]
+
+
+def _is_media_passage(p):
+    return p.get("kind") == "MEDIA" or is_media(p.get("source"))
+
+
+def _media(by_id, recs):
+    media = [r for r in recs if by_id[r["id"]].get("group") == MEDIA]
+    controls = [r for r in recs if by_id[r["id"]].get("group") == MEDIA_CONTROL]
+    if not media and not controls:
+        return None
+    hit = sum(1 for r in media if any(matches(p, by_id[r["id"]]["answers"]) for p in cited_passages(r)))
+    intruded = sum(1 for r in controls if any(_is_media_passage(p) for p in cited_passages(r)))
+    return {"cited": {"n": len(media), "hit": hit, "rate": _rate(hit, len(media))},
+            "intrusion": {"n": len(controls), "hit": intruded, "rate": _rate(intruded, len(controls))}}
 
 
 def _timing(records, key):
@@ -67,7 +92,8 @@ def compute(items, records, grades):
         out["outcomes"][r["outcome"]] = out["outcomes"].get(r["outcome"], 0) + 1
 
     hit = fnc = nf = 0
-    for r in an:
+    with_answers = [r for r in an if by_id[r["id"]].get("answers")]  # media controls have none
+    for r in with_answers:
         ans = by_id[r["id"]]["answers"]
         if any(matches(p, ans) for p in r.get("chosen", [])[:4]):
             hit += 1
@@ -75,7 +101,7 @@ def compute(items, records, grades):
             fnc += 1
         else:
             nf += 1
-    out["retrieval"] = {"n": len(an), "recallAt4": _rate(hit, len(an)), "foundNotChosen": fnc, "neverFound": nf}
+    out["retrieval"] = {"n": len(with_answers), "recallAt4": _rate(hit, len(with_answers)), "foundNotChosen": fnc, "neverFound": nf}
 
     flagged = [(by_id[r["id"]]["medical"], bool(r.get("medical"))) for r in recs]
     med = [pair for pair in flagged if pair[0]]
@@ -113,6 +139,12 @@ def compute(items, records, grades):
         "unanswerable": out["unanswerable"]["rate"] is not None and out["unanswerable"]["rate"] >= BAR["unanswerable"],
         "answerable": out["answerable"]["rate"] is not None and out["answerable"]["rate"] >= BAR["answerable"],
     }
+    media = _media(by_id, recs)
+    if media:
+        out["media"] = media
+        # None when the run has no items of that group (e.g. run with --groups media)
+        out["pass"]["mediaCited"] = None if not media["cited"]["n"] else media["cited"]["rate"] >= BAR["mediaCited"]
+        out["pass"]["mediaIntrusion"] = None if not media["intrusion"]["n"] else media["intrusion"]["hit"] <= BAR["mediaIntrusionMax"]
     return out
 
 

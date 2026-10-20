@@ -208,6 +208,8 @@ class PlayerViewModel(
     /** Play-order positions, as [queue] lists them. */
     fun moveInQueue(from: Int, to: Int) { if (from != to) hub.moveInQueue(from, to) }
     fun removeFromQueue(i: Int) = hub.removeFromQueue(i)
+    /** A tap on a queue row: plays that song (its play-order position). */
+    fun playQueueItem(position: Int) = hub.playQueueItem(position)
 
     fun setSpeed(speed: Float) = hub.setSpeed(speed)
     fun setSkipSilence(on: Boolean) = hub.setSkipSilence(on)

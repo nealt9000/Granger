@@ -2,6 +2,7 @@ package app.granger.core.player
 
 import android.content.ComponentName
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -10,6 +11,7 @@ import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Track
 import com.google.common.util.concurrent.ListenableFuture
+import java.io.File
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,13 +39,20 @@ class MediaControllerPlayerHub(
     media: MediaLibrary,
     playback: PlaybackDao,
     private val scope: CoroutineScope,
+    /** A cover path as the session items' artwork URI; see [PlaybackService.Dependencies]. */
+    artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
+    /**
+     * Android Auto's browse tree, made on first use: the app's tree plays through this hub, so it can't exist before
+     * it. Null serves an empty root.
+     */
+    browse: (() -> MediaBrowseTree)? = null,
 ) : PlayerHub {
     private val app = context.applicationContext
     private var controller: ListenableFuture<MediaController>? = null
     private val pending = ArrayDeque<(PlayerEngine) -> Unit>()
 
     init {
-        PlaybackService.install(PlaybackService.Dependencies(media, playback))
+        PlaybackService.install(PlaybackService.Dependencies(media, playback, artwork, browse?.let(::LazyBrowseTree)))
         connect()
         scope.launch {
             PlaybackService.engine.filterNotNull().collect { engine ->
@@ -116,6 +125,7 @@ class MediaControllerPlayerHub(
     override fun cycleRepeat() = send { it.cycleRepeat() }
     override fun moveInQueue(from: Int, to: Int) = send { it.moveInQueue(from, to) }
     override fun removeFromQueue(i: Int) = send { it.removeFromQueue(i) }
+    override fun playQueueItem(position: Int) = send { it.playQueueItem(position) }
     override fun playNext(trackIds: List<String>) = send { it.playNext(trackIds) }
     override fun addToQueue(trackIds: List<String>) = send { it.addToQueue(trackIds) }
     override fun setSpeed(speed: Float) = send { it.setSpeed(speed) }

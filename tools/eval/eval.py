@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Drives the Research eval (docs/superpowers/specs/2026-10-17-research-eval-design.md).
 
-  eval.py validate dataset/tune.json [--packs DIR] [--books DIR]
+  eval.py validate dataset/tune.json [--packs DIR] [--books DIR] [--media EXPORT.json]   # EXPORT from media_library.py
   eval.py run dataset/tune.json --run-id ID [--ids a,b] [--groups g1,g2] [--guesses none|small|large|both]
   eval.py worksheet ID                       # runs/ID/worksheet.md: replies that still need a grade
   eval.py report --dataset-only dataset/tune.json dataset/heldout.json
@@ -36,7 +36,8 @@ def load_run(run_id):
 
 def cmd_validate(a):
     items = dataset.load(a.dataset)
-    problems = dataset.validate_answers(items, packs=a.packs, books=a.books)
+    media = json.loads(Path(a.media).read_text(encoding="utf-8")) if a.media else None
+    problems = dataset.validate_answers(items, packs=a.packs, books=a.books, media=media)
     for p in problems:
         print(p)
     print("%d items, %d problems" % (len(items), len(problems)))
@@ -91,7 +92,7 @@ def cmd_sweep(a):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     s = p.add_subparsers(dest="cmd", required=True)
-    v = s.add_parser("validate"); v.add_argument("dataset"); v.add_argument("--packs"); v.add_argument("--books"); v.set_defaults(f=cmd_validate)
+    v = s.add_parser("validate"); v.add_argument("dataset"); v.add_argument("--packs"); v.add_argument("--books"); v.add_argument("--media"); v.set_defaults(f=cmd_validate)
     r = s.add_parser("run"); r.add_argument("dataset"); r.add_argument("--run-id", required=True)
     r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"]); r.set_defaults(f=cmd_run)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)

@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
 import app.granger.core.library.BookHit
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.MediaResults
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.SearchHit
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +22,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
+fun interface MediaSearch { suspend fun search(query: String): MediaResults }
+
 /**
- * Search over titles then article text. [initialQuery] (for example text selected in the reader, or a
+ * Search over titles, then music and audiobooks, then article text, then books. [initialQuery] (for example text selected in the reader, or a
  * recent search) is searched straight away; opening a hit remembers the query and opens a rail tab.
  */
 @OptIn(FlowPreview::class)
@@ -29,10 +34,13 @@ class SearchViewModel(
     private val search: LibrarySearch,
     private val sessions: ReadingSessions,
     initialQuery: String = "",
+    private val media: MediaSearch = MediaSearch { MediaResults() },
 ) : ViewModel() {
     data class State(
         val query: String = "",
         val titles: List<SearchHit> = emptyList(),
+        /** Music and audiobooks, shown after [titles]. */
+        val media: MediaResults = MediaResults(),
         /** Full-text hits whose article is not already in [titles]. */
         val fullText: List<SearchHit> = emptyList(),
         /** Hits inside books, after the article sections. */
@@ -67,12 +75,21 @@ class SearchViewModel(
                 wait
             }.distinctUntilChanged().collectLatest { q ->
                 if (q.isBlank()) {
-                    _state.update { it.copy(titles = emptyList(), fullText = emptyList(), books = emptyList(), searching = false) }
+                    _state.update { it.copy(titles = emptyList(), media = MediaResults(), fullText = emptyList(), books = emptyList(), searching = false) }
                     return@collectLatest
                 }
                 _state.update { it.copy(searching = true) }
                 val titles = search.titles(q)
                 _state.update { it.copy(titles = titles) }
+                // The media index is in memory and quick; a failure there must not cost the article and book results.
+                val found = try {
+                    media.search(q)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    MediaResults()
+                }
+                _state.update { it.copy(media = found) }
                 val shown = titles.map { it.packId to it.path }.toSet()
                 val fullText = search.fullText(q).filterNot { (it.packId to it.path) in shown }
                 _state.update { it.copy(fullText = fullText) }
@@ -86,6 +103,11 @@ class SearchViewModel(
         searchText = text
         query.value = text.trim()
         _state.update { it.copy(query = text) }
+    }
+
+    /** Remembers the current query as a recent search; called when a music or audiobook result is opened or played. */
+    suspend fun recordSearch() {
+        sessions.recordSearch(query.value)
     }
 
     /** Remembers the current query as a recent search, opens the hit in a new rail tab and returns its id. */

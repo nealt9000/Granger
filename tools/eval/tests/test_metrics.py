@@ -118,3 +118,52 @@ def test_book_answer_still_matches_by_substring():
     ans = [{"source": "book:granger:romans", "location": "chap1", "quote": "x"}]
     assert metrics.matches(P(source="book:granger:romans", location="OEBPS/chap1.xhtml"), ans)
     assert not metrics.matches(P(source="book:granger:romans", location="OEBPS/chap9.xhtml"), ans)
+
+
+def M(source, kind="MEDIA"):
+    return {"kind": kind, "source": source, "title": "t", "location": "", "heading": ""}
+
+
+def media_run():
+    items, recs = [], []
+
+    def add(id, group, answers, chosen, cited):
+        items.append({"id": id, "group": group, "split": "media", "answerable": True, "medical": False, "question": "q", "answers": answers})
+        recs.append({"id": id, "medical": False, "outcome": "answered" if cited else "declined", "reply": "r",
+                     "found": list(chosen), "chosen": list(chosen), "cited": cited})
+
+    wall = [{"source": "album:wall", "location": "", "quote": ""}]
+    holst = [{"source": "album:holst", "location": "", "quote": ""}, {"source": "album:venus", "location": "", "quote": ""}]
+    add("m1", "media", wall, [P(), M("album:wall")], [2])                 # cited the expected album
+    add("m2", "media", wall, [M("album:wall"), P()], [2])                 # found it, but cited only the article
+    add("m3", "media", holst, [M("album:venus")], [1])                    # either Holst album counts
+    add("m4", "media", wall, [M("album:moon")], [1])                      # cited the wrong album
+    add("m5", "media", wall, [], [])                                      # declined
+    add("c1", "media-control", [], [P(), M("album:moon")], [1])          # article only: no intrusion
+    add("c2", "media-control", [], [P(), M("album:moon")], [1, 2])       # cited media: intrusion
+    return items, recs
+
+
+def test_media_cited_counts_an_expected_media_source_among_cited():
+    items, recs = media_run()
+    m = metrics.compute(items, recs, {})["media"]
+    assert m["cited"] == {"n": 5, "hit": 2, "rate": 2 / 5}
+    # the expected media source matches by source alone, so recall counts it with an empty location
+    assert metrics.matches(M("album:wall"), [{"source": "album:wall", "location": "", "quote": ""}])
+
+
+def test_media_intrusion_counts_any_cited_media_on_controls():
+    items, recs = media_run()
+    out = metrics.compute(items, recs, {})
+    assert out["media"]["intrusion"] == {"n": 2, "hit": 1, "rate": 1 / 2}
+    assert out["pass"]["mediaCited"] is False and out["pass"]["mediaIntrusion"] is False
+    # controls have no answers, so retrieval leaves them out
+    assert out["retrieval"]["n"] == 5
+    clean = [dict(r, cited=[1]) if r["id"] == "c2" else r for r in recs]
+    assert metrics.compute(items, clean, {})["pass"]["mediaIntrusion"] is True
+
+
+def test_media_metrics_absent_without_media_items():
+    items, recs = make()
+    out = metrics.compute(items, recs, {})
+    assert "media" not in out and set(out["pass"]) == {"unanswerable", "answerable"}

@@ -12,9 +12,11 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.HandlerWrapper
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder
+import androidx.media3.session.MediaSession
 import app.granger.core.library.Albums
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
+import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.AudiobookState
 import app.granger.core.library.MediaAddress
 import app.granger.core.library.MediaLibrary
@@ -26,6 +28,7 @@ import app.granger.core.player.PositionSaver.SaveReason
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.random.Random
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -74,6 +77,8 @@ class PlayerEngine(
     private val replayGain: ReplayGainProcessor? = null,
     writer: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
     private val random: Random = Random.Default,
+    /** A cover path as the items' artwork URI (the app passes its artwork provider's content:// URI). */
+    private val artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
 ) : PlayerHub {
     private enum class Mode { NONE, MUSIC, BOOK }
 
@@ -261,16 +266,53 @@ class PlayerEngine(
         }
     }
 
-    private fun submit(command: suspend () -> Unit) { if (!released) commands.trySend(command) }
+    private fun submit(command: suspend () -> Unit) { trySubmit(command) }
+
+    private fun trySubmit(command: suspend () -> Unit): Boolean = !released && commands.trySend(command).isSuccess
 
     // ---- restore and release (the service's lifecycle) ----
 
     /** Loads the last active player's saved state, paused (after the service is recreated). */
-    fun restore() = submit {
+    fun restore() = submit { restoreLast() }
+
+    private suspend fun restoreLast() {
         when (prefs.getString(PlayerSettingsKeys.LAST_MODE, null)) {
             MODE_BOOK -> prefs.getString(PlayerSettingsKeys.LAST_AUDIOBOOK, null)?.let { loadBook(it, null, play = false) }
             MODE_MUSIC -> playback.musicState()?.let { loadMusicState(it) }
         }
+    }
+
+    /**
+     * Loads the last active player paused from its saved state if nothing is loaded; then its items, index and
+     * position (null when nothing was ever saved). For a play press after the process died (the session's playback
+     * resumption). Runs in turn with the hub's calls, so a restore already queued is waited for, not repeated; like
+     * any restore it writes nothing before its seek is confirmed.
+     */
+    suspend fun resumption(): MediaSession.MediaItemsWithStartPosition? = inTurn(restore = true)
+
+    /**
+     * The loaded items, index and position, once every call sent before this one has run (null when nothing is
+     * loaded then). For a controller's request ([LibraryCallback.onSetMediaItems]): the tree has just asked the hub to
+     * play something, and this answers with what the engine loaded for it. Loads nothing itself.
+     */
+    suspend fun loadedItems(): MediaSession.MediaItemsWithStartPosition? = inTurn(restore = false)
+
+    private suspend fun inTurn(restore: Boolean): MediaSession.MediaItemsWithStartPosition? {
+        val result = CompletableDeferred<MediaSession.MediaItemsWithStartPosition?>()
+        val sent = trySubmit {
+            try {
+                if (restore && !loaded) restoreLast()
+                if (loaded && player.mediaItemCount > 0) {
+                    val items = (0 until player.mediaItemCount).map { player.getMediaItemAt(it) }
+                    result.complete(MediaSession.MediaItemsWithStartPosition(
+                        items, player.currentMediaItemIndex, player.currentPosition.coerceAtLeast(0L),
+                    ))
+                }
+            } finally {
+                result.complete(null)
+            }
+        }
+        return if (sent) result.await() else null
     }
 
     /** Writes the current position now and waits for it (task removed, service destroyed). */
@@ -504,6 +546,25 @@ class PlayerEngine(
         musicChanged()
     }
 
+    override fun playQueueItem(position: Int) = submit {
+        val q = musicQueue ?: return@submit
+        if (mode != Mode.MUSIC || position !in q.ids.indices) return@submit
+        playItem(q.playOrder[position], 0L)
+    }
+
+    /** A controller's seek to playlist item [index] (Auto's queue): plays it, as a tap on its queue row does. */
+    internal fun playMediaItem(index: Int, positionMs: Long) = submit {
+        val q = musicQueue ?: return@submit
+        if (mode != Mode.MUSIC || index !in q.ids.indices) return@submit
+        playItem(index, positionMs)
+    }
+
+    private fun playItem(index: Int, positionMs: Long) {
+        // The transition re-points the queue at the item (select); the play order is left as it is.
+        player.seekTo(index, positionMs.coerceAtLeast(0L))
+        resume()
+    }
+
     override fun playNext(trackIds: List<String>) = submit { insert(trackIds, next = true) }
 
     override fun addToQueue(trackIds: List<String>) = submit { insert(trackIds, next = false) }
@@ -643,8 +704,13 @@ class PlayerEngine(
         replayGain?.setGains(emptyMap())          // ReplayGain is for music
         effects.open(player.audioSessionId, speech = true)
         effects.setBoost(boostMb)
-        player.setMediaItems(files.map { item(it, b) }, fileIndex ?: 0, position)
-        lastChapter = m.chapterAt(fileIndex ?: 0, position).ordinal
+        val startChapter = m.chapterAt(fileIndex ?: 0, position)
+        // Each file is titled with the chapter it starts in (the start file with the chapter it starts at); a
+        // chapter change within a file retitles it then ([showChapter]).
+        player.setMediaItems(files.mapIndexed { i, f ->
+            item(f, b, if (i == (fileIndex ?: 0)) startChapter else m.chapterAt(i, 0L))
+        }, fileIndex ?: 0, position)
+        lastChapter = startChapter.ordinal
         awaitingReady = true
         saveWhenReady = play                      // a restore leaves the saved row (and its time) untouched
         loaded = true
@@ -661,14 +727,15 @@ class PlayerEngine(
         return true
     }
 
-    private fun item(t: Track, b: Audiobook?): MediaItem = MediaItem.Builder()
+    /** A song, or a book's file titled with [chapter] (the book as album, its author as artist). */
+    private fun item(t: Track, b: Audiobook?, chapter: AudiobookChapter? = null): MediaItem = MediaItem.Builder()
         .setMediaId(t.id)
         .setUri(t.uri)
         .setMediaMetadata(MediaMetadata.Builder()
-            .setTitle(b?.title ?: t.title)
+            .setTitle(if (b == null) t.title else chapterTitle(b, chapter))
             .setArtist(b?.author ?: t.artists.replace("; ", ", "))
             .setAlbumTitle(b?.title ?: Albums.title(t))
-            .setArtworkUri((b?.coverPath ?: t.coverPath)?.let { Uri.fromFile(File(it)) })
+            .setArtworkUri((b?.coverPath ?: t.coverPath)?.let(artwork))
             .build())
         .build()
 
@@ -755,13 +822,31 @@ class PlayerEngine(
     private fun checkChapter() {
         val m = map ?: return
         if (mode != Mode.BOOK || player.mediaItemCount == 0) return
-        val c = m.chapterAt(player.currentMediaItemIndex, player.currentPosition).ordinal
+        val chapter = m.chapterAt(player.currentMediaItemIndex, player.currentPosition)
+        val c = chapter.ordinal
         if (c != lastChapter) {
             val first = lastChapter == -1
             lastChapter = c
             if (!first) save(SaveReason.CHAPTER)
         }
+        showChapter(chapter)
     }
+
+    /**
+     * The session's title is the chapter's: the current item's metadata is replaced in place when it names another
+     * chapter. Same URI, so ExoPlayer updates the item without re-preparing it (no gap, no position jump; pinned by
+     * `chapterChangeUpdatesTheTitleWithoutRepreparing`).
+     */
+    private fun showChapter(chapter: AudiobookChapter) {
+        val b = book ?: return
+        val index = player.currentMediaItemIndex
+        val current = player.currentMediaItem ?: return
+        val title = chapterTitle(b, chapter)
+        if (current.mediaMetadata.title?.toString() == title) return
+        player.replaceMediaItem(index, current.buildUpon().setMediaMetadata(current.mediaMetadata.buildUpon().setTitle(title).build()).build())
+    }
+
+    private fun chapterTitle(b: Audiobook, chapter: AudiobookChapter?): String = chapter?.title?.takeIf { it.isNotBlank() } ?: b.title
 
     // ---- music queue ----
 
@@ -921,8 +1006,19 @@ class PlayerEngine(
 
     // ---- ui ----
 
+    /** A book with chapters to step through is loaded: the session offers next and previous (see [SessionPlayer]). */
+    internal val chapterSteps: Boolean get() = loaded && mode == Mode.BOOK && (map?.size ?: 0) > 1
+
+    /** Told (on main) when [chapterSteps] changes. */
+    internal var onChapterStepsChanged: (() -> Unit)? = null
+    private var lastChapterSteps = false
+
     private fun refresh() {
         if (released) return
+        if (chapterSteps != lastChapterSteps) {
+            lastChapterSteps = chapterSteps
+            onChapterStepsChanged?.invoke()
+        }
         val now: NowPlaying
         var position = player.currentPosition.coerceAtLeast(0L)
         var duration = player.duration.takeIf { it != C.TIME_UNSET } ?: 0L

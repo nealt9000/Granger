@@ -26,6 +26,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Granger">
         <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="false" />
+        <!-- Android Auto finds the playback service's browse tree (PlaybackService, :core:player). -->
+        <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/automotive_app_desc" />
         <uses-native-library android:name="libOpenCL.so" android:required="false" />
         <uses-native-library android:name="libvndksupport.so" android:required="false" />
         <activity
@@ -36,6 +38,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- The home-screen widget, "Granger player". -->
+        <receiver
+            android:name=".widget.PlayerWidgetReceiver"
+            android:label="@string/widget_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/player_widget_info" />
+        </receiver>
         <!-- "Show in other apps": downloaded media, read-only. Off until the Settings switch enables it. -->
         <provider
             android:name=".media.MediaDocumentsProvider"
@@ -48,5 +60,11 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
+        <!-- Cover art for Android Auto, the widget and the session, read-only (images under the media roots only). -->
+        <provider
+            android:name=".media.ArtworkProvider"
+            android:authorities="app.granger.artwork"
+            android:exported="true"
+            android:grantUriPermissions="false" />
     </application>
 </manifest>

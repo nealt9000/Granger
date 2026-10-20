@@ -8,6 +8,9 @@ A dataset file is a JSON array of items (see docs/superpowers/specs/2026-10-17-r
   and the quote must appear in that entry's text (HTML stripped, whitespace and case folded).
 * Book sources are ids like `book:granger:<ref>`; the file is `<BOOKS>/<ref>.epub`. The location is matched as a
   substring of a spine item's href, and the quote must appear in that item's text.
+* Media sources are a Research media card's sourceId: `album:<albumKey>` or an audiobook id (`audiobook:<origin>:<ref>`).
+  Their location is "" and they match by source alone. With an export of the phone's library (`media_library.py`),
+  the album key or audiobook id must be in it.
 """
 import html
 import json
@@ -17,8 +20,15 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-SPLITS = ("tune", "heldout")
+SPLITS = ("tune", "heldout", "media")
 BOOK_PREFIX = "book:granger:"
+ALBUM_PREFIX = "album:"
+AUDIOBOOK_PREFIX = "audiobook:"
+MEDIA_CONTROL = "media-control"
+
+
+def is_media(source):
+    return (source or "").startswith((ALBUM_PREFIX, AUDIOBOOK_PREFIX))
 
 
 def load(path):
@@ -42,16 +52,21 @@ def check(items):
             raise ValueError("%s: no question" % i)
         if it.get("answerable"):
             answers = it.get("answers") or []
-            if not answers or any(not a.get("source") or not a.get("location") for a in answers):
+            if not answers and it.get("group") == MEDIA_CONTROL:
+                continue  # a media control is answered from the packs; what it checks is that no media is cited
+            if not answers or any(not a.get("source") or not (a.get("location") or is_media(a["source"])) for a in answers):
                 raise ValueError("%s: an answerable question needs an answer with a source and a location" % i)
 
 
 def location_matches(source, want, have):
     """Does a passage at location `have` (from source `source`) satisfy an answer's location `want`?
 
-    Book sources (`book:...`) match `want` as a case-insensitive substring of `have`. Article sources match exactly,
-    case-insensitively, after dropping any `#fragment` from both sides.
+    Media sources (`album:...`, `audiobook:...`) match on the source alone. Book sources (`book:...`) match `want` as a
+    case-insensitive substring of `have`. Article sources match exactly, case-insensitively, after dropping any
+    `#fragment` from both sides.
     """
+    if is_media(source):
+        return True
     if source.startswith("book:"):
         return want.lower() in have.lower()
     return _bare(want) == _bare(have)
@@ -101,14 +116,28 @@ def _epub_problem(path, a):
     return "quote not found in spine item matching %r" % a["location"] if matched else "no spine item matches %r" % a["location"]
 
 
-def validate_answers(items, packs=None, books=None):
-    """Returns a list of problem strings (empty when every answer checks out). Sources without a directory are skipped."""
+def _media_problem(media, a):
+    src = a["source"]
+    if a.get("location"):
+        return "a media answer's location must be empty, not %r" % a["location"]
+    if src.startswith(ALBUM_PREFIX):
+        return None if src[len(ALBUM_PREFIX):] in media.get("albums", {}) else "no such album in the library export"
+    return None if src in media.get("audiobooks", {}) else "no such audiobook in the library export"
+
+
+def validate_answers(items, packs=None, books=None, media=None):
+    """Returns a list of problem strings (empty when every answer checks out). Sources without a directory (or, for
+    media, without a library export: `{"albums": {key: title}, "audiobooks": {id: title}}`) are skipped."""
     problems, archives = [], {}
     for it in items:
         for a in it.get("answers") or []:
             src = a["source"]
             try:
-                if src.startswith(BOOK_PREFIX):
+                if is_media(src):
+                    if media is None:
+                        continue
+                    p = _media_problem(media, a)
+                elif src.startswith(BOOK_PREFIX):
                     if books is None:
                         continue
                     f = Path(books) / (src[len(BOOK_PREFIX):] + ".epub")

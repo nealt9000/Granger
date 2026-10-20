@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.provider.Settings
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
@@ -40,6 +41,7 @@ import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.MediaIndex
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Playlists
@@ -62,6 +64,10 @@ import app.granger.core.media.FileTagReadGuard
 import app.granger.core.media.FolderSource
 import app.granger.core.media.MediaStoreSource
 import app.granger.core.media.PhoneScanner
+import app.granger.media.Artwork
+import app.granger.media.AutoBrowseTree
+import app.granger.media.PlayResumer
+import app.granger.media.SongPlayer
 import app.granger.media.MediaDownloader
 import app.granger.media.MediaSharing
 import app.granger.media.PhoneMediaScans
@@ -78,6 +84,11 @@ import app.granger.ebook.ReadiumBookOpener
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
+import app.granger.widget.PlayerWidget
+import app.granger.widget.WidgetModel
+import app.granger.widget.WidgetModelStore
+import app.granger.widget.WidgetUpdater
+import androidx.glance.appwidget.updateAll
 import app.granger.research.ModelsAdapter
 import app.granger.research.installedModelsOf
 import java.util.concurrent.atomic.AtomicBoolean
@@ -87,6 +98,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -113,6 +125,12 @@ open class GrangerApp : Application(), DownloadsHost {
     protected open fun startMedia() {
         container.playerHub
         container.phoneMediaScans.start()
+        // The home-screen widget follows the player: re-rendered on changes, never on a clock.
+        WidgetUpdater(container.playerHub, container.appScope) { model ->
+            container.widgetModel.value = model
+            container.widgetStore.save(model)
+            PlayerWidget().updateAll(this)
+        }
         // Granger's own downloads: no permission needed. Quiet, on the app scope: a failure never crashes the start.
         container.appScope.launch { container.mediaDownloader.rescanQuietly() }
     }
@@ -203,6 +221,9 @@ class AppContainer(context: Context) {
     /** Phone music and audiobooks. */
     val media: MediaLibrary = RoomMediaLibrary(libraryDb)
 
+    /** Music and audiobooks in memory, for Search, Research and Android Auto; follows [media]'s rows. */
+    val mediaIndex = MediaIndex(media, appScope)
+
     /** Reads the phone's music and audiobooks in place, read-only; started from [GrangerApp] behind Features.PLAYER. */
     val phoneScanner: PhoneScanner by lazy {
         PhoneScanner(
@@ -220,9 +241,32 @@ class AppContainer(context: Context) {
     /** Positions, bookmarks and the rest of the players' state. */
     val playback: PlaybackDao = libraryDb.playbackDao()
 
+    /** Cover art as content:// URIs ([ArtworkProvider]), for the session's items, Android Auto and the widget. */
+    val artwork: Artwork = Artwork.forContext(context)
+
     /** The one way to the players (spec §8); made in [GrangerApp.onCreate], on the main thread. */
     val playerHub: PlayerHub by lazy {
-        MediaControllerPlayerHub(context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate))
+        MediaControllerPlayerHub(
+            context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+            // A cover outside the provider's roots keeps its file:// URI, which the in-process notification can still read.
+            artwork = { path -> artwork.uri(path) ?: Uri.fromFile(File(path)) },
+            // Made on first use (the tree plays through this hub): Android Auto's first browse.
+            browse = { autoBrowse },
+        )
+    }
+
+    /** What the home-screen widget shows; null until [WidgetUpdater] has published once. */
+    val widgetModel = MutableStateFlow<WidgetModel?>(null)
+
+    /** The widget's last render, for the next process's first draw. */
+    val widgetStore = WidgetModelStore(context.getSharedPreferences(WidgetModelStore.PREFS, Context.MODE_PRIVATE))
+
+    /** Plays a song in its album, from that song (Search, Android Auto). */
+    val songs: SongPlayer by lazy { SongPlayer(media, playerHub) }
+
+    /** What Android Auto browses, searches and plays; reaches the session through [playerHub]. */
+    val autoBrowse: AutoBrowseTree by lazy {
+        AutoBrowseTree(media, playlists, playback, mediaIndex, PlayResumer(media, playlists, playerHub), songs, playerHub, artwork)
     }
 
     /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */
@@ -345,7 +389,7 @@ class AppContainer(context: Context) {
         appScope, useEmbedder = RERANK_WITH_EMBEDDER,
     )
 
-    val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves)
+    val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex)
 
     /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9). */
     val rankingConfig = RankingConfig()

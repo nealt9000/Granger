@@ -56,6 +56,7 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
     override fun cycleRepeat() { calls += "cycleRepeat" }
     override fun moveInQueue(from: Int, to: Int) { calls += "move:$from>$to" }
     override fun removeFromQueue(i: Int) { calls += "remove:$i" }
+    override fun playQueueItem(position: Int) { calls += "playQueueItem:$position" }
     override fun playNext(trackIds: List<String>) { calls += "playNext"; nexts += trackIds }
     override fun addToQueue(trackIds: List<String>) { calls += "addToQueue"; queued += trackIds }
     override fun setSpeed(speed: Float) { calls += "speed:$speed" }

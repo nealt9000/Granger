@@ -327,4 +327,24 @@ class EvalRunnerTest {
         assertThat(thrown).isInstanceOf(kotlin.coroutines.cancellation.CancellationException::class.java)
         assertThat(File(tmp.root, "r7/failed").exists()).isFalse()
     }
+
+    @Test
+    fun mediaPassagesAreRecordedWithTheirSourceId() = runTest {
+        val album = Passage(SourceKind.MEDIA, "album:handel|water music", "Water Music", packTitle = "Your music", location = "",
+            text = "Album: Water Music\nArtist: Handel\nTracks: Water boils; Hornpipe\nIn your library as: Music album")
+        val article = Passage(SourceKind.ARTICLE, "pack-7", "Water", location = "Water", text = "Water boils at 100 degrees.")
+        val out = File(tmp.root, "m/results.jsonl")
+        // the source namer the eval screen uses: an article's pack is named by its ZIM name, everything else by its sourceId
+        runner(listOf(album, article), source = evalSourceName(mapOf("pack-7" to "wikipedia_en_top"))).run(listOf(item("media-001")), out, GuessModels.NONE)
+        val r = records(out).single()
+        for (list in listOf("found", "chosen")) {
+            val passages = r.getJSONArray(list).let { a -> (0 until a.length()).map { a.getJSONObject(it) } }
+            val media = passages.single { it.getString("kind") == "MEDIA" }
+            assertThat(media.getString("source")).isEqualTo("album:handel|water music")
+            assertThat(media.getString("location")).isEmpty()
+            assertThat(passages.single { it.getString("kind") == "ARTICLE" }.getString("source")).isEqualTo("wikipedia_en_top")
+        }
+        val corpus = records(File(tmp.root, "m/found.jsonl")).single().getJSONArray("passages")
+        assertThat((0 until corpus.length()).map { corpus.getJSONObject(it).getString("source") }).contains("album:handel|water music")
+    }
 }

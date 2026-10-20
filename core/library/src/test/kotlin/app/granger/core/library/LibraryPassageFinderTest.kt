@@ -71,9 +71,63 @@ class LibraryPassageFinderTest {
         books: List<Book> = emptyList(),
         docs: Int = 8,
         bookLimit: Int = 40,
-    ) = LibraryPassageFinder(Archives(packs, archives), index, StubBookshelf(books), FakeShelves(rows), dispatcher, docs = docs, bookLimit = bookLimit)
+        media: MediaIndex? = null,
+    ) = LibraryPassageFinder(Archives(packs, archives), index, StubBookshelf(books), FakeShelves(rows), dispatcher, docs = docs, bookLimit = bookLimit, media = media)
+
+    private val media = MemoryMedia()
+    private fun TestScope.mediaIndex() = MediaIndex(media, backgroundScope, dispatcher)
+
+    private fun planets() = listOf("Mars", "Venus", "Jupiter").mapIndexed { i, title ->
+        musicTrack("p$i", album = "The Planets", albumArtist = "Gustav Holst", title = title, trackNo = i + 1)
+    }
 
     private fun page(text: String) = "<h2 id=\"s\">Section</h2><p>$text</p>"
+
+    @Test fun holstQuestionFindsTheMediaCard() = test {
+        media.trackList.value = planets() + musicTrack("w1", album = "The Wall", albumArtist = "Pink Floyd", title = "Hey You")
+        val found = finder(emptyList(), emptyMap(), media = mediaIndex()).find(listOf("holst"))
+        val card = found.single { it.kind == SourceKind.MEDIA }
+        assertThat(card.sourceId).isEqualTo("album:" + planets().first().albumKey)
+        assertThat(card.location).isEmpty()
+        assertThat(card.sourceTitle).isEqualTo("The Planets")
+        assertThat(card.packTitle).isEqualTo("Your music")
+        assertThat(card.text).startsWith("Album: The Planets\nArtist: Gustav Holst")
+    }
+
+    @Test fun atMostTwoMediaCards() = test {
+        media.trackList.value = (1..4).map { musicTrack("m$it", album = "Mars Album $it", albumArtist = "Band $it", title = "Mars") }
+        media.bookList.value = listOf(phoneAudiobook("b", "Mars Stories"))
+        val found = finder(emptyList(), emptyMap(), media = mediaIndex()).find(listOf("mars", "mars album"))
+        assertThat(found.count { it.kind == SourceKind.MEDIA }).isEqualTo(2)
+    }
+
+    @Test fun mediaCardsMatchAnyKeywordAsWholeWords() = test {
+        media.trackList.value = planets()
+        val index = mediaIndex()
+        // One keyword's words must all be there; another keyword that doesn't match doesn't stop it.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("gustav holst", "steam engine")).map { it.kind })
+            .containsExactly(SourceKind.MEDIA)
+        // Whole words only: "hol" is no prefix match.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("hol"))).isEmpty()
+    }
+
+    @Test fun aKeywordThatMatchesNoWorkIsTriedWordByWord() = test {
+        media.trackList.value = planets() + musicTrack("m1", album = "The Dark Side of the Moon", albumArtist = "Pink Floyd", title = "Money")
+        val index = mediaIndex()
+        // "from" is a stopword; "money" finds the song's album.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("money from")).map { it.sourceTitle })
+            .containsExactly("The Dark Side of the Moon")
+        // "pink floyd money" matches as a whole; "holst steam" doesn't, so its words are tried and "holst" finds The Planets.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("pink floyd money", "holst steam")).map { it.sourceTitle })
+            .containsExactly("The Dark Side of the Moon", "The Planets")
+        // One word is never split further, and a stopword alone finds nothing.
+        assertThat(finder(emptyList(), emptyMap(), media = index).find(listOf("steamboat", "from with"))).isEmpty()
+    }
+
+    @Test fun noMediaIndexMeansNoMediaPassages() = test {
+        media.trackList.value = planets()
+        assertThat(finder(emptyList(), emptyMap()).find(listOf("holst"))).isEmpty()
+    }
 
     @Test fun articlePassagesCarryPackAnchorAndCollection() = test {
         val p = pack("wiki", "Wikipedia")

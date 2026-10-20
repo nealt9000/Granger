@@ -17,13 +17,13 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | **Done, bar not reached:** `2026-10-18-plan-09-research-eval.md` (Research stays debug-only; see below) |
 | M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **Done:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10; parity `media-parity-checklist.md`: ✅ 39, ⏭ 4, ❌ 8) |
 | M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | **Done:** `2026-10-19-plan-m2-media-sources.md` (2026-10-19; 1236 JVM tests; Pixel 6 walkthrough in `media-parity-checklist.md`) |
-| M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | Written: `2026-10-19-plan-m3-media-search-research-auto.md` (spec §6/§7 Auto and widget rows, §8, §9, §13) |
+| M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | **Done:** `2026-10-19-plan-m3-media-search-research-auto.md` (2026-10-20; 1512 JVM tests; eval and walkthrough below and in `media-parity-checklist.md`: ✅ 43, ⏭ 0, ❌ 8). **The Media project is done.** |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
 Media spec (2026-10-19): `docs/superpowers/specs/2026-10-19-media-design.md` replaces the old "After v1: Media" row. Media (M1–M3) is built before Plans 10 and 11. It is the first of four projects, in this order (spec §1):
 
-1. **Media**: music and audiobook players, mini-player, phone media, LibriVox and archive.org audio, media in Search and Research retrieval.
+1. **Media** (done 2026-10-20, M1–M3): music and audiobook players, mini-player, phone media, LibriVox and archive.org audio, media in Search and Research retrieval.
 2. **Research deep links + knowing your library**: results open at the exact passage, track or section; grounding quality (Plan 9 ended at 37% grounded); how Research becomes expert on any user's library.
 3. **The voice**: one on-device speech engine for read-aloud in both readers and for Research answers; music/voice mix.
 4. **Actions**: Research builds reading plans and playlists, and opens, reads aloud or plays things.
@@ -381,5 +381,70 @@ Show in other apps:
 
 Device checks still to do:
 - Deleting a phone file in the Files app, then restoring it (skipped again).
+- The Play policy check for LibriVox and archive.org audio (Plan 11).
+
+## Carried forward from M3
+
+Built and measured (2026-10-20, on the Mac Studio):
+- **1512 JVM tests pass**: `./gradlew testDebugUnitTest` plus `./gradlew :core:research:test`. `:core:research` is a plain JVM module, and `testDebugUnitTest` doesn't run it. The M1 and M2 counts (1046, 1236) left it out; it has 164 tests now. No new device tests.
+- Library schema v8 (`album_notes`). New dependency: Glance 1.2.0 (the widget).
+- Eval (`tools/eval/runs/checkpoints/m3/NOTES.md`): media cited 9/10, intrusion 0/3. Tuning split 91% declined, 44% grounded (tune-5: 91%, 45%). The held-out split was not touched.
+
+Neal's calls (2026-10-19 and 2026-10-20):
+- A song tapped in Search plays its album from that song. The Music and Audiobooks groups come after Titles.
+- Task 10 tuned on the media set and the tuning split only:
+  - On a media question, the best media card goes first.
+  - "do I have" and "have I got" are now cues; "score" isn't.
+  - A multi-word keyword that matches no work is tried word by word.
+
+Fixed in the walkthrough: Media3's `MediaButtonReceiver` was never declared, so a play press after the process died went nowhere (`320021b`).
+
+Asked for in the walkthrough (not built):
+- **Search:** with a full library, each group (Titles included) should show its first 8–10 results, with a button to see the whole group.
+- **Readers:** going back to an e-book or Wikipedia reader tab goes straight to full screen. It should open with the toolbar showing and fit the content, as the rest of the app does; a tap in the middle then goes full screen.
+- **Research:** on factual questions, fiction (*Metamorphoses*, *War of the Worlds*) ranks the same as reference works. Weighing the kind of source is project 2's grounding work, measured on the tuning split.
+
+Still open:
+
+Research and the eval:
+- "Who wrote Wicked?" answers from the musical's article; there's no "who wrote" cue, because it would also catch the tuning split's who-wrote group.
+- unanswerable-031 (an NFL score) answers with an unrelated game since "score" left the cues. That's how it behaved before media.
+- The word-by-word fallback runs for every question. Watch for media intrusion in later runs.
+- Folder-named albums have no artist, so the model adds "Gustav" to "Holst" from its own knowledge.
+- The cue list also catches non-media phrasings ("composed of", "world record", "track and field", "rubber band"). That means a cap of 2 and a lifted card there. Cues read only the question, so follow-ups stay at a cap of 1.
+- A card over 1,200 characters loses its tail, including "In your library as", to `AnswerPrompt`'s cut.
+- `LexicalScore` doesn't fold accents, but the media gate does.
+- A CORRUPT (not MISSING) audiobook still opens from a citation.
+- `media.json` has to be re-exported and validated if Holst is re-tagged or moved, or the album-key rules change. The "Venus" album's artist tag is "Release - Topic".
+- The Mac's system Python has no pytest. `tools/dev` should say how to make the eval venv.
+
+Search and the media index:
+- After a library change, a search can briefly use the previous snapshot. If the library flow itself fails, the index keeps its last snapshot until restart.
+- Artist hits come only from album artists. `MediaWork.creator` is raw "; "-joined text.
+- There's no Compose UI test for Search's media groups.
+- A song tap gives no feedback beyond the mini-player.
+- On a cold start, a Search with a query waits for the index's first build.
+
+Player, session and Auto:
+- In book mode, a controller's `seekTo(index, ms)` goes straight to ExoPlayer.
+- `SessionPlayer.isEngines` compares media ids only, so a re-send of the same queue with another start index is swallowed.
+- Tapping the current song's queue row restarts it from 0.
+- The queue-row tap has no Compose UI test.
+- Artwork tokens depend on the order of the roots, and the key changes on reinstall or clear data, so URIs cached by Auto or the launcher can stop resolving.
+- A cover written after the queue loads stays `file://` until the items are rebuilt.
+- `Artwork.uri` touches the disk on the main thread.
+- Auto doesn't get `notifyChildrenChanged` when the library changes; it refreshes when it browses again.
+- Recents whose source is gone are left out. An empty playlist recent is still listed.
+- If the engine takes over 5 s to load, Auto reports a failure while playback still starts.
+- Only an album, an audiobook and search were played on the head unit. A playlist, next and previous, the queue, and switching players were checked on the phone but not on the head unit.
+
+Widget:
+- No `previewLayout`; the picker uses the generic preview, which Neal found usable.
+- The cover is decoded on the drawing path (cached, ≤ 300 px). Every change also calls `updateAll` (not profiled).
+- The second button's label is "Back" and doesn't follow the skip setting.
+- A boot or resize update starts the process, which binds the service and restores the player paused.
+
+Device checks still to do:
+- Deleting a phone file in the Files app, then restoring it (skipped in M1, M2 and M3).
 - The Play policy check for LibriVox and archive.org audio (Plan 11).
 

@@ -46,6 +46,7 @@ import app.granger.librivox.LibriVoxViewModel
 import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.Albums
 import app.granger.core.library.BookIds
+import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
 import app.granger.ebook.Dictionary
@@ -78,6 +79,7 @@ import app.granger.reader.ReaderViewModel
 import app.granger.readiness.ReadinessScreen
 import app.granger.readiness.ReadinessViewModel
 import app.granger.search.SearchScreen
+import app.granger.search.MediaSearch
 import app.granger.search.SearchViewModel
 import android.content.Context
 import app.granger.media.PlayResumer
@@ -255,6 +257,12 @@ fun NavController.togglePlayer() {
     }
 }
 
+/** Shows the full-screen player: nothing when it's on top, brought back up when further down, else opened. */
+fun NavController.showPlayer() {
+    if (currentBackStackEntry?.destination?.hasRoute<PlayerRoute>() == true) return
+    if (!popBackStack<PlayerRoute>(inclusive = false)) navigate(PlayerRoute) { launchSingleTop = true }
+}
+
 /**
  * The player's shelf link: Music ([MusicRoute] for All music) or Audiobooks ([AudiobookShelfRoute] for all of them).
  * The player is closed first, so Back from the shelf returns to the screen the player was opened from, as closing the
@@ -321,7 +329,7 @@ private class CurrentTab : ViewModel() {
 }
 
 @Composable
-fun GrangerNavHost(container: AppContainer, start: StartScreen) {
+fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0) {
     val nav = rememberNavController()
     val shell = rememberShellState()
     // True only for the first resume navigation; read when that navigation's transitions are chosen.
@@ -372,8 +380,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
         }
     }
 
+    // The home-screen widget's body: each request (a new count) shows the Player, over whatever the launch opened.
+    LaunchedEffect(openPlayerRequests) { if (openPlayerRequests > 0 && Features.PLAYER) nav.showPlayer() }
+
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
     val scope = rememberCoroutineScope()
+    // A song tapped in Search plays its album from there.
+    val songs = container.songs
     fun showTab(tabId: Long) {
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
@@ -629,11 +642,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             composable<SearchRoute> { backStackEntry ->
                 val query = backStackEntry.toRoute<SearchRoute>().query
                 SearchScreen(
-                    viewModel = viewModel { SearchViewModel(container.search, container.sessions, query) },
+                    viewModel = viewModel {
+                        SearchViewModel(
+                            container.search, container.sessions, query,
+                            media = if (Features.PLAYER) MediaSearch { container.mediaIndex.search(it) } else MediaSearch { MediaResults() },
+                        )
+                    },
                     onOpenTab = ::showTab,
                     onOpenBook = { tabId, at ->
                         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it, at) } }
                     },
+                    onOpenAlbum = { nav.navigate(AlbumRoute(it)) },
+                    onOpenArtist = { nav.navigate(ArtistRoute(it)) },
+                    onOpenAudiobook = { nav.navigate(AudiobookRoute(it)) },
+                    onPlaySong = { track -> scope.launch { songs.play(track) } },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -644,7 +666,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                         ResearchViewModel(
                             route.chatId.takeIf { it != 0L }, route.quotePassage(),
                             container.researchChats, container.research, container.modelManager, container.sessions,
-                            container.library, container.bookshelf, container.appScope,
+                            container.library, container.bookshelf, container.mediaIndex, container.appScope,
                             savedState = createSavedStateHandle(),
                         )
                     },
@@ -655,13 +677,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
                             val tabId = when (target) {
                                 is CitationTarget.Article -> target.tabId
                                 is CitationTarget.Book -> target.tabId
+                                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey))
+                                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId))
                                 CitationTarget.Gone -> return@launch
                             }
                             val tab = citationTab(container.sessions, tabId) ?: return@launch
                             when (target) {
                                 is CitationTarget.Article -> nav.showTab(tab, fragment = target.fragment)
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)
-                                CitationTarget.Gone -> Unit
+                                is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
                             }
                         }
                     },

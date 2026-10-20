@@ -32,6 +32,10 @@ def totals_rows(m):
         row("Medical flag accuracy / recall", "%s / %s" % (pct(f["accuracy"]), pct(f["recall"])), "recall aim 95%", None if f["recall"] is None else f["recall"] >= 0.95),
         row("Think deeper grounded (%d of %d)" % (d["grounded"], d["n"]), pct(d["rate"]), "E4B bar 80%", None if d["rate"] is None else d["rate"] >= 0.8),
     ]
+    if "media" in m:
+        c, i = m["media"]["cited"], m["media"]["intrusion"]
+        rows.append(row("Media cited (%d of %d)" % (c["hit"], c["n"]), pct(c["rate"]), "bar 80% (8 of 10)", m["pass"]["mediaCited"]))
+        rows.append(row("Media intrusion on controls (%d of %d)" % (i["hit"], i["n"]), pct(i["rate"]), "bar 0", m["pass"]["mediaIntrusion"]))
     for model, g in m["guesses"].items():
         rows.append(row("Best guess %s (%d graded of %d): confidently wrong / right or partly" % (model, g["graded"], g["n"]),
                         "%s / %s" % (pct(g["confidentlyWrongRate"]), pct(g["rightOrPartlyRate"])), "bar at most 10% / at least 60%", g["goodEnough"] if g["graded"] else None))

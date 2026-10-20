@@ -72,6 +72,31 @@ Connect the Pixel 6 over USB and run `adb devices`. On the first connection it l
 
 Device-test rules (from the plan's Global Constraints): never run `:app:connectedDebugAndroidTest` (it wipes the library), never `adb reboot`, and after any library-module device test check `adb shell pm list packages app.granger`.
 
+## Android Auto: the Desktop Head Unit
+
+The Desktop Head Unit (DHU) shows Android Auto in a window on the Mac, driven by the phone over USB.
+
+Install **2.1**, which is on the preview channel. 2.0 (the stable channel) disconnects from Android Auto 17.8 right after the TLS
+handshake ("Failed to read from transport"):
+
+```bash
+sdkmanager --channel=1 "extras;google;auto"     # → $ANDROID_HOME/extras/google/auto, 2.1-mac-arm64
+```
+
+On the phone, once (Neal): Settings → Android Auto → tap **Version** about 10 times → allow developer settings → ⋮ →
+**Developer settings** → **Unknown sources** on (Granger isn't from Play). Then, each session: ⋮ → **Start head unit server**.
+
+On the Mac:
+
+```bash
+adb forward tcp:5277 tcp:5277
+cd "$ANDROID_HOME/extras/google/auto" && ./desktop-head-unit
+```
+
+The DHU reads commands from its terminal and exits when stdin closes, so from a script or a background shell keep stdin open
+(`sleep 86400 | ./desktop-head-unit`). The first connection runs Android Auto's setup on the phone; accept its prompts. If it
+won't connect after a disconnect, stop and start the head unit server on the phone and run `adb forward` again.
+
 ## Case-insensitive file system
 
 macOS volumes are case-insensitive by default, so two classes in one package whose names differ only in case overwrite each other's `.class` files in `build/`. `core/library` had both `Bookmark` and `BookMark`. `BookMark` is now `BookAnnotation` (its table is still `book_marks`, so the schema didn't change), and the build runs from the normal checkout. Don't reintroduce names that differ only in case.
