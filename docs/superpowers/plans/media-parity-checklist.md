@@ -3,12 +3,12 @@
 Spec: `docs/superpowers/specs/2026-10-19-media-design.md` §6 (music player, match Auxio), §7 (audiobook player, match Voice), §13 (Done means). Plan: `2026-10-19-plan-m1-media-players.md`, Task 13. Checked 2026-10-19 against the code on `plan-m1-media-players`.
 
 - ✅ done in M1, with where it lives (a file, a test, or the walkthrough). Every ✅ was checked in the code, not taken from the plan.
-- ⏭ comes in a later Media plan, by design (M3: Android Auto, widget, Search).
+- ⏭ comes in a later Media plan, by design (M3: Android Auto, widget, Search). M3 closed all four (2026-10-20).
 - ❌ a gap: what's missing, why, and the plan that takes it.
 
 Paths are short: `core/player/…` is `core/player/src/main/kotlin/app/granger/core/player/…`, and the same for the other modules and `app/`.
 
-**Totals: 51 rows. ✅ 39, ⏭ 4, ❌ 8.** Music: 37 rows (✅ 27, ⏭ 3, ❌ 7). Audiobooks: 14 rows (✅ 12, ⏭ 1, ❌ 1).
+**Totals: 51 rows. ✅ 43, ⏭ 0, ❌ 8** (after M3; M1 ended at ✅ 39, ⏭ 4). Music: 37 rows (✅ 30, ❌ 7). Audiobooks: 14 rows (✅ 13, ❌ 1).
 
 ## Music player (spec §6, Auxio)
 
@@ -31,13 +31,13 @@ Paths are short: `core/player/…` is `core/player/src/main/kotlin/app/granger/c
 | Dependable playlists: create, reorder, survive rescans | ✅ | `core/library/Playlists.kt` (`RoomPlaylists`, also the app-level function for project 4). `PlaylistsTest`: `playlistSurvivesTrackGoingMissingAndBack`, `createWithTracksKeepsOrder`, `moveReordersOrdinals`, `removeKeepsOrdinalsDense`, `renameAndDelete`. Reorder is Move up / Move down, no drag |
 | Playlists: add from anywhere | ❌ | "Add to playlist…" is on every song and album menu (`app/music/MusicParts.kt`), but not in the full player or the queue. Later (media polish) |
 | Saved playback state: queue, position, shuffle/repeat | ✅ | `MusicState` row (queue, index, position, shuffled order, repeat); `stateRoundTrip`, `restoresAudiobookAfterServiceRecreated`, `activatingMusicRestoresTheSavedQueueAfterSavingTheAudiobook`. Walkthrough: resume after force-stop |
-| Search | ⏭ | M3: the media index in Granger's Search (spec §9) |
+| Search | ✅ | M3: `core/library/MediaIndex.kt` (in memory, folded whole words, last word a prefix), Music and Audiobooks groups after Titles (`app/search/`); a song plays its album from that song (`app/media/SongPlayer.kt`). `MediaIndexTest`, `SearchRowsTest`. M3 walkthrough PASS |
 | External equalizers | ✅ | `core/player/EffectsSession.kt` sends `ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION` / `CLOSE_…` with the session id; wired in `PlaybackService.kt`. Not tried with an equalizer app on the device |
 | Embedded cover art | ✅ | First embedded picture from TagLib, stored once per image by a hash of its bytes (`embeddedCoverIsStoredOncePerImage`); `folder.jpg` / `cover.jpg` when none is embedded (`PhoneScanner.kt`) |
 | Square covers | ✅ | `aspectRatio(1f)` covers in `app/music/MusicParts.kt` and `app/audiobooks/AudiobookShelfScreen.kt` |
 | Autoplay on headset connect (setting, off by default) | ✅ | `core/player/HeadsetAutoplay.kt` (`AudioDeviceCallback`, wired headset or A2DP), started in `PlaybackService.kt`; default off (`playerSettingsWriteThePlayerPrefsWithDefaults`). Not tried on the device |
-| Android Auto | ⏭ | M3. The service's browse tree is empty on purpose (`PlaybackService.kt`, `onGetChildren`) |
-| Resizable widgets | ⏭ | M3 |
+| Android Auto | ✅ | M3: `app/media/AutoBrowseTree.kt` behind `core/player/MediaBrowseTree.kt` (Recent, Music, Audiobooks; albums, artists, playlists), search and voice play, covers through `ArtworkProvider`. `AutoBrowseTreeTest`, `PlaybackCallbackTest`. Desktop Head Unit 2.1 PASS (2026-10-20) |
+| Resizable widgets | ✅ | M3: Glance `app/widget/PlayerWidget.kt` (small and large layouts, whichever player is current, play/pause and the second button, resumes after a kill). `WidgetModelTest`, `WidgetUpdaterTest`. Pixel 6 PASS |
 | Edge-to-edge, Material design, private and offline | ✅ | Granger's shell (Plan 5). The players draw in the theme's content colour (`PlayerContentColorTest`; walkthrough) |
 | Queue view and editing | ✅ | `app/player/QueueSheet.kt`: long-press drag to reorder, remove. `moveKeepsCurrentTrackCurrent`, `removeCurrentMovesToWhatWouldHaveBeenNext`, `playNextInsertsAfterCurrent`, `queueAndBookActionsGoToTheHub` |
 | Queue: tap a row to play it | ❌ | Tapping a queue row does nothing: `PlayerHub` has no play-at-index call. M3 (Android Auto's queue needs the same call) |
@@ -64,7 +64,7 @@ Paths are short: `core/player/…` is `core/player/src/main/kotlin/app/granger/c
 | Silence skipping, per book | ✅ | `AudiobookState.skipSilence`, `PlayerEngine.setSkipSilence` (`skipSilenceEnabled`) |
 | Auto-rewind after pauses | ✅ | `core/player/AutoRewind.kt` (under 10 s none, 5 min 3 s, 1 h 10 s, else 30 s): `rewindSteps`, `boundariesBelongToTheLongerStep`, `transientFocusLossPausesAndResumesWithRewind`. Walkthrough PASS |
 | Volume boost | ✅ | `LoudnessEnhancer` in `core/player/EffectsSession.kt`, per book in `AudiobookState.volumeBoostMb`; books only (music sets 0). Not listened to on the device |
-| Android Auto | ⏭ | M3, the same service as music |
+| Android Auto | ✅ | M3, the same browse tree: the Audiobooks tab, last played first; a book resumes at its place. Desktop Head Unit PASS |
 | Controls close at hand: big skips, chapter list one tap away | ✅ | 30 s back / 30 s forward by default, 10/15/30/60 s in Settings (`skipLabelsFollowTheSettings`, `playerSettingsWriteThePlayerPrefsWithDefaults`); the chapters button in `app/player/AudiobookPlayerScreen.kt`; the mini-player's second button is back 30 s for books (`secondaryButtonCallsNextForMusicAndSkipBackForBooks`) |
 | Formats: M4B, MP3, M4A, OGG, OGA, OPUS | ✅ | Tags: `readsEveryFormat`, `opusKeepsR128Gain` (`TagLibDeviceTest`); `.m4b` is always an audiobook (`m4bAndAudiobooksFolderAndSystemFlagAreAudiobooks`); picked folders accept all six by extension (`FolderSource.AUDIO_EXTENSIONS`); playback is Media3's. On the device only an MP3 folder book was played |
 | Builder's call: marking finished | ✅ | "Mark as finished" / "Mark as unfinished" on the book page: `markFinishedThenResumeStartsFromBeginning`, `markUnfinishedRewindsOnlyABookLeftAtItsEnd`, `finishedBookResumesFromTheStartAndIsUnfinishedOncePlaying`, `restoredFinishedBookStaysFinishedUntilPlayed` |
@@ -118,4 +118,22 @@ The spec §13 items M2 covers. Installed over the existing app with `./gradlew :
 | Deleting a phone file in the Files app, then restoring it | SKIPPED again by Neal (covered by tests, as in M1) |
 
 Also changed at Neal's request: album pages number tracks plainly, with "Disc n" headers on multi-disc albums, blank for untagged tracks, and a fixed-width number column (`5e559ff`).
+
+## M3 walkthrough (2026-10-20)
+
+Pixel 6 and the Desktop Head Unit, with the M3 build installed over the app (no uninstall; `firstInstallTime` still 2026-10-16). The library and downloads databases were backed up first (library v7 → v8 on first open: 154 tracks, 2 audiobooks). Neal did every step on the phone and the head unit and listened for everything audible.
+
+| Item | Result |
+| --- | --- |
+| Search: "Holst" shows the Music group; "comfortably" shows the song and plays *The Wall* from it; album and artist results open their pages; "wicked" shows the audiobook and opens its page | PASS. Neal's note: with a full library, each group (Titles too) should show its first few results with a way to see them all |
+| Research: "Do I have any Holst?" cites the Holst album and the citation opens it; "How far is Mars from the Sun?" cites no media | PASS. Neal's note: the Mars answer cited *Metamorphoses* and *War of the Worlds* before the encyclopedia; ranking doesn't weigh fiction differently from reference works on factual questions |
+| Notification and lock screen: chapter title, changing at the boundary with no break across a file change (Wicked, multi-file); next and previous step chapters; music shows the track | PASS |
+| Queue: tapping a row plays it | PASS |
+| Resumption: force-stop, then a play press | FAIL, then PASS (`320021b`): no `MediaButtonReceiver` was declared, so the system had nowhere to send the press and `onPlaybackResumption` was never reached. With the receiver, a play press after a force-stop restarted Granger and resumed *The Wall* where it was paused (0:29) |
+| Widget: picker preview, resize small → large, current player, play/pause and the second button, switching players updates it, resumes after the process is swiped away | PASS |
+| Android Auto (Desktop Head Unit): Recent, Music and Audiobooks; play an album and an audiobook; search across both | PASS. DHU 2.0 (the stable channel) disconnects from Android Auto 17.8 right after the TLS handshake; 2.1 (`sdkmanager --channel=1`) connects (`tools/dev/MAC-SETUP.md`) |
+| Phone media unchanged | PASS: the 91 files under `Music/` and `Audiobooks/` have the same size, mtime and md5 as before M2 |
+| LibriVox book by chapter, resumes after a force-stop; an archive.org album plays gaplessly; audiobook → music → audiobook keeps its place; the mini-player the same everywhere; "Show in other apps" read-only | PASS. Neal's note: going back to an e-book or Wikipedia reader tab goes straight to full screen; it should keep the toolbar showing, as the rest of the app does, with a tap in the middle for full screen |
+
+Eval (Task 10, `tools/eval/runs/checkpoints/m3/NOTES.md`): media cited 9/10, intrusion 0/3; tuning split 91% declined, 44% grounded (tune-5: 91%, 45%).
 
