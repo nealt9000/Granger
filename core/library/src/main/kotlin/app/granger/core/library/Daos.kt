@@ -175,6 +175,25 @@ interface SessionDao {
             "(SELECT query FROM recent_searches ORDER BY searchedAt DESC, query LIMIT :limit)",
     )
     suspend fun trimRecentSearches(limit: Int)
+
+    @Query("DELETE FROM recent_searches WHERE query = :query")
+    suspend fun deleteRecentSearch(query: String)
+
+    /** Newest pin first; a tie (the same millisecond) goes to the later insert. */
+    @Query("SELECT * FROM rail_pins ORDER BY pinnedAt DESC, rowid DESC")
+    fun observePins(): Flow<List<RailPin>>
+
+    @Query("SELECT COUNT(*) FROM rail_pins")
+    suspend fun pinCount(): Int
+
+    @Query("SELECT EXISTS(SELECT 1 FROM rail_pins WHERE `key` = :key)")
+    suspend fun isPinned(key: String): Boolean
+
+    @Insert
+    suspend fun insertPin(pin: RailPin)
+
+    @Query("DELETE FROM rail_pins WHERE `key` IN (:keys)")
+    suspend fun deletePins(keys: Collection<String>)
 }
 
 @Dao

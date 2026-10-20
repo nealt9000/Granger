@@ -224,4 +224,43 @@ class MigrationTest {
             assertThat(it.moveToFirst()).isTrue()
         }
     }
+
+    @Test fun migration8To9KeepsTabsAndAddsEmptyStacks() {
+        helper.createDatabase("migrate9.db", 8).apply {
+            execSQL("INSERT INTO reading_tabs (id, packId, path, title, openedAt, onRail) VALUES (1, 'u-a', 'Cat', 'Cat', 5, 1)")
+            execSQL("INSERT INTO reading_tabs (id, packId, path, title, openedAt, onRail) VALUES (2, 'u-a', 'Dog', 'Dog', 7, 1)")
+            execSQL("INSERT INTO reading_tabs (id, packId, path, title, openedAt, onRail) VALUES (3, 'u-a', 'Eel', 'Eel', 9, 0)")
+            execSQL("INSERT INTO recent_searches (query, searchedAt) VALUES ('cats', 3)")
+            LibraryDatabase.createBookText(this)
+            execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate9.db", 9, false, LibraryDatabase.MIGRATION_8_9)
+        val tabs = mutableListOf<List<Any>>()
+        db.query("SELECT id, path, openedAt, onRail, backStack FROM reading_tabs ORDER BY openedAt DESC").use {
+            while (it.moveToNext()) tabs += listOf(it.getLong(0), it.getString(1), it.getLong(2), it.getInt(3), it.getString(4))
+        }
+        // Same rows, same order, each with an empty stack (the first page shown starts it).
+        assertThat(tabs).containsExactly(
+            listOf(3L, "Eel", 9L, 0, ""),
+            listOf(2L, "Dog", 7L, 1, ""),
+            listOf(1L, "Cat", 5L, 1, ""),
+        ).inOrder()
+        db.query("SELECT COUNT(*) FROM recent_searches").use {
+            it.moveToFirst()
+            assertThat(it.getInt(0)).isEqualTo(1)
+        }
+        db.query("SELECT COUNT(*) FROM rail_pins").use {
+            it.moveToFirst()
+            assertThat(it.getInt(0)).isEqualTo(0)
+        }
+        db.execSQL("INSERT INTO rail_pins (`key`, pinnedAt) VALUES ('tab:1', 11)")
+        db.query("SELECT `key` FROM rail_pins").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("tab:1")
+        }
+        db.query("SELECT docid FROM book_text WHERE book_text MATCH 'quick'").use {
+            assertThat(it.moveToFirst()).isTrue()
+        }
+    }
 }
