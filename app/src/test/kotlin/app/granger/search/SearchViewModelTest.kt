@@ -9,8 +9,11 @@ import app.granger.core.library.LibrarySearch
 import app.granger.core.library.ArtistHit
 import app.granger.core.library.MediaResults
 import app.granger.core.library.SearchHit
+import app.granger.core.library.TitleResults
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +29,9 @@ class SearchViewModelTest {
             SearchHit("p", "Pack", "Leaf", "Leaf", "<b>photo</b>"),
         )
 
-        override suspend fun titles(query: String): List<SearchHit> { titleQueries += query; return titles }
+        /** Set where the search says some pack had more titles than it was asked for. */
+        var titlesMore = false
+        override suspend fun titles(query: String): TitleResults { titleQueries += query; return TitleResults(titles, titlesMore) }
         /** Completed by a test that wants to look at the state while full text is still being searched. */
         var fullTextGate: CompletableDeferred<Unit>? = null
         override suspend fun fullText(query: String): List<SearchHit> { fullTextGate?.await(); return fullText }
@@ -197,5 +202,69 @@ class SearchViewModelTest {
         vm.recordSearch()
         assertThat(sessions.searches.value).containsExactly("holst")
         assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    private fun hits(n: Int, prefix: String = "T") = (1..n).map { SearchHit("p", "Pack", "$prefix$it", "$prefix $it") }
+
+    @Test fun aGroupShowsItsPreviewUntilShowAll() = runTest(main.dispatcher) {
+        search.titles = hits(12)
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.advanceUntilIdle()
+        val state = vm.state.value
+        assertThat(state.shown(SearchGroup.TITLES, state.titles)).hasSize(SearchGroup.TITLES.preview)
+        vm.toggle(SearchGroup.TITLES)
+        assertThat(vm.state.value.let { it.shown(SearchGroup.TITLES, it.titles) }).hasSize(12)
+        // Other groups stay at their preview.
+        assertThat(vm.state.value.expanded).containsExactly(SearchGroup.TITLES)
+        vm.toggle(SearchGroup.TITLES)
+        assertThat(vm.state.value.let { it.shown(SearchGroup.TITLES, it.titles) }).hasSize(SearchGroup.TITLES.preview)
+    }
+
+    @Test fun aNewQueryCollapsesExpandedGroups() = runTest(main.dispatcher) {
+        search.titles = hits(12)
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.advanceUntilIdle()
+        vm.toggle(SearchGroup.TITLES)
+        vm.toggle(SearchGroup.SONGS)
+        vm.onQueryChange("photos")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.expanded).isEmpty()
+        vm.toggle(SearchGroup.TITLES)
+        vm.onQueryChange("")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.expanded).isEmpty()
+    }
+
+    @Test fun groupsThatFillTheirFetchAreMarkedCapped() = runTest(main.dispatcher) {
+        search.titles = hits(SearchGroup.TITLES.fetch)
+        // Every full-text hit counts towards the cap, including those hidden as duplicates of a title.
+        search.fullText = hits(SearchGroup.FULL_TEXT.fetch)
+        val vm = SearchViewModel(search, sessions, "photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.fullText).isEmpty()
+        assertThat(vm.state.value.capped).containsExactly(SearchGroup.TITLES, SearchGroup.FULL_TEXT)
+        search.titles = hits(SearchGroup.TITLES.fetch - 1)
+        vm.onQueryChange("photos")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.capped).doesNotContain(SearchGroup.TITLES)
+        // A pack that filled its share may have more, though the total is short of the limit.
+        search.titlesMore = true
+        search.titles = hits(20)
+        vm.onQueryChange("photon")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.capped).contains(SearchGroup.TITLES)
+    }
+
+    @Test fun resultsArriveWithTheirCapSoTheLabelDoesNotFlicker() = runTest(main.dispatcher) {
+        search.titles = hits(SearchGroup.TITLES.fetch)
+        search.fullText = hits(SearchGroup.FULL_TEXT.fetch, prefix = "F")
+        val vm = SearchViewModel(search, sessions, "")
+        val seen = mutableListOf<SearchViewModel.State>()
+        // Unconfined, so the collector sees every value the state passes through.
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.state.collect { seen += it } }
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(seen.filter { it.titles.isNotEmpty() }.map { SearchGroup.TITLES in it.capped }.distinct()).containsExactly(true)
+        assertThat(seen.filter { it.fullText.isNotEmpty() }.map { SearchGroup.FULL_TEXT in it.capped }.distinct()).containsExactly(true)
     }
 }

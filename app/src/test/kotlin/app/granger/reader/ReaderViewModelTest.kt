@@ -62,13 +62,23 @@ class ReaderViewModelTest {
         assertThat(tab.title).isEqualTo("Photosynthesis")
     }
 
-    @Test fun chromeStartsHiddenAndToggles() = runTest(main.dispatcher) {
+    @Test fun chromeStartsVisibleAndAMiddleTapToggles() = runTest(main.dispatcher) {
+        // A new reader opens with its top bar and the rail showing; a middle tap goes full screen, another comes back.
         val vm = reader("C++")
-        assertThat(vm.state.value.chromeVisible).isFalse()
-        vm.toggleChrome()
         assertThat(vm.state.value.chromeVisible).isTrue()
         vm.toggleChrome()
         assertThat(vm.state.value.chromeVisible).isFalse()
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+    }
+
+    @Test fun leavingTheScreenBringsTheChromeBackForTheReturn() = runTest(main.dispatcher) {
+        // Read full screen, then left for another screen: coming back to the tab shows the chrome again.
+        val vm = reader("C++")
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        vm.onScreenLeft()
+        assertThat(vm.state.value.chromeVisible).isTrue()
     }
 
     @Test fun showChromeBringsItUpAndIsIdempotent() = runTest(main.dispatcher) {

@@ -55,8 +55,8 @@ class ReaderViewModel(
         val page: Page? = null,
         val bookmarked: Boolean = false,
         val error: String? = null,
-        /** The top bar and the side rail. Hidden while reading; an error keeps them up so the user can leave. */
-        val chromeVisible: Boolean = false,
+        /** The top bar and the side rail. Up when the reader opens and when its tab is returned to; a middle tap hides them for full-screen reading. An error keeps them up so the user can leave. */
+        val chromeVisible: Boolean = true,
         /** Find in page: null when the find bar is closed. */
         val findQuery: String? = null,
         /** Search this pack: null when closed. */
@@ -161,6 +161,12 @@ class ReaderViewModel(
     fun showChrome() {
         _state.update { it.copy(chromeVisible = true) }
     }
+
+    /**
+     * The screen went away (another screen on top, or the tab left), not a rotation: coming back to this tab shows
+     * the chrome again, as opening it does.
+     */
+    fun onScreenLeft() = showChrome()
 
     fun startFind() {
         searchJob?.cancel()

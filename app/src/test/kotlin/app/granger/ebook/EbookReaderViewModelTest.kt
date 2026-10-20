@@ -248,14 +248,24 @@ class EbookReaderViewModelTest {
         assertThat(OpenBooks.current).isNull()
     }
 
-    @Test fun chromeStartsHiddenAndToggles() = runTest(main.dispatcher) {
+    @Test fun chromeStartsVisibleAndAMiddleTapToggles() = runTest(main.dispatcher) {
+        // A new reader opens with its bars and the rail showing; a middle tap goes full screen, another comes back.
         val vm = reader()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.toggleChrome()
         assertThat(vm.state.value.chromeVisible).isFalse()
         vm.toggleChrome()
         assertThat(vm.state.value.chromeVisible).isTrue()
         vm.toggleChrome()
-        assertThat(vm.state.value.chromeVisible).isFalse()
         vm.showChrome()
+        assertThat(vm.state.value.chromeVisible).isTrue()
+    }
+
+    @Test fun leavingTheScreenBringsTheChromeBackForTheReturn() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.toggleChrome()
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        vm.onScreenLeft()
         assertThat(vm.state.value.chromeVisible).isTrue()
     }
 

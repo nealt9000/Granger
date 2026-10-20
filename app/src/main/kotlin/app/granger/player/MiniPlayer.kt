@@ -47,18 +47,15 @@ enum class MiniPlayerPlacement {
 
     /** In the shell's slot at the top of the content column, pushing the screen down. */
     PUSH,
-
-    /** Over the top of the content, so the reader's page doesn't reflow; the reader moves its bars down instead. */
-    OVER,
 }
 
 /**
  * Nothing loaded, or the full-screen player showing: hidden. In a reader it follows the reader's chrome (the rail's
- * visibility) and is drawn over the page; elsewhere it's always there and pushes the screen down.
+ * visibility); whenever it shows it pushes the screen (the reader's page too) down.
  */
 fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean, railVisible: Boolean): MiniPlayerPlacement = when {
     !loaded || onPlayer -> MiniPlayerPlacement.HIDDEN
-    reading -> if (railVisible) MiniPlayerPlacement.OVER else MiniPlayerPlacement.HIDDEN
+    reading -> if (railVisible) MiniPlayerPlacement.PUSH else MiniPlayerPlacement.HIDDEN
     else -> MiniPlayerPlacement.PUSH
 }
 

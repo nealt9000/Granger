@@ -12,14 +12,17 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
@@ -62,6 +65,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
@@ -80,16 +84,16 @@ import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
-import app.granger.shell.LocalTopOverlayInset
-import app.granger.shell.NarrowRailWidth
+import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.launch
 
 /** Find-in-page results: [active] is 0-based. */
 private data class FindMatches(val active: Int, val count: Int, val done: Boolean)
 
 /**
- * The web-style reader, full screen. A middle tap on the page shows or hides the chrome: the top bar here and the
- * shell's rail (through [onChromeVisibleChange]), with the system bars hidden alongside. Selecting text offers
+ * The web-style reader. It opens (and comes back) with its chrome up: the top bar here and the shell's rail (through
+ * [onChromeVisibleChange]), with the page fitted below and beside them. A middle tap on the page hides the chrome and
+ * the system bars for full-screen reading; another brings them back. Selecting text offers
  * Search ([onSearchText]) and Research ([onResearch], with the article it was selected in); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome; the top bar offers search inside the pack, the bookmark star and a menu with Home, Random article and find in page.
  */
 @Composable
@@ -122,11 +126,12 @@ fun ReaderScreen(
         view.loadUrl(url)
     }
 
-    // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts, so a fresh screen stays immersive.
+    // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts, so an old swipe isn't replayed.
     val requestAtEntry = remember { showChromeRequest }
     LaunchedEffect(showChromeRequest) { if (isNewChromeRequest(requestAtEntry, showChromeRequest)) viewModel.showChrome() }
     LaunchedEffect(state.chromeVisible) { onChromeVisibleChange(state.chromeVisible) }
     SystemBarsHidden(!state.chromeVisible)
+    ChromeBackOnReturn(viewModel::onScreenLeft)
 
     BackHandler(enabled = canGoBack) {
         saveScroll()
@@ -150,103 +155,112 @@ fun ReaderScreen(
     }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        val error = state.error
-        val startUrl = state.url
-        when {
-            error != null -> Box(Modifier.fillMaxSize().padding(start = NarrowRailWidth).padding(32.dp), Alignment.Center) {
-                Text(error, textAlign = TextAlign.Center)
-            }
-            startUrl != null -> AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = { context ->
-                    val client = ZimWebViewClient(
-                        resolver = resolver,
-                        assets = context.assets,
-                        onExternalLink = { url -> openExternal(context, url) },
-                        onLeavingPage = { view -> viewModel.savePosition(view.url, (view as ReaderWebView).scrollFraction()) },
-                        onPageShown = { view, url ->
-                            canGoBack = view.canGoBack()
-                            val title = view.title?.takeUnless { it == url }
+        // With the chrome up the page is laid out below the top bar and above the navigation bar, like any other
+        // screen (the shell puts the rail and the mini-player beside and above it); hidden, it fills the screen.
+        Column(Modifier.fillMaxSize()) {
+            // Fades only, so the page is resized once per tap rather than on every frame of a slide.
+            AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
+                if (findQuery != null) {
+                    FindBar(
+                        query = findQuery,
+                        matches = matches,
+                        onQueryChange = viewModel::setFindQuery,
+                        onNext = { forward -> webView?.findNext(forward) },
+                        onClose = viewModel::endFind,
+                    )
+                } else {
+                    ReaderTopBar(
+                        title = state.page?.title.orEmpty(),
+                        showPageActions = state.page != null,
+                        bookmarked = state.bookmarked,
+                        showMenu = state.error == null,
+                        hasHome = state.hasHome,
+                        onBack = onBack,
+                        onSearchPack = viewModel::startPackSearch,
+                        onHome = { scope.launch { viewModel.homeUrl()?.let(::navigate) } },
+                        onRandom = {
                             scope.launch {
-                                viewModel.onPageShown(url, title)?.let { (view as ReaderWebView).scrollToFraction(it) }
+                                val url = viewModel.randomUrl()
+                                if (url != null) navigate(url) else Toast.makeText(context, NO_RANDOM_ARTICLE, Toast.LENGTH_SHORT).show()
                             }
+                        },
+                        onFind = viewModel::startFind,
+                        onToggleBookmark = viewModel::toggleBookmark,
+                    )
+                }
+            }
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .testTag(ReaderTags.PAGE)
+                    .windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
+            ) {
+                val error = state.error
+                val startUrl = state.url
+                when {
+                    error != null -> Box(Modifier.fillMaxSize().padding(32.dp), Alignment.Center) {
+                        Text(error, textAlign = TextAlign.Center)
+                    }
+                    startUrl != null -> AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { context ->
+                            val client = ZimWebViewClient(
+                                resolver = resolver,
+                                assets = context.assets,
+                                onExternalLink = { url -> openExternal(context, url) },
+                                onLeavingPage = { view -> viewModel.savePosition(view.url, (view as ReaderWebView).scrollFraction()) },
+                                onPageShown = { view, url ->
+                                    canGoBack = view.canGoBack()
+                                    val title = view.title?.takeUnless { it == url }
+                                    scope.launch {
+                                        viewModel.onPageShown(url, title)?.let { (view as ReaderWebView).scrollToFraction(it) }
+                                    }
+                                },
+                            )
+                            ReaderWebView(
+                                context = context,
+                                client = client,
+                                onToggleChrome = viewModel::toggleChrome,
+                                onSelectionAction = { action, text ->
+                                    when (action) {
+                                        SelectionAction.SEARCH -> searchText(text.take(200))
+                                        SelectionAction.RESEARCH -> {
+                                            val page = viewModel.state.value.page
+                                            val pack = viewModel.packId
+                                            if (page != null && pack != null) research(text, pack, page.path, page.title)
+                                        }
+                                    }
+                                },
+                            ).also {
+                                it.setFindListener { active, count, done -> matches = FindMatches(active, count, done) }
+                                webView = it
+                                val saved = viewModel.webViewState
+                                if (saved == null || it.restoreState(saved) == null) it.loadUrl(startUrl)
+                            }
+                        },
+                        onRelease = {
+                            viewModel.webViewState = Bundle().apply { it.saveState(this) }
+                            it.destroy()
                         },
                     )
-                    ReaderWebView(
-                        context = context,
-                        client = client,
-                        onToggleChrome = viewModel::toggleChrome,
-                        onSelectionAction = { action, text ->
-                            when (action) {
-                                SelectionAction.SEARCH -> searchText(text.take(200))
-                                SelectionAction.RESEARCH -> {
-                                    val page = viewModel.state.value.page
-                                    val pack = viewModel.packId
-                                    if (page != null && pack != null) research(text, pack, page.path, page.title)
-                                }
-                            }
-                        },
-                    ).also {
-                        it.setFindListener { active, count, done -> matches = FindMatches(active, count, done) }
-                        webView = it
-                        val saved = viewModel.webViewState
-                        if (saved == null || it.restoreState(saved) == null) it.loadUrl(startUrl)
-                    }
-                },
-                onRelease = {
-                    viewModel.webViewState = Bundle().apply { it.saveState(this) }
-                    it.destroy()
-                },
-            )
-        }
-        AnimatedVisibility(
-            visible = state.chromeVisible,
-            // The shell's rail is drawn over the reader's left edge while the chrome shows, and the mini-player over its top.
-            modifier = Modifier.padding(start = NarrowRailWidth, top = LocalTopOverlayInset.current),
-            enter = fadeIn() + slideInVertically { -it },
-            exit = fadeOut() + slideOutVertically { -it },
-        ) {
-            val packSearch = state.packSearch
-            if (packSearch != null) {
-                PackSearchPanel(
-                    search = packSearch,
-                    packTitle = state.packTitle,
-                    onQueryChange = viewModel::setPackQuery,
-                    onSubmit = viewModel::submitPackSearch,
-                    onOpen = { hit ->
-                        viewModel.packId?.let { navigate(ZimUrls.forEntry(it, hit.path, null)) }
-                        viewModel.endPackSearch()
-                    },
-                    onClose = viewModel::endPackSearch,
-                )
-            } else if (findQuery != null) {
-                FindBar(
-                    query = findQuery,
-                    matches = matches,
-                    onQueryChange = viewModel::setFindQuery,
-                    onNext = { forward -> webView?.findNext(forward) },
-                    onClose = viewModel::endFind,
-                )
-            } else {
-                ReaderTopBar(
-                    title = state.page?.title.orEmpty(),
-                    showPageActions = state.page != null,
-                    bookmarked = state.bookmarked,
-                    showMenu = state.error == null,
-                    hasHome = state.hasHome,
-                    onBack = onBack,
-                    onSearchPack = viewModel::startPackSearch,
-                    onHome = { scope.launch { viewModel.homeUrl()?.let(::navigate) } },
-                    onRandom = {
-                        scope.launch {
-                            val url = viewModel.randomUrl()
-                            if (url != null) navigate(url) else Toast.makeText(context, NO_RANDOM_ARTICLE, Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    onFind = viewModel::startFind,
-                    onToggleBookmark = viewModel::toggleBookmark,
-                )
+                }
             }
+        }
+        // Over the page and its top bar, so opening the search doesn't resize the page underneath.
+        val packSearch = state.packSearch
+        if (state.chromeVisible && packSearch != null) {
+            PackSearchPanel(
+                search = packSearch,
+                packTitle = state.packTitle,
+                onQueryChange = viewModel::setPackQuery,
+                onSubmit = viewModel::submitPackSearch,
+                onOpen = { hit ->
+                    viewModel.packId?.let { navigate(ZimUrls.forEntry(it, hit.path, null)) }
+                    viewModel.endPackSearch()
+                },
+                onClose = viewModel::endPackSearch,
+            )
         }
     }
 }
@@ -268,6 +282,7 @@ private fun ReaderTopBar(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     TopAppBar(
+        windowInsets = ReaderTopBarInsets,
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) },
         navigationIcon = {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
@@ -362,6 +377,7 @@ private fun FindBar(
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     TopAppBar(
+        windowInsets = ReaderTopBarInsets,
         title = {
             TextField(
                 value = query,
@@ -431,7 +447,32 @@ internal object BarsHideRequests {
     }
 }
 
-private tailrec fun Context.findActivity(): Activity? = when (this) {
+/**
+ * What a reader's page keeps clear of. With the chrome up: the bars' places on [sides] (the top bar takes the top,
+ * and the e-book's bottom bar its bottom). In full screen: only a camera cutout. Both ignore whether the system bars
+ * are showing, so the page is laid out once per middle tap, not along the bars' animation.
+ */
+@Composable
+internal fun readerPageInsets(chromeVisible: Boolean, sides: WindowInsetsSides): WindowInsets =
+    if (chromeVisible) SafeDrawingIgnoringBars.only(sides) else WindowInsets.displayCutout
+
+/** A reader's top bar: below the status bar's place (or the pushing mini-player) even while the bars animate. */
+internal val ReaderTopBarInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+
+/**
+ * Calls [onLeft] when a reader's screen goes away (left, or another screen put on top), but not for a rotation:
+ * the view model, and with it full-screen reading, carries over that.
+ */
+@Composable
+internal fun ChromeBackOnReturn(onLeft: () -> Unit) {
+    val activity = LocalContext.current.findActivity()
+    val left by rememberUpdatedState(onLeft)
+    DisposableEffect(activity) {
+        onDispose { if (activity?.isChangingConfigurations != true) left() }
+    }
+}
+
+internal tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
@@ -449,3 +490,7 @@ private const val NO_RANDOM_ARTICLE = "This pack has no articles to pick from."
 
 /** A shell edge-swipe request counts only when it is newer than the counter value this reader started with. */
 internal fun isNewChromeRequest(atEntry: Int, current: Int): Boolean = current > atEntry
+
+object ReaderTags {
+    const val PAGE = "reader_page"
+}

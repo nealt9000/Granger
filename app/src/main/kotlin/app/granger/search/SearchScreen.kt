@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,6 +71,17 @@ fun SearchScreen(
     fun open(hit: BookHit) { scope.launch { viewModel.openBook(hit).let { (tab, at) -> onOpenBook(tab, at) } } }
     /** A music or audiobook result: the query is remembered as for an article, then [go] opens or plays it. */
     fun media(go: () -> Unit) { scope.launch { viewModel.recordSearch(); go() } }
+    val list = rememberLazyListState()
+    /** Show all or Show fewer for [group] of [rows]; folding a group the list has scrolled through brings its top back. */
+    fun toggle(group: SearchGroup, rows: Int) {
+        val folding = group in state.expanded
+        viewModel.toggle(group)
+        if (!folding) return
+        val foot = list.layoutInfo.visibleItemsInfo.firstOrNull { it.key == moreKey(group) } ?: return
+        // The rows above the group keep their places, so its header (or the row before it) is just above its first row.
+        val top = (foot.index - rows - 1).coerceAtLeast(0)
+        if (top < list.firstVisibleItemIndex) scope.launch { list.scrollToItem(top) }
+    }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     Scaffold(
@@ -96,7 +109,7 @@ fun SearchScreen(
             if (nothingFound) {
                 Text("Nothing in your library matches.", Modifier.align(Alignment.Center).padding(24.dp))
             }
-            LazyColumn(Modifier.fillMaxSize()) {
+            LazyColumn(Modifier.fillMaxSize(), state = list) {
                 if (state.query.isBlank() && state.recent.isNotEmpty()) {
                     item { SectionHeader("Recent") }
                     items(state.recent, key = { "r:$it" }) { recent ->
@@ -107,7 +120,7 @@ fun SearchScreen(
                     }
                 }
                 if (state.titles.isNotEmpty()) item { SectionHeader("Titles") }
-                items(state.titles, key = { "t:${it.packId}/${it.path}" }) { hit ->
+                results(state, SearchGroup.TITLES, state.titles, { _, hit -> "t:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.title) },
@@ -118,29 +131,29 @@ fun SearchScreen(
                 if (music.artists.isNotEmpty() || music.albums.isNotEmpty() || music.songs.isNotEmpty()) {
                     item { SectionHeader("Music") }
                 }
-                items(music.artists, key = { "ma:${it.name}" }) { artist ->
+                results(state, SearchGroup.ARTISTS, music.artists, { _, artist -> "ma:${artist.name}" }, ::toggle) { artist ->
                     MediaRow(artist.name, SearchRows.artist(artist), { AlbumCover(artist.coverPath, it) }) {
                         media { onOpenArtist(artist.name) }
                     }
                 }
-                items(music.albums, key = { "mb:${it.key}" }) { album ->
+                results(state, SearchGroup.ALBUMS, music.albums, { _, album -> "mb:${album.key}" }, ::toggle) { album ->
                     MediaRow(album.title, SearchRows.album(album), { AlbumCover(album.coverPath, it) }) {
                         media { onOpenAlbum(album.key) }
                     }
                 }
-                items(music.songs, key = { "ms:${it.id}" }) { track ->
+                results(state, SearchGroup.SONGS, music.songs, { _, track -> "ms:${track.id}" }, ::toggle) { track ->
                     MediaRow(track.title, SearchRows.song(track), { AlbumCover(track.coverPath, it) }) {
                         media { onPlaySong(track) }
                     }
                 }
                 if (music.audiobooks.isNotEmpty()) item { SectionHeader("Audiobooks") }
-                items(music.audiobooks, key = { "mk:${it.id}" }) { book ->
+                results(state, SearchGroup.AUDIOBOOKS, music.audiobooks, { _, book -> "mk:${book.id}" }, ::toggle) { book ->
                     MediaRow(book.title, SearchRows.audiobook(book), { AudiobookCover(book.coverPath, it) }) {
                         media { onOpenAudiobook(book.id) }
                     }
                 }
                 if (state.fullText.isNotEmpty()) item { SectionHeader("In article text") }
-                items(state.fullText, key = { "f:${it.packId}/${it.path}" }) { hit ->
+                results(state, SearchGroup.FULL_TEXT, state.fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.title) },
@@ -155,7 +168,7 @@ fun SearchScreen(
                     )
                 }
                 if (state.books.isNotEmpty()) item { SectionHeader("In books") }
-                itemsIndexed(state.books, key = { index, _ -> "b:$index" }) { _, hit ->
+                results(state, SearchGroup.BOOKS, state.books, { index, _ -> "b:$index" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.bookTitle) },
@@ -174,7 +187,34 @@ fun SearchScreen(
     }
 }
 
-/** The second line of each music and audiobook result (the copy is fixed by plan M3). */
+private fun moreKey(group: SearchGroup) = "more:${group.name}"
+
+/**
+ * [group]'s rows as [SearchViewModel.State.shown] has them, then, when it has more than its preview, a row at its foot
+ * that shows them all or folds them back.
+ */
+private fun <T> LazyListScope.results(
+    state: SearchViewModel.State,
+    group: SearchGroup,
+    all: List<T>,
+    key: (Int, T) -> Any,
+    onToggle: (SearchGroup, rows: Int) -> Unit,
+    row: @Composable (T) -> Unit,
+) {
+    val shown = state.shown(group, all)
+    itemsIndexed(shown, key = key) { _, result -> row(result) }
+    if (all.size > group.preview) {
+        item(key = moreKey(group)) {
+            val text = if (group in state.expanded) SearchRows.showFewer(group) else SearchRows.showAll(group, all.size, group in state.capped)
+            ListItem(
+                modifier = Modifier.clickable { onToggle(group, shown.size) },
+                headlineContent = { Text(text, color = MaterialTheme.colorScheme.primary) },
+            )
+        }
+    }
+}
+
+/** The second line of each music and audiobook result (the copy is fixed by plan M3), and the Show all row. */
 internal object SearchRows {
     fun artist(a: ArtistHit) = "Artist · ${a.albumCount} ${if (a.albumCount == 1) "album" else "albums"}"
     fun album(a: AlbumSummary) = "Album · ${a.albumArtist}"
@@ -183,6 +223,12 @@ internal object SearchRows {
         val author = b.author.ifBlank { UNKNOWN_AUTHOR }
         return if (b.narrator.isBlank()) author else "$author · read by ${b.narrator}"
     }
+
+    /** A [capped] group may hold more than were fetched, so it doesn't claim to show them all. */
+    fun showAll(group: SearchGroup, count: Int, capped: Boolean) =
+        if (capped) "Show the first $count ${group.noun}" else "Show all $count ${group.noun}"
+
+    fun showFewer(group: SearchGroup) = "Show fewer ${group.noun}"
 }
 
 @Composable

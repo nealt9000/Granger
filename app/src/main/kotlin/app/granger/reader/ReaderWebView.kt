@@ -49,7 +49,11 @@ class ReaderWebView(
         settings.safeBrowsingEnabled = false
         // With the app theme's isLightTheme=false, pages that don't style themselves for dark are darkened.
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
-            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+            try {
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+            } catch (e: UnsupportedOperationException) {
+                // Reported as supported but refused (a framework and WebView APK that disagree): pages keep their own colours.
+            }
         }
         setBackgroundColor(GrangerColors.Background.toArgb()) // no white flash before the first page paints
         addJavascriptInterface(GrangerBridge(onToggleChrome), ReaderPageScript.BRIDGE_NAME)
