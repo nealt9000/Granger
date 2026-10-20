@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -35,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.granger.reader.ReaderTopBarInsets
+import app.granger.shell.SafeDrawingIgnoringBars
 import app.granger.theme.GrangerColors
 import org.readium.r2.shared.publication.Locator
 
@@ -43,6 +43,7 @@ import org.readium.r2.shared.publication.Locator
 @Composable
 fun EbookTopBar(title: String, onBack: () -> Unit, onContents: () -> Unit, onSearch: () -> Unit) {
     TopAppBar(
+        windowInsets = ReaderTopBarInsets,
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) },
         navigationIcon = {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
@@ -81,7 +82,7 @@ fun EbookBottomBar(
     val followed = (locator?.locations?.totalProgression ?: 0.0).toFloat().coerceIn(0f, 1f)
     Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
         // Clear of the navigation bar, and in landscape of the cutout beside the rail, which pads for it too.
-        Column(Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)).padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(Modifier.windowInsetsPadding(SafeDrawingIgnoringBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)).padding(horizontal = 16.dp, vertical = 8.dp)) {
             if (locator != null) {
                 Text(
                     ProgressLabel.of(locator, positionsCount),

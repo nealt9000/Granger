@@ -42,13 +42,16 @@ import org.readium.r2.streamer.parser.DefaultPublicationParser
 
 /**
  * The navigator's configuration. ReadiumCSS night mode paints links #63caff, which beats the theme's text colour;
- * links take the app's accent instead, in every theme, visited or not.
+ * links take the app's accent instead, in every theme, visited or not. Readium's own inset padding is off: it reads
+ * the window's cutout directly, and would add the notch again below the reader's top bar. The reader pads the page
+ * itself (readerPageInsets), the same way as the web reader's.
  */
 fun readerConfiguration(): EpubNavigatorFragment.Configuration {
     val accent = CssColor.Int(GrangerColors.Flame.toArgb())
     return EpubNavigatorFragment.Configuration(
         readiumCssRsProperties = RsProperties(linkColor = accent, visitedColor = accent),
         selectionActionModeCallback = SelectionMenu(),
+        shouldApplyInsetsPadding = false,
     )
 }
 

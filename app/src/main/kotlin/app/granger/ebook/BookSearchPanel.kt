@@ -37,7 +37,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import app.granger.shell.NarrowRailWidth
 import app.granger.theme.GrangerColors
 
 /** A side sheet from the right: a search box and the hits in context. A tap on a row jumps there. */
@@ -51,7 +50,7 @@ fun BookSearchPanel(
     var text by remember { mutableStateOf(ui.query) }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { if (ui.query.isEmpty()) focus.requestFocus() }
-    Box(Modifier.fillMaxSize().padding(start = NarrowRailWidth)) {
+    Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().background(GrangerColors.Scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
         Surface(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
