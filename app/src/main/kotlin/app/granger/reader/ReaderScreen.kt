@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -84,6 +84,7 @@ import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
+import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.launch
 
 /** Find-in-page results: [active] is 0-based. */
@@ -193,7 +194,7 @@ fun ReaderScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .testTag(ReaderTags.PAGE)
-                    .then(if (state.chromeVisible) Modifier.windowInsetsPadding(BottomAndSideInsets) else Modifier),
+                    .windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
             ) {
                 val error = state.error
                 val startUrl = state.url
@@ -281,6 +282,7 @@ private fun ReaderTopBar(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     TopAppBar(
+        windowInsets = ReaderTopBarInsets,
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) },
         navigationIcon = {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
@@ -375,6 +377,7 @@ private fun FindBar(
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     TopAppBar(
+        windowInsets = ReaderTopBarInsets,
         title = {
             TextField(
                 value = query,
@@ -444,8 +447,17 @@ internal object BarsHideRequests {
     }
 }
 
-/** The navigation bar (and a landscape cutout) the page keeps clear of while the chrome shows. */
-private val BottomAndSideInsets @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+/**
+ * What a reader's page keeps clear of. With the chrome up: the bars' places on [sides] (the top bar takes the top,
+ * and the e-book's bottom bar its bottom). In full screen: only a camera cutout. Both ignore whether the system bars
+ * are showing, so the page is laid out once per middle tap, not along the bars' animation.
+ */
+@Composable
+internal fun readerPageInsets(chromeVisible: Boolean, sides: WindowInsetsSides): WindowInsets =
+    if (chromeVisible) SafeDrawingIgnoringBars.only(sides) else WindowInsets.displayCutout
+
+/** A reader's top bar: below the status bar's place (or the pushing mini-player) even while the bars animate. */
+internal val ReaderTopBarInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
 
 /**
  * Calls [onLeft] when a reader's screen goes away (left, or another screen put on top), but not for a rotation:

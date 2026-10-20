@@ -13,16 +13,21 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.systemGestureExclusion
@@ -44,7 +49,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import app.granger.theme.GrangerColors
 
-private val TopInsets @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+/**
+ * [WindowInsets.safeDrawing], except that the status and navigation bars count where they would be even while
+ * hidden. A reader hides them for full-screen reading; layouts padded by this don't follow the bars' show and hide
+ * animation frame by frame, so a middle tap lays the page out once. Wherever the bars show it equals safeDrawing.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+val SafeDrawingIgnoringBars: WindowInsets
+    @Composable get() = WindowInsets.systemBarsIgnoringVisibility.union(WindowInsets.displayCutout).union(WindowInsets.ime)
+
+private val TopInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Top)
 
 /** The shell's own state, saved across rotation. */
 class ShellState(railVisible: Boolean = true, expanded: Boolean = false) {
@@ -113,7 +127,7 @@ fun GrangerShell(
                     .weight(1f)
                     .fillMaxHeight()
                     // The rail already pads for the start inset (landscape cutout); screens shouldn't again.
-                    .then(if (railVisible) Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Start)) else Modifier),
+                    .then(if (railVisible) Modifier.consumeWindowInsets(SafeDrawingIgnoringBars.only(WindowInsetsSides.Start)) else Modifier),
             ) {
                 if (miniPlayer != null) {
                     Box(Modifier.fillMaxWidth().background(GrangerColors.SurfaceVariant).windowInsetsPadding(TopInsets)) { miniPlayer() }

@@ -12,14 +12,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -76,7 +74,7 @@ internal val ExpandedRailWidth = 200.dp
 /** The tools at the top; Research also needs a phone that can run it ([showResearch]). */
 private fun topTools(showResearch: Boolean) =
     RailTool.entries.filter { it.shown && it != RailTool.SETTINGS && (it != RailTool.RESEARCH || showResearch) }
-private val RailInsets @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
+private val RailInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
 
 @Composable
 private fun RailTool.painter(): Painter = when (this) {

@@ -14,13 +14,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -47,6 +45,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.reader.ChromeBackOnReturn
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
+import app.granger.reader.readerPageInsets
+import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.DecorableNavigator
@@ -188,13 +188,14 @@ fun EbookReaderScreen(
                     onSearch = { viewModel.open(Panel.SEARCH) },
                 )
             }
-            Box(Modifier.weight(1f).fillMaxWidth()) {
+            // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
+            Box(Modifier.weight(1f).fillMaxWidth().windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Horizontal))) {
                 val error = state.error
                 val factory = viewModel.navigatorFactory
                 val bookId = viewModel.bookId
                 when {
                     error != null -> Box(
-                        Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)).padding(32.dp),
+                        Modifier.fillMaxSize().windowInsetsPadding(SafeDrawingIgnoringBars.only(WindowInsetsSides.Bottom)).padding(32.dp),
                         Alignment.Center,
                     ) {
                         Text(error, textAlign = TextAlign.Center)
