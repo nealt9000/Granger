@@ -321,6 +321,8 @@ class AppContainer(context: Context) {
             downloads, downloadedMedia, media, volumes, downloadPrefs, appScope,
             // The Files app refreshes "Show in other apps" after each filing or removal.
             onChanged = { MediaSharing.notifyChanged(context) },
+            // Removing what's playing empties the player instead of leaving it there, unplayable (Pixel 6, M2).
+            onRemoving = { audiobookId, trackIds -> playerHub.unload(audiobookId, trackIds) },
         )
     }
 

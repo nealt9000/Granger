@@ -168,6 +168,20 @@ class MediaDownloaderTest {
         assertThat(playback.observeBookmarks(bookId).first().map { it.id }).containsExactly(mark)
     }
 
+    // Pixel 6: removed while playing, the book stayed in the player, unplayable. The player is told first, with every track.
+    @Test fun removeTellsThePlayerFirst() = runTest {
+        val told = mutableListOf<Pair<String, Set<String>>>()
+        val d = MediaDownloader(downloads, scanner, media, volumes, prefs, backgroundScope, onRemoving = { id, tracks -> told += id to tracks; assertThat(dir().exists()).isTrue() })
+        d.get(book)
+        arrive(book.files.indices)
+        d.onFileInstalled(installed(0))
+
+        d.remove(group)
+        val (id, tracks) = told.single()
+        assertThat(id).isEqualTo(bookId)
+        assertThat(tracks).containsAtLeastElementsIn(book.files.map { DownloadedIds.trackId(book, it) })
+    }
+
     @Test fun removeThenGetAgainRestoresPositionAndPlacement() = runTest {
         val d = downloader()
         d.get(book)

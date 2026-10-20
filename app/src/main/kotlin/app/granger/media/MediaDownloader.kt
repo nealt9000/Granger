@@ -55,6 +55,8 @@ class MediaDownloader(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** After every downloaded-media scan (a filing, a removal, "Rescan now"): tells other apps' views to refresh. */
     private val onChanged: () -> Unit = {},
+    /** Before a removal deletes anything: the player lets go of the book or tracks (`PlayerHub.unload`). */
+    private val onRemoving: (audiobookId: String, trackIds: Set<String>) -> Unit = { _, _ -> },
 ) {
     /** Get, cancel and remove, one at a time. */
     private val ops = Mutex()
@@ -184,12 +186,6 @@ class MediaDownloader(
             val records = downloads.records.first().filter { it.groupId == groupId }
             val dirs = itemDirs(source, ref, records)
             val manifests = withContext(io) { dirs.mapNotNull { MediaManifests.read(it) } }
-
-            downloads.removeGroup(groupId)
-            withContext(io) { dirs.forEach { it.deleteRecursively() } }
-            rescanQuietly()
-            sweepStrayFolders()
-
             val audiobookId = "audiobook:$source:$ref"
             val trackIds = buildSet {
                 manifests.forEach { m -> m.files.forEach { add(DownloadedIds.trackId(m, it)) } }
@@ -197,6 +193,12 @@ class MediaDownloader(
                 val key = Albums.itemKey(source, ref)
                 media.tracks.first().filter { it.albumKey == key }.forEach { add(it.id) }
             }
+            onRemoving(audiobookId, trackIds)
+
+            downloads.removeGroup(groupId)
+            withContext(io) { dirs.forEach { it.deleteRecursively() } }
+            rescanQuietly()
+            sweepStrayFolders()
             media.forget(trackIds, listOf(audiobookId))
         }
     }

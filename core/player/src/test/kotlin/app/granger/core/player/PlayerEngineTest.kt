@@ -606,6 +606,36 @@ class PlayerEngineTest {
         assertThat(bookState(book.id)!!.finished).isFalse()
     }
 
+    @Test fun unloadEmptiesThePlayerOnlyForWhatsLoaded() {
+        val ids = musicFixtures()
+        val book = fakeBook("removed", 3_000, 3_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 1_000)
+        engine.player.pause()
+        idle()
+
+        engine.unload("audiobook:phone:other", emptySet())                // another book: left alone
+        idle()
+        assertThat(engine.ui.value.now).isInstanceOf(NowPlaying.Book::class.java)
+
+        engine.unload(book.id, emptySet())
+        idle()
+        assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+        assertThat(engine.player.mediaItemCount).isEqualTo(0)
+        assertThat(bookState(book.id)!!.positionMs).isAtLeast(900L)     // its place was saved first
+
+        engine.playTracks(ids, 0, false, PlaySource("songs", "Songs"))
+        idle()
+        engine.unload("audiobook:phone:none", setOf("track:phone:not-queued"))
+        idle()
+        assertThat(engine.ui.value.now).isInstanceOf(NowPlaying.Music::class.java)
+        engine.unload("audiobook:phone:none", setOf(ids[1]))           // a queued song's album was removed
+        idle()
+        assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+    }
+
     /** Restored (not played), a finished book stays finished through its next saves; playing it un-finishes it. */
     @Test fun restoredFinishedBookStaysFinishedUntilPlayed() {
         val ids = musicFixtures()
