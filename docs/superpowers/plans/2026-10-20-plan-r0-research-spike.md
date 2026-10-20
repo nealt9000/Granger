@@ -45,10 +45,10 @@
 
 **Files:** create `tools/eval/replay.py` and `tools/eval/tests/test_replay.py`. Reference: `core/research/.../Ranking.kt` and `LexicalScore.kt`.
 
-- [ ] Port `Ranking` to Python: preselect, lexical score (keyword word credit, `LEAD_BONUS` 0.3, `TITLE_BONUS` 0.1), `perDocument` 3, `lexicalThreshold` 0.6, the media cap and `liftMedia`. Write tests from the Kotlin tests' cases.
-- [ ] `replay.py run CORPUS --config NAME` prints recall@4 and empty rate. It writes the chosen passages per item for later tasks.
-- [ ] **Gate:** on `m3-tune-1`, the port reproduces the app's `chosen` exactly for at least 200 of 202 items. Note why any item differs.
-- [ ] Record the baseline recall@4 and empty rate.
+- [x] Port `Ranking` to Python: preselect, lexical score (keyword word credit, `LEAD_BONUS` 0.3, `TITLE_BONUS` 0.1), `perDocument` 3, `lexicalThreshold` 0.6, the media cap and `liftMedia`. Write tests from the Kotlin tests' cases.
+- [x] `replay.py run CORPUS --config NAME` prints recall@4 and empty rate. It writes the chosen passages per item for later tasks.
+- [x] **Gate:** on `m3-tune-1`, the port reproduces the app's `chosen` exactly for at least 200 of 202 items. Note why any item differs.
+- [x] Record the baseline recall@4 and empty rate.
 
 ### Task 2: EmbeddingGemma rerank, offline
 
