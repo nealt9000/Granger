@@ -1,6 +1,10 @@
 package app.granger.widget
 
+import app.granger.core.player.PlayerMode
+import app.granger.core.player.SavedModes
+import app.granger.core.player.SavedMusic
 import app.granger.player.FakePlayerHub
+import app.granger.player.track
 import app.granger.player.audiobook
 import app.granger.player.bookUi
 import app.granger.player.chapter
@@ -35,6 +39,16 @@ class WidgetUpdaterTest {
         assertThat(renders.last().playing).isFalse()
         // Progress is drawn as of that render.
         assertThat(renders.last().progress).isWithin(1e-6f).of(4_000f / 200_000f)
+    }
+
+    @Test fun savedStateNotYetReadIsNotRendered() = runTest {
+        // A cold start: nothing loaded and the saved state not read yet. "Nothing playing" would flash here.
+        hub.saved.value = SavedModes.UNKNOWN
+        start()
+        assertThat(renders).isEmpty()
+        hub.saved.value = SavedModes(SavedMusic(listOf(track("a", "Song A")), 0, 0L, false, 0), null, PlayerMode.MUSIC)
+        runCurrent()
+        assertThat(renders.map { it.title }).containsExactly("Song A")
     }
 
     @Test fun switchingPlayersUpdatesTheWidget() = runTest {

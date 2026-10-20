@@ -61,7 +61,7 @@ class MainActivity : FragmentActivity() {
             container.appScope.launch { container.catalog.load() }
         }
         // Not on a re-creation: the intent that started this activity was already handled then.
-        if (savedInstanceState == null && intent.opensPlayer()) openPlayer.intValue++
+        if (savedInstanceState == null && opensPlayer(intent)) openPlayer.intValue++
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -102,7 +102,7 @@ class MainActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.opensPlayer()) openPlayer.intValue++
+        if (opensPlayer(intent)) openPlayer.intValue++
     }
 
     override fun onStart() {
@@ -140,7 +140,10 @@ class MainActivity : FragmentActivity() {
             .putExtra(EXTRA_OPEN_PLAYER, true)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
-        private fun Intent?.opensPlayer(): Boolean = Features.PLAYER && this?.getBooleanExtra(EXTRA_OPEN_PLAYER, false) == true
+        /** Asks for the Player, and isn't a relaunch from Recents (which replays the widget's old intent). */
+        internal fun opensPlayer(intent: Intent?): Boolean = Features.PLAYER && intent != null &&
+            intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0 &&
+            intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false)
     }
 }
 

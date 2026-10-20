@@ -75,14 +75,17 @@ class PlayerWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val container = (context.applicationContext as GrangerApp).container
         val models = container.widgetModel
-        val initial = models.value ?: if (Features.PLAYER) {
+        // Before the first publish in this process: what was last drawn, not "Nothing playing" (no cold-start flash).
+        val initial = models.value ?: container.widgetStore.load() ?: if (Features.PLAYER) {
             WidgetModel.of(container.playerHub.ui.value, container.playerHub.saved.value)
         } else {
             WidgetModel.EMPTY
         }
+        // One per session, outside the per-size content: every size gets the same Bitmap, which RemoteViews sends once.
+        val covers = CoverCache()
         provideContent {
             val model by models.filterNotNull().collectAsState(initial)
-            val cover = remember(model.coverPath) { model.coverPath?.let(::loadCover)?.let(::ImageProvider) }
+            val cover = remember(model.coverPath) { covers.get(model.coverPath)?.let(::ImageProvider) }
             PlayerWidgetContent(model, cover)
         }
     }
@@ -93,7 +96,7 @@ class PlayerWidget : GlanceAppWidget() {
         val LARGE = DpSize(180.dp, 100.dp)
 
         /** The longest side a cover is decoded at: RemoteViews bitmaps cross a binder, which caps their size. */
-        const val COVER_MAX_PX = 300
+        const val COVER_MAX_PX = 192
     }
 }
 
@@ -200,6 +203,25 @@ private fun Button(icon: Int, label: String, action: Action, tag: String) {
     ) {
         Image(ImageProvider(icon), contentDescription = label, colorFilter = ColorFilter.tint(OnSurface),
             modifier = GlanceModifier.size(28.dp))
+    }
+}
+
+/**
+ * The last cover decoded, by path: Responsive content composes once per size, and each must get the same Bitmap
+ * (one copy in the RemoteViews, not three). A new path replaces it.
+ */
+internal class CoverCache(private val decode: (String) -> Bitmap? = { loadCover(it) }) {
+    private var path: String? = null
+    private var bitmap: Bitmap? = null
+
+    @Synchronized
+    fun get(coverPath: String?): Bitmap? {
+        if (coverPath == null) return null
+        if (coverPath != path) {
+            bitmap = decode(coverPath)
+            path = coverPath
+        }
+        return bitmap
     }
 }
 

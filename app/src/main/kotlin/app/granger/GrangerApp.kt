@@ -86,6 +86,7 @@ import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
 import app.granger.widget.PlayerWidget
 import app.granger.widget.WidgetModel
+import app.granger.widget.WidgetModelStore
 import app.granger.widget.WidgetUpdater
 import androidx.glance.appwidget.updateAll
 import app.granger.research.ModelsAdapter
@@ -127,6 +128,7 @@ open class GrangerApp : Application(), DownloadsHost {
         // The home-screen widget follows the player: re-rendered on changes, never on a clock.
         WidgetUpdater(container.playerHub, container.appScope) { model ->
             container.widgetModel.value = model
+            container.widgetStore.save(model)
             PlayerWidget().updateAll(this)
         }
         // Granger's own downloads: no permission needed. Quiet, on the app scope: a failure never crashes the start.
@@ -255,6 +257,9 @@ class AppContainer(context: Context) {
 
     /** What the home-screen widget shows; null until [WidgetUpdater] has published once. */
     val widgetModel = MutableStateFlow<WidgetModel?>(null)
+
+    /** The widget's last render, for the next process's first draw. */
+    val widgetStore = WidgetModelStore(context.getSharedPreferences(WidgetModelStore.PREFS, Context.MODE_PRIVATE))
 
     /** Plays a song in its album, from that song (Search, Android Auto). */
     val songs: SongPlayer by lazy { SongPlayer(media, playerHub) }
