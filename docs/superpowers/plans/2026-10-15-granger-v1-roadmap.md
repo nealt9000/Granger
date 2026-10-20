@@ -16,7 +16,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | 8 | Research (was Inquire & Abstract) | Old Ask pipeline (rewrite → find → chunk → rank → answer/decline, citation validation, medical banner, Think deeper) plus metadata grounding, cross-source connections, selection entry, kept chats with threaded follow-ups | **Done:** `2026-10-17-plan-08-research.md` |
 | 9 | Eval harness | `tools/eval`, ~300-question dataset, metrics, threshold/prompt tuning to the pass bar | **Done, bar not reached:** `2026-10-18-plan-09-research-eval.md` (Research stays debug-only; see below) |
 | M1 | Media: players and phone media | Phone media (MediaStore + picked folders) referenced in place, TagLib tags, music player (Auxio-grade), audiobook player (Voice-grade), one mini-player + Player rail tool, music browsing, playlists, Recent plays | **Done:** `2026-10-19-plan-m1-media-players.md` (spec `docs/superpowers/specs/2026-10-19-media-design.md` §2, §3.1, §5–§8, §10; parity `media-parity-checklist.md`: ✅ 39, ⏭ 4, ❌ 8) |
-| M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | Written: `2026-10-19-plan-m2-media-sources.md` |
+| M2 | Media: sources and downloads | LibriVox, archive.org audio with the rolling filter, sources by media type, media downloads with origin records, "Show in other apps" | **Done:** `2026-10-19-plan-m2-media-sources.md` (2026-10-19; 1236 JVM tests; Pixel 6 walkthrough in `media-parity-checklist.md`) |
 | M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | Written after M2 merges (spec §6/§7 Auto and widget rows, §9, §13) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
@@ -318,7 +318,7 @@ UI:
 
 Device checks still to do:
 - Deleting a file in the Files app, then restoring it (skipped in the walkthrough).
-- Resume after a reboot (M2's Done-means, with a LibriVox book; never `adb reboot`).
+- ~~Resume after a reboot (M2's Done-means, with a LibriVox book; never `adb reboot`).~~ PASS in M2's walkthrough.
 - With nothing loaded, no media notification or foreground service appears (the hub binds the playback service at launch).
 - The media notification relies on Android 13+'s media-session exemption: `POST_NOTIFICATIONS` is only requested before downloads.
 - The notification and lock screen, Bluetooth and headset buttons, headset autoplay, ReplayGain, volume boost and an external equalizer haven't been tried one by one; nor the queue drag and the chapters, speed, sleep and bookmark sheets, nor the audiobook shelf and book page beyond the walkthrough's resume checks.
@@ -330,3 +330,56 @@ Environment:
 - Development is in `~/Developer/Granger/Granger`. The old copy on `~/Desktop` (perhaps iCloud-synced) is stale: it spawned "X 2" duplicate files in `build/` directories that broke dexing.
 - `gradle.properties` still has the Linux machine's limits (2 workers, 2 GB heap, in-process Kotlin); they could be raised on the Mac.
 - `:core:zim`'s androidTest assets now include `testdata/audio` (about 200 KB). Harmless.
+
+## Carried forward from M2
+
+Built and measured (2026-10-19, on the Mac Studio):
+- **1236 JVM tests pass** (`./gradlew testDebugUnitTest`; 1046 after M1). No new device tests.
+- Downloads ledger schema v3 (an AutoMigration adds `groupId`); one WorkManager chain per book or album.
+
+Neal's calls (2026-10-19):
+- A slug title (an archive.org item whose title is its identifier) reads from the longest common prefix of its file names: Holst becomes "The Planets Op. 32, H. 125".
+- Archive.org spoken word before the waiver shows no results, only a note pointing to LibriVox that also offers Show everything.
+- LibriVox at 64 kbps, no setting. Cancel keeps the chapters already in; Remove deletes everything. LibriVox shelves: Recently added plus six genres.
+- **No storage cap**: the only limit is the phone's free space.
+- During the walkthrough: with the waiver accepted, archive.org audio **searches** cover all archive.org audio, community uploads included (less podcasts, LibriVox and the other kind's curated collections); shelves and filtered searches stay on the curated collections. Album pages number tracks plainly, with "Disc n" headers.
+
+Fixed after the walkthrough: the book page's Play button now pauses the book that's playing (`08a26f1`); album numbering (`5e559ff`); waiver searches match titles and creators and cover all audio (`b4fc1f9`); the book and album pages say "Waiting for Wi-Fi", "Waiting for a connection" or "Retrying" (`4b664bb`, `aa2050e`); removing a download empties the player if it's loaded (`3e8dd71`).
+
+Still open:
+
+Sources and search:
+- The Holst item needs the waiver: archive.org dates it by its 2025 upload, and the rolling filter reads `year`, so it stays hidden after 2027 too.
+- Book (texts) search still matches every field and ranks by downloads, the pattern that broke audio search; consider title and creator matching for texts.
+- Audio search ranks matches by downloads, not the website's relevance, so its order can differ from archive.org's.
+- Archive.org track titles keep the album prefix ("The Planets Op. 32, H. 125_ I. Mars…"); trimming it was offered, not chosen.
+- Archive.org items have no versions, so no updates (as for books).
+- LibriVox descriptions keep HTML entities (`&amp;`); tags are stripped, entities aren't decoded.
+- An empty text query isn't treated specially; `choose()` doesn't check that the fetched item's id is the identifier asked for.
+- A Browse row always offers Get (search results don't say whether an item has files); an item without them gets a notice on tap.
+- The same archive.org identifier got under both Music and Audiobooks shares one group id (rare, unhandled). An item got from Music shows as downloaded in Audiobooks' Browse too (status per group); Open on one still downloading in the other view can land on an empty page until its first file is filed.
+
+Downloads:
+- `WorkManagerScheduler` has no test (no work-testing dependency). Cancelling or removing one file of a group by its item id doesn't stop a running chain member (its record is gone, so the worker ends GONE and deletes the file).
+- A queued file that hasn't started (no bytes, no error) when the network drops shows "Waiting" only if nothing in the group has come in yet; between files the page reads "Downloading".
+- Android 15's 6-hour `dataSync` limit on very long books.
+- SD cards (the Pixel 6 has no slot); two volumes whose `StorageVolume` is null both key as `primary` (the first wins). The same item on two volumes: the first root wins.
+- A crash can leave a stray `.granger-item.json.*.tmp` (a dotfile, harmless). Embedded chapters in downloaded files are ignored (one file, one chapter).
+- Readiness's row text says "the file", not "a file".
+- The left-over cap plumbing (`capBytes`, `OverCap`) is still there, unused (Plan 10 removes it).
+
+Library and player:
+- `MediaLibrary.forget()` deletes a book's file tracks only when the caller passes their ids (`MediaDownloader.remove` does).
+- `PlayerHub.unload` empties the whole music queue when any removed track is in it, rather than taking those tracks out.
+- An empty Music collection shows "No music yet" on every tab except Playlists. The LibriVox screen and sheet have no Compose tests beyond navigation.
+- M1's `unknown|<folder>` album-key collision corner case is left as is.
+
+Show in other apps:
+- Files by Google lists Granger under "Other storage" but opens the app instead of browsing it; in debug builds it opens the Spike launcher. Browsing works in Android's own file browser and any file picker.
+- Tapping a file there sends it to Drive's quick viewer, which adds `?cpn=…` to the link and so loses its read grant ("problem with file"). Open with another app works. Drive's behaviour, not Granger's.
+- The provider root has no search. The canonical-path check isn't pinned by its own test (the shelf-prefix check catches symlinks).
+
+Device checks still to do:
+- Deleting a phone file in the Files app, then restoring it (skipped again).
+- The Play policy check for LibriVox and archive.org audio (Plan 11).
+

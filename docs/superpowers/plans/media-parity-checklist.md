@@ -56,7 +56,7 @@ Paths are short: `core/player/…` is `core/player/src/main/kotlin/app/granger/c
 
 | Voice feature | | Where, or why not |
 | --- | --- | --- |
-| Resume positions (anti-goal) | ✅ | `core/player/PositionSaver.kt`: every 5 s while playing, and at every pause, seek, chapter change, track change and stop (`savesEveryFiveSecondsWhilePlaying`, `everyEventWritesImmediately`, `audiobookPositionSavedOnPauseAndEveryFiveSeconds`). `restoresAudiobookAfterServiceRecreated`, `noSaveBeforeTheRestoreSeekCompletes`, `unresolvedSavedTrackIsNotOverwrittenUntilTheUserPicksAPlace`. Walkthrough: force-stop PASS. Worst case about 6 s lost; after a reboot not checked (M2's Done-means) |
+| Resume positions (anti-goal) | ✅ | `core/player/PositionSaver.kt`: every 5 s while playing, and at every pause, seek, chapter change, track change and stop (`savesEveryFiveSecondsWhilePlaying`, `everyEventWritesImmediately`, `audiobookPositionSavedOnPauseAndEveryFiveSeconds`). `restoresAudiobookAfterServiceRecreated`, `noSaveBeforeTheRestoreSeekCompletes`, `unresolvedSavedTrackIsNotOverwrittenUntilTheUserPicksAPlace`. Walkthrough: force-stop PASS. Worst case about 6 s lost. After a reboot: PASS in M2 (LibriVox *The Time Machine*, Neal rebooted by hand) |
 | Chapter navigation | ✅ | Embedded chapters: m4b `chpl` and the QuickTime chapter track, MP3 ID3 `CHAP` (`core/media/ChapterReader.kt`, `ChapterReaderTest`); folder books one chapter per file (`folderOfFilesIsOneBookInNaturalOrder`). `core/player/ChapterMap.kt`, `app/player/ChaptersSheet.kt`, `bookmarkAndChapterSeekUseTheChapterMap`, `chapterStepsStopAtEitherEnd`. LibriVox sections come with M2 |
 | Sleep timer with fade-out, including end of chapter | ✅ | `core/player/SleepTimer.kt` (linear fade over the last 10 s), `app/player/SleepTimerSheet.kt` (5–60 min, end of chapter). `sleepTimerFadesOverLastTenSeconds`, `endOfChapterExpiresAtChapterEnd`, `sleepTimerPausesAtEndOfChapter` |
 | Bookmarks with optional notes, listed per book | ✅ | `app/player/AudioBookmarksSheet.kt`; the book page lists them, edits notes, deletes (`app/audiobooks/AudiobookScreen.kt`); `chapterAndBookmarkTapsStartThereInOneCall` |
@@ -69,7 +69,7 @@ Paths are short: `core/player/…` is `core/player/src/main/kotlin/app/granger/c
 | Formats: M4B, MP3, M4A, OGG, OGA, OPUS | ✅ | Tags: `readsEveryFormat`, `opusKeepsR128Gain` (`TagLibDeviceTest`); `.m4b` is always an audiobook (`m4bAndAudiobooksFolderAndSystemFlagAreAudiobooks`); picked folders accept all six by extension (`FolderSource.AUDIO_EXTENSIONS`); playback is Media3's. On the device only an MP3 folder book was played |
 | Builder's call: marking finished | ✅ | "Mark as finished" / "Mark as unfinished" on the book page: `markFinishedThenResumeStartsFromBeginning`, `markUnfinishedRewindsOnlyABookLeftAtItsEnd`, `finishedBookResumesFromTheStartAndIsUnfinishedOncePlaying`, `restoredFinishedBookStaysFinishedUntilPlayed` |
 | Builder's call: shelf by last played, with progress | ✅ | `shelfOrdersByLastPlayedThenUnplayedThenFinished`, `progressIsChapterOffsetPlusPositionOverDuration` (`AudiobooksViewModelTest`) |
-| Builder's call: cover replacement | ❌ | No way to pick a book's cover; a book with no embedded art and no folder image shows the placeholder (the walkthrough's LibriVox zip). Later; M2's LibriVox downloads bring their own covers |
+| Builder's call: cover replacement | ❌ | No way to pick a book's cover; a book with no embedded art and no folder image shows the placeholder (the walkthrough's LibriVox zip). Still no picker after M2, but LibriVox and archive.org downloads bring their own `cover.jpg` (checked on the Pixel 6) |
 
 ## Pixel 6 walkthrough (2026-10-19)
 
@@ -93,3 +93,29 @@ Also checked: the narrow rail's recents, bookmarks and History open the full rai
 Data finding: Holst's *The Planets* (LSO, 1922–24, from archive.org) splits in two: six files have no tags and group by folder, and "Venus" has its own title as its album. That's the files, not Granger. Neal's call: an archive.org album stays one album by its origin item, whatever the tags say (M2). A folder-merge rule for phone files was declined; it would merge unrelated singles in folders like `Download/`.
 
 The rest of §13 is for later plans: LibriVox download and reboot resume, archive.org album and the rolling filter, "Show in other apps" (M2); Search, Research and the eval check, Android Auto, widget (M3).
+
+## M2 Pixel 6 walkthrough (2026-10-19)
+
+The spec §13 items M2 covers. Installed over the existing app with `./gradlew :app:installDebug` (no uninstall, no app-data wipe); the library and downloads databases were backed up first (library v7: 10 packs, 142 tracks; downloads v2: 364 records). Neal listened for everything audible.
+
+| §13 item | Result |
+| --- | --- |
+| Install over the existing app keeps the library; the ledger 2→3 migration | PASS: `firstInstallTime` unchanged; library, packs, books and phone media intact; Readiness verified a Classics book. The 91 phone media files were unchanged (md5) |
+| Archive sources grouped by media type | PASS |
+| LibriVox: search, Get, the book appears with its cover after the first file, plays while the rest download, "Downloading: n of 13" | PASS. All 13 files and `cover.jpg` in `audiobooks/librivox/817/`. The book page's Play button showed Resume while the book played and reloaded it from its last save (a small jump back): fixed in `08a26f1` (Pause while this book plays) |
+| Resume after force-stop | PASS: Neal saw 0:45 in chapter 3; reopened at 0:50, then the 3 s auto-rewind to 0:47 on play |
+| Resume after a reboot (M1's open check) | PASS: Neal rebooted by hand; same place, auto-rewind on play |
+| Archive.org music, filtered: the note, years 1860–1925, the Holst item hidden before the waiver | PASS |
+| Holst after the waiver: one album, "The Planets Op. 32, H. 125", 7 tracks in order, cover; plays in order; withdrawing the waiver keeps it | PASS. Neal removed it afterwards (a noisy recording); Remove worked |
+| Archive.org spoken word: before the waiver only the note with LibriVox and Show everything; after it, Get a short item, filed under Audiobooks → Archive.org, plays | PASS |
+| Waiver searches find what the website finds | FAIL, then PASS (`b4fc1f9`): "John Williams" listed *AMSCO AP World History* first and "wicked audiobook" found only Plato. Free text matched every field, ranked by downloads, and searches covered only the curated collections. Audio searches now match titles and creators and, with the waiver, all archive.org audio less podcasts, LibriVox and the other kind's collections (Neal's call). Shelves stay curated |
+| Network lost mid-file: "Waiting for Wi-Fi", the `.part` holds its size, resumes | Download PASS: the `.part` froze at 21,004,252 bytes and resumed; the finished file's md5 matched archive.org's. Page FAIL, then PASS: it said "Downloading" throughout (`4b664bb`, then `aa2050e`: the stopped file speaks for its group); now "Waiting for Wi-Fi" |
+| Process killed mid-file resumes after backoff | PASS. `am kill` was refused (the download runs as a foreground service), so the process was killed with `run-as app.granger kill -9`; a new process resumed the `.part` about 40 s later |
+| Cancel keeps chapters ("Partly downloaded"), Get the rest; Remove deletes the folder; bookmark and position kept | PASS (Get again after Remove skipped by Neal; covered by `removeThenGetAgainRestoresPositionAndPlacement`). A book removed while playing stayed in the player, unplayable: fixed in `3e8dd71` (`PlayerHub.unload`), retest PASS |
+| Show in other apps: off, on, read-only, off again | PASS in Android's file browser (DocumentsUI): Music and Audiobooks, folders by title, files and `cover.jpg`, no delete or rename; a file opened in Files by Google plays. Two notes: Files by Google's "Other storage" opens the app rather than browsing it (it picked the debug-only Spike launcher); tapping a file sends it to Drive's quick viewer, which adds `?cpn=…` to the link and so loses its read grant ("problem with file"): Drive's, not Granger's |
+| Audio permission revoked: phone items missing, downloads still play | PASS |
+| Readiness lists each downloaded item, Verify passes; Settings storage includes media | PASS |
+| Deleting a phone file in the Files app, then restoring it | SKIPPED again by Neal (covered by tests, as in M1) |
+
+Also changed at Neal's request: album pages number tracks plainly, with "Disc n" headers on multi-disc albums, blank for untagged tracks, and a fixed-width number column (`5e559ff`).
+
