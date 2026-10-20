@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.Features
 import app.granger.R
+import app.granger.settings.RailSide
 import app.granger.theme.GrangerColors
 
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
@@ -74,7 +75,10 @@ internal val ExpandedRailWidth = 200.dp
 /** The tools at the top; Research also needs a phone that can run it ([showResearch]). */
 private fun topTools(showResearch: Boolean) =
     RailTool.entries.filter { it.shown && it != RailTool.SETTINGS && (it != RailTool.RESEARCH || showResearch) }
-private val RailInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
+
+/** The rail pads for the top and bottom and for its own edge (a landscape cutout on that side). */
+@Composable
+private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInsetsSides.Vertical + side.insetSide)
 
 @Composable
 private fun RailTool.painter(): Painter = when (this) {
@@ -109,6 +113,7 @@ internal fun NarrowRail(
     onExpand: () -> Unit,
     onTool: (RailTool) -> Unit,
     onCloseTab: (Long) -> Unit,
+    side: RailSide = RailSide.LEFT,
 ) {
     Column(
         Modifier
@@ -116,7 +121,7 @@ internal fun NarrowRail(
             .background(GrangerColors.Surface)
             // Tapping the rail's background opens the expanded rail.
             .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onExpand)
-            .windowInsetsPadding(RailInsets)
+            .windowInsetsPadding(railInsets(side))
             // After the insets: in landscape the cutout widens the rail rather than squeezing its 56 dp.
             .width(NarrowRailWidth)
             .padding(vertical = 8.dp),
@@ -173,6 +178,7 @@ internal fun ExpandedRail(
     onRecentSearch: (String) -> Unit,
     onRecentChat: (Long) -> Unit,
     onRecentPlay: (RecentItem.Play) -> Unit,
+    side: RailSide = RailSide.LEFT,
 ) {
     Column(
         Modifier
@@ -180,7 +186,7 @@ internal fun ExpandedRail(
             .background(GrangerColors.SurfaceVariant)
             // Swallow taps on the panel so they don't reach the scrim beneath it.
             .clickable(remember { MutableInteractionSource() }, indication = null) {}
-            .windowInsetsPadding(RailInsets)
+            .windowInsetsPadding(railInsets(side))
             .width(ExpandedRailWidth)
             .padding(vertical = 8.dp),
     ) {

@@ -26,6 +26,8 @@ import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimItem
 import app.granger.core.zim.ZimMetadata
 import app.granger.ebook.BookOpener
+import app.granger.settings.AppearancePrefs
+import app.granger.settings.RailSide
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.publication.Metadata
@@ -39,6 +41,7 @@ import org.readium.r2.shared.util.resource.Resource
 import org.readium.r2.shared.util.mediatype.MediaType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -277,4 +280,11 @@ class FakeBookOpener(var publication: Publication? = testPublication()) : BookOp
         opened += file
         return publication
     }
+}
+
+/** [AppearancePrefs] in memory. */
+class FakeAppearancePrefs(side: RailSide = RailSide.LEFT) : AppearancePrefs {
+    private val state = MutableStateFlow(side)
+    override val railSide: StateFlow<RailSide> = state
+    override fun setRailSide(side: RailSide) { state.value = side }
 }

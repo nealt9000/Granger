@@ -1,5 +1,6 @@
 package app.granger.settings
 
+import app.granger.FakeAppearancePrefs
 import app.granger.FakeDownloads
 import app.granger.FakePrefs
 import app.granger.FakeVolumes
@@ -22,6 +23,7 @@ class SettingsViewModelTest {
     private val volumes = FakeVolumes(listOf(volume("/internal", "Internal storage"), volume("/sd", "SD card")))
     private val prefs = FakePrefs()
     private val archivePrefs = FakeArchivePrefs()
+    private val appearancePrefs = FakeAppearancePrefs()
 
     private class FakeArchivePrefs : ArchivePrefs {
         private val state = MutableStateFlow(false)
@@ -31,7 +33,7 @@ class SettingsViewModelTest {
     }
 
     private fun TestScope.viewModel(): SettingsViewModel {
-        val vm = SettingsViewModel(downloads, volumes, prefs, archivePrefs, appScope = this, io = main.dispatcher)
+        val vm = SettingsViewModel(downloads, volumes, prefs, archivePrefs, appearancePrefs, appScope = this, io = main.dispatcher)
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         return vm
@@ -61,5 +63,13 @@ class SettingsViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.archiveEverything).isFalse()
         assertThat(archivePrefs.waiverAccepted.value).isFalse()
+    }
+
+    @Test fun railSideIsShownAndChangedAtOnce() = runTest(main.dispatcher) {
+        val vm = viewModel()
+        assertThat(vm.railSide.value).isEqualTo(RailSide.LEFT)
+        vm.setRailSide(RailSide.RIGHT)
+        assertThat(vm.railSide.value).isEqualTo(RailSide.RIGHT)
+        assertThat(appearancePrefs.railSide.value).isEqualTo(RailSide.RIGHT)
     }
 }
