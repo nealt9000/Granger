@@ -1,10 +1,11 @@
 {
+  "kiwix": {"languages": ["eng"], "families": "tools/catalog-gen/kiwix_families.json"},
   "packs": [
     {"name": "wikipedia_en_medicine", "flavour": "nopic", "category": "Medical", "license": "CC BY-SA 4.0",
      "title": "WikiMed (no pictures)"},
     {"name": "wikipedia_en_medicine", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 4.0",
      "title": "WikiMed"},
-    {"name": "wikem_en_all", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 3.0",
+    {"name": "wikem_en_all", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 4.0",
      "title": "WikEM emergency medicine"},
     {"name": "wikipedia_en_top", "flavour": "nopic", "category": "Reference", "license": "CC BY-SA 4.0",
      "title": "Wikipedia: best articles (no pictures)"},
@@ -35,7 +36,8 @@
     {"name": "wikipedia_en_knots", "flavour": "maxi", "category": "How-to", "license": "CC BY-SA 4.0",
      "title": "Knots (Wikipedia)"},
     {"name": "ifixit_en_all", "category": "How-to", "license": "CC BY-NC-SA 3.0", "nonCommercial": true,
-     "title": "iFixit repair guides"}
+     "title": "iFixit repair guides",
+     "description": "Step-by-step repair guides for phones, computers, appliances, cars and more, written by iFixit's community"}
   ],
   "books": [
     {"bookRelease": "tools/pack-builder/releases/granger_classics_books.json", "license": "Public domain (US)"}

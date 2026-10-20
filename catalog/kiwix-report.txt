@@ -1,0 +1,194 @@
+Kiwix packs in eng: 1311; listed 909, curated 18
+
+Listed, by category and family:
+  Games & Hobbies / alexandria.dk: 1
+  Games & Hobbies / balatrowiki: 1
+  Games & Hobbies / bindingofisaacrebirth: 1
+  Games & Hobbies / bulbagarden: 2
+  Games & Hobbies / capoeirawiki.org: 1
+  Games & Hobbies / dandwiki: 2
+  Games & Hobbies / dwarffortresswiki.org: 1
+  Games & Hobbies / evageeks: 1
+  Games & Hobbies / footballdatabase.com: 1
+  Games & Hobbies / frackinuniverse: 1
+  Games & Hobbies / fretmap.app: 1
+  Games & Hobbies / granbluefantasy: 2
+  Games & Hobbies / ibanezwiki: 1
+  Games & Hobbies / minecraft.wiki: 1
+  Games & Hobbies / music.dalitio.de: 1
+  Games & Hobbies / neos-wiki: 2
+  Games & Hobbies / pg3d: 1
+  Games & Hobbies / pokemonwiki: 1
+  Games & Hobbies / rimworldwiki: 1
+  Games & Hobbies / riskofrain2: 1
+  Games & Hobbies / sh1.org: 1
+  Games & Hobbies / stardewvalleywiki: 1
+  Games & Hobbies / survivors: 1
+  Games & Hobbies / terraria.wiki.gg: 1
+  Games & Hobbies / the: 1
+  Games & Hobbies / tonedear.com: 1
+  Games & Hobbies / uesp.net: 1
+  Games & Hobbies / whitewolfwiki: 1
+  Games & Hobbies / wiki: 1
+  Games & Hobbies / wiki.leagueoflegends.com: 1
+  Games & Hobbies / zdoom: 2
+  How-to / 100r.co: 1
+  How-to / appropedia: 1
+  How-to / armypubs: 1
+  How-to / based.cooking: 1
+  How-to / cd3wdproject.org: 1
+  How-to / energypedia: 2
+  How-to / foss.cooking: 1
+  How-to / gardenology: 1
+  How-to / gramps-project.org: 1
+  How-to / grimgrains: 1
+  How-to / privacydefence.org: 1
+  How-to / publicdomainrecipes.com: 1
+  How-to / rabbitwaves.ca: 1
+  How-to / ready.gov: 1
+  How-to / restarters: 1
+  How-to / solar.lowtechmagazine.com: 1
+  How-to / survivorlibrary.com: 1
+  How-to / trueprepper.com: 1
+  How-to / usda-2015: 1
+  How-to / wikiciv: 1
+  How-to / zimgit-food-preparation: 1
+  How-to / zimgit-knots: 1
+  How-to / zimgit-post-disaster: 1
+  How-to / zimgit-water: 1
+  Literature & Drama / allthetropes: 1
+  Literature & Drama / booksdash: 1
+  Literature & Drama / celticscores.com: 1
+  Literature & Drama / chopin.lib.uchicago.edu: 1
+  Literature & Drama / coppermind.net: 1
+  Literature & Drama / folgerpedia.folger.edu: 1
+  Literature & Drama / gutenberg: 39
+  Literature & Drama / kiwix.westeros: 1
+  Literature & Drama / mutopiaproject.org: 1
+  Literature & Drama / prunelle: 3
+  Literature & Drama / smbc-comics.com: 1
+  Literature & Drama / tomlehrersongs.com: 1
+  Literature & Drama / wikiquote: 2
+  Literature & Drama / wikisource: 1
+  Literature & Drama / xkcd.com: 1
+  Maps / maps: 193
+  Maps / openstreetmap-wiki: 2
+  Medical / irp.fas.org: 1
+  Medical / librepathology: 1
+  Medical / mdwiki: 2
+  Medical / medlineplus.gov: 1
+  Medical / nhs.uk: 1
+  Medical / wikem: 1
+  Medical / wikivet.net: 1
+  Medical / wwwnc.cdc.gov: 1
+  Medical / zimgit-medicine: 1
+  Other / anonymousplanet.org: 1
+  Other / explainxkcd: 1
+  Other / incognitocat.me: 1
+  Other / ncert-audiobooks: 1
+  Other / oer4schools: 1
+  Other / permacomputing.net: 1
+  Other / phzh: 2
+  Other / ragajunglism.org: 1
+  Other / scoutwiki.org: 1
+  Programming / alpinelinux: 1
+  Programming / archlinux: 1
+  Programming / cheatography.com: 1
+  Programming / cloudflare.com: 1
+  Programming / dart.dev: 1
+  Programming / devdocs: 243
+  Programming / devhints.io: 1
+  Programming / docs.python.org: 1
+  Programming / freecodecamp: 5
+  Programming / gentoo: 1
+  Programming / getbootstrap.com: 1
+  Programming / gobyexample.com: 1
+  Programming / htdp.org: 1
+  Programming / installgentoo: 2
+  Programming / lesscss.org: 1
+  Programming / lua.org: 1
+  Programming / mediawiki: 1
+  Programming / noted.lol: 1
+  Programming / opendatastructures.org: 1
+  Programming / openwrt.org: 1
+  Programming / openzim: 2
+  Programming / peps.python: 1
+  Programming / php.net: 1
+  Programming / postmarketos: 1
+  Programming / techbase.kde.org: 1
+  Programming / termux: 1
+  Programming / thalesdoc: 1
+  Programming / unrealircd: 1
+  Programming / wikitech: 1
+  Programming / www.mankier.com: 1
+  Q&A / stack_exchange: 181
+  Reference / bitcoin: 2
+  Reference / bogleheads: 1
+  Reference / citizendium.org: 1
+  Reference / consumerrights.wiki: 1
+  Reference / cyborganthropology.com: 1
+  Reference / edutechwiki: 1
+  Reference / finiki: 1
+  Reference / lgbtqia.wiki: 1
+  Reference / milneopentextbooks.org: 1
+  Reference / psiram: 1
+  Reference / rationalwiki: 2
+  Reference / theworldfactbook: 1
+  Reference / vikidia: 2
+  Reference / wikibooks: 2
+  Reference / wikipedia: 54
+  Reference / wikiversity: 2
+  Reference / wiktionary: 1
+  Reference / womenshistory.si.edu: 1
+  Regional / citizensinformation.ie: 1
+  Regional / ghana-bece-past-questions: 1
+  Regional / metakgp: 2
+  Regional / wikivoyage: 3
+  Religion & Philosophy / gotquestions.org: 1
+  Religion & Philosophy / internet-encyclopedia-philosophy: 1
+  Science & Math / apod.nasa.gov: 1
+  Science & Math / artofproblemsolving: 2
+  Science & Math / encyclopedie-environnement.org: 1
+  Science & Math / ethanweed: 1
+  Science & Math / jeffe.cs.illinois.edu: 1
+  Science & Math / learningstatistics: 1
+  Science & Math / learningstatisticswithr.com: 1
+  Science & Math / libretexts.org: 13
+  Science & Math / lost-stats.github.io: 1
+  Science & Math / mspeekenbrink: 1
+  Science & Math / ncase.me: 1
+  Science & Math / openmusictheory.com: 1
+  Science & Math / phet: 2
+  Science & Math / planetmath.org: 1
+  Science & Math / proofwiki: 1
+  Science & Math / proofwiki.org: 1
+  Science & Math / stacks.math.columbia.edu: 1
+  Science & Math / wikispecies: 2
+
+Held back (video): 384
+  biologycourses: 1
+  canadian-prepper: 4
+  coreyms: 8
+  crashcourse: 1
+  diksha-std5ssc: 1
+  genomicseducation: 1
+  khanacademy: 1
+  kris-occhipinti: 1
+  lrnselfreliance: 1
+  project-fuel: 1
+  quickguidesformedicine: 1
+  s2underground: 1
+  science-in-the-bath: 1
+  skin-of-color-society: 1
+  studio.blender.org: 1
+  ted: 357
+  urban-prepper: 1
+  voa: 1
+
+No license found: 0
+
+No family-table row: 0
+
+Unsafe ids: 0
+
+Failed to pin: 0

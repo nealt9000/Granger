@@ -117,6 +117,68 @@ class SourceViewModelTest {
         assertThat(ids(CatalogScope.MODELS)).containsExactly("e2b")
     }
 
+    private fun kiwix(id: String, category: String = "Q&A", featured: Boolean = false, zimName: String = "n-$id") =
+        packEntry(id, category = category, urls = listOf("https://download.kiwix.org/zim/$id.zim"), featured = featured, zimName = zimName)
+
+    @Test fun kiwixListsRecommendedFirstAndNeverTwice() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(listOf(kiwix("se1"), kiwix("med", "Medical", featured = true), kiwix("top", "Reference", featured = true))),
+        )
+        val sections = viewModel(CatalogScope.KIWIX).ui.value.sections
+        assertThat(sections.map { it.title }).containsExactly("Recommended", "Q&A").inOrder()
+        assertThat(sections[0].rows.map { it.id }).containsExactly("med", "top").inOrder()
+        assertThat(sections.flatMap { it.rows }.map { it.id }).containsNoDuplicates()
+    }
+
+    @Test fun featuredPacksStayInTheirCategoryOffTheKiwixScreen() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(packEntry("med", featured = true))))
+        assertThat(viewModel().ui.value.sections.map { it.title }).containsExactly("Medical")
+    }
+
+    @Test fun kiwixCategoriesFoldUntilShowAll() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf((1..20).map { kiwix("se$it") } + kiwix("m1", "Maps")))
+        val vm = viewModel(CatalogScope.KIWIX)
+        val qa = vm.ui.value.sections.single { it.title == "Q&A" }
+        assertThat(qa.rows).hasSize(SourceViewModel.FOLDED_ROWS)
+        assertThat(qa.total).isEqualTo(20)
+        assertThat(qa.foldable).isTrue()
+        assertThat(vm.ui.value.sections.single { it.title == "Maps" }.foldable).isFalse()
+
+        vm.toggleSection("Q&A")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single { it.title == "Q&A" }.rows).hasSize(20)
+
+        vm.toggleSection("Q&A")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single { it.title == "Q&A" }.rows).hasSize(SourceViewModel.FOLDED_ROWS)
+    }
+
+    @Test fun aKiwixSearchUnfoldsAndMatchesTheZimName() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf((1..20).map { kiwix("se$it", zimName = "stackoverflow.com_en_all_$it") } + kiwix("other")),
+        )
+        val vm = viewModel(CatalogScope.KIWIX)
+        vm.setQuery("stackoverflow")
+        testScheduler.advanceUntilIdle()
+        val sections = vm.ui.value.sections
+        assertThat(sections.single().rows).hasSize(20)
+        assertThat(sections.single().foldable).isFalse()
+    }
+
+    @Test fun grangerSectionsNeverFold() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf((1..20).map { packEntry("p$it") }))
+        val section = viewModel().ui.value.sections.single()
+        assertThat(section.rows).hasSize(20)
+        assertThat(section.foldable).isFalse()
+    }
+
+    @Test fun categoriesUseTheFamilyTableOrder() = runTest(main.dispatcher) {
+        val categories = listOf("Other", "Maps", "Q&A", "Science & Math", "Zebra", "How-to", "Medical")
+        catalog.mutable.value = CatalogState(catalog = catalogOf(categories.mapIndexed { i, c -> packEntry("p$i", category = c) }))
+        assertThat(viewModel().ui.value.sections.map { it.title })
+            .containsExactly("Medical", "Science & Math", "How-to", "Q&A", "Maps", "Other", "Zebra").inOrder()
+    }
+
     @Test fun presetsOnlyOnGranger() = runTest(main.dispatcher) {
         assertThat(viewModel(CatalogScope.GRANGER).ui.value.presets).hasSize(1)
         assertThat(viewModel(CatalogScope.KIWIX).ui.value.presets).isEmpty()
