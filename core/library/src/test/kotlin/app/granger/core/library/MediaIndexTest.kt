@@ -1,9 +1,11 @@
 package app.granger.core.library
 
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -174,5 +176,37 @@ class MediaIndexTest {
         assertThat(book.partTitles).containsExactly("Mowgli's Brothers", "Kaa's Hunting").inOrder()
         // The note is searchable, at the lowest weight.
         assertThat(index.works(listOf("orchestra"), limit = 5).map { it.id }).containsExactly("album:$key")
+    }
+    /** A library flow that fails never leaves a caller waiting for the first snapshot. */
+    @Test fun failedLibraryFlowLeavesAnEmptyIndex() = runTest {
+        val failing = object : MediaLibrary by media {
+            override val tracks: Flow<List<Track>> = flow { throw IllegalStateException("database closed") }
+        }
+        val index = MediaIndex(failing, backgroundScope, UnconfinedTestDispatcher(testScheduler))
+        assertThat(index.search("holst")).isEqualTo(MediaResults())
+        assertThat(index.works(listOf("holst"), limit = 3)).isEmpty()
+        assertThat(index.work("album:x")).isNull()
+    }
+
+    /** Both titles hold both words (equal field scores); only one holds them as a phrase, punctuation aside. */
+    @Test fun titlePhraseBonusIgnoresPunctuation() = runTest {
+        media.trackList.value = listOf(
+            musicTrack("a", album = "Planets by Holst", albumArtist = "X"),
+            musicTrack("b", album = "The Holst, Planets", albumArtist = "Y"),
+        )
+        // Without the bonus the tie goes by title, "Planets by Holst" first.
+        assertThat(index().search("holst: planets").albums.map { it.title }).containsExactly("The Holst, Planets", "Planets by Holst").inOrder()
+    }
+
+    /** Ties go by title whatever the phone's language: in Turkish, "I" lower-cases to a dotless ı that sorts after "j". */
+    @Test fun tiesSortByTitleInAnyLocale() = runTest {
+        val default = Locale.getDefault()
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"))
+        try {
+            media.trackList.value = listOf(musicTrack("j", title = "Ja Song"), musicTrack("i", title = "Iz Song"))
+            assertThat(index().search("song").songs.map { it.title }).containsExactly("Iz Song", "Ja Song").inOrder()
+        } finally {
+            Locale.setDefault(default)
+        }
     }
 }

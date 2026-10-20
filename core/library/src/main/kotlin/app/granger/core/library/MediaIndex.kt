@@ -1,16 +1,20 @@
 package app.granger.core.library
 
+import java.util.Locale
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** An album artist found by [MediaIndex.search]: [albumCount] of their present albums, and one of their covers. */
@@ -47,15 +51,33 @@ data class MediaWork(
  * Matching: text is folded and split into words ([MediaText]). Every query word must equal a word of the item, except
  * the last, which may be a prefix of one ("the plan" finds *The Planets*). Score: per query word, the best-weighted
  * field it matched (title 3; album, artist, album artist, composer, author, narrator 2; track or chapter titles and
- * genres 1; description 0.5), plus 2 when the whole folded query appears in the folded title. Ties by title, then id.
+ * genres 1; description 0.5), plus 2 when the query's words, in order, appear among the title's words (punctuation aside). Ties by title, then id.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineDispatcher = Dispatchers.Default) {
+    /** The last snapshot built; a failed build or a failed library flow falls back to it (or to an empty one). */
+    @Volatile private var last: Snapshot? = null
+
+    /** Never left null by a failure: callers of [current] never hang. */
     private val snapshot: StateFlow<Snapshot?> =
         combine(media.tracks, media.audiobooks, media.allChapters, media.albumNotes) { tracks, books, chapters, notes ->
             Inputs(tracks, books, chapters, notes)
         }
-            .mapLatest { build(it) }
+            .mapLatest { inputs ->
+                try {
+                    build(inputs)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    warn(e)
+                    last ?: EMPTY
+                }
+            }
+            .onEach { last = it }
+            .catch { e ->
+                warn(e)
+                emit(last ?: EMPTY)
+            }
             .flowOn(compute)
             .stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -64,7 +86,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
     suspend fun search(query: String, artists: Int = 3, albums: Int = 5, songs: Int = 8, audiobooks: Int = 5): MediaResults {
         val words = MediaText.words(query)
         if (words.isEmpty()) return MediaResults()
-        val phrase = collapse(MediaText.fold(query))
+        val phrase = words.joinToString(" ")
         val s = current()
         return MediaResults(
             artists = rank(s.artists, words, prefixLast = true, phrase, artists),
@@ -79,7 +101,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
         val folded = words.flatMap(MediaText::words)
         if (folded.isEmpty() || limit <= 0) return emptyList()
         val s = current()
-        val phrase = collapse(folded.joinToString(" "))
+        val phrase = folded.joinToString(" ")
         return rank(s.works, folded, prefixLast = false, phrase, limit)
     }
 
@@ -94,8 +116,8 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
     }
 
     private class Doc<T>(val id: String, val title: String, val fields: List<Field>, val value: T) {
-        val foldedTitle = collapse(MediaText.fold(title))
-        val sortTitle = title.lowercase()
+        val titleWords = MediaText.words(title).joinToString(" ")
+        val sortTitle = title.lowercase(Locale.ROOT)
     }
 
     private class Snapshot(
@@ -124,7 +146,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
             if (best == 0.0) return null
             total += best
         }
-        if (phrase.isNotEmpty() && phrase in doc.foldedTitle) total += PHRASE
+        if (phrase.isNotEmpty() && phrase in doc.titleWords) total += PHRASE
         return total
     }
 
@@ -207,9 +229,11 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
         const val PART = 1.0
         const val ABOUT = 0.5
         const val PHRASE = 2.0
-        val SPACES = Regex("\\s+")
+        val EMPTY = Snapshot(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyMap())
 
-        fun collapse(s: String) = s.replace(SPACES, " ").trim()
+        fun warn(e: Throwable) {
+            runCatching { android.util.Log.w("Granger", "Media index build failed", e) }
+        }
         fun field(weight: Double, text: String) = Field(MediaText.words(text).toSet(), weight)
         fun field(weight: Double, texts: List<String>) = Field(texts.flatMapTo(HashSet()) { MediaText.words(it) }, weight)
     }
