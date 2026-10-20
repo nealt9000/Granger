@@ -80,6 +80,7 @@ import app.granger.readiness.ReadinessScreen
 import app.granger.readiness.ReadinessViewModel
 import app.granger.search.SearchScreen
 import app.granger.search.MediaSearch
+import app.granger.search.searchForGroups
 import app.granger.search.SearchViewModel
 import android.content.Context
 import app.granger.media.PlayResumer
@@ -645,7 +646,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         SearchViewModel(
                             container.search, container.sessions, query,
-                            media = if (Features.PLAYER) MediaSearch { container.mediaIndex.search(it) } else MediaSearch { MediaResults() },
+                            media = if (Features.PLAYER) MediaSearch { container.mediaIndex.searchForGroups(it) } else MediaSearch { MediaResults() },
                         )
                     },
                     onOpenTab = ::showTab,

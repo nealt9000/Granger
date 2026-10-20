@@ -29,11 +29,13 @@ class ZimLibrarySearch(
     private val library: Library,
     private val bookIndex: BookIndex? = null,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val titlesPerPack: Int = 8,
-    private val fullTextLimit: Int = 30,
+    private val titlesPerPack: Int = TITLE_LIMIT,
+    private val fullTextLimit: Int = FULL_TEXT_LIMIT,
+    private val titleLimit: Int = TITLE_LIMIT,
 ) : LibrarySearch {
+    // Pack by pack, in library order; Search shows the first few and keeps the rest behind Show all.
     override suspend fun titles(query: String): List<SearchHit> =
-        across(query) { it.suggest(query, titlesPerPack) }.map { it.second }
+        across(query) { it.suggest(query, titlesPerPack) }.take(titleLimit).map { it.second }
 
     override suspend fun fullText(query: String): List<SearchHit> =
         across(query) { if (it.hasFulltextIndex) it.search(query, fullTextLimit) else emptyList() }
@@ -58,5 +60,11 @@ class ZimLibrarySearch(
                     .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, hit.title, hit.snippet) }
             }
         }
+    }
+
+    companion object {
+        /** The most titles returned, over every pack (and from any one pack). */
+        const val TITLE_LIMIT = 50
+        const val FULL_TEXT_LIMIT = 30
     }
 }

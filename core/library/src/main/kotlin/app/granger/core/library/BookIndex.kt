@@ -61,7 +61,7 @@ class BookIndex(
         }
     }
 
-    suspend fun search(query: String, limit: Int = 30, perBook: Int = 3): List<BookHit> {
+    suspend fun search(query: String, limit: Int = LIMIT, perBook: Int = 3): List<BookHit> {
         // Quotes would end the phrase early; a typed trailing `*` is dropped since the last word gets one anyway.
         val words = query.split(WHITESPACE).map { it.replace("\"", "").trimEnd('*') }
             .filter { word -> word.any { it.isLetterOrDigit() } }
@@ -244,8 +244,10 @@ class BookIndex(
         }
     }
 
-    private companion object {
-        val WHITESPACE = Regex("\\s+")
+    companion object {
+        /** The most hits [search] returns by default. */
+        const val LIMIT = 30
+        private val WHITESPACE = Regex("\\s+")
     }
 }
 

@@ -59,6 +59,12 @@ class ZimLibrarySearchTest {
         assertThat(hits.first { it.path == "Aspirin" }.packId).isEqualTo("u-med")
     }
 
+    @Test fun titlesStopAtTheLimitOverEveryPack() = test {
+        val capped = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 2, titleLimit = 2)
+        // Pack order holds, so the cap is taken from the end.
+        assertThat(capped.titles("as")).hasSize(2)
+    }
+
     @Test fun fullTextIsMergedByScoreAndLimited() = test {
         val hits = search.fullText("anything")
         assertThat(hits.map { it.path }).containsExactly("Fever", "Hamlet", "Aspirin").inOrder()

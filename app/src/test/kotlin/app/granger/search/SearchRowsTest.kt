@@ -21,4 +21,10 @@ class SearchRowsTest {
         assertThat(SearchRows.audiobook(book)).isEqualTo("Rudyard Kipling")
         assertThat(SearchRows.audiobook(book.copy(narrator = "Kara Shallenberg"))).isEqualTo("Rudyard Kipling · read by Kara Shallenberg")
     }
+
+    @Test fun showAllSaysHowManyAndOwnsUpToACap() {
+        assertThat(SearchRows.showAll(SearchGroup.TITLES, 12, capped = false)).isEqualTo("Show all 12 titles")
+        assertThat(SearchRows.showAll(SearchGroup.SONGS, 25, capped = true)).isEqualTo("Show the first 25 songs")
+        assertThat(SearchRows.showFewer(SearchGroup.FULL_TEXT)).isEqualTo("Show fewer article matches")
+    }
 }
