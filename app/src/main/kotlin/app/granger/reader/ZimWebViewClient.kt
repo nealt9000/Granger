@@ -15,7 +15,7 @@ import java.nio.charset.Charset
 /**
  * Serves every request from the ZIM (the Kiwix approach) and blocks everything else, so the reader
  * never touches the network. The pseudo-pack [APP_PACK] is answered from the app's `assets/reader/` instead, and
- * HTML pages get [MainPageFixes]. After each page loads it runs [ReaderPageScript]. Callbacks run on the main thread.
+ * HTML pages get [MainPageFixes] and [DevDocsFixes]. After each page loads it runs [ReaderPageScript]. Callbacks run on the main thread.
  */
 class ZimWebViewClient(
     private val resolver: ZimResolver,
@@ -52,7 +52,7 @@ class ZimWebViewClient(
     private fun patched(bytes: ByteArray, encoding: String?): ByteArray {
         val charset = encoding?.let { runCatching { Charset.forName(it) }.getOrNull() } ?: Charsets.UTF_8
         val html = String(bytes, charset)
-        val fixed = MainPageFixes.patch(html)
+        val fixed = DevDocsFixes.patch(MainPageFixes.patch(html))
         return if (fixed === html) bytes else fixed.toByteArray(charset)
     }
 
