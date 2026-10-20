@@ -52,15 +52,15 @@
 
 ### Task 2: EmbeddingGemma rerank, offline
 
-- [ ] Embed every passage and question in the corpus with the Hugging Face weights of the shipped EmbeddingGemma. Cache the vectors in `runs/<id>/emb.npy`, which is gitignored.
-- [ ] Check the Mac against the phone: embed 10 passages in `ResearchBenchmarkActivity`. Expect a cosine correlation of at least 0.99; if it's lower, say so in the results and use phone vectors for the finalists.
-- [ ] Configs to replay:
+- [x] Embed every passage and question in the corpus with the Hugging Face weights of the shipped EmbeddingGemma. Cache the vectors in `runs/<id>/emb.npy`, which is gitignored.
+- [x] Check the Mac against the phone: embed 10 passages in `ResearchBenchmarkActivity`. Expect a cosine correlation of at least 0.99; if it's lower, say so in the results and use phone vectors for the finalists.
+- [x] Configs to replay:
   - cosine only;
   - hybrid `α·lexical + (1−α)·cosine`, with α swept from 0 to 1 in steps of 0.1;
   - preselect 12 against 24.
 
   For each config, sweep the cosine threshold. Report recall@4 and empty rate.
-- [ ] Latency cost: Plan 8 measured 4.2 s for 12 passages on the GPU. Price each config by its passage count.
+- [x] Latency cost: Plan 8 measured 4.2 s for 12 passages on the GPU. Price each config by its passage count.
 
 ### Task 3: Source-kind weighting, offline
 
