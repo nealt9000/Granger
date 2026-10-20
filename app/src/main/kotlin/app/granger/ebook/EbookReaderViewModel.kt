@@ -48,8 +48,8 @@ data class EbookUi(
     val publication: Publication? = null,
     /** Where the navigator opens. */
     val initial: Locator? = null,
-    /** The top bar and the side rail. Hidden while reading; an error keeps them up so the user can leave. */
-    val chromeVisible: Boolean = false,
+    /** The top bar and the side rail. Up when the reader opens and when its tab is returned to; a middle tap hides them for full-screen reading. An error keeps them up so the user can leave. */
+    val chromeVisible: Boolean = true,
     /** The place on screen now; null until the navigator reports one. */
     val locator: Locator? = null,
     val prefs: ReadingPrefs = ReadingPrefs(),
@@ -413,6 +413,12 @@ class EbookReaderViewModel(
     fun showChrome() {
         _state.update { it.copy(chromeVisible = true) }
     }
+
+    /**
+     * The screen went away (another screen on top, or the tab left), not a rotation: coming back to this tab shows
+     * the chrome again, as opening it does.
+     */
+    fun onScreenLeft() = showChrome()
 
     /** Makes this reader the one the selection menu reaches; called whenever its screen is shown. */
     fun claimSelection() {

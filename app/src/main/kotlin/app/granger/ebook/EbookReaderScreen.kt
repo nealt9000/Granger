@@ -11,12 +11,17 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -39,10 +44,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.reader.ChromeBackOnReturn
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
-import app.granger.shell.LocalTopOverlayInset
-import app.granger.shell.NarrowRailWidth
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.DecorableNavigator
@@ -57,9 +61,10 @@ import org.readium.r2.shared.util.AbsoluteUrl
 private const val EDGE_FRACTION = 0.2
 
 /**
- * The e-book reader, full screen and paginated. Edge taps and swipes turn pages; a tap in the middle shows or
- * hides the chrome: the top bar here and the shell's rail (through [onChromeVisibleChange]), with the system bars
- * hidden alongside. A rising [showChromeRequest] (the shell's edge swipe) shows the chrome.
+ * The e-book reader, paginated. It opens (and comes back) with its chrome up: the top and bottom bars here and the
+ * shell's rail (through [onChromeVisibleChange]), with the page fitted between them. Edge taps and swipes turn pages;
+ * a tap in the middle hides the chrome and the system bars for full-screen reading, and another brings them back.
+ * A rising [showChromeRequest] (the shell's edge swipe) shows the chrome.
  */
 @Composable
 fun EbookReaderScreen(
@@ -91,11 +96,12 @@ fun EbookReaderScreen(
     // Another reader may have taken the menu (or cleared it on its way out) while this one was underneath.
     SideEffect { viewModel.claimSelection() }
 
-    // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts.
+    // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts, so an old swipe isn't replayed.
     val requestAtEntry = remember { showChromeRequest }
     LaunchedEffect(showChromeRequest) { if (isNewChromeRequest(requestAtEntry, showChromeRequest)) viewModel.showChrome() }
     LaunchedEffect(state.chromeVisible) { onChromeVisibleChange(state.chromeVisible) }
     SystemBarsHidden(!state.chromeVisible)
+    ChromeBackOnReturn(viewModel::onScreenLeft)
     // Backgrounded, or the screen left: write the place now rather than after the debounce.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
 
@@ -170,68 +176,66 @@ fun EbookReaderScreen(
     }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        val error = state.error
-        val factory = viewModel.navigatorFactory
-        val bookId = viewModel.bookId
-        when {
-            error != null -> Box(Modifier.fillMaxSize().padding(start = NarrowRailWidth).padding(32.dp), Alignment.Center) {
-                Text(error, textAlign = TextAlign.Center)
-            }
-            state.publication != null && factory != null && bookId != null -> NavigatorHost(
-                bookId = bookId,
-                factory = factory,
-                // The latest place, so a navigator rebuilt after rotation opens where the reader is.
-                initial = state.locator ?: state.initial,
-                prefs = state.prefs.toEpub(),
-                listener = listener,
-                config = config,
-                isCleared = { viewModel.isCleared },
-                onReady = { fragment ->
-                    fragment.addInputListener(
-                        DirectionalNavigationAdapter(
-                            fragment,
-                            minimumHorizontalEdgeSize = 0.0,
-                            horizontalEdgeThresholdPercent = EDGE_FRACTION,
-                            animatedTransition = true,
-                        ),
-                    )
-                    fragment.addInputListener(MiddleTapListener(fragment, viewModel::toggleChrome))
-                    navigator = fragment
-                },
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-        // The shell's rail is drawn over the reader's left edge while the chrome shows.
-        AnimatedVisibility(
-            visible = state.chromeVisible,
-            // Below the mini-player, which the shell draws over the page with the chrome.
-            modifier = Modifier.padding(start = NarrowRailWidth, top = LocalTopOverlayInset.current).align(Alignment.TopCenter),
-            enter = fadeIn() + slideInVertically { -it },
-            exit = fadeOut() + slideOutVertically { -it },
-        ) {
-            EbookTopBar(
-                title = state.title,
-                onBack = onBack,
-                onContents = { viewModel.open(Panel.CONTENTS) },
-                onSearch = { viewModel.open(Panel.SEARCH) },
-            )
-        }
-        if (state.error == null) {
-            AnimatedVisibility(
-                visible = state.chromeVisible,
-                modifier = Modifier.padding(start = NarrowRailWidth).align(Alignment.BottomCenter),
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it },
-            ) {
-                EbookBottomBar(
-                    locator = state.locator ?: state.initial,
-                    positionsCount = state.positionsCount,
-                    bookmarked = state.isBookmarkedHere,
-                    onSeek = viewModel::goToProgression,
+        // With the chrome up the page is laid out between the top and bottom bars, like any other screen (the shell
+        // puts the rail and the mini-player beside and above it); hidden, it fills the screen. Fades only, so the
+        // page is laid out again once per tap rather than on every frame of a slide.
+        Column(Modifier.fillMaxSize()) {
+            AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
+                EbookTopBar(
+                    title = state.title,
+                    onBack = onBack,
                     onContents = { viewModel.open(Panel.CONTENTS) },
-                    onTextSettings = { viewModel.open(Panel.SETTINGS) },
-                    onBookmark = viewModel::toggleBookmark,
+                    onSearch = { viewModel.open(Panel.SEARCH) },
                 )
+            }
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                val error = state.error
+                val factory = viewModel.navigatorFactory
+                val bookId = viewModel.bookId
+                when {
+                    error != null -> Box(
+                        Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)).padding(32.dp),
+                        Alignment.Center,
+                    ) {
+                        Text(error, textAlign = TextAlign.Center)
+                    }
+                    state.publication != null && factory != null && bookId != null -> NavigatorHost(
+                        bookId = bookId,
+                        factory = factory,
+                        // The latest place, so a navigator rebuilt after rotation opens where the reader is.
+                        initial = state.locator ?: state.initial,
+                        prefs = state.prefs.toEpub(),
+                        listener = listener,
+                        config = config,
+                        isCleared = { viewModel.isCleared },
+                        onReady = { fragment ->
+                            fragment.addInputListener(
+                                DirectionalNavigationAdapter(
+                                    fragment,
+                                    minimumHorizontalEdgeSize = 0.0,
+                                    horizontalEdgeThresholdPercent = EDGE_FRACTION,
+                                    animatedTransition = true,
+                                ),
+                            )
+                            fragment.addInputListener(MiddleTapListener(fragment, viewModel::toggleChrome))
+                            navigator = fragment
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+            if (state.error == null) {
+                AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
+                    EbookBottomBar(
+                        locator = state.locator ?: state.initial,
+                        positionsCount = state.positionsCount,
+                        bookmarked = state.isBookmarkedHere,
+                        onSeek = viewModel::goToProgression,
+                        onContents = { viewModel.open(Panel.CONTENTS) },
+                        onTextSettings = { viewModel.open(Panel.SETTINGS) },
+                        onBookmark = viewModel::toggleBookmark,
+                    )
+                }
             }
         }
         when (state.panel) {
@@ -251,7 +255,7 @@ fun EbookReaderScreen(
                 )
             }
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(start = NarrowRailWidth))
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 }
 
