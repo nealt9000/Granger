@@ -18,6 +18,9 @@ import app.granger.music.song
 import app.granger.player.FakePlayerHub
 import app.granger.player.audiobook
 import app.granger.player.chapter
+import app.granger.player.musicUi
+import app.granger.core.player.PlayerMode
+import app.granger.core.player.SavedModes
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.test.TestScope
@@ -247,6 +250,81 @@ class AutoBrowseTreeTest {
         assertThat(hits.all { it.mediaMetadata.isPlayable == true }).isTrue()
         assertThat(tree().search("kipling").map { it.mediaId }).containsExactly(jungle.id)
         assertThat(tree().search("")).isEmpty()
+    }
+
+    @Test fun addingAppendsToTheQueue() = runTest {
+        val tree = tree()
+        hub.ui.value = musicUi()
+        assertThat(tree.add("album:$planetsKey#${venus.id}")).isTrue()
+        assertThat(tree.add("album:$moonKey")).isTrue()
+        val id = playlists.create("Mix", listOf(money.id, gone.id, mars.id))
+        assertThat(tree.add("playlist:$id#2")).isTrue()
+        assertThat(tree.add("playlist:$id")).isTrue()
+        assertThat(tree.add("artist:Pink Floyd")).isTrue()
+        assertThat(hub.queued).containsExactly(
+            listOf(venus.id), listOf(time.id, money.id), listOf(mars.id), listOf(money.id, mars.id), listOf(time.id, money.id),
+        ).inOrder()
+        assertThat(hub.plays).isEmpty()
+        assertThat(tree.add("playlist:$id#1")).isFalse()               // a MISSING entry
+        assertThat(tree.add("nope")).isFalse()
+        // An audiobook can't be queued: it plays, as a recent does.
+        assertThat(tree.add(wicked.id)).isTrue()
+        assertThat(hub.bookPlays.single()).isEqualTo(wicked.id to null)
+        assertThat(hub.queued).hasSize(5)
+    }
+
+    @Test fun addingWithNoMusicLoadedPlaysInstead() = runTest {
+        val tree = tree()
+        assertThat(tree.add("album:$planetsKey#${venus.id}")).isTrue()
+        assertThat(hub.queued).isEmpty()
+        assertThat(hub.plays.single().startIndex).isEqualTo(1)
+    }
+
+    @Test fun songIdsSplitOnTheLastTrackMarker() = runTest {
+        // An untagged album is keyed by its folder, which may hold "#track:".
+        val odd = song("7", "Odd", album = "", albumArtists = "Somebody", folder = "Music/odd#track:x/", trackNo = 1)
+        val odder = song("8", "Odder", album = "", albumArtists = "Somebody", folder = "Music/odd#track:x/", trackNo = 2)
+        media.trackList.value = media.trackList.value + odd + odder
+        val tree = tree()
+        val album = "album:${odd.albumKey}"
+        assertThat(odd.albumKey).contains("#track:")
+        assertThat(tree.item(album)!!.mediaMetadata.isBrowsable).isTrue()
+        assertThat(tree.ids(album)).containsExactly("$album#${odd.id}", "$album#${odder.id}").inOrder()
+        assertThat(tree.item("$album#${odder.id}")!!.title()).isEqualTo("Odder")
+        assertThat(tree.children("$album#${odder.id}", 0, 10)).isNull()
+        assertThat(tree.play("$album#${odder.id}")).isTrue()
+        assertThat(hub.plays.single().trackIds).containsExactly(odd.id, odder.id).inOrder()
+        assertThat(hub.plays.single().startIndex).isEqualTo(1)
+        assertThat(tree.play(album)).isTrue()
+        assertThat(hub.plays.last().startIndex).isEqualTo(0)
+    }
+
+    @Test fun hugePagesDoNotOverflow() = runTest {
+        val tree = tree()
+        assertThat(tree.ids("audiobooks", page = Int.MAX_VALUE, size = Int.MAX_VALUE)).isEmpty()
+        assertThat(tree.ids("audiobooks", page = 1, size = Int.MAX_VALUE)).isEmpty()
+        assertThat(tree.ids("audiobooks", page = -3, size = 2)).containsExactly(annals.id, jungle.id).inOrder()
+        assertThat(tree.ids("audiobooks", page = 0, size = -1)).hasSize(3)
+    }
+
+    @Test fun voiceTitleMatchIsOnWholeWords() = runTest {
+        val ball = song("9", "Opening", album = "Moneyball", albumArtists = "Mychael Danna", trackNo = 1)
+        media.trackList.value = media.trackList.value + ball
+        val tree = tree()
+        assertThat(tree.play("", "money")).isTrue()
+        assertThat(hub.plays.single().source).isEqualTo(PlaySource("album:$moonKey", "The Dark Side of the Moon"))
+        assertThat(hub.plays.single().trackIds[hub.plays.single().startIndex]).isEqualTo(money.id)
+    }
+
+    @Test fun emptyVoicePlayResumesTheLastPlayer() = runTest {
+        val tree = tree()
+        assertThat(tree.play("", "")).isFalse()                          // nothing ever played
+        playback.upsertRecentPlay(RecentPlay(jungle.id, "The Jungle Book", 200L))
+        assertThat(tree.play("", null)).isTrue()                         // no saved player: the newest recent
+        assertThat(hub.bookPlays.single()).isEqualTo(jungle.id to null)
+        hub.saved.value = SavedModes(null, null, PlayerMode.MUSIC)
+        assertThat(tree.play("", "")).isTrue()
+        assertThat(hub.calls.last()).isEqualTo("activate:MUSIC")
     }
 
     private fun state(id: String, at: Long) = AudiobookState(id, "track:phone:x", 1_000L, 1f, false, 0, false, at)

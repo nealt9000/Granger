@@ -74,6 +74,13 @@ class PlaybackCallbackTest {
             engine.playTracks(songs, 1, shuffle = false, source = PlaySource("album:songs", "Songs"))
             return true
         }
+        val added = mutableListOf<String>()
+        override suspend fun add(id: String): Boolean {
+            added += id
+            if (id != "song:0") return false
+            engine.addToQueue(listOf(songs[0]))
+            return true
+        }
     }
 
     /** Counts the times the player's items were replaced (a load moves to an item of the new playlist). */
@@ -127,6 +134,55 @@ class PlaybackCallbackTest {
         assertThat(runBlocking { rig.playback.musicState() }!!.sourceKey).isEqualTo("album:songs")
     }
 
+    @Test fun addMediaItemsFromAutoAppendsThroughTheTree() {
+        val songs = rig.songs()
+        val engine = rig.engine()
+        val tree = FakeTree(engine, songs)
+        val callback = LibraryCallback(engine, scope, tree)
+        val session = librarySession(engine, callback)
+        engine.playTracks(songs.take(2), 0, shuffle = false, source = PlaySource("songs", "Songs"))
+        rig.idle()
+        run(engine.player).untilState(Player.STATE_READY)
+        val auto = controller(session)
+
+        auto.addMediaItem(MediaItem.Builder().setMediaId("song:0").setUri("https://example.com/not-ours.mp3").build())
+        rig.idle()
+        assertThat(tree.added).containsExactly("song:0")
+        val player = engine.player
+        assertThat((0 until player.mediaItemCount).map { player.getMediaItemAt(it).mediaId })
+            .containsExactly(songs[0], songs[1], songs[0]).inOrder()
+        assertThat(player.getMediaItemAt(2).localConfiguration!!.uri.scheme).isEqualTo("fake")
+
+        // The callback answers with nothing for the session to add itself; an unknown id fails.
+        val direct = callback.onAddMediaItems(session, controller, mutableListOf(MediaItem.Builder().setMediaId("song:0").build()))
+        val unknown = callback.onAddMediaItems(session, controller, mutableListOf(MediaItem.Builder().setMediaId("nope").build()))
+        rig.idle()
+        assertThat(direct.get()).isEmpty()
+        assertThrows(ExecutionException::class.java) { unknown.get() }
+    }
+
+    @Test fun handBackIsDroppedEvenIfThePlaylistChangedMeanwhile() {
+        val songs = rig.songs()
+        val engine = rig.engine()
+        val callback = LibraryCallback(engine, scope, FakeTree(engine, songs))
+        val session = librarySession(engine, callback)
+        val loads = countLoads(engine)
+        val answer = callback.onSetMediaItems(session, controller, mutableListOf(MediaItem.Builder().setMediaId("album:songs").build()), 0, 0L)
+        rig.idle()
+        val handBack = answer.get()
+        assertThat(loads()).isEqualTo(1)
+
+        // Before the session hands the items back, an engine command replaces the playlist.
+        engine.playTracks(songs.take(2), 0, shuffle = false, source = PlaySource("songs", "Songs"))
+        rig.idle()
+        val afterEngine = loads()
+        assertThat(afterEngine).isGreaterThan(1)
+        session.player.setMediaItems(handBack.mediaItems, handBack.startIndex, handBack.startPositionMs)
+        rig.idle()
+        assertThat(loads()).isEqualTo(afterEngine)
+        assertThat(engine.player.mediaItemCount).isEqualTo(2)
+    }
+
     @Test fun unknownSetMediaItemsFails() {
         val engine = rig.engine()
         val tree = FakeTree(engine, rig.songs())
@@ -172,6 +228,9 @@ class PlaybackCallbackTest {
         assertThat(page.get().value!!.map { it.mediaId }).containsExactly("music")
         assertThat(past.get().value!!).isEmpty()
         assertThat(LibraryCallback.pageOf((1..7).toList(), 1, 3)).containsExactly(4, 5, 6).inOrder()
+        assertThat(LibraryCallback.pageOf((1..7).toList(), Int.MAX_VALUE, Int.MAX_VALUE)).isEmpty()
+        assertThat(LibraryCallback.pageOf((1..7).toList(), 1, Int.MAX_VALUE)).isEmpty()
+        assertThat(LibraryCallback.pageOf((1..7).toList(), -2, 3)).containsExactly(1, 2, 3).inOrder()
     }
 
     @Test fun playbackResumptionReturnsTheEngineItems() {

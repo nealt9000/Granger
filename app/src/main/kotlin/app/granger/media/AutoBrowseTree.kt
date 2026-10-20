@@ -19,6 +19,7 @@ import app.granger.core.library.Playlists
 import app.granger.core.library.RecentPlay
 import app.granger.core.library.Track
 import app.granger.core.player.MediaBrowseTree
+import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
 import app.granger.music.MusicCatalog
 import app.granger.music.MusicSources
@@ -27,6 +28,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * What Android Auto browses (spec §6/§7): Recent, Music (Albums, Artists, Playlists) and Audiobooks, over both players.
@@ -35,6 +37,8 @@ import kotlinx.coroutines.withContext
  * `audiobooks`; `album:<albumKey>` (its songs; plays from the first), `album:<albumKey>#<trackId>` (plays the album from
  * that song), `artist:<name>` (its albums; plays its songs), `playlist:<id>` and `playlist:<id>#<ordinal>`, an
  * audiobook's own id (`audiobook:…`, resumes it) and `recent:<recent key>` (resumes it through [PlayResumer]).
+ * A song's id is split on its last "#track:" (an untagged album's key is its folder, which may hold one). [add]
+ * appends to the music queue; an audiobook, a recent play, or anything while no music is loaded plays instead.
  *
  * MISSING items are left out; an empty list shows one "Nothing here yet" row. Items carry no URI: Auto plays by id
  * through [play], which goes through the [hub], so the engine stays the only thing that loads the player. Covers are
@@ -58,7 +62,9 @@ class AutoBrowseTree(
     override suspend fun children(parentId: String, page: Int, pageSize: Int): List<MediaItem>? {
         val all = list(parentId) ?: return null
         if (all.isEmpty()) return if (page <= 0) listOf(nothing()) else emptyList()
-        return if (pageSize < 1) all else all.drop(page.coerceAtLeast(0) * pageSize).take(pageSize)
+        if (pageSize < 1) return all
+        val from = page.coerceAtLeast(0).toLong() * pageSize          // Long: a huge page can't wrap round
+        return if (from >= all.size) emptyList() else all.drop(from.toInt()).take(pageSize)
     }
 
     /** Every child of [parentId] as Auto lists it; null for an unknown (or wholly MISSING) parent. */
@@ -72,7 +78,7 @@ class AutoBrowseTree(
         parentId == ARTISTS -> withContext(compute) { MusicCatalog.artists(present()).map { artistItem(it.name) } }
         parentId == PLAYLISTS -> playlists.all.first().map(::playlistItem)
         parentId == AUDIOBOOKS -> shelf().map(::bookItem)
-        parentId.startsWith(ALBUM) && TRACK !in parentId -> withContext(compute) {
+        parentId.startsWith(ALBUM) -> if (song(parentId) != null) null else withContext(compute) {
             MusicCatalog.albumTracks(parentId.removePrefix(ALBUM), present()).map(::songItem).ifEmpty { null }
         }
         parentId.startsWith(ARTIST) -> withContext(compute) {
@@ -118,21 +124,59 @@ class AutoBrowseTree(
     }
 
     override suspend fun play(id: String, searchQuery: String?): Boolean = when {
-        id.isEmpty() -> playBest(searchQuery.orEmpty())
+        id.isEmpty() -> if (MediaText.words(searchQuery.orEmpty()).isEmpty()) playLast() else playBest(searchQuery.orEmpty())
         id.startsWith(RECENT_ITEM) -> {
             val key = id.removePrefix(RECENT_ITEM)
             val title = playback.observeRecentPlays(RECENT_LIMIT).first().firstOrNull { it.key == key }?.title ?: key
             resumer.resume(key, title)
         }
-        id.startsWith(ALBUM) && TRACK in id -> song(id)?.let { songs.play(it); true } ?: false
-        id.startsWith(ALBUM) -> playAlbum(id.removePrefix(ALBUM))
+        id.startsWith(ALBUM) -> song(id)?.let { songs.play(it); true } ?: playAlbum(id.removePrefix(ALBUM))
         id.startsWith(ARTIST) -> playArtist(id.removePrefix(ARTIST))
         id.startsWith(PLAYLIST) -> playPlaylist(id)
         id.startsWith(AUDIOBOOK) -> playBook(id)
         else -> false
     }
 
+    override suspend fun add(id: String): Boolean {
+        // An audiobook or a recent play can't be queued; nor can anything while no music is loaded: they play.
+        if (id.isEmpty() || id.startsWith(AUDIOBOOK) || id.startsWith(RECENT_ITEM) || hub.ui.value.now !is NowPlaying.Music) {
+            return play(id)
+        }
+        val ids = queueable(id) ?: return false
+        hub.addToQueue(ids)
+        return true
+    }
+
+    /** The playable track ids a song, album, artist, playlist or playlist entry id names, in its order; null if none. */
+    private suspend fun queueable(id: String): List<String>? = when {
+        id.startsWith(ALBUM) -> song(id)?.let { okIds(listOf(it)) } ?: withContext(compute) {
+            okIds(MusicCatalog.albumTracks(id.removePrefix(ALBUM), media.tracks.first()))
+        }
+        id.startsWith(ARTIST) -> withContext(compute) { MusicCatalog.artistPage(id.removePrefix(ARTIST), present()) }?.let { okIds(it.songs) }
+        id.startsWith(PLAYLIST) -> playlistId(id)?.takeIf { pid -> playlists.all.first().any { it.id == pid } }?.let { pid ->
+            val items = playlists.items(pid).first()
+            when (val ordinal = entryOrdinal(id)) {
+                null -> okIds(items.map { it.track })
+                else -> items.firstOrNull { it.ordinal == ordinal }?.let { okIds(listOf(it.track)) }
+            }
+        }
+        else -> null
+    }
+
+    private fun okIds(tracks: List<Track>): List<String>? = MusicCatalog.playable(tracks, tapped = null)?.first
+
     // ---- playing ----
+
+    /**
+     * "Play Granger" (no id, no query): the last active player, else the newest recent play. False only when nothing
+     * was ever played.
+     */
+    private suspend fun playLast(): Boolean {
+        val saved = withTimeoutOrNull(SAVED_WAIT_MS) { hub.saved.first { it.loaded } }
+        saved?.lastMode?.let { hub.activate(it); return true }
+        val newest = playback.observeRecentPlays(RECENT_LIMIT).first().firstOrNull() ?: return false
+        return resumer.resume(newest.key, newest.title)
+    }
 
     /**
      * A voice "play …": an album, else an audiobook, else a song (in its album), else an artist's songs. A hit whose
@@ -143,7 +187,8 @@ class AutoBrowseTree(
         if (words.isEmpty()) return false
         val hits = index.search(query, artists = 1, albums = 1, songs = 1, audiobooks = 1)
         val phrase = words.joinToString(" ")
-        fun titled(title: String) = phrase in MediaText.words(title).joinToString(" ")
+        // Whole words only: "money" is in "Money", not in "Moneyball".
+        fun titled(title: String) = " $phrase " in " ${MediaText.words(title).joinToString(" ")} "
         val album = hits.albums.firstOrNull()
         val book = hits.audiobooks.firstOrNull()
         val song = hits.songs.firstOrNull()
@@ -197,9 +242,13 @@ class AutoBrowseTree(
 
     private fun albums(tracks: List<Track>): List<AlbumSummary> = MediaNames.albums(tracks)
 
-    /** The present track an `album:<key>#<trackId>` id names, if it's in that album. */
+    /**
+     * The present track an `album:<key>#<trackId>` id names, if it's in that album. Split on the last "#track:": an
+     * untagged album's key is its folder, which may hold one. Null for an album's own id.
+     */
     private suspend fun song(id: String): Track? {
-        val at = id.indexOf(TRACK).takeIf { it > ALBUM.length } ?: return null
+        if (!id.startsWith(ALBUM)) return null
+        val at = id.lastIndexOf(TRACK).takeIf { it >= ALBUM.length } ?: return null
         val key = id.substring(ALBUM.length, at)
         return media.track(id.substring(at + ENTRY.length))?.takeIf { it.albumKey == key && it.status != PackStatus.MISSING }
     }
@@ -338,5 +387,6 @@ class AutoBrowseTree(
         /** Where an album song's track id starts in its id: track ids all begin "track:" (and may hold '#'). */
         private const val TRACK = "#track:"
         private const val RECENT_LIMIT = 30
+        private const val SAVED_WAIT_MS = 2_000L
     }
 }

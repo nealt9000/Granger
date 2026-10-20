@@ -147,16 +147,19 @@ class PlaybackService : MediaLibraryService() {
  * Browsing is [browse]'s; with none installed the root is empty. Lists are paged by the tree; search results are paged
  * here (the media index is in memory, so a page is a fresh search).
  *
- * A controller's items ([onSetMediaItems], [onAddMediaItems]) are routed by media id only: the tree starts what the
- * id names through the hub, then [PlayerEngine.loadedItems] answers, in turn after that call, with the engine's own
- * items, index and position. The session hands those to [SessionPlayer.setMediaItems] (or `addMediaItems`), which
- * does nothing for the engine's own items, so the engine loads the player once and a controller's URIs and artwork are
- * never loaded. Nothing plays, or the engine doesn't answer within [PLAY_TIMEOUT_MS]: a failed future.
+ * A controller's items are routed by media id only, so a controller's URIs and artwork are never loaded:
+ * - [onSetMediaItems]: the tree starts what the id names through the hub, then [PlayerEngine.loadedItems] answers, in
+ *   turn after that call, with the engine's own items, index and position. Before answering, the callback tells the
+ *   [SessionPlayer] to expect the session's hand-back of those items, which it drops (even if an engine command has
+ *   replaced the playlist meanwhile), so the engine loads the player once. Nothing plays, or the engine doesn't
+ *   answer within [PLAY_TIMEOUT_MS]: a failed future.
+ * - [onAddMediaItems]: each id is appended through the tree ([MediaBrowseTree.add]; an audiobook plays instead) and
+ *   the answer is no items, so the session adds nothing to the player itself. Nothing added: a failed future.
  *
  * Playback resumption: a play press (headset, Bluetooth, Auto) that finds the player empty, typically after the
  * process died, asks [onPlaybackResumption]; the engine restores the last active player paused from its saved state
  * and answers with its items and position. The session then hands those items back to [SessionPlayer.setMediaItems]
- * (a no-op: they're already loaded) and presses play, which goes through the engine. Nothing saved: a failed future.
+ * (dropped, as an expected hand-back: they're already loaded) and presses play, which goes through the engine. Nothing saved: a failed future.
  */
 internal class LibraryCallback(
     private val engine: PlayerEngine,
@@ -216,11 +219,19 @@ internal class LibraryCallback(
     override fun onSetMediaItems(
         mediaSession: MediaSession, controller: MediaSession.ControllerInfo, mediaItems: MutableList<MediaItem>,
         startIndex: Int, startPositionMs: Long,
-    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = future { playRequested(mediaItems, startIndex) }
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
+        future { playRequested(mediaItems, startIndex).also { expectHandBack(mediaSession) } }
 
     override fun onAddMediaItems(
         mediaSession: MediaSession, controller: MediaSession.ControllerInfo, mediaItems: MutableList<MediaItem>,
-    ): ListenableFuture<MutableList<MediaItem>> = future { playRequested(mediaItems, 0).mediaItems.toMutableList() }
+    ): ListenableFuture<MutableList<MediaItem>> = future {
+        val tree = browse ?: throw UnsupportedOperationException("No browse tree")
+        // Each by id, in order: songs are appended through the hub (an audiobook or recent plays instead).
+        var any = false
+        for (item in mediaItems) if (tree.add(item.mediaId)) any = true
+        if (!any) throw IllegalArgumentException("Nothing to add for ${mediaItems.map { it.mediaId }}")
+        mutableListOf()                       // nothing for the session to add to the player itself
+    }
 
     /** Plays the requested item through the tree and answers with what the engine loaded; throws if nothing played. */
     private suspend fun playRequested(items: List<MediaItem>, startIndex: Int): MediaSession.MediaItemsWithStartPosition {
@@ -234,11 +245,14 @@ internal class LibraryCallback(
     override fun onPlaybackResumption(
         mediaSession: MediaSession, controller: MediaSession.ControllerInfo, isForPlayback: Boolean,
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
-        future { engine.resumption() ?: throw UnsupportedOperationException("Nothing to resume") }
+        future { (engine.resumption() ?: throw UnsupportedOperationException("Nothing to resume")).also { expectHandBack(mediaSession) } }
 
     override fun onPlaybackResumption(
         mediaSession: MediaSession, controller: MediaSession.ControllerInfo,
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = onPlaybackResumption(mediaSession, controller, true)
+
+    /** The session hands the answer's items to its player next; the player drops them (see [SessionPlayer.expectHandBack]). */
+    private fun expectHandBack(session: MediaSession) { (session.player as? SessionPlayer)?.expectHandBack() }
 
     /** [block] on [scope] as a future; an exception fails it, a cancellation cancels it. */
     private fun <T> future(block: suspend () -> T): ListenableFuture<T> {
@@ -261,7 +275,10 @@ internal class LibraryCallback(
 
         /** [page] of [items] at [pageSize] a page; everything for a page size below 1. */
         fun <T> pageOf(items: List<T>, page: Int, pageSize: Int): List<T> =
-            if (pageSize < 1) items else items.drop(page.coerceAtLeast(0) * pageSize).take(pageSize)
+            if (pageSize < 1) items else {
+                val from = page.coerceAtLeast(0).toLong() * pageSize
+                if (from >= items.size) emptyList() else items.drop(from.toInt()).take(pageSize)
+            }
     }
 }
 
@@ -273,8 +290,9 @@ internal class LibraryCallback(
  *   item for ExoPlayer); they step chapters. The change is announced to the listeners the session gave, and anything
  *   ExoPlayer announces reaches them as these commands, not its own.
  * - A seek to another playlist item (Auto's queue) plays it through the engine, as a queue row tap does.
- * - Items handed back that are already the engine's (a resumption's, or a controller's request resolved through
- *   [LibraryCallback]) aren't loaded or added again: the engine is the only thing that loads the player.
+ * - The session's hand-back of [LibraryCallback]'s answers (a resumption's, a controller's request) is dropped
+ *   ([expectHandBack]), and so are items that are already the engine's: the engine is the only thing that loads the
+ *   player.
  */
 internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine) : ForwardingPlayer(player) {
     private val listeners = LinkedHashMap<Player.Listener, Player.Listener>()   // as given → as registered
@@ -377,31 +395,51 @@ internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine
         override fun onMetadata(metadata: Metadata) = l.onMetadata(metadata)
     }
 
-    // The engine's own items handed back (a resumption's): already loaded, so nothing to do.
-    override fun setMediaItems(mediaItems: List<MediaItem>) { if (!isEngines(mediaItems)) super.setMediaItems(mediaItems) }
-    override fun setMediaItems(mediaItems: List<MediaItem>, resetPosition: Boolean) {
-        if (!isEngines(mediaItems)) super.setMediaItems(mediaItems, resetPosition)
-    }
-    override fun setMediaItems(mediaItems: List<MediaItem>, startIndex: Int, startPositionMs: Long) {
-        if (!isEngines(mediaItems)) super.setMediaItems(mediaItems, startIndex, startPositionMs)
-    }
-    override fun setMediaItem(mediaItem: MediaItem) { if (!isEngines(listOf(mediaItem))) super.setMediaItem(mediaItem) }
-    override fun setMediaItem(mediaItem: MediaItem, resetPosition: Boolean) {
-        if (!isEngines(listOf(mediaItem))) super.setMediaItem(mediaItem, resetPosition)
-    }
-    override fun setMediaItem(mediaItem: MediaItem, startPositionMs: Long) {
-        if (!isEngines(listOf(mediaItem))) super.setMediaItem(mediaItem, startPositionMs)
+    /**
+     * One hand-back is coming: [LibraryCallback] has answered a controller's request (or a resumption) with the
+     * engine's items, and the session passes them to [setMediaItems] next. That call is dropped whatever the playlist
+     * is by then (an engine command may have replaced it meanwhile), so it never loads into ExoPlayer. One-shot: used
+     * by the next set, and a newer answer just sets it again. Main thread, as the session's calls are.
+     */
+    fun expectHandBack() { handBackExpected = true }
+    private var handBackExpected = false
+
+    /** A hand-back to drop: the one expected, or the engine's own items, or nothing at all. */
+    private fun dropped(items: List<MediaItem>): Boolean {
+        if (handBackExpected) {
+            handBackExpected = false
+            return true
+        }
+        return items.isEmpty() || isEngines(items)
     }
 
-    // The engine's own items handed back after a controller's add ([LibraryCallback.onAddMediaItems]): already loaded.
-    override fun addMediaItems(mediaItems: List<MediaItem>) { if (!isEngines(mediaItems)) super.addMediaItems(mediaItems) }
+    override fun setMediaItems(mediaItems: List<MediaItem>) { if (!dropped(mediaItems)) super.setMediaItems(mediaItems) }
+    override fun setMediaItems(mediaItems: List<MediaItem>, resetPosition: Boolean) {
+        if (!dropped(mediaItems)) super.setMediaItems(mediaItems, resetPosition)
+    }
+    override fun setMediaItems(mediaItems: List<MediaItem>, startIndex: Int, startPositionMs: Long) {
+        if (!dropped(mediaItems)) super.setMediaItems(mediaItems, startIndex, startPositionMs)
+    }
+    override fun setMediaItem(mediaItem: MediaItem) { if (!dropped(listOf(mediaItem))) super.setMediaItem(mediaItem) }
+    override fun setMediaItem(mediaItem: MediaItem, resetPosition: Boolean) {
+        if (!dropped(listOf(mediaItem))) super.setMediaItem(mediaItem, resetPosition)
+    }
+    override fun setMediaItem(mediaItem: MediaItem, startPositionMs: Long) {
+        if (!dropped(listOf(mediaItem))) super.setMediaItem(mediaItem, startPositionMs)
+    }
+
+    // A controller's add is appended by the engine ([LibraryCallback.onAddMediaItems] answers with no items): the
+    // session's empty add, or the engine's own items, are nothing to do. The hand-back token is for sets only.
+    override fun addMediaItems(mediaItems: List<MediaItem>) { if (!addDropped(mediaItems)) super.addMediaItems(mediaItems) }
     override fun addMediaItems(index: Int, mediaItems: List<MediaItem>) {
-        if (!isEngines(mediaItems)) super.addMediaItems(index, mediaItems)
+        if (!addDropped(mediaItems)) super.addMediaItems(index, mediaItems)
     }
-    override fun addMediaItem(mediaItem: MediaItem) { if (!isEngines(listOf(mediaItem))) super.addMediaItem(mediaItem) }
+    override fun addMediaItem(mediaItem: MediaItem) { if (!addDropped(listOf(mediaItem))) super.addMediaItem(mediaItem) }
     override fun addMediaItem(index: Int, mediaItem: MediaItem) {
-        if (!isEngines(listOf(mediaItem))) super.addMediaItem(index, mediaItem)
+        if (!addDropped(listOf(mediaItem))) super.addMediaItem(index, mediaItem)
     }
+
+    private fun addDropped(items: List<MediaItem>) = items.isEmpty() || isEngines(items)
 
     private fun isEngines(items: List<MediaItem>): Boolean =
         items.isNotEmpty() && items.size == mediaItemCount && items.indices.all { items[it].mediaId == getMediaItemAt(it).mediaId }

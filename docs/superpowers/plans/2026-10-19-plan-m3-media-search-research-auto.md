@@ -536,6 +536,8 @@ git commit -m "Media M3: a read-only artwork provider for the session, Android A
       suspend fun search(query: String): List<MediaItem>
       /** Starts what [id] names through the hub (an empty id with [searchQuery] plays the best hit). False if nothing plays. */
       suspend fun play(id: String, searchQuery: String? = null): Boolean
+      /** Appends what [id] names to the music queue (an audiobook or recent, or anything with no music loaded, plays instead). */
+      suspend fun add(id: String): Boolean   // added in review: Auto's add appends
   }
   class AutoBrowseTree(
       media: MediaLibrary, playlists: Playlists, playback: PlaybackDao, index: MediaIndex,
