@@ -31,10 +31,12 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,6 +57,7 @@ import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
+import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.AbsoluteUrl
 
 /** Taps this far in from either side turn the page; taps between show or hide the chrome. */
@@ -104,6 +107,10 @@ fun EbookReaderScreen(
     ChromeBackOnReturn(viewModel::onScreenLeft)
     // Backgrounded, or the screen left: write the place now rather than after the debounce.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
+
+    // A middle tap resizes the page; Readium keeps only the page number, so go back to the text that was on screen.
+    val spotScope = rememberCoroutineScope()
+    val spotKeeper = remember { SpotKeeper<Locator>(spotScope) { navigator?.go(it, animated = false) } }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(navigator, lifecycle) {
@@ -221,7 +228,9 @@ fun EbookReaderScreen(
                             fragment.addInputListener(MiddleTapListener(fragment, viewModel::toggleChrome))
                             navigator = fragment
                         },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().onSizeChanged { size ->
+                            spotKeeper.onSize(size) { navigator?.currentLocator?.value }
+                        },
                     )
                 }
             }
