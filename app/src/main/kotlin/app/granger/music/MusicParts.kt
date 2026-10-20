@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
@@ -135,7 +137,10 @@ fun SongRow(
             modifier = Modifier
                 .combinedClickable(onClick = { if (playable) onPlay() }, onLongClick = { menu = true })
                 .alpha(if (playable) 1f else 0.4f),
-            leadingContent = leading?.let { { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
+            // A fixed, right-aligned column, so titles line up whether the number is "9", "10" or blank.
+            leadingContent = leading?.let {
+                { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.width(28.dp)) }
+            },
             headlineContent = { Text(trackTitle(track), maxLines = 1, overflow = TextOverflow.Ellipsis) },
             supportingContent = {
                 val parts = listOfNotNull(trackArtist(track), if (showAlbum) trackAlbum(track) else null)

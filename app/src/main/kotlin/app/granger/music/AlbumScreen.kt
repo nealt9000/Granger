@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -58,7 +58,6 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav) {
         if (loaded == null) return@Scaffold
         val album = loaded.album
         val source = MusicSources.album(album)
-        val multiDisc = loaded.tracks.mapNotNull { it.disc }.distinct().size > 1
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             item {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -90,9 +89,16 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav) {
                     onShuffle = { vm.play(loaded.tracks, null, source, shuffle = true) },
                 )
             }
-            itemsIndexed(loaded.tracks, key = { _, t -> t.id }) { i, track ->
-                val number = track.trackNo?.let { n -> if (multiDisc) "${track.disc ?: 1}.$n" else "$n" } ?: "–"
-                SongRow(track, vm, dialogs, nav, onPlay = { vm.play(loaded.tracks, i, source) }, leading = number, showAlbum = false)
+            items(AlbumRows.of(loaded.tracks), key = { row -> if (row is AlbumRow.Song) row.track.id else "disc:${(row as AlbumRow.Disc).number}" }) { row ->
+                when (row) {
+                    is AlbumRow.Disc -> Text(
+                        "Disc ${row.number}", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                    )
+                    is AlbumRow.Song -> SongRow(
+                        row.track, vm, dialogs, nav, onPlay = { vm.play(loaded.tracks, row.index, source) }, leading = row.number, showAlbum = false,
+                    )
+                }
             }
         }
     }
