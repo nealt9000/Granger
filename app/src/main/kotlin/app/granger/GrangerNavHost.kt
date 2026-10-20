@@ -257,6 +257,12 @@ fun NavController.togglePlayer() {
     }
 }
 
+/** Shows the full-screen player: nothing when it's on top, brought back up when further down, else opened. */
+fun NavController.showPlayer() {
+    if (currentBackStackEntry?.destination?.hasRoute<PlayerRoute>() == true) return
+    if (!popBackStack<PlayerRoute>(inclusive = false)) navigate(PlayerRoute) { launchSingleTop = true }
+}
+
 /**
  * The player's shelf link: Music ([MusicRoute] for All music) or Audiobooks ([AudiobookShelfRoute] for all of them).
  * The player is closed first, so Back from the shelf returns to the screen the player was opened from, as closing the
@@ -323,7 +329,7 @@ private class CurrentTab : ViewModel() {
 }
 
 @Composable
-fun GrangerNavHost(container: AppContainer, start: StartScreen) {
+fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0) {
     val nav = rememberNavController()
     val shell = rememberShellState()
     // True only for the first resume navigation; read when that navigation's transitions are chosen.
@@ -373,6 +379,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             }
         }
     }
+
+    // The home-screen widget's body: each request (a new count) shows the Player, over whatever the launch opened.
+    LaunchedEffect(openPlayerRequests) { if (openPlayerRequests > 0 && Features.PLAYER) nav.showPlayer() }
 
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
     val scope = rememberCoroutineScope()

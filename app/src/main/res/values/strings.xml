@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The home-screen widget (PlayerWidget). -->
+    <string name="widget_name">Granger player</string>
+    <string name="widget_description">Shows and controls what\'s playing</string>
+    <string name="widget_nothing_playing">Nothing playing</string>
+    <string name="widget_open_granger">Open Granger</string>
+</resources>

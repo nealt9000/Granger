@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.readium.streamer)
     implementation(libs.readium.navigator)
     implementation(libs.androidx.fragment.compose)
+    implementation(libs.androidx.glance.appwidget)   // the home-screen player widget
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.kotlinx.coroutines.android)
 
@@ -80,6 +81,7 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.glance.appwidget.testing)
     // Puts the empty activity Compose tests host their content in into the debug manifest Robolectric reads.
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

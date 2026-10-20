@@ -84,6 +84,10 @@ import app.granger.ebook.ReadiumBookOpener
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
+import app.granger.widget.PlayerWidget
+import app.granger.widget.WidgetModel
+import app.granger.widget.WidgetUpdater
+import androidx.glance.appwidget.updateAll
 import app.granger.research.ModelsAdapter
 import app.granger.research.installedModelsOf
 import java.util.concurrent.atomic.AtomicBoolean
@@ -93,6 +97,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -119,6 +124,11 @@ open class GrangerApp : Application(), DownloadsHost {
     protected open fun startMedia() {
         container.playerHub
         container.phoneMediaScans.start()
+        // The home-screen widget follows the player: re-rendered on changes, never on a clock.
+        WidgetUpdater(container.playerHub, container.appScope) { model ->
+            container.widgetModel.value = model
+            PlayerWidget().updateAll(this)
+        }
         // Granger's own downloads: no permission needed. Quiet, on the app scope: a failure never crashes the start.
         container.appScope.launch { container.mediaDownloader.rescanQuietly() }
     }
@@ -242,6 +252,9 @@ class AppContainer(context: Context) {
             browse = { autoBrowse },
         )
     }
+
+    /** What the home-screen widget shows; null until [WidgetUpdater] has published once. */
+    val widgetModel = MutableStateFlow<WidgetModel?>(null)
 
     /** Plays a song in its album, from that song (Search, Android Auto). */
     val songs: SongPlayer by lazy { SongPlayer(media, playerHub) }

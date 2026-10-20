@@ -1,5 +1,7 @@
 package app.granger
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -7,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
@@ -34,6 +37,9 @@ import kotlinx.coroutines.withContext
 class MainActivity : FragmentActivity() {
     private lateinit var container: AppContainer
 
+    /** Counts requests to show the Player (the home-screen widget's body); each new one opens it. */
+    private val openPlayer = mutableIntStateOf(0)
+
     /** Null while the launch decision reads Room; the screen stays blank (background colour) meanwhile. */
     private val start = mutableStateOf<StartScreen?>(null)
 
@@ -54,6 +60,8 @@ class MainActivity : FragmentActivity() {
             // Model roles come from the catalog; load the cached one (no network) so Research knows its models.
             container.appScope.launch { container.catalog.load() }
         }
+        // Not on a re-creation: the intent that started this activity was already handled then.
+        if (savedInstanceState == null && intent.opensPlayer()) openPlayer.intValue++
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -74,7 +82,7 @@ class MainActivity : FragmentActivity() {
                 if (decided == null) {
                     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
                 } else {
-                    GrangerNavHost(container, decided)
+                    GrangerNavHost(container, decided, openPlayerRequests = openPlayer.intValue)
                 }
             }
         }
@@ -89,6 +97,12 @@ class MainActivity : FragmentActivity() {
             container.library.packs.first().any { it.id == lastTab.packId && isPackResumable(it.status, it.filePath) }
         }
         return LaunchDecider.decide(LaunchFacts(clean, booted, firstRun, lastTab, packOk))
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.opensPlayer()) openPlayer.intValue++
     }
 
     override fun onStart() {
@@ -115,6 +129,18 @@ class MainActivity : FragmentActivity() {
         // Backgrounded, swiped away or reclaimed later: all normal; only a crash in the foreground skips this.
         container.sessionMarker.markCleanExit()
         super.onStop()
+    }
+
+    companion object {
+        /** Boolean extra: show the full-screen Player once the app is up. */
+        const val EXTRA_OPEN_PLAYER = "app.granger.extra.OPEN_PLAYER"
+
+        /** Opens Granger at the Player: brings an existing task forward rather than stacking a second activity. */
+        fun openPlayerIntent(context: Context): Intent = Intent(context, MainActivity::class.java)
+            .putExtra(EXTRA_OPEN_PLAYER, true)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+        private fun Intent?.opensPlayer(): Boolean = Features.PLAYER && this?.getBooleanExtra(EXTRA_OPEN_PLAYER, false) == true
     }
 }
 

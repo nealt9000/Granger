@@ -38,6 +38,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- The home-screen widget, "Granger player". -->
+        <receiver
+            android:name=".widget.PlayerWidgetReceiver"
+            android:label="@string/widget_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/player_widget_info" />
+        </receiver>
         <!-- "Show in other apps": downloaded media, read-only. Off until the Settings switch enables it. -->
         <provider
             android:name=".media.MediaDocumentsProvider"
