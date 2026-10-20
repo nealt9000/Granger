@@ -288,3 +288,145 @@ def test_collection_token_expands_to_book_ids_in_presets(tmp_path, monkeypatch):
     catalog = cg.build(curated, fake_fetch(ROUTES), head=lambda url: 10 if "hamlet" in url else 11)
     starter = next(p for p in catalog["presets"] if p["id"] == "starter")
     assert starter["items"] == ["gc-hamlet", "gc-macbeth"]
+
+
+def feed_entry(name, flavour="", language="eng", category="", updated="2026-10-01", title=None):
+    return f"""
+  <entry>
+    <id>urn:uuid:{name}-{flavour}-{updated}</id>
+    <title>{title or name}</title>
+    <updated>{updated}T00:00:00Z</updated>
+    <summary>About {name}</summary>
+    <language>{language}</language>
+    <name>{name}</name>
+    <flavour>{flavour}</flavour>
+    <category>{category}</category>
+    <tags>_ftindex:yes</tags>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim"
+          href="https://lb.download.kiwix.org/zim/x/{name}_{flavour}_{updated}.zim.meta4" length="1000" />
+  </entry>"""
+
+
+def feed(*entries):
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">' + "".join(entries) + "\n</feed>"
+
+
+def meta4_for(url):
+    name = url.rsplit("/", 1)[1].removesuffix(".meta4")
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<metalink xmlns="urn:ietf:params:xml:ns:metalink"><file name="{name}"><size>1000</size>
+<hash type="sha-256">{"ab" * 32}</hash>
+<url priority="1">https://ftpmirror.your.org/pub/kiwix/zim/x/{name}</url></file></metalink>"""
+
+
+FAMILIES = [
+    {"family": "wikipedia", "match": "^wikipedia_", "category": "Reference", "license": "CC BY-SA 4.0"},
+    {"family": "stack_exchange", "match": {"kiwixCategory": "stack_exchange"}, "category": "Q&A",
+     "license": "CC BY-SA 4.0"},
+    {"family": "libretexts", "match": "^libretexts\\.org_", "category": "Science & Math", "license": "CC BY-NC-SA 4.0",
+     "nonCommercial": True},
+    {"family": "ted", "match": "^ted_", "category": "Other", "license": "CC BY-NC-ND 4.0", "hold": "video"},
+    {"family": "devdocs", "match": "^devdocs_", "category": "Programming", "license": None},
+]
+
+
+def feed_fetch(xml, broken=()):
+    def fetch(url):
+        if url.startswith(cg.OPDS_ENTRIES + "?count=-1"):
+            return xml.encode()
+        if url.endswith(".meta4"):
+            if any(b in url for b in broken):
+                raise OSError("connection reset")
+            return meta4_for(url).encode()
+        raise AssertionError(f"unexpected fetch {url}")
+    return fetch
+
+
+def kiwix(xml, curated_keys=frozenset(), broken=()):
+    return cg.kiwix_entries({"languages": ["eng"]}, FAMILIES, cg.kiwix_feed(feed_fetch(xml, broken)), set(curated_keys),
+                            feed_fetch(xml, broken), workers=2, sleep=lambda s: None)
+
+
+def test_kiwix_keeps_licensed_english_families():
+    xml = feed(feed_entry("wikipedia_en_physics", "maxi"),
+               feed_entry("wikipedia_fr_physique", "maxi", language="fra"),
+               feed_entry("wikipedia_mul_x", "maxi", language="fra,eng"),
+               feed_entry("tezos.stackexchange.com_en_all", category="stack_exchange"),
+               feed_entry("libretexts.org_en_math"),
+               feed_entry("ted_en_science"),
+               feed_entry("devdocs_en_python"),
+               feed_entry("xkcd.com_en_all"))
+    packs, report = kiwix(xml)
+    by_id = {p["id"]: p for p in packs}
+    assert set(by_id) == {"wikipedia_en_physics_maxi", "wikipedia_mul_x_maxi", "tezos.stackexchange.com_en_all",
+                          "libretexts.org_en_math"}
+    assert by_id["tezos.stackexchange.com_en_all"]["category"] == "Q&A"
+    assert by_id["tezos.stackexchange.com_en_all"]["family"] == "stack_exchange"
+    assert by_id["libretexts.org_en_math"]["nonCommercial"] is True
+    assert "nonCommercial" not in by_id["wikipedia_en_physics_maxi"]
+    assert all(p["featured"] is False for p in packs)
+    text = "\n".join(report)
+    assert "Held back (video): 1\n  ted: 1" in text
+    assert "No license found: 1\n  devdocs: 1" in text
+    assert "No family-table row: 1\n  xkcd.com: 1" in text
+
+
+def test_kiwix_takes_the_newest_snapshot_and_sorts():
+    xml = feed(feed_entry("wikipedia_en_b", updated="2026-09-01", title="Beta"),
+               feed_entry("wikipedia_en_b", updated="2026-10-01", title="Beta"),
+               feed_entry("wikipedia_en_a", title="alpha"),
+               feed_entry("serverfault.com_en_all", category="stack_exchange", title="Server Fault"))
+    packs, _ = kiwix(xml)
+    assert [p["id"] for p in packs] == ["serverfault.com_en_all", "wikipedia_en_a", "wikipedia_en_b"]
+    assert packs[2]["snapshotDate"] == "2026-10-01"
+
+
+def test_kiwix_skips_curated_packs():
+    xml = feed(feed_entry("wikipedia_en_top", "nopic"), feed_entry("wikipedia_en_top", "maxi"))
+    packs, _ = kiwix(xml, curated_keys={("wikipedia_en_top", "nopic")})
+    assert [p["id"] for p in packs] == ["wikipedia_en_top_maxi"]
+
+
+def test_kiwix_reports_a_pack_that_wont_pin():
+    xml = feed(feed_entry("wikipedia_en_a"), feed_entry("wikipedia_en_b"))
+    packs, report = kiwix(xml, broken=("wikipedia_en_b",))
+    assert [p["id"] for p in packs] == ["wikipedia_en_a"]
+    assert "Failed to pin: 1" in "\n".join(report)
+
+
+def test_kiwix_skips_unsafe_ids():
+    packs, report = kiwix(feed(feed_entry("wikipedia_en_a b")))
+    assert packs == []
+    assert "Unsafe ids: 1" in "\n".join(report)
+
+
+def test_build_with_kiwix_features_the_curated_rows(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": FAMILIES}))
+    xml = feed(feed_entry("wikipedia_en_top", "nopic"), feed_entry("wikipedia_en_physics", "maxi"),
+               feed_entry("ifixit_en_all"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"},
+               "packs": [{"name": "wikipedia_en_top", "flavour": "nopic", "category": "Reference",
+                          "license": "CC BY-SA 4.0", "title": "Wikipedia: best articles", "description": "Curated"},
+                         {"name": "ifixit_en_all", "category": "How-to", "license": "CC BY-NC-SA 3.0",
+                          "nonCommercial": True}],
+               "models": [], "presets": []}
+    report = []
+    catalog = cg.build(curated, feed_fetch(xml), report=report, root=tmp_path)
+    packs = catalog["packs"]
+    assert [p["id"] for p in packs] == ["wikipedia_en_top_nopic", "ifixit_en_all", "wikipedia_en_physics_maxi"]
+    top, ifixit, physics = packs
+    assert top["featured"] and top["family"] == "wikipedia"
+    assert top["title"] == "Wikipedia: best articles" and top["description"] == "Curated"
+    # A curated pack needs no family-table row of its own.
+    assert ifixit["featured"] and ifixit["family"] == "" and ifixit["nonCommercial"]
+    assert not physics["featured"] and physics["description"] == "About wikipedia_en_physics"
+    assert report and report[0].startswith("Kiwix packs in eng: 3; listed 1, curated 2")
+
+
+def test_build_with_kiwix_fails_on_a_missing_curated_pack(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": FAMILIES}))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"},
+               "packs": [{"name": "wikipedia_en_gone", "category": "Reference", "license": "CC BY-SA 4.0"}],
+               "models": [], "presets": []}
+    with pytest.raises(SystemExit, match="not in the Kiwix catalog"):
+        cg.build(curated, feed_fetch(feed(feed_entry("wikipedia_en_a"))), root=tmp_path)

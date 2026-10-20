@@ -9,6 +9,10 @@ one snapshot by its sha256 from Kiwix's metalink file. Models are listed in cura
   catalog_gen.py sign   --key ~/.config/granger/catalog-signing.key catalog/catalog.json
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
 
+With a "kiwix" setting in curated.json, every pack in Kiwix's catalog in one of its languages is listed too, when its
+family has a row in the family table (kiwix_families.json) that gives its license and no hold. The curated rows win
+for their own packs and are marked featured. `build` writes what it kept and left out to catalog/kiwix-report.txt.
+
 Packs we build ourselves (tools/pack-builder) are listed with a "release" row in curated.json that names
 their release descriptor; the hosted file's size is checked against it. A "books" row names the descriptor
 of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a catalog entry and the
@@ -18,12 +22,14 @@ The app trusts only catalogs signed by the key whose public half is in catalog/p
 """
 import argparse
 import base64
+import concurrent.futures
 import datetime
 import json
 import os
 import pathlib
 import re
 import sys
+import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -76,6 +82,7 @@ def opds_entries(xml_bytes):
             "flavour": text("flavour"),
             "updated": text("updated"),
             "tags": text("tags").split(";"),
+            "category": text("category"),
             "meta4": link.get("href"),
             "length": int(link.get("length")),
         })
@@ -94,14 +101,26 @@ def metalink(xml_bytes):
     }
 
 
-def pack_entry(curated, fetch=http_get):
+def kiwix_feed(fetch=http_get):
+    """Every entry in Kiwix's catalog, in one request."""
+    return opds_entries(fetch(f"{OPDS_ENTRIES}?count=-1"))
+
+
+def pack_entry(curated, fetch=http_get, feed=None):
+    """A curated Kiwix pack: its newest snapshot, from [feed] when given, else from a query for its name."""
     name, flavour = curated["name"], curated.get("flavour", "")
-    query = urllib.parse.urlencode({"name": name, "count": 50})
-    matches = [e for e in opds_entries(fetch(f"{OPDS_ENTRIES}?{query}"))
-               if e["name"] == name and e["flavour"] == flavour]
+    if feed is None:
+        query = urllib.parse.urlencode({"name": name, "count": 50})
+        feed = opds_entries(fetch(f"{OPDS_ENTRIES}?{query}"))
+    matches = [e for e in feed if e["name"] == name and e["flavour"] == flavour]
     if not matches:
         raise SystemExit(f"{name} ({flavour or 'no flavour'}): not in the Kiwix catalog")
-    entry = max(matches, key=lambda e: e["updated"])
+    return pin(max(matches, key=lambda e: e["updated"]), curated, fetch)
+
+
+def pin(entry, row, fetch=http_get):
+    """[entry] pinned to its snapshot's sha256 and mirrors; title, category and license come from [row]."""
+    name, flavour = entry["name"], entry["flavour"]
     meta4_url = urllib.parse.urljoin(OPDS_ENTRIES, entry["meta4"])
     meta = metalink(fetch(meta4_url))
     # OPDS rounds the length to whole KiB; the metalink size is exact. Only a big gap means a mix-up.
@@ -112,23 +131,101 @@ def pack_entry(curated, fetch=http_get):
               if u.startswith("https://") and urllib.parse.urlparse(u).hostname in STABLE_MIRRORS]
     result = {
         "id": f"{name}_{flavour}" if flavour else name,
-        "title": curated.get("title", entry["title"]),
-        "description": entry["summary"],
-        "category": curated["category"],
+        "title": row.get("title", entry["title"]),
+        "description": row.get("description", entry["summary"]),
+        "category": row["category"],
         "language": entry["language"],
         "sizeBytes": meta["size"],
         "sha256": meta["sha256"],
         "urls": ([canonical] + stable)[:MAX_URLS],
         "snapshotDate": entry["updated"][:10],
-        "license": curated["license"],
+        "license": row["license"],
         "hasFulltextIndex": "_ftindex:yes" in entry["tags"],
         "topics": [],
         "zimUuid": entry["uuid"],
         "zimName": entry["name"],
+        "featured": row.get("featured", False),
+        "family": row.get("family", ""),
     }
-    if curated.get("nonCommercial"):
+    if row.get("nonCommercial"):
         result["nonCommercial"] = True
     return result
+
+
+def family_of(entry, families):
+    """The first family-table row that matches [entry]'s ZIM name (or its Kiwix category), else None."""
+    for row in families:
+        match = row["match"]
+        if isinstance(match, dict):
+            if entry["category"] == match["kiwixCategory"]:
+                return row
+        elif re.match(match, entry["name"]):
+            return row
+    return None
+
+
+def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep):
+    """
+    Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
+    the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
+    """
+    languages = set(config["languages"])
+    newest = {}
+    for e in feed:
+        if languages & set(e["language"].split(",")):
+            key = (e["name"], e["flavour"])
+            if key not in newest or e["updated"] > newest[key]["updated"]:
+                newest[key] = e
+    kept, held, no_row, no_license, unsafe = [], {}, {}, {}, []
+    for key, e in sorted(newest.items()):
+        if key in curated_keys:
+            continue
+        row = family_of(e, families)
+        family = row["family"] if row else e["name"].split("_")[0]
+        if row is None:
+            no_row[family] = no_row.get(family, 0) + 1
+        elif row.get("hold"):
+            held.setdefault(row["hold"], {}).setdefault(family, 0)
+            held[row["hold"]][family] += 1
+        elif not row.get("license"):
+            no_license[family] = no_license.get(family, 0) + 1
+        elif not SAFE_NAME.match(f"{e['name']}_{e['flavour']}" if e["flavour"] else e["name"]):
+            unsafe.append(e["name"])
+        else:
+            kept.append((e, row))
+
+    def pin_with_retries(item):
+        e, row = item
+        fields = {"family": row["family"], "category": row["category"], "license": row["license"],
+                  "nonCommercial": row.get("nonCommercial", False)}
+        for attempt in range(tries):
+            try:
+                return pin(e, fields, fetch), None
+            except SystemExit as error:  # a size mix-up won't fix itself
+                return None, f"{e['name']} {e['flavour']}: {error}"
+            except Exception as error:
+                if attempt == tries - 1:
+                    return None, f"{e['name']} {e['flavour']}: {error}"
+                sleep(2 ** attempt)
+
+    with concurrent.futures.ThreadPoolExecutor(workers) as pool:
+        results = list(pool.map(pin_with_retries, kept))
+    packs = sorted((p for p, _ in results if p), key=lambda p: (p["category"], p["title"].lower(), p["id"]))
+    failed = [f for _, f in results if f]
+
+    report = [f"Kiwix packs in {', '.join(sorted(languages))}: {len(newest)}; listed {len(packs)}, "
+              f"curated {len(curated_keys & set(newest))}", ""]
+    by_family = {}
+    for p in packs:
+        by_family[(p["category"], p["family"])] = by_family.get((p["category"], p["family"]), 0) + 1
+    report += ["Listed, by category and family:"] + [f"  {c} / {f}: {n}" for (c, f), n in sorted(by_family.items())]
+    for hold, counts in sorted(held.items()):
+        report += ["", f"Held back ({hold}): {sum(counts.values())}"] + [f"  {f}: {n}" for f, n in sorted(counts.items())]
+    report += ["", f"No license found: {sum(no_license.values())}"] + [f"  {f}: {n}" for f, n in sorted(no_license.items())]
+    report += ["", f"No family-table row: {sum(no_row.values())}"] + [f"  {f}: {n}" for f, n in sorted(no_row.items())]
+    report += ["", f"Unsafe ids: {len(unsafe)}"] + [f"  {n}" for n in unsafe]
+    report += ["", f"Failed to pin: {len(failed)}"] + [f"  {f}" for f in failed]
+    return packs, report
 
 
 def release_entry(curated, head=http_head, root=None):
@@ -159,6 +256,8 @@ def release_entry(curated, head=http_head, root=None):
         "topics": [],
         "zimUuid": descriptor["zimUuid"],
         "zimName": descriptor["zimName"],
+        "featured": False,
+        "family": "",
     }
 
 
@@ -194,9 +293,29 @@ def book_entries(curated, head=http_head, root=None):
     return descriptor["collection"], entries
 
 
-def build(curated, fetch=http_get, now=None, head=http_head):
+def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=None):
+    """The catalog. With a "kiwix" setting, the Kiwix report's lines are appended to [report]."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
-    packs = [release_entry(c, head) if "release" in c else pack_entry(c, fetch) for c in curated["packs"]]
+    kiwix = curated.get("kiwix")
+    if kiwix is None:
+        packs = [release_entry(c, head) if "release" in c else pack_entry(c, fetch) for c in curated["packs"]]
+    else:
+        families = json.loads((pathlib.Path(root or REPO_ROOT) / kiwix["families"]).read_text(encoding="utf-8"))["families"]
+        feed = kiwix_feed(fetch)
+        by_key = {(e["name"], e["flavour"]): e for e in feed}
+        packs = []
+        for c in curated["packs"]:
+            if "release" in c:
+                packs.append(release_entry(c, head))
+                continue
+            sample = by_key.get((c["name"], c.get("flavour", "")))
+            row = family_of(sample, families) if sample else None
+            packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else ""}, fetch, feed))
+        curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
+        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch)
+        packs += bulk
+        if report is not None:
+            report += lines
     models = curated["models"]
     books, collections = [], {}
     for row in curated.get("books", []):
@@ -283,9 +402,14 @@ def main(argv):
     if args.command == "keygen":
         print(keygen(args.out))
     elif args.command == "build":
-        catalog = build(json.loads(pathlib.Path(args.curated).read_text()))
-        pathlib.Path(args.out).write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(f"{args.out}: {len(catalog['packs'])} packs, {len(catalog['models'])} models")
+        report = []
+        catalog = build(json.loads(pathlib.Path(args.curated).read_text()), report=report)
+        out = pathlib.Path(args.out)
+        out.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        if report:
+            (out.parent / "kiwix-report.txt").write_text("\n".join(report) + "\n", encoding="utf-8")
+        print(f"{args.out}: {len(catalog['packs'])} packs, {len(catalog['models'])} models, "
+              f"{out.stat().st_size / 1e6:.2f} MB")
     elif args.command == "sign":
         hex_seed = args.key_hex or pathlib.Path(args.key).expanduser().read_text().strip()
         sign_file(bytes.fromhex(hex_seed), args.file)
