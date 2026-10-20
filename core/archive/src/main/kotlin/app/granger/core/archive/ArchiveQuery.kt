@@ -2,12 +2,24 @@ package app.granger.core.archive
 
 import java.time.LocalDate
 
-/** What an archive.org view lists. [noun] names it in copy; [base] is its search clause. */
-enum class ArchiveKind(val noun: String, val base: String, val datedRecordings: Boolean) {
+/**
+ * What an archive.org view lists. [noun] names it in copy; [base] is its clause: archive.org's curated collections.
+ * [wideBase], for an audio kind, is what a search with the waiver accepted covers: all of archive.org's audio, community
+ * uploads included, less podcasts, LibriVox (its own source) and the other audio kind's curated collections. Shelves
+ * keep [base]: browsing all audio by downloads is mostly sermons and recitations (Pixel 6 walkthrough, 2026-10-19).
+ */
+enum class ArchiveKind(val noun: String, val base: String, val datedRecordings: Boolean, val wideBase: String = base) {
     TEXTS("texts", "mediatype:texts", datedRecordings = false),
     // archive.org dates spoken word by its text, so it has no usable recording date: nothing is searched before the waiver (Decisions).
-    SPOKEN_WORD("audiobooks", "mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio", datedRecordings = false),
-    MUSIC("music", "mediatype:audio AND collection:audio_music", datedRecordings = true),
+    SPOKEN_WORD(
+        "audiobooks", "mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio", datedRecordings = false,
+        wideBase = "mediatype:audio AND NOT collection:podcasts* AND NOT collection:librivoxaudio AND NOT collection:audio_music",
+    ),
+    MUSIC(
+        "music", "mediatype:audio AND collection:audio_music", datedRecordings = true,
+        wideBase = "mediatype:audio AND NOT collection:podcasts* AND NOT collection:librivoxaudio AND NOT collection:audio_bookspoetry" +
+            " AND NOT collection:*audiobooks*",
+    ),
 }
 
 enum class ArchiveShelf(val kind: ArchiveKind, val title: String, val clause: String) {
@@ -42,7 +54,9 @@ object ArchiveQuery {
     /**
      * Texts keep Plan 7's date-only filter. An audio kind is filtered by the rolling recording range for [today]; a
      * filtered audio kind without [ArchiveKind.datedRecordings] (spoken word) has nothing it may show, so it throws,
-     * as does a [shelf] of another kind.
+     * as does a [shelf] of another kind. An audio kind's [text] matches titles and creators only (matched against every
+     * field and ranked by downloads, popular items that merely mention the words came first), and unfiltered it searches
+     * [ArchiveKind.wideBase].
      */
     fun build(
         text: String,
@@ -56,9 +70,13 @@ object ArchiveQuery {
             "archive.org ${kind.noun} have no recording date to filter by"
         }
         val cleaned = balance(text).trim()
+        val audio = kind != ArchiveKind.TEXTS
         return buildString {
-            append(kind.base)
-            if (cleaned.isNotEmpty()) append(" AND (").append(cleaned).append(')')
+            append(if (audio && !filtered && cleaned.isNotEmpty()) kind.wideBase else kind.base)
+            if (cleaned.isNotEmpty()) {
+                if (audio) append(" AND (title:(").append(cleaned).append(") OR creator:(").append(cleaned).append("))")
+                else append(" AND (").append(cleaned).append(')')
+            }
             if (shelf != null && shelf.clause.isNotEmpty()) append(" AND ").append(shelf.clause)
             if (filtered) append(" AND ").append(PublicDomain.clause(kind, today))
         }

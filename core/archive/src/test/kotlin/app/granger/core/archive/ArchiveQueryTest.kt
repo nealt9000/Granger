@@ -39,16 +39,33 @@ class ArchiveQueryTest {
 
     @Test fun filteredMusicCutoffRollsOverOnJanuaryFirst() {
         assertThat(ArchiveQuery.build("waltz", ArchiveShelf.MUSIC_78, true, ArchiveKind.MUSIC, LocalDate.of(2026, 12, 31)))
-            .isEqualTo("mediatype:audio AND collection:audio_music AND (waltz) AND collection:78rpm AND year:[1860 TO 1925]")
+            .isEqualTo("mediatype:audio AND collection:audio_music AND (title:(waltz) OR creator:(waltz)) AND collection:78rpm AND year:[1860 TO 1925]")
         assertThat(ArchiveQuery.build("waltz", ArchiveShelf.MUSIC_78, true, ArchiveKind.MUSIC, LocalDate.of(2027, 1, 1)))
-            .isEqualTo("mediatype:audio AND collection:audio_music AND (waltz) AND collection:78rpm AND year:[1860 TO 1926]")
+            .isEqualTo("mediatype:audio AND collection:audio_music AND (title:(waltz) OR creator:(waltz)) AND collection:78rpm AND year:[1860 TO 1926]")
     }
 
     @Test fun unfilteredMusicHasNoDateClause() = assertThat(ArchiveQuery.build("", ArchiveShelf.MUSIC_CLASSICAL, false, ArchiveKind.MUSIC))
         .isEqualTo("mediatype:audio AND collection:audio_music AND subject:classical")
 
-    @Test fun spokenWordLeavesLibriVoxOut() = assertThat(ArchiveQuery.build("poems", null, false, ArchiveKind.SPOKEN_WORD))
-        .isEqualTo("mediatype:audio AND collection:audio_bookspoetry AND NOT collection:librivoxaudio AND (poems)")
+    // A search with the waiver accepted covers all archive.org audio (Pixel 6: "John Williams" found only 78s, "wicked audiobook"
+    // found Plato), matching titles and creators only (every field, ranked by downloads, put AMSCO AP World History first).
+    @Test fun spokenWordSearchIsWideAndLeavesLibriVoxOut() = assertThat(ArchiveQuery.build("wicked audiobook", null, false, ArchiveKind.SPOKEN_WORD))
+        .isEqualTo(
+            "mediatype:audio AND NOT collection:podcasts* AND NOT collection:librivoxaudio AND NOT collection:audio_music" +
+                " AND (title:(wicked audiobook) OR creator:(wicked audiobook))",
+        )
+
+    @Test fun unfilteredMusicSearchIsWide() = assertThat(ArchiveQuery.build("john williams", null, false, ArchiveKind.MUSIC))
+        .isEqualTo(
+            "mediatype:audio AND NOT collection:podcasts* AND NOT collection:librivoxaudio AND NOT collection:audio_bookspoetry" +
+                " AND NOT collection:*audiobooks* AND (title:(john williams) OR creator:(john williams))",
+        )
+
+    @Test fun filteredMusicSearchStaysCurated() = assertThat(ArchiveQuery.build("holst", null, true, ArchiveKind.MUSIC, LocalDate.of(2026, 10, 19)))
+        .isEqualTo("mediatype:audio AND collection:audio_music AND (title:(holst) OR creator:(holst)) AND year:[1860 TO 1925]")
+
+    @Test fun textSearchStillMatchesEveryField() = assertThat(ArchiveQuery.build("steam engine", null, false, ArchiveKind.TEXTS))
+        .isEqualTo("mediatype:texts AND (steam engine)")
 
     @Test fun aShelfOfAnotherKindIsRefused() {
         assertThrows(IllegalArgumentException::class.java) { ArchiveQuery.build("", ArchiveShelf.MANUALS, true, ArchiveKind.MUSIC) }
