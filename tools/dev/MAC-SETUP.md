@@ -70,6 +70,25 @@ The two SHA-256 lines must match. **Verified 2026-10-19:** Neal copied the Linux
 
 Connect the Pixel 6 over USB and run `adb devices`. On the first connection it lists the phone as `unauthorized` until Neal accepts the "Allow USB debugging" prompt on the phone (tick "Always allow from this computer"). Then it shows `device`.
 
+### Wi-Fi installs (the default from 2026-10-20)
+
+Builds go to the phone over Wi-Fi with adb's wireless debugging; USB is only needed for the DHU. The Mac and the phone must be on the same network.
+
+Once (Neal, on the phone): Settings → System → Developer options → **Wireless debugging** on (tick "Always allow on this network"), then **Pair device with pairing code**. It shows an `ip:port` and a six-digit code. On the Mac, while that screen is still open:
+
+```
+tools/dev/phone-wifi.sh pair 192.168.1.23:37123 123456
+```
+
+After that:
+
+```
+tools/dev/phone-wifi.sh install    # finds the phone (mDNS), connects, ./gradlew :app:installDebug
+tools/dev/phone-wifi.sh connect    # just connects; then ANDROID_SERIAL="$(tools/dev/phone-wifi.sh serial)" adb …
+```
+
+The connect port changes whenever Wireless debugging is turned off and on or the phone restarts. The script finds the current port each time, so nothing has to be re-paired. If the phone isn't found, check that Wireless debugging is still on (Android turns it off on a new network) and that the Mac isn't on a guest network that isolates devices. The Homebrew `adb` and the SDK's (used by Gradle) are the same version (37.0.1), so they share one server. Keep them in step: a version mismatch restarts the server and drops the Wi-Fi connection.
+
 Device-test rules (from the plan's Global Constraints): never run `:app:connectedDebugAndroidTest` (it wipes the library), never `adb reboot`, and after any library-module device test check `adb shell pm list packages app.granger`.
 
 ## Android Auto: the Desktop Head Unit
