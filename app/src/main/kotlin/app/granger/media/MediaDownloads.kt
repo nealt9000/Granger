@@ -139,19 +139,23 @@ object MediaDownloads {
     /** Whether [record] is the group's cover, not one of its [fileCount] audio files. */
     fun isCover(record: DownloadRecord): Boolean = record.itemId.endsWith("/000") && File(record.filePath).name == COVER_NAME
 
-    /** Active → Queued/Downloading(bytes done / total)/Failed; all files installed → Installed; some installed, none active → Partial; none → NotInstalled. */
+    /**
+     * Active → Queued/Downloading(bytes done / total)/Failed; all files installed → Installed; some installed, none
+     * active → Partial; none → NotInstalled. A queued file is Queued (waiting: for Wi-Fi, a connection, or a retry)
+     * once it has bytes or an error, or before anything has come in; a fresh file queued between two others is the
+     * group still Downloading, so the page doesn't flash "Waiting" between files.
+     */
     fun statusOf(groupId: String, fileCount: Int, records: List<DownloadRecord>): ItemStatus {
         val group = records.filter { it.groupId == groupId }
         if (group.isEmpty()) return ItemStatus.NotInstalled
         val running = group.any { it.state == DownloadState.RUNNING }
         val queued = group.firstOrNull { it.state == DownloadState.QUEUED }
         if (running || queued != null) {
-            if (running) {
-                val total = group.sumOf { it.sizeBytes }
-                val done = group.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone.coerceIn(0, it.sizeBytes) }
-                return ItemStatus.Downloading(if (total > 0) done.toFloat() / total else 0f)
-            }
-            return ItemStatus.Queued(queued!!.wifiOnly, queued.error)
+            if (running) return ItemStatus.Downloading(fractionOf(group))
+            val stalled = queued!!.bytesDone > 0 || queued.error != null
+            val started = group.any { it.state == DownloadState.INSTALLED && !isCover(it) }
+            if (!stalled && started) return ItemStatus.Downloading(fractionOf(group))
+            return ItemStatus.Queued(queued.wifiOnly, queued.error)
         }
         group.firstOrNull { it.state == DownloadState.FAILED }?.let { return ItemStatus.Failed(it.error ?: "Download failed") }
         val installed = group.filter { it.state == DownloadState.INSTALLED && !isCover(it) }.map { it.itemId }.distinct().size
@@ -160,6 +164,12 @@ object MediaDownloads {
             installed > 0 -> ItemStatus.Partial(installed, fileCount)
             else -> ItemStatus.NotInstalled
         }
+    }
+
+    private fun fractionOf(group: List<DownloadRecord>): Float {
+        val total = group.sumOf { it.sizeBytes }
+        val done = group.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone.coerceIn(0, it.sizeBytes) }
+        return if (total > 0) done.toFloat() / total else 0f
     }
 
     /** A download group's state for a book or album page: its [status], and its audio files in ([done]) and in all. */

@@ -126,6 +126,18 @@ class MediaDownloadsTest {
         val running = five + file(6, DownloadState.RUNNING, bytesDone = 50)
         assertThat(MediaDownloads.statusOf(group, 13, running)).isEqualTo(ItemStatus.Downloading(650f / 700f))
 
+        // Pixel 6: Wi-Fi lost mid-file requeues it with its bytes kept; the page said "Downloading" throughout.
+        val stopped = five + file(6, DownloadState.QUEUED, bytesDone = 50).copy(wifiOnly = true)
+        assertThat(MediaDownloads.statusOf(group, 13, stopped)).isEqualTo(ItemStatus.Queued(wifiOnly = true))
+        val retrying = five + file(6, DownloadState.QUEUED).copy(wifiOnly = true, error = "a.test answered 503")
+        assertThat(MediaDownloads.statusOf(group, 13, retrying)).isEqualTo(ItemStatus.Queued(wifiOnly = true, lastError = "a.test answered 503"))
+        // The next file, queued between two: still downloading, no "Waiting" flash.
+        val between = five + file(6, DownloadState.QUEUED).copy(wifiOnly = true)
+        assertThat(MediaDownloads.statusOf(group, 13, between)).isEqualTo(ItemStatus.Downloading(600f / 700f))
+        // Nothing in yet: queued.
+        val fresh = listOf(file(1, DownloadState.QUEUED).copy(wifiOnly = true))
+        assertThat(MediaDownloads.statusOf(group, 13, fresh)).isEqualTo(ItemStatus.Queued(wifiOnly = true))
+
         val failed = five + file(6, DownloadState.FAILED).copy(error = "Checksum mismatch")
         assertThat(MediaDownloads.statusOf(group, 13, failed)).isEqualTo(ItemStatus.Failed("Checksum mismatch"))
 

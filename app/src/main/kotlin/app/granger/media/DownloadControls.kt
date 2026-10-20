@@ -18,7 +18,12 @@ import app.granger.sources.ItemStatus
 
 /** What a downloaded book or album page says about its files; null when there's nothing to say (all in). */
 internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: String): String? = when (status) {
-    is ItemStatus.Queued, is ItemStatus.Downloading -> if (total > 0) "Downloading: $done of $total $unit" else "Downloading"
+    is ItemStatus.Queued -> when {
+        status.lastError != null -> "Retrying"
+        status.wifiOnly -> "Waiting for Wi-Fi"
+        else -> "Waiting for a connection"
+    } + if (total > 0) ": $done of $total $unit" else ""
+    is ItemStatus.Downloading -> if (total > 0) "Downloading: $done of $total $unit" else "Downloading"
     is ItemStatus.Partial -> "Partly downloaded: ${status.done} of ${status.total} $unit"
     is ItemStatus.Failed -> status.reason
     else -> null
