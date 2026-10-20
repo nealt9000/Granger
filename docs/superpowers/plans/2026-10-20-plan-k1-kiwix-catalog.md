@@ -40,6 +40,7 @@ Neal's (2026-10-20):
 1. **English only for now.** A pack is in if its language list includes `eng`. Other languages arrive with app-wide language support in their own delivery. The generator takes the languages as a setting (`"languages": ["eng"]`), so that delivery changes one line.
 2. **No video packs yet.** They're held back by a `hold: "video"` row in the family table, not dropped silently. When the video media type is built, that project starts from the held list (see Task 7).
 3. **Licenses come from a family table; a pack whose family has no row is left out.** Nothing ships with an unknown license before Plan 11's Play policy check. The build report lists the families left out, so adding one later means adding a row.
+   - **Revised (Neal, 2026-10-20, after reviewing the table):** families whose source states no license are listed too, as "Not stated by the source". Non-commercial packs were always listed; the flag only adds "provided by Kiwix". DevDocs is in, under its upstream projects' open licenses. WikEM is CC BY-SA 4.0 (its copyright page). Video families stay held.
 
 Builder's calls (for Neal's review):
 - **The curated rows win.** For the same name and flavour, the curated title, category and license replace the family table's, and the entry is `featured: true`. The 18 packs keep their ids, titles and categories exactly.

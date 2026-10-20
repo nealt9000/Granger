@@ -1,16 +1,16 @@
 {
- "_about": "Kiwix pack families for catalog_gen.py: category, license and hold per family, verified against each source on 2026-10-20 (source = where the license is stated). A pack whose family has no row, a null license or a hold is left out; the first matching row wins. match is a regex on the ZIM name, or {\"kiwixCategory\": …}.",
+ "_about": "Kiwix pack families for catalog_gen.py: category, license and hold per family, verified against each source on 2026-10-20 (source = where the license is stated). A pack whose family has no row, a null license or a hold is left out (Neal, 2026-10-20: families with no stated license are listed as \"Not stated by the source\"); the first matching row wins. match is a regex on the ZIM name, or {\"kiwixCategory\": …}.",
  "families": [
   {
    "family": "alexandria.dk",
    "match": "^alexandria\\.dk_",
    "category": "Games & Hobbies",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "alexandria.dk/en/about: other usage requires author permission; protected as collective work under Danish Copyright Act section 71. Large (43GB) - includes scanned RPG scenarios."
+   "note": "Neal, 2026-10-20: listed without a stated license. alexandria.dk/en/about: other usage requires author permission; protected as collective work under Danish Copyright Act section 71. Large (43GB) - includes scanned RPG scenarios."
   },
   {
    "family": "balatrowiki",
@@ -115,12 +115,12 @@
    "family": "fretmap.app",
    "match": "^fretmap\\.app_",
    "category": "Games & Hobbies",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://fretmap.app/terms",
-   "note": "The terms say all materials are FretMap's property and users may not reproduce or redistribute them. Excluded."
+   "note": "Neal, 2026-10-20: listed without a stated license. The terms say all materials are FretMap's property and users may not reproduce or redistribute them. Excluded."
   },
   {
    "family": "granbluefantasy",
@@ -170,12 +170,12 @@
    "family": "neos-wiki",
    "match": "^neos-wiki_",
    "category": "Games & Hobbies",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "wiki.neos.com offline; no license found."
+   "note": "Neal, 2026-10-20: listed without a stated license. wiki.neos.com offline; no license found."
   },
   {
    "family": "pg3d",
@@ -225,12 +225,12 @@
    "family": "sh1.org",
    "match": "^sh1\\.org_",
    "category": "Games & Hobbies",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": "https://sh1.org/legal.htm",
-   "note": "German railway signals site; all content (c) Wolfgang Meyenberg, use only by permission ('Please inquire prior to use'), non-profit. Not an open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. German railway signals site; all content (c) Wolfgang Meyenberg, use only by permission ('Please inquire prior to use'), non-profit. Not an open license."
   },
   {
    "family": "stardewvalleywiki",
@@ -280,12 +280,12 @@
    "family": "tonedear.com",
    "match": "^tonedear\\.com_",
    "category": "Games & Hobbies",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "No license stated; zim-requests#723 lists License: Not Mentioned. Ear-training web app."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; zim-requests#723 lists License: Not Mentioned. Ear-training web app."
   },
   {
    "family": "uesp.net",
@@ -335,12 +335,12 @@
    "family": "zdoom",
    "match": "^zdoom_",
    "category": "Games & Hobbies",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Site unreachable; third-party archive label suggests GFDL, unverified."
+   "note": "Neal, 2026-10-20: listed without a stated license. Site unreachable; third-party archive label suggests GFDL, unverified."
   },
   {
    "family": "100r.co",
@@ -401,12 +401,12 @@
    "family": "cd3wdproject.org",
    "match": "^cd3wdproject\\.org_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "No license on the site. Appropedia lists CC BY-SA 3.0 but says clear permission was not given. Documents come from many third-party NGOs and agencies."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license on the site. Appropedia lists CC BY-SA 3.0 but says clear permission was not given. Documents come from many third-party NGOs and agencies."
   },
   {
    "family": "energypedia",
@@ -566,34 +566,34 @@
    "family": "solar.lowtechmagazine.com",
    "match": "^solar\\.lowtechmagazine\\.com_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Only '© Kris De Decker'. No license found on the homepage or about pages."
+   "note": "Neal, 2026-10-20: listed without a stated license. Only '© Kris De Decker'. No license found on the homepage or about pages."
   },
   {
    "family": "survivorlibrary.com",
    "match": "^survivorlibrary\\.com_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "No license stated; old scanned books, mostly presumed public domain but not stated."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; old scanned books, mostly presumed public domain but not stated."
   },
   {
    "family": "trueprepper.com",
    "match": "^trueprepper\\.com_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Footer: 'Copyright 2016-2026 TruePrepper. All rights reserved.' (https://www.trueprepper.com/)"
+   "note": "Neal, 2026-10-20: listed without a stated license. Footer: 'Copyright 2016-2026 TruePrepper. All rights reserved.' (https://www.trueprepper.com/)"
   },
   {
    "family": "urban-prepper",
@@ -610,12 +610,12 @@
    "family": "usda-2015",
    "match": "^usda-2015_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "USDA Complete Guide to Home Canning (2015). Likely US federal public domain, but no explicit statement found on USDA/NCHFP pages; left null. Could be set to Public Domain if accepted as US government work."
+   "note": "Neal, 2026-10-20: listed without a stated license. USDA Complete Guide to Home Canning (2015). Likely US federal public domain, but no explicit statement found on USDA/NCHFP pages; left null. Could be set to Public Domain if accepted as US government work."
   },
   {
    "family": "voa",
@@ -643,45 +643,45 @@
    "family": "zimgit-food-preparation",
    "match": "^zimgit-food-preparation_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "Curated collection of ~17 PDFs from various third-party sources; no single stated license found; each PDF would need its own check."
+   "note": "Neal, 2026-10-20: listed without a stated license. Curated collection of ~17 PDFs from various third-party sources; no single stated license found; each PDF would need its own check."
   },
   {
    "family": "zimgit-knots",
    "match": "^zimgit-knots_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "openZIM nautilus compilation of third-party knot resources ('creator: Various'). No collection-level license, and per-item licenses are unknown."
+   "note": "Neal, 2026-10-20: listed without a stated license. openZIM nautilus compilation of third-party knot resources ('creator: Various'). No collection-level license, and per-item licenses are unknown."
   },
   {
    "family": "zimgit-post-disaster",
    "match": "^zimgit-post-disaster_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Curated collection of documents from varied sources; no single license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Curated collection of documents from varied sources; no single license."
   },
   {
    "family": "zimgit-water",
    "match": "^zimgit-water_",
    "category": "How-to",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Nautilus collection of PDFs from 'Various' creators (zimfarm recipe zimgit_en_water); no collection license stated, per-document licenses unknown."
+   "note": "Neal, 2026-10-20: listed without a stated license. Nautilus collection of PDFs from 'Various' creators (zimfarm recipe zimgit_en_water); no collection license stated, per-document licenses unknown."
   },
   {
    "family": "allthetropes",
@@ -786,12 +786,12 @@
    "family": "prunelle",
    "match": "^prunelle_",
    "category": "Literature & Drama",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/openzim/zim-requests/issues/502",
-   "note": "Ebooks supplied privately to Kiwix; no public license found."
+   "note": "Neal, 2026-10-20: listed without a stated license. Ebooks supplied privately to Kiwix; no public license found."
   },
   {
    "family": "smbc-comics.com",
@@ -885,12 +885,12 @@
    "family": "irp.fas.org",
    "match": "^irp\\.fas\\.org_",
    "category": "Medical",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "US military manuals likely public domain as US Government works, but no stated license."
+   "note": "Neal, 2026-10-20: listed without a stated license. US military manuals likely public domain as US Government works, but no stated license."
   },
   {
    "family": "librepathology",
@@ -918,12 +918,12 @@
    "family": "medlineplus.gov",
    "match": "^medlineplus\\.gov_",
    "category": "Medical",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": "https://medlineplus.gov/about/using/usingcontent/",
-   "note": "Mixed: federal content is public domain, but the A.D.A.M. Medical Encyclopedia, ASHP drug monographs and many images are copyrighted and only licensed to MedlinePlus. The ZIM scrapes the whole site including the encyclopedia, so no single license; left null."
+   "note": "Neal, 2026-10-20: listed without a stated license. Mixed: federal content is public domain, but the A.D.A.M. Medical Encyclopedia, ASHP drug monographs and many images are copyrighted and only licensed to MedlinePlus. The ZIM scrapes the whole site including the encyclopedia, so no single license; left null."
   },
   {
    "family": "nhs.uk",
@@ -995,12 +995,12 @@
    "family": "zimgit-medicine",
    "match": "^zimgit-medicine_",
    "category": "Medical",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "openZIM nautilus compilation of third-party field and emergency medicine books ('creator: Various'). No collection-level license, and per-item licenses are unknown."
+   "note": "Neal, 2026-10-20: listed without a stated license. openZIM nautilus compilation of third-party field and emergency medicine books ('creator: Various'). No collection-level license, and per-item licenses are unknown."
   },
   {
    "family": "anonymousplanet.org",
@@ -1050,12 +1050,12 @@
    "family": "ncert-audiobooks",
    "match": "^ncert-audiobooks_",
    "category": "Other",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "CIET/NCERT audiobooks (audio of textbooks). Audiobook page has only a (c) NCERT footer; CIET states NCERT textbooks are CC BY-NC-ND and other resources CC BY-NC-SA, but nothing specific for audiobooks. Left null."
+   "note": "Neal, 2026-10-20: listed without a stated license. CIET/NCERT audiobooks (audio of textbooks). Audiobook page has only a (c) NCERT footer; CIET states NCERT textbooks are CC BY-NC-ND and other resources CC BY-NC-SA, but nothing specific for audiobooks. Left null."
   },
   {
    "family": "oer4schools",
@@ -1083,23 +1083,23 @@
    "family": "phzh",
    "match": "^phzh_",
    "category": "Other",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "PH Zurich MOOC platform (mooc.phzh.ch) is gone; no license found; may be video-heavy course."
+   "note": "Neal, 2026-10-20: listed without a stated license. PH Zurich MOOC platform (mooc.phzh.ch) is gone; no license found; may be video-heavy course."
   },
   {
    "family": "ragajunglism.org",
    "match": "^ragajunglism\\.org_",
    "category": "Other",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "No license or copyright statement found (site 403; archived homepage has none)."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license or copyright statement found (site 403; archived homepage has none)."
   },
   {
    "family": "scoutwiki.org",
@@ -1171,12 +1171,12 @@
    "family": "cloudflare.com",
    "match": "^cloudflare\\.com_",
    "category": "Programming",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": "https://www.cloudflare.com/website-terms/",
-   "note": "Website terms: Cloudflare reserves all rights to the Materials; no open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Website terms: Cloudflare reserves all rights to the Materials; no open license."
   },
   {
    "family": "coreyms",
@@ -1215,12 +1215,12 @@
    "family": "devhints.io",
    "match": "^devhints\\.io_",
    "category": "Programming",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "No license stated on devhints.io; source repo rstacruz/cheatsheets has no license file."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated on devhints.io; source repo rstacruz/cheatsheets has no license file."
   },
   {
    "family": "docs.python.org",
@@ -1237,12 +1237,12 @@
    "family": "freecodecamp",
    "match": "^freecodecamp_",
    "category": "Programming",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "freeCodeCamp README: software BSD-3, but /curriculum learning resources are 'copyright freeCodeCamp.org' with no open license (https://github.com/freeCodeCamp/freeCodeCamp#license). Rosetta Code-derived challenges not separately licensed."
+   "note": "Neal, 2026-10-20: listed without a stated license. freeCodeCamp README: software BSD-3, but /curriculum learning resources are 'copyright freeCodeCamp.org' with no open license (https://github.com/freeCodeCamp/freeCodeCamp#license). Rosetta Code-derived challenges not separately licensed."
   },
   {
    "family": "gentoo",
@@ -1347,12 +1347,12 @@
    "family": "noted.lol",
    "match": "^noted\\.lol_",
    "category": "Programming",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://noted.lol/",
-   "note": "Footer: '© 2026 Noted. All rights reserved.' Excluded."
+   "note": "Neal, 2026-10-20: listed without a stated license. Footer: '© 2026 Noted. All rights reserved.' Excluded."
   },
   {
    "family": "opendatastructures.org",
@@ -1446,12 +1446,12 @@
    "family": "thalesdoc",
    "match": "^thalesdoc_",
    "category": "Programming",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "thalesdocs.com: 'Copyright 2019-2026, Thales Group', no open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. thalesdocs.com: 'Copyright 2019-2026, Thales Group', no open license."
   },
   {
    "family": "unrealircd",
@@ -1479,12 +1479,12 @@
    "family": "www.mankier.com",
    "match": "^www\\.mankier\\.com_",
    "category": "Programming",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.mankier.com/about",
-   "note": "No license stated; man pages carry per-page licenses."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; man pages carry per-page licenses."
   },
   {
    "family": "stack_exchange",
@@ -1558,12 +1558,12 @@
    "family": "cyborganthropology.com",
    "match": "^cyborganthropology\\.com_",
    "category": "Reference",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "No license on site footer/disclaimer; Kiwix request claims CC BY-NC-ND-SA, unverified."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license on site footer/disclaimer; Kiwix request claims CC BY-NC-ND-SA, unverified."
   },
   {
    "family": "edutechwiki",
@@ -1613,12 +1613,12 @@
    "family": "psiram",
    "match": "^psiram_",
    "category": "Reference",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": "https://www.psiram.com/en/index.php/Main_Page",
-   "note": "Footer says only 'Content is available under Creative Commons' with no variant; the linked Lizenz page is empty, so NC/ND can't be determined. Anonymous skeptic site with contentious content about named people."
+   "note": "Neal, 2026-10-20: listed without a stated license. Footer says only 'Content is available under Creative Commons' with no variant; the linked Lizenz page is empty, so NC/ND can't be determined. Anonymous skeptic site with contentious content about named people."
   },
   {
    "family": "rationalwiki",
@@ -1701,12 +1701,12 @@
    "family": "womenshistory.si.edu",
    "match": "^womenshistory\\.si\\.edu_",
    "category": "Reference",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.si.edu/termsofuse",
-   "note": "Smithsonian terms allow personal/educational noncommercial use only, not an open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Smithsonian terms allow personal/educational noncommercial use only, not an open license."
   },
   {
    "family": "citizensinformation.ie",
@@ -1723,12 +1723,12 @@
    "family": "ghana-bece-past-questions",
    "match": "^ghana-bece-past-questions_",
    "category": "Regional",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Scraped from passco.org; no license stated (footer terms links are placeholders). Exam papers are WAEC material."
+   "note": "Neal, 2026-10-20: listed without a stated license. Scraped from passco.org; no license stated (footer terms links are placeholders). Exam papers are WAEC material."
   },
   {
    "family": "metakgp",
@@ -1756,45 +1756,45 @@
    "family": "gotquestions.org",
    "match": "^gotquestions\\.org_",
    "category": "Religion & Philosophy",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.gotquestions.org/copyright.html",
-   "note": "Copyrighted, with reuse limited to quotes (about 200 words per article) and attribution. No open license, so excluded. Bible text is © Biblica."
+   "note": "Neal, 2026-10-20: listed without a stated license. Copyrighted, with reuse limited to quotes (about 200 words per article) and attribution. No open license, so excluded. Bible text is © Biblica."
   },
   {
    "family": "internet-encyclopedia-philosophy",
    "match": "^internet-encyclopedia-philosophy_",
    "category": "Religion & Philosophy",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://iep.utm.edu/home/copyright/",
-   "note": "All rights reserved: 'not open source or in the public domain', and copies may not be posted elsewhere online. Excluded."
+   "note": "Neal, 2026-10-20: listed without a stated license. All rights reserved: 'not open source or in the public domain', and copies may not be posted elsewhere online. Excluded."
   },
   {
    "family": "apod.nasa.gov",
    "match": "^apod\\.nasa\\.gov_",
    "category": "Science & Math",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://apod.nasa.gov/apod/lib/about_apod.html",
-   "note": "Many images copyrighted by their owners; no blanket license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Many images copyrighted by their owners; no blanket license."
   },
   {
    "family": "artofproblemsolving",
    "match": "^artofproblemsolving_",
    "category": "Science & Math",
-   "license": null,
+   "license": "Not stated by the source",
    "nonCommercial": null,
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "AoPS Wiki:Copyright page says the site has not yet chosen a documentation license (per search snippet; site blocks fetch). Contains copyrighted competition problems. No license stated."
+   "note": "Neal, 2026-10-20: listed without a stated license. AoPS Wiki:Copyright page says the site has not yet chosen a documentation license (per search snippet; site blocks fetch). Contains copyrighted competition problems. No license stated."
   },
   {
    "family": "biologycourses",

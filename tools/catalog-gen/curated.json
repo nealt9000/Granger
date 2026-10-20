@@ -5,7 +5,7 @@
      "title": "WikiMed (no pictures)"},
     {"name": "wikipedia_en_medicine", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 4.0",
      "title": "WikiMed"},
-    {"name": "wikem_en_all", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 3.0",
+    {"name": "wikem_en_all", "flavour": "maxi", "category": "Medical", "license": "CC BY-SA 4.0",
      "title": "WikEM emergency medicine"},
     {"name": "wikipedia_en_top", "flavour": "nopic", "category": "Reference", "license": "CC BY-SA 4.0",
      "title": "Wikipedia: best articles (no pictures)"},
