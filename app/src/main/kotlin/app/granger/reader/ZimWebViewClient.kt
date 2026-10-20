@@ -23,6 +23,8 @@ class ZimWebViewClient(
     private val onExternalLink: (url: String) -> Unit,
     private val onLeavingPage: (WebView) -> Unit,
     private val onPageShown: (WebView, url: String) -> Unit,
+    /** The WebView's history changed to [url]: a new page committed (before it finishes), or a jump within one. */
+    private val onVisited: (url: String) -> Unit = {},
 ) : WebViewClient() {
     /** File names under `assets/reader/`; nothing else is ever served from the app. */
     private val appFiles: Set<String> by lazy { assets.list(ASSET_DIR).orEmpty().toSet() }
@@ -77,6 +79,10 @@ class ZimWebViewClient(
     override fun onPageFinished(view: WebView, url: String) {
         view.evaluateJavascript(ReaderPageScript.SOURCE, null)
         onPageShown(view, url)
+    }
+
+    override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
+        if (!isReload) onVisited(url)
     }
 
     private fun notFound() =

@@ -10,9 +10,12 @@ import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimUrls
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +24,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -83,6 +88,7 @@ class ReaderViewModel(
 
     private var archive: ZimArchive? = null
     private var searchJob: Job? = null
+    private val stackWrites = Mutex()
 
     init {
         viewModelScope.launch {
@@ -118,19 +124,66 @@ class ReaderViewModel(
 
     /**
      * The WebView finished loading [url]. [documentTitle] is null when the page has none. The tab now shows this
-     * page. Returns the scroll fraction to restore, or null to stay at the top (or at the URL's #fragment).
+     * page, on top of its back stack. Returns the scroll fraction to restore, or null to stay at the top (or at the URL's #fragment).
      */
     suspend fun onPageShown(url: String, documentTitle: String?): Float? {
         val pack = packId ?: return null
         val zim = ZimUrls.parse(url)?.takeIf { it.packId == pack } ?: return null
-        val title = documentTitle?.takeIf { it.isNotBlank() }
-            ?: zim.path.substringAfterLast('/').replace('_', ' ')
+        val title = documentTitle?.takeIf { it.isNotBlank() } ?: titleFromPath(zim.path)
         val shown = Page(zim.path, title)
         page.value = shown
         _state.update { it.copy(url = url, page = shown) }
-        appScope.launch { sessions.showInTab(tabId, pack, zim.path, title) }
+        writeStack { sessions.pushPath(tabId, zim.path, title) }
         return if (zim.fragment != null) null else library.position(pack, zim.path)
     }
+
+    /**
+     * The WebView committed a navigation to [url] (its history changed), before the page has finished loading. A new
+     * page goes on the tab's back stack now, so Back pressed while it loads returns to the page the link was on; a
+     * jump within the page shown isn't a new page.
+     */
+    fun onPageVisited(url: String) {
+        val pack = packId ?: return
+        val zim = ZimUrls.parse(url)?.takeIf { it.packId == pack } ?: return
+        if (zim.path == page.value?.path) return
+        writeStack { sessions.pushPath(tabId, zim.path, titleFromPath(zim.path)) }
+    }
+
+    /** What Back does: see [back]. */
+    sealed interface BackStep {
+        /** Go back in the WebView's own history. */
+        data object InWebView : BackStep
+
+        /** Load the tab's previous page, from its stored back stack. */
+        data class Load(val url: String) : BackStep
+
+        /** At the tab's first page: leave the reader. */
+        data object Leave : BackStep
+    }
+
+    /**
+     * Back, from the ← arrow or the system: the WebView's own history while it has one, then the tab's stored back
+     * stack (the WebView's history is lost with the reader's destination and with the process), then leaving.
+     * [webPrevious] is the URL the WebView would go back to, or null when it can't go back; [webCurrent] is the one it
+     * shows. The stored stack steps back with the WebView, except out of a jump within the same page.
+     */
+    suspend fun back(webCurrent: String?, webPrevious: String?): BackStep {
+        if (webPrevious != null) {
+            val samePage = webCurrent != null && ZimUrls.parse(webPrevious)?.path?.let { it == ZimUrls.parse(webCurrent)?.path } == true
+            if (!samePage) writeStack { sessions.popPath(tabId) }.await()
+            return BackStep.InWebView
+        }
+        val pack = packId ?: return BackStep.Leave
+        val previous = writeStack { sessions.popPath(tabId) }.await() ?: return BackStep.Leave
+        return BackStep.Load(ZimUrls.forEntry(pack, previous, null))
+    }
+
+    /**
+     * Runs a write to the tab's back stack in [appScope], so it finishes when the screen goes, after every write
+     * asked for before it: each starts on the caller's (main) thread and queues on [stackWrites] there, in order.
+     */
+    private fun <T> writeStack(write: suspend () -> T): Deferred<T> =
+        appScope.async(start = CoroutineStart.UNDISPATCHED) { stackWrites.withLock { write() } }
 
     fun savePosition(url: String?, scrollFraction: Float) {
         val pack = packId ?: return
@@ -245,6 +298,9 @@ class ReaderViewModel(
     }
 
     companion object {
+        /** A page's title when it has none of its own: the last part of its path, with spaces for underscores. */
+        private fun titleFromPath(path: String) = path.substringAfterLast('/').replace('_', ' ')
+
         private const val SUGGEST_DEBOUNCE_MS = 200L
         private const val SUGGESTION_LIMIT = 10
         private const val FULLTEXT_LIMIT = 25

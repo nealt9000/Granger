@@ -95,6 +95,7 @@ private data class FindMatches(val active: Int, val count: Int, val done: Boolea
  * [onChromeVisibleChange]), with the page fitted below and beside them. A middle tap on the page hides the chrome and
  * the system bars for full-screen reading; another brings them back. Selecting text offers
  * Search ([onSearchText]) and Research ([onResearch], with the article it was selected in); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome; the top bar offers search inside the pack, the bookmark star and a menu with Home, Random article and find in page.
+ * Back, the ← arrow or the system's, steps back through the pages read in this tab; at its first page it calls [onBack].
  */
 @Composable
 fun ReaderScreen(
@@ -110,7 +111,9 @@ fun ReaderScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var webView by remember { mutableStateOf<ReaderWebView?>(null) }
-    var canGoBack by remember { mutableStateOf(false) }
+    // Set when Back loads the tab's previous page from its stored stack: once shown, the WebView's history is cleared
+    // so it holds only that page, and the next Back goes on down the stored stack instead of forward again.
+    var clearHistoryOnShow by remember { mutableStateOf(false) }
     var matches by remember { mutableStateOf<FindMatches?>(null) }
     val searchText by rememberUpdatedState(onSearchText)
     val research by rememberUpdatedState(onResearch)
@@ -126,6 +129,27 @@ fun ReaderScreen(
         view.loadUrl(url)
     }
 
+    /** ← and system Back: back through the tab's pages (see [ReaderViewModel.back]), then out of the reader. */
+    fun goBack() {
+        val view = webView
+        val history = view?.copyBackForwardList()
+        val previous = if (view?.canGoBack() == true) history?.getItemAtIndex(history.currentIndex - 1)?.url.orEmpty() else null
+        val current = history?.currentItem?.url
+        scope.launch {
+            when (val step = viewModel.back(current, previous)) {
+                ReaderViewModel.BackStep.InWebView -> {
+                    saveScroll()
+                    view?.goBack()
+                }
+                is ReaderViewModel.BackStep.Load -> {
+                    clearHistoryOnShow = true
+                    navigate(step.url)
+                }
+                ReaderViewModel.BackStep.Leave -> onBack()
+            }
+        }
+    }
+
     // The shell's left-edge swipe asks for the chrome; only a request newer than the one seen at entry counts, so an old swipe isn't replayed.
     val requestAtEntry = remember { showChromeRequest }
     LaunchedEffect(showChromeRequest) { if (isNewChromeRequest(requestAtEntry, showChromeRequest)) viewModel.showChrome() }
@@ -133,10 +157,7 @@ fun ReaderScreen(
     SystemBarsHidden(!state.chromeVisible)
     ChromeBackOnReturn(viewModel::onScreenLeft)
 
-    BackHandler(enabled = canGoBack) {
-        saveScroll()
-        webView?.goBack()
-    }
+    BackHandler { goBack() }
     // Declared later, so it takes Back first while the find bar is open.
     BackHandler(enabled = state.findQuery != null) { viewModel.endFind() }
     BackHandler(enabled = state.packSearch != null) { viewModel.endPackSearch() }
@@ -175,7 +196,7 @@ fun ReaderScreen(
                         bookmarked = state.bookmarked,
                         showMenu = state.error == null,
                         hasHome = state.hasHome,
-                        onBack = onBack,
+                        onBack = ::goBack,
                         onSearchPack = viewModel::startPackSearch,
                         onHome = { scope.launch { viewModel.homeUrl()?.let(::navigate) } },
                         onRandom = {
@@ -211,12 +232,16 @@ fun ReaderScreen(
                                 onExternalLink = { url -> openExternal(context, url) },
                                 onLeavingPage = { view -> viewModel.savePosition(view.url, (view as ReaderWebView).scrollFraction()) },
                                 onPageShown = { view, url ->
-                                    canGoBack = view.canGoBack()
+                                    if (clearHistoryOnShow) {
+                                        clearHistoryOnShow = false
+                                        view.clearHistory()
+                                    }
                                     val title = view.title?.takeUnless { it == url }
                                     scope.launch {
                                         viewModel.onPageShown(url, title)?.let { (view as ReaderWebView).scrollToFraction(it) }
                                     }
                                 },
+                                onVisited = viewModel::onPageVisited,
                             )
                             ReaderWebView(
                                 context = context,

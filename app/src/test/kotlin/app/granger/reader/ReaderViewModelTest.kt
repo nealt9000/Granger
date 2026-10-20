@@ -13,6 +13,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -60,6 +61,102 @@ class ReaderViewModelTest {
         val tab = sessions.tab(1)!!
         assertThat(tab.path).isEqualTo("Photosynthesis")
         assertThat(tab.title).isEqualTo("Photosynthesis")
+    }
+
+    /** Shows each of [paths] in turn, as following links does. */
+    private fun TestScope.show(vm: ReaderViewModel, vararg paths: String) {
+        for (path in paths) {
+            launch { vm.onPageShown(url(path), path) }
+            testScheduler.advanceUntilIdle()
+        }
+    }
+
+    private suspend fun stack() = sessions.tab(1)!!.backStack.split('\n')
+
+    @Test fun followingALinkPushesThePath() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        show(vm, "C++", "Photosynthesis")
+        assertThat(stack()).containsExactly("C++", "Photosynthesis").inOrder()
+        assertThat(sessions.tab(1)!!.path).isEqualTo("Photosynthesis")
+        // A reload of the same page isn't another step back.
+        show(vm, "Photosynthesis")
+        assertThat(stack()).containsExactly("C++", "Photosynthesis").inOrder()
+    }
+
+    @Test fun aVisitIsRecordedBeforeThePageFinishes() = runTest(main.dispatcher) {
+        // Back pressed while the next page is still loading must go back to the page the link was on.
+        val vm = reader("C++")
+        show(vm, "C++")
+        vm.onPageVisited(url("Photosynthesis"))
+        testScheduler.advanceUntilIdle()
+        assertThat(stack()).containsExactly("C++", "Photosynthesis").inOrder()
+        // A jump to a section of the page shown isn't a new page.
+        show(vm, "Photosynthesis")
+        vm.onPageVisited(url("Photosynthesis", "s3"))
+        testScheduler.advanceUntilIdle()
+        assertThat(stack()).containsExactly("C++", "Photosynthesis").inOrder()
+        assertThat(sessions.tab(1)!!.title).isEqualTo("Photosynthesis")
+    }
+
+    @Test fun backWithWebHistoryGoesBackInTheWebView() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        show(vm, "C++", "Photosynthesis")
+        assertThat(vm.back(webCurrent = url("Photosynthesis"), webPrevious = url("C++"))).isEqualTo(ReaderViewModel.BackStep.InWebView)
+        // The stored stack steps back with it, so the page the WebView goes back to isn't pushed again.
+        assertThat(stack()).containsExactly("C++")
+        show(vm, "C++")
+        assertThat(stack()).containsExactly("C++")
+    }
+
+    @Test fun backOutOfASectionKeepsTheStack() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        show(vm, "C++", "Photosynthesis")
+        assertThat(vm.back(webCurrent = url("Photosynthesis", "s3"), webPrevious = url("Photosynthesis")))
+            .isEqualTo(ReaderViewModel.BackStep.InWebView)
+        assertThat(stack()).containsExactly("C++", "Photosynthesis").inOrder()
+    }
+
+    @Test fun backWithoutWebHistoryLoadsTheStoredPreviousPath() = runTest(main.dispatcher) {
+        // The WebView's history went with the destination (a rail switch) or the process.
+        val vm = reader("C++")
+        show(vm, "C++", "What_is_this?", "Photosynthesis")
+        assertThat(vm.back(webCurrent = url("Photosynthesis"), webPrevious = null)).isEqualTo(ReaderViewModel.BackStep.Load(url("What_is_this?")))
+        show(vm, "What_is_this?")
+        assertThat(vm.back(webCurrent = url("What_is_this?"), webPrevious = null)).isEqualTo(ReaderViewModel.BackStep.Load(url("C++")))
+        show(vm, "C++")
+        assertThat(stack()).containsExactly("C++")
+    }
+
+    @Test fun backAtTheFirstPageLeavesTheReader() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        show(vm, "C++")
+        assertThat(vm.back(webCurrent = url("C++"), webPrevious = null)).isEqualTo(ReaderViewModel.BackStep.Leave)
+        assertThat(stack()).containsExactly("C++")
+    }
+
+    @Test fun backFromAnErrorLeavesTheReader() = runTest(main.dispatcher) {
+        library.archives.clear()
+        assertThat(reader("C++").back(webCurrent = null, webPrevious = null)).isEqualTo(ReaderViewModel.BackStep.Leave)
+    }
+
+    @Test fun homeAndRandomPushLikeLinks() = runTest(main.dispatcher) {
+        library.archives["p"] = FakeZimArchive("p", setOf("index", "C++", "Photosynthesis"), random = "Photosynthesis")
+        val vm = reader("C++")
+        show(vm, "C++")
+        launch { vm.onPageShown(vm.homeUrl()!!, "Home") }
+        testScheduler.advanceUntilIdle()
+        launch { vm.onPageShown(vm.randomUrl()!!, "Photosynthesis") }
+        testScheduler.advanceUntilIdle()
+        assertThat(stack()).containsExactly("C++", "index", "Photosynthesis").inOrder()
+        assertThat(vm.back(webCurrent = url("Photosynthesis"), webPrevious = null)).isEqualTo(ReaderViewModel.BackStep.Load(url("index")))
+    }
+
+    @Test fun restoredTabKeepsItsStack() = runTest(main.dispatcher) {
+        // The reader's destination was replaced (a rail switch) or the process died: a new view model for the same tab.
+        show(reader("C++"), "C++", "What_is_this?", "Photosynthesis")
+        val restored = ReaderViewModel(1, library, sessions, this, main.dispatcher).also { testScheduler.advanceUntilIdle() }
+        assertThat(restored.state.value.url).isEqualTo(url("Photosynthesis"))
+        assertThat(restored.back(webCurrent = null, webPrevious = null)).isEqualTo(ReaderViewModel.BackStep.Load(url("What_is_this?")))
     }
 
     @Test fun chromeStartsVisibleAndAMiddleTapToggles() = runTest(main.dispatcher) {
