@@ -288,11 +288,20 @@ class PlayerEngine(
      * resumption). Runs in turn with the hub's calls, so a restore already queued is waited for, not repeated; like
      * any restore it writes nothing before its seek is confirmed.
      */
-    suspend fun resumption(): MediaSession.MediaItemsWithStartPosition? {
+    suspend fun resumption(): MediaSession.MediaItemsWithStartPosition? = inTurn(restore = true)
+
+    /**
+     * The loaded items, index and position, once every call sent before this one has run (null when nothing is
+     * loaded then). For a controller's request ([LibraryCallback.onSetMediaItems]): the tree has just asked the hub to
+     * play something, and this answers with what the engine loaded for it. Loads nothing itself.
+     */
+    suspend fun loadedItems(): MediaSession.MediaItemsWithStartPosition? = inTurn(restore = false)
+
+    private suspend fun inTurn(restore: Boolean): MediaSession.MediaItemsWithStartPosition? {
         val result = CompletableDeferred<MediaSession.MediaItemsWithStartPosition?>()
         val sent = trySubmit {
             try {
-                if (!loaded) restoreLast()
+                if (restore && !loaded) restoreLast()
                 if (loaded && player.mediaItemCount > 0) {
                     val items = (0 until player.mediaItemCount).map { player.getMediaItemAt(it) }
                     result.complete(MediaSession.MediaItemsWithStartPosition(

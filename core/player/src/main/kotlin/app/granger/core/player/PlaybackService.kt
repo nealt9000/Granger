@@ -26,6 +26,7 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaLibraryService.LibraryParams
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionError
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
 import com.google.common.collect.ImmutableList
@@ -41,11 +42,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * The playback service: owns the one [ExoPlayer] and its [PlayerEngine], and publishes them as a
- * [MediaLibrarySession] (notification, lock screen, Bluetooth and headset buttons; Android Auto browses it in M3,
- * so the browse tree is empty for now). A play press after the process died resumes through [LibraryCallback].
+ * [MediaLibrarySession] (notification, lock screen, Bluetooth and headset buttons, and Android Auto, which browses
+ * the app's [MediaBrowseTree]). A play press after the process died resumes through [LibraryCallback].
  *
  * Talking to the app: the app is in the same process, so [MediaControllerPlayerHub] binds through a MediaController
  * (which starts the service and keeps it alive) and then calls the running engine directly through [engine]. Outside
@@ -63,6 +65,8 @@ class PlaybackService : MediaLibraryService() {
         val media: MediaLibrary,
         val playback: PlaybackDao,
         val artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
+        /** What Android Auto browses and plays; null serves an empty root. */
+        val browse: MediaBrowseTree? = null,
     )
 
     companion object {
@@ -104,7 +108,7 @@ class PlaybackService : MediaLibraryService() {
             artwork = deps.artwork,
         )
         engine = e
-        session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope))
+        session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope, deps.browse))
             .apply { sessionActivity()?.let(::setSessionActivity) }
             .build()
         headset = HeadsetAutoplay(this, e::onHeadsetConnected).also { it.start() }
@@ -138,37 +142,110 @@ class PlaybackService : MediaLibraryService() {
 }
 
 /**
- * The session's callback. The browse tree is still an empty root (Task 8 fills it for Android Auto).
+ * The session's callback: the browse tree (Android Auto), search, playing what a controller picks, and resumption.
+ *
+ * Browsing is [browse]'s; with none installed the root is empty. Lists are paged by the tree; search results are paged
+ * here (the media index is in memory, so a page is a fresh search).
+ *
+ * A controller's items ([onSetMediaItems], [onAddMediaItems]) are routed by media id only: the tree starts what the
+ * id names through the hub, then [PlayerEngine.loadedItems] answers, in turn after that call, with the engine's own
+ * items, index and position. The session hands those to [SessionPlayer.setMediaItems] (or `addMediaItems`), which
+ * does nothing for the engine's own items, so the engine loads the player once and a controller's URIs and artwork are
+ * never loaded. Nothing plays, or the engine doesn't answer within [PLAY_TIMEOUT_MS]: a failed future.
  *
  * Playback resumption: a play press (headset, Bluetooth, Auto) that finds the player empty, typically after the
  * process died, asks [onPlaybackResumption]; the engine restores the last active player paused from its saved state
  * and answers with its items and position. The session then hands those items back to [SessionPlayer.setMediaItems]
  * (a no-op: they're already loaded) and presses play, which goes through the engine. Nothing saved: a failed future.
  */
-internal class LibraryCallback(private val engine: PlayerEngine, private val scope: CoroutineScope) : MediaLibrarySession.Callback {
-    private val root = MediaItem.Builder()
+internal class LibraryCallback(
+    private val engine: PlayerEngine,
+    private val scope: CoroutineScope,
+    private val browse: MediaBrowseTree? = null,
+) : MediaLibrarySession.Callback {
+    private val emptyRoot = MediaItem.Builder()
         .setMediaId("root")
         .setMediaMetadata(MediaMetadata.Builder().setIsBrowsable(true).setIsPlayable(false).build())
         .build()
 
     override fun onGetLibraryRoot(
         session: MediaLibrarySession, browser: MediaSession.ControllerInfo, params: LibraryParams?,
-    ): ListenableFuture<LibraryResult<MediaItem>> = Futures.immediateFuture(LibraryResult.ofItem(root, params))
+    ): ListenableFuture<LibraryResult<MediaItem>> =
+        Futures.immediateFuture(LibraryResult.ofItem(browse?.root() ?: emptyRoot, params))
 
     override fun onGetChildren(
         session: MediaLibrarySession, browser: MediaSession.ControllerInfo, parentId: String, page: Int,
         pageSize: Int, params: LibraryParams?,
-    ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> =
-        Futures.immediateFuture(LibraryResult.ofItemList(ImmutableList.of(), params))
+    ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+        val tree = browse ?: return Futures.immediateFuture(
+            if (parentId == emptyRoot.mediaId) LibraryResult.ofItemList(ImmutableList.of(), params)
+            else LibraryResult.ofError(SessionError.ERROR_BAD_VALUE),
+        )
+        return future {
+            tree.children(parentId, page, pageSize)?.let { LibraryResult.ofItemList(it, params) }
+                ?: LibraryResult.ofError(SessionError.ERROR_BAD_VALUE)
+        }
+    }
+
+    override fun onGetItem(
+        session: MediaLibrarySession, browser: MediaSession.ControllerInfo, mediaId: String,
+    ): ListenableFuture<LibraryResult<MediaItem>> {
+        val tree = browse ?: return Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_BAD_VALUE))
+        return future { tree.item(mediaId)?.let { LibraryResult.ofItem(it, null) } ?: LibraryResult.ofError(SessionError.ERROR_BAD_VALUE) }
+    }
+
+    override fun onSearch(
+        session: MediaLibrarySession, browser: MediaSession.ControllerInfo, query: String, params: LibraryParams?,
+    ): ListenableFuture<LibraryResult<Void>> {
+        val tree = browse ?: return Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_NOT_SUPPORTED))
+        return future {
+            val count = tree.search(query).size
+            session.notifySearchResultChanged(browser, query, count, params)
+            LibraryResult.ofVoid(params)
+        }
+    }
+
+    override fun onGetSearchResult(
+        session: MediaLibrarySession, browser: MediaSession.ControllerInfo, query: String, page: Int, pageSize: Int,
+        params: LibraryParams?,
+    ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+        val tree = browse ?: return Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_NOT_SUPPORTED))
+        return future { LibraryResult.ofItemList(pageOf(tree.search(query), page, pageSize), params) }
+    }
+
+    override fun onSetMediaItems(
+        mediaSession: MediaSession, controller: MediaSession.ControllerInfo, mediaItems: MutableList<MediaItem>,
+        startIndex: Int, startPositionMs: Long,
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = future { playRequested(mediaItems, startIndex) }
+
+    override fun onAddMediaItems(
+        mediaSession: MediaSession, controller: MediaSession.ControllerInfo, mediaItems: MutableList<MediaItem>,
+    ): ListenableFuture<MutableList<MediaItem>> = future { playRequested(mediaItems, 0).mediaItems.toMutableList() }
+
+    /** Plays the requested item through the tree and answers with what the engine loaded; throws if nothing played. */
+    private suspend fun playRequested(items: List<MediaItem>, startIndex: Int): MediaSession.MediaItemsWithStartPosition {
+        val tree = browse ?: throw UnsupportedOperationException("No browse tree")
+        val item = items.getOrNull(startIndex) ?: items.firstOrNull() ?: throw IllegalArgumentException("No items")
+        if (!tree.play(item.mediaId, item.requestMetadata.searchQuery)) throw IllegalArgumentException("Nothing plays for ${item.mediaId}")
+        return withTimeoutOrNull(PLAY_TIMEOUT_MS) { engine.loadedItems() }
+            ?: throw IllegalStateException("The engine loaded nothing for ${item.mediaId}")
+    }
 
     override fun onPlaybackResumption(
         mediaSession: MediaSession, controller: MediaSession.ControllerInfo, isForPlayback: Boolean,
-    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
-        val future = SettableFuture.create<MediaSession.MediaItemsWithStartPosition>()
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
+        future { engine.resumption() ?: throw UnsupportedOperationException("Nothing to resume") }
+
+    override fun onPlaybackResumption(
+        mediaSession: MediaSession, controller: MediaSession.ControllerInfo,
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = onPlaybackResumption(mediaSession, controller, true)
+
+    /** [block] on [scope] as a future; an exception fails it, a cancellation cancels it. */
+    private fun <T> future(block: suspend () -> T): ListenableFuture<T> {
+        val future = SettableFuture.create<T>()
         scope.launch {
             try {
-                val resumed = engine.resumption()
-                if (resumed != null) future.set(resumed) else future.setException(UnsupportedOperationException("Nothing to resume"))
+                future.set(block())
             } catch (e: CancellationException) {
                 future.cancel(false)
                 throw e
@@ -179,9 +256,13 @@ internal class LibraryCallback(private val engine: PlayerEngine, private val sco
         return future
     }
 
-    override fun onPlaybackResumption(
-        mediaSession: MediaSession, controller: MediaSession.ControllerInfo,
-    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = onPlaybackResumption(mediaSession, controller, true)
+    companion object {
+        const val PLAY_TIMEOUT_MS = 5_000L
+
+        /** [page] of [items] at [pageSize] a page; everything for a page size below 1. */
+        fun <T> pageOf(items: List<T>, page: Int, pageSize: Int): List<T> =
+            if (pageSize < 1) items else items.drop(page.coerceAtLeast(0) * pageSize).take(pageSize)
+    }
 }
 
 /**
@@ -192,8 +273,8 @@ internal class LibraryCallback(private val engine: PlayerEngine, private val sco
  *   item for ExoPlayer); they step chapters. The change is announced to the listeners the session gave, and anything
  *   ExoPlayer announces reaches them as these commands, not its own.
  * - A seek to another playlist item (Auto's queue) plays it through the engine, as a queue row tap does.
- * - Items handed back that are already the engine's (a resumption's) aren't loaded again: the engine is the only thing
- *   that loads the player.
+ * - Items handed back that are already the engine's (a resumption's, or a controller's request resolved through
+ *   [LibraryCallback]) aren't loaded or added again: the engine is the only thing that loads the player.
  */
 internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine) : ForwardingPlayer(player) {
     private val listeners = LinkedHashMap<Player.Listener, Player.Listener>()   // as given → as registered
@@ -310,6 +391,16 @@ internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine
     }
     override fun setMediaItem(mediaItem: MediaItem, startPositionMs: Long) {
         if (!isEngines(listOf(mediaItem))) super.setMediaItem(mediaItem, startPositionMs)
+    }
+
+    // The engine's own items handed back after a controller's add ([LibraryCallback.onAddMediaItems]): already loaded.
+    override fun addMediaItems(mediaItems: List<MediaItem>) { if (!isEngines(mediaItems)) super.addMediaItems(mediaItems) }
+    override fun addMediaItems(index: Int, mediaItems: List<MediaItem>) {
+        if (!isEngines(mediaItems)) super.addMediaItems(index, mediaItems)
+    }
+    override fun addMediaItem(mediaItem: MediaItem) { if (!isEngines(listOf(mediaItem))) super.addMediaItem(mediaItem) }
+    override fun addMediaItem(index: Int, mediaItem: MediaItem) {
+        if (!isEngines(listOf(mediaItem))) super.addMediaItem(index, mediaItem)
     }
 
     private fun isEngines(items: List<MediaItem>): Boolean =

@@ -41,13 +41,18 @@ class MediaControllerPlayerHub(
     private val scope: CoroutineScope,
     /** A cover path as the session items' artwork URI; see [PlaybackService.Dependencies]. */
     artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
+    /**
+     * Android Auto's browse tree, made on first use: the app's tree plays through this hub, so it can't exist before
+     * it. Null serves an empty root.
+     */
+    browse: (() -> MediaBrowseTree)? = null,
 ) : PlayerHub {
     private val app = context.applicationContext
     private var controller: ListenableFuture<MediaController>? = null
     private val pending = ArrayDeque<(PlayerEngine) -> Unit>()
 
     init {
-        PlaybackService.install(PlaybackService.Dependencies(media, playback, artwork))
+        PlaybackService.install(PlaybackService.Dependencies(media, playback, artwork, browse?.let(::LazyBrowseTree)))
         connect()
         scope.launch {
             PlaybackService.engine.filterNotNull().collect { engine ->

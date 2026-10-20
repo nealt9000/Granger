@@ -65,6 +65,9 @@ import app.granger.core.media.FolderSource
 import app.granger.core.media.MediaStoreSource
 import app.granger.core.media.PhoneScanner
 import app.granger.media.Artwork
+import app.granger.media.AutoBrowseTree
+import app.granger.media.PlayResumer
+import app.granger.media.SongPlayer
 import app.granger.media.MediaDownloader
 import app.granger.media.MediaSharing
 import app.granger.media.PhoneMediaScans
@@ -235,7 +238,17 @@ class AppContainer(context: Context) {
             context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
             // A cover outside the provider's roots keeps its file:// URI, which the in-process notification can still read.
             artwork = { path -> artwork.uri(path) ?: Uri.fromFile(File(path)) },
+            // Made on first use (the tree plays through this hub): Android Auto's first browse.
+            browse = { autoBrowse },
         )
+    }
+
+    /** Plays a song in its album, from that song (Search, Android Auto). */
+    val songs: SongPlayer by lazy { SongPlayer(media, playerHub) }
+
+    /** What Android Auto browses, searches and plays; reaches the session through [playerHub]. */
+    val autoBrowse: AutoBrowseTree by lazy {
+        AutoBrowseTree(media, playlists, playback, mediaIndex, PlayResumer(media, playlists, playerHub), songs, playerHub, artwork)
     }
 
     /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */

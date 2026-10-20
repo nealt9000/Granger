@@ -83,7 +83,6 @@ import app.granger.search.MediaSearch
 import app.granger.search.SearchViewModel
 import android.content.Context
 import app.granger.media.PlayResumer
-import app.granger.media.SongPlayer
 import app.granger.settings.ComponentOtherAppsSharing
 import app.granger.settings.DaoMediaFolders
 import app.granger.settings.MediaSettings
@@ -378,7 +377,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
     val scope = rememberCoroutineScope()
     // A song tapped in Search plays its album from there.
-    val songs = remember { SongPlayer(container.media, container.playerHub) }
+    val songs = container.songs
     fun showTab(tabId: Long) {
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }

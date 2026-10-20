@@ -543,7 +543,7 @@ git commit -m "Media M3: a read-only artwork provider for the session, Android A
   ) : MediaBrowseTree
   ```
 - Items: browsable folders set `isBrowsable = true, isPlayable = false, mediaType` (`MEDIA_TYPE_FOLDER_ALBUMS`, `_ARTISTS`, `_PLAYLISTS`, `_AUDIO_BOOKS`); albums and audiobooks get `MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE/PLAYABLE = CONTENT_STYLE_GRID`; every item with a cover sets `artworkUri` from `Artwork.uri`.
-- `onSetMediaItems(session, controller, items, startIndex, startPositionMs)`: `browse.play(items[startIndex].mediaId, items[startIndex].requestMetadata.searchQuery)`, then waits (at most 5 s) until the engine's `ui` shows the requested item loaded, and returns the engine's items, index and position. On failure, a failed future (`SessionError.ERROR_BAD_VALUE`).
+- `onSetMediaItems(session, controller, items, startIndex, startPositionMs)`: `browse.play(items[startIndex].mediaId, items[startIndex].requestMetadata.searchQuery)`, then waits (at most 5 s) until the engine's `ui` shows the requested item loaded, and returns the engine's items, index and position. On failure, a failed future (`SessionError.ERROR_BAD_VALUE`). *(As built: the wait is `PlayerEngine.loadedItems()`, a call that runs in turn after the hub call the tree made and answers with the engine's items, index and position, under a 5 s timeout; a failure is a failed future. `MediaControllerPlayerHub` takes the tree as a provider, `browse: (() -> MediaBrowseTree)?`, to break the hub ↔ tree cycle; `Dependencies.browse` stays `MediaBrowseTree?`.)*
 
 - [ ] **Step 1: Write the failing tests.**
 
