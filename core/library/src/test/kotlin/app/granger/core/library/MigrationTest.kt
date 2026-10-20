@@ -347,7 +347,7 @@ class MigrationTest {
         }
         assertThat(types).containsExactly(
             listOf("literature", "Literature", 1, 0),
-            listOf("maps", "Maps", 1, 4),
+            listOf("maps", "Maps", 1, 5),
             listOf("u-ref", "Reference", 0, 4),
         ).inOrder()
     }

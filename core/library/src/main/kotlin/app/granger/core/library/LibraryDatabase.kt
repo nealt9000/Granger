@@ -133,7 +133,11 @@ abstract class LibraryDatabase : RoomDatabase() {
         val MIGRATION_9_10 = object : Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE `collections` ADD COLUMN `parentId` TEXT")
-                seedBuiltIns(db, BUILT_INS.drop(4))
+                // Maps takes the next free place: a type the user made may already hold 4 (Neal's "Reference" does).
+                db.execSQL(
+                    "INSERT OR IGNORE INTO media_types (id, name, builtIn, sortOrder) " +
+                        "SELECT 'maps', 'Maps', 1, MAX(4, COALESCE(MAX(sortOrder), -1) + 1) FROM media_types",
+                )
                 db.execSQL(
                     "INSERT OR IGNORE INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) " +
                         "SELECT 'c:${Filing.FOLDER_KEY}', '${Filing.FOLDER_NAME}', 'literature', 0, '${Filing.FOLDER_KEY}', NULL " +
