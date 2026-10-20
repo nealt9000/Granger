@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** An album artist found by [MediaIndex.search]: [albumCount] of their present albums, and one of their covers. */
 data class ArtistHit(val name: String, val albumCount: Int, val coverPath: String?)
@@ -54,7 +55,7 @@ data class MediaWork(
  * genres 1; description 0.5), plus 2 when the query's words, in order, appear among the title's words (punctuation aside). Ties by title, then id.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineDispatcher = Dispatchers.Default) {
+class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute: CoroutineDispatcher = Dispatchers.Default) {
     /** The last snapshot built; a failed build or a failed library flow falls back to it (or to an empty one). */
     @Volatile private var last: Snapshot? = null
 
@@ -88,12 +89,13 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
         if (words.isEmpty()) return MediaResults()
         val phrase = words.joinToString(" ")
         val s = current()
-        return MediaResults(
+        // Scanning every document is the caller's cost otherwise, and Search calls from the main thread.
+        return withContext(compute) { MediaResults(
             artists = rank(s.artists, words, prefixLast = true, phrase, artists),
             albums = rank(s.albums, words, prefixLast = true, phrase, albums),
             songs = rank(s.songs, words, prefixLast = true, phrase, songs),
             audiobooks = rank(s.audiobooks, words, prefixLast = true, phrase, audiobooks),
-        )
+        ) }
     }
 
     /** Albums and audiobooks whose text holds every word of [words] as whole words (Research's gate), best first. */
@@ -102,7 +104,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, compute: CoroutineD
         if (folded.isEmpty() || limit <= 0) return emptyList()
         val s = current()
         val phrase = folded.joinToString(" ")
-        return rank(s.works, folded, prefixLast = false, phrase, limit)
+        return withContext(compute) { rank(s.works, folded, prefixLast = false, phrase, limit) }
     }
 
     /** The present album ("album:<albumKey>") or audiobook (its id) with this id; null when it's gone or MISSING. */
