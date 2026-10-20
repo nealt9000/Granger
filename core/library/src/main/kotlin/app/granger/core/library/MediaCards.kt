@@ -6,7 +6,7 @@ import app.granger.core.research.SourceMeta
 
 /**
  * Research's catalogue card for an album or audiobook: one per work, never per song. "Label: value" lines, blank values
- * left off, with the track or chapter titles cut at [TRACKS_CHARS] and the description at [ABOUT_CHARS].
+ * left off, with the track titles ("Tracks") or chapter titles ("Chapters") cut at [TRACKS_CHARS] and the description at [ABOUT_CHARS].
  */
 object MediaCards {
     private const val TRACKS_CHARS = 400
@@ -22,7 +22,7 @@ object MediaCards {
             "Narrator" to names(work.narrators),
             "Genre" to names(work.genres),
             "Year" to work.year,
-            "Tracks" to cut(work.partTitles.map(::oneLine).filter { it.isNotEmpty() }.joinToString("; "), TRACKS_CHARS),
+            (if (work.isAlbum) "Tracks" else "Chapters") to cut(work.partTitles.map(::oneLine).filter { it.isNotEmpty() }.joinToString("; "), TRACKS_CHARS),
             "About" to cut(oneLine(work.description), ABOUT_CHARS),
             "In your library as" to if (work.isAlbum) "Music album" else "Audiobook",
         ).map { (label, value) -> label to oneLine(value) }

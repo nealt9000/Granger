@@ -18,20 +18,26 @@ data class RankingConfig(
 /** Picks which passages go into the prompt: a cheap lexical preselect, then a threshold on embeddings or keywords. */
 object Ranking {
     /** Best-first by lexical score then search score, at most [RankingConfig.perDocument] per article or book chapter
-     * (a source and location), not per pack. */
+     * (a source and location), not per pack. Media passages never take one of the [RankingConfig.preselect] slots:
+     * the other passages are preselected exactly as if there were none, and the media ones (the finder sends at most
+     * two) are carried alongside, in their best-first place, for ranking and the media cap to judge. */
     fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
-        val perDocument = HashMap<Pair<String, String>, Int>()
         val score = LexicalScore.scorer(keywords)
         // Scored once each: a sort comparator would score every passage many times over.
-        return passages
+        val sorted = passages
             .map { it to score(it) }
             .sortedWith(compareByDescending<Pair<Passage, Double>> { it.second }.thenByDescending { it.first.searchScore })
             .map { it.first }
-            .filter { p ->
-                val seen = perDocument.merge(p.sourceId to p.location, 1, Int::plus)!!
-                seen <= config.perDocument
-            }
-            .take(config.preselect)
+        // Each kind fills its own slots; the result keeps the best-first order across both, so ties stay as they were.
+        val perDocument = HashMap<Pair<String, String>, Int>()
+        var others = 0
+        var media = 0
+        return sorted.filter { p ->
+            val isMedia = p.kind == SourceKind.MEDIA
+            if ((if (isMedia) media else others) >= config.preselect) return@filter false
+            val seen = perDocument.merge(p.sourceId to p.location, 1, Int::plus)!!
+            (seen <= config.perDocument).also { kept -> if (kept) { if (isMedia) media++ else others++ } }
+        }
     }
 
     fun cosine(a: FloatArray, b: FloatArray): Float {

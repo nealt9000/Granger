@@ -131,6 +131,21 @@ class RankingTest {
         assertThat(Ranking.capMedia(ranked, asked = false, config)).isEqualTo(ranked)
     }
 
+    @Test fun mediaNeverTakesPreselectSlots() {
+        val strong = (1..12).map { passage("S$it", "steam engine", it) }
+        val weaker = (13..15).map { passage("S$it", "steam", it) }
+        val media = listOf(
+            Passage(SourceKind.MEDIA, "album:a1", "Steam", text = "Album: Steam\nTracks: steam engine"),
+            Passage(SourceKind.MEDIA, "album:a2", "Engines", text = "Album: Engines\nTracks: steam engine"),
+        )
+        val keywords = listOf("steam", "engine")
+        val without = Ranking.preselect(strong + weaker, keywords, config)
+        val with = Ranking.preselect(media + strong + weaker, keywords, config)
+        assertThat(with.filter { it.kind != SourceKind.MEDIA }).isEqualTo(without)
+        assertThat(without).isEqualTo(strong)
+        assertThat(with.filter { it.kind == SourceKind.MEDIA }).containsExactlyElementsIn(media)
+    }
+
     @Test fun rankingCanKeepMoreThanLargeForTheCap() {
         val ps = (1..20).map { passage("S$it", "steam", it) }
         assertThat(Ranking.byLexical(ps, listOf("steam"), config, limit = 12)).hasSize(12)

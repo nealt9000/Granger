@@ -62,7 +62,7 @@ class MediaCardsTest {
             Audiobook: Wicked
             Author: Gregory Maguire
             Narrator: John McDonough
-            Tracks: Part One; Part Two
+            Chapters: Part One; Part Two
             About: The life and times of the Wicked Witch.
             In your library as: Audiobook
             """.trimIndent(),
