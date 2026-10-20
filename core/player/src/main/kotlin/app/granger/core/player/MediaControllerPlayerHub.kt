@@ -116,6 +116,7 @@ class MediaControllerPlayerHub(
     override fun cycleRepeat() = send { it.cycleRepeat() }
     override fun moveInQueue(from: Int, to: Int) = send { it.moveInQueue(from, to) }
     override fun removeFromQueue(i: Int) = send { it.removeFromQueue(i) }
+    override fun playQueueItem(position: Int) = send { it.playQueueItem(position) }
     override fun playNext(trackIds: List<String>) = send { it.playNext(trackIds) }
     override fun addToQueue(trackIds: List<String>) = send { it.addToQueue(trackIds) }
     override fun setSpeed(speed: Float) = send { it.setSpeed(speed) }

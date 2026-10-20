@@ -8,6 +8,7 @@ import android.os.Looper
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -40,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Test
@@ -886,10 +888,123 @@ class PlayerEngineTest {
         idle()
         assertThat(rg.gainOf(ids[0])).isWithin(0.01f).of(0.5f)
     }
+
+    // ---- the session tells the truth (M3 Task 6) ----
+
+    /**
+     * The chapter's title replaces the item's metadata in place, mid-file and while playing: the item isn't
+     * re-prepared (the state stays READY, no discontinuity, the position runs on), so no gap. The chapter check runs
+     * on the engine's 1 s tick, so the boundary is early (0.5 s) and the run long enough for a tick to cross it.
+     */
+    @Test fun chapterChangeUpdatesTheTitleWithoutRepreparing() {
+        val id = "audiobook:phone:mid"
+        val file = track("mid-file", fixture("chapters.mp3"), 3_000, audiobookId = id)
+        val book = saveBook(id, "Mid", listOf(file), listOf(
+            AudiobookChapter(id, 0, "Opening", file.id, 0L, 500L),
+            AudiobookChapter(id, 1, "Middle", file.id, 500L, 2_500L),
+        ))
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilPosition(0, 300)
+        assertThat(engine.player.currentMediaItem!!.mediaMetadata.title.toString()).isEqualTo("Opening")
+
+        val states = mutableListOf<Int>()
+        val discontinuities = mutableListOf<Int>()
+        val titles = mutableListOf<String>()
+        engine.player.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) { states += playbackState }
+            override fun onPositionDiscontinuity(oldPosition: Player.PositionInfo, newPosition: Player.PositionInfo, reason: Int) {
+                discontinuities += reason
+            }
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) { titles += mediaMetadata.title.toString() }
+        })
+        run(engine.player).untilPosition(0, 2_500)
+        assertThat(engine.player.currentMediaItem!!.mediaMetadata.title.toString()).isEqualTo("Middle")
+        assertThat(engine.player.mediaMetadata.title.toString()).isEqualTo("Middle")
+        assertThat(titles).contains("Middle")
+        assertThat(states).isEmpty()                       // never left READY: not re-prepared
+        assertThat(discontinuities).isEmpty()               // the position ran on
+        assertThat(engine.player.playbackState).isEqualTo(Player.STATE_READY)
+        assertThat(engine.player.currentPosition).isAtLeast(2_480L)
+        assertThat(engine.player.mediaItemCount).isEqualTo(1)
+    }
+
+    @Test fun bookItemsCarryAuthorAndBookAsArtistAndAlbum() {
+        val book = fakeBook("tales", 10_000, 10_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        val items = (0 until engine.player.mediaItemCount).map { engine.player.getMediaItemAt(it).mediaMetadata }
+        assertThat(items.map { it.title.toString() }).containsExactly("Chapter 1", "Chapter 2").inOrder()
+        items.forEach {
+            assertThat(it.artist.toString()).isEqualTo("Author")
+            assertThat(it.albumTitle.toString()).isEqualTo("tales")
+        }
+    }
+
+    @Test fun playQueueItemPlaysThatPositionInPlayOrder() {
+        val ids = musicFixtures()
+        val engine = newEngine()
+        engine.playTracks(ids, 3, true, PlaySource("songs", "Songs"))
+        idle()
+        engine.playPause(); idle()
+        val queue = engine.queue.value.map { it.id }
+        assertThat(queue[2]).isNotEqualTo(ids[2])           // shuffled: play order isn't item order
+
+        engine.playQueueItem(2)
+        idle()
+        assertThat(engine.player.currentMediaItem!!.mediaId).isEqualTo(queue[2])
+        assertThat(engine.player.currentPosition).isEqualTo(0L)
+        assertThat(engine.player.playWhenReady).isTrue()
+        assertThat((engine.ui.value.now as NowPlaying.Music).index).isEqualTo(2)
+        assertThat(engine.queue.value.map { it.id }).isEqualTo(queue)   // the queue itself is unchanged
+    }
+
+    @Test fun resumptionRestoresTheSavedBookWithoutSavingFirst() {
+        val book = fakeBook("resume", 60_000, 60_000)
+        val first = newEngine()
+        first.playAudiobook(book.id)
+        idle()
+        run(first.player).untilPosition(1, 50_000)
+        first.playPause()
+        idle()
+        first.release(save = false)                  // the process dies
+        val saved = bookState(book.id)!!
+        assertNear(saved.positionMs, 50_000L)
+
+        clock.advanceTime(60_000)
+        val second = newEngine()
+        var result: MediaSession.MediaItemsWithStartPosition? = null
+        CoroutineScope(Dispatchers.Main.immediate).launch { result = second.resumption() }
+        idle()
+        val r = result!!
+        assertThat(r.mediaItems.map { it.mediaId }).containsExactly("track:phone:resume-0", "track:phone:resume-1").inOrder()
+        assertThat(r.startIndex).isEqualTo(1)
+        assertThat(r.startPositionMs).isEqualTo(saved.positionMs)
+        assertThat(bookState(book.id)).isEqualTo(saved)              // nothing written before the seek lands
+        assertThat(second.player.playWhenReady).isFalse()
+
+        run(second.player).untilState(Player.STATE_READY)
+        idle()
+        assertThat(second.player.currentPosition).isEqualTo(saved.positionMs)
+        assertThat(bookState(book.id)).isEqualTo(saved)              // a restore leaves the saved row as it was
+    }
+
+    @Test fun resumptionWithNothingSavedIsNull() {
+        val engine = newEngine()
+        var done = false
+        var result: MediaSession.MediaItemsWithStartPosition? = null
+        CoroutineScope(Dispatchers.Main.immediate).launch { result = engine.resumption(); done = true }
+        idle()
+        assertThat(done).isTrue()
+        assertThat(result).isNull()
+        assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+    }
 }
 
 /** Long synthetic files for `fake://<ms>/<name>`; everything else goes to the real extractors. */
-private class TestSources(context: Context) : MediaSource.Factory {
+internal class TestSources(context: Context) : MediaSource.Factory {
     private val real = DefaultMediaSourceFactory(context)
     override fun setDrmSessionManagerProvider(provider: DrmSessionManagerProvider) = apply { real.setDrmSessionManagerProvider(provider) }
     override fun setLoadErrorHandlingPolicy(policy: LoadErrorHandlingPolicy) = apply { real.setLoadErrorHandlingPolicy(policy) }

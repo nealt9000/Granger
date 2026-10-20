@@ -116,6 +116,9 @@ interface PlayerHub {
 
     /** [moveInQueue] and [removeFromQueue] take positions in [queue] (play order). */
     fun setShuffle(on: Boolean); fun cycleRepeat(); fun moveInQueue(from: Int, to: Int); fun removeFromQueue(i: Int)
+
+    /** Plays the queue's [position] (play order, as the queue sheet lists it) from its start. Music only. */
+    fun playQueueItem(position: Int)
     fun playNext(trackIds: List<String>); fun addToQueue(trackIds: List<String>)
     fun setSpeed(speed: Float); fun setSkipSilence(on: Boolean); fun setVolumeBoost(mb: Int)
     fun startSleepTimer(setting: SleepSetting); fun cancelSleepTimer()

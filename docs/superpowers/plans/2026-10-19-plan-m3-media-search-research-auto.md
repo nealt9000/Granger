@@ -519,7 +519,7 @@ git commit -m "Media M3: a read-only artwork provider for the session, Android A
 
 **Files:**
 - Create: `core/player/src/main/kotlin/app/granger/core/player/MediaBrowseTree.kt` (interface)
-- Modify: `core/player/src/main/kotlin/app/granger/core/player/PlaybackService.kt` (`LibraryCallback`: `onGetLibraryRoot`, `onGetChildren`, `onGetItem`, `onSearch`, `onGetSearchResult`, `onSetMediaItems`, `onAddMediaItems`; `SessionPlayer.setMediaItems`/`addMediaItems` no-op for the engine's own items; `Dependencies` gains `browse: MediaBrowseTree?`)
+- Modify: `core/player/src/main/kotlin/app/granger/core/player/PlaybackService.kt` (`LibraryCallback`: `onGetLibraryRoot`, `onGetChildren`, `onGetItem`, `onSearch`, `onGetSearchResult`, `onSetMediaItems`, `onAddMediaItems`; `SessionPlayer.addMediaItems` no-op for the engine's own items (Task 6 already made `setMediaItems`/`setMediaItem` no-ops for them, for resumption); `LibraryCallback` is already an `internal class LibraryCallback(engine, scope)` with `onPlaybackResumption` (Task 6), so it gains the tree as a constructor argument; `Dependencies` gains `browse: MediaBrowseTree?`)
 - Create: `app/src/main/kotlin/app/granger/media/AutoBrowseTree.kt`
 - Create: `app/src/main/res/xml/automotive_app_desc.xml`; Modify: `app/src/main/AndroidManifest.xml` (car meta-data)
 - Modify: `app/src/main/kotlin/app/granger/GrangerApp.kt` (`MediaControllerPlayerHub` installs the tree)
