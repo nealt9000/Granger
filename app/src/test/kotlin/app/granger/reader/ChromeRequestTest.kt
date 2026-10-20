@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class ChromeRequestTest {
-    @Test fun aReaderEnteredAfterEarlierSwipesStaysImmersive() {
+    @Test fun aSwipeFromBeforeTheReaderWasEnteredIsNotReplayed() {
         assertThat(isNewChromeRequest(atEntry = 3, current = 3)).isFalse()
     }
 

@@ -49,7 +49,12 @@ class ReaderWebView(
         settings.safeBrowsingEnabled = false
         // With the app theme's isLightTheme=false, pages that don't style themselves for dark are darkened.
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
-            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+            // A WebView that claims the feature but refuses it (Robolectric's does) just keeps its own colours.
+            try {
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+            } catch (e: UnsupportedOperationException) {
+                Unit
+            }
         }
         setBackgroundColor(GrangerColors.Background.toArgb()) // no white flash before the first page paints
         addJavascriptInterface(GrangerBridge(onToggleChrome), ReaderPageScript.BRIDGE_NAME)

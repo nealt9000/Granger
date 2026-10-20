@@ -366,7 +366,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val destination = entry?.destination
     val readerTabId = entry?.readingTabId()
     LaunchedEffect(readerTabId) { currentTab.id.value = readerTabId }
-    // Non-reader screens always show the rail; the reader shows it only with its chrome (a middle tap).
+    // Non-reader screens always show the rail; a reader shows it with its chrome (up on entry, a middle tap hides it).
     LaunchedEffect(destination) { if (destination?.isReading() != true) shell.railVisible = true else skipTransition = false }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
@@ -450,7 +450,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         selected = selected,
         onToggleExpanded = { shell.expanded = !shell.expanded },
         onEdgeSwipe = {
-            // Immersive reader: the swipe brings the chrome (and with it the rail) up; elsewhere it opens the rail.
+            // Full-screen reader: the swipe brings the chrome (and with it the rail) up; elsewhere it opens the rail.
             if (readerTabId != null && !shell.railVisible) showChromeRequest++ else shell.expanded = !shell.expanded
         },
         onTool = { tool ->
@@ -479,8 +479,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
         },
         showResearch = showResearch,
-        // Over the page, so a middle tap doesn't narrow it and reflow the text.
-        railOverContent = readerTabId != null,
+        reading = readerTabId != null,
         miniPlayer = if (player == null || miniPlacement == MiniPlayerPlacement.HIDDEN) {
             null
         } else {
@@ -494,8 +493,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
         },
-        // The reader's page mustn't reflow when its chrome (and the mini-player with it) comes up.
-        miniPlayerOverContent = miniPlacement == MiniPlayerPlacement.OVER,
     ) {
         NavHost(
             nav,
