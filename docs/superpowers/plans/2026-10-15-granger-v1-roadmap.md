@@ -399,10 +399,16 @@ Neal's calls (2026-10-19 and 2026-10-20):
 
 Fixed in the walkthrough: Media3's `MediaButtonReceiver` was never declared, so a play press after the process died went nowhere (`320021b`).
 
-Asked for in the walkthrough (not built):
-- **Search:** with a full library, each group (Titles included) should show its first 8–10 results, with a button to see the whole group.
-- **Readers:** going back to an e-book or Wikipedia reader tab goes straight to full screen. It should open with the toolbar showing and fit the content, as the rest of the app does; a tap in the middle then goes full screen.
-- **Research:** on factual questions, fiction (*Metamorphoses*, *War of the Worlds*) ranks the same as reference works. Weighing the kind of source is project 2's grounding work, measured on the tuning split.
+Built after the walkthrough, at Neal's request (branch `m3-followups-search-reader`, 1533 JVM tests):
+- **Search groups show their first results, with Show all** (`04ff58c`, `93d9e53`): 8 for Titles, article text and books; artists 3, albums 5, songs 5, audiobooks 5. The button says "Show all N …", or "Show the first N …" when a fetch limit was reached; a new query folds every group. Titles: each pack is asked for 20 and the packs take turns, up to 50, so the first 8 mix packs.
+- **Readers open with the toolbar showing** (`c5546c8`, `47c1864`): opening a reader or coming back to its tab shows the top bar, the collapsed rail and the system bars, with the page fitted beside the rail and below the bars. A middle tap goes full screen; rotation keeps full screen. The rail and mini-player sit beside the page, no longer over it. The insets don't follow the system bars' animation. Readium's own inset padding is off, and the e-book panels no longer leave a strip by the rail.
+- Tried and reverted (Neal: both just as jarring on the phone):
+  - fixed margins, where the page keeps one size and the bars show over its margins (`6479788`, reverted in `2b7578b`);
+  - keeping the reading spot across the resize: a scroll anchor in the WebView, and Readium's locator restored after re-pagination (`be0d3bf`, reverted).
+
+  Toggling full screen still reflows the page, so the text moves on each tap.
+
+Research, raised in the walkthrough (not built): on factual questions, fiction (*Metamorphoses*, *War of the Worlds*) ranks the same as reference works. Weighing the kind of source is project 2's grounding work, measured on the tuning split.
 
 Still open:
 
@@ -443,6 +449,12 @@ Widget:
 - The cover is decoded on the drawing path (cached, ≤ 300 px). Every change also calls `updateAll` (not profiled).
 - The second button's label is "Back" and doesn't follow the skip setting.
 - A boot or resize update starts the process, which binds the service and restores the player paused.
+
+Readers and Search after the follow-ups:
+- Toggling full screen reflows the page (see above). A better feel may need a different model: a bar that slides with scrolling, or an animated resize. Not chosen yet.
+- Titles ask every pack for 20 suggestions per keystroke; not timed on the Pixel.
+- `ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.
+- Agent worktrees don't check out the taglib submodule: run `git submodule update --init --recursive` in a new worktree before building.
 
 Device checks still to do:
 - Deleting a phone file in the Files app, then restoring it (skipped in M1, M2 and M3).
