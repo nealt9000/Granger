@@ -91,8 +91,9 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * The app frame: the side rail beside every screen, on the left or the right ([side]; only the rail moves, the text
  * and icons don't flip). The narrow rail sits in the layout; the expanded one is drawn over the content with a scrim,
  * sliding in from the rail's edge. An edge swipe (within 24 dp of the rail's edge, inwards, calling [onEdgeSwipe]) or tapping the rail's background,
- * its bookmark tiles, History or its recents expands it (only the tools go straight to their screens from the narrow rail;
- * [onTab], [onHistory] and the recent callbacks are reached from the expanded one); tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
+ * its tiles or History expands it (only the tools go straight to their screens from the narrow rail;
+ * [onTab], [onHistory], [onSearch], [onChat] and [onPlay] are reached from the expanded one; a long press on any item
+ * offers [actions]); tapping the scrim, Back, or choosing an item collapses it. [miniPlayer] is drawn above [content] in the
  * content column, pushing it down, and takes the status bar's inset for itself. In a reader ([reading]) the rail can
  * be hidden for full-screen reading; the edge swipe then stays live, as the way back to the chrome. [showResearch] is
  * false on phones below the ASK tier, which hides the Research tool.
@@ -107,11 +108,11 @@ fun GrangerShell(
     onEdgeSwipe: () -> Unit,
     onTool: (RailTool) -> Unit,
     onTab: (Long) -> Unit,
-    onCloseTab: (Long) -> Unit,
     onHistory: () -> Unit,
-    onRecentSearch: (String) -> Unit,
-    onRecentChat: (Long) -> Unit = {},
-    onRecentPlay: (RecentItem.Play) -> Unit = {},
+    onSearch: (String) -> Unit,
+    onChat: (Long) -> Unit = {},
+    onPlay: (RailEntry.Play) -> Unit = {},
+    actions: RailEntryActions = RailEntryActions(),
     side: RailSide = RailSide.LEFT,
     showResearch: Boolean = false,
     reading: Boolean = false,
@@ -131,7 +132,7 @@ fun GrangerShell(
         val right = side == RailSide.RIGHT
         Row(Modifier.fillMaxSize()) {
             if (railVisible && !right) {
-                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onCloseTab, side)
+                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, actions, side)
             }
             Column(
                 Modifier
@@ -152,7 +153,7 @@ fun GrangerShell(
                 ) { content() }
             }
             if (railVisible && right) {
-                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, onCloseTab, side)
+                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, actions, side)
             }
         }
         if (edgeSwipeActive) {
@@ -188,11 +189,11 @@ fun GrangerShell(
                 showResearch = showResearch,
                 onTool = { onTool(it); onToggleExpanded() },
                 onTab = { onTab(it); onToggleExpanded() },
-                onCloseTab = onCloseTab,
                 onHistory = { onHistory(); onToggleExpanded() },
-                onRecentSearch = { onRecentSearch(it); onToggleExpanded() },
-                onRecentChat = { onRecentChat(it); onToggleExpanded() },
-                onRecentPlay = { onRecentPlay(it); onToggleExpanded() },
+                onSearch = { onSearch(it); onToggleExpanded() },
+                onChat = { onChat(it); onToggleExpanded() },
+                onPlay = { onPlay(it); onToggleExpanded() },
+                actions = actions,
                 side = side,
             )
         }

@@ -15,6 +15,10 @@ import app.granger.core.library.CollectionRow
 import app.granger.core.library.HistoryEntry
 import app.granger.core.library.Library
 import app.granger.core.library.MAX_BACK_STACK
+import app.granger.core.library.MAX_RAIL_PINS
+import app.granger.core.library.PinResult
+import app.granger.core.library.RailPin
+import app.granger.core.library.RailPins
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
@@ -29,6 +33,7 @@ import app.granger.core.zim.ZimMetadata
 import app.granger.ebook.BookOpener
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.RailSide
+import app.granger.shell.RailHidden
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.publication.Metadata
@@ -308,6 +313,37 @@ class FakeBookOpener(var publication: Publication? = testPublication()) : BookOp
         opened += file
         return publication
     }
+}
+
+/** [RailPins] in memory, with the Room version's rules; [clock] stamps each pin. */
+class FakeRailPins : RailPins {
+    val pinList = MutableStateFlow<List<RailPin>>(emptyList())
+    val dropped = mutableListOf<String>()
+    private var clock = 1_000L
+
+    override val pins: Flow<List<RailPin>> = pinList.map { list -> list.sortedByDescending { it.pinnedAt } }
+
+    override suspend fun pin(key: String): PinResult = when {
+        pinList.value.any { it.key == key } -> PinResult.ALREADY_PINNED
+        pinList.value.size >= MAX_RAIL_PINS -> PinResult.FULL
+        else -> {
+            pinList.update { it + RailPin(key, ++clock) }
+            PinResult.PINNED
+        }
+    }
+
+    override suspend fun unpin(key: String) = pinList.update { list -> list.filterNot { it.key == key } }
+
+    override suspend fun dropMissing(keys: Collection<String>) {
+        dropped += keys
+        pinList.update { list -> list.filterNot { it.key in keys } }
+    }
+}
+
+/** [RailHidden] in memory. */
+class FakeRailHidden : RailHidden {
+    override val hidden = MutableStateFlow<Map<String, Long>>(emptyMap())
+    override fun hide(key: String, at: Long) = hidden.update { it + (key to at) }
 }
 
 /** [AppearancePrefs] in memory. */
