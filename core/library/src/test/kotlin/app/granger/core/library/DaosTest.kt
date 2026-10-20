@@ -61,7 +61,7 @@ class DaosTest {
 
     @Test fun freshDatabaseHasBuiltInMediaTypes() = runTest {
         val types = db.shelfDao().observeMediaTypes().first()
-        assertThat(types.map { it.id }).containsExactly("literature", "audiobooks", "music", "video").inOrder()
+        assertThat(types.map { it.id }).containsExactly("literature", "audiobooks", "music", "video", "maps").inOrder()
         assertThat(types.all { it.builtIn }).isTrue()
     }
 

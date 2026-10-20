@@ -23,7 +23,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** One collection's packs and books. Rename and Delete are offered only when `ui.collection.userCreated`. */
+/**
+ * One collection's packs and books, or a folder's collections (`ui.children`). Rename and Delete are offered only
+ * when `ui.collection.userCreated`; a folder offers nothing.
+ */
 class CollectionViewModel(
     private val collectionId: String,
     private val shelves: Shelves,

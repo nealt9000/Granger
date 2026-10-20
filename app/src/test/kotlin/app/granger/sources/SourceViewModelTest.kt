@@ -179,6 +179,56 @@ class SourceViewModelTest {
             .containsExactly("Medical", "Science & Math", "How-to", "Q&A", "Maps", "Other", "Zebra").inOrder()
     }
 
+    private val kiwixCatalog = catalogOf(
+        (1..20).map { kiwix("se$it", zimName = "se_$it") } +
+            listOf(kiwix("m1", "Maps"), kiwix("m2", "Maps"), kiwix("med", "Medical", featured = true), kiwix("lone", "Medical")),
+    )
+
+    @Test fun kiwixChipsListTheCategoriesInOrder() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = kiwixCatalog)
+        val ui = viewModel(CatalogScope.KIWIX).ui.value
+        assertThat(ui.categories).containsExactly("Medical", "Q&A", "Maps").inOrder()
+        assertThat(ui.category).isNull()
+    }
+
+    @Test fun aChipShowsOneCategoryWholeWithItsFeaturedPacks() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = kiwixCatalog)
+        val vm = viewModel(CatalogScope.KIWIX)
+        vm.setCategory("Q&A")
+        testScheduler.advanceUntilIdle()
+        val qa = vm.ui.value.sections.single()
+        assertThat(qa.title).isEqualTo("Q&A")
+        assertThat(qa.rows).hasSize(20)
+        assertThat(qa.foldable).isFalse()
+
+        vm.setCategory("Medical")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single().rows.map { it.id }).containsExactly("med", "lone").inOrder()
+
+        vm.setCategory(null)
+        testScheduler.advanceUntilIdle()
+        val sections = vm.ui.value.sections
+        assertThat(sections.map { it.title }).containsExactly("Recommended", "Medical", "Q&A", "Maps").inOrder()
+        assertThat(sections.single { it.title == "Q&A" }.rows).hasSize(SourceViewModel.FOLDED_ROWS)
+    }
+
+    @Test fun aQuerySearchesWithinTheChosenCategory() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = kiwixCatalog)
+        val vm = viewModel(CatalogScope.KIWIX)
+        vm.setCategory("Maps")
+        vm.setQuery("se_1")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections).isEmpty()
+        vm.setCategory("Q&A")
+        testScheduler.advanceUntilIdle()
+        // se_1 and se_10 … se_19.
+        assertThat(vm.ui.value.sections.single().rows).hasSize(11)
+    }
+
+    @Test fun grangerHasNoChips() = runTest(main.dispatcher) {
+        assertThat(viewModel().ui.value.categories).isEmpty()
+    }
+
     @Test fun presetsOnlyOnGranger() = runTest(main.dispatcher) {
         assertThat(viewModel(CatalogScope.GRANGER).ui.value.presets).hasSize(1)
         assertThat(viewModel(CatalogScope.KIWIX).ui.value.presets).isEmpty()

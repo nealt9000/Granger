@@ -85,6 +85,10 @@ data class SourceUi(
     val presets: List<PresetRow> = emptyList(),
     val sections: List<Section> = emptyList(),
     val notice: String? = null,
+    /** The Kiwix screen's category chips, in order; empty elsewhere. */
+    val categories: List<String> = emptyList(),
+    /** The chosen chip; null is All. */
+    val category: String? = null,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -127,6 +131,7 @@ class SourceViewModel(
         val tab: SourceTab,
         val query: String,
         val expanded: Set<String>,
+        val category: String?,
     )
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
@@ -137,6 +142,7 @@ class SourceViewModel(
     private val query = MutableStateFlow("")
     /** Sections opened with Show all, by title; closed again by a new query. */
     private val expanded = MutableStateFlow<Set<String>>(emptySet())
+    private val category = MutableStateFlow<String?>(null)
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -150,7 +156,10 @@ class SourceViewModel(
         tab,
         query,
         expanded,
-    ) { c, tab, query, expanded -> Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded) }
+        category,
+    ) { c, tab, query, expanded, category ->
+        Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded, category)
+    }
 
     val ui: StateFlow<SourceUi> =
         combine(catalog.state, downloads.records, library.packs, settings, ::buildUi)
@@ -238,6 +247,11 @@ class SourceViewModel(
         expanded.value = emptySet()
     }
 
+    /** Shows only [value]'s packs, unfolded; null shows them all again. */
+    fun setCategory(value: String?) {
+        category.value = value
+    }
+
     /** Show all, or Show fewer, for the section titled [title]. */
     fun toggleSection(title: String) {
         expanded.value = expanded.value.let { if (title in it) it - title else it + title }
@@ -314,8 +328,14 @@ class SourceViewModel(
             }
             return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
         }
+        val kiwix = scope == CatalogScope.KIWIX
+        val categories = if (!kiwix || current == null) emptyList() else
+            current.packs.filter { scopeOf(it) == scope }.map { it.category }.distinct()
+                .sortedWith(compareBy({ categoryRank(it) }, { it }))
+        // A chip shows one category whole; a category that has left the catalog falls back to All.
+        val chosen = s.category?.takeIf { it in categories }
         // The Kiwix screen lists the whole catalog, so its categories fold until Show all, except while searching.
-        val folds = scope == CatalogScope.KIWIX && needle.isEmpty()
+        val folds = kiwix && needle.isEmpty() && chosen == null
         fun section(title: String, entries: List<CatalogItem>): Section {
             val open = !folds || title in s.expanded || entries.size <= FOLDED_ROWS
             val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::row)
@@ -324,7 +344,8 @@ class SourceViewModel(
         val sections = if (current == null) emptyList() else buildList {
             val models = current.models.filter(::shown)
             if (models.isNotEmpty()) add(Section("AI models", models.map(::row)))
-            val (featured, rest) = current.packs.filter(::shown).partition { scope == CatalogScope.KIWIX && it.featured }
+            val packs = current.packs.filter { shown(it) && (chosen == null || it.category == chosen) }
+            val (featured, rest) = packs.partition { kiwix && chosen == null && it.featured }
             if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
             rest.groupBy { it.category }
                 .toList()
@@ -351,6 +372,8 @@ class SourceViewModel(
             presets = presets,
             sections = sections,
             notice = s.notice,
+            categories = categories,
+            category = chosen,
         )
     }
 

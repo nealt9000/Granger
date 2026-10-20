@@ -73,10 +73,10 @@ class LibraryPassageFinder(
         }
     }
 
-    /** Pack ids and book ids to the name of the collection they are filed in. */
+    /** Pack ids and book ids to the name of the collection they are filed in (a folder's child by its own name). */
     private suspend fun collectionNames(): Map<String, String> = try {
         buildMap {
-            for (row in shelves.shelves.first().flatMap { it.collections }) {
+            for (row in shelves.shelves.first().flatMap { it.allCollections }) {
                 row.packs.forEach { put(it.id, row.collection.name) }
                 row.books.forEach { put(it.id, row.collection.name) }
             }

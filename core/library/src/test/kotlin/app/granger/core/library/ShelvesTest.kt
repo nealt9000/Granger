@@ -49,12 +49,21 @@ class ShelvesTest {
         val (s, _) = shelves(top, medicine, ifixit)
         val shelf = s.shelves.first().single()
         assertThat(shelf.mediaType.id).isEqualTo("literature")
-        assertThat(shelf.collections.map { it.collection.name }).containsExactly("iFixit", "Wikipedia").inOrder()
-        assertThat(shelf.collections.map { it.packs.size }).containsExactly(1, 2).inOrder()
+        // Kiwix's packs are filed in the Kiwix folder, made on first use.
+        val folder = shelf.collections.single()
+        assertThat(folder.collection.id).isEqualTo("c:kiwix")
+        assertThat(folder.collection.name).isEqualTo("Kiwix")
+        assertThat(folder.isFolder).isTrue()
+        assertThat(folder.packs).isEmpty()
+        assertThat(folder.children.map { it.collection.name }).containsExactly("iFixit", "Wikipedia").inOrder()
+        assertThat(folder.children.map { it.packs.size }).containsExactly(1, 2).inOrder()
+        assertThat(folder.children.map { it.collection.parentId }).containsExactly("c:kiwix", "c:kiwix")
         // A second read finds nothing more to file.
         val placements = db.shelfDao().getPlacements()
-        assertThat(s.shelves.first().single().collections).hasSize(2)
+        val collections = db.shelfDao().getCollections()
+        assertThat(s.shelves.first().single().allCollections).hasSize(3)
         assertThat(db.shelfDao().getPlacements()).containsExactlyElementsIn(placements)
+        assertThat(db.shelfDao().getCollections()).containsExactlyElementsIn(collections)
     }
 
     @Test fun blankNameFilesUnderOther() = runTest {
@@ -79,12 +88,69 @@ class ShelvesTest {
 
     @Test fun moveCollectionToNewMediaType() = runTest {
         val (s, _) = shelves(top, ifixit)
-        val wikipedia = s.shelves.first().single().collections.first { it.collection.name == "Wikipedia" }.collection.id
+        val wikipedia = s.shelves.first().single().allCollections.first { it.collection.name == "Wikipedia" }.collection.id
         val reference = s.createMediaType("Reference")
         s.moveCollection(wikipedia, reference)
         val shelves = s.shelves.first()
         assertThat(shelves.map { it.mediaType.name }).containsExactly("Literature", "Reference").inOrder()
-        assertThat(shelves[1].collections.single().collection.name).isEqualTo("Wikipedia")
+        // Moving a child out of its media type takes it out of the folder too.
+        val moved = shelves[1].collections.single()
+        assertThat(moved.collection.name).isEqualTo("Wikipedia")
+        assertThat(moved.collection.parentId).isNull()
+        assertThat(shelves[0].collections.single().children.map { it.collection.name }).containsExactly("iFixit")
+        // Moved back, it stays at the top of Literature: the user put it there.
+        s.moveCollection(wikipedia, "literature")
+        assertThat(s.shelves.first().single().collections.map { it.collection.name }).containsExactly("Kiwix", "Wikipedia").inOrder()
+    }
+
+    @Test fun aFolderWhoseChildrenAreAllEmptyIsHidden() = runTest {
+        val (s, library) = shelves(top)
+        assertThat(s.shelves.first().single().collections.single().isFolder).isTrue()
+        val mine = s.createCollection("Mine", "literature")
+        s.movePack(top, mine)
+        // The folder and Wikipedia still exist, empty; the Library shows only Mine.
+        assertThat(s.shelves.first().single().collections.map { it.collection.name }).containsExactly("Mine")
+        assertThat(s.collection("c:kiwix").first()!!.children).isEmpty()
+        library.state.value = listOf(top, medicine)
+        // A new Wikipedia pack is filed in the old Wikipedia collection, back in its folder.
+        val folder = s.shelves.first().single().collections.first { it.isFolder }
+        assertThat(folder.children.single().packs.map { it.id }).containsExactly("m1")
+    }
+
+    @Test fun theFolderScreenGetsTheFolderWithItsChildren() = runTest {
+        val (s, _) = shelves(top, ifixit)
+        s.shelves.first()
+        val folder = s.collection("c:kiwix").first()!!
+        assertThat(folder.children.map { it.collection.name }).containsExactly("iFixit", "Wikipedia").inOrder()
+        val child = s.collection("c:wikipedia").first()!!
+        assertThat(child.packs.map { it.id }).containsExactly("u1")
+        assertThat(child.children).isEmpty()
+    }
+
+    @Test fun kiwixPacksGoInTheFolderAndGrangerAndNamelessOnesDont() = runTest {
+        val devdocs = named("d1", "devdocs_en_python")
+        val zimgit = named("z2", "zimgit-medicine_en")
+        val (s, _) = shelves(named("z1", "granger_classics"), pack("x1"), devdocs, zimgit)
+        val shelf = s.shelves.first().single()
+        assertThat(shelf.collections.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix", "Other").inOrder()
+        assertThat(shelf.collections.first { it.isFolder }.children.map { it.collection.defaultKey })
+            .containsExactly("devdocs", "pack:zimgit-medicine_en")
+        // A user collection is never put in the folder.
+        val mine = s.createCollection("Mine", "literature")
+        s.movePack(devdocs, mine)
+        assertThat(db.shelfDao().collection(mine)!!.parentId).isNull()
+    }
+
+    @Test fun mapsPacksFileUnderMapsAsOpenStreetMap() = runTest {
+        val (s, _) = shelves(named("h1", "maps_en_haiti"), top)
+        val shelves = s.shelves.first()
+        assertThat(shelves.map { it.mediaType.id }).containsExactly("literature", "maps").inOrder()
+        assertThat(shelves[1].mediaType.name).isEqualTo("Maps")
+        val maps = shelves[1].collections.single()
+        assertThat(maps.collection.id).isEqualTo("c:maps")
+        assertThat(maps.collection.name).isEqualTo("OpenStreetMap")
+        assertThat(maps.collection.parentId).isNull()
+        assertThat(maps.packs.map { it.id }).containsExactly("h1")
     }
 
     @Test fun builtInMediaTypeCannotBeDeleted() = runTest {
@@ -95,7 +161,7 @@ class ShelvesTest {
 
     @Test fun nonEmptyUserMediaTypeCannotBeDeleted() = runTest {
         val (s, _) = shelves(top)
-        val wikipedia = s.shelves.first().single().collections.single().collection.id
+        val wikipedia = s.shelves.first().single().collections.single().children.single().collection.id
         val reference = s.createMediaType("Reference")
         s.moveCollection(wikipedia, reference)
         assertThat(s.deleteMediaType(reference)).isFalse()
@@ -109,7 +175,7 @@ class ShelvesTest {
         val mine = s.createCollection("Mine", "literature")
         s.movePack(top, mine)
         s.deleteCollection(mine)
-        val row = s.shelves.first().single().collections.single()
+        val row = s.shelves.first().single().collections.single().children.single()
         assertThat(row.collection.name).isEqualTo("Wikipedia")
         assertThat(row.packs.map { it.id }).containsExactly("u1")
         assertThat(s.collection(mine).first()).isNull()
@@ -187,6 +253,15 @@ class ShelvesTest {
         assertThat(Filing.defaultKey(book("x", BookOrigin.ARCHIVE_ORG))).isEqualTo("archive-org")
         assertThat(Filing.isSuperseded(named("a", "granger_classics_en"))).isTrue()
         assertThat(Filing.isSuperseded(named("a", "gutenberg_en_all"))).isFalse()
+        assertThat(Filing.defaultMediaType(named("a", "maps_en_fiji"))).isEqualTo("maps")
+        assertThat(Filing.defaultMediaType(named("a", "wikipedia_en_top"))).isEqualTo("literature")
+        assertThat(Filing.defaultName("maps", named("a", "maps_en_fiji"))).isEqualTo("OpenStreetMap")
+        assertThat(Filing.isKiwix(named("a", "wikipedia_en_top"))).isTrue()
+        assertThat(Filing.isKiwix(named("a", "granger_classics_en"))).isFalse()
+        assertThat(Filing.isKiwix(pack("a"))).isFalse()
+        assertThat(Filing.folderKey(named("a", "devdocs_en_python"))).isEqualTo("kiwix")
+        assertThat(Filing.folderKey(named("a", "maps_en_fiji"))).isNull()
+        assertThat(Filing.folderKey(named("a", "granger_classics"))).isNull()
     }
 
     @Test fun phoneAlbumsFileUnderMusicOnThisPhone() = runTest {

@@ -1,6 +1,7 @@
 package app.granger.core.library
 
 import androidx.room.testing.MigrationTestHelper
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -262,5 +263,109 @@ class MigrationTest {
         db.query("SELECT docid FROM book_text WHERE book_text MATCH 'quick'").use {
             assertThat(it.moveToFirst()).isTrue()
         }
+    }
+
+    /** One v9 `collections` row. */
+    private fun SupportSQLiteDatabase.collection(id: String, name: String, type: String, user: Boolean, key: String?) =
+        execSQL(
+            "INSERT INTO collections (id, name, mediaTypeId, userCreated, defaultKey) VALUES (?, ?, ?, ?, ?)",
+            arrayOf<Any?>(id, name, type, if (user) 1 else 0, key),
+        )
+
+    private fun SupportSQLiteDatabase.placement(packKey: String, collectionId: String, userSet: Boolean = false) =
+        execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES (?, ?, ?)", arrayOf<Any>(packKey, collectionId, if (userSet) 1 else 0))
+
+    /** Every collection, by id, as (name, mediaTypeId, parentId). */
+    private fun SupportSQLiteDatabase.collections(): Map<String, Triple<String, String, String?>> = buildMap {
+        query("SELECT id, name, mediaTypeId, parentId FROM collections").use {
+            while (it.moveToNext()) put(it.getString(0), Triple(it.getString(1), it.getString(2), if (it.isNull(3)) null else it.getString(3)))
+        }
+    }
+
+    private fun SupportSQLiteDatabase.placements(): List<List<Any>> = buildList {
+        query("SELECT packKey, collectionId, userSet FROM placements ORDER BY packKey").use {
+            while (it.moveToNext()) add(listOf(it.getString(0), it.getString(1), it.getInt(2)))
+        }
+    }
+
+    @Test fun migration9To10FilesKiwixCollectionsInTheFolderAndMapsUnderMaps() {
+        helper.createDatabase("migrate10.db", 9).apply {
+            execSQL("INSERT INTO media_types (id, name, builtIn, sortOrder) VALUES ('literature', 'Literature', 1, 0)")
+            execSQL("INSERT INTO media_types (id, name, builtIn, sortOrder) VALUES ('u-ref', 'Reference', 0, 4)")
+            collection("c:wikipedia", "Wikipedia", "literature", false, "wikipedia")
+            collection("c:devdocs", "DevDocs", "literature", false, "devdocs")
+            collection("c:pack:devdocs_en_rust", "Rust", "literature", false, "pack:devdocs_en_rust")
+            collection("c:maps", "Maps", "literature", false, "maps")
+            collection("c:granger-classics", "Granger Classics", "literature", false, "granger-classics")
+            collection("c:my-books", "My books", "literature", false, "my-books")
+            collection("c:archive-org", "Archive.org", "literature", false, "archive-org")
+            collection("c:other", "Other", "literature", false, "other")
+            collection("u-1", "Mine", "literature", true, null)
+            // A Kiwix collection the user moved to their own type, and a media one they moved into Literature.
+            collection("c:gutenberg", "Gutenberg", "u-ref", false, "gutenberg")
+            collection("c:music:on-this-phone", "On this phone", "literature", false, "music:on-this-phone")
+            placement("wikipedia_en_top", "c:wikipedia")
+            placement("devdocs_en_python", "c:devdocs")
+            placement("devdocs_en_rust", "c:pack:devdocs_en_rust")
+            placement("maps_en_haiti", "c:maps")
+            placement("book:granger:pride", "c:granger-classics")
+            placement("wikipedia_en_medicine", "u-1", userSet = true)
+            placement("gutenberg_en_all", "c:gutenberg")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate10.db", 10, false, LibraryDatabase.MIGRATION_9_10)
+        assertThat(db.collections()).containsExactly(
+            // The folder, and Kiwix's reading collections in it.
+            "c:kiwix", Triple("Kiwix", "literature", null),
+            "c:wikipedia", Triple("Wikipedia", "literature", "c:kiwix"),
+            "c:devdocs", Triple("DevDocs", "literature", "c:kiwix"),
+            "c:pack:devdocs_en_rust", Triple("Rust", "literature", "c:kiwix"),
+            // Maps is its own type now.
+            "c:maps", Triple("OpenStreetMap", "maps", null),
+            // The rest stay where they were.
+            "c:granger-classics", Triple("Granger Classics", "literature", null),
+            "c:my-books", Triple("My books", "literature", null),
+            "c:archive-org", Triple("Archive.org", "literature", null),
+            "c:other", Triple("Other", "literature", null),
+            "u-1", Triple("Mine", "literature", null),
+            "c:gutenberg", Triple("Gutenberg", "u-ref", null),
+            "c:music:on-this-phone", Triple("On this phone", "literature", null),
+        )
+        // No placement changes: packs go with their collections, and the user's move stands.
+        assertThat(db.placements()).containsExactly(
+            listOf("book:granger:pride", "c:granger-classics", 0),
+            listOf("devdocs_en_python", "c:devdocs", 0),
+            listOf("devdocs_en_rust", "c:pack:devdocs_en_rust", 0),
+            listOf("gutenberg_en_all", "c:gutenberg", 0),
+            listOf("maps_en_haiti", "c:maps", 0),
+            listOf("wikipedia_en_medicine", "u-1", 1),
+            listOf("wikipedia_en_top", "c:wikipedia", 0),
+        ).inOrder()
+        val types = mutableListOf<List<Any>>()
+        db.query("SELECT id, name, builtIn, sortOrder FROM media_types ORDER BY id").use {
+            while (it.moveToNext()) types += listOf(it.getString(0), it.getString(1), it.getInt(2), it.getInt(3))
+        }
+        assertThat(types).containsExactly(
+            listOf("literature", "Literature", 1, 0),
+            listOf("maps", "Maps", 1, 5),
+            listOf("u-ref", "Reference", 0, 4),
+        ).inOrder()
+    }
+
+    @Test fun migration9To10LeavesAMapsCollectionTheUserMovedAndMakesNoEmptyFolder() {
+        helper.createDatabase("migrate10b.db", 9).apply {
+            execSQL("INSERT INTO media_types (id, name, builtIn, sortOrder) VALUES ('u-places', 'Places', 0, 4)")
+            collection("c:maps", "Maps", "u-places", false, "maps")
+            collection("c:granger-classics", "Granger Classics", "literature", false, "granger-classics")
+            placement("maps_en_haiti", "c:maps")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate10b.db", 10, false, LibraryDatabase.MIGRATION_9_10)
+        // No Kiwix collections, so no folder; the moved maps collection keeps its type and name.
+        assertThat(db.collections()).containsExactly(
+            "c:maps", Triple("Maps", "u-places", null),
+            "c:granger-classics", Triple("Granger Classics", "literature", null),
+        )
+        assertThat(db.placements()).containsExactly(listOf("maps_en_haiti", "c:maps", 0))
     }
 }

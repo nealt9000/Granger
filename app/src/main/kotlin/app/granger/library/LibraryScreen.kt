@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.core.library.CollectionRow
 import app.granger.audiobooks.ALL_AUDIOBOOKS
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.music.ALL_MUSIC
@@ -169,17 +170,19 @@ fun LibraryScreen(
                             modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
                             headlineContent = { Text(if (music) ALL_MUSIC else ALL_AUDIOBOOKS) },
                             supportingContent = {
-                                Text(countText(0, 0, shelf.collections.sumOf { it.albums.size }, shelf.collections.sumOf { it.audiobooks.size }))
+                                Text(countText(0, 0, shelf.allCollections.sumOf { it.albums.size }, shelf.allCollections.sumOf { it.audiobooks.size }))
                             },
                         )
                     }
                 }
+                // A folder (Kiwix) is one row; it opens the folder screen, which lists its children.
                 if (open) for (row in shelf.collections) {
                     item(key = "collection:${row.collection.id}") {
                         ListItem(
                             modifier = Modifier
                                 .clickable {
                                     when {
+                                        row.isFolder -> onOpenCollection(row.collection.id)
                                         music -> onOpenMusic(row.collection.id)
                                         audiobooks -> onOpenAudiobooks(row.collection.id)
                                         else -> onOpenCollection(row.collection.id)
@@ -187,7 +190,7 @@ fun LibraryScreen(
                                 }
                                 .padding(start = 16.dp),
                             headlineContent = { Text(row.collection.name) },
-                            supportingContent = { Text(countText(row.packs.size, row.books.size, row.albums.size, row.audiobooks.size)) },
+                            supportingContent = { Text(rowCountText(row)) },
                         )
                     }
                 }
@@ -268,6 +271,12 @@ internal fun missingMediaText(shownTypeIds: List<String>): String? {
 private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
 )
+
+/** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */
+internal fun rowCountText(row: CollectionRow): String {
+    val rows = row.withChildren
+    return countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
+}
 
 private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): String = listOfNotNull(
     if (packs > 0) (if (packs == 1) "1 pack" else "$packs packs") else null,

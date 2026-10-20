@@ -20,6 +20,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | M3 | Media: Search, Research, Auto, widget | Media index in Search, Research media passages + eval check, Android Auto, widget, final Done-means walkthrough | **Done:** `2026-10-19-plan-m3-media-search-research-auto.md` (2026-10-20; 1512 JVM tests; eval and walkthrough below and in `media-parity-checklist.md`: ✅ 43, ⏭ 0, ❌ 8). **The Media project is done.** |
 | P1 | Polish | Wiki Back within the tab, the new wiki top bar, one rail list with pins, the toolbar on the left or right; library v9. The logo and full screen are held back (see "Carried forward from P1") | **Done (partly):** `2026-10-20-plan-p1-polish.md` (2026-10-20; 1593 JVM tests; Pixel 6 walkthrough all PASS) |
 | K1 | The full Kiwix catalog (English) | Family table with licenses, bulk generator with a report, Recommended + folded categories on the Kiwix screen, filing for new families, 16 MB catalog cap; Wi-Fi installs (`tools/dev/phone-wifi.sh`) | **Done:** `2026-10-20-plan-k1-kiwix-catalog.md` (2026-10-20; 927 packs published; 1602 JVM tests; Pixel 6 walkthrough all PASS). Follow-ups in K2 |
+| K2 | Kiwix follow-ups | Category chips on the Kiwix screen, DevDocs nav as a Contents drawer in portrait, library v10: the Kiwix folder and the Maps media type | **Done:** `2026-10-20-plan-k2-kiwix-followups.md` (2026-10-20; 1620 JVM tests; Pixel 6 walkthrough all PASS) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
@@ -520,4 +521,32 @@ Still open:
   Kiwix's `_videos:yes` tag can't be trusted (most packs carry it), so the family table decides.
 - Kiwix's content server (library.kiwix.org) puts an anti-crawler confirmation in front of pages, so packs can't be inspected online. Download a pack and read it with python-libzim instead.
 - The catalog has to be regenerated monthly (Kiwix retires snapshots). The build takes about 5 minutes.
+
+
+## Carried forward from K2
+
+Built and measured (2026-10-20, on the Mac Studio):
+- **1620 JVM tests pass** (`./gradlew testDebugUnitTest` plus `./gradlew :core:research:test`).
+- **Library schema v10:** `collections.parentId`, the built-in Maps type and the Kiwix folder (`MIGRATION_9_10`). Before installing, the migration's SQL was run on a copy of Neal's real database. Literature's top level became Archive.org, Granger Classics, My books and Kiwix, with nine collections in the folder. Maps → OpenStreetMap; no placement changed. Both databases were backed up before installing.
+- Maps takes the next free sort place, because a type Neal made ("Reference") already held 4.
+- Task 3 was built by an agent in a worktree (branch `k2-task3`, merged).
+
+Pixel 6 walkthrough (2026-10-20), over Wi-Fi; **all PASS**:
+- The Kiwix chips, and search within a chip.
+- DevDocs in portrait: the Contents drawer, with the page starting below the button (the first build covered the title).
+- The Library:
+  - Literature, the Kiwix folder and its collections, Maps → OpenStreetMap;
+  - reading places and bookmarks intact;
+  - the indented move dialog; moving a collection out of the folder;
+  - a new download filing into the folder.
+
+Builder's calls (see the plan and the Task 3 report):
+- The folder opens through `CollectionRoute` and lists its children. It has no menu: the folder can't be moved, renamed or deleted.
+- Empty app-made Kiwix collections go in the folder too, so later packs don't land at the top level.
+- A child moved out of the folder and back into Literature stays at the top level; filing never re-parents.
+- Users can't make folders yet.
+
+Still open:
+- Some Kiwix packs are mostly PDFs (irp.fas.org military medicine). They open, but show little until the reader handles PDFs (the PDF pass, still unscheduled).
+- The DevDocs Contents button stays pinned over the page once you scroll.
 

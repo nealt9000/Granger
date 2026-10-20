@@ -74,7 +74,8 @@ data class MediaType(@PrimaryKey val id: String, val name: String, val builtIn: 
 
 /**
  * A named group of packs within a [MediaType]. [defaultKey] is the filing key for collections the app made
- * (`"wikipedia"`, `"other"`, ...); null for ones the user created.
+ * (`"wikipedia"`, `"other"`, ...); null for ones the user created. [parentId] is the folder it sits in (the app-made
+ * Kiwix folder, `c:kiwix`, since version 10); null at the top of its media type. Folders go one level deep.
  */
 @Entity(tableName = "collections", indices = [Index(value = ["defaultKey"], unique = true)])
 data class ShelfCollection(
@@ -83,6 +84,7 @@ data class ShelfCollection(
     val mediaTypeId: String,
     val userCreated: Boolean,
     val defaultKey: String?,
+    val parentId: String? = null,
 )
 
 /**
