@@ -101,7 +101,17 @@ data class ReadingTab(
     val title: String,
     val openedAt: Long,
     val onRail: Boolean,
+    /**
+     * The paths shown in this tab, oldest first and `\n`-joined, at most [MAX_BACK_STACK]; the last is the current
+     * page. Back in the reader falls back on it when the WebView's own history is gone. Empty for a tab from before
+     * version 9 until its first page is shown.
+     */
+    @ColumnInfo(defaultValue = "''") val backStack: String = "",
 )
+
+/** A rail item pinned to the top of the rail's list. [key] is the item's kind and id: `tab:12`, `search:holst`, `chat:3`, `play:<key>`. */
+@Entity(tableName = "rail_pins")
+data class RailPin(@PrimaryKey val key: String, val pinnedAt: Long)
 
 /** An article that was opened, one row per article. */
 @Entity(tableName = "history", primaryKeys = ["packId", "path"], indices = [Index("openedAt")])

@@ -87,4 +87,74 @@ class ReadingSessionsTest {
         assertThat(sessions.recentSearchRows().first())
             .containsExactly(RecentSearch("dogs", 1_001L), RecentSearch("cats", 1_000L)).inOrder()
     }
+
+    @Test fun openTabStartsANewStack() = runTest {
+        val id = sessions.openTab("p", "Cat", "Cat")
+        assertThat(sessions.tab(id)?.backStack).isEqualTo("Cat")
+        assertThat(sessions.popPath(id)).isNull()
+    }
+
+    @Test fun pushPathAppendsAndCapsAtFifty() = runTest {
+        val id = sessions.openTab("p", "A0", "A0")
+        for (i in 1..59) sessions.pushPath(id, "A$i", "Article $i")
+        val stack = sessions.tab(id)!!.backStack.split('\n')
+        assertThat(stack).hasSize(MAX_BACK_STACK)
+        assertThat(stack.first()).isEqualTo("A10")
+        assertThat(stack.last()).isEqualTo("A59")
+        // The tab shows the newest page, and history has it.
+        assertThat(sessions.tab(id)?.path).isEqualTo("A59")
+        assertThat(sessions.tab(id)?.title).isEqualTo("Article 59")
+        assertThat(sessions.history.first().first().path).isEqualTo("A59")
+    }
+
+    @Test fun pushingTheShownPathAgainDoesNotRepeatIt() = runTest {
+        // A reload, or the page shown after Back loaded the previous path.
+        val id = sessions.openTab("p", "Cat", "Cat")
+        sessions.pushPath(id, "Dog", "Dog")
+        sessions.pushPath(id, "Dog", "Dog")
+        assertThat(sessions.tab(id)?.backStack).isEqualTo("Cat\nDog")
+    }
+
+    @Test fun popPathReturnsPreviousAndShortens() = runTest {
+        val id = sessions.openTab("p", "Cat", "Cat")
+        sessions.pushPath(id, "Dog", "Dog")
+        sessions.pushPath(id, "Eel", "Eel")
+        assertThat(sessions.popPath(id)).isEqualTo("Dog")
+        assertThat(sessions.tab(id)?.backStack).isEqualTo("Cat\nDog")
+        // The page shown after Back pushes the path it went back to; that isn't added twice.
+        sessions.pushPath(id, "Dog", "Dog")
+        assertThat(sessions.popPath(id)).isEqualTo("Cat")
+        assertThat(sessions.tab(id)?.backStack).isEqualTo("Cat")
+    }
+
+    @Test fun popAtFirstPageIsNull() = runTest {
+        val id = sessions.openTab("p", "Cat", "Cat")
+        assertThat(sessions.popPath(id)).isNull()
+        assertThat(sessions.tab(id)?.backStack).isEqualTo("Cat")
+        assertThat(sessions.popPath(404L)).isNull()
+    }
+
+    @Test fun reopeningATabKeepsItsStack() = runTest {
+        val id = sessions.openTab("p", "Cat", "Cat")
+        sessions.pushPath(id, "Dog", "Dog")
+        assertThat(sessions.openTab("p", "Dog", "Dog")).isEqualTo(id)
+        assertThat(sessions.popPath(id)).isEqualTo("Cat")
+    }
+
+    @Test fun aTabFromBeforeVersion9StartsItsStackAtItsPage() = runTest {
+        // A migrated tab has an empty stack: the first page shown starts it.
+        val id = db.sessionDao().insertTab(ReadingTab(0, "p", "Cat", "Cat", 1L, onRail = true))
+        assertThat(sessions.popPath(id)).isNull()
+        sessions.pushPath(id, "Cat", "Cat")
+        sessions.pushPath(id, "Dog", "Dog")
+        assertThat(sessions.popPath(id)).isEqualTo("Cat")
+    }
+
+    @Test fun forgetSearchDeletesOnlyThatQuery() = runTest {
+        sessions.recordSearch("cats")
+        sessions.recordSearch("dogs")
+        sessions.forgetSearch(" cats ")
+        sessions.forgetSearch("never searched")
+        assertThat(sessions.recentSearches().first()).containsExactly("dogs")
+    }
 }
