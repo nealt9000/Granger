@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import androidx.annotation.VisibleForTesting
+import app.granger.GrangerApp
 import java.io.FileNotFoundException
 
 /**
@@ -14,13 +15,17 @@ import java.io.FileNotFoundException
  * secret, but nothing else is reachable: [Artwork.file] resolves only images under the media roots.
  *
  * [openFile] refuses every mode but "r"; there is no query, and insert, update and delete do nothing.
- * It builds its own [Artwork] from the context (it may be created before the app's container).
+ * It uses the app container's [Artwork] (same process, so one key and one root cache), or builds its own from the
+ * context if the application isn't Granger's.
  */
 class ArtworkProvider : ContentProvider() {
 
     @VisibleForTesting internal var artworkOverride: Artwork? = null
 
-    private val defaultArtwork by lazy { Artwork.forContext(requireNotNull(context)) }
+    private val defaultArtwork by lazy {
+        val context = requireNotNull(context)
+        (context.applicationContext as? GrangerApp)?.container?.artwork ?: Artwork.forContext(context)
+    }
     private val artwork: Artwork get() = artworkOverride ?: defaultArtwork
 
     override fun onCreate(): Boolean = true

@@ -31,7 +31,7 @@ class ArtworkProviderTest {
         cover = File(covers, "abc.jpg").apply { writeBytes(byteArrayOf(1, 2, 3)) }
         File(covers, "b.png").writeBytes(byteArrayOf(4))
         File(covers, "c.webp").writeBytes(byteArrayOf(5))
-        artwork = Artwork { listOf(covers) }
+        artwork = Artwork({ listOf(covers) }, { ByteArray(32) { 1 } })
         val info = ProviderInfo().apply {
             authority = Artwork.AUTHORITY
             exported = true
@@ -47,6 +47,10 @@ class ArtworkProviderTest {
         // A token for nothing is not found.
         val nothing = Uri.parse("content://${Artwork.AUTHORITY}/bm9wZQ")
         org.junit.Assert.assertThrows(FileNotFoundException::class.java) { provider.openFile(nothing, "r") }
+        // The real cover's path without its MAC: a probe for whether a file is there learns nothing.
+        val unsigned = Uri.parse("content://${Artwork.AUTHORITY}/" + uri.lastPathSegment!!.substringBefore('.'))
+        org.junit.Assert.assertThrows(FileNotFoundException::class.java) { provider.openFile(unsigned, "r") }
+        assertThat(provider.getType(unsigned)).isNull()
         val noToken = Uri.parse("content://${Artwork.AUTHORITY}")
         org.junit.Assert.assertThrows(FileNotFoundException::class.java) { provider.openFile(noToken, "r") }
         // The same through a ContentResolver, as Media3's bitmap loader and Auto read it.
