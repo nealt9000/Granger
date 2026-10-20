@@ -559,6 +559,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onOpened = ::showTab,
                     onGetBooks = { nav.navigate(SourceRoute(CatalogScope.GRANGER)) },
+                    onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onBack = { nav.popBackStack() },
                 )
             }

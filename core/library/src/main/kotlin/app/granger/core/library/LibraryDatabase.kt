@@ -19,7 +19,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Playlist::class, PlaylistEntry::class, MusicState::class, RecentPlay::class, MediaFolder::class, ScanCacheEntry::class,
         AlbumNote::class, RailPin::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -46,7 +46,7 @@ abstract class LibraryDatabase : RoomDatabase() {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `history` (`packId` TEXT NOT NULL, `path` TEXT NOT NULL, `title` TEXT NOT NULL, `openedAt` INTEGER NOT NULL, PRIMARY KEY(`packId`, `path`))")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_history_openedAt` ON `history` (`openedAt`)")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `recent_searches` (`query` TEXT NOT NULL, `searchedAt` INTEGER NOT NULL, PRIMARY KEY(`query`))")
-                seedBuiltIns(db)
+                seedBuiltIns(db, BUILT_INS.take(4))
             }
         }
 
@@ -125,12 +125,45 @@ abstract class LibraryDatabase : RoomDatabase() {
         }
 
         /**
+         * Adds folders (`collections.parentId`) and the built-in Maps type. The app-made collections of Kiwix's
+         * reading packs that are still in Literature go in the new Kiwix folder; the folder row is made only when one
+         * does. The app-made maps collection moves to Maps as "OpenStreetMap" unless the user moved it out of
+         * Literature. Nothing the user made or moved is touched, and no placement changes.
+         */
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `collections` ADD COLUMN `parentId` TEXT")
+                seedBuiltIns(db, BUILT_INS.drop(4))
+                db.execSQL(
+                    "INSERT OR IGNORE INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) " +
+                        "SELECT 'c:${Filing.FOLDER_KEY}', '${Filing.FOLDER_NAME}', 'literature', 0, '${Filing.FOLDER_KEY}', NULL " +
+                        "WHERE EXISTS (SELECT 1 FROM collections WHERE $IN_KIWIX_FOLDER)",
+                )
+                db.execSQL("UPDATE collections SET parentId = 'c:${Filing.FOLDER_KEY}' WHERE $IN_KIWIX_FOLDER")
+                db.execSQL(
+                    "UPDATE collections SET mediaTypeId = 'maps', name = 'OpenStreetMap' " +
+                        "WHERE id = 'c:maps' AND userCreated = 0 AND mediaTypeId = 'literature'",
+                )
+            }
+        }
+
+        /**
+         * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
+         * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
+         * and the like, should the user have moved one here); of the keys with a `:`, only `pack:` ones are packs'.
+         */
+        private val IN_KIWIX_FOLDER =
+            "userCreated = 0 AND mediaTypeId = 'literature' AND defaultKey IS NOT NULL " +
+                "AND defaultKey NOT IN ('granger-classics', 'my-books', 'archive-org', 'other', 'maps', '${Filing.FOLDER_KEY}') " +
+                "AND (defaultKey LIKE 'pack:%' OR defaultKey NOT LIKE '%:%')"
+
+        /**
          * Seeds the built-in media types and creates `book_text` on a fresh install. Every database builder
          * must add this: Room doesn't manage `book_text`, so only this callback and [MIGRATION_3_4] create it.
          */
         val SeedCallback = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
-                seedBuiltIns(db)
+                seedBuiltIns(db, BUILT_INS)
                 createBookText(db)
             }
         }
@@ -140,16 +173,27 @@ abstract class LibraryDatabase : RoomDatabase() {
             db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS book_text USING fts4(content=\"\", text, tokenize=unicode61)")
         }
 
-        private fun seedBuiltIns(db: SupportSQLiteDatabase) {
-            listOf("literature" to "Literature", "audiobooks" to "Audiobooks", "music" to "Music", "video" to "Video")
-                .forEachIndexed { index, (id, name) ->
-                    db.execSQL("INSERT OR IGNORE INTO media_types (id, name, builtIn, sortOrder) VALUES ('$id', '$name', 1, $index)")
-                }
+        /**
+         * The built-in media types in sort order (each one's index). Version 3 brought the first four; [MIGRATION_9_10]
+         * brought Maps.
+         */
+        private val BUILT_INS = listOf(
+            "literature" to "Literature", "audiobooks" to "Audiobooks", "music" to "Music", "video" to "Video", "maps" to "Maps",
+        )
+
+        private fun seedBuiltIns(db: SupportSQLiteDatabase, types: List<Pair<String, String>>) {
+            for ((id, name) in types) {
+                val sortOrder = BUILT_INS.indexOf(id to name)
+                db.execSQL("INSERT OR IGNORE INTO media_types (id, name, builtIn, sortOrder) VALUES ('$id', '$name', 1, $sortOrder)")
+            }
         }
 
         fun create(context: Context): LibraryDatabase =
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
-                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                .addMigrations(
+                    MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+                    MIGRATION_9_10,
+                )
                 .addCallback(SeedCallback)
                 .build()
     }

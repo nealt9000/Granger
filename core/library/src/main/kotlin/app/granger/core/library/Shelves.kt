@@ -7,25 +7,41 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/** A media type with the non-empty collections filed under it. */
-data class Shelf(val mediaType: MediaType, val collections: List<CollectionRow>)
+/** A media type with the non-empty collections filed under it; [collections] are its top level, folders holding their children. */
+data class Shelf(val mediaType: MediaType, val collections: List<CollectionRow>) {
+    /** Every collection shown here, each folder followed by its children. */
+    val allCollections: List<CollectionRow> get() = collections.flatMap { it.withChildren }
+}
 
+/** A collection and what's filed in it. A folder (the Kiwix folder) holds no items of its own, only [children]. */
 data class CollectionRow(
     val collection: ShelfCollection,
     val packs: List<Pack>,
     val books: List<Book> = emptyList(),
     val albums: List<AlbumSummary> = emptyList(),
     val audiobooks: List<Audiobook> = emptyList(),
+    /** The non-empty collections in this folder, sorted by name; empty for an ordinary collection. */
+    val children: List<CollectionRow> = emptyList(),
 ) {
-    val isEmpty: Boolean get() = packs.isEmpty() && books.isEmpty() && albums.isEmpty() && audiobooks.isEmpty()
+    /** True when nothing is filed here or in any child. */
+    val isEmpty: Boolean get() =
+        packs.isEmpty() && books.isEmpty() && albums.isEmpty() && audiobooks.isEmpty() && children.all { it.isEmpty }
+
+    /** The app-made Kiwix folder; it isn't a place to move things to. */
+    val isFolder: Boolean get() = collection.defaultKey == Filing.FOLDER_KEY
+
+    val withChildren: List<CollectionRow> get() = listOf(this) + children
 }
 
 /** The library's media type, collection and placement structure. */
 interface Shelves {
-    /** Media types holding at least one pack, book, album or audiobook, in sort order; collections sorted by name, empty app-made ones hidden. */
+    /**
+     * Media types holding at least one pack, book, album or audiobook, in sort order; collections sorted by name, empty
+     * app-made ones hidden. A folder is one row carrying its children, and is hidden when they're all empty.
+     */
     val shelves: Flow<List<Shelf>>
 
-    /** One collection with its packs and books, or null if it doesn't exist. */
+    /** One collection with its packs and books (a folder with its non-empty children), or null if it doesn't exist. */
     fun collection(id: String): Flow<CollectionRow?>
 
     /** A manual move; it survives the pack being updated to a new snapshot. */
@@ -40,6 +56,7 @@ interface Shelves {
     /** A manual move; it survives the audiobook being re-scanned. */
     suspend fun moveAudiobook(book: Audiobook, toCollectionId: String)
 
+    /** Moves the collection to the top of [toMediaTypeId], out of any folder. */
     suspend fun moveCollection(collectionId: String, toMediaTypeId: String)
 
     /** Returns the new id. */
@@ -80,14 +97,20 @@ class RoomShelves(
         val albumOrigins: Map<String, MediaOrigin>,
     )
 
-    /** What filing needs to know about an item. */
-    private class Filable(val key: String, val defaultKey: String, val name: () -> String, val mediaTypeId: String)
+    /** What filing needs to know about an item. [folderKey] is the `defaultKey` of the folder a new collection for it goes in. */
+    private class Filable(
+        val key: String,
+        val defaultKey: String,
+        val name: () -> String,
+        val mediaTypeId: String,
+        val folderKey: String? = null,
+    )
 
     private fun filables(items: Items): List<Filable> {
         val (packs, books, albums, audiobooks, origins) = items
         return packs.map { pack ->
             val key = Filing.defaultKey(pack)
-            Filable(Filing.packKey(pack), key, { Filing.defaultName(key, pack) }, Filing.defaultMediaType(pack))
+            Filable(Filing.packKey(pack), key, { Filing.defaultName(key, pack) }, Filing.defaultMediaType(pack), Filing.folderKey(pack))
         } + books.map { book ->
             val key = Filing.defaultKey(book)
             Filable(Filing.bookKey(book), key, { Filing.defaultName(key, book) }, Filing.defaultMediaType(book))
@@ -107,18 +130,24 @@ class RoomShelves(
     private suspend fun settled(items: List<Filable>): Triple<List<MediaType>, List<ShelfCollection>, Map<String, String>> =
         db.withTransaction {
             var placements = dao.getPlacements().associate { it.packKey to it.collectionId }
-            var collections = dao.getCollections()
+            val collections = dao.getCollections()
+            var filed = false
             for (item in items) {
                 val placed = placements[item.key]
                 if (placed != null && collections.any { it.id == placed }) continue
                 val collection = fileInto(item)
-                if (collections.none { it.id == collection.id }) collections = collections + collection
                 placements = placements + (item.key to collection.id)
                 dao.upsertPlacement(Placement(item.key, collection.id, userSet = false))
+                filed = true
             }
-            Triple(dao.getMediaTypes(), collections, placements)
+            // Filing may have made collections (and a folder); read them back rather than track each.
+            Triple(dao.getMediaTypes(), if (filed) dao.getCollections() else collections, placements)
         }
 
+    /**
+     * The collection with [item]'s default key, whatever its media type or folder now (the user may have moved it).
+     * A new one goes in [Filable.folderKey]'s folder, made on first use.
+     */
     private suspend fun fileInto(item: Filable): ShelfCollection {
         dao.collectionByDefaultKey(item.defaultKey)?.let { return it }
         val created = ShelfCollection(
@@ -127,7 +156,16 @@ class RoomShelves(
             mediaTypeId = item.mediaTypeId,
             userCreated = false,
             defaultKey = item.defaultKey,
+            parentId = item.folderKey?.let { folder(it, item.mediaTypeId).id },
         )
+        dao.upsertCollection(created)
+        return created
+    }
+
+    /** The app-made folder with [key], made in [mediaTypeId] when it's missing. */
+    private suspend fun folder(key: String, mediaTypeId: String): ShelfCollection {
+        dao.collectionByDefaultKey(key)?.let { return it }
+        val created = ShelfCollection("c:$key", Filing.FOLDER_NAME, mediaTypeId, userCreated = false, defaultKey = key)
         dao.upsertCollection(created)
         return created
     }
@@ -152,9 +190,25 @@ class RoomShelves(
             )
         }
 
+    /**
+     * Puts each row whose parent is a top-level collection of the same media type in that folder's [CollectionRow.children],
+     * dropping empty app-made children; any other row stays at the top (a parent that's gone or elsewhere doesn't hide it).
+     */
+    private fun nested(rows: List<CollectionRow>): List<CollectionRow> {
+        val byId = rows.associateBy { it.collection.id }
+        fun inFolder(row: CollectionRow): Boolean {
+            val parent = row.collection.parentId?.let(byId::get) ?: return false
+            return parent.collection.parentId == null && parent.collection.mediaTypeId == row.collection.mediaTypeId
+        }
+        val children = rows.filter(::inFolder).filter(::shown).groupBy { it.collection.parentId }
+        return rows.filterNot(::inFolder).map { row -> children[row.collection.id]?.let { row.copy(children = it) } ?: row }
+    }
+
+    private fun shown(row: CollectionRow) = !row.isEmpty || row.collection.userCreated
+
     override val shelves: Flow<List<Shelf>> = trigger().map { items ->
         val (types, collections, placements) = settled(filables(items))
-        val rows = rows(collections, placements, items).filter { !it.isEmpty || it.collection.userCreated }
+        val rows = nested(rows(collections, placements, items)).filter(::shown)
         types.mapNotNull { type ->
             val inType = rows.filter { it.collection.mediaTypeId == type.id }
             if (inType.any { !it.isEmpty }) Shelf(type, inType) else null
@@ -163,7 +217,9 @@ class RoomShelves(
 
     override fun collection(id: String): Flow<CollectionRow?> = trigger().map { items ->
         val (_, collections, placements) = settled(filables(items))
-        collections.firstOrNull { it.id == id }?.let { rows(listOf(it), placements, items).single() }
+        // The collection and, if it's a folder, its children.
+        val wanted = collections.filter { it.id == id || it.parentId == id }
+        nested(rows(wanted, placements, items)).firstOrNull { it.collection.id == id }
     }.distinctUntilChanged()
 
     override suspend fun movePack(pack: Pack, toCollectionId: String) {
@@ -184,7 +240,7 @@ class RoomShelves(
 
     override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) {
         db.withTransaction {
-            dao.collection(collectionId)?.let { dao.upsertCollection(it.copy(mediaTypeId = toMediaTypeId)) }
+            dao.collection(collectionId)?.let { dao.upsertCollection(it.copy(mediaTypeId = toMediaTypeId, parentId = null)) }
         }
     }
 

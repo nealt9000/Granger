@@ -18,7 +18,7 @@ object Filing {
         Rule({ it.startsWith("wikiquote_") }, "wikiquote", "Wikiquote"),
         Rule({ it.startsWith("wikiversity_") }, "wikiversity", "Wikiversity"),
         Rule({ it.startsWith("phet_") }, "phet", "PhET"),
-        Rule({ it.startsWith("maps_") }, "maps", "Maps"),
+        Rule({ it.startsWith("maps_") }, "maps", "OpenStreetMap"),
         Rule({ it.startsWith("devdocs_") }, "devdocs", "DevDocs"),
         Rule({ "stackexchange" in it || "stackoverflow" in it || it.substringBefore('_') in STACK_EXCHANGE_SITES },
             "stack-exchange", "Stack Exchange"),
@@ -42,9 +42,22 @@ object Filing {
         else -> RULES.firstOrNull { it.key == key }?.name ?: pack.title
     }
 
-    /** Every ZIM is reading material. */
-    @Suppress("UNUSED_PARAMETER")
-    fun defaultMediaType(pack: Pack): String = "literature"
+    /** Kiwix's OpenStreetMap packs are maps; every other ZIM is reading material. */
+    fun defaultMediaType(pack: Pack): String = if (pack.name.startsWith("maps_")) "maps" else "literature"
+
+    /** The `defaultKey` of the app-made Kiwix folder (`c:kiwix`, "Kiwix", in Literature). */
+    const val FOLDER_KEY = "kiwix"
+
+    const val FOLDER_NAME = "Kiwix"
+
+    /**
+     * Whether [pack] is Kiwix's: every named ZIM except Granger's own. Packs have no origin field, so this covers
+     * sideloaded Kiwix ZIMs too. Nameless packs ("Other") are nobody's.
+     */
+    fun isKiwix(pack: Pack): Boolean = pack.name.isNotBlank() && !pack.name.startsWith("granger_classics")
+
+    /** The folder a new app-made collection for [pack] goes in: [FOLDER_KEY] for Kiwix's reading packs, none for maps. */
+    fun folderKey(pack: Pack): String? = FOLDER_KEY.takeIf { isKiwix(pack) && defaultMediaType(pack) == "literature" }
 
     /** Books are filed by origin; these are their collections' keys and names. */
     private val BOOK_COLLECTIONS = mapOf(

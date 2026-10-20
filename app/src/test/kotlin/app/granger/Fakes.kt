@@ -207,7 +207,7 @@ class FakeReadingSessions : ReadingSessions {
     }
 }
 
-/** In-memory [Shelves] serving whatever [shelfList] holds; writes are recorded, not applied. */
+/** In-memory [Shelves] serving whatever [shelfList] holds (a folder's children too); writes are recorded, not applied. */
 class FakeShelves : Shelves {
     val shelfList = MutableStateFlow<List<Shelf>>(emptyList())
     val moves = mutableListOf<Pair<String, String>>()
@@ -216,7 +216,7 @@ class FakeShelves : Shelves {
     override val shelves: Flow<List<Shelf>> = shelfList
 
     override fun collection(id: String): Flow<CollectionRow?> =
-        shelfList.map { shelves -> shelves.flatMap { it.collections }.firstOrNull { it.collection.id == id } }
+        shelfList.map { shelves -> shelves.flatMap { it.allCollections }.firstOrNull { it.collection.id == id } }
 
     override suspend fun movePack(pack: Pack, toCollectionId: String) { moves += pack.id to toCollectionId }
     override suspend fun moveBook(book: Book, toCollectionId: String) { moves += book.id to toCollectionId }

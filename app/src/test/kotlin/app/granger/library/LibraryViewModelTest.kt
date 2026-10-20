@@ -79,6 +79,22 @@ class LibraryViewModelTest {
         assertThat(ui.emptyLibrary).isFalse()
     }
 
+    @Test fun theKiwixFolderIsOneRowCountingItsChildren() = runTest(main.dispatcher) {
+        val kiwix = shelf("Literature", "Wikipedia" to 3, "DevDocs" to 2).collections
+        val folder = CollectionRow(
+            ShelfCollection("c:kiwix", "Kiwix", "literature", userCreated = false, defaultKey = "kiwix"), emptyList(),
+            children = kiwix,
+        )
+        val classics = shelf("Literature", "Granger Classics" to 1).collections.single()
+        shelves.shelfList.value = listOf(shelf("Literature").copy(collections = listOf(classics, folder)))
+        val literature = vm().ui.filterNotNull().first().media.single()
+        assertThat(literature.collections.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix").inOrder()
+        val row = literature.collections[1]
+        assertThat(row.isFolder).isTrue()
+        assertThat(rowCountText(row)).isEqualTo("5 packs")
+        assertThat(rowCountText(classics)).isEqualTo("1 pack")
+    }
+
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.emptyLibrary).isTrue()

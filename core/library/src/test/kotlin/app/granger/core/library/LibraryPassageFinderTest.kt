@@ -232,6 +232,13 @@ class LibraryPassageFinderTest {
         assertThat(found.filter { it.kind == SourceKind.CARD }.map { it.sourceId }).containsExactly(book.id)
     }
 
+    @Test fun aPackInTheKiwixFolderCarriesItsOwnCollectionName() = test {
+        val p = pack("wiki", "Wikipedia")
+        val folder = collection("Kiwix").copy(children = listOf(collection("Wikipedia", listOf(p))))
+        val found = finder(listOf(p), emptyMap(), rows = listOf(folder)).find(listOf("wikipedia"))
+        assertThat(found.single { it.kind == SourceKind.CARD }.meta.collection).isEqualTo("Wikipedia")
+    }
+
     @Test fun packCardOmitsBlankValues() = test {
         val p = pack("wiki", "Wikipedia").copy(description = "")
         val found = finder(listOf(p), emptyMap(), rows = listOf(collection("Wikipedia", listOf(p)))).find(listOf("wikipedia"))

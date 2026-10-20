@@ -2,7 +2,10 @@ package app.granger.library
 
 import android.text.format.Formatter
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,7 +52,10 @@ import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import kotlinx.coroutines.launch
 
-/** One collection's packs. Tap opens a pack in a reader tab; long-press organises or removes it. */
+/**
+ * One collection's packs. Tap opens a pack in a reader tab; long-press organises or removes it. A folder (Kiwix)
+ * lists its collections instead, as the Library does, each opening its own screen; a folder has no menu.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CollectionScreen(
@@ -57,6 +63,8 @@ fun CollectionScreen(
     onOpened: (tabId: Long) -> Unit,
     /** Opens the Granger source, where the e-books that replace a superseded pack are. */
     onGetBooks: () -> Unit,
+    /** A folder's child collection. */
+    onOpenCollection: (collectionId: String) -> Unit,
     onBack: () -> Unit,
 ) {
     val row by viewModel.ui.collectAsStateWithLifecycle()
@@ -81,7 +89,7 @@ fun CollectionScreen(
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
                 actions = {
-                    if (loaded != null) Box {
+                    if (loaded != null && !loaded.isFolder) Box {
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             DropdownMenuItem(
@@ -104,7 +112,15 @@ fun CollectionScreen(
             )
         },
     ) { padding ->
-        if (loaded != null) LazyVerticalGrid(
+        if (loaded != null && loaded.isFolder) LazyColumn(Modifier.padding(padding).fillMaxSize()) {
+            items(loaded.children, key = { it.collection.id }) { child ->
+                ListItem(
+                    modifier = Modifier.clickable { onOpenCollection(child.collection.id) },
+                    headlineContent = { Text(child.collection.name) },
+                    supportingContent = { Text(rowCountText(child)) },
+                )
+            }
+        } else if (loaded != null) LazyVerticalGrid(
             columns = GridCells.Adaptive(104.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(bottom = 16.dp),
