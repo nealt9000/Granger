@@ -15,15 +15,40 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.granger.core.library.Shelf
 
-/** One row of a "Move to…" list. */
-private sealed interface MoveChoice {
+/** One row of a "Move to…" list. A [Folder] isn't a place to move to; its children follow it, [Existing.indented]. */
+internal sealed interface MoveChoice {
     data class Header(val name: String) : MoveChoice
-    data class Existing(val id: String, val name: String) : MoveChoice
+    data class Folder(val name: String) : MoveChoice
+    data class Existing(val id: String, val name: String, val indented: Boolean = false) : MoveChoice
     data class NewCollection(val mediaTypeId: String, val mediaTypeName: String) : MoveChoice
     data object NewMediaType : MoveChoice
+}
+
+/**
+ * The "Move to collection…" list: each media type's collections, a folder's children indented under it, leaving out
+ * [currentCollectionId]; then "New collection…" per type and, if [allowNewMediaType], "New media type…".
+ */
+internal fun moveChoices(shelves: List<Shelf>, currentCollectionId: String?, allowNewMediaType: Boolean): List<MoveChoice> = buildList {
+    for (shelf in shelves) {
+        add(MoveChoice.Header(shelf.mediaType.name))
+        for (row in shelf.collections) {
+            if (row.isFolder) {
+                val children = row.children.filter { it.collection.id != currentCollectionId }
+                if (children.isEmpty()) continue
+                add(MoveChoice.Folder(row.collection.name))
+                children.forEach { add(MoveChoice.Existing(it.collection.id, it.collection.name, indented = true)) }
+            } else if (row.collection.id != currentCollectionId) {
+                add(MoveChoice.Existing(row.collection.id, row.collection.name))
+            }
+        }
+        add(MoveChoice.NewCollection(shelf.mediaType.id, shelf.mediaType.name))
+    }
+    if (allowNewMediaType) add(MoveChoice.NewMediaType)
 }
 
 /**
@@ -42,15 +67,7 @@ fun MovePackDialog(
 ) {
     var newIn by rememberSaveable { mutableStateOf<String?>(null) }
     var newMediaType by rememberSaveable { mutableStateOf(false) }
-    val choices = buildList {
-        for (shelf in shelves) {
-            add(MoveChoice.Header(shelf.mediaType.name))
-            shelf.collections.filter { it.collection.id != currentCollectionId }
-                .forEach { add(MoveChoice.Existing(it.collection.id, it.collection.name)) }
-            add(MoveChoice.NewCollection(shelf.mediaType.id, shelf.mediaType.name))
-        }
-        if (allowNewMediaType) add(MoveChoice.NewMediaType)
-    }
+    val choices = moveChoices(shelves, currentCollectionId, allowNewMediaType)
     when {
         newIn != null -> NameDialog(
             title = "New collection",
@@ -71,7 +88,7 @@ fun MovePackDialog(
                 is MoveChoice.Existing -> { onMove(choice.id); onDismiss() }
                 is MoveChoice.NewCollection -> newIn = choice.mediaTypeId
                 MoveChoice.NewMediaType -> newMediaType = true
-                is MoveChoice.Header -> Unit
+                is MoveChoice.Header, is MoveChoice.Folder -> Unit
             }
         }
     }
@@ -123,9 +140,12 @@ private fun ChoiceDialog(title: String, choices: List<MoveChoice>, onDismiss: ()
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.clickable(enabled = false) {},
                         )
+                        is MoveChoice.Folder -> ListItem(
+                            headlineContent = { Text(choice.name, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        )
                         is MoveChoice.Existing -> ListItem(
                             headlineContent = { Text(choice.name) },
-                            modifier = Modifier.clickable { onPick(choice) },
+                            modifier = Modifier.clickable { onPick(choice) }.padding(start = if (choice.indented) 16.dp else 0.dp),
                         )
                         is MoveChoice.NewCollection -> ListItem(
                             headlineContent = { Text("New collection…") },

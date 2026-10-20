@@ -58,6 +58,42 @@ class CollectionViewModelTest {
         assertThat(opened.title).isEqualTo("Wikipedia")
     }
 
+    private fun kiwix(vararg children: CollectionRow) =
+        CollectionRow(ShelfCollection("c:kiwix", "Kiwix", "lit", false, defaultKey = "kiwix"), emptyList(), children = children.toList())
+
+    @Test fun theFolderScreenListsItsCollectionsAndEachOpensItsOwn() = runTest(main.dispatcher) {
+        val wiki = pack("wiki", "Wikipedia")
+        show(collection("c:granger-classics", false), kiwix(collection("c:devdocs", false, pack("py")), collection("c:wikipedia", false, wiki)))
+        val folder = vm("c:kiwix").ui.filterNotNull().first()
+        assertThat(folder.isFolder).isTrue()
+        assertThat(folder.children.map { it.collection.id }).containsExactly("c:devdocs", "c:wikipedia").inOrder()
+        assertThat(folder.children.map(::rowCountText)).containsExactly("1 pack", "1 pack")
+        // A child opens as an ordinary collection.
+        val child = vm("c:wikipedia").ui.filterNotNull().first()
+        assertThat(child.isFolder).isFalse()
+        assertThat(child.packs).containsExactly(wiki)
+    }
+
+    @Test fun theMoveListIndentsAFoldersChildrenAndOffersNoFolder() {
+        val shelves = listOf(
+            Shelf(
+                MediaType("lit", "Literature", true, 0),
+                listOf(collection("c:granger-classics", false), kiwix(collection("c:devdocs", false), collection("c:wikipedia", false))),
+            ),
+        )
+        assertThat(moveChoices(shelves, currentCollectionId = "c:wikipedia", allowNewMediaType = true)).containsExactly(
+            MoveChoice.Header("Literature"),
+            MoveChoice.Existing("c:granger-classics", "c:granger-classics"),
+            MoveChoice.Folder("Kiwix"),
+            MoveChoice.Existing("c:devdocs", "c:devdocs", indented = true),
+            MoveChoice.NewCollection("lit", "Literature"),
+            MoveChoice.NewMediaType,
+        ).inOrder()
+        // A folder with nothing left to offer isn't listed.
+        assertThat(moveChoices(shelves.map { it.copy(collections = listOf(kiwix(collection("c:devdocs", false)))) }, "c:devdocs", false))
+            .containsExactly(MoveChoice.Header("Literature"), MoveChoice.NewCollection("lit", "Literature")).inOrder()
+    }
+
     @Test fun openUnavailablePackDoesNothing() = runTest(main.dispatcher) {
         val missing = pack("gone", status = PackStatus.MISSING)
         val noStart = pack("blank")
