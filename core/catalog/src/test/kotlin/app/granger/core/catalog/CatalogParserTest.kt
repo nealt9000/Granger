@@ -53,6 +53,28 @@ class CatalogParserTest {
         assertThat(catalog.packs.single().nonCommercial).isTrue()
     }
 
+    @Test fun featuredAndFamilyDefaultWhenAbsent() {
+        val pack = ok(parse(catalogJson())).packs.single()
+        assertThat(pack.featured).isFalse()
+        assertThat(pack.family).isEmpty()
+    }
+
+    @Test fun featuredAndFamilyAreRead() {
+        val pack = ok(parse(catalogJson(packExtra = ""","featured": true, "family": "wikipedia""""))).packs.single()
+        assertThat(pack.featured).isTrue()
+        assertThat(pack.family).isEqualTo("wikipedia")
+    }
+
+    @Test fun aThousandPacksParse() {
+        val packs = (1..1000).joinToString(",") { i ->
+            """{"id": "p$i", "title": "Pack $i", "category": "Q&A", "language": "eng", "sizeBytes": 1000,
+               "sha256": "$SHA_A", "urls": ["https://download.kiwix.org/zim/p$i.zim"], "snapshotDate": "2026-10-10",
+               "license": "CC BY-SA 4.0", "hasFulltextIndex": true, "zimUuid": "u$i", "zimName": "p$i"}"""
+        }
+        val bytes = """{"formatVersion": 1, "generatedAt": "2026-10-20T00:00:00Z", "packs": [$packs]}""".toByteArray()
+        assertThat(ok(parse(bytes)).packs).hasSize(1000)
+    }
+
     @Test fun tamperedBytesFailTheSignature() {
         val bytes = catalogJson()
         val sig = TestKeys.sign(bytes)

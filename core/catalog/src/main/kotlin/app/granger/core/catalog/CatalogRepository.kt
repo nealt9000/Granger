@@ -128,6 +128,7 @@ class CatalogRepository(
     }
 
     private companion object {
-        const val MAX_BYTES = 4L * 1024 * 1024
+        // The English Kiwix catalog is about 1 MB; every language would be about 3 MB.
+        const val MAX_BYTES = 16L * 1024 * 1024
     }
 }

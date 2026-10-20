@@ -53,6 +53,10 @@ data class PackEntry(
     val zimName: String,
     /** The license forbids commercial use (iFixit): the app says Kiwix provides the pack. Absent in older catalogs. */
     val nonCommercial: Boolean = false,
+    /** One of the hand-picked packs, listed under Recommended. Absent in older catalogs. */
+    val featured: Boolean = false,
+    /** The pack's family in the generator's family table (e.g. "wikipedia"); blank in older catalogs. */
+    val family: String = "",
 ) : CatalogItem
 
 /** An e-book (EPUB) the reader opens. */
