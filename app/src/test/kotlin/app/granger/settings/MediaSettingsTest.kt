@@ -19,6 +19,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import app.granger.FakeAppearancePrefs
 import app.granger.FakeDownloads
 import app.granger.FakePrefs
 import app.granger.FakeVolumes
@@ -294,7 +295,8 @@ class MediaSettingsTest {
     }
 
     @Test fun mediaSectionIndexComesFromTheKeys() {
-        assertThat(settingsIndexOf(MEDIA_SECTION_KEY)).isEqualTo(5)
+        assertThat(settingsIndexOf(MEDIA_SECTION_KEY)).isEqualTo(6)
+        assertThat(settingsIndexOf("appearance")).isEqualTo(2)
         assertThat(settingsIndexOf("models")).isEqualTo(0)
     }
 
@@ -314,7 +316,7 @@ class MediaSettingsTest {
     @OptIn(ExperimentalTestApi::class)
     private fun openSettings(scrollToMedia: Boolean, check: androidx.compose.ui.test.ComposeUiTest.() -> Unit) = runComposeUiTest {
         val vm = SettingsViewModel(
-            FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(),
+            FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(), FakeAppearancePrefs(),
             appScope = CoroutineScope(Dispatchers.Unconfined),
             mediaSettings = { scope ->
                 MediaSettings(folders, grants, prefs, MemorySharing(), scanner = { ScanSummary(0, 0) }, scope = scope)

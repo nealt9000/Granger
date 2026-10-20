@@ -345,6 +345,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
+    // Settings → Appearance; a change there moves the rail at once.
+    val railSide by container.appearancePrefs.railSide.collectAsStateWithLifecycle()
     // One for the activity: the mini-player and the full-screen player share it.
     val player = if (Features.PLAYER) {
         viewModel {
@@ -478,6 +480,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
             }
         },
+        side = railSide,
         showResearch = showResearch,
         reading = readerTabId != null,
         miniPlayer = if (player == null || miniPlacement == MiniPlayerPlacement.HIDDEN) {
@@ -746,7 +749,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 SettingsScreen(
                     viewModel = viewModel {
                         SettingsViewModel(
-                            container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appScope,
+                            container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
+                            container.appScope,
                             mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
                         )
                     },

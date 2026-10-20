@@ -33,6 +33,8 @@ import app.granger.core.library.BookOrigin
 import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
 import app.granger.archive.SharedArchivePrefs
+import app.granger.settings.AppearancePrefs
+import app.granger.settings.SharedAppearancePrefs
 import app.granger.archive.ArchiveUserAgent
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.ArchiveQuery
@@ -314,6 +316,7 @@ class AppContainer(context: Context) {
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
+    val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
     val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")

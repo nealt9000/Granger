@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import app.granger.media.MediaPermissionState
 import app.granger.media.rememberMediaPermission
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -40,6 +41,7 @@ import app.granger.archive.WaiverDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,7 +50,7 @@ import app.granger.R
 import app.granger.formatBytes
 
 /**
- * Models, Readiness, storage and download choices, Music & audiobooks, and About. [scrollToMedia] opens it at the
+ * Models, Readiness, Appearance (the toolbar's side), storage and download choices, Music & audiobooks, and About. [scrollToMedia] opens it at the
  * Music & audiobooks section (the Library's link). [onPermissionChecked] runs after each permission check (resume, or
  * an answer to the prompt), so the app can rescan when the permission changed.
  */
@@ -67,6 +69,7 @@ fun SettingsScreen(
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val railSide by viewModel.railSide.collectAsStateWithLifecycle()
     val media = viewModel.media
     val listState = rememberLazyListState()
     var scrolled by rememberSaveable { mutableStateOf(false) }
@@ -119,6 +122,10 @@ fun SettingsScreen(
                         )
                         HorizontalDivider()
                     }
+                    "appearance" -> {
+                        AppearanceSection(railSide, viewModel::setRailSide)
+                        HorizontalDivider()
+                    }
                     "storage" -> StorageSection(ui, viewModel::selectVolume)
                     "wifi" -> {
                         ListItem(
@@ -169,7 +176,7 @@ fun SettingsScreen(
 }
 
 /** The keys of the rows above Music & audiobooks, in order. Add a row above it here and the scroll follows. */
-private val LEADING_KEYS = listOf("models", "readiness", "storage", "wifi", "archive")
+private val LEADING_KEYS = listOf("models", "readiness", "appearance", "storage", "wifi", "archive")
 
 /** The list index of [key] when the media section is shown: one item per leading key, then [MEDIA_SECTION_KEY]. */
 internal fun settingsIndexOf(key: String): Int = (LEADING_KEYS + MEDIA_SECTION_KEY).indexOf(key)
@@ -193,6 +200,34 @@ private fun rememberMediaControls(media: MediaSettings, onPermissionChecked: () 
         pickingAudiobooks = audiobooks
         picker.launch(null)
     }
+}
+
+/** "Toolbar side": Left or Right, applied at once (the shell reads the same preference). */
+@Composable
+internal fun AppearanceSection(side: RailSide, onSide: (RailSide) -> Unit) {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Appearance", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        Text("Toolbar side", modifier = Modifier.padding(top = 8.dp))
+        Column(Modifier.selectableGroup()) {
+            for (choice in RailSide.entries) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(selected = choice == side, role = Role.RadioButton, onClick = { onSide(choice) })
+                        .padding(vertical = 4.dp),
+                ) {
+                    RadioButton(selected = choice == side, onClick = null)
+                    Text(choice.label, modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+        }
+    }
+}
+
+private val RailSide.label get() = when (this) {
+    RailSide.LEFT -> "Left"
+    RailSide.RIGHT -> "Right"
 }
 
 @Composable

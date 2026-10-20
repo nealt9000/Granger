@@ -45,12 +45,16 @@ data class SettingsUi(
     val archiveEverything: Boolean = false,
 )
 
-/** Where downloads go and whether they may use mobile data; the choices the source screens used to carry. */
+/**
+ * Where downloads go and whether they may use mobile data (the choices the source screens used to carry), and the
+ * rail's side, which the shell reads from [AppearancePrefs] and applies at once.
+ */
 class SettingsViewModel(
     private val downloads: Downloads,
     private val volumes: VolumeSource,
     private val prefs: DownloadPrefs,
     private val archivePrefs: ArchivePrefs,
+    private val appearancePrefs: AppearancePrefs,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** Builds the "Music & audiobooks" section's model on this view model's scope; null hides the section. */
@@ -67,6 +71,8 @@ class SettingsViewModel(
             val rows = volumeRows(list, records)
             SettingsUi(rows, rows.firstOrNull { it.path == path }?.path ?: rows.firstOrNull()?.path, wifi, archive)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUi())
+
+    val railSide: StateFlow<RailSide> = appearancePrefs.railSide
 
     init {
         refreshVolumes()
@@ -94,6 +100,10 @@ class SettingsViewModel(
 
     fun withdrawArchiveWaiver() {
         archivePrefs.withdraw()
+    }
+
+    fun setRailSide(side: RailSide) {
+        appearancePrefs.setRailSide(side)
     }
 }
 
