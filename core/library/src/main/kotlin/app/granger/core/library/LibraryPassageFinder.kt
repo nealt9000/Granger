@@ -16,11 +16,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /**
- * Finds passages for Research in three places: full-text hits in ZIM articles, matching chunks of e-books, and short
- * "catalogue cards" built from book and pack metadata (so "books by Darwin" has something to cite).
+ * Finds passages for Research in four places: full-text hits in ZIM articles, matching chunks of e-books, short
+ * "catalogue cards" built from book and pack metadata (so "books by Darwin" has something to cite), and media cards for
+ * albums and audiobooks ([MediaCards]) from [media].
  *
  * @param docs how many articles are read, overall; @param perPack how many hits each pack is asked for;
- * @param cards how many catalogue cards are kept; @param bookLimit how many chunks the general book search keeps.
+ * @param cards how many catalogue cards are kept; @param bookLimit how many chunks the general book search keeps;
+ * @param mediaCards how many media cards are kept.
  *
  * A question that names a work ("does the bible say ...") also searches inside the named books, for the other keywords.
  */
@@ -34,13 +36,34 @@ class LibraryPassageFinder(
     private val perPack: Int = 8,
     private val cards: Int = 3,
     private val bookLimit: Int = 40,
+    private val media: MediaIndex? = null,
+    private val mediaCards: Int = 2,
 ) : PassageFinder {
     override suspend fun find(keywords: List<String>): List<Passage> {
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
         val collections = collectionNames()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
-        return articles(words, packs, collections) + books(words, collections) + cards(words, packs, collections)
+        return articles(words, packs, collections) + books(words, collections) + cards(words, packs, collections) + mediaCards(words)
+    }
+
+    /**
+     * Albums and audiobooks that hold every word of some keyword as whole words (the cards' rule), best by the
+     * keywords' lexical score, at most [mediaCards].
+     */
+    private suspend fun mediaCards(words: List<String>): List<Passage> {
+        val index = media ?: return emptyList()
+        if (mediaCards <= 0) return emptyList()
+        return try {
+            val works = words.flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }.distinctBy { it.id }
+            val score = LexicalScore.scorer(words)
+            // Stable: equal scores keep the index's order.
+            works.map(MediaCards::passage).map { it to score(it) }.sortedByDescending { it.second }.take(mediaCards).map { it.first }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     /** Pack ids and book ids to the name of the collection they are filed in. */
@@ -214,6 +237,9 @@ class LibraryPassageFinder(
 
     private companion object {
         const val NAMED_BOOKS = 3
+
+        /** Works asked of the media index for each keyword, before the best [mediaCards] are picked. */
+        const val MEDIA_PER_KEYWORD = 6
 
         /** Title words that don't name a work: "The Complete Works of X" is not named by "complete". */
         val GENERIC_TITLE_WORDS = setOf(

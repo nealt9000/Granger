@@ -4,37 +4,12 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-
-/** In-memory [MediaLibrary]: the index only reads its flows. */
-private class MemoryMedia : MediaLibrary {
-    val trackList = MutableStateFlow<List<Track>>(emptyList())
-    val bookList = MutableStateFlow<List<Audiobook>>(emptyList())
-    val chapterList = MutableStateFlow<List<AudiobookChapter>>(emptyList())
-    val noteList = MutableStateFlow<List<AlbumNote>>(emptyList())
-    override val tracks: Flow<List<Track>> = trackList
-    override val audiobooks: Flow<List<Audiobook>> = bookList
-    override val allChapters: Flow<List<AudiobookChapter>> = chapterList
-    override val albumNotes: Flow<List<AlbumNote>> = noteList
-    override fun chapters(audiobookId: String) = chapterList.map { all -> all.filter { it.audiobookId == audiobookId } }
-    override suspend fun track(id: String) = trackList.value.firstOrNull { it.id == id }
-    override suspend fun audiobook(id: String) = bookList.value.firstOrNull { it.id == id }
-    override suspend fun coverPaths() = emptySet<String>()
-    override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) {
-        trackList.value = trackList.value.filter { it.origin != origin } + result.tracks.filter { it.audiobookId == null }
-        bookList.value = bookList.value.filter { it.origin != origin } + result.audiobooks.map { it.book }
-        noteList.value = noteList.value + result.albumNotes
-    }
-    override suspend fun markAllMissing(origin: MediaOrigin) = error("not in tests")
-    override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = error("not in tests")
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MediaIndexTest {

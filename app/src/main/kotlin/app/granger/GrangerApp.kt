@@ -349,7 +349,7 @@ class AppContainer(context: Context) {
         appScope, useEmbedder = RERANK_WITH_EMBEDDER,
     )
 
-    val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves)
+    val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex)
 
     /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9). */
     val rankingConfig = RankingConfig()

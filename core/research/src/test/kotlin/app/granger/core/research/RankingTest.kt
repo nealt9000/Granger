@@ -106,6 +106,36 @@ class RankingTest {
         assertThat(Ranking.byLexical(ps, listOf("steam"), config)).hasSize(8)
     }
 
+    private fun media(n: Int) = Passage(SourceKind.MEDIA, "album:a$n", "Album $n", packTitle = "Your music", text = "Album: Album $n")
+    private fun book(n: Int) = passage("B$n", "steam", n)
+
+    @Test fun mediaCapKeepsOneMediaPassageForANonMediaQuestion() {
+        val ranked = listOf(media(1), book(1), media(2), book(2))
+        assertThat(Ranking.capMedia(ranked, asked = false, config)).containsExactly(media(1), book(1), book(2)).inOrder()
+    }
+
+    @Test fun mediaCuesRaiseTheCapToTwo() {
+        val ranked = listOf(media(1), book(1), media(2), media(3), book(2))
+        assertThat(Ranking.capMedia(ranked, asked = true, config)).containsExactly(media(1), book(1), media(2), book(2)).inOrder()
+    }
+
+    @Test fun cappedMediaGivesItsPlaceToTheNextPassage() {
+        // Ranked best first, more than the pool holds: 3 media among the first 8.
+        val ranked = listOf(book(1), media(1), book(2), media(2), book(3), media(3), book(4), book(5), book(6), book(7), book(8))
+        val pool = Ranking.capMedia(ranked, asked = false, config).take(config.large)
+        assertThat(pool).containsExactly(book(1), media(1), book(2), book(3), book(4), book(5), book(6), book(7)).inOrder()
+    }
+
+    @Test fun capLeavesOtherKindsUntouched() {
+        val ranked = (1..10).map { book(it) } + Passage(SourceKind.CARD, "c", "Card", text = "Title: x")
+        assertThat(Ranking.capMedia(ranked, asked = false, config)).isEqualTo(ranked)
+    }
+
+    @Test fun rankingCanKeepMoreThanLargeForTheCap() {
+        val ps = (1..20).map { passage("S$it", "steam", it) }
+        assertThat(Ranking.byLexical(ps, listOf("steam"), config, limit = 12)).hasSize(12)
+    }
+
     @Test fun cosineRejectsVectorsOfDifferentSizes() {
         val e = runCatching { Ranking.cosine(floatArrayOf(1f, 0f), floatArrayOf(1f)) }.exceptionOrNull()
         assertThat(e).isInstanceOf(IllegalArgumentException::class.java)

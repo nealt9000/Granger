@@ -1,6 +1,7 @@
 package app.granger.core.research
 
-enum class SourceKind { ARTICLE, BOOK, CARD, SELECTION }
+/** MEDIA is an album or audiobook catalogue card: [Passage.sourceId] "album:<albumKey>" or the audiobook id, location "". */
+enum class SourceKind { ARTICLE, BOOK, CARD, SELECTION, MEDIA }
 
 /** Bibliographic extras that help ranking and citation; all optional. */
 data class SourceMeta(

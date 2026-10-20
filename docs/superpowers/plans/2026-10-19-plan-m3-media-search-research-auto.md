@@ -322,7 +322,7 @@ git commit -m "Media M3: Music and Audiobooks groups in Search; a song plays its
 @Test fun mediaPassagesRoundTrip()
 ```
 
-- [ ] **Step 2: Run to verify they fail.** Run: `./gradlew :core:research:testDebugUnitTest :core:library:testDebugUnitTest`. Expected: compile failure.
+- [ ] **Step 2: Run to verify they fail.** Run: `./gradlew :core:research:test :core:library:testDebugUnitTest`. Expected: compile failure. (`:core:research` is a plain JVM module: its task is `test`, and `testDebugUnitTest` does not run it.)
 - [ ] **Step 3: Implement.** In `ResearchPipeline.run`, after `rank()` and before `.take(config.large)`, apply `Ranking.capMedia(ranked, MediaCues.asked(request.question), config)`. Check every `SourceKind` use the survey listed (`AnswerPrompt.kt:58`, `LexicalScore.kt:40`, `ResearchViewModel.kt:241, 320, 330, 482`, `ResearchScreen.kt:139`, `GrangerNavHost.kt:293`, `EvalActivity.kt:86`) and say in the commit message which needed a change.
 - [ ] **Step 4: Run to verify they pass.** Same command. Expected: PASS.
 - [ ] **Step 5: Commit**

@@ -10,6 +10,9 @@ data class RankingConfig(
     val lexicalThreshold: Double = 0.6,
     val small: Int = 4,
     val large: Int = 8,
+    /** At most this many media passages reach the answer; [mediaCapAsked] when the question asks about media ([MediaCues]). */
+    val mediaCap: Int = 1,
+    val mediaCapAsked: Int = 2,
 )
 
 /** Picks which passages go into the prompt: a cheap lexical preselect, then a threshold on embeddings or keywords. */
@@ -45,31 +48,45 @@ object Ranking {
         return if (denom == 0f) 0f else dot / denom
     }
 
-    /** [vectors] lines up with [candidates]. */
+    /**
+     * Keeps the best [RankingConfig.mediaCap] media passages ([RankingConfig.mediaCapAsked] when [asked]) and drops the
+     * rest, so each dropped one gives its place to the next passage. Every other passage keeps its order. Applied to the
+     * ranked list before it is cut to [RankingConfig.large].
+     */
+    fun capMedia(passages: List<Passage>, asked: Boolean, config: RankingConfig): List<Passage> {
+        val cap = if (asked) config.mediaCapAsked else config.mediaCap
+        var media = 0
+        return passages.filter { it.kind != SourceKind.MEDIA || ++media <= cap }
+    }
+
+    /** [vectors] lines up with [candidates]. At most [limit] are kept. */
     fun byEmbedding(
         candidates: List<Passage>,
         query: FloatArray,
         vectors: List<FloatArray>,
         config: RankingConfig,
+        limit: Int = config.large,
     ): List<Passage> =
         candidates.indices
             .map { it to cosine(query, vectors[it]) }
             .filter { it.second >= config.cosineThreshold }
             .sortedByDescending { it.second }
-            .take(config.large)
+            .take(limit)
             .map { candidates[it.first] }
 
+    /** Above [RankingConfig.lexicalThreshold], best first; at most [limit]. */
     fun byLexical(
         candidates: List<Passage>,
         keywords: List<String>,
         config: RankingConfig,
+        limit: Int = config.large,
     ): List<Passage> {
         val score = LexicalScore.scorer(keywords)
         return candidates
             .map { it to score(it) }
             .filter { it.second >= config.lexicalThreshold }
             .sortedByDescending { it.second }
-            .take(config.large)
+            .take(limit)
             .map { it.first }
     }
 }

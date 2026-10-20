@@ -312,6 +312,36 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun nonMediaQuestionPoolMatchesThePoolWithoutMedia() = runTest {
+        fun book(n: Int) = passage("S$n", "Water boils, entry $n.", "Water $n")
+        fun media(n: Int) = Passage(SourceKind.MEDIA, "album:a$n", "Water Music $n", packTitle = "Your music", text = "Album: Water boils $n")
+        val books = (1..10).map { book(it) }
+        val withMedia = listOf(media(1), books[0], media(2), books[1], media(3)) + books.drop(2)
+        val withoutMedia = listOf(media(1)) + books
+        suspend fun pool(found: List<Passage>): List<Passage> {
+            val events = ResearchPipeline(FakeFinder(found), FakeModels(FakeGenerator(), embedder = null))
+                .run(ResearchRequest("At what temperature does water boil?")).toList()
+            val out = outcome(events) as Outcome.Answered
+            return out.passages + out.candidates
+        }
+        val capped = pool(withMedia)
+        assertThat(capped).isEqualTo(pool(withoutMedia))
+        assertThat(capped).hasSize(8)
+        assertThat(capped.count { it.kind == SourceKind.MEDIA }).isEqualTo(1)
+    }
+
+    @Test
+    fun mediaQuestionKeepsTwoMediaPassages() = runTest {
+        fun book(n: Int) = passage("S$n", "Water boils, entry $n.", "Water $n")
+        fun media(n: Int) = Passage(SourceKind.MEDIA, "album:a$n", "Water Music $n", packTitle = "Your music", text = "Album: Water boils $n")
+        val found = listOf(media(1), media(2), media(3)) + (1..10).map { book(it) }
+        val events = ResearchPipeline(FakeFinder(found), FakeModels(FakeGenerator(), embedder = null))
+            .run(ResearchRequest("Which album has water boils on it?")).toList()
+        val out = outcome(events) as Outcome.Answered
+        assertThat((out.passages + out.candidates).filter { it.kind == SourceKind.MEDIA }).containsExactly(media(1), media(2)).inOrder()
+    }
+
+    @Test
     fun followUpRewriteSeesPreviousQuestion() = runTest {
         val gen = FakeGenerator()
         ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder))
