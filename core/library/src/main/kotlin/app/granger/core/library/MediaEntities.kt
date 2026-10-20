@@ -128,3 +128,10 @@ data class MediaFolder(@PrimaryKey val uri: String, val audiobooks: Boolean, val
 /** Scanner cache: skip re-fingerprinting and re-tagging an unchanged file. */
 @Entity(tableName = "scan_cache")
 data class ScanCacheEntry(@PrimaryKey val uri: String, val sizeBytes: Long, val modifiedMs: Long, val fingerprint: String)
+
+/**
+ * What a downloaded album's manifest says about it (an archive.org item's description), which [Track] has no column
+ * for. Written by the downloaded-media sync; deleted when the album's last track row is forgotten. Phone albums have none.
+ */
+@Entity(tableName = "album_notes")
+data class AlbumNote(@PrimaryKey val albumKey: String, val description: String)

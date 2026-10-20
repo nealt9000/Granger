@@ -183,4 +183,45 @@ class MigrationTest {
             assertThat(it.getLong(0)).isEqualTo(7L)
         }
     }
+    @Test fun migrate7To8KeepsDataAndCreatesAlbumNotes() {
+        helper.createDatabase("migrate8.db", 7).apply {
+            execSQL(
+                "INSERT INTO packs (id, filePath, title, description, language, date, sizeBytes, hasFulltextIndex, status, addedAt, name) " +
+                    "VALUES ('u-a', '/p/a.zim', 'A', '', 'eng', '2026-10-15', 10, 1, 'OK', 5, 'a')",
+            )
+            execSQL(
+                "INSERT INTO tracks (id, origin, uri, folder, title, album, albumKey, albumArtists, artists, composers, genres, disc, trackNo, " +
+                    "date, originalDate, releaseType, sortTitle, sortAlbum, sortArtist, sortAlbumArtist, durationMs, rgTrackGain, rgTrackPeak, " +
+                    "rgAlbumGain, rgAlbumPeak, coverPath, audiobookId, status, addedAt) VALUES ('track:archive_org:x', 'ARCHIVE_ORG', 'file:///x.mp3', " +
+                    "'music/archive-org/x/', 'Mars', 'The Planets', '|item|archive-org:x', 'Gustav Holst', 'Gustav Holst', '', '', NULL, 1, '', '', '', " +
+                    "'', '', '', '', 1000, NULL, NULL, NULL, NULL, NULL, NULL, 'OK', 9)",
+            )
+            execSQL("INSERT INTO audiobook_states (audiobookId, trackId, positionMs, speed, skipSilence, volumeBoostMb, finished, updatedAt) VALUES ('b', 't', 42, 1.0, 0, 0, 0, 1)")
+            LibraryDatabase.createBookText(this)
+            execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate8.db", 8, false, LibraryDatabase.MIGRATION_7_8)
+        db.query("SELECT title, albumKey FROM tracks").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("Mars")
+            assertThat(it.getString(1)).isEqualTo("|item|archive-org:x")
+        }
+        db.query("SELECT positionMs FROM audiobook_states").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getLong(0)).isEqualTo(42L)
+        }
+        db.query("SELECT COUNT(*) FROM packs").use {
+            it.moveToFirst()
+            assertThat(it.getInt(0)).isEqualTo(1)
+        }
+        db.execSQL("INSERT INTO album_notes (albumKey, description) VALUES ('|item|archive-org:x', 'LSO')")
+        db.query("SELECT description FROM album_notes").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("LSO")
+        }
+        db.query("SELECT docid FROM book_text WHERE book_text MATCH 'quick'").use {
+            assertThat(it.moveToFirst()).isTrue()
+        }
+    }
 }

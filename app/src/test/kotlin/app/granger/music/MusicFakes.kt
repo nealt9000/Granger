@@ -1,5 +1,6 @@
 package app.granger.music
 
+import app.granger.core.library.AlbumNote
 import app.granger.core.library.Albums
 import app.granger.core.library.Audiobook
 import app.granger.core.library.AudiobookChapter
@@ -25,6 +26,8 @@ class FakeMediaLibrary(tracks: List<Track> = emptyList()) : MediaLibrary {
     override val tracks: Flow<List<Track>> = trackList
     override val audiobooks: Flow<List<Audiobook>> = bookList.map { all -> all.sortedBy { it.title.lowercase() } }
     override val allChapters: Flow<List<AudiobookChapter>> = chapterList
+    val noteList = MutableStateFlow<List<AlbumNote>>(emptyList())
+    override val albumNotes: Flow<List<AlbumNote>> = noteList
     override fun chapters(audiobookId: String): Flow<List<AudiobookChapter>> =
         chapterList.map { all -> all.filter { it.audiobookId == audiobookId }.sortedBy { it.ordinal } }
     override suspend fun track(id: String): Track? = trackList.value.firstOrNull { it.id == id }

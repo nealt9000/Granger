@@ -40,6 +40,7 @@ import app.granger.core.library.Library
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.library.LibrarySearch
+import app.granger.core.library.MediaIndex
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Playlists
@@ -202,6 +203,9 @@ class AppContainer(context: Context) {
     val booksScannedThisProcess = AtomicBoolean(false)
     /** Phone music and audiobooks. */
     val media: MediaLibrary = RoomMediaLibrary(libraryDb)
+
+    /** Music and audiobooks in memory, for Search, Research and Android Auto; follows [media]'s rows. */
+    val mediaIndex = MediaIndex(media, appScope)
 
     /** Reads the phone's music and audiobooks in place, read-only; started from [GrangerApp] behind Features.PLAYER. */
     val phoneScanner: PhoneScanner by lazy {

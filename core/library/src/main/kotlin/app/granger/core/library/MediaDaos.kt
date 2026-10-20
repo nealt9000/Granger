@@ -10,7 +10,7 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
- * The media catalog: tracks, audiobooks and chapters. Written only by [RoomMediaLibrary.sync], and deleted from only by
+ * The media catalog: tracks, audiobooks, chapters and album notes. Written only by [RoomMediaLibrary.sync], and deleted from only by
  * [RoomMediaLibrary.forget] (removed downloads; never a PHONE row).
  */
 @Dao
@@ -75,6 +75,20 @@ interface MediaDao {
     /** The chapters of these downloaded audiobooks (none of a PHONE one). Run before [deleteAudiobooks]; callers chunk. */
     @Query("DELETE FROM audiobook_chapters WHERE audiobookId IN (SELECT id FROM audiobooks WHERE id IN (:ids) AND origin != 'PHONE')")
     suspend fun deleteChaptersOf(ids: List<String>)
+
+    @Query("SELECT * FROM album_notes ORDER BY albumKey")
+    fun observeAlbumNotes(): Flow<List<AlbumNote>>
+
+    @Upsert
+    suspend fun upsertAlbumNotes(notes: List<AlbumNote>)
+
+    /** Keep [albumKeys] under 999 variables; callers chunk. */
+    @Query("DELETE FROM album_notes WHERE albumKey IN (:albumKeys)")
+    suspend fun deleteAlbumNotes(albumKeys: List<String>)
+
+    /** Notes whose album has no track row left (its downloads were forgotten). */
+    @Query("DELETE FROM album_notes WHERE albumKey NOT IN (SELECT albumKey FROM tracks)")
+    suspend fun deleteOrphanAlbumNotes()
 
     /** Downloaded rows only, as [deleteTracks]. Their chapters go first ([deleteChaptersOf]); callers chunk. */
     @Query("DELETE FROM audiobooks WHERE id IN (:ids) AND origin != 'PHONE'")

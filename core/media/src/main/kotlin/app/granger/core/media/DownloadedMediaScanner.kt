@@ -2,6 +2,7 @@ package app.granger.core.media
 
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import app.granger.core.library.AlbumNote
 import app.granger.core.library.Albums
 import app.granger.core.library.Audiobook
 import app.granger.core.library.MediaLibrary
@@ -28,6 +29,7 @@ import kotlinx.coroutines.withContext
  *
  * - Syncs only [MediaOrigin.LIBRIVOX] and [MediaOrigin.ARCHIVE_ORG], never PHONE: phone media is [PhoneScanner]'s.
  * - An album is one origin item: its tracks share `Albums.itemKey(source, ref)` and the item's title and creators.
+ *   Its description is filed as its [AlbumNote].
  *   Embedded tags give a track its title (when the origin has none), duration, ReplayGain and art, never its album.
  * - A file is present when it exists at its full size; `*.part` files never count. Present files' tags are read once,
  *   read-only and under [tagGuard], and cached in the manifest, so later scans never open them.
@@ -137,24 +139,26 @@ class DownloadedMediaScanner(
         var read = 0
         val tracks = mutableMapOf<MediaOrigin, MutableList<Track>>()
         val books = mutableMapOf<MediaOrigin, MutableList<ScannedAudiobook>>()
+        val notes = mutableMapOf<MediaOrigin, MutableList<AlbumNote>>()
         for ((dir, m) in survey.items) {
             val filed = file(dir, m, skipTags)
             read += filed.read
             val origin = DownloadedIds.origin(m)
             tracks.getOrPut(origin) { mutableListOf() } += filed.tracks
             filed.book?.let { books.getOrPut(origin) { mutableListOf() } += it }
+            filed.note?.let { notes.getOrPut(origin) { mutableListOf() } += it }
         }
 
         // Rows under a folder that couldn't be read or listed are unknown, not gone.
         val unknown = (survey.unreadable + survey.unlisted).map { Uri.fromFile(it).toString() + "/" }
         for (origin in ORIGINS) {
-            val result = ScanResult(tracks[origin].orEmpty(), books[origin].orEmpty())
+            val result = ScanResult(tracks[origin].orEmpty(), books[origin].orEmpty(), notes[origin].orEmpty())
             media.sync(origin, result) { uri -> unknown.any { uri.startsWith(it) } }
         }
         return read
     }
 
-    private class Filed(val tracks: List<Track>, val book: ScannedAudiobook?, val read: Int)
+    private class Filed(val tracks: List<Track>, val book: ScannedAudiobook?, val note: AlbumNote?, val read: Int)
 
     private fun file(dir: File, original: MediaManifest, skipTags: Set<String>): Filed {
         val folder = MediaManifests.relativeDir(original) + "/"
@@ -195,7 +199,10 @@ class DownloadedMediaScanner(
                 chapters = tracks.map { it.id to ScannedChapter(it.title, 0L) },
             )
         }
-        return Filed(tracks, book, read)
+        // An album's description has no track column: it's kept as the album's note.
+        val note = m.description.trim().takeIf { m.kind == MediaManifest.ALBUM && it.isNotEmpty() && tracks.isNotEmpty() }
+            ?.let { AlbumNote(Albums.itemKey(m.source, m.ref), it) }
+        return Filed(tracks, book, note, read)
     }
 
     private fun track(dir: File, folder: String, m: MediaManifest, index: Int, album: String, coverFile: File?, audiobookId: String?): Track {

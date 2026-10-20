@@ -9,8 +9,11 @@ data class ScannedChapter(val title: String, val startMs: Long)
 /** [chapters] pairs each chapter with its track id, in listening order. */
 data class ScannedAudiobook(val book: Audiobook, val trackIds: List<String>, val chapters: List<Pair<String, ScannedChapter>>)
 
-/** [tracks] holds every scanned track, audiobook files included (with `audiobookId` set). */
-data class ScanResult(val tracks: List<Track>, val audiobooks: List<ScannedAudiobook>)
+/**
+ * [tracks] holds every scanned track, audiobook files included (with `audiobookId` set). [albumNotes] describe albums
+ * among [tracks] (downloaded ones; a phone scan has none).
+ */
+data class ScanResult(val tracks: List<Track>, val audiobooks: List<ScannedAudiobook>, val albumNotes: List<AlbumNote> = emptyList())
 
 interface MediaLibrary {
     /** Music only (audiobookId == null), all statuses. */
@@ -20,6 +23,9 @@ interface MediaLibrary {
 
     /** Every audiobook's chapters, by book then ordinal (the shelf's progress bars). */
     val allChapters: Flow<List<AudiobookChapter>>
+
+    /** Every album note (downloaded albums' descriptions), any status. */
+    val albumNotes: Flow<List<AlbumNote>>
     suspend fun track(id: String): Track?
     suspend fun audiobook(id: String): Audiobook?
 
@@ -32,6 +38,9 @@ interface MediaLibrary {
      *
      * An absent track whose uri [keep] accepts is left exactly as it is (its source couldn't be listed, so it's
      * unknown, not gone), and so is an absent audiobook with any such track.
+     *
+     * Album notes: each of [result]'s notes is written; a scanned album with no note in [result] loses its old one. An
+     * absent album's note stays, as its rows do.
      */
     suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean = { false })
 
@@ -39,7 +48,8 @@ interface MediaLibrary {
     suspend fun markAllMissing(origin: MediaOrigin)
 
     /**
-     * Deletes these catalog rows (tracks, audiobooks, and the audiobooks' chapters). Audiobook states, bookmarks, playlist
+     * Deletes these catalog rows (tracks, audiobooks, and the audiobooks' chapters), and the notes of albums left with
+     * no track row. Audiobook states, bookmarks, playlist
      * entries and placements stay, so the same ids coming back (a re-download) find them again.
      *
      * For removed downloads only (LIBRIVOX, ARCHIVE_ORG): a PHONE id is ignored, since phone files are never Granger's to
@@ -60,6 +70,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
     override val audiobooks: Flow<List<Audiobook>> = dao.observeAudiobooks()
     override fun chapters(audiobookId: String): Flow<List<AudiobookChapter>> = dao.observeChapters(audiobookId)
     override val allChapters: Flow<List<AudiobookChapter>> = dao.observeAllChapters()
+    override val albumNotes: Flow<List<AlbumNote>> = dao.observeAlbumNotes()
     override suspend fun track(id: String): Track? = dao.track(id)
     override suspend fun audiobook(id: String): Audiobook? = dao.audiobook(id)
     override suspend fun coverPaths(): Set<String> = dao.coverPaths().toSet()
@@ -67,6 +78,8 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
     override suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean) {
         require(result.tracks.all { it.origin == origin }) { "Scan for $origin holds tracks of another origin" }
         require(result.audiobooks.all { it.book.origin == origin }) { "Scan for $origin holds audiobooks of another origin" }
+        val scannedAlbums = result.tracks.filter { it.audiobookId == null }.mapTo(HashSet()) { it.albumKey }
+        require(result.albumNotes.all { it.albumKey in scannedAlbums }) { "Scan for $origin holds notes for albums it didn't scan" }
         db.withTransaction {
             val at = now()
 
@@ -103,6 +116,10 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
                 dao.deleteChapters(scanned.book.id)
                 dao.insertChapters(chapterRows(scanned, newTracks))
             }
+
+            val noted = result.albumNotes.associateBy { it.albumKey }
+            for (keys in (scannedAlbums - noted.keys).chunked(MAX_IDS)) dao.deleteAlbumNotes(keys)
+            dao.upsertAlbumNotes(noted.values.toList())
         }
     }
 
@@ -121,6 +138,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
                 dao.deleteAudiobooks(ids)
             }
             for (ids in trackIds.distinct().chunked(MAX_IDS)) dao.deleteTracks(ids)
+            dao.deleteOrphanAlbumNotes()
         }
     }
 

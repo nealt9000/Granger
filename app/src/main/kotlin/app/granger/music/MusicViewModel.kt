@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Albums
 import app.granger.core.library.MediaLibrary
+import app.granger.core.library.MediaNames
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Playlist
 import app.granger.core.library.PlaylistItem
@@ -40,7 +41,7 @@ const val MUSIC_TYPE_ID = "music"
 /** The name of the unscoped Music view (exact, per the plan). */
 const val ALL_MUSIC = "All music"
 
-const val UNKNOWN_GENRE = "Unknown genre"
+const val UNKNOWN_GENRE = MediaNames.UNKNOWN_GENRE
 
 /** How the Songs tab is ordered. */
 enum class SongSort(val label: String) { TITLE("Title"), ARTIST("Artist"), ALBUM("Album"), YEAR("Year"), DATE_ADDED("Date added") }
@@ -124,31 +125,21 @@ object MusicSources {
 object MusicCatalog {
     private const val JOIN = "; "
 
-    private fun split(joined: String): List<String> = joined.split(JOIN).map { it.trim() }.filter { it.isNotEmpty() }
-
     /** Artists are matched without regard to case or surrounding space. */
-    fun nameKey(name: String): String = name.trim().lowercase(Locale.ROOT)
+    fun nameKey(name: String): String = MediaNames.nameKey(name)
 
     /** A track's album artists; with none tagged, its track artists stand in (Auxio). */
-    fun albumArtistsOf(t: Track): List<String> =
-        split(t.albumArtists).ifEmpty { split(t.artists) }.ifEmpty { listOf(Albums.UNKNOWN_ARTIST) }
+    fun albumArtistsOf(t: Track): List<String> = MediaNames.albumArtistsOf(t)
 
     /** A track's own artists; with none tagged, its album artists stand in. */
-    fun trackArtistsOf(t: Track): List<String> =
-        split(t.artists).ifEmpty { split(t.albumArtists) }.ifEmpty { listOf(Albums.UNKNOWN_ARTIST) }
+    fun trackArtistsOf(t: Track): List<String> = MediaNames.trackArtistsOf(t)
 
-    fun genresOf(t: Track): List<String> = split(t.genres).ifEmpty { listOf(UNKNOWN_GENRE) }
+    fun genresOf(t: Track): List<String> = MediaNames.genresOf(t)
 
     private fun sortName(sort: String, name: String) = sort.ifBlank { name }.lowercase(Locale.ROOT)
 
     /** Albums as [Albums.summaries] builds them, with the track artists named where no album artist is tagged. */
-    fun albums(tracks: List<Track>): List<AlbumSummary> {
-        val byKey = tracks.groupBy { it.albumKey }
-        return Albums.summaries(tracks).map { a ->
-            if (a.albumArtist != Albums.UNKNOWN_ARTIST) a
-            else a.copy(albumArtist = byKey[a.key].orEmpty().flatMap(::albumArtistsOf).distinctBy(::nameKey).joinToString(JOIN))
-        }
-    }
+    fun albums(tracks: List<Track>): List<AlbumSummary> = MediaNames.albums(tracks)
 
     fun sortSongs(tracks: List<Track>, sort: SongSort): List<Track> {
         val byTitle = compareBy<Track>({ sortName(it.sortTitle, it.title) }, { it.id })

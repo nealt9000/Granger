@@ -261,4 +261,29 @@ class MediaLibraryTest {
             assertThat(library.chapters(scanned.book.id).first()).hasSize(1)
         }
     }
+    /** A downloaded album's note is written with its tracks, replaced or dropped by a re-sync, and deleted by forget. */
+    @Test fun syncWritesAlbumNotesAndForgetDeletesThem() = runTest {
+        val holst = listOf(track("h1", MediaOrigin.ARCHIVE_ORG), track("h2", MediaOrigin.ARCHIVE_ORG)).map { it.copy(albumKey = "|item|archive-org:holst") }
+        val wall = track("w1", MediaOrigin.ARCHIVE_ORG).copy(albumKey = "|item|archive-org:wall")
+        val holstNote = AlbumNote("|item|archive-org:holst", "LSO, 1922–24.")
+        library.sync(MediaOrigin.ARCHIVE_ORG, ScanResult(holst + wall, emptyList(), listOf(holstNote, AlbumNote(wall.albumKey, "Pink Floyd."))))
+        assertThat(library.albumNotes.first()).containsExactly(holstNote, AlbumNote(wall.albumKey, "Pink Floyd."))
+
+        // Re-sync: Holst's note changes, the Wall's description is gone from its manifest.
+        library.sync(MediaOrigin.ARCHIVE_ORG, ScanResult(holst + wall, emptyList(), listOf(holstNote.copy(description = "London, 1922–24."))))
+        assertThat(library.albumNotes.first()).containsExactly(holstNote.copy(description = "London, 1922–24."))
+
+        // An absent album keeps its note, as its MISSING rows stay.
+        library.sync(MediaOrigin.ARCHIVE_ORG, ScanResult(listOf(wall), emptyList()))
+        assertThat(library.albumNotes.first()).hasSize(1)
+        // A phone sync never touches downloaded albums' notes.
+        library.sync(MediaOrigin.PHONE, ScanResult(listOf(track("a")), emptyList()))
+        assertThat(library.albumNotes.first()).hasSize(1)
+
+        // Forgetting one of the album's tracks keeps the note; forgetting the last deletes it.
+        library.forget(listOf(holst[0].id), emptyList())
+        assertThat(library.albumNotes.first()).hasSize(1)
+        library.forget(listOf(holst[1].id), emptyList())
+        assertThat(library.albumNotes.first()).isEmpty()
+    }
 }
