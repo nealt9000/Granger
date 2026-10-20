@@ -40,6 +40,7 @@
 - Regression check: the Plan 9 **held-out** set is not touched again. Media changes are checked against the **tuning** split: declined and grounded may not drop more than 2 points below tune-5 (so **≥ 89% declined, ≥ 43% grounded**), plus a small media question set (spec §9).
 - Android Auto: a browse tree over both players, tested on the Desktop Head Unit. One widget that shows whichever player is current (spec §6, Neal's calls).
 - Research stays debug-only (`Features.RESEARCH = BuildConfig.DEBUG`); M3's Research work ships behind the same flag.
+- **Answered for M3 (Neal, 2026-10-19):** tapping a song in Search plays its album from that song; the Music and Audiobooks groups come after Titles; the eval runs in Task 10 use the phone for about 3.5 hours, and Neal leaves it open for them to run into the night.
 
 ## Builder's calls in this plan (for Neal's review)
 
