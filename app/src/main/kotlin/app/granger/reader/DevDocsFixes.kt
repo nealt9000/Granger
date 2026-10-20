@@ -17,6 +17,8 @@ object DevDocsFixes {
         @media (max-width: ${NARROW_PX}px) {
           devdocs-navbar ._sidebar { display: none !important; }
           ._container { margin-left: 0 !important; }
+          /* Room for the button above the page's title; it stays pinned over the page once scrolled. */
+          main._content { padding-top: 48px !important; }
           .granger-nav {
             display: block; position: fixed; top: 8px; left: 8px; z-index: 1001;
             padding: 6px 10px; border: 0; border-radius: 6px; font: inherit; font-size: 14px;
