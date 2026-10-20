@@ -46,6 +46,7 @@ import app.granger.librivox.LibriVoxViewModel
 import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.Albums
 import app.granger.core.library.BookIds
+import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
 import app.granger.ebook.Dictionary
@@ -78,9 +79,11 @@ import app.granger.reader.ReaderViewModel
 import app.granger.readiness.ReadinessScreen
 import app.granger.readiness.ReadinessViewModel
 import app.granger.search.SearchScreen
+import app.granger.search.MediaSearch
 import app.granger.search.SearchViewModel
 import android.content.Context
 import app.granger.media.PlayResumer
+import app.granger.media.SongPlayer
 import app.granger.settings.ComponentOtherAppsSharing
 import app.granger.settings.DaoMediaFolders
 import app.granger.settings.MediaSettings
@@ -374,6 +377,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
 
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
     val scope = rememberCoroutineScope()
+    // A song tapped in Search plays its album from there.
+    val songs = remember { SongPlayer(container.media, container.playerHub) }
     fun showTab(tabId: Long) {
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
@@ -629,11 +634,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen) {
             composable<SearchRoute> { backStackEntry ->
                 val query = backStackEntry.toRoute<SearchRoute>().query
                 SearchScreen(
-                    viewModel = viewModel { SearchViewModel(container.search, container.sessions, query) },
+                    viewModel = viewModel {
+                        SearchViewModel(
+                            container.search, container.sessions, query,
+                            media = if (Features.PLAYER) MediaSearch { container.mediaIndex.search(it) } else MediaSearch { MediaResults() },
+                        )
+                    },
                     onOpenTab = ::showTab,
                     onOpenBook = { tabId, at ->
                         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it, at) } }
                     },
+                    onOpenAlbum = { nav.navigate(AlbumRoute(it)) },
+                    onOpenArtist = { nav.navigate(ArtistRoute(it)) },
+                    onOpenAudiobook = { nav.navigate(AudiobookRoute(it)) },
+                    onPlaySong = { track -> scope.launch { songs.play(track) } },
                     onBack = { nav.popBackStack() },
                 )
             }
