@@ -21,6 +21,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | P1 | Polish | Wiki Back within the tab, the new wiki top bar, one rail list with pins, the toolbar on the left or right; library v9. The logo and full screen are held back (see "Carried forward from P1") | **Done (partly):** `2026-10-20-plan-p1-polish.md` (2026-10-20; 1593 JVM tests; Pixel 6 walkthrough all PASS) |
 | K1 | The full Kiwix catalog (English) | Family table with licenses, bulk generator with a report, Recommended + folded categories on the Kiwix screen, filing for new families, 16 MB catalog cap; Wi-Fi installs (`tools/dev/phone-wifi.sh`) | **Done:** `2026-10-20-plan-k1-kiwix-catalog.md` (2026-10-20; 927 packs published; 1602 JVM tests; Pixel 6 walkthrough all PASS). Follow-ups in K2 |
 | K2 | Kiwix follow-ups | Category chips on the Kiwix screen, DevDocs nav as a Contents drawer in portrait, library v10: the Kiwix folder and the Maps media type | **Done:** `2026-10-20-plan-k2-kiwix-followups.md` (2026-10-20; 1620 JVM tests; Pixel 6 walkthrough all PASS) |
+| V0 | The voice: engine spike | `:core:speech` with the vendored sherpa-onnx AAR, `VoiceSpikeActivity`: the system voice, Piper (ljspeech, libritts_r) and Kokoro measured on the Pixel 6 (first audio, real-time factor, memory beside E2B, the music mix), a listening session, results and decisions for V1 | **Written:** `2026-10-21-plan-v0-voice-spike.md` (spec `docs/superpowers/specs/2026-10-21-voice-design.md`) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
@@ -28,7 +29,7 @@ Media spec (2026-10-19): `docs/superpowers/specs/2026-10-19-media-design.md` rep
 
 1. **Media** (done 2026-10-20, M1–M3): music and audiobook players, mini-player, phone media, LibriVox and archive.org audio, media in Search and Research retrieval.
 2. **Research deep links + knowing your library**: results open at the exact passage, track or section; grounding quality (Plan 9 ended at 37% grounded); how Research becomes expert on any user's library.
-3. **The voice**: one on-device speech engine for read-aloud in both readers and for Research answers; music/voice mix.
+3. **The voice**: one on-device speech engine for read-aloud in both readers and for Research answers; music/voice mix. Spec (2026-10-21): `docs/superpowers/specs/2026-10-21-voice-design.md`; Neal moved it ahead of the Home, Readiness and Onboarding work (2026-10-21). V0 is the engine spike; V1 and V2 are written after it.
 4. **Actions**: Research builds reading plans and playlists, and opens, reads aloud or plays things.
 
 Video and the PDF pass, from the old row, are not part of these four projects (spec §2 non-goals).
