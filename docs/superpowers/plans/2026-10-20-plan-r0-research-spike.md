@@ -92,15 +92,15 @@ The recorded corpus only holds what keyword search found, so these questions nee
 
 ### Task 7: Results and decisions
 
-- [ ] Write `docs/superpowers/spikes/2026-10-research-spike-results.md`:
+- [x] Write `docs/superpowers/spikes/2026-10-research-spike-results.md`:
   - every table;
   - what's adopted against the constraints;
   - what failed and why;
   - a fine-tuning verdict from the remaining failures (whether it's needed, and on what data);
   - "knowing your library": what an index built at download time would cost and buy, from Task 4's numbers.
-- [ ] Add a project 2 row to the roadmap pointing at the results, and at the fresh held-out set the project 2 plan has to write.
-- [ ] Revert or leave behind debug flags only; nothing changes for release users.
-- [ ] Clean up every candidate model not carried forward (Neal, 2026-10-21):
+- [x] Add a project 2 row to the roadmap pointing at the results, and at the fresh held-out set the project 2 plan has to write.
+- [x] Revert or leave behind debug flags only; nothing changes for release users.
+- [x] Clean up every candidate model not carried forward (Neal, 2026-10-21):
   - the phone's `files/eval/models/` and the replay prompts;
   - the converted bundles and Hugging Face downloads under the session scratchpad (`conv/out`, `conv/hf`), plus the converter checkout and caches;
   - leave `~/.cache/huggingface` alone (Neal's own models).
