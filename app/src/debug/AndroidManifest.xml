@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Lets the voice spike list and bind the phone's text-to-speech engines (package visibility, API 30+). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
     <application>
         <activity
             android:name="app.granger.spike.SpikeActivity"
@@ -14,6 +20,10 @@
             android:name="app.granger.research.ResearchBenchmarkActivity"
             android:exported="true"
             android:label="Research benchmark" />
+        <activity
+            android:name="app.granger.voice.VoiceSpikeActivity"
+            android:exported="true"
+            android:label="Voice spike" />
         <activity
             android:name="app.granger.eval.EvalActivity"
             android:exported="true"
