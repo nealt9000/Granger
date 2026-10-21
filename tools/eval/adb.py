@@ -59,6 +59,28 @@ def check_front(runner):
         raise SystemExit("%s is in front on the phone; close it (or go to the home screen) before the eval starts" % pkg)
 
 
+def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
+    """Polls for the phone's eval/<run_id>/done marker; stops on its failed marker, repeated adb errors or the time limit."""
+    waited = errors = 0
+    while True:
+        rc, o = runner(["shell", "ls", "%s/%s/done" % (REMOTE, run_id)])
+        if rc == 0:
+            break
+        if not is_adb_error(o):
+            errors = 0  # any other failed ls just means the done marker is not there yet
+            frc, fo = runner(["shell", "cat", "%s/%s/failed" % (REMOTE, run_id)])
+            if frc == 0 and fo.strip() and "no such file" not in fo.lower() and not is_adb_error(fo):
+                raise SystemExit("the eval failed on the phone: " + fo.strip())
+        else:
+            errors += 1
+            if errors >= max_errors:
+                raise SystemExit("adb failed %d times in a row while waiting for the eval: %s" % (errors, o.strip()))
+        if waited >= max_wait:
+            raise SystemExit("eval %s did not finish within %d seconds" % (run_id, max_wait))
+        sleep(POLL_SECONDS)
+        waited += POLL_SECONDS
+
+
 def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, sleep=time.sleep,
              max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
     check_front(runner)
@@ -84,24 +106,7 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     rc, o = runner(start)
     if rc:
         raise SystemExit("could not start the eval activity: " + o)
-    waited = errors = 0
-    while True:
-        rc, o = runner(["shell", "ls", "%s/%s/done" % (REMOTE, run_id)])
-        if rc == 0:
-            break
-        if not is_adb_error(o):
-            errors = 0  # any other failed ls just means the done marker is not there yet
-            frc, fo = runner(["shell", "cat", "%s/%s/failed" % (REMOTE, run_id)])
-            if frc == 0 and fo.strip() and "no such file" not in fo.lower() and not is_adb_error(fo):
-                raise SystemExit("the eval failed on the phone: " + fo.strip())
-        else:
-            errors += 1
-            if errors >= max_errors:
-                raise SystemExit("adb failed %d times in a row while waiting for the eval: %s" % (errors, o.strip()))
-        if waited >= max_wait:
-            raise SystemExit("eval %s did not finish within %d seconds" % (run_id, max_wait))
-        sleep(POLL_SECONDS)
-        waited += POLL_SECONDS
+    wait_done(runner, run_id, sleep, max_wait, max_errors)
     rc, o = runner(["pull", "%s/%s/results.jsonl" % (REMOTE, run_id), str(out) + "/"])
     # The search corpus (found.jsonl) is optional: older builds don't write it.
     runner(["pull", "%s/%s/found.jsonl" % (REMOTE, run_id), str(out) + "/"])

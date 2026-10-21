@@ -212,3 +212,61 @@ It goes into the project 2 plan as the core of "knowing your library". Open ques
 
 Task 6's combined run can't include it without that engineering, so Task 6 measures ranking plus answerer only. Dense is
 reported here as an offline number.
+
+## Task 5: The answerer, on the phone
+
+`answerers.py` replays `r0-base`'s recorded answer prompts (the same 4 passages per item) through another model with
+`EvalActivity`'s replay mode (`PromptReplay`: greedy, 512 tokens, thinking stripped before citations are checked). Only the
+model changes. Sanity check: E2B's replay reproduced all 189 `r0-base` replies byte for byte, so M3's grades carry over.
+
+**Full set, E2B against E4B** (189 prompts; 126 answerable, 76 unanswerable incl. 13 that never reach a model):
+
+| | E2B | E4B |
+|---|---|---|
+| grounded | 56/126 | 54/126 |
+| answered, not grounded | 41 | 26 |
+| answerable declined | 29 | 46 |
+| unanswerable declined | 69/76 | 75/76 |
+| multi-step grounded | 2/20 | 3/20 |
+| model first words, median | 4.2 s | 16.3 s |
+| send to first words, median | 16.2 s | 28.4 s |
+| load | 15 s | 75 s |
+| peak memory | 2.4 GB | 3.5 GB |
+
+E4B trades wrong answers for declines; it grounds no more. Four times slower to first words and 1 GB more memory: not worth it.
+
+**Candidates, on a fixed sample of 40 prompts** (`--sample 40`, seed 5: 28 answerable, 12 unanswerable, plus the 13 that
+never reach a model). Converted models were built with john-rocky/hf-to-litertlm (int4, blockwise-32 OCTAV), all on GPU unless noted:
+
+| | grounded | not grounded | answerable declined | unverified | unanswerable declined | first words | load | memory |
+|---|---|---|---|---|---|---|---|---|
+| E2B (Google's build) | 11/28 | 11 | 6 | 0 | 24/25 | 4.0 s | 15 s | 2.4 GB |
+| E4B (Google's build) | 10/28 | 7 | 11 | 0 | 25/25 | 16.9 s | 75 s | 3.5 GB |
+| **E2B QAT** (converted) | **11/28** | 9 | 6 | 2 | **25/25** | 5.6 s | 26 s | **1.9 GB** |
+| E2B stock (converted, control) | 6/28 | 4 | 18 | 0 | 25/25 | 3.8 s | 23 s | 2.0 GB |
+| Fable 5 distill of E2B (ermiaazarkhalili) | 3/28 | 16 | 0 | 14 | 13/25 | 4.8 s | 23 s | 2.0 GB |
+| Opus distill of E2B (armand0e) | not graded | | 2 | 24 | 17/25 | 60 s | 22 s | 1.8 GB |
+| Fable 5 distill of Qwen3-4B (Parable) | 9/28 | 6 | 11 | 2 | 25/25 | 108 s | 76 s | 2.4 GB |
+| Opus distill of Qwen3.5-2B (Jackrong), CPU | not graded | | 5 | 24 | 13/25 | 30 s | 30 s | 3.1 GB |
+| Qwen3.5-2B (litert-community), CPU | not graded | | 20 | 11 | 18/25 | 30 s | 59 s | 4.0 GB |
+| Ministral-3-3B (litert-community) | stopped after 4 | | | | | 34–62 s | 74 s | 1.4 GB |
+
+Not graded: disqualified on the other columns first. Qwen3.5-2B doesn't fit the Pixel 6 GPU (killed during load), so both Qwen3.5
+models ran on CPU.
+
+What we learned:
+- **Nothing beats E2B on quality.** Every model fails the same questions (Gilbert and Sullivan for Matthew 6:34, the opium-den
+  line for Holmes's first words, Koch's bacillus as the disease's name): the misses are retrieval and passage reading.
+- **Frontier distills don't help here.** Reasoning distills think before answering: 60–110 s to first words, and often all
+  512 tokens spent thinking (empty replies). The non-thinking Fable distill of E2B lost the base model's instruction
+  following: it never declines, invents details and loops. Thinking traces taught Parable to decline carefully, not to read
+  passages better. All of them also carry the Claude-output terms-of-service risk for the catalog.
+- **Qwen3.5 echoes the prompt** ("Passages: [1]…", "Earlier in this conversation…") on the phone, stock and distill alike;
+  likely its template in LiteRT-LM. Not pursued.
+- **The converter's int4 hurts plain E2B** (control: 18 answerable declined against 6 for Google's build). **QAT recovers it**
+  under the same converter (6 declined, 11 grounded) and uses 0.5 GB less memory than Google's E2B, but our file is 4.1 GB
+  against Google's 2.0 GB and 1.6 s slower to first words.
+
+Decision: **keep E2B as the answerer.** E4B's place as Think deeper is left to Task 7: it grounds no more, but declines
+more safely. For project 2: a Google-built (or Google-recipe) LiteRT-LM file of the QAT checkpoint is worth chasing for the memory
+saving at equal quality. The 40-item sample is small: differences of 1–2 are noise.
