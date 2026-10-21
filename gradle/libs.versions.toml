@@ -29,6 +29,7 @@ desugarJdkLibs = "2.1.5"
 media3 = "1.11.1"
 glance = "1.2.0"
 ndk = "30.0.16248370"
+sherpaOnnx = "1.13.8"   # vendored AAR in core/speech/libs (no Maven artifact); see core/speech/NOTICE.md
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
