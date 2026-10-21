@@ -154,3 +154,61 @@ What went wrong:
 
 Decision: **not adopted.** Search gets 3 s slower and E2B doesn't know the source's vocabulary well enough to bridge it with
 keywords. That meets the plan's trigger for the optional dense-retrieval check (4b).
+
+### 4b. Dense retrieval over the books, offline (`dense.py`)
+
+The 350 EPUBs in the phone's library (Classics plus the archive.org books) were pulled and chunked as `XhtmlText` does
+(400–2000 characters): **249,391 chunks**, 186 M characters. Each was embedded with `google/embeddinggemma-2` on the Mac
+("title: <book> | text: …"), which took 2 h 6 min on the GPU. The raw question is the query (search prompt, no rewrite).
+The comparison covers the 35 tuning questions with a book answer. A hit is an answer location or quote among the passages,
+judged the same way for both searches.
+
+| | Of 35 |
+|---|---|
+| Keyword search, answer in the top 4 (the app) | 3 |
+| Keyword search, answer found at all | 19 |
+| **Dense, answer in the top 4** | **20** (13 with the quote itself in the chunk) |
+| Dense, top 12 / top 50 | 25 / 30 |
+| Either one's top 4 | 21 |
+
+Examples where dense ranks first and keyword search never found the passage:
+- "is there a verse about not worrying about tomorrow" → Matthew 6:34, "Take therefore no thought for the morrow";
+- "what does the art of war say about intelligence gathering" → the chapter on spies;
+- "How does Captain Ahab die?" → the harpoon line running foul;
+- Adam Smith's pin-maker.
+
+Where it misses:
+- **Follow-ups** ("Who's telling the story?"): the raw question has no context. A real version would embed the rewrite,
+  or the question plus the previous one.
+- A few bible and vocab-gap questions sit at ranks 7–50.
+
+Caveats:
+- This searches books only; in the app, dense results would compete with ZIM articles and cards for the 4 slots.
+- These are the Mac's full-precision vectors; the phone's int4 embedder agreed at r ≈ 0.98 (Task 2).
+- 35 questions, chosen in M3 partly *because* keyword search failed them.
+
+Costs, for project 2:
+- **Building the index on the phone is out.** About 0.3 s per chunk on the phone GPU means roughly 20 hours for this library.
+  The vectors have to be built off the phone. For Classics, that means at pack-build time, shipped with the pack.
+  Books a user adds one at a time (a few hundred to a few thousand chunks each) could be embedded on the phone in minutes.
+- **Storage:** 768 dims as float16 is 383 MB for this library (about 1.5 KB per chunk). int8 halves that. Truncating to
+  256 dims (EmbeddingGemma is trained Matryoshka-style), still to be measured for recall, brings it to about 64 MB.
+- **Query time:** brute-force search over 249k float16 vectors takes 0.29 s on the Mac, plus one query embedding
+  (about 0.3 s on the phone). The phone should land around 1 s or under with int8 and fewer dims. That fits the latency rule.
+
+Decision: **this is the biggest lever the spike has found.** On book questions it takes answer-in-top-4 from 3 to 20 of 35
+(+49 points), well past the 15-point bar, and it addresses the vocabulary gap directly. It isn't adopted inside the spike,
+because it's engineering:
+- a pack-time vector build;
+- a vector file format;
+- an on-phone index;
+- merging dense hits with keyword hits.
+
+It goes into the project 2 plan as the core of "knowing your library". Open questions for that plan:
+- dims and quantization against recall;
+- how to merge with ZIM keyword results (for example, reserve 1–2 of the 4 slots for dense book hits above a cosine floor);
+- whether to embed the rewrite or the raw question;
+- ZIMs stay keyword-only unless someone precomputes Wikipedia vectors.
+
+Task 6's combined run can't include it without that engineering, so Task 6 measures ranking plus answerer only. Dense is
+reported here as an offline number.

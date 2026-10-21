@@ -72,10 +72,10 @@
 
 The recorded corpus only holds what keyword search found, so these questions need new searches.
 
-- [ ] `EvalActivity` gets a debug `rewriteVariant` extra. The variant prompt asks for the keywords plus up to 3 words the *source* would use ("alcohol" → wine, strong drink).
-- [ ] Run the `vocab-gap`, `bible`, `words` and `literature` groups (31 questions) with the variant, recording `found.jsonl`. Replay that corpus with the baseline and the best offline ranking.
-- [ ] Record the rewrite's added time (it's about 2.7 s today).
-- [ ] Optional, only if this falls short by more than 10 points: offline dense retrieval over Classics book chunks for the `bible` group. It tells project 2 whether an on-phone vector index is worth its storage.
+- [x] `EvalActivity` gets a debug `rewriteVariant` extra. The variant prompt asks for the keywords plus up to 3 words the *source* would use ("alcohol" → wine, strong drink).
+- [x] Run the `vocab-gap`, `bible`, `words` and `literature` groups (31 questions) with the variant, recording `found.jsonl`. Replay that corpus with the baseline and the best offline ranking.
+- [x] Record the rewrite's added time (it's about 2.7 s today).
+- [x] Optional, only if this falls short by more than 10 points: offline dense retrieval over Classics book chunks for the `bible` group. It tells project 2 whether an on-phone vector index is worth its storage.
 
 ### Task 5: The answerer, on the phone
 
