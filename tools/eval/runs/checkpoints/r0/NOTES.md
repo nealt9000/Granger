@@ -270,3 +270,43 @@ What we learned:
 Decision: **keep E2B as the answerer.** E4B's place as Think deeper is left to Task 7: it grounds no more, but declines
 more safely. For project 2: a Google-built (or Google-recipe) LiteRT-LM file of the QAT checkpoint is worth chasing for the memory
 saving at equal quality. The 40-item sample is small: differences of 1–2 are noise.
+
+## Task 6: the combined run
+
+Tasks 2–5 adopted nothing (no ranking change met the 5-point bar; E2B stays the answerer), so the only change left to
+combine is Task 3's fiction weighting, which was kept aside to see whether fewer novels among the passages means fewer
+wrong answers. It runs on the phone behind debug flags: `ResearchPipeline(sourceWeight =)` (null in the app), the debug-only
+`FictionWeight` (0.7 on fiction books for questions that aren't about literature, ported from `kinds.py`), and
+`eval.py run --fiction runs/checkpoints/r0/fiction.txt` (285 fiction book ids).
+
+**Library drift.** A Hermeneutics Stack Exchange pack was added to the phone after `m3-tune-1` (= r0-base). It now feeds
+Bible and theology questions and changed the passages of two control questions, so the weighting's effect can't be
+measured against `m3-tune-1`. Instead:
+- `r0-combined`: all 202 tuning questions on today's library, weighted.
+- Replaying its `found.jsonl` offline (`kinds.lexical_ranker` at 0.7 and 1.0) lists the 16 questions whose 4 passages the
+  weighting changed. The port agrees with the phone's chosen passages on 201 of 202. `words-002` was ranked unweighted on the
+  phone though `FictionWeight` returns 0.7 for its inputs in a unit test; unexplained, and it changes no outcome.
+- `r0-combined-base`: those 16 on the phone unweighted. The other 186 get the same passages either way.
+
+| | m3-tune-1 | r0-combined (weighted) | same library, unweighted |
+|---|---|---|---|
+| answerable grounded | 56/126 (44%) | 57/126 (45%) | 57/126 (45%) |
+| answerable not grounded | 41 | 39 | 41 |
+| unanswerable declined | 70/76 (92%) | 69/76 (91%) | 69/76 (91%) |
+| Think deeper grounded | 3/12 | 4/12 | |
+| recall@4 | 32% | 29% | |
+| send to first words, median / p90 | 14.6 / 19.3 s | 17.4 / 23.7 s | |
+
+On the 16, the weighting turned two wrong answers into declines (multi-step-008: "Lincoln was already president", citing
+*Main Street*; knots-001) and changed no other outcome. It costs nothing measurable (ranking stays 7 ms median).
+
+The slower first words are the library, not the change: median search went from 8.9 s to 10.9 s with the new pack
+(rewrite 2.5 → 2.8 s). Recall@4 fell for the same reason (new passages compete), and grounded held.
+
+Verdict: **the fiction weighting misses the adoption bar** (+0 grounded, not +5). It's a small, free safety gain (2 of 126
+fewer confidently cited wrong answers); worth carrying into project 2 as a ranking default only alongside the bigger
+retrieval work, not on its own. **Project 2's starting point is 45% answerable grounded, 91% unanswerable declined, on the
+tuning split with today's library** (a tuning number, not a pass).
+
+Graded replies: 44 new for `r0-combined` (24 grounded, 20 not), 1 for `r0-combined-base`. Most of the run's replies matched
+earlier grades by hash.

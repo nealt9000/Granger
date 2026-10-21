@@ -94,6 +94,17 @@ class RankingTest {
     }
 
     @Test
+    fun weightReordersAndIsThresholded() {
+        val novel = passage("Novel", "steam engine boiler", 1)
+        val ref = passage("Ref", "steam engine", 2)
+        val keywords = listOf("steam", "engine", "boiler")
+        val weight = { p: Passage -> if (p.sourceId == "Novel") 0.5 else 1.0 }
+        assertThat(Ranking.preselect(listOf(novel, ref), keywords, config, weight)).containsExactly(ref, novel).inOrder()
+        // 0.5 × 1.0 is under the 0.6 threshold; 2/3 isn't.
+        assertThat(Ranking.byLexical(listOf(novel, ref), keywords, config, weight = weight)).containsExactly(ref)
+    }
+
+    @Test
     fun nothingPassesGivesEmpty() {
         val ps = listOf(passage("A", "river", 1))
         assertThat(Ranking.byLexical(ps, listOf("steam"), config)).isEmpty()

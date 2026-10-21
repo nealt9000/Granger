@@ -87,8 +87,8 @@ The recorded corpus only holds what keyword search found, so these questions nee
 
 ### Task 6: The combined run
 
-- [ ] Build the best ranking and the best answerer behind debug flags. Run the full tuning split on the phone, grade it, and compare with `m3-tune-1` (`eval.py report --compare`).
-- [ ] This number is the project 2 starting point. It is a tuning-split number, not a pass.
+- [x] Build the best ranking and the best answerer behind debug flags. Run the full tuning split on the phone, grade it, and compare with `m3-tune-1` (`eval.py report --compare`).
+- [x] This number is the project 2 starting point. It is a tuning-split number, not a pass.
 
 ### Task 7: Results and decisions
 
