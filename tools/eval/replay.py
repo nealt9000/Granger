@@ -90,21 +90,27 @@ def is_lead(p):
 
 def scorer(keywords):
     """LexicalScore.scorer: each keyword counts for the share of its words present; title and lead bonuses."""
+    # Each keyword is a list of alternatives (`wine|strong drink`, or just itself), each a list of words.
     groups = []
     for k in keywords:
-        g = list(dict.fromkeys(w.lower() for w in words(k) if w.lower() not in STOPWORDS))
-        if g:
-            groups.append(g)
+        alts = []
+        for v in (x.strip() for x in k.split("|")):
+            g = list(dict.fromkeys(w.lower() for w in words(v) if w.lower() not in STOPWORDS))
+            if g:
+                alts.append(g)
+        if alts:
+            groups.append(alts)
     if not groups:
         return lambda p: 0.0
-    patterns = {w: _whole_word(w) for g in groups for w in g}
+    patterns = {w: _whole_word(w) for alts in groups for g in alts for w in g}
 
     def score(p):
         text = _ascii_lower("%s %s" % (p.get("heading") or "", p.get("text") or ""))
         present = {w for w, rx in patterns.items() if rx.search(text)}
         title_words = {w.lower() for w in words(p.get("title") or "")}
-        in_title = any(all(alternatives(w) & title_words for w in g) for g in groups)
-        found = sum(sum(1 for w in g if w in present) / len(g) for g in groups)
+        in_title = any(all(alternatives(w) & title_words for w in g) for alts in groups for g in alts)
+        # A keyword counts for its best alternative.
+        found = sum(max(sum(1 for w in g if w in present) / len(g) for g in alts) for alts in groups)
         return found / len(groups) + (TITLE_BONUS if in_title else 0.0) + (LEAD_BONUS if found > 0 and is_lead(p) else 0.0)
 
     return score
@@ -191,6 +197,11 @@ def load(run_id):
     items = {i["id"]: i for i in json.loads((d / "dataset.json").read_text(encoding="utf-8"))}
     corpus = {c["id"]: c for c in _jsonl(d / "found.jsonl")}
     records = {r["id"]: r for r in _jsonl(d / "results.jsonl")}
+    # The finder is given every alternate of a `wine|strong drink` group on its own; ranking scores the groups, which
+    # the result records keep. Without alternates the two lists are the same.
+    for id, c in corpus.items():
+        if records.get(id, {}).get("keywords"):
+            c["keywords"] = records[id]["keywords"]
     return d, items, corpus, records
 
 

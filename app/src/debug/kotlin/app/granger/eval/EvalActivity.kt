@@ -74,6 +74,8 @@ class EvalActivity : ComponentActivity() {
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
+        // Plan R0, Task 4: the rewrite variant that gives keywords alternates.
+        val alternates = intent.getStringExtra("rewrite") == "alternates"
         val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
         val result = EvalSession.start(runId, root, ::log) {
             // Model roles come from the catalog. MainActivity loads the cached one at launch; a cold start straight
@@ -84,10 +86,10 @@ class EvalActivity : ComponentActivity() {
             val sourceName = evalSourceName(packNames)
             val finder = RecordingFinder(c.passageFinder)
             val prompts = PromptRecorder(ModelsAdapter(c.modelManager))
-            val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig)
+            val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates)
             val runner = EvalRunner(pipeline, finder, sourceName, prompts) { android.os.SystemClock.elapsedRealtime() }
             runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-            log("run $runId: ${items.size} items, guesses=$guesses")
+            log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}")
             runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             File(root, "$runId/done").writeText("done\n")
             log("done $runId")

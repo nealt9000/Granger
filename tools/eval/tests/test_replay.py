@@ -126,3 +126,10 @@ def test_evaluate_counts_recall_ceiling_and_empty():
     corpus = {"a": {"id": "a", "keywords": ["paris"], "passages": [hit]}, "u": {"id": "u", "keywords": ["zzz"], "passages": [book("B", "river")]}}
     r = replay.evaluate(items, corpus, CFG)
     assert (r["location"], r["quote"], r["inCorpus"], r["empty"]) == (1, 1, 1, 1)
+
+
+def test_a_keyword_counts_for_its_best_alternative():
+    kjv = P("Wine is a mocker, strong drink is raging.", title="The King James Bible")
+    assert of(kjv, ["alcohol|strong drink|wine", "tomorrow"]) == pytest.approx(0.5)
+    assert of(P("strong winds"), ["alcohol|strong spirits"]) == pytest.approx(0.5)
+    assert of(P("nothing here", title="Wine"), ["alcohol|wine"]) == pytest.approx(0.1)

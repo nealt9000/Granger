@@ -587,4 +587,18 @@ class ResearchPipelineTest {
         )
         assertThat(out).isNotInstanceOf(Outcome.Declined::class.java)
     }
+
+    @Test
+    fun alternatesVariantSearchesEveryAlternateAndRanksByGroup() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: hot water (steam), boils\n", "medical: no") })
+        val finder = FakeFinder(listOf(water))
+        val out = outcome(
+            ResearchPipeline(finder, FakeModels(gen), rewriteAlternates = true)
+                .run(ResearchRequest("At what temperature does water boil?")).toList(),
+        ) as Outcome.Answered
+        assertThat(out.keywords).containsExactly("hot water|steam", "boils").inOrder()
+        assertThat(finder.calls).containsExactly(listOf("hot water", "steam", "boils"))
+        assertThat(gen.prompts.first()).contains("in brackets")
+        assertThat(gen.maxTokens.first()).isEqualTo(64)
+    }
 }

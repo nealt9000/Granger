@@ -59,7 +59,7 @@ def check_front(runner):
         raise SystemExit("%s is in front on the phone; close it (or go to the home screen) before the eval starts" % pkg)
 
 
-def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, sleep=time.sleep,
+def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, sleep=time.sleep,
              max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
     check_front(runner)
     runs_dir = Path(runs_dir)
@@ -78,7 +78,7 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     # -S stops the app first, so the eval screen starts fresh with these extras (a screen left over from an install or
     # an earlier run would otherwise take the intent and never begin).
     start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
-    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses)):
+    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite)):
         if val:
             start += ["--es", key, val]
     rc, o = runner(start)

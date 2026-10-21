@@ -159,4 +159,9 @@ class KeywordsTest {
             assertWithMessage(it).that(Medical.looksMedical(it)).isTrue()
         }
     }
+
+    @Test fun searchTermsFlattenGroups() {
+        assertThat(Keywords.searchTerms(listOf("alcohol|strong drink|wine", "bible", "Wine"))).containsExactly("alcohol", "strong drink", "wine", "bible").inOrder()
+        assertThat(Keywords.variants("bible")).containsExactly("bible")
+    }
 }

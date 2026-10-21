@@ -117,3 +117,40 @@ Decision: **not adopted on recall** (0 points against the 5-point bar). It's che
 so it's worth carrying into project 2 as part of any rerank (weight 0.7, filter mode), and Task 6's graded run can show whether
 fewer novels in the prompt means fewer wrong answers. On its own, the M3 walkthrough's "fiction ranks like reference" complaint is
 a symptom: the reference passage that should outrank the novel was never found. That's Task 4 again.
+
+## Task 4: the vocabulary gap
+
+### 4a. A rewrite with alternates, on the phone (`r0-alt-1`)
+
+A debug-only variant (`ResearchPipeline(rewriteAlternates = true)`, `eval.py run --rewrite alternates`):
+- **The prompt** lets each keyword carry up to 2 words the source might use instead, in brackets.
+- **The finder** searches every alternate on its own.
+- **Ranking** scores a group (`wine|strong drink`) by its best alternative, so adding alternates can't lower a passage's score.
+  Plain keywords score exactly as before; the port still reproduces the phone 202/202 with the change.
+
+It ran on the vocab-gap, bible, words and literature groups (31 questions, E2B, greedy) against the same 31 in `r0-base`:
+
+| | r0-base | r0-alt-1 |
+|---|---|---|
+| Answer passage found at all | 14 | 16 |
+| Answer in the top 4 (location / quote) | 1 / 0 | 1 / 0 |
+| Rewrite, median | 2.2 s | 2.3 s |
+| Search, median | 8.7 s | 11.9 s |
+| Send to first words, median | 13.8 s | 16.9 s |
+
+What went wrong:
+- **Brackets:** E2B used square brackets in 12 of 31 replies ("evil [malice, sin]"), which the parser didn't expect, so
+  those keywords were searched broken.
+- **The alternates themselves are the real problem.** They're modern synonyms or categories, not the source's words:
+  - alcohol → "intoxication" (the King James Bible says wine, strong drink);
+  - tattoos → "body markings";
+  - wherefore → "why";
+  - betimes → "when";
+  - *Pride and Prejudice* → "[novel]".
+
+  Checked offline with the brackets fixed: in only 2 of 17 questions does an alternate appear in the answer quote where no
+  original keyword does (Gita "fruit", Thoreau "simplicity"). A rerun with the parser fixed could add at most 2 found answers,
+  so it wasn't run.
+
+Decision: **not adopted.** Search gets 3 s slower and E2B doesn't know the source's vocabulary well enough to bridge it with
+keywords. That meets the plan's trigger for the optional dense-retrieval check (4b).

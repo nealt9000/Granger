@@ -131,6 +131,8 @@ class ResearchPipeline(
     private val models: ResearchModels,
     private val config: RankingConfig = RankingConfig(),
     private val rewriteTimeoutMs: Long = 5_000,
+    /** Plan R0's debug variant: the rewrite may give each keyword alternates (see [Rewrite.prompt]). Off in the app. */
+    private val rewriteAlternates: Boolean = false,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
@@ -167,7 +169,7 @@ class ResearchPipeline(
             }
             emit(ResearchEvent.Progress(Stage.SEARCHING))
             val all = try {
-                finder.find(keywords)
+                finder.find(Keywords.searchTerms(keywords))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -316,13 +318,15 @@ class ResearchPipeline(
             coroutineScope {
                 val ready = CompletableDeferred<Unit>()
                 val work = launch {
-                    val reply = generator.generate(Rewrite.prompt(request.question, request.priorQuestion), REWRITE_TOKENS) { ready.complete(Unit) }
+                    val prompt = Rewrite.prompt(request.question, request.priorQuestion, rewriteAlternates)
+                    val tokens = if (rewriteAlternates) REWRITE_TOKENS_ALTERNATES else REWRITE_TOKENS
+                    val reply = generator.generate(prompt, tokens) { ready.complete(Unit) }
                         .fold("") { acc, chunk -> acc + chunk }
-                    result = Rewrite.parse(reply)
+                    result = Rewrite.parse(reply, rewriteAlternates)
                 }
                 val timer = launch {
                     ready.await()
-                    delay(rewriteTimeoutMs)
+                    delay(if (rewriteAlternates) rewriteTimeoutMs + ALTERNATES_EXTRA_MS else rewriteTimeoutMs)
                     work.cancel()
                 }
                 work.join()
@@ -351,6 +355,9 @@ class ResearchPipeline(
 
     private companion object {
         const val REWRITE_TOKENS = 32
+        /** Room for up to two alternates per keyword, and the time to write them. */
+        const val REWRITE_TOKENS_ALTERNATES = 64
+        const val ALTERNATES_EXTRA_MS = 3_000L
         const val ANSWER_TOKENS = 512
     }
 }
