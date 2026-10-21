@@ -80,3 +80,40 @@ an index that also *finds* passages (not just reorders them) is worth it, since 
 
 Not done: re-checking a finalist with the phone's own vectors over the whole corpus (about 32k passages, roughly 3 hours on the
 phone). Rerank fails on latency whatever the exact gain, so it wouldn't change the decision.
+
+## Task 3: source-kind weighting, offline
+
+`kinds.py sweep` tags each passage from the Classics manifest's sections:
+- **fiction:** novels, drama, poetry, libretti;
+- **scripture**, **philosophy**;
+- **reference:** ZIM articles and cards;
+- **media**.
+
+On a question that isn't about literature, a fiction passage's score is multiplied by a weight below 1. A question counts as literary
+if it has a cue word (novel, poem, says, character, verse, author, book…) or a keyword names a fiction work the search found. By that
+rule, 62 of 202 tuning questions are literary. `order` uses the weight for ordering only; `filter` also thresholds the weighted score.
+
+Fiction on factual questions counts answerable questions outside literature, who-wrote and words with a fiction passage among the 4.
+
+| Base | Weight, mode | Location | Quote | Empty | Fiction on factual questions |
+|---|---|---|---|---|---|
+| App (lexical) | 1.0 | 40 | 48 | 13 | 9 |
+| App (lexical) | 0.7 or lower, either mode | 40 | 48 | 13 | 5 |
+| Task 2 rerank (titled, 24, alpha 0.1) | 1.0 | 49 | 54 | 13 | 14 |
+| Task 2 rerank | 0.7 or lower, order | 49 | 54 | 13 | 6 |
+| Task 2 rerank | 0.7 or lower, filter | 49 | 54 | 15 | 6 |
+
+Literature, who-wrote and words recall are unchanged at every weight, so the rule doesn't cost the questions that want fiction.
+
+What it shows:
+- **Recall doesn't move at all.** Weighting removes fiction from science-002 ("how far away is the moon": *Paradise Lost*,
+  *Dracula*), knots-001, multi-step-015 and multi-step-017. In each case the passage that moves up isn't an answer either, because the
+  search never found the reference passage that answers it (for the moon question it found "Exploration of the Moon", not "Moon").
+- **Embedding rerank pulls in more fiction** (14 against 9). Novels read as close in meaning to almost any question, so a weight
+  matters more if a rerank is ever adopted. In filter mode it also empties 2 more unanswerable questions.
+- The 5 that remain are questions the rule calls literary ("verse", "author", "old novels", *Hamlet*); that's defensible.
+
+Decision: **not adopted on recall** (0 points against the 5-point bar). It's cheap and removes misleading passages from the prompt,
+so it's worth carrying into project 2 as part of any rerank (weight 0.7, filter mode), and Task 6's graded run can show whether
+fewer novels in the prompt means fewer wrong answers. On its own, the M3 walkthrough's "fiction ranks like reference" complaint is
+a symptom: the reference passage that should outrank the novel was never found. That's Task 4 again.

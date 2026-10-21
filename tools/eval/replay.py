@@ -116,8 +116,8 @@ def media_asked(question):
     return any(w in CUES for w in ws) or any(ws[i:i + len(ph)] == ph for ph in PHRASES for i in range(len(ws)))
 
 
-def preselect(passages, keywords, cfg):
-    score = scorer(keywords)
+def preselect(passages, keywords, cfg, score=None):
+    score = score or scorer(keywords)
     scored = sorted(((p, score(p)) for p in passages), key=lambda x: (-x[1], -(x[0].get("searchScore") or 0.0)))
     seen, others, media, out = {}, 0, 0, []
     for p, _ in scored:

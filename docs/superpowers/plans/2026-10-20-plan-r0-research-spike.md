@@ -64,9 +64,9 @@
 
 ### Task 3: Source-kind weighting, offline
 
-- [ ] Tag each corpus passage as reference (ZIM articles, Wiktionary), scripture, fiction/literature (Classics works by subject), or media.
-- [ ] Try a fiction weight below 1 on questions that aren't literature questions, deciding by the rewrite's keywords and a small cue list. *Metamorphoses* and *War of the Worlds* (M3 walkthrough) are the motivating cases.
-- [ ] Replay on top of the best Task 2 config and on the baseline.
+- [x] Tag each corpus passage as reference (ZIM articles, Wiktionary), scripture, fiction/literature (Classics works by subject), or media.
+- [x] Try a fiction weight below 1 on questions that aren't literature questions, deciding by the rewrite's keywords and a small cue list. *Metamorphoses* and *War of the Worlds* (M3 walkthrough) are the motivating cases.
+- [x] Replay on top of the best Task 2 config and on the baseline.
 
 ### Task 4: Vocabulary gap, on the phone
 
