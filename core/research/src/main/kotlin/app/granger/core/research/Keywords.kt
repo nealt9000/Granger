@@ -34,6 +34,12 @@ object Keywords {
 
     fun isStopword(word: String): Boolean = word.lowercase() in STOPWORDS
 
+    /** A keyword's alternatives: the rewrite's alternates variant writes a group as `wine|strong drink`; a plain keyword is its own only one. */
+    fun variants(keyword: String): List<String> = keyword.split('|').map { it.trim() }.filter { it.isNotEmpty() }
+
+    /** What the finder searches for: every alternative of every keyword, each on its own. */
+    fun searchTerms(keywords: List<String>): List<String> = keywords.flatMap(::variants).distinctBy { it.lowercase() }
+
     /** The words of a keyword phrase: the rewrite's phrases ("portia mercy") are matched word by word, in any order. */
     fun words(keyword: String): List<String> = WORD.findAll(keyword).map { it.value }.toList()
 

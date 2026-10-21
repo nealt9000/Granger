@@ -91,4 +91,16 @@ class LexicalScoreTest {
         val koran = passage("Charity is a duty.", title = "The Koran")
         assertThat(LexicalScore.of(koran, listOf("quran", "charity"))).isWithin(1e-9).of(0.5 + 0.1)
     }
+
+    @Test fun aKeywordCountsForItsBestAlternative() {
+        val kjv = passage("Wine is a mocker, strong drink is raging.", title = "The King James Bible")
+        // "alcohol" alone isn't there; its alternates are. Each keyword still weighs one: (1 + 0) / 2.
+        assertThat(LexicalScore.of(kjv, listOf("alcohol|strong drink|wine", "tomorrow"))).isWithin(1e-9).of(0.5)
+        assertThat(LexicalScore.of(kjv, listOf("alcohol", "tomorrow"))).isEqualTo(0.0)
+        // Half of "strong spirits" is the best of the group when nothing else matches.
+        assertThat(LexicalScore.of(passage("strong winds"), listOf("alcohol|strong spirits"))).isWithin(1e-9).of(0.5)
+    }
+
+    @Test fun anAlternateInTheTitleGetsTheBonus() =
+        assertThat(LexicalScore.of(passage("nothing here", title = "Wine"), listOf("alcohol|wine"))).isWithin(1e-9).of(0.1)
 }

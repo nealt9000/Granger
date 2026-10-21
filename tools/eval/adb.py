@@ -59,31 +59,8 @@ def check_front(runner):
         raise SystemExit("%s is in front on the phone; close it (or go to the home screen) before the eval starts" % pkg)
 
 
-def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, sleep=time.sleep,
-             max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
-    check_front(runner)
-    runs_dir = Path(runs_dir)
-    out = runs_dir / run_id
-    out.mkdir(parents=True, exist_ok=True)
-    shutil.copy(dataset_path, out / "dataset.json")
-    runner(["shell", "mkdir", "-p", REMOTE])
-    if fresh:
-        runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])  # start the run over
-    else:
-        # keep results.jsonl so the phone resumes after the last finished item; old markers must not end the wait early
-        runner(["shell", "rm", "-f", "%s/%s/done" % (REMOTE, run_id), "%s/%s/failed" % (REMOTE, run_id)])
-    rc, o = runner(["push", str(dataset_path), REMOTE + "/dataset.json"])
-    if rc:
-        raise SystemExit("adb push failed: " + o)
-    # -S stops the app first, so the eval screen starts fresh with these extras (a screen left over from an install or
-    # an earlier run would otherwise take the intent and never begin).
-    start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
-    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses)):
-        if val:
-            start += ["--es", key, val]
-    rc, o = runner(start)
-    if rc:
-        raise SystemExit("could not start the eval activity: " + o)
+def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
+    """Polls for the phone's eval/<run_id>/done marker; stops on its failed marker, repeated adb errors or the time limit."""
     waited = errors = 0
     while True:
         rc, o = runner(["shell", "ls", "%s/%s/done" % (REMOTE, run_id)])
@@ -102,6 +79,40 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
             raise SystemExit("eval %s did not finish within %d seconds" % (run_id, max_wait))
         sleep(POLL_SECONDS)
         waited += POLL_SECONDS
+
+
+def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, fiction=None, sleep=time.sleep,
+             max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
+    check_front(runner)
+    runs_dir = Path(runs_dir)
+    out = runs_dir / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    shutil.copy(dataset_path, out / "dataset.json")
+    runner(["shell", "mkdir", "-p", REMOTE])
+    if fresh:
+        runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])  # start the run over
+    else:
+        # keep results.jsonl so the phone resumes after the last finished item; old markers must not end the wait early
+        runner(["shell", "rm", "-f", "%s/%s/done" % (REMOTE, run_id), "%s/%s/failed" % (REMOTE, run_id)])
+    rc, o = runner(["push", str(dataset_path), REMOTE + "/dataset.json"])
+    if rc:
+        raise SystemExit("adb push failed: " + o)
+    if fiction:  # Plan R0, Task 6: fiction book ids, one per line, weighted on non-literature questions
+        rc, o = runner(["push", str(fiction), REMOTE + "/fiction.txt"])
+        if rc:
+            raise SystemExit("adb push failed: " + o)
+    # -S stops the app first, so the eval screen starts fresh with these extras (a screen left over from an install or
+    # an earlier run would otherwise take the intent and never begin).
+    start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
+    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite)):
+        if val:
+            start += ["--es", key, val]
+    if fiction:
+        start += ["--es", "fiction", "fiction.txt"]
+    rc, o = runner(start)
+    if rc:
+        raise SystemExit("could not start the eval activity: " + o)
+    wait_done(runner, run_id, sleep, max_wait, max_errors)
     rc, o = runner(["pull", "%s/%s/results.jsonl" % (REMOTE, run_id), str(out) + "/"])
     # The search corpus (found.jsonl) is optional: older builds don't write it.
     runner(["pull", "%s/%s/found.jsonl" % (REMOTE, run_id), str(out) + "/"])

@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import app.granger.GrangerApp
+import app.granger.core.ai.LiteRtLlmEngine
+import app.granger.core.ai.LlmBackend
+import app.granger.core.ai.RssMemorySampler
 import app.granger.core.research.ResearchPipeline
 import app.granger.research.ModelsAdapter
 import java.io.File
@@ -71,9 +74,17 @@ class EvalActivity : ComponentActivity() {
             log("no valid runId extra")
             return
         }
+        intent.getStringExtra("replay")?.let { replay(root, runId, it); return }
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
+        // Plan R0, Task 4: the rewrite variant that gives keywords alternates.
+        val alternates = intent.getStringExtra("rewrite") == "alternates"
+        // Plan R0, Task 6: `fiction` names a file under eval/ of fiction book ids, one per line; `fictionWeight` (0.7).
+        val fiction = intent.getStringExtra("fiction")?.let { name ->
+            FictionWeight(File(root, name).readLines().map { it.trim() }.filter { it.isNotEmpty() }.toSet(),
+                intent.getStringExtra("fictionWeight")?.toDoubleOrNull() ?: 0.7)
+        }
         val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
         val result = EvalSession.start(runId, root, ::log) {
             // Model roles come from the catalog. MainActivity loads the cached one at launch; a cold start straight
@@ -84,10 +95,10 @@ class EvalActivity : ComponentActivity() {
             val sourceName = evalSourceName(packNames)
             val finder = RecordingFinder(c.passageFinder)
             val prompts = PromptRecorder(ModelsAdapter(c.modelManager))
-            val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig)
+            val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, sourceWeight = fiction)
             val runner = EvalRunner(pipeline, finder, sourceName, prompts) { android.os.SystemClock.elapsedRealtime() }
             runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-            log("run $runId: ${items.size} items, guesses=$guesses")
+            log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (fiction != null) ", fiction weighted" else ""}")
             runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             File(root, "$runId/done").writeText("done\n")
             log("done $runId")
@@ -98,6 +109,29 @@ class EvalActivity : ComponentActivity() {
             EvalSession.Start.ATTACHED -> log("run $runId is already running; showing its progress")
             EvalSession.Start.BUSY -> log("another eval is running; $runId was not started")
         }
+    }
+
+    /**
+     * Plan R0, Task 5: `replay` names a prompts file under `eval/`, `model` a .litertlm path (absolute, or under
+     * `eval/models/`), `backend` gpu (default) or cpu. Writes `eval/<runId>/replay.jsonl`, then `done`.
+     */
+    private fun replay(root: File, runId: String, prompts: String) {
+        val modelName = intent.getStringExtra("model").orEmpty()
+        val model = if (modelName.startsWith("/")) File(modelName) else File(root, "models/$modelName")
+        val backend = if (intent.getStringExtra("backend").equals("cpu", ignoreCase = true)) LlmBackend.CPU else LlmBackend.GPU
+        val result = EvalSession.start(runId, root, ::log) {
+            require(model.canRead()) { "can't read model $model" }
+            val replay = PromptReplay({ path, b -> LiteRtLlmEngine(path, b, cacheDir.path) }, RssMemorySampler()) {
+                android.os.SystemClock.elapsedRealtime()
+            }
+            replay.onItem = { id, n, total -> log("$n / $total $id") }
+            log("replay $runId: ${model.name} on $backend")
+            val dir = File(root, runId).apply { mkdirs() }
+            replay.run(File(root, prompts), model.path, backend, File(dir, "replay.jsonl"))
+            File(dir, "done").writeText("done\n")
+            log("done $runId")
+        }
+        if (result != EvalSession.Start.STARTED) log("replay $runId not started: $result")
     }
 
     private companion object {

@@ -41,6 +41,14 @@ interface ResearchModels {
     suspend fun embedder(): PassageEmbedder?
 }
 
+/**
+ * Plan R0's debug source weighting: given the question, the keywords and every passage found, a multiplier for each
+ * passage's lexical score. Not used in the app.
+ */
+fun interface SourceWeight {
+    fun of(question: String, keywords: List<String>, found: List<Passage>): (Passage) -> Double
+}
+
 class ModelUnavailableException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 enum class Stage { LOADING_MODEL, SEARCHING, RANKING, WRITING }
@@ -131,6 +139,10 @@ class ResearchPipeline(
     private val models: ResearchModels,
     private val config: RankingConfig = RankingConfig(),
     private val rewriteTimeoutMs: Long = 5_000,
+    /** Plan R0's debug variant: the rewrite may give each keyword alternates (see [Rewrite.prompt]). Off in the app. */
+    private val rewriteAlternates: Boolean = false,
+    /** Plan R0's debug variant: see [SourceWeight]. Off in the app. */
+    private val sourceWeight: SourceWeight? = null,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
@@ -167,17 +179,18 @@ class ResearchPipeline(
             }
             emit(ResearchEvent.Progress(Stage.SEARCHING))
             val all = try {
-                finder.find(keywords)
+                finder.find(Keywords.searchTerms(keywords))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
                 return@flow
             }
-            val found = Ranking.preselect(all, keywords, config)
+            val weight = sourceWeight?.of(request.question, keywords, all) ?: Ranking.NO_WEIGHT
+            val found = Ranking.preselect(all, keywords, config, weight)
             emit(ResearchEvent.Progress(Stage.RANKING))
             ranked = try {
-                Ranking.liftMedia(rank(request.question, found, keywords), found, asked)
+                Ranking.liftMedia(rank(request.question, found, keywords, weight), found, asked)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -316,13 +329,15 @@ class ResearchPipeline(
             coroutineScope {
                 val ready = CompletableDeferred<Unit>()
                 val work = launch {
-                    val reply = generator.generate(Rewrite.prompt(request.question, request.priorQuestion), REWRITE_TOKENS) { ready.complete(Unit) }
+                    val prompt = Rewrite.prompt(request.question, request.priorQuestion, rewriteAlternates)
+                    val tokens = if (rewriteAlternates) REWRITE_TOKENS_ALTERNATES else REWRITE_TOKENS
+                    val reply = generator.generate(prompt, tokens) { ready.complete(Unit) }
                         .fold("") { acc, chunk -> acc + chunk }
-                    result = Rewrite.parse(reply)
+                    result = Rewrite.parse(reply, rewriteAlternates)
                 }
                 val timer = launch {
                     ready.await()
-                    delay(rewriteTimeoutMs)
+                    delay(if (rewriteAlternates) rewriteTimeoutMs + ALTERNATES_EXTRA_MS else rewriteTimeoutMs)
                     work.cancel()
                 }
                 work.join()
@@ -340,10 +355,10 @@ class ResearchPipeline(
         return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
     }
 
-    private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>): List<Passage> {
+    private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>, weight: (Passage) -> Double): List<Passage> {
         if (candidates.isEmpty()) return emptyList()
         // Every candidate that passes is kept: the pool is cut to `large` after the media cap.
-        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size)
+        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size, weight = weight)
         val query = embedder.embed(listOf(question), isQuery = true).single()
         val vectors = embedder.embed(candidates.map { it.text }, isQuery = false)
         return Ranking.byEmbedding(candidates, query, vectors, config, limit = candidates.size)
@@ -351,6 +366,9 @@ class ResearchPipeline(
 
     private companion object {
         const val REWRITE_TOKENS = 32
+        /** Room for up to two alternates per keyword, and the time to write them. */
+        const val REWRITE_TOKENS_ALTERNATES = 64
+        const val ALTERNATES_EXTRA_MS = 3_000L
         const val ANSWER_TOKENS = 512
     }
 }

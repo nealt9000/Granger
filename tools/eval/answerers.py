@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Answer models compared on the same prompts (Plan R0, Task 5).
+
+  answerers.py prompts BASE                          # runs/BASE/prompts.jsonl: each item's recorded answer prompt
+  answerers.py run BASE NEW --model FILE [--push LOCAL] [--backend gpu|cpu]
+                                                     # replays them on the phone, then builds runs/NEW
+  answerers.py build BASE NEW                        # runs/NEW/results.jsonl from BASE's records and NEW/replay.jsonl
+  answerers.py summary NEW [NEW ...] [--only SAMPLED]  # grounded, declined, timings and memory per model
+
+The prompts are the ones BASE's ranking built, so only the model changes. NEW's records are BASE's with the reply,
+outcome and citations replaced (Think deeper and best guesses dropped), so `eval.py worksheet/report` work on them
+and an unchanged reply keeps its grade. Their timings estimate send to first words as BASE's rewrite, search and rank
+plus the replay's own time to first words; the model swap that a different answer model would add is reported apart.
+"""
+import argparse
+import json
+import random
+import shutil
+import sys
+from pathlib import Path
+
+import adb
+import grading
+import metrics
+
+HERE = Path(__file__).resolve().parent
+RUNS = HERE / "runs"
+GRADES = HERE / "grades" / "grades.jsonl"
+
+
+def read_jsonl(path):
+    return [json.loads(l) for l in Path(path).read_text(encoding="utf-8").splitlines() if l.strip()]
+
+
+def write_jsonl(path, rows):
+    Path(path).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+
+
+def answer_prompt(rec):
+    """The last `answer` stage prompt: a follow-up's prior question has its own, earlier one."""
+    ps = [p for p in rec.get("prompts") or [] if p["stage"] == "answer"]
+    return ps[-1]["prompt"] if ps else None
+
+
+SAMPLE_SEED = 5
+
+
+def prompts(base, sample=None):
+    """Every recorded answer prompt, or a fixed random `sample` of them (the same ids for every model)."""
+    rows = []
+    for rec in read_jsonl(RUNS / base / "results.jsonl"):
+        p = answer_prompt(rec)
+        if p is not None:
+            rows.append({"id": rec["id"], "prompt": p, "passages": len(rec.get("chosen") or [])})
+    if sample:
+        keep = {r["id"] for r in random.Random(SAMPLE_SEED).sample(rows, sample)}
+        rows = [r for r in rows if r["id"] in keep]
+    return rows
+
+
+def cmd_prompts(a):
+    rows = prompts(a.base)
+    write_jsonl(RUNS / a.base / "prompts.jsonl", rows)
+    print("%d prompts -> runs/%s/prompts.jsonl" % (len(rows), a.base))
+    return 0
+
+
+def before_answer(rec):
+    ms = rec.get("ms") or {}
+    return sum(ms.get(k, 0) for k in ("rewrite", "search", "rank"))
+
+
+def build(base, new):
+    replies = {r["id"]: r for r in read_jsonl(RUNS / new / "replay.jsonl")}
+    out = []
+    for rec in read_jsonl(RUNS / base / "results.jsonl"):
+        rec = {k: v for k, v in rec.items() if k not in ("deeper", "guesses")}
+        r = replies.get(rec["id"])
+        if answer_prompt(rec) is not None:
+            if r is None:
+                continue  # not replayed (yet)
+            pre = before_answer(rec)
+            rec.update(runId=new, outcome=r["outcome"], reply=r["reply"],
+                       cited="".join("[%d]" % n for n in r["cited"]),
+                       ms={"firstWords": pre + r["firstWordsMs"], "total": pre + r["totalMs"]},
+                       replay={k: r[k] for k in ("firstWordsMs", "totalMs", "peakRssMb", "loadMs", "raw") if r.get(k) is not None})
+        out.append(rec)
+    shutil.copy(RUNS / base / "dataset.json", RUNS / new / "dataset.json")
+    write_jsonl(RUNS / new / "results.jsonl", out)
+    return out
+
+
+def cmd_build(a):
+    print("%d records -> runs/%s/results.jsonl" % (len(build(a.base, a.new)), a.new))
+    return 0
+
+
+def cmd_run(a, runner=adb.real_runner, sleep=adb.time.sleep):
+    rows = prompts(a.base, a.sample)
+    local = RUNS / a.base / "prompts.jsonl"
+    write_jsonl(local, rows)
+    adb.check_front(runner)
+    remote_model = "%s/models/%s" % (adb.REMOTE, a.model)
+    runner(["shell", "mkdir", "-p", adb.REMOTE + "/models"])
+    if a.push:
+        size = Path(a.push).stat().st_size
+        rc, o = runner(["shell", "stat", "-c", "%s", remote_model])
+        if rc or o.strip() != str(size):
+            print("pushing %s (%.2f GB)…" % (a.model, size / 1e9))
+            rc, o = runner(["push", a.push, remote_model])
+            if rc:
+                raise SystemExit("adb push failed: " + o)
+    (RUNS / a.new).mkdir(parents=True, exist_ok=True)
+    runner(["shell", "rm", "-f", "%s/%s/done" % (adb.REMOTE, a.new), "%s/%s/failed" % (adb.REMOTE, a.new)])
+    rc, o = runner(["push", str(local), adb.REMOTE + "/r0-prompts.jsonl"])
+    if rc:
+        raise SystemExit("adb push failed: " + o)
+    rc, o = runner(["shell", "am", "start", "-S", "-n", adb.PKG + "/.eval.EvalActivity", "--es", "runId", a.new,
+                    "--es", "replay", "r0-prompts.jsonl", "--es", "model", a.model, "--es", "backend", a.backend])
+    if rc:
+        raise SystemExit("could not start the eval activity: " + o)
+    adb.wait_done(runner, a.new, sleep)
+    rc, o = runner(["pull", "%s/%s/replay.jsonl" % (adb.REMOTE, a.new), str(RUNS / a.new) + "/"])
+    if rc:
+        raise SystemExit("adb pull failed: " + o)
+    print("%d records -> runs/%s/results.jsonl" % (len(build(a.base, a.new)), a.new))
+    return 0
+
+
+def summary(new, grades, only=None):
+    ds = json.loads((RUNS / new / "dataset.json").read_text(encoding="utf-8"))
+    items = ds["items"] if isinstance(ds, dict) else ds
+    by_id = {i["id"]: i for i in items}
+    recs = read_jsonl(RUNS / new / "results.jsonl")
+    if only is not None:
+        recs = [r for r in recs if r["id"] in only]
+    m = metrics.compute(items, recs, grades)
+    replayed = [r["replay"] for r in recs if r.get("replay")]
+    an = [r for r in recs if by_id[r["id"]]["answerable"]]
+    outcome = lambda rs, o: sum(r["outcome"] == o for r in rs)
+    not_grounded = sum(1 for r in an if r["outcome"] == "answered" and
+                       (grading.current_grade(grades, r["id"], "answer", r.get("reply", "")) or {}).get("grade") == "not-grounded")
+    multi = [r for r in an if by_id[r["id"]].get("multiStep")]
+    multi_g = sum(1 for r in multi if r["outcome"] == "answered" and
+                  (grading.current_grade(grades, r["id"], "answer", r.get("reply", "")) or {}).get("grade") == "grounded")
+    load = next((r["loadMs"] for r in replayed if "loadMs" in r), None)
+    return {
+        "run": new,
+        "grounded": "%d/%d" % (m["answerable"]["grounded"], m["answerable"]["n"]),
+        "ungraded": m["answerable"]["ungraded"],
+        "notGrounded": not_grounded,
+        "answerableDeclined": outcome(an, "declined"),
+        "unverified": outcome(recs, "unverified"),
+        "unanswerableDeclined": "%d/%d" % (m["unanswerable"]["handled"], m["unanswerable"]["n"]),
+        "multiStepGrounded": "%d/%d" % (multi_g, len(multi)),
+        "modelFirstWordsMedianMs": metrics.median([r["firstWordsMs"] for r in replayed]),
+        "modelTotalMedianMs": metrics.median([r["totalMs"] for r in replayed]),
+        "sendToFirstWordsMedianMs": m["timings"]["firstWords"]["median"],
+        "loadMs": load,
+        "peakRssMb": max((r["peakRssMb"] for r in replayed), default=None),
+    }
+
+
+def cmd_summary(a):
+    grades = grading.load_grades(GRADES)
+    only = None
+    if a.only:
+        # The items a sampled run replayed, plus those that never reached a model (the same in every run).
+        replayed = {r["id"] for r in read_jsonl(RUNS / a.only / "replay.jsonl")}
+        reached = {r["id"] for r in prompts(a.base)}
+        only = replayed | {r["id"] for r in read_jsonl(RUNS / a.base / "results.jsonl") if r["id"] not in reached}
+    for new in a.runs:
+        print(json.dumps(summary(new, grades, only)))
+    return 0
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    s = p.add_subparsers(dest="cmd", required=True)
+    c = s.add_parser("prompts"); c.add_argument("base"); c.set_defaults(f=cmd_prompts)
+    r = s.add_parser("run"); r.add_argument("base"); r.add_argument("new"); r.add_argument("--model", required=True)
+    r.add_argument("--push"); r.add_argument("--backend", default="gpu", choices=["gpu", "cpu"])
+    r.add_argument("--sample", type=int, help="replay a fixed random sample of this many prompts"); r.set_defaults(f=cmd_run)
+    b = s.add_parser("build"); b.add_argument("base"); b.add_argument("new"); b.set_defaults(f=cmd_build)
+    m = s.add_parser("summary"); m.add_argument("runs", nargs="+")
+    m.add_argument("--only", help="restrict to the items this (sampled) run replayed"); m.add_argument("--base", default="r0-base")
+    m.set_defaults(f=cmd_summary)
+    a = p.parse_args(argv)
+    return a.f(a)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
