@@ -55,6 +55,18 @@ def write_chunks(work, rows):
     tmp.rename(work / "chunks.jsonl")
 
 
+PIECE = 2000  # chunks per encode call; the MPS cache is emptied after each, or it grows for hours until the Mac swaps
+
+
+def encode(model, texts):
+    import gc
+    import torch
+    vecs = model.encode(texts, batch_size=32, normalize_embeddings=True)
+    gc.collect()
+    torch.mps.empty_cache()
+    return vecs
+
+
 def embed(work, model_box):
     chunks = [json.loads(l) for l in (work / "chunks.jsonl").open(encoding="utf-8")]
     shards = []
@@ -69,7 +81,9 @@ def embed(work, model_box):
         part = chunks[start:start + SHARD]
         texts = [doc_text(c["title"], c["heading"], c["text"]) for c in part]
         order = sorted(range(len(texts)), key=lambda i: -len(texts[i]))  # similar lengths batch faster
-        vecs = model_box[0].encode([texts[i] for i in order], batch_size=32, normalize_embeddings=True)
+        vecs = np.concatenate([
+            encode(model_box[0], [texts[i] for i in order[at:at + PIECE]]) for at in range(0, len(order), PIECE)
+        ])
         out = np.empty_like(vecs)
         out[order] = vecs
         np.save(path.with_suffix(".tmp.npy"), out.astype(np.float16))
