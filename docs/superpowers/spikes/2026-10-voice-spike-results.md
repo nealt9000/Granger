@@ -165,11 +165,18 @@ The WAVs are at `/Users/s.nealthompson/Developer/Granger/voice-spike-2026-10-21/
 
 | Engine | Naturalness 1–5 | Names and numbers 1–5 | Pacing 1–5 | Notes |
 | --- | --- | --- | --- | --- |
-| System (`en-US-language`) | | | | good enough as the default? |
-| Piper ljspeech | | | | |
-| Piper libritts_r speaker 0 | | | | |
-| Piper libritts_r speakers 1, 2 | | | | which sounds male? |
-| Kokoro (English speaker 0) | | | | for reference only; it is out on speed |
+| System (`en-US-language`) |2 | 4 | 4 | good enough, not great |
+| Piper ljspeech | 4 | 2 | 5 | pretty good, but all said 'rossetter stone' in the article test |
+| Piper libritts_r speaker 0 | 5 | 3 | 2 | seems to take pauses a numbers, best was t4 |
+| Piper libritts_r speakers 1, 2 | 4 | 3 | 2 | 2nd voice is Male |
+| Kokoro (English speaker 0) | 2 | 3 | 3 | for reference only; it is out on speed; also had high-pitched noise. |
+
+What the listening adds to the numbers (Neal, 2026-10-21):
+- **The voice people will want is a Piper voice, not the system one.** The system engine is fast and light but rated 2 for naturalness; ljspeech rated 4 and libritts_r 5. So the downloadable voice is the product, and the system voice is the fallback, which is the spec's order already.
+- **Names are Piper's weak spot** (ljspeech 2, libritts_r 3). "Rosetta" came out as "rossetter" from every Piper voice, which points at the phonemizer they share rather than a model: both voices use espeak-ng phonemes (`phoneme_type: espeak` in their model cards). V1 needs a pronunciation path: espeak-ng's extra-dictionary mechanism compiled into the shipped `espeak-ng-data`, or a word-level override applied before synthesis, seeded from the mistakes the readers hit. The system engine scored 4 here, so it stays the reference for names.
+- **Numbers make libritts_r pause** (pacing 2) where ljspeech flows (pacing 5); Neal found the 4-thread libritts_r file best, which the numbers do not explain (the audio is the same model at the same speed), so the difference is between takes rather than threads. Read-aloud of Research answers, which are full of numbers, favours ljspeech's pacing.
+- **libritts_r is the best-sounding voice and the one we cannot ship.** Speaker 2 is male, which the catalog wants for a second voice. V1's licence search should look for a from-scratch or permissively trained voice of similar quality, and it is worth asking whether a Lessac-free LibriTTS-R training exists or can be made; LibriTTS-R itself is CC BY 4.0.
+- **Kokoro's high-pitched noise** on top of its speed confirms the drop; the int8 build may be the cause of the noise, which does not matter now.
 
 ## Decisions (proposed from the numbers; Neal confirms after listening)
 

@@ -86,8 +86,8 @@
 
 ### Task 5: The listening session
 
-- [ ] Neal listens to each engine's three passages (the WAVs, or on the phone) and rates each 1–5 on naturalness, names and numbers, and pacing, with one line of notes. Also whether the system voice on the Pixel is good enough to be the default.
-- [ ] Record the ratings in the results doc beside the numbers.
+- [x] Neal listens to each engine's three passages (the WAVs, or on the phone) and rates each 1–5 on naturalness, names and numbers, and pacing, with one line of notes. Also whether the system voice on the Pixel is good enough to be the default. *Done 2026-10-21: system 2/4/4 ("good enough, not great"); ljspeech 4/2/5 (every Piper voice said "rossetter stone"); libritts_r speaker 0 5/3/2 (pauses at numbers; the 4-thread file sounded best); speakers 1 and 2: 4/3/2, speaker 2 is male; Kokoro 2/3/3 with a high-pitched noise.*
+- [x] Record the ratings in the results doc beside the numbers.
 
 ### Task 6: Results and decisions
 
