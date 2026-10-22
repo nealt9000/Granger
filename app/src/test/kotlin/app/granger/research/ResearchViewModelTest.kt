@@ -129,7 +129,7 @@ class ResearchViewModelTest {
 
     private fun TestScope.manager(llms: LlmEngineFactory, tier: DeviceTier = DeviceTier.THINK_DEEPER) = ModelManager(
         tier, installed, llms, TextEmbedderFactory { error("no embedder") }, backgroundScope,
-        useEmbedder = false, io = StandardTestDispatcher(testScheduler),
+        useEmbedder = { false }, io = StandardTestDispatcher(testScheduler),
     )
 
     private class ClosingLlm : LlmEngine {

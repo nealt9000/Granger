@@ -601,4 +601,66 @@ class ResearchPipelineTest {
         assertThat(gen.prompts.first()).contains("in brackets")
         assertThat(gen.maxTokens.first()).isEqualTo(64)
     }
+
+    /** Returns [hits] for any query, recording each one; [fail] throws instead. */
+    private class FakeDense(val hits: List<Passage>, val fail: Boolean = false) : DenseFinder {
+        val queries = mutableListOf<FloatArray>()
+        override suspend fun find(query: FloatArray): List<Passage> {
+            queries += query
+            if (fail) error("vector file damaged")
+            return hits
+        }
+    }
+
+    @Test
+    fun denseHitsReachThePromptAlongsideKeywordPassages() = runTest {
+        val boiling = passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.85)
+        val embedded = mutableListOf<String>()
+        val queryEmbedder = PassageEmbedder { texts, isQuery -> embedded += texts; assertThat(isQuery).isTrue(); texts.map { floatArrayOf(1f, 0f) } }
+        val dense = FakeDense(listOf(boiling))
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = queryEmbedder), dense = dense)
+            .run(ResearchRequest("At what temperature does water boil?", priorQuestion = "Tell me about water")).toList()
+        val out = outcome(events) as Outcome.Answered
+        // Water matches every keyword (0.1 × 1.1 + 0.9 × the 0.74 floor); boiling is by meaning alone (0.9 × 0.85).
+        assertThat(out.passages).containsExactly(water, boiling).inOrder()
+        // The prior question comes first in the query, as Task 3 chose; only the query is embedded.
+        assertThat(embedded).containsExactly("Tell me about water At what temperature does water boil?")
+        assertThat(dense.queries).hasSize(1)
+    }
+
+    @Test
+    fun weakDenseHitsAndPartialKeywordMatchesDecline() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: water, boils, kelvin\n", "medical: no") })
+        val vague = passage("V", "Liquids can change state.", "States").copy(cosine = 0.75)
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen, embedder = embedder), dense = FakeDense(listOf(vague)))
+            .run(ResearchRequest("At what temperature in kelvin does water boil?")).toList()
+        assertThat(outcome(events)).isInstanceOf(Outcome.Declined::class.java)
+        assertThat(gen.answerPrompts).isEmpty()
+    }
+
+    @Test
+    fun denseFailureFallsBackToKeywordRanking() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(emptyList(), fail = true))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
+    }
+
+    @Test
+    fun noVectorsMeansKeywordRankingWithoutTheEmbedderRerank() = runTest {
+        val reranks = mutableListOf<Int>()
+        val counting = PassageEmbedder { texts, isQuery -> if (!isQuery) reranks += texts.size; texts.map { floatArrayOf(1f, 0f) } }
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = counting), dense = FakeDense(emptyList()))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
+        assertThat(reranks).isEmpty()
+    }
+
+    @Test
+    fun noEmbedderMeansKeywordRanking() = runTest {
+        val dense = FakeDense(listOf(passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.9)))
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = null), dense = dense)
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
+        assertThat(dense.queries).isEmpty()
+    }
 }

@@ -3,6 +3,7 @@ package app.granger.eval
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Outcome
+import app.granger.core.research.DenseFinder
 import app.granger.core.research.Passage
 import app.granger.core.research.PassageFinder
 import app.granger.core.research.PriorTurn
@@ -50,6 +51,24 @@ class RecordingFinder(private val inner: PassageFinder) : PassageFinder {
     fun scored(): List<Pair<Passage, Double>> {
         val score = LexicalScore.scorer(keywords)
         return passages.map { it to score(it) }.sortedByDescending { it.second }
+    }
+}
+
+/** Records the dense hits of the current item and how long the scan and rebuild took, for found.jsonl and `ms.dense`. */
+class RecordingDenseFinder(private val inner: DenseFinder, private val clock: () -> Long) : DenseFinder {
+    var passages: List<Passage> = emptyList()
+        private set
+    var ms: Long? = null
+        private set
+
+    fun reset() {
+        passages = emptyList()
+        ms = null
+    }
+
+    override suspend fun find(query: FloatArray): List<Passage> {
+        val start = clock()
+        return inner.find(query).also { passages = it; ms = clock() - start }
     }
 }
 
@@ -123,6 +142,8 @@ class EvalRunner(
     private val finder: RecordingFinder,
     private val sourceName: (Passage) -> String,
     private val prompts: PromptRecorder? = null,
+    /** The dense finder the pipeline was given, when dense retrieval is on for the run. */
+    private val dense: RecordingDenseFinder? = null,
     private val clock: () -> Long,
 ) {
     /** Called before each item with the item and its place (1-based) among the items still to run. */
@@ -155,10 +176,12 @@ class EvalRunner(
     }
 
     private fun corpus(item: EvalItem): JSONObject = JSONObject().put("id", item.id).put("keywords", JSONArray(finder.keywords))
-        .put("passages", JSONArray(finder.passages.map { p ->
-            JSONObject().put("kind", p.kind.name).put("source", sourceName(p)).put("title", p.sourceTitle)
-                .put("location", p.location).put("heading", p.heading).put("searchScore", p.searchScore).put("text", p.text)
-        }))
+        .put("passages", JSONArray(finder.passages.map(::corpusPassage)))
+        .also { o -> dense?.let { d -> o.put("dense", JSONArray(d.passages.map(::corpusPassage))) } }
+
+    private fun corpusPassage(p: Passage): JSONObject = JSONObject().put("kind", p.kind.name).put("source", sourceName(p))
+        .put("title", p.sourceTitle).put("location", p.location).put("heading", p.heading).put("searchScore", p.searchScore)
+        .put("text", p.text).also { o -> p.cosine?.let { o.put("cosine", it) } }
 
     /**
      * Keeps the complete, non-failed lines (a truncated tail is dropped, and a failed item is retried) and returns
@@ -226,9 +249,11 @@ class EvalRunner(
             if (first is Outcome.Answered) prior = PriorTurn(item.priorQuestion, first.text)
         }
         finder.reset()
+        dense?.reset()
         val request = ResearchRequest(item.question, prior = prior, priorQuestion = item.priorQuestion)
         prompts?.begin("main")
         val main = execute(pipeline.run(request))
+        dense?.ms?.let { main.ms.put("dense", it) }
         val outcome = main.outcome
         val keywords = outcome?.keywords.orEmpty()
         val fallbackKeywords = Keywords.extract(listOfNotNull(item.question, item.priorQuestion).joinToString(" "))

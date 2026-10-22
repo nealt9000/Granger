@@ -1,5 +1,6 @@
 package app.granger.core.research
 
+import app.granger.core.text.Chunkers
 import kotlin.math.sqrt
 
 data class RankingConfig(
@@ -13,6 +14,11 @@ data class RankingConfig(
     /** At most this many media passages reach the answer; [mediaCapAsked] when the question asks about media ([MediaCues]). */
     val mediaCap: Int = 1,
     val mediaCapAsked: Int = 2,
+    // Dense retrieval (Plan R1 Task 7, the tuning split's sweep in `tools/eval/merge.py`): see [Ranking.hybrid].
+    val denseAlpha: Double = 0.1,
+    val cosineFloor: Double = 0.74,
+    val denseGate: Double = 0.78,
+    val lexicalGate: Double = 1.0,
 )
 
 /** Picks which passages go into the prompt: a cheap lexical preselect, then a threshold on embeddings or keywords. */
@@ -95,6 +101,55 @@ object Ranking {
             .sortedByDescending { it.second }
             .take(limit)
             .map { candidates[it.first] }
+
+    /**
+     * Keyword passages ([found], preselected) and dense hits ([dense], each with its [Passage.cosine]) in one list, best
+     * first; a port of `gated(hybrid(0.1, 0.74), 0.78, 1.0)` in `tools/eval/merge.py`, which chose it.
+     *
+     * Nothing comes back unless the best dense hit reaches [RankingConfig.denseGate] or a keyword passage matches every
+     * keyword ([RankingConfig.lexicalGate]): an unanswerable question rarely clears either, and an empty list declines it.
+     * Otherwise each keyword passage above [RankingConfig.lexicalThreshold] scores `α·lexical + (1−α)·cosine`, the cosine
+     * of the dense hit with the same text or the floor when it has none, and each dense hit above
+     * [RankingConfig.cosineFloor] scores the same way. A passage both found is listed once. [weight] multiplies the
+     * lexical score and the cosine alike, and at most [RankingConfig.perDocument] are kept per article or chapter.
+     */
+    fun hybrid(
+        found: List<Passage>,
+        dense: List<Passage>,
+        keywords: List<String>,
+        config: RankingConfig,
+        weight: (Passage) -> Double = NO_WEIGHT,
+    ): List<Passage> {
+        val lexical = LexicalScore.scorer(keywords)
+        val kept = found.map { it to lexical(it) * weight(it) }
+            .sortedByDescending { it.second }
+            .filter { it.second >= config.lexicalThreshold }
+        val weighted = dense.map { it to it.cosine!! * weight(it) }
+        val bestCosine = weighted.maxOfOrNull { it.second } ?: 0.0
+        val bestLexical = kept.maxOfOrNull { it.second } ?: 0.0
+        if (bestCosine < config.denseGate && bestLexical < config.lexicalGate) return emptyList()
+
+        val a = config.denseAlpha
+        // The last hit with a text wins, as in merge.py; the same text twice is the same chunk in two packs.
+        val cosineOf = dense.associate { textKey(it) to it.cosine!! }
+        val scored = kept.map { (p, lex) ->
+            val c = cosineOf[textKey(p)]
+            p to (if (c != null) a * lex + (1 - a) * c * weight(p) else a * lex + (1 - a) * config.cosineFloor)
+        } + weighted.filter { it.second >= config.cosineFloor }.map { (p, cos) ->
+            p to a * lexical(p) * weight(p) + (1 - a) * cos
+        }
+        val seen = HashSet<String>()
+        val perDocument = HashMap<Pair<String, String>, Int>()
+        return scored.sortedByDescending { it.second }
+            .map { it.first }
+            .filter { seen.add(textKey(it)) }
+            .filter { perDocument.merge(it.sourceId to it.location, 1, Int::plus)!! <= config.perDocument }
+    }
+
+    private val SPACES = Regex("[${Chunkers.SPACE}]+")
+
+    /** A passage's text with its whitespace runs folded, as `merge.text_key` does: how a dense hit meets its keyword twin. */
+    fun textKey(p: Passage): String = p.text.replace(SPACES, " ").trim()
 
     /** Above [RankingConfig.lexicalThreshold], best first; at most [limit]. The [weight]ed score is the one thresholded. */
     fun byLexical(

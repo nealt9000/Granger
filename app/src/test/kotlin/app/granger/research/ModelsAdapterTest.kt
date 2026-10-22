@@ -59,7 +59,7 @@ class ModelsAdapterTest {
             DeviceTier.THINK_DEEPER, MutableStateFlow(installed),
             LlmEngineFactory { path, _: LlmBackend -> GatedLlm(path).also { engines += it } },
             TextEmbedderFactory { CountingEmbedder().also { embedders += it } },
-            backgroundScope, useEmbedder = true, io = io,
+            backgroundScope, useEmbedder = { true }, io = io,
         )
         return ModelsAdapter(manager, io, Mutex()) to manager
     }

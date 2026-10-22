@@ -42,7 +42,8 @@ class ModelManager(
     private val llms: LlmEngineFactory,
     private val embedders: TextEmbedderFactory,
     private val scope: CoroutineScope,
-    private val useEmbedder: Boolean,
+    /** Read on each [embedder] call, so a debug run can turn dense retrieval on without a new manager. */
+    private val useEmbedder: () -> Boolean,
     private val backend: LlmBackend = LlmBackend.GPU,
     private val releaseAfterMs: Long = 120_000,
     private val io: CoroutineDispatcher = Dispatchers.IO,
@@ -123,7 +124,7 @@ class ModelManager(
 
     /** The embedder, or null (disabled, not installed, large model resident, or failed to load: callers rank lexically). */
     suspend fun embedder(): TextEmbedder? {
-        if (!useEmbedder) return null
+        if (!useEmbedder()) return null
         cancelRelease()
         return lock.withLock {
             if (llmSize == LlmSize.LARGE) return@withLock null

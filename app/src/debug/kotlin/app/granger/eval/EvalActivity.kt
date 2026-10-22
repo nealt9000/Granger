@@ -17,10 +17,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import app.granger.DENSE_RETRIEVAL
 import app.granger.GrangerApp
 import app.granger.core.ai.LiteRtLlmEngine
 import app.granger.core.ai.LlmBackend
 import app.granger.core.ai.RssMemorySampler
+import app.granger.core.research.FictionWeight
 import app.granger.core.research.ResearchPipeline
 import app.granger.research.ModelsAdapter
 import java.io.File
@@ -80,11 +82,17 @@ class EvalActivity : ComponentActivity() {
         val groups = intent.getStringExtra("groups")
         // Plan R0, Task 4: the rewrite variant that gives keywords alternates.
         val alternates = intent.getStringExtra("rewrite") == "alternates"
-        // Plan R0, Task 6: `fiction` names a file under eval/ of fiction book ids, one per line; `fictionWeight` (0.7).
-        val fiction = intent.getStringExtra("fiction")?.let { name ->
-            FictionWeight(File(root, name).readLines().map { it.trim() }.filter { it.isNotEmpty() }.toSet(),
-                intent.getStringExtra("fictionWeight")?.toDoubleOrNull() ?: 0.7)
+        // Fiction weighting is the app's (the catalog's literature books, 0.7) unless `fiction` is `off`, or names a file
+        // under eval/ of fiction book ids, one per line (Plan R0, Task 6); `fictionWeight` sets the weight.
+        val fictionWeight = intent.getStringExtra("fictionWeight")?.toDoubleOrNull() ?: FictionWeight.DEFAULT
+        val fiction = when (val name = intent.getStringExtra("fiction")) {
+            null -> if (intent.hasExtra("fictionWeight")) FictionWeight(c::literatureBooks, fictionWeight) else c.fictionWeight
+            "off" -> null
+            else -> File(root, name).readLines().map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+                .let { ids -> FictionWeight({ ids }, fictionWeight) }
         }
+        // Plan R1: `dense` on or off; the app's DENSE_RETRIEVAL when not given.
+        val denseOn = intent.getStringExtra("dense")?.let { it == "on" } ?: DENSE_RETRIEVAL
         val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
         val result = EvalSession.start(runId, root, ::log) {
             // Model roles come from the catalog. MainActivity loads the cached one at launch; a cold start straight
@@ -95,11 +103,19 @@ class EvalActivity : ComponentActivity() {
             val sourceName = evalSourceName(packNames)
             val finder = RecordingFinder(c.passageFinder)
             val prompts = PromptRecorder(ModelsAdapter(c.modelManager))
-            val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, sourceWeight = fiction)
-            val runner = EvalRunner(pipeline, finder, sourceName, prompts) { android.os.SystemClock.elapsedRealtime() }
-            runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-            log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (fiction != null) ", fiction weighted" else ""}")
-            runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
+            val clock = { android.os.SystemClock.elapsedRealtime() }
+            val dense = if (denseOn) RecordingDenseFinder(c.denseFinder, clock) else null
+            c.embedderWanted.set(denseOn)
+            try {
+                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, sourceWeight = fiction, dense = dense)
+                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
+                runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
+                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}" +
+                    "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
+                runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
+            } finally {
+                c.embedderWanted.set(DENSE_RETRIEVAL)
+            }
             File(root, "$runId/done").writeText("done\n")
             log("done $runId")
             c.modelManager.releaseSoon()

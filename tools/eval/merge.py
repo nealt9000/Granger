@@ -3,8 +3,10 @@
 
   merge.py sweep RUN       # every ranker over a grid of its settings; recall@4, empty rate, fiction intrusions
   merge.py show RUN NAME   # one config's per-domain split (NAME as the sweep prints it)
+  merge.py check RUN       # does the app's Ranking.hybrid choose what the port chooses? (Task 9's gate)
 
-RUN needs found.jsonl (the keyword search, as recorded) and dense.jsonl (`tools/vectors/hits.py`). The keyword side is
+RUN needs found.jsonl (the keyword search, as recorded) and the dense hits: found.jsonl's `dense` lists from a phone
+run with dense retrieval on, or else dense.jsonl (`tools/vectors/hits.py`). The keyword side is
 the app's ranking (`replay`) with fiction weighted on non-literature questions (`kinds`, 0.7, filter mode). A dense hit
 whose text a keyword passage already has is the same passage: it lends that passage its cosine.
 
@@ -32,10 +34,16 @@ def text_key(p):
     return " ".join((p.get("text") or "").split())
 
 
-def load(run):
-    d, items, corpus, _ = replay.load(run)
-    dense = {r["id"]: r["passages"] for r in replay._jsonl(d / "dense.jsonl")}
-    return items, corpus, dense
+PICK = "gated g0.78 l1.0 hybrid a0.1 f0.74"
+
+
+def load(run, with_records=False):
+    d, items, corpus, records = replay.load(run)
+    if any("dense" in c for c in corpus.values()):
+        dense = {id: c.get("dense", []) for id, c in corpus.items()}
+    else:
+        dense = {r["id"]: r["passages"] for r in replay._jsonl(d / "dense.jsonl")}
+    return (items, corpus, dense, records) if with_records else (items, corpus, dense)
 
 
 def _weight(question, corpus, hits):
@@ -210,11 +218,29 @@ def cmd_show(a):
     return 0
 
 
+def cmd_check(a):
+    items, corpus, dense, records = load(a.run, with_records=True)
+    ranker = configs()[PICK]
+    n, bad = 0, []
+    for id, rec in records.items():
+        if rec.get("outcome") == "failed" or id not in corpus:
+            continue
+        n += 1
+        top = ranker(items[id]["question"], corpus[id], replay.Config(), dense.get(id, []))
+        if not replay.agrees(rec.get("chosen", []), top):
+            bad.append((id, rec.get("chosen", []), top))
+    for id, chosen, top in bad:
+        print("%s\n  phone: %s\n  port:  %s" % (id, [(p["source"], p["location"]) for p in chosen], [(p["source"], p["location"]) for p in top]))
+    print("%d of %d agree" % (n - len(bad), n))
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     s = p.add_subparsers(dest="cmd", required=True)
     c = s.add_parser("sweep"); c.add_argument("run"); c.add_argument("--only"); c.set_defaults(f=cmd_sweep)
     c = s.add_parser("show"); c.add_argument("run"); c.add_argument("name"); c.set_defaults(f=cmd_show)
+    c = s.add_parser("check"); c.add_argument("run"); c.set_defaults(f=cmd_check)
     a = p.parse_args(argv)
     return a.f(a)
 

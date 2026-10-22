@@ -41,7 +41,7 @@ class ModelManagerTest {
         val manager = ModelManager(
             tier, installed, llms,
             { embedders += FakeEmbedder(); embedders.last() },
-            backgroundScope, useEmbedder, io = dispatcher,
+            backgroundScope, { useEmbedder }, io = dispatcher,
         )
         return Rig(manager, llms, embedders, installed)
     }
@@ -179,7 +179,7 @@ class ModelManagerTest {
                     override fun load() { job?.cancel(); super.load() }
                 }.also { created += it }
         }
-        val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), llms, { FakeEmbedder() }, backgroundScope, true, io = StandardTestDispatcher(testScheduler))
+        val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), llms, { FakeEmbedder() }, backgroundScope, { true }, io = StandardTestDispatcher(testScheduler))
         job = launch { m.engine(LlmSize.SMALL) }
         runCurrent()
         assertThat(job.isCancelled).isTrue()
@@ -195,7 +195,7 @@ class ModelManagerTest {
         val factory = TextEmbedderFactory {
             object : FakeEmbedder() { override fun load() { job?.cancel() } }.also { created += it }
         }
-        val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), FakeLlmFactory(FakeClock()), factory, backgroundScope, true, io = StandardTestDispatcher(testScheduler))
+        val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), FakeLlmFactory(FakeClock()), factory, backgroundScope, { true }, io = StandardTestDispatcher(testScheduler))
         job = launch { m.embedder() }
         runCurrent()
         assertThat(job.isCancelled).isTrue()

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,8 +48,8 @@ interface ResearchModels {
 }
 
 /**
- * Plan R0's debug source weighting: given the question, the keywords and every passage found, a multiplier for each
- * passage's lexical score. Not used in the app.
+ * Source weighting: given the question, the keywords and every passage found, a multiplier for each passage's lexical
+ * score (and its cosine, with dense retrieval). The app's is [FictionWeight].
  */
 fun interface SourceWeight {
     fun of(question: String, keywords: List<String>, found: List<Passage>): (Passage) -> Double
@@ -146,8 +147,14 @@ class ResearchPipeline(
     private val rewriteTimeoutMs: Long = 5_000,
     /** Plan R0's debug variant: the rewrite may give each keyword alternates (see [Rewrite.prompt]). Off in the app. */
     private val rewriteAlternates: Boolean = false,
-    /** Plan R0's debug variant: see [SourceWeight]. Off in the app. */
+    /** See [SourceWeight]; the app passes [FictionWeight]. */
     private val sourceWeight: SourceWeight? = null,
+    /**
+     * Dense retrieval (Plan R1): the question (after the prior one, when there is one) is embedded and searched by
+     * meaning alongside the keyword search, and [Ranking.hybrid] merges the two. Without it, or when the embedder or
+     * the vectors aren't there, ranking is the keyword ranking.
+     */
+    private val dense: DenseFinder? = null,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
@@ -183,19 +190,24 @@ class ResearchPipeline(
                 return@flow
             }
             emit(ResearchEvent.Progress(Stage.SEARCHING))
+            var hits: List<Passage>? = null
             val all = try {
-                finder.find(Keywords.searchTerms(keywords))
+                coroutineScope {
+                    val byMeaning = dense?.let { d -> async { denseHits(d, request) } }
+                    finder.find(Keywords.searchTerms(keywords)).also { hits = byMeaning?.await() }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
                 return@flow
             }
-            val weight = sourceWeight?.of(request.question, keywords, all) ?: Ranking.NO_WEIGHT
+            val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
             val found = Ranking.preselect(all, keywords, config, weight)
             emit(ResearchEvent.Progress(Stage.RANKING))
             ranked = try {
-                Ranking.liftMedia(rank(request.question, found, keywords, weight), found, asked)
+                val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight) }
+                Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight), found, asked)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -360,10 +372,30 @@ class ResearchPipeline(
         return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
     }
 
+    /**
+     * The dense hits for [request], or null for keyword ranking alone: no embedder, no vector files, or a failure.
+     * Dense retrieval only ever adds; a question it can't help with is ranked as it was without it.
+     */
+    private suspend fun denseHits(finder: DenseFinder, request: ResearchRequest): List<Passage>? = try {
+        val embedder = models.embedder()
+        if (embedder == null) {
+            null
+        } else {
+            val text = listOfNotNull(request.priorQuestion, request.question).joinToString(" ")
+            finder.find(embedder.embed(listOf(text), isQuery = true).single()).takeIf { it.isNotEmpty() }
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        null
+    }
+
     private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>, weight: (Passage) -> Double): List<Passage> {
         if (candidates.isEmpty()) return emptyList()
-        // Every candidate that passes is kept: the pool is cut to `large` after the media cap.
-        val embedder = models.embedder() ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size, weight = weight)
+        // Every candidate that passes is kept: the pool is cut to `large` after the media cap. With dense retrieval the
+        // embedder is for the query alone: reranking 12 passages with it takes 4 s on the Pixel 6.
+        val embedder = (if (dense == null) models.embedder() else null)
+            ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size, weight = weight)
         val query = embedder.embed(listOf(question), isQuery = true).single()
         val vectors = embedder.embed(candidates.map { it.text }, isQuery = false)
         return Ranking.byEmbedding(candidates, query, vectors, config, limit = candidates.size)

@@ -181,4 +181,49 @@ class RankingTest {
         val e = runCatching { Ranking.cosine(floatArrayOf(1f, 0f), floatArrayOf(1f)) }.exceptionOrNull()
         assertThat(e).isInstanceOf(IllegalArgumentException::class.java)
     }
+
+    // Ranking.hybrid: the cases of tools/eval/tests/test_merge.py.
+    private fun article(text: String, title: String, cosine: Double? = null) =
+        Passage(SourceKind.ARTICLE, "wikipedia_en_top", title, location = title, text = text, cosine = cosine)
+
+    @Test
+    fun hybridListsADenseHitWithAKeywordTwinOnce() {
+        val lexical = article("Rust is an iron oxide formed by oxidation.", "Rust")
+        val dense = article("Rust is an iron oxide  formed by oxidation.", "Rust", cosine = 0.82)
+        assertThat(Ranking.hybrid(listOf(lexical), listOf(dense), listOf("rust"), RankingConfig()).map { it.text })
+            .containsExactly("Rust is an iron oxide formed by oxidation.")
+    }
+
+    @Test
+    fun hybridLeavesOutDenseHitsBelowTheFloor() {
+        val hits = listOf(article("Moon distance is 384,400 km.", "Moon", 0.80), article("A poem about the night.", "Night", 0.70))
+        assertThat(Ranking.hybrid(emptyList(), hits, listOf("moon"), RankingConfig()).map { it.sourceTitle })
+            .containsExactly("Moon")
+    }
+
+    @Test
+    fun hybridGateEmptiesWeakDenseAndPartialKeywordMatches() {
+        val lexical = article("The bank of the river was steep.", "River")
+        val hits = listOf(article("Banks hold deposits.", "Bank", 0.75))
+        assertThat(Ranking.hybrid(listOf(lexical), hits, listOf("bank", "balance"), RankingConfig())).isEmpty()
+    }
+
+    @Test
+    fun hybridGatePassesAStrongDenseHitOrACompleteKeywordMatch() {
+        val paris = article("Paris is the capital of France.", "Paris")
+        assertThat(Ranking.hybrid(emptyList(), listOf(paris.copy(cosine = 0.85)), listOf("capital", "france"), RankingConfig())).hasSize(1)
+        assertThat(Ranking.hybrid(listOf(paris), emptyList(), listOf("capital", "france"), RankingConfig())).containsExactly(paris)
+    }
+
+    @Test
+    fun hybridOrdersByTheBlendAndWeightsFictionCosines() {
+        val novel = Passage(SourceKind.BOOK, "book:dracula", "Dracula", location = "c1", text = "The moon rose red.", cosine = 0.90)
+        val moon = article("The Moon is Earth's only natural satellite.", "Moon", 0.80)
+        val fiction = { p: Passage -> if (p.sourceId == "book:dracula") 0.7 else 1.0 }
+        assertThat(Ranking.hybrid(emptyList(), listOf(novel, moon), listOf("moon"), RankingConfig()).map { it.sourceTitle })
+            .containsExactly("Dracula", "Moon").inOrder()
+        // 0.90 × 0.7 is under the floor.
+        assertThat(Ranking.hybrid(emptyList(), listOf(novel, moon), listOf("moon"), RankingConfig(), fiction).map { it.sourceTitle })
+            .containsExactly("Moon")
+    }
 }

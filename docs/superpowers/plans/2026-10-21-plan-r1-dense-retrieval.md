@@ -354,16 +354,31 @@ and `BookIndex.kt` (expose the chapter re-chunk used by `chunkTexts`).
 - `core/research/.../ResearchPipeline.kt`, `Ranking.kt`, and their tests;
 - `app/.../GrangerApp.kt`, `research/ModelsAdapter.kt`, `core/ai/.../ModelManager.kt`.
 
-- [ ] `ResearchPipeline` takes an optional `DenseFinder` (an interface in `:core:research`). The query (Task 3's choice) is
-  embedded **concurrently with the rewrite**, and the dense search runs alongside the keyword search.
-- [ ] `Ranking` gets Task 7's ranker, ported from `replay.py`. The `replay.py check` agreement test is extended to cover it:
-  **gate:** phone and replay choose the same 4 on at least 200 of 202.
-- [ ] Fiction weighting moves from debug (`FictionWeight`) to main, on by default at 0.7. The `sourceWeight` parameter stays
-  for the eval.
-- [ ] `RERANK_WITH_EMBEDDER` is replaced by `DENSE_RETRIEVAL` (default false until Task 11). With it on, `ModelManager` loads
-  the embedder alongside E2B. Think deeper computes the query vector before E4B loads, since loading E4B closes the embedder.
-- [ ] The Sources screen's "Not used yet" label for EmbeddingGemma changes to "Used by Research" when `DENSE_RETRIEVAL` is on.
-- [ ] `EvalRunner` records `cosine` in `found.jsonl` and `ms.dense` in results.
+- [x] `ResearchPipeline` takes an optional `DenseFinder`. The query is "prior + question" (Task 3's choice).
+  - **Deviation:** it's embedded right after the rewrite, not at the same time. `ModelsAdapter` runs one model at a time,
+    so the rewrite and the embedder can't overlap.
+  - The embedding (0.12 s) and the scan run alongside the keyword search, which takes seconds, so they add no wait.
+  - No embedder, no vector files, or a failure means keyword ranking alone. Dense retrieval only ever adds.
+  - With dense on, the old embedder rerank of the 12 is never used.
+- [x] `Ranking.hybrid` is Task 7's pick, ported from `merge.py`. `RankingConfig` gains `denseAlpha` 0.1, `cosineFloor` 0.74,
+  `denseGate` 0.78 and `lexicalGate` 1.0. `RankingTest` mirrors `test_merge.py`.
+- [ ] The agreement gate runs with Task 11's phone run: `merge.py check RUN` compares the phone's 4 with the port's.
+  **Gate:** at least 200 of 202 the same.
+  - One known source of difference: `kinds.py` counts the archive.org *Goody Two-Shoes* as fiction. The app's list is the
+    catalog's literature books, which match R0's 284 Classics exactly.
+- [x] `FictionWeight` moves to `:core:research`, on by default at 0.7. Its fiction list is the catalog's `literature`
+  books (H1's domains), and it weights cosines as well as lexical scores. `SourceWeight` stays the hook; the eval's
+  `fiction` extra can still name a file, or `off`.
+- [x] `RERANK_WITH_EMBEDDER` is replaced by `DENSE_RETRIEVAL` (false).
+  - `ModelManager`'s `useEmbedder` is now read on each call (the container's `embedderWanted`), so an eval run can turn
+    it on with `--es dense on`.
+  - Think deeper needs no query vector: it reuses the first answer's passages and skips retrieval. The case the plan
+    feared (the embedder closed while E4B is loaded) doesn't arise.
+- [x] The Sources screen's EmbeddingGemma row reads "Used by Research" when `DENSE_RETRIEVAL` is on.
+- [x] `EvalRunner` records each dense hit (with `cosine`) under `dense` in found.jsonl, and `ms.dense` (the scan plus
+  the rebuild) in results. The latter is Tasks 5 and 6's timing gates, measured in the same run.
+- [x] Interim vector files: `DirectoryVectorSources` reads `files/vectors/index.tsv`, and `tools/vectors/push.py`
+  pushes `WORK/out` and writes the index. Task 10 replaces it with catalog downloads.
 
 ### Task 10: Vectors in the catalog
 

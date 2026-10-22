@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.RERANK_WITH_EMBEDDER
+import app.granger.DENSE_RETRIEVAL
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogItem
@@ -318,8 +318,8 @@ class SourceViewModel(
             val description = when (item) {
                 is PackEntry -> item.description
                 is BookEntry -> item.description
-                // Rerank is off (Plan 9 eval), so the embedder downloads but nothing uses it.
-                is ModelEntry -> if (item.role == ModelRole.EMBEDDER && !RERANK_WITH_EMBEDDER) "Not used yet" else ""
+                // Research embeds its questions with it once dense retrieval is on (Plan R1); until then nothing uses it.
+                is ModelEntry -> if (item.role != ModelRole.EMBEDDER) "" else if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet"
                 is VoiceEntry -> item.attribution
             }
             return ItemRow(item.id, item.title, details, description, item.sizeBytes, status(item), packId)

@@ -98,6 +98,24 @@ class EvalRunnerTest {
     }
 
     @Test
+    fun aDenseRunRecordsItsHitsWithCosinesAndTheScanTime() = runTest {
+        val boiling = Passage(SourceKind.ARTICLE, "wikipedia_en_top", "Boiling", location = "Boiling", text = "Boiling turns a liquid to vapour.", cosine = 0.86)
+        val models = object : ResearchModels {
+            override suspend fun generator(deeper: Boolean): TextGenerator = small
+            override suspend fun embedder(): PassageEmbedder = PassageEmbedder { texts, _ -> texts.map { floatArrayOf(1f) } }
+        }
+        val finder = RecordingFinder(Finder(listOf(water)))
+        val dense = RecordingDenseFinder({ listOf(boiling) }) { ticks += 10; ticks }
+        val out = File(tmp.root, "d/results.jsonl")
+        EvalRunner(ResearchPipeline(finder, models, dense = dense), finder, { it.sourceId }, dense = dense) { ticks += 10; ticks }
+            .run(listOf(item("a")), out, GuessModels.NONE)
+        val hit = records(File(tmp.root, "d/found.jsonl")).single().getJSONArray("dense").getJSONObject(0)
+        assertThat(hit.getString("title")).isEqualTo("Boiling")
+        assertThat(hit.getDouble("cosine")).isEqualTo(0.86)
+        assertThat(records(out).single().getJSONObject("ms").getLong("dense")).isEqualTo(10)
+    }
+
+    @Test
     fun recordsPromptsInCallOrderWithStagesAndConcatenatedOutput() = runTest {
         val out = File(tmp.root, "r/results.jsonl")
         runner().run(listOf(item("a")), out, GuessModels.NONE)

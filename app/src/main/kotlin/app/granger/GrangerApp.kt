@@ -138,6 +138,11 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.Base64
 import java.util.concurrent.TimeUnit
+import app.granger.core.library.BookIds
+import app.granger.core.library.DensePassageFinder
+import app.granger.core.library.DirectoryVectorSources
+import app.granger.core.research.FictionWeight
+import java.util.concurrent.Executors
 
 open class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
@@ -211,12 +216,14 @@ internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, reco
 }
 
 /**
- * Whether Research reranks passages with the embedding model. Off: on the Pixel 6 a query plus 12 passages took
- * 4.2–4.7 s on the GPU (9.6–10.2 s on the CPU), over the 3 s budget, so ranking is lexical (Plan 8 Task 9).
+ * Whether Research also searches by meaning (Plan R1): the question is embedded (0.12 s on the Pixel 6's GPU) and
+ * scanned against the installed packs' and books' vector files, alongside the keyword search, and [Ranking.hybrid]
+ * merges the two. Off until Plan R1 Task 11's tuning run decides. Reranking found passages with the embedder stays off:
+ * a query plus 12 passages took 4.2–4.7 s on the GPU (Plan 8 Task 9).
  */
-const val RERANK_WITH_EMBEDDER = false
+const val DENSE_RETRIEVAL = false
 
-/** Where the embedding model runs when reranking is on: the GPU, about twice as fast as the CPU on the Pixel 6. */
+/** Where the embedding model runs: the GPU, about twice as fast as the CPU on the Pixel 6. */
 val EMBEDDER_BACKEND = LlmBackend.GPU
 
 /** Hand-wired dependencies; one instance per process. */
@@ -487,17 +494,37 @@ class AppContainer(context: Context) {
 
     private val modelCacheDir = context.cacheDir.path
 
+    /** Whether the model manager loads the embedder: [DENSE_RETRIEVAL], or a debug eval run that turns it on. */
+    val embedderWanted = AtomicBoolean(DENSE_RETRIEVAL)
+
     val modelManager = ModelManager(
         deviceTier, installedModels,
         { path, backend -> LiteRtLlmEngine(path, backend, modelCacheDir) },
         { path -> LiteRtTextEmbedder(path, modelCacheDir, EMBEDDER_BACKEND) },
-        appScope, useEmbedder = RERANK_WITH_EMBEDDER,
+        appScope, useEmbedder = embedderWanted::get,
     )
 
     val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex)
 
-    /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9). */
+    /** Plan R1's vector files, pushed to `files/vectors/` with an index until the catalog lists them (Task 10). */
+    val vectorSources = DirectoryVectorSources(File(context.getExternalFilesDir(null), "vectors"))
+
+    /** The scan's threads: each file is split into ranges searched at once. */
+    private val vectorPool by lazy { Executors.newFixedThreadPool(4) }
+
+    val denseFinder by lazy { DensePassageFinder(library, bookshelf, shelves, vectorSources, vectorPool) }
+
+    /** The book ids of the Granger Classics the catalog files under literature: novels, drama, poetry and libretti (R0's fiction list). */
+    fun literatureBooks(): Set<String> = catalog.state.value.catalog?.books.orEmpty()
+        .filter { it.domain == "literature" }.mapTo(HashSet()) { BookIds.of(BookOrigin.GRANGER, it.id) }
+
+    val fictionWeight = FictionWeight(::literatureBooks)
+
+    /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9) and Plan R1's merging sweep. */
     val rankingConfig = RankingConfig()
 
-    val research = ResearchPipeline(passageFinder, ModelsAdapter(modelManager), rankingConfig)
+    val research = ResearchPipeline(
+        passageFinder, ModelsAdapter(modelManager), rankingConfig,
+        sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
+    )
 }
