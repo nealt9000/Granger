@@ -165,6 +165,18 @@ Listed, by category and family:
   Science & Math / stacks.math.columbia.edu: 1
   Science & Math / wikispecies: 2
 
+Listed, by readiness domain:
+  (storage only): 60
+  food: 25
+  literature: 78
+  making: 23
+  maps: 203
+  medicine: 14
+  reference: 77
+  science: 55
+  technology: 357
+  thought: 17
+
 Held back (video): 384
   biologycourses: 1
   canadian-prepper: 4
