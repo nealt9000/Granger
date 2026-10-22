@@ -501,12 +501,13 @@ READINESS = {"domains": [
 ]}
 
 
-def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_FAMILIES, books=THOUGHT_BOOKS, onboarding=None):
+def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_FAMILIES, books=THOUGHT_BOOKS, onboarding=None,
+                    extra=()):
     (tmp_path / "families.json").write_text(json.dumps({"families": families}))
     (tmp_path / "books.json").write_text(json.dumps(books))
     monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
     xml = feed(feed_entry("wikipedia_en_medicine", "nopic"), feed_entry("wikipedia_en_top", "nopic"),
-               feed_entry("maps_en_france"), feed_entry("maps_en_spain"))
+               feed_entry("maps_en_france"), feed_entry("maps_en_spain"), *extra)
     curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [],
                "books": [BOOK_ROW], "presets": [], "readiness": readiness}
     if onboarding is not None:
@@ -568,6 +569,61 @@ def test_efficient_and_comprehensive_presets_come_from_the_tiers(tmp_path, monke
     assert presets["comprehensive"]["items"] == ["wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic", "gc-hamlet",
                                                  "gc-iliad", "gc-bible", "gc-republic"]
     assert presets["comprehensive"]["title"] == "Comprehensive library"
+
+
+CALIBRATED = {"domains": [
+    {"id": "medicine", "title": "Medicine & first aid",
+     "essential": ["wikipedia_en_medicine_nopic"], "comprehensive": ["wikipedia_en_medicine_maxi"]},
+    {"id": "maps", "title": "Maps, places & travel", "essential": ["family:maps"], "comprehensive": []},
+    {"id": "reference", "title": "General reference",
+     "essential": ["wikipedia_en_top_nopic"], "comprehensive": ["wikipedia_en_top1m_nopic"]},
+    {"id": "literature", "title": "Literature & the arts", "essential": [], "comprehensive": []},
+    {"id": "thought", "title": "Religion, philosophy & history", "essential": [], "comprehensive": []},
+], "contains": {"wikipedia_en_top1m": ["wikipedia_en_top", "wikipedia_en_100"], "wikipedia_en_all": ["wikipedia_en_*"]}}
+CALIBRATED_FEED = (feed_entry("wikipedia_en_medicine", "maxi"), feed_entry("wikipedia_en_top1m", "nopic"),
+                   feed_entry("wikipedia_en_100"), feed_entry("wikipedia_en_all", "nopic"))
+
+
+def test_readiness_contains_is_written_and_checked(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch, readiness=CALIBRATED, extra=CALIBRATED_FEED)
+    assert catalog["readiness"]["contains"] == CALIBRATED["contains"]
+    # A key or a plain value naming no ZIM fails the build; a prefix that matches nothing yet is allowed.
+    for contains in ({"wikipedia_en_atlantis": ["wikipedia_en_top"]}, {"wikipedia_en_top1m": ["wikipedia_en_atlantis"]}):
+        with pytest.raises(SystemExit, match="wikipedia_en_atlantis"):
+            readiness_build(tmp_path, monkeypatch, readiness={**CALIBRATED, "contains": contains}, extra=CALIBRATED_FEED)
+    catalog = readiness_build(tmp_path, monkeypatch, readiness={**CALIBRATED, "contains": {"wikipedia_en_top1m": ["nothing_*"]}},
+                              extra=CALIBRATED_FEED)
+    assert catalog["readiness"]["contains"] == {"wikipedia_en_top1m": ["nothing_*"]}
+
+
+def test_a_catalog_without_contains_writes_none(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch)
+    assert "contains" not in catalog["readiness"]
+
+
+def test_presets_carry_one_flavour_per_zim(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch, readiness=CALIBRATED, extra=CALIBRATED_FEED)
+    presets = {p["id"]: p["items"] for p in catalog["presets"]}
+    assert "wikipedia_en_medicine_nopic" in presets["efficient"]
+    assert "wikipedia_en_medicine_maxi" not in presets["efficient"]
+    assert "wikipedia_en_medicine_maxi" in presets["comprehensive"]
+    assert "wikipedia_en_medicine_nopic" not in presets["comprehensive"]
+
+
+def test_comprehensive_preset_leaves_out_contained_zims(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch, readiness=CALIBRATED, extra=CALIBRATED_FEED)
+    presets = {p["id"]: p["items"] for p in catalog["presets"]}
+    assert presets["efficient"] == ["wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic"]
+    assert presets["comprehensive"] == ["wikipedia_en_medicine_maxi", "wikipedia_en_top1m_nopic"]
+
+
+def test_tier_sizes_count_each_zim_once_and_leave_out_contained_ones(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch, readiness=CALIBRATED, extra=CALIBRATED_FEED)
+    sizes = cg.tier_sizes(catalog)
+    # Every feed pack is 1000 bytes: medicine counts one flavour, reference counts Top 1M and not Top.
+    assert sizes["medicine"] == (1000, 1000)
+    assert sizes["reference"] == (1000, 1000)
+    assert sizes["All"] == (2000, 2000)
 
 
 def test_build_without_a_readiness_block_writes_none(tmp_path, monkeypatch):
@@ -653,6 +709,21 @@ def test_real_curated_onboarding_names_seven_use_cases_and_larger_areas():
     assert len(block["regions"]["larger"]) >= 7
     assert all(p.startswith("maps_en_") for p in block["regions"]["larger"])
     assert "Puerto Rico" in block["regions"]["covered"]["maps_en_central-america"]
+
+
+def test_real_curated_tiers_fit_the_target():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
+    published = json.loads((cg.REPO_ROOT / "catalog/catalog.json").read_text())
+    if "readiness" not in published:
+        pytest.skip("the published catalog has no readiness block")
+    tokens = [t for d in curated["readiness"]["domains"] for t in d["essential"] + d["comprehensive"]]
+    assert "stackoverflow.com_en_all" not in tokens
+    if "contains" not in published["readiness"]:
+        pytest.skip("the published catalog predates the calibration (Plan H4)")
+    sizes = cg.tier_sizes(published)
+    efficient, comprehensive = sizes["All"]
+    assert efficient < 12e9
+    assert comprehensive < 95e9
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():
