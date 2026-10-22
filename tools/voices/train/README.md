@@ -51,7 +51,11 @@ It is GPL-3.0, which suits a GPL app.
 ## Facts that shaped the recipe
 
 - **Phonemes.** The ljspeech checkpoint was trained with espeak voice `en` (British phonemes: `ɒ`, `ə`, no rhotic r).
-  LibriTTS-R readers are American, so the fine-tune uses `en-us`, and the exported `.onnx` says `voice=en-us`. The
+  LibriTTS-R readers are American, so the fine-tune uses `en-us`, and the exported `.onnx` says `voice=en-us`.
+  This is the likely cause of ljspeech's "Australiar", "Rosettar" (roadmap, carried forward from V2): under `en`,
+  "Rosetta" ends `-tə` and "water" ends `-tə` too, though LJ says the r, so the model learned that a final `ə`
+  sometimes carries one; under `en-us` they are `-ɾə` and `-ɾɚ`. The fine-tune has to unlearn the base's habit, so
+  `say.py`'s text has Rosetta, Australia and area, and the listening checks them. The
   phoneme id maps line up: ljspeech's 157 ids are an exact prefix of piper1-gpl's 166 (the extra 9 are diphthongs),
   and both have 256 symbols, so the embedding carries over unchanged.
 - **Never pass `--data.vowel_clusters`.** It merges diphthongs into single tokens (`aɪ`); sherpa-onnx tokenises

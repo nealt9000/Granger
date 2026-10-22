@@ -15,6 +15,7 @@ import time
 TEXT = (
     "It was the best of times, it was the worst of times. "
     "Dr. Okafor arrived at 7:45 on March 3rd, 1984, carrying $12.50 and a copy of Middlemarch. "
+    "The Rosetta Stone left Egypt long before anyone in Australia had heard of it, and the whole area forgot it. "
     "Would you like me to read the next chapter?"
 )
 
