@@ -208,6 +208,22 @@ class ReadAloudEngineTest {
     }
 
     @Test
+    fun theCacheIsKeyedBySpeedSoAStepBackAtTheOldSpeedReplaysWithoutSynthesis() = runTest {
+        val out = FakeOutput(); val speech = FakeSpeech()
+        val engine = ReadAloudEngine(out, backgroundScope, lookAheadSentences = 1)
+        engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
+        out.release(2); settle()                                   // "One two." heard at 1×
+        val madeAtOne = speech.spoken.count { it == "One two." }
+        engine.setSpeed(2f)
+        engine.previousSentence(); out.release(2); settle()        // again at 2×: a new synthesis
+        assertThat(speech.spoken.count { it == "One two." }).isEqualTo(madeAtOne + 1)
+        engine.setSpeed(1f)
+        engine.previousSentence(); out.release(2); settle()        // back at 1×: from the cache
+        assertThat(speech.spoken.count { it == "One two." }).isEqualTo(madeAtOne + 1)
+        assertThat(speech.speeds.last()).isEqualTo(2f)
+    }
+
+    @Test
     fun jumpToAnAddressRestartsThere() = runTest {
         val out = FakeOutput(); val speech = FakeSpeech()
         val engine = ReadAloudEngine(out, backgroundScope)

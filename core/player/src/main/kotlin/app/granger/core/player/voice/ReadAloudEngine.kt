@@ -76,8 +76,10 @@ class ReadAloudEngine(
     private var index = 0                            // the sentence playing or to play next
     private var jobs: Job? = null
     private var idleClose: Job? = null
-    private val recent = object : LinkedHashMap<ReadAddress, Pcm>(8, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<ReadAddress, Pcm>?) = size > 6
+    // The last few sentences' audio, by address and the speed they were made at, so a step back (or a speed change
+    // and back) replays without a second synthesis.
+    private val recent = object : LinkedHashMap<Pair<ReadAddress, Float>, Pcm>(8, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<ReadAddress, Float>, Pcm>?) = size > 6
     }
 
     val current: Utterance? get() = buffer.getOrNull(index)
@@ -156,7 +158,7 @@ class ReadAloudEngine(
         restartAt(i)
     }
 
-    fun setSpeed(speed: Float) { this.speed = speed; recent.clear() }
+    fun setSpeed(speed: Float) { this.speed = speed }
 
     suspend fun stop() = lock.withLock {
         cancelJobs()
@@ -241,8 +243,9 @@ class ReadAloudEngine(
             val u = buffer[i]
             // Wait while more than lookAheadMs of audio is synthesized but unheard.
             while (queuedMs.value > lookAheadMs) delay(50)
-            val pcm = recent[u.address] ?: synthesize(s, u)
-            if (pcm != null) { recent[u.address] = pcm; queuedMs.value += pcm.durationMs }
+            val at = speed
+            val pcm = recent[u.address to at] ?: synthesize(s, u)
+            if (pcm != null) { recent[u.address to at] = pcm; queuedMs.value += pcm.durationMs }
             spoken.send(i to pcm)
             i++
         }

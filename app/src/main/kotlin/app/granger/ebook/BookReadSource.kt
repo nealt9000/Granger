@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.util.Url
@@ -62,10 +63,25 @@ class BookReadSource(
         return locators[utterance.address]
     }
 
+    /** Chapter titles from the table of contents by resource path (the first entry for a file wins), for locators that carry none. */
+    private val tocTitles: Map<String, String> by lazy {
+        val out = LinkedHashMap<String, String>()
+        fun walk(links: List<Link>) {
+            for (link in links) {
+                val t = link.title?.trim().orEmpty()
+                if (t.isNotEmpty()) out.putIfAbsent(link.href.toString().substringBefore('#'), t)
+                walk(link.children)
+            }
+        }
+        walk(publication.tableOfContents)
+        out
+    }
+
     override suspend fun sectionTitle(at: ReadAddress): String? {
         val a = at as? ReadAddress.Book ?: return null
         val locator = parse(a.locatorJson) ?: return null
-        return locator.title?.takeIf { it.isNotBlank() && it != title }
+        val own = locator.title?.takeIf { it.isNotBlank() && it != title }
+        return own ?: tocTitles[locator.href.toString().substringBefore('#')]?.takeIf { it != title }
     }
 
     override suspend fun utterances(from: ReadAddress?, limit: Int): List<Utterance> = lock.withLock {

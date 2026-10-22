@@ -201,7 +201,7 @@ No app code. The candidates are packed with the existing tool and pushed under t
 
 **Files:** `core/player/.../voice/ReadAloudEngine.kt` (the `recent` cache keyed by address *and* speed, so a speed change doesn't re-synthesize the sentence being replayed), `app/.../ebook/BookReadSource.kt` (`sectionTitle` from the table of contents when the locator has no title), `GrangerApp.kt` (`readSources` for a book closes the previous restored `Publication` when a different book is restored), tests for each.
 
-- [ ] Tests, implement, `testDebugUnitTest` green. **Commit.** `Voice: V1 debts — speed-keyed cache, section titles from the TOC, one restored publication`
+- [x] Tests, implement, `testDebugUnitTest` green. *`ReadAloudEngineTest.theCacheIsKeyedBySpeedSoAStepBackAtTheOldSpeedReplaysWithoutSynthesis`, `BookReadSourceTest.sectionTitleComesFromTheTableOfContentsWhenTheLocatorHasNone`; the one-restored-publication rule lives in `GrangerApp.readSources` (`restoredBook`), covered by the walkthrough.* **Commit.** `Voice: V1 debts — speed-keyed cache, section titles from the TOC, one restored publication`
 
 ### Task 10: Pixel 6 walkthrough; roadmap
 

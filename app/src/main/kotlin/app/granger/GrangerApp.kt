@@ -122,6 +122,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import org.readium.r2.shared.publication.Publication
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -287,7 +289,15 @@ class AppContainer(context: Context) {
             is ReadSourceKey.Article -> library.archive(k.packId)?.let { ArticleReadSource(it, k.packId, k.path, title) }
             is ReadSourceKey.Book -> bookshelf.book(k.bookId)?.let { book ->
                 val file = File(book.filePath)
-                if (file.isFile) bookOpener.open(file)?.let { BookReadSource(it, k.bookId, book.title) } else null
+                if (!file.isFile) return@let null
+                // One restored book at a time: the same book is reopened from the copy already open; another book
+                // closes it (the reader keeps its own copy, so this never touches a page on screen).
+                val kept = restoredBook?.takeIf { it.first == k.bookId }?.second
+                val opened = kept ?: bookOpener.open(file)?.also { fresh ->
+                    restoredBook?.second?.let { old -> withContext(Dispatchers.IO) { runCatching { old.close() } } }
+                    restoredBook = k.bookId to fresh
+                } ?: return@let null
+                BookReadSource(opened, k.bookId, book.title)
             }
             // A Research answer read aloud (Plan V2): `text:answer:<turnId>`, re-read from the kept chat.
             is ReadSourceKey.Text -> k.key.removePrefix("answer:").takeIf { it != k.key }?.toLongOrNull()?.let { id ->
@@ -298,6 +308,9 @@ class AppContainer(context: Context) {
             null -> null
         }
     }
+
+    /** The book the voice's restore last opened, kept open for the process (Plan V2: one at most). */
+    private var restoredBook: Pair<String, Publication>? = null
 
     /** Resumes a `voice:` play from the rail: the saved place, read again. */
     private val resumeVoice: suspend (String) -> Boolean = { sourceKey ->
