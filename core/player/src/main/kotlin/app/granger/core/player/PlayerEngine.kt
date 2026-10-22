@@ -776,6 +776,25 @@ class PlayerEngine(
         if (target != C.INDEX_UNSET) p.seekTo(target, 0L)
     }
 
+    override fun setVoice(voice: VoiceId) = submit {
+        if (mode != Mode.VOICE || voice == voiceId) return@submit
+        val list = voices ?: return@submit
+        if (list.voices.value.none { it.id == voice }) return@submit
+        Log.i(VOICE_TAG, "Voice: switching to ${voice.encode()}")
+        val wasPlaying = player.playWhenReady && !voiceEnded
+        // Pause through the carrier (the voice follows), reopen with the new engine at this sentence, then play again
+        // the same way, so the listener's play reaches the new engine.
+        player.pause()
+        voiceFrom = (if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom
+        if (voiceOpen) readAloud.stop()
+        voiceOpen = false
+        voiceSpeech = null
+        voiceId = voice
+        save(SaveReason.SEEK)
+        refresh()
+        if (wasPlaying) resume()
+    }
+
     /** Puts [q] on the second player at [positionMs], at the mix level, under the voice; false without a factory. */
     private fun startMusicUnder(q: MusicQueue, byId: Map<String, Track>, positionMs: Long, play: Boolean): Boolean {
         val make = musicUnderFactory ?: return false

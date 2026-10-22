@@ -1,6 +1,7 @@
 package app.granger.player
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -56,6 +57,19 @@ class MiniPlayerTest {
         ui = voiceUi(ended = true)
         compose.waitForIdle()
         compose.onNodeWithTag(MiniPlayerTags.SUBTITLE, useUnmergedTree = true).assertTextEquals("Finished reading")
+    }
+
+    @Test fun theMusicLineNamesTheMusicUnderTheVoice() {
+        val music = musicUi().now as app.granger.core.player.NowPlaying.Music
+        var ui by mutableStateOf(voiceUi(section = "History"))
+        compose.setContent { MiniPlayer(ui, onPlayPause = {}, onSecondary = {}, onOpen = {}) }
+        compose.onNodeWithTag(MiniPlayerTags.MUSIC, useUnmergedTree = true).assertDoesNotExist()
+        val height = compose.onNodeWithTag(MiniPlayerTags.ROOT).fetchSemanticsNode().size.height
+        ui = ui.copy(now = (ui.now as app.granger.core.player.NowPlaying.Voice).copy(music = music, musicPlaying = true))
+        compose.waitForIdle()
+        compose.onNodeWithTag(MiniPlayerTags.MUSIC, useUnmergedTree = true).assert(androidx.compose.ui.test.hasText(music.track.title, substring = true))
+        compose.onNodeWithTag(MiniPlayerTags.SUBTITLE, useUnmergedTree = true).assertTextEquals("Reading · History")
+        assertThat(compose.onNodeWithTag(MiniPlayerTags.ROOT).fetchSemanticsNode().size.height).isEqualTo(height)
     }
 
     @Test fun miniPlayerSameLayoutForMusicAndBook() {

@@ -252,6 +252,26 @@ class PlayerEngineVoiceTest {
         assertThat(speeches).isEmpty()
     }
 
+    @Test fun setVoiceReopensTheNewEngineAtTheCurrentSentence() {
+        val other = Voice(VoiceId.Granger("vits-piper-en_US-norman-medium"), "Granger voice (norman)", "en-US")
+        val two = InstalledVoices({ emptyList() }, { listOf(grangerVoice, other) }, factory, factory)
+        val e = rig.engine(focus = focus, speechOutput = output, voices = two, readSources = { key, _ -> sources[key] })
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        val before = e.voiceProgress.value!!.utterance.text
+        e.setVoice(other.id)
+        rig.idle(); e.untilReady(); speak(2)
+        assertThat(speeches).hasSize(2)
+        assertThat(speeches[1].voice.id).isEqualTo(other.id)
+        assertThat(speeches[1].spoken.first()).isEqualTo(before)
+        assertThat(speeches[0].closed).isEqualTo(1)
+        assertThat((e.ui.value.now as NowPlaying.Voice).voiceId).isEqualTo(other.id)
+        assertThat(e.ui.value.playing).isTrue()
+        e.setVoice(VoiceId.Granger("not-installed"))
+        rig.idle()
+        assertThat((e.ui.value.now as NowPlaying.Voice).voiceId).isEqualTo(other.id)
+    }
+
     // ---- music under the voice (Plan V2) ----
 
     private fun mixEngine(): PlayerEngine =

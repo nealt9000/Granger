@@ -152,11 +152,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/GrangerNavHost.kt` (the sheet's host; Open calls `openVoiceSource`; a `text:` source's Open goes to the Research chat)
 - Tests: `MiniPlayerTest` (`theSecondLineNamesTheMusicUnderTheVoice`), `VoiceSheetTest` (Compose: sentences, slider shown only with music, Stop calls the hub), `PlayerViewModelTest` (`settingTheVoiceReopensAtTheCurrentSentence`).
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.player.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Player UI: the voice's full-view sheet; the music line in the mini-player`
+- [x] **Step 1: Failing tests** as named. *`VoiceSheetTest` (4), `MiniPlayerTest.theMusicLineNamesTheMusicUnderTheVoice`, `PlayerEngineVoiceTest.setVoiceReopensTheNewEngineAtTheCurrentSentence`.*
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.player.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`VoiceProgress` carries the previous and next sentences (no separate `neighbours()`); `PlayerHub.setVoice` pauses through the carrier, reopens the new engine at the current sentence and plays again the same way. The sheet opens fully expanded (half of it would hide the music row and the buttons); the sleep timer is the existing sheet on top of it. The mini-player's third line is `labelSmall`, inside the same 64 dp.*
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Player UI: the voice's full-view sheet; the music line in the mini-player`
 
 ### Task 7: Spoken Research answers
 

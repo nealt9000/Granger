@@ -139,6 +139,9 @@ interface PlayerHub {
      */
     fun setMixLevel(level: Float); fun playPauseMusic(); fun nextMusic()
 
+    /** Switches the reading voice to [voice] (an installed one) at the current sentence; no-op when the voice isn't the mode. */
+    fun setVoice(voice: VoiceId)
+
     /**
      * The book page has just written [finished] into [audiobookId]'s state. If that book is loaded, the player adopts
      * it (so its next save doesn't undo it) and saves; unfinished while at the end, it goes back to the first chapter.

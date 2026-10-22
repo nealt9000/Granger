@@ -39,6 +39,7 @@ object MiniPlayerTags {
     const val PLAY_PAUSE = "mini_player_play_pause"
     const val PROGRESS = "mini_player_progress"
     const val SECONDARY = "mini_player_secondary"
+    const val MUSIC = "mini_player_music"
 }
 
 /** Where the shell draws the mini-player. */
@@ -84,7 +85,7 @@ fun MiniPlayer(
     ) {
         Column(Modifier.fillMaxWidth().height(MiniPlayerHeight)) {
             Row(
-                Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = if (voice) "Open the page" else "Open player", onClick = onOpen).padding(start = 8.dp),
+                Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = if (voice) "Open the voice" else "Open player", onClick = onOpen).padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 PlayerCover(info.coverPath, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
@@ -98,6 +99,14 @@ fun MiniPlayer(
                         info.subtitle, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag(MiniPlayerTags.SUBTITLE),
                     )
+                    // Music under the voice (Plan V2): a thin third line names it.
+                    (now as? NowPlaying.Voice)?.music?.let { under ->
+                        Text(
+                            "♪ ${under.track.title} · ${under.track.artists.ifBlank { under.track.albumArtists }}",
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag(MiniPlayerTags.MUSIC),
+                        )
+                    }
                 }
                 IconButton(onClick = onPlayPause, modifier = Modifier.testTag(MiniPlayerTags.PLAY_PAUSE)) {
                     PlayPauseIcon(ui.playing)

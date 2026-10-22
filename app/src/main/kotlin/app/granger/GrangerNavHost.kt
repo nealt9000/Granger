@@ -38,6 +38,7 @@ import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.player.PlayerUi
 import app.granger.player.MiniPlayer
+import app.granger.player.VoiceSheet
 import app.granger.player.MiniPlayerPlacement
 import app.granger.player.PlayerScreen
 import app.granger.player.PlayerViewModel
@@ -468,6 +469,27 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
+    // The voice's full view (Plan V2): a sheet over whatever is on screen, opened from the mini-player; it closes by
+    // itself when the voice is no longer loaded.
+    var voiceSheet by rememberSaveable { mutableStateOf(false) }
+    val voiceNow = playerUi.now as? NowPlaying.Voice
+    if (voiceSheet && player != null && voiceNow != null) {
+        val progress by player.voiceProgress.collectAsStateWithLifecycle()
+        val voices by container.installedVoices.voices.collectAsStateWithLifecycle()
+        VoiceSheet(
+            ui = playerUi, progress = progress, voices = voices,
+            mixLevel = remember { container.playerPrefs.getFloat(PlayerSettingsKeys.MIX_LEVEL, PlayerSettingsKeys.DEFAULT_MIX) },
+            onPlayPause = player::playPause, onPreviousParagraph = player::previousParagraph, onNextParagraph = player::nextParagraph,
+            onBackSentence = player::previousSentence, onSpeed = player::setSpeed, onVoice = player::setVoice,
+            onMix = player::setMixLevel, onPlayPauseMusic = player::playPauseMusic, onNextMusic = player::nextMusic,
+            onSleep = player::startSleepTimer, onCancelSleep = player::cancelSleepTimer,
+            onStop = { player.stopVoice(); voiceSheet = false },
+            onOpen = { voiceSheet = false; scope.launch { openVoiceSource(voiceNow) ?: nav.togglePlayer() } },
+            onDismiss = { voiceSheet = false },
+        )
+    } else if (voiceSheet && voiceNow == null) {
+        voiceSheet = false
+    }
     GrangerShell(
         rail = rail,
         expanded = shell.expanded,
@@ -526,11 +548,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     playerUi,
                     onPlayPause = player::playPause,
                     onSecondary = player::secondary,
-                    // The voice has no Player tab: Open goes to the page being read.
-                    onOpen = {
-                        val voice = player.voiceNow()
-                        if (voice == null) nav.togglePlayer() else scope.launch { openVoiceSource(voice) ?: nav.togglePlayer() }
-                    },
+                    // The voice has no Player tab: its full view is a sheet (Plan V2), whose Open goes to the page being read.
+                    onOpen = { if (player.voiceNow() == null) nav.togglePlayer() else voiceSheet = true },
                     skipBackS = player.skipBackS(),
                 )
             }

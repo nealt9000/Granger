@@ -25,8 +25,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/** The sentence being spoken: what the readers mark and the notification shows. */
-data class VoiceProgress(val address: ReadAddress, val utterance: Utterance, val index: Int)
+/**
+ * The sentence being spoken: what the readers mark and the notification shows. [previous] and [next] are the
+ * sentences around it for the voice's full view (Plan V2); [next] is null at the end of what the source has handed over.
+ */
+data class VoiceProgress(val address: ReadAddress, val utterance: Utterance, val index: Int, val previous: String? = null, val next: String? = null)
 
 /** One sentence's cost: how long the engine took and how much audio it made (the real-time factor is their ratio). */
 data class SentenceStat(val address: ReadAddress, val chars: Int, val synthMs: Long, val audioMs: Long) {
@@ -92,7 +95,7 @@ class ReadAloudEngine(
         fetchMore(located)
         index = 0
         output.flush()
-        _progress.value = buffer.firstOrNull()?.let { VoiceProgress(it.address, it, 0) }
+        _progress.value = progressAt(0)
         if (autoplay) {
             output.play()
             _playing.value = true
@@ -188,9 +191,13 @@ class ReadAloudEngine(
         cancelJobs()
         output.flush()
         index = i
-        _progress.value = buffer.getOrNull(i)?.let { VoiceProgress(it.address, it, i) }
+        _progress.value = progressAt(i)
         if (wasPlaying) launchJobs()
     }
+
+    /** The progress for sentence [i] of the buffer, with its neighbours; null past the end. */
+    private fun progressAt(i: Int): VoiceProgress? =
+        buffer.getOrNull(i)?.let { VoiceProgress(it.address, it, i, buffer.getOrNull(i - 1)?.text, buffer.getOrNull(i + 1)?.text) }
 
     private fun cancelJobs() { jobs?.cancel(); jobs = null }
 
@@ -205,7 +212,7 @@ class ReadAloudEngine(
                 for ((i, pcm) in spoken) {
                     index = i
                     val u = buffer[i]
-                    _progress.value = VoiceProgress(u.address, u, i)
+                    _progress.value = progressAt(i)
                     if (pcm != null) {
                         output.open(pcm.sampleRate)
                         output.write(pcm)
