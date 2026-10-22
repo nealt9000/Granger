@@ -90,6 +90,8 @@ data class SourceUi(
     val categories: List<String> = emptyList(),
     /** The chosen chip; null is All. */
     val category: String? = null,
+    /** The readiness domain the Kiwix list is filtered to (Plan H1, spec §4.1); null when it isn't. */
+    val domainTitle: String? = null,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -121,8 +123,10 @@ class SourceViewModel(
     private val tier: DeviceTier,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** Opened from Readiness: the Kiwix list filtered to this domain until the chip is closed. */
+    private val domain: String? = null,
 ) : ViewModel() {
-    private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: String?)
+    private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: String?, val domainCleared: Boolean)
 
     private data class Settings(
         val volumes: List<Volume>,
@@ -133,6 +137,7 @@ class SourceViewModel(
         val query: String,
         val expanded: Set<String>,
         val category: String?,
+        val domain: String?,
     )
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
@@ -144,6 +149,7 @@ class SourceViewModel(
     /** Sections opened with Show all, by title; closed again by a new query. */
     private val expanded = MutableStateFlow<Set<String>>(emptySet())
     private val category = MutableStateFlow<String?>(null)
+    private val domainCleared = MutableStateFlow(false)
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -153,13 +159,13 @@ class SourceViewModel(
     var searchText by mutableStateOf("")
         private set
     private val settings = combine(
-        combine(volumeList, selectedPath, wifiOnly, notice, ::Choices),
+        combine(volumeList, selectedPath, wifiOnly, notice, domainCleared, ::Choices),
         tab,
         query,
         expanded,
         category,
     ) { c, tab, query, expanded, category ->
-        Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded, category)
+        Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded, category, if (c.domainCleared) null else domain)
     }
 
     val ui: StateFlow<SourceUi> =
@@ -249,6 +255,11 @@ class SourceViewModel(
     }
 
     /** Shows only [value]'s packs, unfolded; null shows them all again. */
+    /** The ✕ on the domain chip: back to the whole Kiwix catalog with its category chips. */
+    fun clearDomain() {
+        domainCleared.value = true
+    }
+
     fun setCategory(value: String?) {
         category.value = value
     }
@@ -314,8 +325,14 @@ class SourceViewModel(
             return ItemRow(item.id, item.title, details, description, item.sizeBytes, status(item), packId)
         }
         val needle = s.query.trim()
+        val kiwix = scope == CatalogScope.KIWIX
+        // A domain the catalog's model doesn't name shows the whole list, with no chip (Plan H1 Task 5).
+        val domainId = s.domain?.takeIf { kiwix }
+        val domainTitle = domainId?.let { id -> current?.readiness?.domains?.firstOrNull { it.id == id }?.title }
+        val inDomain = domainTitle != null
         fun shown(item: CatalogItem): Boolean {
             if (scopeOf(item) != scope) return false
+            if (inDomain && (item !is PackEntry || item.domain != domainId)) return false
             val status = status(item)
             val inTab = when (s.tab) {
                 SourceTab.BROWSE -> true
@@ -331,14 +348,13 @@ class SourceViewModel(
             }
             return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
         }
-        val kiwix = scope == CatalogScope.KIWIX
-        val categories = if (!kiwix || current == null) emptyList() else
+        val categories = if (!kiwix || current == null || inDomain) emptyList() else
             current.packs.filter { scopeOf(it) == scope }.map { it.category }.distinct()
                 .sortedWith(compareBy({ categoryRank(it) }, { it }))
         // A chip shows one category whole; a category that has left the catalog falls back to All.
         val chosen = s.category?.takeIf { it in categories }
         // The Kiwix screen lists the whole catalog, so its categories fold until Show all, except while searching.
-        val folds = kiwix && needle.isEmpty() && chosen == null
+        val folds = kiwix && needle.isEmpty() && chosen == null && !inDomain
         fun section(title: String, entries: List<CatalogItem>): Section {
             val open = !folds || title in s.expanded || entries.size <= FOLDED_ROWS
             val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::row)
@@ -348,7 +364,16 @@ class SourceViewModel(
             val models = current.models.filter(::shown)
             if (models.isNotEmpty()) add(Section("AI models", models.map(::row)))
             val packs = current.packs.filter { shown(it) && (chosen == null || it.category == chosen) }
-            val (featured, rest) = packs.partition { kiwix && chosen == null && it.featured }
+            val (featured, rest) = if (inDomain) {
+                // Recommended in a domain: its tier items (essential first), the uninstalled before the installed.
+                val domain = current.readiness!!.domains.first { it.id == domainId }
+                val tierIds = (domain.essential + domain.comprehensive).distinct()
+                val byId = packs.associateBy { it.id }
+                val tier = tierIds.mapNotNull { byId[it] }.sortedBy { status(it) == ItemStatus.Installed }
+                tier to packs.filterNot { it.id in tierIds }
+            } else {
+                packs.partition { kiwix && chosen == null && it.featured }
+            }
             if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
             rest.groupBy { it.category }
                 .toList()
@@ -377,6 +402,7 @@ class SourceViewModel(
             notice = s.notice,
             categories = categories,
             category = chosen,
+            domainTitle = domainTitle,
         )
     }
 

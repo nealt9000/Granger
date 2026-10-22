@@ -29,4 +29,33 @@ class PublishedCatalogTest {
         assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(351)
         assertThat(catalog.presets.single { it.id == "granger-classics" }.items).hasSize(347)
     }
+
+    /** Plan H1: the readiness model rides in the catalog, and every pack and book names its domain or is storage-only. */
+    @Test fun publishedCatalogCarriesTheReadinessModel() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+
+        val domains = catalog.readiness!!.domains
+        assertThat(domains.map { it.id }).containsExactly(
+            "medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought",
+        ).inOrder()
+        val ids = domains.mapTo(HashSet()) { it.id }
+        for (domain in domains) {
+            assertThat(domain.essential).isNotEmpty()
+            assertThat(domain.comprehensive).containsAtLeastElementsIn(domain.essential)
+        }
+        // The parser keeps only tokens it can resolve; the generator checked them too, so none were lost.
+        val raw = kotlinx.serialization.json.Json.parseToJsonElement(bytes.decodeToString()) as kotlinx.serialization.json.JsonObject
+        val rawDomains = raw["readiness"]!!.let { it as kotlinx.serialization.json.JsonObject }["domains"] as kotlinx.serialization.json.JsonArray
+        assertThat(domains.sumOf { it.comprehensive.size }).isEqualTo(
+            rawDomains.sumOf { ((it as kotlinx.serialization.json.JsonObject)["comprehensive"] as kotlinx.serialization.json.JsonArray).size },
+        )
+        assertThat(catalog.packs.filter { it.domain.isNotBlank() && it.domain !in ids }).isEmpty()
+        assertThat(catalog.packs.count { it.domain.isNotBlank() }).isGreaterThan(800)
+        assertThat(catalog.books.all { it.domain == "literature" || it.domain == "thought" }).isTrue()
+        assertThat(catalog.presets.single { it.id == "efficient" }.items).isNotEmpty()
+        assertThat(catalog.presets.single { it.id == "comprehensive" }.items.size)
+            .isAtLeast(catalog.presets.single { it.id == "efficient" }.items.size)
+    }
 }

@@ -50,6 +50,9 @@ SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 RELEASE_KEYS = ("id", "description", "language", "sizeBytes", "sha256", "urls", "snapshotDate",
                 "hasFulltextIndex", "zimUuid", "zimName")
+# Readiness (Plan H1): a Classics book's domain comes from its section; what isn't scripture or philosophy is literature.
+BOOK_DOMAINS = {"Scripture & religion": "thought", "Philosophy": "thought"}
+BOOK_DOMAIN_DEFAULT = "literature"
 
 
 def http_get(url):
@@ -146,6 +149,8 @@ def pin(entry, row, fetch=http_get):
         "zimName": entry["name"],
         "featured": row.get("featured", False),
         "family": row.get("family", ""),
+        # The readiness domain (spec §3.2); blank means storage only.
+        "domain": row.get("domain") or "",
     }
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
@@ -197,7 +202,7 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     def pin_with_retries(item):
         e, row = item
         fields = {"family": row["family"], "category": row["category"], "license": row["license"],
-                  "nonCommercial": row.get("nonCommercial", False)}
+                  "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain")}
         for attempt in range(tries):
             try:
                 return pin(e, fields, fetch), None
@@ -219,6 +224,10 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     for p in packs:
         by_family[(p["category"], p["family"])] = by_family.get((p["category"], p["family"]), 0) + 1
     report += ["Listed, by category and family:"] + [f"  {c} / {f}: {n}" for (c, f), n in sorted(by_family.items())]
+    by_domain = {}
+    for p in packs:
+        by_domain[p["domain"] or "(storage only)"] = by_domain.get(p["domain"] or "(storage only)", 0) + 1
+    report += ["", "Listed, by readiness domain:"] + [f"  {d}: {n}" for d, n in sorted(by_domain.items())]
     for hold, counts in sorted(held.items()):
         report += ["", f"Held back ({hold}): {sum(counts.values())}"] + [f"  {f}: {n}" for f, n in sorted(counts.items())]
     report += ["", f"No license found: {sum(no_license.values())}"] + [f"  {f}: {n}" for f, n in sorted(no_license.items())]
@@ -258,6 +267,7 @@ def release_entry(curated, head=http_head, root=None):
         "zimName": descriptor["zimName"],
         "featured": False,
         "family": "",
+        "domain": curated.get("domain", ""),
     }
 
 
@@ -289,6 +299,7 @@ def book_entries(curated, head=http_head, root=None):
             "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
             "license": curated["license"], "collection": descriptor["collection"],
             "published": book["published"],
+            "domain": BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
         })
     return descriptor["collection"], entries
 
@@ -310,7 +321,8 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                 continue
             sample = by_key.get((c["name"], c.get("flavour", "")))
             row = family_of(sample, families) if sample else None
-            packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else ""}, fetch, feed))
+            packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else "",
+                                     "domain": c.get("domain", row.get("domain") if row else "")}, fetch, feed))
         curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
         bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch)
         packs += bulk
@@ -339,11 +351,15 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                for p in curated["presets"]]
     presets += [{"id": name, "title": "Granger Classics: all books", "items": ids_}
                 for name, ids_ in collections.items()]
+    readiness = None
+    if "readiness" in curated:
+        readiness, tier_presets = readiness_block(curated["readiness"], packs, books, collections)
+        presets += tier_presets
     for preset in presets:
         unknown = set(preset["items"]) - set(ids)
         if unknown:
             raise SystemExit(f"preset {preset['id']} lists unknown items {sorted(unknown)}")
-    return {
+    catalog = {
         "formatVersion": FORMAT_VERSION,
         "generatedAt": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "packs": packs,
@@ -352,6 +368,59 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         "presets": presets,
         "voices": voices,
     }
+    if readiness is not None:
+        catalog["readiness"] = readiness
+    return catalog
+
+
+def readiness_block(block, packs, books, collections):
+    """
+    The catalog's `readiness` object (Plan H1, spec §3.2) and the two presets it generates. Every tier token is checked:
+    a catalog id, "@<collection>" (that collection's books of the domain) or "family:<name>" (any pack of the family).
+    Essential items are folded into comprehensive. A pack or book whose domain isn't one of the block's ids fails the build.
+    """
+    pack_ids = {p["id"] for p in packs}
+    book_ids = {b["id"] for b in books}
+    families = {p["family"] for p in packs if p.get("family")}
+    books_by_domain = {}
+    for b in books:
+        books_by_domain.setdefault((b["collection"], b["domain"]), []).append(b["id"])
+    ids, domains, efficient, comprehensive = set(), [], [], []
+    for d in block.get("domains", []):
+        did, title = d.get("id") or "", d.get("title") or ""
+        if not did or not title or did in ids:
+            raise SystemExit(f"readiness: bad or duplicate domain id {did!r}")
+        ids.add(did)
+        essential = list(dict.fromkeys(d.get("essential", [])))
+        full = list(dict.fromkeys(essential + list(d.get("comprehensive", []))))
+        for token in full:
+            if token.startswith("@"):
+                if token[1:] not in collections:
+                    raise SystemExit(f"readiness {did}: unknown collection {token}")
+            elif token.startswith("family:"):
+                if token[len("family:"):] not in families:
+                    raise SystemExit(f"readiness {did}: unknown family {token}")
+            elif token not in pack_ids and token not in book_ids:
+                raise SystemExit(f"readiness {did}: unknown item {token}")
+        domains.append({"id": did, "title": title, "essential": essential, "comprehensive": full})
+
+        def expand(tokens):
+            out = []
+            for token in tokens:
+                if token.startswith("@"):
+                    out += books_by_domain.get((token[1:], did), [])
+                elif not token.startswith("family:"):  # the region's map is picked in onboarding
+                    out.append(token)
+            return out
+
+        efficient += expand(essential)
+        comprehensive += expand(full)
+    for item in packs + books:
+        if item.get("domain") and item["domain"] not in ids:
+            raise SystemExit(f"{item['id']}: domain {item['domain']!r} is not in the readiness block")
+    presets = [{"id": "efficient", "title": "Efficient start", "items": list(dict.fromkeys(efficient))},
+               {"id": "comprehensive", "title": "Comprehensive library", "items": list(dict.fromkeys(comprehensive))}]
+    return {"domains": domains}, presets
 
 
 def public_key(seed):

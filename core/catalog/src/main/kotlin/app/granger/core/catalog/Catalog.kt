@@ -14,6 +14,8 @@ data class Catalog(
     val presets: List<Preset> = emptyList(),
     /** Downloadable voices for read-aloud (Plan V1); absent in older catalogs. */
     val voices: List<VoiceEntry> = emptyList(),
+    /** The readiness model (Plan H1, spec §3); absent in older catalogs. */
+    val readiness: Readiness? = null,
 ) {
     val items: List<CatalogItem> get() = models + packs + books + voices
 
@@ -59,6 +61,8 @@ data class PackEntry(
     val featured: Boolean = false,
     /** The pack's family in the generator's family table (e.g. "wikipedia"); blank in older catalogs. */
     val family: String = "",
+    /** One of the readiness domain ids (spec §3.1), or blank: the pack counts in storage only. Absent in older catalogs. */
+    val domain: String = "",
 ) : CatalogItem
 
 /** An e-book (EPUB) the reader opens. */
@@ -78,6 +82,8 @@ data class BookEntry(
     val collection: String,
     /** The year the work was first published, when known. */
     val published: Int? = null,
+    /** The readiness domain the book counts toward (`literature` or `thought` for Classics); blank in older catalogs. */
+    val domain: String = "",
 ) : CatalogItem
 
 @Serializable
@@ -130,3 +136,21 @@ data class VoiceEntry(
 
 @Serializable
 data class Preset(val id: String, val title: String, val items: List<String>)
+
+/** The readiness model (Plan H1, spec §3): the knowledge domains in screen order, each with its tier items. */
+@Serializable
+data class Readiness(val domains: List<Domain> = emptyList())
+
+/**
+ * One knowledge domain. A tier item is a catalog id, `@<collection>` (the collection's books whose own [BookEntry.domain]
+ * is this domain) or `family:<name>` (any pack of that family). The parser drops tokens the catalog can't resolve.
+ */
+@Serializable
+data class Domain(
+    val id: String,
+    val title: String,
+    /** Installed → Basic. */
+    val essential: List<String> = emptyList(),
+    /** All installed → Comprehensive. Includes [essential]. */
+    val comprehensive: List<String> = emptyList(),
+)

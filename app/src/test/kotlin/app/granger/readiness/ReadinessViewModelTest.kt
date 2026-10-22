@@ -1,16 +1,25 @@
 package app.granger.readiness
 
+import app.granger.FakeBookshelf
+import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
 import app.granger.FakeVolumes
 import app.granger.MainDispatcherRule
+import app.granger.book
+import app.granger.catalogOf
 import app.granger.core.ai.DeviceTier
+import app.granger.core.catalog.CatalogState
+import app.granger.core.catalog.Domain
+import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Integrity
 import app.granger.core.downloads.ItemKind
+import app.granger.core.library.BookOrigin
 import app.granger.core.library.PackStatus
 import app.granger.pack
+import app.granger.packEntry
 import app.granger.record
 import app.granger.volume
 import com.google.common.truth.Truth.assertThat
@@ -27,6 +36,8 @@ class ReadinessViewModelTest {
 
     private val downloads = FakeDownloads()
     private val library = FakeLibrary()
+    private val bookshelf = FakeBookshelf()
+    private val catalog = FakeCatalogSource()
     private val volumes = FakeVolumes(listOf(volume("/internal", "Internal storage", free = 9_000, total = 64_000)))
     private val quick = mutableMapOf<String, Integrity>()
     private var fullResult = CompletableDeferred<Integrity>()
@@ -38,7 +49,7 @@ class ReadinessViewModelTest {
 
     private fun TestScope.viewModel(): ReadinessViewModel {
         val vm = ReadinessViewModel(
-            downloads, library, volumes, DeviceTier.THINK_DEEPER, totalRamBytes = 7_974_752_256, appScope = this,
+            downloads, library, bookshelf, catalog, volumes, DeviceTier.THINK_DEEPER, totalRamBytes = 7_974_752_256, appScope = this,
             io = main.dispatcher,
             quick = { quick[it.itemId] ?: Integrity.SIZE_OK },
             full = { _, progress ->
@@ -196,5 +207,64 @@ class ReadinessViewModelTest {
         vm.repair(row.key)
         testScheduler.advanceUntilIdle()
         assertThat(downloads.calls.filter { it.startsWith("repair:") }).containsExactly("repair:${chapters[4].itemId}")
+    }
+
+    // --- Plan H1: coverage, signals and storage on the UI ---
+
+    private val medEntry = packEntry("med", category = "Medical").copy(domain = "medicine", family = "wikipedia")
+    private val wikemEntry = packEntry("wikem", category = "Medical").copy(domain = "medicine", family = "wikem")
+    private val mapEntry = packEntry("m1", category = "Maps").copy(domain = "maps", family = "maps")
+    private val model = Readiness(
+        listOf(
+            Domain("medicine", "Medicine & first aid", listOf("med"), listOf("med", "wikem")),
+            Domain("maps", "Maps, places & travel", listOf("family:maps"), listOf("family:maps")),
+        ),
+    )
+
+    @Test fun coverageRowsComeFromTheCatalogAndTheLibrary() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(packs = listOf(medEntry, wikemEntry, mapEntry)).copy(readiness = model))
+        library.packList.value = listOf(pack("u-med", "WikiMed").copy(name = "n-med", sizeBytes = 900))
+        val report = viewModel().ui.value.report
+        assertThat(report.needsCatalogRefresh).isFalse()
+        assertThat(report.domains.map { it.id }).containsExactly("medicine", "maps").inOrder()
+        assertThat(report.domains.map { it.coverage }).containsExactly(Coverage.BASIC, Coverage.NONE).inOrder()
+        assertThat(report.domains.first().installedBytes).isEqualTo(900)
+        assertThat(catalog.loads).isEqualTo(1)
+    }
+
+    @Test fun anOlderCatalogAsksForARefreshAndKeepsTheFileRows() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med, e2b)
+        val ui = viewModel().ui.value
+        assertThat(ui.report.needsCatalogRefresh).isTrue()
+        assertThat(ui.report.domains).isEmpty()
+        assertThat(ui.packs.map { it.key }).containsExactly(key(med))
+        assertThat(ui.models.map { it.key }).containsExactly(key(e2b))
+    }
+
+    @Test fun storageBySourceAndBooksReachTheUi() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med, e2b)
+        bookshelf.bookList.value = listOf(book("notes").copy(origin = BookOrigin.IMPORT, sizeBytes = 42))
+        val storage = viewModel().ui.value.report.storage.associateBy { it.source }
+        // The fakes' URLs are on a.test, which is neither Kiwix nor archive.org: Granger's own.
+        assertThat(storage.getValue(Source.GRANGER).bytes).isEqualTo(1_000)
+        assertThat(storage.getValue(Source.MODELS).bytes).isEqualTo(1_000)
+        assertThat(storage.getValue(Source.MY_BOOKS).bytes).isEqualTo(42)
+    }
+
+    @Test fun shownSignalsCapAtThreeUntilShowAll() {
+        val signals = (1..5).map { Signal.Unsearchable("p$it", "Pack $it can't be searched: the pack has no index.") }
+        assertThat(shownSignals(signals, showAll = false)).hasSize(SHOWN_SIGNALS)
+        assertThat(shownSignals(signals, showAll = true)).hasSize(5)
+        assertThat(shownSignals(signals.take(2), showAll = false)).hasSize(2)
+    }
+
+    @Test fun coverageTextReadsTheStatus() {
+        fun d(coverage: Coverage, installed: Long, essential: Long = 1_000, comprehensive: Long = 4_000) =
+            DomainCoverage("x", "X", coverage, installed, essential, comprehensive, emptyList())
+        assertThat(coverageText(d(Coverage.NONE, 0))).isEqualTo("Nothing yet · the essentials are 1.0 KB")
+        assertThat(coverageText(d(Coverage.NONE, 0, essential = 0))).isEqualTo("Nothing yet")
+        assertThat(coverageText(d(Coverage.NONE, 500))).isEqualTo("No essentials yet · 500 B held · the essentials are 1.0 KB")
+        assertThat(coverageText(d(Coverage.BASIC, 1_200))).isEqualTo("Basic · 1.2 KB of 4.0 KB")
+        assertThat(coverageText(d(Coverage.COMPREHENSIVE, 5_000))).isEqualTo("Comprehensive · 5.0 KB")
     }
 }

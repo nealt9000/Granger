@@ -257,7 +257,8 @@ def test_book_release_adds_books_and_preset(tmp_path, monkeypatch):
     assert hamlet == {"id": "gc-hamlet", "title": "Hamlet", "author": "W. Shakespeare", "description": "",
                       "category": "Drama", "language": "en", "sizeBytes": 10, "sha256": "ab" * 32,
                       "urls": BOOKS["books"][0]["urls"], "releaseDate": "2026-10-17",
-                      "license": "Public domain (US)", "collection": "granger-classics", "published": 1603}
+                      "license": "Public domain (US)", "collection": "granger-classics", "published": 1603,
+                      "domain": "literature"}
     assert [b["id"] for b in catalog["books"]] == ["gc-hamlet", "gc-macbeth"]
     assert {"id": "granger-classics", "title": "Granger Classics: all books",
             "items": ["gc-hamlet", "gc-macbeth"]} in catalog["presets"]
@@ -430,3 +431,173 @@ def test_build_with_kiwix_fails_on_a_missing_curated_pack(tmp_path):
                "models": [], "presets": []}
     with pytest.raises(SystemExit, match="not in the Kiwix catalog"):
         cg.build(curated, feed_fetch(feed(feed_entry("wikipedia_en_a"))), root=tmp_path)
+
+
+# --- Plan H1: domains and the readiness tiers ---
+
+DOMAIN_FAMILIES = [
+    {"family": "wikipedia", "match": "^wikipedia_en_medicine", "category": "Medical", "license": "CC BY-SA 4.0",
+     "domain": "medicine"},
+    {"family": "wikipedia", "match": "^wikipedia_", "category": "Reference", "license": "CC BY-SA 4.0",
+     "domain": "reference"},
+    {"family": "stack_exchange", "match": "^(cooking|gardening)\\.stackexchange\\.com_", "category": "Q&A",
+     "license": "CC BY-SA 4.0", "domain": "food"},
+    {"family": "stack_exchange", "match": {"kiwixCategory": "stack_exchange"}, "category": "Q&A",
+     "license": "CC BY-SA 4.0", "domain": "technology"},
+    {"family": "maps", "match": "^maps_", "category": "Maps", "license": "ODbL", "domain": "maps"},
+    {"family": "xkcd.com", "match": "^xkcd\\.com_", "category": "Literature & Drama", "license": "CC BY-NC 2.5",
+     "nonCommercial": True, "domain": None},
+]
+
+
+def domain_kiwix(xml):
+    return cg.kiwix_entries({"languages": ["eng"]}, DOMAIN_FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                            feed_fetch(xml), workers=2, sleep=lambda s: None)[0]
+
+
+def test_pin_carries_the_rows_domain():
+    packs = domain_kiwix(feed(feed_entry("wikipedia_en_physics", "maxi"), feed_entry("xkcd.com_en_all")))
+    by_id = {p["id"]: p for p in packs}
+    assert by_id["wikipedia_en_physics_maxi"]["domain"] == "reference"
+    # A null domain is written blank: the pack counts in storage only.
+    assert by_id["xkcd.com_en_all"]["domain"] == ""
+
+
+def test_family_sub_rows_split_a_family_across_domains():
+    packs = domain_kiwix(feed(feed_entry("wikipedia_en_medicine", "nopic"), feed_entry("wikipedia_en_top", "nopic")))
+    by_id = {p["id"]: p for p in packs}
+    assert by_id["wikipedia_en_medicine_nopic"]["domain"] == "medicine"
+    assert by_id["wikipedia_en_top_nopic"]["domain"] == "reference"
+    assert {p["family"] for p in packs} == {"wikipedia"}
+
+
+def test_stack_exchange_sites_split_by_their_own_rows():
+    xml = feed(feed_entry("cooking.stackexchange.com_en_all", category="stack_exchange"),
+               feed_entry("python.stackexchange.com_en_all", category="stack_exchange"))
+    packs = domain_kiwix(xml)
+    by_id = {p["id"]: p for p in packs}
+    assert by_id["cooking.stackexchange.com_en_all"]["domain"] == "food"
+    assert by_id["python.stackexchange.com_en_all"]["domain"] == "technology"
+    assert {p["family"] for p in packs} == {"stack_exchange"}
+
+
+THOUGHT_BOOKS = {"releaseDate": "2026-10-17", "collection": "granger-classics", "books": [
+    {"id": f"gc-{slug}", "title": title, "author": "", "translator": None, "published": 1600,
+     "section": section, "language": "en", "sizeBytes": 10 + i, "sha256": "ab" * 32,
+     "urls": [f"https://github.com/nealt9000/Granger/releases/download/classics-2026-10-17/gc-{slug}_2026-10-17.epub"]}
+    for i, (slug, title, section) in enumerate([("bible", "Bible", "Scripture & religion"),
+                                                 ("republic", "Republic", "Philosophy"),
+                                                 ("hamlet", "Hamlet", "Drama"),
+                                                 ("iliad", "Iliad", "Epic & poetry")])]}
+
+READINESS = {"domains": [
+    {"id": "medicine", "title": "Medicine & first aid",
+     "essential": ["wikipedia_en_medicine_nopic"], "comprehensive": ["wikipedia_en_medicine_nopic"]},
+    {"id": "maps", "title": "Maps, places & travel", "essential": ["family:maps"], "comprehensive": []},
+    {"id": "reference", "title": "General reference", "essential": ["wikipedia_en_top_nopic"], "comprehensive": []},
+    {"id": "literature", "title": "Literature & the arts", "essential": ["@granger-classics"], "comprehensive": []},
+    {"id": "thought", "title": "Religion, philosophy & history", "essential": ["@granger-classics"],
+     "comprehensive": ["wikipedia_en_top_nopic"]},
+]}
+
+
+def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_FAMILIES, books=THOUGHT_BOOKS):
+    (tmp_path / "families.json").write_text(json.dumps({"families": families}))
+    (tmp_path / "books.json").write_text(json.dumps(books))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    xml = feed(feed_entry("wikipedia_en_medicine", "nopic"), feed_entry("wikipedia_en_top", "nopic"),
+               feed_entry("maps_en_france"), feed_entry("maps_en_spain"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [],
+               "books": [BOOK_ROW], "presets": [], "readiness": readiness}
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in books["books"]}
+    return cg.build(curated, feed_fetch(xml), head=lambda url: sizes[url], root=tmp_path)
+
+
+def test_books_take_their_domain_from_their_category(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch)
+    domains = {b["id"]: b["domain"] for b in catalog["books"]}
+    assert domains == {"gc-bible": "thought", "gc-republic": "thought", "gc-hamlet": "literature", "gc-iliad": "literature"}
+
+
+def test_readiness_block_is_written_with_essential_folded_into_comprehensive(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch)
+    domains = {d["id"]: d for d in catalog["readiness"]["domains"]}
+    assert [d["id"] for d in catalog["readiness"]["domains"]] == ["medicine", "maps", "reference", "literature", "thought"]
+    assert domains["maps"]["comprehensive"] == ["family:maps"]
+    assert domains["thought"]["comprehensive"] == ["@granger-classics", "wikipedia_en_top_nopic"]
+    # Already there: not doubled.
+    assert domains["medicine"]["comprehensive"] == ["wikipedia_en_medicine_nopic"]
+    assert domains["literature"]["title"] == "Literature & the arts"
+
+
+def test_readiness_rejects_an_unknown_token(tmp_path, monkeypatch):
+    bad = {"domains": [{"id": "maps", "title": "Maps", "essential": ["maps_en_atlantis"], "comprehensive": []}]}
+    with pytest.raises(SystemExit, match="maps_en_atlantis"):
+        readiness_build(tmp_path, monkeypatch, readiness=bad)
+    bad = {"domains": [{"id": "maps", "title": "Maps", "essential": ["family:atlas"], "comprehensive": []}]}
+    with pytest.raises(SystemExit, match="family:atlas"):
+        readiness_build(tmp_path, monkeypatch, readiness=bad)
+    bad = {"domains": [{"id": "maps", "title": "Maps", "essential": ["@lost-books"], "comprehensive": []}]}
+    with pytest.raises(SystemExit, match="@lost-books"):
+        readiness_build(tmp_path, monkeypatch, readiness=bad)
+
+
+def test_readiness_rejects_a_pack_with_an_unknown_domain(tmp_path, monkeypatch):
+    families = [dict(DOMAIN_FAMILIES[1], domain="encyclopaedia")] + DOMAIN_FAMILIES[2:]
+    with pytest.raises(SystemExit, match="encyclopaedia"):
+        readiness_build(tmp_path, monkeypatch, families=families)
+
+
+def test_readiness_rejects_duplicate_or_blank_domain_ids(tmp_path, monkeypatch):
+    bad = {"domains": [{"id": "maps", "title": "Maps", "essential": [], "comprehensive": []},
+                       {"id": "maps", "title": "Maps again", "essential": [], "comprehensive": []}]}
+    with pytest.raises(SystemExit, match="maps"):
+        readiness_build(tmp_path, monkeypatch, readiness=bad)
+
+
+def test_efficient_and_comprehensive_presets_come_from_the_tiers(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch)
+    presets = {p["id"]: p for p in catalog["presets"]}
+    # The Classics token expands to the domain's own books; family tokens are left out (H3 picks the region).
+    assert presets["efficient"]["items"] == ["wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic", "gc-hamlet", "gc-iliad",
+                                             "gc-bible", "gc-republic"]
+    assert presets["efficient"]["title"] == "Efficient start"
+    # A pack listed in two domains' tiers appears once.
+    assert presets["comprehensive"]["items"] == ["wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic", "gc-hamlet",
+                                                 "gc-iliad", "gc-bible", "gc-republic"]
+    assert presets["comprehensive"]["title"] == "Comprehensive library"
+
+
+def test_build_without_a_readiness_block_writes_none(tmp_path, monkeypatch):
+    (tmp_path / "families.json").write_text(json.dumps({"families": DOMAIN_FAMILIES}))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    xml = feed(feed_entry("wikipedia_en_top", "nopic"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [], "presets": []}
+    catalog = cg.build(curated, feed_fetch(xml), root=tmp_path)
+    assert "readiness" not in catalog
+    assert {p["id"] for p in catalog["presets"]} == set()
+
+
+DOMAIN_IDS = ["medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought"]
+
+
+def test_real_family_table_has_a_domain_on_every_row():
+    table = json.loads((cg.REPO_ROOT / "tools/catalog-gen/kiwix_families.json").read_text())
+    rows = table["families"]
+    for row in rows:
+        assert "domain" in row, row["family"]
+        assert row["domain"] is None or row["domain"] in DOMAIN_IDS, (row["family"], row["domain"])
+    # The first matching row wins, so each family's catch-all comes after its sub-rows.
+    for family in ("stack_exchange", "wikipedia", "libretexts.org"):
+        same = [r for r in rows if r["family"] == family]
+        assert len(same) > 1, family
+        catch_all = same[-1]["match"]
+        assert isinstance(catch_all, dict) or catch_all.rstrip("_") == f"^{family.replace('.', chr(92) + '.')}", catch_all
+
+
+def test_real_curated_readiness_names_nine_domains_in_order():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
+    domains = curated["readiness"]["domains"]
+    assert [d["id"] for d in domains] == DOMAIN_IDS
+    for d in domains:
+        assert d["title"] and d["essential"], d["id"]

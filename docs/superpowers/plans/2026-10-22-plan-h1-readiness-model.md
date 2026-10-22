@@ -208,11 +208,11 @@ Rules (spec §3.3–§3.4, Decisions 4, 5, 8): an installed pack resolves to a c
 
 Waits for the phone (held by the voice and R1 sessions; ask before taking it; back up both databases before installing).
 
-- [ ] Install over the app. Refresh the catalog from the Granger or Kiwix screen.
-- [ ] Readiness: nine rows with Neal's real library; the statuses and sizes match what is installed; tapping Medicine opens the Kiwix screen with the Medicine chip and WikiMed first; ✕ brings the category chips back; the signals that apply appear (iFixit unsearchable is expected); storage by source adds up; Files works as before (Check, Download again).
-- [ ] Settings → Readiness and the Library top bar both open it.
-- [ ] Roadmap: H1 → Done with the date and the test count; "Carried forward from H1" with what was measured, builder's calls, and what H2 needs.
-- [ ] **Commit.** `Roadmap: H1 done; carried forward from H1`
+- [x] Install over the app. Refresh the catalog from the Granger or Kiwix screen.
+- [x] Readiness: nine rows with Neal's real library; the statuses and sizes match what is installed; tapping Medicine opens the Kiwix screen with the Medicine chip and WikiMed first; ✕ brings the category chips back; the signals that apply appear (iFixit unsearchable is expected); storage by source adds up; Files works as before (Check, Download again).
+- [x] Settings → Readiness and the Library top bar both open it.
+- [x] Roadmap: H1 → Done with the date and the test count; "Carried forward from H1" with what was measured, builder's calls, and what H2 needs.
+- [x] **Commit.** `Roadmap: H1 done; carried forward from H1`
 
 ## Order and size
 
