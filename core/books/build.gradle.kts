@@ -17,6 +17,7 @@ android {
 }
 
 dependencies {
+    api(project(":core:text"))
     implementation(libs.jsoup)
     implementation(libs.commonmark)
 

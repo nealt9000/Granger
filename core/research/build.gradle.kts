@@ -19,6 +19,7 @@ kotlin {
 tasks.withType<JavaCompile>().configureEach { options.release.set(17) }
 
 dependencies {
+    api(project(":core:text"))
     api(libs.kotlinx.coroutines.core)
     implementation(libs.jsoup)
 

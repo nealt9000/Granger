@@ -1,5 +1,6 @@
 package app.granger.core.research
 
+import app.granger.core.text.Chunkers
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 
@@ -12,7 +13,7 @@ object HtmlPassages {
     private const val NESTING = ArticleText.NESTING
     private val HEADINGS = ArticleText.HEADINGS
     private val SKIPPED_SECTIONS = ArticleText.SKIPPED_SECTIONS
-    private val WHITESPACE = Regex("[\\s\\u00A0\\u2007\\u202F]+")
+    private val WHITESPACE = Regex("[${Chunkers.SPACE}]+")
 
     fun split(html: String, targetWords: Int = 200, maxWords: Int = 300): List<HtmlPassage> {
         val doc = Jsoup.parse(html)

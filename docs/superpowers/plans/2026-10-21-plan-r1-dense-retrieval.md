@@ -102,16 +102,30 @@ held-out set and the pass-or-stop scoring are R2.
 - add `:core:text` to `settings.gradle.kts`, with dependencies from `:core:books` and `:core:research`;
 - create `tools/chunker/` (a JVM application: `build.gradle.kts`, `Main.kt`, tests).
 
-- [ ] Move the two files and their tests. Every existing JVM test passes unchanged.
-- [ ] `XhtmlText` gets an entry point that takes chapter XHTML text, not just a `ZipFile`, so the CLI can feed it.
+- [x] Move the two files and their tests. Every existing JVM test passes unchanged.
+- [x] `XhtmlText` gets an entry point that takes chapter XHTML text, not just a `ZipFile`, so the CLI can feed it.
   `all(file, spine)` keeps its behavior.
-- [ ] Add `CHUNKER_VERSION = 1` in `:core:text`. Bump it on any change to either chunker's output; a vector file with another
+- [x] Add `CHUNKER_VERSION = 1` in `:core:text`. Bump it on any change to either chunker's output; a vector file with another
   version is ignored on the phone.
-- [ ] The CLI reads JSONL from stdin: `{kind: "xhtml"|"html", key, title, html}`. It writes JSONL to stdout: `{key, ordinal,
+- [x] The CLI reads JSONL from stdin: `{kind: "xhtml"|"html", key, title, html}`. It writes JSONL to stdout: `{key, ordinal,
   heading, anchor, progression, text, hash}`. `hash` is xxhash64 of `text` (the same function lives in `:core:text`).
-- [ ] `./gradlew :tools:chunker:installDist` produces `tools/chunker/build/install/chunker/bin/chunker`.
-- [ ] **Gate:** on 20 Classics chapters and 50 articles from three vectored ZIMs, the CLI's chunks equal what
+- [x] `./gradlew :tools:chunker:installDist` produces `tools/chunker/build/install/chunker/bin/chunker`.
+- [x] **Gate:** on 20 Classics chapters and 50 articles from three vectored ZIMs, the CLI's chunks equal what
   `XhtmlText`/`HtmlPassages` produce in a JVM test that reads the same bytes. Add a golden-file test.
+
+**Done (2026-10-21).**
+- `XhtmlText`'s chunking is `XhtmlChunks.of(href, bytes)` in `:core:text`. `cutAtSpaces` moved with it, and `XhtmlText` keeps
+  only the zip reading.
+- The hash is the first 8 bytes of SHA-1 (`Chunkers.hash`), not xxhash64: both sides have it built in.
+- The CLI takes base64 bytes, so it decodes them exactly as the phone does.
+- **Gate:** checked against the phone itself rather than a JVM test, which is stronger. Every passage `r0-combined` recorded
+  is matched by a Mac chunk of the same file (`tools/vectors/parity.py`):
+  - books: 6,369 of 6,369;
+  - `internet-encyclopedia-philosophy_en_all`: 2,898 of 2,898;
+  - `wikipedia_en_chemistry`: 1,871 of 1,871.
+- **What the gate found:** Android's `\s` (ICU) is Unicode whitespace, but the desktop JVM's is ASCII-only, so the same
+  code split thin spaces differently. Both chunkers now use ICU's set spelled out (`Chunkers.SPACE`). The phone's output
+  is unchanged.
 
 ### Task 2: Size the set
 
