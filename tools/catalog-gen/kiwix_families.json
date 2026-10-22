@@ -1937,7 +1937,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_medicine",
+   "match": "^wikipedia_en_medicine$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -1949,7 +1949,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_(physics|chemistry|mathematics|astronomy|molcell|climate-change)_",
+   "match": "^wikipedia_en_(physics|chemistry|mathematics|astronomy|molcell|climate-change)$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -1961,7 +1961,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_history_",
+   "match": "^wikipedia_en_history$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -1973,7 +1973,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_geography_",
+   "match": "^wikipedia_en_geography$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -1985,7 +1985,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_computer_",
+   "match": "^wikipedia_en_computer$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -1997,7 +1997,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_knots_",
+   "match": "^wikipedia_en_knots$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -2009,7 +2009,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_(movies|indian-cinema|nollywood|ray-charles)_",
+   "match": "^wikipedia_en_(movies|indian-cinema|nollywood|ray-charles)$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
@@ -2021,7 +2021,7 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_(baseball|basketball|cricket|football|golf|ice-hockey|tennis|comics)_",
+   "match": "^wikipedia_en_(baseball|basketball|cricket|football|golf|ice-hockey|tennis|comics)$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
