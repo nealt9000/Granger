@@ -74,34 +74,34 @@
 - Modify: `core/catalog/src/main/kotlin/app/granger/core/catalog/Catalog.kt` (`Onboarding`, `UseCase`, `Catalog.onboarding`), `CatalogParser.kt`, tests (`CatalogParserTest`, `PublishedCatalogTest`: seven use cases, every token resolves, every `larger` id is a maps pack)
 - Regenerate: `catalog/catalog.json`, `.sig`, `kiwix-report.txt` (after checking with granger-0d)
 
-- [ ] `curated.json` `onboarding` per Decision 4 with `_about`; `regions.larger` = `maps_en_all`, `maps_en_africa`, `maps_en_asia`, `maps_en_europe`, `maps_en_north-america`, `maps_en_south-america`, `maps_en_australia-oceania`, `maps_en_central-america`, `maps_en_nordics`, `maps_en_andes` (ids checked against the built catalog).
-- [ ] The generator validates every token and every `larger` id (a `SystemExit` names the bad one), writes the block, and the report lists each use case with its item count and size.
-- [ ] `:core:catalog` parses it, dropping unknown tokens; older catalogs give `onboarding == null`.
-- [ ] Regenerate, sign, verify; `PublishedCatalogTest` passes against the signed file.
-- [ ] **Commit.** `Catalog: the onboarding use cases and the larger map areas`
+- [x] `curated.json` `onboarding` per Decision 4 with `_about`; `regions.larger` = `maps_en_all`, `maps_en_africa`, `maps_en_asia`, `maps_en_europe`, `maps_en_north-america`, `maps_en_south-america`, `maps_en_australia-oceania`, `maps_en_central-america`, `maps_en_nordics`, `maps_en_andes` (ids checked against the built catalog).
+- [x] The generator validates every token and every `larger` id (a `SystemExit` names the bad one), writes the block, and the report lists each use case with its item count and size.
+- [x] `:core:catalog` parses it, dropping unknown tokens; older catalogs give `onboarding == null`.
+- [x] Regenerate, sign, verify; `PublishedCatalogTest` passes against the signed file.
+- [x] **Commit.** `Catalog: the onboarding use cases and the larger map areas`
 
 ### Task 2: The onboarding model
 
 **Files:**
 - Create: `app/src/main/kotlin/app/granger/onboarding/OnboardingModel.kt`, `app/src/test/kotlin/app/granger/onboarding/OnboardingModelTest.kt`
 
-- [ ] `StartChoice(id, title, lines: List<Line>, bytes)` from a preset: packs one per line; books of one collection folded into one line with the count; a line carries its items so unticking removes them all. `installed` lines are marked and excluded from the total.
-- [ ] `Regions(countries, larger)` from the maps family and `onboarding.regions.larger`, sorted by title, each with its size; a search filter.
-- [ ] `UseCaseAddition(useCase, items, bytes)` = the use case's resolved items minus the start's chosen items minus installed; `family:` contributes its smallest pack and a "a <family> pack" line.
-- [ ] `Review(groups: Start / Region / Use cases, items distinct, bytes, freeBytes, fits)`; `specs()` for the enqueue.
-- [ ] Tests: no double counting; installed excluded; a `family:` line; an older catalog (no `onboarding`) gives a review from the start alone; the Classics fold.
-- [ ] **Commit.** `Onboarding: the model — start choices, regions, use-case additions, the review`
+- [x] `StartChoice(id, title, lines: List<Line>, bytes)` from a preset: packs one per line; books of one collection folded into one line with the count; a line carries its items so unticking removes them all. `installed` lines are marked and excluded from the total.
+- [x] `Regions(countries, larger)` from the maps family and `onboarding.regions.larger`, sorted by title, each with its size; a search filter.
+- [x] `UseCaseAddition(useCase, items, bytes)` = the use case's resolved items minus the start's chosen items minus installed; `family:` contributes its smallest pack and a "a <family> pack" line.
+- [x] `Review(groups: Start / Region / Use cases, items distinct, bytes, freeBytes, fits)`; `specs()` for the enqueue.
+- [x] Tests: no double counting; installed excluded; a `family:` line; an older catalog (no `onboarding`) gives a review from the start alone; the Classics fold.
+- [x] **Commit.** `Onboarding: the model — start choices, regions, use-case additions, the review`
 
 ### Task 3: The screens
 
 **Files:**
 - Create: `app/src/main/kotlin/app/granger/onboarding/OnboardingViewModel.kt`, `OnboardingScreen.kt` (the five steps), `BrandLockup.kt`, `OnboardingPrefs.kt`; tests `OnboardingViewModelTest.kt`, `OnboardingScreenTest.kt`
 
-- [ ] `OnboardingViewModel(catalog, library, bookshelf, downloads, volumes, prefs: DownloadPrefs, tier, totalRamBytes, onboardingPrefs, io)`: `step`, the choices (saved), `ui` per step from the model; `start()` enqueues the group per Decision 6 and returns the notice or null; `skip()` and `start()` set the mark.
-- [ ] Welcome: `BrandLockup` + one line + Get started / Skip. This phone: Decision 8. Pick a start: three radio choices, the chosen one's lines with checkboxes, the total vs free. Your situation: the region search and list, the seven chips with "+ 1.2 GB · 4 packs" under each and a "See" link to the Kiwix screen filtered to the matching domain. Review and start: the groups, the total, Wi-Fi only, the volume when there are two, Start.
-- [ ] Skip in the top bar on every step; Back steps back; the Research line on This phone when the tier is LIBRARY_ONLY or ASK.
-- [ ] Tests: each step renders its data; unticking a line changes the total; Skip and Start call the view model; a notice from `start()` shows.
-- [ ] **Commit.** `Onboarding: the five screens`
+- [x] `OnboardingViewModel(catalog, library, bookshelf, downloads, volumes, prefs: DownloadPrefs, tier, totalRamBytes, onboardingPrefs, io)`: `step`, the choices (saved), `ui` per step from the model; `start()` enqueues the group per Decision 6 and returns the notice or null; `skip()` and `start()` set the mark.
+- [x] Welcome: `BrandLockup` + one line + Get started / Skip. This phone: Decision 8. Pick a start: three radio choices, the chosen one's lines with checkboxes, the total vs free. Your situation: the region search and list, the seven chips with "+ 1.2 GB · 4 packs" under each and a "See" link to the Kiwix screen filtered to the matching domain. Review and start: the groups, the total, Wi-Fi only, the volume when there are two, Start.
+- [x] Skip in the top bar on every step; Back steps back; the Research line on This phone when the tier is LIBRARY_ONLY or ASK.
+- [x] Tests: each step renders its data; unticking a line changes the total; Skip and Start call the view model; a notice from `start()` shows.
+- [x] **Commit.** `Onboarding: the five screens`
 
 ### Task 4: Launch, Home's progress strip, Settings
 

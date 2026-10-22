@@ -233,25 +233,7 @@ class DownloadManager(
         if (group == null) scheduler.schedule(record, replace) else scheduler.scheduleGroup(group, listOf(record))
     }
 
-    /** Packs and books count against the storage cap; models do not. Each pack snapshot and book release gets its own file, so an update never overwrites the pack being read. */
-    private fun specOf(item: CatalogItem): DownloadSpec = when (item) {
-        is PackEntry -> DownloadSpec(
-            item.id, ItemKind.PACK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-            "packs/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, capped = true,
-        )
-        is BookEntry -> DownloadSpec(
-            item.id, ItemKind.BOOK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-            "books/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, capped = true,
-        )
-        is ModelEntry -> DownloadSpec(
-            item.id, ItemKind.MODEL, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-            "models/${item.fileName}", "", capped = false,
-        )
-        is VoiceEntry -> DownloadSpec(
-            item.id, ItemKind.VOICE, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-            "voices/${item.id}.zip", "", capped = false,
-        )
-    }
+    private fun specOf(item: CatalogItem): DownloadSpec = downloadSpecOf(item)
 
     override suspend fun retry(itemId: String) = mutex.withLock {
         val failed = dao.forItem(itemId).firstOrNull { it.state == DownloadState.FAILED } ?: return@withLock
@@ -319,4 +301,28 @@ class DownloadManager(
             scheduler.scheduleGroup(groupId, records.sortedBy { it.itemId }, replace = true)
         }
     }
+}
+
+/**
+ * The spec a catalog item downloads as. Packs and books count against the storage cap; models and voices do not. Each
+ * pack snapshot and book release gets its own file, so an update never overwrites the pack being read. [groupId] puts
+ * the item in a group (one file at a time, one progress), as onboarding's setup does (Plan H3).
+ */
+fun downloadSpecOf(item: CatalogItem, groupId: String? = null): DownloadSpec = when (item) {
+    is PackEntry -> DownloadSpec(
+        item.id, ItemKind.PACK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+        "packs/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, capped = true, groupId = groupId,
+    )
+    is BookEntry -> DownloadSpec(
+        item.id, ItemKind.BOOK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+        "books/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, capped = true, groupId = groupId,
+    )
+    is ModelEntry -> DownloadSpec(
+        item.id, ItemKind.MODEL, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+        "models/${item.fileName}", "", capped = false, groupId = groupId,
+    )
+    is VoiceEntry -> DownloadSpec(
+        item.id, ItemKind.VOICE, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+        "voices/${item.id}.zip", "", capped = false, groupId = groupId,
+    )
 }
