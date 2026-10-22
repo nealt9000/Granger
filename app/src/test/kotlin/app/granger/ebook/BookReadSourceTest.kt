@@ -55,6 +55,12 @@ class BookReadSourceTest {
         assertThat(fresh.locate(ReadAddress.Book("book:granger:hamlet", "not json", 0))).isNull()
     }
 
+    @Test fun addressAtHrefStartsAChapter() = runTest {
+        val at = source.addressAtHref("c002.xhtml")!!
+        assertThat(source.utterances(at, 1).single().text).isEqualTo("Act II")
+        assertThat(source.addressAtHref("c999.xhtml")).isNull()
+    }
+
     @Test fun addressAtAVisibleElementOrASelectionPicksItsSentence() = runTest {
         val chapterTwo = Locator(href = Url("c002.xhtml")!!, mediaType = MediaType.XHTML, locations = Locator.Locations(progression = 0.0))
         val at = source.addressAt(chapterTwo)!!

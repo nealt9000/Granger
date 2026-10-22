@@ -23,6 +23,7 @@ import app.granger.music.MusicSources
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import app.granger.core.player.NowPlaying
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -71,11 +72,19 @@ sealed interface RailEntry {
         override val key get() = "$PLAY$playKey"
     }
 
+    /** The voice reading [title] now (Plan V2): heads the list while it is loaded; tapping it opens the page. Not pinnable. */
+    data class Reading(val sourceKey: String, val title: String) : RailEntry {
+        override val key get() = "$READING$sourceKey"
+        override val at: Long get() = Long.MAX_VALUE
+        override val pinned: Boolean get() = false
+    }
+
     companion object {
         const val TAB = "tab:"
         const val SEARCH = "search:"
         const val CHAT = "chat:"
         const val PLAY = "play:"
+        const val READING = "reading:"
     }
 }
 
@@ -100,6 +109,8 @@ class RailViewModel(
     /** A recorded play by its key, for a pinned play older than [plays] holds. */
     private val recentPlay: suspend (String) -> RecentPlay? = { null },
     private val resumer: PlayResumer? = null,
+    /** The voice reading now (Plan V2); it heads the list while it is loaded. */
+    voice: Flow<NowPlaying.Voice?> = flowOf(null),
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
 
@@ -134,7 +145,7 @@ class RailViewModel(
         Opened(tabs, searches, chats, plays)
     }
 
-    val ui: StateFlow<RailUi> = combine(opened, shelf, currentTabId, pins.pins, hidden.hidden) { opened, shelf, current, pinList, hiddenKeys ->
+    private val list: Flow<RailUi> = combine(opened, shelf, currentTabId, pins.pins, hidden.hidden) { opened, shelf, current, pinList, hiddenKeys ->
         val all = (
             opened.tabs.map { tabEntry(it, shelf, current) } +
                 opened.searches.map { RailEntry.Search(it.query, it.searchedAt) } +
@@ -156,6 +167,10 @@ class RailViewModel(
             .sortedByDescending { it.at }
             .take(UNPINNED)
         RailUi(pinned + others)
+    }
+
+    val ui: StateFlow<RailUi> = combine(list, voice) { list, v ->
+        if (v == null) list else RailUi(listOf(RailEntry.Reading(v.sourceKey, v.title)) + list.entries)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailUi(emptyList()))
 
     private sealed interface Found {
@@ -187,6 +202,7 @@ class RailViewModel(
         is RailEntry.Search -> copy(pinned = true)
         is RailEntry.Chat -> copy(pinned = true)
         is RailEntry.Play -> copy(pinned = true)
+        is RailEntry.Reading -> this                        // never pinned: it is there while the voice reads
     }
 
     private fun tabEntry(tab: ReadingTab, shelf: Shelf, current: Long?): RailEntry.Tab {
@@ -243,6 +259,7 @@ class RailViewModel(
                 is RailEntry.Tab -> sessions.closeTab(entry.tab.tabId)
                 is RailEntry.Search -> sessions.forgetSearch(entry.query)
                 is RailEntry.Chat, is RailEntry.Play -> hidden.hide(entry.key, entry.at)
+                is RailEntry.Reading -> Unit                // it leaves with the voice; the mini-player stops it
             }
         }
     }

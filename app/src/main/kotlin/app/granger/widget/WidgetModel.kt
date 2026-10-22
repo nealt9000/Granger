@@ -44,7 +44,7 @@ data class WidgetModel(
             NowPlaying.Idle -> ofSaved(saved)
         }
 
-        private fun ofSaved(saved: SavedModes): WidgetModel = when (saved.resumeMode()) {
+        private fun ofSaved(saved: SavedModes): WidgetModel = savedVoice(saved) ?: when (saved.resumeMode()) {
             PlayerMode.MUSIC -> {
                 val m = saved.music!!
                 val t = m.track
@@ -61,6 +61,13 @@ data class WidgetModel(
                 )
             }
             null -> EMPTY
+        }
+
+        /** The voice was the last thing playing (Plan V2): its title, paused, so the widget's play resumes it. */
+        private fun savedVoice(saved: SavedModes): WidgetModel? {
+            val v = saved.voice?.takeIf { saved.lastWasVoice } ?: return null
+            val subtitle = listOfNotNull("Reading", v.section?.takeIf { it.isNotBlank() }).joinToString(" · ")
+            return WidgetModel(v.title, subtitle, null, playing = false, Secondary.NONE, progress = null, empty = false)
         }
     }
 }

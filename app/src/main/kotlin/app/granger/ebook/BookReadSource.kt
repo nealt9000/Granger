@@ -18,6 +18,7 @@ import org.json.JSONObject
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.publication.services.content.Content
 import org.readium.r2.shared.publication.services.content.content
 
@@ -110,6 +111,17 @@ class BookReadSource(
             if (at >= 0) return (element.lastOrNull { it.start <= at } ?: element.first()).address as ReadAddress.Book
         }
         return first
+    }
+
+    /**
+     * The first sentence of the chapter a contents entry's [href] points into (Plan V2, `ReadAloud.start`); null when
+     * the book has no such resource.
+     */
+    suspend fun addressAtHref(href: String): ReadAddress.Book? {
+        val url = Url(href) ?: return null
+        val link = publication.linkWithHref(url) ?: return null
+        val locator = publication.locatorFromLink(link) ?: return null
+        return addressAt(locator)
     }
 
     /**

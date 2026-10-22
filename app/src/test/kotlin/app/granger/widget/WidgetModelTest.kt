@@ -16,6 +16,17 @@ import org.junit.Test
 class WidgetModelTest {
     private val none = SavedModes(null, null, null)
 
+    @Test fun aSavedVoiceShowsItsTitlePaused() {
+        val voice = app.granger.core.player.SavedVoice("book:b", "Hamlet", "Act I", app.granger.core.speech.ReadAddress.Text("k", 0, 0), 1f, null)
+        val m = WidgetModel.of(PlayerUi.IDLE, SavedModes(null, null, null, voice = voice, lastWasVoice = true))
+        assertThat(m.title).isEqualTo("Hamlet")
+        assertThat(m.subtitle).isEqualTo("Reading · Act I")
+        assertThat(m.playing).isFalse()
+        assertThat(m.empty).isFalse()
+        // The voice that was last but isn't the saved mode any more gives way to the players.
+        assertThat(WidgetModel.of(PlayerUi.IDLE, SavedModes(null, null, null, voice = voice, lastWasVoice = false))).isEqualTo(WidgetModel.EMPTY)
+    }
+
     @Test fun musicShowsTrackArtistAndNext() {
         val t = track("a", "Mars, the Bringer of War", artists = "Holst").copy(coverPath = "/covers/planets.jpg")
         val m = WidgetModel.of(musicUi(t, positionMs = 50_000L), none)

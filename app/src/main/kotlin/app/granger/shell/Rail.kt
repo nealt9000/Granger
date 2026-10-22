@@ -114,9 +114,10 @@ private fun RailEntry.painter(): Painter = when (this) {
         playKey.startsWith("playlist:") -> painterResource(R.drawable.ic_queue_music)
         playKey.startsWith("artist:") -> rememberVectorPainter(Icons.Filled.Person)
         playKey.startsWith("folder:") -> painterResource(R.drawable.ic_library)
-        playKey.startsWith("voice:") -> painterResource(R.drawable.ic_library)   // something read aloud
+        playKey.startsWith("voice:") -> painterResource(R.drawable.ic_voice)     // something read aloud
         else -> painterResource(R.drawable.ic_music_note) // album:, genre:, songs
     }
+    is RailEntry.Reading -> painterResource(R.drawable.ic_voice)
 }
 
 /** What TalkBack reads for an item's tile in the narrow rail. */
@@ -126,6 +127,7 @@ private val RailEntry.description: String
         is RailEntry.Search -> "Recent search: $query"
         is RailEntry.Chat -> "Research chat: $title"
         is RailEntry.Play -> "Play again: $title"
+        is RailEntry.Reading -> "Reading aloud: $title"
     }
 
 /**
@@ -189,6 +191,8 @@ internal fun ExpandedRail(
     onPlay: (RailEntry.Play) -> Unit,
     actions: RailEntryActions,
     side: RailSide = RailSide.LEFT,
+    /** The live reading's row (Plan V2): opens the page being read. */
+    onReading: (RailEntry.Reading) -> Unit = {},
 ) {
     Column(
         Modifier
@@ -216,6 +220,7 @@ internal fun ExpandedRail(
                     is RailEntry.Search -> { { onSearch(entry.query) } }
                     is RailEntry.Chat -> { { onChat(entry.chatId) } }
                     is RailEntry.Play -> { { onPlay(entry) } }
+                    is RailEntry.Reading -> { { onReading(entry) } }
                 }
                 EntryTarget(entry, actions, open, onClickLabel = "Open", Modifier.fillMaxWidth()) {
                     if (entry is RailEntry.Tab) TabRowContent(entry) else EntryRowContent(entry)
@@ -431,6 +436,7 @@ private fun EntryRowContent(entry: RailEntry) {
         is RailEntry.Chat -> entry.title
         is RailEntry.Play -> entry.title
         is RailEntry.Tab -> entry.tab.title
+        is RailEntry.Reading -> "Reading aloud: ${entry.title}"
     }
     Row(
         Modifier

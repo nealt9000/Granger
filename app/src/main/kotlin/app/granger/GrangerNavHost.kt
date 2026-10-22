@@ -112,6 +112,7 @@ import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -352,6 +353,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) container.playResumer else null,
+            voice = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub.ui.map { it.now as? NowPlaying.Voice } else flowOf(null),
         )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
@@ -524,6 +526,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             nav.navigate(SearchRoute(query)) { if (searchOnTop) popUpTo<SearchRoute> { inclusive = true } }
         },
         onChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+        // The live reading's row (Plan V2) opens the page being read, as the voice sheet's Open does.
+        onReading = { scope.launch { voiceNow?.let { openVoiceSource(it) } } },
         onPlay = { item ->
             scope.launch {
                 // Gone or unplayable: the Library, with a notice saying so (it replaces the Library on the stack).

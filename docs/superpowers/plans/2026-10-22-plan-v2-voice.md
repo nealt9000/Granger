@@ -191,11 +191,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/shell/Rail.kt` and its model (a `RailEntry.Reading` at the top of the list while `player.ui.now is Voice`, title "Reading aloud: <title>", a voice icon (new `ic_voice.xml`, a speaking-head glyph); past `voice:` plays use the same icon; tapping opens the page or the chat), `media/PlayResumer.kt` (unchanged contract), `widget/WidgetModel.kt` + the widget's resume (a `voice` tab: resume through `PlayResumer.VOICE`)
 - Tests: `ReadAloudTest` (`anArticleStartsAtItsFirstSentence`, `aBookChapterStartsAtTheChaptersFirstSentence`, `anAnswerReadsTheStoredTurn`, `aMissingTargetIsFalse`), `RailTest` (`aLiveReadingHeadsTheListAndOpensItsPage`), `WidgetTest` (`theWidgetResumesTheVoice`).
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.voice.*' --tests 'app.granger.shell.*' --tests 'app.granger.widget.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Voice: ReadAloud.start for project 4; the rail's live reading; the widget resumes the voice`
+- [x] **Step 1: Failing tests** as named. *`ReadAloudTest` (3), `RailViewModelTest.aLiveReadingHeadsTheListAndLeavesWithTheVoice`, `WidgetActionsTest` and `WidgetModelTest` +1 each, `BookReadSourceTest.addressAtHrefStartsAChapter`.*
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.voice.*' --tests 'app.granger.shell.*' --tests 'app.granger.widget.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`ReadAloud` takes the hub and the container's `readSources`, so a target is opened exactly as a restore opens it; a book chapter goes through the new `BookReadSource.addressAtHref`. The live reading is a `RailEntry.Reading` combined onto the list (never pinnable, no `at`); `ic_voice` is a speaker glyph, used for past `voice:` plays too. The widget's play with nothing loaded tries the saved voice first through the play resumer, and its idle face shows the saved voice's title.*
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Voice: ReadAloud.start for project 4; the rail's live reading; the widget resumes the voice`
 
 ### Task 9: Small debts from V1
 

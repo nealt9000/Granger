@@ -25,6 +25,7 @@ import app.granger.player.FakePlayerHub
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -44,10 +45,31 @@ class RailViewModelTest {
     private val hidden = FakeRailHidden()
     private val playRows = mutableMapOf<String, RecentPlay>()
 
+    private val voice = MutableStateFlow<app.granger.core.player.NowPlaying.Voice?>(null)
+
     private fun vm() = RailViewModel(
         sessions, library, bookshelf, chats, current, pins, hidden, plays,
-        recentPlay = { playRows[it] }, resumer = PlayResumer(media, playlists, hub),
+        recentPlay = { playRows[it] }, resumer = PlayResumer(media, playlists, hub), voice = voice,
     )
+
+    @Test fun aLiveReadingHeadsTheListAndLeavesWithTheVoice() = runTest(main.dispatcher) {
+        sessions.tabs.value = listOf(tab(1, "p", "Photosynthesis"))
+        val vm = vm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.filterIsInstance<RailEntry.Reading>()).isEmpty()
+        voice.value = app.granger.core.player.NowPlaying.Voice("book:b", "Hamlet", "Act I", "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+        testScheduler.advanceUntilIdle()
+        val first = vm.ui.value.entries.first()
+        assertThat(first).isInstanceOf(RailEntry.Reading::class.java)
+        assertThat((first as RailEntry.Reading).title).isEqualTo("Hamlet")
+        assertThat(first.pinned).isFalse()
+        assertThat(vm.ui.value.tabs).hasSize(1)                       // the rest of the list is unchanged under it
+        voice.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.filterIsInstance<RailEntry.Reading>()).isEmpty()
+        collecting.cancel()
+    }
 
     private fun tab(id: Long, packId: String, title: String, openedAt: Long = id) =
         ReadingTab(id, packId, title, title, openedAt, onRail = true)
