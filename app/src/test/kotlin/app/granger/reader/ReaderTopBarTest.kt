@@ -28,7 +28,7 @@ import org.robolectric.annotation.Config
 class ReaderTopBarTest {
     @get:Rule val compose = createComposeRule()
 
-    private fun bar(packTitle: String? = "Wikipedia", hasHome: Boolean = true, readingThisPage: Boolean = false, onReadAloud: (() -> Unit)? = null) = compose.setContent {
+    private fun bar(packTitle: String? = "Wikipedia", hasHome: Boolean = true, voice: app.granger.player.VoiceButton = app.granger.player.VoiceButton.IDLE, onReadAloud: (() -> Unit)? = null) = compose.setContent {
         ReaderTopBar(
             pageTitle = "Photosynthesis",
             packTitle = packTitle,
@@ -42,7 +42,7 @@ class ReaderTopBarTest {
             onRandom = {},
             onFind = {},
             onToggleBookmark = {},
-            readingThisPage = readingThisPage,
+            voice = voice,
             onReadAloud = onReadAloud,
         )
     }
@@ -56,9 +56,10 @@ class ReaderTopBarTest {
     }
 
     @Test fun theMenuSaysStopReadingWhileTheVoiceReadsThisPage() {
-        bar(readingThisPage = true, onReadAloud = {})
+        bar(voice = app.granger.player.VoiceButton.READING, onReadAloud = {})
         compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithText("Stop reading").assertExists()
+        compose.onNodeWithText("Pause reading").assertExists()
         compose.onNodeWithText("Read aloud").assertDoesNotExist()
     }
 

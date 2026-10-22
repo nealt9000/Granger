@@ -123,11 +123,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/reader/ReaderScreen.kt` (⋯: "Read aloud" | "Pause reading" / "Resume reading" + "Stop reading"), `ReaderViewModel.kt` (`readingThisPage` → the same three-state; `pauseResume()`)
 - Tests: `EbookReaderViewModelTest` (`voiceButtonFollowsThePlayerForThisBookOnly`, `pauseResumeTogglesThePlayerNotTheSource`), `ReaderViewModelTest` likewise; a Compose test for the bar's three icons and the long-press stop.
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*' --tests 'app.granger.reader.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** Paused means: the voice's source is this page or book and `ui.playing` is false and not `ended`; ended shows Read aloud again.
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Readers: the voice button pauses and resumes; Stop moves to a long press and the ⋯ menu`
+- [x] **Step 1: Failing tests** as named. *Plus `VoiceButtonTest` (the shared three-state rule) and `EbookBottomBarTest` (Compose: the three icons, tap and long press).*
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*' --tests 'app.granger.reader.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`VoiceButton` lives in `app.granger.player` and both view models publish it beside `readingThisBook`/`readingThisPage` (which stay: Read from here still moves a paused voice). The bar button is a `combinedClickable` box, since `IconButton` has no long press; with no long-press action Compose treats a long press as a tap, so the idle button starts on either.* Paused means: the voice's source is this page or book and `ui.playing` is false and not `ended`; ended shows Read aloud again.
+- [x] **Step 4:** The same command. Expected: PASS. *222 tests across `ebook`, `reader` and `player`.*
+- [x] **Step 5: Commit.** `Readers: the voice button pauses and resumes; Stop moves to a long press and the ⋯ menu`
 
 ### Task 5: Music under the voice — the engine, focus, the session
 

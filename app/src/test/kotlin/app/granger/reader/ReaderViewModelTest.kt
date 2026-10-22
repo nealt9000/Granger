@@ -515,4 +515,31 @@ class ReaderViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.packSearch).isNull()
     }
+
+    @Test fun theVoiceEntryFollowsThePlayerForThisPageOnly() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.IDLE)
+        hub.ui.value = voiceUiFor("pack:p/Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.READING)
+        hub.ui.value = voiceUiFor("pack:p/Photosynthesis").copy(playing = false)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.PAUSED)
+        assertThat(vm.state.value.readingThisPage).isTrue()
+        hub.ui.value = voiceUiFor("pack:p/Other")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.IDLE)
+    }
+
+    @Test fun pauseResumeTogglesThePlayerOnlyWhileThisPageIsRead() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        vm.pauseResume()
+        assertThat(hub.calls).isEmpty()
+        hub.ui.value = voiceUiFor("pack:p/Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        vm.pauseResume()
+        assertThat(hub.calls).containsExactly("playPause")
+    }
 }

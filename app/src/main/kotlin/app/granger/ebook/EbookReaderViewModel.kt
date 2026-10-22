@@ -10,6 +10,7 @@ import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
 import app.granger.core.player.NowPlaying
+import app.granger.player.VoiceButton
 import app.granger.core.player.PlayerHub
 import app.granger.core.speech.ReadSourceKey
 import java.io.File
@@ -78,10 +79,12 @@ data class EbookUi(
     val editingHighlight: Long? = null,
     /** Whether that sheet opens with the note field focused (a new note). */
     val focusNote: Boolean = false,
-    /** The voice is reading this book (the bottom bar's button says Stop reading). */
+    /** The voice is loaded on this book (reading, paused or run out); Read from here moves it instead of starting it. */
     val readingThisBook: Boolean = false,
     /** The sentence being read, to decorate and follow; null when the voice is elsewhere or silent. */
     val reading: BookReading? = null,
+    /** What the bottom bar's voice button does now: start, pause or resume. */
+    val voice: VoiceButton = VoiceButton.IDLE,
 )
 
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
@@ -172,10 +175,11 @@ class EbookReaderViewModel(
         SelectionBridge.sink = selectionSink
         player?.let { hub ->
             viewModelScope.launch {
-                combine(hub.ui, hub.voiceProgress) { ui, progress -> (ui.now as? NowPlaying.Voice) to progress }
-                    .collect { (voice, progress) ->
-                        val id = bookId
-                        val mine = voice != null && id != null && voice.sourceKey == ReadSourceKey.book(id)
+                combine(hub.ui, hub.voiceProgress) { ui, progress -> ui to progress }
+                    .collect { (ui, progress) ->
+                        val voice = ui.now as? NowPlaying.Voice
+                        val key = bookId?.let(ReadSourceKey::book)
+                        val mine = voice != null && key != null && voice.sourceKey == key
                         if (!mine) following = true
                         // The source is this reader's own when it started the voice, else made now: the voice may
                         // have been reading this book before this reader existed (a restore, a return to the book).
@@ -184,7 +188,7 @@ class EbookReaderViewModel(
                         } else {
                             null
                         }
-                        _state.update { it.copy(readingThisBook = mine, reading = reading) }
+                        _state.update { it.copy(readingThisBook = mine, reading = reading, voice = VoiceButton.of(ui, key)) }
                     }
             }
         }
@@ -494,6 +498,9 @@ class EbookReaderViewModel(
     }
 
     fun stopReading() { player?.stopVoice() }
+
+    /** The bar's button while this book is read: pauses the voice, or resumes it at its sentence. */
+    fun pauseResume() { if (_state.value.readingThisBook) player?.playPause() }
 
     /** The screen is about to turn the page to the voice's sentence: the page change that follows is not the user's. */
     fun voiceMoved() { voiceMovedAt = now() }
