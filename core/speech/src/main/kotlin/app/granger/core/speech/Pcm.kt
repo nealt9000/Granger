@@ -6,6 +6,6 @@ class Pcm(val samples: FloatArray, val sampleRate: Int) {
 
     companion object {
         /** [ms] of silence at [sampleRate]: the pauses between sentences are written as audio so the clock stays true. */
-        fun silence(ms: Long, sampleRate: Int): Pcm = Pcm(FloatArray((ms * sampleRate / 1000).toInt().coerceAtLeast(0)), sampleRate)
+        fun silence(ms: Long, sampleRate: Int): Pcm = Pcm(FloatArray(((ms * sampleRate + 999) / 1000).toInt().coerceAtLeast(0)), sampleRate)
     }
 }
