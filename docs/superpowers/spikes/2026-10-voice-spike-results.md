@@ -235,10 +235,4 @@ Newer engines in sherpa-onnx 1.13.8's model release, for a later spike of their 
 
 **On the phone for the listening session:** `vits-piper-en_US-norman-medium`, `-kusal-medium`, `-kristin-medium`, `-john-medium` (and the two `libritts-high` builds, for the ear only) under `files/voices/`; the spike's `libritts_r` and Kokoro directories were removed. Settings → Voice lists each as "Granger voice (<name>)". Neal's ratings, 1–5 as in V0:
 
-| Voice | Naturalness | Names and numbers | Pacing | Notes |
-| --- | --- | --- | --- | --- |
-| ljspeech (shipping) | | | | |
-| norman | | | | |
-| kusal | | | | |
-| kristin | | | | |
-| john | | | | |
+Neal's verdict (2026-10-22, Tom Sawyer on the phone, flipping between voices): **`libritts-high` is the clear stand-out; norman, kusal, kristin and john sound no better than `ljspeech`.** So the medium LibriVox voices don't earn a catalog slot, and the question becomes how to get `libritts`'s sound at a cost between its and `ljspeech`'s (see the V2 plan's follow-up).
