@@ -12,5 +12,5 @@ object Features {
     const val IMPORT = true
 
     /** Read aloud in both readers (Plan V1). Debug builds while V1 is built; `true` once the Pixel 6 walkthrough passes. */
-    val READ_ALOUD = BuildConfig.DEBUG
+    val READ_ALOUD = true
 }

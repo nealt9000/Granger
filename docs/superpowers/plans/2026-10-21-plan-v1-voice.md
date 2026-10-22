@@ -282,19 +282,19 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 
 ### Task 10: Pixel 6 walkthrough; flag on; roadmap
 
-- [ ] Install over the app (databases backed up first).
-- [ ] Check (spec §10):
-  - [ ] **Article:** Read aloud from the first visible paragraph of a Wikipedia article; the sentence is marked and the page follows; References, navboxes, infobox tables and `[n]` markers are never spoken; scroll away → Follow chip → tap → back on the sentence; a long press on a later paragraph moves the voice; following a link stops the voice; "Stop reading" works.
-  - [ ] **DevDocs page:** code blocks are "Code omitted"; Stack Exchange: the question and answers read in order.
-  - [ ] **E-book:** a Classics book reads from the visible page, turns pages as it goes, skips footnotes; a user page turn stops following; Read from here from a selection; after a force-stop the mini-player shows it paused at the same sentence; the same after a reboot.
-  - [ ] **Player shell:** one notification throughout; the headset button pauses and resumes at the sentence start; a phone call pauses the voice and the call's end resumes it; the sleep timer fades and stops it; starting music stops the voice and saves its place; the mini-player's secondary button steps back a sentence; tapping the mini-player opens the reader at the sentence.
-  - [ ] **Screen off five minutes:** reading continues (Task 9's numbers).
-  - [ ] **Engines:** the system voice and the downloaded Granger voice both read; Settings → Voice shows the licence and attribution; removing the voice falls back to the system voice with a notice; a phone with no offline voice (simulate by picking none) shows "No offline voice on this phone" and the Get button.
-  - [ ] **Pronunciation:** "Rosetta Stone" is said correctly by the Granger voice.
-  - [ ] **No regressions:** the music and audiobook parity rows that touch focus, the mini-player and the notification.
-- [ ] `Features.READ_ALOUD = true`.
-- [ ] Update the roadmap: the V1 row to Done with what passed and what's open, and a "Carried forward from V1" section (for V2: the mix and transport routing in `SessionPlayer`, the full-view sheet, the rail entry, `ReadAloud.start`, the second voice's licence search, the espeak-ng dictionary route, anything the walkthrough left).
-- [ ] **Commit.** `Voice V1: read-aloud in both readers through the player; roadmap`
+- [x] Install over the app (databases backed up first).
+- [x] Check (spec §10):
+  - [x] **Article:** Read aloud from the first visible paragraph of a Wikipedia article; the sentence is marked and the page follows; References, navboxes, infobox tables and `[n]` markers are never spoken; scroll away → Follow chip → tap → back on the sentence; a long press on a later paragraph moves the voice; following a link stops the voice; "Stop reading" works.
+  - [x] **DevDocs page:** code blocks are "Code omitted"; Stack Exchange: the question and answers read in order.
+  - [x] **E-book:** a Classics book reads from the visible page, turns pages as it goes, skips footnotes; a user page turn stops following; Read from here from a selection; after a force-stop the mini-player shows it paused at the same sentence; the same after a reboot.
+  - [x] **Player shell:** one notification throughout; the headset button pauses and resumes at the sentence start; a phone call pauses the voice and the call's end resumes it; the sleep timer fades and stops it; starting music stops the voice and saves its place; the mini-player's secondary button steps back a sentence; tapping the mini-player opens the reader at the sentence.
+  - [x] **Screen off five minutes:** reading continues (Task 9's numbers).
+  - [x] **Engines:** the system voice and the downloaded Granger voice both read; Settings → Voice shows the licence and attribution; removing the voice falls back to the system voice with a notice; a phone with no offline voice (simulate by picking none) shows "No offline voice on this phone" and the Get button.
+  - [x] **Pronunciation:** "Rosetta Stone" is said correctly by the Granger voice. *Not achieved: the phonemes are right and every respelling keeps the ljspeech model's final "ah"; the built-in table is empty and a year normaliser is the carried-forward win.*
+  - [x] **No regressions:** the music and audiobook parity rows that touch focus, the mini-player and the notification.
+- [x] `Features.READ_ALOUD = true`. *Walkthrough 2026-10-22: three fix rounds (voice ranking; e-book follow; Read aloud from the page's first visible sentence), then "the rest passes".*
+- [x] Update the roadmap: the V1 row to Done with what passed and what's open, and a "Carried forward from V1" section (for V2: the mix and transport routing in `SessionPlayer`, the full-view sheet, the rail entry, `ReadAloud.start`, the second voice's licence search, the espeak-ng dictionary route, anything the walkthrough left).
+- [x] **Commit.** `Voice V1: read-aloud in both readers through the player; roadmap`
 
 ## Order and size
 
