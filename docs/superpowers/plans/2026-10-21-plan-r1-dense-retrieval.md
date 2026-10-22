@@ -288,21 +288,56 @@ and `BookIndex.kt` (expose the chapter re-chunk used by `chunkTexts`).
 
 ### Task 7: Merging, offline
 
-**Files:** `tools/eval/replay.py` (a new ranker) and `tools/eval/tests/test_replay.py`.
+**Files:** `tools/eval/merge.py` and `tools/eval/tests/test_merge.py`; `tools/vectors/hits.py`.
 
 - [x] Re-record the corpus on the phone with the set installed and dense off: `r1-base`, the full tuning split, graded. This
   is R1's baseline.
-- [ ] Offline dense hits per tuning question, from Mac vectors with the phone query vectors from Task 3, added to the
-  `r1-base` corpus.
-- [ ] Rankers to compare:
-  - calibrated hybrid: `α·lexical + (1−α)·cosine` where a cosine exists, lexical alone otherwise, α from 0 to 0.4;
-  - reciprocal rank fusion of the lexical and cosine lists;
-  - 1 or 2 of the 4 slots reserved for dense hits above a cosine floor, the rest lexical.
+- [x] Offline dense hits per tuning question: `tools/vectors/hits.py` scans the Mac's vector files as the phone does, using
+  the phone's own query vectors (404, both modes, embedded on the Pixel on 2026-10-22). The query is "prior + question".
+  It writes `runs/r1-base/dense.jsonl`: 24 hits per question over 1.42M rows in 353 files, in about 6 s.
+- [x] Rankers compared in `tools/eval/merge.py` (with `tests/test_merge.py`) rather than in `replay.py`, which stays the
+  app's port. Each runs with fiction weighting 0.7 (filter mode). A dense hit with the same text as a keyword passage is
+  that passage.
+- [x] Results, on the tuning split. They cover the vectors built so far: the priority packs plus the Granger Classics.
+  Appropedia, history, physics, WikEM, cooking, DevDocs, the Stack Exchanges, Wikivoyage and iFixit wait for the rest
+  of the build.
 
-  Each runs with fiction weighting 0.7 (filter mode) and a cosine floor sweep. `perDocument`, the media cap and the 4/8 slots
-  are kept.
-- [ ] Report recall@4 by location and by quote, the empty rate on unanswerable questions, and the per-domain split from
-  `set.json`'s tags. Pick the best ranker that keeps the empty rate at or above `r1-base`'s.
+  | Ranker | Location | Quote | Unanswerable empty | Fiction on factual |
+  |---|---|---|---|---|
+  | Keyword (today, fiction 0.7) | 32/126 | 41 | 17/76 | 5 |
+  | Dense alone, floor 0.76 | 58/126 | 56 | 37/76 | 5 |
+  | Hybrid α 0.1, floor 0.72 | 62/126 | 66 | 2/76 | 4 |
+  | RRF, floor 0.76 | 58/126 | 60 | 6/76 | 6 |
+  | 2 dense slots, floor 0.76 | 57/126 | 57 | 6/76 | 5 |
+  | **Gated hybrid: α 0.1, floor 0.74, gate 0.78 / lexical 1.0** | **60/126** | **66** | **49/76** | **4** |
+
+  Every plain merge loses the empty rate, because keyword search almost always returns something. The fix is a gate:
+  return nothing unless the best dense hit reaches 0.78 (after fiction weighting) or a keyword passage matches every
+  keyword (lexical 1.0 or more). The top cosine separates the two kinds of question well. At 0.78, 115 of 126 answerable
+  questions reach it and 23 of 76 unanswerable ones do.
+
+  By dataset group (recall@4, keyword → gated), nothing gets worse:
+  - chemistry 1→3/3
+  - follow-up 7→10/10
+  - geography 0→2/3
+  - geography-general 0→2/4
+  - history 3→6/6
+  - knots 0→1/2
+  - literature 0→3/7
+  - mathematics 0→1/2
+  - medical 11→17/25
+  - multi-step 13→16/20
+  - physics 2→3/3
+  - science 1→4/6
+  - vocab-gap 0→2/10
+  - who-wrote 9→11/11
+
+  These stay weak: bible 1/10, vocab-gap 2/10 and words 0/4.
+
+  **Pick:** the gated hybrid (`gated g0.78 l1.0 hybrid a0.1 f0.74`). Caveats for Task 11:
+  - More vectored packs give unanswerable questions more chances at a high cosine, so recheck the gate when the full set is
+    built.
+  - Both thresholds were tuned on this split, so R2's held-out set is the real test.
 
 ### Task 8: Fewer keyword searches, in parallel
 
