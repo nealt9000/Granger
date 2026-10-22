@@ -91,6 +91,22 @@ held-out set and the pass-or-stop scoring are R2.
 - The held-out sets (Plan 9's, and the fresh one R2 writes) are not opened in R1.
 - Release behavior changes only behind `DENSE_RETRIEVAL` (Task 9) until Task 11 turns it on.
 
+## Paused (Neal, 2026-10-22)
+
+R1's phone work waits until V1 (the voice) is finished and merged to main. V1's build moved the phone's database to v11,
+and this branch is v10. To resume:
+1. Rebase `r1-dense-retrieval` onto main, which will include V1's migration.
+2. Ask the voice session before installing over its build.
+3. Run `r1-base` (Task 7's first step): `ANDROID_SERIAL=… python eval.py run dataset/tune.json --run-id r1-base --fresh`.
+   `tools/eval/runs/r1-base` links to the main checkout's runs folder, so the run outlives this worktree.
+
+State at the pause:
+- **Done:** Tasks 1–3; the code for Tasks 4–6 and 8.
+- **Mac build:** the vector build keeps running there (`~/Developer/Granger/vectors-work/run-build.sh`, log `build.log`;
+  it resumes per shard if stopped).
+- **Phone:** the set's 16 missing packs are already on it.
+- **Not started:** Task 7 (merging) and Tasks 9–12.
+
 ---
 
 ### Task 1: `:core:text` and the chunker CLI
