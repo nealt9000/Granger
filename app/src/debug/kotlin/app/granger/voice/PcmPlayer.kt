@@ -1,5 +1,7 @@
 package app.granger.voice
 
+import app.granger.core.speech.Pcm
+
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack

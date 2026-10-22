@@ -28,6 +28,8 @@ android {
 dependencies {
     // Public: the player works on Track, Audiobook, MusicState and the playback DAOs.
     api(project(":core:library"))
+    // Public: PlayerHub reads aloud through Speech, ReadSource and VoiceId.
+    api(project(":core:speech"))
     // Public: PlayerHub exposes StateFlows and suspend functions.
     api(libs.kotlinx.coroutines.android)
     implementation(libs.media3.exoplayer)

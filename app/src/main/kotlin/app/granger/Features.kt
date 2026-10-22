@@ -11,6 +11,6 @@ object Features {
     /** Importing the user's own books; Plan 10 adds the Pro gate. */
     const val IMPORT = true
 
-    /** Read aloud in the e-book reader; later. */
-    const val READ_ALOUD = false
+    /** Read aloud in both readers (Plan V1). Debug builds while V1 is built; `true` once the Pixel 6 walkthrough passes. */
+    val READ_ALOUD = BuildConfig.DEBUG
 }

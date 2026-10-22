@@ -1,5 +1,7 @@
 package app.granger.voice
 
+import app.granger.core.speech.Wav
+
 import android.app.ActivityManager
 import android.content.Intent
 import android.media.MediaPlayer

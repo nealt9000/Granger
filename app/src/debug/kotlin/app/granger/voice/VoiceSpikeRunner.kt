@@ -1,5 +1,9 @@
 package app.granger.voice
 
+import app.granger.core.speech.Pcm
+import app.granger.core.speech.Sentences
+import app.granger.core.speech.Wav
+
 import app.granger.core.ai.MemorySampler
 import app.granger.core.ai.MonoClock
 import java.io.File

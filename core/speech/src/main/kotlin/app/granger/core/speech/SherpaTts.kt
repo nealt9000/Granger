@@ -33,12 +33,10 @@ class SherpaTts(val voice: SherpaVoice, val threads: Int = 2) : AutoCloseable {
             // The callback runs on this thread, inside the native call; 1 keeps generating, 0 stops early.
             // sherpa's JNI finds it by reflection as `invoke([F)Ljava/lang/Integer;`, which an invokedynamic
             // lambda (Kotlin 2's default) doesn't have; an object expression compiles to a class that does.
-            val callback = object : (FloatArray) -> Int {
-                override fun invoke(samples: FloatArray): Int {
-                    if (!isActive) return 0
-                    trySendBlocking(samples.copyOf())
-                    return if (isActive) 1 else 0
-                }
+            val callback = chunkCallback { samples ->
+                if (!isActive) return@chunkCallback 0
+                trySendBlocking(samples.copyOf())
+                if (isActive) 1 else 0
             }
             tts.generateWithCallback(text, speaker, speed, callback)
         }
@@ -46,7 +44,16 @@ class SherpaTts(val voice: SherpaVoice, val threads: Int = 2) : AutoCloseable {
 
     override fun close() = tts.free()
 
-    private companion object {
+    internal companion object {
+        /**
+         * The callback sherpa-onnx's JNI can find: it looks up `invoke([F)Ljava/lang/Integer;` by reflection, which an
+         * invokedynamic lambda (Kotlin 2's default) doesn't declare; an object expression compiles to a class that does.
+         * Every callback handed to sherpa goes through here (`SherpaCallbackTest` checks the method is there).
+         */
+        fun chunkCallback(onChunk: (FloatArray) -> Int): (FloatArray) -> Int = object : (FloatArray) -> Int {
+            override fun invoke(samples: FloatArray): Int = onChunk(samples)
+        }
+
         fun config(voice: SherpaVoice, threads: Int): OfflineTtsConfig {
             val model = when (voice) {
                 is SherpaVoice.Piper -> OfflineTtsModelConfig(

@@ -14,14 +14,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
     // sherpa-onnx 1.13.8, Apache-2.0, static-link-onnxruntime build trimmed to two ABIs: NOTICE.md says how.
     api(files("libs/sherpa-onnx-1.13.8-static-arm64-x86_64.aar"))
-    implementation(libs.kotlinx.coroutines.core)
+    // Public: Speech hands out Flows and StateFlows.
+    api(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)          // ICU's sentence breaks come from the framework
+    testImplementation(libs.androidx.test.core)
 }

@@ -54,7 +54,7 @@ dependencies {
     implementation(project(":core:research"))
     implementation(project(":core:media"))
     implementation(project(":core:player"))
-    debugImplementation(project(":core:speech"))   // the voice spike (Plan V0); V1 makes it implementation
+    implementation(project(":core:speech"))        // the voice (Plan V1): Speech, both engines, installed voices
     implementation(libs.media3.session)   // MediaConstants for the Android Auto browse tree
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

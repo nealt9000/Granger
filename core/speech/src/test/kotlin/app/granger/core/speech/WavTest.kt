@@ -1,4 +1,4 @@
-package app.granger.voice
+package app.granger.core.speech
 
 import com.google.common.truth.Truth.assertThat
 import java.io.IOException

@@ -1,5 +1,8 @@
 package app.granger.voice
 
+import app.granger.core.speech.Pcm
+import app.granger.core.speech.Wav
+
 import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech

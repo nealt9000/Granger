@@ -1,16 +1,11 @@
-package app.granger.voice
+package app.granger.core.speech
 
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-/** Audio as the spike passes it around: mono float samples in [-1, 1]. */
-class Pcm(val samples: FloatArray, val sampleRate: Int) {
-    val durationMs: Long get() = if (sampleRate <= 0) 0L else samples.size * 1000L / sampleRate
-}
-
-/** 16-bit PCM WAV files: written for the listening session, read back from the system engine's output. */
+/** 16-bit PCM WAV files: read back from the system engine's `synthesizeToFile`, written by the spike for listening. */
 object Wav {
     fun write(pcm: Pcm, file: File) {
         val dataBytes = pcm.samples.size * 2
