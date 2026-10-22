@@ -17,18 +17,23 @@ object LexicalScore {
      * An article's opening passage (see [isLead]) that matches at least one word gets [LEAD_BONUS].
      */
     fun scorer(keywords: List<String>): (Passage) -> Double {
+        // Each keyword is a list of alternatives (one, unless the rewrite gave `wine|strong drink`), each a list of words.
         val groups = keywords
-            .map { k -> Keywords.words(k).map { it.lowercase() }.filterNot(Keywords::isStopword).distinct() }
+            .map { k ->
+                Keywords.variants(k).map { v -> Keywords.words(v).map { it.lowercase() }.filterNot(Keywords::isStopword).distinct() }
+                    .filter { it.isNotEmpty() }
+            }
             .filter { it.isNotEmpty() }
         if (groups.isEmpty()) return { 0.0 }
-        val patterns = groups.flatten().distinct().associateWith(::wholeWord)
+        val patterns = groups.flatten().flatten().distinct().associateWith(::wholeWord)
         return { passage ->
             val text = body(passage)
             val present = patterns.filterValues { it.containsMatchIn(text) }.keys
             val titleWords = Keywords.words(passage.sourceTitle).map { it.lowercase() }.toSet()
             // A title only adds a small bonus: crediting a whole keyword let "sister" pass every passage of Sister Carrie (tune-4).
-            val inTitle = groups.any { group -> group.all { w -> Keywords.alternatives(w).any { it in titleWords } } }
-            val found = groups.sumOf { group -> group.count { it in present }.toDouble() / group.size }
+            val inTitle = groups.any { alts -> alts.any { words -> words.all { w -> Keywords.alternatives(w).any { it in titleWords } } } }
+            // A keyword counts for its best alternative.
+            val found = groups.sumOf { alts -> alts.maxOf { words -> words.count { it in present }.toDouble() / words.size } }
             found / groups.size +
                 (if (inTitle) TITLE_BONUS else 0.0) +
                 (if (found > 0 && isLead(passage)) LEAD_BONUS else 0.0)

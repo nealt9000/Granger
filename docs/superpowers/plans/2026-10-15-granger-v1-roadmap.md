@@ -21,6 +21,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | P1 | Polish | Wiki Back within the tab, the new wiki top bar, one rail list with pins, the toolbar on the left or right; library v9. The logo and full screen are held back (see "Carried forward from P1") | **Done (partly):** `2026-10-20-plan-p1-polish.md` (2026-10-20; 1593 JVM tests; Pixel 6 walkthrough all PASS) |
 | K1 | The full Kiwix catalog (English) | Family table with licenses, bulk generator with a report, Recommended + folded categories on the Kiwix screen, filing for new families, 16 MB catalog cap; Wi-Fi installs (`tools/dev/phone-wifi.sh`) | **Done:** `2026-10-20-plan-k1-kiwix-catalog.md` (2026-10-20; 927 packs published; 1602 JVM tests; Pixel 6 walkthrough all PASS). Follow-ups in K2 |
 | K2 | Kiwix follow-ups | Category chips on the Kiwix screen, DevDocs nav as a Contents drawer in portrait, library v10: the Kiwix folder and the Maps media type | **Done:** `2026-10-20-plan-k2-kiwix-followups.md` (2026-10-20; 1620 JVM tests; Pixel 6 walkthrough all PASS) |
+| R0 | Project 2 spike: retrieval + answerer | Offline ranking replay on `m3-tune-1` (EmbeddingGemma rerank, hybrid, source-kind weights), vocabulary-gap rewrite on the phone, E2B / E4B / Hugging Face answerers compared on the Pixel 6, results and decisions for the project 2 plan | **Done:** `2026-10-20-plan-r0-research-spike.md` (2026-10-21; results in `docs/superpowers/spikes/2026-10-research-spike-results.md`: nothing adopted as is; a dense book index is project 2's lever; tuning-split start 45% grounded / 91% declined; project 2 must write a fresh held-out set) |
 | V0 | The voice: engine spike | `:core:speech` with the vendored sherpa-onnx AAR, `VoiceSpikeActivity`: the system voice, Piper (ljspeech, libritts_r) and Kokoro measured on the Pixel 6 (first audio, real-time factor, memory beside E2B, the music mix), a listening session, results and decisions for V1 | **Done (measured; listening session pending):** `2026-10-21-plan-v0-voice-spike.md` (2026-10-21; results `docs/superpowers/spikes/2026-10-voice-spike-results.md`; spec `docs/superpowers/specs/2026-10-21-voice-design.md`) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), import gating, onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
@@ -551,6 +552,36 @@ Still open:
 - Some Kiwix packs are mostly PDFs (irp.fas.org military medicine). They open, but show little until the reader handles PDFs (the PDF pass, still unscheduled).
 - The DevDocs Contents button stays pinned over the page once you scroll.
 
+## Carried forward from R0
+
+Results: `docs/superpowers/spikes/2026-10-research-spike-results.md` (2026-10-21; working notes in `tools/eval/runs/checkpoints/r0/NOTES.md`).
+
+**Project 2's starting point:** 57/126 answerable grounded (45%) and 69/76 unanswerable declined (91%), on the tuning split with
+today's phone library, E2B and the app's ranking. This is a tuning number, not a pass. Of the 69 failed answerable questions,
+49 fail in retrieval (35 never found, 14 found but not chosen); a perfect answerer would reach about 61%.
+
+For the project 2 plan:
+- **The core of "knowing your library" is a dense book index built ahead of time.** Offline it takes answer-in-top-4 from 3 to
+  20 of 35 book questions.
+  - Classics vectors are built at pack time and shipped (on the phone the build would take about 20 hours).
+  - Books a user adds are embedded on the phone.
+  - ZIMs stay keyword-only.
+  - Open: dims and quantization against recall, how dense hits share the 4 slots with ZIM hits, and query text (rewrite or raw).
+- **The project 2 plan must write a fresh held-out set** (a separate subagent writes and grades it) before any pass-bar claim; the old held-out split is used up.
+- **Keep E2B as the answerer and E4B as Think deeper.** No Hugging Face candidate or frontier distill did better on the Pixel 6.
+  A Google-built LiteRT-LM file of the E2B QAT checkpoint is worth watching for: equal quality at 0.5 GB less memory.
+- **Fiction weighting** (0.7 on non-literature questions) turned 2 wrong answers into declines and changed nothing else. Carry it
+  as a ranking default alongside the dense work; it's behind a debug flag now (`ResearchPipeline(sourceWeight =)`).
+- **Ruled out:**
+  - question-time EmbeddingGemma rerank (+5–7 points for 3–8 s);
+  - rewrite alternates (E2B gives modern synonyms, not the source's words);
+  - fine-tuning before retrieval is fixed.
+- **Deep links** (open at the passage, track or section) go straight into the plan as engineering.
+
+Still open:
+- Search time grows with the library: median search went from 8.9 s to 10.9 s after the Hermeneutics Stack Exchange pack was
+  added, and send to first words is now 17.4 s against the 9 s target.
+- One unexplained replay mismatch (words-002 ranked unweighted on the phone); no outcome changed.
 ## Carried forward from V0
 
 Measured on the Pixel 6 (2026-10-21, `docs/superpowers/spikes/2026-10-voice-spike-results.md`): Piper through sherpa-onnx at 2 threads has a real-time factor of 0.11–0.14 (0.14–0.15 with E2B resident on the GPU, 2.3 GB peak), first audio 250–400 ms for ordinary sentences and up to 1.6 s for 190-character ones, +420 MB of process memory while speaking; the system engine (Google TTS, 29 offline English voices) is at 0.06 and ≤ 573 ms; Kokoro is 1.5–2.2× slower than real time and slower with more threads. 1638 JVM tests pass.

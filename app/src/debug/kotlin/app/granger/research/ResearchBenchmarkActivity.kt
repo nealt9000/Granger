@@ -89,6 +89,14 @@ class ResearchBenchmarkActivity : ComponentActivity() {
         log("models small=${models.small?.name} large=${models.large?.name} embedder=${models.embedder?.name}")
         c.modelManager.releaseNow()
 
+        intent.getStringExtra("cosines")?.let { name ->
+            // Model roles come from the catalog, which only MainActivity loads at launch (as EvalActivity does).
+            c.catalog.load()
+            val embedderFile = c.installedModels.first().embedder ?: return log("cosines skipped: no embedder installed")
+            cosines(java.io.File(getExternalFilesDir(null), name), embedderFile.path)
+            return
+        }
+
         // (a) The query and 12 real passages, embedded the way the pipeline does it (query, then passages).
         val embedderFile = models.embedder
         if (intent.getBooleanExtra("skipEmbedder", false)) {
@@ -154,6 +162,37 @@ class ResearchBenchmarkActivity : ComponentActivity() {
             (outcome as? Outcome.Answered)?.let { log("(b)    answer: ${it.text.take(160).replace('\n', ' ')}") }
         }
         c.modelManager.releaseSoon()
+    }
+
+    /**
+     * Plan R0 Task 2: the phone's cosines for [input] (`[{id, question, passages: [text]}]`, pushed by `tools/eval/rerank.py`),
+     * on each backend, written to `<input>.out.json` so the desktop's vectors can be checked against the phone's.
+     * Start with `--es cosines <file name in the app's external files dir>`.
+     */
+    private suspend fun cosines(input: java.io.File, embedderPath: String) {
+        val items = JSONArray(input.readText())
+        val out = JSONArray()
+        for (backend in LlmBackend.entries) {
+            withContext(Dispatchers.IO) {
+                val embedder = LiteRtTextEmbedder(embedderPath, cacheDir.path, backend)
+                try {
+                    embedder.load()
+                    for (i in 0 until items.length()) {
+                        val item = items.getJSONObject(i)
+                        val texts = item.getJSONArray("passages").let { a -> List(a.length()) { a.getString(it) } }
+                        val q = embedder.embed(listOf(item.getString("question")), isQuery = true).single()
+                        val cos = embedder.embed(texts, isQuery = false).map { Ranking.cosine(q, it).toDouble() }
+                        out.put(JSONObject().put("id", item.getString("id")).put("backend", backend.name).put("cosines", JSONArray(cos)))
+                    }
+                    log("cosines $backend: ${items.length()} questions")
+                } catch (t: Throwable) {
+                    log("cosines $backend failed: $t")
+                } finally {
+                    embedder.close()
+                }
+            }
+        }
+        java.io.File(input.path + ".out.json").writeText(out.toString())
     }
 
     /** Wraps the app's models so each question's keywords and passage cosines are recorded. */

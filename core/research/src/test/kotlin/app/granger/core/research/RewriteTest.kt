@@ -87,4 +87,24 @@ class RewriteTest {
         assertThat(Rewrite.parse("keywords: bible, money, evil, scripture")!!.keywords).containsExactly("bible", "money", "evil").inOrder()
         assertThat(Rewrite.parse("keywords: hamlet quotes, verse, passages")!!.keywords).containsExactly("hamlet", "verse").inOrder()
     }
+
+    @Test fun alternatesBecomeOneGroupPerKeyword() {
+        val r = Rewrite.parse("keywords: drunkenness (strong drink, wine), bible, tomorrow (morrow)\nmedical: no", alternates = true)!!
+        assertThat(r.keywords).containsExactly("drunkenness|strong drink|wine", "bible", "tomorrow|morrow").inOrder()
+    }
+
+    @Test fun alternatesAreCappedCleanedAndToleratedUnclosed() {
+        val r = Rewrite.parse("keywords: wine (Wine, drink, strong drink, beer), verse (scripture), hope (trust", alternates = true)!!
+        // "wine" repeats its head, so it's dropped; at most 2 alternates; a meta word is cleaned away; an unclosed bracket still parses.
+        assertThat(r.keywords).containsExactly("wine|drink|strong drink", "verse", "hope|trust").inOrder()
+    }
+
+    @Test fun withoutAlternatesBracketsAreNotGroups() =
+        assertThat(Rewrite.parse("keywords: wine (strong drink), bible\nmedical: no")!!.keywords)
+            .containsExactly("wine (strong drink)", "bible").inOrder()
+
+    @Test fun alternatesPromptAsksForBrackets() {
+        assertThat(Rewrite.prompt("q", null, alternates = true)).contains("in brackets")
+        assertThat(Rewrite.prompt("q", null)).doesNotContain("brackets")
+    }
 }

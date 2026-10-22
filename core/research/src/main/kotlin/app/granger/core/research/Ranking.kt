@@ -17,12 +17,16 @@ data class RankingConfig(
 
 /** Picks which passages go into the prompt: a cheap lexical preselect, then a threshold on embeddings or keywords. */
 object Ranking {
+    val NO_WEIGHT: (Passage) -> Double = { 1.0 }
+
     /** Best-first by lexical score then search score, at most [RankingConfig.perDocument] per article or book chapter
      * (a source and location), not per pack. Media passages never take one of the [RankingConfig.preselect] slots:
      * the other passages are preselected exactly as if there were none, and the media ones (the finder sends at most
-     * two) are carried alongside, in their best-first place, for ranking and the media cap to judge. */
-    fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig): List<Passage> {
-        val score = LexicalScore.scorer(keywords)
+     * two) are carried alongside, in their best-first place, for ranking and the media cap to judge.
+     * [weight] multiplies each passage's lexical score (Plan R0's debug source weighting; none in the app). */
+    fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig, weight: (Passage) -> Double = NO_WEIGHT): List<Passage> {
+        val lexical = LexicalScore.scorer(keywords)
+        val score = { p: Passage -> lexical(p) * weight(p) }
         // Scored once each: a sort comparator would score every passage many times over.
         val sorted = passages
             .map { it to score(it) }
@@ -92,14 +96,16 @@ object Ranking {
             .take(limit)
             .map { candidates[it.first] }
 
-    /** Above [RankingConfig.lexicalThreshold], best first; at most [limit]. */
+    /** Above [RankingConfig.lexicalThreshold], best first; at most [limit]. The [weight]ed score is the one thresholded. */
     fun byLexical(
         candidates: List<Passage>,
         keywords: List<String>,
         config: RankingConfig,
         limit: Int = config.large,
+        weight: (Passage) -> Double = NO_WEIGHT,
     ): List<Passage> {
-        val score = LexicalScore.scorer(keywords)
+        val lexical = LexicalScore.scorer(keywords)
+        val score = { p: Passage -> lexical(p) * weight(p) }
         return candidates
             .map { it to score(it) }
             .filter { it.second >= config.lexicalThreshold }
