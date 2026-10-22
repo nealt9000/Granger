@@ -166,5 +166,5 @@ On the Pixel 6:
 ## 12. Order
 
 1. **V0, the engine spike** (`2026-10-21-plan-v0-voice-spike.md`): build the AAR into the app, measure both engines and Kokoro on the Pixel 6, listen, decide. Results in `docs/superpowers/spikes/2026-10-voice-spike-results.md`.
-2. **V1, the voice**: `:core:speech`, the voice in the player, both readers, Settings → Voice, catalog voices. Written after V0 lands.
+2. **V1, the voice**: `:core:speech`, the voice in the player, both readers, Settings → Voice, catalog voices. Plan: `docs/superpowers/plans/2026-10-21-plan-v1-voice.md` (written 2026-10-21, after V0's decisions were confirmed). In V1 starting the voice pauses music; the mix is V2.
 3. **V2, spoken answers and the mix**: Research speech, music under the voice, the full view, the rail entry, `ReadAloud.start`. Written after V1; may fold into V1 if V1 comes in small.
