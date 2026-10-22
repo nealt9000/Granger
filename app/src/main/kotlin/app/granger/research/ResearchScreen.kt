@@ -57,10 +57,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.TurnOutcome
@@ -208,6 +210,10 @@ fun ResearchScreen(
         }
     }
 
+    fun play(turnId: Long, n: Int) {
+        scope.launch { if (!viewModel.play(turnId, n)) snackbar.showSnackbar(SOURCE_GONE) }
+    }
+
     fun cite(turnId: Long, n: Int) {
         val key = sourceKey(turnId, n)
         val index = rows.indexOfFirst { it.key == key }
@@ -318,7 +324,10 @@ fun ResearchScreen(
                         onGuess = { viewModel.bestGuess(row.turn.turn.id) },
                         onReadiness = onReadiness,
                     )
-                    is ThreadRow.Source -> SourceCard(row.n, row.passage, flashing == row.key) { open(row.turnId, row.n) }
+                    is ThreadRow.Source -> SourceCard(
+                        row.n, row.passage, flashing == row.key, onOpen = { open(row.turnId, row.n) },
+                        onPlay = if (viewModel.canPlay && row.passage.kind == SourceKind.MEDIA) ({ play(row.turnId, row.n) }) else null,
+                    )
                     is ThreadRow.Deeper -> OutlinedButton(
                         onClick = { viewModel.thinkDeeper(row.turnId) },
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -532,9 +541,12 @@ private fun QuoteCard(passage: Passage, modifier: Modifier = Modifier) {
     }
 }
 
-/** Cited passage [n]: its source and the first lines of its text; outlined in flame while [flash]. */
+/**
+ * Cited passage [n]: its source and the first lines of its text; outlined in flame while [flash]. [onPlay], for a song,
+ * album, chapter or audiobook, shows a Play button that plays it without leaving Research.
+ */
 @Composable
-private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> Unit) {
+private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> Unit, onPlay: (() -> Unit)? = null) {
     val shape = RoundedCornerShape(8.dp)
     val byline = sourceByline(passage)
     Column(
@@ -546,13 +558,25 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
             .clickable(onClick = onOpen)
             .padding(12.dp),
     ) {
-        Text(
-            "$n · ${passage.sourceTitle}",
-            style = MaterialTheme.typography.titleSmall,
-            color = GrangerColors.OnSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "$n · ${passage.sourceTitle}",
+                style = MaterialTheme.typography.titleSmall,
+                color = GrangerColors.OnSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            if (onPlay != null) {
+                IconButton(onClick = onPlay, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        painterResource(R.drawable.ic_play),
+                        contentDescription = "Play ${passage.heading.ifBlank { passage.sourceTitle }}",
+                        tint = GrangerColors.Flame,
+                    )
+                }
+            }
+        }
         if (byline.isNotEmpty()) {
             Text(
                 byline,

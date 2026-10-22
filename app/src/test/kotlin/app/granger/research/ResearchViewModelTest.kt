@@ -17,18 +17,25 @@ import app.granger.core.ai.ModelManager
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.ai.TextEmbedderFactory
 import app.granger.core.books.TextQuote
+import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
+import app.granger.core.library.AudiobookChapter
+import app.granger.core.library.ChatSummary
+import app.granger.core.library.ChatTurn
 import app.granger.core.library.MediaIndex
 import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.TurnOutcome
+import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlaySource
 import app.granger.core.research.Passage
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
 import app.granger.music.FakeMediaLibrary
 import app.granger.music.song
+import app.granger.player.FakePlayerHub
 import app.granger.pack
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -68,13 +75,13 @@ class ResearchViewModelTest {
         savedState: SavedStateHandle = SavedStateHandle(),
         cpu: CoroutineDispatcher = main.dispatcher,
         sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
-        player: app.granger.core.player.PlayerHub? = null,
+        player: PlayerHub? = null,
         speakAnswers: Boolean = false,
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
-            player = player, speakAnswers = { speakAnswers },
+            player = player, speakAnswers = { speakAnswers }, now = { 42L },
         )
     }
 
@@ -819,6 +826,95 @@ class ResearchViewModelTest {
         assertThat(selection.at).isNull()
         val placed = vm.open(passage.copy(kind = SourceKind.SELECTION)) as CitationTarget.Book
         assertThat(placed.at?.href).isEqualTo("ch1.xhtml")
+    }
+
+    // ---- Play on a media citation (Plan R3) ----
+
+    /** A kept chat (id 7) whose one answered turn (id 1) cites [card] as [1]. */
+    private fun keptTurnCiting(card: Passage) {
+        chats.chats.value = listOf(ChatSummary(7, "Music", 1L))
+        chats.turnList.value = listOf(
+            ChatTurn(1, 7, "Which?", TurnOutcome.ANSWERED, "That one [1].", false, false, false, emptyList(), listOf(card), emptyList(), 1L),
+        )
+    }
+
+    private val planets = listOf("Mars, the Bringer of War", "Venus, the Bringer of Peace").mapIndexed { i, title ->
+        song("p$i", title, album = "The Planets", albumArtists = "Gustav Holst")
+    }
+
+    @Test fun playStartsTheAlbumAtTheCitedSong() = runTest(main.dispatcher) {
+        mediaLibrary.trackList.value = planets
+        val key = planets.first().albumKey
+        keptTurnCiting(media(1, key).copy(location = planets[1].id, heading = planets[1].title))
+        val hub = FakePlayerHub()
+        val vm = vm(chatId = 7, player = hub)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.canPlay).isTrue()
+        assertThat(vm.play(1, 1)).isTrue()
+        assertThat(hub.plays.single()).isEqualTo(FakePlayerHub.Play(planets.map { it.id }, 1, false, PlaySource("album:$key", "The Planets")))
+        assertThat(sessions.tabs.value).isEmpty()
+    }
+
+    @Test fun playOnAWholeAlbumStartsAtItsFirstSong() = runTest(main.dispatcher) {
+        mediaLibrary.trackList.value = planets
+        keptTurnCiting(media(1, planets.first().albumKey))
+        val hub = FakePlayerHub()
+        val vm = vm(chatId = 7, player = hub)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.play(1, 1)).isTrue()
+        assertThat(hub.plays.single().startIndex).isEqualTo(0)
+    }
+
+    private val jungleId = "audiobook:phone:jungle"
+
+    private fun jungle() {
+        mediaLibrary.bookList.value = listOf(
+            Audiobook(jungleId, MediaOrigin.PHONE, "jungle", "The Jungle Book", "Rudyard Kipling", "", "", null, 0L, PackStatus.OK, 0L),
+        )
+        mediaLibrary.chapterList.value = listOf(
+            AudiobookChapter(jungleId, 0, "Mowgli's Brothers", "t1", 0L, 60_000L),
+            AudiobookChapter(jungleId, 1, "Kaa's Hunting", "t1", 60_000L, 60_000L),
+        )
+    }
+
+    @Test fun playStartsTheAudiobookAtTheCitedChapter() = runTest(main.dispatcher) {
+        jungle()
+        keptTurnCiting(mediaBook(jungleId, "The Jungle Book").copy(location = "chapter:1", heading = "Kaa's Hunting"))
+        val hub = FakePlayerHub()
+        val vm = vm(chatId = 7, player = hub)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.play(1, 1)).isTrue()
+        assertThat(hub.bookPlays.single()).isEqualTo(jungleId to AudioBookmark(0L, jungleId, "t1", 60_000L, "Kaa's Hunting", "", 42L))
+    }
+
+    @Test fun playOnAWholeAudiobookResumesItsSavedPlace() = runTest(main.dispatcher) {
+        jungle()
+        keptTurnCiting(mediaBook(jungleId, "The Jungle Book"))
+        val hub = FakePlayerHub()
+        val vm = vm(chatId = 7, player = hub)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.play(1, 1)).isTrue()
+        assertThat(hub.bookPlays.single()).isEqualTo(jungleId to null)
+    }
+
+    @Test fun playOnAGoneSourceOrAnArticleSaysNo() = runTest(main.dispatcher) {
+        keptTurnCiting(media(1, "never-there"))
+        val hub = FakePlayerHub()
+        val vm = vm(chatId = 7, player = hub)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.play(1, 1)).isFalse()
+        assertThat(vm.play(1, 2)).isFalse()
+        keptTurnCiting(article(1))
+        library.packList.value = listOf(pack("pack1"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.play(1, 1)).isFalse()
+        assertThat(hub.calls).isEmpty()
+        assertThat(sessions.tabs.value).isEmpty()
+        assertThat(vm().canPlay).isFalse()
+    }
+
+    @Test fun aFocusedMediaCardsBylineNamesItsPart() {
+        assertThat(sourceByline(media(1).copy(heading = "Mars"))).isEqualTo("Artist 1 · Album · Mars")
     }
 
     @Test fun mediaAlbumCitationOpensTheAlbum() = runTest(main.dispatcher) {

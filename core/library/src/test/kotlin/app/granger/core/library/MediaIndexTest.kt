@@ -151,6 +151,10 @@ class MediaIndexTest {
         assertThat(book.partTitles).containsExactly("Mowgli's Brothers", "Kaa's Hunting").inOrder()
         assertThat(album.partIds).containsExactly(*planets().map { it.id }.toTypedArray()).inOrder()
         assertThat(book.partIds).containsExactly("chapter:0", "chapter:1").inOrder()
+        assertThat(index.chapter("audiobook:phone:jungle", 1)?.title).isEqualTo("Kaa's Hunting")
+        assertThat(index.chapter("audiobook:phone:jungle", 5)).isNull()
+        assertThat(index.workWithPart(tracks.last().id)?.id).isEqualTo("album:$key")
+        assertThat(index.workWithPart("track:phone:none")).isNull()
         // The note is searchable, at the lowest weight.
         assertThat(index.works(listOf("orchestra"), limit = 5).map { it.id }).containsExactly("album:$key")
     }

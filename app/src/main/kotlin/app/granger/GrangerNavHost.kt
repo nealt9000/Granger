@@ -131,7 +131,8 @@ import app.granger.research.ResearchViewModel
 
 /** Music's tabs for one Music collection; null is "All music" (not scoped). */
 @Serializable data class MusicRoute(val collectionId: String? = null)
-@Serializable data class AlbumRoute(val albumKey: String)
+/** [trackId]: a cited song, scrolled to and marked. */
+@Serializable data class AlbumRoute(val albumKey: String, val trackId: String? = null)
 @Serializable data class ArtistRoute(val name: String)
 @Serializable data class GenreRoute(val name: String)
 @Serializable data class PlaylistRoute(val playlistId: Long)
@@ -144,7 +145,8 @@ private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumR
 
 /** The Audiobooks shelf for one Audiobooks collection; null is "All audiobooks" (not scoped). */
 @Serializable data class AudiobookShelfRoute(val collectionId: String? = null)
-@Serializable data class AudiobookRoute(val audiobookId: String)
+/** [chapter]: a cited chapter's ordinal, scrolled to and marked. */
+@Serializable data class AudiobookRoute(val audiobookId: String, val chapter: Int? = null)
 
 private fun NavDestination.isAudiobooks() = hasRoute<AudiobookShelfRoute>() || hasRoute<AudiobookRoute>()
 /** Said when a cited article's page is gone from its pack, so its main page opened instead (research spec §7). */
@@ -644,7 +646,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 MusicScreen(viewModel { musicViewModel(id) }, musicNav)
             }
             composable<AlbumRoute> { backStackEntry ->
-                AlbumScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<AlbumRoute>().albumKey, musicNav)
+                val route = backStackEntry.toRoute<AlbumRoute>()
+                AlbumScreen(viewModel { musicViewModel(null) }, route.albumKey, musicNav, marked = route.trackId)
             }
             composable<ArtistRoute> { backStackEntry ->
                 ArtistScreen(viewModel { musicViewModel(null) }, backStackEntry.toRoute<ArtistRoute>().name, musicNav)
@@ -674,10 +677,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<AudiobookRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<AudiobookRoute>()
                 AudiobookScreen(
                     viewModel { audiobooksViewModel(null) },
-                    backStackEntry.toRoute<AudiobookRoute>().audiobookId,
+                    route.audiobookId,
                     onBack = { nav.popBackStack() },
+                    markedChapter = route.chapter,
                 )
             }
             composable<ReaderRoute> { backStackEntry ->
@@ -761,8 +766,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             val tabId = when (target) {
                                 is CitationTarget.Article -> target.tabId
                                 is CitationTarget.Book -> target.tabId
-                                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey))
-                                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId))
+                                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey, target.trackId))
+                                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId, target.chapter))
                                 CitationTarget.Gone -> return@launch
                             }
                             val tab = citationTab(container.sessions, tabId) ?: return@launch

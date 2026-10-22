@@ -111,6 +111,10 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
     /** The present album ("album:<albumKey>") or audiobook (its id) with this id; null when it's gone or MISSING. */
     suspend fun work(id: String): MediaWork? = current().workById[id]
 
+    /** Chapter [ordinal] of a present audiobook, for playing a cited chapter from its start. */
+    suspend fun chapter(audiobookId: String, ordinal: Int): AudiobookChapter? =
+        current().chapters[audiobookId]?.firstOrNull { it.ordinal == ordinal }?.takeIf { audiobookId in current().workById }
+
     /** The album holding track [trackId], for a song's address that doesn't name its album. */
     suspend fun workWithPart(trackId: String): MediaWork? = current().works.firstOrNull { trackId in it.value.partIds }?.value
 
@@ -133,6 +137,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
         val audiobooks: List<Doc<Audiobook>>,
         val works: List<Doc<MediaWork>>,
         val workById: Map<String, MediaWork>,
+        val chapters: Map<String, List<AudiobookChapter>> = emptyMap(),
     )
 
     private fun <T> rank(docs: List<Doc<T>>, words: List<String>, prefixLast: Boolean, phrase: String, limit: Int): List<T> {
@@ -226,7 +231,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
             ))
         }
 
-        return Snapshot(artistDocs, albums, songs, books, works, works.associate { it.id to it.value })
+        return Snapshot(artistDocs, albums, songs, books, works, works.associate { it.id to it.value }, chapters)
     }
 
     private companion object {
