@@ -57,7 +57,32 @@ object CatalogParser {
             .distinctBy { it.id }
         val ids = (packs.map { it.id } + models.map { it.id } + books.map { it.id } + voices.map { it.id }).toSet()
         val presets = entries<Preset>(root, "presets").map { preset -> preset.copy(items = preset.items.filter { it in ids }) }
-        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices))
+        val readiness = (root["readiness"] as? JsonObject)?.let { readiness(it, packs, books) }
+        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices, readiness))
+    }
+
+    /**
+     * The readiness model (Plan H1): a domain with a blank or repeated id is dropped, so is a tier token that names no
+     * pack, book, collection or family in this catalog, and essential items are folded into comprehensive.
+     */
+    private fun readiness(obj: JsonObject, packs: List<PackEntry>, books: List<BookEntry>): Readiness? {
+        val parsed = runCatching { json.decodeFromJsonElement<Readiness>(obj) }.getOrNull() ?: return null
+        val ids = packs.mapTo(HashSet()) { it.id }.apply { books.mapTo(this) { it.id } }
+        val collections = books.mapTo(HashSet()) { it.collection }
+        val families = packs.mapNotNullTo(HashSet()) { it.family.ifBlank { null } }
+        fun known(token: String) = when {
+            token.startsWith("@") -> token.drop(1) in collections
+            token.startsWith("family:") -> token.removePrefix("family:") in families
+            else -> token in ids
+        }
+        val seen = HashSet<String>()
+        val domains = parsed.domains
+            .filter { it.id.isNotBlank() && it.title.isNotBlank() && seen.add(it.id) }
+            .map { domain ->
+                val essential = domain.essential.filter(::known).distinct()
+                domain.copy(essential = essential, comprehensive = (essential + domain.comprehensive.filter(::known)).distinct())
+            }
+        return if (domains.isEmpty()) null else Readiness(domains)
     }
 
     private inline fun <reified T> entries(root: JsonObject, key: String): List<T> =

@@ -176,4 +176,70 @@ class CatalogParserTest {
         assertThat(catalog.books).isEmpty()
         assertThat(catalog.items).hasSize(3)
     }
+
+    // --- Plan H1: domains and the readiness model ---
+
+    private fun pack(id: String, family: String, domain: String) =
+        """{"id": "$id", "title": "$id", "category": "Reference", "language": "eng", "sizeBytes": 1000, "sha256": "$SHA_A",
+            "urls": ["https://download.kiwix.org/zim/$id.zim"], "snapshotDate": "2026-10-10", "license": "CC BY-SA 4.0",
+            "hasFulltextIndex": true, "zimUuid": "u-$id", "zimName": "$id", "family": "$family", "domain": "$domain"}"""
+
+    private fun book(id: String, domain: String) =
+        """{"id": "$id", "title": "$id", "category": "Drama", "language": "en", "sizeBytes": 500, "sha256": "$SHA_A",
+            "urls": ["https://example.com/$id.epub"], "releaseDate": "2026-10-17", "license": "Public domain (US)",
+            "collection": "granger-classics", "domain": "$domain"}"""
+
+    private fun readinessCatalog(domains: String) = """
+        {"formatVersion": 1, "generatedAt": "2026-10-22T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine")}, ${pack("maps_en_france", "maps", "maps")}],
+         "books": [${book("gc-bible", "thought")}, ${book("gc-hamlet", "literature")}],
+         "readiness": {"domains": [$domains]}}
+    """.trimIndent().toByteArray()
+
+    private val domains = """
+        {"id": "medicine", "title": "Medicine & first aid", "essential": ["med"], "comprehensive": ["med", "wikem", "@lost"]},
+        {"id": "maps", "title": "Maps", "essential": ["family:maps", "family:atlas"], "comprehensive": []},
+        {"id": "thought", "title": "Thought", "essential": ["@granger-classics"], "comprehensive": ["med"]},
+        {"id": "", "title": "Blank", "essential": [], "comprehensive": []},
+        {"id": "maps", "title": "Maps again", "essential": [], "comprehensive": []}
+    """
+
+    @Test fun packsAndBooksCarryTheirDomain() {
+        val catalog = ok(parse(readinessCatalog(domains)))
+        assertThat(catalog.packs.map { it.domain }).containsExactly("medicine", "maps").inOrder()
+        assertThat(catalog.books.map { it.domain }).containsExactly("thought", "literature").inOrder()
+    }
+
+    @Test fun olderCatalogsHaveBlankDomainsAndNoReadiness() {
+        val catalog = ok(parse(catalogWithBooksJson()))
+        assertThat(catalog.packs.single().domain).isEmpty()
+        assertThat(catalog.books.first().domain).isEmpty()
+        assertThat(catalog.readiness).isNull()
+    }
+
+    @Test fun readinessKeepsOnlyTokensTheCatalogKnows() {
+        val readiness = ok(parse(readinessCatalog(domains))).readiness!!
+        val medicine = readiness.domains.single { it.id == "medicine" }
+        assertThat(medicine.comprehensive).containsExactly("med")
+        val maps = readiness.domains.single { it.id == "maps" }
+        assertThat(maps.essential).containsExactly("family:maps")
+    }
+
+    @Test fun readinessFoldsEssentialIntoComprehensive() {
+        val readiness = ok(parse(readinessCatalog(domains))).readiness!!
+        assertThat(readiness.domains.single { it.id == "maps" }.comprehensive).containsExactly("family:maps")
+        assertThat(readiness.domains.single { it.id == "thought" }.comprehensive).containsExactly("@granger-classics", "med").inOrder()
+    }
+
+    @Test fun readinessDropsDomainsWithBlankIdsOrDuplicates() {
+        val readiness = ok(parse(readinessCatalog(domains))).readiness!!
+        assertThat(readiness.domains.map { it.id }).containsExactly("medicine", "maps", "thought").inOrder()
+        assertThat(readiness.domains.single { it.id == "maps" }.title).isEqualTo("Maps")
+    }
+
+    @Test fun readinessWithNothingLeftIsNull() {
+        val onlyBlank = """{"id": "", "title": "Blank", "essential": [], "comprehensive": []}"""
+        assertThat(ok(parse(readinessCatalog(onlyBlank))).readiness).isNull()
+        assertThat(ok(parse(readinessCatalog(""))).readiness).isNull()
+    }
 }
