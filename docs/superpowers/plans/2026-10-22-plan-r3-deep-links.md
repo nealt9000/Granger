@@ -18,7 +18,7 @@ it can take an address later); plans and playlists of addresses (project 4); PDF
   Pure JVM, `java.text.BreakIterator` for sentences.
 - **`:core:library`:** `PassageAddress`, the four address kinds from spec §7 plus the two whole-source ones (a pack's main
   page, an album or audiobook), with `format`, `parse` and `of(passage, quote)`. It reuses `MediaAddress` for tracks and
-  audiobooks. Media cards can focus on one part: `MediaWork.partIds`, `MediaIndex.bestPart`, and `MediaCards.passage(work, part)`.
+  audiobooks. Media cards can focus on one part: `MediaWork.partIds`, `MediaCards.bestPart`, and `MediaCards.passage(work, part)`.
 - **`:app`:** `CitationOpener` moves out of `ResearchViewModel.target()` and resolves an address with the fallback chain.
   `CitationTarget` gains the quote, the part and the fallbacks. The web reader marks a cited range through `ReadAloudScript`
   (a second highlight name). The e-book reader's existing search-hit mark gets the better quote with its context. The album
@@ -182,12 +182,14 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
 
 **Files:**
 - Modify: `core/library/.../MediaIndex.kt` (`MediaWork.partIds`: track ids in album order, or chapter ordinals as strings
-  for an audiobook; `bestPart(work, words): Int?`, the index into the parts, whole-word matches on the folded title, decision 5)
-- Modify: `core/library/.../MediaCards.kt` (`passage(work, part: Int? = null)`: `location`, `heading` and the first line
+  for an audiobook, as `chapter:<ordinal>`)
+- Modify: `core/library/.../MediaCards.kt` (`bestPart(work, words): Int?`, the index into the parts, whole-word matches on
+  the folded title, decision 5; scoring stays on the whole-work card so the kept works don't change; `passage(work, part: Int? = null)`: `location`, `heading` and the first line
   `Song: <title> (<i> of <n>)` / `Chapter: <title> (<i> of <n>)`)
 - Modify: `core/library/.../LibraryPassageFinder.kt` (`mediaCards`: `MediaCards.passage(work, index.bestPart(work, words))`)
-- Tests: `MediaIndexTest` (`bestPartPicksTheTitleMatchingMostWords`, `noPartWhenOnlyTheAlbumMatches`), `MediaCardsTest`
-  (`aFocusedCardLeadsWithItsPart`, `anUnfocusedCardIsUnchanged`), `LibraryPassageFinderTest`
+- Tests: `MediaIndexTest` (`workCarriesPartsAndTheAlbumNote` checks `partIds`), `MediaCardsTest`
+  (`aFocusedCardLeadsWithItsPart`, `aChapterCardSaysChapter`, `anUnfocusedCardIsUnchanged`, `bestPartPicksTheTitleMatchingMostWords`,
+  `noPartWhenOnlyTheAlbumMatches`), `LibraryPassageFinderTest`
   (`aSongTitleFocusesItsAlbumsCard`: "Mars bringer of war" finds *The Planets* focused on track 1)
 
 - [ ] **Step 1: Failing tests** as named.

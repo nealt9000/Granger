@@ -63,9 +63,9 @@ object CitedQuote {
         return citing.ifEmpty { listOf(answer) }
     }
 
-    /** Folded content words: lower case, accents off, no stopwords. */
+    /** Folded content words: lower case, accents off, no stopwords and nothing under three letters (as [Keywords.extract]). */
     internal fun contentWords(s: String): Set<String> =
-        word.findAll(fold(s)).map { it.value }.filterNot(Keywords::isStopword).toSet()
+        word.findAll(fold(s)).map { it.value }.filter { it.length >= 3 && !Keywords.isStopword(it) }.toSet()
 
     internal fun fold(s: String): String = marks.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase(Locale.ROOT)
 

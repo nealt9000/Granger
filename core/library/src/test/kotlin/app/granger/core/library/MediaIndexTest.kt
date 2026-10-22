@@ -149,6 +149,8 @@ class MediaIndexTest {
         assertThat(book.creator).isEqualTo("Rudyard Kipling")
         assertThat(book.narrators).containsExactly("Ann Reader", "Bo Reader").inOrder()
         assertThat(book.partTitles).containsExactly("Mowgli's Brothers", "Kaa's Hunting").inOrder()
+        assertThat(album.partIds).containsExactly(*planets().map { it.id }.toTypedArray()).inOrder()
+        assertThat(book.partIds).containsExactly("chapter:0", "chapter:1").inOrder()
         // The note is searchable, at the lowest weight.
         assertThat(index.works(listOf("orchestra"), limit = 5).map { it.id }).containsExactly("album:$key")
     }

@@ -12,6 +12,7 @@ class MediaCardsTest {
         id = "album:gustav holst|the planets", isAlbum = true, title = "The Planets", creator = "Gustav Holst; London Symphony Orchestra",
         composers = listOf("Gustav Holst"), narrators = emptyList(), genres = listOf("Classical", "Orchestral"), year = "1918",
         partTitles = partTitles, description = description, origin = MediaOrigin.ARCHIVE_ORG, coverPath = null,
+        partIds = partTitles.indices.map { "track:archive_org:planets/$it" },
     )
 
     @Test fun albumCardHasTheLabelsInOrder() {
@@ -76,5 +77,38 @@ class MediaCardsTest {
         val p = MediaCards.passage(album().copy(creator = Albums.UNKNOWN_ARTIST))
         assertThat(p.text).doesNotContain("Artist:")
         assertThat(p.meta.author).isEmpty()
+    }
+
+    @Test fun aFocusedCardLeadsWithItsPart() {
+        val p = MediaCards.passage(album(), part = 0)
+        assertThat(p.text.lines().take(2)).containsExactly("Song: Mars, the Bringer of War (1 of 2)", "Album: The Planets").inOrder()
+        assertThat(p.location).isEqualTo("track:archive_org:planets/0")
+        assertThat(p.heading).isEqualTo("Mars, the Bringer of War")
+        assertThat(p.sourceId).isEqualTo("album:gustav holst|the planets")
+    }
+
+    @Test fun aChapterCardSaysChapter() {
+        val book = album().copy(id = "audiobook:phone:b", isAlbum = false, partTitles = listOf("One", "Two"), partIds = listOf("chapter:0", "chapter:1"))
+        val p = MediaCards.passage(book, part = 1)
+        assertThat(p.text.lines().first()).isEqualTo("Chapter: Two (2 of 2)")
+        assertThat(p.location).isEqualTo("chapter:1")
+    }
+
+    @Test fun anUnfocusedCardIsUnchanged() {
+        assertThat(MediaCards.passage(album(), part = null)).isEqualTo(MediaCards.passage(album()))
+        assertThat(MediaCards.passage(album(), part = 9)).isEqualTo(MediaCards.passage(album()))
+        assertThat(MediaCards.passage(album().copy(partIds = emptyList()), part = 0).location).isEmpty()
+    }
+
+    @Test fun bestPartPicksTheTitleMatchingMostWords() {
+        assertThat(MediaCards.bestPart(album(), listOf("mars bringer of war"))).isEqualTo(0)
+        assertThat(MediaCards.bestPart(album(), listOf("bringer of peace"))).isEqualTo(1)
+        assertThat(MediaCards.bestPart(album(), listOf("bringer"))).isEqualTo(0)
+        assertThat(MediaCards.bestPart(album(), listOf("VÉNUS"))).isEqualTo(1)
+    }
+
+    @Test fun noPartWhenOnlyTheAlbumMatches() {
+        assertThat(MediaCards.bestPart(album(), listOf("holst", "the planets"))).isNull()
+        assertThat(MediaCards.bestPart(album(), listOf("the", "of"))).isNull()
     }
 }

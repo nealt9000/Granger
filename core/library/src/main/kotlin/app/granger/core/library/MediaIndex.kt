@@ -43,6 +43,7 @@ data class MediaWork(
     val description: String,
     val origin: MediaOrigin,
     val coverPath: String?,
+    val partIds: List<String> = emptyList(), // beside partTitles: the track ids, or "chapter:<ordinal>" for an audiobook
 )
 
 /**
@@ -185,7 +186,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
             works += Doc(id, a.title, fields, MediaWork(
                 id = id, isAlbum = true, title = a.title, creator = a.albumArtist, composers = composers, narrators = emptyList(),
                 genres = genres, year = a.year, partTitles = tracks.map { it.title }, description = description,
-                origin = tracks.first().origin, coverPath = a.coverPath,
+                origin = tracks.first().origin, coverPath = a.coverPath, partIds = tracks.map { it.id },
             ))
         }
 
@@ -205,7 +206,8 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
         val books = mutableListOf<Doc<Audiobook>>()
         for (b in inputs.books) {
             if (b.status == PackStatus.MISSING) continue
-            val parts = chapters[b.id].orEmpty().sortedBy { it.ordinal }.map { it.title }
+            val sorted = chapters[b.id].orEmpty().sortedBy { it.ordinal }
+            val parts = sorted.map { it.title }
             val fields = listOf(
                 field(TITLE, b.title),
                 field(NAME, MediaNames.split(b.author) + MediaNames.split(b.narrator)),
@@ -217,6 +219,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
                 id = b.id, isAlbum = false, title = b.title, creator = b.author, composers = emptyList(),
                 narrators = MediaNames.split(b.narrator), genres = emptyList(), year = "", partTitles = parts,
                 description = b.description, origin = b.origin, coverPath = b.coverPath,
+                partIds = sorted.map { "$CHAPTER${it.ordinal}" },
             ))
         }
 
@@ -225,6 +228,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
 
     private companion object {
         const val ALBUM = "album:"
+        const val CHAPTER = "chapter:"
         const val ARTIST = "artist:"
         const val TITLE = 3.0
         const val NAME = 2.0
