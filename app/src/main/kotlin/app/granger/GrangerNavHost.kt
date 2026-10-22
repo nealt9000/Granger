@@ -102,6 +102,8 @@ import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
 import app.granger.shell.HistoryViewModel
+import app.granger.home.CardTarget
+import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
 import app.granger.home.HomeViewModel
 import app.granger.shell.RailEntry
@@ -893,11 +895,37 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             composable<HomeRoute> {
                 HomeScreen(
                     viewModel = viewModel {
-                        HomeViewModel(container.catalog, container.library, container.bookshelf, container.downloads, railViewModel.ui)
+                        HomeViewModel(
+                            container.catalog, container.library, container.bookshelf, container.downloads, railViewModel.ui,
+                            container.homeFeeds,
+                            FeedDrawer(
+                                archiveOf = { container.library.archive(it.id) },
+                                chunksOf = container.bookIndex::chunks,
+                                bookSearch = { container.bookIndex.search(it) },
+                                librarySearch = container.search,
+                            ),
+                            container.shelves, container.media, container.homePrefs,
+                        )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
+                    onOpenCard = { card ->
+                        when (val target = card.target) {
+                            is CardTarget.Article -> scope.launch {
+                                val tabId = container.sessions.openTab(target.packId, target.path, card.title)
+                                container.sessions.tab(tabId)?.let { nav.showTab(it, fragment = target.fragment) }
+                            }
+                            is CardTarget.Book -> scope.launch {
+                                val tabId = container.sessions.openTab(target.bookId, "", card.title)
+                                val at = target.href?.let { BookTarget(it, target.progression) }
+                                container.sessions.tab(tabId)?.let { nav.showTab(it, at) }
+                            }
+                            is CardTarget.Album -> nav.navigate(AlbumRoute(target.albumKey))
+                            is CardTarget.Audiobook -> nav.navigate(AudiobookRoute(target.audiobookId))
+                            is CardTarget.Search -> nav.navigate(SearchRoute(target.query))
+                        }
+                    },
                 )
             }
             composable<ReadinessRoute> {

@@ -4,15 +4,26 @@ import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
+import app.granger.FakeShelves
+import app.granger.FakeZimArchive
 import app.granger.MainDispatcherRule
 import app.granger.catalogOf
 import app.granger.core.catalog.CatalogState
 import app.granger.core.catalog.Domain
 import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
+import app.granger.core.library.FeedKind
+import app.granger.core.library.HomeDraw
+import app.granger.core.library.LibrarySearch
+import app.granger.core.library.PackStatus
+import app.granger.core.library.SearchHit
+import app.granger.core.library.TitleResults
+import app.granger.core.zim.ZimHit
+import app.granger.music.FakeMediaLibrary
 import app.granger.pack
 import app.granger.packEntry
 import app.granger.readiness.Coverage
+import app.granger.readiness.ReadinessReport
 import app.granger.record
 import app.granger.shell.RailEntry
 import app.granger.shell.RailTabUi
@@ -33,7 +44,12 @@ class HomeViewModelTest {
     private val bookshelf = FakeBookshelf()
     private val downloads = FakeDownloads()
     private val catalog = FakeCatalogSource()
+    private val shelves = FakeShelves()
+    private val media = FakeMediaLibrary()
+    private val homeFeeds = FakeHomeFeeds()
+    private val prefs = FakeHomePrefs()
     private val rail = MutableStateFlow(RailUi(emptyList()))
+    private var today = LocalDate.of(2026, 10, 22)
 
     private val med = packEntry("wikipedia_en_medicine_nopic", zimName = "wikipedia_en_medicine").copy(domain = "medicine")
     private val food = packEntry("cooking.stackexchange.com_en_all", zimName = "cooking.stackexchange.com_en", size = 500).copy(domain = "food")
@@ -41,10 +57,24 @@ class HomeViewModelTest {
         Domain("medicine", "Medicine & first aid", listOf(med.id), listOf(med.id)),
         Domain("food", "Food, water & survival", listOf(food.id), listOf(food.id)),
     )
+    private val wikipedia = pack("u1", "Wikipedia").copy(name = "wikipedia_en_all")
+    private val archive = FakeZimArchive(
+        uuid = "u1",
+        paths = setOf("index", "Cat"),
+        random = "Cat",
+        results = (1..6).map { ZimHit("Hit_$it", "Hit $it") },
+        contents = mapOf("Cat" to "<html><head><title>Cat</title></head><body></body></html>"),
+    )
+    private val librarySearch = object : LibrarySearch {
+        override suspend fun titles(query: String) = TitleResults(emptyList())
+        override suspend fun fullText(query: String) = emptyList<SearchHit>()
+    }
 
     private fun TestScope.viewModel(): HomeViewModel {
+        val drawer = FeedDrawer({ library.archives[it.id] }, { emptyList() }, { emptyList() }, librarySearch)
         val vm = HomeViewModel(
-            catalog, library, bookshelf, downloads, rail, io = main.dispatcher, today = { LocalDate.of(2026, 10, 22) },
+            catalog, library, bookshelf, downloads, rail, homeFeeds, drawer, shelves, media, prefs,
+            io = main.dispatcher, today = { today },
         )
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
@@ -53,6 +83,11 @@ class HomeViewModelTest {
 
     private fun tab(id: Long, title: String) =
         RailEntry.Tab(RailTabUi(id, title, "A pack", title.first(), available = true, current = false), at = id)
+
+    private fun installWikipedia() {
+        library.packList.value = listOf(wikipedia)
+        library.archives["u1"] = archive
+    }
 
     @Test fun stripIsTheReadinessReportOverTheCachedCatalog() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = catalogOf(packs = listOf(med, food)).copy(readiness = Readiness(domains)))
@@ -90,7 +125,83 @@ class HomeViewModelTest {
         assertThat(dotAlpha(Coverage.NONE)).isLessThan(dotAlpha(Coverage.BASIC))
         assertThat(dotAlpha(Coverage.BASIC)).isLessThan(dotAlpha(Coverage.COMPREHENSIVE))
         assertThat(dotAlpha(Coverage.COMPREHENSIVE)).isEqualTo(1f)
-        val ready = app.granger.readiness.ReadinessReport(emptyList(), emptyList(), emptyList(), needsCatalogRefresh = false)
+        val ready = ReadinessReport(emptyList(), emptyList(), emptyList(), needsCatalogRefresh = false)
         assertThat(stripText(ready)).isEqualTo("Ready.")
+    }
+
+    @Test fun theDefaultsAreSeededOnceAndDormantOnesStayHidden() = runTest(main.dispatcher) {
+        installWikipedia()
+        val vm = viewModel()
+        assertThat(homeFeeds.list.value.map { it.scope to it.kind }).containsExactlyElementsIn(
+            HomeViewModel.DEFAULTS.map { (scope, kind) -> scope.text to kind },
+        ).inOrder()
+        assertThat(prefs.seeded).isTrue()
+        // Wikipedia is installed, the Classics and Wikiquote are not: two rows show, two are hidden.
+        assertThat(vm.ui.value.feeds.map { it.feed.kind }).containsExactly(FeedKind.ON_THIS_DAY, FeedKind.RANDOM).inOrder()
+        assertThat(vm.ui.value.feeds.map { it.scopeName }.distinct()).containsExactly("Wikipedia")
+
+        // Removing every row and starting again seeds nothing: the mark is set.
+        homeFeeds.list.value.forEach { homeFeeds.remove(it.id) }
+        viewModel()
+        assertThat(homeFeeds.list.value).isEmpty()
+    }
+
+    @Test fun aDrawIsCachedForTheDayAndRedrawnTheNext() = runTest(main.dispatcher) {
+        installWikipedia()
+        prefs.seeded = true
+        val id = homeFeeds.add("pack:wikipedia_en_all", FeedKind.RANDOM)
+        val vm = viewModel()
+        val row = vm.ui.value.feeds.single()
+        assertThat(row.drawn!!.title).isEqualTo("Random from Wikipedia")
+        assertThat(row.drawn!!.cards.single().title).isEqualTo("Cat")
+        assertThat(homeFeeds.draws[id]!!.day).isEqualTo("2026-10-22")
+
+        // A fresh look the same day shows the cache as is, even when the archive would now say otherwise.
+        val cached = Drawn("Random from Wikipedia", listOf(Card("Cached", "Wikipedia", CardTarget.Article("u1", "Cached"))))
+        homeFeeds.draws[id] = HomeDraw(id, "2026-10-22", Cards.encode(cached))
+        val again = viewModel()
+        assertThat(again.ui.value.feeds.single().drawn!!.cards.single().title).isEqualTo("Cached")
+
+        // The next day (a resume after midnight): redrawn and the cache replaced.
+        today = today.plusDays(1)
+        again.refresh()
+        testScheduler.advanceUntilIdle()
+        assertThat(again.ui.value.feeds.single().drawn!!.cards.single().title).isEqualTo("Cat")
+        assertThat(homeFeeds.draws[id]!!.day).isEqualTo("2026-10-23")
+    }
+
+    @Test fun aCachedCardWhosePackIsGoneIsDroppedAndTheRowRedrawn() = runTest(main.dispatcher) {
+        installWikipedia()
+        prefs.seeded = true
+        val id = homeFeeds.add("pack:wikipedia_en_all", FeedKind.RANDOM)
+        val stale = Drawn("Random from Wikipedia", listOf(Card("Old", "Gone pack", CardTarget.Article("u-gone", "Old"))))
+        homeFeeds.draws[id] = HomeDraw(id, "2026-10-22", Cards.encode(stale))
+        val vm = viewModel()
+        assertThat(vm.ui.value.feeds.single().drawn!!.cards.single().title).isEqualTo("Cat")
+    }
+
+    @Test fun addRemoveAndMoveGoToTheStore() = runTest(main.dispatcher) {
+        installWikipedia()
+        prefs.seeded = true
+        val vm = viewModel()
+        vm.addFeed(FeedScope.Pack("wikipedia_en_all"), FeedKind.SEARCH, "cats")
+        vm.addFeed(FeedScope.Library, FeedKind.RANDOM)
+        testScheduler.advanceUntilIdle()
+        assertThat(homeFeeds.list.value.map { it.scope }).containsExactly("pack:wikipedia_en_all", "library").inOrder()
+        assertThat(vm.ui.value.feeds.map { it.drawn!!.title }).containsExactly("cats · Wikipedia", "Random from the library").inOrder()
+        vm.moveFeed(homeFeeds.list.value.last().id, up = true)
+        testScheduler.advanceUntilIdle()
+        assertThat(homeFeeds.list.value.map { it.scope }).containsExactly("library", "pack:wikipedia_en_all").inOrder()
+        vm.removeFeed(homeFeeds.list.value.first().id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.feeds.map { it.feed.scope }).containsExactly("pack:wikipedia_en_all")
+    }
+
+    @Test fun scopeChoicesOfferWhatIsOnThePhone() = runTest(main.dispatcher) {
+        library.packList.value = listOf(wikipedia, pack("u2", "Gone", status = PackStatus.MISSING).copy(name = "x_en"), pack("u3", "No name"))
+        prefs.seeded = true
+        val choices = viewModel().ui.value.scopeChoices
+        assertThat(choices.map { it.label }).containsExactly("Whole library", "Wikipedia").inOrder()
+        assertThat(choices.last().scope).isEqualTo(FeedScope.Pack("wikipedia_en_all"))
     }
 }

@@ -75,6 +75,8 @@ import app.granger.core.library.RoomReadingSessions
 import app.granger.core.library.RoomResearchChats
 import app.granger.core.library.RailPins
 import app.granger.core.library.HomeFeeds
+import app.granger.home.HomePrefs
+import app.granger.home.SharedHomePrefs
 import app.granger.core.library.RoomHomeFeeds
 import app.granger.core.library.RoomRailPins
 import app.granger.shell.RailHidden
@@ -402,6 +404,7 @@ class AppContainer(context: Context) {
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
+    val homePrefs: HomePrefs = SharedHomePrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
     val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")
