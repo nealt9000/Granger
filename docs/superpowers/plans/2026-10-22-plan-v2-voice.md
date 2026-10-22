@@ -166,11 +166,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/GrangerApp.kt` (`readSources`: `text:answer:<id>` → `chats.turn(id)` → `TextReadSource`), `GrangerNavHost.kt` (`openVoiceSource` for `text:answer:` opens the chat), `settings/VoiceSettingsScreen.kt` + `VoicePrefs` ("Speak answers as they arrive")
 - Tests: `AnswerTextTest` (`spokenDropsChipsMarksAndListMarkers`, `medicalBannerIsSpokenFirstOnce`), `StreamingTextReadSourceTest` (`closedSentencesAreServedWhileOpen`, `theLastFragmentWaitsForComplete`, `completeEndsTheSource`), `ResearchViewModelTest` (`readAnswerStartsTheVoiceOnTheTurnsText`, `withTheSettingOnANewAnswerIsReadAsItStreams`, `aStoppedTurnEndsTheRead`), `GrangerAppTest`/`PlayResumerTest` (`anAnswerKeyRestoresFromTheChatsTable`).
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :core:speech:testDebugUnitTest :app:testDebugUnitTest --tests 'app.granger.research.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** The streaming source splits with `Sentences` on the text so far and holds back the last sentence until a sentence break follows it or `complete()` is called. The read starts only when the Research screen is on top (V1's finding: focus is refused from the background), which is where answers stream.
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Research: answers read aloud — the speaker button, Speak answers as they arrive, restore from the chat`
+- [x] **Step 1: Failing tests** as named. *`StreamingTextReadSourceTest` (3), `AnswerTextTest` +2, `ResearchViewModelTest` +2, the settings fake grew the switch. The restore of a `text:answer:` key runs through `GrangerApp.readSources` and is covered by the walkthrough, not a JVM test.*
+- [x] **Step 2:** `./gradlew :core:speech:testDebugUnitTest :app:testDebugUnitTest --tests 'app.granger.research.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`ResearchChats.turn(id)` was added for the restore and the sheet's Open (which goes to the chat). The speaker row sits under an answered turn and under a kept guess; while a turn runs it shows only if something is being read. The medical banner text moved to `AnswerText.MEDICAL` so the screen and the voice share it.* The streaming source splits with `Sentences` on the text so far and holds back the last sentence until a sentence break follows it or `complete()` is called. The read starts only when the Research screen is on top (V1's finding: focus is refused from the background), which is where answers stream.
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Research: answers read aloud — the speaker button, Speak answers as they arrive, restore from the chat`
 
 ### Task 8: `ReadAloud.start`, the rail's live entry, the widget
 

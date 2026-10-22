@@ -5,6 +5,19 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class AnswerTextTest {
+    @Test fun spokenDropsChipsMarksAndListMarkers() {
+        val answer = "Plants make **sugar** from light [1]. They use *chlorophyll* [2, 3].\n\n## How it works\n\n- Light is absorbed.\n- Water is split.\n1. Oxygen leaves."
+        assertThat(AnswerText.spoken(answer)).isEqualTo(
+            "Plants make sugar from light. They use chlorophyll.\n\nHow it works\n\nLight is absorbed.\n\nWater is split.\n\nOxygen leaves.",
+        )
+    }
+
+    @Test fun medicalBannerIsSpokenFirstOnce() {
+        assertThat(AnswerText.spoken("Rest and drink water [1].", medical = true))
+            .isEqualTo("${AnswerText.MEDICAL}\n\nRest and drink water.")
+        assertThat(AnswerText.spoken("Rest.", medical = false)).isEqualTo("Rest.")
+    }
+
     @Test fun splitsCitations() {
         assertThat(AnswerText.segments("A [1] b [2, 3].")).containsExactly(
             Segment.Text("A "), Segment.Cite(1), Segment.Text(" b "), Segment.Cite(2), Segment.Cite(3), Segment.Text("."),

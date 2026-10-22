@@ -43,6 +43,8 @@ data class VoiceSettingsUi(
     val markSentence: Boolean = true,
     val catalog: List<CatalogVoiceRow> = emptyList(),
     val notice: String? = null,
+    /** Research reads a new answer aloud as it is written (Plan V2). */
+    val speakAnswers: Boolean = false,
 )
 
 /**
@@ -63,9 +65,9 @@ class VoiceSettingsViewModel(
     private val notice = MutableStateFlow<String?>(null)
 
     val ui: StateFlow<VoiceSettingsUi> = combine(
-        installed.voices, prefs.voiceId, prefs.speed, prefs.markSentence,
+        installed.voices, prefs.voiceId, prefs.speed, combine(prefs.markSentence, prefs.speakAnswers) { mark, speak -> mark to speak },
         combine(catalog.state.map { it.catalog?.voices.orEmpty() }, downloads.records, notice) { entries, records, n -> Triple(entries, records, n) },
-    ) { voices, chosen, speed, mark, (entries, records, n) ->
+    ) { voices, chosen, speed, (mark, speak), (entries, records, n) ->
         val rows = entries.map { entry ->
             val versions = records.filter { it.itemId == entry.id }
             val active = versions.firstOrNull { it.state != DownloadState.INSTALLED }
@@ -77,7 +79,7 @@ class VoiceSettingsViewModel(
                 error = active?.takeIf { it.state == DownloadState.FAILED }?.error,
             )
         }
-        VoiceSettingsUi(voices, chosen, speed, mark, rows, n)
+        VoiceSettingsUi(voices, chosen, speed, mark, rows, n, speakAnswers = speak)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), VoiceSettingsUi())
 
     init {
@@ -87,6 +89,7 @@ class VoiceSettingsViewModel(
     fun choose(id: VoiceId?) = prefs.setVoice(id)
     fun setSpeed(speed: Float) = prefs.setSpeed(speed)
     fun setMarkSentence(on: Boolean) = prefs.setMarkSentence(on)
+    fun setSpeakAnswers(on: Boolean) = prefs.setSpeakAnswers(on)
     fun dismissNotice() { notice.value = null }
 
     fun get(entry: VoiceEntry) {

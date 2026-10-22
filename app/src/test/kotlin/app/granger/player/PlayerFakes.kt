@@ -48,7 +48,13 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
         bookPlays += id to at
     }
     override val voiceProgress = MutableStateFlow<VoiceProgress?>(null)
-    override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) { calls += "readAloud:${source.key}@${from?.encode()}" }
+    /** The source of the last [readAloud], for tests that feed a streaming one. */
+    var lastSource: ReadSource? = null
+
+    override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) {
+        calls += "readAloud:${source.key}@${from?.encode()}"
+        lastSource = source
+    }
     override fun stopVoice() { calls += "stopVoice" }
     override fun nextParagraph() { calls += "nextParagraph" }
     override fun previousParagraph() { calls += "previousParagraph" }

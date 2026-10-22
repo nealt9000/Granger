@@ -5,6 +5,7 @@ import app.granger.core.research.Passage
 import app.granger.core.research.SourceMeta
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /** One question in a chat. The large-model fallback notice shows when [askedDeeper] and not [usedLarge]. */
@@ -40,6 +41,9 @@ interface ResearchChats {
     fun turns(chatId: Long): Flow<List<ChatTurn>>
 
     suspend fun chat(chatId: Long): ChatSummary?
+
+    /** One turn with its passages, for reading an answer aloud after the fact (Plan V2); null when it is gone. */
+    suspend fun turn(turnId: Long): ChatTurn?
 
     /** Starts a chat; the caller makes [title] (the question cut to 60 characters at a word boundary). */
     suspend fun create(title: String): Long
@@ -81,27 +85,32 @@ class RoomResearchChats(
     override fun turns(chatId: Long): Flow<List<ChatTurn>> =
         combine(dao.observeTurns(chatId), dao.observePassages(chatId)) { turns, passages ->
             val byTurn = passages.groupBy { it.turnId }
-            turns.map { turn ->
-                val rows = byTurn[turn.id].orEmpty()
-                ChatTurn(
-                    id = turn.id,
-                    chatId = turn.chatId,
-                    question = turn.question,
-                    outcome = turn.outcome,
-                    answer = turn.answer,
-                    medical = turn.medical,
-                    usedLarge = turn.usedLarge,
-                    askedDeeper = turn.askedDeeper,
-                    keywords = if (turn.keywords.isEmpty()) emptyList() else turn.keywords.split(KEYWORD_SEPARATOR),
-                    shown = rows.filter { it.role == PassageRole.SHOWN }.map { it.toPassage() },
-                    candidates = rows.filter { it.role == PassageRole.CANDIDATE }.map { it.toPassage() },
-                    createdAt = turn.createdAt,
-                    guess = turn.guess,
-                    guessLarge = turn.guessLarge,
-                    guessFellBack = turn.guessFellBack,
-                )
-            }
+            turns.map { turn -> turn.toChatTurn(byTurn[turn.id].orEmpty()) }
         }
+
+    override suspend fun turn(turnId: Long): ChatTurn? {
+        val turn = dao.turn(turnId) ?: return null
+        val rows = dao.observePassages(turn.chatId).first().filter { it.turnId == turnId }
+        return turn.toChatTurn(rows)
+    }
+
+    private fun ResearchTurn.toChatTurn(rows: List<ResearchPassage>): ChatTurn = ChatTurn(
+        id = id,
+        chatId = chatId,
+        question = question,
+        outcome = outcome,
+        answer = answer,
+        medical = medical,
+        usedLarge = usedLarge,
+        askedDeeper = askedDeeper,
+        keywords = if (keywords.isEmpty()) emptyList() else keywords.split(KEYWORD_SEPARATOR),
+        shown = rows.filter { it.role == PassageRole.SHOWN }.map { it.toPassage() },
+        candidates = rows.filter { it.role == PassageRole.CANDIDATE }.map { it.toPassage() },
+        createdAt = createdAt,
+        guess = guess,
+        guessLarge = guessLarge,
+        guessFellBack = guessFellBack,
+    )
 
     override suspend fun chat(chatId: Long): ChatSummary? = dao.chat(chatId)?.summary()
 

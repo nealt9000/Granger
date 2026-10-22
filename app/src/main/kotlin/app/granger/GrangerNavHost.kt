@@ -409,7 +409,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         val tabId = when (val key = ReadSourceKey.parse(voice.sourceKey)) {
             is ReadSourceKey.Article -> container.sessions.openTab(key.packId, key.path, voice.title)
             is ReadSourceKey.Book -> container.sessions.openTab(key.bookId, "", voice.title)
-            is ReadSourceKey.Text, null -> return null
+            is ReadSourceKey.Text -> {
+                // A spoken Research answer (Plan V2) opens its chat.
+                val turnId = ResearchViewModel.answerTurnId(voice.sourceKey) ?: return null
+                val chatId = container.researchChats.turn(turnId)?.chatId ?: return null
+                nav.navigate(ResearchRoute(chatId))
+                return Unit
+            }
+            null -> return null
         }
         container.sessions.tab(tabId)?.let { nav.showTab(it) }
         return Unit
@@ -732,6 +739,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.researchChats, container.research, container.modelManager, container.sessions,
                             container.library, container.bookshelf, container.mediaIndex, container.appScope,
                             savedState = createSavedStateHandle(),
+                            player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
+                            speakAnswers = { container.voicePrefs.speakAnswers.value },
                         )
                     },
                     focusInput = route.quote != null,
