@@ -14,6 +14,10 @@ import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
 import app.granger.core.library.RoomMediaLibrary
 import app.granger.core.library.Track
+import app.granger.core.player.voice.SpeechOutput
+import app.granger.core.speech.InstalledVoices
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.VoiceId
 import java.io.File
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
@@ -46,12 +50,18 @@ internal class PlayerTestRig {
 
     fun idle() = shadowOf(Looper.getMainLooper()).idle()
 
-    fun engine(): PlayerEngine {
+    fun engine(
+        focus: FakeFocusRequester = FakeFocusRequester(),
+        speechOutput: SpeechOutput? = null,
+        voices: InstalledVoices? = null,
+        readSources: (suspend (String) -> ReadSource?)? = null,
+        preferredVoice: () -> VoiceId? = { null },
+    ): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()
         return PlayerEngine(
-            player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(FakeFocusRequester()),
+            player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(focus),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), writer = Dispatchers.Unconfined,
-            random = Random(7),
+            random = Random(7), speechOutput = speechOutput, voices = voices, readSources = readSources, preferredVoice = preferredVoice,
         ).also { engines += it }
     }
 

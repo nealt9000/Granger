@@ -29,6 +29,9 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionError
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
+import app.granger.core.speech.InstalledVoices
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.VoiceId
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -67,6 +70,11 @@ class PlaybackService : MediaLibraryService() {
         val artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
         /** What Android Auto browses and plays; null serves an empty root. */
         val browse: MediaBrowseTree? = null,
+        /** The voice (Plan V1): the installed voices, and how a saved source is reopened for a restore; null: no voice. */
+        val voices: InstalledVoices? = null,
+        val readSources: (suspend (String) -> ReadSource?)? = null,
+        val preferredVoice: () -> VoiceId? = { null },
+        val voiceSpeed: () -> Float = { 1f },
     )
 
     companion object {
@@ -106,6 +114,10 @@ class PlaybackService : MediaLibraryService() {
             effects = EffectsSession(this),
             replayGain = replayGain,
             artwork = deps.artwork,
+            voices = deps.voices,
+            readSources = deps.readSources,
+            preferredVoice = deps.preferredVoice,
+            defaultVoiceSpeed = deps.voiceSpeed,
         )
         engine = e
         session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope, deps.browse))
@@ -324,13 +336,19 @@ internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine
     }
 
     private fun isMusic() = engine.ui.value.now is NowPlaying.Music
+    private fun isVoice() = engine.ui.value.now is NowPlaying.Voice
 
     override fun getAvailableCommands(): Player.Commands = withChapterSteps(super.getAvailableCommands())
 
     override fun isCommandAvailable(command: Int): Boolean = availableCommands.contains(command)
 
-    private fun withChapterSteps(commands: Player.Commands): Player.Commands =
-        if (engine.chapterSteps) commands.buildUpon().addAll(*CHAPTER_STEPS).build() else commands
+    /** Chapter (or paragraph) steps when the engine offers them; no seeking within the voice's carrier item. */
+    private fun withChapterSteps(commands: Player.Commands): Player.Commands {
+        var c = commands
+        if (engine.chapterSteps) c = c.buildUpon().addAll(*CHAPTER_STEPS).build()
+        if (isVoice()) c = c.buildUpon().removeAll(*VOICE_NO_SEEK).build()
+        return c
+    }
 
     override fun addListener(listener: Player.Listener) {
         val registered = CommandsListener(listener)
@@ -448,6 +466,9 @@ internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine
         val CHAPTER_STEPS = intArrayOf(
             Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_PREVIOUS,
             Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM,
+        )
+        val VOICE_NO_SEEK = intArrayOf(
+            Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM, Player.COMMAND_SEEK_TO_MEDIA_ITEM, Player.COMMAND_SEEK_TO_DEFAULT_POSITION,
         )
     }
 }

@@ -15,6 +15,24 @@ import org.robolectric.annotation.Config
 class MigrationTest {
     @get:Rule val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), LibraryDatabase::class.java)
 
+    @Test fun migration10To11AddsVoiceStates() {
+        helper.createDatabase("migrate11.db", 10).apply {
+            execSQL("INSERT INTO recent_plays (`key`, title, playedAt) VALUES ('album:x', 'X', 1)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate11.db", 11, true, LibraryDatabase.MIGRATION_10_11)
+        db.execSQL(
+            "INSERT INTO voice_states (sourceKey, address, speed, title, section, voiceId, updatedAt) " +
+                "VALUES ('book:granger:hamlet', 'book:granger:hamlet@{}:3', 1.0, 'Hamlet', 'Act I', 'granger:vits-piper-en_US-ljspeech-medium', 7)",
+        )
+        db.query("SELECT sourceKey, section FROM voice_states").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("book:granger:hamlet")
+            assertThat(it.getString(1)).isEqualTo("Act I")
+        }
+        db.query("SELECT COUNT(*) FROM recent_plays").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+    }
+
     @Test fun version1PacksGetABlankNameAndKeepTheirRows() {
         helper.createDatabase("migrate.db", 1).apply {
             execSQL(

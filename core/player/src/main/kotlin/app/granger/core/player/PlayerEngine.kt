@@ -11,7 +11,12 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.HandlerWrapper
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.Timeline
+import androidx.media3.exoplayer.source.ForwardingTimeline
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ShuffleOrder
+import androidx.media3.exoplayer.source.SilenceMediaSource
+import androidx.media3.exoplayer.source.WrappingMediaSource
 import androidx.media3.session.MediaSession
 import app.granger.core.library.Albums
 import app.granger.core.library.AudioBookmark
@@ -24,7 +29,18 @@ import app.granger.core.library.MusicState
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.RecentPlay
 import app.granger.core.library.Track
+import app.granger.core.library.VoiceState
 import app.granger.core.player.PositionSaver.SaveReason
+import app.granger.core.player.voice.AudioTrackSpeechOutput
+import app.granger.core.player.voice.ReadAloudEngine
+import app.granger.core.player.voice.SpeechOutput
+import app.granger.core.player.voice.VoiceProgress
+import app.granger.core.speech.InstalledVoices
+import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.Speech
+import app.granger.core.speech.SpeechException
+import app.granger.core.speech.VoiceId
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.random.Random
@@ -79,8 +95,15 @@ class PlayerEngine(
     private val random: Random = Random.Default,
     /** A cover path as the items' artwork URI (the app passes its artwork provider's content:// URI). */
     private val artwork: (String) -> Uri = { Uri.fromFile(File(it)) },
+    /** The voice (Plan V1). [speechOutput] null: an [AudioTrackSpeechOutput] made on first use (tests inject a fake). */
+    private val speechOutput: SpeechOutput? = null,
+    private val voices: InstalledVoices? = null,
+    /** Reopens a saved source by its key for a restore; null when nothing can be reopened. */
+    private val readSources: (suspend (String) -> ReadSource?)? = null,
+    private val preferredVoice: () -> VoiceId? = { null },
+    private val defaultVoiceSpeed: () -> Float = { 1f },
 ) : PlayerHub {
-    private enum class Mode { NONE, MUSIC, BOOK }
+    private enum class Mode { NONE, MUSIC, BOOK, VOICE }
 
     private val clock = player.clock
     private fun now() = clock.currentTimeMillis()
@@ -120,6 +143,27 @@ class PlayerEngine(
     // left alone until the user picks a place (seek, skip, chapter, bookmark) or plays the book to its end.
     private var restoreUnresolved = false
 
+    // Voice (Plan V1). ExoPlayer plays a silent carrier item so the session, notification, focus and sleep timer behave
+    // as for a book; the speech itself goes to [output]. The speech engine is opened on the first play, not on a restore.
+    private var output: SpeechOutput? = null
+    private val readAloud: ReadAloudEngine by lazy {
+        val out = speechOutput ?: AudioTrackSpeechOutput()
+        output = out
+        ReadAloudEngine(out, scope).also { engine ->
+            scope.launch { engine.progress.collect { if (mode == Mode.VOICE && it != null) onVoiceProgress() } }
+            scope.launch { engine.ended.collect { if (mode == Mode.VOICE) onVoiceEnded() } }
+            scope.launch { engine.errors.collect { Log.w(TAG, "Voice: ${it.message}") } }
+        }
+    }
+    private var voiceSource: ReadSource? = null
+    private var voiceId: VoiceId? = null
+    private var voiceSpeech: Speech? = null
+    private var voiceSpeed = 1f
+    private var voiceFrom: ReadAddress? = null      // where to start speaking: the restored place, or null for the start
+    private var voiceOpen = false                   // the speech engine is loaded and the source is queued
+    private var voiceEnded = false
+    private var voiceSection: String? = null
+
     private var errorRun = 0              // playback errors since an item last got ready: stops a queue of broken files
     private var pausedAt = 0L
     private var pausedForFocus = false
@@ -145,6 +189,8 @@ class PlayerEngine(
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             // Who paused or played (reason: 1 us or a controller, 3 headphones unplugged): for reading a device test.
             Log.i(FOCUS_TAG, "playWhenReady=$playWhenReady reason=$reason pausedForFocus=$pausedForFocus")
+            // The carrier drives the voice: whoever paused ExoPlayer (user, focus, headset, sleep timer) paused the voice.
+            if (mode == Mode.VOICE && voiceOpen) { if (playWhenReady) readAloud.play() else readAloud.pause() }
             // The pause time (for auto-rewind) is kept for audiobooks only, so it survives the process.
             if (playWhenReady) {
                 pausedAt = 0L
@@ -279,7 +325,22 @@ class PlayerEngine(
         when (prefs.getString(PlayerSettingsKeys.LAST_MODE, null)) {
             MODE_BOOK -> prefs.getString(PlayerSettingsKeys.LAST_AUDIOBOOK, null)?.let { loadBook(it, null, play = false) }
             MODE_MUSIC -> playback.musicState()?.let { loadMusicState(it) }
+            MODE_VOICE -> restoreVoice()
         }
+    }
+
+    /** The voice's last place, paused, if its source can still be opened; a source that is gone clears the row. */
+    private suspend fun restoreVoice() {
+        val key = prefs.getString(PlayerSettingsKeys.LAST_VOICE, null) ?: return
+        val state = playback.voiceState(key) ?: return
+        val source = runCatching { readSources?.invoke(key) }.getOrNull()
+        if (source == null) {
+            Log.i(TAG, "Voice: $key is gone; forgetting its place")
+            withContext(writerDispatcher) { playback.deleteVoiceState(key) }
+            prefs.edit().remove(PlayerSettingsKeys.LAST_VOICE).apply()
+            return
+        }
+        startVoice(source, ReadAddress.decode(state.address), VoiceId.decode(state.voiceId), state.speed, play = false)
     }
 
     /**
@@ -334,6 +395,8 @@ class PlayerEngine(
         focus.abandon()
         effects.close()
         scope.cancel()
+        runCatching { voiceSpeech?.close() }
+        runCatching { output?.close() }
         player.release()
     }
 
@@ -353,6 +416,7 @@ class PlayerEngine(
                 val c = m.chapterAt(player.currentMediaItemIndex, player.currentPosition)
                 MediaAddress.audiobook(book!!.id, c.ordinal, m.inChapter(player.currentMediaItemIndex, player.currentPosition))
             }
+            Mode.VOICE -> (readAloud.progress.value?.address ?: voiceFrom)?.encode()
             Mode.NONE -> null
         }
     }
@@ -374,6 +438,33 @@ class PlayerEngine(
     }
 
     override fun playAudiobook(id: String, at: AudioBookmark?) = submit { startBook(id, at) }
+
+    // ---- the voice ----
+
+    override val voiceProgress: StateFlow<VoiceProgress?> get() = readAloud.progress
+
+    override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) = submit {
+        stopCurrent()
+        if (startVoice(source, from, voice, defaultVoiceSpeed(), play = true)) {
+            playback.upsertRecentPlay(RecentPlay("voice:${source.key}", source.title, now()))
+        }
+    }
+
+    override fun stopVoice() = submit {
+        if (mode != Mode.VOICE) return@submit
+        stopCurrent()
+        refresh()
+    }
+
+    override fun nextParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.nextParagraph() }
+    override fun previousParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.previousParagraph() }
+    override fun nextSentence() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.nextSentence() }
+    override fun previousSentence() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.previousSentence() }
+    override fun jumpTo(address: ReadAddress) = submit {
+        if (mode != Mode.VOICE) return@submit
+        if (voiceOpen) readAloud.jumpTo(address) else voiceFrom = address
+        refresh()
+    }
 
     private suspend fun startBook(id: String, at: AudioBookmark?) {
         val b = media.audiobook(id) ?: return
@@ -423,7 +514,7 @@ class PlayerEngine(
         val loadedHere = when (mode) {
             Mode.BOOK -> book?.id == audiobookId
             Mode.MUSIC -> musicQueue?.ids?.any { it in trackIds } == true
-            Mode.NONE -> false
+            Mode.VOICE, Mode.NONE -> false
         }
         if (!loadedHere) return@submit
         stopCurrent()
@@ -452,6 +543,7 @@ class PlayerEngine(
                 if (target != C.INDEX_UNSET) player.seekTo(target, 0L)
             }
             Mode.BOOK -> { userMoved(); chapterStep(+1) }
+            Mode.VOICE -> if (voiceOpen) readAloud.nextParagraph()
             Mode.NONE -> Unit
         }
     }
@@ -463,17 +555,20 @@ class PlayerEngine(
                 player.seekTo(q.previous(player.currentPosition), 0L)
             }
             Mode.BOOK -> { userMoved(); chapterStep(-1) }
+            Mode.VOICE -> if (voiceOpen) readAloud.previousParagraph()
             Mode.NONE -> Unit
         }
     }
 
     override fun skipBack() = submit {
+        if (mode == Mode.VOICE) { if (voiceOpen) readAloud.previousSentence(); return@submit }
         if (mode != Mode.BOOK) return@submit
         userMoved()
         seekBookBy(-prefs.getInt(PlayerSettingsKeys.SKIP_BACK_S, DEFAULT_SKIP_S) * 1_000L)
     }
 
     override fun skipForward() = submit {
+        if (mode == Mode.VOICE) { if (voiceOpen) readAloud.nextSentence(); return@submit }
         if (mode != Mode.BOOK) return@submit
         userMoved()
         seekBookBy(prefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, DEFAULT_SKIP_S) * 1_000L)
@@ -489,7 +584,7 @@ class PlayerEngine(
                 player.seekTo(m.fileIndexOf(c), c.startMs + positionMs.coerceIn(0L, c.durationMs.takeIf { it > 0 } ?: Long.MAX_VALUE))
                 retargetSleep()
             }
-            Mode.NONE -> Unit
+            Mode.VOICE, Mode.NONE -> Unit
         }
     }
 
@@ -570,6 +665,13 @@ class PlayerEngine(
     override fun addToQueue(trackIds: List<String>) = submit { insert(trackIds, next = false) }
 
     override fun setSpeed(speed: Float) = submit {
+        if (mode == Mode.VOICE) {
+            voiceSpeed = speed.coerceIn(MIN_VOICE_SPEED, MAX_VOICE_SPEED)
+            if (voiceOpen) readAloud.setSpeed(voiceSpeed)
+            save(SaveReason.SEEK)
+            refresh()
+            return@submit
+        }
         if (mode != Mode.BOOK) return@submit
         this.speed = speed.coerceIn(MIN_SPEED, MAX_SPEED)
         player.setPlaybackSpeed(this.speed)
@@ -621,10 +723,111 @@ class PlayerEngine(
         cancelSleep()
         loaded = false
         player.pause()
+        if (mode == Mode.VOICE) {
+            if (voiceOpen) readAloud.stop()
+            voiceOpen = false; voiceEnded = false
+            voiceSource = null; voiceSpeech = null; voiceFrom = null; voiceSection = null
+        }
         player.clearMediaItems()
         effects.setBoost(0)
         mode = Mode.NONE
         _queue.value = emptyList()
+    }
+
+    /**
+     * Makes the voice the active mode for [source] at [from] with [wanted] (else the preferred, else the first voice):
+     * the carrier item is loaded and the state saved as "voice"; the speech engine itself opens on the first play
+     * ([openVoice]), so a restore after process death costs nothing until the user presses play. False when no voice
+     * can speak.
+     */
+    private suspend fun startVoice(source: ReadSource, from: ReadAddress?, wanted: VoiceId?, speed: Float, play: Boolean): Boolean {
+        val list = voices ?: return false
+        if (list.voices.value.isEmpty()) list.refresh()
+        val voice = list.preferred(wanted ?: preferredVoice()) ?: run { Log.i(TAG, "Voice: nothing installed can speak"); return false }
+        voiceSource = source
+        voiceId = voice.id
+        voiceSpeed = speed.coerceIn(MIN_VOICE_SPEED, MAX_VOICE_SPEED)
+        voiceFrom = from
+        voiceOpen = false
+        voiceEnded = false
+        voiceSection = from?.let { runCatching { source.sectionTitle(it) }.getOrNull() }
+        musicQueue = null; tracks = emptyMap(); book = null; map = null
+        mode = Mode.VOICE
+        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_VOICE).putString(PlayerSettingsKeys.LAST_VOICE, source.key).apply()
+
+        player.setAudioAttributes(attributes(speech = true), false)
+        player.shuffleModeEnabled = false
+        player.repeatMode = Player.REPEAT_MODE_OFF
+        player.setPlaybackSpeed(1f)
+        player.skipSilenceEnabled = false
+        replayGain?.setGains(emptyMap())
+        effects.setBoost(0)
+        player.setMediaSource(carrier(source, voiceSection))
+        awaitingReady = true
+        saveWhenReady = play
+        loaded = true
+        player.prepare()
+        pausedAt = 0L
+        refresh()
+        if (play) resume()
+        return true
+    }
+
+    /** A long silent item carrying the voice's metadata, so the session and the notification show "Reading · <title>". */
+    private fun carrier(source: ReadSource, section: String?): MediaSource {
+        val item = MediaItem.Builder()
+            .setMediaId("voice:${source.key}")
+            .setMediaMetadata(MediaMetadata.Builder().setTitle("Reading · ${source.title}").setArtist(section).setAlbumTitle(source.title).build())
+            .build()
+        return CarrierSource(item, CARRIER_US)
+    }
+
+    /** Silence whose timeline window and media item are [item]'s, so `currentMediaItem` and the session see the voice's metadata. */
+    private class CarrierSource(private val item: MediaItem, durationUs: Long) : WrappingMediaSource(SilenceMediaSource(durationUs)) {
+        override fun getMediaItem(): MediaItem = item
+        override fun onChildSourceInfoRefreshed(newTimeline: Timeline) {
+            refreshSourceInfo(object : ForwardingTimeline(newTimeline) {
+                override fun getWindow(windowIndex: Int, window: Timeline.Window, defaultPositionProjectionUs: Long): Timeline.Window =
+                    super.getWindow(windowIndex, window, defaultPositionProjectionUs).also { it.mediaItem = item }
+            })
+        }
+    }
+
+    /** Loads the speech engine for the chosen voice and queues the source from its place, without speaking yet. */
+    private suspend fun openVoice(): Boolean {
+        val source = voiceSource ?: return false
+        val list = voices ?: return false
+        val id = voiceId ?: return false
+        val voice = list.voices.value.firstOrNull { it.id == id } ?: list.preferred(null)?.also { voiceId = it.id } ?: return false
+        val speech = voiceSpeech ?: try {
+            list.open(voice)
+        } catch (e: SpeechException) {
+            Log.w(TAG, "Voice: ${voice.title} didn't open", e)
+            return false
+        }
+        voiceSpeech = speech
+        readAloud.start(source, speech, voiceFrom, voiceSpeed, autoplay = false)
+        voiceOpen = true
+        voiceEnded = false
+        return true
+    }
+
+    private fun onVoiceProgress() {
+        val p = readAloud.progress.value ?: return
+        val source = voiceSource ?: return
+        scope.launch {
+            val section = runCatching { source.sectionTitle(p.address) }.getOrNull()
+            if (section != voiceSection) { voiceSection = section; refresh() }
+        }
+        save(SaveReason.TRACK)
+        refresh()
+    }
+
+    private fun onVoiceEnded() {
+        voiceEnded = true
+        player.pause()
+        save(SaveReason.STOP)
+        refresh()
     }
 
     private fun startMusic(q: MusicQueue, byId: Map<String, Track>, positionMs: Long) {
@@ -744,8 +947,16 @@ class PlayerEngine(
     /** Play, with focus; an audiobook steps back by [AutoRewind] for the time it was paused. */
     private fun resume() {
         if (!loaded) return
+        if (mode == Mode.VOICE && (!voiceOpen || voiceEnded)) {
+            // First play (or play again after the end): open the engine in turn, then come back here.
+            submit {
+                if (voiceEnded && voiceOpen) { voiceFrom = null; voiceOpen = false }
+                if (openVoice()) resume()
+            }
+            return
+        }
         if (sleep.expired()) cancelSleep()
-        if (!focus.request(speech = mode == Mode.BOOK)) {
+        if (!focus.request(speech = mode != Mode.MUSIC)) {
             // A call still has focus. Accepted as delayed, its end (GAIN) plays; refused, play stays the only way.
             if (focus.suspended) pausedForFocus = true
             Log.i(FOCUS_TAG, "play refused: focus ${if (focus.suspended) "delayed, will play on gain" else "not granted"}")
@@ -896,12 +1107,19 @@ class PlayerEngine(
     private sealed interface Snapshot {
         data class Book(val state: AudiobookState) : Snapshot
         data class Music(val state: MusicState) : Snapshot
+        data class Voice(val state: VoiceState) : Snapshot
     }
 
     private fun snapshot(): Snapshot? {
         if (!loaded || awaitingReady || player.mediaItemCount == 0) return null
         val position = player.currentPosition.coerceAtLeast(0L)
         return when (mode) {
+            Mode.VOICE -> {
+                val src = voiceSource ?: return null
+                val id = voiceId ?: return null
+                val address = (if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom ?: return null
+                Snapshot.Voice(VoiceState(src.key, address.encode(), voiceSpeed, src.title, voiceSection, id.encode(), now()))
+            }
             Mode.BOOK -> {
                 if (restoreUnresolved) return null
                 val b = book ?: return null
@@ -918,6 +1136,7 @@ class PlayerEngine(
         when (snapshot) {
             is Snapshot.Book -> playback.upsertAudiobookState(snapshot.state)
             is Snapshot.Music -> playback.upsertMusicState(snapshot.state)
+            is Snapshot.Voice -> playback.upsertVoiceState(snapshot.state)
         }
     } catch (e: CancellationException) {
         throw e
@@ -941,7 +1160,7 @@ class PlayerEngine(
     private fun tick() {
         if (!ticking || released) return
         if (player.isPlaying) {
-            val interval = if (mode == Mode.BOOK) BOOK_SAVE_MS else MUSIC_SAVE_MS
+            val interval = if (mode == Mode.MUSIC) MUSIC_SAVE_MS else BOOK_SAVE_MS
             scope.launch(start = CoroutineStart.UNDISPATCHED) { saver.onTick(interval) }
             checkChapter()
         }
@@ -974,7 +1193,7 @@ class PlayerEngine(
         sleepTarget = when (mode) {
             Mode.BOOK -> map?.chapterAt(player.currentMediaItemIndex, player.currentPosition)?.ordinal ?: -1
             Mode.MUSIC -> player.currentMediaItemIndex
-            Mode.NONE -> -1
+            Mode.VOICE, Mode.NONE -> -1
         }
     }
 
@@ -997,17 +1216,20 @@ class PlayerEngine(
                 val d = player.duration.takeIf { it != C.TIME_UNSET } ?: return null
                 d - position
             }
-            Mode.NONE -> return null
+            Mode.VOICE, Mode.NONE -> return null
         }
         return (mediaLeft / player.playbackParameters.speed).toLong()
     }
 
-    private fun applyVolume() { player.volume = duck * fade }
+    private fun applyVolume() {
+        player.volume = duck * fade
+        output?.volume = duck * fade
+    }
 
     // ---- ui ----
 
-    /** A book with chapters to step through is loaded: the session offers next and previous (see [SessionPlayer]). */
-    internal val chapterSteps: Boolean get() = loaded && mode == Mode.BOOK && (map?.size ?: 0) > 1
+    /** A book with chapters, or the voice (paragraphs): the session offers next and previous (see [SessionPlayer]). */
+    internal val chapterSteps: Boolean get() = loaded && ((mode == Mode.BOOK && (map?.size ?: 0) > 1) || mode == Mode.VOICE)
 
     /** Told (on main) when [chapterSteps] changes. */
     internal var onChapterStepsChanged: (() -> Unit)? = null
@@ -1024,6 +1246,15 @@ class PlayerEngine(
         var duration = player.duration.takeIf { it != C.TIME_UNSET } ?: 0L
         when {
             !loaded || mode == Mode.NONE -> { _ui.value = PlayerUi.IDLE; return }
+            mode == Mode.VOICE -> {
+                val src = voiceSource ?: return
+                val id = voiceId ?: return
+                val p = if (voiceOpen) readAloud.progress.value else null
+                duration = 0L
+                now = NowPlaying.Voice(
+                    src.key, src.title, voiceSection, p?.utterance?.text ?: "", p?.utterance?.paragraph ?: 0, voiceSpeed, id, voiceEnded,
+                )
+            }
             mode == Mode.MUSIC -> {
                 val q = musicQueue ?: return
                 val track = tracks[player.currentMediaItem?.mediaId ?: q.ids[q.index]] ?: return
@@ -1047,6 +1278,10 @@ class PlayerEngine(
         const val FOCUS_TAG = FocusPolicy.TAG
         const val MODE_MUSIC = "music"
         const val MODE_BOOK = "audiobook"
+        const val MODE_VOICE = "voice"
+        const val CARRIER_US = 4 * 60 * 60 * 1_000_000L   // the silent item under the voice: four hours, then it ends
+        const val MIN_VOICE_SPEED = 0.7f
+        const val MAX_VOICE_SPEED = 2.0f
         const val TICK_MS = 1_000L
         const val FADE_TICK_MS = 200L
         const val FADE_WINDOW_MS = 11_000L

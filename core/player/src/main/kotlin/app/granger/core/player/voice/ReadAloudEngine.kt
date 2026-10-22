@@ -71,7 +71,8 @@ class ReadAloudEngine(
 
     val current: Utterance? get() = buffer.getOrNull(index)
 
-    suspend fun start(source: ReadSource, speech: Speech, from: ReadAddress?, speed: Float) = lock.withLock {
+    /** Queues [source] from [from] with [speech]; speaks at once unless [autoplay] is false (then [play] starts it). */
+    suspend fun start(source: ReadSource, speech: Speech, from: ReadAddress?, speed: Float, autoplay: Boolean = true) = lock.withLock {
         cancelJobs()
         idleClose?.cancel(); idleClose = null
         this.speech?.takeIf { it !== speech }?.close()
@@ -83,10 +84,17 @@ class ReadAloudEngine(
         fetchMore(located)
         index = 0
         output.flush()
-        output.play()
-        _playing.value = true
-        launchJobs()
+        _progress.value = buffer.firstOrNull()?.let { VoiceProgress(it.address, it, 0) }
+        if (autoplay) {
+            output.play()
+            _playing.value = true
+            launchJobs()
+        } else {
+            _playing.value = false
+        }
     }
+
+    suspend fun nextSentence() = lock.withLock { if (index + 1 < buffer.size || fetchMore(null)) restartAt(index + 1) }
 
     fun play() {
         if (speech == null || _playing.value) return

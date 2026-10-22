@@ -4,6 +4,10 @@ import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
 import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.Track
+import app.granger.core.player.voice.VoiceProgress
+import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.flow.StateFlow
 
 /** What a play started from; written to recent plays. [key] follows `RecentPlay.key` ("album:<albumKey>", "songs", …). */
@@ -17,11 +21,21 @@ sealed interface NowPlaying {
 
     data class Book(val book: Audiobook, val chapter: AudiobookChapter, val chapterCount: Int, val speed: Float,
                     val skipSilence: Boolean, val volumeBoostMb: Int) : NowPlaying
+
+    /**
+     * The voice reading [title] (an article, a book, an answer; [sourceKey] names it as the saved place does), at
+     * [sentence] of [paragraph], in [section] when the source has sections. [ended]: the source ran out; play reads it again.
+     */
+    data class Voice(
+        val sourceKey: String, val title: String, val section: String?, val sentence: String, val paragraph: Int,
+        val speed: Float, val voiceId: VoiceId, val ended: Boolean = false,
+    ) : NowPlaying
 }
 
 /**
  * The player as the UI shows it. For music [positionMs]/[durationMs] are within the track; for audiobooks they are
- * within the current chapter (the book-wide progress is the earlier chapters' durations plus [positionMs]).
+ * within the current chapter (the book-wide progress is the earlier chapters' durations plus [positionMs]); for the
+ * voice [positionMs] is the time spent reading and [durationMs] is 0 (there is no bar).
  * [playing] is "wants to play" (true while buffering), which is what the play/pause button shows.
  */
 data class PlayerUi(val now: NowPlaying, val playing: Boolean, val positionMs: Long, val durationMs: Long, val sleepRemainingMs: Long?) {
@@ -30,7 +44,7 @@ data class PlayerUi(val now: NowPlaying, val playing: Boolean, val positionMs: L
     }
 }
 
-/** The player's two modes (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. */
+/** The player's two tabs (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. The voice is a third mode without a tab. */
 enum class PlayerMode { MUSIC, AUDIOBOOK }
 
 /**
@@ -56,12 +70,18 @@ data class SavedBook(
     val finished: Boolean,
 )
 
+/** The last thing the voice read, at the sentence it stopped on. */
+data class SavedVoice(val sourceKey: String, val title: String, val section: String?, val address: ReadAddress, val speed: Float, val voiceId: VoiceId?)
+
 /**
  * Each mode's saved state, read from the db without loading anything into the player; it follows every save.
- * [music]/[book] are null for a mode never used. [lastMode] is the mode last loaded (what a restore brings back).
- * [loaded] is false until the db has been read once.
+ * [music]/[book]/[voice] are null for a mode never used. [lastMode] is the tab last loaded (what a restore brings
+ * back), null when the voice was last ([lastWasVoice]). [loaded] is false until the db has been read once.
  */
-data class SavedModes(val music: SavedMusic?, val book: SavedBook?, val lastMode: PlayerMode?, val loaded: Boolean = true) {
+data class SavedModes(
+    val music: SavedMusic?, val book: SavedBook?, val lastMode: PlayerMode?, val loaded: Boolean = true,
+    val voice: SavedVoice? = null, val lastWasVoice: Boolean = false,
+) {
     companion object {
         val UNKNOWN = SavedModes(null, null, null, loaded = false)
     }
@@ -80,6 +100,9 @@ interface PlayerHub {
     /** Both modes' saved states, for showing the inactive one without loading it. The player stays their only writer. */
     val saved: StateFlow<SavedModes>
 
+    /** The sentence the voice is on, null while nothing is read; the readers mark and follow from this. */
+    val voiceProgress: StateFlow<VoiceProgress?>
+
     /**
      * Makes [mode] the active one and plays it. Already active: plays. Otherwise the active mode is saved first (as
      * any switch does), then [mode] is loaded from its saved state (music: the saved queue, track, position, shuffle
@@ -95,6 +118,19 @@ interface PlayerHub {
     fun playAudiobook(id: String, at: AudioBookmark? = null)
 
     /**
+     * Reads [source] aloud from [from] (its start when null) with [voice], else the preferred voice, else the first
+     * one installed. Whatever was playing is saved and stopped first (the voice does not mix in V1). Nothing happens
+     * when no voice can speak.
+     */
+    fun readAloud(source: ReadSource, from: ReadAddress? = null, voice: VoiceId? = null)
+
+    /** Stops the voice and empties the player, saving its place. No-op when the voice isn't the active mode. */
+    fun stopVoice()
+
+    /** Voice only: by paragraph and by sentence. [jumpTo] moves the voice to an address of its source. */
+    fun nextParagraph(); fun previousParagraph(); fun nextSentence(); fun previousSentence(); fun jumpTo(address: ReadAddress)
+
+    /**
      * The book page has just written [finished] into [audiobookId]'s state. If that book is loaded, the player adopts
      * it (so its next save doesn't undo it) and saves; unfinished while at the end, it goes back to the first chapter.
      * Otherwise nothing happens: the row is the library's.
@@ -108,7 +144,7 @@ interface PlayerHub {
     fun unload(audiobookId: String, trackIds: Set<String>)
     fun playPause(); fun next(); fun previous()
 
-    /** Audiobooks: ± the skip interval; music: no-op. */
+    /** Audiobooks: ± the skip interval; the voice: a sentence back or forward; music: no-op. */
     fun skipBack(); fun skipForward()
 
     /** Music: within the track. Audiobooks: within the current chapter (as [PlayerUi.positionMs]). */
@@ -120,6 +156,7 @@ interface PlayerHub {
     /** Plays the queue's [position] (play order, as the queue sheet lists it) from its start. Music only. */
     fun playQueueItem(position: Int)
     fun playNext(trackIds: List<String>); fun addToQueue(trackIds: List<String>)
+    /** Audiobooks 0.5–3.0 through ExoPlayer; the voice 0.7–2.0 through its engine. */
     fun setSpeed(speed: Float); fun setSkipSilence(on: Boolean); fun setVolumeBoost(mb: Int)
     fun startSleepTimer(setting: SleepSetting); fun cancelSleepTimer()
 
@@ -144,5 +181,6 @@ object PlayerSettingsKeys {
     // Kept by the engine, not settings: which player to restore and when it was paused (survive process death).
     internal const val LAST_MODE = "last_mode"
     internal const val LAST_AUDIOBOOK = "last_audiobook"
+    internal const val LAST_VOICE = "last_voice"
     internal const val PAUSED_AT = "paused_at"
 }

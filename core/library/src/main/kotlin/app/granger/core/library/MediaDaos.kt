@@ -116,6 +116,18 @@ interface PlaybackDao {
     @Upsert
     suspend fun upsertMusicState(state: MusicState)
 
+    @Query("SELECT * FROM voice_states WHERE sourceKey = :sourceKey")
+    suspend fun voiceState(sourceKey: String): VoiceState?
+
+    @Query("SELECT * FROM voice_states ORDER BY updatedAt DESC")
+    fun observeVoiceStates(): Flow<List<VoiceState>>
+
+    @Upsert
+    suspend fun upsertVoiceState(state: VoiceState)
+
+    @Query("DELETE FROM voice_states WHERE sourceKey = :sourceKey")
+    suspend fun deleteVoiceState(sourceKey: String)
+
     @Query("SELECT * FROM scan_cache WHERE uri = :uri")
     suspend fun scanCache(uri: String): ScanCacheEntry?
 

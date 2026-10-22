@@ -85,6 +85,22 @@ data class AudiobookState(
     val updatedAt: Long,
 )
 
+/**
+ * Where the voice is in what it was reading (Plan V1): [sourceKey] names the article, book or answer
+ * (`pack:<id>/<path>`, `book:<id>`, `text:<key>`), [address] is the sentence's encoded `ReadAddress`, [voiceId] the
+ * voice's encoded id. One row per source; never deleted by a scan.
+ */
+@Entity(tableName = "voice_states")
+data class VoiceState(
+    @PrimaryKey val sourceKey: String,
+    val address: String,
+    val speed: Float,
+    val title: String,
+    val section: String?,
+    val voiceId: String,
+    val updatedAt: Long,
+)
+
 /** A bookmark in an audiobook. Distinct from web-page [Bookmark]s and e-book [BookAnnotation]s. */
 @Entity(tableName = "audio_bookmarks", indices = [Index("audiobookId")])
 data class AudioBookmark(

@@ -10,6 +10,11 @@ import app.granger.core.library.AudioBookmark
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PlaybackDao
 import app.granger.core.library.Track
+import app.granger.core.player.voice.VoiceProgress
+import app.granger.core.speech.InstalledVoices
+import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.VoiceId
 import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
@@ -46,13 +51,20 @@ class MediaControllerPlayerHub(
      * it. Null serves an empty root.
      */
     browse: (() -> MediaBrowseTree)? = null,
+    /** The voice (Plan V1): what can speak, how a saved source is reopened after process death, and the settings. */
+    voices: InstalledVoices? = null,
+    readSources: (suspend (String) -> ReadSource?)? = null,
+    preferredVoice: () -> VoiceId? = { null },
+    voiceSpeed: () -> Float = { 1f },
 ) : PlayerHub {
     private val app = context.applicationContext
     private var controller: ListenableFuture<MediaController>? = null
     private val pending = ArrayDeque<(PlayerEngine) -> Unit>()
 
     init {
-        PlaybackService.install(PlaybackService.Dependencies(media, playback, artwork, browse?.let(::LazyBrowseTree)))
+        PlaybackService.install(
+            PlaybackService.Dependencies(media, playback, artwork, browse?.let(::LazyBrowseTree), voices, readSources, preferredVoice, voiceSpeed),
+        )
         connect()
         scope.launch {
             PlaybackService.engine.filterNotNull().collect { engine ->
@@ -68,6 +80,10 @@ class MediaControllerPlayerHub(
     override val queue: StateFlow<List<Track>> = PlaybackService.engine
         .flatMapLatest { it?.queue ?: flowOf(emptyList()) }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    override val voiceProgress: StateFlow<VoiceProgress?> = PlaybackService.engine
+        .flatMapLatest { it?.voiceProgress ?: flowOf(null) }
+        .stateIn(scope, SharingStarted.Eagerly, null)
 
     // Read from the db, not the engine, so the saved modes show even while the service is down.
     override val saved: StateFlow<SavedModes> =
@@ -110,6 +126,13 @@ class MediaControllerPlayerHub(
     override fun playTracks(trackIds: List<String>, startIndex: Int, shuffle: Boolean, source: PlaySource) =
         send { it.playTracks(trackIds, startIndex, shuffle, source) }
     override fun playAudiobook(id: String, at: AudioBookmark?) = send { it.playAudiobook(id, at) }
+    override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) = send { it.readAloud(source, from, voice) }
+    override fun stopVoice() { PlaybackService.engine.value?.stopVoice() }
+    override fun nextParagraph() = send { it.nextParagraph() }
+    override fun previousParagraph() = send { it.previousParagraph() }
+    override fun nextSentence() = send { it.nextSentence() }
+    override fun previousSentence() = send { it.previousSentence() }
+    override fun jumpTo(address: ReadAddress) = send { it.jumpTo(address) }
     override fun activate(mode: PlayerMode) = send { it.activate(mode) }
     override fun setFinished(audiobookId: String, finished: Boolean) = send { it.setFinished(audiobookId, finished) }
     // No service running, nothing loaded: don't start one just to empty it.
