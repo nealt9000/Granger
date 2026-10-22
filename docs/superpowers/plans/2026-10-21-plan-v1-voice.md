@@ -103,11 +103,11 @@ object Pronunciations {
 }
 ```
 
-- [ ] **Step 1: Failing tests:** `pronunciationsReplaceWholeWordsAndKeepCase` ("Rosetta Stone" → "Rozetta Stone", "rosetta" → "rozetta", "Rosettas" untouched), `pronunciationsLeaveTextWithoutMatchesIdentical`, `installedVoicesListsGrangerVoicesBeforeSystemOnes`, `installedVoicesSkipsNetworkOnlySystemVoices`, `systemSpeechSynthesizesOneSentenceToPcm` (Robolectric shadow: a 24 kHz WAV written by the shadow is read back), `sherpaSpeechPassesAnObjectCallback` (a reflection test: the class of the callback passed to `generateWithCallback` declares `invoke([F)Ljava/lang/Integer;`; the AAR's `OfflineTts` is not constructed), plus the moved `SentencesTest` and `WavTest`.
-- [ ] **Step 2:** Run `./gradlew :core:speech:testDebugUnitTest`. Expected: compile failure.
-- [ ] **Step 3: Implement.** `SystemSpeech`: `TextToSpeech` per factory (shared, init once), `setVoice` by name, `synthesizeToFile` into `context.cacheDir/speech/`, `Wav.read`, delete; errors become `SpeechException(code)`. `SherpaSpeech`: wraps `SherpaTts(voice, threads = 2)`, applies `Pronunciations.apply` before synthesis, speaker 0. `InstalledVoices`: `SherpaVoice.list` over `volumesRoots.map { File(it, "voices") }`, plus `TextToSpeech.voices` filtered to offline English; `refresh()` after a download or removal.
-- [ ] **Step 4:** `./gradlew :core:speech:testDebugUnitTest :app:testDebugUnitTest`. Expected: PASS (the spike's tests moved, still green).
-- [ ] **Step 5: Commit.** `Speech: the Speech interface, system and sherpa engines, installed voices, pronunciations`
+- [x] **Step 1: Failing tests:** `pronunciationsReplaceWholeWordsAndKeepCase` ("Rosetta Stone" → "Rozetta Stone", "rosetta" → "rozetta", "Rosettas" untouched), `pronunciationsLeaveTextWithoutMatchesIdentical`, `installedVoicesListsGrangerVoicesBeforeSystemOnes`, `installedVoicesSkipsNetworkOnlySystemVoices`, `systemSpeechSynthesizesOneSentenceToPcm` (Robolectric shadow: a 24 kHz WAV written by the shadow is read back), `sherpaSpeechPassesAnObjectCallback` (a reflection test: the class of the callback passed to `generateWithCallback` declares `invoke([F)Ljava/lang/Integer;`; the AAR's `OfflineTts` is not constructed), plus the moved `SentencesTest` and `WavTest`.
+- [x] **Step 2:** Run `./gradlew :core:speech:testDebugUnitTest`. Expected: compile failure.
+- [x] **Step 3: Implement.** `SystemSpeech`: `TextToSpeech` per factory (shared, init once), `setVoice` by name, `synthesizeToFile` into `context.cacheDir/speech/`, `Wav.read`, delete; errors become `SpeechException(code)`. `SherpaSpeech`: wraps `SherpaTts(voice, threads = 2)`, applies `Pronunciations.apply` before synthesis, speaker 0. `InstalledVoices`: `SherpaVoice.list` over `volumesRoots.map { File(it, "voices") }`, plus `TextToSpeech.voices` filtered to offline English; `refresh()` after a download or removal.
+- [x] **Step 4:** `./gradlew :core:speech:testDebugUnitTest :app:testDebugUnitTest`. Expected: PASS (the spike's tests moved, still green).
+- [x] **Step 5: Commit.** `Speech: the Speech interface, system and sherpa engines, installed voices, pronunciations`
 
 ### Task 2: Utterances and read sources
 
@@ -141,11 +141,11 @@ object Utterances {
 }
 ```
 
-- [ ] **Step 1: Failing tests:** `addressesRoundTripThroughEncode`, `blocksBecomeHeadingAndSentenceUtterancesWithPauses`, `preBlocksBecomeOneCodeOmittedUtterance`, `emptyAndPunctuationOnlyBlocksAreDropped`, `paragraphIndexAdvancesPerBlock`.
-- [ ] **Step 2:** Run `./gradlew :core:speech:testDebugUnitTest`. Expected: compile failure.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Speech: utterances, read addresses and the ReadSource contract`
+- [x] **Step 1: Failing tests:** `addressesRoundTripThroughEncode`, `blocksBecomeHeadingAndSentenceUtterancesWithPauses`, `preBlocksBecomeOneCodeOmittedUtterance`, `emptyAndPunctuationOnlyBlocksAreDropped`, `paragraphIndexAdvancesPerBlock`.
+- [x] **Step 2:** Run `./gradlew :core:speech:testDebugUnitTest`. Expected: compile failure.
+- [x] **Step 3: Implement.**
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Speech: utterances, read addresses and the ReadSource contract`
 
 ### Task 3: `ReadAloudEngine` and the speech output
 
@@ -179,11 +179,11 @@ class ReadAloudEngine(
 }
 ```
 
-- [ ] **Step 1: Failing tests:** `startSpeaksSentencesInOrderWithPausesBetween`, `lookAheadStaysWithinTwoSentencesAndThirtySeconds`, `pauseRewindsToTheCurrentSentenceStart`, `nextParagraphSkipsTheRestOfThisOne`, `previousSentenceAtTheFirstSentenceStaysThere`, `stopProducesNoFurtherWritesAndClosesSpeechAfterIdle`, `aSentenceThatFailsIsSkippedAndReported`, `theSourceIsAskedForMoreBeforeTheQueueRunsDry`, `endedFiresAfterTheLastSentence`, `speedChangeAppliesFromTheNextSentence`.
-- [ ] **Step 2:** `./gradlew :core:player:testDebugUnitTest --tests 'app.granger.core.player.voice.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** A producer coroutine synthesizes ahead into a bounded channel of `(Utterance, Pcm)`; a consumer writes to the output and publishes `progress` as each sentence starts; pauses are silence written to the track (so `playedMs` stays truthful), not sleeps. `AudioTrackSpeechOutput` uses `AudioTrack.Builder` with `MODE_STREAM`, float PCM, a 1 s buffer, `write(..., WRITE_BLOCKING)` on `Dispatchers.IO`.
-- [ ] **Step 4:** The same command, then all of `:core:player:testDebugUnitTest`. Expected: PASS.
-- [ ] **Step 5: Commit.** `Player: ReadAloudEngine and the speech output (second AudioTrack)`
+- [x] **Step 1: Failing tests:** `startSpeaksSentencesInOrderWithPausesBetween`, `lookAheadStaysWithinTwoSentencesAndThirtySeconds`, `pauseRewindsToTheCurrentSentenceStart`, `nextParagraphSkipsTheRestOfThisOne`, `previousSentenceAtTheFirstSentenceStaysThere`, `stopProducesNoFurtherWritesAndClosesSpeechAfterIdle`, `aSentenceThatFailsIsSkippedAndReported`, `theSourceIsAskedForMoreBeforeTheQueueRunsDry`, `endedFiresAfterTheLastSentence`, `speedChangeAppliesFromTheNextSentence`.
+- [x] **Step 2:** `./gradlew :core:player:testDebugUnitTest --tests 'app.granger.core.player.voice.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** A producer coroutine synthesizes ahead into a bounded channel of `(Utterance, Pcm)`; a consumer writes to the output and publishes `progress` as each sentence starts; pauses are silence written to the track (so `playedMs` stays truthful), not sleeps. `AudioTrackSpeechOutput` uses `AudioTrack.Builder` with `MODE_STREAM`, float PCM, a 1 s buffer, `write(..., WRITE_BLOCKING)` on `Dispatchers.IO`.
+- [x] **Step 4:** The same command, then all of `:core:player:testDebugUnitTest`. Expected: PASS.
+- [x] **Step 5: Commit.** `Player: ReadAloudEngine and the speech output (second AudioTrack)`
 
 ### Task 4: The voice as a player mode — carrier item, focus, saved place, library v11
 
@@ -203,11 +203,11 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 // PlayerSettingsKeys gains LAST_VOICE (the source key); MODE_VOICE = "voice"
 ```
 
-- [ ] **Step 1: Failing tests:** `readAloudPausesMusicAndRequestsFocusAsSpeech`, `playPauseNextPreviousGoToTheVoiceInVoiceMode`, `theCarrierItemHasTheVoiceMetadataAndNoSeekCommands`, `startingMusicStopsTheVoiceAndSavesItsPlace`, `voiceStateIsSavedOnPauseStopAndSentenceChange`, `restoreLoadsTheVoicePausedAtItsSentence`, `restoreWithAMissingSourceClearsTheStateOnce`, `sleepTimerFadesTheVoiceAndPausesIt`, `transientFocusLossPausesTheVoiceAndGainResumesAtSentenceStart`, `migration10To11AddsVoiceStates`.
-- [ ] **Step 2:** `./gradlew :core:player:testDebugUnitTest :core:library:testDebugUnitTest`. Expected: compile failure.
-- [ ] **Step 3: Implement.** `MIGRATION_10_11`: `CREATE TABLE voice_states (sourceKey TEXT PRIMARY KEY NOT NULL, address TEXT NOT NULL, speed REAL NOT NULL, title TEXT NOT NULL, section TEXT, voiceId TEXT NOT NULL, updatedAt INTEGER NOT NULL)`. In the engine: `startVoice()` stops the current mode, requests focus with `speech = true`, sets the carrier (`SilenceMediaSource(1h)`, `MediaMetadata` title "Reading · <title>", artist = section, artwork = the book's cover or the pack icon), starts `ReadAloudEngine`; ExoPlayer's `onPlayWhenReadyChanged` drives `readAloud.play()/pause()`; `onEvents` from the voice (sentence change) updates the carrier's metadata section; `PositionSaver` events map to `VoiceState` writes. `SessionPlayer.getAvailableCommands()` drops the seek commands while `engine.ui.value.now is NowPlaying.Voice`.
-- [ ] **Step 4:** The same command, then `testDebugUnitTest`. Expected: PASS, including every existing `PlayerEngineTest`.
-- [ ] **Step 5: Commit.** `Player: the voice as a third mode — carrier item, focus, saved place; library v11`
+- [x] **Step 1: Failing tests:** `readAloudPausesMusicAndRequestsFocusAsSpeech`, `playPauseNextPreviousGoToTheVoiceInVoiceMode`, `theCarrierItemHasTheVoiceMetadataAndNoSeekCommands`, `startingMusicStopsTheVoiceAndSavesItsPlace`, `voiceStateIsSavedOnPauseStopAndSentenceChange`, `restoreLoadsTheVoicePausedAtItsSentence`, `restoreWithAMissingSourceClearsTheStateOnce`, `sleepTimerFadesTheVoiceAndPausesIt`, `transientFocusLossPausesTheVoiceAndGainResumesAtSentenceStart`, `migration10To11AddsVoiceStates`.
+- [x] **Step 2:** `./gradlew :core:player:testDebugUnitTest :core:library:testDebugUnitTest`. Expected: compile failure.
+- [x] **Step 3: Implement.** `MIGRATION_10_11`: `CREATE TABLE voice_states (sourceKey TEXT PRIMARY KEY NOT NULL, address TEXT NOT NULL, speed REAL NOT NULL, title TEXT NOT NULL, section TEXT, voiceId TEXT NOT NULL, updatedAt INTEGER NOT NULL)`. In the engine: `startVoice()` stops the current mode, requests focus with `speech = true`, sets the carrier (`SilenceMediaSource(1h)`, `MediaMetadata` title "Reading · <title>", artist = section, artwork = the book's cover or the pack icon), starts `ReadAloudEngine`; ExoPlayer's `onPlayWhenReadyChanged` drives `readAloud.play()/pause()`; `onEvents` from the voice (sentence change) updates the carrier's metadata section; `PositionSaver` events map to `VoiceState` writes. `SessionPlayer.getAvailableCommands()` drops the seek commands while `engine.ui.value.now is NowPlaying.Voice`.
+- [x] **Step 4:** The same command, then `testDebugUnitTest`. Expected: PASS, including every existing `PlayerEngineTest`.
+- [x] **Step 5: Commit.** `Player: the voice as a third mode — carrier item, focus, saved place; library v11`
 
 ### Task 5: Mini-player, widget and player view model for the voice
 
@@ -215,11 +215,11 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 - Modify: `app/.../player/PlayerViewModel.kt` (`secondary()`: Voice → `previousSentence()`; `modeOf(Voice) = null` so the full player keeps its two tabs; `playerTab` unchanged), `PlayerParts.kt` (`nowInfo(Voice)`: "Reading" over the title and section, a page icon or the book cover), `MiniPlayer.kt` (secondary icon for Voice: "back one sentence"; `onOpen` for Voice opens the reader at the sentence, not the player), `GrangerNavHost.kt` (`nav.togglePlayer()` → `nav.openReading(address)` when Voice), `widget/PlayerWidget.kt`
 - Test: `MiniPlayerTest` (+ voice rows), `PlayerViewModelTest` (+ `secondaryOnVoiceStepsBackASentence`, `openOnVoiceGoesToTheReader`), `PlayerWidgetTest`
 
-- [ ] **Step 1: Failing tests** as named, plus `miniPlayerShowsReadingOverTitleAndSection`.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.player.*'`. Expected: compile failure (the exhaustive `when`s).
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Player UI: the voice in the mini-player and the widget`
+- [x] **Step 1: Failing tests** as named, plus `miniPlayerShowsReadingOverTitleAndSection`.
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.player.*'`. Expected: compile failure (the exhaustive `when`s).
+- [x] **Step 3: Implement.**
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Player UI: the voice in the mini-player and the widget`
 
 ### Task 6: Web reader — the read-aloud page script, Read aloud, Read from here, Follow
 
@@ -230,11 +230,11 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 
 **The script (`READ_SOURCE`):** `window.__grangerRead = { blocks(), firstVisibleBlock(), mark(blockId, start, end, scroll), clear(), blockAtSelection() }`. `blocks()` walks `BLOCKS` in document order, skipping `NOISE` subtrees, blocks nested in `NESTING` ancestors, and `SKIPPED_SECTIONS` (heading text match until a heading of the same or higher level), assigns `data-gid` = the element's id or `g<n>`, and returns `[{id, kind, text}]` with whitespace folded. `mark()` builds a `Range` over the block's text nodes from character `start` to `end` and sets `CSS.highlights.set("granger-reading", new Highlight(range))` (style injected once: `::highlight(granger-reading) { background: rgba(232,96,28,.28) }`); without `CSS.highlights`, it toggles a `granger-reading` class on the block. When `scroll` is true and the range's rect is outside the viewport, `scrollIntoView({block: "center"})`, flagging the next scroll event as the script's own so `onUserScroll` isn't sent for it. A `contextmenu`/long-press on a block while reading sends `onLongPress(id, offset)`.
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.reader.*' :core:research:test`. Expected: compile failure.
-- [ ] **Step 3: Implement.** Kotlin splits each block into sentences and keeps character offsets so `mark` can be given the sentence's range. The reader collects `player.voiceProgress` for its own source key and calls `mark` (with `scroll = following`). "Read aloud" when a voice is already reading this page shows "Stop reading".
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Web reader: read aloud — the page script, Read from here, the sentence highlight and Follow`
+- [x] **Step 1: Failing tests** as named.
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.reader.*' :core:research:test`. Expected: compile failure.
+- [x] **Step 3: Implement.** Kotlin splits each block into sentences and keeps character offsets so `mark` can be given the sentence's range. The reader collects `player.voiceProgress` for its own source key and calls `mark` (with `scroll = following`). "Read aloud" when a voice is already reading this page shows "Stop reading".
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Web reader: read aloud — the page script, Read from here, the sentence highlight and Follow`
 
 ### Task 7: E-book reader — Readium content, decorations, the bottom-bar button
 
@@ -243,11 +243,11 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 - Modify: `EbookReaderViewModel.kt` (`readAloud()` from `firstVisibleElementLocator()`, `readFrom(locator)`, `follow()`, `EbookUi.reading`, `EbookUi.following`; voice decorations as `VOICE_GROUP = "voice"` with `Decoration.Style.Highlight(tint = READING_TINT)`), `EbookReaderScreen.kt` (apply the voice decoration group; `fragment.go(locator)` when the sentence's locator is on another page and `following`; the Follow chip; a user page turn while reading sets `following = false`), `ReaderControls.kt` (the reserved slot becomes the Read aloud / Stop reading button under `Features.READ_ALOUD`), `SelectionMenu.kt` (`SelectionAction.READ_ALOUD`, "Read from here"), `BookAnnotations.kt` (`VOICE_GROUP`, `READING_TINT`)
 - Test: `EbookReaderViewModelTest` (+ `readAloudStartsAtTheFirstVisibleElement`, `readFromStartsAtTheSelection`, `voiceDecorationFollowsTheSentence`, `aUserPageTurnStopsFollowing`), `BookReadSourceTest` (a small EPUB fixture with a footnote and two headings: utterances in order, footnote absent, pauses after headings, locators round-trip), `SelectionMenuTest` (+ the item)
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** The content iterator is `@ExperimentalReadiumApi`; opt in at the file. `utterances(from, limit)` resumes the iterator from the address's locator; `locate` returns the locator as is (Readium locators survive re-open).
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `E-book reader: read aloud through Readium's content iterator, the voice decoration, Read from here`
+- [x] **Step 1: Failing tests** as named.
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** The content iterator is `@ExperimentalReadiumApi`; opt in at the file. `utterances(from, limit)` resumes the iterator from the address's locator; `locate` returns the locator as is (Readium locators survive re-open).
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `E-book reader: read aloud through Readium's content iterator, the voice decoration, Read from here`
 
 ### Task 8: Voices in the catalog, the download, Settings → Voice, Readiness
 
