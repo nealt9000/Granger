@@ -117,6 +117,17 @@ class EbookReaderViewModelTest {
         assertThat(hub.calls[0]).startsWith("readAloud:book:b@book:b@")
         assertThat(hub.calls[0]).contains("c002.xhtml")
         hub.calls.clear()
+        // The page's first words pick the sentence; words from nowhere fall back to the page's first element.
+        vm.readAloud(locator("c001.xhtml", 0.0, 0.0), visibleText = "Second sentence.")
+        settle { hub.calls.isNotEmpty() }
+        assertThat(hub.calls[0]).contains("c001.xhtml")
+        assertThat(hub.calls[0]).endsWith(":1")
+        hub.calls.clear()
+        vm.readAloud(locator("c001.xhtml", 0.0, 0.0), visibleText = "Not in this book at all")
+        settle { hub.calls.isNotEmpty() }
+        assertThat(hub.calls[0]).contains("c001.xhtml")
+        assertThat(hub.calls[0]).endsWith(":0")
+        hub.calls.clear()
 
         hub.ui.value = voiceUiFor("book:b")
         testScheduler.advanceUntilIdle()

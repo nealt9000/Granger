@@ -5,14 +5,13 @@ package app.granger.core.speech
  * gets the original text: it handles names better on its own.
  *
  * A respelling only helps when it changes the phonemes espeak-ng (Piper's phonemizer) produces; check with
- * `espeak-ng -v en-us -q --ipa "<word>"`. "Rosetta" and "Rozetta" both give ɹoʊzˈɛɾə, so the "rossetter" heard in V0
- * and the V1 walkthrough is the ljspeech model's rendering of the flapped t and final schwa, not the phonemes; the
- * entry stays until a listening test picks a respelling that sounds right.
+ * `espeak-ng -v en-us -q --ipa "<word>"`. "Rosetta" and "Rozetta" both give ɹoʊzˈɛɾə, and every respelling Neal
+ * listened to (2026-10-22) still ended in the same hard "ah", so the "rossetter" heard in V0 is the ljspeech model's
+ * rendering of a final schwa, not the phonemes. The built-in table is empty until a broader win turns up (a year
+ * normaliser, say: espeak reads 1799 as "one thousand seven hundred ninety nine"); the mechanism stays for it.
  */
 object Pronunciations {
-    val builtIn: Map<String, String> = mapOf(
-        "Rosetta" to "Rozetta",
-    )
+    val builtIn: Map<String, String> = emptyMap()
 
     fun apply(text: String, table: Map<String, String> = builtIn): String {
         if (table.isEmpty()) return text

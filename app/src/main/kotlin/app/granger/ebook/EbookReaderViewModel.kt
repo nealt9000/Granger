@@ -465,12 +465,18 @@ class EbookReaderViewModel(
         return readSource?.takeIf { it.bookId == id } ?: BookReadSource(opened, id, _state.value.title, io).also { readSource = it }
     }
 
-    /** Starts the voice at [from] (the first visible element, a chapter's start), else where the book is open. */
-    fun readAloud(from: Locator?) {
+    /**
+     * Starts the voice at the sentence holding [visibleText] (the page's first words) in [from]'s chapter; without
+     * the words, at the first element at [from] (a chapter's start), else where the book is open.
+     */
+    fun readAloud(from: Locator?, visibleText: String? = null) {
         val hub = player ?: return
         val src = source() ?: return
         viewModelScope.launch {
-            val address = src.addressAt(from ?: _state.value.locator ?: _state.value.initial) ?: return@launch
+            val page = from ?: _state.value.locator ?: _state.value.initial
+            val address = visibleText?.let { words -> page?.let { src.addressAtText(it, words) } }
+                ?: src.addressAt(page)
+                ?: return@launch
             following = true
             hub.readAloud(src, address)
         }

@@ -69,4 +69,14 @@ class BookReadSourceTest {
         assertThat(source.utterances(picked, 1).single().text).isEqualTo("Stand and unfold yourself.")
         assertThat(source.sectionTitle(picked)).isNull()   // the test publication's locators carry no chapter title
     }
+
+    @Test fun addressAtTextFindsTheSentenceHoldingThePagesFirstWords() = runTest {
+        val page = Locator(href = Url("c001.xhtml")!!, mediaType = MediaType.XHTML, locations = Locator.Locations(progression = 0.6))
+        val at = source.addressAtText(page, "Stand and   unfold yourself. Long live")!!   // the page's words, whitespace as the DOM has it
+        assertThat(source.utterances(at, 1).single().text).isEqualTo("Stand and unfold yourself.")
+        val king = source.addressAtText(page, "Long live the king!")!!
+        assertThat(source.utterances(king, 1).single().text).isEqualTo("Long live the king!")
+        assertThat(source.addressAtText(page, "Second act begins.")).isNull()           // another chapter's words
+        assertThat(source.addressAtText(page, "   ")).isNull()
+    }
 }

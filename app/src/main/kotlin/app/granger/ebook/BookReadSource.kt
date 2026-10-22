@@ -112,6 +112,47 @@ class BookReadSource(
         return first
     }
 
+    /**
+     * The sentence holding [visibleText] (the first words on the page, [FirstVisibleText]) in [resource]'s chapter,
+     * or null when no element there contains them. The chapter is read from its start: Readium's iterator only
+     * positions itself by an element selector, and the page's own element is what can't be trusted.
+     */
+    suspend fun addressAtText(resource: Locator, visibleText: String): ReadAddress.Book? = withContext(io) {
+        val needle = Sentences.fold(visibleText).take(NEEDLE)
+        if (needle.length < NEEDLE_MIN) return@withContext null
+        val start = resource.copy(locations = Locator.Locations(), text = Locator.Text())
+        val it = publication.content(start)?.iterator() ?: return@withContext null
+        // The chapter's readable elements, each with its folded text, then the words matched whole first and
+        // shortened a word at a time: the page's first words can run on into the next paragraph.
+        val elements = ArrayList<Pair<String, List<Utterance>>>()
+        while (elements.size < RESOURCE_SCAN && it.hasNext()) {
+            val element = it.next()
+            if (!element.locator.href.isEquivalent(resource.href)) break
+            val made = toUtterances(element, paragraph = 0) ?: continue
+            elements += Sentences.fold((element as Content.TextElement).text) to made
+        }
+        for (candidate in needles(needle)) {
+            for ((body, made) in elements) {
+                val at = body.indexOf(candidate)
+                if (at >= 0) return@withContext (made.lastOrNull { it.start <= at } ?: made.first()).address as ReadAddress.Book
+            }
+        }
+        null
+    }
+
+    /** [needle], then [needle] cut back a word at a time while at least [NEEDLE_MIN] characters remain. */
+    private fun needles(needle: String): List<String> {
+        val out = mutableListOf(needle)
+        var cut = needle
+        while (true) {
+            val space = cut.lastIndexOf(' ')
+            if (space < NEEDLE_MIN) break
+            cut = cut.substring(0, space)
+            out += cut
+        }
+        return out
+    }
+
     /** The utterances of the first readable element from [locator]; null when nothing readable follows. */
     private suspend fun firstElementAt(locator: Locator?): List<Utterance>? = elementsAt(locator, 1).firstOrNull()
 
@@ -187,5 +228,9 @@ class BookReadSource(
         const val SELECTION_SCAN = 8
         /** How many utterances past a reopened iterator's start are searched for the asked-for sentence. */
         const val REOPEN_SCAN = 600
+        /** How many elements of a chapter are searched for the page's first words, and how many of those words count. */
+        const val RESOURCE_SCAN = 3_000
+        const val NEEDLE = 40
+        const val NEEDLE_MIN = 12
     }
 }

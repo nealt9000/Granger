@@ -275,7 +275,13 @@ fun EbookReaderScreen(
                                 viewModel.stopReading()
                             } else {
                                 val fragment = navigator
-                                scope.launch { viewModel.readAloud(fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }) }
+                                scope.launch {
+                                    // The page's first words place the voice; Readium's first visible element is the
+                                    // fallback (it can be the paragraph that ran over from the page before).
+                                    val words = fragment?.let { runCatching { FirstVisibleText.parse(it.evaluateJavascript(FirstVisibleText.JS)) }.getOrNull() }
+                                    val page = if (words != null) fragment.currentLocator.value else fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }
+                                    viewModel.readAloud(page, words)
+                                }
                             }
                         }),
                     )
