@@ -1,0 +1,100 @@
+package app.granger.onboarding
+
+import app.granger.bookEntry
+import app.granger.catalogOf
+import app.granger.core.catalog.Onboarding
+import app.granger.core.catalog.Preset
+import app.granger.core.catalog.UseCase
+import app.granger.packEntry
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
+
+class OnboardingModelTest {
+    private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000).copy(family = "wikipedia")
+    private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900).copy(family = "wikipedia")
+    private val wikem = packEntry("wikem_en_all_maxi", size = 375).copy(family = "wikem")
+    private val voyage = packEntry("wikivoyage_en_all_maxi", size = 1_070).copy(family = "wikivoyage")
+    private val france = packEntry("maps_en_france", size = 4_000).copy(family = "maps", title = "France")
+    private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
+    private val europe = packEntry("maps_en_europe", size = 20_000).copy(family = "maps", title = "Europe")
+    private val mdwikiNopic = packEntry("mdwiki_en_all_nopic", size = 800).copy(family = "mdwiki")
+    private val mdwikiMaxi = packEntry("mdwiki_en_all_maxi", size = 12_000).copy(family = "mdwiki")
+    private val bible = bookEntry("gc-bible", category = "Scripture & religion").copy(sizeBytes = 10, collection = "granger-classics")
+    private val hamlet = bookEntry("gc-hamlet", category = "Drama").copy(sizeBytes = 20, collection = "granger-classics")
+
+    private val catalog = catalogOf(
+        packs = listOf(med, medMaxi, wikem, voyage, france, peru, europe, mdwikiNopic, mdwikiMaxi),
+        books = listOf(bible, hamlet),
+        presets = listOf(
+            Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_nopic", "gc-bible", "gc-hamlet")),
+            Preset("comprehensive", "Comprehensive library", listOf("wikipedia_en_medicine_nopic", "gc-bible", "wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "gc-hamlet")),
+        ),
+    ).copy(
+        onboarding = Onboarding(
+            useCases = listOf(
+                UseCase("medical", "Medical work", "Clinical.", listOf("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "family:mdwiki")),
+                UseCase("faith", "Faith & philosophy", "", listOf("@granger-classics")),
+                UseCase("travel", "Travel", "", listOf("wikivoyage_en_all_maxi")),
+            ),
+            larger = listOf("maps_en_europe"),
+        ),
+    )
+
+    @Test fun startChoicesFoldBooksIntoOneLineAndSkipInstalledOnes() {
+        val choices = OnboardingModel.startChoices(catalog, installed = setOf("wikem_en_all_maxi"))
+        assertThat(choices.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()
+        val efficient = choices[0]
+        assertThat(efficient.lines.map { it.title }).containsExactly("Pack wikipedia_en_medicine_nopic", "Granger Classics").inOrder()
+        assertThat(efficient.lines[1].count).isEqualTo(2)
+        assertThat(efficient.bytes()).isEqualTo(1_030)
+        assertThat(efficient.bytes(unticked = setOf("collection:granger-classics"))).isEqualTo(1_000)
+        val comprehensive = choices[1]
+        assertThat(comprehensive.lines.single { it.id == "wikem_en_all_maxi" }.installed).isTrue()
+        assertThat(comprehensive.bytes()).isEqualTo(1_000 + 30 + 1_900)
+        assertThat(OnboardingModel.startChoices(catalogOf(), emptySet())).isEmpty()
+    }
+
+    @Test fun regionsAreCountriesThenLargerAreasAndSearchable() {
+        val regions = OnboardingModel.regions(catalog, installed = setOf("maps_en_peru"))
+        assertThat(regions.countries.map { it.title }).containsExactly("France", "Peru").inOrder()
+        assertThat(regions.larger.map { it.title }).containsExactly("Europe")
+        assertThat(regions.countries[1].installed).isTrue()
+        assertThat(regions.matching("per").countries.map { it.title }).containsExactly("Peru")
+        assertThat(regions.matching("eur").larger.map { it.title }).containsExactly("Europe")
+        assertThat(regions.matching("  ")).isEqualTo(regions)
+    }
+
+    @Test fun additionsLeaveOutWhatIsChosenOrInstalledAndTakeAFamilysSmallestPack() {
+        val additions = OnboardingModel.additions(catalog, installed = setOf("wikem_en_all_maxi"), chosen = setOf("wikipedia_en_medicine_maxi"))
+        val medical = additions.first { it.useCase.id == "medical" }
+        assertThat(medical.lines.map { it.id }).containsExactly("mdwiki_en_all_nopic")
+        assertThat(medical.bytes).isEqualTo(800)
+        val faith = additions.first { it.useCase.id == "faith" }
+        assertThat(faith.lines.single().title).isEqualTo("Granger Classics")
+        assertThat(faith.packs).isEqualTo(2)
+        assertThat(OnboardingModel.additions(catalogOf(), emptySet(), emptySet())).isEmpty()
+    }
+
+    @Test fun theReviewCountsEveryItemOnceAndNothingInstalled() {
+        val installed = setOf("wikem_en_all_maxi")
+        val start = OnboardingModel.startChoices(catalog, installed)[1] // comprehensive
+        val region = OnboardingModel.regions(catalog, installed).countries.first { it.title == "Peru" }
+        val additions = OnboardingModel.additions(catalog, installed, chosen = start.chosen().flatMap { it.items }.map { it.id }.toSet())
+        val review = OnboardingModel.review(start, unticked = setOf("wikipedia_en_medicine_nopic"), region, additions, freeBytes = 10_000)
+        assertThat(review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region", "Your situation").inOrder()
+        assertThat(review.items.map { it.id }).containsExactly(
+            "gc-bible", "wikipedia_en_medicine_maxi", "gc-hamlet", "maps_en_peru", "mdwiki_en_all_nopic", "wikivoyage_en_all_maxi",
+        )
+        assertThat(review.bytes).isEqualTo(10 + 1_900 + 20 + 500 + 800 + 1_070)
+        assertThat(review.fits).isTrue()
+        assertThat(review.copy(freeBytes = 100).fits).isFalse()
+
+        // A use case chosen alongside a start that already holds its items adds nothing twice.
+        val twice = OnboardingModel.review(start, emptySet(), null, OnboardingModel.additions(catalog, installed, emptySet()), 1)
+        assertThat(twice.items.map { it.id }).containsNoDuplicates()
+        assertThat(twice.items.map { it.id }).doesNotContain("wikem_en_all_maxi")
+
+        // Nothing chosen at all.
+        assertThat(OnboardingModel.review(null, emptySet(), null, emptyList(), 1).isEmpty).isTrue()
+    }
+}
