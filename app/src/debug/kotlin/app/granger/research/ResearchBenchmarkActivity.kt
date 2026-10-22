@@ -96,6 +96,12 @@ class ResearchBenchmarkActivity : ComponentActivity() {
             cosines(java.io.File(getExternalFilesDir(null), name), embedderFile.path)
             return
         }
+        intent.getStringExtra("queries")?.let { name ->
+            c.catalog.load()
+            val embedderFile = c.installedModels.first().embedder ?: return log("queries skipped: no embedder installed")
+            queries(java.io.File(getExternalFilesDir(null), name), embedderFile.path)
+            return
+        }
 
         // (a) The query and 12 real passages, embedded the way the pipeline does it (query, then passages).
         val embedderFile = models.embedder
@@ -191,6 +197,29 @@ class ResearchBenchmarkActivity : ComponentActivity() {
                     embedder.close()
                 }
             }
+        }
+        java.io.File(input.path + ".out.json").writeText(out.toString())
+    }
+
+    /**
+     * Plan R1 Task 3: the phone's query vectors for [input] (`[{id, mode, text}]`, pushed by `tools/vectors/recall.py`), on
+     * the GPU as the app runs it, written to `<input>.out.json` as `[{id, mode, vector}]`. Start with `--es queries <file>`.
+     */
+    private suspend fun queries(input: java.io.File, embedderPath: String) = withContext(Dispatchers.IO) {
+        val items = JSONArray(input.readText())
+        val out = JSONArray()
+        val embedder = LiteRtTextEmbedder(embedderPath, cacheDir.path, LlmBackend.GPU)
+        try {
+            embedder.load()
+            for (i in 0 until items.length()) {
+                val item = items.getJSONObject(i)
+                val v = embedder.embed(listOf(item.getString("text")), isQuery = true).single()
+                out.put(JSONObject().put("id", item.getString("id")).put("mode", item.getString("mode"))
+                    .put("vector", JSONArray(v.map { it.toDouble() })))
+            }
+            log("queries: ${items.length()} embedded")
+        } finally {
+            embedder.close()
         }
         java.io.File(input.path + ".out.json").writeText(out.toString())
     }

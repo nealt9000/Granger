@@ -142,19 +142,53 @@ held-out set and the pass-or-stop scoring are R2.
 - [ ] **Stop and tell Neal** if the set's vectors exceed 1.5 GB at 256 dims, or a single pack's file would exceed GitHub's
   2 GB asset limit. Options then: drop `_nopic` long tails, split files, or lower the dims.
 
+**Stopped at the size check (2026-10-21).** The proposed set came to 6.69M chunks: 1.98 GB at 256 int8, and about 56 h
+of Mac embedding.
+- Three packs have no text the app can read:
+  - *Algorithms* is 696 PDFs;
+  - LibreTexts K12 renders its pages from JSON;
+  - Milne is a catalogue page per book.
+- WikEM is 96% translations.
+
+**Neal's decisions:**
+- trim and keep every domain:
+  - WikEM English only;
+  - Wikipedia packs capped at an article's first 12 chunks;
+  - Wikiquote keyword-only;
+- technology is the DevDocs bundle (Python, Bash, Git, HTTP, SQLite, C, JavaScript) plus the reverse engineering,
+  software engineering, computer science and Unix Stack Exchanges;
+- *Algorithms*, LibreTexts K12 and Milne leave the set until a PDF/JSON pass.
+
+`set.json` records all of it (`keywordOnly` says why each pack is out).
+
 ### Task 3: Dims, quantization and phone queries (offline)
 
 **Files:** extend `tools/eval/dense.py` (or `tools/vectors/recall.py`), plus `ResearchBenchmarkActivity`'s `cosines` mode.
 
-- [ ] Re-chunk R0's 350-book library through the CLI. Re-embed titled, then evaluate the 35 book questions at 768 float,
+- [x] Re-chunk R0's 350-book library through the CLI. Re-embed titled, then evaluate the 35 book questions at 768 float,
   768 int8, 256 int8 and 128 int8.
-- [ ] Phone queries: embed the 202 tuning questions (raw, and prior question + question for follow-ups) on the Pixel 6 through
+- [x] Phone queries: embed the 202 tuning questions (raw, and prior question + question for follow-ups) on the Pixel 6 through
   `ResearchBenchmarkActivity cosines=`. Pull the vectors and rerun the recall with phone queries against Mac documents.
-- [ ] **Decisions, recorded in this plan:**
+- [x] **Decisions, recorded in this plan:**
   - dims: 256 unless it loses more than 2 of 35 against 768;
   - Mac documents: kept unless phone queries lose more than 2 of 35, in which case stop and choose with Neal between building
     documents with LiteRT-LM or accepting the loss;
   - query text: raw or prior + question, whichever recalls more on follow-ups without losing first questions.
+
+**Done (2026-10-21).** On R0's 35 book questions (answer in the top 4; top 12 and top 50 in `recall.py`). R0's vectors
+were reused for the 248,393 of 249,393 app chunks whose text is unchanged.
+
+| Query | 768 float | 768 int8 | 256 int8 | 128 int8 |
+|---|---|---|---|---|
+| Mac, raw | 20 | 20 | 18 | 16 |
+| Mac, prior + question | 20 | 20 | 19 | 17 |
+| Phone (GPU, int4 model), raw | 18 | 18 | 19 | 14 |
+| Phone, prior + question | 18 | 18 | **20** | 15 |
+
+- **Dims: 256 int8.** With phone queries it loses nothing against 768. 35 questions is a small sample, so ±2 is noise.
+- **Documents: built on the Mac.** Phone queries against Mac documents lose at most 2 of 35.
+- **Query text: the prior question, then the question.** It never loses, and it lifts the follow-ups slightly.
+- On the phone, a query takes about 0.12 s on the GPU (404 queries in 48 s).
 
 ### Task 4: The vector file and the build
 

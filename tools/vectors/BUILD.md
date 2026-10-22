@@ -2,8 +2,8 @@
 
 Everything large lives outside the repo:
 
-- **Python:** `~/.venvs/granger-vectors` (Python 3.14; libzim, numpy, sentence-transformers, torch with MPS, pytest).
-  Recreate it with `python3 -m venv ~/.venvs/granger-vectors && ~/.venvs/granger-vectors/bin/pip install libzim numpy sentence-transformers pytest`.
+- **Python:** `~/.venvs/granger-vectors` (Python 3.14; libzim, numpy, sentence-transformers, torch with MPS, pillow, torchvision, pytest).
+  Recreate it with `python3 -m venv ~/.venvs/granger-vectors && ~/.venvs/granger-vectors/bin/pip install libzim numpy sentence-transformers pillow torchvision pytest`.
 - **Sources:** `~/Developer/Granger/vectors-work/sources/` (ZIMs and EPUBs, pulled from the phone or downloaded from the catalog).
 - **Chunker:** `./gradlew :tools:chunker:installDist` (JDK 17), then `tools/chunker/build/install/chunker/bin/chunker`.
 - **Tests:** `~/.venvs/granger-vectors/bin/python -m pytest tools/vectors/tests`.
