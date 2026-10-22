@@ -43,6 +43,7 @@ data class MediaWork(
     val description: String,
     val origin: MediaOrigin,
     val coverPath: String?,
+    val partIds: List<String> = emptyList(), // beside partTitles: the track ids, or "chapter:<ordinal>" for an audiobook
 )
 
 /**
@@ -110,6 +111,13 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
     /** The present album ("album:<albumKey>") or audiobook (its id) with this id; null when it's gone or MISSING. */
     suspend fun work(id: String): MediaWork? = current().workById[id]
 
+    /** Chapter [ordinal] of a present audiobook, for playing a cited chapter from its start. */
+    suspend fun chapter(audiobookId: String, ordinal: Int): AudiobookChapter? =
+        current().chapters[audiobookId]?.firstOrNull { it.ordinal == ordinal }?.takeIf { audiobookId in current().workById }
+
+    /** The album holding track [trackId], for a song's address that doesn't name its album. */
+    suspend fun workWithPart(trackId: String): MediaWork? = current().works.firstOrNull { trackId in it.value.partIds }?.value
+
     private class Inputs(val tracks: List<Track>, val books: List<Audiobook>, val chapters: List<AudiobookChapter>, val notes: List<AlbumNote>)
 
     /** A field's words, stored once, folded. */
@@ -129,6 +137,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
         val audiobooks: List<Doc<Audiobook>>,
         val works: List<Doc<MediaWork>>,
         val workById: Map<String, MediaWork>,
+        val chapters: Map<String, List<AudiobookChapter>> = emptyMap(),
     )
 
     private fun <T> rank(docs: List<Doc<T>>, words: List<String>, prefixLast: Boolean, phrase: String, limit: Int): List<T> {
@@ -185,7 +194,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
             works += Doc(id, a.title, fields, MediaWork(
                 id = id, isAlbum = true, title = a.title, creator = a.albumArtist, composers = composers, narrators = emptyList(),
                 genres = genres, year = a.year, partTitles = tracks.map { it.title }, description = description,
-                origin = tracks.first().origin, coverPath = a.coverPath,
+                origin = tracks.first().origin, coverPath = a.coverPath, partIds = tracks.map { it.id },
             ))
         }
 
@@ -205,7 +214,8 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
         val books = mutableListOf<Doc<Audiobook>>()
         for (b in inputs.books) {
             if (b.status == PackStatus.MISSING) continue
-            val parts = chapters[b.id].orEmpty().sortedBy { it.ordinal }.map { it.title }
+            val sorted = chapters[b.id].orEmpty().sortedBy { it.ordinal }
+            val parts = sorted.map { it.title }
             val fields = listOf(
                 field(TITLE, b.title),
                 field(NAME, MediaNames.split(b.author) + MediaNames.split(b.narrator)),
@@ -217,14 +227,16 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
                 id = b.id, isAlbum = false, title = b.title, creator = b.author, composers = emptyList(),
                 narrators = MediaNames.split(b.narrator), genres = emptyList(), year = "", partTitles = parts,
                 description = b.description, origin = b.origin, coverPath = b.coverPath,
+                partIds = sorted.map { "$CHAPTER${it.ordinal}" },
             ))
         }
 
-        return Snapshot(artistDocs, albums, songs, books, works, works.associate { it.id to it.value })
+        return Snapshot(artistDocs, albums, songs, books, works, works.associate { it.id to it.value }, chapters)
     }
 
     private companion object {
         const val ALBUM = "album:"
+        const val CHAPTER = "chapter:"
         const val ARTIST = "artist:"
         const val TITLE = 3.0
         const val NAME = 2.0

@@ -64,8 +64,10 @@ class LibraryPassageFinder(
                 }
             }.distinctBy { it.id }
             val score = LexicalScore.scorer(words)
-            // Stable: equal scores keep the index's order.
-            works.map(MediaCards::passage).map { it to score(it) }.sortedByDescending { it.second }.take(mediaCards).map { it.first }
+            // Stable: equal scores keep the index's order. Scored as whole works, so focusing a card on a song or
+            // chapter that matched doesn't change which works are kept.
+            works.map { it to score(MediaCards.passage(it)) }.sortedByDescending { it.second }.take(mediaCards)
+                .map { (work, _) -> MediaCards.passage(work, MediaCards.bestPart(work, words)) }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {

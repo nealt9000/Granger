@@ -32,6 +32,8 @@ data class BlockRef(val id: String, val prefix: String, val offset: Int? = null)
  * - `selectionBlock()`: the block the selection starts in and the folded offset into it, `{id, prefix, offset}`.
  * - `mark(id, prefix, start, end, scroll)`: highlights characters `start..end` of the block's folded text.
  * - `clear()`.
+ * - `cite(id, prefix, start, end)`: marks a cited quote ([ArticleQuote]) as the e-book marks a search hit, under its
+ *   own highlight so the voice's mark doesn't clear it, and scrolls it a third of the way down. `clearCite()`.
  */
 object ReadAloudScript {
     val SOURCE = """
@@ -40,11 +42,13 @@ object ReadAloudScript {
           var NOISE = ${js(ArticleText.NOISE)};
           var BLOCKS = ${js(ArticleText.BLOCKS)};
           var style = document.createElement('style');
-          style.textContent = '::highlight(granger-reading){background:rgba(232,96,28,.28)} .granger-reading{background:rgba(232,96,28,.18)}';
+          style.textContent = '::highlight(granger-reading){background:rgba(232,96,28,.28)} .granger-reading{background:rgba(232,96,28,.18)}' +
+            ' ::highlight(granger-cite){background:rgba(242,139,48,.35)} .granger-cite{background:rgba(242,139,48,.2)}';
           (document.head || document.documentElement).appendChild(style);
           var hasHighlight = !!(window.CSS && CSS.highlights && window.Highlight);
           var ownScrollUntil = 0;
           var marked = null;
+          var cited = null;
 
           function inNoise(node) {
             var el = node.nodeType === 1 ? node : node.parentElement;
@@ -117,6 +121,22 @@ object ReadAloudScript {
             }
             return 'ok';
           }
+          function clearCite() {
+            if (hasHighlight) CSS.highlights.delete('granger-cite');
+            if (cited) { cited.classList.remove('granger-cite'); cited = null; }
+          }
+          function cite(id, prefix, start, end) {
+            clearCite();
+            var el = find(id, prefix);
+            if (!el) return 'missing';
+            var r = rangeFor(el, start, end);
+            if (hasHighlight && r) CSS.highlights.set('granger-cite', new Highlight(r));
+            else { el.classList.add('granger-cite'); cited = el; }
+            var rect = (r && r.getBoundingClientRect().height ? r : el).getBoundingClientRect();
+            ownScrollUntil = Date.now() + 800;
+            window.scrollBy(0, rect.top - window.innerHeight / 3);
+            return 'ok';
+          }
           function firstVisible() {
             var list = blocks();
             for (var i = 0; i < list.length; i++) {
@@ -147,7 +167,7 @@ object ReadAloudScript {
             if (Date.now() < ownScrollUntil) return;
             if (window.${ReaderPageScript.BRIDGE_NAME}) ${ReaderPageScript.BRIDGE_NAME}.onUserScroll();
           }, { passive: true });
-          window.__grangerRead = { firstVisible: firstVisible, selectionBlock: selectionBlock, mark: mark, clear: clear };
+          window.__grangerRead = { firstVisible: firstVisible, selectionBlock: selectionBlock, mark: mark, clear: clear, cite: cite, clearCite: clearCite };
         })();
     """.trimIndent()
 

@@ -297,6 +297,14 @@ fun ReaderScreen(
                         },
                     )
                 }
+                // A cited quote is marked once its page has loaded (the page script is in by then).
+                val cite = state.cite
+                val citedPage = state.page?.path
+                LaunchedEffect(cite, citedPage, webView) {
+                    val view = webView ?: return@LaunchedEffect
+                    if (cite == null) view.evaluateJavascript(ReadAloudScript.call("clearCite"), null)
+                    else if (citedPage != null) view.evaluateJavascript(ReadAloudScript.call("cite", cite.blockId, cite.prefix, cite.start, cite.end), null)
+                }
                 // The voice's sentence is marked in the page and scrolled into view while the page follows it.
                 val reading = state.reading
                 LaunchedEffect(reading, webView) {

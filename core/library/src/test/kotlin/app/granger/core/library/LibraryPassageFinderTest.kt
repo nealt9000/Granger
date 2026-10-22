@@ -94,6 +94,14 @@ class LibraryPassageFinderTest {
         assertThat(card.text).startsWith("Album: The Planets\nArtist: Gustav Holst")
     }
 
+    @Test fun aSongTitleFocusesItsAlbumsCard() = test {
+        media.trackList.value = planets()
+        val card = finder(emptyList(), emptyMap(), media = mediaIndex()).find(listOf("holst", "venus")).single { it.kind == SourceKind.MEDIA }
+        assertThat(card.location).isEqualTo(planets()[1].id)
+        assertThat(card.heading).isEqualTo("Venus")
+        assertThat(card.text).startsWith("Song: Venus (2 of 3)\nAlbum: The Planets")
+    }
+
     @Test fun atMostTwoMediaCards() = test {
         media.trackList.value = (1..4).map { musicTrack("m$it", album = "Mars Album $it", albumArtist = "Band $it", title = "Mars") }
         media.bookList.value = listOf(phoneAudiobook("b", "Mars Stories"))

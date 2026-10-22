@@ -8,6 +8,7 @@ import app.granger.core.library.ReadingSessions
 import app.granger.core.player.NowPlaying
 import app.granger.player.VoiceButton
 import app.granger.core.player.PlayerHub
+import app.granger.core.research.ArticleText
 import app.granger.core.speech.ReadAddress
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.zim.ZimArchive
@@ -37,7 +38,8 @@ import kotlinx.coroutines.withContext
 /**
  * One reading tab: the article it shows and the pages reached by following links from it. Writes (positions,
  * bookmarks, the tab's current page) go to [appScope] so they finish even when the user leaves the screen first.
- * [fragment] scrolls the first page to that section (a cited passage's heading).
+ * [fragment] scrolls the first page to that section (a cited passage's heading); [quote] marks the cited sentence in
+ * it, until the reader goes to another page.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReaderViewModel(
@@ -49,6 +51,7 @@ class ReaderViewModel(
     private val fragment: String? = null,
     /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
     private val player: PlayerHub? = null,
+    private val quote: String? = null,
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
@@ -87,6 +90,8 @@ class ReaderViewModel(
         val reading: Reading? = null,
         /** What the ⋯ menu's voice entry does now: start, pause or resume. */
         val voice: VoiceButton = VoiceButton.IDLE,
+        /** The cited quote on the first page (research spec §7), to mark; null once the reader leaves that page. */
+        val cite: CiteRange? = null,
     )
 
     /**
@@ -108,6 +113,8 @@ class ReaderViewModel(
     private val stackWrites = Mutex()
     private var source: ArticleReadSource? = null
     private var following = true
+    /** The page [State.cite] belongs to; null once it's been left. */
+    private var citedPath: String? = null
 
     init {
         viewModelScope.launch {
@@ -127,6 +134,11 @@ class ReaderViewModel(
                     packTitle = archive.metadata.title.takeIf { t -> t.isNotBlank() },
                     hasHome = archive.mainPath != null,
                 )
+            }
+            if (!quote.isNullOrBlank()) {
+                citedPath = path
+                val cite = withContext(io) { citeIn(archive, path, quote) }
+                if (citedPath == path) _state.update { it.copy(cite = cite) }
             }
         }
         viewModelScope.launch {
@@ -206,6 +218,15 @@ class ReaderViewModel(
         _state.update { s -> s.copy(reading = s.reading?.copy(following = true)) }
     }
 
+    /** Where [quote] is on [path]'s page; null when the page can't be read or the quote isn't on it. */
+    private fun citeIn(archive: ZimArchive, path: String, quote: String): CiteRange? = try {
+        val item = archive.read(path)
+        val html = item?.let { String(it.bytes, ArticleReadSource.charsetOf(it.mimeType)) }.orEmpty()
+        ArticleQuote.locate(ArticleText.blocks(html), fragment, quote)
+    } catch (e: Exception) {
+        null
+    }
+
     private fun fail(message: String) {
         _state.update { it.copy(error = message, chromeVisible = true) }
     }
@@ -220,7 +241,8 @@ class ReaderViewModel(
         val title = documentTitle?.takeIf { it.isNotBlank() } ?: titleFromPath(zim.path)
         val shown = Page(zim.path, title)
         page.value = shown
-        _state.update { it.copy(url = url, page = shown) }
+        if (citedPath != null && citedPath != zim.path) citedPath = null
+        _state.update { it.copy(url = url, page = shown, cite = it.cite.takeIf { citedPath != null }) }
         writeStack { sessions.pushPath(tabId, zim.path, title) }
         return if (zim.fragment != null) null else library.position(pack, zim.path)
     }

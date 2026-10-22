@@ -6,21 +6,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.BookTarget
+import app.granger.audiobooks.AudiobookShelf
 import app.granger.core.ai.ModelManager
 import app.granger.core.ai.ResearchReadiness
-import app.granger.core.books.TextQuote
-import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.ChatTurn
 import app.granger.core.library.Library
 import app.granger.core.library.MediaIndex
-import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.TurnOutcome
 import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlaySource
 import app.granger.core.player.PlayerHub
 import app.granger.core.player.PlayerUi
 import app.granger.core.speech.StreamingTextReadSource
@@ -86,10 +84,11 @@ class ResearchViewModel(
     private val savedState: SavedStateHandle = SavedStateHandle(),
     /** Runs the pipeline's own work (prompt building, ranking, citation checks) off the main thread. */
     private val cpu: CoroutineDispatcher = Dispatchers.Default,
-    /** Reads answers aloud (Plan V2); null without the player. */
+    /** Reads answers aloud (Plan V2) and plays cited songs and chapters (Plan R3); null leaves both out. */
     private val player: PlayerHub? = null,
     /** Settings → Voice → "Speak answers as they arrive": a new answer is read as its sentences close. */
     private val speakAnswers: () -> Boolean = { false },
+    private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     /** The answer the voice is on ([turnId]) and whether it is speaking; null when the voice is elsewhere or has run out. */
     data class Reading(val turnId: Long, val playing: Boolean)
@@ -325,12 +324,22 @@ class ResearchViewModel(
         }
     }
 
+    /** Resolves citations; every passage opens through it. */
+    private val opener = CitationOpener(sessions, library, bookshelf, media)
+
+    /** Opens cited passage [n] (1-based) of turn [turnId], as [open] does. */
+    suspend fun open(turnId: Long, n: Int): CitationTarget {
+        val turn = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn ?: return CitationTarget.Gone
+        val passage = turn.shown.getOrNull(n - 1) ?: return CitationTarget.Gone
+        return open(passage, turn.answer, n)
+    }
+
     /**
-     * Opens the cited passage's source in a rail tab, at the passage where it can; [CitationTarget.Gone] when it's gone,
-     * or can't be opened (a storage error is logged, not thrown into the screen's tap handler).
+     * Opens [passage], cited as `[n]` in [answer], at the sentence the answer used where it can; [CitationTarget.Gone]
+     * when it's gone, or can't be opened (a storage error is logged, not thrown into the screen's tap handler).
      */
-    suspend fun open(passage: Passage): CitationTarget = try {
-        target(passage)
+    suspend fun open(passage: Passage, answer: String = "", n: Int = 0): CitationTarget = try {
+        opener.open(passage, answer, n)
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
@@ -338,30 +347,39 @@ class ResearchViewModel(
         CitationTarget.Gone
     }
 
-    private suspend fun target(passage: Passage): CitationTarget {
-        // Checked first: a media card's sourceId is neither a book nor a pack.
-        if (passage.kind == SourceKind.MEDIA) {
-            val work = media.work(passage.sourceId) ?: return CitationTarget.Gone
-            return if (work.isAlbum) CitationTarget.Album(work.id.removePrefix(ALBUM_SOURCE)) else CitationTarget.Audiobook(work.id)
+    /** Whether cited media can be played here (a source card shows Play). */
+    val canPlay: Boolean get() = player != null
+
+    /**
+     * Plays cited media [n] of turn [turnId]: an album from its cited song (else its first), an audiobook from its cited
+     * chapter's start (else where it was left). Stays in Research; the mini-player shows. False when it's gone.
+     */
+    suspend fun play(turnId: Long, n: Int): Boolean {
+        val hub = player ?: return false
+        val passage = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn?.shown?.getOrNull(n - 1) ?: return false
+        if (passage.kind != SourceKind.MEDIA) return false
+        return try {
+            when (val target = open(passage, n = n)) {
+                is CitationTarget.Album -> {
+                    val work = media.work(ALBUM_SOURCE + target.albumKey) ?: return false
+                    if (work.partIds.isEmpty()) return false
+                    val start = target.trackId?.let(work.partIds::indexOf)?.takeIf { it >= 0 } ?: 0
+                    hub.playTracks(work.partIds, start, shuffle = false, PlaySource(ALBUM_SOURCE + target.albumKey, work.title))
+                    true
+                }
+                is CitationTarget.Audiobook -> {
+                    val chapter = target.chapter?.let { media.chapter(target.audiobookId, it) }
+                    hub.playAudiobook(target.audiobookId, chapter?.let { AudiobookShelf.at(target.audiobookId, it, now()) })
+                    true
+                }
+                else -> false
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            runCatching { android.util.Log.w("Granger", "Research media couldn't be played", e) }
+            false
         }
-        if (!BookIds.isBook(passage.sourceId)) {
-            val pack = library.packs.first().firstOrNull { it.id == passage.sourceId }
-            if (pack == null || pack.status != PackStatus.OK) return CitationTarget.Gone
-            // A catalogue card describes the whole pack, so it opens the pack's main page.
-            val card = passage.kind == SourceKind.CARD
-            val tabId = sessions.openTab(pack.id, if (card) "" else passage.location, passage.sourceTitle)
-            // The tab can vanish between opening and showing it (closed from the rail): the source is gone, say so.
-            if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
-            return CitationTarget.Article(tabId, if (card) null else passage.anchor)
-        }
-        val book = bookshelf.book(passage.sourceId)
-        if (book == null || book.status != PackStatus.OK) return CitationTarget.Gone
-        val tabId = sessions.openTab(book.id, "", book.title)
-        if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
-        val placed = passage.kind == SourceKind.BOOK || (passage.kind == SourceKind.SELECTION && passage.location.isNotEmpty())
-        if (!placed) return CitationTarget.Book(tabId, at = null)
-        val quote = TextQuote("", cutAtWord(passage.text.trim(), BOOK_QUOTE), "")
-        return CitationTarget.Book(tabId, BookTarget(passage.location, passage.progression, quote))
     }
 
     /** Deletes this chat (stopping a running turn) and leaves the view empty. */
@@ -571,7 +589,6 @@ class ResearchViewModel(
         const val MAX_QUESTION = 1_000
         const val TITLE = 60
         const val QUOTE_TITLE = 40
-        const val BOOK_QUOTE = 80
         const val DEEPER_PASSAGES = 8
         private val DEEPENABLE = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED)
         private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED, TurnOutcome.SEARCH_FAILED)
@@ -584,13 +601,16 @@ internal const val ALBUM_SOURCE = "album:"
 
 /**
  * A source card's second line: the author (or the pack, for an article without one) and the heading; for an album or
- * audiobook, the artist or author (else "Your music" / "Your audiobooks") and "Album" or "Audiobook".
+ * audiobook, the artist or author (else "Your music" / "Your audiobooks"), "Album" or "Audiobook", and the cited song or
+ * chapter.
  */
 internal fun sourceByline(passage: Passage): String {
     val who = passage.meta.author.ifBlank { passage.packTitle }
     val what = if (passage.kind != SourceKind.MEDIA) passage.heading
     else if (passage.sourceId.startsWith(ALBUM_SOURCE)) "Album" else "Audiobook"
-    return listOf(who, what).filter { it.isNotBlank() }.joinToString(" · ")
+    // A card focused on a song or chapter names it too.
+    val part = if (passage.kind == SourceKind.MEDIA) passage.heading else ""
+    return listOf(who, what, part).filter { it.isNotBlank() }.joinToString(" · ")
 }
 
 /**

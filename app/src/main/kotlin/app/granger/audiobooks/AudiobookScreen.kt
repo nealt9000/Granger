@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -45,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.AudioBookmark
 import app.granger.library.ConfirmDialog
 import app.granger.media.DownloadControls
+import app.granger.media.citedMark
+import app.granger.media.citedTint
 import app.granger.player.formatTime
 
 /**
@@ -53,7 +56,7 @@ import app.granger.player.formatTime
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> Unit) {
+fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> Unit, markedChapter: Int? = null) {
     val page by remember(audiobookId) { vm.book(audiobookId) }.collectAsStateWithLifecycle(null)
     var editing by remember { mutableStateOf<AudioBookmark?>(null) }
     var deleting by remember { mutableStateOf<AudioBookmark?>(null) }
@@ -68,7 +71,13 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
     ) { padding ->
         if (loaded == null) return@Scaffold
         val book = loaded.book
-        LazyColumn(Modifier.padding(padding).fillMaxSize()) {
+        val download = loaded.download
+        val remove = loaded.onRemoveDownload
+        val list = rememberLazyListState()
+        val citedMarked = citedMark(
+            list, citedChapterIndex(loaded.chapters.map { it.ordinal }, markedChapter, download != null && remove != null, book.description.isNotBlank()),
+        )
+        LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
             item {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     AudiobookCover(book.coverPath, Modifier.width(140.dp).alpha(if (loaded.missing) 0.4f else 1f))
@@ -108,8 +117,6 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                     }
                 }
             }
-            val download = loaded.download
-            val remove = loaded.onRemoveDownload
             if (download != null && remove != null) {
                 item(key = "download") {
                     DownloadControls(book.title, download, loaded.filesDone, loaded.filesTotal, "chapters", onRemove = remove)
@@ -120,7 +127,8 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
             items(loaded.chapters, key = { "chapter:${it.ordinal}" }) { chapter ->
                 val current = chapter.ordinal == loaded.currentChapter
                 ListItem(
-                    modifier = Modifier.clickable(enabled = loaded.playable) { vm.playChapter(book.id, chapter) },
+                    modifier = Modifier.citedTint(citedMarked && chapter.ordinal == markedChapter)
+                        .clickable(enabled = loaded.playable) { vm.playChapter(book.id, chapter) },
                     leadingContent = { Text("${chapter.ordinal + 1}", style = MaterialTheme.typography.labelLarge) },
                     headlineContent = {
                         Text(
@@ -168,6 +176,16 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
             onConfirm = { vm.deleteBookmark(mark) }, onDismiss = { deleting = null },
         )
     }
+}
+
+/**
+ * The list index of chapter [ordinal] in an audiobook page: after the header, the progress, the buttons, the download
+ * controls and the description (when shown) and the "Chapters" title. [ordinals] are the chapters in page order.
+ */
+internal fun citedChapterIndex(ordinals: List<Int>, ordinal: Int?, hasDownload: Boolean, hasDescription: Boolean): Int? {
+    if (ordinal == null) return null
+    val i = ordinals.indexOf(ordinal)
+    return if (i < 0) null else i + 4 + (if (hasDownload) 1 else 0) + (if (hasDescription) 1 else 0)
 }
 
 @Composable
