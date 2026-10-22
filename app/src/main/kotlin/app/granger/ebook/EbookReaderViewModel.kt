@@ -123,6 +123,7 @@ class EbookReaderViewModel(
     private val savedState: SavedStateHandle = SavedStateHandle(),
     /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
     private val player: PlayerHub? = null,
+    private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -165,6 +166,7 @@ class EbookReaderViewModel(
     // Read aloud (Plan V1): one source per open book, kept so its sentence locators survive across calls.
     private var readSource: BookReadSource? = null
     private var following = true
+    private var voiceMovedAt = 0L
 
     init {
         SelectionBridge.sink = selectionSink
@@ -175,8 +177,10 @@ class EbookReaderViewModel(
                         val id = bookId
                         val mine = voice != null && id != null && voice.sourceKey == ReadSourceKey.book(id)
                         if (!mine) following = true
+                        // The source is this reader's own when it started the voice, else made now: the voice may
+                        // have been reading this book before this reader existed (a restore, a return to the book).
                         val reading = if (mine && progress != null) {
-                            readSource?.locatorOf(progress.utterance)?.let { BookReading(it, progress.utterance.paragraph, following) }
+                            source()?.locatorOf(progress.utterance)?.let { BookReading(it, progress.utterance.paragraph, following) }
                         } else {
                             null
                         }
@@ -485,9 +489,16 @@ class EbookReaderViewModel(
 
     fun stopReading() { player?.stopVoice() }
 
-    /** The user turned a page or scrolled: the page stops following the voice until [follow]. */
+    /** The screen is about to turn the page to the voice's sentence: the page change that follows is not the user's. */
+    fun voiceMoved() { voiceMovedAt = now() }
+
+    /**
+     * The page changed. Within [VOICE_MOVE_GRACE_MS] of [voiceMoved] it is the voice's own turn; otherwise the user
+     * turned a page or scrolled, and the page stops following the voice until [follow].
+     */
     fun onUserMoved() {
         if (!following || _state.value.reading == null) return
+        if (now() - voiceMovedAt <= VOICE_MOVE_GRACE_MS) return
         following = false
         _state.update { s -> s.copy(reading = s.reading?.copy(following = false)) }
     }
@@ -520,6 +531,8 @@ class EbookReaderViewModel(
         const val BOOK_GONE = "This book isn't on the phone any more. Check the SD card, or download it again from Granger."
         const val BOOK_DAMAGED = "This book couldn't be opened. Try removing it, then download or import it again."
         const val SAVE_DEBOUNCE_MS = 1_000L
+        /** A page change this soon after the voice asked for one is the voice's, not the user's. */
+        const val VOICE_MOVE_GRACE_MS = 1_500L
         const val TARGET_CONSUMED = "targetConsumed"
     }
 }

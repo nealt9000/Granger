@@ -76,7 +76,10 @@ class BookReadSource(
             reset(locator, a?.locatorJson)
             start = 0
             if (a != null) {
+                // The iterator usually opens on the element itself; when it opens earlier, read on until the
+                // sentence turns up (bounded), rather than restart the voice from wherever the iterator began.
                 fill(limit + a.sentence + 1)
+                while (buffer.none { it.address == a } && !exhausted && buffer.size < REOPEN_SCAN) fill(buffer.size + limit)
                 start = buffer.indexOfFirst { it.address == a }.takeIf { it >= 0 }
                     ?: buffer.indexOfFirst { (it.address as ReadAddress.Book).locatorJson == a.locatorJson }.takeIf { it >= 0 }
                     ?: 0
@@ -182,5 +185,7 @@ class BookReadSource(
         const val CONTEXT = 60
         /** How many elements after a selection's locator are searched for its text (a selection's locator can point at its page, not its paragraph). */
         const val SELECTION_SCAN = 8
+        /** How many utterances past a reopened iterator's start are searched for the asked-for sentence. */
+        const val REOPEN_SCAN = 600
     }
 }

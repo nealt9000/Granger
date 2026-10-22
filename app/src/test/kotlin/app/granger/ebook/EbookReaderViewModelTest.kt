@@ -48,6 +48,7 @@ class EbookReaderViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     @get:Rule val tmp = TemporaryFolder()
 
+    private var clock = 10_000L
     private val bookshelf = FakeBookshelf()
     private val sessions = FakeReadingSessions()
     private val opener = FakeBookOpener()
@@ -83,7 +84,7 @@ class EbookReaderViewModelTest {
 
     // ---- read aloud (Plan V1) ----
 
-    private fun TestScope.readingReader(hub: app.granger.player.FakePlayerHub): EbookReaderViewModel {
+    private fun TestScope.readingReader(hub: app.granger.player.FakePlayerHub, now: () -> Long = { clock }): EbookReaderViewModel {
         opener.publication = app.granger.testPublicationWithContent(
             title = "The Upanishads",
             chapters = linkedMapOf("c001.xhtml" to "<h1>One</h1><p>First sentence. Second sentence.</p>", "c002.xhtml" to "<p>Chapter two text.</p>"),
@@ -91,7 +92,7 @@ class EbookReaderViewModelTest {
         val file = tmp.root.resolve("b.epub").apply { writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, null, bookshelf, sessions, opener, prefsStore, this, main.dispatcher, FakeBookSearcher(), SavedStateHandle(), player = hub)
+        return EbookReaderViewModel(1, null, bookshelf, sessions, opener, prefsStore, this, main.dispatcher, FakeBookSearcher(), SavedStateHandle(), player = hub, now = now)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -142,6 +143,12 @@ class EbookReaderViewModelTest {
         assertThat(reading.locator.text.highlight).isEqualTo("Second sentence.")
         assertThat(reading.paragraph).isEqualTo(1)
         assertThat(reading.following).isTrue()
+        // The page change right after the voice's own turn is the voice's; one later than the grace is the user's.
+        vm.voiceMoved()
+        clock += 1_000
+        vm.onUserMoved()
+        assertThat(vm.state.value.reading!!.following).isTrue()
+        clock += 1_000
         vm.onUserMoved()
         assertThat(vm.state.value.reading!!.following).isFalse()
         vm.follow()
@@ -152,6 +159,21 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.readingThisBook).isFalse()
         vm.stopReading()
         assertThat(hub.calls).contains("stopVoice")
+    }
+
+    @Test fun aReaderOpenedWhileTheVoiceAlreadyReadsThisBookShowsItsSentence() = runTest(main.dispatcher) {
+        // The voice was restored by the service (or started from an earlier reader); this reader never called readAloud.
+        val hub = app.granger.player.FakePlayerHub()
+        hub.ui.value = voiceUiFor("book:b")
+        val vm = readingReader(hub)
+        val src = BookReadSource(vm.state.value.publication!!, "b", "The Upanishads", main.dispatcher)
+        val second = src.utterances(null, 10)[2]
+        hub.voiceProgress.value = app.granger.core.player.voice.VoiceProgress(second.address, second, 2)
+        settle { vm.state.value.reading != null }
+        assertThat(vm.state.value.readingThisBook).isTrue()
+        assertThat(vm.state.value.reading!!.locator.text.highlight).isEqualTo("Second sentence.")
+        assertThat(vm.state.value.reading!!.following).isTrue()
+        assertThat(hub.calls).isEmpty()
     }
 
     @Test fun opensAtSavedPosition() = runTest(main.dispatcher) {

@@ -43,7 +43,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.AssistChip
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.testTag
 import app.granger.Features
@@ -66,7 +65,6 @@ import org.readium.r2.shared.util.AbsoluteUrl
 private const val EDGE_FRACTION = 0.2
 
 /** A locator change this soon after the voice's own jump is the jump, not the user. */
-private const val VOICE_MOVE_GRACE_MS = 1_500L
 private const val VOICE_LOG = "GrangerVoice"
 
 object EbookTags {
@@ -120,29 +118,29 @@ fun EbookReaderScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    // A page change within a moment of the voice's own jump is the voice's; any other is the user's, and Follow goes off.
-    var voiceMovedAt by remember { mutableLongStateOf(0L) }
+    // A page change is the user's unless the voice just turned the page (the view model keeps that moment: this
+    // screen can be composed again while the voice reads on).
     LaunchedEffect(navigator, lifecycle) {
         navigator?.currentLocator?.collect {
             viewModel.onLocator(it, onScreen = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
-            val sinceVoice = System.currentTimeMillis() - voiceMovedAt
-            Log.d(VOICE_LOG, "Voice: page ${it.href} p=${it.locations.progression} sinceVoiceMs=$sinceVoice")
-            if (sinceVoice > VOICE_MOVE_GRACE_MS) viewModel.onUserMoved()
+            Log.d(VOICE_LOG, "Voice: page ${it.href} p=${it.locations.progression}")
+            viewModel.onUserMoved()
         }
     }
-    // The voice's sentence: decorated, and the page turned to it (once per paragraph) while the reader follows.
+    // The voice's sentence: decorated, and the page turned to it while the reader follows. Every sentence is asked
+    // for (a paragraph can run over the page): a sentence already on the page moves nothing.
     LaunchedEffect(navigator, state.reading?.locator) {
         val reading = state.reading
         navigator?.applyDecorations(
             listOfNotNull(reading?.let { Decoration("voice", it.locator, Decoration.Style.Highlight(tint = READING_TINT)) }), VOICE_GROUP,
         )
     }
-    LaunchedEffect(navigator, state.reading?.paragraph, state.reading?.following) {
+    LaunchedEffect(navigator, state.reading?.locator, state.reading?.following) {
         val reading = state.reading ?: return@LaunchedEffect
         if (!reading.following) return@LaunchedEffect
-        voiceMovedAt = System.currentTimeMillis()
+        viewModel.voiceMoved()
         val went = navigator?.go(reading.locator, animated = false)
-        Log.d(VOICE_LOG, "Voice: follow ¶${reading.paragraph} go=$went ${reading.locator.href} p=${reading.locator.locations.progression} \"${reading.locator.text.highlight?.take(30)}\"")
+        Log.d(VOICE_LOG, "Voice: follow ¶${reading.paragraph} go=$went ${reading.locator.href} \"${reading.locator.text.highlight?.take(30)}\"")
     }
     LaunchedEffect(navigator) {
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }
