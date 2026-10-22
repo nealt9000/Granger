@@ -127,11 +127,18 @@ object OnboardingModel {
         else -> listOfNotNull(catalog.item(token))
     }
 
-    /** Packs one per line in catalog order; a collection's books as one line, placed where its first book was. */
+    /**
+     * Packs one per line in catalog order; a collection's books as one line, placed where its first book was. Of two
+     * flavours of one ZIM (WikiMed with and without pictures) only the larger is listed: the other would be a duplicate
+     * of what the phone gets or already holds (Neal, 2026-10-22).
+     */
     fun lines(items: List<CatalogItem>, installed: Set<String>): List<Line> {
         val out = ArrayList<Line>()
         val bookLines = LinkedHashMap<String, MutableList<BookEntry>>()
+        val largestFlavour = items.filterIsInstance<PackEntry>().filter { it.zimName.isNotBlank() }
+            .groupBy { it.zimName }.mapValues { (_, packs) -> packs.maxBy { it.sizeBytes }.id }
         for (item in items) {
+            if (item is PackEntry && item.zimName.isNotBlank() && largestFlavour[item.zimName] != item.id) continue
             when (item) {
                 is BookEntry -> bookLines.getOrPut(item.collection) { mutableListOf() }.also { if (it.isEmpty()) out += PLACEHOLDER }.add(item)
                 else -> out += Line(item.id, item.title, listOf(item), installed = item.id in installed)

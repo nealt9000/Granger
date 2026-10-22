@@ -10,15 +10,15 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class OnboardingModelTest {
-    private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000).copy(family = "wikipedia")
-    private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900).copy(family = "wikipedia")
+    private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
+    private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
     private val wikem = packEntry("wikem_en_all_maxi", size = 375).copy(family = "wikem")
     private val voyage = packEntry("wikivoyage_en_all_maxi", size = 1_070).copy(family = "wikivoyage")
     private val france = packEntry("maps_en_france", size = 4_000).copy(family = "maps", title = "France")
     private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
     private val europe = packEntry("maps_en_europe", size = 20_000).copy(family = "maps", title = "Europe")
-    private val mdwikiNopic = packEntry("mdwiki_en_all_nopic", size = 800).copy(family = "mdwiki")
-    private val mdwikiMaxi = packEntry("mdwiki_en_all_maxi", size = 12_000).copy(family = "mdwiki")
+    private val mdwikiNopic = packEntry("mdwiki_en_all_nopic", size = 800, zimName = "mdwiki_en_all").copy(family = "mdwiki")
+    private val mdwikiMaxi = packEntry("mdwiki_en_all_maxi", size = 12_000, zimName = "mdwiki_en_all").copy(family = "mdwiki")
     private val bible = bookEntry("gc-bible", category = "Scripture & religion").copy(sizeBytes = 10, collection = "granger-classics")
     private val hamlet = bookEntry("gc-hamlet", category = "Drama").copy(sizeBytes = 20, collection = "granger-classics")
 
@@ -50,7 +50,9 @@ class OnboardingModelTest {
         assertThat(efficient.bytes(unticked = setOf("collection:granger-classics"))).isEqualTo(1_000)
         val comprehensive = choices[1]
         assertThat(comprehensive.lines.single { it.id == "wikem_en_all_maxi" }.installed).isTrue()
-        assertThat(comprehensive.bytes()).isEqualTo(1_000 + 30 + 1_900)
+        // WikiMed with and without pictures are one ZIM: only the larger is listed (Neal, 2026-10-22).
+        assertThat(comprehensive.lines.map { it.id }).containsExactly("collection:granger-classics", "wikipedia_en_medicine_maxi", "wikem_en_all_maxi").inOrder()
+        assertThat(comprehensive.bytes()).isEqualTo(30 + 1_900)
         assertThat(OnboardingModel.startChoices(catalogOf(), emptySet())).isEmpty()
     }
 
@@ -86,6 +88,8 @@ class OnboardingModelTest {
             "gc-bible", "wikipedia_en_medicine_maxi", "gc-hamlet", "maps_en_peru", "mdwiki_en_all_nopic", "wikivoyage_en_all_maxi",
         )
         assertThat(review.bytes).isEqualTo(10 + 1_900 + 20 + 500 + 800 + 1_070)
+        // Unticking the medicine line by its surviving (larger) id removes it.
+        assertThat(OnboardingModel.review(start, setOf("wikipedia_en_medicine_maxi"), null, emptyList(), 1).items.map { it.id }).doesNotContain("wikipedia_en_medicine_maxi")
         assertThat(review.fits).isTrue()
         assertThat(review.copy(freeBytes = 100).fits).isFalse()
 

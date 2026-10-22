@@ -119,8 +119,16 @@ class OnboardingViewModel(
         refreshVolumes()
     }
 
-    private fun installedIds(catalog: Catalog, records: List<DownloadRecord>, packs: List<Pack>): Set<String> =
-        catalog.items.filter { statusOf(it, records, packs, tier) == ItemStatus.Installed }.mapTo(HashSet()) { it.id }
+    /**
+     * What the phone holds, by catalog id: the Kiwix screen's rule, plus every flavour of an installed ZIM (a pack with
+     * pictures covers the one without, and the other way round), as the readiness model counts them.
+     */
+    private fun installedIds(catalog: Catalog, records: List<DownloadRecord>, packs: List<Pack>): Set<String> {
+        val ids = catalog.items.filter { statusOf(it, records, packs, tier) == ItemStatus.Installed }.mapTo(HashSet()) { it.id }
+        val names = packs.filter { it.status == app.granger.core.library.PackStatus.OK }.mapTo(HashSet()) { it.name }
+        catalog.packs.filter { it.zimName.isNotBlank() && it.zimName in names }.mapTo(ids) { it.id }
+        return ids
+    }
 
     private fun build(f: Facts, c: Choices, s: Setup): OnboardingUi {
         val catalog = f.catalog

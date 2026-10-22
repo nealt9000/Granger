@@ -39,7 +39,8 @@ class OnboardingViewModelTest {
     private val enqueued = mutableListOf<Triple<String, List<String>, Boolean>>()
     private var enqueueResult: EnqueueResult = EnqueueResult.Queued
 
-    private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000).copy(family = "wikipedia")
+    private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
+    private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
     private val wikem = packEntry("wikem_en_all_maxi", size = 375).copy(family = "wikem")
     private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
     private val europe = packEntry("maps_en_europe", size = 20_000).copy(family = "maps", title = "Europe")
@@ -124,6 +125,16 @@ class OnboardingViewModelTest {
         assertThat(prefs.wifiOnly).isFalse()
         assertThat(onboardingPrefs.done).isTrue()
         assertThat(vm.finished.value).isTrue()
+    }
+
+    @Test fun anInstalledFlavourCoversTheOtherFlavourOfTheSameZim() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full.copy(packs = full.packs + medMaxi))
+        // WikiMed with pictures is on the phone (by its ZIM name); the preset's no-pictures line counts as held.
+        library.packList.value = listOf(app.granger.pack("u-med", "WikiMed").copy(name = "wikipedia_en_medicine"))
+        val vm = viewModel()
+        val efficient = vm.ui.value.starts.first { it.id == "efficient" }
+        assertThat(efficient.lines.single { it.id == "wikipedia_en_medicine_nopic" }.installed).isTrue()
+        assertThat(efficient.bytes()).isEqualTo(10)
     }
 
     @Test fun aRefusedStartStaysWithANoticeAndAnEmptyReviewJustFinishes() = runTest(main.dispatcher) {
