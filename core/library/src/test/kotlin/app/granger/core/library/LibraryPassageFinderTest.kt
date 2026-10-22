@@ -205,6 +205,24 @@ class LibraryPassageFinderTest {
         assertThat(io.hops).isAtLeast(2)
     }
 
+    @Test fun packsAreSearchedAtTheSameTime(): Unit = kotlinx.coroutines.runBlocking {
+        // Each archive's search waits until both searches have started: one after another, this would time out.
+        val started = java.util.concurrent.CountDownLatch(2)
+        fun waiting(id: String) = object : ZimArchive by FakeZimArchive(id) {
+            override fun search(query: String, limit: Int): List<ZimHit> {
+                started.countDown()
+                check(started.await(5, java.util.concurrent.TimeUnit.SECONDS)) { "searches ran one at a time" }
+                return listOf(ZimHit("index", id, score = 1))
+            }
+            override fun read(path: String) = app.granger.core.zim.ZimItem(path, "text/html", page("steam in $id").toByteArray())
+        }
+        val packs = listOf(pack("a"), pack("b"))
+        val realIndex = BookIndex(db, kotlinx.coroutines.Dispatchers.IO)
+        val finder = LibraryPassageFinder(Archives(packs, mapOf("a" to waiting("a"), "b" to waiting("b"))), realIndex, StubBookshelf(), FakeShelves(), kotlinx.coroutines.Dispatchers.IO)
+        val found = finder.find(listOf("steam")).filter { it.kind == SourceKind.ARTICLE }
+        assertThat(found.map { it.sourceId }.toSet()).containsExactly("a", "b")
+    }
+
     @Test fun eachKeywordIsSearchedOnItsOwnAndHitsMerge() = test {
         val archive = FakeZimArchive(
             "wiki", paths = setOf("Boiler"), results = listOf(ZimHit("Boiler", "Boiler", score = 3)),

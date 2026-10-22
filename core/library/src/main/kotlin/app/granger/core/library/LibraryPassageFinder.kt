@@ -12,6 +12,8 @@ import app.granger.core.zim.ZimHit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
@@ -22,7 +24,7 @@ import kotlinx.coroutines.withContext
  *
  * @param docs how many articles are read, overall; @param perPack how many hits each pack is asked for;
  * @param cards how many catalogue cards are kept; @param bookLimit how many chunks the general book search keeps;
- * @param mediaCards how many media cards are kept.
+ * @param mediaCards how many media cards are kept; @param searchParallelism how many packs are searched at once.
  *
  * A question that names a work ("does the bible say ...") also searches inside the named books, for the other keywords.
  */
@@ -38,6 +40,7 @@ class LibraryPassageFinder(
     private val bookLimit: Int = 40,
     private val media: MediaIndex? = null,
     private val mediaCards: Int = 2,
+    private val searchParallelism: Int = 4,
 ) : PassageFinder {
     override suspend fun find(keywords: List<String>): List<Passage> {
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
@@ -97,17 +100,21 @@ class LibraryPassageFinder(
     /** Each keyword is searched on its own (the full-text engine wants every word of a query); an article found twice keeps its best score. */
     private suspend fun articles(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> =
         withContext(io) {
-            val hits = packs.filter { it.hasFulltextIndex }.flatMap { pack ->
-                try {
-                    val archive = library.archive(pack.id) ?: return@flatMap emptyList()
-                    words.flatMap { archive.search(it, perPack) }
-                        .groupBy { it.path }.values.map { same -> Triple(pack, archive, same.maxBy { it.score }) }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    emptyList()
+            // Packs are searched [searchParallelism] at a time: one after another, search time grew with every pack added.
+            val searching = io.limitedParallelism(searchParallelism)
+            val hits = packs.filter { it.hasFulltextIndex }.map { pack ->
+                async(searching) {
+                    try {
+                        val archive = library.archive(pack.id) ?: return@async emptyList()
+                        words.flatMap { archive.search(it, perPack) }
+                            .groupBy { it.path }.values.map { same -> Triple(pack, archive, same.maxBy { it.score }) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (_: Exception) {
+                        emptyList()
+                    }
                 }
-            }
+            }.awaitAll().flatten()
             hits.sortedByDescending { it.third.score }.take(docs).flatMap { (pack, archive, hit) ->
                 try {
                     articlePassages(pack, archive, hit, collections[pack.id].orEmpty())
