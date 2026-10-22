@@ -205,7 +205,8 @@ fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: 
 
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
-@Serializable data class SourceRoute(val scope: CatalogScope)
+/** [domain] filters the Kiwix list to a readiness domain (Plan H1); null is the whole catalog. */
+@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null)
 /** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
 @Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
 /** The LibriVox source: Recently added, six genres and search (Plan M2). */
@@ -782,12 +783,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<SourceRoute> { backStackEntry ->
-                val source = backStackEntry.toRoute<SourceRoute>().scope
+                val route = backStackEntry.toRoute<SourceRoute>()
+                val source = route.scope
                 SourceScreen(
                     viewModel = viewModel {
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
-                            container.downloadPrefs, container.deviceTier, container.appScope,
+                            container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
                         )
                     },
                     title = source.title,
@@ -861,11 +863,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 ReadinessScreen(
                     viewModel = viewModel {
                         ReadinessViewModel(
-                            container.downloads, container.library, container.volumes,
+                            container.downloads, container.library, container.bookshelf, container.catalog, container.volumes,
                             container.deviceTier, container.totalRamBytes, container.appScope,
                         )
                     },
                     onBack = { nav.popBackStack() },
+                    onOpenKiwix = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                 )
             }
         }

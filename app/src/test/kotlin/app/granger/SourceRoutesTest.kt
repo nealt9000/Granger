@@ -11,6 +11,9 @@ class SourceRoutesTest {
     @Test fun everySourceLinkOpensItsView() {
         assertThat(routeOf(SourceLink.GRANGER)).isEqualTo(SourceRoute(CatalogScope.GRANGER))
         assertThat(routeOf(SourceLink.KIWIX)).isEqualTo(SourceRoute(CatalogScope.KIWIX))
+        // The source screens open unfiltered; Readiness adds a domain (Plan H1).
+        assertThat((routeOf(SourceLink.KIWIX) as SourceRoute).domain).isNull()
+        assertThat(SourceRoute(CatalogScope.KIWIX, "medicine")).isNotEqualTo(SourceRoute(CatalogScope.KIWIX))
         assertThat(routeOf(SourceLink.ARCHIVE_ORG)).isEqualTo(ArchiveRoute(ArchiveKind.TEXTS))
         assertThat(routeOf(SourceLink.ARCHIVE_ORG_SPOKEN)).isEqualTo(ArchiveRoute(ArchiveKind.SPOKEN_WORD))
         assertThat(routeOf(SourceLink.ARCHIVE_ORG_MUSIC)).isEqualTo(ArchiveRoute(ArchiveKind.MUSIC))

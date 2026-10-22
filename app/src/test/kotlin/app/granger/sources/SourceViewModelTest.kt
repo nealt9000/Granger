@@ -13,7 +13,9 @@ import app.granger.catalogOf
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogState
+import app.granger.core.catalog.Domain
 import app.granger.core.catalog.Preset
+import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
 import app.granger.modelEntry
@@ -463,5 +465,83 @@ class SourceViewModelTest {
         assertThat(models.sections.single().rows.single().status).isEqualTo(ItemStatus.NeedsMoreMemory)
         val granger = viewModel(tier = DeviceTier.LIBRARY_ONLY).ui.value
         assertThat(granger.presets.single().remainingCount).isEqualTo(3)
+    }
+
+    // --- Plan H1: the Kiwix list filtered to a readiness domain ---
+
+    private val domainCatalog = catalogOf(
+        listOf(
+            kiwix("med", "Medical", featured = true).copy(domain = "medicine", family = "wikipedia"),
+            kiwix("wikem", "Medical").copy(domain = "medicine", family = "wikem"),
+            kiwix("cdc", "Medical").copy(domain = "medicine", family = "cdc"),
+            kiwix("top", "Reference", featured = true).copy(domain = "reference", family = "wikipedia"),
+            kiwix("se1").copy(domain = "technology", family = "stack_exchange"),
+        ),
+    ).copy(
+        readiness = Readiness(
+            listOf(
+                Domain("medicine", "Medicine & first aid", essential = listOf("med"), comprehensive = listOf("med", "wikem")),
+                Domain("reference", "General reference", essential = listOf("top"), comprehensive = listOf("top")),
+            ),
+        ),
+    )
+
+    private fun TestScope.domainViewModel(domain: String?): SourceViewModel {
+        val vm = SourceViewModel(
+            CatalogScope.KIWIX, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.THINK_DEEPER,
+            appScope = this, io = main.dispatcher, domain = domain,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    @Test fun aDomainFiltersTheKiwixListAndHidesTheCategoryChips() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = domainCatalog)
+        val ui = domainViewModel("medicine").ui.value
+        assertThat(ui.domainTitle).isEqualTo("Medicine & first aid")
+        assertThat(ui.categories).isEmpty()
+        assertThat(ui.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "wikem", "cdc")
+        // Short list: nothing folds.
+        assertThat(ui.sections.none { it.foldable }).isTrue()
+    }
+
+    @Test fun recommendedInADomainIsItsTierItemsUninstalledFirst() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = domainCatalog)
+        library.packList.value = listOf(pack("u-med"))
+        val sections = domainViewModel("medicine").ui.value.sections
+        assertThat(sections.map { it.title }).containsExactly("Recommended", "Medical").inOrder()
+        // wikem (not installed) before med (installed); the non-tier pack is in its category.
+        assertThat(sections[0].rows.map { it.id }).containsExactly("wikem", "med").inOrder()
+        assertThat(sections[1].rows.map { it.id }).containsExactly("cdc")
+    }
+
+    @Test fun clearingTheDomainBringsTheChipsBack() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = domainCatalog)
+        val vm = domainViewModel("medicine")
+        vm.clearDomain()
+        testScheduler.advanceUntilIdle()
+        val ui = vm.ui.value
+        assertThat(ui.domainTitle).isNull()
+        assertThat(ui.categories).containsExactly("Medical", "Reference", "Q&A").inOrder()
+        // Both featured packs sit under Recommended again, so Reference has no section of its own.
+        assertThat(ui.sections.map { it.title }).containsExactly("Recommended", "Medical", "Q&A").inOrder()
+        assertThat(ui.sections[0].rows.map { it.id }).containsExactly("med", "top").inOrder()
+    }
+
+    @Test fun anUnknownDomainShowsEverything() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = domainCatalog)
+        val ui = domainViewModel("astrology").ui.value
+        assertThat(ui.domainTitle).isNull()
+        assertThat(ui.sections.flatMap { it.rows }).hasSize(5)
+        assertThat(ui.categories).isNotEmpty()
+    }
+
+    @Test fun aQueryInADomainSearchesTheDomainOnly() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = domainCatalog)
+        val vm = domainViewModel("medicine")
+        vm.setQuery("Pack")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "wikem", "cdc")
     }
 }
