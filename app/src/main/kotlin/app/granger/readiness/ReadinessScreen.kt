@@ -46,8 +46,11 @@ fun shownSignals(signals: List<Signal>, showAll: Boolean): List<Signal> = if (sh
 
 /** The status line under a domain's bar. */
 fun coverageText(domain: DomainCoverage): String = when (domain.coverage) {
-    Coverage.NONE ->
-        if (domain.essentialBytes > 0L) "Nothing yet · the essentials are ${formatBytes(domain.essentialBytes)}" else "Nothing yet"
+    // A domain can hold packs outside its tiers (the bar shows them) and still have no essential.
+    Coverage.NONE -> listOfNotNull(
+        if (domain.installedBytes > 0L) "No essentials yet · ${formatBytes(domain.installedBytes)} held" else "Nothing yet",
+        if (domain.essentialBytes > 0L) "the essentials are ${formatBytes(domain.essentialBytes)}" else null,
+    ).joinToString(" · ")
     Coverage.BASIC -> "Basic · ${formatBytes(domain.installedBytes)} of ${formatBytes(domain.comprehensiveBytes)}"
     Coverage.COMPREHENSIVE -> "Comprehensive · ${formatBytes(domain.installedBytes)}"
 }

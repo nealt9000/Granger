@@ -128,7 +128,7 @@ fun SettingsScreen(
                     "readiness" -> {
                         ListItem(
                             headlineContent = { Text("Readiness") },
-                            supportingContent = { Text("Check that what you downloaded still works") },
+                            supportingContent = { Text("What you hold offline, and whether it still works") },
                             trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                             modifier = Modifier.selectable(selected = false, onClick = onReadiness),
                         )

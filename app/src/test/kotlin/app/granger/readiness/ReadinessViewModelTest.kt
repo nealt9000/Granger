@@ -263,6 +263,7 @@ class ReadinessViewModelTest {
             DomainCoverage("x", "X", coverage, installed, essential, comprehensive, emptyList())
         assertThat(coverageText(d(Coverage.NONE, 0))).isEqualTo("Nothing yet · the essentials are 1.0 KB")
         assertThat(coverageText(d(Coverage.NONE, 0, essential = 0))).isEqualTo("Nothing yet")
+        assertThat(coverageText(d(Coverage.NONE, 500))).isEqualTo("No essentials yet · 500 B held · the essentials are 1.0 KB")
         assertThat(coverageText(d(Coverage.BASIC, 1_200))).isEqualTo("Basic · 1.2 KB of 4.0 KB")
         assertThat(coverageText(d(Coverage.COMPREHENSIVE, 5_000))).isEqualTo("Comprehensive · 5.0 KB")
     }
