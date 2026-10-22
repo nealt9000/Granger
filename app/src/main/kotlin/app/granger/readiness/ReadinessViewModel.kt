@@ -3,6 +3,8 @@ package app.granger.readiness
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.ai.DeviceTier
+import app.granger.core.catalog.Catalog
+import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
@@ -11,6 +13,8 @@ import app.granger.core.downloads.IntegrityChecker
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
+import app.granger.core.library.Book
+import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -29,6 +33,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.time.LocalDate
 
 enum class CheckStatus { VERIFIED, SIZE_OK, INCOMPLETE, CORRUPTED, MISSING, DAMAGED, NOT_FROM_CATALOG }
 
@@ -57,11 +62,15 @@ data class ReadinessUi(
     val packs: List<CheckRow> = emptyList(),
     /** One row per downloaded book or album (its files' sizes summed). */
     val media: List<CheckRow> = emptyList(),
+    /** What the phone holds per knowledge domain, the signals and storage by source (Plan H1). */
+    val report: ReadinessReport = ReadinessReport.EMPTY,
 )
 
 class ReadinessViewModel(
     private val downloads: Downloads,
     private val library: Library,
+    private val bookshelf: Bookshelf,
+    private val catalog: CatalogSource,
     private val volumes: VolumeSource,
     private val tier: DeviceTier,
     private val totalRamBytes: Long,
@@ -71,19 +80,28 @@ class ReadinessViewModel(
     private val full: suspend (DownloadRecord, (Float) -> Unit) -> Integrity = { record, progress ->
         IntegrityChecker.full(record, io, progress)
     },
+    private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
     private val progress = MutableStateFlow<Map<String, Float>>(emptyMap())
     private val results = MutableStateFlow<Map<String, Integrity>>(emptyMap())
     private val checks = mutableMapOf<String, Job>()
 
+    private data class Checks(val vols: List<Volume>, val prog: Map<String, Float>, val res: Map<String, Integrity>)
+    private data class Sources(val catalog: Catalog?, val books: List<Book>)
+
+    private val checkState = combine(volumeList, progress, results, ::Checks)
+    private val sources = combine(catalog.state, bookshelf.books) { state, books -> Sources(state.catalog, books) }
+
     val ui: StateFlow<ReadinessUi> =
-        combine(downloads.records, library.packs, volumeList, progress, results) { records, packs, vols, prog, res ->
+        combine(downloads.records, library.packs, sources, checkState) { records, packs, src, chk ->
             // The quick check reads file sizes.
-            withContext(io) { build(records, packs, vols, prog, res) }
+            withContext(io) { build(records, packs, src, chk) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReadinessUi(tier = tier, totalRamBytes = totalRamBytes))
 
     init {
+        // The cached catalog, never the network: the coverage rows read it (spec §8).
+        viewModelScope.launch { catalog.load() }
         refreshVolumes()
     }
 
@@ -153,13 +171,8 @@ class ReadinessViewModel(
         }
     }
 
-    private fun build(
-        records: List<DownloadRecord>,
-        packs: List<Pack>,
-        vols: List<Volume>,
-        prog: Map<String, Float>,
-        res: Map<String, Integrity>,
-    ): ReadinessUi {
+    private fun build(records: List<DownloadRecord>, packs: List<Pack>, src: Sources, chk: Checks): ReadinessUi {
+        val (vols, prog, res) = chk
         val all = records.filter { it.state == DownloadState.INSTALLED }
         val (grouped, installed) = all.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
         val media = grouped.groupBy { it.groupId!! }.map { (group, files) -> groupRow(group, files, prog, res) }
@@ -217,6 +230,7 @@ class ReadinessViewModel(
             voices = rows.filter { it.key in voiceKeys },
             packs = rows.filterNot { it.isModel || it.key in voiceKeys } + byHand,
             media = media.sortedBy { it.title.lowercase() },
+            report = ReadinessModel.report(src.catalog, packs, src.books, records, today()),
         )
     }
 
