@@ -37,6 +37,7 @@ class OnboardingModelTest {
                 UseCase("travel", "Travel", "", listOf("wikivoyage_en_all_maxi")),
             ),
             larger = listOf("maps_en_europe"),
+            covered = mapOf("maps_en_europe" to listOf("Corsica", "Faroe Islands")),
         ),
     )
 
@@ -63,7 +64,13 @@ class OnboardingModelTest {
         assertThat(regions.countries[1].installed).isTrue()
         assertThat(regions.matching("per").countries.map { it.title }).containsExactly("Peru")
         assertThat(regions.matching("eur").larger.map { it.title }).containsExactly("Europe")
-        assertThat(regions.matching("  ")).isEqualTo(regions)
+        assertThat(regions.matching("  ")).isEqualTo(regions.copy(places = emptyList()))
+        // A covered place is found by its own name and chooses its pack (Neal: Puerto Rico is in Central America).
+        val corsica = regions.matching("cors").countries.single()
+        assertThat(corsica.title).isEqualTo("Corsica")
+        assertThat(corsica.pack.id).isEqualTo("maps_en_europe")
+        assertThat(corsica.place).isEqualTo("Corsica")
+        assertThat(regions.places.map { it.title }).containsExactly("Corsica", "Faroe Islands").inOrder()
     }
 
     @Test fun additionsLeaveOutWhatIsChosenOrInstalledAndTakeAFamilysSmallestPack() {

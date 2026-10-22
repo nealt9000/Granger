@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-22T19:45:32Z",
+  "generatedAt": "2026-10-22T20:34:31Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -374,7 +374,8 @@
       "sha256": "29a3ffa52a725d0ef9dd5359d27b864ec8454c61430c0bfb15fd1929f4b73390",
       "urls": [
         "https://download.kiwix.org/zim/wikipedia/wikipedia_en_knots_maxi_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-10.zim"
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-10.zim"
       ],
       "snapshotDate": "2026-10-18",
       "license": "CC BY-SA 4.0",
@@ -27752,6 +27753,29 @@
       "maps_en_central-america",
       "maps_en_nordics",
       "maps_en_andes"
-    ]
+    ],
+    "covered": {
+      "maps_en_central-america": [
+        "Puerto Rico",
+        "Trinidad and Tobago",
+        "Barbados",
+        "Grenada",
+        "Saint Lucia",
+        "Saint Vincent and the Grenadines",
+        "Antigua and Barbuda",
+        "Dominica",
+        "Saint Kitts and Nevis",
+        "Virgin Islands",
+        "Cayman Islands",
+        "Aruba",
+        "Curaçao",
+        "Martinique",
+        "Guadeloupe",
+        "Turks and Caicos",
+        "Anguilla",
+        "Montserrat",
+        "Caribbean"
+      ]
+    }
   }
 }

@@ -603,7 +603,7 @@ ONBOARDING = {"useCases": [
     {"id": "medical", "title": "Medical work", "blurb": "Clinical references.",
      "items": ["wikipedia_en_medicine_nopic", "wikipedia_en_medicine_nopic", "family:maps"]},
     {"id": "faith", "title": "Faith & philosophy", "items": ["@granger-classics", "wikipedia_en_top_nopic"]},
-], "regions": {"larger": ["maps_en_france"]}}
+], "regions": {"larger": ["maps_en_france"], "covered": {"maps_en_france": ["Corsica", " Corsica ", ""]}}}
 
 
 def test_onboarding_block_is_written_with_tokens_checked(tmp_path, monkeypatch):
@@ -615,6 +615,7 @@ def test_onboarding_block_is_written_with_tokens_checked(tmp_path, monkeypatch):
     assert medical["blurb"] == "Clinical references."
     assert block["useCases"][1]["blurb"] == ""
     assert block["larger"] == ["maps_en_france"]
+    assert block["covered"] == {"maps_en_france": ["Corsica"]}
 
 
 def test_onboarding_rejects_bad_tokens_ids_and_areas(tmp_path, monkeypatch):
@@ -634,6 +635,9 @@ def test_onboarding_rejects_bad_tokens_ids_and_areas(tmp_path, monkeypatch):
     bad = {"useCases": [], "regions": {"larger": ["wikipedia_en_top_nopic"]}}
     with pytest.raises(SystemExit, match="not a maps pack"):
         readiness_build(tmp_path, monkeypatch, onboarding=bad)
+    bad = {"useCases": [], "regions": {"covered": {"wikipedia_en_top_nopic": ["Nowhere"]}}}
+    with pytest.raises(SystemExit, match="regions.covered"):
+        readiness_build(tmp_path, monkeypatch, onboarding=bad)
 
 
 def test_build_without_an_onboarding_block_writes_none(tmp_path, monkeypatch):
@@ -648,6 +652,7 @@ def test_real_curated_onboarding_names_seven_use_cases_and_larger_areas():
         assert u["title"] and u["blurb"] and u["items"], u["id"]
     assert len(block["regions"]["larger"]) >= 7
     assert all(p.startswith("maps_en_") for p in block["regions"]["larger"])
+    assert "Puerto Rico" in block["regions"]["covered"]["maps_en_central-america"]
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():

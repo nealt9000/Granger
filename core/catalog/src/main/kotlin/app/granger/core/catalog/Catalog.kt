@@ -163,6 +163,8 @@ data class Onboarding(
     val useCases: List<UseCase> = emptyList(),
     /** The maps packs that are continents or multi-country areas; the region picker lists the other maps as countries. */
     val larger: List<String> = emptyList(),
+    /** Per larger maps pack, the places inside it that have no pack of their own (Puerto Rico → Central America). */
+    val covered: Map<String, List<String>> = emptyMap(),
 )
 
 /** A use-case chip: what it adds, as readiness-style tokens the parser has resolved. */

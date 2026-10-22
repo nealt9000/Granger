@@ -50,6 +50,8 @@ class PublishedCatalogTest {
         assertThat(maps.size).isGreaterThan(150)
         assertThat(onboarding.larger.all { id -> maps.any { it.id == id } }).isTrue()
         assertThat(onboarding.useCases.all { it.blurb.isNotBlank() }).isTrue()
+        assertThat(onboarding.covered["maps_en_central-america"]).contains("Puerto Rico")
+        assertThat(onboarding.covered.keys.all { id -> maps.any { it.id == id } }).isTrue()
     }
 
     @Test fun publishedCatalogCarriesTheReadinessModel() {

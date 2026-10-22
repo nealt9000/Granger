@@ -231,13 +231,14 @@ class CatalogParserTest {
             {"id": "empty", "title": "Nothing", "items": ["nope"]},
             {"id": "", "title": "Blank", "items": ["med"]},
             {"id": "medical", "title": "Again", "items": ["med"]}
-        ], "larger": ["maps_en_france", "med", "maps_en_france"]}"""
+        ], "larger": ["maps_en_france", "med", "maps_en_france"], "covered": {"maps_en_france": ["Corsica", " "], "med": ["Nowhere"]}}"""
         val onboarding = ok(parse(onboardingCatalog(block))).onboarding!!
         assertThat(onboarding.useCases.map { it.id }).containsExactly("medical", "faith").inOrder()
         assertThat(onboarding.useCases[0].items).containsExactly("med", "family:maps").inOrder()
         assertThat(onboarding.useCases[0].blurb).isEqualTo("Clinical.")
         assertThat(onboarding.useCases[1].items).containsExactly("@granger-classics")
         assertThat(onboarding.larger).containsExactly("maps_en_france")
+        assertThat(onboarding.covered).containsExactly("maps_en_france", listOf("Corsica"))
     }
 
     @Test fun onboardingWithNothingLeftIsNullAndOlderCatalogsHaveNone() {

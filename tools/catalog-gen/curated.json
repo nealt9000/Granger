@@ -370,7 +370,7 @@
     ]
   },
   "onboarding": {
-    "_about": "Onboarding's tables (Plan H3, spec 2026-10-21-home-readiness-onboarding-design.md §6). A use case's items use the readiness grammar (a catalog id, \"@<collection>\" for the collection's books, \"family:<name>\" for any pack of the family); the app shows what each adds beyond the start choice and what is installed. regions.larger names the maps packs that are continents or multi-country areas, so the region picker lists countries first. catalog_gen.py checks every token.",
+    "_about": "Onboarding's tables (Plan H3, spec 2026-10-21-home-readiness-onboarding-design.md §6). A use case's items use the readiness grammar (a catalog id, \"@<collection>\" for the collection's books, \"family:<name>\" for any pack of the family); the app shows what each adds beyond the start choice and what is installed. regions.larger names the maps packs that are continents or multi-country areas, so the region picker lists countries first; regions.covered names, per larger pack, the places inside it that have no pack of their own, so searching for one finds the pack (Neal, 2026-10-22: Puerto Rico is in Central America). catalog_gen.py checks every token.",
     "useCases": [
       {
         "id": "offgrid",
@@ -478,7 +478,30 @@
         "maps_en_central-america",
         "maps_en_nordics",
         "maps_en_andes"
-      ]
+      ],
+      "covered": {
+        "maps_en_central-america": [
+          "Puerto Rico",
+          "Trinidad and Tobago",
+          "Barbados",
+          "Grenada",
+          "Saint Lucia",
+          "Saint Vincent and the Grenadines",
+          "Antigua and Barbuda",
+          "Dominica",
+          "Saint Kitts and Nevis",
+          "Virgin Islands",
+          "Cayman Islands",
+          "Aruba",
+          "Curaçao",
+          "Martinique",
+          "Guadeloupe",
+          "Turks and Caicos",
+          "Anguilla",
+          "Montserrat",
+          "Caribbean"
+        ]
+      }
     }
   }
 }

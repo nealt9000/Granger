@@ -28,19 +28,26 @@ data class StartChoice(val id: String, val title: String, val blurb: String, val
     fun chosen(unticked: Set<String> = emptySet()): List<Line> = lines.filter { !it.installed && it.id !in unticked }
 }
 
-/** A map pack the region picker offers. */
-data class Region(val pack: PackEntry, val installed: Boolean) {
-    val title: String get() = pack.title
+/**
+ * A map pack the region picker offers. A [place] inside a larger pack with no pack of its own (Puerto Rico in Central
+ * America) is offered under its own name and chooses the pack.
+ */
+data class Region(val pack: PackEntry, val installed: Boolean, val place: String? = null) {
+    /** What the row says: the place, or the pack's title. */
+    val title: String get() = place ?: pack.title
     val bytes: Long get() = pack.sizeBytes
 }
 
-/** Countries first, then continents and multi-country areas (Plan H3, Decision 3). */
-data class Regions(val countries: List<Region>, val larger: List<Region>) {
+/**
+ * Countries first, then continents and multi-country areas (Plan H3, Decision 3); [places] are the covered places,
+ * shown only when a search names one.
+ */
+data class Regions(val countries: List<Region>, val larger: List<Region>, val places: List<Region> = emptyList()) {
     fun matching(query: String): Regions {
         val q = query.trim()
-        if (q.isEmpty()) return this
+        if (q.isEmpty()) return copy(places = emptyList())
         fun List<Region>.hit() = filter { it.title.contains(q, ignoreCase = true) }
-        return Regions(countries.hit(), larger.hit())
+        return Regions(countries.hit() + places.hit(), larger.hit())
     }
 }
 
@@ -79,11 +86,16 @@ object OnboardingModel {
         }
     }
 
-    /** The maps family split by [app.granger.core.catalog.Onboarding.larger], each list by title. */
+    /** The maps family split by [app.granger.core.catalog.Onboarding.larger], each list by title, plus the covered places. */
     fun regions(catalog: Catalog, installed: Set<String>): Regions {
         val larger = catalog.onboarding?.larger.orEmpty().toSet()
         val maps = catalog.packs.filter { it.family == "maps" }.map { Region(it, it.id in installed) }.sortedBy { it.title.lowercase() }
-        return Regions(countries = maps.filter { it.pack.id !in larger }, larger = maps.filter { it.pack.id in larger })
+        val byId = maps.associateBy { it.pack.id }
+        val places = catalog.onboarding?.covered.orEmpty().flatMap { (packId, names) ->
+            val region = byId[packId] ?: return@flatMap emptyList()
+            names.map { region.copy(place = it) }
+        }.sortedBy { it.title.lowercase() }
+        return Regions(countries = maps.filter { it.pack.id !in larger }, larger = maps.filter { it.pack.id in larger }, places = places)
     }
 
     /** Each use case's lines beyond [chosen] item ids and [installed] ones; a use case left with nothing is kept with no lines. */

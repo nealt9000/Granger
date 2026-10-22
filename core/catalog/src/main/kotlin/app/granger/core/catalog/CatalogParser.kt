@@ -107,7 +107,9 @@ object CatalogParser {
             .map { it.copy(items = it.items.filter(known).distinct()) }
             .filter { it.items.isNotEmpty() }
         val larger = parsed.larger.filter { it in maps }.distinct()
-        return if (useCases.isEmpty() && larger.isEmpty()) null else Onboarding(useCases, larger)
+        val covered = parsed.covered.filterKeys { it in maps }.mapValues { (_, names) -> names.map { it.trim() }.filter { it.isNotEmpty() }.distinct() }
+            .filterValues { it.isNotEmpty() }
+        return if (useCases.isEmpty() && larger.isEmpty() && covered.isEmpty()) null else Onboarding(useCases, larger, covered)
     }
 
     private inline fun <reified T> entries(root: JsonObject, key: String): List<T> =

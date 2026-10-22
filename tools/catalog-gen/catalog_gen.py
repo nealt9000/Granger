@@ -409,11 +409,19 @@ def onboarding_block(block, packs, books, collections):
         for token in items:
             check_token(f"onboarding {uid}", token, pack_ids, book_ids, families, collections)
         use_cases.append({"id": uid, "title": title, "blurb": u.get("blurb") or "", "items": items})
-    larger = list(dict.fromkeys(block.get("regions", {}).get("larger", [])))
+    regions = block.get("regions", {})
+    larger = list(dict.fromkeys(regions.get("larger", [])))
     for pack_id in larger:
         if pack_id not in maps:
             raise SystemExit(f"onboarding regions.larger: {pack_id!r} is not a maps pack")
-    return {"useCases": use_cases, "larger": larger}
+    covered = {}
+    for pack_id, places in regions.get("covered", {}).items():
+        if pack_id not in maps:
+            raise SystemExit(f"onboarding regions.covered: {pack_id!r} is not a maps pack")
+        names = [str(n).strip() for n in places if str(n).strip()]
+        if names:
+            covered[pack_id] = list(dict.fromkeys(names))
+    return {"useCases": use_cases, "larger": larger, "covered": covered}
 
 
 def readiness_block(block, packs, books, collections):

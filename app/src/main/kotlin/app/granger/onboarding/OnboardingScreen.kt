@@ -267,7 +267,8 @@ private fun RegionRow(region: Region, ui: OnboardingUi, actions: OnboardingActio
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = region.pack.id == ui.region?.pack?.id, onClick = null)
-        Text("${region.title} · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(start = 8.dp))
+        val via = region.place?.let { " · in ${region.pack.title}" }.orEmpty()
+        Text("${region.title}$via · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(start = 8.dp))
     }
 }
 
