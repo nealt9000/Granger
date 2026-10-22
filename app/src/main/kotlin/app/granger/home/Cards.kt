@@ -23,15 +23,19 @@ sealed interface CardTarget {
 @Serializable
 data class Card(val title: String, val subtitle: String, val target: CardTarget, val imagePath: String? = null)
 
-/** A feed's cards for the day, with the row's title. */
+/** A feed's cards for the day, with the row's title. [version] is [Cards.VERSION] when drawn; older draws are redone. */
 @Serializable
-data class Drawn(val title: String, val cards: List<Card>)
+data class Drawn(val title: String, val cards: List<Card>, val version: Int = 0)
 
 object Cards {
+    /** Bumped when what a draw carries changes (1: article thumbnails), so a cached draw from before is redrawn. */
+    const val VERSION = 1
+
     private val json = Json { ignoreUnknownKeys = true; classDiscriminator = "kind" }
 
-    fun encode(drawn: Drawn): String = json.encodeToString(Drawn.serializer(), drawn)
+    fun encode(drawn: Drawn): String = json.encodeToString(Drawn.serializer(), drawn.copy(version = VERSION))
 
-    /** Null for JSON this build can't read (a card kind from a newer app): the feed is redrawn. */
-    fun decode(text: String): Drawn? = runCatching { json.decodeFromString(Drawn.serializer(), text) }.getOrNull()
+    /** Null for JSON this build can't read (a card kind from a newer app) or a draw from an older format: the feed is redrawn. */
+    fun decode(text: String): Drawn? =
+        runCatching { json.decodeFromString(Drawn.serializer(), text) }.getOrNull()?.takeIf { it.version == VERSION }
 }

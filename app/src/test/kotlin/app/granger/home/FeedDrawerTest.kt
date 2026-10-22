@@ -155,7 +155,9 @@ class FeedDrawerTest {
 
     @Test fun cardsRoundTripThroughJson() {
         val drawn = Drawn("October 22", listOf(Card("A", "Events", CardTarget.Article("u1", "October_22", "Events")), Card("B", "", CardTarget.Search("owls"))))
-        assertThat(Cards.decode(Cards.encode(drawn))).isEqualTo(drawn)
+        assertThat(Cards.decode(Cards.encode(drawn))).isEqualTo(drawn.copy(version = Cards.VERSION))
+        // A draw from before thumbnails (no version) is redrawn rather than shown.
+        assertThat(Cards.decode("{\"title\":\"x\",\"cards\":[]}")).isNull()
         assertThat(Cards.decode("{\"title\":\"x\",\"cards\":[{\"title\":\"a\",\"subtitle\":\"\",\"target\":{\"kind\":\"Digest\"}}]}")).isNull()
         assertThat(Cards.decode("not json")).isNull()
     }

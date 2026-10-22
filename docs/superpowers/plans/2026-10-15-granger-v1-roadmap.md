@@ -727,3 +727,4 @@ Still open (for H3 and later):
 - `family:wikipedia` picks the first whole pack of the family; a preference for the fullest (by size) would favour a full Wikipedia over "Best of".
 - H3 needs: Start → Home (`StartScreen.Home` exists), the default feeds for a fresh library (they seed on first Home with no packs and resolve as packs arrive), and the strip's first signal as the onboarding nudge.
 - The thumbnail cache lives under `cacheDir` and is never pruned by the app; the OS may clear it, and the card then shows its icon.
+- Cached draws carry `Cards.VERSION` (1 since thumbnails); a draw from an older format is redrawn, so a feature that changes what a card carries bumps the version rather than waiting for midnight.
