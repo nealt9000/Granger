@@ -34,8 +34,8 @@ The Pixel 6 is shared. The V2 session (granger-1d) holds it for a 4-thread `libr
 
 ### Task 1: The recipe runs end to end on a toy
 
-- [ ] `tools/voices/train/README.md` (what this is, pins, the exact commands) and `tools/voices/train/` scripts: fetch the checkpoint and the ljspeech voice (for `espeak-ng-data`/`tokens.txt`), fetch LibriTTS-R subsets, build the `metadata.csv` for chosen speakers at 22 050 Hz, preprocess, train, export, pack.
-- [ ] Prove the pipeline on the Mac with a few minutes of one speaker for a handful of epochs: it preprocesses, trains a step, exports an `.onnx` that sherpa-onnx loads (the app's `SherpaVoice.detect` wants `*.onnx`, `tokens.txt`, `espeak-ng-data/`). Commit the scripts.
+- [x] `tools/voices/train/README.md` (what this is, pins, the exact commands) and `tools/voices/train/` scripts: fetch the checkpoint and the ljspeech voice (for `espeak-ng-data`/`tokens.txt`), fetch LibriTTS-R subsets, build the `metadata.csv` for chosen speakers at 22 050 Hz, preprocess, train, export, pack.
+- [x] Prove the pipeline on the Mac with a few minutes of one speaker for a handful of epochs: it preprocesses, trains a step, exports an `.onnx` that sherpa-onnx loads (the app's `SherpaVoice.detect` wants `*.onnx`, `tokens.txt`, `espeak-ng-data/`). Commit the scripts.
 
 ### Task 2: Speakers and data
 
