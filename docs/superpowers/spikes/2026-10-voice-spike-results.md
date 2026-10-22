@@ -178,7 +178,7 @@ What the listening adds to the numbers (Neal, 2026-10-21):
 - **libritts_r is the best-sounding voice and the one we cannot ship.** Speaker 2 is male, which the catalog wants for a second voice. V1's licence search should look for a from-scratch or permissively trained voice of similar quality, and it is worth asking whether a Lessac-free LibriTTS-R training exists or can be made; LibriTTS-R itself is CC BY 4.0.
 - **Kokoro's high-pitched noise** on top of its speed confirms the drop; the int8 build may be the cause of the noise, which does not matter now.
 
-## Decisions (proposed from the numbers; Neal confirms after listening)
+## Decisions (proposed from the numbers; confirmed by Neal after the listening session, 2026-10-21)
 
 1. **V1 ships two engines:** the system `TextToSpeech` as the default, and Piper through sherpa-onnx as the downloadable voice. Both meet the speed bar with a wide margin on the Pixel 6.
 2. **Kokoro is dropped** for this device class. It returns only with a faster runtime or a bigger phone, as its own spike.
