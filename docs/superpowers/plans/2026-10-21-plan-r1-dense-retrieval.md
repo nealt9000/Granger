@@ -44,6 +44,13 @@ held-out set and the pass-or-stop scoring are R2.
 - E2B answers and E4B is Think deeper. There's no question-time passage embedding.
 - Vectors are built off the phone, except for books a user adds (that's R2).
 
+## Decisions on this plan (Neal, 2026-10-21)
+
+- The Mac runs the app's own chunker code (`:core:text` and `tools/chunker`), not a Python port.
+- The new baseline (`r1-base`) is expected to show a few gaps in the set, and probably some pruning before the release set.
+  `set.json` is data: Task 11's per-domain results propose additions and cuts, and Neal approves the release set before
+  Task 10's upload is final.
+
 ## Builder's calls in this plan (for Neal's review)
 
 - **`:core:text` and a JVM chunker CLI** instead of the spec's Python port with a parity gate. The gate still runs (Task 1),
