@@ -1,0 +1,53 @@
+10-21 19:55:14.009 24569 24569 I Granger : Voice: device Google Pixel 6 · Android 17 · SoC Tensor · totalMem 7974752256 B · tier THINK_DEEPER
+10-21 19:55:14.034 24569 24569 I Granger : Voice: auto start engines=[vits-piper-en_US-ljspeech-medium] threads=2 speaker=0 passes=2 llm=false music=false
+10-21 19:55:14.039 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 pass=1 start llmResident=false music=false
+10-21 19:55:16.106 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 load loadMs=2067 rssMb=399 sampleRate=22050 speakers=1 model=en_US-ljspeech-medium.onnx
+10-21 19:55:17.650 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=0 chars=190 firstAudioMs=1529 synthMs=1533 audioMs=13606 rtf=0.11 rssMb=730
+10-21 19:55:18.536 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=1 chars=139 firstAudioMs=879 synthMs=884 audioMs=8547 rtf=0.10 rssMb=735
+10-21 19:55:19.341 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=2 chars=131 firstAudioMs=799 synthMs=804 audioMs=7500 rtf=0.11 rssMb=730
+10-21 19:55:20.205 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=3 chars=135 firstAudioMs=858 synthMs=862 audioMs=7565 rtf=0.11 rssMb=733
+10-21 19:55:21.526 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=4 chars=202 firstAudioMs=1314 synthMs=1320 audioMs=11872 rtf=0.11 rssMb=737
+10-21 19:55:22.543 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=5 chars=115 firstAudioMs=1011 synthMs=1015 audioMs=9155 rtf=0.11 rssMb=741
+10-21 19:55:22.956 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=0 chars=37 firstAudioMs=284 synthMs=288 audioMs=2426 rtf=0.12 rssMb=750
+10-21 19:55:23.353 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=1 chars=66 firstAudioMs=392 synthMs=396 audioMs=3738 rtf=0.11 rssMb=752
+10-21 19:55:23.847 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=2 chars=65 firstAudioMs=486 synthMs=492 audioMs=4509 rtf=0.11 rssMb=754
+10-21 19:55:24.395 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=3 chars=86 firstAudioMs=541 synthMs=546 audioMs=4856 rtf=0.11 rssMb=756
+10-21 19:55:25.486 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=4 chars=165 firstAudioMs=1084 synthMs=1089 audioMs=9425 rtf=0.12 rssMb=760
+10-21 19:55:26.487 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=5 chars=148 firstAudioMs=993 synthMs=999 audioMs=8848 rtf=0.11 rssMb=763
+10-21 19:55:27.333 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=6 chars=121 firstAudioMs=839 synthMs=845 audioMs=7110 rtf=0.12 rssMb=767
+10-21 19:55:27.986 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=7 chars=90 firstAudioMs=645 synthMs=651 audioMs=5687 rtf=0.11 rssMb=769
+10-21 19:55:29.113 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=8 chars=162 firstAudioMs=1120 synthMs=1126 audioMs=9483 rtf=0.12 rssMb=772
+10-21 19:55:30.505 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=0 chars=125 firstAudioMs=1290 synthMs=1294 audioMs=10952 rtf=0.12 rssMb=785
+10-21 19:55:31.360 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=1 chars=93 firstAudioMs=850 synthMs=854 audioMs=7320 rtf=0.12 rssMb=790
+10-21 19:55:32.465 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=2 chars=123 firstAudioMs=1095 synthMs=1103 audioMs=9221 rtf=0.12 rssMb=790
+10-21 19:55:33.341 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=3 chars=119 firstAudioMs=867 synthMs=874 audioMs=7258 rtf=0.12 rssMb=734
+10-21 19:55:33.427 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article summary sentences=6 synthMs=6418 audioMs=58245 rtf=0.11 firstAudioMaxMs=1529 rssMaxMb=741
+10-21 19:55:33.428 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book summary sentences=9 synthMs=6432 audioMs=56082 rtf=0.11 firstAudioMaxMs=1120 rssMaxMb=772
+10-21 19:55:33.428 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer summary sentences=4 synthMs=4125 audioMs=34751 rtf=0.12 firstAudioMaxMs=1290 rssMaxMb=790
+10-21 19:55:33.428 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 pass=1 done llmResident=false music=false
+10-21 19:55:33.494 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 pass=2 start llmResident=false music=false
+10-21 19:55:35.125 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 load loadMs=1630 rssMb=404 sampleRate=22050 speakers=1 model=en_US-ljspeech-medium.onnx
+10-21 19:55:36.754 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=0 chars=190 firstAudioMs=1619 synthMs=1626 audioMs=13606 rtf=0.12 rssMb=726
+10-21 19:55:37.704 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=1 chars=139 firstAudioMs=942 synthMs=948 audioMs=8547 rtf=0.11 rssMb=735
+10-21 19:55:38.554 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=2 chars=131 firstAudioMs=843 synthMs=848 audioMs=7500 rtf=0.11 rssMb=749
+10-21 19:55:39.474 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=3 chars=135 firstAudioMs=912 synthMs=918 audioMs=7565 rtf=0.12 rssMb=752
+10-21 19:55:40.897 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=4 chars=202 firstAudioMs=1415 synthMs=1420 audioMs=11872 rtf=0.12 rssMb=756
+10-21 19:55:41.942 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article sentence=5 chars=115 firstAudioMs=1036 synthMs=1042 audioMs=9155 rtf=0.11 rssMb=756
+10-21 19:55:42.344 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=0 chars=37 firstAudioMs=293 synthMs=296 audioMs=2426 rtf=0.12 rssMb=740
+10-21 19:55:42.772 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=1 chars=66 firstAudioMs=424 synthMs=427 audioMs=3738 rtf=0.11 rssMb=742
+10-21 19:55:43.292 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=2 chars=65 firstAudioMs=513 synthMs=518 audioMs=4509 rtf=0.11 rssMb=743
+10-21 19:55:43.869 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=3 chars=86 firstAudioMs=570 synthMs=575 audioMs=4856 rtf=0.12 rssMb=745
+10-21 19:55:45.031 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=4 chars=165 firstAudioMs=1155 synthMs=1160 audioMs=9425 rtf=0.12 rssMb=749
+10-21 19:55:46.083 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=5 chars=148 firstAudioMs=1041 synthMs=1050 audioMs=8848 rtf=0.12 rssMb=753
+10-21 19:55:46.977 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=6 chars=121 firstAudioMs=889 synthMs=893 audioMs=7110 rtf=0.13 rssMb=757
+10-21 19:55:47.700 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=7 chars=90 firstAudioMs=714 synthMs=721 audioMs=5687 rtf=0.13 rssMb=759
+10-21 19:55:48.918 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book sentence=8 chars=162 firstAudioMs=1210 synthMs=1216 audioMs=9483 rtf=0.13 rssMb=762
+10-21 19:55:50.347 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=0 chars=125 firstAudioMs=1313 synthMs=1318 audioMs=10952 rtf=0.12 rssMb=769
+10-21 19:55:51.213 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=1 chars=93 firstAudioMs=858 synthMs=864 audioMs=7320 rtf=0.12 rssMb=738
+10-21 19:55:52.313 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=2 chars=123 firstAudioMs=1092 synthMs=1098 audioMs=9221 rtf=0.12 rssMb=740
+10-21 19:55:53.205 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer sentence=3 chars=119 firstAudioMs=884 synthMs=890 audioMs=7258 rtf=0.12 rssMb=745
+10-21 19:55:53.295 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=article summary sentences=6 synthMs=6802 audioMs=58245 rtf=0.12 firstAudioMaxMs=1619 rssMaxMb=756
+10-21 19:55:53.295 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=book summary sentences=9 synthMs=6856 audioMs=56082 rtf=0.12 firstAudioMaxMs=1210 rssMaxMb=762
+10-21 19:55:53.295 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 passage=answer summary sentences=4 synthMs=4170 audioMs=34751 rtf=0.12 firstAudioMaxMs=1313 rssMaxMb=769
+10-21 19:55:53.296 24569 24569 I Granger : Voice: engine=vits-piper-en_US-ljspeech-medium threads=2 pass=2 done llmResident=false music=false
+10-21 19:55:53.369 24569 24569 I Granger : Voice: auto done engines=[vits-piper-en_US-ljspeech-medium] threads=2 passes=2 llm=false music=false

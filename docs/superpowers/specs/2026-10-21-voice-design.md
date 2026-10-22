@@ -72,7 +72,7 @@ Everything above this line (readers, Research, the player) speaks to `Speech` an
   - `en_US-libritts_r-medium`: its dataset is **CC BY 4.0** and it has 904 speakers in one file, but its model card says it was **fine-tuned from `lessac`**, whose data is licensed for non-commercial use only. Until that provenance is cleared it is measured in the spike and **not shipped**; Most of Piper's other English voices (`arctic`, `ryan`, `amy`, `hfc_*`) are fine-tuned from `lessac` too, so a second clean voice is more likely Kokoro (Apache-2.0) than another Piper voice; V1 settles it.
   - `en_US-lessac` (Blizzard 2013) and `en_US-hfc_*` (CC BY-NC-SA) are **out**: research-only and non-commercial terms. `en_US-amy` points at Mimic 3's terms, unverified; out unless checked.
   - `espeak-ng-data` (the phonemizer's data) is GPL-3.0, fine for a GPL app and shipped inside the voice download, not the APK.
-- **Kokoro-82M** (Apache-2.0; sherpa-onnx builds `kokoro-multi-lang-v1_1`, with an int8 variant, and `kokoro-en-v0_19`: about 310–330 MB of model plus voices) sounds better than Piper but is heavy: sherpa-onnx's own numbers put it at a real-time factor of 2.8–7.6 on a Raspberry Pi 4, that is 3–8 s of CPU per second of speech. The Pixel 6 is a few times faster per core, which lands near real time at best. **Kokoro ships only if the spike (§12) shows it beats real time on the Pixel 6 with E2B resident, and Neal prefers it after listening.** Otherwise it is noted as a later "better voice" for stronger phones.
+- **Kokoro-82M** *(V0 result, 2026-10-21: dropped for this device class; on the Pixel 6 it is 1.5–2.2× slower than real time, slower with more threads, 890 MB; see `docs/superpowers/spikes/2026-10-voice-spike-results.md`)* (Apache-2.0; sherpa-onnx builds `kokoro-multi-lang-v1_1`, with an int8 variant, and `kokoro-en-v0_19`: about 310–330 MB of model plus voices) sounds better than Piper but is heavy: sherpa-onnx's own numbers put it at a real-time factor of 2.8–7.6 on a Raspberry Pi 4, that is 3–8 s of CPU per second of speech. The Pixel 6 is a few times faster per core, which lands near real time at best. **Kokoro ships only if the spike (§12) shows it beats real time on the Pixel 6 with E2B resident, and Neal prefers it after listening.** Otherwise it is noted as a later "better voice" for stronger phones.
 
 ### 3.4 Voices in the catalog
 
@@ -132,7 +132,7 @@ Every source becomes the same thing: an ordered list of **utterances** (sentence
 
 ## 8. Catalog, licenses, size
 
-- sherpa-onnx: Apache-2.0. Piper: MIT. Voices: public domain (`ljspeech`), CC BY 4.0 (`libritts_r`, attribution shown in Settings and About). espeak-ng data: GPL-3.0. Kokoro: Apache-2.0, if adopted. All GPL-3.0-compatible.
+- sherpa-onnx: Apache-2.0. Piper: MIT. Voices: public domain (`ljspeech`), CC BY 4.0 (`libritts_r`, attribution shown in Settings and About). espeak-ng data: GPL-3.0. Kokoro: Apache-2.0, not adopted after V0. All GPL-3.0-compatible.
 - APK growth: the AAR's native libraries for two ABIs (a few MB; measured in the spike). Voice data is never in the APK.
 - Android 15's 16 KB page-size requirement for new Play uploads: the AAR's `.so` files are checked for 16 KB alignment in the spike; a failing library blocks adoption until a build that passes.
 

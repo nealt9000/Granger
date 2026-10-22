@@ -1,0 +1,53 @@
+10-21 19:58:24.928 25840 25840 I Granger : Voice: device Google Pixel 6 · Android 17 · SoC Tensor · totalMem 7974752256 B · tier THINK_DEEPER
+10-21 19:58:24.946 25840 25840 I Granger : Voice: auto start engines=[vits-piper-en_US-libritts_r-medium] threads=1 speaker=0 passes=2 llm=false music=false
+10-21 19:58:24.950 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 pass=1 start llmResident=false music=false
+10-21 19:58:26.487 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 load loadMs=1537 rssMb=408 sampleRate=22050 speakers=904 model=en_US-libritts_r-medium.onnx
+10-21 19:58:29.087 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=0 chars=190 firstAudioMs=2583 synthMs=2592 audioMs=12620 rtf=0.21 rssMb=698
+10-21 19:58:30.384 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=1 chars=139 firstAudioMs=1290 synthMs=1294 audioMs=6594 rtf=0.20 rssMb=699
+10-21 19:58:31.581 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=2 chars=131 firstAudioMs=1192 synthMs=1196 audioMs=6304 rtf=0.19 rssMb=689
+10-21 19:58:32.843 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=3 chars=135 firstAudioMs=1257 synthMs=1260 audioMs=6977 rtf=0.18 rssMb=697
+10-21 19:58:34.813 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=4 chars=202 firstAudioMs=1964 synthMs=1969 audioMs=10263 rtf=0.19 rssMb=702
+10-21 19:58:36.417 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=5 chars=115 firstAudioMs=1598 synthMs=1603 audioMs=8324 rtf=0.19 rssMb=705
+10-21 19:58:36.925 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=0 chars=37 firstAudioMs=361 synthMs=363 audioMs=1787 rtf=0.20 rssMb=714
+10-21 19:58:37.563 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=1 chars=66 firstAudioMs=632 synthMs=636 audioMs=3076 rtf=0.21 rssMb=714
+10-21 19:58:38.175 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=2 chars=65 firstAudioMs=606 synthMs=611 audioMs=3134 rtf=0.19 rssMb=716
+10-21 19:58:38.920 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=3 chars=86 firstAudioMs=738 synthMs=743 audioMs=3831 rtf=0.19 rssMb=722
+10-21 19:58:40.606 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=4 chars=165 firstAudioMs=1679 synthMs=1685 audioMs=8695 rtf=0.19 rssMb=726
+10-21 19:58:42.098 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=5 chars=148 firstAudioMs=1486 synthMs=1490 audioMs=7604 rtf=0.20 rssMb=726
+10-21 19:58:43.309 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=6 chars=121 firstAudioMs=1205 synthMs=1209 audioMs=5897 rtf=0.21 rssMb=706
+10-21 19:58:44.305 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=7 chars=90 firstAudioMs=989 synthMs=994 audioMs=4945 rtf=0.20 rssMb=709
+10-21 19:58:45.732 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=8 chars=162 firstAudioMs=1420 synthMs=1425 audioMs=6919 rtf=0.21 rssMb=711
+10-21 19:58:47.902 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=0 chars=125 firstAudioMs=2082 synthMs=2085 audioMs=10437 rtf=0.20 rssMb=722
+10-21 19:58:49.234 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=1 chars=93 firstAudioMs=1328 synthMs=1331 audioMs=6315 rtf=0.21 rssMb=724
+10-21 19:58:50.941 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=2 chars=123 firstAudioMs=1703 synthMs=1706 audioMs=7662 rtf=0.22 rssMb=728
+10-21 19:58:52.360 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=3 chars=119 firstAudioMs=1414 synthMs=1418 audioMs=6246 rtf=0.23 rssMb=730
+10-21 19:58:52.412 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article summary sentences=6 synthMs=9914 audioMs=51082 rtf=0.19 firstAudioMaxMs=2583 rssMaxMb=705
+10-21 19:58:52.412 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book summary sentences=9 synthMs=9156 audioMs=45888 rtf=0.20 firstAudioMaxMs=1679 rssMaxMb=726
+10-21 19:58:52.412 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer summary sentences=4 synthMs=6540 audioMs=30660 rtf=0.21 firstAudioMaxMs=2082 rssMaxMb=730
+10-21 19:58:52.413 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 pass=1 done llmResident=false music=false
+10-21 19:58:52.497 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 pass=2 start llmResident=false music=false
+10-21 19:58:53.790 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 load loadMs=1293 rssMb=435 sampleRate=22050 speakers=904 model=en_US-libritts_r-medium.onnx
+10-21 19:58:56.776 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=0 chars=190 firstAudioMs=2977 synthMs=2983 audioMs=12620 rtf=0.24 rssMb=674
+10-21 19:58:58.501 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=1 chars=139 firstAudioMs=1719 synthMs=1723 audioMs=6594 rtf=0.26 rssMb=688
+10-21 19:59:00.073 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=2 chars=131 firstAudioMs=1565 synthMs=1571 audioMs=6304 rtf=0.25 rssMb=688
+10-21 19:59:01.781 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=3 chars=135 firstAudioMs=1701 synthMs=1706 audioMs=6977 rtf=0.24 rssMb=693
+10-21 19:59:04.345 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=4 chars=202 firstAudioMs=2555 synthMs=2561 audioMs=10263 rtf=0.25 rssMb=698
+10-21 19:59:06.402 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article sentence=5 chars=115 firstAudioMs=2051 synthMs=2056 audioMs=8324 rtf=0.25 rssMb=701
+10-21 19:59:06.948 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=0 chars=37 firstAudioMs=456 synthMs=462 audioMs=1787 rtf=0.26 rssMb=710
+10-21 19:59:07.713 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=1 chars=66 firstAudioMs=757 synthMs=764 audioMs=3076 rtf=0.25 rssMb=711
+10-21 19:59:08.479 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=2 chars=65 firstAudioMs=762 synthMs=765 audioMs=3134 rtf=0.24 rssMb=713
+10-21 19:59:09.453 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=3 chars=86 firstAudioMs=969 synthMs=972 audioMs=3831 rtf=0.25 rssMb=718
+10-21 19:59:11.397 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=4 chars=165 firstAudioMs=1936 synthMs=1942 audioMs=8695 rtf=0.22 rssMb=722
+10-21 19:59:13.064 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=5 chars=148 firstAudioMs=1659 synthMs=1665 audioMs=7604 rtf=0.22 rssMb=723
+10-21 19:59:14.361 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=6 chars=121 firstAudioMs=1289 synthMs=1295 audioMs=5897 rtf=0.22 rssMb=710
+10-21 19:59:15.437 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=7 chars=90 firstAudioMs=1068 synthMs=1075 audioMs=4945 rtf=0.22 rssMb=713
+10-21 19:59:16.993 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book sentence=8 chars=162 firstAudioMs=1549 synthMs=1554 audioMs=6919 rtf=0.22 rssMb=716
+10-21 19:59:19.225 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=0 chars=125 firstAudioMs=2143 synthMs=2147 audioMs=10437 rtf=0.21 rssMb=726
+10-21 19:59:20.511 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=1 chars=93 firstAudioMs=1281 synthMs=1285 audioMs=6315 rtf=0.20 rssMb=728
+10-21 19:59:22.054 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=2 chars=123 firstAudioMs=1537 synthMs=1541 audioMs=7662 rtf=0.20 rssMb=732
+10-21 19:59:23.303 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer sentence=3 chars=119 firstAudioMs=1243 synthMs=1248 audioMs=6246 rtf=0.20 rssMb=735
+10-21 19:59:23.381 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=article summary sentences=6 synthMs=12600 audioMs=51082 rtf=0.25 firstAudioMaxMs=2977 rssMaxMb=701
+10-21 19:59:23.381 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=book summary sentences=9 synthMs=10494 audioMs=45888 rtf=0.23 firstAudioMaxMs=1936 rssMaxMb=723
+10-21 19:59:23.381 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 passage=answer summary sentences=4 synthMs=6221 audioMs=30660 rtf=0.20 firstAudioMaxMs=2143 rssMaxMb=735
+10-21 19:59:23.382 25840 25840 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium threads=1 pass=2 done llmResident=false music=false
+10-21 19:59:23.447 25840 25840 I Granger : Voice: auto done engines=[vits-piper-en_US-libritts_r-medium] threads=1 passes=2 llm=false music=false

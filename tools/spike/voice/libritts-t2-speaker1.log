@@ -1,0 +1,28 @@
+10-21 20:28:27.273  1997  1997 I Granger : Voice: device Google Pixel 6 · Android 17 · SoC Tensor · totalMem 7974752256 B · tier THINK_DEEPER
+10-21 20:28:27.297  1997  1997 I Granger : Voice: auto start engines=[vits-piper-en_US-libritts_r-medium] threads=2 speaker=1 passes=1 llm=false music=false
+10-21 20:28:27.304  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 pass=1 start llmResident=false music=false
+10-21 20:28:29.474  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 load loadMs=2168 rssMb=410 sampleRate=22050 speakers=904 model=en_US-libritts_r-medium.onnx
+10-21 20:28:31.545  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article sentence=0 chars=190 firstAudioMs=2054 synthMs=2064 audioMs=12573 rtf=0.16 rssMb=696
+10-21 20:28:32.625  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article sentence=1 chars=139 firstAudioMs=1071 synthMs=1076 audioMs=6710 rtf=0.16 rssMb=696
+10-21 20:28:33.654  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article sentence=2 chars=131 firstAudioMs=1023 synthMs=1028 audioMs=6455 rtf=0.16 rssMb=688
+10-21 20:28:34.735  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article sentence=3 chars=135 firstAudioMs=1073 synthMs=1079 audioMs=6873 rtf=0.16 rssMb=694
+10-21 20:28:36.416  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article sentence=4 chars=202 firstAudioMs=1672 synthMs=1678 audioMs=10321 rtf=0.16 rssMb=699
+10-21 20:28:37.887  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article sentence=5 chars=115 firstAudioMs=1464 synthMs=1470 audioMs=8591 rtf=0.17 rssMb=702
+10-21 20:28:38.371  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=0 chars=37 firstAudioMs=349 synthMs=353 audioMs=1915 rtf=0.18 rssMb=713
+10-21 20:28:38.922  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=1 chars=66 firstAudioMs=545 synthMs=550 audioMs=3030 rtf=0.18 rssMb=713
+10-21 20:28:39.552  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=2 chars=65 firstAudioMs=625 synthMs=629 audioMs=3448 rtf=0.18 rssMb=715
+10-21 20:28:40.258  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=3 chars=86 firstAudioMs=699 synthMs=704 audioMs=4086 rtf=0.17 rssMb=717
+10-21 20:28:41.808  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=4 chars=165 firstAudioMs=1544 synthMs=1549 audioMs=9148 rtf=0.17 rssMb=721
+10-21 20:28:43.069  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=5 chars=148 firstAudioMs=1254 synthMs=1260 audioMs=7279 rtf=0.17 rssMb=728
+10-21 20:28:43.997  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=6 chars=121 firstAudioMs=919 synthMs=926 audioMs=5932 rtf=0.16 rssMb=735
+10-21 20:28:44.677  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=7 chars=90 firstAudioMs=672 synthMs=678 audioMs=4191 rtf=0.16 rssMb=737
+10-21 20:28:45.870  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book sentence=8 chars=162 firstAudioMs=1186 synthMs=1192 audioMs=7511 rtf=0.16 rssMb=741
+10-21 20:28:47.548  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=answer sentence=0 chars=125 firstAudioMs=1578 synthMs=1583 audioMs=10240 rtf=0.15 rssMb=752
+10-21 20:28:48.537  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=answer sentence=1 chars=93 firstAudioMs=981 synthMs=987 audioMs=6037 rtf=0.16 rssMb=755
+10-21 20:28:49.665  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=answer sentence=2 chars=123 firstAudioMs=1119 synthMs=1126 audioMs=7093 rtf=0.16 rssMb=755
+10-21 20:28:50.765  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=answer sentence=3 chars=119 firstAudioMs=1093 synthMs=1098 audioMs=6292 rtf=0.17 rssMb=704
+10-21 20:28:50.798  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=article summary sentences=6 synthMs=8395 audioMs=51523 rtf=0.16 firstAudioMaxMs=2054 rssMaxMb=702
+10-21 20:28:50.798  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=book summary sentences=9 synthMs=7841 audioMs=46540 rtf=0.17 firstAudioMaxMs=1544 rssMaxMb=741
+10-21 20:28:50.798  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 passage=answer summary sentences=4 synthMs=4794 audioMs=29662 rtf=0.16 firstAudioMaxMs=1578 rssMaxMb=755
+10-21 20:28:50.799  1997  1997 I Granger : Voice: engine=vits-piper-en_US-libritts_r-medium#1 threads=2 pass=1 done llmResident=false music=false
+10-21 20:28:50.896  1997  1997 I Granger : Voice: auto done engines=[vits-piper-en_US-libritts_r-medium] threads=2 passes=1 llm=false music=false

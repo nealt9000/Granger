@@ -1,0 +1,50 @@
+10-21 20:00:52.549 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 load loadMs=5445 rssMb=540 sampleRate=24000 speakers=103 model=model.int8.onnx
+10-21 20:01:25.364 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=0 chars=190 firstAudioMs=32780 synthMs=32788 audioMs=12700 rtf=2.58 rssMb=864
+10-21 20:01:41.497 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=1 chars=139 firstAudioMs=16125 synthMs=16130 audioMs=8325 rtf=1.94 rssMb=864
+10-21 20:01:53.849 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=2 chars=131 firstAudioMs=12344 synthMs=12350 audioMs=7350 rtf=1.68 rssMb=867
+10-21 20:02:05.368 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=3 chars=135 firstAudioMs=11511 synthMs=11517 audioMs=7600 rtf=1.52 rssMb=870
+10-21 20:02:22.157 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=4 chars=202 firstAudioMs=16782 synthMs=16788 audioMs=11700 rtf=1.43 rssMb=871
+10-21 20:02:34.989 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=5 chars=115 firstAudioMs=12826 synthMs=12830 audioMs=8625 rtf=1.49 rssMb=874
+10-21 20:02:39.433 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=0 chars=37 firstAudioMs=4296 synthMs=4298 audioMs=3025 rtf=1.42 rssMb=877
+10-21 20:02:45.624 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=1 chars=66 firstAudioMs=6185 synthMs=6190 audioMs=4325 rtf=1.43 rssMb=879
+10-21 20:02:51.465 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=2 chars=65 firstAudioMs=5836 synthMs=5839 audioMs=4100 rtf=1.42 rssMb=882
+10-21 20:02:58.355 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=3 chars=86 firstAudioMs=6884 synthMs=6889 audioMs=4825 rtf=1.43 rssMb=884
+10-21 20:03:12.584 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=4 chars=165 firstAudioMs=14222 synthMs=14227 audioMs=9425 rtf=1.51 rssMb=874
+10-21 20:03:25.848 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=5 chars=148 firstAudioMs=13257 synthMs=13262 audioMs=8975 rtf=1.48 rssMb=875
+10-21 20:03:35.436 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=6 chars=121 firstAudioMs=9581 synthMs=9586 audioMs=6600 rtf=1.45 rssMb=878
+10-21 20:03:43.614 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=7 chars=90 firstAudioMs=8170 synthMs=8176 audioMs=5450 rtf=1.50 rssMb=878
+10-21 20:03:56.978 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=8 chars=162 firstAudioMs=13356 synthMs=13362 audioMs=8800 rtf=1.52 rssMb=883
+10-21 20:04:12.072 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=0 chars=125 firstAudioMs=14991 synthMs=14996 audioMs=9850 rtf=1.52 rssMb=895
+10-21 20:04:22.373 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=1 chars=93 firstAudioMs=10294 synthMs=10299 audioMs=6775 rtf=1.52 rssMb=872
+10-21 20:04:36.166 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=2 chars=123 firstAudioMs=13786 synthMs=13792 audioMs=9075 rtf=1.52 rssMb=877
+10-21 20:04:46.916 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=3 chars=119 firstAudioMs=10746 synthMs=10749 audioMs=7100 rtf=1.51 rssMb=880
+10-21 20:04:46.955 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article summary sentences=6 synthMs=102403 audioMs=56300 rtf=1.82 firstAudioMaxMs=32780 rssMaxMb=874
+10-21 20:04:46.955 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book summary sentences=9 synthMs=81829 audioMs=55525 rtf=1.47 firstAudioMaxMs=14222 rssMaxMb=884
+10-21 20:04:46.955 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer summary sentences=4 synthMs=49836 audioMs=32800 rtf=1.52 firstAudioMaxMs=14991 rssMaxMb=895
+10-21 20:04:46.956 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 pass=1 done llmResident=false music=false
+10-21 20:04:47.199 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 pass=2 start llmResident=false music=false
+10-21 20:04:49.777 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 load loadMs=2577 rssMb=566 sampleRate=24000 speakers=103 model=model.int8.onnx
+10-21 20:05:08.730 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=0 chars=190 firstAudioMs=18946 synthMs=18951 audioMs=12700 rtf=1.49 rssMb=875
+10-21 20:05:21.201 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=1 chars=139 firstAudioMs=12462 synthMs=12469 audioMs=8325 rtf=1.50 rssMb=873
+10-21 20:05:32.349 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=2 chars=131 firstAudioMs=11140 synthMs=11146 audioMs=7350 rtf=1.52 rssMb=876
+10-21 20:05:43.861 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=3 chars=135 firstAudioMs=11506 synthMs=11510 audioMs=7600 rtf=1.51 rssMb=880
+10-21 20:06:02.283 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=4 chars=202 firstAudioMs=18416 synthMs=18420 audioMs=11700 rtf=1.57 rssMb=876
+10-21 20:06:16.239 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article sentence=5 chars=115 firstAudioMs=13950 synthMs=13955 audioMs=8625 rtf=1.62 rssMb=880
+10-21 20:06:20.955 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=0 chars=37 firstAudioMs=4621 synthMs=4624 audioMs=3025 rtf=1.53 rssMb=883
+10-21 20:06:27.508 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=1 chars=66 firstAudioMs=6547 synthMs=6551 audioMs=4325 rtf=1.51 rssMb=885
+10-21 20:06:33.700 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=2 chars=65 firstAudioMs=6186 synthMs=6190 audioMs=4100 rtf=1.51 rssMb=888
+10-21 20:06:41.048 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=3 chars=86 firstAudioMs=7341 synthMs=7346 audioMs=4825 rtf=1.52 rssMb=890
+10-21 20:06:55.697 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=4 chars=165 firstAudioMs=14642 synthMs=14647 audioMs=9425 rtf=1.55 rssMb=880
+10-21 20:07:10.077 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=5 chars=148 firstAudioMs=14374 synthMs=14378 audioMs=8975 rtf=1.60 rssMb=887
+10-21 20:07:20.412 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=6 chars=121 firstAudioMs=10329 synthMs=10333 audioMs=6600 rtf=1.57 rssMb=890
+10-21 20:07:28.688 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=7 chars=90 firstAudioMs=8272 synthMs=8274 audioMs=5450 rtf=1.52 rssMb=878
+10-21 20:07:42.057 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book sentence=8 chars=162 firstAudioMs=13363 synthMs=13368 audioMs=8800 rtf=1.52 rssMb=884
+10-21 20:07:57.955 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=0 chars=125 firstAudioMs=15791 synthMs=15796 audioMs=9850 rtf=1.60 rssMb=896
+10-21 20:08:09.028 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=1 chars=93 firstAudioMs=11067 synthMs=11071 audioMs=6775 rtf=1.63 rssMb=878
+10-21 20:08:22.840 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=2 chars=123 firstAudioMs=13806 synthMs=13811 audioMs=9075 rtf=1.52 rssMb=882
+10-21 20:08:34.339 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer sentence=3 chars=119 firstAudioMs=11492 synthMs=11497 audioMs=7100 rtf=1.62 rssMb=880
+10-21 20:08:34.406 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=article summary sentences=6 synthMs=86451 audioMs=56300 rtf=1.54 firstAudioMaxMs=18946 rssMaxMb=880
+10-21 20:08:34.407 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=book summary sentences=9 synthMs=85711 audioMs=55525 rtf=1.54 firstAudioMaxMs=14642 rssMaxMb=890
+10-21 20:08:34.407 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 passage=answer summary sentences=4 synthMs=52175 audioMs=32800 rtf=1.59 firstAudioMaxMs=15791 rssMaxMb=896
+10-21 20:08:34.407 26634 26634 I Granger : Voice: engine=kokoro-int8-multi-lang-v1_1 threads=1 pass=2 done llmResident=false music=false
+10-21 20:08:34.665 26634 26634 I Granger : Voice: auto done engines=[kokoro-int8-multi-lang-v1_1] threads=1 passes=2 llm=false music=false

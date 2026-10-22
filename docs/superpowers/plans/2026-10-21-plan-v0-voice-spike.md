@@ -57,8 +57,8 @@
   - *`vits-piper-en_US-ljspeech-medium.tar.bz2` 67,169,893 B, sha256 `3dfb4b759d8be032a4903a9538d128b0fda2a06ab1de6cbc2d93a97e2dd83dba`, 79 MB unpacked (model 63.5 MB, `espeak-ng-data` 18 MB). Card: 1 speaker, 22,050 Hz, LJ Speech, **public domain**, trained from scratch.*
   - *`vits-piper-en_US-libritts_r-medium.tar.bz2` 82,038,311 B, sha256 `10dc268f3e371696d721486123e2705a9fc1faa113491979fde4d88dba1f1b1c`, 99 MB unpacked (model 78.5 MB). Card: 904 speakers, dataset CC BY 4.0, but **fine-tuned from `lessac`**, whose Blizzard 2013 data is non-commercial only. Measured, not shippable as it stands (spec §3.3).*
   - *`kokoro-int8-multi-lang-v1_1.tar.bz2` 147,031,220 B, sha256 `a1e94694776049035c4f2c6529f003aaece993c76aae9a78995831c3c4dcafc6`, 210 MB unpacked (`model.int8.onnx` 114.3 MB, `voices.bin` 53.8 MB, lexicons 14.4 MB, `dict/` 14 MB, `espeak-ng-data`). LICENSE: Apache-2.0; README points at hexgrad/Kokoro-82M-v1.1-zh.*
-- [ ] Push the unpacked directories to `/sdcard/Android/data/app.granger/files/voices/<id>/` over Wi-Fi adb (not into assets). Record the total space used.
-- [ ] Check the Pixel 6's system engine: `adb shell settings get secure tts_default_synth`, and the engine's installed voices as the activity lists them in Task 3 (name, locale, `isNetworkConnectionRequired`, quality).
+- [x] Push the unpacked directories to `/sdcard/Android/data/app.granger/files/voices/<id>/` over Wi-Fi adb (not into assets). Record the total space used. *Done 2026-10-21 evening, once Neal freed the phone: 379 MB under `files/voices/` for the three voices, plus `music.mp3` (a Holst track copied on the phone itself) for the mix check. Both databases were copied to `files/db-backup-2026-10-21/` inside the app's private storage before the install.*
+- [x] Check the Pixel 6's system engine: `adb shell settings get secure tts_default_synth`, and the engine's installed voices as the activity lists them in Task 3 (name, locale, `isNetworkConnectionRequired`, quality). *`tts_default_synth` is unset (null), so the platform default applies: `com.google.android.tts`, the only engine installed. It reports 474 voices, 29 of them offline English (en-US, en-GB, en-AU, en-IN, en-NG), all quality 400 and latency 200; the default voice is `en-US-language`. The activity chose that default.*
 
 ### Task 3: `VoiceSpikeActivity`
 
@@ -75,14 +75,14 @@
 - [x] **With music:** a toggle plays a local music file through a plain `AudioTrack` or `MediaPlayer` at 30 % while a passage is spoken through a second `AudioTrack` (`CONTENT_TYPE_SPEECH`). Nothing is measured; it confirms the two streams mix and the voice is intelligible over the music.
 - [x] **Audio out:** every synthesized passage is saved as `voice-<engine>-<passage>.wav` under the app's external files dir for pulling; a Play button plays it back on the phone.
 - [x] JVM tests for the pure parts: sentence splitting of the three passages (counts and the first sentence of each), the real-time-factor arithmetic, and the log line format. `./gradlew :app:testDebugUnitTest --tests 'app.granger.voice.*'`. *Done: `SentencesTest` (Robolectric; ICU splits the passages into 6, 9 and 4 sentences), `VoiceLogTest`, `WavTest`: 13 tests. Builder's calls: the article passage is the Rosetta Stone lead from Wikipedia (CC BY-SA, cited in the source), not the Ray Charles ZIM, so the passage is fixed text rather than read from a pack; the system engine's first audio comes from `onAudioAvailable`, which not every engine sends, so that row may show `-`; the music file is `files/voices/music.*`, pushed by hand, so the mix check needs no media permission.*
-- [ ] **Commit.** `Voice spike: VoiceSpikeActivity measures the system voice, Piper and Kokoro`
+- [x] **Commit.** `Voice spike: VoiceSpikeActivity measures the system voice, Piper and Kokoro` *(d3b533f; two fixes followed on the phone: sherpa's JNI finds the callback by reflection as `invoke([F)Ljava/lang/Integer;`, which Kotlin 2's invokedynamic lambdas lack, so `SherpaTts` passes an object expression; and the activity keeps the screen on, since with the screen off the process is confined to the little cores and every number was five to ten times worse.)*
 
 ### Task 4: The runs
 
-- [ ] Install over Wi-Fi (`tools/dev/phone-wifi.sh install`), with the library database backed up first, as every install does.
-- [ ] For each engine: force-stop the app, open the activity, run the three passages (cold run), then run them again (warm run). Threads 1, 2 and 4 for sherpa-onnx. Then the E2B-resident runs at the best thread count. Then the music mix check once.
-- [ ] Pull the logcat `Voice:` lines and the WAV files into `tools/spike/voice/` (the files are small; keep the WAVs out of git if they pass 5 MB in total, and say where they are).
-- [ ] Tabulate: one table per engine (passage × threads: first audio, real-time factor, peak RSS) and a summary table against the adoption rules.
+- [x] Install over Wi-Fi (`tools/dev/phone-wifi.sh install`), with the library database backed up first, as every install does. *Done 2026-10-21 evening: both databases (with their WAL files) copied to `files/db-backup-2026-10-21/` in the app's private storage, then `adb install -r` of the worktree's debug APK; three installs in all as the two fixes landed.*
+- [x] For each engine: force-stop the app, open the activity, run the three passages (cold run), then run them again (warm run). Threads 1, 2 and 4 for sherpa-onnx. Then the E2B-resident runs at the best thread count. Then the music mix check once. *Done, unattended through intent extras (`tools/spike/voice/run-voice.sh`): system; ljspeech and libritts_r at 1, 2, 4 threads; Kokoro at 1, 2, 4; both Piper voices at 2 threads with E2B resident; the music run; libritts_r speakers 1 and 2 for listening. Kokoro was not run with E2B: it is 1.5–2.2× slower than real time without it. The first batch was discarded: the screen went dark two minutes in and every number was five to ten times worse (see the results doc).*
+- [x] Pull the logcat `Voice:` lines and the WAV files into `tools/spike/voice/` (the files are small; keep the WAVs out of git if they pass 5 MB in total, and say where they are). *Logs in `tools/spike/voice/*.log` with `tabulate.py` and its `tables.md`; the 36 WAVs (69 MB) are outside git at `/Users/s.nealthompson/Developer/Granger/voice-spike-2026-10-21/wav/`, with the on-phone logs beside them.*
+- [x] Tabulate: one table per engine (passage × threads: first audio, real-time factor, peak RSS) and a summary table against the adoption rules. *In `docs/superpowers/spikes/2026-10-voice-spike-results.md`. Piper: RTF 0.11–0.14 at 2 threads, first audio 250–400 ms for short sentences and up to 1.6 s for 190-character ones, +420 MB while speaking; with E2B resident RTF 0.14–0.15 at 2.3 GB. Kokoro: RTF 1.5–2.2, out. System: RTF 0.06, first audio ≤ 573 ms.*
 
 ### Task 5: The listening session
 
@@ -91,10 +91,10 @@
 
 ### Task 6: Results and decisions
 
-- [ ] Write `docs/superpowers/spikes/2026-10-voice-spike-results.md` in the model spike's shape: device line, method, raw tables (cold and warm), the E2B-resident table, the mix check, the 16 KB and APK-size findings, the voice files' sizes and licenses, Neal's ratings, then **decisions**: which engines V1 ships, the default order, the thread count, the look-ahead the real-time factor allows, and Kokoro's fate.
-- [ ] Update the roadmap: the V0 row to Done with the results link, and a "Carried forward from V0" section (what V1 has to carry, e.g. the espeak-ng-data packaging, the pipe-vs-file choice for the system engine).
-- [ ] Leave `:core:speech` and the debug activity in place for V1; nothing changes for release users (`Features.READ_ALOUD` stays false, the module is `debugImplementation` until V1).
-- [ ] **Commit.** `Voice spike: results and decisions for V1`
+- [x] Write `docs/superpowers/spikes/2026-10-voice-spike-results.md` in the model spike's shape: device line, method, raw tables (cold and warm), the E2B-resident table, the mix check, the 16 KB and APK-size findings, the voice files' sizes and licenses, Neal's ratings, then **decisions**: which engines V1 ships, the default order, the thread count, the look-ahead the real-time factor allows, and Kokoro's fate. *Written; the ratings table waits for Task 5 and the decisions are proposed until Neal confirms them.*
+- [x] Update the roadmap: the V0 row to Done with the results link, and a "Carried forward from V0" section (what V1 has to carry, e.g. the espeak-ng-data packaging, the pipe-vs-file choice for the system engine).
+- [x] Leave `:core:speech` and the debug activity in place for V1; nothing changes for release users (`Features.READ_ALOUD` stays false, the module is `debugImplementation` until V1).
+- [x] **Commit.** `Voice spike: results and decisions for V1`
 
 ## Order and size
 
