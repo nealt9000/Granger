@@ -31,6 +31,29 @@ class PublishedCatalogTest {
     }
 
     /** Plan H1: the readiness model rides in the catalog, and every pack and book names its domain or is storage-only. */
+    @Test fun publishedCatalogCarriesTheOnboardingTables() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+
+        val onboarding = catalog.onboarding!!
+        assertThat(onboarding.useCases.map { it.id }).containsExactly("offgrid", "travel", "study", "build", "medical", "software", "faith").inOrder()
+        // The generator checked every token, so the parser dropped none.
+        val raw = kotlinx.serialization.json.Json.parseToJsonElement(bytes.decodeToString()) as kotlinx.serialization.json.JsonObject
+        val rawBlock = raw["onboarding"] as kotlinx.serialization.json.JsonObject
+        val rawItems = (rawBlock["useCases"] as kotlinx.serialization.json.JsonArray).sumOf {
+            ((it as kotlinx.serialization.json.JsonObject)["items"] as kotlinx.serialization.json.JsonArray).size
+        }
+        assertThat(onboarding.useCases.sumOf { it.items.size }).isEqualTo(rawItems)
+        assertThat(onboarding.larger).hasSize((rawBlock["larger"] as kotlinx.serialization.json.JsonArray).size)
+        val maps = catalog.packs.filter { it.family == "maps" }
+        assertThat(maps.size).isGreaterThan(150)
+        assertThat(onboarding.larger.all { id -> maps.any { it.id == id } }).isTrue()
+        assertThat(onboarding.useCases.all { it.blurb.isNotBlank() }).isTrue()
+        assertThat(onboarding.covered["maps_en_central-america"]).contains("Puerto Rico")
+        assertThat(onboarding.covered.keys.all { id -> maps.any { it.id == id } }).isTrue()
+    }
+
     @Test fun publishedCatalogCarriesTheReadinessModel() {
         val bytes = repoFile("catalog/catalog.json").readBytes()
         val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())

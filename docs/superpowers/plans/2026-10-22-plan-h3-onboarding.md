@@ -7,7 +7,7 @@
 **Out of this plan:** billing and the telemetry opt-in (Plan 10 slots them into this flow later), offering AI models (Research hasn't shipped; one line says it is coming), a state-level region list (the catalog's maps are countries and larger areas; see Decision 3), the brand itself (Task 5 swaps one composable and its assets once Neal decides), Slim and Park (S1), any network call beyond the downloads the user starts.
 
 **Architecture (what changes):**
-- **`tools/catalog-gen`:** `curated.json` gains `onboarding`: `useCases` (id, title, one line, `items` as readiness-style tokens: catalog ids, `@<collection>`, `family:<name>`) and `regions.larger` (the map packs that are continents or multi-country areas, so the picker can list countries first). `catalog_gen.py` validates every token with the readiness validator and writes `catalog["onboarding"]`.
+- **`tools/catalog-gen`:** `curated.json` gains `onboarding`: `useCases` (id, title, one line, `items` as readiness-style tokens: catalog ids, `@<collection>`, `family:<name>`) and `regions.larger` (the map packs that are continents or multi-country areas, so the picker can list countries first) and `regions.covered` (per larger pack, the places inside it with no pack of their own, so a search for Puerto Rico finds Central America; added after the walkthrough). `catalog_gen.py` validates every token with the readiness validator and writes `catalog["onboarding"]`.
 - **`:core:catalog`:** `Catalog.onboarding: Onboarding?` with `UseCase(id, title, blurb, items)` and `larger: List<String>`; the parser drops unknown tokens, as it does for readiness.
 - **`:app` onboarding (new package):** `OnboardingModel` (pure: the start choices from the `efficient` and `comprehensive` presets with books folded into one line; the regions from the maps family split into countries and larger areas; each use case's additions against what is already chosen or installed, with sizes; the review list and the total against free space), `OnboardingViewModel`, `OnboardingScreen` (five steps in one route, Skip always visible, Back steps back), `BrandLockup` (the Welcome screen's mark and name, a placeholder until Task 5), `OnboardingPrefs` (`done`).
 - **Launch, Home, Settings:** `StartScreen.Onboarding`; `LaunchFacts.onboarded`; the nav host opens Home then pushes Onboarding on a first run (or when the mark is unset), and Start or Skip pops back to Home. Home shows a progress strip for the onboarding download group. Settings → "Set up suggestions again".
@@ -74,34 +74,34 @@
 - Modify: `core/catalog/src/main/kotlin/app/granger/core/catalog/Catalog.kt` (`Onboarding`, `UseCase`, `Catalog.onboarding`), `CatalogParser.kt`, tests (`CatalogParserTest`, `PublishedCatalogTest`: seven use cases, every token resolves, every `larger` id is a maps pack)
 - Regenerate: `catalog/catalog.json`, `.sig`, `kiwix-report.txt` (after checking with granger-0d)
 
-- [ ] `curated.json` `onboarding` per Decision 4 with `_about`; `regions.larger` = `maps_en_all`, `maps_en_africa`, `maps_en_asia`, `maps_en_europe`, `maps_en_north-america`, `maps_en_south-america`, `maps_en_australia-oceania`, `maps_en_central-america`, `maps_en_nordics`, `maps_en_andes` (ids checked against the built catalog).
-- [ ] The generator validates every token and every `larger` id (a `SystemExit` names the bad one), writes the block, and the report lists each use case with its item count and size.
-- [ ] `:core:catalog` parses it, dropping unknown tokens; older catalogs give `onboarding == null`.
-- [ ] Regenerate, sign, verify; `PublishedCatalogTest` passes against the signed file.
-- [ ] **Commit.** `Catalog: the onboarding use cases and the larger map areas`
+- [x] `curated.json` `onboarding` per Decision 4 with `_about`; `regions.larger` = `maps_en_all`, `maps_en_africa`, `maps_en_asia`, `maps_en_europe`, `maps_en_north-america`, `maps_en_south-america`, `maps_en_australia-oceania`, `maps_en_central-america`, `maps_en_nordics`, `maps_en_andes` (ids checked against the built catalog).
+- [x] The generator validates every token and every `larger` id (a `SystemExit` names the bad one), writes the block, and the report lists each use case with its item count and size.
+- [x] `:core:catalog` parses it, dropping unknown tokens; older catalogs give `onboarding == null`.
+- [x] Regenerate, sign, verify; `PublishedCatalogTest` passes against the signed file.
+- [x] **Commit.** `Catalog: the onboarding use cases and the larger map areas`
 
 ### Task 2: The onboarding model
 
 **Files:**
 - Create: `app/src/main/kotlin/app/granger/onboarding/OnboardingModel.kt`, `app/src/test/kotlin/app/granger/onboarding/OnboardingModelTest.kt`
 
-- [ ] `StartChoice(id, title, lines: List<Line>, bytes)` from a preset: packs one per line; books of one collection folded into one line with the count; a line carries its items so unticking removes them all. `installed` lines are marked and excluded from the total.
-- [ ] `Regions(countries, larger)` from the maps family and `onboarding.regions.larger`, sorted by title, each with its size; a search filter.
-- [ ] `UseCaseAddition(useCase, items, bytes)` = the use case's resolved items minus the start's chosen items minus installed; `family:` contributes its smallest pack and a "a <family> pack" line.
-- [ ] `Review(groups: Start / Region / Use cases, items distinct, bytes, freeBytes, fits)`; `specs()` for the enqueue.
-- [ ] Tests: no double counting; installed excluded; a `family:` line; an older catalog (no `onboarding`) gives a review from the start alone; the Classics fold.
-- [ ] **Commit.** `Onboarding: the model — start choices, regions, use-case additions, the review`
+- [x] `StartChoice(id, title, lines: List<Line>, bytes)` from a preset: packs one per line; books of one collection folded into one line with the count; a line carries its items so unticking removes them all. `installed` lines are marked and excluded from the total.
+- [x] `Regions(countries, larger)` from the maps family and `onboarding.regions.larger`, sorted by title, each with its size; a search filter.
+- [x] `UseCaseAddition(useCase, items, bytes)` = the use case's resolved items minus the start's chosen items minus installed; `family:` contributes its smallest pack and a "a <family> pack" line.
+- [x] `Review(groups: Start / Region / Use cases, items distinct, bytes, freeBytes, fits)`; `specs()` for the enqueue.
+- [x] Tests: no double counting; installed excluded; a `family:` line; an older catalog (no `onboarding`) gives a review from the start alone; the Classics fold.
+- [x] **Commit.** `Onboarding: the model — start choices, regions, use-case additions, the review`
 
 ### Task 3: The screens
 
 **Files:**
 - Create: `app/src/main/kotlin/app/granger/onboarding/OnboardingViewModel.kt`, `OnboardingScreen.kt` (the five steps), `BrandLockup.kt`, `OnboardingPrefs.kt`; tests `OnboardingViewModelTest.kt`, `OnboardingScreenTest.kt`
 
-- [ ] `OnboardingViewModel(catalog, library, bookshelf, downloads, volumes, prefs: DownloadPrefs, tier, totalRamBytes, onboardingPrefs, io)`: `step`, the choices (saved), `ui` per step from the model; `start()` enqueues the group per Decision 6 and returns the notice or null; `skip()` and `start()` set the mark.
-- [ ] Welcome: `BrandLockup` + one line + Get started / Skip. This phone: Decision 8. Pick a start: three radio choices, the chosen one's lines with checkboxes, the total vs free. Your situation: the region search and list, the seven chips with "+ 1.2 GB · 4 packs" under each and a "See" link to the Kiwix screen filtered to the matching domain. Review and start: the groups, the total, Wi-Fi only, the volume when there are two, Start.
-- [ ] Skip in the top bar on every step; Back steps back; the Research line on This phone when the tier is LIBRARY_ONLY or ASK.
-- [ ] Tests: each step renders its data; unticking a line changes the total; Skip and Start call the view model; a notice from `start()` shows.
-- [ ] **Commit.** `Onboarding: the five screens`
+- [x] `OnboardingViewModel(catalog, library, bookshelf, downloads, volumes, prefs: DownloadPrefs, tier, totalRamBytes, onboardingPrefs, io)`: `step`, the choices (saved), `ui` per step from the model; `start()` enqueues the group per Decision 6 and returns the notice or null; `skip()` and `start()` set the mark.
+- [x] Welcome: `BrandLockup` + one line + Get started / Skip. This phone: Decision 8. Pick a start: three radio choices, the chosen one's lines with checkboxes, the total vs free. Your situation: the region search and list, the seven chips with "+ 1.2 GB · 4 packs" under each and a "See" link to the Kiwix screen filtered to the matching domain. Review and start: the groups, the total, Wi-Fi only, the volume when there are two, Start.
+- [x] Skip in the top bar on every step; Back steps back; the Research line on This phone when the tier is LIBRARY_ONLY or ASK.
+- [x] Tests: each step renders its data; unticking a line changes the total; Skip and Start call the view model; a notice from `start()` shows.
+- [x] **Commit.** `Onboarding: the five screens`
 
 ### Task 4: Launch, Home's progress strip, Settings
 
@@ -109,12 +109,12 @@
 - Modify: `launch/LaunchDecider.kt` (`StartScreen.Onboarding`, `LaunchFacts.onboarded`), `MainActivity.kt`, `GrangerNavHost.kt` (`OnboardingRoute`; a Home start that pushes Onboarding; Start/Skip pop to Home), `GrangerApp.kt` (`onboardingPrefs`), `home/HomeViewModel.kt` + `HomeScreen.kt` (the group's progress under the strip; tap → the Kiwix screen), `settings/SettingsScreen.kt` + `SettingsViewModel.kt` ("Set up suggestions again")
 - Tests: `LaunchDeciderTest`, `HomeViewModelTest`, `HomeScreenTest`, the settings test
 
-- [ ] `decide`: `!onboarded` → `Onboarding` (before every other rule, so a first run never resumes a tab from a restored backup either).
-- [ ] The nav host: `StartScreen.Onboarding` → `HomeRoute` then `OnboardingRoute`, both with the transition skipped; `onDone` pops to Home.
-- [ ] Home: `HomeUi.setup: SetupProgress?` from records whose `groupId` starts with `onboarding:` and are not all installed; a `LinearProgressIndicator` and one line under the strip; gone when the group finishes or is cancelled.
-- [ ] Settings: the row under Readiness; it navigates to `OnboardingRoute` (the mark stays set).
-- [ ] Full JVM suite green.
-- [ ] **Commit.** `Onboarding: a first run opens it over Home; the setup strip; Set up suggestions again`
+- [x] `decide`: `!onboarded` → `Onboarding` (before every other rule, so a first run never resumes a tab from a restored backup either).
+- [x] The nav host: `StartScreen.Onboarding` → `HomeRoute` then `OnboardingRoute`, both with the transition skipped; `onDone` pops to Home.
+- [x] Home: `HomeUi.setup: SetupProgress?` from records whose `groupId` starts with `onboarding:` and are not all installed; a `LinearProgressIndicator` and one line under the strip; gone when the group finishes or is cancelled.
+- [x] Settings: the row under Readiness; it navigates to `OnboardingRoute` (the mark stays set).
+- [x] Full JVM suite green.
+- [x] **Commit.** `Onboarding: a first run opens it over Home; the setup strip; Set up suggestions again`
 
 ### Task 5: The brand (after Neal's decision)
 
@@ -125,10 +125,10 @@
 
 Waits for the phone (ask on the channel; back up both databases before installing). The first-run path runs on the emulator (`emulator-5562`, a fresh install); the phone exercises Settings → Set up suggestions again.
 
-- [ ] Emulator, fresh install, no catalog cached: Pick a start says to refresh; after a refresh the three choices show with real sizes; Skip from Welcome lands on Home and the flow doesn't return on the next launch.
-- [ ] Phone, from Settings: This phone says THINK_DEEPER and the real free space; Efficient lists Neal's installed packs as on the phone; the region search finds "Peru" and "Andean countries"; the chips show what they add; Review totals match; Start with one small item enqueues it in a group and Home's strip shows it until it lands.
-- [ ] Roadmap: H3 → Done with the date and the test count; "Carried forward from H3" with what was measured, builder's calls, and what Plan 10 slots in (billing, telemetry).
-- [ ] **Commit.** `Roadmap: H3 done; carried forward from H3`
+- [x] (On the phone by the missing mark; no AVD on this Mac; the no-catalog case is JVM-tested.) Emulator, fresh install, no catalog cached: Pick a start says to refresh; after a refresh the three choices show with real sizes; Skip from Welcome lands on Home and the flow doesn't return on the next launch.
+- [x] Phone, from Settings: This phone says THINK_DEEPER and the real free space; Efficient lists Neal's installed packs as on the phone; the region search finds "Peru" and "Andean countries"; the chips show what they add; Review totals match; Start with one small item enqueues it in a group and Home's strip shows it until it lands.
+- [x] Roadmap: H3 → Built, brand pending (Task 5 open) with the date and the test count; "Carried forward from H3" with what was measured, builder's calls, and what Plan 10 slots in (billing, telemetry).
+- [x] **Commit.** `Roadmap: H3 built, brand pending; carried forward from H3`
 
 ## Order and size
 

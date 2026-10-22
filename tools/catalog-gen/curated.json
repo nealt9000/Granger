@@ -368,5 +368,140 @@
         ]
       }
     ]
+  },
+  "onboarding": {
+    "_about": "Onboarding's tables (Plan H3, spec 2026-10-21-home-readiness-onboarding-design.md §6). A use case's items use the readiness grammar (a catalog id, \"@<collection>\" for the collection's books, \"family:<name>\" for any pack of the family); the app shows what each adds beyond the start choice and what is installed. regions.larger names the maps packs that are continents or multi-country areas, so the region picker lists countries first; regions.covered names, per larger pack, the places inside it that have no pack of their own, so searching for one finds the pack (Neal, 2026-10-22: Puerto Rico is in Central America). catalog_gen.py checks every token.",
+    "useCases": [
+      {
+        "id": "offgrid",
+        "title": "Off-grid & emergencies",
+        "blurb": "What to do when the grid, the water or the clinic is out of reach.",
+        "items": [
+          "zimgit-post-disaster_en",
+          "ready.gov_en_all",
+          "trueprepper.com_en_all",
+          "appropedia_en_all_maxi",
+          "zimgit-water_en",
+          "zimgit-food-preparation_en",
+          "zimgit-medicine_en",
+          "wikem_en_all_maxi"
+        ]
+      },
+      {
+        "id": "travel",
+        "title": "Travel",
+        "blurb": "Guides and maps for the road; your region's map comes from the picker above.",
+        "items": [
+          "wikivoyage_en_all_maxi",
+          "openstreetmap-wiki_en_all_maxi"
+        ]
+      },
+      {
+        "id": "study",
+        "title": "Study",
+        "blurb": "Textbooks and courses, from school to university.",
+        "items": [
+          "wikibooks_en_all_maxi",
+          "wikiversity_en_all_maxi",
+          "wikipedia_en_mathematics_maxi",
+          "wikipedia_en_physics_maxi",
+          "wikipedia_en_chemistry_maxi",
+          "oer4schools_en_all",
+          "milneopentextbooks.org_en_all"
+        ]
+      },
+      {
+        "id": "build",
+        "title": "Build & repair",
+        "blurb": "Fixing, making and powering things.",
+        "items": [
+          "ifixit_en_all",
+          "wikipedia_en_knots_maxi",
+          "solar.lowtechmagazine.com_mul_all",
+          "cd3wdproject.org_en_all",
+          "diy.stackexchange.com_en_all",
+          "electronics.stackexchange.com_en_all",
+          "family:energypedia"
+        ]
+      },
+      {
+        "id": "medical",
+        "title": "Medical work",
+        "blurb": "Clinical references beyond first aid.",
+        "items": [
+          "wikipedia_en_medicine_maxi",
+          "wikem_en_all_maxi",
+          "medlineplus.gov_en_all",
+          "zimgit-medicine_en",
+          "wwwnc.cdc.gov_en_all",
+          "family:mdwiki"
+        ]
+      },
+      {
+        "id": "software",
+        "title": "Software",
+        "blurb": "Documentation and answers for programming and systems.",
+        "items": [
+          "wikipedia_en_computer_maxi",
+          "docs.python.org_en_all",
+          "superuser.com_en_all",
+          "unix.stackexchange.com_en_all",
+          "openwrt.org_en_all",
+          "family:mediawiki"
+        ]
+      },
+      {
+        "id": "faith",
+        "title": "Faith & philosophy",
+        "blurb": "Scripture, philosophy and history, and the questions people ask about them.",
+        "items": [
+          "@granger-classics",
+          "wikipedia_en_history_maxi",
+          "philosophy.stackexchange.com_en_all",
+          "christianity.stackexchange.com_en_all",
+          "islam.stackexchange.com_en_all",
+          "judaism.stackexchange.com_en_all",
+          "buddhism.stackexchange.com_en_all",
+          "hinduism.stackexchange.com_en_all"
+        ]
+      }
+    ],
+    "regions": {
+      "larger": [
+        "maps_en_all",
+        "maps_en_africa",
+        "maps_en_asia",
+        "maps_en_europe",
+        "maps_en_north-america",
+        "maps_en_south-america",
+        "maps_en_australia-oceania",
+        "maps_en_central-america",
+        "maps_en_nordics",
+        "maps_en_andes"
+      ],
+      "covered": {
+        "maps_en_central-america": [
+          "Puerto Rico",
+          "Trinidad and Tobago",
+          "Barbados",
+          "Grenada",
+          "Saint Lucia",
+          "Saint Vincent and the Grenadines",
+          "Antigua and Barbuda",
+          "Dominica",
+          "Saint Kitts and Nevis",
+          "Virgin Islands",
+          "Cayman Islands",
+          "Aruba",
+          "Curaçao",
+          "Martinique",
+          "Guadeloupe",
+          "Turks and Caicos",
+          "Anguilla",
+          "Montserrat",
+          "Caribbean"
+        ]
+      }
+    }
   }
 }

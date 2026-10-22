@@ -60,6 +60,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onModels: () -> Unit,
     onReadiness: () -> Unit,
+    /** Runs the onboarding flow again (Plan H3). */
+    onSetUpAgain: () -> Unit = {},
     onBack: () -> Unit,
     scrollToMedia: Boolean = false,
     onPermissionChecked: () -> Unit = {},
@@ -132,6 +134,12 @@ fun SettingsScreen(
                             supportingContent = { Text("What you hold offline, and whether it still works") },
                             trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                             modifier = Modifier.selectable(selected = false, onClick = onReadiness),
+                        )
+                        ListItem(
+                            headlineContent = { Text("Set up suggestions again") },
+                            supportingContent = { Text("Pick a start, your region and what you'll use Granger for") },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                            modifier = Modifier.selectable(selected = false, onClick = onSetUpAgain),
                         )
                         HorizontalDivider()
                     }

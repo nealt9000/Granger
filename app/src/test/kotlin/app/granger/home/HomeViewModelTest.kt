@@ -197,6 +197,23 @@ class HomeViewModelTest {
         assertThat(vm.ui.value.feeds.map { it.feed.scope }).containsExactly("pack:wikipedia_en_all")
     }
 
+    @Test fun theSetupStripFollowsTheNewestOnboardingGroupUntilItLands() = runTest(main.dispatcher) {
+        prefs.seeded = true
+        val a = record("a", DownloadState.INSTALLED).copy(groupId = "onboarding:1", sizeBytes = 100)
+        val b = record("b", DownloadState.RUNNING).copy(groupId = "onboarding:1", sizeBytes = 300, bytesDone = 50)
+        val c = record("c", DownloadState.FAILED).copy(groupId = "onboarding:1", sizeBytes = 100)
+        val old = record("z", DownloadState.QUEUED).copy(groupId = "onboarding:0", sizeBytes = 999)
+        downloads.list.value = listOf(a, b, c, old)
+        val vm = viewModel()
+        val setup = vm.ui.value.setup!!
+        assertThat(setup).isEqualTo(SetupProgress(done = 1, total = 3, bytesDone = 150, bytes = 500, failed = 1))
+        assertThat(setupText(setup)).isEqualTo("Setting up · 1 of 3 · 150 B of 500 B · 1 failed, tap to retry")
+        downloads.list.value = listOf(a, b.copy(state = DownloadState.INSTALLED), c.copy(state = DownloadState.INSTALLED), old)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.setup).isNull()
+        assertThat(HomeViewModel.setupProgress(emptyList())).isNull()
+    }
+
     @Test fun scopeChoicesOfferWhatIsOnThePhone() = runTest(main.dispatcher) {
         library.packList.value = listOf(wikipedia, pack("u2", "Gone", status = PackStatus.MISSING).copy(name = "x_en"), pack("u3", "No name"))
         prefs.seeded = true

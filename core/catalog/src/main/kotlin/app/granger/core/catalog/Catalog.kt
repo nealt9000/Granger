@@ -16,6 +16,8 @@ data class Catalog(
     val voices: List<VoiceEntry> = emptyList(),
     /** The readiness model (Plan H1, spec §3); absent in older catalogs. */
     val readiness: Readiness? = null,
+    /** Onboarding's use cases and larger map areas (Plan H3); null in older catalogs. */
+    val onboarding: Onboarding? = null,
 ) {
     val items: List<CatalogItem> get() = models + packs + books + voices
 
@@ -154,3 +156,17 @@ data class Domain(
     /** All installed → Comprehensive. Includes [essential]. */
     val comprehensive: List<String> = emptyList(),
 )
+
+/** Onboarding's tables (Plan H3, spec §6). */
+@Serializable
+data class Onboarding(
+    val useCases: List<UseCase> = emptyList(),
+    /** The maps packs that are continents or multi-country areas; the region picker lists the other maps as countries. */
+    val larger: List<String> = emptyList(),
+    /** Per larger maps pack, the places inside it that have no pack of their own (Puerto Rico → Central America). */
+    val covered: Map<String, List<String>> = emptyMap(),
+)
+
+/** A use-case chip: what it adds, as readiness-style tokens the parser has resolved. */
+@Serializable
+data class UseCase(val id: String, val title: String, val blurb: String = "", val items: List<String> = emptyList())

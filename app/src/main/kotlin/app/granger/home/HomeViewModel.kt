@@ -3,6 +3,8 @@ package app.granger.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.catalog.CatalogSource
+import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.library.Albums
 import app.granger.core.library.Bookshelf
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
@@ -48,7 +51,14 @@ data class HomeUi(
     /** Feeds whose scope names something on the phone, in Home order; the others are hidden (Decision 3). */
     val feeds: List<FeedUi> = emptyList(),
     val scopeChoices: List<ScopeChoice> = emptyList(),
+    /** Onboarding's downloads while they run (Plan H3); null once they have all landed or were cancelled. */
+    val setup: SetupProgress? = null,
 )
+
+/** The latest onboarding group's progress: files landed of files asked for, and bytes. */
+data class SetupProgress(val done: Int, val total: Int, val bytesDone: Long, val bytes: Long, val failed: Int) {
+    val fraction: Float get() = if (bytes <= 0L) 0f else (bytesDone.toFloat() / bytes).coerceIn(0f, 1f)
+}
 
 /** The one-time marks Home keeps (SharedPreferences `"home"`). */
 interface HomePrefs {
@@ -105,8 +115,13 @@ class HomeViewModel(
         }
     }
 
-    val ui: StateFlow<HomeUi> = combine(strip, rail, feedRows, snapshot) { report, railUi, rows, snap ->
-        HomeUi(strip = report, continueCards = continueCards(railUi), feeds = rows.filter { it.drawn?.cards?.isEmpty() != true }, scopeChoices = scopeChoices(snap))
+    private val setup = downloads.records.map { setupProgress(it) }
+
+    val ui: StateFlow<HomeUi> = combine(strip, rail, feedRows, snapshot, setup) { report, railUi, rows, snap, progress ->
+        HomeUi(
+            strip = report, continueCards = continueCards(railUi), feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
+            scopeChoices = scopeChoices(snap), setup = progress,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
 
     init {
@@ -163,6 +178,23 @@ class HomeViewModel(
             FeedScope.Collection("c:granger-classics") to FeedKind.RANDOM,
             FeedScope.Family("wikiquote") to FeedKind.RANDOM,
         )
+
+        /** The newest onboarding group (`onboarding:<epoch>`) that still has files to land, else null. */
+        fun setupProgress(records: List<DownloadRecord>): SetupProgress? {
+            val group = records.mapNotNull { it.groupId?.takeIf { g -> g.startsWith(SETUP_GROUP) } }.maxOrNull() ?: return null
+            val rows = records.filter { it.groupId == group }
+            val done = rows.count { it.state == DownloadState.INSTALLED }
+            if (done == rows.size) return null
+            return SetupProgress(
+                done = done,
+                total = rows.size,
+                bytesDone = rows.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
+                bytes = rows.sumOf { it.sizeBytes },
+                failed = rows.count { it.state == DownloadState.FAILED },
+            )
+        }
+
+        const val SETUP_GROUP = "onboarding:"
 
         /** The rail's tabs and plays in the rail's order; searches, chats and the voice's live row are not "continue". */
         fun continueCards(rail: RailUi): List<RailEntry> =

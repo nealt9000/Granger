@@ -355,6 +355,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     if "readiness" in curated:
         readiness, tier_presets = readiness_block(curated["readiness"], packs, books, collections)
         presets += tier_presets
+    onboarding = onboarding_block(curated["onboarding"], packs, books, collections) if "onboarding" in curated else None
     for preset in presets:
         unknown = set(preset["items"]) - set(ids)
         if unknown:
@@ -370,7 +371,57 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     }
     if readiness is not None:
         catalog["readiness"] = readiness
+    if onboarding is not None:
+        catalog["onboarding"] = onboarding
     return catalog
+
+
+def check_token(scope, token, pack_ids, book_ids, families, collections):
+    """A readiness-style token names a catalog item, "@<collection>" or "family:<name>"; anything else fails the build."""
+    if token.startswith("@"):
+        if token[1:] not in collections:
+            raise SystemExit(f"{scope}: unknown collection {token}")
+    elif token.startswith("family:"):
+        if token[len("family:"):] not in families:
+            raise SystemExit(f"{scope}: unknown family {token}")
+    elif token not in pack_ids and token not in book_ids:
+        raise SystemExit(f"{scope}: unknown item {token}")
+
+
+def onboarding_block(block, packs, books, collections):
+    """
+    The catalog's `onboarding` object (Plan H3, spec §6): the use cases with their items (readiness tokens) and the
+    maps packs that are continents or multi-country areas (`larger`), so the region picker lists countries first.
+    """
+    pack_ids = {p["id"] for p in packs}
+    book_ids = {b["id"] for b in books}
+    families = {p["family"] for p in packs if p.get("family")}
+    maps = {p["id"] for p in packs if p.get("family") == "maps"}
+    ids, use_cases = set(), []
+    for u in block.get("useCases", []):
+        uid, title = u.get("id") or "", u.get("title") or ""
+        if not uid or not title or uid in ids:
+            raise SystemExit(f"onboarding: bad or duplicate use case id {uid!r}")
+        ids.add(uid)
+        items = list(dict.fromkeys(u.get("items", [])))
+        if not items:
+            raise SystemExit(f"onboarding {uid}: no items")
+        for token in items:
+            check_token(f"onboarding {uid}", token, pack_ids, book_ids, families, collections)
+        use_cases.append({"id": uid, "title": title, "blurb": u.get("blurb") or "", "items": items})
+    regions = block.get("regions", {})
+    larger = list(dict.fromkeys(regions.get("larger", [])))
+    for pack_id in larger:
+        if pack_id not in maps:
+            raise SystemExit(f"onboarding regions.larger: {pack_id!r} is not a maps pack")
+    covered = {}
+    for pack_id, places in regions.get("covered", {}).items():
+        if pack_id not in maps:
+            raise SystemExit(f"onboarding regions.covered: {pack_id!r} is not a maps pack")
+        names = [str(n).strip() for n in places if str(n).strip()]
+        if names:
+            covered[pack_id] = list(dict.fromkeys(names))
+    return {"useCases": use_cases, "larger": larger, "covered": covered}
 
 
 def readiness_block(block, packs, books, collections):
@@ -394,14 +445,7 @@ def readiness_block(block, packs, books, collections):
         essential = list(dict.fromkeys(d.get("essential", [])))
         full = list(dict.fromkeys(essential + list(d.get("comprehensive", []))))
         for token in full:
-            if token.startswith("@"):
-                if token[1:] not in collections:
-                    raise SystemExit(f"readiness {did}: unknown collection {token}")
-            elif token.startswith("family:"):
-                if token[len("family:"):] not in families:
-                    raise SystemExit(f"readiness {did}: unknown family {token}")
-            elif token not in pack_ids and token not in book_ids:
-                raise SystemExit(f"readiness {did}: unknown item {token}")
+            check_token(f"readiness {did}", token, pack_ids, book_ids, families, collections)
         domains.append({"id": did, "title": title, "essential": essential, "comprehensive": full})
 
         def expand(tokens):

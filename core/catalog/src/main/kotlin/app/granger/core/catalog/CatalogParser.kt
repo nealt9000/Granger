@@ -58,7 +58,8 @@ object CatalogParser {
         val ids = (packs.map { it.id } + models.map { it.id } + books.map { it.id } + voices.map { it.id }).toSet()
         val presets = entries<Preset>(root, "presets").map { preset -> preset.copy(items = preset.items.filter { it in ids }) }
         val readiness = (root["readiness"] as? JsonObject)?.let { readiness(it, packs, books) }
-        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices, readiness))
+        val onboarding = (root["onboarding"] as? JsonObject)?.let { onboarding(it, packs, books) }
+        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices, readiness, onboarding))
     }
 
     /**
@@ -67,22 +68,48 @@ object CatalogParser {
      */
     private fun readiness(obj: JsonObject, packs: List<PackEntry>, books: List<BookEntry>): Readiness? {
         val parsed = runCatching { json.decodeFromJsonElement<Readiness>(obj) }.getOrNull() ?: return null
-        val ids = packs.mapTo(HashSet()) { it.id }.apply { books.mapTo(this) { it.id } }
-        val collections = books.mapTo(HashSet()) { it.collection }
-        val families = packs.mapNotNullTo(HashSet()) { it.family.ifBlank { null } }
-        fun known(token: String) = when {
-            token.startsWith("@") -> token.drop(1) in collections
-            token.startsWith("family:") -> token.removePrefix("family:") in families
-            else -> token in ids
-        }
+        val known = tokenChecker(packs, books)
         val seen = HashSet<String>()
         val domains = parsed.domains
             .filter { it.id.isNotBlank() && it.title.isNotBlank() && seen.add(it.id) }
             .map { domain ->
-                val essential = domain.essential.filter(::known).distinct()
-                domain.copy(essential = essential, comprehensive = (essential + domain.comprehensive.filter(::known)).distinct())
+                val essential = domain.essential.filter(known).distinct()
+                domain.copy(essential = essential, comprehensive = (essential + domain.comprehensive.filter(known)).distinct())
             }
         return if (domains.isEmpty()) null else Readiness(domains)
+    }
+
+    /** Whether a readiness-style token names something in this catalog. */
+    private fun tokenChecker(packs: List<PackEntry>, books: List<BookEntry>): (String) -> Boolean {
+        val ids = packs.mapTo(HashSet()) { it.id }.apply { books.mapTo(this) { it.id } }
+        val collections = books.mapTo(HashSet()) { it.collection }
+        val families = packs.mapNotNullTo(HashSet()) { it.family.ifBlank { null } }
+        return { token ->
+            when {
+                token.startsWith("@") -> token.drop(1) in collections
+                token.startsWith("family:") -> token.removePrefix("family:") in families
+                else -> token in ids
+            }
+        }
+    }
+
+    /**
+     * Onboarding's tables (Plan H3): a use case with a blank or repeated id, or none of whose items resolve, is dropped;
+     * so is a larger area that isn't a maps pack. Null when nothing is left.
+     */
+    private fun onboarding(obj: JsonObject, packs: List<PackEntry>, books: List<BookEntry>): Onboarding? {
+        val parsed = runCatching { json.decodeFromJsonElement<Onboarding>(obj) }.getOrNull() ?: return null
+        val known = tokenChecker(packs, books)
+        val maps = packs.filter { it.family == "maps" }.mapTo(HashSet()) { it.id }
+        val seen = HashSet<String>()
+        val useCases = parsed.useCases
+            .filter { it.id.isNotBlank() && it.title.isNotBlank() && seen.add(it.id) }
+            .map { it.copy(items = it.items.filter(known).distinct()) }
+            .filter { it.items.isNotEmpty() }
+        val larger = parsed.larger.filter { it in maps }.distinct()
+        val covered = parsed.covered.filterKeys { it in maps }.mapValues { (_, names) -> names.map { it.trim() }.filter { it.isNotEmpty() }.distinct() }
+            .filterValues { it.isNotEmpty() }
+        return if (useCases.isEmpty() && larger.isEmpty() && covered.isEmpty()) null else Onboarding(useCases, larger, covered)
     }
 
     private inline fun <reified T> entries(root: JsonObject, key: String): List<T> =

@@ -28,6 +28,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -72,6 +73,7 @@ fun HomeScreen(
     onOpenTab: (Long) -> Unit,
     onPlay: (RailEntry.Play) -> Unit,
     onOpenCard: (Card) -> Unit,
+    onOpenSetup: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -79,7 +81,7 @@ fun HomeScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val actions = remember(viewModel) { FeedActions(viewModel::addFeed, viewModel::removeFeed, viewModel::moveFeed) }
-    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions)
+    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenSetup)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +93,7 @@ fun HomeContent(
     onPlay: (RailEntry.Play) -> Unit,
     onOpenCard: (Card) -> Unit = {},
     actions: FeedActions = FeedActions(),
+    onOpenSetup: () -> Unit = {},
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -103,6 +106,14 @@ fun HomeContent(
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list")) {
             item(key = "strip") { ReadinessStrip(ui.strip, onReadiness) }
+            ui.setup?.let { setup ->
+                item(key = "setup") {
+                    Column(Modifier.fillMaxWidth().clickable(onClick = onOpenSetup).padding(horizontal = 16.dp, vertical = 8.dp).testTag("setup-strip")) {
+                        LinearProgressIndicator(progress = { setup.fraction }, modifier = Modifier.fillMaxWidth())
+                        Text(setupText(setup), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 6.dp))
+                    }
+                }
+            }
             if (adding) {
                 item(key = "add-feed") {
                     AddFeedPanel(
@@ -299,4 +310,10 @@ internal fun Card(title: String, subtitle: String, enabled: Boolean, onClick: ()
             )
         }
     }
+}
+
+/** "Setting up · 3 of 14 · 1.2 GB of 9.8 GB", with the failures when there are any. */
+fun setupText(setup: SetupProgress): String {
+    val base = "Setting up · ${setup.done} of ${setup.total} · ${app.granger.formatBytes(setup.bytesDone)} of ${app.granger.formatBytes(setup.bytes)}"
+    return if (setup.failed > 0) "$base · ${setup.failed} failed, tap to retry" else base
 }

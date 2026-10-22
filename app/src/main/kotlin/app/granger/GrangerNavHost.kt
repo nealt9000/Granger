@@ -108,6 +108,8 @@ import app.granger.home.CardTarget
 import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
 import app.granger.home.HomeViewModel
+import app.granger.onboarding.OnboardingScreen
+import app.granger.onboarding.OnboardingViewModel
 import app.granger.shell.RailEntry
 import app.granger.shell.RailEntryActions
 import app.granger.shell.RailTool
@@ -137,6 +139,9 @@ import app.granger.research.ResearchViewModel
 
 /** Home (Plan H2): the readiness strip, Continue and the feeds. A rail tool, pushed over the Library. */
 @Serializable object HomeRoute
+
+/** Onboarding (Plan H3): five screens over Home on a first run, or from Settings. */
+@Serializable object OnboardingRoute
 @Serializable data class CollectionRoute(val collectionId: String)
 
 /** Music's tabs for one Music collection; null is "All music" (not scoped). */
@@ -260,7 +265,7 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 
 /** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
 internal fun railToolOf(destination: NavDestination): RailTool? = when {
-    destination.hasRoute<HomeRoute>() -> RailTool.HOME
+    destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
     destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
         destination.hasRoute<LibriVoxRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
@@ -402,7 +407,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     // Non-reader screens always show the rail; a reader shows it with its chrome (up on entry, a middle tap hides it).
     LaunchedEffect(destination) {
         if (destination?.isReading() != true) shell.railVisible = true
-        if (destination?.isReading() == true || destination?.hasRoute<HomeRoute>() == true) skipTransition = false
+        if (destination?.isReading() == true || destination?.hasRoute<HomeRoute>() == true || destination?.hasRoute<OnboardingRoute>() == true) {
+            skipTransition = false
+        }
     }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
@@ -417,6 +424,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 // Home over the Library, the same way: Back from it lands on the Library (Plan H2, Decision 1).
                 skipTransition = true
                 nav.navigate(HomeRoute)
+            } else if (start is StartScreen.Onboarding) {
+                // Home, then the flow over it: Start and Skip pop back to Home (Plan H3, Decision 1).
+                skipTransition = true
+                nav.navigate(HomeRoute)
+                nav.navigate(OnboardingRoute)
             }
         }
     }
@@ -868,6 +880,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
+                    onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
@@ -911,6 +924,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
+                    onOpenSetup = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
                     onOpenCard = { card ->
@@ -929,6 +943,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             is CardTarget.Search -> nav.navigate(SearchRoute(target.query))
                         }
                     },
+                )
+            }
+            composable<OnboardingRoute> {
+                OnboardingScreen(
+                    viewModel = viewModel {
+                        OnboardingViewModel(
+                            container.catalog, container.library, container.downloads, container.volumes, container.downloadPrefs,
+                            container.deviceTier, container.totalRamBytes, container.onboardingPrefs,
+                        )
+                    },
+                    onDone = { nav.popBackStack() },
+                    onSeeDomain = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                 )
             }
             composable<ReadinessRoute> {
