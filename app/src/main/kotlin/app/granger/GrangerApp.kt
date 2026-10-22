@@ -76,6 +76,8 @@ import app.granger.core.library.RoomResearchChats
 import app.granger.core.library.RailPins
 import app.granger.core.library.HomeFeeds
 import app.granger.home.HomePrefs
+import app.granger.onboarding.OnboardingPrefs
+import app.granger.onboarding.SharedOnboardingPrefs
 import app.granger.home.SharedHomePrefs
 import app.granger.core.library.RoomHomeFeeds
 import app.granger.core.library.RoomRailPins
@@ -405,6 +407,7 @@ class AppContainer(context: Context) {
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
     val homePrefs: HomePrefs = SharedHomePrefs(context)
+    val onboardingPrefs: OnboardingPrefs = SharedOnboardingPrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
     val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")

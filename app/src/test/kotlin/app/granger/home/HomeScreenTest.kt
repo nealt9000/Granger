@@ -79,6 +79,14 @@ class HomeScreenTest {
         assertThat(calls).containsExactly("tab:1", "play:album:Blue").inOrder()
     }
 
+    @Test fun theSetupStripShowsProgressAndOpensTheDownloads() {
+        compose.setContent {
+            HomeContent(HomeUi(strip = report, setup = SetupProgress(2, 5, 1_000, 4_000, 0)), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenSetup = { calls += "setup" })
+        }
+        compose.onNodeWithText("Setting up · 2 of 5 · 1.0 KB of 4.0 KB").performClick()
+        assertThat(calls).containsExactly("setup")
+    }
+
     @Test fun anEmptyRailShowsNoContinue() {
         show(HomeUi(strip = report))
         compose.onAllNodes(hasTestTag("continue-row")).assertCountEquals(0)

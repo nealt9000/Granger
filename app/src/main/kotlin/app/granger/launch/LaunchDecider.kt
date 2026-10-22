@@ -17,6 +17,9 @@ sealed interface StartScreen {
 
     /** Open Home (Plan H2): nothing to resume, or the setting says so. */
     data object Home : StartScreen
+
+    /** Open Home with the onboarding flow over it (Plan H3): the flow was never finished or skipped. */
+    data object Onboarding : StartScreen
 }
 
 /** What we know about the previous session when the app starts. */
@@ -28,6 +31,8 @@ data class LaunchFacts(
     val lastTabPackOk: Boolean,
     /** Settings → Open to (Plan H2). */
     val openTo: OpenTo = OpenTo.RESUME,
+    /** The onboarding flow was finished or skipped once (Plan H3). */
+    val onboarded: Boolean = true,
 )
 
 /**
@@ -40,6 +45,8 @@ object LaunchDecider {
         "The last thing you were reading isn't available. Check that its pack is still on the phone or SD card."
 
     fun decide(f: LaunchFacts): StartScreen {
+        // Before everything else: a first run never resumes a tab, not even one restored from a backup.
+        if (!f.onboarded) return StartScreen.Onboarding
         val tab = f.lastTab
         if (f.firstRun || !f.previousExitClean || f.bootedSinceLastSession || tab == null) {
             return StartScreen.Home

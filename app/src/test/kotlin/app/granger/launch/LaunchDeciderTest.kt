@@ -50,6 +50,12 @@ class LaunchDeciderTest {
             .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
     }
 
+    @Test fun notOnboardedOpensTheFlowBeforeAnythingElse() {
+        assertThat(LaunchDecider.decide(normal.copy(onboarded = false))).isEqualTo(StartScreen.Onboarding)
+        assertThat(LaunchDecider.decide(normal.copy(onboarded = false, lastTabPackOk = false))).isEqualTo(StartScreen.Onboarding)
+        assertThat(LaunchDecider.decide(normal.copy(onboarded = false, firstRun = true))).isEqualTo(StartScreen.Onboarding)
+    }
+
     @Test fun openToHomeOpensHomeInsteadOfResuming() {
         assertThat(LaunchDecider.decide(normal.copy(openTo = OpenTo.HOME))).isEqualTo(StartScreen.Home)
     }

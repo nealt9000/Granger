@@ -109,12 +109,12 @@
 - Modify: `launch/LaunchDecider.kt` (`StartScreen.Onboarding`, `LaunchFacts.onboarded`), `MainActivity.kt`, `GrangerNavHost.kt` (`OnboardingRoute`; a Home start that pushes Onboarding; Start/Skip pop to Home), `GrangerApp.kt` (`onboardingPrefs`), `home/HomeViewModel.kt` + `HomeScreen.kt` (the group's progress under the strip; tap → the Kiwix screen), `settings/SettingsScreen.kt` + `SettingsViewModel.kt` ("Set up suggestions again")
 - Tests: `LaunchDeciderTest`, `HomeViewModelTest`, `HomeScreenTest`, the settings test
 
-- [ ] `decide`: `!onboarded` → `Onboarding` (before every other rule, so a first run never resumes a tab from a restored backup either).
-- [ ] The nav host: `StartScreen.Onboarding` → `HomeRoute` then `OnboardingRoute`, both with the transition skipped; `onDone` pops to Home.
-- [ ] Home: `HomeUi.setup: SetupProgress?` from records whose `groupId` starts with `onboarding:` and are not all installed; a `LinearProgressIndicator` and one line under the strip; gone when the group finishes or is cancelled.
-- [ ] Settings: the row under Readiness; it navigates to `OnboardingRoute` (the mark stays set).
-- [ ] Full JVM suite green.
-- [ ] **Commit.** `Onboarding: a first run opens it over Home; the setup strip; Set up suggestions again`
+- [x] `decide`: `!onboarded` → `Onboarding` (before every other rule, so a first run never resumes a tab from a restored backup either).
+- [x] The nav host: `StartScreen.Onboarding` → `HomeRoute` then `OnboardingRoute`, both with the transition skipped; `onDone` pops to Home.
+- [x] Home: `HomeUi.setup: SetupProgress?` from records whose `groupId` starts with `onboarding:` and are not all installed; a `LinearProgressIndicator` and one line under the strip; gone when the group finishes or is cancelled.
+- [x] Settings: the row under Readiness; it navigates to `OnboardingRoute` (the mark stays set).
+- [x] Full JVM suite green.
+- [x] **Commit.** `Onboarding: a first run opens it over Home; the setup strip; Set up suggestions again`
 
 ### Task 5: The brand (after Neal's decision)
 
