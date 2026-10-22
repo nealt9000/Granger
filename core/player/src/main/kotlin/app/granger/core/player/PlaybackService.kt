@@ -121,6 +121,8 @@ class PlaybackService : MediaLibraryService() {
             defaultVoiceSpeed = deps.voiceSpeed,
         )
         engine = e
+        val power = getSystemService(android.os.PowerManager::class.java)
+        e.setScreenState { if (power?.isInteractive == true) "on" else "off" }
         session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope, deps.browse))
             .apply { sessionActivity()?.let(::setSessionActivity) }
             .build()

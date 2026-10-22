@@ -80,9 +80,12 @@ class VoiceSpikeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Measurements are only meaningful with the screen on: once it goes dark the process is treated as
         // background and confined to the little cores, and the numbers degrade tenfold.
-        setShowWhenLocked(true)
-        setTurnScreenOn(true)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // The service run (Plan V1 Task 9) wants the screen to go dark on its own; every other run needs it on.
+        if (!intent.getBooleanExtra("service", false)) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
         val root = getExternalFilesDir(null) ?: filesDir
         logFile = File(root, "voice-spike-${System.currentTimeMillis()}.log")
         voicesDir = File(root, "voices")
@@ -101,7 +104,46 @@ class VoiceSpikeActivity : ComponentActivity() {
             }
         }
 
-        if (savedInstanceState == null) intent.getStringExtra("engine")?.let { autoRun(it, intent) }
+        if (savedInstanceState == null) {
+            if (intent.getBooleanExtra("service", false)) serviceRun(intent) else intent.getStringExtra("engine")?.let { autoRun(it, intent) }
+        }
+    }
+
+    /**
+     * Plan V1 Task 9: the three passages read through the real player (`PlayerHub.readAloud`, so the voice runs under
+     * `PlaybackService`'s foreground service) with the screen free to go dark. `--es voice <id>` picks a voice
+     * (`granger:<dir>` or `system:<engine>:<name>`), else the preferred one. Per-sentence costs come from the
+     * engine's `GrangerVoice` log lines; this logs the progress and `Voice: auto done` when the reading ends.
+     */
+    private fun serviceRun(intent: Intent) {
+        val hub = (application as app.granger.GrangerApp).container.playerHub
+        val voiceId = intent.getStringExtra("voice")?.let(app.granger.core.speech.VoiceId::decode)
+        // The three passages are about 2.5 minutes of speech; repeated (default three times) the run outlasts five minutes with the screen off.
+        val repeat = intent.getIntExtra("repeat", 3).coerceAtLeast(1)
+        val text = List(repeat) { VoiceSpikePassages.ALL.joinToString("\n\n") { it.text } }.joinToString("\n\n")
+        val source = app.granger.core.speech.TextReadSource("spike:service", "Voice spike passages", text)
+        log("Voice: service start voice=${voiceId?.encode() ?: "preferred"} repeat=$repeat sentences=${source.size}")
+        running = true
+        lifecycleScope.launch {
+            val started = SystemMonoClock.nanos()
+            hub.readAloud(source, null, voiceId)
+            var last = -1
+            var seenVoice = false
+            kotlinx.coroutines.flow.combine(hub.ui, hub.voiceProgress) { ui, p -> ui to p }.collect { (ui, p) ->
+                val now = ui.now as? app.granger.core.player.NowPlaying.Voice
+                if (now != null) seenVoice = true
+                if (p != null && p.index != last) {
+                    last = p.index
+                    log("Voice: service sentence=${p.index} chars=${p.utterance.text.length} atMs=${(SystemMonoClock.nanos() - started) / 1_000_000} playing=${ui.playing}")
+                }
+                if (now?.ended == true || (seenVoice && now == null)) {
+                    log("Voice: service ended=${now?.ended} atMs=${(SystemMonoClock.nanos() - started) / 1_000_000}")
+                    log("Voice: auto done service=true")
+                    running = false
+                    return@collect
+                }
+            }
+        }
     }
 
     /** Builds the engine named [name]: `system`, or a voice directory's id. */

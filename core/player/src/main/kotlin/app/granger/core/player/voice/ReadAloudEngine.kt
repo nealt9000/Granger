@@ -28,6 +28,11 @@ import kotlinx.coroutines.sync.withLock
 /** The sentence being spoken: what the readers mark and the notification shows. */
 data class VoiceProgress(val address: ReadAddress, val utterance: Utterance, val index: Int)
 
+/** One sentence's cost: how long the engine took and how much audio it made (the real-time factor is their ratio). */
+data class SentenceStat(val address: ReadAddress, val chars: Int, val synthMs: Long, val audioMs: Long) {
+    val rtf: Double get() = if (audioMs <= 0) Double.NaN else synthMs.toDouble() / audioMs
+}
+
 /**
  * Reads a [ReadSource] aloud through a [Speech] engine into a [SpeechOutput]: synthesizes a little ahead so
  * sentences flow, writes the pauses as silence so the output's clock stays true, pauses at a sentence start, and
@@ -55,6 +60,9 @@ class ReadAloudEngine(
     val ended: SharedFlow<Unit> = _ended.asSharedFlow()
     private val _errors = MutableSharedFlow<SpeechException>(extraBufferCapacity = 8)
     val errors: SharedFlow<SpeechException> = _errors.asSharedFlow()
+    private val _stats = MutableSharedFlow<SentenceStat>(extraBufferCapacity = 64)
+    /** Every sentence synthesized (not served from the cache), for the log and the screen-off run. */
+    val stats: SharedFlow<SentenceStat> = _stats.asSharedFlow()
 
     private val lock = Mutex()
     private var source: ReadSource? = null
@@ -237,8 +245,11 @@ class ReadAloudEngine(
     private suspend fun synthesize(s: Speech, u: Utterance): Pcm? {
         if (u.kind == UtteranceKind.CODE_OMITTED && u.text.isEmpty()) return null
         return try {
+            val start = System.nanoTime()
             val chunks = s.synthesize(u.text, speed).toList()
-            if (chunks.isEmpty()) null else Pcm(Wav.concat(chunks.map { it.samples }), chunks.first().sampleRate)
+            val pcm = if (chunks.isEmpty()) null else Pcm(Wav.concat(chunks.map { it.samples }), chunks.first().sampleRate)
+            _stats.tryEmit(SentenceStat(u.address, u.text.length, (System.nanoTime() - start) / 1_000_000, pcm?.durationMs ?: 0))
+            pcm
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

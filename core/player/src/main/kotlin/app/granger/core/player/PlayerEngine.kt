@@ -153,6 +153,12 @@ class PlayerEngine(
             scope.launch { engine.progress.collect { if (mode == Mode.VOICE && it != null) onVoiceProgress() } }
             scope.launch { engine.ended.collect { if (mode == Mode.VOICE) onVoiceEnded() } }
             scope.launch { engine.errors.collect { Log.w(TAG, "Voice: ${it.message}") } }
+            // One line per synthesized sentence: the screen-off run (Plan V1 Task 9) reads these from logcat.
+            scope.launch {
+                engine.stats.collect {
+                    Log.i(VOICE_TAG, "Voice: synth chars=${it.chars} synthMs=${it.synthMs} audioMs=${it.audioMs} rtf=${"%.2f".format(java.util.Locale.ROOT, it.rtf)} screen=${screenState()}")
+                }
+            }
         }
     }
     private var voiceSource: ReadSource? = null
@@ -1273,8 +1279,15 @@ class PlayerEngine(
         _ui.value = PlayerUi(now, playing, position, duration, sleep.remainingMs)
     }
 
+    /** "on"/"off" for the voice's log lines; the service has no display, so the power manager's word is used when at hand. */
+    private var screenState: () -> String = { "?" }
+
+    /** Lets the service say whether the screen is on, for the voice's per-sentence log lines. */
+    fun setScreenState(state: () -> String) { screenState = state }
+
     private companion object {
         const val TAG = "PlayerEngine"
+        const val VOICE_TAG = "GrangerVoice"
         const val FOCUS_TAG = FocusPolicy.TAG
         const val MODE_MUSIC = "music"
         const val MODE_BOOK = "audiobook"
