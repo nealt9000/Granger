@@ -32,11 +32,17 @@ object ReaderPageScript {
  * The page's only way into the app, added to the WebView as [ReaderPageScript.BRIDGE_NAME]. JavaScript calls arrive
  * on a WebView background thread, so [onToggleChrome] is posted to the main thread.
  */
-class GrangerBridge(private val onToggleChrome: () -> Unit) {
+class GrangerBridge(private val onToggleChrome: () -> Unit, private val onUserScroll: () -> Unit = {}) {
     private val main = Handler(Looper.getMainLooper())
 
     @JavascriptInterface
     fun toggleChrome() {
         main.post(onToggleChrome)
+    }
+
+    /** The user scrolled the page themselves (not the read-aloud script): the voice stops following until Follow is tapped. */
+    @JavascriptInterface
+    fun onUserScroll() {
+        main.post(onUserScroll)
     }
 }

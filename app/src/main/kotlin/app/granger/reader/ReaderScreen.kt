@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -92,6 +93,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.Features
 import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimResolver
@@ -221,6 +223,16 @@ fun ReaderScreen(
                         },
                         onFind = viewModel::startFind,
                         onToggleBookmark = viewModel::toggleBookmark,
+                        readingThisPage = state.readingThisPage,
+                        onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
+                            if (state.readingThisPage) {
+                                viewModel.stopReading()
+                            } else {
+                                val view = webView
+                                if (view == null) viewModel.readAloud(null)
+                                else view.evaluateJavascript(ReadAloudScript.call("firstVisible")) { json -> viewModel.readAloud(BlockRef.parse(json)) }
+                            }
+                        }),
                     )
                 }
             }
@@ -269,8 +281,10 @@ fun ReaderScreen(
                                             val pack = viewModel.packId
                                             if (page != null && pack != null) research(text, pack, page.path, page.title)
                                         }
+                                        SelectionAction.READ_ALOUD -> BlockRef.parse(text)?.let(viewModel::readFrom)
                                     }
                                 },
+                                onUserScroll = viewModel::onUserScroll,
                             ).also {
                                 it.setFindListener { active, count, done -> matches = FindMatches(active, count, done) }
                                 webView = it
@@ -282,6 +296,26 @@ fun ReaderScreen(
                             viewModel.webViewState = Bundle().apply { it.saveState(this) }
                             it.destroy()
                         },
+                    )
+                }
+                // The voice's sentence is marked in the page and scrolled into view while the page follows it.
+                val reading = state.reading
+                LaunchedEffect(reading, webView) {
+                    val view = webView ?: return@LaunchedEffect
+                    if (reading == null) {
+                        view.evaluateJavascript(ReadAloudScript.call("clear"), null)
+                    } else {
+                        view.evaluateJavascript(
+                            ReadAloudScript.call("mark", reading.address.blockId, reading.prefix, reading.start, reading.end, reading.following), null,
+                        )
+                    }
+                }
+                if (reading != null && !reading.following) {
+                    AssistChip(
+                        onClick = viewModel::follow,
+                        label = { Text("Follow") },
+                        leadingIcon = { Icon(painterResource(R.drawable.ic_replay), contentDescription = null, Modifier.size(18.dp)) },
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp).testTag(ReaderTags.FOLLOW),
                     )
                 }
             }
@@ -324,6 +358,9 @@ internal fun ReaderTopBar(
     onRandom: () -> Unit,
     onFind: () -> Unit,
     onToggleBookmark: () -> Unit,
+    readingThisPage: Boolean = false,
+    /** Read aloud / Stop reading in ⋯ (Plan V1); null leaves it out. */
+    onReadAloud: (() -> Unit)? = null,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     Surface(color = MaterialTheme.colorScheme.surface) {
@@ -360,6 +397,12 @@ internal fun ReaderTopBar(
                     DropdownMenuItem(text = { Text("Random article") }, onClick = { menuOpen = false; onRandom() })
                     if (showPageActions) {
                         DropdownMenuItem(text = { Text("Find in page") }, onClick = { menuOpen = false; onFind() })
+                    }
+                    if (showPageActions && onReadAloud != null) {
+                        DropdownMenuItem(
+                            text = { Text(if (readingThisPage) "Stop reading" else "Read aloud") },
+                            onClick = { menuOpen = false; onReadAloud() },
+                        )
                     }
                 }
             }
@@ -573,4 +616,5 @@ internal fun isNewChromeRequest(atEntry: Int, current: Int): Boolean = current >
 
 object ReaderTags {
     const val PAGE = "reader_page"
+    const val FOLLOW = "reader_follow"
 }

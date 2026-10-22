@@ -39,6 +39,92 @@ class ReaderViewModelTest {
         assertThat(reader("C++").state.value.url).isEqualTo(url("C++"))
     }
 
+    // ---- read aloud (Plan V1) ----
+
+    private val article = """
+        <html><body><h1 id="t">Photosynthesis</h1><p>Plants make sugar. They use light.</p><h2 id="Overview">Overview</h2><p>Second paragraph here.</p></body></html>
+    """.trimIndent()
+
+    private fun TestScope.readingReader(hub: app.granger.player.FakePlayerHub): ReaderViewModel {
+        library.archives["p"] = FakeZimArchive("p", setOf("index", "Photosynthesis", "Other"), contents = mapOf("Photosynthesis" to article))
+        sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
+        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, player = hub)
+        testScheduler.advanceUntilIdle()
+        launch { vm.onPageShown(url("Photosynthesis"), "Photosynthesis") }
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    private fun voiceUiFor(key: String) = app.granger.core.player.PlayerUi(
+        app.granger.core.player.NowPlaying.Voice(key, "Photosynthesis", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v")),
+        playing = true, positionMs = 0L, durationMs = 0L, sleepRemainingMs = null,
+    )
+
+    @Test fun readAloudStartsAtTheFirstVisibleBlockOrTheTop() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        vm.readAloud(BlockRef("g1", "Plants make sugar."))
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#g1:0")
+        hub.calls.clear()
+        vm.readAloud(null)
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#t:0")
+    }
+
+    @Test fun readFromStartsAtTheSelectionsSentenceOrJumpsWhenAlreadyReading() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        vm.readFrom(BlockRef("g1", "Plants make sugar.", offset = 20))
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#g1:1")
+        hub.calls.clear()
+        hub.ui.value = voiceUiFor("pack:p/Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.readingThisPage).isTrue()
+        vm.readFrom(BlockRef("g3", "Second paragraph here.", offset = 0))
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("jumpTo:pack:p/Photosynthesis#g3:0")
+    }
+
+    @Test fun theSentenceIsMarkedAndScrollingAwayStopsFollowingUntilFollowIsTapped() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        hub.ui.value = voiceUiFor("pack:p/Photosynthesis")
+        val utterance = app.granger.core.speech.Utterance(
+            app.granger.core.speech.ReadAddress.Article("p", "Photosynthesis", "g1", 1), app.granger.core.speech.UtteranceKind.SENTENCE,
+            "They use light.", paragraph = 1, pauseAfterMs = 700, start = 19, end = 34,
+        )
+        hub.voiceProgress.value = app.granger.core.player.voice.VoiceProgress(utterance.address, utterance, 2)
+        testScheduler.advanceUntilIdle()
+        val reading = vm.state.value.reading!!
+        assertThat(reading.address.blockId).isEqualTo("g1")
+        assertThat(reading.start).isEqualTo(19)
+        assertThat(reading.end).isEqualTo(34)
+        assertThat(reading.following).isTrue()
+        vm.onUserScroll()
+        assertThat(vm.state.value.reading!!.following).isFalse()
+        vm.follow()
+        assertThat(vm.state.value.reading!!.following).isTrue()
+        // The voice moving to another page clears the mark here.
+        hub.ui.value = voiceUiFor("pack:p/Other")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.reading).isNull()
+        assertThat(vm.state.value.readingThisPage).isFalse()
+    }
+
+    @Test fun followingALinkWhileReadingStopsTheVoice() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        hub.ui.value = voiceUiFor("pack:p/Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        vm.onPageVisited(url("Photosynthesis"))            // a jump within the page: nothing
+        assertThat(hub.calls).isEmpty()
+        vm.onPageVisited(url("Other"))
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("stopVoice")
+    }
+
     @Test fun fragmentGoesIntoTheFirstUrl() = runTest(main.dispatcher) {
         sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
         val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, fragment = "History")

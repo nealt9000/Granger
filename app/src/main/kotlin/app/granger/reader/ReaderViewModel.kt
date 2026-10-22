@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Library
 import app.granger.core.library.ReadingSessions
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerHub
+import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadSourceKey
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimUrls
@@ -20,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -41,8 +46,13 @@ class ReaderViewModel(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val fragment: String? = null,
+    /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
+    private val player: PlayerHub? = null,
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
+
+    /** The sentence the voice is reading on this page: its block and character range, and whether the page follows it. */
+    data class Reading(val address: ReadAddress.Article, val prefix: String, val start: Int, val end: Int, val following: Boolean)
 
     /**
      * Search inside the pack: [hits] are title suggestions while typing, then those plus full-text results once
@@ -70,6 +80,10 @@ class ReaderViewModel(
         val packTitle: String? = null,
         /** Whether the pack has a main page, so the overflow menu can offer Home. */
         val hasHome: Boolean = false,
+        /** The voice is reading the page shown (the menu says "Stop reading"). */
+        val readingThisPage: Boolean = false,
+        /** The sentence being read on this page, to mark and follow; null when the voice is elsewhere or silent. */
+        val reading: Reading? = null,
     )
 
     /**
@@ -89,6 +103,8 @@ class ReaderViewModel(
     private var archive: ZimArchive? = null
     private var searchJob: Job? = null
     private val stackWrites = Mutex()
+    private var source: ArticleReadSource? = null
+    private var following = true
 
     init {
         viewModelScope.launch {
@@ -116,6 +132,70 @@ class ReaderViewModel(
                 if (p == null || pack == null) flowOf(false) else library.isBookmarked(pack, p.path)
             }.collect { bookmarked -> _state.update { it.copy(bookmarked = bookmarked) } }
         }
+        player?.let { hub ->
+            viewModelScope.launch {
+                combine(hub.ui, hub.voiceProgress, page) { ui, progress, p -> Triple(ui.now as? NowPlaying.Voice, progress, p) }
+                    .collect { (voice, progress, p) ->
+                        val pack = packId
+                        val mine = voice != null && p != null && pack != null && voice.sourceKey == ReadSourceKey.article(pack, p.path)
+                        if (!mine) following = true
+                        val address = progress?.address as? ReadAddress.Article
+                        val reading = if (mine && progress != null && address != null && address.path == p?.path) {
+                            Reading(address, if (progress.utterance.start == 0) progress.utterance.text.take(40) else "", progress.utterance.start, progress.utterance.end, following)
+                        } else {
+                            null
+                        }
+                        _state.update { it.copy(readingThisPage = mine, reading = reading) }
+                    }
+            }
+        }
+    }
+
+    // ---- read aloud (Plan V1) ----
+
+    private fun sourceFor(pack: String, p: Page, archive: ZimArchive): ArticleReadSource =
+        source?.takeIf { it.packId == pack && it.path == p.path } ?: ArticleReadSource(archive, pack, p.path, p.title, io).also { source = it }
+
+    /** Starts the voice on this page at [from] (a block the page named), else at the article's first sentence. */
+    fun readAloud(from: BlockRef?) {
+        val hub = player ?: return
+        val pack = packId ?: return
+        val p = page.value ?: return
+        val archive = archive ?: return
+        viewModelScope.launch {
+            val src = sourceFor(pack, p, archive)
+            val address = from?.let { src.addressAt(it.id, it.offset) } ?: src.firstAddress() ?: return@launch
+            following = true
+            hub.readAloud(src, address)
+        }
+    }
+
+    /** Read from here: moves the voice within this page when it is already reading it, else starts it there. */
+    fun readFrom(ref: BlockRef) {
+        val hub = player ?: return
+        if (!_state.value.readingThisPage) return readAloud(ref)
+        val pack = packId ?: return
+        val p = page.value ?: return
+        val archive = archive ?: return
+        viewModelScope.launch {
+            val address = sourceFor(pack, p, archive).addressAt(ref.id, ref.offset) ?: return@launch
+            following = true
+            hub.jumpTo(address)
+        }
+    }
+
+    fun stopReading() { player?.stopVoice() }
+
+    /** The user scrolled: the page stops following the voice until [follow]. */
+    fun onUserScroll() {
+        if (!following || _state.value.reading == null) return
+        following = false
+        _state.update { s -> s.copy(reading = s.reading?.copy(following = false)) }
+    }
+
+    fun follow() {
+        following = true
+        _state.update { s -> s.copy(reading = s.reading?.copy(following = true)) }
     }
 
     private fun fail(message: String) {
@@ -146,6 +226,8 @@ class ReaderViewModel(
         val pack = packId ?: return
         val zim = ZimUrls.parse(url)?.takeIf { it.packId == pack } ?: return
         if (zim.path == page.value?.path) return
+        // Following a link while the voice reads this page stops the voice (spec §4.1).
+        if (_state.value.readingThisPage) player?.stopVoice()
         writeStack { sessions.pushPath(tabId, zim.path, titleFromPath(zim.path)) }
     }
 

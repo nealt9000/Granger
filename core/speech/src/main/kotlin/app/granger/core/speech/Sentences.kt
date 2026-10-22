@@ -14,12 +14,8 @@ object Sentences {
     fun sentences(text: String, locale: Locale = Locale.US): List<Sentence> {
         val folded = fold(text)
         if (folded.isEmpty()) return emptyList()
-        val breaks = BreakIterator.getSentenceInstance(locale)
-        breaks.setText(folded)
         val out = mutableListOf<Sentence>()
-        var start = breaks.first()
-        var end = breaks.next()
-        while (end != BreakIterator.DONE) {
+        for ((start, end) in breaks(folded, locale)) {
             var s = start
             var e = end
             while (s < e && folded[s].isWhitespace()) s++
@@ -27,11 +23,29 @@ object Sentences {
             val sentence = folded.substring(s, e)
             // A run of punctuation or whitespace isn't a sentence.
             if (sentence.any { it.isLetterOrDigit() }) out += Sentence(sentence, s, e)
-            start = end
-            end = breaks.next()
         }
         return mergeAbbreviations(out, folded)
     }
+
+    /** ICU's sentence breaks; off the device (plain JVM tests, where the framework is a stub) a punctuation split. */
+    private fun breaks(folded: String, locale: Locale): List<Pair<Int, Int>> {
+        val icu = runCatching { BreakIterator.getSentenceInstance(locale) }.getOrNull()
+        if (icu != null) {
+            icu.setText(folded)
+            val out = mutableListOf<Pair<Int, Int>>()
+            var start = icu.first()
+            var end = icu.next()
+            while (end != BreakIterator.DONE) { out += start to end; start = end; end = icu.next() }
+            return out
+        }
+        val out = mutableListOf<Pair<Int, Int>>()
+        var start = 0
+        for (m in FALLBACK_BREAK.findAll(folded)) { out += start to m.range.last + 1; start = m.range.last + 1 }
+        if (start < folded.length) out += start to folded.length
+        return out
+    }
+
+    private val FALLBACK_BREAK = Regex("[.!?]+[\"'”’)\\]]*\\s+(?=\\S)")
 
     /**
      * ICU on Android breaks after "Dr." and after initials ("J. R. R. Tolkien"); spoken, that is a pause in the

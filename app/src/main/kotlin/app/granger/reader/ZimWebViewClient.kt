@@ -78,6 +78,7 @@ class ZimWebViewClient(
 
     override fun onPageFinished(view: WebView, url: String) {
         view.evaluateJavascript(ReaderPageScript.SOURCE, null)
+        view.evaluateJavascript(ReadAloudScript.SOURCE, null)
         onPageShown(view, url)
     }
 

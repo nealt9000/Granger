@@ -65,11 +65,13 @@ class FakeZimArchive(
     var random: String? = null,
     var suggestions: List<ZimHit> = emptyList(),
     var results: List<ZimHit> = emptyList(),
+    /** HTML per path, for the pages that need a body (read-aloud); others read as empty. */
+    val contents: Map<String, String> = emptyMap(),
 ) : ZimArchive {
     override val metadata = ZimMetadata(uuid, "", "eng", "2026-10-15", uuid)
     override val hasFulltextIndex = true
-    override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
-    override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", ByteArray(0)) }
+    override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths || it in contents }
+    override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html; charset=utf-8", contents[it]?.toByteArray() ?: ByteArray(0)) }
     override fun randomPath() = random
     var suggestCalls = 0
     override fun suggest(query: String, limit: Int): List<ZimHit> {

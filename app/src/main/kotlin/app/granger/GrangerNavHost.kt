@@ -453,7 +453,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
     val showResearch = container.deviceTier >= DeviceTier.ASK
-    SideEffect { SelectionBridge.researchAvailable = showResearch }
+    SideEffect {
+        SelectionBridge.researchAvailable = showResearch
+        SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
+    }
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
     fun openResearch(route: ResearchRoute) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
@@ -641,7 +644,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 val route = backStackEntry.toRoute<ReaderRoute>()
                 ReaderScreen(
                     viewModel = viewModel {
-                        ReaderViewModel(route.tabId, container.library, container.sessions, container.appScope, fragment = route.fragment)
+                        ReaderViewModel(
+                            route.tabId, container.library, container.sessions, container.appScope, fragment = route.fragment,
+                            player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
+                        )
                     },
                     resolver = container.resolver,
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },

@@ -36,6 +36,9 @@ object SelectionBridge {
     /** Whether the selection menus offer Research now. */
     val offersResearch: Boolean get() = Features.RESEARCH && researchAvailable
 
+    /** Whether the selection menus offer Read from here (Plan V1); the app sets it from the feature flag. */
+    @Volatile var readAloudAvailable: Boolean = false
+
     fun dispatch(request: SelectionRequest) {
         sink?.invoke(request)
     }

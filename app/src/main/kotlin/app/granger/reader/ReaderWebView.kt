@@ -16,15 +16,17 @@ import app.granger.ebook.SelectionBridge
 import app.granger.theme.GrangerColors
 import org.json.JSONTokener
 
-/** What the text-selection menu offers besides the system's own Copy. */
+/** What the text-selection menu offers besides the system's own Copy. [READ_ALOUD] hands over the selection's block (JSON), not its text. */
 enum class SelectionAction(val label: String) {
     SEARCH("Search"),
     RESEARCH("Research"),
+    READ_ALOUD("Read from here"),
 }
 
 /**
  * A WebView configured for ZIM content that can report and restore how far down the page it is. A middle tap on the
- * page calls [onToggleChrome]; a selection action calls [onSelectionAction] with the selected text.
+ * page calls [onToggleChrome]; a selection action calls [onSelectionAction] with the selected text (for Read from
+ * here, the page script's `{id, prefix, offset}` of the selection's block); the user's own scrolls call [onUserScroll].
  */
 @SuppressLint("SetJavaScriptEnabled", "ViewConstructor", "JavascriptInterface")
 class ReaderWebView(
@@ -32,6 +34,7 @@ class ReaderWebView(
     client: ZimWebViewClient,
     onToggleChrome: () -> Unit = {},
     private val onSelectionAction: (SelectionAction, String) -> Unit = { _, _ -> },
+    onUserScroll: () -> Unit = {},
 ) : WebView(context) {
     init {
         // Compose's AndroidView adds views with wrap-content params, which puts WebView in "zero layout height" mode:
@@ -56,7 +59,7 @@ class ReaderWebView(
             }
         }
         setBackgroundColor(GrangerColors.Background.toArgb()) // no white flash before the first page paints
-        addJavascriptInterface(GrangerBridge(onToggleChrome), ReaderPageScript.BRIDGE_NAME)
+        addJavascriptInterface(GrangerBridge(onToggleChrome, onUserScroll), ReaderPageScript.BRIDGE_NAME)
         webViewClient = client
     }
 
@@ -81,7 +84,13 @@ class ReaderWebView(
 
     /** The system's selection menu (Copy, Select all…) plus Granger's actions, ahead of them. */
     private inner class SelectionCallback(private val system: ActionMode.Callback) : ActionMode.Callback2() {
-        private val actions = SelectionAction.entries.filter { it != SelectionAction.RESEARCH || SelectionBridge.offersResearch }
+        private val actions = SelectionAction.entries.filter {
+            when (it) {
+                SelectionAction.RESEARCH -> SelectionBridge.offersResearch
+                SelectionAction.READ_ALOUD -> SelectionBridge.readAloudAvailable
+                SelectionAction.SEARCH -> true
+            }
+        }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val created = system.onCreateActionMode(mode, menu)
@@ -96,10 +105,11 @@ class ReaderWebView(
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             val action = actions.getOrNull(item.itemId - MENU_ID_BASE) ?: return system.onActionItemClicked(mode, item)
             // Read the selection before closing the menu, which clears it.
-            evaluateJavascript("window.getSelection().toString()") { json ->
+            val script = if (action == SelectionAction.READ_ALOUD) ReadAloudScript.call("selectionBlock") else "window.getSelection().toString()"
+            evaluateJavascript(script) { json ->
                 mode.finish()
                 val text = (JSONTokener(json).nextValue() as? String)?.trim().orEmpty()
-                if (text.isNotEmpty()) onSelectionAction(action, text)
+                if (text.isNotEmpty() && text != "null") onSelectionAction(action, text)
             }
             return true
         }

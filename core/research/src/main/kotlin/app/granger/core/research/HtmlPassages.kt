@@ -5,16 +5,13 @@ import org.jsoup.nodes.Element
 
 data class HtmlPassage(val heading: String, val anchor: String?, val text: String)
 
-/** Splits an article's HTML into quotable passages along its headings. */
+/** Splits an article's HTML into quotable passages along its headings. The rules for what counts as text are [ArticleText]'s, shared with the voice. */
 object HtmlPassages {
-    private const val NOISE = "script, style, sup.reference, .mw-editsection, .navbox, table, nav, footer"
-    private const val BLOCKS = "h1, h2, h3, h4, p, li, dd, blockquote, pre"
-    private const val NESTING = "p, li, dd, blockquote, pre"
-    private val HEADINGS = setOf("h1", "h2", "h3", "h4")
-    private val SKIPPED_SECTIONS = setOf(
-        "references", "notes", "footnotes", "citations", "sources", "bibliography", "further reading",
-        "external links", "see also", "notes and references", "references and notes", "works cited", "literature cited",
-    )
+    private const val NOISE = ArticleText.NOISE
+    private const val BLOCKS = ArticleText.BLOCKS
+    private const val NESTING = ArticleText.NESTING
+    private val HEADINGS = ArticleText.HEADINGS
+    private val SKIPPED_SECTIONS = ArticleText.SKIPPED_SECTIONS
     private val WHITESPACE = Regex("[\\s\\u00A0\\u2007\\u202F]+")
 
     fun split(html: String, targetWords: Int = 200, maxWords: Int = 300): List<HtmlPassage> {

@@ -28,7 +28,7 @@ import org.robolectric.annotation.Config
 class ReaderTopBarTest {
     @get:Rule val compose = createComposeRule()
 
-    private fun bar(packTitle: String? = "Wikipedia", hasHome: Boolean = true) = compose.setContent {
+    private fun bar(packTitle: String? = "Wikipedia", hasHome: Boolean = true, readingThisPage: Boolean = false, onReadAloud: (() -> Unit)? = null) = compose.setContent {
         ReaderTopBar(
             pageTitle = "Photosynthesis",
             packTitle = packTitle,
@@ -42,7 +42,30 @@ class ReaderTopBarTest {
             onRandom = {},
             onFind = {},
             onToggleBookmark = {},
+            readingThisPage = readingThisPage,
+            onReadAloud = onReadAloud,
         )
+    }
+
+    @Test fun theMenuOffersReadAloud() {
+        var taps = 0
+        bar(onReadAloud = { taps++ })
+        compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithText("Read aloud").performClick()
+        assertThat(taps).isEqualTo(1)
+    }
+
+    @Test fun theMenuSaysStopReadingWhileTheVoiceReadsThisPage() {
+        bar(readingThisPage = true, onReadAloud = {})
+        compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithText("Stop reading").assertExists()
+        compose.onNodeWithText("Read aloud").assertDoesNotExist()
+    }
+
+    @Test fun withoutTheVoiceTheMenuHasNoReadAloud() {
+        bar()
+        compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithText("Read aloud").assertDoesNotExist()
     }
 
     private fun SemanticsNodeInteraction.left() = getBoundsInRoot().left
