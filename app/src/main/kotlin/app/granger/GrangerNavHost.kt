@@ -102,6 +102,8 @@ import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
 import app.granger.shell.HistoryViewModel
+import app.granger.home.ArticleThumbnails
+import java.io.File
 import app.granger.home.CardTarget
 import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
@@ -903,6 +905,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 chunksOf = container.bookIndex::chunks,
                                 bookSearch = { container.bookIndex.search(it) },
                                 librarySearch = container.search,
+                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
                             ),
                             container.shelves, container.media, container.homePrefs,
                         )

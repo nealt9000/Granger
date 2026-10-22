@@ -21,8 +21,9 @@ import org.junit.Test
 class FeedDrawerTest {
     private val day = LocalDate.of(2026, 10, 22)
     private val wikipedia = pack("u1", "Wikipedia").copy(name = "wikipedia_en_all")
-    private val hamlet = book("book:granger:1", "Hamlet", author = "Shakespeare")
-    private val odyssey = book("book:granger:2", "The Odyssey", author = "Homer")
+    private val hamlet = book("book:granger:1", "Hamlet", author = "Shakespeare").copy(subjects = "Drama")
+    private val odyssey = book("book:granger:2", "The Odyssey", author = "Homer").copy(subjects = "Epic & poetry")
+    private val leaves = book("book:granger:3", "Leaves of Grass", author = "Whitman", coverPath = "/covers/leaves.jpg").copy(subjects = "Epic & poetry")
 
     private val dayHtml = """<html><head><title>October 22</title></head><body>
         <h2 id="Events">Events</h2><ul>${(1..6).joinToString("") { "<li>Event number $it happened.</li>" }}</ul>
@@ -37,6 +38,7 @@ class FeedDrawerTest {
     )
     private val chunks = mapOf(
         hamlet.id to (0..4).map { BookChunk(it.toLong(), hamlet.id, "ch$it.xhtml", it, it / 5.0) },
+        leaves.id to (0..4).map { BookChunk(10L + it, leaves.id, "p$it.xhtml", it, it / 5.0) },
     )
     private var bookHits = listOf(
         BookHit(hamlet.id, "Hamlet", "Shakespeare", "ch2.xhtml", 0.4, "<b>stoic</b> calm"),
@@ -62,15 +64,21 @@ class FeedDrawerTest {
         assertThat(drawn.cards).containsExactly(Card("Cat", "Wikipedia", CardTarget.Article("u1", "Cat")))
     }
 
-    @Test fun randomFromBooksPicksAChapterAndIsStableForTheDay() = runTest {
-        val scope = Resolved("Granger Classics", books = listOf(hamlet, odyssey))
+    @Test fun randomFromBooksDipsIntoPoetryAndSuggestsANovelFromTheStart() = runTest {
+        val scope = Resolved("Granger Classics", books = listOf(hamlet, odyssey, leaves))
         val first = drawer.draw(feed(FeedKind.RANDOM), scope, day)!!
         val again = drawer.draw(feed(FeedKind.RANDOM), scope, day)!!
         assertThat(again).isEqualTo(first)
-        assertThat(first.cards).hasSize(2)
+        assertThat(first.cards).hasSize(3)
+        // A play is a suggestion: no chapter, so the reader opens it at the start or where it was left.
         val hamletCard = first.cards.first { it.title == "Hamlet" }
-        assertThat(hamletCard.subtitle).matches("Chapter [1-5] · Shakespeare")
-        assertThat((hamletCard.target as CardTarget.Book).href).matches("ch[0-4]\\.xhtml")
+        assertThat(hamletCard.subtitle).isEqualTo("Shakespeare")
+        assertThat(hamletCard.target).isEqualTo(CardTarget.Book(hamlet.id))
+        // Poetry is for dipping into: a random chapter, and the cover as the card's picture.
+        val leavesCard = first.cards.first { it.title == "Leaves of Grass" }
+        assertThat(leavesCard.subtitle).matches("Chapter [1-5] · Whitman")
+        assertThat((leavesCard.target as CardTarget.Book).href).matches("p[0-4]\\.xhtml")
+        assertThat(leavesCard.imagePath).isEqualTo("/covers/leaves.jpg")
         val odysseyCard = first.cards.first { it.title == "The Odyssey" }
         assertThat(odysseyCard.subtitle).isEqualTo("Homer") // Not indexed yet: no chapter.
         assertThat(odysseyCard.target).isEqualTo(CardTarget.Book(odyssey.id))
@@ -127,6 +135,22 @@ class FeedDrawerTest {
         assertThat(drawn.cards.map { it.target }.filterIsInstance<CardTarget.Album>()).hasSize(FeedDrawer.CARDS)
         val found = drawer.draw(feed(FeedKind.SEARCH, "Album 3"), Resolved("Music", albums = albums), day)!!
         assertThat(found.cards.map { it.title }).containsExactly("Album 3")
+    }
+
+    @Test fun articleCardsCarryTheThumbnailTheDrawerIsGiven() = runTest {
+        val seen = mutableListOf<String>()
+        val drawer = FeedDrawer({ archive }, { emptyList() }, { emptyList() }, librarySearch) { _, path, html ->
+            seen += path
+            if ("<title>" in html) "/cache/$path.jpg" else null
+        }
+        val scope = Resolved("Wikipedia", packs = listOf(wikipedia))
+        val random = drawer.draw(feed(FeedKind.RANDOM), scope, day)!!
+        assertThat(random.cards.single().imagePath).isEqualTo("/cache/Cat.jpg")
+        val search = drawer.draw(feed(FeedKind.SEARCH, "owls"), scope, day)!!
+        // Only the five kept hits are read for a picture; the fake's hit pages are empty, so none has one.
+        assertThat(search.cards).hasSize(FeedDrawer.CARDS)
+        assertThat(search.cards.map { it.imagePath }.toSet()).containsExactly(null)
+        assertThat(seen.filter { it.startsWith("Hit_") }).hasSize(0)
     }
 
     @Test fun cardsRoundTripThroughJson() {

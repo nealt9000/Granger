@@ -19,9 +19,9 @@ sealed interface CardTarget {
     @Serializable data class Search(val query: String) : CardTarget
 }
 
-/** One card in a feed's row. */
+/** One card in a feed's row; [imagePath] is a cached thumbnail file (an article's lead image), if there is one. */
 @Serializable
-data class Card(val title: String, val subtitle: String, val target: CardTarget)
+data class Card(val title: String, val subtitle: String, val target: CardTarget, val imagePath: String? = null)
 
 /** A feed's cards for the day, with the row's title. */
 @Serializable

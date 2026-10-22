@@ -219,20 +219,36 @@ private fun PlayCard(entry: RailEntry.Play, onClick: () -> Unit) {
     }
 }
 
-/** A feed card: an icon for what it opens, the line, and where it is from. */
+/** A feed card: its picture when it has one, else an icon for what it opens; the line; where it is from. */
 @Composable
 private fun FeedCard(card: Card, onClick: () -> Unit) {
     Card(title = card.title, subtitle = card.subtitle, enabled = true, onClick = onClick) {
-        IconTile(
-            when (card.target) {
-                is CardTarget.Article -> painterResource(R.drawable.ic_library)
-                is CardTarget.Book -> painterResource(R.drawable.ic_library)
-                is CardTarget.Album -> painterResource(R.drawable.ic_music_note)
-                is CardTarget.Audiobook -> painterResource(R.drawable.ic_headphones)
-                is CardTarget.Search -> rememberVectorPainter(Icons.Filled.Search)
-            },
-        )
+        if (card.imagePath != null) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val image = rememberRailCover(card.imagePath, maxWidth)
+                if (image != null) {
+                    Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                } else {
+                    TargetIcon(card)
+                }
+            }
+        } else {
+            TargetIcon(card)
+        }
     }
+}
+
+@Composable
+private fun TargetIcon(card: Card) {
+    IconTile(
+        when (card.target) {
+            is CardTarget.Article -> painterResource(R.drawable.ic_library)
+            is CardTarget.Book -> painterResource(R.drawable.ic_library)
+            is CardTarget.Album -> painterResource(R.drawable.ic_music_note)
+            is CardTarget.Audiobook -> painterResource(R.drawable.ic_headphones)
+            is CardTarget.Search -> rememberVectorPainter(Icons.Filled.Search)
+        },
+    )
 }
 
 @Composable

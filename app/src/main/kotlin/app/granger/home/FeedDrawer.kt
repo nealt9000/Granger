@@ -1,5 +1,6 @@
 package app.granger.home
 
+import app.granger.core.library.Book
 import app.granger.core.library.BookChunk
 import app.granger.core.library.BookHit
 import app.granger.core.library.FeedKind
@@ -23,6 +24,8 @@ class FeedDrawer(
     /** Full-text hits inside books. */
     private val bookSearch: suspend (query: String) -> List<BookHit>,
     private val librarySearch: LibrarySearch,
+    /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. */
+    private val thumbnail: (archive: ZimArchive, path: String, html: String) -> String? = { _, _, _ -> null },
 ) {
     /** The feed's row for the day, or null when it has nothing to show. */
     suspend fun draw(feed: HomeFeed, scope: Resolved, day: LocalDate): Drawn? {
@@ -41,12 +44,14 @@ class FeedDrawer(
 
     private suspend fun random(scope: Resolved, random: Random): List<Card> = when {
         scope.books.isNotEmpty() -> scope.books.shuffled(random).take(CARDS).map { book ->
-            val chunks = chunksOf(book.id)
-            val chunk = chunks.takeIf { it.isNotEmpty() }?.let { it[random.nextInt(it.size)] }
+            // Poetry, scripture and philosophy are for dipping into: a random chapter. A novel or a play is a
+            // suggestion: it opens at the start, or where the reader left off (Neal, 2026-10-22).
+            val chunk = if (dipsIn(book)) chunksOf(book.id).takeIf { it.isNotEmpty() }?.let { it[random.nextInt(it.size)] } else null
             Card(
                 title = book.title,
                 subtitle = listOfNotNull(chunk?.let { "Chapter ${it.ordinal + 1}" }, book.author.ifBlank { null }).joinToString(" · "),
                 target = CardTarget.Book(book.id, chunk?.href, chunk?.progression ?: 0.0),
+                imagePath = book.coverPath,
             )
         }
         scope.packs.isNotEmpty() -> {
@@ -58,14 +63,31 @@ class FeedDrawer(
                 val path = archive.randomPath() ?: return@repeat
                 val key = "${pack.id}/$path"
                 if (key in cards) return@repeat
-                cards[key] = Card(pageTitle(archive, path), pack.title, CardTarget.Article(pack.id, path))
+                cards[key] = articleCard(archive, pack, path)
             }
             cards.values.toList()
         }
         scope.albums.isNotEmpty() -> scope.albums.shuffled(random).take(CARDS).map {
-            Card(it.title, it.albumArtist, CardTarget.Album(it.key))
+            Card(it.title, it.albumArtist, CardTarget.Album(it.key), imagePath = it.coverPath)
         }
-        else -> scope.audiobooks.shuffled(random).take(CARDS).map { Card(it.title, it.author, CardTarget.Audiobook(it.id)) }
+        else -> scope.audiobooks.shuffled(random).take(CARDS).map { Card(it.title, it.author, CardTarget.Audiobook(it.id), imagePath = it.coverPath) }
+    }
+
+    /** A random chapter suits a book one dips into; by the shelf's subjects (the Classics' category, or an import's). */
+    private fun dipsIn(book: Book): Boolean {
+        val subjects = book.subjects.lowercase()
+        return DIP_IN.any { it in subjects }
+    }
+
+    /** An article card with its title read from the page and, when the page has one, its lead image. */
+    private fun articleCard(archive: ZimArchive, pack: Pack, path: String): Card {
+        val html = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) }
+        return Card(
+            title = html?.let { pageTitle(it) } ?: pathTitle(path),
+            subtitle = pack.title,
+            target = CardTarget.Article(pack.id, path),
+            imagePath = html?.let { thumbnail(archive, path, it) },
+        )
     }
 
     private suspend fun onThisDay(scope: Resolved, day: LocalDate, random: Random): List<Card> {
@@ -79,9 +101,7 @@ class FeedDrawer(
         val path = DayPage.paths(day).firstNotNullOfOrNull { archive.resolvePath(it) }
         val page = path?.let { archive.read(it) }?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8)) }
         if (path == null || page == null || page.isEmpty) {
-            return archive.search(title, SEARCH_LIMIT).shuffled(random).take(CARDS).map {
-                Card(it.title, pack.title, CardTarget.Article(pack.id, it.path))
-            }
+            return archive.search(title, SEARCH_LIMIT).shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) }
         }
         fun pick(lines: List<String>, n: Int, section: String) =
             lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
@@ -102,6 +122,19 @@ class FeedDrawer(
                 Card(it.title, packTitles[it.packId] ?: it.packTitle, CardTarget.Article(it.packId, it.path))
             }
         }
+        val chosen = pickSearch(scope, cards, query, random)
+        // Thumbnails for the five kept article hits only; reading thirty pages for five cards would be waste.
+        val packsById = scope.packs.associateBy { it.id }
+        return chosen.map { card ->
+            val target = card.target as? CardTarget.Article ?: return@map card
+            val pack = packsById[target.packId] ?: return@map card
+            val archive = archiveOf(pack) ?: return@map card
+            val html = archive.read(target.path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@map card
+            card.copy(imagePath = thumbnail(archive, target.path, html))
+        }
+    }
+
+    private suspend fun pickSearch(scope: Resolved, cards: ArrayList<Card>, query: String, random: Random): List<Card> {
         if (scope.books.isNotEmpty()) {
             val ids = scope.books.mapTo(HashSet()) { it.id }
             bookSearch(query).filter { it.bookId in ids }.mapTo(cards) { bookCard(it) }
@@ -117,14 +150,11 @@ class FeedDrawer(
         target = CardTarget.Book(hit.bookId, hit.href, hit.progression),
     )
 
-    /** The page's `<title>` (Wikipedia's suffix dropped), else its path with the underscores spaced. */
-    private fun pageTitle(archive: ZimArchive, path: String): String {
-        val item = archive.read(path) ?: return pathTitle(path)
-        val html = String(item.bytes, Charsets.UTF_8)
+    /** The page's `<title>` (Wikipedia's suffix dropped), else null. */
+    private fun pageTitle(html: String): String? {
         val doc = Jsoup.parse(html)
-        val title = doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }
-            .replace(Regex("\\s+[-–—]\\s+Wikipedia$"), "").trim()
-        return title.ifBlank { pathTitle(path) }
+        return doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }
+            .replace(Regex("\\s+[-–—]\\s+Wikipedia$"), "").trim().ifBlank { null }
     }
 
     private fun pathTitle(path: String) = path.substringAfterLast('/').replace('_', ' ')
@@ -134,6 +164,9 @@ class FeedDrawer(
     companion object {
         const val CARDS = 5
         private const val SEARCH_LIMIT = 30
+
+        /** Subjects (lower-cased substrings) of books one dips into rather than reads through. */
+        val DIP_IN = listOf("poetry", "poem", "scripture", "religion", "philosophy", "quotation", "aphorism", "essay", "proverb")
 
         /** The same day and feed draw the same cards; another day draws others. */
         fun seed(day: LocalDate, feedId: Long): Long = day.toEpochDay() xor (feedId * 0x9E3779B97F4A7C15uL.toLong())
