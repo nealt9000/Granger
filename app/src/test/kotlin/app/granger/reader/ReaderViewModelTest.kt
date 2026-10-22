@@ -60,6 +60,33 @@ class ReaderViewModelTest {
         playing = true, positionMs = 0L, durationMs = 0L, sleepRemainingMs = null,
     )
 
+    // ---- citations (Plan R3) ----
+
+    @Test fun aCitedQuoteYieldsACiteRangeUntilTheReaderLeavesThePage() = runTest(main.dispatcher) {
+        library.archives["p"] = FakeZimArchive("p", setOf("index", "Photosynthesis", "Other"), contents = mapOf("Photosynthesis" to article))
+        sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
+        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, fragment = "Overview", quote = "Second paragraph here.")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.url).isEqualTo(url("Photosynthesis", "Overview"))
+        assertThat(vm.state.value.cite).isEqualTo(CiteRange("g3", "Second paragraph here.", 0, 22))
+        vm.onPageShown(url("Photosynthesis", "Overview"), "Photosynthesis")
+        assertThat(vm.state.value.cite).isNotNull()
+        vm.onPageShown(url("Other"), "Other")
+        assertThat(vm.state.value.cite).isNull()
+        vm.onPageShown(url("Photosynthesis"), "Photosynthesis")
+        assertThat(vm.state.value.cite).isNull()
+    }
+
+    @Test fun noQuoteOrAQuoteNotOnThePageMarksNothing() = runTest(main.dispatcher) {
+        library.archives["p"] = FakeZimArchive("p", setOf("index", "Photosynthesis"), contents = mapOf("Photosynthesis" to article))
+        sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
+        val plain = ReaderViewModel(1, library, sessions, this, main.dispatcher, fragment = "Overview")
+        val missing = ReaderViewModel(1, library, sessions, this, main.dispatcher, quote = "Not on this page at all, anywhere.")
+        testScheduler.advanceUntilIdle()
+        assertThat(plain.state.value.cite).isNull()
+        assertThat(missing.state.value.cite).isNull()
+    }
+
     @Test fun readAloudStartsAtTheFirstVisibleBlockOrTheTop() = runTest(main.dispatcher) {
         val hub = app.granger.player.FakePlayerHub()
         val vm = readingReader(hub)

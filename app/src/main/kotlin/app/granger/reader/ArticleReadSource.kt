@@ -93,7 +93,7 @@ class ArticleReadSource(
         return list.indexOfFirst { (it.address as ReadAddress.Article).blockId == a.blockId }.takeIf { it >= 0 }
     }
 
-    private companion object {
+    internal companion object {
         fun charsetOf(mimeType: String): Charset {
             val name = Regex("charset=([^;\\s]+)", RegexOption.IGNORE_CASE).find(mimeType)?.groupValues?.get(1) ?: return Charsets.UTF_8
             return runCatching { Charset.forName(name.trim('"')) }.getOrDefault(Charsets.UTF_8)

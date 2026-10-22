@@ -147,8 +147,11 @@ private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumR
 @Serializable data class AudiobookRoute(val audiobookId: String)
 
 private fun NavDestination.isAudiobooks() = hasRoute<AudiobookShelfRoute>() || hasRoute<AudiobookRoute>()
-/** An article; [fragment] scrolls its first page to that section (a cited passage's heading). */
-@Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null)
+/** Said when a cited article's page is gone from its pack, so its main page opened instead (research spec §7). */
+const val PAGE_MOVED = "That page is no longer in this pack."
+
+/** An article; [fragment] scrolls its first page to that section (a cited passage's heading), and [quote] is marked there. */
+@Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null, val quote: String? = null)
 
 /**
  * An e-book; [href] and [progression] ask the reader to open there (a search hit) instead of where it left off.
@@ -182,19 +185,21 @@ private fun NavBackStackEntry.readingTabId(): Long? = when {
 /**
  * The one way to open a reading tab: a book goes to [BookRoute], an article to [ReaderRoute]. A reader already on top
  * is replaced rather than stacked ([keepCurrent] stacks instead), and showing the same tab again does nothing unless
- * [at] (a book) or [fragment] (an article's section) asks for a place in it.
+ * [at] (a book) or [fragment] (an article's section, with [quote] to mark in it) asks for a place in it.
  */
-fun NavController.showTab(tab: ReadingTab, at: BookTarget? = null, keepCurrent: Boolean = false, fragment: String? = null) {
+fun NavController.showTab(
+    tab: ReadingTab, at: BookTarget? = null, keepCurrent: Boolean = false, fragment: String? = null, quote: String? = null,
+) {
     // Read the back stack now, not the composition's copy: opening a tab suspends, and a second tap
     // meanwhile must replace the reader the first one pushed.
     val top = currentBackStackEntry
     val showing = top?.readingTabId()
-    if (tab.id == showing && at == null && fragment == null) return
+    if (tab.id == showing && at == null && fragment == null && quote == null) return
     val route: Any =
         if (BookIds.isBook(tab.packId)) {
             BookRoute(tab.id, at?.href, at?.progression, at?.quote?.highlight, at?.quote?.before, at?.quote?.after)
         } else {
-            ReaderRoute(tab.id, fragment)
+            ReaderRoute(tab.id, fragment, quote)
         }
     navigate(route) {
         // Switching tabs replaces the reader instead of stacking one per tab.
@@ -682,6 +687,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ReaderViewModel(
                             route.tabId, container.library, container.sessions, container.appScope, fragment = route.fragment,
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
+                            quote = route.quote,
                         )
                     },
                     resolver = container.resolver,
@@ -761,7 +767,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             }
                             val tab = citationTab(container.sessions, tabId) ?: return@launch
                             when (target) {
-                                is CitationTarget.Article -> nav.showTab(tab, fragment = target.fragment)
+                                is CitationTarget.Article -> {
+                                    nav.showTab(tab, fragment = target.fragment, quote = target.quote)
+                                    if (target.moved) Toast.makeText(appContext, PAGE_MOVED, Toast.LENGTH_LONG).show()
+                                }
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)
                                 is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
                             }
