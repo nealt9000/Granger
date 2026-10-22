@@ -81,6 +81,79 @@ class EbookReaderViewModelTest {
             .also { testScheduler.advanceUntilIdle() }
     }
 
+    // ---- read aloud (Plan V1) ----
+
+    private fun TestScope.readingReader(hub: app.granger.player.FakePlayerHub): EbookReaderViewModel {
+        opener.publication = app.granger.testPublicationWithContent(
+            title = "The Upanishads",
+            chapters = linkedMapOf("c001.xhtml" to "<h1>One</h1><p>First sentence. Second sentence.</p>", "c002.xhtml" to "<p>Chapter two text.</p>"),
+        )
+        val file = tmp.root.resolve("b.epub").apply { writeText("epub") }
+        bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
+        sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
+        return EbookReaderViewModel(1, null, bookshelf, sessions, opener, prefsStore, this, main.dispatcher, FakeBookSearcher(), SavedStateHandle(), player = hub)
+            .also { testScheduler.advanceUntilIdle() }
+    }
+
+    private fun voiceUiFor(key: String) = app.granger.core.player.PlayerUi(
+        app.granger.core.player.NowPlaying.Voice(key, "The Upanishads", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v")),
+        playing = true, positionMs = 0L, durationMs = 0L, sleepRemainingMs = null,
+    )
+
+    /** Readium parses on its own threads: run the scheduler until [until] holds, within a few seconds. */
+    private fun TestScope.settle(until: () -> Boolean) {
+        val deadline = System.currentTimeMillis() + 5_000
+        while (!until() && System.currentTimeMillis() < deadline) { testScheduler.advanceUntilIdle(); Thread.sleep(10) }
+        testScheduler.advanceUntilIdle()
+    }
+
+    @Test fun readAloudStartsAtTheVisibleElementAndReadFromAtTheSelection() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        vm.readAloud(locator("c002.xhtml", 0.0, 0.5))
+        settle { hub.calls.isNotEmpty() }
+        assertThat(hub.calls).hasSize(1)
+        assertThat(hub.calls[0]).startsWith("readAloud:book:b@book:b@")
+        assertThat(hub.calls[0]).contains("c002.xhtml")
+        hub.calls.clear()
+
+        hub.ui.value = voiceUiFor("book:b")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.readingThisBook).isTrue()
+        vm.readFrom(locator("c001.xhtml", 0.0, 0.0).copy(text = Locator.Text(before = "First sentence. ", highlight = "Second", after = " sentence.")))
+        settle { hub.calls.isNotEmpty() }
+        assertThat(hub.calls).hasSize(1)
+        assertThat(hub.calls[0]).startsWith("jumpTo:book:b@")
+        assertThat(hub.calls[0]).endsWith(":1")           // the second sentence of that paragraph
+    }
+
+    @Test fun theVoicesSentenceIsDecoratedAndAUserPageTurnStopsFollowing() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        vm.readAloud(null)                                // builds the view model's source
+        settle { hub.calls.isNotEmpty() }
+        hub.ui.value = voiceUiFor("book:b")
+        val src = BookReadSource(vm.state.value.publication!!, "b", "The Upanishads", main.dispatcher)
+        val second = src.utterances(null, 10)[2]           // "Second sentence."
+        // The addresses are the same whichever source made them; the view model's reads the element it hasn't seen.
+        hub.voiceProgress.value = app.granger.core.player.voice.VoiceProgress(second.address, second, 2)
+        settle { vm.state.value.reading != null }
+        val reading = vm.state.value.reading!!
+        assertThat(reading.locator.text.highlight).isEqualTo("Second sentence.")
+        assertThat(reading.paragraph).isEqualTo(1)
+        assertThat(reading.following).isTrue()
+        vm.onUserMoved()
+        assertThat(vm.state.value.reading!!.following).isFalse()
+        vm.follow()
+        assertThat(vm.state.value.reading!!.following).isTrue()
+        hub.ui.value = voiceUiFor("book:other")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.reading).isNull()
+        assertThat(vm.state.value.readingThisBook).isFalse()
+        vm.stopReading()
+        assertThat(hub.calls).contains("stopVoice")
+    }
+
     @Test fun opensAtSavedPosition() = runTest(main.dispatcher) {
         val saved = locator("c002.xhtml", 0.4, 0.45)
         bookshelf.positionMap.value = mapOf("b" to BookPosition("b", saved.toJSON().toString(), 0.45, "Two", 0L))

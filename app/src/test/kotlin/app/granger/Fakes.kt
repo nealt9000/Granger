@@ -40,9 +40,13 @@ import org.readium.r2.shared.publication.Metadata
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.LocalizedString
 import org.readium.r2.shared.publication.services.PerResourcePositionsService
+import org.readium.r2.shared.publication.services.content.DefaultContentService
+import org.readium.r2.shared.publication.services.content.contentServiceFactory
+import org.readium.r2.shared.publication.services.content.iterators.HtmlResourceContentIterator
 import org.readium.r2.shared.publication.services.positionsServiceFactory
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.data.Container
+import org.readium.r2.shared.util.resource.InMemoryResource
 import org.readium.r2.shared.util.resource.Resource
 import org.readium.r2.shared.util.mediatype.MediaType
 import kotlinx.coroutines.flow.Flow
@@ -307,6 +311,39 @@ fun testPublication(
         positionsServiceFactory = PerResourcePositionsService.createFactory(MediaType.XHTML)
     },
 )
+
+/**
+ * A publication whose chapters have XHTML bodies ([chapters]: path to markup inside `<body>`), with Readium's content
+ * service, so the content iterator (read-aloud) walks real text.
+ */
+fun testPublicationWithContent(
+    title: String = "Test Book",
+    chapters: Map<String, String>,
+    toc: List<Pair<String, List<String>>> = emptyList(),
+): Publication {
+    val resources = chapters.mapKeys { Url.fromDecodedPath(it.key)!! }.mapValues { (_, body) ->
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>c</title></head><body>$body</body></html>".toByteArray()
+    }
+    val container = object : Container<Resource> {
+        override val entries: Set<Url> = resources.keys
+        override fun get(url: Url): Resource? = resources[url]?.let { InMemoryResource(it) }
+        override fun close() {}
+    }
+    return Publication(
+        manifest = Manifest(
+            metadata = Metadata(localizedTitle = LocalizedString(title)),
+            readingOrder = chapters.keys.map { Link(Url.fromDecodedPath(it)!!, mediaType = MediaType.XHTML) },
+            tableOfContents = toc.map { (href, children) ->
+                Link(Url(href)!!, title = href, children = children.map { Link(Url(it)!!, title = it) })
+            },
+        ),
+        container = container,
+        servicesBuilder = Publication.ServicesBuilder().apply {
+            positionsServiceFactory = PerResourcePositionsService.createFactory(MediaType.XHTML)
+            contentServiceFactory = DefaultContentService.createFactory(listOf(HtmlResourceContentIterator.Factory()))
+        },
+    )
+}
 
 /** [publication] is what every open returns; null is a file Readium can't open. [opened] records each file asked for. */
 class FakeBookOpener(var publication: Publication? = testPublication()) : BookOpener {

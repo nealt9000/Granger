@@ -13,6 +13,7 @@ enum class SelectionAction(val label: String) {
     DEFINE("Define"),
     SEARCH("Search"),
     RESEARCH("Research"),
+    READ_ALOUD("Read from here"),
 }
 
 /** A menu tap, with the menu to close once the screen has read the selection and acted. */
@@ -64,6 +65,8 @@ class SelectionMenu : ActionMode.Callback {
         menu.findItem(MENU_ID_BASE + define)?.isVisible = SelectionBridge.dictionaryAvailable
         val research = actions.indexOf(SelectionAction.RESEARCH)
         menu.findItem(MENU_ID_BASE + research)?.isVisible = SelectionBridge.offersResearch
+        val readAloud = actions.indexOf(SelectionAction.READ_ALOUD)
+        menu.findItem(MENU_ID_BASE + readAloud)?.isVisible = SelectionBridge.readAloudAvailable
         return true
     }
 

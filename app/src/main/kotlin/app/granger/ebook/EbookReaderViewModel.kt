@@ -9,6 +9,9 @@ import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerHub
+import app.granger.core.speech.ReadSourceKey
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CancellationException
@@ -24,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -74,7 +78,14 @@ data class EbookUi(
     val editingHighlight: Long? = null,
     /** Whether that sheet opens with the note field focused (a new note). */
     val focusNote: Boolean = false,
+    /** The voice is reading this book (the bottom bar's button says Stop reading). */
+    val readingThisBook: Boolean = false,
+    /** The sentence being read, to decorate and follow; null when the voice is elsewhere or silent. */
+    val reading: BookReading? = null,
 )
+
+/** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
+data class BookReading(val locator: Locator, val paragraph: Int, val following: Boolean)
 
 data class TocRow(val title: String, val href: String, val depth: Int)
 
@@ -110,6 +121,8 @@ class EbookReaderViewModel(
     private val searcher: BookSearcher = ReadiumBookSearcher(),
     /** Survives process death with the route; remembers that the route's [target] was already used. */
     private val savedState: SavedStateHandle = SavedStateHandle(),
+    /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
+    private val player: PlayerHub? = null,
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -149,8 +162,28 @@ class EbookReaderViewModel(
     private var unsaved: Locator? = null
     private var saveJob: Job? = null
 
+    // Read aloud (Plan V1): one source per open book, kept so its sentence locators survive across calls.
+    private var readSource: BookReadSource? = null
+    private var following = true
+
     init {
         SelectionBridge.sink = selectionSink
+        player?.let { hub ->
+            viewModelScope.launch {
+                combine(hub.ui, hub.voiceProgress) { ui, progress -> (ui.now as? NowPlaying.Voice) to progress }
+                    .collect { (voice, progress) ->
+                        val id = bookId
+                        val mine = voice != null && id != null && voice.sourceKey == ReadSourceKey.book(id)
+                        if (!mine) following = true
+                        val reading = if (mine && progress != null) {
+                            readSource?.locatorOf(progress.utterance)?.let { BookReading(it, progress.utterance.paragraph, following) }
+                        } else {
+                            null
+                        }
+                        _state.update { it.copy(readingThisBook = mine, reading = reading) }
+                    }
+            }
+        }
         viewModelScope.launch {
             val tab = sessions.tab(tabId) ?: return@launch fail(TAB_GONE)
             val book = bookshelf.book(tab.packId) ?: return@launch fail(BOOK_GONE)
@@ -419,6 +452,50 @@ class EbookReaderViewModel(
      * the chrome again, as opening it does.
      */
     fun onScreenLeft() = showChrome()
+
+    // ---- read aloud (Plan V1) ----
+
+    private fun source(): BookReadSource? {
+        val id = bookId ?: return null
+        val opened = _state.value.publication ?: return null
+        return readSource?.takeIf { it.bookId == id } ?: BookReadSource(opened, id, _state.value.title, io).also { readSource = it }
+    }
+
+    /** Starts the voice at [from] (the first visible element, a chapter's start), else where the book is open. */
+    fun readAloud(from: Locator?) {
+        val hub = player ?: return
+        val src = source() ?: return
+        viewModelScope.launch {
+            val address = src.addressAt(from ?: _state.value.locator ?: _state.value.initial) ?: return@launch
+            following = true
+            hub.readAloud(src, address)
+        }
+    }
+
+    /** Read from here: the selection's sentence; moves the voice when it already reads this book, else starts it. */
+    fun readFrom(selection: Locator) {
+        val hub = player ?: return
+        val src = source() ?: return
+        viewModelScope.launch {
+            val address = src.addressAt(selection) ?: return@launch
+            following = true
+            if (_state.value.readingThisBook) hub.jumpTo(address) else hub.readAloud(src, address)
+        }
+    }
+
+    fun stopReading() { player?.stopVoice() }
+
+    /** The user turned a page or scrolled: the page stops following the voice until [follow]. */
+    fun onUserMoved() {
+        if (!following || _state.value.reading == null) return
+        following = false
+        _state.update { s -> s.copy(reading = s.reading?.copy(following = false)) }
+    }
+
+    fun follow() {
+        following = true
+        _state.update { s -> s.copy(reading = s.reading?.copy(following = true)) }
+    }
 
     /** Makes this reader the one the selection menu reaches; called whenever its screen is shown. */
     fun claimSelection() {

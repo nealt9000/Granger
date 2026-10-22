@@ -19,10 +19,12 @@ object HighlightColors {
     }
 }
 
-/** The group of decorations drawn for the saved highlights, and the one for the search hit being shown. */
+/** The group of decorations drawn for the saved highlights, the one for the search hit being shown, and the voice's sentence. */
 const val HIGHLIGHT_GROUP = "highlights"
 const val SEARCH_GROUP = "search"
+const val VOICE_GROUP = "voice"
 internal const val SEARCH_HIT_TINT = 0xFFF28B30.toInt()
+internal const val READING_TINT = 0x66E8601C
 
 internal fun parseLocator(json: String): Locator? = try {
     Locator.fromJSON(JSONObject(json))

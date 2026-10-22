@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.ui.res.painterResource
+import app.granger.R
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -69,6 +72,9 @@ fun EbookBottomBar(
     onTextSettings: () -> Unit,
     onBookmark: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Read aloud / Stop reading (Plan V1); null leaves the slot empty. */
+    onReadAloud: (() -> Unit)? = null,
+    reading: Boolean = false,
 ) {
     // The released value stays shown until the navigator reports a new place, so the thumb doesn't snap back.
     var dragging by remember { mutableStateOf<Float?>(null) }
@@ -106,7 +112,15 @@ fun EbookBottomBar(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onContents) { Icon(Icons.Filled.Menu, contentDescription = "Contents") }
                 IconButton(onClick = onTextSettings) { Text("Aa", style = MaterialTheme.typography.titleMedium) }
-                // The read-aloud button arrives with Features.READ_ALOUD.
+                if (onReadAloud != null) {
+                    IconButton(onClick = onReadAloud) {
+                        Icon(
+                            painterResource(R.drawable.ic_headphones),
+                            contentDescription = if (reading) "Stop reading" else "Read aloud",
+                            tint = if (reading) GrangerColors.Flame else LocalContentColor.current,
+                        )
+                    }
+                }
                 IconButton(onClick = onBookmark) {
                     if (bookmarked) {
                         Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = GrangerColors.Flame)

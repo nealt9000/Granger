@@ -42,6 +42,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.AssistChip
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.testTag
+import app.granger.Features
 import app.granger.reader.ChromeBackOnReturn
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
@@ -59,6 +64,13 @@ import org.readium.r2.shared.util.AbsoluteUrl
 
 /** Taps this far in from either side turn the page; taps between show or hide the chrome. */
 private const val EDGE_FRACTION = 0.2
+
+/** A locator change this soon after the voice's own jump is the jump, not the user. */
+private const val VOICE_MOVE_GRACE_MS = 1_500L
+
+object EbookTags {
+    const val FOLLOW = "ebook_follow"
+}
 
 /**
  * The e-book reader, paginated. It opens (and comes back) with its chrome up: the top and bottom bars here and the
@@ -82,6 +94,7 @@ fun EbookReaderScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var navigator by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
+    val scope = rememberCoroutineScope()
     val appContext = LocalContext.current.applicationContext
     // Outlives a rotation inside the restored navigator, so it holds nothing tied to an activity.
     val listener = remember(appContext) { ExternalLinkListener(appContext) }
@@ -106,8 +119,26 @@ fun EbookReaderScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // A page change within a moment of the voice's own jump is the voice's; any other is the user's, and Follow goes off.
+    var voiceMovedAt by remember { mutableLongStateOf(0L) }
     LaunchedEffect(navigator, lifecycle) {
-        navigator?.currentLocator?.collect { viewModel.onLocator(it, onScreen = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) }
+        navigator?.currentLocator?.collect {
+            viewModel.onLocator(it, onScreen = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
+            if (System.currentTimeMillis() - voiceMovedAt > VOICE_MOVE_GRACE_MS) viewModel.onUserMoved()
+        }
+    }
+    // The voice's sentence: decorated, and the page turned to it (once per paragraph) while the reader follows.
+    LaunchedEffect(navigator, state.reading?.locator) {
+        val reading = state.reading
+        navigator?.applyDecorations(
+            listOfNotNull(reading?.let { Decoration("voice", it.locator, Decoration.Style.Highlight(tint = READING_TINT)) }), VOICE_GROUP,
+        )
+    }
+    LaunchedEffect(navigator, state.reading?.paragraph, state.reading?.following) {
+        val reading = state.reading ?: return@LaunchedEffect
+        if (!reading.following) return@LaunchedEffect
+        voiceMovedAt = System.currentTimeMillis()
+        navigator?.go(reading.locator, animated = false)
     }
     LaunchedEffect(navigator) {
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }
@@ -129,6 +160,7 @@ fun EbookReaderScreen(
                         SelectionAction.NOTE -> viewModel.note(selection.locator, text)
                         SelectionAction.DEFINE -> message = define(appContext, currentDictionary, text, lookUp)
                         SelectionAction.SEARCH -> searchText(text.take(200))
+                        SelectionAction.READ_ALOUD -> viewModel.readFrom(selection.locator)
                         SelectionAction.RESEARCH -> viewModel.bookId?.let { id ->
                             val at = selection.locator
                             // A decoded path, like the book index's hrefs that a cited passage opens at.
@@ -235,9 +267,26 @@ fun EbookReaderScreen(
                         onContents = { viewModel.open(Panel.CONTENTS) },
                         onTextSettings = { viewModel.open(Panel.SETTINGS) },
                         onBookmark = viewModel::toggleBookmark,
+                        reading = state.readingThisBook,
+                        onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
+                            if (state.readingThisBook) {
+                                viewModel.stopReading()
+                            } else {
+                                val fragment = navigator
+                                scope.launch { viewModel.readAloud(fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }) }
+                            }
+                        }),
                     )
                 }
             }
+        }
+        val reading = state.reading
+        if (reading != null && !reading.following) {
+            AssistChip(
+                onClick = viewModel::follow,
+                label = { Text("Follow") },
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 96.dp).testTag(EbookTags.FOLLOW),
+            )
         }
         when (state.panel) {
             Panel.CONTENTS -> ContentsPanel(state, viewModel::goTo, viewModel::goToMark, onDismiss = { viewModel.open(null) })
