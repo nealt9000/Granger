@@ -29,7 +29,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 Media spec (2026-10-19): `docs/superpowers/specs/2026-10-19-media-design.md` replaces the old "After v1: Media" row. Media (M1–M3) is built before Plans 10 and 11. It is the first of four projects, in this order (spec §1):
 
 1. **Media** (done 2026-10-20, M1–M3): music and audiobook players, mini-player, phone media, LibriVox and archive.org audio, media in Search and Research retrieval.
-2. **Research deep links + knowing your library**: results open at the exact passage, track or section; grounding quality (Plan 9 ended at 37% grounded); how Research becomes expert on any user's library.
+2. **Research deep links + knowing your library**: results open at the exact passage, track or section; grounding quality (Plan 9 ended at 37% grounded); how Research becomes expert on any user's library. Spec (approved 2026-10-21): `docs/superpowers/specs/2026-10-21-research-library-design.md`; plans R1–R3.
 3. **The voice**: one on-device speech engine for read-aloud in both readers and for Research answers; music/voice mix. Spec (2026-10-21): `docs/superpowers/specs/2026-10-21-voice-design.md`; Neal moved it ahead of the Home, Readiness and Onboarding work (2026-10-21). V0 is the engine spike; V1 and V2 are written after it.
 4. **Actions**: Research builds reading plans and playlists, and opens, reads aloud or plays things.
 
