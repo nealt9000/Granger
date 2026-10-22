@@ -340,7 +340,8 @@ and `BookIndex.kt` (expose the chapter re-chunk used by `chunkTexts`).
 
 Rebase onto H1 (branch `h1-readiness-model`) first. H1's catalog already gives each pack a `domain` ("" means
 storage-only) and each book one too (literature or thought). It also adds a top-level `readiness.domains[]`. The ids are
-the same as `set.json`'s, so take the domains from the catalog rather than adding a second list.
+the same as `set.json`'s, so take the domains from the catalog rather than adding a second list. H1 is on main (ad98d6a).
+Regenerate on top of its signed catalog (generatedAt 2026-10-22T12:04:01Z or later), because the app refuses an older one.
 
 - [ ] Parse the optional `vectors` object. An older catalog, or an entry without it, behaves as today. Test with a catalog that
   has and lacks the field.
