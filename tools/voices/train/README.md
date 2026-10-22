@@ -98,3 +98,16 @@ Two `train-clean-100` readers, 40 (F, 3.0 min) and 27 (M, 2.8 min), 52 utterance
 ones started fresh); the resume restored from `last.ckpt` and skipped the warm-start; `val_mel` 0.607 → 0.580 → 0.614.
 The export loads in sherpa-onnx 1.13.8 and speaks both speakers at RTF 0.05 on the Mac (ljspeech: 0.05);
 `pack_voice.py --from` packs it (80.0 MB zip, 95.1 MB unpacked, 359 files). MPS ran 1.5–2.7 s a step at batch 8.
+
+## The data (Task 2, 2026-10-22)
+
+| Speaker id | Reader | | In LibriTTS-R | Restoration failed | Kept (1–15 s) | Utterances |
+|---|---|---|---|---|---|---|
+| 0 | 3922 Ashley Candland | F | 32.3 min | 0.4 min | 29.4 min | 501 before the length filter |
+| 1 | 4535 Brett W. Downey | M | 20.6 min | 0.6 min | 19.2 min | 422 before the length filter |
+
+840 utterances, 48.6 minutes, `dataset/granger-v1` (`build_dataset.py build --subsets train-clean-360 --readers 3922 4535
+--max-minutes 60`). Both are all `train-clean-360` has of them; 4535 is at the low end of Piper's 20–60 minutes. If
+he comes out weaker than 3922, the next reader by ear and minutes is 8699 (Jessica Atha, F, 25.4 min); 6701 (Dayle, M,
+19.6 min) is no longer. Raw clips for listening: `voice-spike-2026-10-21/libritts-samples/` (four per reader, 24 kHz,
+with their text).

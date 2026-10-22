@@ -39,8 +39,8 @@ The Pixel 6 is shared. The V2 session (granger-1d) holds it for a 4-thread `libr
 
 ### Task 2: Speakers and data
 
-- [ ] Map `libritts_r-medium`'s speakers 0 and 2 to LibriTTS-R reader ids; list each candidate reader's minutes in `train-clean-100/360`. Pick two or three (Decision 2); put raw samples in `/Users/s.nealthompson/Developer/Granger/voice-spike-2026-10-21/libritts-samples/` for Neal if the choice is open.
-- [ ] Build the dataset (resampled, trimmed, `id|speaker|text`), note minutes per speaker in the README.
+- [x] Map `libritts_r-medium`'s speakers 0 and 2 to LibriTTS-R reader ids; list each candidate reader's minutes in `train-clean-100/360`. Pick two or three (Decision 2); put raw samples in `/Users/s.nealthompson/Developer/Granger/voice-spike-2026-10-21/libritts-samples/` for Neal if the choice is open.
+- [x] Build the dataset (resampled, trimmed, `id|speaker|text`), note minutes per speaker in the README.
 
 ### Task 3: The fine-tune
 
