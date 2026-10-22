@@ -261,6 +261,10 @@ interface BookDao {
     @Query("SELECT * FROM book_chunks WHERE id = :id")
     suspend fun chunk(id: Long): BookChunk?
 
+    /** A book's chunks (one per spine item) in reading order. */
+    @Query("SELECT * FROM book_chunks WHERE bookId = :bookId ORDER BY ordinal")
+    suspend fun chunksOf(bookId: String): List<BookChunk>
+
     /** For queries over `book_text`, which Room doesn't know about; they must select `book_chunks` columns. */
     @RawQuery
     suspend fun chunksMatching(query: SupportSQLiteQuery): List<BookChunk>
@@ -312,4 +316,41 @@ interface ResearchDao {
 
     @Query("DELETE FROM research_chats WHERE id = :id")
     suspend fun deleteChat(id: Long)
+}
+
+/** Home's feeds and their daily draws (Plan H2). */
+@Dao
+interface HomeDao {
+    @Query("SELECT * FROM home_feeds ORDER BY ordinal, id")
+    fun observeFeeds(): Flow<List<HomeFeed>>
+
+    @Query("SELECT * FROM home_feeds ORDER BY ordinal, id")
+    suspend fun feeds(): List<HomeFeed>
+
+    @Query("SELECT COUNT(*) FROM home_feeds")
+    suspend fun feedCount(): Int
+
+    @Query("SELECT COALESCE(MAX(ordinal), -1) FROM home_feeds")
+    suspend fun maxOrdinal(): Int
+
+    @Insert
+    suspend fun insertFeed(feed: HomeFeed): Long
+
+    @Update
+    suspend fun updateFeeds(feeds: List<HomeFeed>)
+
+    @Query("DELETE FROM home_feeds WHERE id = :id")
+    suspend fun deleteFeed(id: Long)
+
+    @Query("SELECT * FROM home_draws WHERE feedId = :feedId")
+    suspend fun draw(feedId: Long): HomeDraw?
+
+    @Upsert
+    suspend fun upsertDraw(draw: HomeDraw)
+
+    @Query("DELETE FROM home_draws WHERE feedId = :feedId")
+    suspend fun deleteDraw(feedId: Long)
+
+    @Query("DELETE FROM home_draws WHERE feedId NOT IN (SELECT id FROM home_feeds)")
+    suspend fun deleteOrphanDraws()
 }

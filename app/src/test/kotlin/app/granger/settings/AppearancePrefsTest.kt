@@ -44,9 +44,29 @@ class AppearancePrefsTest {
         assertThat(SharedAppearancePrefs(shared).railSide.value).isEqualTo(RailSide.LEFT)
     }
 
+    @Test fun openToDefaultsToResumeAndIsSaved() {
+        val prefs = SharedAppearancePrefs(shared)
+        assertThat(prefs.openTo.value).isEqualTo(OpenTo.RESUME)
+        prefs.setOpenTo(OpenTo.HOME)
+        assertThat(prefs.openTo.value).isEqualTo(OpenTo.HOME)
+        assertThat(SharedAppearancePrefs(shared).openTo.value).isEqualTo(OpenTo.HOME)
+        shared.edit().putString("openTo", "ELSEWHERE").commit()
+        assertThat(SharedAppearancePrefs(shared).openTo.value).isEqualTo(OpenTo.RESUME)
+    }
+
+    @Test fun openToRowsChooseAtOnce() {
+        var openTo by mutableStateOf(OpenTo.RESUME)
+        compose.setContent { AppearanceSection(RailSide.LEFT, {}, openTo) { openTo = it } }
+        compose.onNodeWithText("Open to").assertExists()
+        compose.onNodeWithText("Where I left off").assertIsSelected()
+        compose.onNodeWithText("Home").assertIsNotSelected().performClick()
+        compose.runOnIdle { assertThat(openTo).isEqualTo(OpenTo.HOME) }
+        compose.onNodeWithText("Home").assertIsSelected()
+    }
+
     @Test fun toolbarSideRowsChooseAtOnce() {
         var side by mutableStateOf(RailSide.LEFT)
-        compose.setContent { AppearanceSection(side) { side = it } }
+        compose.setContent { AppearanceSection(side, { side = it }) }
         compose.onNodeWithText("Appearance").assertExists()
         compose.onNodeWithText("Toolbar side").assertExists()
         compose.onNodeWithText("Left").assertIsSelected()

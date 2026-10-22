@@ -73,6 +73,7 @@ class SettingsViewModel(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUi())
 
     val railSide: StateFlow<RailSide> = appearancePrefs.railSide
+    val openTo: StateFlow<OpenTo> = appearancePrefs.openTo
 
     init {
         refreshVolumes()
@@ -104,6 +105,10 @@ class SettingsViewModel(
 
     fun setRailSide(side: RailSide) {
         appearancePrefs.setRailSide(side)
+    }
+
+    fun setOpenTo(openTo: OpenTo) {
+        appearancePrefs.setOpenTo(openTo)
     }
 }
 

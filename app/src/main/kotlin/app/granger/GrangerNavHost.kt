@@ -102,6 +102,13 @@ import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
 import app.granger.shell.HistoryViewModel
+import app.granger.home.ArticleThumbnails
+import java.io.File
+import app.granger.home.CardTarget
+import app.granger.home.FeedDrawer
+import app.granger.home.HomeScreen
+import app.granger.home.HomeViewModel
+import app.granger.shell.RailEntry
 import app.granger.shell.RailEntryActions
 import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
@@ -127,6 +134,9 @@ import app.granger.research.ResearchViewModel
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
 @Serializable data class LibraryRoute(val notice: String? = null)
+
+/** Home (Plan H2): the readiness strip, Continue and the feeds. A rail tool, pushed over the Library. */
+@Serializable object HomeRoute
 @Serializable data class CollectionRoute(val collectionId: String)
 
 /** Music's tabs for one Music collection; null is "All music" (not scoped). */
@@ -250,6 +260,7 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 
 /** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
 internal fun railToolOf(destination: NavDestination): RailTool? = when {
+    destination.hasRoute<HomeRoute>() -> RailTool.HOME
     destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
         destination.hasRoute<LibriVoxRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
@@ -389,7 +400,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val readerTabId = entry?.readingTabId()
     LaunchedEffect(readerTabId) { currentTab.id.value = readerTabId }
     // Non-reader screens always show the rail; a reader shows it with its chrome (up on entry, a middle tap hides it).
-    LaunchedEffect(destination) { if (destination?.isReading() != true) shell.railVisible = true else skipTransition = false }
+    LaunchedEffect(destination) {
+        if (destination?.isReading() != true) shell.railVisible = true
+        if (destination?.isReading() == true || destination?.hasRoute<HomeRoute>() == true) skipTransition = false
+    }
 
     // Resuming puts the reader on top of the Library, so Back from it lands there. Once per launch, not per rotation.
     var resumeHandled by rememberSaveable { mutableStateOf(false) }
@@ -399,6 +413,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             if (start is StartScreen.Reader) {
                 skipTransition = true
                 nav.navigate(if (start.book) BookRoute(start.tabId) else ReaderRoute(start.tabId))
+            } else if (start is StartScreen.Home) {
+                // Home over the Library, the same way: Back from it lands on the Library (Plan H2, Decision 1).
+                skipTransition = true
+                nav.navigate(HomeRoute)
             }
         }
     }
@@ -507,6 +525,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     } else if (voiceSheet && voiceNow == null) {
         voiceSheet = false
     }
+    /** Plays a rail item again. Gone or unplayable: the Library, with a notice saying so (it replaces the Library on the stack). */
+    fun resumePlay(item: RailEntry.Play) {
+        scope.launch {
+            val notice = railViewModel.resume(item) ?: return@launch
+            nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
+        }
+    }
+
     GrangerShell(
         rail = rail,
         expanded = shell.expanded,
@@ -519,6 +545,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         },
         onTool = { tool ->
             when (tool) {
+                RailTool.HOME -> if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute()) { launchSingleTop = true }
@@ -536,13 +563,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         onChat = { chatId -> openResearch(ResearchRoute(chatId)) },
         // The live reading's row (Plan V2) opens the page being read, as the voice sheet's Open does.
         onReading = { scope.launch { voiceNow?.let { openVoiceSource(it) } } },
-        onPlay = { item ->
-            scope.launch {
-                // Gone or unplayable: the Library, with a notice saying so (it replaces the Library on the stack).
-                val notice = railViewModel.resume(item) ?: return@launch
-                nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
-            }
-        },
+        onPlay = ::resumePlay,
         actions = remember(railViewModel) {
             RailEntryActions(
                 onPin = { entry ->
@@ -871,6 +892,43 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onBack = { nav.popBackStack() },
+                )
+            }
+            composable<HomeRoute> {
+                HomeScreen(
+                    viewModel = viewModel {
+                        HomeViewModel(
+                            container.catalog, container.library, container.bookshelf, container.downloads, railViewModel.ui,
+                            container.homeFeeds,
+                            FeedDrawer(
+                                archiveOf = { container.library.archive(it.id) },
+                                chunksOf = container.bookIndex::chunks,
+                                bookSearch = { container.bookIndex.search(it) },
+                                librarySearch = container.search,
+                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
+                            ),
+                            container.shelves, container.media, container.homePrefs,
+                        )
+                    },
+                    onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
+                    onOpenTab = ::showTab,
+                    onPlay = ::resumePlay,
+                    onOpenCard = { card ->
+                        when (val target = card.target) {
+                            is CardTarget.Article -> scope.launch {
+                                val tabId = container.sessions.openTab(target.packId, target.path, card.title)
+                                container.sessions.tab(tabId)?.let { nav.showTab(it, fragment = target.fragment) }
+                            }
+                            is CardTarget.Book -> scope.launch {
+                                val tabId = container.sessions.openTab(target.bookId, "", card.title)
+                                val at = target.href?.let { BookTarget(it, target.progression) }
+                                container.sessions.tab(tabId)?.let { nav.showTab(it, at) }
+                            }
+                            is CardTarget.Album -> nav.navigate(AlbumRoute(target.albumKey))
+                            is CardTarget.Audiobook -> nav.navigate(AudiobookRoute(target.audiobookId))
+                            is CardTarget.Search -> nav.navigate(SearchRoute(target.query))
+                        }
+                    },
                 )
             }
             composable<ReadinessRoute> {

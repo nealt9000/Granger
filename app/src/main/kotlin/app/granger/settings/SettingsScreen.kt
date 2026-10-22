@@ -73,6 +73,7 @@ fun SettingsScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val railSide by viewModel.railSide.collectAsStateWithLifecycle()
+    val openTo by viewModel.openTo.collectAsStateWithLifecycle()
     val media = viewModel.media
     val listState = rememberLazyListState()
     var scrolled by rememberSaveable { mutableStateOf(false) }
@@ -135,7 +136,7 @@ fun SettingsScreen(
                         HorizontalDivider()
                     }
                     "appearance" -> {
-                        AppearanceSection(railSide, viewModel::setRailSide)
+                        AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo)
                         HorizontalDivider()
                     }
                     "storage" -> StorageSection(ui, viewModel::selectVolume)
@@ -216,22 +217,34 @@ private fun rememberMediaControls(media: MediaSettings, onPermissionChecked: () 
 
 /** "Toolbar side": Left or Right, applied at once (the shell reads the same preference). */
 @Composable
-internal fun AppearanceSection(side: RailSide, onSide: (RailSide) -> Unit) {
+internal fun AppearanceSection(
+    side: RailSide,
+    onSide: (RailSide) -> Unit,
+    openTo: OpenTo = OpenTo.RESUME,
+    onOpenTo: (OpenTo) -> Unit = {},
+) {
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text("Appearance", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Text("Toolbar side", modifier = Modifier.padding(top = 8.dp))
-        Column(Modifier.selectableGroup()) {
-            for (choice in RailSide.entries) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(selected = choice == side, role = Role.RadioButton, onClick = { onSide(choice) })
-                        .padding(vertical = 4.dp),
-                ) {
-                    RadioButton(selected = choice == side, onClick = null)
-                    Text(choice.label, modifier = Modifier.padding(start = 8.dp))
-                }
+        RadioGroup(RailSide.entries, side, { it.label }, onSide)
+        Text("Open to", modifier = Modifier.padding(top = 8.dp))
+        RadioGroup(OpenTo.entries, openTo, { it.label }, onOpenTo)
+    }
+}
+
+@Composable
+private fun <T> RadioGroup(choices: List<T>, chosen: T, label: (T) -> String, onChoose: (T) -> Unit) {
+    Column(Modifier.selectableGroup()) {
+        for (choice in choices) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(selected = choice == chosen, role = Role.RadioButton, onClick = { onChoose(choice) })
+                    .padding(vertical = 4.dp),
+            ) {
+                RadioButton(selected = choice == chosen, onClick = null)
+                Text(label(choice), modifier = Modifier.padding(start = 8.dp))
             }
         }
     }
@@ -240,6 +253,11 @@ internal fun AppearanceSection(side: RailSide, onSide: (RailSide) -> Unit) {
 private val RailSide.label get() = when (this) {
     RailSide.LEFT -> "Left"
     RailSide.RIGHT -> "Right"
+}
+
+private val OpenTo.label get() = when (this) {
+    OpenTo.RESUME -> "Where I left off"
+    OpenTo.HOME -> "Home"
 }
 
 @Composable

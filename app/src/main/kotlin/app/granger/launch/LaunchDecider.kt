@@ -4,6 +4,7 @@ import app.granger.core.library.Book
 import app.granger.core.library.BookIds
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
+import app.granger.settings.OpenTo
 import java.io.File
 
 /** Where the app opens. */
@@ -13,6 +14,9 @@ sealed interface StartScreen {
 
     /** Open the Library, optionally with a one-line [notice] explaining why we did not resume. */
     data class Library(val notice: String? = null) : StartScreen
+
+    /** Open Home (Plan H2): nothing to resume, or the setting says so. */
+    data object Home : StartScreen
 }
 
 /** What we know about the previous session when the app starts. */
@@ -22,9 +26,15 @@ data class LaunchFacts(
     val firstRun: Boolean,
     val lastTab: ReadingTab?,
     val lastTabPackOk: Boolean,
+    /** Settings → Open to (Plan H2). */
+    val openTo: OpenTo = OpenTo.RESUME,
 )
 
-/** Resume the last tab only after a normal close; first run, a crash or a reboot land on the Library. */
+/**
+ * Resume the last tab only after a normal close; first run, a crash, a reboot or nothing to resume land on Home
+ * (Plan H2), as does every normal open when the setting says Home. A last tab whose pack is gone lands on the Library
+ * with a notice: that is where it is fixed.
+ */
 object LaunchDecider {
     const val MISSING_NOTICE =
         "The last thing you were reading isn't available. Check that its pack is still on the phone or SD card."
@@ -32,9 +42,10 @@ object LaunchDecider {
     fun decide(f: LaunchFacts): StartScreen {
         val tab = f.lastTab
         if (f.firstRun || !f.previousExitClean || f.bootedSinceLastSession || tab == null) {
-            return StartScreen.Library()
+            return StartScreen.Home
         }
-        return if (f.lastTabPackOk) StartScreen.Reader(tab.id, BookIds.isBook(tab.packId)) else StartScreen.Library(MISSING_NOTICE)
+        if (!f.lastTabPackOk) return StartScreen.Library(MISSING_NOTICE)
+        return if (f.openTo == OpenTo.HOME) StartScreen.Home else StartScreen.Reader(tab.id, BookIds.isBook(tab.packId))
     }
 }
 

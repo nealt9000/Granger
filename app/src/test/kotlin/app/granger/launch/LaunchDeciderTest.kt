@@ -3,6 +3,7 @@ package app.granger.launch
 import app.granger.book
 import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingTab
+import app.granger.settings.OpenTo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -28,24 +29,33 @@ class LaunchDeciderTest {
             .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
     }
 
-    @Test fun firstRunOpensLibrary() {
-        assertThat(LaunchDecider.decide(normal.copy(firstRun = true))).isEqualTo(StartScreen.Library())
+    @Test fun firstRunOpensHome() {
+        assertThat(LaunchDecider.decide(normal.copy(firstRun = true))).isEqualTo(StartScreen.Home)
     }
 
-    @Test fun crashBeforeCleanExitOpensLibrary() {
-        assertThat(LaunchDecider.decide(normal.copy(previousExitClean = false))).isEqualTo(StartScreen.Library())
+    @Test fun crashBeforeCleanExitOpensHome() {
+        assertThat(LaunchDecider.decide(normal.copy(previousExitClean = false))).isEqualTo(StartScreen.Home)
     }
 
-    @Test fun rebootOpensLibrary() {
-        assertThat(LaunchDecider.decide(normal.copy(bootedSinceLastSession = true))).isEqualTo(StartScreen.Library())
+    @Test fun rebootOpensHome() {
+        assertThat(LaunchDecider.decide(normal.copy(bootedSinceLastSession = true))).isEqualTo(StartScreen.Home)
     }
 
-    @Test fun noTabsOpensLibrary() {
-        assertThat(LaunchDecider.decide(normal.copy(lastTab = null))).isEqualTo(StartScreen.Library())
+    @Test fun noTabsOpensHome() {
+        assertThat(LaunchDecider.decide(normal.copy(lastTab = null))).isEqualTo(StartScreen.Home)
     }
 
     @Test fun launchWithMissingPackOpensLibraryWithNotice() {
         assertThat(LaunchDecider.decide(normal.copy(lastTabPackOk = false)))
+            .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
+    }
+
+    @Test fun openToHomeOpensHomeInsteadOfResuming() {
+        assertThat(LaunchDecider.decide(normal.copy(openTo = OpenTo.HOME))).isEqualTo(StartScreen.Home)
+    }
+
+    @Test fun openToHomeStillShowsTheMissingPackNotice() {
+        assertThat(LaunchDecider.decide(normal.copy(openTo = OpenTo.HOME, lastTabPackOk = false)))
             .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
     }
 

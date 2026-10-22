@@ -96,7 +96,7 @@ class MainActivity : FragmentActivity() {
         } else {
             container.library.packs.first().any { it.id == lastTab.packId && isPackResumable(it.status, it.filePath) }
         }
-        return LaunchDecider.decide(LaunchFacts(clean, booted, firstRun, lastTab, packOk))
+        return LaunchDecider.decide(LaunchFacts(clean, booted, firstRun, lastTab, packOk, container.appearancePrefs.openTo.value))
     }
 
     override fun onNewIntent(intent: Intent) {
