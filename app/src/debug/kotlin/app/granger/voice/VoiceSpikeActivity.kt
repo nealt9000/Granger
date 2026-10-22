@@ -1,10 +1,12 @@
 package app.granger.voice
 
 import android.app.ActivityManager
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.horizontalScroll
@@ -53,21 +55,36 @@ import kotlinx.coroutines.withContext
  * `files/voices/<id>/` on the three fixed passages, with E2B resident and with music under the voice when asked.
  * Logs `Voice:` lines under the Granger tag and appends them to `files/voice-spike-<time>.log`; each passage's audio
  * is saved as a WAV beside it. Start with `adb shell am start -n app.granger/.voice.VoiceSpikeActivity`.
+ *
+ * Unattended runs take intent extras: `--es engine system|<voice id>|all` (comma-separated ids allowed),
+ * `--ei threads 2`, `--ei speaker 0`, `--ei passes 2` (each pass speaks the three passages; the second is the warm
+ * run), `--ez llm true` (E2B resident on the GPU first), `--ez music true`. The run ends with a `Voice: auto done` line.
  */
 class VoiceSpikeActivity : ComponentActivity() {
     private val lines = mutableStateListOf<String>()
     private val wavs = mutableStateListOf<File>()
+    private var running by mutableStateOf(false)
+    private var llmResident by mutableStateOf(false)
+    private var musicOn by mutableStateOf(false)
     private lateinit var logFile: File
+    private lateinit var voicesDir: File
+    private lateinit var runner: VoiceSpikeRunner
     private val player = PcmPlayer()
     private var llm: LiteRtLlmEngine? = null
     private var music: MediaPlayer? = null
+    private val musicFile: File? get() = voicesDir.listFiles().orEmpty().firstOrNull { it.isFile && it.name.startsWith("music.") }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Measurements are only meaningful with the screen on: once it goes dark the process is treated as
+        // background and confined to the little cores, and the numbers degrade tenfold.
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val root = getExternalFilesDir(null) ?: filesDir
         logFile = File(root, "voice-spike-${System.currentTimeMillis()}.log")
-        val voicesDir = File(root, "voices")
-        val runner = VoiceSpikeRunner(RssMemorySampler(), SystemMonoClock, File(root, "voice-spike"))
+        voicesDir = File(root, "voices")
+        runner = VoiceSpikeRunner(RssMemorySampler(), SystemMonoClock, File(root, "voice-spike"))
         val totalMem = ActivityManager.MemoryInfo().also { (getSystemService(ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(it) }.totalMem
         val soc = if (Build.VERSION.SDK_INT >= 31) Build.SOC_MODEL else "unknown"
         val deviceLine = "${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} · SoC $soc · totalMem $totalMem B · tier ${DeviceTiers.forTotalRam(totalMem)}"
@@ -77,48 +94,97 @@ class VoiceSpikeActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(Modifier.fillMaxSize()) {
-                    Screen(deviceLine, voicesDir, runner)
+                    Screen(deviceLine)
                 }
+            }
+        }
+
+        if (savedInstanceState == null) intent.getStringExtra("engine")?.let { autoRun(it, intent) }
+    }
+
+    /** Builds the engine named [name]: `system`, or a voice directory's id. */
+    private fun engineFor(name: String, threads: Int, speaker: Int): SpikeEngine? = when (name) {
+        "system" -> SystemSpikeEngine(this, cacheDir)
+        else -> SherpaVoice.list(voicesDir).firstOrNull { it.id == name }?.let { SherpaSpikeEngine(it, threads, speaker) }
+    }
+
+    private fun autoRun(engines: String, intent: Intent) {
+        val threads = intent.getIntExtra("threads", 2)
+        val speaker = intent.getIntExtra("speaker", 0)
+        val passes = intent.getIntExtra("passes", 1).coerceAtLeast(1)
+        val withLlm = intent.getBooleanExtra("llm", false)
+        val withMusic = intent.getBooleanExtra("music", false)
+        val names = if (engines == "all") listOf("system") + SherpaVoice.list(voicesDir).map { it.id } else engines.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        running = true
+        lifecycleScope.launch {
+            try {
+                log("Voice: auto start engines=$names threads=$threads speaker=$speaker passes=$passes llm=$withLlm music=$withMusic")
+                if (withLlm && !llmResident) { loadLlm(); llmResident = llm != null }
+                if (withMusic && !musicOn) toggleMusic()
+                for (pass in 1..passes) for (name in names) {
+                    val make = { engineFor(name, threads, speaker) ?: error("no engine named $name under ${voicesDir.path}") }
+                    runOnce(make, threads, pass)
+                }
+                log("Voice: auto done engines=$names threads=$threads passes=$passes llm=$llmResident music=$musicOn")
+            } finally {
+                running = false
             }
         }
     }
 
+    /** Loads one engine, speaks the three passages, logs the rows and the summaries, closes it. Never throws. */
+    private suspend fun runOnce(make: () -> SpikeEngine, threads: Int, pass: Int) {
+        try {
+            val engine = make()
+            try {
+                log("Voice: engine=${engine.name} threads=$threads pass=$pass start llmResident=$llmResident music=$musicOn")
+                log(VoiceLog.line(runner.load(engine, threads)))
+                val rows = mutableListOf<SentenceRow>()
+                for (passage in VoiceSpikePassages.ALL) {
+                    rows += runner.run(engine, threads, passage) { row -> log(VoiceLog.line(row)) }
+                    val wav = runner.wavFile(engine.name, threads, passage.id)
+                    if (wav.exists() && wav !in wavs) wavs += wav
+                }
+                VoiceLog.summary(rows).forEach(::log)
+                log("Voice: engine=${engine.name} threads=$threads pass=$pass done llmResident=$llmResident music=$musicOn")
+            } finally {
+                withContext(Dispatchers.Default) { engine.close() }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            Log.e(TAG, "Voice: run failed", t)
+            log("Voice: run failed: $t")
+        }
+    }
+
+    private fun toggleMusic() {
+        val file = musicFile
+        if (musicOn) {
+            music?.release(); music = null; musicOn = false
+            log("Voice: music off")
+        } else if (file != null) {
+            music = MediaPlayer().apply {
+                setDataSource(file.path); isLooping = true; setVolume(0.3f, 0.3f); prepare(); start()
+            }
+            musicOn = true
+            log("Voice: music under the voice at 30 %: ${file.name}")
+        } else {
+            log("Voice: no voices/music.* file to play")
+        }
+    }
+
     @Composable
-    private fun Screen(deviceLine: String, voicesDir: File, runner: VoiceSpikeRunner) {
-        var running by remember { mutableStateOf(false) }
+    private fun Screen(deviceLine: String) {
         var threads by remember { mutableIntStateOf(2) }
         var speaker by remember { mutableIntStateOf(0) }
-        var llmResident by remember { mutableStateOf(false) }
-        var musicOn by remember { mutableStateOf(false) }
         val voices = remember { SherpaVoice.list(voicesDir) }
-        val musicFile = remember { voicesDir.listFiles().orEmpty().firstOrNull { it.isFile && it.name.startsWith("music.") } }
+        val hasMusic = remember { musicFile != null }
 
         fun runEngine(make: () -> SpikeEngine) {
             running = true
             lifecycleScope.launch {
-                try {
-                    val engine = make()
-                    try {
-                        log(VoiceLog.line(runner.load(engine, threads)))
-                        val rows = mutableListOf<SentenceRow>()
-                        for (passage in VoiceSpikePassages.ALL) {
-                            rows += runner.run(engine, threads, passage) { row -> log(VoiceLog.line(row)) }
-                            val wav = runner.wavFile(engine.name, threads, passage.id)
-                            if (wav.exists() && wav !in wavs) wavs += wav
-                        }
-                        VoiceLog.summary(rows).forEach(::log)
-                        log("Voice: engine=${engine.name} done llmResident=$llmResident music=$musicOn")
-                    } finally {
-                        withContext(Dispatchers.Default) { engine.close() }
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (t: Throwable) {
-                    Log.e(TAG, "Voice: run failed", t)
-                    log("Voice: run failed: $t")
-                } finally {
-                    running = false
-                }
+                try { runOnce(make, threads, 1) } finally { running = false }
             }
         }
 
@@ -158,19 +224,9 @@ class VoiceSpikeActivity : ComponentActivity() {
                 Spacer(Modifier.width(8.dp))
                 FilterChip(
                     selected = musicOn,
-                    enabled = !running && musicFile != null,
-                    onClick = {
-                        val file = musicFile
-                        if (musicOn) { music?.release(); music = null; musicOn = false }
-                        else if (file != null) {
-                            music = MediaPlayer().apply {
-                                setDataSource(file.path); isLooping = true; setVolume(0.3f, 0.3f); prepare(); start()
-                            }
-                            musicOn = true
-                            log("Voice: music under the voice at 30 %: ${file.name}")
-                        }
-                    },
-                    label = { Text(if (musicFile == null) "No voices/music.* file" else if (musicOn) "Music on (30 %)" else "Music under the voice") },
+                    enabled = !running && hasMusic,
+                    onClick = { toggleMusic() },
+                    label = { Text(if (!hasMusic) "No voices/music.* file" else if (musicOn) "Music on (30 %)" else "Music under the voice") },
                 )
             }
 

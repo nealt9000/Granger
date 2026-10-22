@@ -31,11 +31,16 @@ class SherpaTts(val voice: SherpaVoice, val threads: Int = 2) : AutoCloseable {
     fun synthesize(text: String, speaker: Int = 0, speed: Float = 1f): Flow<FloatArray> = channelFlow {
         withContext(Dispatchers.Default) {
             // The callback runs on this thread, inside the native call; 1 keeps generating, 0 stops early.
-            tts.generateWithCallback(text, speaker, speed) { samples ->
-                if (!isActive) return@generateWithCallback 0
-                trySendBlocking(samples.copyOf())
-                if (isActive) 1 else 0
+            // sherpa's JNI finds it by reflection as `invoke([F)Ljava/lang/Integer;`, which an invokedynamic
+            // lambda (Kotlin 2's default) doesn't have; an object expression compiles to a class that does.
+            val callback = object : (FloatArray) -> Int {
+                override fun invoke(samples: FloatArray): Int {
+                    if (!isActive) return 0
+                    trySendBlocking(samples.copyOf())
+                    return if (isActive) 1 else 0
+                }
             }
+            tts.generateWithCallback(text, speaker, speed, callback)
         }
     }
 
