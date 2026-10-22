@@ -46,7 +46,7 @@ def cmd_validate(a):
 
 def cmd_run(a):
     items = dataset.load(a.dataset)
-    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction)
+    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense)
     print("results in %s (%d items in the dataset)" % (out, len(items)))
     return 0
 
@@ -96,7 +96,8 @@ def main(argv=None):
     r = s.add_parser("run"); r.add_argument("dataset"); r.add_argument("--run-id", required=True)
     r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"])
     r.add_argument("--rewrite", choices=["alternates"], help="a debug rewrite variant (Plan R0)")
-    r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)"); r.set_defaults(f=cmd_run)
+    r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
+    r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)
     rp = s.add_parser("report"); rp.add_argument("targets", nargs="+"); rp.add_argument("--dataset-only", action="store_true")
     rp.add_argument("--totals-only", action="store_true"); rp.add_argument("--compare"); rp.set_defaults(f=cmd_report)
