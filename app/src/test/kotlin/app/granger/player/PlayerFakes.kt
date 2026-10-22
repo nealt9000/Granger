@@ -55,6 +55,9 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
     override fun nextSentence() { calls += "nextSentence" }
     override fun previousSentence() { calls += "previousSentence" }
     override fun jumpTo(address: ReadAddress) { calls += "jumpTo:${address.encode()}" }
+    override fun setMixLevel(level: Float) { calls += "mix:$level" }
+    override fun playPauseMusic() { calls += "playPauseMusic" }
+    override fun nextMusic() { calls += "nextMusic" }
     override fun setFinished(audiobookId: String, finished: Boolean) { calls += "setFinished:$audiobookId=$finished" }
     override fun unload(audiobookId: String, trackIds: Set<String>) { calls += "unload:$audiobookId" }
     override fun playPause() { calls += "playPause" }

@@ -25,10 +25,12 @@ sealed interface NowPlaying {
     /**
      * The voice reading [title] (an article, a book, an answer; [sourceKey] names it as the saved place does), at
      * [sentence] of [paragraph], in [section] when the source has sections. [ended]: the source ran out; play reads it again.
+     * [music] is the track playing under the voice (Plan V2), null when the voice is alone; [musicPlaying] whether it is heard.
      */
     data class Voice(
         val sourceKey: String, val title: String, val section: String?, val sentence: String, val paragraph: Int,
         val speed: Float, val voiceId: VoiceId, val ended: Boolean = false,
+        val music: Music? = null, val musicPlaying: Boolean = false,
     ) : NowPlaying
 }
 
@@ -131,6 +133,13 @@ interface PlayerHub {
     fun nextParagraph(); fun previousParagraph(); fun nextSentence(); fun previousSentence(); fun jumpTo(address: ReadAddress)
 
     /**
+     * Music under the voice (Plan V2). Starting the voice while music plays keeps the music at [setMixLevel]'s level
+     * (0–1, remembered), and starting music while the voice reads puts it underneath; the transport drives the
+     * voice, and the music has these two of its own. No-ops without music under the voice.
+     */
+    fun setMixLevel(level: Float); fun playPauseMusic(); fun nextMusic()
+
+    /**
      * The book page has just written [finished] into [audiobookId]'s state. If that book is loaded, the player adopts
      * it (so its next save doesn't undo it) and saves; unfinished while at the end, it goes back to the first chapter.
      * Otherwise nothing happens: the row is the library's.
@@ -177,6 +186,10 @@ object PlayerSettingsKeys {
 
     /** Resume when a headset connects; default false (as in Auxio). */
     const val HEADSET_AUTOPLAY = "headset_autoplay"
+
+    /** Music under the voice, 0–1 (Plan V2); default [DEFAULT_MIX]. */
+    const val MIX_LEVEL = "mix_level"
+    const val DEFAULT_MIX = 0.3f
 
     // Kept by the engine, not settings: which player to restore and when it was paused (survive process death).
     internal const val LAST_MODE = "last_mode"

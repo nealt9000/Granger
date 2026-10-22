@@ -56,12 +56,17 @@ internal class PlayerTestRig {
         voices: InstalledVoices? = null,
         readSources: (suspend (String, String) -> ReadSource?)? = null,
         preferredVoice: () -> VoiceId? = { null },
+        /** Plan V2: lets the engine put music under the voice on a second test player. */
+        musicUnder: Boolean = false,
     ): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()
         return PlayerEngine(
             player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(focus),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), writer = Dispatchers.Unconfined,
             random = Random(7), speechOutput = speechOutput, voices = voices, readSources = readSources, preferredVoice = preferredVoice,
+            musicUnderFactory = if (!musicUnder) null else ({
+                TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build() to null
+            }),
         ).also { engines += it }
     }
 
