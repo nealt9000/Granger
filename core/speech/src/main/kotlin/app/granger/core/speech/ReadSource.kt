@@ -19,6 +19,28 @@ interface ReadSource {
     suspend fun locate(address: ReadAddress): ReadAddress? = address
 }
 
+/** What a source key names, for whoever has to reopen it (the reader, the player's restore, the rail). */
+sealed interface ReadSourceKey {
+    data class Article(val packId: String, val path: String) : ReadSourceKey
+    data class Book(val bookId: String) : ReadSourceKey
+    data class Text(val key: String) : ReadSourceKey
+
+    companion object {
+        fun article(packId: String, path: String) = "pack:$packId/$path"
+        fun book(bookId: String) = "book:$bookId"
+
+        fun parse(key: String): ReadSourceKey? = when {
+            key.startsWith("pack:") -> {
+                val slash = key.indexOf('/', 5)
+                if (slash <= 5) null else Article(key.substring(5, slash), key.substring(slash + 1))
+            }
+            key.startsWith("book:") && key.length > 5 -> Book(key.substring(5))
+            key.startsWith("text:") && key.length > 5 -> Text(key.substring(5))
+            else -> null
+        }
+    }
+}
+
 /** Plain text as a source: Research answers (V2) and the spike's passages read through the player. */
 class TextReadSource(override val key: String, override val title: String, text: String) : ReadSource {
     private val all: List<Utterance> = Utterances.fromBlocks(

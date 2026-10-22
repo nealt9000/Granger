@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.archive.ArchiveScreen
 import app.granger.core.player.NowPlaying
+import app.granger.core.speech.ReadSourceKey
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.player.PlayerUi
@@ -398,6 +399,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
 
+    /** Opens the page the voice is reading (an article in its tab, a book in its reader); null when the key names neither. */
+    suspend fun openVoiceSource(voice: NowPlaying.Voice): Unit? {
+        val tabId = when (val key = ReadSourceKey.parse(voice.sourceKey)) {
+            is ReadSourceKey.Article -> container.sessions.openTab(key.packId, key.path, voice.title)
+            is ReadSourceKey.Book -> container.sessions.openTab(key.bookId, "", voice.title)
+            is ReadSourceKey.Text, null -> return null
+        }
+        container.sessions.tab(tabId)?.let { nav.showTab(it) }
+        return Unit
+    }
+
     // What Define does in the e-book reader; the selection menu reads it live through SelectionBridge.
     val appContext = LocalContext.current.applicationContext
     val dictionary by produceState<DictionaryChoice>(DictionaryChoice.None) {
@@ -507,7 +519,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     playerUi,
                     onPlayPause = player::playPause,
                     onSecondary = player::secondary,
-                    onOpen = { nav.togglePlayer() },
+                    // The voice has no Player tab: Open goes to the page being read.
+                    onOpen = {
+                        val voice = player.voiceNow()
+                        if (voice == null) nav.togglePlayer() else scope.launch { openVoiceSource(voice) ?: nav.togglePlayer() }
+                    },
                     skipBackS = player.skipBackS(),
                 )
             }

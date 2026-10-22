@@ -11,11 +11,18 @@ import kotlinx.coroutines.flow.first
 
 /**
  * Plays a `RecentPlay` again from the rail: an audiobook resumes at its saved position; a music list is rebuilt the
- * way its screen builds it ([MusicCatalog.sourceTracks]) and played from the top with only its playable tracks.
+ * way its screen builds it ([MusicCatalog.sourceTracks]) and played from the top with only its playable tracks; a
+ * read-aloud (`voice:<source key>`) resumes through [voice], which reopens the source at its saved sentence.
  */
-class PlayResumer(private val media: MediaLibrary, private val playlists: Playlists, private val hub: PlayerHub) {
+class PlayResumer(
+    private val media: MediaLibrary,
+    private val playlists: Playlists,
+    private val hub: PlayerHub,
+    private val voice: suspend (sourceKey: String) -> Boolean = { false },
+) {
     /** False when the source is gone, or nothing in it can play now. */
     suspend fun resume(key: String, title: String): Boolean {
+        if (key.startsWith(VOICE)) return voice(key.removePrefix(VOICE))
         if (key.startsWith(AUDIOBOOK)) {
             if (media.audiobook(key)?.status != PackStatus.OK) return false
             hub.playAudiobook(key)
@@ -31,5 +38,6 @@ class PlayResumer(private val media: MediaLibrary, private val playlists: Playli
 
     private companion object {
         const val AUDIOBOOK = "audiobook:"
+        const val VOICE = "voice:"
     }
 }

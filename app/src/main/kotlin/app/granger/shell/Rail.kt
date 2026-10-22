@@ -114,6 +114,7 @@ private fun RailEntry.painter(): Painter = when (this) {
         playKey.startsWith("playlist:") -> painterResource(R.drawable.ic_queue_music)
         playKey.startsWith("artist:") -> rememberVectorPainter(Icons.Filled.Person)
         playKey.startsWith("folder:") -> painterResource(R.drawable.ic_library)
+        playKey.startsWith("voice:") -> painterResource(R.drawable.ic_library)   // something read aloud
         else -> painterResource(R.drawable.ic_music_note) // album:, genre:, songs
     }
 }

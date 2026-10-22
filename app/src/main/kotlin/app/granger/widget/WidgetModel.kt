@@ -6,6 +6,7 @@ import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
 import app.granger.player.chapterTitle
 import app.granger.player.fraction
+import app.granger.player.voiceSubtitle
 
 /** The widget's second button: next track for music, skip back for books (as the mini-player); none when nothing is loaded. */
 enum class Secondary { NEXT, BACK, NONE }
@@ -35,6 +36,10 @@ data class WidgetModel(
             is NowPlaying.Book -> WidgetModel(
                 chapterTitle(now), now.book.title, now.book.coverPath,
                 ui.playing, Secondary.BACK, fraction(ui.positionMs, ui.durationMs), empty = false,
+            )
+            is NowPlaying.Voice -> WidgetModel(
+                now.title, voiceSubtitle(now), null,
+                ui.playing, Secondary.BACK, progress = null, empty = false,
             )
             NowPlaying.Idle -> ofSaved(saved)
         }

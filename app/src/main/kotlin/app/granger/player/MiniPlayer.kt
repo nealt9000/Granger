@@ -77,16 +77,17 @@ fun MiniPlayer(
     if (now == NowPlaying.Idle) return
     val info = nowInfo(now) ?: return
     val book = now is NowPlaying.Book
+    val voice = now is NowPlaying.Voice
     Surface(
         color = GrangerColors.SurfaceVariant,
         modifier = modifier.fillMaxWidth().testTag(MiniPlayerTags.ROOT),
     ) {
         Column(Modifier.fillMaxWidth().height(MiniPlayerHeight)) {
             Row(
-                Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = "Open player", onClick = onOpen).padding(start = 8.dp),
+                Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = if (voice) "Open the page" else "Open player", onClick = onOpen).padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PlayerCover(info.coverPath, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER))
+                PlayerCover(info.coverPath, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -102,7 +103,9 @@ fun MiniPlayer(
                     PlayPauseIcon(ui.playing)
                 }
                 IconButton(onClick = onSecondary, modifier = Modifier.testTag(MiniPlayerTags.SECONDARY)) {
-                    if (book) {
+                    if (voice) {
+                        Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back a sentence")
+                    } else if (book) {
                         Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back $skipBackS seconds")
                     } else {
                         Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next track")

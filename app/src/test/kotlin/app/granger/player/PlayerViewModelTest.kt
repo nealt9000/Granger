@@ -23,10 +23,18 @@ class PlayerViewModelTest {
         vm.secondary()
         assertThat(hub.calls).containsExactly("skipBack")
 
+        hub.ui.value = voiceUi()
+        hub.calls.clear()
+        vm.secondary()
+        assertThat(hub.calls).containsExactly("previousSentence")
+        assertThat(vm.voiceNow()?.title).isEqualTo("Rosetta Stone")
+        assertThat(modeOf(hub.ui.value.now)).isNull()                 // no Player tab for the voice
+
         hub.ui.value = app.granger.core.player.PlayerUi.IDLE
         hub.calls.clear()
         vm.secondary()
         assertThat(hub.calls).isEmpty()
+        assertThat(vm.voiceNow()).isNull()
     }
 
     @Test fun bookProgressAddsEarlierChaptersToThePositionInThisOne() = runTest(main.dispatcher) {

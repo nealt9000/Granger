@@ -43,17 +43,22 @@ internal data class NowInfo(val title: String, val subtitle: String, val coverPa
 internal fun nowInfo(now: NowPlaying): NowInfo? = when (now) {
     is NowPlaying.Music -> NowInfo(now.track.title, now.track.artists.ifBlank { now.track.albumArtists }, now.track.coverPath)
     is NowPlaying.Book -> NowInfo(now.book.title, chapterTitle(now), now.book.coverPath)
+    is NowPlaying.Voice -> NowInfo(now.title, voiceSubtitle(now), null)
     NowPlaying.Idle -> null
 }
+
+/** "Reading", with the section when the source has one; "Finished reading" once the voice ran out. */
+internal fun voiceSubtitle(voice: NowPlaying.Voice): String =
+    listOfNotNull(if (voice.ended) "Finished reading" else "Reading", voice.section?.takeIf { it.isNotBlank() }).joinToString(" · ")
 
 internal fun chapterTitle(book: NowPlaying.Book): String = book.chapter.title.ifBlank { "Chapter ${book.chapter.ordinal + 1}" }
 
 internal fun fraction(positionMs: Long, durationMs: Long): Float =
     if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
 
-/** A square cover from [path], or a music note (headphones for a book) on a plain tile when there's none. */
+/** A square cover from [path], or a music note (headphones for a book, a page for the voice) on a plain tile when there's none. */
 @Composable
-internal fun PlayerCover(path: String?, book: Boolean, size: Dp, modifier: Modifier = Modifier) {
+internal fun PlayerCover(path: String?, book: Boolean, size: Dp, modifier: Modifier = Modifier, voice: Boolean = false) {
     val cover = rememberRailCover(path, size)
     val shape = RoundedCornerShape(if (size > 100.dp) 12.dp else 6.dp)
     Box(
@@ -64,7 +69,7 @@ internal fun PlayerCover(path: String?, book: Boolean, size: Dp, modifier: Modif
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
             Icon(
-                painterResource(if (book) R.drawable.ic_headphones else R.drawable.ic_music_note),
+                painterResource(if (voice) R.drawable.ic_library else if (book) R.drawable.ic_headphones else R.drawable.ic_music_note),
                 contentDescription = null,
                 tint = GrangerColors.OnSurfaceVariant,
                 modifier = Modifier.size(size / 2),

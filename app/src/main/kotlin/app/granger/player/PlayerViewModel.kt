@@ -13,6 +13,7 @@ import app.granger.core.player.SavedBook
 import app.granger.core.player.SavedModes
 import app.granger.core.player.SavedMusic
 import app.granger.core.player.SleepSetting
+import app.granger.core.player.voice.VoiceProgress
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -75,11 +76,11 @@ fun bookProgressAt(
     return if (finished) progress.copy(positionMs = progress.durationMs) else progress
 }
 
-/** The mode [now] belongs to; null when idle. */
+/** The tab [now] belongs to; null when idle, and for the voice, which has no tab (its full view is a sheet, V2). */
 fun modeOf(now: NowPlaying): PlayerMode? = when (now) {
     is NowPlaying.Music -> PlayerMode.MUSIC
     is NowPlaying.Book -> PlayerMode.AUDIOBOOK
-    NowPlaying.Idle -> null
+    is NowPlaying.Voice, NowPlaying.Idle -> null
 }
 
 /** The Player's tab: the one picked, else the active mode, else the mode last used, else Music. */
@@ -168,12 +169,24 @@ class PlayerViewModel(
 
     fun playPause() = hub.playPause()
 
-    /** The mini-player's one secondary button: next track for music, skip back for audiobooks. */
+    /** The mini-player's one secondary button: next track for music, skip back for audiobooks, back a sentence for the voice. */
     fun secondary() = when (hub.ui.value.now) {
         is NowPlaying.Music -> hub.next()
         is NowPlaying.Book -> hub.skipBack()
+        is NowPlaying.Voice -> hub.previousSentence()
         NowPlaying.Idle -> Unit
     }
+
+    /** The sentence the voice is on (null while nothing is read); the readers mark and follow from this. */
+    val voiceProgress: StateFlow<VoiceProgress?> = hub.voiceProgress
+
+    /** The voice loaded now, for the mini-player's Open (which goes to its page, not the Player). */
+    fun voiceNow(): NowPlaying.Voice? = hub.ui.value.now as? NowPlaying.Voice
+
+    fun stopVoice() = hub.stopVoice()
+    fun nextParagraph() = hub.nextParagraph()
+    fun previousParagraph() = hub.previousParagraph()
+    fun previousSentence() = hub.previousSentence()
 
     fun next() = hub.next()
     fun previous() = hub.previous()

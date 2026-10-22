@@ -46,6 +46,7 @@ internal fun secondaryFromWidget(hub: PlayerHub) {
     when (hub.ui.value.now) {
         is NowPlaying.Music -> hub.next()
         is NowPlaying.Book -> hub.skipBack()
+        is NowPlaying.Voice -> hub.previousSentence()
         NowPlaying.Idle -> Unit
     }
 }

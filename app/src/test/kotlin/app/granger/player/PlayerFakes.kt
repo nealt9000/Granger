@@ -13,6 +13,10 @@ import app.granger.core.player.PlayerMode
 import app.granger.core.player.SavedModes
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SleepSetting
+import app.granger.core.player.voice.VoiceProgress
+import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Records every call by name; [ui] and [queue] are set by the test. */
@@ -43,6 +47,14 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
         calls += "playAudiobook:$id@${at?.positionMs}"
         bookPlays += id to at
     }
+    override val voiceProgress = MutableStateFlow<VoiceProgress?>(null)
+    override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) { calls += "readAloud:${source.key}@${from?.encode()}" }
+    override fun stopVoice() { calls += "stopVoice" }
+    override fun nextParagraph() { calls += "nextParagraph" }
+    override fun previousParagraph() { calls += "previousParagraph" }
+    override fun nextSentence() { calls += "nextSentence" }
+    override fun previousSentence() { calls += "previousSentence" }
+    override fun jumpTo(address: ReadAddress) { calls += "jumpTo:${address.encode()}" }
     override fun setFinished(audiobookId: String, finished: Boolean) { calls += "setFinished:$audiobookId=$finished" }
     override fun unload(audiobookId: String, trackIds: Set<String>) { calls += "unload:$audiobookId" }
     override fun playPause() { calls += "playPause" }
@@ -87,6 +99,14 @@ fun chapter(book: Audiobook, ordinal: Int, durationMs: Long, title: String = "Ch
 fun musicUi(t: Track = track("a", "Song A"), positionMs: Long = 50_000L) = PlayerUi(
     NowPlaying.Music(t, index = 0, queueSize = 3, shuffle = false, repeat = 0),
     playing = true, positionMs = positionMs, durationMs = t.durationMs, sleepRemainingMs = null,
+)
+
+fun voiceUi(title: String = "Rosetta Stone", section: String? = null, playing: Boolean = true, ended: Boolean = false) = PlayerUi(
+    NowPlaying.Voice(
+        "pack:wikipedia_en_top/A/Rosetta_Stone", title, section, "It was found in 1799.", paragraph = 1, speed = 1f,
+        voiceId = VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), ended = ended,
+    ),
+    playing = playing, positionMs = 12_000L, durationMs = 0L, sleepRemainingMs = null,
 )
 
 fun bookUi(book: Audiobook, chapter: AudiobookChapter, chapterCount: Int, positionMs: Long = 0L) = PlayerUi(
