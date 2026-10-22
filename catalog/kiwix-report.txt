@@ -1,4 +1,4 @@
-Kiwix packs in eng: 1311; listed 909, curated 18
+Kiwix packs in eng: 1311; listed 908, curated 18
 
 Listed, by category and family:
   Games & Hobbies / alexandria.dk: 1
@@ -114,7 +114,6 @@ Listed, by category and family:
   Programming / openzim: 2
   Programming / peps.python: 1
   Programming / php.net: 1
-  Programming / postmarketos: 1
   Programming / techbase.kde.org: 1
   Programming / termux: 1
   Programming / thalesdoc: 1
@@ -174,7 +173,7 @@ Listed, by readiness domain:
   medicine: 14
   reference: 77
   science: 55
-  technology: 357
+  technology: 356
   thought: 17
 
 Held back (video): 384
@@ -199,7 +198,8 @@ Held back (video): 384
 
 No license found: 0
 
-No family-table row: 0
+No family-table row: 1
+  wiki.nura.eco: 1
 
 Unsafe ids: 0
 

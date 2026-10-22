@@ -501,7 +501,7 @@ READINESS = {"domains": [
 ]}
 
 
-def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_FAMILIES, books=THOUGHT_BOOKS):
+def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_FAMILIES, books=THOUGHT_BOOKS, onboarding=None):
     (tmp_path / "families.json").write_text(json.dumps({"families": families}))
     (tmp_path / "books.json").write_text(json.dumps(books))
     monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
@@ -509,6 +509,8 @@ def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_
                feed_entry("maps_en_france"), feed_entry("maps_en_spain"))
     curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [],
                "books": [BOOK_ROW], "presets": [], "readiness": readiness}
+    if onboarding is not None:
+        curated["onboarding"] = onboarding
     sizes = {b["urls"][0]: b["sizeBytes"] for b in books["books"]}
     return cg.build(curated, feed_fetch(xml), head=lambda url: sizes[url], root=tmp_path)
 
@@ -593,6 +595,59 @@ def test_real_family_table_has_a_domain_on_every_row():
         assert len(same) > 1, family
         catch_all = same[-1]["match"]
         assert isinstance(catch_all, dict) or catch_all.rstrip("_") == f"^{family.replace('.', chr(92) + '.')}", catch_all
+
+
+# --- Plan H3: the onboarding block ---
+
+ONBOARDING = {"useCases": [
+    {"id": "medical", "title": "Medical work", "blurb": "Clinical references.",
+     "items": ["wikipedia_en_medicine_nopic", "wikipedia_en_medicine_nopic", "family:maps"]},
+    {"id": "faith", "title": "Faith & philosophy", "items": ["@granger-classics", "wikipedia_en_top_nopic"]},
+], "regions": {"larger": ["maps_en_france"]}}
+
+
+def test_onboarding_block_is_written_with_tokens_checked(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch, onboarding=ONBOARDING)
+    block = catalog["onboarding"]
+    assert [u["id"] for u in block["useCases"]] == ["medical", "faith"]
+    medical = block["useCases"][0]
+    assert medical["items"] == ["wikipedia_en_medicine_nopic", "family:maps"]  # de-duplicated, order kept
+    assert medical["blurb"] == "Clinical references."
+    assert block["useCases"][1]["blurb"] == ""
+    assert block["larger"] == ["maps_en_france"]
+
+
+def test_onboarding_rejects_bad_tokens_ids_and_areas(tmp_path, monkeypatch):
+    bad = {"useCases": [{"id": "x", "title": "X", "items": ["nope"]}]}
+    with pytest.raises(SystemExit, match="onboarding x: unknown item"):
+        readiness_build(tmp_path, monkeypatch, onboarding=bad)
+    bad = {"useCases": [{"id": "x", "title": "X", "items": ["family:atlas"]}]}
+    with pytest.raises(SystemExit, match="unknown family"):
+        readiness_build(tmp_path, monkeypatch, onboarding=bad)
+    bad = {"useCases": [{"id": "x", "title": "X", "items": []}]}
+    with pytest.raises(SystemExit, match="no items"):
+        readiness_build(tmp_path, monkeypatch, onboarding=bad)
+    bad = {"useCases": [{"id": "x", "title": "X", "items": ["wikipedia_en_top_nopic"]},
+                        {"id": "x", "title": "Again", "items": ["wikipedia_en_top_nopic"]}]}
+    with pytest.raises(SystemExit, match="duplicate use case"):
+        readiness_build(tmp_path, monkeypatch, onboarding=bad)
+    bad = {"useCases": [], "regions": {"larger": ["wikipedia_en_top_nopic"]}}
+    with pytest.raises(SystemExit, match="not a maps pack"):
+        readiness_build(tmp_path, monkeypatch, onboarding=bad)
+
+
+def test_build_without_an_onboarding_block_writes_none(tmp_path, monkeypatch):
+    assert "onboarding" not in readiness_build(tmp_path, monkeypatch)
+
+
+def test_real_curated_onboarding_names_seven_use_cases_and_larger_areas():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
+    block = curated["onboarding"]
+    assert [u["id"] for u in block["useCases"]] == ["offgrid", "travel", "study", "build", "medical", "software", "faith"]
+    for u in block["useCases"]:
+        assert u["title"] and u["blurb"] and u["items"], u["id"]
+    assert len(block["regions"]["larger"]) >= 7
+    assert all(p.startswith("maps_en_") for p in block["regions"]["larger"])
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():

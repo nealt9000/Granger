@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-22T12:04:01Z",
+  "generatedAt": "2026-10-22T19:45:32Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -370,18 +370,17 @@
       "description": "A subset of Wikipedia encyclopedia dedicated to knots",
       "category": "How-to",
       "language": "eng",
-      "sizeBytes": 18462854,
-      "sha256": "26a926e463151a796ac4ba3274011b51da6967860c5edd8cf22ffc5edafbfeba",
+      "sizeBytes": 14093352,
+      "sha256": "29a3ffa52a725d0ef9dd5359d27b864ec8454c61430c0bfb15fd1929f4b73390",
       "urls": [
-        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_knots_maxi_2026-07.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-07.zim",
-        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-07.zim"
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_en_knots_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_knots_maxi_2026-10.zim"
       ],
-      "snapshotDate": "2026-07-20",
+      "snapshotDate": "2026-10-18",
       "license": "CC BY-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "3a4fe0d0-0bd0-7583-ada8-c52d173ae44d",
+      "zimUuid": "b37270fd-f267-39ba-fc4f-9f3c720e5d8f",
       "zimName": "wikipedia_en_knots",
       "featured": true,
       "family": "wikipedia",
@@ -1541,16 +1540,16 @@
       "description": "How things work and how to fix them",
       "category": "How-to",
       "language": "eng",
-      "sizeBytes": 17343764,
-      "sha256": "f667292f297712d1fe8662450caa27010d91f04b3d1ca36aa8d1285e83044cee",
+      "sizeBytes": 17044635,
+      "sha256": "c57dddaee3d82f735292ee62b4e29e9dd90ba898d5ae691863d2c56eb99999bd",
       "urls": [
-        "https://download.kiwix.org/zim/other/restarters_en_all_maxi_2026-04.zim"
+        "https://download.kiwix.org/zim/other/restarters_en_all_maxi_2026-10.zim"
       ],
-      "snapshotDate": "2026-04-25",
+      "snapshotDate": "2026-10-22",
       "license": "CC BY-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "858ed097-7a8b-c59d-32f4-655e8bf4ff4b",
+      "zimUuid": "f432fb56-2daf-0cd0-c306-db4954e93cb0",
       "zimName": "restarters_en_all",
       "featured": false,
       "family": "restarters",
@@ -7415,16 +7414,16 @@
       "description": "Alpine Linux is a security-oriented, lightweight Linux distribution",
       "category": "Programming",
       "language": "eng",
-      "sizeBytes": 3097481,
-      "sha256": "2d191a9da8bfde47ae505164d076a187513070bf92298fe0eaabdfbaa981ddf1",
+      "sizeBytes": 3208151,
+      "sha256": "730ffb68af1b6a87636297f875c79446a820ab181180fed842a38c63bc68fff5",
       "urls": [
-        "https://download.kiwix.org/zim/other/alpinelinux_en_all_maxi_2026-07.zim"
+        "https://download.kiwix.org/zim/other/alpinelinux_en_all_maxi_2026-10.zim"
       ],
-      "snapshotDate": "2026-07-20",
+      "snapshotDate": "2026-10-18",
       "license": "CC BY-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "d8150207-a8f4-213d-e587-6298ab930cf8",
+      "zimUuid": "31c3bd61-e278-7206-d3dc-9465f909cf97",
       "zimName": "alpinelinux_en_all",
       "featured": false,
       "family": "alpinelinux",
@@ -7541,16 +7540,16 @@
       "description": "Arch Linux documentation",
       "category": "Programming",
       "language": "eng",
-      "sizeBytes": 35601208,
-      "sha256": "c3df551010a953d2c173af8d65a596a7ce434a7fa0771741bc800feeccad1942",
+      "sizeBytes": 38311014,
+      "sha256": "e0cabb299ce29d7a60e0a65cab4d3e14d8e60b5995daeb60b2932bbac04e505b",
       "urls": [
-        "https://download.kiwix.org/zim/other/archlinux_en_all_maxi_2026-07.zim"
+        "https://download.kiwix.org/zim/other/archlinux_en_all_maxi_2026-10.zim"
       ],
-      "snapshotDate": "2026-07-23",
+      "snapshotDate": "2026-10-21",
       "license": "GFDL 1.3 or later",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "431f20f7-58c7-87d4-8f68-eaa4462478bc",
+      "zimUuid": "fbfdc6a7-8d63-f6c8-7580-f6a6faf3b1dd",
       "zimName": "archlinux_en_all",
       "featured": false,
       "family": "archlinux",
@@ -10693,16 +10692,16 @@
       "description": "An independent publication about self-hosting and open-source software",
       "category": "Programming",
       "language": "eng",
-      "sizeBytes": 2399032361,
-      "sha256": "f2d53379824e15a7a693d59126fc577eadcb22096f5c96d424bf2179d16c8c2e",
+      "sizeBytes": 2207619958,
+      "sha256": "ac8672d9b05e20c047718f2b7ad45387ea4ac24ff2eb78ec4ba47be81d416e8e",
       "urls": [
-        "https://download.kiwix.org/zim/zimit/noted.lol_en_all_2026-07.zim"
+        "https://download.kiwix.org/zim/zimit/noted.lol_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-07-21",
+      "snapshotDate": "2026-10-19",
       "license": "Not stated by the source",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "a492a02e-e6cc-6509-3ddc-958ee1f00bf1",
+      "zimUuid": "3271faa0-f8bd-fec2-cde7-9d4991e08b05",
       "zimName": "noted.lol_en_all",
       "featured": false,
       "family": "noted.lol",
@@ -10748,27 +10747,6 @@
       "zimName": "devdocs_en_numpy",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
-    },
-    {
-      "id": "postmarketos_en_all_maxi",
-      "title": "Nura",
-      "description": "Reference wiki for the Linux distribution for mobile devices and beyond",
-      "category": "Programming",
-      "language": "eng",
-      "sizeBytes": 30417456,
-      "sha256": "6abdce8d2c530b12604ccb46685dd3e3a23ec083ba74f647ea40a8bf643103d6",
-      "urls": [
-        "https://download.kiwix.org/zim/other/postmarketos_en_all_maxi_2026-08.zim"
-      ],
-      "snapshotDate": "2026-08-20",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "ce298e1d-615b-48cb-4403-073d2d2080e0",
-      "zimName": "postmarketos_en_all",
-      "featured": false,
-      "family": "postmarketos",
       "domain": "technology"
     },
     {
@@ -13486,16 +13464,16 @@
       "description": "Stack Exchange Q&A for Ubuntu users and developers",
       "category": "Q&A",
       "language": "eng",
-      "sizeBytes": 2767308034,
-      "sha256": "845013492d494c9026b8df3199e9920eb4cfea6cffee2d0ec3c82f549db6e4f2",
+      "sizeBytes": 2767228112,
+      "sha256": "126123033e9f06b9a98461be2c57c926b9501e80cf7851ba110a57574a97d248",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/askubuntu.com_en_all_2026-06.zim"
+        "https://download.kiwix.org/zim/stack_exchange/askubuntu.com_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-06-19",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "cfb37851-8378-f886-3de8-0c038c8bb71b",
+      "zimUuid": "d4c59ca3-b2ba-dd51-9261-4a29efe7821e",
       "zimName": "askubuntu.com_en_all",
       "featured": false,
       "family": "stack_exchange",
@@ -14620,16 +14598,16 @@
       "description": "Stack Exchange Q&A for professional and independent game developers",
       "category": "Q&A",
       "language": "eng",
-      "sizeBytes": 532395857,
-      "sha256": "64d33e935900e1bf9fea6e17175326f85254d0217911396a79ea7df14c4a6b93",
+      "sizeBytes": 533451217,
+      "sha256": "a03be9ad69bfd37f41a233476a04eb47b9498b9e1d655906a695351a19030af8",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/gamedev.stackexchange.com_en_all_2026-02.zim"
+        "https://download.kiwix.org/zim/stack_exchange/gamedev.stackexchange.com_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-02-02",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "f14c3a49-d422-beee-767b-0d58fde0b73d",
+      "zimUuid": "4f4af63d-d7b4-5bac-b5d9-5060d1d80767",
       "zimName": "gamedev.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange",
@@ -15334,16 +15312,16 @@
       "description": "Stack Exchange Q&A for everything related to medicine and healthcare sciences",
       "category": "Q&A",
       "language": "eng",
-      "sizeBytes": 60799834,
-      "sha256": "cdf4bfa36ba2142fe3ec0d19d7c08486a0d121f55b9c44f7f5adbfb748d6cbad",
+      "sizeBytes": 60659941,
+      "sha256": "14542ddfa6a9b354fa3e0468b3ff49ee2544defce175270209f4014d34f2feec",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/medicalsciences.stackexchange.com_en_all_2026-02.zim"
+        "https://download.kiwix.org/zim/stack_exchange/medicalsciences.stackexchange.com_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-02-02",
+      "snapshotDate": "2026-10-20",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "106a6b3b-25b7-dc35-90e3-499044f6370c",
+      "zimUuid": "2f760ea4-f61e-962c-0e85-f62f6aa46552",
       "zimName": "medicalsciences.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange",
@@ -16132,16 +16110,16 @@
       "description": "Stack Exchange Q&A for system and network administrators",
       "category": "Q&A",
       "language": "eng",
-      "sizeBytes": 1639953058,
-      "sha256": "e7e40021c3bc03e23a83859a1a5d9f467043b8bc312566a8dea5599ddc375587",
+      "sizeBytes": 1636338002,
+      "sha256": "b734f98236e2190d508f60e73cd24ac1f2708b16c2b1d9f7ba5851228a781692",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/serverfault.com_en_all_2026-02.zim"
+        "https://download.kiwix.org/zim/stack_exchange/serverfault.com_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-02-05",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "242d10e5-e4f6-1c2c-babe-777c11ba2f48",
+      "zimUuid": "8b14e9a1-00b9-d813-3eb7-1e496c6d5a84",
       "zimName": "serverfault.com_en_all",
       "featured": false,
       "family": "stack_exchange",
@@ -16447,16 +16425,16 @@
       "description": "Perguntas e respostas para programadores profissionais e entusiastas",
       "category": "Q&A",
       "language": "eng,por",
-      "sizeBytes": 934140922,
-      "sha256": "8c7b994da82b5f64ccba24d01d1505b8f215273934450df83ae4f72a76cf4832",
+      "sizeBytes": 933616206,
+      "sha256": "977bb245553ca7a0899022febf64c7640cf497995614c7fbfe1061710810bdd8",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/pt.stackoverflow.com_mul_all_2026-02.zim"
+        "https://download.kiwix.org/zim/stack_exchange/pt.stackoverflow.com_mul_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-02-05",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "15001180-9b29-2f8f-e5a3-34ff2797908d",
+      "zimUuid": "d7ffb673-0c41-ffd2-17a2-fca562910a3e",
       "zimName": "pt.stackoverflow.com_mul_all",
       "featured": false,
       "family": "stack_exchange",
@@ -16468,16 +16446,16 @@
       "description": "Preguntas y respuestas para programadores y profesionales de la informática",
       "category": "Q&A",
       "language": "eng,spa",
-      "sizeBytes": 1430257791,
-      "sha256": "4be65e0f0cb95a540001f9e184e9651a2bbd7432ad8edd363e9ffb227af5c68c",
+      "sizeBytes": 1436456316,
+      "sha256": "63cddb9a17e6c87a0c2256b6bfe251f94685160f50856a1d3f8415628c5b2ac5",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/es.stackoverflow.com_mul_all_2026-02.zim"
+        "https://download.kiwix.org/zim/stack_exchange/es.stackoverflow.com_mul_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-02-02",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "a613c8b4-a4f0-783b-b669-837e501568d8",
+      "zimUuid": "3854b941-1bc8-b6ea-c417-60ade02d2f66",
       "zimName": "es.stackoverflow.com_mul_all",
       "featured": false,
       "family": "stack_exchange",
@@ -17035,16 +17013,16 @@
       "description": "熱狂的でプロフェッショナルなプログラマーのためのQ&A",
       "category": "Q&A",
       "language": "eng,jpn",
-      "sizeBytes": 236789540,
-      "sha256": "7217481d1d05f6dd82d0e4c8d69c834c884596960fff9da3f12aa7932f8b08e2",
+      "sizeBytes": 236055455,
+      "sha256": "c1a3a311d7a071dc0032cc1a79a5bf87e3f748959c33d488adbecbcf13926a0d",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/ja.stackoverflow.com_mul_all_2026-02.zim"
+        "https://download.kiwix.org/zim/stack_exchange/ja.stackoverflow.com_mul_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-02-04",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "9528fea1-132e-9621-e133-e8a6c200e8c7",
+      "zimUuid": "ab7c8918-9940-f83d-9a14-7f64b4f55636",
       "zimName": "ja.stackoverflow.com_mul_all",
       "featured": false,
       "family": "stack_exchange",
@@ -27665,6 +27643,115 @@
           "hermeneutics.stackexchange.com_en_all"
         ]
       }
+    ]
+  },
+  "onboarding": {
+    "useCases": [
+      {
+        "id": "offgrid",
+        "title": "Off-grid & emergencies",
+        "blurb": "What to do when the grid, the water or the clinic is out of reach.",
+        "items": [
+          "zimgit-post-disaster_en",
+          "ready.gov_en_all",
+          "trueprepper.com_en_all",
+          "appropedia_en_all_maxi",
+          "zimgit-water_en",
+          "zimgit-food-preparation_en",
+          "zimgit-medicine_en",
+          "wikem_en_all_maxi"
+        ]
+      },
+      {
+        "id": "travel",
+        "title": "Travel",
+        "blurb": "Guides and maps for the road; your region's map comes from the picker above.",
+        "items": [
+          "wikivoyage_en_all_maxi",
+          "openstreetmap-wiki_en_all_maxi"
+        ]
+      },
+      {
+        "id": "study",
+        "title": "Study",
+        "blurb": "Textbooks and courses, from school to university.",
+        "items": [
+          "wikibooks_en_all_maxi",
+          "wikiversity_en_all_maxi",
+          "wikipedia_en_mathematics_maxi",
+          "wikipedia_en_physics_maxi",
+          "wikipedia_en_chemistry_maxi",
+          "oer4schools_en_all",
+          "milneopentextbooks.org_en_all"
+        ]
+      },
+      {
+        "id": "build",
+        "title": "Build & repair",
+        "blurb": "Fixing, making and powering things.",
+        "items": [
+          "ifixit_en_all",
+          "wikipedia_en_knots_maxi",
+          "solar.lowtechmagazine.com_mul_all",
+          "cd3wdproject.org_en_all",
+          "diy.stackexchange.com_en_all",
+          "electronics.stackexchange.com_en_all",
+          "family:energypedia"
+        ]
+      },
+      {
+        "id": "medical",
+        "title": "Medical work",
+        "blurb": "Clinical references beyond first aid.",
+        "items": [
+          "wikipedia_en_medicine_maxi",
+          "wikem_en_all_maxi",
+          "medlineplus.gov_en_all",
+          "zimgit-medicine_en",
+          "wwwnc.cdc.gov_en_all",
+          "family:mdwiki"
+        ]
+      },
+      {
+        "id": "software",
+        "title": "Software",
+        "blurb": "Documentation and answers for programming and systems.",
+        "items": [
+          "wikipedia_en_computer_maxi",
+          "docs.python.org_en_all",
+          "superuser.com_en_all",
+          "unix.stackexchange.com_en_all",
+          "openwrt.org_en_all",
+          "family:mediawiki"
+        ]
+      },
+      {
+        "id": "faith",
+        "title": "Faith & philosophy",
+        "blurb": "Scripture, philosophy and history, and the questions people ask about them.",
+        "items": [
+          "@granger-classics",
+          "wikipedia_en_history_maxi",
+          "philosophy.stackexchange.com_en_all",
+          "christianity.stackexchange.com_en_all",
+          "islam.stackexchange.com_en_all",
+          "judaism.stackexchange.com_en_all",
+          "buddhism.stackexchange.com_en_all",
+          "hinduism.stackexchange.com_en_all"
+        ]
+      }
+    ],
+    "larger": [
+      "maps_en_all",
+      "maps_en_africa",
+      "maps_en_asia",
+      "maps_en_europe",
+      "maps_en_north-america",
+      "maps_en_south-america",
+      "maps_en_australia-oceania",
+      "maps_en_central-america",
+      "maps_en_nordics",
+      "maps_en_andes"
     ]
   }
 }

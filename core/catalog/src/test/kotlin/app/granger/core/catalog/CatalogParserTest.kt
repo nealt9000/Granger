@@ -217,6 +217,34 @@ class CatalogParserTest {
         assertThat(catalog.readiness).isNull()
     }
 
+    private fun onboardingCatalog(block: String) = """
+        {"formatVersion": 1, "generatedAt": "2026-10-22T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine")}, ${pack("maps_en_france", "maps", "maps")}],
+         "books": [${book("gc-bible", "thought")}, ${book("gc-hamlet", "literature")}],
+         "onboarding": $block}
+    """.trimIndent().toByteArray()
+
+    @Test fun onboardingKeepsResolvedUseCasesAndMapAreas() {
+        val block = """{"useCases": [
+            {"id": "medical", "title": "Medical work", "blurb": "Clinical.", "items": ["med", "nope", "family:maps", "med"]},
+            {"id": "faith", "title": "Faith", "items": ["@granger-classics", "@lost"]},
+            {"id": "empty", "title": "Nothing", "items": ["nope"]},
+            {"id": "", "title": "Blank", "items": ["med"]},
+            {"id": "medical", "title": "Again", "items": ["med"]}
+        ], "larger": ["maps_en_france", "med", "maps_en_france"]}"""
+        val onboarding = ok(parse(onboardingCatalog(block))).onboarding!!
+        assertThat(onboarding.useCases.map { it.id }).containsExactly("medical", "faith").inOrder()
+        assertThat(onboarding.useCases[0].items).containsExactly("med", "family:maps").inOrder()
+        assertThat(onboarding.useCases[0].blurb).isEqualTo("Clinical.")
+        assertThat(onboarding.useCases[1].items).containsExactly("@granger-classics")
+        assertThat(onboarding.larger).containsExactly("maps_en_france")
+    }
+
+    @Test fun onboardingWithNothingLeftIsNullAndOlderCatalogsHaveNone() {
+        assertThat(ok(parse(onboardingCatalog("""{"useCases": [{"id": "x", "title": "X", "items": ["nope"]}], "larger": ["med"]}"""))).onboarding).isNull()
+        assertThat(ok(parse(readinessCatalog(domains))).onboarding).isNull()
+    }
+
     @Test fun readinessKeepsOnlyTokensTheCatalogKnows() {
         val readiness = ok(parse(readinessCatalog(domains))).readiness!!
         val medicine = readiness.domains.single { it.id == "medicine" }
