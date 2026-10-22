@@ -15,7 +15,10 @@ import kotlin.math.sqrt
  * the first such sentence wins.
  */
 object CitedQuote {
-    /** [sentence] with up to [CONTEXT] characters of the passage on each side, for telling repeats apart. */
+    /**
+     * [sentence] with up to [CONTEXT] characters of the passage on each side, for telling repeats apart. Context never
+     * crosses a paragraph break (`\n` in passage text), since the page's text has none there.
+     */
     data class Quote(val before: String, val sentence: String, val after: String)
 
     const val MIN_WORDS = 4
@@ -47,10 +50,12 @@ object CitedQuote {
         val start = best.first + (raw.length - raw.trimStart().length)
         val sentence = cut(raw.trim())
         val end = start + sentence.length
+        val paragraphStart = text.lastIndexOf('\n', start - 1) + 1
+        val paragraphEnd = text.indexOf('\n', end).let { if (it < 0) text.length else it }
         return Quote(
-            before = text.substring((start - CONTEXT).coerceAtLeast(0), start),
+            before = text.substring((start - CONTEXT).coerceAtLeast(paragraphStart), start),
             sentence = sentence,
-            after = text.substring(end, (end + CONTEXT).coerceAtMost(text.length)),
+            after = text.substring(end, (end + CONTEXT).coerceAtMost(paragraphEnd)),
         )
     }
 
@@ -69,16 +74,25 @@ object CitedQuote {
 
     internal fun fold(s: String): String = marks.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase(Locale.ROOT)
 
+    /** Sentence ranges in [text], paragraph by paragraph: a sentence never runs across a `\n`. */
     private fun sentences(text: String): List<IntRange> {
-        val it = BreakIterator.getSentenceInstance(Locale.ENGLISH)
-        it.setText(text)
         val out = mutableListOf<IntRange>()
-        var start = it.first()
-        var end = it.next()
-        while (end != BreakIterator.DONE) {
-            if (text.substring(start, end).isNotBlank()) out += start until end
-            start = end
-            end = it.next()
+        val it = BreakIterator.getSentenceInstance(Locale.ENGLISH)
+        var from = 0
+        while (from <= text.length) {
+            val to = text.indexOf('\n', from).let { i -> if (i < 0) text.length else i }
+            val paragraph = text.substring(from, to)
+            it.setText(paragraph)
+            var start = it.first()
+            var end = it.next()
+            while (end != BreakIterator.DONE) {
+                // Trailing whitespace stays out, so a range ends on the sentence's last character.
+                val piece = paragraph.substring(start, end)
+                if (piece.isNotBlank()) out += (from + start) until (from + start + piece.trimEnd().length)
+                start = end
+                end = it.next()
+            }
+            from = to + 1
         }
         return out
     }

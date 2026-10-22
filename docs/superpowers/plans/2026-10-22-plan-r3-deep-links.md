@@ -256,20 +256,15 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
 
 ### Task 6: Better book quotes
 
-**Files:**
-- Modify: `CitationOpener.kt` (the book target's `TextQuote(before, sentence, after)` from `CitedQuote`; with no quote, the
-  old first-80-characters cut, so nothing gets worse)
-- Modify: `app/src/main/kotlin/app/granger/ebook/StartLocator.kt` only if a test shows Readium needs the quote trimmed to
-  the resource's text (whitespace)
-- Tests: `StartLocatorTest` (`aMidPassageQuoteLandsOnItsSentence` on the test's own small EPUB fixture, `beforeAfterPickTheRightRepeat`),
-  `CitationOpenerTest` (from Task 4, now asserting the sentence)
+**As built (2026-10-22):** the opener from Task 4 already hands books `TextQuote(before, sentence, after)` from
+`CitedQuote`, and `StartLocator` already passes all three to Readium and falls back to the saved place for an href outside
+the reading order (`startLocatorPrefersRouteTargetThenSavedThenStart`, `targetQuoteBecomesTheLocatorText`), so it is
+unchanged. What changed is `CitedQuote`: book passage text joins paragraphs with `\n` (`XhtmlText`), which the page's
+text doesn't have, so sentences are split paragraph by paragraph and the 40-character context stops at the paragraph.
+Readium's own text search runs in the WebView; the walkthrough (Task 8) checks it lands.
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*' --tests '*CitationOpenerTest'`. Expected:
-      failures on the new tests.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** Same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: book citations highlight the sentence the answer used`
+- Test: `CitedQuoteTest.sentencesAndContextStopAtParagraphs`; `CitationOpenerTest.aBookOpensAtTheBestSentenceWithContext`.
+- **Commit.** `R3: book citations highlight the sentence the answer used`
 
 ### Task 7: Media pages at the part, and the Play button
 

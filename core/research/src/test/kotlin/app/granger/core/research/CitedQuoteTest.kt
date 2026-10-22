@@ -61,4 +61,13 @@ class CitedQuoteTest {
     @Test fun noWordsIsNull() {
         assertThat(CitedQuote.pick("x [1]", 1, "  … ")).isNull()
     }
+
+    @Test fun sentencesAndContextStopAtParagraphs() {
+        val text = "CHAPTER I\nEmma Woodhouse, handsome, clever, and rich, seemed to unite some of the best blessings.\nShe had lived nearly twenty-one years in the world."
+        val q = CitedQuote.pick("Emma was handsome, clever and rich [1].", 1, text)!!
+        assertThat(q.sentence).isEqualTo("Emma Woodhouse, handsome, clever, and rich, seemed to unite some of the best blessings.")
+        assertThat(q.before).isEmpty()
+        assertThat(q.after).isEmpty()
+        assertThat(CitedQuote.pick("[1]", 1, text)!!.sentence).startsWith("Emma Woodhouse")    // "CHAPTER I" is too short
+    }
 }
