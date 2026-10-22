@@ -1,5 +1,5 @@
 {
- "_about": "Kiwix pack families for catalog_gen.py: category, license and hold per family, verified against each source on 2026-10-20 (source = where the license is stated). A pack whose family has no row, a null license or a hold is left out (Neal, 2026-10-20: families with no stated license are listed as \"Not stated by the source\"); the first matching row wins. match is a regex on the ZIM name, or {\"kiwixCategory\": …}.",
+ "_about": "Kiwix pack families for catalog_gen.py: category, license, hold and readiness domain per family, verified against each source on 2026-10-20 (source = where the license is stated). A pack whose family has no row, a null license or a hold is left out (Neal, 2026-10-20: families with no stated license are listed as \"Not stated by the source\"); the first matching row wins, so a family's sub-rows (Wikipedia's subject packs, the Stack Exchange sites, LibreTexts) come before its catch-all. match is a regex on the ZIM name, or {\"kiwixCategory\": …}. domain is one of the nine readiness domains (medicine, food, making, science, technology, maps, reference, literature, thought; Plan H1, spec 2026-10-21-home-readiness-onboarding-design.md §3) or null for families that count in storage only.",
  "families": [
   {
    "family": "alexandria.dk",
@@ -10,7 +10,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. alexandria.dk/en/about: other usage requires author permission; protected as collective work under Danish Copyright Act section 71. Large (43GB) - includes scanned RPG scenarios."
+   "note": "Neal, 2026-10-20: listed without a stated license. alexandria.dk/en/about: other usage requires author permission; protected as collective work under Danish Copyright Act section 71. Large (43GB) - includes scanned RPG scenarios.",
+   "domain": null
   },
   {
    "family": "balatrowiki",
@@ -21,7 +22,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://balatrowiki.org/",
-   "note": null
+   "note": null,
+   "domain": null
   },
   {
    "family": "bindingofisaacrebirth",
@@ -32,7 +34,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://bindingofisaacrebirth.wiki.gg/wiki/Binding_of_Isaac:_Rebirth_Wiki",
-   "note": "wiki.gg footer CC BY-SA 4.0 unless otherwise noted. Game assets are Nicalis/McMillen's."
+   "note": "wiki.gg footer CC BY-SA 4.0 unless otherwise noted. Game assets are Nicalis/McMillen's.",
+   "domain": null
   },
   {
    "family": "bulbagarden",
@@ -43,7 +46,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://bulbapedia.bulbagarden.net/wiki/Bulbapedia:Copyrights",
-   "note": "Read via search result (site 403). Pre-2007 revisions CC BY-NC-SA 2.0; Wikipedia-derived articles GFDL; Pokemon images copyrighted."
+   "note": "Read via search result (site 403). Pre-2007 revisions CC BY-NC-SA 2.0; Wikipedia-derived articles GFDL; Pokemon images copyrighted.",
+   "domain": null
   },
   {
    "family": "capoeirawiki.org",
@@ -54,7 +58,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://capoeirawiki.org/",
-   "note": "Footer: 'unless otherwise noted'."
+   "note": "Footer: 'unless otherwise noted'.",
+   "domain": null
   },
   {
    "family": "dandwiki",
@@ -65,7 +70,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.dandwiki.com/wiki/D%26D_Wiki:Copyrights",
-   "note": "The site returned 403, so the license comes from a search excerpt of the copyright page. Some content is marked OGL v1.0a or other exceptions. Content is fan homebrew for a trademarked game."
+   "note": "The site returned 403, so the license comes from a search excerpt of the copyright page. Some content is marked OGL v1.0a or other exceptions. Content is fan homebrew for a trademarked game.",
+   "domain": null
   },
   {
    "family": "dwarffortresswiki.org",
@@ -76,7 +82,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://dwarffortresswiki.org/index.php/MediaWiki:Licenses",
-   "note": "Footer/rightsinfo: GFDL & MIT unless otherwise noted. Images individually licensed, some non-free screenshots."
+   "note": "Footer/rightsinfo: GFDL & MIT unless otherwise noted. Images individually licensed, some non-free screenshots.",
+   "domain": null
   },
   {
    "family": "evageeks",
@@ -87,7 +94,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.evageeks.org/EvaWiki:Copyrights",
-   "note": "Read via search result (site 403); rules page also mentions GFDL; screenshots (c) Gainax/Khara."
+   "note": "Read via search result (site 403); rules page also mentions GFDL; screenshots (c) Gainax/Khara.",
+   "domain": null
   },
   {
    "family": "footballdatabase.com",
@@ -98,7 +106,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.footballdatabase.com/",
-   "note": "The only basis is the footer line '(CC BY-SA 4.0) FootballDatabase.com'. There is no separate license page, and club logos and crests are likely third-party."
+   "note": "The only basis is the footer line '(CC BY-SA 4.0) FootballDatabase.com'. There is no separate license page, and club logos and crests are likely third-party.",
+   "domain": null
   },
   {
    "family": "frackinuniverse",
@@ -109,7 +118,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://frackinuniverse.miraheze.org/wiki/Main_Page",
-   "note": "Footer: 'unless otherwise noted'. This is a wiki for a Starbound mod, and game assets belong to their owners."
+   "note": "Footer: 'unless otherwise noted'. This is a wiki for a Starbound mod, and game assets belong to their owners.",
+   "domain": null
   },
   {
    "family": "fretmap.app",
@@ -120,7 +130,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://fretmap.app/terms",
-   "note": "Neal, 2026-10-20: listed without a stated license. The terms say all materials are FretMap's property and users may not reproduce or redistribute them. Excluded."
+   "note": "Neal, 2026-10-20: listed without a stated license. The terms say all materials are FretMap's property and users may not reproduce or redistribute them. Excluded.",
+   "domain": "literature"
   },
   {
    "family": "granbluefantasy",
@@ -131,7 +142,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://gbf.wiki/Granblue_Fantasy_Wiki:General_disclaimer",
-   "note": "Footer license read via search result (site 403). Game art (c) Cygames."
+   "note": "Footer license read via search result (site 403). Game art (c) Cygames.",
+   "domain": null
   },
   {
    "family": "ibanezwiki",
@@ -142,7 +154,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.fandom.com/licensing",
-   "note": "Source is ibanez.fandom.com (Fandom default CC BY-SA 3.0; footer 'CC-BY-SA' seen via search, site 402). Product images/catalog scans not owned by wiki."
+   "note": "Source is ibanez.fandom.com (Fandom default CC BY-SA 3.0; footer 'CC-BY-SA' seen via search, site 402). Product images/catalog scans not owned by wiki.",
+   "domain": "literature"
   },
   {
    "family": "minecraft.wiki",
@@ -153,7 +166,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://minecraft.wiki/w/Minecraft_Wiki:Copyrights",
-   "note": "Game images copyright Mojang."
+   "note": "Game images copyright Mojang.",
+   "domain": null
   },
   {
    "family": "music.dalitio.de",
@@ -164,7 +178,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://music.dalitio.de/faq.html",
-   "note": "Sheet music by Christoph Dalitz; FAQ says works use CC Attribution or Share-Alike licenses, not specified per work."
+   "note": "Sheet music by Christoph Dalitz; FAQ says works use CC Attribution or Share-Alike licenses, not specified per work.",
+   "domain": "literature"
   },
   {
    "family": "neos-wiki",
@@ -175,7 +190,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. wiki.neos.com offline; no license found."
+   "note": "Neal, 2026-10-20: listed without a stated license. wiki.neos.com offline; no license found.",
+   "domain": null
   },
   {
    "family": "pg3d",
@@ -186,7 +202,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://pg3d.wiki.gg/",
-   "note": "wiki.gg footer CC BY-SA 4.0 unless otherwise noted."
+   "note": "wiki.gg footer CC BY-SA 4.0 unless otherwise noted.",
+   "domain": null
   },
   {
    "family": "pokemonwiki",
@@ -197,7 +214,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://pokemon.fandom.com/api.php?action=query&meta=siteinfo&siprop=rightsinfo&format=json",
-   "note": "Source is pokemon.fandom.com (zim-requests#545). Site rightsinfo says CC-BY-SA (Fandom default, 3.0); the request issue claimed CC BY-NC-SA 3.0, conflicting. Images are mostly copyrighted Nintendo/Game Freak artwork under fair use."
+   "note": "Source is pokemon.fandom.com (zim-requests#545). Site rightsinfo says CC-BY-SA (Fandom default, 3.0); the request issue claimed CC BY-NC-SA 3.0, conflicting. Images are mostly copyrighted Nintendo/Game Freak artwork under fair use.",
+   "domain": null
   },
   {
    "family": "rimworldwiki",
@@ -208,7 +226,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://rimworldwiki.com/wiki/Main_Page",
-   "note": "Footer: 'Content is available under CC BY-SA 3.0 unless otherwise noted.' Game images are Ludeon's."
+   "note": "Footer: 'Content is available under CC BY-SA 3.0 unless otherwise noted.' Game images are Ludeon's.",
+   "domain": null
   },
   {
    "family": "riskofrain2",
@@ -219,7 +238,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://riskofrain2.wiki.gg/wiki/Risk_of_Rain_2_Wiki",
-   "note": "Assumes ZIM is from riskofrain2.wiki.gg; Fandom version is CC BY-NC-SA 3.0."
+   "note": "Assumes ZIM is from riskofrain2.wiki.gg; Fandom version is CC BY-NC-SA 3.0.",
+   "domain": null
   },
   {
    "family": "sh1.org",
@@ -230,7 +250,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": "https://sh1.org/legal.htm",
-   "note": "Neal, 2026-10-20: listed without a stated license. German railway signals site; all content (c) Wolfgang Meyenberg, use only by permission ('Please inquire prior to use'), non-profit. Not an open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. German railway signals site; all content (c) Wolfgang Meyenberg, use only by permission ('Please inquire prior to use'), non-profit. Not an open license.",
+   "domain": null
   },
   {
    "family": "stardewvalleywiki",
@@ -241,7 +262,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://stardewvalleywiki.com/Stardew_Valley_Wiki:Copyrights",
-   "note": "Site 403, so the license comes from a search excerpt. Game images, art and lore belong to ConcernedApe and are excluded from the CC license."
+   "note": "Site 403, so the license comes from a search excerpt. Game images, art and lore belong to ConcernedApe and are excluded from the CC license.",
+   "domain": null
   },
   {
    "family": "survivors",
@@ -252,7 +274,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://vampire.survivors.wiki/w/Main_Page",
-   "note": "Weird Gloop wiki; footer CC BY-NC-SA 3.0."
+   "note": "Weird Gloop wiki; footer CC BY-NC-SA 3.0.",
+   "domain": null
   },
   {
    "family": "terraria.wiki.gg",
@@ -263,7 +286,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://terraria.wiki.gg/wiki/Terraria_Wiki",
-   "note": null
+   "note": null,
+   "domain": null
   },
   {
    "family": "the",
@@ -274,7 +298,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://theinfosphere.org/Main_Page",
-   "note": "Futurama screenshots copyrighted."
+   "note": "Futurama screenshots copyrighted.",
+   "domain": null
   },
   {
    "family": "tonedear.com",
@@ -285,7 +310,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; zim-requests#723 lists License: Not Mentioned. Ear-training web app."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; zim-requests#723 lists License: Not Mentioned. Ear-training web app.",
+   "domain": "literature"
   },
   {
    "family": "uesp.net",
@@ -296,7 +322,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.uesp.net/wiki/Main_Page",
-   "note": "Game images (c) Bethesda."
+   "note": "Game images (c) Bethesda.",
+   "domain": null
   },
   {
    "family": "whitewolfwiki",
@@ -307,7 +334,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.fandom.com/licensing",
-   "note": "Fandom wiki; siteinfo rights 'CC-BY-SA' -> fandom.com/licensing (CC BY-SA 3.0). Old policy pages still mention GFDL. Heavy fair-use of White Wolf IP."
+   "note": "Fandom wiki; siteinfo rights 'CC-BY-SA' -> fandom.com/licensing (CC BY-SA 3.0). Old policy pages still mention GFDL. Heavy fair-use of White Wolf IP.",
+   "domain": null
   },
   {
    "family": "wiki",
@@ -318,7 +346,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://mtg.wiki/page/Main_Page",
-   "note": "mtg.wiki (Magic: The Gathering) footer CC BY-NC-SA 4.0. Card images are Wizards of the Coast. Generic 'wiki_' name - regex relies on no other pack being named wiki_*."
+   "note": "mtg.wiki (Magic: The Gathering) footer CC BY-NC-SA 4.0. Card images are Wizards of the Coast. Generic 'wiki_' name - regex relies on no other pack being named wiki_*.",
+   "domain": null
   },
   {
    "family": "wiki.leagueoflegends.com",
@@ -329,7 +358,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.leagueoflegends.com/en-us/",
-   "note": "Footer: 'additional terms may apply'. Game assets are © Riot Games."
+   "note": "Footer: 'additional terms may apply'. Game assets are © Riot Games.",
+   "domain": null
   },
   {
    "family": "zdoom",
@@ -340,7 +370,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Site unreachable; third-party archive label suggests GFDL, unverified."
+   "note": "Neal, 2026-10-20: listed without a stated license. Site unreachable; third-party archive label suggests GFDL, unverified.",
+   "domain": null
   },
   {
    "family": "100r.co",
@@ -351,7 +382,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://100r.co/site/home.html",
-   "note": "Hundred Rabbits site (sailing/off-grid/tools). Footer: BY-NC-SA 4.0."
+   "note": "Hundred Rabbits site (sailing/off-grid/tools). Footer: BY-NC-SA 4.0.",
+   "domain": "making"
   },
   {
    "family": "appropedia",
@@ -362,7 +394,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.appropedia.org/Welcome_to_Appropedia",
-   "note": "Footer CC BY-SA 4.0 unless otherwise noted; some pages carry other licenses (e.g. CC BY-SA 3.0)."
+   "note": "Footer CC BY-SA 4.0 unless otherwise noted; some pages carry other licenses (e.g. CC BY-SA 3.0).",
+   "domain": "food"
   },
   {
    "family": "armypubs",
@@ -373,7 +406,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://armypubs.army.mil/Footer/PrivacyNotice.aspx",
-   "note": "Information 'not identified as protected by copyright, is considered public information and may be distributed or copied'. Credit is requested. Some publications may contain copyrighted third-party material. Military doctrine content."
+   "note": "Information 'not identified as protected by copyright, is considered public information and may be distributed or copied'. Credit is requested. Some publications may contain copyrighted third-party material. Military doctrine content.",
+   "domain": "food"
   },
   {
    "family": "based.cooking",
@@ -384,7 +418,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/LukeSmithxyz/based.cooking/blob/master/README.md",
-   "note": "README: 'This website and all its content is in the public domain.'"
+   "note": "README: 'This website and all its content is in the public domain.'",
+   "domain": "food"
   },
   {
    "family": "canadian-prepper",
@@ -395,7 +430,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube channel scrape (openZIM youtube offliner). No license found other than standard YouTube terms."
+   "note": "YouTube channel scrape (openZIM youtube offliner). No license found other than standard YouTube terms.",
+   "domain": "food"
   },
   {
    "family": "cd3wdproject.org",
@@ -406,7 +442,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. No license on the site. Appropedia lists CC BY-SA 3.0 but says clear permission was not given. Documents come from many third-party NGOs and agencies."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license on the site. Appropedia lists CC BY-SA 3.0 but says clear permission was not given. Documents come from many third-party NGOs and agencies.",
+   "domain": "making"
   },
   {
    "family": "energypedia",
@@ -417,7 +454,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://energypedia.info/wiki/Energypedia:About",
-   "note": "Footer: CC BY-SA 4.0."
+   "note": "Footer: CC BY-SA 4.0.",
+   "domain": "making"
   },
   {
    "family": "foss.cooking",
@@ -428,7 +466,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/Rushmore75/foss.cooking/blob/master/LICENSE.md",
-   "note": "Site itself was down (522); license from the site's source repo."
+   "note": "Site itself was down (522); license from the site's source repo.",
+   "domain": "food"
   },
   {
    "family": "gardenology",
@@ -439,7 +478,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.gardenology.org/wiki/Copyright",
-   "note": "Text CC BY-SA (deed links 3.0); photos have individual licenses, 'vast majority' CC or GNU."
+   "note": "Text CC BY-SA (deed links 3.0); photos have individual licenses, 'vast majority' CC or GNU.",
+   "domain": "food"
   },
   {
    "family": "gramps-project.org",
@@ -450,7 +490,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://gramps-project.org/wiki/index.php/Gramps:Copyrights",
-   "note": "From a search excerpt. The manual section is dual GFDL/GPLv2+."
+   "note": "From a search excerpt. The manual section is dual GFDL/GPLv2+.",
+   "domain": "technology"
   },
   {
    "family": "grimgrains",
@@ -461,7 +502,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://grimgrains.com/site/home.html",
-   "note": "Hundred Rabbits recipe site."
+   "note": "Hundred Rabbits recipe site.",
+   "domain": "food"
   },
   {
    "family": "ifixit",
@@ -472,7 +514,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.ifixit.com/Info/Licensing",
-   "note": "iFixit also prohibits using its content to train AI."
+   "note": "iFixit also prohibits using its content to train AI.",
+   "domain": "making"
   },
   {
    "family": "lrnselfreliance",
@@ -483,7 +526,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube channel scrape. No license found beyond standard YouTube terms."
+   "note": "YouTube channel scrape. No license found beyond standard YouTube terms.",
+   "domain": "food"
   },
   {
    "family": "privacydefence.org",
@@ -494,7 +538,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://privacydefence.org/opsec/bibleprivacy/",
-   "note": null
+   "note": null,
+   "domain": "technology"
   },
   {
    "family": "project-fuel",
@@ -505,7 +550,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube playlist scrape. No license found beyond standard YouTube terms."
+   "note": "YouTube playlist scrape. No license found beyond standard YouTube terms.",
+   "domain": "making"
   },
   {
    "family": "publicdomainrecipes.com",
@@ -516,7 +562,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://publicdomainrecipes.com/",
-   "note": null
+   "note": null,
+   "domain": "food"
   },
   {
    "family": "rabbitwaves.ca",
@@ -527,7 +574,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://rabbitwaves.ca/site/about",
-   "note": "Footer: '© 2024 BY-NC-SA 4.0' (Hundred Rabbits)."
+   "note": "Footer: '© 2024 BY-NC-SA 4.0' (Hundred Rabbits).",
+   "domain": "making"
   },
   {
    "family": "ready.gov",
@@ -538,7 +586,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.fema.gov/about/website-information",
-   "note": "FEMA: 'Most material on FEMA.gov is free of copyright and may be copied and distributed without permission'; some licensed photos/graphics restricted. Ready.gov is FEMA's site; statement is on fema.gov."
+   "note": "FEMA: 'Most material on FEMA.gov is free of copyright and may be copied and distributed without permission'; some licensed photos/graphics restricted. Ready.gov is FEMA's site; statement is on fema.gov.",
+   "domain": "food"
   },
   {
    "family": "restarters",
@@ -549,7 +598,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.restarters.net/Main_Page",
-   "note": "Main page says reuse is allowed under 'Creative Commons ShareAlike Licence 4.0' (wording omits 'Attribution'). Not in the footer."
+   "note": "Main page says reuse is allowed under 'Creative Commons ShareAlike Licence 4.0' (wording omits 'Attribution'). Not in the footer.",
+   "domain": "making"
   },
   {
    "family": "s2underground",
@@ -560,7 +610,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube playlists; standard YouTube license, no open license found. Content is security/tradecraft commentary."
+   "note": "YouTube playlists; standard YouTube license, no open license found. Content is security/tradecraft commentary.",
+   "domain": "food"
   },
   {
    "family": "solar.lowtechmagazine.com",
@@ -571,7 +622,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Only '© Kris De Decker'. No license found on the homepage or about pages."
+   "note": "Neal, 2026-10-20: listed without a stated license. Only '© Kris De Decker'. No license found on the homepage or about pages.",
+   "domain": "making"
   },
   {
    "family": "survivorlibrary.com",
@@ -582,7 +634,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; old scanned books, mostly presumed public domain but not stated."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; old scanned books, mostly presumed public domain but not stated.",
+   "domain": "food"
   },
   {
    "family": "trueprepper.com",
@@ -593,7 +646,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Footer: 'Copyright 2016-2026 TruePrepper. All rights reserved.' (https://www.trueprepper.com/)"
+   "note": "Neal, 2026-10-20: listed without a stated license. Footer: 'Copyright 2016-2026 TruePrepper. All rights reserved.' (https://www.trueprepper.com/)",
+   "domain": "food"
   },
   {
    "family": "urban-prepper",
@@ -604,7 +658,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube playlists of Urban Prepper channel; standard YouTube license, no open license found."
+   "note": "YouTube playlists of Urban Prepper channel; standard YouTube license, no open license found.",
+   "domain": "food"
   },
   {
    "family": "usda-2015",
@@ -615,7 +670,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. USDA Complete Guide to Home Canning (2015). Likely US federal public domain, but no explicit statement found on USDA/NCHFP pages; left null. Could be set to Public Domain if accepted as US government work."
+   "note": "Neal, 2026-10-20: listed without a stated license. USDA Complete Guide to Home Canning (2015). Likely US federal public domain, but no explicit statement found on USDA/NCHFP pages; left null. Could be set to Public Domain if accepted as US government work.",
+   "domain": "food"
   },
   {
    "family": "voa",
@@ -626,7 +682,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": "https://learningenglish.voanews.com/p/6861.html",
-   "note": "YouTube playlist scrape of VOA Learning English. VOA's own material is public domain, but AP/Reuters/AFP material is excluded. The source page was read via a search excerpt."
+   "note": "YouTube playlist scrape of VOA Learning English. VOA's own material is public domain, but AP/Reuters/AFP material is excluded. The source page was read via a search excerpt.",
+   "domain": "reference"
   },
   {
    "family": "wikiciv",
@@ -637,7 +694,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wikiciv.org/",
-   "note": "Footer: 'Content is available under CC-BY-SA-4.0 unless otherwise noted.'"
+   "note": "Footer: 'Content is available under CC-BY-SA-4.0 unless otherwise noted.'",
+   "domain": "food"
   },
   {
    "family": "zimgit-food-preparation",
@@ -648,7 +706,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Curated collection of ~17 PDFs from various third-party sources; no single stated license found; each PDF would need its own check."
+   "note": "Neal, 2026-10-20: listed without a stated license. Curated collection of ~17 PDFs from various third-party sources; no single stated license found; each PDF would need its own check.",
+   "domain": "food"
   },
   {
    "family": "zimgit-knots",
@@ -659,7 +718,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. openZIM nautilus compilation of third-party knot resources ('creator: Various'). No collection-level license, and per-item licenses are unknown."
+   "note": "Neal, 2026-10-20: listed without a stated license. openZIM nautilus compilation of third-party knot resources ('creator: Various'). No collection-level license, and per-item licenses are unknown.",
+   "domain": "making"
   },
   {
    "family": "zimgit-post-disaster",
@@ -670,7 +730,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Curated collection of documents from varied sources; no single license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Curated collection of documents from varied sources; no single license.",
+   "domain": "food"
   },
   {
    "family": "zimgit-water",
@@ -681,7 +742,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Nautilus collection of PDFs from 'Various' creators (zimfarm recipe zimgit_en_water); no collection license stated, per-document licenses unknown."
+   "note": "Neal, 2026-10-20: listed without a stated license. Nautilus collection of PDFs from 'Various' creators (zimfarm recipe zimgit_en_water); no collection license stated, per-document licenses unknown.",
+   "domain": "food"
   },
   {
    "family": "allthetropes",
@@ -692,7 +754,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://allthetropes.org/wiki/Main_Page",
-   "note": "Footer CC BY-SA 4.0; older imported content CC BY-SA 3.0."
+   "note": "Footer CC BY-SA 4.0; older imported content CC BY-SA 3.0.",
+   "domain": "literature"
   },
   {
    "family": "booksdash",
@@ -703,7 +766,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://bookdash.org/re-using-the-book-dash-content/",
-   "note": "Read via search result."
+   "note": "Read via search result.",
+   "domain": "literature"
   },
   {
    "family": "celticscores.com",
@@ -714,7 +778,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.celticscores.com/",
-   "note": "The site design is CC BY-NC-SA 3.0. Each score has its own license, some NC and some marked 'Unknown license', so marked NC. Consider excluding."
+   "note": "The site design is CC BY-NC-SA 3.0. Each score has its own license, some NC and some marked 'Unknown license', so marked NC. Consider excluding.",
+   "domain": "literature"
   },
   {
    "family": "chopin.lib.uchicago.edu",
@@ -725,7 +790,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://chopin.lib.uchicago.edu/copyres.html",
-   "note": "The library says these are not subject to US copyright, but commercial publication needs its permission and a fee, so marked NC. The page was read via a search excerpt. Category could also be Other (sheet music)."
+   "note": "The library says these are not subject to US copyright, but commercial publication needs its permission and a fee, so marked NC. The page was read via a search excerpt. Category could also be Other (sheet music).",
+   "domain": "literature"
   },
   {
    "family": "coppermind.net",
@@ -736,7 +802,8 @@
    "noDerivatives": true,
    "hold": null,
    "source": "https://coppermind.net/wiki/Coppermind:Copyrights",
-   "note": "Read via search result (site 403); formerly CC BY-SA; images copyrighted by artists."
+   "note": "Read via search result (site 403); formerly CC BY-SA; images copyrighted by artists.",
+   "domain": "literature"
   },
   {
    "family": "folgerpedia.folger.edu",
@@ -747,7 +814,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://folgerpedia.folger.edu/Folgerpedia:Content_licensing",
-   "note": "Images of Folger collection items may have separate terms."
+   "note": "Images of Folger collection items may have separate terms.",
+   "domain": "literature"
   },
   {
    "family": "gutenberg",
@@ -758,7 +826,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.gutenberg.org/policy/license.html",
-   "note": "Nearly all works are public domain in the US; a few remain copyrighted. The PG trademark license asks for a 20% royalty if you charge for copies that use the PG name. Readers outside the US should check local law."
+   "note": "Nearly all works are public domain in the US; a few remain copyrighted. The PG trademark license asks for a 20% royalty if you charge for copies that use the PG name. Readers outside the US should check local law.",
+   "domain": "literature"
   },
   {
    "family": "kiwix.westeros",
@@ -769,7 +838,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://awoiaf.westeros.org/index.php/A_Wiki_of_Ice_and_Fire:Copyrights",
-   "note": "The site returned 403, so the license comes from a search excerpt. The copyrights page says text is CC-BY-SA, with no version given. Templates use 3.0, and some files are CC BY-NC-SA 3.0 or fair-use images. Fan wiki of copyrighted fiction."
+   "note": "The site returned 403, so the license comes from a search excerpt. The copyrights page says text is CC-BY-SA, with no version given. Templates use 3.0, and some files are CC BY-NC-SA 3.0 or fair-use images. Fan wiki of copyrighted fiction.",
+   "domain": "literature"
   },
   {
    "family": "mutopiaproject.org",
@@ -780,7 +850,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.mutopiaproject.org/legal.html",
-   "note": "Licensed per score, all free (no NC or ND). Category could also be Other (sheet music)."
+   "note": "Licensed per score, all free (no NC or ND). Category could also be Other (sheet music).",
+   "domain": "literature"
   },
   {
    "family": "prunelle",
@@ -791,7 +862,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/openzim/zim-requests/issues/502",
-   "note": "Neal, 2026-10-20: listed without a stated license. Ebooks supplied privately to Kiwix; no public license found."
+   "note": "Neal, 2026-10-20: listed without a stated license. Ebooks supplied privately to Kiwix; no public license found.",
+   "domain": "literature"
   },
   {
    "family": "smbc-comics.com",
@@ -802,7 +874,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.smbc-comics.com/covid/files/miniSciWebv6.pdf",
-   "note": "License read from the PDF's colophon (one of the COVID book PDFs); assumed same for the other books in the pack. Some books are adult humour (e.g. Bible parody)."
+   "note": "License read from the PDF's colophon (one of the COVID book PDFs); assumed same for the other books in the pack. Some books are adult humour (e.g. Bible parody).",
+   "domain": null
   },
   {
    "family": "tomlehrersongs.com",
@@ -813,7 +886,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.tomlehrersongs.com/",
-   "note": "Lehrer released his songs to public domain; music by others in parodies/translations excluded. Includes audio recordings."
+   "note": "Lehrer released his songs to public domain; music by others in parodies/translations excluded. Includes audio recordings.",
+   "domain": "literature"
   },
   {
    "family": "wikiquote",
@@ -824,7 +898,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "Quotations themselves may be copyrighted by their authors (fair-use excerpts)."
+   "note": "Quotations themselves may be copyrighted by their authors (fair-use excerpts).",
+   "domain": "literature"
   },
   {
    "family": "wikisource",
@@ -835,7 +910,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.wikisource.org/wiki/Main_Page",
-   "note": "Footer: CC BY-SA. Hosted texts are mostly public domain or freely licensed source texts."
+   "note": "Footer: CC BY-SA. Hosted texts are mostly public domain or freely licensed source texts.",
+   "domain": "literature"
   },
   {
    "family": "xkcd.com",
@@ -846,7 +922,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://xkcd.com/license.html",
-   "note": null
+   "note": null,
+   "domain": null
   },
   {
    "family": "maps",
@@ -857,7 +934,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.openstreetmap.org/copyright",
-   "note": "OpenStreetMap data (ODbL). Attribution required: (c) OpenStreetMap contributors."
+   "note": "OpenStreetMap data (ODbL). Attribution required: (c) OpenStreetMap contributors.",
+   "domain": "maps"
   },
   {
    "family": "openstreetmap-wiki",
@@ -868,7 +946,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.openstreetmap.org/wiki/Wiki_content_license",
-   "note": "Some pages/images may differ. It is the OSM wiki, not map data."
+   "note": "Some pages/images may differ. It is the OSM wiki, not map data.",
+   "domain": "maps"
   },
   {
    "family": "genomicseducation",
@@ -879,7 +958,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube channel scrape (NHS England Genomics Education Programme). No license found for the videos."
+   "note": "YouTube channel scrape (NHS England Genomics Education Programme). No license found for the videos.",
+   "domain": "medicine"
   },
   {
    "family": "irp.fas.org",
@@ -890,7 +970,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. US military manuals likely public domain as US Government works, but no stated license."
+   "note": "Neal, 2026-10-20: listed without a stated license. US military manuals likely public domain as US Government works, but no stated license.",
+   "domain": "medicine"
   },
   {
    "family": "librepathology",
@@ -901,7 +982,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.librepathology.org/wiki/Libre_Pathology:Copyrights",
-   "note": "Footer/siteinfo CC BY-NC-SA 4.0; Commons images vary."
+   "note": "Footer/siteinfo CC BY-NC-SA 4.0; Commons images vary.",
+   "domain": "medicine"
   },
   {
    "family": "mdwiki",
@@ -912,7 +994,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://mdwiki.org/wiki/Main_Page",
-   "note": "Main page states only CC BY-SA, CC BY and public-domain text accepted; site blocked automated fetch so exact footer version (likely 4.0) not confirmed. Content largely derived from Wikipedia."
+   "note": "Main page states only CC BY-SA, CC BY and public-domain text accepted; site blocked automated fetch so exact footer version (likely 4.0) not confirmed. Content largely derived from Wikipedia.",
+   "domain": "medicine"
   },
   {
    "family": "medlineplus.gov",
@@ -923,7 +1006,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": "https://medlineplus.gov/about/using/usingcontent/",
-   "note": "Neal, 2026-10-20: listed without a stated license. Mixed: federal content is public domain, but the A.D.A.M. Medical Encyclopedia, ASHP drug monographs and many images are copyrighted and only licensed to MedlinePlus. The ZIM scrapes the whole site including the encyclopedia, so no single license; left null."
+   "note": "Neal, 2026-10-20: listed without a stated license. Mixed: federal content is public domain, but the A.D.A.M. Medical Encyclopedia, ASHP drug monographs and many images are copyrighted and only licensed to MedlinePlus. The ZIM scrapes the whole site including the encyclopedia, so no single license; left null.",
+   "domain": "medicine"
   },
   {
    "family": "nhs.uk",
@@ -934,7 +1018,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.nhs.uk/our-policies/terms-and-conditions/",
-   "note": "Open Government Licence v3.0; third-party/stock images excluded."
+   "note": "Open Government Licence v3.0; third-party/stock images excluded.",
+   "domain": "medicine"
   },
   {
    "family": "quickguidesformedicine",
@@ -945,7 +1030,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube channel 'Quickguidesformedicine' (Surviving Residency); standard YouTube license; surviving residency site now parked domain."
+   "note": "YouTube channel 'Quickguidesformedicine' (Surviving Residency); standard YouTube license; surviving residency site now parked domain.",
+   "domain": "medicine"
   },
   {
    "family": "skin-of-color-society",
@@ -956,7 +1042,8 @@
    "noDerivatives": null,
    "hold": "video",
    "source": null,
-   "note": "YouTube-channel ZIM (152 videos per openzim/zim-requests#1595). SOCS site terms allow personal use only; no open license found."
+   "note": "YouTube-channel ZIM (152 videos per openzim/zim-requests#1595). SOCS site terms allow personal use only; no open license found.",
+   "domain": "medicine"
   },
   {
    "family": "wikem",
@@ -967,7 +1054,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wikem.org/wiki/WikEM:Copyrights",
-   "note": null
+   "note": null,
+   "domain": "medicine"
   },
   {
    "family": "wikivet.net",
@@ -978,7 +1066,8 @@
    "noDerivatives": true,
    "hold": null,
    "source": "https://en.wikivet.net/Main_Page",
-   "note": "Footer: CC BY-NC-ND 3.0 except where noted. Veterinary medicine."
+   "note": "Footer: CC BY-NC-ND 3.0 except where noted. Veterinary medicine.",
+   "domain": "medicine"
   },
   {
    "family": "wwwnc.cdc.gov",
@@ -989,7 +1078,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.cdc.gov/other/agencymaterials.html",
-   "note": "Most CDC content public domain; some third-party images restricted."
+   "note": "Most CDC content public domain; some third-party images restricted.",
+   "domain": "medicine"
   },
   {
    "family": "zimgit-medicine",
@@ -1000,7 +1090,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. openZIM nautilus compilation of third-party field and emergency medicine books ('creator: Various'). No collection-level license, and per-item licenses are unknown."
+   "note": "Neal, 2026-10-20: listed without a stated license. openZIM nautilus compilation of third-party field and emergency medicine books ('creator: Various'). No collection-level license, and per-item licenses are unknown.",
+   "domain": "medicine"
   },
   {
    "family": "anonymousplanet.org",
@@ -1011,7 +1102,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://gitlab.com/anonymousplanetorg/thgtoa/-/blob/main/LICENSE",
-   "note": "Current README/LICENSE CC BY-SA 4.0; older guide versions said CC BY-NC 4.0 or CC BY 4.0. Content is OPSEC/anonymity guidance."
+   "note": "Current README/LICENSE CC BY-SA 4.0; older guide versions said CC BY-NC 4.0 or CC BY 4.0. Content is OPSEC/anonymity guidance.",
+   "domain": "technology"
   },
   {
    "family": "diksha-std5ssc",
@@ -1022,7 +1114,8 @@
    "noDerivatives": null,
    "hold": "video",
    "source": "https://ciet.ncert.gov.in/initiative/diksha?lang=en",
-   "note": "Videos + textbook for Maharashtra Std 5 SSC (zim-requests#304, via Zaya partnership). DIKSHA allows per-item CC licenses; CIET says NCERT textbooks CC BY-NC-ND, other resources CC BY-NC-SA, but this is state-board content; no specific license confirmed."
+   "note": "Videos + textbook for Maharashtra Std 5 SSC (zim-requests#304, via Zaya partnership). DIKSHA allows per-item CC licenses; CIET says NCERT textbooks CC BY-NC-ND, other resources CC BY-NC-SA, but this is state-board content; no specific license confirmed.",
+   "domain": "reference"
   },
   {
    "family": "explainxkcd",
@@ -1033,7 +1126,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.explainxkcd.com/wiki/index.php/explain_xkcd:Copyrights",
-   "note": "Wiki text CC BY-SA 3.0, but embedded xkcd comics are CC BY-NC 2.5, so flagged NC."
+   "note": "Wiki text CC BY-SA 3.0, but embedded xkcd comics are CC BY-NC 2.5, so flagged NC.",
+   "domain": null
   },
   {
    "family": "incognitocat.me",
@@ -1044,7 +1138,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://incognitocat.me/",
-   "note": "Footer: 'This page is available under the Creative Commons Attribution-ShareAlike License' (links 4.0). Privacy topic blog."
+   "note": "Footer: 'This page is available under the Creative Commons Attribution-ShareAlike License' (links 4.0). Privacy topic blog.",
+   "domain": "technology"
   },
   {
    "family": "ncert-audiobooks",
@@ -1055,7 +1150,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. CIET/NCERT audiobooks (audio of textbooks). Audiobook page has only a (c) NCERT footer; CIET states NCERT textbooks are CC BY-NC-ND and other resources CC BY-NC-SA, but nothing specific for audiobooks. Left null."
+   "note": "Neal, 2026-10-20: listed without a stated license. CIET/NCERT audiobooks (audio of textbooks). Audiobook page has only a (c) NCERT footer; CIET states NCERT textbooks are CC BY-NC-ND and other resources CC BY-NC-SA, but nothing specific for audiobooks. Left null.",
+   "domain": "reference"
   },
   {
    "family": "oer4schools",
@@ -1066,7 +1162,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://oer.opendeved.net/wiki/OER4Schools",
-   "note": "Footer: CC BY-SA or CC BY-NC unless noted; treated as NC. Teacher professional-development materials; includes some embedded videos but mainly text."
+   "note": "Footer: CC BY-SA or CC BY-NC unless noted; treated as NC. Teacher professional-development materials; includes some embedded videos but mainly text.",
+   "domain": "reference"
   },
   {
    "family": "permacomputing.net",
@@ -1077,7 +1174,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://permacomputing.net/license/",
-   "note": null
+   "note": null,
+   "domain": "technology"
   },
   {
    "family": "phzh",
@@ -1088,7 +1186,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. PH Zurich MOOC platform (mooc.phzh.ch) is gone; no license found; may be video-heavy course."
+   "note": "Neal, 2026-10-20: listed without a stated license. PH Zurich MOOC platform (mooc.phzh.ch) is gone; no license found; may be video-heavy course.",
+   "domain": "reference"
   },
   {
    "family": "ragajunglism.org",
@@ -1099,7 +1198,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. No license or copyright statement found (site 403; archived homepage has none)."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license or copyright statement found (site 403; archived homepage has none).",
+   "domain": "literature"
   },
   {
    "family": "scoutwiki.org",
@@ -1110,7 +1210,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.scoutwiki.org/Main_Page",
-   "note": "Other language editions dual GFDL/CC BY-SA. ZIM family may include non-English editions."
+   "note": "Other language editions dual GFDL/CC BY-SA. ZIM family may include non-English editions.",
+   "domain": "food"
   },
   {
    "family": "studio.blender.org",
@@ -1121,7 +1222,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": "https://studio.blender.org/terms-and-conditions/",
-   "note": "Read via search result; older films CC BY 3.0."
+   "note": "Read via search result; older films CC BY 3.0.",
+   "domain": "technology"
   },
   {
    "family": "ted",
@@ -1132,7 +1234,8 @@
    "noDerivatives": true,
    "hold": "video",
    "source": "https://www.ted.com/about/our-organization/our-policies-terms/ted-talks-usage-policy",
-   "note": "TED talk videos; NC+ND."
+   "note": "TED talk videos; NC+ND.",
+   "domain": "reference"
   },
   {
    "family": "alpinelinux",
@@ -1143,7 +1246,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.alpinelinux.org/wiki/MediaWiki:Copyright",
-   "note": "Contributions since Jan 2022 CC BY-SA 4.0; older contributions remain GFDL unless relicensed by authors (mixed). Site blocked fetch; read via search."
+   "note": "Contributions since Jan 2022 CC BY-SA 4.0; older contributions remain GFDL unless relicensed by authors (mixed). Site blocked fetch; read via search.",
+   "domain": "technology"
   },
   {
    "family": "archlinux",
@@ -1154,7 +1258,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.archlinux.org/title/Main_page",
-   "note": "Footer: 'Content is available under GNU Free Documentation License 1.3 or later unless otherwise noted.'"
+   "note": "Footer: 'Content is available under GNU Free Documentation License 1.3 or later unless otherwise noted.'",
+   "domain": "technology"
   },
   {
    "family": "cheatography.com",
@@ -1165,7 +1270,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://cheatography.com/",
-   "note": "Footer CC License link -> by-nc-sa/2.0/uk; user-submitted sheets, unclear if every sheet is covered."
+   "note": "Footer CC License link -> by-nc-sa/2.0/uk; user-submitted sheets, unclear if every sheet is covered.",
+   "domain": "technology"
   },
   {
    "family": "cloudflare.com",
@@ -1176,7 +1282,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": "https://www.cloudflare.com/website-terms/",
-   "note": "Neal, 2026-10-20: listed without a stated license. Website terms: Cloudflare reserves all rights to the Materials; no open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Website terms: Cloudflare reserves all rights to the Materials; no open license.",
+   "domain": "technology"
   },
   {
    "family": "coreyms",
@@ -1187,7 +1294,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": "https://github.com/openzim/zim-requests/issues/1511",
-   "note": "YouTube tutorials; Kiwix request cites CC BY-NC by private permission ticket; no public license found."
+   "note": "YouTube tutorials; Kiwix request cites CC BY-NC by private permission ticket; no public license found.",
+   "domain": "technology"
   },
   {
    "family": "dart.dev",
@@ -1198,7 +1306,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://dart.dev/terms",
-   "note": "Code samples BSD-3-Clause; Dart name/logo excluded."
+   "note": "Code samples BSD-3-Clause; Dart name/logo excluded.",
+   "domain": "technology"
   },
   {
    "family": "devdocs",
@@ -1209,7 +1318,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://devdocs.io/about#credits",
-   "note": "Neal, 2026-10-20: listed. Each DevDocs set carries its upstream license (mostly MIT/Apache/BSD/CC BY/CC BY-SA/GFDL; InfluxData = MIT). A few upstreams say 'All rights reserved' alongside an open license (e.g. OpenJDK GPLv2+CE). Credits table is generated from attributions in github.com/freeCodeCamp/devdocs lib/docs/scrapers."
+   "note": "Neal, 2026-10-20: listed. Each DevDocs set carries its upstream license (mostly MIT/Apache/BSD/CC BY/CC BY-SA/GFDL; InfluxData = MIT). A few upstreams say 'All rights reserved' alongside an open license (e.g. OpenJDK GPLv2+CE). Credits table is generated from attributions in github.com/freeCodeCamp/devdocs lib/docs/scrapers.",
+   "domain": "technology"
   },
   {
    "family": "devhints.io",
@@ -1220,7 +1330,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. No license stated on devhints.io; source repo rstacruz/cheatsheets has no license file."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated on devhints.io; source repo rstacruz/cheatsheets has no license file.",
+   "domain": "technology"
   },
   {
    "family": "docs.python.org",
@@ -1231,7 +1342,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://docs.python.org/3/copyright.html",
-   "note": ""
+   "note": "",
+   "domain": "technology"
   },
   {
    "family": "freecodecamp",
@@ -1242,7 +1354,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. freeCodeCamp README: software BSD-3, but /curriculum learning resources are 'copyright freeCodeCamp.org' with no open license (https://github.com/freeCodeCamp/freeCodeCamp#license). Rosetta Code-derived challenges not separately licensed."
+   "note": "Neal, 2026-10-20: listed without a stated license. freeCodeCamp README: software BSD-3, but /curriculum learning resources are 'copyright freeCodeCamp.org' with no open license (https://github.com/freeCodeCamp/freeCodeCamp#license). Rosetta Code-derived challenges not separately licensed.",
+   "domain": "technology"
   },
   {
    "family": "gentoo",
@@ -1253,7 +1366,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.gentoo.org/wiki/Gentoo_Wiki:Copyrights",
-   "note": "Applies 'unless stated otherwise'."
+   "note": "Applies 'unless stated otherwise'.",
+   "domain": "technology"
   },
   {
    "family": "getbootstrap.com",
@@ -1264,7 +1378,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://getbootstrap.com/",
-   "note": ""
+   "note": "",
+   "domain": "technology"
   },
   {
    "family": "gobyexample.com",
@@ -1275,7 +1390,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/mmcgrana/gobyexample",
-   "note": "The site footer links to its license, and the repo README says CC BY 3.0 Unported."
+   "note": "The site footer links to its license, and the repo README says CC BY 3.0 Unported.",
+   "domain": "technology"
   },
   {
    "family": "htdp.org",
@@ -1286,7 +1402,8 @@
    "noDerivatives": true,
    "hold": null,
    "source": "https://htdp.org/2024-11-6/Book/index.html",
-   "note": "Version not stated. © MIT Press."
+   "note": "Version not stated. © MIT Press.",
+   "domain": "technology"
   },
   {
    "family": "installgentoo",
@@ -1297,7 +1414,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://igwiki.lyci.de//wiki/InstallGentoo_Wiki:Copyrights",
-   "note": "Wiki moved to igwiki.lyci.de; copyrights page says public domain or CC0 unless otherwise noted. Imageboard-culture wiki; may contain crude content."
+   "note": "Wiki moved to igwiki.lyci.de; copyrights page says public domain or CC0 unless otherwise noted. Imageboard-culture wiki; may contain crude content.",
+   "domain": "technology"
   },
   {
    "family": "kris-occhipinti",
@@ -1308,7 +1426,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": null,
-   "note": "YouTube channel of Linux tutorials; standard YouTube license, no open license found."
+   "note": "YouTube channel of Linux tutorials; standard YouTube license, no open license found.",
+   "domain": "technology"
   },
   {
    "family": "lesscss.org",
@@ -1319,7 +1438,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://lesscss.org/",
-   "note": "Footer: documentation CC BY 3.0, code MIT."
+   "note": "Footer: documentation CC BY 3.0, code MIT.",
+   "domain": "technology"
   },
   {
    "family": "lua.org",
@@ -1330,7 +1450,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.lua.org/manual/5.4/",
-   "note": "Reference manuals: 'Freely available under the terms of the Lua license' (MIT, https://www.lua.org/license.html). Rest of the lua.org site (news, pages, possibly archives) has no stated license beyond copyright Lua.org."
+   "note": "Reference manuals: 'Freely available under the terms of the Lua license' (MIT, https://www.lua.org/license.html). Rest of the lua.org site (news, pages, possibly archives) has no stated license beyond copyright Lua.org.",
+   "domain": "technology"
   },
   {
    "family": "mediawiki",
@@ -1341,7 +1462,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.mediawiki.org/wiki/Project:Copyrights",
-   "note": "CC BY-SA 4.0 + GFDL; Help: namespace is CC0."
+   "note": "CC BY-SA 4.0 + GFDL; Help: namespace is CC0.",
+   "domain": "technology"
   },
   {
    "family": "noted.lol",
@@ -1352,7 +1474,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://noted.lol/",
-   "note": "Neal, 2026-10-20: listed without a stated license. Footer: '© 2026 Noted. All rights reserved.' Excluded."
+   "note": "Neal, 2026-10-20: listed without a stated license. Footer: '© 2026 Noted. All rights reserved.' Excluded.",
+   "domain": "technology"
   },
   {
    "family": "opendatastructures.org",
@@ -1363,7 +1486,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://opendatastructures.org/",
-   "note": "Version not specified on page (book states CC BY 2.5)."
+   "note": "Version not specified on page (book states CC BY 2.5).",
+   "domain": "technology"
   },
   {
    "family": "openwrt.org",
@@ -1374,7 +1498,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://openwrt.org/license",
-   "note": null
+   "note": null,
+   "domain": "technology"
   },
   {
    "family": "openzim",
@@ -1385,7 +1510,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://archive.org/details/wiki-openzimorg_w",
-   "note": "wiki.openzim.org is behind an Anubis bot wall; license taken from Internet Archive dump metadata of the wiki (CC BY-SA 3.0), not read on the live site."
+   "note": "wiki.openzim.org is behind an Anubis bot wall; license taken from Internet Archive dump metadata of the wiki (CC BY-SA 3.0), not read on the live site.",
+   "domain": "technology"
   },
   {
    "family": "peps.python",
@@ -1396,7 +1522,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://peps.python.org/pep-0001/",
-   "note": "Per-PEP; new PEPs PD/CC0, a few old PEPs may differ."
+   "note": "Per-PEP; new PEPs PD/CC0, a few old PEPs may differ.",
+   "domain": "technology"
   },
   {
    "family": "php.net",
@@ -1407,7 +1534,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.php.net/manual/en/copyright.php",
-   "note": null
+   "note": null,
+   "domain": "technology"
   },
   {
    "family": "postmarketos",
@@ -1418,7 +1546,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.postmarketos.org/api.php?action=query&meta=siteinfo&siprop=rightsinfo",
-   "note": "Wiki's MediaWiki rightsinfo = CC BY-SA 4.0; project renamed Nura (wiki.nura.eco)."
+   "note": "Wiki's MediaWiki rightsinfo = CC BY-SA 4.0; project renamed Nura (wiki.nura.eco).",
+   "domain": "technology"
   },
   {
    "family": "techbase.kde.org",
@@ -1429,7 +1558,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://techbase.kde.org/Main_Page",
-   "note": "Footer: 'Creative Commons License SA 4.0'."
+   "note": "Footer: 'Creative Commons License SA 4.0'.",
+   "domain": "technology"
   },
   {
    "family": "termux",
@@ -1440,7 +1570,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://web.archive.org/web/20250102072807/https://wiki.termux.com/wiki/Main_Page",
-   "note": "Live wiki is behind Anubis anti-bot, so the footer ('Creative Commons Attribution', linking CC BY 4.0) was read from an archived copy."
+   "note": "Live wiki is behind Anubis anti-bot, so the footer ('Creative Commons Attribution', linking CC BY 4.0) was read from an archived copy.",
+   "domain": "technology"
   },
   {
    "family": "thalesdoc",
@@ -1451,7 +1582,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. thalesdocs.com: 'Copyright 2019-2026, Thales Group', no open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. thalesdocs.com: 'Copyright 2019-2026, Thales Group', no open license.",
+   "domain": "technology"
   },
   {
    "family": "unrealircd",
@@ -1462,7 +1594,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.unrealircd.org/docs/Main_Page",
-   "note": "Footer: 'Creative Commons Attribution unless otherwise noted' (version not stated)."
+   "note": "Footer: 'Creative Commons Attribution unless otherwise noted' (version not stated).",
+   "domain": "technology"
   },
   {
    "family": "wikitech",
@@ -1473,7 +1606,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wikitech.wikimedia.org/wiki/Main_Page",
-   "note": "Footer says CC BY-SA (Wikimedia current version 4.0)."
+   "note": "Footer says CC BY-SA (Wikimedia current version 4.0).",
+   "domain": "technology"
   },
   {
    "family": "www.mankier.com",
@@ -1484,7 +1618,128 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.mankier.com/about",
-   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; man pages carry per-page licenses."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license stated; man pages carry per-page licenses.",
+   "domain": "technology"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(cooking|gardening|homebrew|outdoors|vegetarianism|coffee|alcohol|sustainability|pets)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "food"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(diy|electronics|woodworking|mechanics|engineering|3dprinting|arduino|crafts|bicycles|drones|robotics|ham|iot|aviation)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "making"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(medicalsciences|fitness)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "medicine"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(physics|chemistry|biology|math|stats|astronomy|earthscience|space|matheducators|mattermodeling|scicomp|bioacoustics|bioinformatics|quantumcomputing|psychology|or)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "science"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^mathoverflow\\.net_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "science"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(travel|expatriates|gis)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "maps"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(philosophy|history|christianity|islam|judaism|buddhism|hinduism|hermeneutics|mythology|genealogy|hsm|politics)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "thought"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(literature|writing|movies|music|musicfans|scifi|anime|worldbuilding|photo|graphicdesign|sound)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "literature"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(english|ell|chinese|french|german|italian|japanese|korean|latin|portuguese|russian|rus|ukrainian|spanish|esperanto|conlang|languagelearning|linguistics|money|law|academia|parenting|workplace|interpersonal|lifehacks|patents|skeptics|opendata|economics|quant|freelancing|pm|communitybuilding)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": "reference"
+  },
+  {
+   "family": "stack_exchange",
+   "match": "^(gaming|boardgames|chess|poker|puzzling|rpg|bricks|sports|martialarts)\\.stackexchange\\.com_",
+   "category": "Q&A",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://stackoverflow.com/help/licensing",
+   "note": "H1 sub-row of stack_exchange: the first matching row wins.",
+   "domain": null
   },
   {
    "family": "stack_exchange",
@@ -1497,7 +1752,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://stackoverflow.com/help/licensing",
-   "note": "Older posts CC BY-SA 2.5/3.0 by contribution date; all CC BY-SA."
+   "note": "Older posts CC BY-SA 2.5/3.0 by contribution date; all CC BY-SA.",
+   "domain": "technology"
   },
   {
    "family": "bitcoin",
@@ -1508,7 +1764,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.bitcoin.it/wiki/Main_Page",
-   "note": "Footer: 'Content is available under Creative Commons Attribution 3.0 unless otherwise noted.'"
+   "note": "Footer: 'Content is available under Creative Commons Attribution 3.0 unless otherwise noted.'",
+   "domain": "reference"
   },
   {
    "family": "bogleheads",
@@ -1519,7 +1776,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://bogleheads.org/wiki/Bogleheads:Privacy_policy",
-   "note": "Site is behind Cloudflare challenge; GFDL statement ('all text added... available for reuse under the terms of the GFDL') read from search-index snippet of this page, not fetched directly."
+   "note": "Site is behind Cloudflare challenge; GFDL statement ('all text added... available for reuse under the terms of the GFDL') read from search-index snippet of this page, not fetched directly.",
+   "domain": "reference"
   },
   {
    "family": "citizendium.org",
@@ -1530,7 +1788,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.citizendium.org/wiki/CZ:Reusing_Citizendium_Content",
-   "note": "Original articles CC BY-SA 3.0; some Wikipedia-derived articles GFDL. Site blocks automated fetch; read via search snippet of the page."
+   "note": "Original articles CC BY-SA 3.0; some Wikipedia-derived articles GFDL. Site blocks automated fetch; read via search snippet of the page.",
+   "domain": "reference"
   },
   {
    "family": "consumerrights.wiki",
@@ -1541,7 +1800,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://consumerrights.wiki/Consumer_Rights_Wiki:Copyrights",
-   "note": null
+   "note": null,
+   "domain": "reference"
   },
   {
    "family": "crashcourse",
@@ -1552,7 +1812,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": "https://thecrashcourse.com/",
-   "note": "Site footer says All Rights Reserved; YouTube videos may carry CC BY-NC-SA, not confirmed."
+   "note": "Site footer says All Rights Reserved; YouTube videos may carry CC BY-NC-SA, not confirmed.",
+   "domain": "reference"
   },
   {
    "family": "cyborganthropology.com",
@@ -1563,7 +1824,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. No license on site footer/disclaimer; Kiwix request claims CC BY-NC-ND-SA, unverified."
+   "note": "Neal, 2026-10-20: listed without a stated license. No license on site footer/disclaimer; Kiwix request claims CC BY-NC-ND-SA, unverified.",
+   "domain": "reference"
   },
   {
    "family": "edutechwiki",
@@ -1574,7 +1836,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://edutechwiki.unige.ch/en/EduTech_Wiki:Copyrights",
-   "note": "Default by-nc-sa; individual pages may set other terms."
+   "note": "Default by-nc-sa; individual pages may set other terms.",
+   "domain": "reference"
   },
   {
    "family": "finiki",
@@ -1585,7 +1848,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://finiki.org/wiki/Finiki:Copyrights",
-   "note": "Canadian personal finance wiki."
+   "note": "Canadian personal finance wiki.",
+   "domain": "reference"
   },
   {
    "family": "lgbtqia.wiki",
@@ -1596,7 +1860,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://lgbtqia.wiki/wiki/LGBTQIA%2B_Wiki:Copyrights",
-   "note": "Some older pages carry a Fandom CC BY-SA 3.0 notice."
+   "note": "Some older pages carry a Fandom CC BY-SA 3.0 notice.",
+   "domain": "reference"
   },
   {
    "family": "milneopentextbooks.org",
@@ -1607,7 +1872,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://milneopentextbooks.org/",
-   "note": "Site says 'Except where otherwise noted' CC BY 4.0. Individual textbooks may carry other CC licenses, possibly NC. Not verified per book."
+   "note": "Site says 'Except where otherwise noted' CC BY 4.0. Individual textbooks may carry other CC licenses, possibly NC. Not verified per book.",
+   "domain": "reference"
   },
   {
    "family": "psiram",
@@ -1618,7 +1884,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": "https://www.psiram.com/en/index.php/Main_Page",
-   "note": "Neal, 2026-10-20: listed without a stated license. Footer says only 'Content is available under Creative Commons' with no variant; the linked Lizenz page is empty, so NC/ND can't be determined. Anonymous skeptic site with contentious content about named people."
+   "note": "Neal, 2026-10-20: listed without a stated license. Footer says only 'Content is available under Creative Commons' with no variant; the linked Lizenz page is empty, so NC/ND can't be determined. Anonymous skeptic site with contentious content about named people.",
+   "domain": "reference"
   },
   {
    "family": "rationalwiki",
@@ -1629,7 +1896,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://rationalwiki.org/wiki/RationalWiki:Copyrights",
-   "note": "The site returned 503, so the license comes from Wikipedia and Wikidata citing the site's CC BY-SA 3.0 (or later). Confirm on the site. Content is opinionated and satirical."
+   "note": "The site returned 503, so the license comes from Wikipedia and Wikidata citing the site's CC BY-SA 3.0 (or later). Confirm on the site. Content is opinionated and satirical.",
+   "domain": "reference"
   },
   {
    "family": "theworldfactbook",
@@ -1640,7 +1908,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.cia.gov/the-world-factbook/about/copyright-and-contributors/",
-   "note": "US government work; CIA states Factbook is public domain (seal restricted, some third-party photos credited). Factbook discontinued Feb 2026; pack is a 2020 snapshot. Copyright page not directly confirmed live (site now a farewell page)."
+   "note": "US government work; CIA states Factbook is public domain (seal restricted, some third-party photos credited). Factbook discontinued Feb 2026; pack is a 2020 snapshot. Copyright page not directly confirmed live (site now a farewell page).",
+   "domain": "maps"
   },
   {
    "family": "vikidia",
@@ -1651,7 +1920,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.vikidia.org/wiki/Main_Page",
-   "note": "Footer: 'Content is available under Creative Commons Attribution-Share Alike 3.0 unless otherwise noted' (read from an archived 2025 copy; live site 403). The French site also dual-licenses under GFDL."
+   "note": "Footer: 'Content is available under Creative Commons Attribution-Share Alike 3.0 unless otherwise noted' (read from an archived 2025 copy; live site 403). The French site also dual-licenses under GFDL.",
+   "domain": "reference"
   },
   {
    "family": "wikibooks",
@@ -1662,7 +1932,104 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.wikibooks.org/wiki/Main_Page",
-   "note": "The footer says 'Creative Commons Attribution-ShareAlike License' (CC BY-SA 4.0 under Wikimedia terms). Some media files have other licenses."
+   "note": "The footer says 'Creative Commons Attribution-ShareAlike License' (CC BY-SA 4.0 under Wikimedia terms). Some media files have other licenses.",
+   "domain": "reference"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_medicine",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "medicine"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_(physics|chemistry|mathematics|astronomy|molcell|climate-change)_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "science"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_history_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "thought"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_geography_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "maps"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_computer_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "technology"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_knots_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "making"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_(movies|indian-cinema|nollywood|ray-charles)_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": "literature"
+  },
+  {
+   "family": "wikipedia",
+   "match": "^wikipedia_en_(baseball|basketball|cricket|football|golf|ice-hockey|tennis|comics)_",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "domain": null
   },
   {
    "family": "wikipedia",
@@ -1673,7 +2040,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "Text CC BY-SA 4.0 / GFDL; images carry per-file licenses."
+   "note": "Text CC BY-SA 4.0 / GFDL; images carry per-file licenses.",
+   "domain": "reference"
   },
   {
    "family": "wikiversity",
@@ -1684,7 +2052,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "Per-file image licenses."
+   "note": "Per-file image licenses.",
+   "domain": "reference"
   },
   {
    "family": "wiktionary",
@@ -1695,7 +2064,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": null
+   "note": null,
+   "domain": "reference"
   },
   {
    "family": "womenshistory.si.edu",
@@ -1706,7 +2076,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.si.edu/termsofuse",
-   "note": "Neal, 2026-10-20: listed without a stated license. Smithsonian terms allow personal/educational noncommercial use only, not an open license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Smithsonian terms allow personal/educational noncommercial use only, not an open license.",
+   "domain": "thought"
   },
   {
    "family": "citizensinformation.ie",
@@ -1717,7 +2088,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.citizensinformation.ie/en/about/reuse-psi/",
-   "note": "Irish PSI licence CC BY 4.0; third-party material excluded."
+   "note": "Irish PSI licence CC BY 4.0; third-party material excluded.",
+   "domain": "reference"
   },
   {
    "family": "ghana-bece-past-questions",
@@ -1728,7 +2100,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. Scraped from passco.org; no license stated (footer terms links are placeholders). Exam papers are WAEC material."
+   "note": "Neal, 2026-10-20: listed without a stated license. Scraped from passco.org; no license stated (footer terms links are placeholders). Exam papers are WAEC material.",
+   "domain": "reference"
   },
   {
    "family": "metakgp",
@@ -1739,7 +2112,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://wiki.metakgp.org/w/Metakgp:Copyrights",
-   "note": "IIT Kharagpur community wiki. Images carry their own licenses."
+   "note": "IIT Kharagpur community wiki. Images carry their own licenses.",
+   "domain": "reference"
   },
   {
    "family": "wikivoyage",
@@ -1750,7 +2124,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://en.wikivoyage.org/wiki/Main_Page",
-   "note": "Wikimedia footer: CC BY-SA; Wikimedia Terms of Use specify CC BY-SA 4.0 (+GFDL). Travel guide."
+   "note": "Wikimedia footer: CC BY-SA; Wikimedia Terms of Use specify CC BY-SA 4.0 (+GFDL). Travel guide.",
+   "domain": "maps"
   },
   {
    "family": "gotquestions.org",
@@ -1761,7 +2136,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://www.gotquestions.org/copyright.html",
-   "note": "Neal, 2026-10-20: listed without a stated license. Copyrighted, with reuse limited to quotes (about 200 words per article) and attribution. No open license, so excluded. Bible text is © Biblica."
+   "note": "Neal, 2026-10-20: listed without a stated license. Copyrighted, with reuse limited to quotes (about 200 words per article) and attribution. No open license, so excluded. Bible text is © Biblica.",
+   "domain": "thought"
   },
   {
    "family": "internet-encyclopedia-philosophy",
@@ -1772,7 +2148,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://iep.utm.edu/home/copyright/",
-   "note": "Neal, 2026-10-20: listed without a stated license. All rights reserved: 'not open source or in the public domain', and copies may not be posted elsewhere online. Excluded."
+   "note": "Neal, 2026-10-20: listed without a stated license. All rights reserved: 'not open source or in the public domain', and copies may not be posted elsewhere online. Excluded.",
+   "domain": "thought"
   },
   {
    "family": "apod.nasa.gov",
@@ -1783,7 +2160,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://apod.nasa.gov/apod/lib/about_apod.html",
-   "note": "Neal, 2026-10-20: listed without a stated license. Many images copyrighted by their owners; no blanket license."
+   "note": "Neal, 2026-10-20: listed without a stated license. Many images copyrighted by their owners; no blanket license.",
+   "domain": "science"
   },
   {
    "family": "artofproblemsolving",
@@ -1794,7 +2172,8 @@
    "noDerivatives": null,
    "hold": null,
    "source": null,
-   "note": "Neal, 2026-10-20: listed without a stated license. AoPS Wiki:Copyright page says the site has not yet chosen a documentation license (per search snippet; site blocks fetch). Contains copyrighted competition problems. No license stated."
+   "note": "Neal, 2026-10-20: listed without a stated license. AoPS Wiki:Copyright page says the site has not yet chosen a documentation license (per search snippet; site blocks fetch). Contains copyrighted competition problems. No license stated.",
+   "domain": "science"
   },
   {
    "family": "biologycourses",
@@ -1805,7 +2184,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": "https://github.com/openzim/zim-requests/issues/1144",
-   "note": "YouTube channel; request claims Creative Commons but not verified at source."
+   "note": "YouTube channel; request claims Creative Commons but not verified at source.",
+   "domain": "science"
   },
   {
    "family": "encyclopedie-environnement.org",
@@ -1816,7 +2196,8 @@
    "noDerivatives": true,
    "hold": null,
    "source": "https://www.encyclopedie-environnement.org/mentions-legales/",
-   "note": "The legal notice names BY-NC-ND 4.0 (text and link), but its conditions list mentions share-alike and 'BY-NC-SA'. Recorded as the stricter BY-NC-ND. Applies 'unless stated otherwise'."
+   "note": "The legal notice names BY-NC-ND 4.0 (text and link), but its conditions list mentions share-alike and 'BY-NC-SA'. Recorded as the stricter BY-NC-ND. Applies 'unless stated otherwise'.",
+   "domain": "science"
   },
   {
    "family": "ethanweed",
@@ -1827,7 +2208,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://ethanweed.github.io/pythonbook/landingpage.html",
-   "note": "Learning Statistics with Python by Navarro & Weed."
+   "note": "Learning Statistics with Python by Navarro & Weed.",
+   "domain": "science"
   },
   {
    "family": "jeffe.cs.illinois.edu",
@@ -1838,7 +2220,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://jeffe.cs.illinois.edu/teaching/algorithms/",
-   "note": "Jeff Erickson's Algorithms textbook."
+   "note": "Jeff Erickson's Algorithms textbook.",
+   "domain": "technology"
   },
   {
    "family": "khanacademy",
@@ -1849,7 +2232,8 @@
    "noDerivatives": false,
    "hold": "video",
    "source": "https://support.khanacademy.org/hc/en-us/articles/202262954-Can-I-use-Khan-Academy-s-videos-name-materials-links-in-my-project",
-   "note": "Khan support page cites CC BY-NC-SA for videos/exercises; some libraries report Khan removed the CC notice from videos, so current status uncertain. Main content is video."
+   "note": "Khan support page cites CC BY-NC-SA for videos/exercises; some libraries report Khan removed the CC notice from videos, so current status uncertain. Main content is video.",
+   "domain": "science"
   },
   {
    "family": "learningstatistics",
@@ -1860,7 +2244,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://learningstatisticswithcogstat.com/",
-   "note": "Licensing section on site."
+   "note": "Licensing section on site.",
+   "domain": "science"
   },
   {
    "family": "learningstatisticswithr.com",
@@ -1871,7 +2256,44 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://learningstatisticswithr.com/",
-   "note": "Danielle Navarro's book."
+   "note": "Danielle Navarro's book.",
+   "domain": "science"
+  },
+  {
+   "family": "libretexts.org",
+   "match": "^libretexts\\.org_en_med",
+   "category": "Science & Math",
+   "license": "Mixed open licenses (mostly CC BY-NC-SA 4.0)",
+   "nonCommercial": true,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://libretexts.org/terms-conditions",
+   "note": "H1 sub-row of libretexts.org: the first matching row wins.",
+   "domain": "medicine"
+  },
+  {
+   "family": "libretexts.org",
+   "match": "^libretexts\\.org_en_eng",
+   "category": "Science & Math",
+   "license": "Mixed open licenses (mostly CC BY-NC-SA 4.0)",
+   "nonCommercial": true,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://libretexts.org/terms-conditions",
+   "note": "H1 sub-row of libretexts.org: the first matching row wins.",
+   "domain": "making"
+  },
+  {
+   "family": "libretexts.org",
+   "match": "^libretexts\\.org_en_(biz|human|socialsci|workforce)",
+   "category": "Science & Math",
+   "license": "Mixed open licenses (mostly CC BY-NC-SA 4.0)",
+   "nonCommercial": true,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://libretexts.org/terms-conditions",
+   "note": "H1 sub-row of libretexts.org: the first matching row wins.",
+   "domain": "reference"
   },
   {
    "family": "libretexts.org",
@@ -1882,7 +2304,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://libretexts.org/terms-conditions",
-   "note": "License is set per page (CC BY, CC BY-SA, CC BY-NC-SA, CC BY-NC, PD, GPL...); many pages are NC, so treated as NC. Some pages may be ND. Covers several subjects (socialsci, chem, bio, math...)."
+   "note": "License is set per page (CC BY, CC BY-SA, CC BY-NC-SA, CC BY-NC, PD, GPL...); many pages are NC, so treated as NC. Some pages may be ND. Covers several subjects (socialsci, chem, bio, math...).",
+   "domain": "science"
   },
   {
    "family": "lost-stats.github.io",
@@ -1893,7 +2316,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/LOST-STATS/lost-stats.github.io/blob/source/LICENSE",
-   "note": "Site states no license; source repo (which holds the content) is GPL-2.0 - a software license applied to docs."
+   "note": "Site states no license; source repo (which holds the content) is GPL-2.0 - a software license applied to docs.",
+   "domain": "science"
   },
   {
    "family": "mspeekenbrink",
@@ -1904,7 +2328,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://mspeekenbrink.github.io/sdam-book/",
-   "note": "Read via search result."
+   "note": "Read via search result.",
+   "domain": "science"
   },
   {
    "family": "ncase.me",
@@ -1915,7 +2340,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://ncase.me/",
-   "note": "Public domain waiver; some projects include third-party assets/music."
+   "note": "Public domain waiver; some projects include third-party assets/music.",
+   "domain": "science"
   },
   {
    "family": "openmusictheory.com",
@@ -1926,7 +2352,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://openmusictheory.github.io/",
-   "note": "Recipe seed openmusictheory.github.io (v1); page links CC BY-SA 4.0. v2 on Pressbooks also CC BY-SA 4.0."
+   "note": "Recipe seed openmusictheory.github.io (v1); page links CC BY-SA 4.0. v2 on Pressbooks also CC BY-SA 4.0.",
+   "domain": "literature"
   },
   {
    "family": "phet",
@@ -1937,7 +2364,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://phet.colorado.edu/en/licensing/html",
-   "note": "PhET moved its library to CC BY-NC in 2026. Sims published before 2026-03-29 stay CC BY 4.0. A recent ZIM likely includes newer versions, so it is marked NC to be safe."
+   "note": "PhET moved its library to CC BY-NC in 2026. Sims published before 2026-03-29 stay CC BY 4.0. A recent ZIM likely includes newer versions, so it is marked NC to be safe.",
+   "domain": "science"
   },
   {
    "family": "planetmath.org",
@@ -1948,7 +2376,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://planetmath.org/",
-   "note": "Version not stated."
+   "note": "Version not stated.",
+   "domain": "science"
   },
   {
    "family": "proofwiki",
@@ -1959,7 +2388,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://proofwiki.org/wiki/Main_Page",
-   "note": "Same site as proofwiki.org family; version assumed."
+   "note": "Same site as proofwiki.org family; version assumed.",
+   "domain": "science"
   },
   {
    "family": "proofwiki.org",
@@ -1970,7 +2400,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://proofwiki.org/wiki/Main_Page",
-   "note": "Footer says CC BY-SA without version; 3.0 assumed."
+   "note": "Footer says CC BY-SA without version; 3.0 assumed.",
+   "domain": "science"
   },
   {
    "family": "science-in-the-bath",
@@ -1981,7 +2412,8 @@
    "noDerivatives": null,
    "hold": "video",
    "source": null,
-   "note": "YouTube channel of Matthew Shribman (115 videos per zim-requests#1595). No open license found."
+   "note": "YouTube channel of Matthew Shribman (115 videos per zim-requests#1595). No open license found.",
+   "domain": "science"
   },
   {
    "family": "stacks.math.columbia.edu",
@@ -1992,7 +2424,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://github.com/stacks/stacks-project/blob/master/COPYING",
-   "note": "Repo COPYING is GFDL 1.2; site includes the GFDL as a chapter (https://stacks.math.columbia.edu/download/fdl.pdf)."
+   "note": "Repo COPYING is GFDL 1.2; site includes the GFDL as a chapter (https://stacks.math.columbia.edu/download/fdl.pdf).",
+   "domain": "science"
   },
   {
    "family": "wikispecies",
@@ -2003,7 +2436,8 @@
    "noDerivatives": false,
    "hold": null,
    "source": "https://species.wikimedia.org/wiki/Main_Page",
-   "note": "The footer says 'Creative Commons Attribution-ShareAlike License'. Wikimedia's current version is 4.0. Also GFDL."
+   "note": "The footer says 'Creative Commons Attribution-ShareAlike License'. Wikimedia's current version is 4.0. Also GFDL.",
+   "domain": "science"
   }
  ]
 }

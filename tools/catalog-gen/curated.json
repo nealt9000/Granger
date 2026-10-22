@@ -203,5 +203,170 @@
       "license": "Public domain (LJ Speech); model by Rhasspy Piper, MIT",
       "attribution": "Voice trained on the LJ Speech dataset (public domain) by the Piper project; spoken through sherpa-onnx (Apache-2.0); espeak-ng data (GPL-3.0)."
     }
-  ]
+  ],
+  "readiness": {
+    "_about": "The readiness tiers (spec 2026-10-21-home-readiness-onboarding-design.md §3.5). An item is a catalog id, \"@<collection>\" (the collection's books whose own domain is this one) or \"family:<name>\" (any pack of the family; the region's map is chosen in onboarding). catalog_gen.py checks every token, folds essential into comprehensive and generates the efficient and comprehensive presets.",
+    "domains": [
+      {
+        "id": "medicine",
+        "title": "Medicine & first aid",
+        "essential": [
+          "wikipedia_en_medicine_nopic"
+        ],
+        "comprehensive": [
+          "wikipedia_en_medicine_maxi",
+          "wikem_en_all_maxi",
+          "medlineplus.gov_en_all",
+          "zimgit-medicine_en",
+          "wwwnc.cdc.gov_en_all"
+        ]
+      },
+      {
+        "id": "food",
+        "title": "Food, water & survival",
+        "essential": [
+          "based.cooking_en_all",
+          "zimgit-water_en",
+          "zimgit-food-preparation_en"
+        ],
+        "comprehensive": [
+          "appropedia_en_all_maxi",
+          "foss.cooking_en_all",
+          "usda-2015_en",
+          "gardenology_en_all",
+          "publicdomainrecipes.com_en_all",
+          "zimgit-post-disaster_en",
+          "ready.gov_en_all",
+          "cooking.stackexchange.com_en_all",
+          "gardening.stackexchange.com_en_all",
+          "outdoors.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "making",
+        "title": "Making, repair & engineering",
+        "essential": [
+          "wikipedia_en_knots_maxi",
+          "ifixit_en_all"
+        ],
+        "comprehensive": [
+          "energypedia_en_all_maxi",
+          "cd3wdproject.org_en_all",
+          "diy.stackexchange.com_en_all",
+          "electronics.stackexchange.com_en_all",
+          "woodworking.stackexchange.com_en_all",
+          "mechanics.stackexchange.com_en_all",
+          "engineering.stackexchange.com_en_all",
+          "3dprinting.stackexchange.com_en_all",
+          "arduino.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "science",
+        "title": "Science & math",
+        "essential": [
+          "wikipedia_en_physics_maxi",
+          "wikipedia_en_chemistry_maxi",
+          "wikipedia_en_mathematics_maxi"
+        ],
+        "comprehensive": [
+          "libretexts.org_en_k12",
+          "libretexts.org_en_phys",
+          "libretexts.org_en_chem",
+          "libretexts.org_en_bio",
+          "libretexts.org_en_math",
+          "wikipedia_en_astronomy_maxi",
+          "wikipedia_en_molcell_maxi",
+          "planetmath.org_en_all",
+          "physics.stackexchange.com_en_all",
+          "chemistry.stackexchange.com_en_all",
+          "biology.stackexchange.com_en_all",
+          "math.stackexchange.com_en_all",
+          "stats.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "technology",
+        "title": "Technology & computing",
+        "essential": [
+          "wikipedia_en_computer_maxi"
+        ],
+        "comprehensive": [
+          "jeffe.cs.illinois.edu_en_all",
+          "family:devdocs",
+          "openwrt.org_en_all",
+          "stackoverflow.com_en_all",
+          "superuser.com_en_all",
+          "askubuntu.com_en_all",
+          "unix.stackexchange.com_en_all",
+          "security.stackexchange.com_en_all",
+          "networkengineering.stackexchange.com_en_all",
+          "raspberrypi.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "maps",
+        "title": "Maps, places & travel",
+        "essential": [
+          "family:maps",
+          "wikivoyage_en_all_nopic"
+        ],
+        "comprehensive": [
+          "wikivoyage_en_all_maxi",
+          "openstreetmap-wiki_en_all_maxi",
+          "wikipedia_en_geography_maxi",
+          "travel.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "reference",
+        "title": "General reference",
+        "essential": [
+          "wikipedia_en_top_nopic",
+          "wiktionary_en_all_nopic"
+        ],
+        "comprehensive": [
+          "wikipedia_en_all_nopic",
+          "wikibooks_en_all_nopic",
+          "wikiversity_en_all_nopic",
+          "citizendium.org_en_all_maxi",
+          "english.stackexchange.com_en_all",
+          "ell.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "literature",
+        "title": "Literature & the arts",
+        "essential": [
+          "@granger-classics"
+        ],
+        "comprehensive": [
+          "wikiquote_en_all_nopic",
+          "wikisource_en_all_nopic",
+          "gutenberg_en_lcc-pr",
+          "literature.stackexchange.com_en_all",
+          "writing.stackexchange.com_en_all"
+        ]
+      },
+      {
+        "id": "thought",
+        "title": "Religion, philosophy & history",
+        "essential": [
+          "@granger-classics"
+        ],
+        "comprehensive": [
+          "internet-encyclopedia-philosophy_en_all",
+          "wikipedia_en_history_nopic",
+          "philosophy.stackexchange.com_en_all",
+          "history.stackexchange.com_en_all",
+          "christianity.stackexchange.com_en_all",
+          "islam.stackexchange.com_en_all",
+          "judaism.stackexchange.com_en_all",
+          "buddhism.stackexchange.com_en_all",
+          "hinduism.stackexchange.com_en_all",
+          "hermeneutics.stackexchange.com_en_all"
+        ]
+      }
+    ]
+  }
 }
