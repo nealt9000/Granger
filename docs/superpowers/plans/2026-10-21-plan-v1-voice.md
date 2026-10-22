@@ -275,10 +275,10 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 - Create: `core/speech/.../TextReadSource.kt` (a `ReadSource` over plain text, used here and by V2's answers)
 - Results: `docs/superpowers/spikes/2026-10-voice-spike-results.md` gains "Screen-off run (V1)" with the table
 
-- [ ] Install over Wi-Fi (both databases backed up first; v10 → v11 on first open).
-- [ ] Run `ljspeech` and the system voice through the service with the screen off for five minutes each: no stall, no notification flicker, per-sentence RTF ≤ 0.5 for Piper. Record the table.
-- [ ] If Piper's RTF with the screen off exceeds 0.5: raise `lookAheadSentences` to a paragraph (`ReadAloudEngine` parameter), re-run, and record both; if that still stalls, stop and bring the numbers to Neal before Task 10.
-- [ ] **Commit.** `Voice: screen-off run through the service`
+- [x] Install over Wi-Fi (both databases backed up first; v10 → v11 on first open). *Done 2026-10-21 late evening: both databases copied to `files/db-backup-2026-10-22/` in the app's private storage, `adb install -r` of the V1 debug build (447,765,355 B).*
+- [x] Run `ljspeech` and the system voice through the service with the screen off for five minutes each: no stall, no notification flicker, per-sentence RTF ≤ 0.5 for Piper. Record the table. *ljspeech: eight minutes with the screen dozing, 56 sentences at RTF 0.17 (worst 0.21), no stall. System voice: seven minutes dozing, 54 sentences at RTF 0.05 (worst 0.09), no stall. Both tables are in the results doc, with the one false start: a locked phone refused the focus request because the activity wasn't on top (Android 14+); the activity now shows over the lock screen in service mode as well.*
+- [x] If Piper's RTF with the screen off exceeds 0.5: raise `lookAheadSentences` to a paragraph (`ReadAloudEngine` parameter), re-run, and record both; if that still stalls, stop and bring the numbers to Neal before Task 10. *Not needed: 0.17.*
+- [x] **Commit.** `Voice: screen-off run through the service`
 
 ### Task 10: Pixel 6 walkthrough; flag on; roadmap
 

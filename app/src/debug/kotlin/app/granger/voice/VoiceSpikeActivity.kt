@@ -80,12 +80,12 @@ class VoiceSpikeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Measurements are only meaningful with the screen on: once it goes dark the process is treated as
         // background and confined to the little cores, and the numbers degrade tenfold.
-        // The service run (Plan V1 Task 9) wants the screen to go dark on its own; every other run needs it on.
-        if (!intent.getBooleanExtra("service", false)) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+        // On top even over the lock screen: a focus request from an app that isn't on top is refused on Android 14+,
+        // and the voice must be playing (so holding focus and a foreground service) before the screen is allowed
+        // to go dark. The service run (Plan V1 Task 9) then lets it go dark; every other run keeps it on.
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
+        if (!intent.getBooleanExtra("service", false)) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val root = getExternalFilesDir(null) ?: filesDir
         logFile = File(root, "voice-spike-${System.currentTimeMillis()}.log")
         voicesDir = File(root, "voices")

@@ -187,3 +187,16 @@ What the listening adds to the numbers (Neal, 2026-10-21):
 5. **Memory budget:** +450 MB while a Piper voice is speaking, 2.3 GB with E2B resident. Gate voice downloads by device tier like models; consider freeing the engine after a long pause.
 6. **The catalog voice is `ljspeech`** (public domain). `libritts_r` is measured but not shippable; the second voice is chosen in V1 after a licence check, from voices trained from scratch or on permissive data.
 7. **V1's acceptance includes a screen-off run** under the foreground service, on the same three passages, before read-aloud is called done.
+
+## Screen-off run (V1, 2026-10-21 late evening)
+
+The acceptance test from decision 7, run with Plan V1's Tasks 1–8 built: the three passages repeated three times (57 sentences, about eight minutes of speech) read through the real player (`PlayerHub.readAloud`, so under `PlaybackService`'s foreground service and its silent carrier item), the screen turned off five seconds after the start with `KEYCODE_SLEEP` and left alone, the phone on AC. Per-sentence costs come from the engine's `GrangerVoice` log lines (`tools/spike/voice/service-off-*.log`); a sampler read the power manager's wakefulness every 30 s.
+
+| Voice | Screen (sampled) | Sentences | Synth ms | Audio ms | RTF | Worst sentence RTF | Stalls |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Piper ljspeech, 2 threads | Dozing from 0:30 to the end (8:00) | 56 off, 1 on | 74,570 | 439,771 | **0.17** | 0.21 | none: 57 sentences in 479.7 s of a 453 s text, the carrier playing throughout |
+| System (Google, `en-US-language`) | Dozing from 0:05 to the end (7:00) | 54 off, 3 on | 20,103 | 368,547 | **0.05** | 0.09 | none: 57 sentences in 418 s of a 394 s text |
+
+**A refused start, worth knowing.** The system voice's first attempt never spoke: the phone was locked when the run began, the spike activity (in service mode) did not show over the lock screen, and the player's audio-focus request came back `FAILED`, so the engine loaded the voice and sat paused (`GrangerFocus: play refused: focus not granted`). Android 14 and later refuse focus to an app that is neither on top nor already running a foreground service. In the app proper the voice starts from a reader on screen, so this cannot happen on the first play; it matters for anything that starts the voice from the background (a restore followed by a play from the notification, project 4's actions), which must go through the media session's play so the service is foreground first. The run was repeated with the activity shown over the lock screen.
+
+**Read:** the foreground service lifts the little-core confinement that wrecked V0's first batch. With the screen off the Piper voice costs 0.17 against 0.12 with it on (a 40 % penalty, likely the big cores idling down), far inside the 0.5 bar, and one sentence of look-ahead keeps the voice continuous. A first attempt of this run lost its early log lines to logcat's 256 KB ring buffer and showed the phone awake again by the end; the buffer was raised to 16 MB (`logcat -G 16M`) and the run repeated with the sampler, which saw the screen dark the whole way. The look-ahead stays at one to two sentences.
