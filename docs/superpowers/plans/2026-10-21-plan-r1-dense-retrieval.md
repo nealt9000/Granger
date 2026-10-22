@@ -107,6 +107,23 @@ State at the pause:
 - **Phone:** the set's 16 missing packs are already on it.
 - **Not started:** Task 7 (merging) and Tasks 9–12.
 
+**Resumed 2026-10-22:** V1 is on main (59a8982), and this branch is rebased onto it. V1's `ArticleText` moved into
+`:core:text` next to `HtmlPassages`, which reads its rules from it. `r1-base` ran on the phone the same day, and its 45 new
+replies were graded:
+
+| Tuning split | r0-combined | r1-base |
+|---|---|---|
+| Unanswerable declined | 69/76 (91%) | 71/76 (93%) |
+| Answerable grounded | 57/126 (45%) | 53/126 (42%) |
+| Retrieval recall@4 | 29% | 25% |
+| Answer found but not chosen / never found | 12 / 77 | 12 / 82 |
+| Think deeper grounded | 4/12 | 2/13 |
+| Send to first words, median / p90 | 17.4 s / 23.7 s | 14.1 s / 18.4 s |
+
+`r1-base` has the whole set installed (16 more packs) plus Task 8's parallel search and the Classics twins dropped. The extra
+packs cost keyword recall (more distractors in the 12 preselected). This is the gap dense retrieval has to close. The parallel
+search saves about 3.3 s at the median despite the extra packs.
+
 ---
 
 ### Task 1: `:core:text` and the chunker CLI
@@ -273,7 +290,7 @@ and `BookIndex.kt` (expose the chapter re-chunk used by `chunkTexts`).
 
 **Files:** `tools/eval/replay.py` (a new ranker) and `tools/eval/tests/test_replay.py`.
 
-- [ ] Re-record the corpus on the phone with the set installed and dense off: `r1-base`, the full tuning split, graded. This
+- [x] Re-record the corpus on the phone with the set installed and dense off: `r1-base`, the full tuning split, graded. This
   is R1's baseline.
 - [ ] Offline dense hits per tuning question, from Mac vectors with the phone query vectors from Task 3, added to the
   `r1-base` corpus.
