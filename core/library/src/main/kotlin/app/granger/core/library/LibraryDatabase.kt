@@ -19,8 +19,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Playlist::class, PlaylistEntry::class, MusicState::class, RecentPlay::class, MediaFolder::class, ScanCacheEntry::class,
         VoiceState::class,
         AlbumNote::class, RailPin::class,
+        HomeFeed::class, HomeDraw::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -34,6 +35,7 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun researchDao(): ResearchDao
     abstract fun mediaDao(): MediaDao
     abstract fun playbackDao(): PlaybackDao
+    abstract fun homeDao(): HomeDao
 
     companion object {
         /** Adds media types, collections, placements, reading tabs, history and recent searches. */
@@ -163,6 +165,20 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Plan H2: Home's feeds and their daily draws. Only creates tables. */
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `home_feeds` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scope` TEXT NOT NULL, " +
+                        "`kind` TEXT NOT NULL, `query` TEXT NOT NULL, `ordinal` INTEGER NOT NULL, `addedAt` INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `home_draws` (`feedId` INTEGER NOT NULL, `day` TEXT NOT NULL, `cardsJson` TEXT NOT NULL, " +
+                        "PRIMARY KEY(`feedId`))",
+                )
+            }
+        }
+
         /**
          * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
          * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
@@ -208,7 +224,7 @@ abstract class LibraryDatabase : RoomDatabase() {
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
                 .addMigrations(
                     MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-                    MIGRATION_9_10, MIGRATION_10_11,
+                    MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
                 )
                 .addCallback(SeedCallback)
                 .build()

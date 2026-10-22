@@ -242,3 +242,24 @@ data class ResearchPassage(
     val subjects: String,
     val collection: String,
 )
+
+/** What a Home feed draws (Plan H2, spec §5). Stored by name; a later kind (project 4's digest) is a new name. */
+enum class FeedKind { RANDOM, ON_THIS_DAY, SEARCH }
+
+/**
+ * A Home feed: one [kind] of thing over a [scope] (`library`, `pack:<zimName>`, `family:<family>`, `collection:<id>`,
+ * `music`, `audiobooks`; the app parses it), with a [query] for Search. [ordinal] is its place on Home.
+ */
+@Entity(tableName = "home_feeds")
+data class HomeFeed(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val scope: String,
+    val kind: FeedKind,
+    val query: String,
+    val ordinal: Int,
+    val addedAt: Long,
+)
+
+/** A feed's cards for one day ([day] is an ISO date), as the app's JSON; redrawn when the day changes. */
+@Entity(tableName = "home_draws")
+data class HomeDraw(@PrimaryKey val feedId: Long, val day: String, val cardsJson: String)

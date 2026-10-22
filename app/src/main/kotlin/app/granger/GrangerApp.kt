@@ -74,6 +74,8 @@ import app.granger.core.library.ResearchChats
 import app.granger.core.library.RoomReadingSessions
 import app.granger.core.library.RoomResearchChats
 import app.granger.core.library.RailPins
+import app.granger.core.library.HomeFeeds
+import app.granger.core.library.RoomHomeFeeds
 import app.granger.core.library.RoomRailPins
 import app.granger.shell.RailHidden
 import app.granger.shell.SharedRailHidden
@@ -464,6 +466,7 @@ class AppContainer(context: Context) {
 
     /** Items pinned to the top of the rail's list. */
     val railPins: RailPins = RoomRailPins(libraryDb)
+    val homeFeeds: HomeFeeds = RoomHomeFeeds(libraryDb)
 
     /** Chats and plays taken off the rail until they're used again. */
     val railHidden: RailHidden = SharedRailHidden(context)

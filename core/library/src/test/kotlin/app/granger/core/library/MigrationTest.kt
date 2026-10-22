@@ -15,6 +15,30 @@ import org.robolectric.annotation.Config
 class MigrationTest {
     @get:Rule val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), LibraryDatabase::class.java)
 
+    @Test fun migration11To12KeepsRowsAndCreatesHomeTables() {
+        helper.createDatabase("migrate12.db", 11).apply {
+            execSQL("INSERT INTO recent_plays (`key`, title, playedAt) VALUES ('album:x', 'X', 1)")
+            execSQL(
+                "INSERT INTO voice_states (sourceKey, address, speed, title, section, voiceId, updatedAt) " +
+                    "VALUES ('book:granger:hamlet', 'a', 1.0, 'Hamlet', NULL, 'v', 7)",
+            )
+            execSQL("INSERT INTO rail_pins (`key`, pinnedAt) VALUES ('tab:1', 5)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate12.db", 12, true, LibraryDatabase.MIGRATION_11_12)
+        db.execSQL("INSERT INTO home_feeds (scope, kind, `query`, ordinal, addedAt) VALUES ('family:wikipedia', 'ON_THIS_DAY', '', 0, 9)")
+        db.execSQL("INSERT INTO home_draws (feedId, day, cardsJson) VALUES (1, '2026-10-22', '[]')")
+        db.query("SELECT scope, kind FROM home_feeds").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("family:wikipedia")
+            assertThat(it.getString(1)).isEqualTo("ON_THIS_DAY")
+        }
+        db.query("SELECT COUNT(*) FROM home_draws").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+        db.query("SELECT COUNT(*) FROM recent_plays").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+        db.query("SELECT COUNT(*) FROM voice_states").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+        db.query("SELECT COUNT(*) FROM rail_pins").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+    }
+
     @Test fun migration10To11AddsVoiceStates() {
         helper.createDatabase("migrate11.db", 10).apply {
             execSQL("INSERT INTO recent_plays (`key`, title, playedAt) VALUES ('album:x', 'X', 1)")
