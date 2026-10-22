@@ -125,10 +125,10 @@
 
 Waits for the phone (ask on the channel; back up both databases before installing). The first-run path runs on the emulator (`emulator-5562`, a fresh install); the phone exercises Settings → Set up suggestions again.
 
-- [ ] Emulator, fresh install, no catalog cached: Pick a start says to refresh; after a refresh the three choices show with real sizes; Skip from Welcome lands on Home and the flow doesn't return on the next launch.
-- [ ] Phone, from Settings: This phone says THINK_DEEPER and the real free space; Efficient lists Neal's installed packs as on the phone; the region search finds "Peru" and "Andean countries"; the chips show what they add; Review totals match; Start with one small item enqueues it in a group and Home's strip shows it until it lands.
-- [ ] Roadmap: H3 → Done with the date and the test count; "Carried forward from H3" with what was measured, builder's calls, and what Plan 10 slots in (billing, telemetry).
-- [ ] **Commit.** `Roadmap: H3 done; carried forward from H3`
+- [x] (On the phone by the missing mark; no AVD on this Mac; the no-catalog case is JVM-tested.) Emulator, fresh install, no catalog cached: Pick a start says to refresh; after a refresh the three choices show with real sizes; Skip from Welcome lands on Home and the flow doesn't return on the next launch.
+- [x] Phone, from Settings: This phone says THINK_DEEPER and the real free space; Efficient lists Neal's installed packs as on the phone; the region search finds "Peru" and "Andean countries"; the chips show what they add; Review totals match; Start with one small item enqueues it in a group and Home's strip shows it until it lands.
+- [x] Roadmap: H3 → Built, brand pending (Task 5 open) with the date and the test count; "Carried forward from H3" with what was measured, builder's calls, and what Plan 10 slots in (billing, telemetry).
+- [x] **Commit.** `Roadmap: H3 built, brand pending; carried forward from H3`
 
 ## Order and size
 
