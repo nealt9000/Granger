@@ -120,3 +120,19 @@ class MemoryMedia : MediaLibrary {
     override suspend fun markAllMissing(origin: MediaOrigin) = error("not in tests")
     override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = error("not in tests")
 }
+
+class FakeShelves(val rows: List<CollectionRow> = emptyList()) : Shelves {
+    override val shelves: Flow<List<Shelf>> =
+        MutableStateFlow(listOf(Shelf(MediaType("m", "Media", true, 0), rows)))
+    override fun collection(id: String): Flow<CollectionRow?> = MutableStateFlow(rows.firstOrNull { it.collection.id == id })
+    override suspend fun movePack(pack: Pack, toCollectionId: String) = Unit
+    override suspend fun moveBook(book: Book, toCollectionId: String) = Unit
+    override suspend fun moveAlbum(album: AlbumSummary, toCollectionId: String) = Unit
+    override suspend fun moveAudiobook(book: Audiobook, toCollectionId: String) = Unit
+    override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) = Unit
+    override suspend fun createMediaType(name: String) = ""
+    override suspend fun deleteMediaType(id: String) = true
+    override suspend fun createCollection(name: String, mediaTypeId: String) = ""
+    override suspend fun renameCollection(id: String, name: String) = Unit
+    override suspend fun deleteCollection(id: String) = Unit
+}

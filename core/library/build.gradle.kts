@@ -31,6 +31,9 @@ dependencies {
     api(project(":core:books"))
     // Public: ResearchChats exposes Passage.
     api(project(":core:research"))
+    // Public: DensePassageFinder takes VectorSources.
+    api(project(":core:vectors"))
+    implementation(libs.jsoup)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

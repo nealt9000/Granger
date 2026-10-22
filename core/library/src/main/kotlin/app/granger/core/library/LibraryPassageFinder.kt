@@ -42,9 +42,27 @@ class LibraryPassageFinder(
     override suspend fun find(keywords: List<String>): List<Passage> {
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
-        val collections = collectionNames()
+        val collections = shelves.collectionNames()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
-        return articles(words, packs, collections) + books(words, collections) + cards(words, packs, collections) + mediaCards(words)
+        val articles = withoutClassicsTwins(articles(words, packs, collections), packs)
+        return articles + books(words, collections) + cards(words, packs, collections) + mediaCards(words)
+    }
+
+    /**
+     * Granger Classics ships as a ZIM and as EPUBs. A work whose EPUB is installed is found through the book (and its
+     * vectors), so the ZIM's pages for that work (`<slug>` and `<slug>/<page>`) are dropped rather than take a second slot.
+     */
+    private suspend fun withoutClassicsTwins(articles: List<Passage>, packs: List<Pack>): List<Passage> {
+        val classics = packs.filter { it.name == CLASSICS_ZIM }.map { it.id }.toSet()
+        if (classics.isEmpty() || articles.none { it.sourceId in classics }) return articles
+        val installed = try {
+            bookshelf.books.first().filter { it.status == PackStatus.OK }.map { it.id }.toSet()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            return articles
+        }
+        return articles.filterNot { it.sourceId in classics && BookIds.of(BookOrigin.GRANGER, "gc-" + it.location.substringBefore('/')) in installed }
     }
 
     /**
@@ -76,19 +94,6 @@ class LibraryPassageFinder(
     }
 
     /** Pack ids and book ids to the name of the collection they are filed in (a folder's child by its own name). */
-    private suspend fun collectionNames(): Map<String, String> = try {
-        buildMap {
-            for (row in shelves.shelves.first().flatMap { it.allCollections }) {
-                row.packs.forEach { put(it.id, row.collection.name) }
-                row.books.forEach { put(it.id, row.collection.name) }
-            }
-        }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (_: Exception) {
-        emptyMap()
-    }
-
     /** Each keyword is searched on its own (the full-text engine wants every word of a query); an article found twice keeps its best score. */
     private suspend fun articles(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> =
         withContext(io) {
@@ -247,6 +252,9 @@ class LibraryPassageFinder(
     private companion object {
         const val NAMED_BOOKS = 3
 
+        /** The Granger Classics ZIM's `Name`. */
+        const val CLASSICS_ZIM = "granger_classics_en"
+
         /** Works asked of the media index for each keyword, before the best [mediaCards] are picked. */
         const val MEDIA_PER_KEYWORD = 6
 
@@ -256,4 +264,18 @@ class LibraryPassageFinder(
             "translated", "tr", "english", "version", "standard",
         )
     }
+}
+
+/** Each pack's and book's collection name, by id; empty when the shelves can't be read. */
+internal suspend fun Shelves.collectionNames(): Map<String, String> = try {
+    buildMap {
+        for (row in shelves.first().flatMap { it.allCollections }) {
+            row.packs.forEach { put(it.id, row.collection.name) }
+            row.books.forEach { put(it.id, row.collection.name) }
+        }
+    }
+} catch (e: CancellationException) {
+    throw e
+} catch (_: Exception) {
+    emptyMap()
 }

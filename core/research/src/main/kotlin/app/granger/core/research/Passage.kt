@@ -27,4 +27,6 @@ data class Passage(
     val text: String,
     val meta: SourceMeta = SourceMeta(),
     val searchScore: Double = 0.0,
+    /** The query's cosine with this passage's precomputed vector, for passages found by dense search; null otherwise. */
+    val cosine: Double? = null,
 )

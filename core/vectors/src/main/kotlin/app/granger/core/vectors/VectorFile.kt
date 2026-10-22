@@ -91,6 +91,57 @@ class VectorFile private constructor(val file: File, private val channel: FileCh
             }
         }
 
+        /**
+         * Writes [vectors] (each truncated to [dims], renormalized and quantized, as `gvec.py` does) with their chunk
+         * [hashes] (16 hex digits) and [keys]. Used on the phone for books a user adds, and by tests.
+         */
+        fun write(
+            file: File,
+            vectors: List<FloatArray>,
+            dims: Int,
+            hashes: List<String>,
+            keys: List<ChunkKey>,
+            chunkerVersion: Int,
+            embedderSha256: String,
+            sourceSha256: String,
+        ) {
+            require(vectors.size == hashes.size && vectors.size == keys.size) { "vectors, hashes and keys differ in count" }
+            val blob = java.io.ByteArrayOutputStream()
+            val offsets = keys.map { k ->
+                val at = blob.size()
+                val bytes = k.key.toByteArray(Charsets.UTF_8)
+                blob.write(ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN).putInt(k.ordinal).putShort(bytes.size.toShort()).array())
+                blob.write(bytes)
+                at
+            }
+            val count = vectors.size
+            val keysAt = HEADER.toLong() + count.toLong() * (dims + 12)
+            val head = ByteBuffer.allocate(HEADER).order(ByteOrder.LITTLE_ENDIAN)
+            head.put(MAGIC).putShort(VERSION.toShort()).putShort(chunkerVersion.toShort()).putInt(dims).putInt(count)
+            head.put(unhex(embedderSha256, 32)).put(unhex(sourceSha256, 32)).putLong(keysAt)
+            val quantized = vectors.map { VectorSearch.quantize(it, dims) }
+            val body = ByteBuffer.allocate(count * (dims + 12)).order(ByteOrder.LITTLE_ENDIAN)
+            quantized.forEach { body.put(it.first) }
+            quantized.forEach { body.putFloat(it.second) }
+            hashes.forEach { body.put(unhex(it, 8)) }
+            val tail = ByteBuffer.allocate(4 * count + 4).order(ByteOrder.LITTLE_ENDIAN)
+            offsets.forEach { tail.putInt(it) }
+            tail.putInt(blob.size())
+            val tmp = File(file.path + ".part")
+            tmp.outputStream().use { out ->
+                out.write(head.array())
+                out.write(body.array())
+                out.write(tail.array())
+                blob.writeTo(out)
+            }
+            if (!tmp.renameTo(file)) throw IOException("could not move ${tmp.name} into place")
+        }
+
+        private fun unhex(hex: String, bytes: Int): ByteArray {
+            require(hex.length == 2 * bytes) { "expected ${2 * bytes} hex digits" }
+            return ByteArray(bytes) { hex.substring(2 * it, 2 * it + 2).toInt(16).toByte() }
+        }
+
         private fun hex(buf: ByteBuffer, at: Int) = buildString(64) { for (i in 0 until 32) append("%02x".format(buf.get(at + i))) }
     }
 }

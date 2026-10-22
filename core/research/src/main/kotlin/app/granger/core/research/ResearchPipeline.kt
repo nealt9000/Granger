@@ -13,6 +13,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
+/** Finds passages by meaning: the [query] vector against precomputed passage vectors, best first. */
+fun interface DenseFinder {
+    suspend fun find(query: FloatArray): List<Passage>
+}
+
 /** Searches the library for passages matching the keywords. */
 fun interface PassageFinder {
     suspend fun find(keywords: List<String>): List<Passage>

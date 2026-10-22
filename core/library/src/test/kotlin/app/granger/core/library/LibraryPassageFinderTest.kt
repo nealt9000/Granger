@@ -45,22 +45,6 @@ class LibraryPassageFinderTest {
         override fun archive(packId: String): ZimArchive? = archives[packId]
     }
 
-    private class FakeShelves(val rows: List<CollectionRow>) : Shelves {
-        override val shelves: Flow<List<Shelf>> =
-            MutableStateFlow(listOf(Shelf(MediaType("m", "Media", true, 0), rows)))
-        override fun collection(id: String): Flow<CollectionRow?> = MutableStateFlow(rows.firstOrNull { it.collection.id == id })
-        override suspend fun movePack(pack: Pack, toCollectionId: String) = Unit
-        override suspend fun moveBook(book: Book, toCollectionId: String) = Unit
-        override suspend fun moveAlbum(album: AlbumSummary, toCollectionId: String) = Unit
-        override suspend fun moveAudiobook(book: Audiobook, toCollectionId: String) = Unit
-        override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) = Unit
-        override suspend fun createMediaType(name: String) = ""
-        override suspend fun deleteMediaType(id: String) = true
-        override suspend fun createCollection(name: String, mediaTypeId: String) = ""
-        override suspend fun renameCollection(id: String, name: String) = Unit
-        override suspend fun deleteCollection(id: String) = Unit
-    }
-
     private fun collection(name: String, packs: List<Pack> = emptyList(), books: List<Book> = emptyList()) =
         CollectionRow(ShelfCollection("c:$name", name, "m", false, name), packs, books)
 
@@ -299,6 +283,19 @@ class LibraryPassageFinderTest {
         assertThat(found.map { it.sourceId }).contains(kjv.id)
         assertThat(found.first { it.sourceId == kjv.id }.text).contains("root of all evil")
         assertThat(found.distinctBy { Triple(it.sourceId, it.location, it.text) }).hasSize(found.size)
+    }
+
+    @Test fun classicsZimPagesOfAnInstalledEpubAreDropped() = test {
+        val walden = addBook("gc-walden", "Walden", "<p>I went to the woods.</p>")
+        val classics = pack("classics").copy(name = "granger_classics_en")
+        val archive = FakeZimArchive(
+            "classics", paths = setOf("walden/c001", "odyssey/c001"),
+            results = listOf(ZimHit("walden/c001", "Walden — Economy", score = 90), ZimHit("odyssey/c001", "The Odyssey — Book I", score = 80)),
+            html = mapOf("walden/c001" to page("woods deliberately"), "odyssey/c001" to page("woods wine dark sea")),
+        )
+        val found = finder(listOf(classics), mapOf("classics" to archive), books = listOf(walden)).find(listOf("woods"))
+            .filter { it.kind == SourceKind.ARTICLE }
+        assertThat(found.map { it.location }).containsExactly("odyssey/c001")
     }
 
     @Test fun quranMatchesKoranTitle() = test {

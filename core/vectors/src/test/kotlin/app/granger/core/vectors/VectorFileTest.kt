@@ -39,3 +39,19 @@ class VectorFileTest {
         assertThat(VectorFile.open(File(tmp.root, "missing.gvec"))).isNull()
     }
 }
+
+class VectorFileWriteTest {
+    @get:Rule val tmp = TemporaryFolder()
+
+    // The phone's writer and gvec.py's must give the same bytes for the same input.
+    @Test fun writesWhatThePythonFixtureHolds() {
+        val fixture = File(javaClass.classLoader.getResource("tiny.gvec")!!.toURI())
+        val vectors = listOf(floatArrayOf(1f, 0f, 0f, 0f), floatArrayOf(0.6f, 0.8f, 0f, 0f), floatArrayOf(0f, 0f, -1f, 0.5f))
+        val out = tmp.newFile("w.gvec")
+        VectorFile.write(
+            out, vectors, 4, listOf("369fae5d28de7efc", "0000000000000001", "ffffffffffffffff"),
+            listOf(ChunkKey("A/Knot", 0), ChunkKey("A/Knot", 1), ChunkKey("OEBPS/c001.xhtml", 7)), 1, "ab".repeat(32), "cd".repeat(32),
+        )
+        assertThat(out.readBytes().toList()).isEqualTo(fixture.readBytes().toList())
+    }
+}
