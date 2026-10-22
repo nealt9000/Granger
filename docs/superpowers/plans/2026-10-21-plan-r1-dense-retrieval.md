@@ -342,6 +342,8 @@ Rebase onto H1 (branch `h1-readiness-model`) first. H1's catalog already gives e
 storage-only) and each book one too (literature or thought). It also adds a top-level `readiness.domains[]`. The ids are
 the same as `set.json`'s, so take the domains from the catalog rather than adding a second list. H1 is on main (ad98d6a).
 Regenerate on top of its signed catalog (generatedAt 2026-10-22T12:04:01Z or later), because the app refuses an older one.
+If the vectors items need a `library.db` change, use version 13. H2 (branch `h2-home`) takes 12. Rebase onto H2 first.
+Do the same before any phone install once an H2 build has run on the Pixel, because a v11 build can't open a v12 database.
 
 - [ ] Parse the optional `vectors` object. An older catalog, or an entry without it, behaves as today. Test with a catalog that
   has and lacks the field.
