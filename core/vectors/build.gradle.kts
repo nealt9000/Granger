@@ -23,3 +23,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.truth)
 }
+
+tasks.withType<Test>().configureEach {
+    if (project.hasProperty("bench")) systemProperty("bench", "1")
+    maxHeapSize = "4g"
+    testLogging { showStandardStreams = project.hasProperty("bench") }
+}

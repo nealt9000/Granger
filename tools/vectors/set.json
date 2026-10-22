@@ -1,42 +1,164 @@
 {
-  "comment": "The vector set (spec §3.2, Plan R1; trimmed by Neal 2026-10-21). Domains are the readiness domains' draft ids; they move to the catalog's domain field when H1 lands. maxChunksPerArticle keeps an article's first N chunks (keyword search still covers the rest); skipPathSuffixes drops translated pages.",
-  "packs": [
-    {"id": "wikipedia_en_medicine_nopic", "domain": "medicine", "maxChunksPerArticle": 12},
-    {"id": "wikem_en_all_maxi", "domain": "medicine",
-     "skipPathSuffixes": ["/es", "/ko", "/vi", "/it", "/ja", "/pt", "/id", "/fr", "/ru", "/tr", "/de", "/pl", "/zh", "/ar", "/hi"]},
-    {"id": "appropedia_en_all_maxi", "domain": "food"},
-    {"id": "based.cooking_en_all", "domain": "food"},
-    {"id": "foss.cooking_en_all", "domain": "food"},
-    {"id": "ifixit_en_all", "domain": "making"},
-    {"id": "wikipedia_en_knots_maxi", "domain": "making", "maxChunksPerArticle": 12},
-    {"id": "wikipedia_en_physics_maxi", "domain": "science", "maxChunksPerArticle": 12},
-    {"id": "wikipedia_en_chemistry_maxi", "domain": "science", "maxChunksPerArticle": 12},
-    {"id": "wikipedia_en_mathematics_maxi", "domain": "science", "maxChunksPerArticle": 12},
-    {"id": "devdocs_en_python", "domain": "technology"},
-    {"id": "devdocs_en_bash", "domain": "technology"},
-    {"id": "devdocs_en_git", "domain": "technology"},
-    {"id": "devdocs_en_http", "domain": "technology"},
-    {"id": "devdocs_en_sqlite", "domain": "technology"},
-    {"id": "devdocs_en_c", "domain": "technology"},
-    {"id": "devdocs_en_javascript", "domain": "technology"},
-    {"id": "reverseengineering.stackexchange.com_en_all", "domain": "technology"},
-    {"id": "softwareengineering.stackexchange.com_en_all", "domain": "technology"},
-    {"id": "cs.stackexchange.com_en_all", "domain": "technology"},
-    {"id": "unix.stackexchange.com_en_all", "domain": "technology"},
-    {"id": "wikivoyage_en_all_nopic", "domain": "maps"},
-    {"id": "wikipedia_en_top_nopic", "domain": "reference", "maxChunksPerArticle": 12},
-    {"id": "internet-encyclopedia-philosophy_en_all", "domain": "thought"},
-    {"id": "wikipedia_en_history_nopic", "domain": "thought", "maxChunksPerArticle": 12}
-  ],
-  "keywordOnly": {
-    "wikiquote_en_all_nopic": "624k chunks of quotes; trimmed 2026-10-21",
-    "jeffe.cs.illinois.edu_en_all": "the book is 696 PDFs; no PDF text on the phone yet",
-    "libretexts.org_en_k12": "pages render from JSON; no text in the HTML",
-    "milneopentextbooks.org_en_all": "a catalogue page per book; the books are PDFs or links"
+ "comment": "The vector set (spec §3.2, Plan R1; trimmed by Neal 2026-10-21). Domains are the readiness domains' draft ids; they move to the catalog's domain field when H1 lands. maxChunksPerArticle keeps an article's first N chunks (keyword search still covers the rest); skipPathSuffixes drops translated pages. skipPathPrefixes drops profile and listing pages.",
+ "packs": [
+  {
+   "id": "wikipedia_en_medicine_nopic",
+   "domain": "medicine",
+   "maxChunksPerArticle": 12
   },
-  "books": {
-    "collection": "granger-classics",
-    "domainByCategory": {"Philosophy": "thought", "Scripture & religion": "thought"},
-    "defaultDomain": "literature"
+  {
+   "id": "wikem_en_all_maxi",
+   "domain": "medicine",
+   "skipPathSuffixes": [
+    "/es",
+    "/ko",
+    "/vi",
+    "/it",
+    "/ja",
+    "/pt",
+    "/id",
+    "/fr",
+    "/ru",
+    "/tr",
+    "/de",
+    "/pl",
+    "/zh",
+    "/ar",
+    "/hi"
+   ]
+  },
+  {
+   "id": "appropedia_en_all_maxi",
+   "domain": "food"
+  },
+  {
+   "id": "based.cooking_en_all",
+   "domain": "food"
+  },
+  {
+   "id": "foss.cooking_en_all",
+   "domain": "food"
+  },
+  {
+   "id": "ifixit_en_all",
+   "domain": "making",
+   "maxChunksPerArticle": 8
+  },
+  {
+   "id": "wikipedia_en_knots_maxi",
+   "domain": "making",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "wikipedia_en_physics_maxi",
+   "domain": "science",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "wikipedia_en_chemistry_maxi",
+   "domain": "science",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "wikipedia_en_mathematics_maxi",
+   "domain": "science",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "devdocs_en_python",
+   "domain": "technology"
+  },
+  {
+   "id": "devdocs_en_bash",
+   "domain": "technology"
+  },
+  {
+   "id": "devdocs_en_git",
+   "domain": "technology"
+  },
+  {
+   "id": "devdocs_en_http",
+   "domain": "technology"
+  },
+  {
+   "id": "devdocs_en_sqlite",
+   "domain": "technology"
+  },
+  {
+   "id": "devdocs_en_c",
+   "domain": "technology"
+  },
+  {
+   "id": "devdocs_en_javascript",
+   "domain": "technology"
+  },
+  {
+   "id": "reverseengineering.stackexchange.com_en_all",
+   "domain": "technology",
+   "skipPathPrefixes": [
+    "users/",
+    "questions_page="
+   ],
+   "maxChunksPerArticle": 4
+  },
+  {
+   "id": "softwareengineering.stackexchange.com_en_all",
+   "domain": "technology",
+   "skipPathPrefixes": [
+    "users/",
+    "questions_page="
+   ],
+   "maxChunksPerArticle": 4
+  },
+  {
+   "id": "cs.stackexchange.com_en_all",
+   "domain": "technology",
+   "skipPathPrefixes": [
+    "users/",
+    "questions_page="
+   ],
+   "maxChunksPerArticle": 4
+  },
+  {
+   "id": "unix.stackexchange.com_en_all",
+   "domain": "technology",
+   "skipPathPrefixes": [
+    "users/",
+    "questions_page="
+   ],
+   "maxChunksPerArticle": 4
+  },
+  {
+   "id": "wikivoyage_en_all_nopic",
+   "domain": "maps"
+  },
+  {
+   "id": "wikipedia_en_top_nopic",
+   "domain": "reference",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "internet-encyclopedia-philosophy_en_all",
+   "domain": "thought"
+  },
+  {
+   "id": "wikipedia_en_history_nopic",
+   "domain": "thought",
+   "maxChunksPerArticle": 12
   }
+ ],
+ "keywordOnly": {
+  "wikiquote_en_all_nopic": "624k chunks of quotes; trimmed 2026-10-21",
+  "jeffe.cs.illinois.edu_en_all": "the book is 696 PDFs; no PDF text on the phone yet",
+  "libretexts.org_en_k12": "pages render from JSON; no text in the HTML",
+  "milneopentextbooks.org_en_all": "a catalogue page per book; the books are PDFs or links"
+ },
+ "books": {
+  "collection": "granger-classics",
+  "domainByCategory": {
+   "Philosophy": "thought",
+   "Scripture & religion": "thought"
+  },
+  "defaultDomain": "literature"
+ }
 }

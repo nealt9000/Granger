@@ -99,7 +99,7 @@ def main(argv=None):
     ap.add_argument("sources")
     ap.add_argument("books")
     ap.add_argument("work")
-    ap.add_argument("--only", nargs="*")
+    ap.add_argument("--only", nargs="*", help="these sources only, in this order (granger-classics for the books)")
     ap.add_argument("--dims", type=int, default=256)
     a = ap.parse_args(argv)
     import subprocess, os
@@ -111,7 +111,8 @@ def main(argv=None):
     packs = {p["id"]: p for p in CATALOG["packs"]}
     vset = count.load_set()
     model_box = [None]
-    for p in vset["packs"]:
+    order = {pid: i for i, pid in enumerate(a.only or [])}
+    for p in sorted(vset["packs"], key=lambda p: order.get(p["id"], len(order))):
         if a.only and p["id"] not in a.only:
             continue
         entry = packs[p["id"]]

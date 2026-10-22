@@ -28,10 +28,12 @@ def zim_file(sources_dir, pack):
 
 
 def selected(pack, path):
-    """The pack's chunks that set.json keeps: translated pages skipped, at most maxChunksPerArticle per article."""
+    """The pack's chunks that set.json keeps: translated, profile and listing pages skipped, at most maxChunksPerArticle per article."""
     skip = tuple(pack.get("skipPathSuffixes", ()))
+    prefixes = tuple(pack.get("skipPathPrefixes", ()))
     cap = pack.get("maxChunksPerArticle")
-    articles = ((k, t, b) for k, t, b in sources.zim_sources(path) if not (skip and k.endswith(skip)))
+    articles = ((k, t, b) for k, t, b in sources.zim_sources(path)
+                if not (skip and k.endswith(skip)) and not (prefixes and k.startswith(prefixes)))
     for title, c in sources.chunk("html", articles):
         if cap is None or c["ordinal"] < cap:
             yield title, c

@@ -161,6 +161,19 @@ of Mac embedding.
 
 `set.json` records all of it (`keywordOnly` says why each pack is out).
 
+**After the trim, a builder's call for Neal's review.** The added Stack Exchanges took the count back to 6.86M (2.1 GB):
+Unix alone is 1.93M, and about 17% of its chunks are user profile pages. So:
+- Stack Exchange profile and question-list pages are skipped, and each question page keeps its first 4 chunks (the question
+  and its top answers);
+- iFixit keeps a guide's first 8 chunks (its median guide is 8 chunks; 22 at the 90th percentile).
+
+Estimated about 5.1M chunks, about 1.6 GB at 256 int8, and about 43 h of embedding. That's still a little over 1.5 GB. The
+real limit is the phone's scan time (Task 5), and a user scans only the packs they've installed. The Mac's JVM scans 1M
+rows in 90 ms on one thread and 14 ms on eight; the Pixel 6 figure decides any further cut.
+
+**Picture and no-picture packs share vectors.** The phone's `wikipedia_en_top_maxi` passages match the `_nopic` file's
+chunks on 18,525 of 18,531. The per-chunk hash check drops the rest, so one vector file serves both flavours.
+
 ### Task 3: Dims, quantization and phone queries (offline)
 
 **Files:** extend `tools/eval/dense.py` (or `tools/vectors/recall.py`), plus `ResearchBenchmarkActivity`'s `cosines` mode.
