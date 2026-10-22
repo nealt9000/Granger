@@ -86,9 +86,10 @@ class ReadAloudEngine(
 
     /** Queues [source] from [from] with [speech]; speaks at once unless [autoplay] is false (then [play] starts it). */
     suspend fun start(source: ReadSource, speech: Speech, from: ReadAddress?, speed: Float, autoplay: Boolean = true) = lock.withLock {
+        val previous = jobs
         cancelJobs()
         idleClose?.cancel(); idleClose = null
-        this.speech?.takeIf { it !== speech }?.close()
+        retire(this.speech?.takeIf { it !== speech }, previous)
         this.source = source
         this.speech = speech
         this.speed = speed
@@ -202,6 +203,19 @@ class ReadAloudEngine(
         buffer.getOrNull(i)?.let { VoiceProgress(it.address, it, i, buffer.getOrNull(i - 1)?.text, buffer.getOrNull(i + 1)?.text) }
 
     private fun cancelJobs() { jobs?.cancel(); jobs = null }
+
+    /**
+     * Closes [old] once [itsJobs] have ended. A cancelled producer may still be inside the engine's native call (a
+     * sentence is made in one piece, and a slow voice takes seconds over it); freeing the engine under it crashed the
+     * process (SIGSEGV in sherpa-onnx, 2026-10-22, on a voice switch mid-sentence).
+     */
+    private fun retire(old: Speech?, itsJobs: Job?) {
+        if (old == null) return
+        scope.launch {
+            itsJobs?.join()
+            old.close()
+        }
+    }
 
     private fun launchJobs() {
         val s = speech ?: return
