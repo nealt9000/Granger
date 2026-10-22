@@ -151,14 +151,14 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
   format and parse go through `MediaAddress`.
 - Test: `core/library/src/test/kotlin/app/granger/core/library/PassageAddressTest.kt`
 
-- [ ] **Step 1: Failing tests:** `everyKindRoundTrips`, `awkwardIdsAndQuotesRoundTrip` (the Review Focus cases),
+- [x] **Step 1: Failing tests:** `everyKindRoundTrips`, `awkwardIdsAndQuotesRoundTrip` (the Review Focus cases),
       `mediaAddressesPassThrough`, `junkParsesToNull`, `ofMapsEachPassageKind` (ARTICLE, CARD → Pack, BOOK, a placed
       SELECTION → Book, an unplaced SELECTION → Book at progression 0 with no href, MEDIA with each location form).
-- [ ] **Step 2:** `./gradlew :core:library:testDebugUnitTest --tests '*PassageAddressTest'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** Percent-encode per field with a small local encoder (not `URLEncoder`, which turns spaces into
+- [x] **Step 2:** `./gradlew :core:library:testDebugUnitTest --tests '*PassageAddressTest'`. Expected: compile failure.
+- [x] **Step 3: Implement.** Percent-encode per field with a small local encoder (not `URLEncoder`, which turns spaces into
       `+`).
-- [ ] **Step 4:** Same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: PassageAddress — one address for every citation kind`
+- [x] **Step 4:** Same command. Expected: PASS.
+- [x] **Step 5: Commit.** `R3: PassageAddress — one address for every citation kind`
 
 ### Task 2: `CitedQuote` — the sentence the answer used
 
@@ -168,15 +168,15 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
   passage, decision 3). `claims(answer, n)` uses `Citations`' chip pattern, so `[1][2]` and `[1, 2]` both count.
 - Test: `core/research/src/test/kotlin/app/granger/core/research/CitedQuoteTest.kt`
 
-- [ ] **Step 1: Failing tests:** `picksTheSentenceSharingTheClaimsWords`, `onlySentencesCitingNCount`,
+- [x] **Step 1: Failing tests:** `picksTheSentenceSharingTheClaimsWords`, `onlySentencesCitingNCount`,
       `noCitingSentenceUsesTheWholeAnswer`, `noOverlapFallsBackToTheFirstSentence`, `shortSentencesAreSkipped`,
       `longQuotesAreCutAtAWord`, `contextIsFortyCharsEachSide`, `accentsAndCaseFold`
       (an inline King James Matthew 6:25–34 fixture: "take no thought for the morrow" is picked for an answer about
       not worrying about tomorrow).
-- [ ] **Step 2:** `./gradlew :core:research:test --tests '*CitedQuoteTest'`. Expected: compile failure.
-- [ ] **Step 3: Implement** as decision 3.
-- [ ] **Step 4:** Same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: CitedQuote — the passage sentence that best matches the answer's claim`
+- [x] **Step 2:** `./gradlew :core:research:test --tests '*CitedQuoteTest'`. Expected: compile failure.
+- [x] **Step 3: Implement** as decision 3.
+- [x] **Step 4:** Same command. Expected: PASS.
+- [x] **Step 5: Commit.** `R3: CitedQuote — the passage sentence that best matches the answer's claim`
 
 ### Task 3: Media cards focus on a song or a chapter
 
@@ -192,12 +192,12 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
   `noPartWhenOnlyTheAlbumMatches`), `LibraryPassageFinderTest`
   (`aSongTitleFocusesItsAlbumsCard`: "Mars bringer of war" finds *The Planets* focused on track 1)
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :core:library:testDebugUnitTest`. Expected: failures on the new tests only.
-- [ ] **Step 3: Implement.** Android Auto's browse and Search's media groups don't read `partIds`; check that their tests
+- [x] **Step 1: Failing tests** as named.
+- [x] **Step 2:** `./gradlew :core:library:testDebugUnitTest`. Expected: failures on the new tests only.
+- [x] **Step 3: Implement.** Android Auto's browse and Search's media groups don't read `partIds`; check that their tests
       are unchanged.
-- [ ] **Step 4:** Same command, plus `./gradlew :core:research:test` (media cue tests). Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: media cards name the song or chapter they matched`
+- [x] **Step 4:** Same command, plus `./gradlew :core:research:test` (media cue tests). Expected: PASS.
+- [x] **Step 5: Commit.** `R3: media cards name the song or chapter they matched`
 
 ### Task 4: `CitationOpener` — addresses resolved, with the fallback chain
 
@@ -221,12 +221,12 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
   `aChapterOpensItsAudiobookAtTheChapter`, `aMissingSourceIsGone`, `aPreR3TurnGetsItsQuoteFromItsAnswer`. Update
   `ResearchViewModelTest` and `CitationTabTest` for the new `open` signature.
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.research.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** Before editing `ResearchScreen`/`ResearchViewModel`, check whether V2 Task 7 has landed on main
+- [x] **Step 1: Failing tests** as named.
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.research.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** Before editing `ResearchScreen`/`ResearchViewModel`, check whether V2 Task 7 has landed on main
       and rebase onto it first if so; tell the V2 session which lines R3 changes (the chip and card `onClick`, `open`).
-- [ ] **Step 4:** Same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: CitationOpener — citations resolve through their address, with fallbacks`
+- [x] **Step 4:** Same command. Expected: PASS.
+- [x] **Step 5: Commit.** `R3: CitationOpener — citations resolve through their address, with fallbacks`
 
 ### Task 5: Article highlight at the passage
 
@@ -247,12 +247,12 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
   `ArticleReadSourceTest`'s fixture), `ReaderViewModelTest` (`aCitedQuoteYieldsACiteRange`,
   `navigatingAwayClearsTheCite`)
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.reader.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** The JS isn't unit tested; the Kotlin side owns all matching, so the page only marks a given
+- [x] **Step 1: Failing tests** as named.
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.reader.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** The JS isn't unit tested; the Kotlin side owns all matching, so the page only marks a given
       range, as V1's `mark` already does on the phone.
-- [ ] **Step 4:** Same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: articles open at the cited sentence, highlighted`
+- [x] **Step 4:** Same command. Expected: PASS.
+- [x] **Step 5: Commit.** `R3: articles open at the cited sentence, highlighted`
 
 ### Task 6: Better book quotes
 
@@ -282,17 +282,17 @@ Readium's own text search runs in the WebView; the walkthrough (Task 8) checks i
   `playOnAWholeAudiobookResumesItsSavedPlace`, `playOnAGoneSongSaysSo`), the album and audiobook view model tests
   (`aRouteTrackIsMarked`, `aRouteChapterIsMarked`)
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest`. Expected: failures on the new tests.
-- [ ] **Step 3: Implement.** Check that `playAudiobook` with a transient bookmark doesn't write a bookmark row (it only reads
+- [x] **Step 1: Failing tests** as named.
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest`. Expected: failures on the new tests.
+- [x] **Step 3: Implement.** Check that `playAudiobook` with a transient bookmark doesn't write a bookmark row (it only reads
       `trackId` and `positionMs`). Spoken answers (V2 Task 7) pause for music like any voice; nothing to do here.
-- [ ] **Step 4:** Same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `R3: media citations open at the song or chapter, and play`
+- [x] **Step 4:** Same command. Expected: PASS.
+- [x] **Step 5: Commit.** `R3: media citations open at the song or chapter, and play`
 
 ### Task 8: Pixel 6 walkthrough; roadmap
 
-- [ ] Ask the session holding the phone (R1 or V2) before taking it. Back up both databases; install over Wi-Fi.
-- [ ] Check each kind (spec §11):
+- [x] Ask the session holding the phone (R1 or V2) before taking it. Back up both databases; install over Wi-Fi.
+- [x] Check each kind (spec §11):
   - An article citation (Rosetta Stone, "What did Champollion decipher?") opens at its section with the cited sentence
     highlighted.
   - A card citation opens the pack's main page.
@@ -305,9 +305,9 @@ Readium's own text search runs in the WebView; the walkthrough (Task 8) checks i
   - Fallbacks: remove a cited book and tap → "That source is no longer in your library."; an article path that's gone (a
     pack updated to a newer snapshot) → the main page with the note.
   - An old chat from before R3 still opens its citations.
-- [ ] Update the roadmap: the R3 row to Done with what passed and what's open; "Carried forward from R3" for projects 3 and 4
+- [x] Update the roadmap: the R3 row to Done with what passed and what's open; "Carried forward from R3" for projects 3 and 4
       (`ResearchChats.addresses`, `CitationOpener.open(address)`).
-- [ ] **Commit.** `Research R3: deep links — every citation opens at its passage; roadmap`
+- [x] **Commit.** `Research R3: deep links — every citation opens at its passage; roadmap`
 
 ## Order and size
 
