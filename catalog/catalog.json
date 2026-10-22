@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-20T19:47:27Z",
+  "generatedAt": "2026-10-22T07:28:45Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -480,16 +480,16 @@
       "description": "A wiki about Afro-Brazilian martial art capoeira",
       "category": "Games & Hobbies",
       "language": "eng",
-      "sizeBytes": 12603863,
-      "sha256": "688189b4813e598a5d2be0bfdd58c1c7658418744d76bab86bc373b20ea90d0c",
+      "sizeBytes": 11026255,
+      "sha256": "20c5e586dd7266b119064485c4e6eb6aeba31c43d6a328a47af00e132cee8f75",
       "urls": [
-        "https://download.kiwix.org/zim/other/capoeirawiki.org_en_all_maxi_2026-07b.zim"
+        "https://download.kiwix.org/zim/other/capoeirawiki.org_en_all_maxi_2026-10.zim"
       ],
-      "snapshotDate": "2026-07-22",
+      "snapshotDate": "2026-10-20",
       "license": "CC BY-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "7c07a44a-c454-2157-00e7-7a3efad75ae3",
+      "zimUuid": "25513a7c-f639-b812-663f-1a1500648f8d",
       "zimName": "capoeirawiki.org_en_all",
       "featured": false,
       "family": "capoeirawiki.org"
@@ -10242,6 +10242,26 @@
       "family": "devdocs"
     },
     {
+      "id": "postmarketos_en_all_maxi",
+      "title": "Nura",
+      "description": "Reference wiki for the Linux distribution for mobile devices and beyond",
+      "category": "Programming",
+      "language": "eng",
+      "sizeBytes": 30417456,
+      "sha256": "6abdce8d2c530b12604ccb46685dd3e3a23ec083ba74f647ea40a8bf643103d6",
+      "urls": [
+        "https://download.kiwix.org/zim/other/postmarketos_en_all_maxi_2026-08.zim"
+      ],
+      "snapshotDate": "2026-08-20",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "ce298e1d-615b-48cb-4403-073d2d2080e0",
+      "zimName": "postmarketos_en_all",
+      "featured": false,
+      "family": "postmarketos"
+    },
+    {
       "id": "devdocs_en_nushell",
       "title": "Nushell Docs",
       "description": "Nushell documentation, by DevDocs",
@@ -10780,26 +10800,6 @@
       "zimName": "devdocs_en_postgresql",
       "featured": false,
       "family": "devdocs"
-    },
-    {
-      "id": "postmarketos_en_all_maxi",
-      "title": "postmarketOS",
-      "description": "Reference wiki for the Linux distribution for mobile devices and beyond",
-      "category": "Programming",
-      "language": "eng",
-      "sizeBytes": 30417456,
-      "sha256": "6abdce8d2c530b12604ccb46685dd3e3a23ec083ba74f647ea40a8bf643103d6",
-      "urls": [
-        "https://download.kiwix.org/zim/other/postmarketos_en_all_maxi_2026-08.zim"
-      ],
-      "snapshotDate": "2026-08-20",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "ce298e1d-615b-48cb-4403-073d2d2080e0",
-      "zimName": "postmarketos_en_all",
-      "featured": false,
-      "family": "postmarketos"
     },
     {
       "id": "devdocs_en_powershell",
@@ -13047,16 +13047,16 @@
       "description": "Stack Exchange Q&A for people who use Blender software to create",
       "category": "Q&A",
       "language": "eng",
-      "sizeBytes": 2837101616,
-      "sha256": "ace722aac8d20d72a68c15777ac6868f5d27c12be4123abae62400779c498640",
+      "sizeBytes": 2869368403,
+      "sha256": "010e89acad8e7be4d30e24c019659ffe21138288ae94da621a730c7e1e350ab1",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/blender.stackexchange.com_en_all_2026-08.zim"
+        "https://download.kiwix.org/zim/stack_exchange/blender.stackexchange.com_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-08-03",
+      "snapshotDate": "2026-10-19",
       "license": "CC BY-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "dd8a52af-2d73-5939-536c-867feea67374",
+      "zimUuid": "3fdc5c3e-4b52-a8c3-5b53-ed9f98d370c7",
       "zimName": "blender.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange"
@@ -13867,16 +13867,16 @@
       "description": "Stack Exchange Q&A for everything related to ExpressionEngine® CMS",
       "category": "Q&A",
       "language": "eng",
-      "sizeBytes": 49963963,
-      "sha256": "dd9175075b20505925c6100c8389f4dd769b75b66c04966c39ba0e414ae6e17d",
+      "sizeBytes": 49982480,
+      "sha256": "8edbc8eebf59761be55b2f7803d3ef3c59b2de044326d7f6cf17605789b74ecf",
       "urls": [
-        "https://download.kiwix.org/zim/stack_exchange/expressionengine.stackexchange.com_en_all_2026-08.zim"
+        "https://download.kiwix.org/zim/stack_exchange/expressionengine.stackexchange.com_en_all_2026-10.zim"
       ],
-      "snapshotDate": "2026-08-01",
+      "snapshotDate": "2026-10-22",
       "license": "CC BY-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "46069a3f-c87a-4f18-3357-2e9ac624ea78",
+      "zimUuid": "df78886a-e197-adde-478f-381326004a14",
       "zimName": "expressionengine.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange"
@@ -16847,16 +16847,16 @@
       "description": "The educational technology and digital learning wiki",
       "category": "Reference",
       "language": "eng",
-      "sizeBytes": 59785270,
-      "sha256": "ebd26db7137f41b073ce273f56beb4e8f270600c6658b3a8134fc0e190b32af0",
+      "sizeBytes": 59338663,
+      "sha256": "d3b0c7f2b0394c841ad1bf18b88cda32c07e51d80768e8c5fabbe72ce29c2286",
       "urls": [
-        "https://download.kiwix.org/zim/other/edutechwiki_en_all_maxi_2026-07.zim"
+        "https://download.kiwix.org/zim/other/edutechwiki_en_all_maxi_2026-10.zim"
       ],
-      "snapshotDate": "2026-07-23",
+      "snapshotDate": "2026-10-21",
       "license": "CC BY-NC-SA",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "7c32ed65-0d13-c051-a2f9-641bd41b5f79",
+      "zimUuid": "6048189f-967b-b186-b693-61a33131f1e8",
       "zimName": "edutechwiki_en_all",
       "featured": false,
       "family": "edutechwiki",
@@ -25392,6 +25392,22 @@
         "gc-hunger",
         "gc-quo-vadis"
       ]
+    }
+  ],
+  "voices": [
+    {
+      "id": "vits-piper-en_US-ljspeech-medium",
+      "title": "Granger voice (ljspeech)",
+      "engine": "piper",
+      "language": "en-US",
+      "speakers": 1,
+      "sampleRate": 22050,
+      "sizeBytes": 67456670,
+      "unpackedBytes": 81529587,
+      "sha256": "3013e3af7bd4c3d35188a93b8a3ef4ebf26e9946a54292e10f3f961ecc0ac23b",
+      "url": "https://github.com/nealt9000/Granger/releases/download/voices-v1/vits-piper-en_US-ljspeech-medium.zip",
+      "license": "Public domain (LJ Speech); model by Rhasspy Piper, MIT",
+      "attribution": "Voice trained on the LJ Speech dataset (public domain) by the Piper project; spoken through sherpa-onnx (Apache-2.0); espeak-ng data (GPL-3.0)."
     }
   ]
 }
