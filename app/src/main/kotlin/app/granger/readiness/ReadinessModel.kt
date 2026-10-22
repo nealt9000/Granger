@@ -113,6 +113,10 @@ object ReadinessModel {
         private val installedNames = packEntries.values.filterNotNull().mapTo(HashSet()) { it.zimName }
         private val installedFamilies = packEntries.values.filterNotNull().mapNotNullTo(HashSet()) { it.family.ifBlank { null } }
 
+        /** A ZIM is held when it, or a ZIM that holds its articles, is installed (Plan H4, Decision 7). */
+        private fun held(zimName: String): Boolean =
+            zimName in installedNames || catalog?.readiness?.containers(zimName).orEmpty().any { it in installedNames }
+
         /** Granger books that are whole, with their entries. */
         val granger: Map<Book, BookEntry> = books.filter { it.origin == BookOrigin.GRANGER }
             .mapNotNull { book -> bookEntries[book.sourceRef]?.let { book to it } }.toMap()
@@ -135,14 +139,22 @@ object ReadinessModel {
                 title = domain.title,
                 coverage = coverage,
                 installedBytes = installedBytes,
-                essentialBytes = essential.sumOf { it.bytes },
-                comprehensiveBytes = comprehensive.sumOf { it.bytes },
+                essentialBytes = tierBytes(essential),
+                comprehensiveBytes = tierBytes(comprehensive),
                 missingEssential = essential.filterNot { it.started }.mapNotNull { it.missing }.sortedBy { it.sizeBytes },
             )
         }
 
-        /** What a tier token stands for and whether it's installed. */
-        private class Token(val started: Boolean, val complete: Boolean, val bytes: Long, val missing: CatalogItem?)
+        /** What a tier token stands for and whether it's installed; [zimName] for a pack token. */
+        private class Token(val started: Boolean, val complete: Boolean, val bytes: Long, val missing: CatalogItem?, val zimName: String? = null)
+
+        /** A tier's catalog size: one entry per ZIM (its largest listed flavour), nothing for a ZIM another in the tier holds. */
+        private fun tierBytes(tokens: List<Token>): Long {
+            val byZim = tokens.filter { !it.zimName.isNullOrBlank() }.groupBy { it.zimName!! }.mapValues { (_, t) -> t.maxOf { it.bytes } }
+            val containers = catalog?.readiness
+            val counted = byZim.filterKeys { zim -> containers?.containers(zim).orEmpty().none { it in byZim } }
+            return counted.values.sum() + tokens.filter { it.zimName.isNullOrBlank() }.sumOf { it.bytes }
+        }
 
         private fun token(token: String, domainId: String): Token = when {
             token.startsWith("@") -> {
@@ -166,12 +178,12 @@ object ReadinessModel {
                 val pack = catalog?.packs.orEmpty().firstOrNull { it.id == token }
                 val book = if (pack == null) bookEntries[token] else null
                 val have = when {
-                    pack != null -> pack.zimName in installedNames
+                    pack != null -> held(pack.zimName)
                     book != null -> book.id in installedBookIds
                     else -> false
                 }
                 val item: CatalogItem? = pack ?: book
-                Token(started = have, complete = have, bytes = item?.sizeBytes ?: 0L, missing = if (have) null else item)
+                Token(started = have, complete = have, bytes = item?.sizeBytes ?: 0L, missing = if (have) null else item, zimName = pack?.zimName)
             }
         }
     }

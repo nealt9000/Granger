@@ -137,6 +137,24 @@ class OnboardingViewModelTest {
         assertThat(efficient.bytes()).isEqualTo(10)
     }
 
+    @Test fun aPackInsideAnInstalledOneCountsAsHeld() = runTest(main.dispatcher) {
+        // Plan H4: Top 1M holds the Top pack's articles, so Efficient's Top line is on the phone.
+        val top = packEntry("wikipedia_en_top_nopic", size = 2_700, zimName = "wikipedia_en_top").copy(family = "wikipedia")
+        val top1m = packEntry("wikipedia_en_top1m_nopic", size = 17_000, zimName = "wikipedia_en_top1m").copy(family = "wikipedia")
+        val readiness = app.granger.core.catalog.Readiness(contains = mapOf("wikipedia_en_top1m" to listOf("wikipedia_en_top")))
+        catalog.mutable.value = CatalogState(
+            catalog = full.copy(
+                packs = full.packs + top + top1m,
+                presets = listOf(Preset("efficient", "Efficient start", listOf("wikipedia_en_top_nopic", "gc-bible"))),
+                readiness = readiness,
+            ),
+        )
+        library.packList.value = listOf(app.granger.pack("u-top1m", "Top 1M").copy(name = "wikipedia_en_top1m"))
+        val vm = viewModel()
+        val efficient = vm.ui.value.starts.first { it.id == "efficient" }
+        assertThat(efficient.lines.single { it.id == "wikipedia_en_top_nopic" }.installed).isTrue()
+    }
+
     @Test fun aRefusedStartStaysWithANoticeAndAnEmptyReviewJustFinishes() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = full)
         enqueueResult = EnqueueResult.NoSpace(neededBytes = 5_000)
