@@ -189,11 +189,11 @@ class CatalogParserTest {
             "urls": ["https://example.com/$id.epub"], "releaseDate": "2026-10-17", "license": "Public domain (US)",
             "collection": "granger-classics", "domain": "$domain"}"""
 
-    private fun readinessCatalog(domains: String) = """
+    private fun readinessCatalog(domains: String, contains: String = "") = """
         {"formatVersion": 1, "generatedAt": "2026-10-22T00:00:00Z",
-         "packs": [${pack("med", "wikipedia", "medicine")}, ${pack("maps_en_france", "maps", "maps")}],
+         "packs": [${pack("med", "wikipedia", "medicine")}, ${pack("maps_en_france", "maps", "maps")}${if (contains.isEmpty()) "" else wikipedias}],
          "books": [${book("gc-bible", "thought")}, ${book("gc-hamlet", "literature")}],
-         "readiness": {"domains": [$domains]}}
+         "readiness": {"domains": [$domains]${if (contains.isEmpty()) "" else ", \"contains\": $contains"}}}
     """.trimIndent().toByteArray()
 
     private val domains = """
@@ -270,5 +270,32 @@ class CatalogParserTest {
         val onlyBlank = """{"id": "", "title": "Blank", "essential": [], "comprehensive": []}"""
         assertThat(ok(parse(readinessCatalog(onlyBlank))).readiness).isNull()
         assertThat(ok(parse(readinessCatalog(""))).readiness).isNull()
+    }
+
+    // --- Plan H4: containment ---
+
+    private val wikipedias = listOf("wikipedia_en_top", "wikipedia_en_top1m", "wikipedia_en_all")
+        .joinToString("") { ", " + pack(it, "wikipedia", "reference") }
+
+    private val contains = """{"wikipedia_en_all": ["wikipedia_en_*"], "wikipedia_en_top1m": ["wikipedia_en_top", "wikipedia_en_100"],
+        "wikipedia_en_atlantis": ["wikipedia_en_top"]}"""
+
+    @Test fun readinessKeepsContainsEntriesWhoseKeyIsAZim() {
+        val readiness = ok(parse(readinessCatalog(domains, contains))).readiness!!
+        assertThat(readiness.contains.keys).containsExactly("wikipedia_en_all", "wikipedia_en_top1m")
+    }
+
+    @Test fun containersNameEveryZimThatHoldsOneAndNeverItself() {
+        val readiness = ok(parse(readinessCatalog(domains, contains))).readiness!!
+        assertThat(readiness.containers("wikipedia_en_top")).containsExactly("wikipedia_en_all", "wikipedia_en_top1m")
+        assertThat(readiness.containers("wikipedia_en_top1m")).containsExactly("wikipedia_en_all")
+        assertThat(readiness.containers("wikipedia_en_all")).isEmpty()
+        assertThat(readiness.containers("maps_en_france")).isEmpty()
+    }
+
+    @Test fun aCatalogWithoutContainsHasNone() {
+        val readiness = ok(parse(readinessCatalog(domains, "{}"))).readiness!!
+        assertThat(readiness.contains).isEmpty()
+        assertThat(readiness.containers("wikipedia_en_top")).isEmpty()
     }
 }
