@@ -1,0 +1,178 @@
+10-22 07:41:30.977 15369 15369 I Granger : Voice: device Google Pixel 6 · Android 17 · SoC Tensor · totalMem 7974752256 B · tier THINK_DEEPER
+10-22 07:41:31.070 15369 15369 I Granger : Voice: service start voice=granger:vits-piper-en_US-libritts-high repeat=3 sentences=57
+10-22 07:41:31.126 15369 15369 I GrangerVoice: Voice: read spike:service from null
+10-22 07:41:33.134 15369 15369 I Granger : Voice: service sentence=0 chars=190 atMs=2062 playing=false
+10-22 07:41:33.135 15369 15369 I GrangerVoice: Voice: at #0 ¶0 "The Rosetta Stone is a stele of granodio"
+10-22 07:41:33.141 15369 15369 I GrangerVoice: Voice: play at #0
+10-22 07:41:47.070 15369 15369 I GrangerVoice: Voice: synth chars=190 synthMs=13923 audioMs=13392 rtf=1.04 screen=off
+10-22 07:41:56.053 15369 15369 I GrangerVoice: Voice: synth chars=139 synthMs=8984 audioMs=8143 rtf=1.10 screen=off
+10-22 07:41:59.896 15369 15369 I Granger : Voice: service sentence=1 chars=139 atMs=28824 playing=true
+10-22 07:41:59.897 15369 15369 I GrangerVoice: Voice: at #1 ¶0 "The top and middle texts are in Ancient "
+10-22 07:42:02.504 15369 15369 I GrangerVoice: Voice: synth chars=131 synthMs=6450 audioMs=7496 rtf=0.86 screen=off
+10-22 07:42:08.373 15369 15369 I Granger : Voice: service sentence=2 chars=131 atMs=37301 playing=true
+10-22 07:42:08.375 15369 15369 I GrangerVoice: Voice: at #2 ¶0 "The decree has only minor differences be"
+10-22 07:42:11.406 15369 15369 I GrangerVoice: Voice: synth chars=135 synthMs=8903 audioMs=7854 rtf=1.13 screen=off
+10-22 07:42:16.231 15369 15369 I Granger : Voice: service sentence=3 chars=135 atMs=45159 playing=true
+10-22 07:42:16.233 15369 15369 I GrangerVoice: Voice: at #3 ¶0 "The stone was carved during the Hellenis"
+10-22 07:42:25.456 15369 15369 I GrangerVoice: Voice: synth chars=202 synthMs=14049 audioMs=11725 rtf=1.20 screen=off
+10-22 07:42:25.498 15369 15369 I GrangerVoice: Voice: at #4 ¶0 "It was probably moved in late antiquity "
+10-22 07:42:25.499 15369 15369 I Granger : Voice: service sentence=4 chars=202 atMs=54427 playing=true
+10-22 07:42:35.472 15369 15369 I GrangerVoice: Voice: synth chars=115 synthMs=10014 audioMs=9052 rtf=1.11 screen=on
+10-22 07:42:36.579 15369 15369 I Granger : Voice: service sentence=5 chars=115 atMs=65507 playing=true
+10-22 07:42:36.582 15369 15369 I GrangerVoice: Voice: at #5 ¶0 "It was found there in July 1799 by Frenc"
+10-22 07:42:37.561 15369 15369 I GrangerVoice: Voice: synth chars=37 synthMs=2089 audioMs=2438 rtf=0.86 screen=on
+10-22 07:42:40.715 15369 15369 I GrangerVoice: Voice: synth chars=66 synthMs=3154 audioMs=3317 rtf=0.95 screen=on
+10-22 07:42:46.351 15369 15369 I Granger : Voice: service sentence=6 chars=37 atMs=75279 playing=true
+10-22 07:42:46.361 15369 15369 I GrangerVoice: Voice: at #6 ¶1 "The quality of mercy is not strained."
+10-22 07:42:49.119 15369 15369 I Granger : Voice: service sentence=7 chars=66 atMs=78047 playing=true
+10-22 07:42:49.121 15369 15369 I GrangerVoice: Voice: at #7 ¶1 "It droppeth as the gentle rain from heav"
+10-22 07:42:50.083 15369 15369 I GrangerVoice: Voice: synth chars=65 synthMs=3743 audioMs=4336 rtf=0.86 screen=on
+10-22 07:42:52.787 15369 15369 I Granger : Voice: service sentence=8 chars=65 atMs=81715 playing=true
+10-22 07:42:52.791 15369 15369 I GrangerVoice: Voice: at #8 ¶1 "It is twice blest: it blesseth him that "
+10-22 07:42:53.696 15369 15369 I GrangerVoice: Voice: synth chars=86 synthMs=3613 audioMs=4527 rtf=0.80 screen=on
+10-22 07:42:57.473 15369 15369 I Granger : Voice: service sentence=9 chars=86 atMs=86401 playing=true
+10-22 07:42:57.476 15369 15369 I GrangerVoice: Voice: at #9 ¶1 "'Tis mightiest in the mightiest; it beco"
+10-22 07:43:02.258 15369 15369 I GrangerVoice: Voice: synth chars=165 synthMs=8560 audioMs=9665 rtf=0.89 screen=on
+10-22 07:43:02.350 15369 15369 I Granger : Voice: service sentence=10 chars=165 atMs=91278 playing=true
+10-22 07:43:02.353 15369 15369 I GrangerVoice: Voice: at #10 ¶1 "His sceptre shows the force of temporal "
+10-22 07:43:10.914 15369 15369 I GrangerVoice: Voice: synth chars=148 synthMs=8657 audioMs=9378 rtf=0.92 screen=on
+10-22 07:43:12.369 15369 15369 I Granger : Voice: service sentence=11 chars=148 atMs=101297 playing=true
+10-22 07:43:12.372 15369 15369 I GrangerVoice: Voice: at #11 ¶1 "It is enthroned in the hearts of kings; "
+10-22 07:43:17.325 15369 15369 I GrangerVoice: Voice: synth chars=121 synthMs=6409 audioMs=7316 rtf=0.88 screen=on
+10-22 07:43:21.444 15369 15369 I GrangerVoice: Voice: synth chars=90 synthMs=4118 audioMs=5050 rtf=0.82 screen=on
+10-22 07:43:22.096 15369 15369 I Granger : Voice: service sentence=12 chars=121 atMs=111024 playing=true
+10-22 07:43:22.100 15369 15369 I GrangerVoice: Voice: at #12 ¶1 "Therefore, Jew, though justice be thy pl"
+10-22 07:43:29.518 15369 15369 I GrangerVoice: Voice: synth chars=162 synthMs=7425 audioMs=8174 rtf=0.91 screen=on
+10-22 07:43:29.774 15369 15369 I Granger : Voice: service sentence=13 chars=90 atMs=118702 playing=true
+10-22 07:43:29.779 15369 15369 I GrangerVoice: Voice: at #13 ¶1 "We do pray for mercy, and that same pray"
+10-22 07:43:35.154 15369 15369 I Granger : Voice: service sentence=14 chars=162 atMs=124082 playing=true
+10-22 07:43:35.157 15369 15369 I GrangerVoice: Voice: at #14 ¶1 "I have spoke thus much to mitigate the j"
+10-22 07:43:39.832 15369 15369 I GrangerVoice: Voice: synth chars=125 synthMs=10078 audioMs=11263 rtf=0.89 screen=on
+10-22 07:43:44.029 15369 15369 I Granger : Voice: service sentence=15 chars=125 atMs=132957 playing=true
+10-22 07:43:44.031 15369 15369 I GrangerVoice: Voice: at #15 ¶2 "Holst began The Planets in 1914 and fini"
+10-22 07:43:45.089 15369 15369 I GrangerVoice: Voice: synth chars=93 synthMs=5256 audioMs=6212 rtf=0.85 screen=on
+10-22 07:43:53.011 15369 15369 I GrangerVoice: Voice: synth chars=123 synthMs=7921 audioMs=8763 rtf=0.90 screen=on
+10-22 07:43:55.664 15369 15369 I Granger : Voice: service sentence=16 chars=93 atMs=144591 playing=true
+10-22 07:43:55.672 15369 15369 I GrangerVoice: Voice: at #16 ¶2 "Mars, the Bringer of War, is written in "
+10-22 07:44:02.181 15369 15369 I GrangerVoice: Voice: synth chars=119 synthMs=6527 audioMs=7698 rtf=0.85 screen=on
+10-22 07:44:02.217 15369 15369 I Granger : Voice: service sentence=17 chars=123 atMs=151145 playing=true
+10-22 07:44:02.218 15369 15369 I GrangerVoice: Voice: at #17 ¶2 "Your library holds the 1926 recording co"
+10-22 07:44:11.331 15369 15369 I Granger : Voice: service sentence=18 chars=119 atMs=160259 playing=true
+10-22 07:44:11.334 15369 15369 I GrangerVoice: Voice: at #18 ¶2 "The score calls for a large orchestra, i"
+10-22 07:44:15.983 15369 15369 I GrangerVoice: Voice: synth chars=190 synthMs=13768 audioMs=13981 rtf=0.98 screen=on
+10-22 07:44:19.728 15369 15369 I Granger : Voice: service sentence=19 chars=190 atMs=168656 playing=true
+10-22 07:44:19.730 15369 15369 I GrangerVoice: Voice: at #19 ¶3 "The Rosetta Stone is a stele of granodio"
+10-22 07:44:24.309 15369 15369 I GrangerVoice: Voice: synth chars=139 synthMs=8325 audioMs=8437 rtf=0.99 screen=on
+10-22 07:44:31.024 15369 15369 I GrangerVoice: Voice: synth chars=131 synthMs=6714 audioMs=7976 rtf=0.84 screen=on
+10-22 07:44:34.054 15369 15369 I Granger : Voice: service sentence=20 chars=139 atMs=182982 playing=true
+10-22 07:44:34.058 15369 15369 I GrangerVoice: Voice: at #20 ¶3 "The top and middle texts are in Ancient "
+10-22 07:44:40.372 15369 15369 I GrangerVoice: Voice: synth chars=135 synthMs=6319 audioMs=7778 rtf=0.81 screen=on
+10-22 07:44:42.840 15369 15369 I Granger : Voice: service sentence=21 chars=131 atMs=191768 playing=true
+10-22 07:44:42.845 15369 15369 I GrangerVoice: Voice: at #21 ¶3 "The decree has only minor differences be"
+10-22 07:44:51.170 15369 15369 I Granger : Voice: service sentence=22 chars=135 atMs=200098 playing=true
+10-22 07:44:51.172 15369 15369 I GrangerVoice: Voice: at #22 ¶3 "The stone was carved during the Hellenis"
+10-22 07:44:52.159 15369 15369 I GrangerVoice: Voice: synth chars=202 synthMs=9321 audioMs=11085 rtf=0.84 screen=on
+10-22 07:44:59.288 15369 15369 I Granger : Voice: service sentence=23 chars=202 atMs=208216 playing=true
+10-22 07:44:59.290 15369 15369 I GrangerVoice: Voice: at #23 ¶3 "It was probably moved in late antiquity "
+10-22 07:45:00.107 15369 15369 I GrangerVoice: Voice: synth chars=115 synthMs=7946 audioMs=8986 rtf=0.88 screen=on
+10-22 07:45:02.080 15369 15369 I GrangerVoice: Voice: synth chars=37 synthMs=1972 audioMs=2275 rtf=0.87 screen=on
+10-22 07:45:10.738 15369 15369 I Granger : Voice: service sentence=24 chars=115 atMs=219665 playing=true
+10-22 07:45:10.744 15369 15369 I GrangerVoice: Voice: at #24 ¶3 "It was found there in July 1799 by Frenc"
+10-22 07:45:13.349 15369 15369 I GrangerVoice: Voice: synth chars=66 synthMs=2620 audioMs=3320 rtf=0.79 screen=on
+10-22 07:45:20.431 15369 15369 I Granger : Voice: service sentence=25 chars=37 atMs=229358 playing=true
+10-22 07:45:20.439 15369 15369 I GrangerVoice: Voice: at #25 ¶4 "The quality of mercy is not strained."
+10-22 07:45:23.054 15369 15369 I Granger : Voice: service sentence=26 chars=66 atMs=231982 playing=true
+10-22 07:45:23.056 15369 15369 I GrangerVoice: Voice: at #26 ¶4 "It droppeth as the gentle rain from heav"
+10-22 07:45:23.453 15369 15369 I GrangerVoice: Voice: synth chars=65 synthMs=3031 audioMs=3873 rtf=0.78 screen=on
+10-22 07:45:26.714 15369 15369 I Granger : Voice: service sentence=27 chars=65 atMs=235642 playing=true
+10-22 07:45:26.717 15369 15369 I GrangerVoice: Voice: at #27 ¶4 "It is twice blest: it blesseth him that "
+10-22 07:45:27.343 15369 15369 I GrangerVoice: Voice: synth chars=86 synthMs=3889 audioMs=4402 rtf=0.88 screen=on
+10-22 07:45:30.933 15369 15369 I Granger : Voice: service sentence=28 chars=86 atMs=239861 playing=true
+10-22 07:45:30.935 15369 15369 I GrangerVoice: Voice: at #28 ¶4 "'Tis mightiest in the mightiest; it beco"
+10-22 07:45:36.590 15369 15369 I GrangerVoice: Voice: synth chars=165 synthMs=9246 audioMs=10042 rtf=0.92 screen=on
+10-22 07:45:36.644 15369 15369 I GrangerVoice: Voice: at #29 ¶4 "His sceptre shows the force of temporal "
+10-22 07:45:36.647 15369 15369 I Granger : Voice: service sentence=29 chars=165 atMs=245575 playing=true
+10-22 07:45:44.767 15369 15369 I GrangerVoice: Voice: synth chars=148 synthMs=8175 audioMs=9196 rtf=0.89 screen=on
+10-22 07:45:46.097 15369 15369 I Granger : Voice: service sentence=30 chars=148 atMs=255025 playing=true
+10-22 07:45:46.099 15369 15369 I GrangerVoice: Voice: at #30 ¶4 "It is enthroned in the hearts of kings; "
+10-22 07:45:51.276 15369 15369 I GrangerVoice: Voice: synth chars=121 synthMs=6509 audioMs=7412 rtf=0.88 screen=on
+10-22 07:45:55.636 15369 15369 I GrangerVoice: Voice: synth chars=90 synthMs=4359 audioMs=5130 rtf=0.85 screen=on
+10-22 07:45:55.639 15369 15369 I Granger : Voice: service sentence=31 chars=121 atMs=264567 playing=true
+10-22 07:45:55.641 15369 15369 I GrangerVoice: Voice: at #31 ¶4 "Therefore, Jew, though justice be thy pl"
+10-22 07:46:03.395 15369 15369 I Granger : Voice: service sentence=32 chars=90 atMs=272323 playing=true
+10-22 07:46:03.397 15369 15369 I GrangerVoice: Voice: at #32 ¶4 "We do pray for mercy, and that same pray"
+10-22 07:46:03.523 15369 15369 I GrangerVoice: Voice: synth chars=162 synthMs=7885 audioMs=8591 rtf=0.92 screen=on
+10-22 07:46:08.873 15369 15369 I Granger : Voice: service sentence=33 chars=162 atMs=277801 playing=true
+10-22 07:46:08.876 15369 15369 I GrangerVoice: Voice: at #33 ¶4 "I have spoke thus much to mitigate the j"
+10-22 07:46:14.172 15369 15369 I GrangerVoice: Voice: synth chars=125 synthMs=10647 audioMs=11004 rtf=0.97 screen=on
+10-22 07:46:18.169 15369 15369 I Granger : Voice: service sentence=34 chars=125 atMs=287097 playing=true
+10-22 07:46:18.171 15369 15369 I GrangerVoice: Voice: at #34 ¶5 "Holst began The Planets in 1914 and fini"
+10-22 07:46:19.008 15369 15369 I GrangerVoice: Voice: synth chars=93 synthMs=4835 audioMs=5909 rtf=0.82 screen=on
+10-22 07:46:27.382 15369 15369 I GrangerVoice: Voice: synth chars=123 synthMs=8374 audioMs=9111 rtf=0.92 screen=on
+10-22 07:46:29.522 15369 15369 I Granger : Voice: service sentence=35 chars=93 atMs=298450 playing=true
+10-22 07:46:29.530 15369 15369 I GrangerVoice: Voice: at #35 ¶5 "Mars, the Bringer of War, is written in "
+10-22 07:46:35.769 15369 15369 I Granger : Voice: service sentence=36 chars=123 atMs=304697 playing=true
+10-22 07:46:35.771 15369 15369 I GrangerVoice: Voice: at #36 ¶5 "Your library holds the 1926 recording co"
+10-22 07:46:37.335 15369 15369 I GrangerVoice: Voice: synth chars=119 synthMs=7820 audioMs=7313 rtf=1.07 screen=off
+10-22 07:46:45.228 15369 15369 I Granger : Voice: service sentence=37 chars=119 atMs=314156 playing=true
+10-22 07:46:45.231 15369 15369 I GrangerVoice: Voice: at #37 ¶5 "The score calls for a large orchestra, i"
+10-22 07:46:55.704 15369 15369 I GrangerVoice: Voice: synth chars=190 synthMs=18367 audioMs=14221 rtf=1.29 screen=off
+10-22 07:46:55.720 15369 15369 I GrangerVoice: Voice: at #38 ¶6 "The Rosetta Stone is a stele of granodio"
+10-22 07:46:55.721 15369 15369 I Granger : Voice: service sentence=38 chars=190 atMs=324649 playing=true
+10-22 07:47:08.882 15369 15369 I GrangerVoice: Voice: synth chars=139 synthMs=13178 audioMs=8416 rtf=1.57 screen=off
+10-22 07:47:09.295 15369 15369 I Granger : Voice: service sentence=39 chars=139 atMs=338223 playing=true
+10-22 07:47:09.297 15369 15369 I GrangerVoice: Voice: at #39 ¶6 "The top and middle texts are in Ancient "
+10-22 07:47:21.906 15369 15369 I GrangerVoice: Voice: synth chars=131 synthMs=13023 audioMs=7492 rtf=1.74 screen=off
+10-22 07:47:21.958 15369 15369 I GrangerVoice: Voice: at #40 ¶6 "The decree has only minor differences be"
+10-22 07:47:21.959 15369 15369 I Granger : Voice: service sentence=40 chars=131 atMs=350887 playing=true
+10-22 07:47:32.741 15369 15369 I GrangerVoice: Voice: synth chars=135 synthMs=10835 audioMs=7389 rtf=1.47 screen=on
+10-22 07:47:32.756 15369 15369 I GrangerVoice: Voice: at #41 ¶6 "The stone was carved during the Hellenis"
+10-22 07:47:32.757 15369 15369 I Granger : Voice: service sentence=41 chars=135 atMs=361685 playing=true
+10-22 07:47:42.149 15369 15369 I GrangerVoice: Voice: synth chars=202 synthMs=9406 audioMs=11126 rtf=0.85 screen=on
+10-22 07:47:42.203 15369 15369 I GrangerVoice: Voice: at #42 ¶6 "It was probably moved in late antiquity "
+10-22 07:47:42.204 15369 15369 I Granger : Voice: service sentence=42 chars=202 atMs=371132 playing=true
+10-22 07:47:50.050 15369 15369 I GrangerVoice: Voice: synth chars=115 synthMs=7901 audioMs=9016 rtf=0.88 screen=on
+10-22 07:47:52.137 15369 15369 I GrangerVoice: Voice: synth chars=37 synthMs=2087 audioMs=2484 rtf=0.84 screen=on
+10-22 07:47:52.702 15369 15369 I Granger : Voice: service sentence=43 chars=115 atMs=381629 playing=true
+10-22 07:47:52.709 15369 15369 I GrangerVoice: Voice: at #43 ¶6 "It was found there in July 1799 by Frenc"
+10-22 07:47:55.897 15369 15369 I GrangerVoice: Voice: synth chars=66 synthMs=3204 audioMs=3831 rtf=0.84 screen=on
+10-22 07:48:02.411 15369 15369 I Granger : Voice: service sentence=44 chars=37 atMs=391339 playing=true
+10-22 07:48:02.417 15369 15369 I GrangerVoice: Voice: at #44 ¶7 "The quality of mercy is not strained."
+10-22 07:48:05.253 15369 15369 I Granger : Voice: service sentence=45 chars=66 atMs=394181 playing=true
+10-22 07:48:05.255 15369 15369 I GrangerVoice: Voice: at #45 ¶7 "It droppeth as the gentle rain from heav"
+10-22 07:48:05.690 15369 15369 I GrangerVoice: Voice: synth chars=65 synthMs=3281 audioMs=3950 rtf=0.83 screen=on
+10-22 07:48:08.973 15369 15369 I GrangerVoice: Voice: synth chars=86 synthMs=3282 audioMs=4121 rtf=0.80 screen=on
+10-22 07:48:09.431 15369 15369 I Granger : Voice: service sentence=46 chars=65 atMs=398359 playing=true
+10-22 07:48:09.435 15369 15369 I GrangerVoice: Voice: at #46 ¶7 "It is twice blest: it blesseth him that "
+10-22 07:48:13.726 15369 15369 I Granger : Voice: service sentence=47 chars=86 atMs=402654 playing=true
+10-22 07:48:13.728 15369 15369 I GrangerVoice: Voice: at #47 ¶7 "'Tis mightiest in the mightiest; it beco"
+10-22 07:48:19.345 15369 15369 I GrangerVoice: Voice: synth chars=165 synthMs=9915 audioMs=10254 rtf=0.97 screen=on
+10-22 07:48:19.403 15369 15369 I GrangerVoice: Voice: at #48 ¶7 "His sceptre shows the force of temporal "
+10-22 07:48:19.405 15369 15369 I Granger : Voice: service sentence=48 chars=165 atMs=408333 playing=true
+10-22 07:48:28.104 15369 15369 I GrangerVoice: Voice: synth chars=148 synthMs=8759 audioMs=9322 rtf=0.94 screen=on
+10-22 07:48:29.012 15369 15369 I Granger : Voice: service sentence=49 chars=148 atMs=417940 playing=true
+10-22 07:48:29.015 15369 15369 I GrangerVoice: Voice: at #49 ¶7 "It is enthroned in the hearts of kings; "
+10-22 07:48:34.713 15369 15369 I GrangerVoice: Voice: synth chars=121 synthMs=6607 audioMs=6811 rtf=0.97 screen=on
+10-22 07:48:38.669 15369 15369 I Granger : Voice: service sentence=50 chars=121 atMs=427597 playing=true
+10-22 07:48:38.672 15369 15369 I GrangerVoice: Voice: at #50 ¶7 "Therefore, Jew, though justice be thy pl"
+10-22 07:48:40.223 15369 15369 I GrangerVoice: Voice: synth chars=90 synthMs=5511 audioMs=5147 rtf=1.07 screen=on
+10-22 07:48:45.832 15369 15369 I Granger : Voice: service sentence=51 chars=90 atMs=434760 playing=true
+10-22 07:48:45.834 15369 15369 I GrangerVoice: Voice: at #51 ¶7 "We do pray for mercy, and that same pray"
+10-22 07:48:49.106 15369 15369 I GrangerVoice: Voice: synth chars=162 synthMs=8880 audioMs=8390 rtf=1.06 screen=on
+10-22 07:48:51.334 15369 15369 I Granger : Voice: service sentence=52 chars=162 atMs=440262 playing=true
+10-22 07:48:51.336 15369 15369 I GrangerVoice: Voice: at #52 ¶7 "I have spoke thus much to mitigate the j"
+10-22 07:49:00.342 15369 15369 I GrangerVoice: Voice: synth chars=125 synthMs=11236 audioMs=10985 rtf=1.02 screen=on
+10-22 07:49:00.435 15369 15369 I Granger : Voice: service sentence=53 chars=125 atMs=449363 playing=true
+10-22 07:49:00.438 15369 15369 I GrangerVoice: Voice: at #53 ¶8 "Holst began The Planets in 1914 and fini"
+10-22 07:49:06.642 15369 15369 I GrangerVoice: Voice: synth chars=93 synthMs=6299 audioMs=6017 rtf=1.05 screen=on
+10-22 07:49:11.774 15369 15369 I Granger : Voice: service sentence=54 chars=93 atMs=460702 playing=true
+10-22 07:49:11.776 15369 15369 I GrangerVoice: Voice: at #54 ¶8 "Mars, the Bringer of War, is written in "
+10-22 07:49:16.313 15369 15369 I GrangerVoice: Voice: synth chars=123 synthMs=9670 audioMs=9236 rtf=1.05 screen=on
+10-22 07:49:18.135 15369 15369 I Granger : Voice: service sentence=55 chars=123 atMs=467063 playing=true
+10-22 07:49:18.137 15369 15369 I GrangerVoice: Voice: at #55 ¶8 "Your library holds the 1926 recording co"
+10-22 07:49:24.357 15369 15369 I GrangerVoice: Voice: synth chars=119 synthMs=8043 audioMs=7023 rtf=1.15 screen=on
+10-22 07:49:27.712 15369 15369 I Granger : Voice: service sentence=56 chars=119 atMs=476640 playing=true
+10-22 07:49:27.716 15369 15369 I GrangerVoice: Voice: at #56 ¶8 "The score calls for a large orchestra, i"
+10-22 07:49:35.433 15369 15369 I GrangerVoice: Voice: pause at #56
+10-22 07:49:35.456 15369 15369 I Granger : Voice: service ended=true atMs=484384
+10-22 07:49:35.460 15369 15369 I Granger : Voice: auto done service=true

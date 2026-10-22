@@ -34,9 +34,11 @@ class VoiceSettingsViewModelTest {
         override val voiceId = MutableStateFlow<VoiceId?>(null)
         override val speed = MutableStateFlow(1f)
         override val markSentence = MutableStateFlow(true)
+        override val speakAnswers = MutableStateFlow(false)
         override fun setVoice(id: VoiceId?) { voiceId.value = id }
         override fun setSpeed(speed: Float) { this.speed.value = speed }
         override fun setMarkSentence(on: Boolean) { markSentence.value = on }
+        override fun setSpeakAnswers(on: Boolean) { speakAnswers.value = on }
     }
 
     private val entry = VoiceEntry(

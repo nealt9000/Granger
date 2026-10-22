@@ -251,4 +251,208 @@ class PlayerEngineVoiceTest {
         assertThat(e.ui.value).isEqualTo(PlayerUi.IDLE)
         assertThat(speeches).isEmpty()
     }
+
+    @Test fun setVoiceReopensTheNewEngineAtTheCurrentSentence() {
+        val other = Voice(VoiceId.Granger("vits-piper-en_US-norman-medium"), "Granger voice (norman)", "en-US")
+        val two = InstalledVoices({ emptyList() }, { listOf(grangerVoice, other) }, factory, factory)
+        val e = rig.engine(focus = focus, speechOutput = output, voices = two, readSources = { key, _ -> sources[key] })
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        val before = e.voiceProgress.value!!.utterance.text
+        e.setVoice(other.id)
+        rig.idle(); e.untilReady(); speak(2)
+        assertThat(speeches).hasSize(2)
+        assertThat(speeches[1].voice.id).isEqualTo(other.id)
+        assertThat(speeches[1].spoken.first()).isEqualTo(before)
+        assertThat(speeches[0].closed).isEqualTo(1)
+        assertThat((e.ui.value.now as NowPlaying.Voice).voiceId).isEqualTo(other.id)
+        assertThat(e.ui.value.playing).isTrue()
+        e.setVoice(VoiceId.Granger("not-installed"))
+        rig.idle()
+        assertThat((e.ui.value.now as NowPlaying.Voice).voiceId).isEqualTo(other.id)
+    }
+
+    // ---- music under the voice (Plan V2) ----
+
+    private fun mixEngine(): PlayerEngine =
+        rig.engine(focus = focus, speechOutput = output, voices = voices, readSources = { key, _ -> sources[key] }, musicUnder = true)
+
+    /** Music playing, then the voice over it, two sentences in. */
+    private fun PlayerEngine.readOverMusic(ids: List<String>) {
+        playTracks(ids, 0, shuffle = false, source = PlaySource("songs", "Songs"))
+        rig.idle(); untilReady()
+        readAloud(source(), null, null)
+        rig.idle(); untilReady(); speak(2)
+    }
+
+    @Test fun startingTheVoiceOverMusicKeepsTheMusicAtTheMixLevel() {
+        val e = mixEngine()
+        val ids = rig.songs()
+        e.readOverMusic(ids)
+        val now = e.ui.value.now as NowPlaying.Voice
+        assertThat(now.music?.track?.id).isEqualTo(ids[0])
+        assertThat(now.musicPlaying).isTrue()
+        assertThat(now.musicDurationMs).isEqualTo(60_000L)              // the Music tab's bar
+        assertThat(e.ui.value.playing).isTrue()
+        val under = e.musicUnderPlayer!!
+        assertThat(under.playWhenReady).isTrue()
+        assertThat(under.volume).isWithin(0.001f).of(0.3f)
+        assertThat(under.mediaItemCount).isEqualTo(5)
+        assertThat(e.player.currentMediaItem?.mediaId).isEqualTo("voice:text:article")   // the carrier still drives the voice
+        assertThat(e.queue.value.map { it.id }).isEqualTo(ids)
+        assertThat(speeches[0].spoken.first()).isEqualTo("One two.")
+        assertThat(focus.held).isTrue()
+        assertThat(runBlocking { rig.playback.musicState() }).isNotNull()
+    }
+
+    @Test fun startingMusicWhileReadingPutsItUnderTheVoice() {
+        val e = mixEngine()
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        val ids = rig.songs()
+        e.playTracks(ids, 1, shuffle = false, source = PlaySource("songs", "Songs"))
+        rig.idle()
+        val now = e.ui.value.now
+        assertThat(now).isInstanceOf(NowPlaying.Voice::class.java)
+        assertThat((now as NowPlaying.Voice).music?.track?.id).isEqualTo(ids[1])
+        assertThat(e.ui.value.playing).isTrue()
+        assertThat(e.musicUnderPlayer!!.playWhenReady).isTrue()
+        assertThat(e.musicUnderPlayer!!.volume).isWithin(0.001f).of(0.3f)
+    }
+
+    @Test fun transportDrivesTheVoiceAndTheMusicRowDrivesTheMusic() {
+        val e = mixEngine()
+        val ids = rig.songs()
+        e.readOverMusic(ids)
+        val under = e.musicUnderPlayer!!
+        e.playPause()                                   // pauses the voice, not the music
+        rig.idle()
+        assertThat(e.ui.value.playing).isFalse()
+        assertThat(under.playWhenReady).isTrue()
+        e.playPauseMusic()                              // pauses the music, not the voice
+        rig.idle()
+        assertThat(under.playWhenReady).isFalse()
+        assertThat((e.ui.value.now as NowPlaying.Voice).musicPlaying).isFalse()
+        e.playPause()                                   // the voice plays again; music the user paused stays paused
+        rig.idle(); speak(1)
+        assertThat(e.ui.value.playing).isTrue()
+        assertThat(under.playWhenReady).isFalse()
+        e.playPauseMusic(); rig.idle()
+        assertThat(under.playWhenReady).isTrue()
+        e.nextMusic(); rig.idle()
+        assertThat(under.currentMediaItemIndex).isEqualTo(1)
+        assertThat((e.ui.value.now as NowPlaying.Voice).music?.track?.id).isEqualTo(ids[1])
+        e.next()                                        // the transport's next is the voice's paragraph
+        rig.idle(); speak(0)
+        assertThat(e.voiceProgress.value?.utterance?.text).isEqualTo("Seven eight.")
+        assertThat(under.currentMediaItemIndex).isEqualTo(1)
+    }
+
+    @Test fun theVoiceEndingHandsTheModeBackToMusicAtFullVolume() {
+        val e = mixEngine()
+        val ids = rig.songs()
+        e.readOverMusic(ids)
+        speak(10)                                       // the rest of the six sentences and their pauses: the source ends
+        rig.idle()
+        val now = e.ui.value.now
+        assertThat(now).isInstanceOf(NowPlaying.Music::class.java)
+        assertThat((now as NowPlaying.Music).track.id).isEqualTo(ids[0])
+        assertThat(e.musicUnderPlayer).isNull()
+        assertThat(e.player.volume).isWithin(0.001f).of(1f)
+        assertThat(e.player.playWhenReady).isTrue()
+        assertThat(e.player.currentMediaItem?.mediaId).isEqualTo(ids[0])
+        assertThat(runBlocking { rig.playback.voiceState("text:article") }).isNotNull()
+        assertThat(rig.prefs.getString(PlayerSettingsKeys.LAST_MODE, null)).isEqualTo("music")
+    }
+
+    @Test fun stopVoiceWithMusicUnderneathBecomesMusic() {
+        val e = mixEngine()
+        val ids = rig.songs()
+        e.readOverMusic(ids)
+        e.nextMusic(); rig.idle()
+        e.stopVoice()
+        rig.idle()
+        val now = e.ui.value.now
+        assertThat(now).isInstanceOf(NowPlaying.Music::class.java)
+        assertThat((now as NowPlaying.Music).track.id).isEqualTo(ids[1])       // where the music under the voice was
+        assertThat(e.musicUnderPlayer).isNull()
+        assertThat(e.player.playWhenReady).isTrue()
+        assertThat(e.voiceProgress.value).isNull()
+        val state = runBlocking { rig.playback.voiceState("text:article") }
+        assertThat(state).isNotNull()
+    }
+
+    @Test fun anAudiobookStopsTheVoiceAndTheMusicUnderIt() {
+        val e = mixEngine()
+        val book = rig.fakeBook("b", 5_000)
+        val ids = rig.songs()
+        e.readOverMusic(ids)
+        e.nextMusic(); rig.idle()
+        e.playAudiobook(book.id)
+        rig.idle()
+        assertThat(e.ui.value.now).isInstanceOf(NowPlaying.Book::class.java)
+        assertThat(e.musicUnderPlayer).isNull()
+        assertThat(runBlocking { rig.playback.voiceState("text:article") }).isNotNull()
+        val music = runBlocking { rig.playback.musicState() }!!
+        assertThat(music.index).isEqualTo(1)                                   // saved from under the voice
+    }
+
+    @Test fun aCallPausesBothAndItsEndResumesBoth() {
+        val e = mixEngine()
+        e.readOverMusic(rig.songs())
+        focus.change(AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)
+        rig.idle()
+        assertThat(e.player.playWhenReady).isFalse()
+        assertThat(e.musicUnderPlayer!!.playWhenReady).isFalse()
+        focus.change(AudioManager.AUDIOFOCUS_GAIN)
+        rig.idle()
+        assertThat(e.player.playWhenReady).isTrue()
+        assertThat(e.musicUnderPlayer!!.playWhenReady).isTrue()
+        // Music the user had paused stays paused through a call.
+        e.playPauseMusic(); rig.idle()
+        focus.change(AudioManager.AUDIOFOCUS_LOSS_TRANSIENT); rig.idle()
+        focus.change(AudioManager.AUDIOFOCUS_GAIN); rig.idle()
+        assertThat(e.player.playWhenReady).isTrue()
+        assertThat(e.musicUnderPlayer!!.playWhenReady).isFalse()
+    }
+
+    @Test fun mixLevelIsRememberedAndDucksWithTheVoice() {
+        val e = mixEngine()
+        e.readOverMusic(rig.songs())
+        e.setMixLevel(0.6f)
+        rig.idle()
+        assertThat(e.musicUnderPlayer!!.volume).isWithin(0.001f).of(0.6f)
+        assertThat(rig.prefs.getFloat(PlayerSettingsKeys.MIX_LEVEL, 0f)).isWithin(0.001f).of(0.6f)
+        assertThat(e.player.volume).isWithin(0.001f).of(1f)
+        focus.change(AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK)
+        rig.idle()
+        assertThat(e.musicUnderPlayer!!.volume).isWithin(0.001f).of(0.6f * 0.2f)
+        assertThat(output.volume).isWithin(0.001f).of(0.2f)
+        focus.change(AudioManager.AUDIOFOCUS_GAIN)
+        rig.idle()
+        assertThat(e.musicUnderPlayer!!.volume).isWithin(0.001f).of(0.6f)
+    }
+
+    @Test fun restoreAfterDeathBringsTheVoiceBackAloneAndTheMusicTabPutsTheQueueUnderIt() {
+        val first = mixEngine()
+        val ids = rig.songs()
+        first.readOverMusic(ids)
+        first.release(save = true)
+        assertThat(runBlocking { rig.playback.musicState() }).isNotNull()
+        assertThat(rig.prefs.getString(PlayerSettingsKeys.LAST_MODE, null)).isEqualTo("voice")
+
+        val second = mixEngine()
+        second.restore()
+        rig.idle()
+        val now = second.ui.value.now as NowPlaying.Voice
+        assertThat(now.music).isNull()
+        assertThat(second.musicUnderPlayer).isNull()
+        assertThat(second.ui.value.playing).isFalse()
+
+        second.activate(PlayerMode.MUSIC)
+        rig.idle()
+        assertThat((second.ui.value.now as NowPlaying.Voice).music?.track?.id).isEqualTo(ids[0])
+        assertThat(second.musicUnderPlayer!!.playWhenReady).isTrue()
+        assertThat(second.ui.value.playing).isFalse()                           // the voice stays paused until play
+    }
 }

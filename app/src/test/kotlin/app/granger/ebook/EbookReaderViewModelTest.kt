@@ -733,6 +733,37 @@ class EbookReaderViewModelTest {
         advanceUntilIdle()
         assertThat(seen).containsExactly(SelectionAction.HIGHLIGHT)
     }
+
+    @Test fun theVoiceButtonFollowsThePlayerForThisBookOnly() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.IDLE)
+        hub.ui.value = voiceUiFor("book:b")
+        settle { vm.state.value.voice == app.granger.player.VoiceButton.READING }
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.READING)
+        hub.ui.value = voiceUiFor("book:b").copy(playing = false)
+        settle { vm.state.value.voice == app.granger.player.VoiceButton.PAUSED }
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.PAUSED)
+        assertThat(vm.state.value.readingThisBook).isTrue()          // Read from here still moves the paused voice
+        hub.ui.value = voiceUiFor("book:other")
+        settle { vm.state.value.voice == app.granger.player.VoiceButton.IDLE }
+        assertThat(vm.state.value.readingThisBook).isFalse()
+        val ended = voiceUiFor("book:b")
+        hub.ui.value = ended.copy(now = (ended.now as app.granger.core.player.NowPlaying.Voice).copy(ended = true), playing = false)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.voice).isEqualTo(app.granger.player.VoiceButton.IDLE)   // Read aloud starts it again
+    }
+
+    @Test fun pauseResumeTogglesThePlayerOnlyWhileThisBookIsRead() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = readingReader(hub)
+        vm.pauseResume()
+        assertThat(hub.calls).isEmpty()
+        hub.ui.value = voiceUiFor("book:b")
+        settle { vm.state.value.readingThisBook }
+        vm.pauseResume()
+        assertThat(hub.calls).containsExactly("playPause")
+    }
 }
 
 class FakeBookSearcher : BookSearcher {

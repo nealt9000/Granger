@@ -55,6 +55,24 @@ class BookReadSourceTest {
         assertThat(fresh.locate(ReadAddress.Book("book:granger:hamlet", "not json", 0))).isNull()
     }
 
+    @Test fun sectionTitleComesFromTheTableOfContentsWhenTheLocatorHasNone() = runTest {
+        val withToc = testPublicationWithContent(
+            title = "Hamlet",
+            chapters = linkedMapOf("c001.xhtml" to "<p>Who's there?</p>", "c002.xhtml" to "<p>Second act begins.</p>"),
+            toc = listOf("c001.xhtml" to emptyList(), "c002.xhtml" to emptyList()),      // the helper titles entries with their href
+        )
+        val s = BookReadSource(withToc, "book:granger:hamlet", "Hamlet", Dispatchers.Unconfined)
+        val all = s.utterances(null, 10)
+        assertThat(s.sectionTitle(all[0].address)).isEqualTo("c001.xhtml")
+        assertThat(s.sectionTitle(all[1].address)).isEqualTo("c002.xhtml")
+    }
+
+    @Test fun addressAtHrefStartsAChapter() = runTest {
+        val at = source.addressAtHref("c002.xhtml")!!
+        assertThat(source.utterances(at, 1).single().text).isEqualTo("Act II")
+        assertThat(source.addressAtHref("c999.xhtml")).isNull()
+    }
+
     @Test fun addressAtAVisibleElementOrASelectionPicksItsSentence() = runTest {
         val chapterTwo = Locator(href = Url("c002.xhtml")!!, mediaType = MediaType.XHTML, locations = Locator.Locations(progression = 0.0))
         val at = source.addressAt(chapterTwo)!!

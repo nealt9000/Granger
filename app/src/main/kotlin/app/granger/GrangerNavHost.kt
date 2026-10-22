@@ -38,6 +38,7 @@ import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.player.PlayerUi
 import app.granger.player.MiniPlayer
+import app.granger.player.VoiceSheet
 import app.granger.player.MiniPlayerPlacement
 import app.granger.player.PlayerScreen
 import app.granger.player.PlayerViewModel
@@ -111,6 +112,7 @@ import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -351,6 +353,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) container.playResumer else null,
+            voice = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub.ui.map { it.now as? NowPlaying.Voice } else flowOf(null),
         )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
@@ -408,7 +411,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         val tabId = when (val key = ReadSourceKey.parse(voice.sourceKey)) {
             is ReadSourceKey.Article -> container.sessions.openTab(key.packId, key.path, voice.title)
             is ReadSourceKey.Book -> container.sessions.openTab(key.bookId, "", voice.title)
-            is ReadSourceKey.Text, null -> return null
+            is ReadSourceKey.Text -> {
+                // A spoken Research answer (Plan V2) opens its chat.
+                val turnId = ResearchViewModel.answerTurnId(voice.sourceKey) ?: return null
+                val chatId = container.researchChats.turn(turnId)?.chatId ?: return null
+                nav.navigate(ResearchRoute(chatId))
+                return Unit
+            }
+            null -> return null
         }
         container.sessions.tab(tabId)?.let { nav.showTab(it) }
         return Unit
@@ -468,6 +478,27 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
+    // The voice's full view (Plan V2): a sheet over whatever is on screen, opened from the mini-player; it closes by
+    // itself when the voice is no longer loaded.
+    var voiceSheet by rememberSaveable { mutableStateOf(false) }
+    val voiceNow = playerUi.now as? NowPlaying.Voice
+    if (voiceSheet && player != null && voiceNow != null) {
+        val progress by player.voiceProgress.collectAsStateWithLifecycle()
+        val voices by container.installedVoices.voices.collectAsStateWithLifecycle()
+        VoiceSheet(
+            ui = playerUi, progress = progress, voices = voices,
+            mixLevel = remember { container.playerPrefs.getFloat(PlayerSettingsKeys.MIX_LEVEL, PlayerSettingsKeys.DEFAULT_MIX) },
+            onPlayPause = player::playPause, onPreviousParagraph = player::previousParagraph, onNextParagraph = player::nextParagraph,
+            onBackSentence = player::previousSentence, onSpeed = player::setSpeed, onVoice = player::setVoice,
+            onMix = player::setMixLevel, onPlayPauseMusic = player::playPauseMusic, onNextMusic = player::nextMusic,
+            onSleep = player::startSleepTimer, onCancelSleep = player::cancelSleepTimer,
+            onStop = { player.stopVoice(); voiceSheet = false },
+            onOpen = { voiceSheet = false; scope.launch { openVoiceSource(voiceNow) ?: nav.togglePlayer() } },
+            onDismiss = { voiceSheet = false },
+        )
+    } else if (voiceSheet && voiceNow == null) {
+        voiceSheet = false
+    }
     GrangerShell(
         rail = rail,
         expanded = shell.expanded,
@@ -495,6 +526,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             nav.navigate(SearchRoute(query)) { if (searchOnTop) popUpTo<SearchRoute> { inclusive = true } }
         },
         onChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+        // The live reading's row (Plan V2) opens the page being read, as the voice sheet's Open does.
+        onReading = { scope.launch { voiceNow?.let { openVoiceSource(it) } } },
         onPlay = { item ->
             scope.launch {
                 // Gone or unplayable: the Library, with a notice saying so (it replaces the Library on the stack).
@@ -526,11 +559,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     playerUi,
                     onPlayPause = player::playPause,
                     onSecondary = player::secondary,
-                    // The voice has no Player tab: Open goes to the page being read.
-                    onOpen = {
-                        val voice = player.voiceNow()
-                        if (voice == null) nav.togglePlayer() else scope.launch { openVoiceSource(voice) ?: nav.togglePlayer() }
-                    },
+                    // The voice has no Player tab: its full view is a sheet (Plan V2), whose Open goes to the page being read.
+                    onOpen = { if (player.voiceNow() == null) nav.togglePlayer() else voiceSheet = true },
                     skipBackS = player.skipBackS(),
                 )
             }
@@ -713,6 +743,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.researchChats, container.research, container.modelManager, container.sessions,
                             container.library, container.bookshelf, container.mediaIndex, container.appScope,
                             savedState = createSavedStateHandle(),
+                            player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
+                            speakAnswers = { container.voicePrefs.speakAnswers.value },
                         )
                     },
                     focusInput = route.quote != null,

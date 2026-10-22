@@ -69,13 +69,22 @@ import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
 import app.granger.research.ResearchViewModel.TurnUi
 import app.granger.theme.GrangerColors
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import app.granger.R
+import app.granger.player.VoiceButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val PLACEHOLDER = "Ask about anything in your library"
 private const val DECLINED = "Not in your library."
 private const val UNVERIFIED = "Couldn't answer from these passages."
-private const val MEDICAL = "Not medical advice. If you can reach emergency services or a professional, do so."
+private const val MEDICAL = AnswerText.MEDICAL
+
+object ResearchTags {
+    const val READ_ALOUD = "research_read_aloud"
+    const val STOP_READING = "research_stop_reading"
+}
 private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
 private const val BEST_GUESS_WAIT = "This takes about half a minute"
 private const val BEST_GUESS_FALLBACK = "The large model couldn't load, so this guess is from the standard one."
@@ -300,6 +309,9 @@ fun ResearchScreen(
                     is ThreadRow.Answer -> AnswerBlock(
                         ui = row.turn,
                         running = state.running,
+                        onRead = { viewModel.readAnswer(row.turn.turn.id) },
+                        onPauseResume = viewModel::pauseResumeReading,
+                        onStopReading = viewModel::stopReading,
                         onCite = { n -> cite(row.turn.turn.id, n) },
                         onSearch = { onSearch(searchInsteadQuery(row.turn.turn.keywords, row.turn.turn.question)) },
                         onRetry = { viewModel.retry(row.turn.turn.id) },
@@ -368,6 +380,9 @@ private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, runnin
 private fun AnswerBlock(
     ui: TurnUi,
     running: Boolean,
+    onRead: () -> Unit,
+    onPauseResume: () -> Unit,
+    onStopReading: () -> Unit,
     onCite: (Int) -> Unit,
     onSearch: () -> Unit,
     onRetry: () -> Unit,
@@ -386,7 +401,10 @@ private fun AnswerBlock(
                 }
                 ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
             }
-            TurnOutcome.ANSWERED -> AnswerBody(turn.answer, onCite)
+            TurnOutcome.ANSWERED -> {
+                AnswerBody(turn.answer, onCite)
+                if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
+            }
             TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
                 Text(DECLINED, style = MaterialTheme.typography.bodyLarge)
@@ -406,6 +424,7 @@ private fun AnswerBlock(
                 if (ui.guessFellBack) Banner(BEST_GUESS_FALLBACK)
                 val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
                 if (guessText.isNotBlank()) GuessCard(guessText)
+                if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
                 if (!ui.guessing) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onSearch) { Text("Search instead") }
@@ -425,6 +444,32 @@ private fun AnswerBlock(
                 Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
                 OutlinedButton(onClick = onReadiness) { Text("Readiness") }
             }
+        }
+    }
+}
+
+/**
+ * The speaker button under an answer (Plan V2): reads it aloud through the player; while this answer is read, a
+ * tap pauses or resumes and Stop ends it. Hidden only while a turn runs and nothing is being read.
+ */
+@Composable
+private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(
+            onClick = { if (voice == VoiceButton.IDLE) onRead() else onPauseResume() },
+            modifier = Modifier.testTag(ResearchTags.READ_ALOUD),
+        ) {
+            when (voice) {
+                VoiceButton.IDLE -> Icon(painterResource(R.drawable.ic_headphones), contentDescription = "Read answer")
+                VoiceButton.READING -> Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause reading", tint = GrangerColors.Flame)
+                VoiceButton.PAUSED -> Icon(painterResource(R.drawable.ic_play), contentDescription = "Resume reading", tint = GrangerColors.Flame)
+            }
+        }
+        if (voice != VoiceButton.IDLE) {
+            Text(
+                if (voice == VoiceButton.READING) "Reading" else "Paused", style = MaterialTheme.typography.labelMedium, color = GrangerColors.Flame,
+            )
+            TextButton(onClick = onStop, modifier = Modifier.testTag(ResearchTags.STOP_READING)) { Text("Stop") }
         }
     }
 }

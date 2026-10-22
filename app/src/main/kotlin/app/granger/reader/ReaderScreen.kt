@@ -96,6 +96,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.Features
 import app.granger.R
 import app.granger.core.zim.ZimHit
+import app.granger.player.VoiceButton
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
 import app.granger.shell.SafeDrawingIgnoringBars
@@ -223,15 +224,13 @@ fun ReaderScreen(
                         },
                         onFind = viewModel::startFind,
                         onToggleBookmark = viewModel::toggleBookmark,
-                        readingThisPage = state.readingThisPage,
+                        voice = state.voice,
+                        onPauseResume = viewModel::pauseResume,
+                        onStop = viewModel::stopReading,
                         onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
-                            if (state.readingThisPage) {
-                                viewModel.stopReading()
-                            } else {
-                                val view = webView
-                                if (view == null) viewModel.readAloud(null)
-                                else view.evaluateJavascript(ReadAloudScript.call("firstVisible")) { json -> viewModel.readAloud(BlockRef.parse(json)) }
-                            }
+                            val view = webView
+                            if (view == null) viewModel.readAloud(null)
+                            else view.evaluateJavascript(ReadAloudScript.call("firstVisible")) { json -> viewModel.readAloud(BlockRef.parse(json)) }
                         }),
                     )
                 }
@@ -358,9 +357,12 @@ internal fun ReaderTopBar(
     onRandom: () -> Unit,
     onFind: () -> Unit,
     onToggleBookmark: () -> Unit,
-    readingThisPage: Boolean = false,
-    /** Read aloud / Stop reading in ⋯ (Plan V1); null leaves it out. */
+    /** The ⋯ menu's voice entries (Plan V2): Read aloud, or Pause / Resume reading plus Stop reading. */
+    voice: VoiceButton = VoiceButton.IDLE,
+    /** Starts the voice on this page (Plan V1); null leaves the entries out. */
     onReadAloud: (() -> Unit)? = null,
+    onPauseResume: () -> Unit = {},
+    onStop: () -> Unit = {},
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     Surface(color = MaterialTheme.colorScheme.surface) {
@@ -399,10 +401,15 @@ internal fun ReaderTopBar(
                         DropdownMenuItem(text = { Text("Find in page") }, onClick = { menuOpen = false; onFind() })
                     }
                     if (showPageActions && onReadAloud != null) {
-                        DropdownMenuItem(
-                            text = { Text(if (readingThisPage) "Stop reading" else "Read aloud") },
-                            onClick = { menuOpen = false; onReadAloud() },
-                        )
+                        if (voice == VoiceButton.IDLE) {
+                            DropdownMenuItem(text = { Text("Read aloud") }, onClick = { menuOpen = false; onReadAloud() })
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text(if (voice == VoiceButton.READING) "Pause reading" else "Resume reading") },
+                                onClick = { menuOpen = false; onPauseResume() },
+                            )
+                            DropdownMenuItem(text = { Text("Stop reading") }, onClick = { menuOpen = false; onStop() })
+                        }
                     }
                 }
             }

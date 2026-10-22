@@ -7,8 +7,8 @@ package app.granger.core.speech
  * A respelling only helps when it changes the phonemes espeak-ng (Piper's phonemizer) produces; check with
  * `espeak-ng -v en-us -q --ipa "<word>"`. "Rosetta" and "Rozetta" both give ɹoʊzˈɛɾə, and every respelling Neal
  * listened to (2026-10-22) still ended in the same hard "ah", so the "rossetter" heard in V0 is the ljspeech model's
- * rendering of a final schwa, not the phonemes. The built-in table is empty until a broader win turns up (a year
- * normaliser, say: espeak reads 1799 as "one thousand seven hundred ninety nine"); the mechanism stays for it.
+ * rendering of a final schwa, not the phonemes. The built-in table is empty until a list of mispronounced names
+ * exists; the mechanism stays for it. Years, ranges and units are [SpokenText]'s job (Plan V2), which runs first.
  */
 object Pronunciations {
     val builtIn: Map<String, String> = emptyMap()

@@ -68,11 +68,56 @@ class ResearchViewModelTest {
         savedState: SavedStateHandle = SavedStateHandle(),
         cpu: CoroutineDispatcher = main.dispatcher,
         sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
+        player: app.granger.core.player.PlayerHub? = null,
+        speakAnswers: Boolean = false,
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
+            player = player, speakAnswers = { speakAnswers },
         )
+    }
+
+    // ---- read aloud (Plan V2) ----
+
+    @Test fun readAnswerStartsTheVoiceOnTheTurnsSpokenText() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = vm(player = hub)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(hub.calls).isEmpty()                                   // the setting is off: nothing read as it streamed
+        vm.readAnswer(turn.id)
+        assertThat(hub.calls).containsExactly("readAloud:text:answer:${turn.id}@null")
+        val source = hub.lastSource!!
+        assertThat(source.title).isEqualTo("How do plants use light?")
+        assertThat(source.utterances(null, 10).map { it.text }).containsExactly("Plants turn light into sugar.")   // no [1]
+        // While it is read, the turn's button follows the player.
+        hub.ui.value = app.granger.player.voiceUi(title = turn.question).let {
+            it.copy(now = (it.now as app.granger.core.player.NowPlaying.Voice).copy(sourceKey = "text:answer:${turn.id}"))
+        }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().voice).isEqualTo(app.granger.player.VoiceButton.READING)
+        vm.pauseResumeReading()
+        vm.stopReading()
+        assertThat(hub.calls.takeLast(2)).containsExactly("playPause", "stopVoice").inOrder()
+    }
+
+    @Test fun withTheSettingOnANewAnswerIsReadAsItStreamsAndEndsWithTheTurn() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = vm(player = hub, speakAnswers = true)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(hub.calls).containsExactly("readAloud:text:answer:${turn.id}@null")
+        val source = hub.lastSource as app.granger.core.speech.StreamingTextReadSource
+        assertThat(source.isComplete).isTrue()
+        assertThat(source.utterances(null, 10).map { it.text }).containsExactly("Plants turn light into sugar.")
+        // A second question reads its own answer afresh.
+        vm.ask("And at night?")
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).hasSize(2)
+        assertThat(hub.lastSource!!.key).isEqualTo("text:answer:${chats.turnList.value.last().id}")
     }
 
     private fun TestScope.manager(llms: LlmEngineFactory, tier: DeviceTier = DeviceTier.THINK_DEEPER) = ModelManager(

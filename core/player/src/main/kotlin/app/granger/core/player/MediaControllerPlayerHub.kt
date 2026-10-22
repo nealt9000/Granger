@@ -133,6 +133,10 @@ class MediaControllerPlayerHub(
     override fun nextSentence() = send { it.nextSentence() }
     override fun previousSentence() = send { it.previousSentence() }
     override fun jumpTo(address: ReadAddress) = send { it.jumpTo(address) }
+    override fun setMixLevel(level: Float) = send { it.setMixLevel(level) }
+    override fun playPauseMusic() = send { it.playPauseMusic() }
+    override fun nextMusic() = send { it.nextMusic() }
+    override fun setVoice(voice: VoiceId) = send { it.setVoice(voice) }
     override fun activate(mode: PlayerMode) = send { it.activate(mode) }
     override fun setFinished(audiobookId: String, finished: Boolean) = send { it.setFinished(audiobookId, finished) }
     // No service running, nothing loaded: don't start one just to empty it.

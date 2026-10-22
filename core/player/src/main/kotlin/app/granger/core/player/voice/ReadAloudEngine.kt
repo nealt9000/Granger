@@ -25,8 +25,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/** The sentence being spoken: what the readers mark and the notification shows. */
-data class VoiceProgress(val address: ReadAddress, val utterance: Utterance, val index: Int)
+/**
+ * The sentence being spoken: what the readers mark and the notification shows. [previous] and [next] are the
+ * sentences around it for the voice's full view (Plan V2); [next] is null at the end of what the source has handed over.
+ */
+data class VoiceProgress(val address: ReadAddress, val utterance: Utterance, val index: Int, val previous: String? = null, val next: String? = null)
 
 /** One sentence's cost: how long the engine took and how much audio it made (the real-time factor is their ratio). */
 data class SentenceStat(val address: ReadAddress, val chars: Int, val synthMs: Long, val audioMs: Long) {
@@ -73,17 +76,20 @@ class ReadAloudEngine(
     private var index = 0                            // the sentence playing or to play next
     private var jobs: Job? = null
     private var idleClose: Job? = null
-    private val recent = object : LinkedHashMap<ReadAddress, Pcm>(8, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<ReadAddress, Pcm>?) = size > 6
+    // The last few sentences' audio, by address and the speed they were made at, so a step back (or a speed change
+    // and back) replays without a second synthesis.
+    private val recent = object : LinkedHashMap<Pair<ReadAddress, Float>, Pcm>(8, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<ReadAddress, Float>, Pcm>?) = size > 6
     }
 
     val current: Utterance? get() = buffer.getOrNull(index)
 
     /** Queues [source] from [from] with [speech]; speaks at once unless [autoplay] is false (then [play] starts it). */
     suspend fun start(source: ReadSource, speech: Speech, from: ReadAddress?, speed: Float, autoplay: Boolean = true) = lock.withLock {
+        val previous = jobs
         cancelJobs()
         idleClose?.cancel(); idleClose = null
-        this.speech?.takeIf { it !== speech }?.close()
+        retire(this.speech?.takeIf { it !== speech }, previous)
         this.source = source
         this.speech = speech
         this.speed = speed
@@ -92,7 +98,7 @@ class ReadAloudEngine(
         fetchMore(located)
         index = 0
         output.flush()
-        _progress.value = buffer.firstOrNull()?.let { VoiceProgress(it.address, it, 0) }
+        _progress.value = progressAt(0)
         if (autoplay) {
             output.play()
             _playing.value = true
@@ -153,7 +159,7 @@ class ReadAloudEngine(
         restartAt(i)
     }
 
-    fun setSpeed(speed: Float) { this.speed = speed; recent.clear() }
+    fun setSpeed(speed: Float) { this.speed = speed }
 
     suspend fun stop() = lock.withLock {
         cancelJobs()
@@ -188,11 +194,28 @@ class ReadAloudEngine(
         cancelJobs()
         output.flush()
         index = i
-        _progress.value = buffer.getOrNull(i)?.let { VoiceProgress(it.address, it, i) }
+        _progress.value = progressAt(i)
         if (wasPlaying) launchJobs()
     }
 
+    /** The progress for sentence [i] of the buffer, with its neighbours; null past the end. */
+    private fun progressAt(i: Int): VoiceProgress? =
+        buffer.getOrNull(i)?.let { VoiceProgress(it.address, it, i, buffer.getOrNull(i - 1)?.text, buffer.getOrNull(i + 1)?.text) }
+
     private fun cancelJobs() { jobs?.cancel(); jobs = null }
+
+    /**
+     * Closes [old] once [itsJobs] have ended. A cancelled producer may still be inside the engine's native call (a
+     * sentence is made in one piece, and a slow voice takes seconds over it); freeing the engine under it crashed the
+     * process (SIGSEGV in sherpa-onnx, 2026-10-22, on a voice switch mid-sentence).
+     */
+    private fun retire(old: Speech?, itsJobs: Job?) {
+        if (old == null) return
+        scope.launch {
+            itsJobs?.join()
+            old.close()
+        }
+    }
 
     private fun launchJobs() {
         val s = speech ?: return
@@ -205,7 +228,7 @@ class ReadAloudEngine(
                 for ((i, pcm) in spoken) {
                     index = i
                     val u = buffer[i]
-                    _progress.value = VoiceProgress(u.address, u, i)
+                    _progress.value = progressAt(i)
                     if (pcm != null) {
                         output.open(pcm.sampleRate)
                         output.write(pcm)
@@ -234,8 +257,9 @@ class ReadAloudEngine(
             val u = buffer[i]
             // Wait while more than lookAheadMs of audio is synthesized but unheard.
             while (queuedMs.value > lookAheadMs) delay(50)
-            val pcm = recent[u.address] ?: synthesize(s, u)
-            if (pcm != null) { recent[u.address] = pcm; queuedMs.value += pcm.durationMs }
+            val at = speed
+            val pcm = recent[u.address to at] ?: synthesize(s, u)
+            if (pcm != null) { recent[u.address to at] = pcm; queuedMs.value += pcm.durationMs }
             spoken.send(i to pcm)
             i++
         }

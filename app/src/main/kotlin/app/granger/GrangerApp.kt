@@ -35,6 +35,7 @@ import app.granger.core.speech.ReadSource
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.speech.SherpaSpeech
 import app.granger.core.speech.SystemSpeech
+import app.granger.core.speech.TextReadSource
 import app.granger.core.speech.VoiceId
 import app.granger.ebook.BookReadSource
 import app.granger.reader.ArticleReadSource
@@ -109,6 +110,7 @@ import app.granger.widget.WidgetModel
 import app.granger.widget.WidgetModelStore
 import app.granger.widget.WidgetUpdater
 import androidx.glance.appwidget.updateAll
+import app.granger.research.AnswerText
 import app.granger.research.ModelsAdapter
 import app.granger.research.installedModelsOf
 import java.util.concurrent.atomic.AtomicBoolean
@@ -120,6 +122,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import org.readium.r2.shared.publication.Publication
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -285,11 +289,28 @@ class AppContainer(context: Context) {
             is ReadSourceKey.Article -> library.archive(k.packId)?.let { ArticleReadSource(it, k.packId, k.path, title) }
             is ReadSourceKey.Book -> bookshelf.book(k.bookId)?.let { book ->
                 val file = File(book.filePath)
-                if (file.isFile) bookOpener.open(file)?.let { BookReadSource(it, k.bookId, book.title) } else null
+                if (!file.isFile) return@let null
+                // One restored book at a time: the same book is reopened from the copy already open; another book
+                // closes it (the reader keeps its own copy, so this never touches a page on screen).
+                val kept = restoredBook?.takeIf { it.first == k.bookId }?.second
+                val opened = kept ?: bookOpener.open(file)?.also { fresh ->
+                    restoredBook?.second?.let { old -> withContext(Dispatchers.IO) { runCatching { old.close() } } }
+                    restoredBook = k.bookId to fresh
+                } ?: return@let null
+                BookReadSource(opened, k.bookId, book.title)
             }
-            is ReadSourceKey.Text, null -> null
+            // A Research answer read aloud (Plan V2): `text:answer:<turnId>`, re-read from the kept chat.
+            is ReadSourceKey.Text -> k.key.removePrefix("answer:").takeIf { it != k.key }?.toLongOrNull()?.let { id ->
+                researchChats.turn(id)?.let { t ->
+                    TextReadSource(key, t.question, AnswerText.spoken(t.answer.ifBlank { t.guess }, t.medical))
+                }
+            }
+            null -> null
         }
     }
+
+    /** The book the voice's restore last opened, kept open for the process (Plan V2: one at most). */
+    private var restoredBook: Pair<String, Publication>? = null
 
     /** Resumes a `voice:` play from the rail: the saved place, read again. */
     private val resumeVoice: suspend (String) -> Boolean = { sourceKey ->

@@ -112,6 +112,7 @@ fun GrangerShell(
     onSearch: (String) -> Unit,
     onChat: (Long) -> Unit = {},
     onPlay: (RailEntry.Play) -> Unit = {},
+    onReading: (RailEntry.Reading) -> Unit = {},
     actions: RailEntryActions = RailEntryActions(),
     side: RailSide = RailSide.LEFT,
     showResearch: Boolean = false,
@@ -193,6 +194,7 @@ fun GrangerShell(
                 onSearch = { onSearch(it); onToggleExpanded() },
                 onChat = { onChat(it); onToggleExpanded() },
                 onPlay = { onPlay(it); onToggleExpanded() },
+                onReading = { onReading(it); onToggleExpanded() },
                 actions = actions,
                 side = side,
             )

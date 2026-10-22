@@ -81,11 +81,11 @@ object SpokenText {
 
 **Rules (Decision 1):** tokens are matched with lookarounds on the folded sentence; replacements are plain words, so espeak-ng gets no digits where a year was. Order: ranges first ("1914–1918" → "1914 to 1918", "12–15" → "12 to 15", en dash, em dash and a spaced hyphen between numbers), then "c." / "ca." before a year → "circa", then decades ("1960s" → "nineteen sixties", "1700s" → "seventeen hundreds", "'60s" left alone), then years, then "°C"/"°F"/"°" and the unit table after a number (km, kg, cm, mm, mi, ft, lb, lbs, mph, km/h, kph: singular after 1, plural otherwise). Exclusions: a digit run longer than four, a comma or a decimal point adjacent, a preceding currency sign, "#" or "No.", a following "%", "th/st/nd/rd", or a unit in the table (the unit is spoken, the number stays).
 
-- [ ] **Step 1: Failing tests:** `yearsAreSpokenAsYears` (table: 1000 "one thousand", 1066 "ten sixty-six", 1100 "eleven hundred", 1799 "seventeen ninety-nine", 1800 "eighteen hundred", 1962 "nineteen sixty-two", 2000 "two thousand", 2005 "two thousand five", 2010 "twenty ten", 2026 "twenty twenty-six", 999 null, 2100 null), `decadesAndRanges` ("The 1960s" → "The nineteen sixties", "the 1700s" → "the seventeen hundreds", "1914–1918" → "nineteen fourteen to nineteen eighteen", "pages 12–15" → "pages 12 to 15"), `circaAndDegrees` ("c. 1850" → "circa eighteen fifty", "37 °C" and "37°C" → "37 degrees Celsius"), `unitsAfterNumbers` ("5 km" → "5 kilometres", "1 km" → "1 kilometre", "3.5 km", "60 mph"), `whatMustNotChange` ("1,234", "20th", "$1500", "No. 1066", "ISBN 0-306-40615-2", "12345", "1.5", "10:30", "Room 101", "in 1500 km" → "in 1500 kilometres"), `theReadersHighlightOffsetsAreUntouched` (an `Utterance` built from "He died in 1962." keeps `start/end`; only the engine's text changes).
-- [ ] **Step 2:** `./gradlew :core:speech:testDebugUnitTest --tests 'app.granger.core.speech.SpokenTextTest'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** Number words for 0–99 and hundreds; `year()` by century: `xx00` → "<xx> hundred", 2000–2009 → "two thousand [n]", 1000–1009 likewise, else "<xx> <yy>" with a hyphen in 21–99. Check the phonemes on the Mac for a few outputs (`espeak-ng -v en-us -q -x "seventeen ninety-nine"`) and note anything odd in the test file.
-- [ ] **Step 4:** The same command, then `:core:speech:testDebugUnitTest`. Expected: PASS.
-- [ ] **Step 5: Commit.** `Speech: SpokenText — years, decades, ranges, circa, degrees and units before Piper`
+- [x] **Step 1: Failing tests:** `yearsAreSpokenAsYears` (table: 1000 "one thousand", 1066 "ten sixty-six", 1100 "eleven hundred", 1799 "seventeen ninety-nine", 1800 "eighteen hundred", 1962 "nineteen sixty-two", 2000 "two thousand", 2005 "two thousand five", 2010 "twenty ten", 2026 "twenty twenty-six", 999 null, 2100 null), `decadesAndRanges` ("The 1960s" → "The nineteen sixties", "the 1700s" → "the seventeen hundreds", "1914–1918" → "nineteen fourteen to nineteen eighteen", "pages 12–15" → "pages 12 to 15"), `circaAndDegrees` ("c. 1850" → "circa eighteen fifty", "37 °C" and "37°C" → "37 degrees Celsius"), `unitsAfterNumbers` ("5 km" → "5 kilometers", "1 km" → "1 kilometer", "3.5 km", "60 mph"), `whatMustNotChange` ("1,234", "20th", "$1500", "No. 1066", "ISBN 0-306-40615-2", "12345", "1.5", "10:30", "Room 101", "in 1500 km" → "in 1500 kilometers"), `theReadersHighlightOffsetsAreUntouched` (an `Utterance` built from "He died in 1962." keeps `start/end`; only the engine's text changes).
+- [x] **Step 2:** `./gradlew :core:speech:testDebugUnitTest --tests 'app.granger.core.speech.SpokenTextTest'`. Expected: compile failure. *The implementation landed while the first run was going, so the run saw 8 tests with 1 failing (the unit regex matched one digit of "11 km"), fixed before Step 4.*
+- [x] **Step 3: Implement.** Number words for 0–99 and hundreds; `year()` by century: `xx00` → "<xx> hundred", 2000–2009 → "two thousand [n]", 1000–1009 likewise, else "<xx> <yy>" with a hyphen in 21–99. Check the phonemes on the Mac for a few outputs (`espeak-ng -v en-us -q -x "seventeen ninety-nine"`) and note anything odd in the test file.
+- [x] **Step 4:** The same command, then `:core:speech:testDebugUnitTest`. Expected: PASS. *44 speech tests, `:core:player` tests and the app's test compile green. US spelling for units ("kilometers"); espeak-ng phonemizes "seventeen ninety-nine", "eighteen oh five", "nineteen sixties" and "circa" cleanly.*
+- [x] **Step 5: Commit.** `Speech: SpokenText — years, decades, ranges, circa, degrees and units before Piper`
 
 ### Task 2: The second voice — listening session and the numbers (Neal, the phone)
 
@@ -95,10 +95,10 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `docs/superpowers/spikes/2026-10-voice-spike-results.md` (a "Second voice (V2)" section: the licence table from Decision 3, the RTF table, Neal's ratings, the choice)
 - Scratch, outside git: `/Users/s.nealthompson/Developer/Granger/voice-spike-2026-10-21/voices-v2/` (the packed candidates)
 
-- [ ] **Step 1:** Tell the R1 session the phone is being taken; back up both databases on the phone (`files/db-backup-<date>/`).
-- [ ] **Step 2:** Pack `vits-piper-en_US-libritts-high`, `vits-piper-en_US-libritts-high-int8` (packed from its own tarball; keep its directory name), `vits-piper-en_US-norman-medium`, `vits-piper-en_US-kristin-medium`, `vits-piper-en_US-kusal-medium`, `vits-piper-en_US-john-medium` with `tools/voices/pack_voice.py` in an empty directory (downloaded archives are untrusted input), then `adb push` each unpacked directory to the app's `files/voices/` (`run-as` or the debug build's external files dir, as V0 did). Remove the spike's `libritts_r` and `kokoro` directories from the phone at the same time (they are unshippable and outrank nothing now, but they clutter the list).
-- [ ] **Step 3: Numbers.** With Granger in front, read the three spike passages through the player (`VoiceSpikeActivity --ez service true --es engine <id>`) for `libritts-high` and `libritts-high-int8`, screen on then screen off for five minutes each; read the `Voice: synth` lines from logcat (`tools/spike/voice/tabulate.py`). Bar: RTF ≤ 0.5 with the screen off, first audio ≤ 2 s for ordinary sentences. The medium candidates are the same size and speed as `ljspeech` and are not re-measured.
-- [ ] **Step 4: Listening (Neal).** In Settings → Voice pick each candidate and read the same Classics page and the same Wikipedia article at 1.0× and 0.8×; for `libritts-high` try speakers by setting `--ei speaker` in the spike activity (it takes a speaker id; the app proper speaks speaker 0 until Task 3). Rate naturalness, names and numbers, pacing, 1–5, as in V0; name the speakers worth keeping (three at most).
+- [x] **Step 1:** Tell the R1 session the phone is being taken; back up both databases on the phone (`files/db-backup-<date>/`). *Told (it needs the Pixel for about half an hour around 2026-10-23 morning and asked to keep `files/packs/`); the backup is made right before the install in Step 4's build.*
+- [x] **Step 2:** Pack `vits-piper-en_US-libritts-high`, `vits-piper-en_US-libritts-high-int8` (packed from its own tarball; keep its directory name), `vits-piper-en_US-norman-medium`, `vits-piper-en_US-kristin-medium`, `vits-piper-en_US-kusal-medium`, `vits-piper-en_US-john-medium` with `tools/voices/pack_voice.py` in an empty directory (downloaded archives are untrusted input), then `adb push` each unpacked directory to the app's `files/voices/` (`run-as` or the debug build's external files dir, as V0 did). Remove the spike's `libritts_r` and `kokoro` directories from the phone at the same time (they are unshippable and outrank nothing now, but they clutter the list).
+- [x] **Step 3: Numbers.** *Done 2026-10-22, in the results doc: fp32 RTF 0.99 screen on, 1.38 off; int8 2.22 on and slower off. `libritts-high` is out, so the speaker picker in Task 3 is moot and is left out.* With Granger in front, read the three spike passages through the player (`VoiceSpikeActivity --ez service true --es engine <id>`) for `libritts-high` and `libritts-high-int8`, screen on then screen off for five minutes each; read the `Voice: synth` lines from logcat (`tools/spike/voice/tabulate.py`). Bar: RTF ≤ 0.5 with the screen off, first audio ≤ 2 s for ordinary sentences. The medium candidates are the same size and speed as `ljspeech` and are not re-measured.
+- [ ] **Step 4: Listening (Neal).** *The four medium candidates are on the phone; the V2 debug build (every task but 3 and 10) is installed for it.* In Settings → Voice pick each candidate and read the same Classics page and the same Wikipedia article at 1.0× and 0.8×; for `libritts-high` try speakers by setting `--ei speaker` in the spike activity (it takes a speaker id; the app proper speaks speaker 0 until Task 3). Rate naturalness, names and numbers, pacing, 1–5, as in V0; name the speakers worth keeping (three at most).
 - [ ] **Step 5:** Record the tables and the choice in the results doc. If `libritts-high` misses the bar and a medium voice is chosen, say so there; if nothing beats `ljspeech` to Neal's ear, the catalog keeps one voice and Task 3 ships only the speaker plumbing. **Commit.** `Voice V2: second-voice licence check, numbers and listening`
 
 ### Task 3: Speakers, and the second voice in the catalog
@@ -123,11 +123,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/reader/ReaderScreen.kt` (⋯: "Read aloud" | "Pause reading" / "Resume reading" + "Stop reading"), `ReaderViewModel.kt` (`readingThisPage` → the same three-state; `pauseResume()`)
 - Tests: `EbookReaderViewModelTest` (`voiceButtonFollowsThePlayerForThisBookOnly`, `pauseResumeTogglesThePlayerNotTheSource`), `ReaderViewModelTest` likewise; a Compose test for the bar's three icons and the long-press stop.
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*' --tests 'app.granger.reader.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** Paused means: the voice's source is this page or book and `ui.playing` is false and not `ended`; ended shows Read aloud again.
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Readers: the voice button pauses and resumes; Stop moves to a long press and the ⋯ menu`
+- [x] **Step 1: Failing tests** as named. *Plus `VoiceButtonTest` (the shared three-state rule) and `EbookBottomBarTest` (Compose: the three icons, tap and long press).*
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.ebook.*' --tests 'app.granger.reader.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`VoiceButton` lives in `app.granger.player` and both view models publish it beside `readingThisBook`/`readingThisPage` (which stay: Read from here still moves a paused voice). The bar button is a `combinedClickable` box, since `IconButton` has no long press; with no long-press action Compose treats a long press as a tap, so the idle button starts on either.* Paused means: the voice's source is this page or book and `ui.playing` is false and not `ended`; ended shows Read aloud again.
+- [x] **Step 4:** The same command. Expected: PASS. *222 tests across `ebook`, `reader` and `player`.*
+- [x] **Step 5: Commit.** `Readers: the voice button pauses and resumes; Stop moves to a long press and the ⋯ menu`
 
 ### Task 5: Music under the voice — the engine, focus, the session
 
@@ -138,11 +138,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 
 **Engine shape:** `mode == VOICE` gains `musicUnder: MusicQueue?`. `readAloud()` while `mode == MUSIC` keeps the queue and tracks, sets `musicUnder`, lowers `player.volume` to the mix, and does *not* load the carrier; `startVoice()` learns `keepMusic`. `onPlayWhenReadyChanged` drives the voice only when the carrier is loaded; with music underneath the voice's play/pause comes from `resume()/userPause()` directly, and the focus listener pauses and resumes both. `activate(MUSIC)` while the voice reads over music is a no-op; `playTracks()` while the voice reads starts the music underneath (Decision 4). `stopCurrent()` from voice-over-music becomes "the voice stops, music stays": `mode = MUSIC`, `applyVolume()`, the voice's state saved. Saving: the music `PositionSaver` keeps saving as music; the voice as voice; `LAST_MODE` stays `voice` while it reads.
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :core:player:testDebugUnitTest`. Expected: compile failure.
-- [ ] **Step 3: Implement.** `SessionPlayer` first (it is the risky piece): a `ForwardingSimpleBasePlayer` whose `getState()` overlays the voice when the engine says so, with `handleSetPlayWhenReady/handleSeekToNext/...` going to the engine; keep `ForwardingPlayer` on a branch if Media3 1.11.1's base class fights the session's media-item handling, and record which way it went in the roadmap. Then the engine.
-- [ ] **Step 4:** The same command. Expected: PASS, including every existing `PlayerEngineTest`.
-- [ ] **Step 5: Commit.** `Player: music under the voice — mix level, transport drives the voice, SessionPlayer over ForwardingSimpleBasePlayer`
+- [x] **Step 1: Failing tests** as named. *Nine new cases in `PlayerEngineVoiceTest`; `SessionPlayerTest` unchanged.*
+- [x] **Step 2:** `./gradlew :core:player:testDebugUnitTest`. Expected: compile failure.
+- [x] **Step 3: Implement.** *Builder's call, after reading Media3 1.11.1's source: `ForwardingSimpleBasePlayer` was dropped before it was tried. Its public `seekToNext()` is final and only reaches `handleSeek` when the reported playlist has a next item, so a one-item playlist (the voice's carrier, a single-file audiobook) would swallow next and previous from the notification and the headset, which V1 shipped working through `ForwardingPlayer`'s overrides. Instead the music under the voice plays on a **second ExoPlayer** (`musicUnderFactory`, built like the first with its own `ReplayGainProcessor`), while the main player keeps the carrier: the session, the notification, the lock screen and the headset go on driving the voice exactly as in V1, `SessionPlayer` is untouched, and the mix is `musicUnder.volume = mix × duck × fade`. The queue moves between the players with its index and position (a short gap in the music at the hand-over); the music row's pause is remembered apart from pauses with the voice (a call, a headset unplug, the sleep timer), which resume with it. `NowPlaying.Voice` carries `music` and `musicPlaying`; `PlayerHub` gains `setMixLevel`, `playPauseMusic`, `nextMusic`. Without a factory (tests, by default) V1's behaviour stands.*
+- [x] **Step 4:** The same command. Expected: PASS, including every existing `PlayerEngineTest`. *120 player tests; the app's player, widget and media tests green.*
+- [x] **Step 5: Commit.** `Player: music under the voice — a second player at the mix level; the transport keeps driving the voice`
 
 ### Task 6: The mini-player's second line and the voice's full-view sheet
 
@@ -152,11 +152,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/GrangerNavHost.kt` (the sheet's host; Open calls `openVoiceSource`; a `text:` source's Open goes to the Research chat)
 - Tests: `MiniPlayerTest` (`theSecondLineNamesTheMusicUnderTheVoice`), `VoiceSheetTest` (Compose: sentences, slider shown only with music, Stop calls the hub), `PlayerViewModelTest` (`settingTheVoiceReopensAtTheCurrentSentence`).
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.player.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Player UI: the voice's full-view sheet; the music line in the mini-player`
+- [x] **Step 1: Failing tests** as named. *`VoiceSheetTest` (4), `MiniPlayerTest.theMusicLineNamesTheMusicUnderTheVoice`, `PlayerEngineVoiceTest.setVoiceReopensTheNewEngineAtTheCurrentSentence`.*
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.player.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`VoiceProgress` carries the previous and next sentences (no separate `neighbours()`); `PlayerHub.setVoice` pauses through the carrier, reopens the new engine at the current sentence and plays again the same way. The sheet opens fully expanded (half of it would hide the music row and the buttons); the sleep timer is the existing sheet on top of it. The mini-player's third line is `labelSmall`, inside the same 64 dp.*
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Player UI: the voice's full-view sheet; the music line in the mini-player`
 
 ### Task 7: Spoken Research answers
 
@@ -166,11 +166,11 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/GrangerApp.kt` (`readSources`: `text:answer:<id>` → `chats.turn(id)` → `TextReadSource`), `GrangerNavHost.kt` (`openVoiceSource` for `text:answer:` opens the chat), `settings/VoiceSettingsScreen.kt` + `VoicePrefs` ("Speak answers as they arrive")
 - Tests: `AnswerTextTest` (`spokenDropsChipsMarksAndListMarkers`, `medicalBannerIsSpokenFirstOnce`), `StreamingTextReadSourceTest` (`closedSentencesAreServedWhileOpen`, `theLastFragmentWaitsForComplete`, `completeEndsTheSource`), `ResearchViewModelTest` (`readAnswerStartsTheVoiceOnTheTurnsText`, `withTheSettingOnANewAnswerIsReadAsItStreams`, `aStoppedTurnEndsTheRead`), `GrangerAppTest`/`PlayResumerTest` (`anAnswerKeyRestoresFromTheChatsTable`).
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :core:speech:testDebugUnitTest :app:testDebugUnitTest --tests 'app.granger.research.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.** The streaming source splits with `Sentences` on the text so far and holds back the last sentence until a sentence break follows it or `complete()` is called. The read starts only when the Research screen is on top (V1's finding: focus is refused from the background), which is where answers stream.
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Research: answers read aloud — the speaker button, Speak answers as they arrive, restore from the chat`
+- [x] **Step 1: Failing tests** as named. *`StreamingTextReadSourceTest` (3), `AnswerTextTest` +2, `ResearchViewModelTest` +2, the settings fake grew the switch. The restore of a `text:answer:` key runs through `GrangerApp.readSources` and is covered by the walkthrough, not a JVM test.*
+- [x] **Step 2:** `./gradlew :core:speech:testDebugUnitTest :app:testDebugUnitTest --tests 'app.granger.research.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`ResearchChats.turn(id)` was added for the restore and the sheet's Open (which goes to the chat). The speaker row sits under an answered turn and under a kept guess; while a turn runs it shows only if something is being read. The medical banner text moved to `AnswerText.MEDICAL` so the screen and the voice share it.* The streaming source splits with `Sentences` on the text so far and holds back the last sentence until a sentence break follows it or `complete()` is called. The read starts only when the Research screen is on top (V1's finding: focus is refused from the background), which is where answers stream.
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Research: answers read aloud — the speaker button, Speak answers as they arrive, restore from the chat`
 
 ### Task 8: `ReadAloud.start`, the rail's live entry, the widget
 
@@ -191,22 +191,22 @@ No app code. The candidates are packed with the existing tool and pushed under t
 - Modify: `app/src/main/kotlin/app/granger/shell/Rail.kt` and its model (a `RailEntry.Reading` at the top of the list while `player.ui.now is Voice`, title "Reading aloud: <title>", a voice icon (new `ic_voice.xml`, a speaking-head glyph); past `voice:` plays use the same icon; tapping opens the page or the chat), `media/PlayResumer.kt` (unchanged contract), `widget/WidgetModel.kt` + the widget's resume (a `voice` tab: resume through `PlayResumer.VOICE`)
 - Tests: `ReadAloudTest` (`anArticleStartsAtItsFirstSentence`, `aBookChapterStartsAtTheChaptersFirstSentence`, `anAnswerReadsTheStoredTurn`, `aMissingTargetIsFalse`), `RailTest` (`aLiveReadingHeadsTheListAndOpensItsPage`), `WidgetTest` (`theWidgetResumesTheVoice`).
 
-- [ ] **Step 1: Failing tests** as named.
-- [ ] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.voice.*' --tests 'app.granger.shell.*' --tests 'app.granger.widget.*'`. Expected: compile failure.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4:** The same command. Expected: PASS.
-- [ ] **Step 5: Commit.** `Voice: ReadAloud.start for project 4; the rail's live reading; the widget resumes the voice`
+- [x] **Step 1: Failing tests** as named. *`ReadAloudTest` (3), `RailViewModelTest.aLiveReadingHeadsTheListAndLeavesWithTheVoice`, `WidgetActionsTest` and `WidgetModelTest` +1 each, `BookReadSourceTest.addressAtHrefStartsAChapter`.*
+- [x] **Step 2:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.voice.*' --tests 'app.granger.shell.*' --tests 'app.granger.widget.*'`. Expected: compile failure.
+- [x] **Step 3: Implement.** *`ReadAloud` takes the hub and the container's `readSources`, so a target is opened exactly as a restore opens it; a book chapter goes through the new `BookReadSource.addressAtHref`. The live reading is a `RailEntry.Reading` combined onto the list (never pinnable, no `at`); `ic_voice` is a speaker glyph, used for past `voice:` plays too. The widget's play with nothing loaded tries the saved voice first through the play resumer, and its idle face shows the saved voice's title.*
+- [x] **Step 4:** The same command. Expected: PASS.
+- [x] **Step 5: Commit.** `Voice: ReadAloud.start for project 4; the rail's live reading; the widget resumes the voice`
 
 ### Task 9: Small debts from V1
 
 **Files:** `core/player/.../voice/ReadAloudEngine.kt` (the `recent` cache keyed by address *and* speed, so a speed change doesn't re-synthesize the sentence being replayed), `app/.../ebook/BookReadSource.kt` (`sectionTitle` from the table of contents when the locator has no title), `GrangerApp.kt` (`readSources` for a book closes the previous restored `Publication` when a different book is restored), tests for each.
 
-- [ ] Tests, implement, `testDebugUnitTest` green. **Commit.** `Voice: V1 debts — speed-keyed cache, section titles from the TOC, one restored publication`
+- [x] Tests, implement, `testDebugUnitTest` green. *`ReadAloudEngineTest.theCacheIsKeyedBySpeedSoAStepBackAtTheOldSpeedReplaysWithoutSynthesis`, `BookReadSourceTest.sectionTitleComesFromTheTableOfContentsWhenTheLocatorHasNone`; the one-restored-publication rule lives in `GrangerApp.readSources` (`restoredBook`), covered by the walkthrough.* **Commit.** `Voice: V1 debts — speed-keyed cache, section titles from the TOC, one restored publication`
 
 ### Task 10: Pixel 6 walkthrough; roadmap
 
-- [ ] Tell the R1 session; back up both databases; install over the app over Wi-Fi.
-- [ ] Check (spec §10 and this plan):
+- [x] Tell the R1 session; back up both databases; install over the app over Wi-Fi. *2026-10-22: installed twice (the second with the engine-close fix), backups in `files/db-backup-2026-10-22b/` and `-c/`.*
+- [x] Check (spec §10 and this plan): *Neal's first pass (2026-10-22): years sound right; music under the voice works; the Music tab's play button stuck on "play" and couldn't pause the music under the voice (fixed: the tab now shows the music under the voice live, with its own transport routed to it); words ending in "a" still come out with an "r" ("Australiar"), which is the `ljspeech` model (V1's Rosetta finding) and goes on V3's listening checklist; the mini-player is clunky when both play, a UX matter carried forward; "the rest is fine for now". Second pass: the Music tab fix works; merged on Neal's word.*
   - An article with years and a range (Rosetta Stone: 1799, 196 BC, 1802) reads them as years; the system voice is unchanged.
   - Both catalog voices Get, pick, speak; the speaker picker; licence and attribution shown; removing the chosen voice falls back with a notice.
   - E-book: the bar button pauses and resumes at the sentence; long press stops; the ⋯ menu in the web reader has both.
@@ -216,8 +216,8 @@ No app code. The candidates are packed with the existing tool and pushed under t
   - Research: the speaker button reads an answer without chips or asterisks; with the setting on an answer is read as it streams and a Stop ends it; the medical banner is spoken once; the spoken answer shows in the rail and resumes after a force-stop.
   - The rail's live entry; the widget resumes the voice.
   - No regressions in the music and audiobook parity rows that touch focus, the mini-player and the notification.
-- [ ] Update the roadmap: the V2 row to Done with what passed and what's open; "Carried forward from V2" (project 4's needs: `ReadAloud.start` targets it may want beyond these three; the names route; a new-engine spike if a better small voice appears).
-- [ ] **Commit.** `Voice V2: a better voice, the mix, the full view, spoken answers; roadmap`
+- [x] Update the roadmap: the V2 row to Done with what passed and what's open; "Carried forward from V2" (project 4's needs: `ReadAloud.start` targets it may want beyond these three; the names route; a new-engine spike if a better small voice appears).
+- [x] **Commit.** `Voice V2: a better voice, the mix, the full view, spoken answers; roadmap`
 
 ## Order and size
 

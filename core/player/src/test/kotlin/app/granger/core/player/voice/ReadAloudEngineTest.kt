@@ -208,6 +208,52 @@ class ReadAloudEngineTest {
     }
 
     @Test
+    fun theCacheIsKeyedBySpeedSoAStepBackAtTheOldSpeedReplaysWithoutSynthesis() = runTest {
+        val out = FakeOutput(); val speech = FakeSpeech()
+        val engine = ReadAloudEngine(out, backgroundScope, lookAheadSentences = 1)
+        engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
+        out.release(2); settle()                                   // "One two." heard at 1×
+        val madeAtOne = speech.spoken.count { it == "One two." }
+        engine.setSpeed(2f)
+        engine.previousSentence(); out.release(2); settle()        // again at 2×: a new synthesis
+        assertThat(speech.spoken.count { it == "One two." }).isEqualTo(madeAtOne + 1)
+        engine.setSpeed(1f)
+        engine.previousSentence(); out.release(2); settle()        // back at 1×: from the cache
+        assertThat(speech.spoken.count { it == "One two." }).isEqualTo(madeAtOne + 1)
+        assertThat(speech.speeds.last()).isEqualTo(2f)
+    }
+
+    @Test
+    fun aNewStartClosesTheOldEngineOnlyAfterItsSentenceIsMade() = runTest {
+        val out = FakeOutput()
+        // A slow voice: a sentence takes a second to make, and making one after close is the crash this guards against.
+        val slow = object : Speech {
+            override val voice = Voice(VoiceId.Granger("slow"), "Slow", "en-US")
+            var closed = 0
+            var madeAfterClose = 0
+            override fun synthesize(text: String, speed: Float): Flow<Pcm> = flow {
+                // Like the native call: once begun, a sentence runs to its end whatever the collector does.
+                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) { delay(1_000) }
+                if (closed > 0) madeAfterClose++
+                emit(Pcm(FloatArray(2_205), 22_050))
+            }
+            override fun close() { closed++ }
+        }
+        val engine = ReadAloudEngine(out, backgroundScope, lookAheadSentences = 1)
+        engine.start(TextReadSource("text:t", "T", text), slow, null, 1f)
+        advanceTimeBy(200); runCurrent()                           // the first sentence is being made
+        val fast = FakeSpeech()
+        engine.start(TextReadSource("text:t", "T", text), fast, null, 1f)
+        runCurrent()
+        assertThat(slow.closed).isEqualTo(0)                       // not while its sentence is in flight
+        advanceTimeBy(1_000); runCurrent()
+        assertThat(slow.closed).isEqualTo(1)
+        assertThat(slow.madeAfterClose).isEqualTo(0)
+        out.release(100); settle()
+        assertThat(fast.spoken.first()).isEqualTo("One two.")
+    }
+
+    @Test
     fun jumpToAnAddressRestartsThere() = runTest {
         val out = FakeOutput(); val speech = FakeSpeech()
         val engine = ReadAloudEngine(out, backgroundScope)

@@ -48,6 +48,7 @@ object VoiceSettingsTags {
     const val REMOVE = "voice_remove"
     const val SPEED = "voice_speed"
     const val MARK = "voice_mark"
+    const val SPEAK_ANSWERS = "voice_speak_answers"
     const val MORE = "voice_more"
 }
 
@@ -154,6 +155,13 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                 ListItem(
                     headlineContent = { Text("Mark the sentence being read") },
                     trailingContent = { Switch(checked = ui.markSentence, onCheckedChange = viewModel::setMarkSentence, modifier = Modifier.testTag(VoiceSettingsTags.MARK)) },
+                )
+            }
+            item(key = "speak-answers") {
+                ListItem(
+                    headlineContent = { Text("Speak answers as they arrive") },
+                    supportingContent = { Text("Research reads a new answer aloud while it is written. Any answer can be read from its speaker button.") },
+                    trailingContent = { Switch(checked = ui.speakAnswers, onCheckedChange = viewModel::setSpeakAnswers, modifier = Modifier.testTag(VoiceSettingsTags.SPEAK_ANSWERS)) },
                 )
             }
         }

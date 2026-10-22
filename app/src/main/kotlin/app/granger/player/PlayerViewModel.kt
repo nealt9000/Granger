@@ -14,6 +14,7 @@ import app.granger.core.player.SavedModes
 import app.granger.core.player.SavedMusic
 import app.granger.core.player.SleepSetting
 import app.granger.core.player.voice.VoiceProgress
+import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -188,6 +189,20 @@ class PlayerViewModel(
     fun previousParagraph() = hub.previousParagraph()
     fun previousSentence() = hub.previousSentence()
 
+    // Music under the voice and the voice's full view (Plan V2).
+    fun setMixLevel(level: Float) = hub.setMixLevel(level)
+    fun playPauseMusic() = hub.playPauseMusic()
+    fun nextMusic() = hub.nextMusic()
+    fun setVoice(id: VoiceId) = hub.setVoice(id)
+
+    /** Music is playing under the voice: the Music tab shows it and its controls drive it, not the voice. */
+    fun musicUnderVoice(): NowPlaying.Voice? = (hub.ui.value.now as? NowPlaying.Voice)?.takeIf { it.music != null }
+
+    /** The Music tab's transport: the music under the voice when there is some (the mini-player's transport stays the voice's), else the player's. */
+    fun musicPlayPause() = if (musicUnderVoice() != null) hub.playPauseMusic() else hub.playPause()
+    fun musicNext() = if (musicUnderVoice() != null) hub.nextMusic() else hub.next()
+    fun musicPrevious() { if (musicUnderVoice() == null) hub.previous() }
+
     fun next() = hub.next()
     fun previous() = hub.previous()
     fun skipBack() = hub.skipBack()
@@ -263,6 +278,10 @@ class PlayerViewModel(
 
         /** The sleep timer's choices in minutes (plus end of chapter). */
         val SLEEP_MINUTES = listOf(5, 10, 15, 30, 45, 60)
+
+        /** The voice's speeds (Plan V2): 0.7× to 2.0× in 0.1 steps, through the engine. */
+        val VOICE_SPEEDS: List<Float> = (7..20).map { it / 10f }
+        val VOICE_PRESETS = listOf(0.8f, 1.0f, 1.2f, 1.5f)
     }
 }
 

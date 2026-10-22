@@ -21,6 +21,19 @@ class WidgetActionsTest {
         assertThat(hub.calls).containsExactly("activate:MUSIC")
     }
 
+    @Test fun playWhenNothingLoadedResumesTheVoiceItWasReading() = runTest {
+        val hub = FakePlayerHub()
+        val voice = app.granger.core.player.SavedVoice("book:b", "Hamlet", "Act I", app.granger.core.speech.ReadAddress.Text("k", 0, 0), 1f, null)
+        hub.saved.value = SavedModes(SavedMusic(listOf(track("a")), 0, 0L, false, 0), null, PlayerMode.MUSIC, voice = voice, lastWasVoice = true)
+        val resumed = mutableListOf<String>()
+        playFromWidget(hub, resumeVoice = { key, title -> resumed += "$key|$title"; true })
+        assertThat(resumed).containsExactly("voice:book:b|Hamlet")
+        assertThat(hub.calls).isEmpty()
+        // A voice whose source is gone falls back to the saved player.
+        playFromWidget(hub, resumeVoice = { _, _ -> false })
+        assertThat(hub.calls).containsExactly("activate:MUSIC")
+    }
+
     @Test fun playWhileLoadedToggles() = runTest {
         val hub = FakePlayerHub(musicUi())
         playFromWidget(hub)

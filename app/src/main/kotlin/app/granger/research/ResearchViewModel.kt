@@ -20,6 +20,13 @@ import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.TurnOutcome
+import app.granger.core.player.NowPlaying
+import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerUi
+import app.granger.core.speech.StreamingTextReadSource
+import app.granger.core.speech.TextReadSource
+import app.granger.player.VoiceButton
+import kotlinx.coroutines.flow.map
 import app.granger.core.research.FailReason
 import app.granger.core.research.Outcome
 import app.granger.core.research.Passage
@@ -79,7 +86,14 @@ class ResearchViewModel(
     private val savedState: SavedStateHandle = SavedStateHandle(),
     /** Runs the pipeline's own work (prompt building, ranking, citation checks) off the main thread. */
     private val cpu: CoroutineDispatcher = Dispatchers.Default,
+    /** Reads answers aloud (Plan V2); null without the player. */
+    private val player: PlayerHub? = null,
+    /** Settings → Voice → "Speak answers as they arrive": a new answer is read as its sentences close. */
+    private val speakAnswers: () -> Boolean = { false },
 ) : ViewModel() {
+    /** The answer the voice is on ([turnId]) and whether it is speaking; null when the voice is elsewhere or has run out. */
+    data class Reading(val turnId: Long, val playing: Boolean)
+
     /**
      * A stored turn, with the reply so far, the stage and the large-model fallback while it is running. [medical] shows
      * the banner, from the pipeline while the turn runs (the stored turn learns it only when settled).
@@ -100,6 +114,8 @@ class ResearchViewModel(
         val guessFellBack: Boolean = false,
         /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
         val guessFailed: Boolean = false,
+        /** The speaker button's state for this turn (Plan V2): read, pause or resume. */
+        val voice: VoiceButton = VoiceButton.IDLE,
     )
 
     data class State(
@@ -175,17 +191,24 @@ class ResearchViewModel(
         if (id == null) flowOf(emptyList()) else chats.turns(id).emptyOnError("Research turns")
     }
 
+    /** Which answer the voice is reading, from the player (Plan V2). */
+    private val reading: Flow<Reading?> = (player?.ui ?: flowOf(PlayerUi.IDLE)).map { ui ->
+        val voice = ui.now as? NowPlaying.Voice ?: return@map null
+        if (voice.ended) null else answerTurnId(voice.sourceKey)?.let { Reading(it, ui.playing) }
+    }
+
     val state: StateFlow<State> = combine(
         turns,
         live,
         combine(models.readiness, models.canThinkDeeper, guessFailed, ::Triple),
         combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS).emptyOnError("Recent research chats"), ::Header),
-    ) { turns, live, (readiness, deeperInstalled, guessFailedId), header ->
+        reading,
+    ) { turns, live, (readiness, deeperInstalled, guessFailedId), header, reading ->
         val last = turns.lastOrNull()
         State(
             chatId = header.chatId,
             title = header.title,
-            turns = turns.map { it.toUi(live, guessFailedId) },
+            turns = turns.map { it.toUi(live, guessFailedId, reading) },
             running = live != null,
             readiness = readiness,
             canThinkDeeper = deeperInstalled && live == null && last != null && last.canDeepen(),
@@ -408,7 +431,10 @@ class ResearchViewModel(
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
-                    is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
+                    is ResearchEvent.Partial -> {
+                        live.update { it?.copy(partial = event.text) }
+                        speakPartial(turnId, ask.question, medical, event.text)
+                    }
                     ResearchEvent.Medical -> {
                         medical = true
                         live.update { it?.copy(medical = true) }
@@ -443,8 +469,47 @@ class ResearchViewModel(
                     logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", medical, false, emptyList(), kept, emptyList()) }
                 }
             }
+        } finally {
+            // However the turn ended, the read of it ends too: what was spoken stays, nothing more is waited for.
+            streaming?.complete()
+            streaming = null
         }
     }
+
+    // ---- read aloud (Plan V2) ----
+
+    /** The answer being read as it streams, while "Speak answers as they arrive" is on; one turn at a time. */
+    private var streaming: StreamingTextReadSource? = null
+
+    /** A new piece of the answer: starts the read on the first one (with the setting on), then feeds it. */
+    private fun speakPartial(turnId: Long?, question: String, medical: Boolean, text: String) {
+        val hub = player ?: return
+        val id = turnId ?: return
+        val source = streaming ?: run {
+            if (!speakAnswers()) return
+            StreamingTextReadSource(answerKey(id), question, preface = if (medical) AnswerText.MEDICAL else null).also {
+                streaming = it
+                hub.readAloud(it)
+            }
+        }
+        // The spoken form is trimmed; the trailing space says whether the last sentence may still be growing.
+        val trailing = if (text.endsWith(" ") || text.endsWith("\n")) " " else ""
+        source.append(AnswerText.spoken(text) + trailing)
+    }
+
+    /** Reads [turnId]'s answer (or its kept guess) aloud through the player, from the start. */
+    fun readAnswer(turnId: Long) {
+        val hub = player ?: return
+        val turn = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn ?: return
+        val text = turn.answer.ifBlank { turn.guess }
+        if (text.isBlank()) return
+        hub.readAloud(TextReadSource(answerKey(turnId), turn.question, AnswerText.spoken(text, turn.medical)))
+    }
+
+    /** The speaker button while its answer is read: pauses the voice, or resumes it at its sentence. */
+    fun pauseResumeReading() { player?.playPause() }
+
+    fun stopReading() { player?.stopVoice() }
 
     /** [usedLarge] is for outcomes that don't carry it. Declined and failed turns keep only the quote. */
     private suspend fun settle(turnId: Long, outcome: Outcome, kept: List<Passage>, usedLarge: Boolean) {
@@ -468,9 +533,14 @@ class ResearchViewModel(
         }
     }
 
-    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?): TurnUi {
+    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?, reading: Reading?): TurnUi {
         val running = live?.takeIf { it.turnId == id }
         return TurnUi(
+            voice = when {
+                reading?.turnId != id -> VoiceButton.IDLE
+                reading.playing -> VoiceButton.READING
+                else -> VoiceButton.PAUSED
+            },
             turn = this,
             partial = running?.partial,
             stage = running?.stage,
@@ -490,6 +560,10 @@ class ResearchViewModel(
     private fun ChatTurn.quote(): Passage? = shown.firstOrNull()?.takeIf { it.kind == SourceKind.SELECTION }
 
     companion object {
+        /** The read-source key of a spoken answer (Plan V2), and the turn it names. */
+        fun answerKey(turnId: Long) = "text:answer:$turnId"
+        fun answerTurnId(key: String): Long? = key.removePrefix("text:answer:").takeIf { it != key }?.toLongOrNull()
+
         const val CHAT_ID = "chatId"
         const val QUOTE_USED = "quoteUsed"
         const val RECENT_CHATS = 10

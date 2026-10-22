@@ -38,11 +38,25 @@ class SherpaTts(val voice: SherpaVoice, val threads: Int = 2) : AutoCloseable {
                 trySendBlocking(samples.copyOf())
                 if (isActive) 1 else 0
             }
-            tts.generateWithCallback(text, speaker, speed, callback)
+            // Under the gate: the engine is never freed while a sentence is being made (a sentence comes back in one
+            // piece, so a cancelled call still runs to its end), and nothing is made once it is freed.
+            synchronized(gate) {
+                if (!closed) tts.generateWithCallback(text, speaker, speed, callback)
+            }
         }
     }
 
-    override fun close() = tts.free()
+    private val gate = Any()
+    @Volatile private var closed = false
+
+    /** Frees the native engine, after any sentence in flight; safe to call twice. */
+    override fun close() {
+        synchronized(gate) {
+            if (closed) return
+            closed = true
+            tts.free()
+        }
+    }
 
     internal companion object {
         /**

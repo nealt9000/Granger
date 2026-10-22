@@ -83,6 +83,25 @@ class PlayerTabsTest {
         assertThat(hub.calls).containsExactly("activate:AUDIOBOOK", "skipBack", "activate:AUDIOBOOK", "seekToChapter:0").inOrder()
     }
 
+    @Test fun musicUnderTheVoiceShowsOnTheMusicTabWithItsOwnControls() {
+        val under = app.granger.core.player.NowPlaying.Music(songs[1], 1, 3, false, 0)
+        val voice = voiceUi(title = "Hamlet").let {
+            it.copy(now = (it.now as app.granger.core.player.NowPlaying.Voice).copy(music = under, musicPlaying = true, musicPositionMs = 42_000L, musicDurationMs = 180_000L))
+        }
+        val hub = FakePlayerHub(voice).apply { saved.value = SavedModes(savedMusic, savedBook, PlayerMode.MUSIC) }
+        show(hub)
+        compose.onNodeWithText("Song B").assertExists()
+        compose.onNodeWithText("Under the voice · 2 of 3").assertExists()
+        compose.onNodeWithText("0:42").assertExists()
+        compose.onNodeWithContentDescription("Pause").performClick()        // it is playing: the button says so and pauses the music, not the voice
+        compose.onNodeWithContentDescription("Next track").performClick()
+        assertThat(hub.calls).containsExactly("playPauseMusic", "nextMusic").inOrder()
+        // The voice stops: the tab shows the saved queue again, paused.
+        hub.ui.value = app.granger.core.player.PlayerUi.IDLE
+        compose.waitForIdle()
+        compose.onNodeWithText("Paused · 2 of 3").assertExists()
+    }
+
     @Test fun inactiveMusicShowsTheSavedQueueAndActivatesOnPlay() {
         val hub = FakePlayerHub(bookUi(book, chapters[0], chapterCount = 2)).apply {
             saved.value = SavedModes(savedMusic, savedBook, PlayerMode.AUDIOBOOK)

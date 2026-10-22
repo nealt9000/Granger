@@ -102,6 +102,11 @@ class PlayerEngine(
     private val readSources: (suspend (key: String, title: String) -> ReadSource?)? = null,
     private val preferredVoice: () -> VoiceId? = { null },
     private val defaultVoiceSpeed: () -> Float = { 1f },
+    /**
+     * Makes the second player that plays music under the voice (Plan V2), with its gain processor when it has one.
+     * Null (the default, and tests without one): starting the voice pauses music, as in V1.
+     */
+    private val musicUnderFactory: (() -> Pair<ExoPlayer, ReplayGainProcessor?>)? = null,
 ) : PlayerHub {
     private enum class Mode { NONE, MUSIC, BOOK, VOICE }
 
@@ -170,6 +175,38 @@ class PlayerEngine(
     private var voiceEnded = false
     private var voiceSection: String? = null
 
+    // Music under the voice (Plan V2). A second ExoPlayer plays the music queue at [mix] while the main player keeps
+    // the voice's carrier, so the session, the notification and the headset go on driving the voice. It is made when
+    // music goes under the voice and released when the voice ends or stops, when the queue goes back to the main
+    // player where it was. [musicUnderHeld]: paused together with the voice (a call, a headset unplug, the sleep
+    // timer), so it plays again with it; the music row's own pause clears it.
+    private var musicUnder: ExoPlayer? = null
+    private var musicUnderGain: ReplayGainProcessor? = null
+    private var musicUnderHeld = false
+    private var mix = prefs.getFloat(PlayerSettingsKeys.MIX_LEVEL, PlayerSettingsKeys.DEFAULT_MIX).coerceIn(0f, 1f)
+    private val voiceOverMusic: Boolean get() = mode == Mode.VOICE && musicUnder != null
+
+    /** The second player, for tests. */
+    internal val musicUnderPlayer: ExoPlayer? get() = musicUnder
+
+    private val musicUnderListener = object : Player.Listener {
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            val p = musicUnder ?: return
+            musicQueue?.select(p.currentMediaItemIndex)
+            musicUnderGain?.onMediaItemTransition(mediaItem?.mediaId)
+            refresh()
+        }
+
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) = refresh()
+        override fun onPlaybackStateChanged(playbackState: Int) = refresh()
+
+        override fun onPlayerError(error: PlaybackException) {
+            val p = musicUnder ?: return
+            Log.w(TAG, "Music under the voice: playback error", error)
+            if (p.hasNextMediaItem()) { p.seekToNextMediaItem(); p.prepare() } else p.pause()
+        }
+    }
+
     private var errorRun = 0              // playback errors since an item last got ready: stops a queue of broken files
     private var pausedAt = 0L
     private var pausedForFocus = false
@@ -200,6 +237,8 @@ class PlayerEngine(
                 Log.i(VOICE_TAG, "Voice: ${if (playWhenReady) "play" else "pause"} at #${readAloud.progress.value?.index}")
                 if (playWhenReady) readAloud.play() else readAloud.pause()
             }
+            // A headset unplug pauses the main player by itself; the music under the voice goes with it (and comes back with it).
+            if (!playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_AUDIO_BECOMING_NOISY) holdMusicUnder()
             // The pause time (for auto-rewind) is kept for audiobooks only, so it survives the process.
             if (playWhenReady) {
                 pausedAt = 0L
@@ -270,12 +309,15 @@ class PlayerEngine(
             } else {
                 Log.i(FOCUS_TAG, "transient loss: not playing, nothing to resume" + if (pausedForFocus) " (still resuming)" else "")
             }
+            holdMusicUnder()
         }
 
         override fun onLoss() {
             Log.i(FOCUS_TAG, "loss: pausing, staying paused")
             pausedForFocus = false
             player.pause()
+            musicUnder?.pause()
+            musicUnderHeld = false
         }
 
         override fun onGain() {
@@ -288,6 +330,7 @@ class PlayerEngine(
             } else {
                 Log.i(FOCUS_TAG, "gain: not paused for focus, playWhenReady=${player.playWhenReady} (volume ${player.volume})")
             }
+            if (musicUnderHeld) musicUnderPlay()
         }
 
         override fun onDuck() {
@@ -395,7 +438,11 @@ class PlayerEngine(
     /** Saves (unless [save] is false, which tests use to stand for the process being killed), then releases all. */
     fun release(save: Boolean = true) {
         if (released) return
-        if (save) saveNow()
+        if (save) {
+            saveNow()
+            if (voiceOverMusic) runBlocking { withTimeoutOrNull(SAVE_TIMEOUT_MS) { saveMusicUnder() } }
+        }
+        releaseMusicUnder()
         released = true
         prefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         commands.close()
@@ -438,9 +485,16 @@ class PlayerEngine(
         if (found.isEmpty()) return@submit
         val start = found.indexOfFirst { it.first >= startIndex }.takeIf { it >= 0 } ?: 0
         val list = found.map { it.second }
-        stopCurrent()
         val q = MusicQueue(list.map { it.id }, start, random)
         if (shuffle) q.setShuffle(true)
+        if (mode == Mode.VOICE && loaded && musicUnderFactory != null) {
+            // Music started while the voice reads goes under it (Plan V2); the voice keeps reading.
+            sourceKey = source.key
+            startMusicUnder(q, list.associateBy { it.id }, positionMs = 0L, play = focus.request(speech = true))
+            playback.upsertRecentPlay(RecentPlay(source.key, source.title, now()))
+            return@submit
+        }
+        stopCurrent()
         sourceKey = source.key
         startMusic(q, list.associateBy { it.id }, positionMs = 0L)
         playback.upsertRecentPlay(RecentPlay(source.key, source.title, now()))
@@ -455,15 +509,26 @@ class PlayerEngine(
 
     override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) = submit {
         Log.i(VOICE_TAG, "Voice: read ${source.key} from ${from?.encode()?.take(80)}")
-        stopCurrent()
-        if (startVoice(source, from, voice, defaultVoiceSpeed(), play = true)) {
-            playback.upsertRecentPlay(RecentPlay("voice:${source.key}", source.title, now()))
+        // Music playing now goes under the voice (Plan V2): the queue moves to the second player where it was.
+        // Music already under the voice stays there while the voice is replaced.
+        val fromMain = mode == Mode.MUSIC && loaded && musicUnderFactory != null
+        val q = musicQueue
+        val byId = tracks
+        val position = player.currentPosition.coerceAtLeast(0L)
+        val playing = player.playWhenReady && player.playbackState != Player.STATE_ENDED
+        val kept = voiceOverMusic
+        stopCurrent(keepMusicUnder = kept)
+        if (!startVoice(source, from, voice, defaultVoiceSpeed(), play = true, keepMusicUnder = kept)) {
+            if (kept) releaseMusicUnder()
+            return@submit
         }
+        if (fromMain && q != null) startMusicUnder(q, byId, position, play = playing)
+        playback.upsertRecentPlay(RecentPlay("voice:${source.key}", source.title, now()))
     }
 
     override fun stopVoice() = submit {
         if (mode != Mode.VOICE) return@submit
-        stopCurrent()
+        if (voiceOverMusic) handToMusic() else stopCurrent()
         refresh()
     }
 
@@ -491,6 +556,15 @@ class PlayerEngine(
     override fun activate(mode: PlayerMode) = submit {
         when (mode) {
             PlayerMode.MUSIC -> {
+                // Music while the voice reads goes under it (Plan V2): the Music tab's play starts the saved queue there.
+                if (voiceOverMusic) return@submit musicUnderPlay()
+                if (this.mode == Mode.VOICE && loaded && musicUnderFactory != null) {
+                    val state = playback.musicState() ?: return@submit
+                    val restored = restoreQueue(state, random) { media.track(it) } ?: return@submit
+                    sourceKey = state.sourceKey
+                    startMusicUnder(restored.queue, restored.tracks, state.positionMs, play = focus.request(speech = true))
+                    return@submit
+                }
                 if (this.mode != Mode.MUSIC) {
                     // Read before the switch: a queue with nothing left to play leaves the audiobook where it is.
                     val state = playback.musicState() ?: return@submit
@@ -526,7 +600,8 @@ class PlayerEngine(
         val loadedHere = when (mode) {
             Mode.BOOK -> book?.id == audiobookId
             Mode.MUSIC -> musicQueue?.ids?.any { it in trackIds } == true
-            Mode.VOICE, Mode.NONE -> false
+            Mode.VOICE -> voiceOverMusic && musicQueue?.ids?.any { it in trackIds } == true
+            Mode.NONE -> false
         }
         if (!loadedHere) return@submit
         stopCurrent()
@@ -676,6 +751,137 @@ class PlayerEngine(
 
     override fun addToQueue(trackIds: List<String>) = submit { insert(trackIds, next = false) }
 
+    // ---- music under the voice (Plan V2) ----
+
+    override fun setMixLevel(level: Float) = submit {
+        mix = level.coerceIn(0f, 1f)
+        prefs.edit().putFloat(PlayerSettingsKeys.MIX_LEVEL, mix).apply()
+        applyVolume()
+    }
+
+    override fun playPauseMusic() = submit {
+        val p = musicUnder ?: return@submit
+        if (!voiceOverMusic) return@submit
+        if (p.playWhenReady && p.playbackState != Player.STATE_ENDED) {
+            musicUnderHeld = false
+            p.pause()
+        } else {
+            musicUnderPlay()
+        }
+    }
+
+    override fun nextMusic() = submit {
+        val p = musicUnder ?: return@submit
+        val target = p.nextMediaItemIndex
+        if (target != C.INDEX_UNSET) p.seekTo(target, 0L)
+    }
+
+    override fun setVoice(voice: VoiceId) = submit {
+        if (mode != Mode.VOICE || voice == voiceId) return@submit
+        val list = voices ?: return@submit
+        if (list.voices.value.none { it.id == voice }) return@submit
+        Log.i(VOICE_TAG, "Voice: switching to ${voice.encode()}")
+        val wasPlaying = player.playWhenReady && !voiceEnded
+        // Pause through the carrier (the voice follows), reopen with the new engine at this sentence, then play again
+        // the same way, so the listener's play reaches the new engine.
+        player.pause()
+        voiceFrom = (if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom
+        if (voiceOpen) readAloud.stop()
+        voiceOpen = false
+        voiceSpeech = null
+        voiceId = voice
+        save(SaveReason.SEEK)
+        refresh()
+        if (wasPlaying) resume()
+    }
+
+    /** Puts [q] on the second player at [positionMs], at the mix level, under the voice; false without a factory. */
+    private fun startMusicUnder(q: MusicQueue, byId: Map<String, Track>, positionMs: Long, play: Boolean): Boolean {
+        val make = musicUnderFactory ?: return false
+        releaseMusicUnder()
+        val (p, gain) = make()
+        musicUnder = p
+        musicUnderGain = gain
+        musicQueue = q
+        tracks = byId
+        p.addListener(musicUnderListener)
+        p.setAudioAttributes(attributes(speech = false), false)
+        p.setHandleAudioBecomingNoisy(false)                  // the main player's unplug pauses both ([holdMusicUnder])
+        p.setMediaItems(q.ids.map { item(byId.getValue(it), null) }, q.index, positionMs)
+        p.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(q.playOrder.toIntArray(), random.nextLong()))
+        p.shuffleModeEnabled = q.shuffle
+        p.repeatMode = exoRepeat(q.repeat)
+        gain?.setGains(gainsFor(q))
+        applyVolume()
+        p.prepare()
+        if (play) p.play()
+        _queue.value = q.playOrder.map { byId.getValue(q.ids[it]) }
+        Log.i(VOICE_TAG, "Voice: music under the voice at ${"%.2f".format(java.util.Locale.ROOT, mix)}: ${q.ids.size} tracks from #${q.index}")
+        refresh()
+        return true
+    }
+
+    private fun releaseMusicUnder() {
+        musicUnder?.let { it.removeListener(musicUnderListener); it.release() }
+        musicUnder = null
+        musicUnderGain = null
+        musicUnderHeld = false
+    }
+
+    /** Pauses the music under the voice together with it; [musicUnderPlay] brings it back with the voice. */
+    private fun holdMusicUnder() {
+        val p = musicUnder ?: return
+        if (p.playWhenReady) { musicUnderHeld = true; p.pause() }
+    }
+
+    private fun musicUnderPlay() {
+        val p = musicUnder ?: return
+        musicUnderHeld = false
+        if (!focus.request(speech = true)) return
+        if (p.playbackState == Player.STATE_ENDED) p.seekToDefaultPosition(p.currentTimeline.getFirstWindowIndex(p.shuffleModeEnabled))
+        if (p.playbackState == Player.STATE_IDLE) p.prepare()
+        p.play()
+        refresh()
+    }
+
+    /** Writes the music's place from the second player (the saver only follows the active mode, the voice). */
+    private suspend fun saveMusicUnder() {
+        val p = musicUnder ?: return
+        val q = musicQueue ?: return
+        val state = q.toState(p.currentPosition.coerceAtLeast(0L), sourceKey, now())
+        withContext(writerDispatcher) { write(Snapshot.Music(state)) }
+    }
+
+    /** The voice ended or was stopped with music under it: the queue goes back to the main player where it was, at full volume, as the mode. */
+    private suspend fun handToMusic() {
+        val p = musicUnder ?: return
+        val q = musicQueue ?: return
+        Log.i(VOICE_TAG, "Voice: done; music comes back to the front")
+        saver.onEvent(SaveReason.STOP)                          // the voice's place
+        if (voiceOpen) readAloud.stop()
+        voiceOpen = false; voiceEnded = false
+        voiceSource = null; voiceSpeech = null; voiceFrom = null; voiceSection = null
+        val position = p.currentPosition.coerceAtLeast(0L)
+        val wasPlaying = p.playWhenReady && p.playbackState != Player.STATE_ENDED
+        val byId = tracks
+        p.pause()
+        releaseMusicUnder()
+        cancelSleep()
+        player.pause()
+        player.clearMediaItems()
+        startMusic(q, byId, position)
+        applyVolume()
+        if (wasPlaying) resume()
+        refresh()
+    }
+
+    /** The music queue's current track as the UI shows it, read from [p] (the main player or the one under the voice). */
+    private fun musicNow(p: Player): NowPlaying.Music? {
+        val q = musicQueue ?: return null
+        val track = tracks[p.currentMediaItem?.mediaId ?: q.ids[q.index]] ?: return null
+        return NowPlaying.Music(track, q.playOrder.indexOf(q.index), q.ids.size, q.shuffle, q.repeat)
+    }
+
     override fun setSpeed(speed: Float) = submit {
         if (mode == Mode.VOICE) {
             voiceSpeed = speed.coerceIn(MIN_VOICE_SPEED, MAX_VOICE_SPEED)
@@ -730,7 +936,8 @@ class PlayerEngine(
     // ---- loading ----
 
     /** Saves the active mode (STOP) and empties the player, so the other mode can load. */
-    private suspend fun stopCurrent() {
+    private suspend fun stopCurrent(keepMusicUnder: Boolean = false) {
+        if (voiceOverMusic && !keepMusicUnder) saveMusicUnder()
         if (mode != Mode.NONE) saver.onEvent(SaveReason.STOP)   // waits for the write, so a reload reads it
         cancelSleep()
         loaded = false
@@ -739,11 +946,12 @@ class PlayerEngine(
             if (voiceOpen) readAloud.stop()
             voiceOpen = false; voiceEnded = false
             voiceSource = null; voiceSpeech = null; voiceFrom = null; voiceSection = null
+            if (!keepMusicUnder) releaseMusicUnder()
         }
         player.clearMediaItems()
         effects.setBoost(0)
         mode = Mode.NONE
-        _queue.value = emptyList()
+        if (!keepMusicUnder) _queue.value = emptyList()
     }
 
     /**
@@ -752,7 +960,9 @@ class PlayerEngine(
      * ([openVoice]), so a restore after process death costs nothing until the user presses play. False when no voice
      * can speak.
      */
-    private suspend fun startVoice(source: ReadSource, from: ReadAddress?, wanted: VoiceId?, speed: Float, play: Boolean): Boolean {
+    private suspend fun startVoice(
+        source: ReadSource, from: ReadAddress?, wanted: VoiceId?, speed: Float, play: Boolean, keepMusicUnder: Boolean = false,
+    ): Boolean {
         val list = voices ?: return false
         if (list.voices.value.isEmpty()) list.refresh()
         val voice = list.preferred(wanted ?: preferredVoice()) ?: run { Log.i(TAG, "Voice: nothing installed can speak"); return false }
@@ -763,7 +973,8 @@ class PlayerEngine(
         voiceOpen = false
         voiceEnded = false
         voiceSection = from?.let { runCatching { source.sectionTitle(it) }.getOrNull() }
-        musicQueue = null; tracks = emptyMap(); book = null; map = null
+        if (!keepMusicUnder) { musicQueue = null; tracks = emptyMap() }
+        book = null; map = null
         mode = Mode.VOICE
         prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_VOICE).putString(PlayerSettingsKeys.LAST_VOICE, source.key).apply()
 
@@ -838,6 +1049,11 @@ class PlayerEngine(
 
     private fun onVoiceEnded() {
         voiceEnded = true
+        if (voiceOverMusic) {
+            // The music under the voice becomes the mode again (Plan V2); the voice's place is saved on the way.
+            submit { if (voiceOverMusic) handToMusic() }
+            return
+        }
         player.pause()
         save(SaveReason.STOP)
         refresh()
@@ -992,6 +1208,7 @@ class PlayerEngine(
             }
         }
         player.play()
+        if (musicUnderHeld) musicUnderPlay()                 // paused with the voice: plays again with it
     }
 
     /** The user picked a place in the book: its position is theirs to save again, even after an unresolved restore. */
@@ -1105,10 +1322,15 @@ class PlayerEngine(
         val rg = replayGain ?: return
         val q = musicQueue
         if (mode != Mode.MUSIC || q == null) return rg.setGains(emptyMap())
+        rg.setGains(gainsFor(q))
+    }
+
+    /** Each track's ReplayGain factor for [q] under the chosen mode (album gain only for an album played in order). */
+    private fun gainsFor(q: MusicQueue): Map<String, Float> {
         val mode = runCatching { ReplayGainMode.valueOf(prefs.getString(PlayerSettingsKeys.REPLAYGAIN_MODE, null) ?: "AUTO") }
             .getOrDefault(ReplayGainMode.AUTO)
         val albumInOrder = sourceKey.startsWith("album:") && !q.shuffle
-        rg.setGains(tracks.mapValues { ReplayGainMath.factor(it.value, mode, albumInOrder) })
+        return tracks.mapValues { ReplayGainMath.factor(it.value, mode, albumInOrder) }
     }
 
     // ---- saving ----
@@ -1161,7 +1383,7 @@ class PlayerEngine(
 
     /** Ticks while playing, and while a sleep timer runs; every second, or every 200 ms through the fade. */
     private fun updateTicker() {
-        val want = !released && loaded && (player.isPlaying || sleep.remainingMs != null)
+        val want = !released && loaded && (player.isPlaying || musicUnder?.isPlaying == true || sleep.remainingMs != null)
         if (want == ticking) return
         ticking = want
         ticker.removeCallbacks(tickRunnable)
@@ -1180,6 +1402,7 @@ class PlayerEngine(
         if (sleep.remainingMs != null) {
             if (sleep.expired()) {
                 if (player.playWhenReady) player.pause()   // pause, then cancel and restore the volume
+                holdMusicUnder()                           // the music under the voice sleeps with it
                 cancelSleep()
             } else {
                 fade = sleep.volume() ?: 1f
@@ -1237,6 +1460,7 @@ class PlayerEngine(
     private fun applyVolume() {
         player.volume = duck * fade
         output?.volume = duck * fade
+        musicUnder?.volume = mix * duck * fade
     }
 
     // ---- ui ----
@@ -1264,15 +1488,20 @@ class PlayerEngine(
                 val id = voiceId ?: return
                 val p = if (voiceOpen) readAloud.progress.value else null
                 duration = 0L
+                val under = musicUnder
+                val underMusic = under?.let(::musicNow)
                 now = NowPlaying.Voice(
                     src.key, src.title, voiceSection, p?.utterance?.text ?: "", p?.utterance?.paragraph ?: 0, voiceSpeed, id, voiceEnded,
+                    music = underMusic,
+                    musicPlaying = under != null && under.playWhenReady && under.playbackState != Player.STATE_ENDED,
+                    musicPositionMs = under?.currentPosition?.coerceAtLeast(0L) ?: 0L,
+                    musicDurationMs = under?.duration?.takeIf { it != C.TIME_UNSET && it > 0L } ?: underMusic?.track?.durationMs ?: 0L,
                 )
             }
             mode == Mode.MUSIC -> {
-                val q = musicQueue ?: return
-                val track = tracks[player.currentMediaItem?.mediaId ?: q.ids[q.index]] ?: return
-                if (duration == 0L) duration = track.durationMs
-                now = NowPlaying.Music(track, q.playOrder.indexOf(q.index), q.ids.size, q.shuffle, q.repeat)
+                val music = musicNow(player) ?: return
+                if (duration == 0L) duration = music.track.durationMs
+                now = music
             }
             else -> {
                 val m = map ?: return

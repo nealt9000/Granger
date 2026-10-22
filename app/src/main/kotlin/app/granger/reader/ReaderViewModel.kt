@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Library
 import app.granger.core.library.ReadingSessions
 import app.granger.core.player.NowPlaying
+import app.granger.player.VoiceButton
 import app.granger.core.player.PlayerHub
 import app.granger.core.speech.ReadAddress
 import app.granger.core.speech.ReadSourceKey
@@ -80,10 +81,12 @@ class ReaderViewModel(
         val packTitle: String? = null,
         /** Whether the pack has a main page, so the overflow menu can offer Home. */
         val hasHome: Boolean = false,
-        /** The voice is reading the page shown (the menu says "Stop reading"). */
+        /** The voice is loaded on the page shown (reading, paused or run out); Read from here moves it instead of starting it. */
         val readingThisPage: Boolean = false,
         /** The sentence being read on this page, to mark and follow; null when the voice is elsewhere or silent. */
         val reading: Reading? = null,
+        /** What the ⋯ menu's voice entry does now: start, pause or resume. */
+        val voice: VoiceButton = VoiceButton.IDLE,
     )
 
     /**
@@ -134,10 +137,12 @@ class ReaderViewModel(
         }
         player?.let { hub ->
             viewModelScope.launch {
-                combine(hub.ui, hub.voiceProgress, page) { ui, progress, p -> Triple(ui.now as? NowPlaying.Voice, progress, p) }
-                    .collect { (voice, progress, p) ->
+                combine(hub.ui, hub.voiceProgress, page) { ui, progress, p -> Triple(ui, progress, p) }
+                    .collect { (ui, progress, p) ->
+                        val voice = ui.now as? NowPlaying.Voice
                         val pack = packId
-                        val mine = voice != null && p != null && pack != null && voice.sourceKey == ReadSourceKey.article(pack, p.path)
+                        val key = if (p != null && pack != null) ReadSourceKey.article(pack, p.path) else null
+                        val mine = voice != null && key != null && voice.sourceKey == key
                         if (!mine) following = true
                         val address = progress?.address as? ReadAddress.Article
                         val reading = if (mine && progress != null && address != null && address.path == p?.path) {
@@ -145,7 +150,7 @@ class ReaderViewModel(
                         } else {
                             null
                         }
-                        _state.update { it.copy(readingThisPage = mine, reading = reading) }
+                        _state.update { it.copy(readingThisPage = mine, reading = reading, voice = VoiceButton.of(ui, key)) }
                     }
             }
         }
@@ -185,6 +190,9 @@ class ReaderViewModel(
     }
 
     fun stopReading() { player?.stopVoice() }
+
+    /** The menu's entry while this page is read: pauses the voice, or resumes it at its sentence. */
+    fun pauseResume() { if (_state.value.readingThisPage) player?.playPause() }
 
     /** The user scrolled: the page stops following the voice until [follow]. */
     fun onUserScroll() {

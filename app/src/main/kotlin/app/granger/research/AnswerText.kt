@@ -31,6 +31,34 @@ object AnswerText {
     /** `[1]`, `[2, 3]`: one or more passage numbers in square brackets. */
     private val CITATION = Regex("""\[(\d+(?:\s*,\s*\d+)*)]""")
 
+    /** The banner over a medical answer; spoken first when an answer is read aloud. */
+    const val MEDICAL = "Not medical advice. If you can reach emergency services or a professional, do so."
+
+    private val HEADING = Regex("""^\s{0,3}#{1,6}\s+""")
+    private val LIST_MARK = Regex("""^\s*(?:[-*•]|\d+[.)])\s+""")
+    private val SPACE_BEFORE_PUNCTUATION = Regex(""" +([.,;:!?])""")
+
+    /**
+     * [answer] as the voice reads it (Plan V2): no citation chips, no emphasis marks, headings and list items as
+     * paragraphs of their own, and [MEDICAL] first when [medical]. Numbers stay as written.
+     */
+    fun spoken(answer: String, medical: Boolean = false): String {
+        val plain = segments(answer).filterIsInstance<Segment.Text>().joinToString("") { it.text }
+        val lines = plain.lines().map { line ->
+            when {
+                HEADING.containsMatchIn(line) -> "\n" + HEADING.replace(line, "").trim() + "\n"
+                LIST_MARK.containsMatchIn(line) -> "\n" + LIST_MARK.replace(line, "").trim()
+                else -> line.trim()
+            }
+        }
+        val body = lines.joinToString("\n")
+            .replace(SPACE_BEFORE_PUNCTUATION, "$1")
+            .replace(Regex("[ \\t]{2,}"), " ")
+            .replace(Regex("\\n{3,}"), "\n\n")
+            .trim()
+        return if (medical) "$MEDICAL\n\n$body" else body
+    }
+
     /** [answer] without its emphasis marks, and the style of each remaining character. */
     private class Marked(val text: String, val bold: BooleanArray, val italic: BooleanArray)
 

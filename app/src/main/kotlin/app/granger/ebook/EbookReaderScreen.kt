@@ -69,6 +69,7 @@ private const val VOICE_LOG = "GrangerVoice"
 
 object EbookTags {
     const val FOLLOW = "ebook_follow"
+    const val VOICE = "ebook_voice"
 }
 
 /**
@@ -269,19 +270,20 @@ fun EbookReaderScreen(
                         onContents = { viewModel.open(Panel.CONTENTS) },
                         onTextSettings = { viewModel.open(Panel.SETTINGS) },
                         onBookmark = viewModel::toggleBookmark,
-                        reading = state.readingThisBook,
+                        voice = state.voice,
+                        onPauseResume = viewModel::pauseResume,
+                        onStop = {
+                            viewModel.stopReading()
+                            scope.launch { snackbar.showSnackbar("Stopped reading") }
+                        },
                         onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
-                            if (state.readingThisBook) {
-                                viewModel.stopReading()
-                            } else {
-                                val fragment = navigator
-                                scope.launch {
-                                    // The page's first words place the voice; Readium's first visible element is the
-                                    // fallback (it can be the paragraph that ran over from the page before).
-                                    val words = fragment?.let { runCatching { FirstVisibleText.parse(it.evaluateJavascript(FirstVisibleText.JS)) }.getOrNull() }
-                                    val page = if (words != null) fragment.currentLocator.value else fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }
-                                    viewModel.readAloud(page, words)
-                                }
+                            val fragment = navigator
+                            scope.launch {
+                                // The page's first words place the voice; Readium's first visible element is the
+                                // fallback (it can be the paragraph that ran over from the page before).
+                                val words = fragment?.let { runCatching { FirstVisibleText.parse(it.evaluateJavascript(FirstVisibleText.JS)) }.getOrNull() }
+                                val page = if (words != null) fragment.currentLocator.value else fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }
+                                viewModel.readAloud(page, words)
                             }
                         }),
                     )

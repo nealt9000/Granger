@@ -59,6 +59,11 @@ class FakeChats : ResearchChats {
 
     override fun turns(chatId: Long): Flow<List<ChatTurn>> = turnList.map { list -> flowFailure?.let { throw it }; list.filter { it.chatId == chatId } }
 
+    override suspend fun turn(turnId: Long): ChatTurn? {
+        failure?.let { throw it }
+        return turnList.value.firstOrNull { it.id == turnId }
+    }
+
     override suspend fun chat(chatId: Long): ChatSummary? {
         failure?.let { throw it }
         return chats.value.firstOrNull { it.id == chatId }

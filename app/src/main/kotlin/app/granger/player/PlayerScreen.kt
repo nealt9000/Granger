@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
+import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
 import app.granger.theme.GrangerColors
 
@@ -73,8 +74,11 @@ fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit, onShelf: (Play
                 when (tab) {
                     PlayerMode.MUSIC -> {
                         val music = saved.music
+                        val under = (ui.now as? NowPlaying.Voice)?.takeIf { it.music != null }
                         when {
                             live -> MusicPlayer(ui, queue, live = true, viewModel) { onShelf(PlayerMode.MUSIC) }
+                            // Music under the voice (Plan V2): shown live with its own transport (the view model routes it there).
+                            under != null -> MusicPlayer(under.musicUi(ui), queue, live = true, viewModel) { onShelf(PlayerMode.MUSIC) }
                             music != null -> MusicPlayer(music.toUi(), music.queue, live = false, viewModel) { onShelf(PlayerMode.MUSIC) }
                             saved.loaded -> NothingPlayed(PlayerMode.MUSIC) { onShelf(PlayerMode.MUSIC) }
                         }
@@ -100,9 +104,14 @@ fun PlayerScreen(viewModel: PlayerViewModel, onClose: () -> Unit, onShelf: (Play
     }
 }
 
+/** The music under the voice as the Music tab shows it: its track, whether it is heard, its place in the track. */
+internal fun NowPlaying.Voice.musicUi(ui: PlayerUi): PlayerUi =
+    PlayerUi(music!!, playing = musicPlaying, positionMs = musicPositionMs, durationMs = musicDurationMs, sleepRemainingMs = ui.sleepRemainingMs)
+
 private fun topLabel(tab: PlayerMode, live: Boolean, now: NowPlaying, saved: SavedModes): String = when (tab) {
     PlayerMode.MUSIC -> when {
         live && now is NowPlaying.Music -> "Now playing · ${now.index + 1} of ${now.queueSize}"
+        now is NowPlaying.Voice && now.music != null -> now.music.let { m -> "Under the voice · ${m!!.index + 1} of ${m.queueSize}" }
         saved.music != null -> saved.music!!.let { "Paused · ${it.index + 1} of ${it.queue.size}" }
         else -> "Music"
     }

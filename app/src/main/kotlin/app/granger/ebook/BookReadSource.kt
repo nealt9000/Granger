@@ -16,8 +16,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.publication.services.content.Content
 import org.readium.r2.shared.publication.services.content.content
 
@@ -61,10 +63,25 @@ class BookReadSource(
         return locators[utterance.address]
     }
 
+    /** Chapter titles from the table of contents by resource path (the first entry for a file wins), for locators that carry none. */
+    private val tocTitles: Map<String, String> by lazy {
+        val out = LinkedHashMap<String, String>()
+        fun walk(links: List<Link>) {
+            for (link in links) {
+                val t = link.title?.trim().orEmpty()
+                if (t.isNotEmpty()) out.putIfAbsent(link.href.toString().substringBefore('#'), t)
+                walk(link.children)
+            }
+        }
+        walk(publication.tableOfContents)
+        out
+    }
+
     override suspend fun sectionTitle(at: ReadAddress): String? {
         val a = at as? ReadAddress.Book ?: return null
         val locator = parse(a.locatorJson) ?: return null
-        return locator.title?.takeIf { it.isNotBlank() && it != title }
+        val own = locator.title?.takeIf { it.isNotBlank() && it != title }
+        return own ?: tocTitles[locator.href.toString().substringBefore('#')]?.takeIf { it != title }
     }
 
     override suspend fun utterances(from: ReadAddress?, limit: Int): List<Utterance> = lock.withLock {
@@ -110,6 +127,17 @@ class BookReadSource(
             if (at >= 0) return (element.lastOrNull { it.start <= at } ?: element.first()).address as ReadAddress.Book
         }
         return first
+    }
+
+    /**
+     * The first sentence of the chapter a contents entry's [href] points into (Plan V2, `ReadAloud.start`); null when
+     * the book has no such resource.
+     */
+    suspend fun addressAtHref(href: String): ReadAddress.Book? {
+        val url = Url(href) ?: return null
+        val link = publication.linkWithHref(url) ?: return null
+        val locator = publication.locatorFromLink(link) ?: return null
+        return addressAt(locator)
     }
 
     /**

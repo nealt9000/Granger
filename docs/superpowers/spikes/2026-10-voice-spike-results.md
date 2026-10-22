@@ -200,3 +200,41 @@ The acceptance test from decision 7, run with Plan V1's Tasks 1–8 built: the t
 **A refused start, worth knowing.** The system voice's first attempt never spoke: the phone was locked when the run began, the spike activity (in service mode) did not show over the lock screen, and the player's audio-focus request came back `FAILED`, so the engine loaded the voice and sat paused (`GrangerFocus: play refused: focus not granted`). Android 14 and later refuse focus to an app that is neither on top nor already running a foreground service. In the app proper the voice starts from a reader on screen, so this cannot happen on the first play; it matters for anything that starts the voice from the background (a restore followed by a play from the notification, project 4's actions), which must go through the media session's play so the service is foreground first. The run was repeated with the activity shown over the lock screen.
 
 **Read:** the foreground service lifts the little-core confinement that wrecked V0's first batch. With the screen off the Piper voice costs 0.17 against 0.12 with it on (a 40 % penalty, likely the big cores idling down), far inside the 0.5 bar, and one sentence of look-ahead keeps the voice continuous. A first attempt of this run lost its early log lines to logcat's 256 KB ring buffer and showed the phone awake again by the end; the buffer was raised to 16 MB (`logcat -G 16M`) and the run repeated with the sampler, which saw the screen dark the whole way. The look-ahead stays at one to two sentences.
+
+## Second voice (V2, 2026-10-22)
+
+The V2 plan's Task 2: which Piper voices could ship beside `ljspeech`, and whether the one that sounds like the `libritts_r` Neal liked is fast enough.
+
+**Licences** (Piper model cards on Hugging Face, `rhasspy/piper-voices`, read 2026-10-22). Shippable means trained from scratch (or from a clean base) on permissively licensed data:
+
+| Voice | Dataset licence | Training | Shippable | Notes |
+| --- | --- | --- | --- | --- |
+| `en_US-libritts-high` | CC BY 4.0 (LibriTTS, OpenSLR 60) | from scratch, train-clean-360 | yes, on licence | 904 speakers, 131 MB tarball; the kin of `libritts_r` (which is fine-tuned from `lessac`) |
+| `en_US-norman-medium` | public domain (LibriVox) | from scratch | yes | one male speaker |
+| `en_US-kusal-medium` | public domain (LibriVox, ~24 h) | from scratch | yes | one male speaker |
+| `en_US-kristin-medium` | public domain (LibriVox) | from scratch | yes | one speaker |
+| `en_US-john-medium` | public domain (LibriVox) | fine-tuned from `kristin` | yes | one male speaker; clean lineage |
+| `en_US-bryce-medium` | public domain | fine-tuned from an unreleased voice | unclear | base unknown |
+| `en_US-ryan-high` | CC BY-NC-SA 4.0 | from scratch | no | non-commercial |
+| `en_GB-vctk`, `en_GB-jenny_dioco`, `en_GB-alba`, `en_GB-cori`, `en_GB-aru`, `en_GB-northern_english_male`, `en_US-sam`, `en_US-reza_ibrahim`, `en_US-danny`, `en_US-joe`, `en_US-libritts_r` | various, some permissive | fine-tuned from `lessac` (`joe` from `ryan`) | no | `lessac`'s Blizzard 2013 data is non-commercial |
+
+Newer engines in sherpa-onnx 1.13.8's model release, for a later spike of their own, not V2: KittenTTS v0.8 (Apache-2.0; nano 15M to mini 80M parameters, 31–68 MB), Kyutai's Pocket TTS (98 MB int8), Inflect. Supertonic is out (OpenRAIL-M weights; its maker is winding down).
+
+**Numbers** for `libritts-high` through the real player (`VoiceSpikeActivity --ez service true`, the three spike passages × 3, 57 sentences), the Pixel 6 on the table, from the engine's `Voice: synth` lines:
+
+| Run | Screen | Sentences | Synth s | Audio s | RTF | Worst sentence RTF | First audio, short (≤140 chars) | First audio, long |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| libritts-high (fp32), screen on | on | 57 | 431 | 437 | **0.99** | 1.74 | up to 13.2 s | up to 18.4 s |
+| libritts-high (fp32), screen off | off | 57 | 600 | 434 | **1.38** | 1.68 | up to 16.5 s | up to 19.6 s |
+| libritts-high int8, screen on | on | 57 | 925 | 416 | **2.22** | 3.08 | up to 26.8 s | up to 32.8 s |
+| libritts-high int8, screen off | off | 20 (stopped) | 439 | 151 | **2.91** | 3.39 | up to 33.7 s | up to 42.6 s |
+
+**Read:** `libritts-high` is out. (The int8 screen-off run was cut off after 20 sentences by the V2 build's install; the 20 say enough.) A "high" Piper model costs eight times the medium one on this phone (RTF 0.99 against 0.12 with the screen on), so the voice falls behind what it is saying from the first sentence, and the screen-off penalty takes it to 1.4. The int8 build is slower still, as Kokoro's was (the int8 kernels don't scale on the Tensor's mixed cores). So the second voice is one of the four medium LibriVox voices, which run at `ljspeech`'s speed and were not re-measured; the speaker picker the plan sketched for a multi-speaker voice is moot.
+
+**A crash found by the first listening minutes (2026-10-22, fixed in V2):** switching voices in the sheet while the slow `libritts-high-int8` was mid-sentence freed the sherpa engine under its running `generateWithCallback` (SIGSEGV in `libsherpa-onnx-jni.so`, null dereference). A sentence comes back from sherpa in one piece, so a cancelled synthesis still runs to its end; `ReadAloudEngine` now retires the old engine only after its producer has ended, and `SherpaTts` gates generate and free on one lock. The same race existed in V1 between a stop and the next start, at human speed.
+
+**Four threads don't help `libritts-high` either** (2026-10-22, engine mode with the screen kept on, one pass, the three passages): 2 threads RTF 0.84 / 0.89 / 0.92 (article / book / answer), 4 threads 0.75 / 1.11 / 1.01, first audio 7.4–10.2 s either way. As with the medium voice in V0, the Pixel 6's two big cores are the ceiling; the little cores add noise, not speed. The remaining path to the LibriTTS sound at a usable cost is a medium model of our own (Plan V3, `2026-10-22-plan-v3-trained-voice.md`).
+
+**On the phone for the listening session:** `vits-piper-en_US-norman-medium`, `-kusal-medium`, `-kristin-medium`, `-john-medium` (and the two `libritts-high` builds, for the ear only) under `files/voices/`; the spike's `libritts_r` and Kokoro directories were removed. Settings → Voice lists each as "Granger voice (<name>)". Neal's ratings, 1–5 as in V0:
+
+Neal's verdict (2026-10-22, Tom Sawyer on the phone, flipping between voices): **`libritts-high` is the clear stand-out; norman, kusal, kristin and john sound no better than `ljspeech`.** So the medium LibriVox voices don't earn a catalog slot, and the question becomes how to get `libritts`'s sound at a cost between its and `ljspeech`'s (see the V2 plan's follow-up).
