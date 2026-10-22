@@ -159,6 +159,8 @@ class VoiceSpikeActivity : ComponentActivity() {
         val withLlm = intent.getBooleanExtra("llm", false)
         val withMusic = intent.getBooleanExtra("music", false)
         val names = if (engines == "all") listOf("system") + SherpaVoice.list(voicesDir).map { it.id } else engines.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        // `--es text "..."` speaks that instead of the passages (a pronunciation check: the WAV is voice-<engine>-t<threads>-custom.wav).
+        val passages = intent.getStringExtra("text")?.takeIf { it.isNotBlank() }?.let { listOf(Passage("custom", "Custom text", it)) } ?: VoiceSpikePassages.ALL
         running = true
         lifecycleScope.launch {
             try {
@@ -167,7 +169,7 @@ class VoiceSpikeActivity : ComponentActivity() {
                 if (withMusic && !musicOn) toggleMusic()
                 for (pass in 1..passes) for (name in names) {
                     val make = { engineFor(name, threads, speaker) ?: error("no engine named $name under ${voicesDir.path}") }
-                    runOnce(make, threads, pass)
+                    runOnce(make, threads, pass, passages)
                 }
                 log("Voice: auto done engines=$names threads=$threads passes=$passes llm=$llmResident music=$musicOn")
             } finally {
@@ -177,14 +179,14 @@ class VoiceSpikeActivity : ComponentActivity() {
     }
 
     /** Loads one engine, speaks the three passages, logs the rows and the summaries, closes it. Never throws. */
-    private suspend fun runOnce(make: () -> SpikeEngine, threads: Int, pass: Int) {
+    private suspend fun runOnce(make: () -> SpikeEngine, threads: Int, pass: Int, passages: List<Passage> = VoiceSpikePassages.ALL) {
         try {
             val engine = make()
             try {
                 log("Voice: engine=${engine.name} threads=$threads pass=$pass start llmResident=$llmResident music=$musicOn")
                 log(VoiceLog.line(runner.load(engine, threads)))
                 val rows = mutableListOf<SentenceRow>()
-                for (passage in VoiceSpikePassages.ALL) {
+                for (passage in passages) {
                     rows += runner.run(engine, threads, passage) { row -> log(VoiceLog.line(row)) }
                     val wav = runner.wavFile(engine.name, threads, passage.id)
                     if (wav.exists() && wav !in wavs) wavs += wav

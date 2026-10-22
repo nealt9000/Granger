@@ -32,6 +32,19 @@ class InstalledVoicesTest {
     }
 
     @Test
+    fun grangerVoicesAreRankedCatalogThenPiperThenTheRest() = runTest {
+        val volume = tmp.newFolder("v")
+        voiceDir(File(volume, "voices"), "kokoro-int8-multi-lang-v1_1")       // first by name, last by rank
+        voiceDir(File(volume, "voices"), "vits-piper-en_US-libritts_r-medium")
+        voiceDir(File(volume, "voices"), "vits-piper-en_US-ljspeech-medium")
+        val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { listOf(systemVoice) }, noFactory, noFactory)
+        voices.refresh()
+        assertThat(voices.voices.value.map { (it.id as? VoiceId.Granger)?.dir ?: "system" })
+            .containsExactly("vits-piper-en_US-ljspeech-medium", "vits-piper-en_US-libritts_r-medium", "kokoro-int8-multi-lang-v1_1", "system").inOrder()
+        assertThat(voices.preferred(null)?.id).isEqualTo(VoiceId.Granger("vits-piper-en_US-ljspeech-medium"))
+    }
+
+    @Test
     fun preferredIsTheWantedVoiceElseTheFirst() = runTest {
         val voices = InstalledVoices({ emptyList() }, { listOf(systemVoice) }, noFactory, noFactory)
         voices.refresh()

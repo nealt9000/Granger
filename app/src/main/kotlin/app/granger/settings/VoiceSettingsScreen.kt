@@ -30,14 +30,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.core.speech.Voice
 import app.granger.core.speech.VoiceId
 import app.granger.formatBytes
+import java.util.Locale
 
 object VoiceSettingsTags {
     const val VOICE_ROW = "voice_row"
@@ -45,6 +48,7 @@ object VoiceSettingsTags {
     const val REMOVE = "voice_remove"
     const val SPEED = "voice_speed"
     const val MARK = "voice_mark"
+    const val MORE = "voice_more"
 }
 
 /**
@@ -56,6 +60,7 @@ object VoiceSettingsTags {
 fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    var showMore by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(ui.notice) {
         val n = ui.notice ?: return@LaunchedEffect
         snackbar.showSnackbar(n)
@@ -80,8 +85,12 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                     )
                 }
             }
-            items(ui.voices.size, key = { "voice-${ui.voices[it].id.encode()}" }) { i ->
-                val voice = ui.voices[i]
+            // The Granger voices and the system voices in the phone's own language and region are listed; the system
+            // engine's other English regions (a dozen more codes) stay behind one row until asked for.
+            val (shown, more) = splitVoices(ui.voices, ui.chosen, Locale.getDefault().toLanguageTag())
+            val list = if (showMore) shown + more else shown
+            items(list.size, key = { "voice-${list[it].id.encode()}" }) { i ->
+                val voice = list[i]
                 val chosen = (ui.chosen ?: ui.voices.first().id) == voice.id
                 ListItem(
                     headlineContent = { Text(voice.title) },
@@ -89,6 +98,13 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                     leadingContent = { RadioButton(selected = chosen, onClick = null) },
                     modifier = Modifier.selectable(selected = chosen, role = Role.RadioButton, onClick = { viewModel.choose(voice.id) }).testTag(VoiceSettingsTags.VOICE_ROW),
                 )
+            }
+            if (more.isNotEmpty() && !showMore) {
+                item(key = "more-voices") {
+                    TextButton(onClick = { showMore = true }, modifier = Modifier.padding(horizontal = 4.dp).testTag(VoiceSettingsTags.MORE)) {
+                        Text("Other system voices (${more.size})")
+                    }
+                }
             }
             item(key = "catalog") { Heading("Granger voices") }
             if (ui.catalog.isEmpty()) item(key = "no-catalog") { ListItem(headlineContent = { Text("The catalog lists no voices yet.") }) }
@@ -142,6 +158,18 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+/**
+ * The voices to list first and the ones behind "Other system voices": every Granger voice, every system voice in
+ * [deviceTag]'s language and region (else the first system voice, so one is always offered), and the chosen voice
+ * wherever it is; the other system voices go second.
+ */
+internal fun splitVoices(voices: List<Voice>, chosen: VoiceId?, deviceTag: String): Pair<List<Voice>, List<Voice>> {
+    val system = voices.filter { it.id is VoiceId.System }
+    val local = system.filter { it.language.equals(deviceTag, ignoreCase = true) }.ifEmpty { system.take(1) }
+    val shown = voices.filter { it.id is VoiceId.Granger || it in local || it.id == chosen }
+    return shown to voices.filterNot { it in shown }
 }
 
 @Composable

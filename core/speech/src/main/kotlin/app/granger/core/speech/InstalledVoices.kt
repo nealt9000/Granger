@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 /**
  * What can speak now, offline: the Granger voices unpacked under each volume's `voices/`, then the system engine's
  * offline English voices. [refresh] after a voice is downloaded or removed. The preferred voice is the one Settings
- * names if it is still here, else the first Granger voice, else the first system voice.
+ * names if it is still here, else the first Granger voice by [rank], else the first system voice.
  */
 class InstalledVoices(
     private val voicesDirs: () -> List<File>,
@@ -26,6 +26,7 @@ class InstalledVoices(
     suspend fun refresh(): List<Voice> {
         val local = withContext(io) { voicesDirs().flatMap { SherpaVoice.list(it) } }
             .distinctBy { it.id }
+            .sortedWith(compareBy<SherpaVoice> { rank(it.id) }.thenBy { it.id })
             .map { Voice(VoiceId.Granger(it.id), SherpaSpeech.title(it.id), "en-US") }
         val remote = runCatching { systemVoices() }.getOrDefault(emptyList())
         return (local + remote).also { _voices.value = it }
@@ -39,4 +40,18 @@ class InstalledVoices(
     }
 
     suspend fun open(voice: Voice): Speech = factoryFor(voice.id).open(voice)
+
+    companion object {
+        /**
+         * The order Granger voices are offered in when nothing is chosen: the catalog's voice, then any other Piper
+         * voice, then the rest (a Kokoro build is too slow to read with on the phone: V0, RTF 1.5–2.2).
+         */
+        fun rank(id: String): Int = when {
+            id == CATALOG_VOICE -> 0
+            id.startsWith("vits-piper-") -> 1
+            else -> 2
+        }
+
+        const val CATALOG_VOICE = "vits-piper-en_US-ljspeech-medium"
+    }
 }

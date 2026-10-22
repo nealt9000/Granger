@@ -67,6 +67,7 @@ private const val EDGE_FRACTION = 0.2
 
 /** A locator change this soon after the voice's own jump is the jump, not the user. */
 private const val VOICE_MOVE_GRACE_MS = 1_500L
+private const val VOICE_LOG = "GrangerVoice"
 
 object EbookTags {
     const val FOLLOW = "ebook_follow"
@@ -124,7 +125,9 @@ fun EbookReaderScreen(
     LaunchedEffect(navigator, lifecycle) {
         navigator?.currentLocator?.collect {
             viewModel.onLocator(it, onScreen = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
-            if (System.currentTimeMillis() - voiceMovedAt > VOICE_MOVE_GRACE_MS) viewModel.onUserMoved()
+            val sinceVoice = System.currentTimeMillis() - voiceMovedAt
+            Log.d(VOICE_LOG, "Voice: page ${it.href} p=${it.locations.progression} sinceVoiceMs=$sinceVoice")
+            if (sinceVoice > VOICE_MOVE_GRACE_MS) viewModel.onUserMoved()
         }
     }
     // The voice's sentence: decorated, and the page turned to it (once per paragraph) while the reader follows.
@@ -138,7 +141,8 @@ fun EbookReaderScreen(
         val reading = state.reading ?: return@LaunchedEffect
         if (!reading.following) return@LaunchedEffect
         voiceMovedAt = System.currentTimeMillis()
-        navigator?.go(reading.locator, animated = false)
+        val went = navigator?.go(reading.locator, animated = false)
+        Log.d(VOICE_LOG, "Voice: follow ¶${reading.paragraph} go=$went ${reading.locator.href} p=${reading.locator.locations.progression} \"${reading.locator.text.highlight?.take(30)}\"")
     }
     LaunchedEffect(navigator) {
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }

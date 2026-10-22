@@ -124,7 +124,18 @@ class SystemSpeech internal constructor(private val engine: TtsEngine, override 
             return e.voices()
                 .filter { it.offline && Locale.forLanguageTag(it.languageTag).language == Locale.ENGLISH.language }
                 .sortedWith(compareByDescending<TtsVoice> { it.quality }.thenBy { it.name })
-                .map { Voice(VoiceId.System(e.engineName, it.name), "${it.name} (${it.languageTag})", it.languageTag) }
+                .map { Voice(VoiceId.System(e.engineName, it.name), title(it.name, it.languageTag), it.languageTag) }
+        }
+
+        companion object {
+            /** "en-us-x-iom-local" (en-US) → "System voice iom (en-US)": the engine's voice names are codes, so the code is kept, short. */
+            fun title(name: String, languageTag: String): String {
+                val short = name.lowercase()
+                    .removePrefix(languageTag.lowercase()).removePrefix("-")
+                    .removePrefix("x-").removeSuffix("-local").removeSuffix("-network")
+                    .ifBlank { "default" }
+                return "System voice $short ($languageTag)"
+            }
         }
 
         override suspend fun open(voice: Voice): Speech {

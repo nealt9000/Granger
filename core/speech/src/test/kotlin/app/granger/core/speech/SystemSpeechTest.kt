@@ -61,6 +61,16 @@ class SystemSpeechTest {
         val factory = SystemSpeech.Factory({ FakeTts() }, tmp.root)
         assertThat(factory.voices().map { (it.id as VoiceId.System).name }).containsExactly("en-us-x-iom-local", "en-gb-x-gba-local").inOrder()
         assertThat(factory.voices().first().id).isEqualTo(VoiceId.System("com.example.tts", "en-us-x-iom-local"))
+        assertThat(factory.voices().map { it.title }).containsExactly("System voice iom (en-US)", "System voice gba (en-GB)").inOrder()
+    }
+
+    @Test
+    fun systemVoiceTitlesKeepOnlyTheVoiceCode() {
+        assertThat(SystemSpeech.Factory.title("en-us-x-iob-local", "en-US")).isEqualTo("System voice iob (en-US)")
+        assertThat(SystemSpeech.Factory.title("en-US-language", "en-US")).isEqualTo("System voice language (en-US)")
+        assertThat(SystemSpeech.Factory.title("en-us-x-sfg-network", "en-US")).isEqualTo("System voice sfg (en-US)")
+        assertThat(SystemSpeech.Factory.title("en-us", "en-US")).isEqualTo("System voice default (en-US)")
+        assertThat(SystemSpeech.Factory.title("Samantha", "en-US")).isEqualTo("System voice samantha (en-US)")
     }
 
     @Test

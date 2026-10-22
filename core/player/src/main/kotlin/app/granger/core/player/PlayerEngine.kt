@@ -196,7 +196,10 @@ class PlayerEngine(
             // Who paused or played (reason: 1 us or a controller, 3 headphones unplugged): for reading a device test.
             Log.i(FOCUS_TAG, "playWhenReady=$playWhenReady reason=$reason pausedForFocus=$pausedForFocus")
             // The carrier drives the voice: whoever paused ExoPlayer (user, focus, headset, sleep timer) paused the voice.
-            if (mode == Mode.VOICE && voiceOpen) { if (playWhenReady) readAloud.play() else readAloud.pause() }
+            if (mode == Mode.VOICE && voiceOpen) {
+                Log.i(VOICE_TAG, "Voice: ${if (playWhenReady) "play" else "pause"} at #${readAloud.progress.value?.index}")
+                if (playWhenReady) readAloud.play() else readAloud.pause()
+            }
             // The pause time (for auto-rewind) is kept for audiobooks only, so it survives the process.
             if (playWhenReady) {
                 pausedAt = 0L
@@ -346,6 +349,7 @@ class PlayerEngine(
             prefs.edit().remove(PlayerSettingsKeys.LAST_VOICE).apply()
             return
         }
+        Log.i(VOICE_TAG, "Voice: restoring $key at ${state.address.take(80)}")
         startVoice(source, ReadAddress.decode(state.address), VoiceId.decode(state.voiceId), state.speed, play = false)
     }
 
@@ -450,6 +454,7 @@ class PlayerEngine(
     override val voiceProgress: StateFlow<VoiceProgress?> get() = readAloud.progress
 
     override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) = submit {
+        Log.i(VOICE_TAG, "Voice: read ${source.key} from ${from?.encode()?.take(80)}")
         stopCurrent()
         if (startVoice(source, from, voice, defaultVoiceSpeed(), play = true)) {
             playback.upsertRecentPlay(RecentPlay("voice:${source.key}", source.title, now()))
@@ -462,12 +467,13 @@ class PlayerEngine(
         refresh()
     }
 
-    override fun nextParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.nextParagraph() }
-    override fun previousParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.previousParagraph() }
+    override fun nextParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) { Log.i(VOICE_TAG, "Voice: next paragraph"); readAloud.nextParagraph() } }
+    override fun previousParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) { Log.i(VOICE_TAG, "Voice: previous paragraph"); readAloud.previousParagraph() } }
     override fun nextSentence() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.nextSentence() }
     override fun previousSentence() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.previousSentence() }
     override fun jumpTo(address: ReadAddress) = submit {
         if (mode != Mode.VOICE) return@submit
+        Log.i(VOICE_TAG, "Voice: jump to ${address.encode().take(80)}")
         if (voiceOpen) readAloud.jumpTo(address) else voiceFrom = address
         refresh()
     }
@@ -561,7 +567,7 @@ class PlayerEngine(
                 player.seekTo(q.previous(player.currentPosition), 0L)
             }
             Mode.BOOK -> { userMoved(); chapterStep(-1) }
-            Mode.VOICE -> if (voiceOpen) readAloud.previousParagraph()
+            Mode.VOICE -> if (voiceOpen) { Log.i(VOICE_TAG, "Voice: previous (session)"); readAloud.previousParagraph() }
             Mode.NONE -> Unit
         }
     }
@@ -821,6 +827,7 @@ class PlayerEngine(
     private fun onVoiceProgress() {
         val p = readAloud.progress.value ?: return
         val source = voiceSource ?: return
+        Log.i(VOICE_TAG, "Voice: at #${p.index} ¶${p.utterance.paragraph} \"${p.utterance.text.take(40)}\"")
         scope.launch {
             val section = runCatching { source.sectionTitle(p.address) }.getOrNull()
             if (section != voiceSection) { voiceSection = section; refresh() }

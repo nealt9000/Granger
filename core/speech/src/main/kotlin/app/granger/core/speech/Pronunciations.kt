@@ -1,9 +1,13 @@
 package app.granger.core.speech
 
 /**
- * Respellings applied to text before a Piper voice speaks it. Piper's phonemizer (espeak-ng) says "rossetter" for
- * Rosetta (V0 listening, 2026-10-21); a respelling fixes the word everywhere without touching the engine. Whole words
- * only, case preserved. The system engine gets the original text: it handles names better on its own.
+ * Respellings applied to text before a Piper voice speaks it, whole words only, case preserved. The system engine
+ * gets the original text: it handles names better on its own.
+ *
+ * A respelling only helps when it changes the phonemes espeak-ng (Piper's phonemizer) produces; check with
+ * `espeak-ng -v en-us -q --ipa "<word>"`. "Rosetta" and "Rozetta" both give ɹoʊzˈɛɾə, so the "rossetter" heard in V0
+ * and the V1 walkthrough is the ljspeech model's rendering of the flapped t and final schwa, not the phonemes; the
+ * entry stays until a listening test picks a respelling that sounds right.
  */
 object Pronunciations {
     val builtIn: Map<String, String> = mapOf(
