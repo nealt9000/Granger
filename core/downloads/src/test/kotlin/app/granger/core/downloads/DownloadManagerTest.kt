@@ -74,6 +74,15 @@ class DownloadManagerTest {
         assertThat(record.wifiOnly).isFalse()
     }
 
+    @Test fun voicesGoToTheVoicesFolderAsAZip() = test {
+        manager.enqueue(voiceEntry(), sd, wifiOnly = true)
+        val record = records().single()
+        assertThat(record.kind).isEqualTo(ItemKind.VOICE)
+        assertThat(record.filePath).isEqualTo(File(sd, "voices/vits-piper-en_US-ljspeech-medium.zip").path)
+        assertThat(record.snapshotDate).isEmpty()
+        assertThat(VoiceUnpacker.voiceDir(record.file)).isEqualTo(File(sd, "voices/vits-piper-en_US-ljspeech-medium"))
+    }
+
     @Test fun bookTargetsBooksGrangerFolder() = test {
         manager.enqueue(bookEntry(), sd, wifiOnly = true)
         val record = records().single()

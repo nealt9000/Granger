@@ -98,8 +98,8 @@ class PlayerEngine(
     /** The voice (Plan V1). [speechOutput] null: an [AudioTrackSpeechOutput] made on first use (tests inject a fake). */
     private val speechOutput: SpeechOutput? = null,
     private val voices: InstalledVoices? = null,
-    /** Reopens a saved source by its key for a restore; null when nothing can be reopened. */
-    private val readSources: (suspend (String) -> ReadSource?)? = null,
+    /** Reopens a saved source by its key and saved title for a restore; null when nothing can be reopened. */
+    private val readSources: (suspend (key: String, title: String) -> ReadSource?)? = null,
     private val preferredVoice: () -> VoiceId? = { null },
     private val defaultVoiceSpeed: () -> Float = { 1f },
 ) : PlayerHub {
@@ -333,7 +333,7 @@ class PlayerEngine(
     private suspend fun restoreVoice() {
         val key = prefs.getString(PlayerSettingsKeys.LAST_VOICE, null) ?: return
         val state = playback.voiceState(key) ?: return
-        val source = runCatching { readSources?.invoke(key) }.getOrNull()
+        val source = runCatching { readSources?.invoke(key, state.title) }.getOrNull()
         if (source == null) {
             Log.i(TAG, "Voice: $key is gone; forgetting its place")
             withContext(writerDispatcher) { playback.deleteVoiceState(key) }

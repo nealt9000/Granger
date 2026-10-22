@@ -72,7 +72,7 @@ class PlayerEngineVoiceTest {
     private fun source(key: String = "text:article", title: String = "Rosetta Stone", body: String = text): ReadSource =
         TextReadSource(key, title, body).also { sources[key] = it }
 
-    private fun engine(): PlayerEngine = rig.engine(focus = focus, speechOutput = output, voices = voices, readSources = { sources[it] })
+    private fun engine(): PlayerEngine = rig.engine(focus = focus, speechOutput = output, voices = voices, readSources = { key, _ -> sources[key] })
 
     private fun PlayerEngine.untilReady() { run(player).untilState(Player.STATE_READY) }
 
@@ -245,7 +245,7 @@ class PlayerEngineVoiceTest {
 
     @Test fun noVoiceInstalledMeansNothingHappens() {
         val none = InstalledVoices({ emptyList() }, { emptyList() }, factory, factory)
-        val e = rig.engine(focus = focus, speechOutput = output, voices = none, readSources = { sources[it] })
+        val e = rig.engine(focus = focus, speechOutput = output, voices = none, readSources = { key, _ -> sources[key] })
         e.readAloud(source(), null, null)
         rig.idle()
         assertThat(e.ui.value).isEqualTo(PlayerUi.IDLE)

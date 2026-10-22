@@ -317,19 +317,20 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         if report is not None:
             report += lines
     models = curated["models"]
+    voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
     books, collections = [], {}
     for row in curated.get("books", []):
         collection, entries = book_entries(row, head)
         books += entries
         collections[collection] = [e["id"] for e in entries]
-    for item in packs + models:
+    for item in packs + models + voices:
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
                 raise SystemExit(f"unsafe {key}: {item[key]!r}")
     for book in books:
         if not SAFE_NAME.match(book["id"]):
             raise SystemExit(f"unsafe id: {book['id']!r}")
-    ids = [item["id"] for item in packs + models + books]
+    ids = [item["id"] for item in packs + models + books + voices]
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
     # "@<collection>" in a preset stands for every book of that collection.
@@ -349,6 +350,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         "models": models,
         "books": books,
         "presets": presets,
+        "voices": voices,
     }
 
 

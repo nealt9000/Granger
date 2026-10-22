@@ -92,6 +92,8 @@ import app.granger.settings.MediaSettings
 import app.granger.settings.ResolverFolderGrants
 import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
+import app.granger.settings.VoiceSettingsScreen
+import app.granger.settings.VoiceSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flowOf
@@ -233,6 +235,8 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 /** [media] opens it at the Music & audiobooks section. */
 @Serializable data class SettingsRoute(val media: Boolean = false)
 @Serializable object ReadinessRoute
+/** Settings → Voice (Plan V1). */
+@Serializable object VoiceRoute
 
 /** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
 internal fun railToolOf(destination: NavDestination): RailTool? = when {
@@ -346,7 +350,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             container.railPins, container.railHidden,
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
-            resumer = if (Features.PLAYER) PlayResumer(container.media, container.playlists, container.playerHub) else null,
+            resumer = if (Features.PLAYER) container.playResumer else null,
         )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
@@ -797,6 +801,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
+                    onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
+                    voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
+                        .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
+                        ?.title ?: "No offline voice on this phone",
                     scrollToMedia = backStackEntry.toRoute<SettingsRoute>().media,
                     onPermissionChecked = { if (Features.PLAYER) container.phoneMediaScans.recheckPermission() },
                 )
@@ -805,6 +813,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 composable<PlayerRoute> {
                     PlayerScreen(player, onClose = { nav.popBackStack() }, onShelf = { nav.openShelfFromPlayer(it) })
                 }
+            }
+            composable<VoiceRoute> {
+                VoiceSettingsScreen(
+                    viewModel = viewModel {
+                        VoiceSettingsViewModel(
+                            container.voicePrefs, container.installedVoices, container.catalog, container.downloads, container.volumes,
+                            container.downloadPrefs, container.appScope,
+                        )
+                    },
+                    onBack = { nav.popBackStack() },
+                )
             }
             composable<ReadinessRoute> {
                 ReadinessScreen(

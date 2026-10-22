@@ -53,7 +53,7 @@ class MediaControllerPlayerHub(
     browse: (() -> MediaBrowseTree)? = null,
     /** The voice (Plan V1): what can speak, how a saved source is reopened after process death, and the settings. */
     voices: InstalledVoices? = null,
-    readSources: (suspend (String) -> ReadSource?)? = null,
+    readSources: (suspend (key: String, title: String) -> ReadSource?)? = null,
     preferredVoice: () -> VoiceId? = { null },
     voiceSpeed: () -> Float = { 1f },
 ) : PlayerHub {

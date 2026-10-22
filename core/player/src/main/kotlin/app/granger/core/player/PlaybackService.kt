@@ -72,7 +72,8 @@ class PlaybackService : MediaLibraryService() {
         val browse: MediaBrowseTree? = null,
         /** The voice (Plan V1): the installed voices, and how a saved source is reopened for a restore; null: no voice. */
         val voices: InstalledVoices? = null,
-        val readSources: (suspend (String) -> ReadSource?)? = null,
+        /** Reopens a saved source by its key (and the title it was saved with) for a restore. */
+        val readSources: (suspend (key: String, title: String) -> ReadSource?)? = null,
         val preferredVoice: () -> VoiceId? = { null },
         val voiceSpeed: () -> Float = { 1f },
     )

@@ -15,6 +15,7 @@ import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.PackEntry
+import app.granger.core.catalog.VoiceEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
@@ -300,6 +301,7 @@ class SourceViewModel(
                 )
                 is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
+                is VoiceEntry -> listOf("Read-aloud voice", item.language, item.license)
             }.filter { it.isNotBlank() }.joinToString(" · ")
             val packId = (item as? PackEntry)?.let { installedPackId(it, recordsById[it.id].orEmpty(), packs) }
             val description = when (item) {
@@ -307,6 +309,7 @@ class SourceViewModel(
                 is BookEntry -> item.description
                 // Rerank is off (Plan 9 eval), so the embedder downloads but nothing uses it.
                 is ModelEntry -> if (item.role == ModelRole.EMBEDDER && !RERANK_WITH_EMBEDDER) "Not used yet" else ""
+                is VoiceEntry -> item.attribution
             }
             return ItemRow(item.id, item.title, details, description, item.sizeBytes, status(item), packId)
         }

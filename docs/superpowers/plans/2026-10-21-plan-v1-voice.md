@@ -261,12 +261,12 @@ val voiceProgress: StateFlow<VoiceProgress?>                                    
 - Modify: `settings/SettingsScreen.kt` (`LEADING_KEYS` + `"voice"` after `"models"`: "Voice · Granger voice (ljspeech)" / "System voice" / "No offline voice"), `GrangerNavHost.kt` (the route), `readiness/ReadinessViewModel.kt` + `ReadinessScreen.kt` ("Voices" rows under AI models, `isModel`-like grouping by kind VOICE, verify and repair)
 - Test: `CatalogParserTest` (+ `voicesParseAndOldCatalogsWithoutThemStillDo`, `aVoiceWithABadUrlIsDropped`), `PublishedCatalogTest` (unchanged; re-run after the regenerated catalog is committed), `DownloadManagerTest` (+ `voiceSpecGoesToVoicesDir`), `VoiceUnpackerTest` (+ zip-slip, partial failure cleanup, manifest), `IntegrityCheckerTest` (+ voice quick/full), `VoiceSettingsViewModelTest`, `ReadinessViewModelTest` (+ a voice row), `SettingsScreen` row test
 
-- [ ] **Step 1:** Run `tools/voices/pack-voice.sh`; upload the zip to the `voices-v1` release (Neal, or with his token); record size and sha256 in `curated.json`.
-- [ ] **Step 2: Failing tests** as named.
-- [ ] **Step 3:** `./gradlew :core:catalog:test :core:downloads:testDebugUnitTest :app:testDebugUnitTest`. Expected: compile failure.
-- [ ] **Step 4: Implement.** Regenerate `catalog/catalog.json` with `catalog_gen.py build`, sign it (Neal's key), commit both.
-- [ ] **Step 5:** The same command, then `testDebugUnitTest`. Expected: PASS, `PublishedCatalogTest` included.
-- [ ] **Step 6: Commit.** `Voices: catalog entry, download and unpack, Settings → Voice, Readiness rows`
+- [x] **Step 1:** Run `tools/voices/pack_voice.py` (Python, deterministic zip); record size and sha256 in `curated.json`. *Done 2026-10-22: `vits-piper-en_US-ljspeech-medium.zip`, 67,456,670 B, sha256 `3013e3af7bd4c3d35188a93b8a3ef4ebf26e9946a54292e10f3f961ecc0ac23b`, 81,529,587 B unpacked, at `/Users/s.nealthompson/Developer/Granger/voice-spike-2026-10-21/voices-zip/`. The entry is in `curated.json`.* **Open for Neal:** upload the zip as an asset of the `voices-v1` release on `nealt9000/Granger`.
+- [x] **Step 2: Failing tests** as named (parser voices, voice spec folder, `VoiceUnpackerTest`, Readiness voice row, `VoiceSettingsViewModelTest`).
+- [x] **Step 3:** compile failure seen, then fixed.
+- [x] **Step 4: Implement.** `VoiceEntry` and `Catalog.voices`; `ItemKind.VOICE`, `voices/<id>.zip`, `Volume.voicesDir`; `VoiceUnpacker` (zip-slip guard, `.part` directory, manifest; the zip is deleted); `IntegrityChecker` checks a voice against its manifest; Settings → Voice (`VoicePrefs`, `VoiceSettingsViewModel/Screen`, the Settings row with the chosen voice as its summary); Readiness "Voices"; the container wires `InstalledVoices`, `readSources` (articles from their pack, books through the opener) and the `voice:` play resumer; the generator copies `voices` like models. **Open for Neal:** regenerate `catalog/catalog.json` with `catalog_gen.py build` and sign it (the key is Neal's); the committed catalog is unchanged until then, and the app's parser accepts a catalog without `voices`.
+- [x] **Step 5:** `testDebugUnitTest` PASS (`PublishedCatalogTest` on the unchanged catalog).
+- [x] **Step 6: Commit.** `Voices: catalog entry, download and unpack, Settings → Voice, Readiness rows`
 
 ### Task 9: The screen-off acceptance run
 

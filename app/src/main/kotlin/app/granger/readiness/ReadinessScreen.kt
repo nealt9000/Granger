@@ -73,6 +73,11 @@ fun ReadinessScreen(viewModel: ReadinessViewModel, onBack: () -> Unit) {
                 Check(row, viewModel::verify, viewModel::repair)
                 HorizontalDivider()
             }
+            if (ui.voices.isNotEmpty()) item(key = "voices") { Heading("Voices") }
+            items(ui.voices, key = { it.key }) { row ->
+                Check(row, viewModel::verify, viewModel::repair)
+                HorizontalDivider()
+            }
             item(key = "packs") { Heading("Packs") }
             if (ui.packs.isEmpty()) item(key = "no-packs") { Empty("No packs installed.") }
             items(ui.packs, key = { it.key }) { row ->

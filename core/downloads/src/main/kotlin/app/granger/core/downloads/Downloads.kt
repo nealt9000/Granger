@@ -4,6 +4,7 @@ import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.PackEntry
+import app.granger.core.catalog.VoiceEntry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -245,6 +246,10 @@ class DownloadManager(
         is ModelEntry -> DownloadSpec(
             item.id, ItemKind.MODEL, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
             "models/${item.fileName}", "", capped = false,
+        )
+        is VoiceEntry -> DownloadSpec(
+            item.id, ItemKind.VOICE, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
+            "voices/${item.id}.zip", "", capped = false,
         )
     }
 

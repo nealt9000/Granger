@@ -52,6 +52,8 @@ data class ReadinessUi(
     val totalRamBytes: Long = 0,
     val volumes: List<VolumeRow> = emptyList(),
     val models: List<CheckRow> = emptyList(),
+    /** Downloaded read-aloud voices (Plan V1), checked against their manifests. */
+    val voices: List<CheckRow> = emptyList(),
     val packs: List<CheckRow> = emptyList(),
     /** One row per downloaded book or album (its files' sizes summed). */
     val media: List<CheckRow> = emptyList(),
@@ -162,6 +164,7 @@ class ReadinessViewModel(
         val (grouped, installed) = all.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
         val media = grouped.groupBy { it.groupId!! }.map { (group, files) -> groupRow(group, files, prog, res) }
         val packByPath = packs.associateBy { it.filePath }
+        val voiceKeys = installed.filter { it.kind == ItemKind.VOICE }.mapTo(HashSet()) { keyOf(it) }
         val rows = installed.map { record ->
             val key = keyOf(record)
             val pack = packByPath[record.filePath]
@@ -211,7 +214,8 @@ class ReadinessViewModel(
             totalRamBytes = totalRamBytes,
             volumes = vols.map { VolumeRow(it.root.path, it.label, it.removable, it.freeBytes, it.totalBytes, it.grangerBytes, 0) },
             models = rows.filter { it.isModel },
-            packs = rows.filterNot { it.isModel } + byHand,
+            voices = rows.filter { it.key in voiceKeys },
+            packs = rows.filterNot { it.isModel || it.key in voiceKeys } + byHand,
             media = media.sortedBy { it.title.lowercase() },
         )
     }

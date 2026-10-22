@@ -6,6 +6,7 @@ import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
+import app.granger.core.catalog.VoiceEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.isActive
@@ -47,7 +48,7 @@ fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>
     val currentInstalled = when (item) {
         is PackEntry -> versions.any { it.hash == item.sha256 } ||
             packs.any { it.id == item.zimUuid && it.status != PackStatus.MISSING }
-        is BookEntry, is ModelEntry -> versions.any { it.hash == item.sha256 }
+        is BookEntry, is ModelEntry, is VoiceEntry -> versions.any { it.hash == item.sha256 }
     }
     return when {
         currentInstalled -> ItemStatus.Installed

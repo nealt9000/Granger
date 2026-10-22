@@ -295,8 +295,8 @@ class MediaSettingsTest {
     }
 
     @Test fun mediaSectionIndexComesFromTheKeys() {
-        assertThat(settingsIndexOf(MEDIA_SECTION_KEY)).isEqualTo(6)
-        assertThat(settingsIndexOf("appearance")).isEqualTo(2)
+        assertThat(settingsIndexOf(MEDIA_SECTION_KEY)).isEqualTo(7)
+        assertThat(settingsIndexOf("appearance")).isEqualTo(3)
         assertThat(settingsIndexOf("models")).isEqualTo(0)
     }
 

@@ -10,6 +10,7 @@ enum class Integrity { VERIFIED, SIZE_OK, INCOMPLETE, CORRUPTED, MISSING }
 /** Readiness checks: a size check always, a full checksum re-hash on request (spec "Readiness"). */
 object IntegrityChecker {
     fun quick(record: DownloadRecord): Integrity {
+        if (record.kind == ItemKind.VOICE) return VoiceUnpacker.quick(record)
         val file = record.file
         return when {
             !file.isFile -> Integrity.MISSING
@@ -24,6 +25,7 @@ object IntegrityChecker {
         io: CoroutineDispatcher = Dispatchers.IO,
         onProgress: (Float) -> Unit = {},
     ): Integrity = withContext(io) {
+        if (record.kind == ItemKind.VOICE) return@withContext VoiceUnpacker.full(record, io, onProgress)
         val file = record.file
         if (!file.isFile) return@withContext Integrity.MISSING
         if (file.length() != record.sizeBytes) return@withContext Integrity.INCOMPLETE

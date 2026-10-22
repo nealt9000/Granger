@@ -29,6 +29,11 @@ fun bookEntry(id: String = "gc-emma", sha256: String = SHA_1, size: Long = 500, 
         collection = "granger-classics",
     )
 
+fun voiceEntry(id: String = "vits-piper-en_US-ljspeech-medium", sha256: String = SHA_2, size: Long = 67_456_670) = app.granger.core.catalog.VoiceEntry(
+    id = id, title = "Granger voice (ljspeech)", engine = "piper", language = "en-US", sizeBytes = size, sha256 = sha256,
+    url = "https://github.com/nealt9000/Granger/releases/download/voices-v1/$id.zip", license = "Public domain",
+)
+
 fun modelEntry(id: String = "e2b", sha256: String = SHA_2, size: Long = 2_000, url: String = "https://hf.test/$id") =
     ModelEntry(
         id = id, title = "Model $id", role = ModelRole.SMALL, fileName = "$id.litertlm", sizeBytes = size,

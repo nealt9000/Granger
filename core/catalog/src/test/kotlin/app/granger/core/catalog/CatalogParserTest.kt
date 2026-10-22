@@ -44,6 +44,29 @@ class CatalogParserTest {
         assertThat(catalog.item("wikipedia_en_medicine_nopic")).isSameInstanceAs(med)
     }
 
+    @Test fun voicesParseAndOldCatalogsWithoutThemStillDo() {
+        assertThat(ok(parse(catalogJson())).voices).isEmpty()
+        val withVoices = catalogJson().decodeToString().trimEnd().removeSuffix("}") + """,
+            "voices": [
+              {"id": "vits-piper-en_US-ljspeech-medium", "title": "Granger voice", "engine": "piper", "language": "en-US",
+               "sizeBytes": 67456670, "unpackedBytes": 81529587, "sha256": "$SHA_A",
+               "url": "https://github.com/nealt9000/Granger/releases/download/voices-v1/v.zip", "license": "Public domain",
+               "attribution": "LJ Speech"},
+              {"id": "bad url", "title": "x", "engine": "piper", "language": "en-US", "sizeBytes": 1, "sha256": "$SHA_A",
+               "url": "http://insecure/v.zip", "license": "x"},
+              {"id": "noengine", "title": "x", "engine": "", "language": "en-US", "sizeBytes": 1, "sha256": "$SHA_A",
+               "url": "https://ok/v.zip", "license": "x"}
+            ]}"""
+        val catalog = ok(parse(withVoices.toByteArray()))
+        assertThat(catalog.voices.map { it.id }).containsExactly("vits-piper-en_US-ljspeech-medium")
+        val voice = catalog.voices.single()
+        assertThat(voice.engine).isEqualTo("piper")
+        assertThat(voice.unpackedBytes).isEqualTo(81529587L)
+        assertThat(voice.urls).containsExactly("https://github.com/nealt9000/Granger/releases/download/voices-v1/v.zip")
+        assertThat(catalog.item("vits-piper-en_US-ljspeech-medium")).isEqualTo(voice)
+        assertThat(catalog.items).contains(voice)
+    }
+
     @Test fun nonCommercialDefaultsToFalse() {
         assertThat(ok(parse(catalogJson())).packs.single().nonCommercial).isFalse()
     }

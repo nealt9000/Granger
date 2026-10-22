@@ -12,8 +12,10 @@ data class Catalog(
     val models: List<ModelEntry> = emptyList(),
     val books: List<BookEntry> = emptyList(),
     val presets: List<Preset> = emptyList(),
+    /** Downloadable voices for read-aloud (Plan V1); absent in older catalogs. */
+    val voices: List<VoiceEntry> = emptyList(),
 ) {
-    val items: List<CatalogItem> get() = models + packs + books
+    val items: List<CatalogItem> get() = models + packs + books + voices
 
     fun item(id: String): CatalogItem? = items.firstOrNull { it.id == id }
 
@@ -97,6 +99,31 @@ data class ModelEntry(
     val url: String,
     override val license: String,
     val evalPassed: Boolean,
+) : CatalogItem {
+    override val urls: List<String> get() = listOf(url)
+}
+
+/**
+ * A voice for read-aloud: one zip (model, `tokens.txt`, `espeak-ng-data/`, `manifest.json`) unpacked into
+ * `voices/<id>/` after verification. [id] is the voice directory's name, as sherpa-onnx names it.
+ */
+@Serializable
+data class VoiceEntry(
+    override val id: String,
+    override val title: String,
+    /** `piper` (sherpa-onnx VITS); others may follow. */
+    val engine: String,
+    val language: String,
+    val speakers: Int = 1,
+    val sampleRate: Int = 22_050,
+    override val sizeBytes: Long,
+    /** Bytes on disk once unpacked (the zip itself is deleted). */
+    val unpackedBytes: Long = 0,
+    override val sha256: String,
+    val url: String,
+    override val license: String,
+    /** The dataset's attribution line, shown in Settings and About. */
+    val attribution: String = "",
 ) : CatalogItem {
     override val urls: List<String> get() = listOf(url)
 }

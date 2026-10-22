@@ -52,6 +52,18 @@ class ReadinessViewModelTest {
         return vm
     }
 
+    @Test fun voicesGetTheirOwnSectionAndStayOutOfPacks() = runTest(main.dispatcher) {
+        val voice = record("vits-piper-en_US-ljspeech-medium", DownloadState.INSTALLED, kind = ItemKind.VOICE, filePath = "/internal/voices/vits-piper-en_US-ljspeech-medium.zip")
+        downloads.list.value = listOf(med, e2b, voice)
+        quick[voice.itemId] = Integrity.VERIFIED
+        val ui = viewModel().ui.value
+        assertThat(ui.voices.map { it.key }).containsExactly(key(voice))
+        assertThat(ui.voices.single().status).isEqualTo(CheckStatus.VERIFIED)
+        assertThat(ui.voices.single().isModel).isFalse()
+        assertThat(ui.packs.map { it.key }).containsExactly(key(med))
+        assertThat(ui.models.map { it.key }).containsExactly(key(e2b))
+    }
+
     @Test fun showsTierRamAndVolumes() = runTest(main.dispatcher) {
         val ui = viewModel().ui.value
         assertThat(ui.loading).isFalse()

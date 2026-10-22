@@ -63,6 +63,9 @@ fun SettingsScreen(
     onBack: () -> Unit,
     scrollToMedia: Boolean = false,
     onPermissionChecked: () -> Unit = {},
+    /** Settings → Voice (Plan V1); null leaves the row out. */
+    onVoice: (() -> Unit)? = null,
+    voiceSummary: String = "",
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -110,6 +113,15 @@ fun SettingsScreen(
                             supportingContent = { Text("AI models for this phone") },
                             trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                             modifier = Modifier.selectable(selected = false, onClick = onModels),
+                        )
+                        HorizontalDivider()
+                    }
+                    "voice" -> if (onVoice != null) {
+                        ListItem(
+                            headlineContent = { Text("Voice") },
+                            supportingContent = { Text(voiceSummary.ifBlank { "Read aloud" }) },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                            modifier = Modifier.selectable(selected = false, onClick = onVoice),
                         )
                         HorizontalDivider()
                     }
@@ -176,7 +188,7 @@ fun SettingsScreen(
 }
 
 /** The keys of the rows above Music & audiobooks, in order. Add a row above it here and the scroll follows. */
-private val LEADING_KEYS = listOf("models", "readiness", "appearance", "storage", "wifi", "archive")
+private val LEADING_KEYS = listOf("models", "voice", "readiness", "appearance", "storage", "wifi", "archive")
 
 /** The list index of [key] when the media section is shown: one item per leading key, then [MEDIA_SECTION_KEY]. */
 internal fun settingsIndexOf(key: String): Int = (LEADING_KEYS + MEDIA_SECTION_KEY).indexOf(key)

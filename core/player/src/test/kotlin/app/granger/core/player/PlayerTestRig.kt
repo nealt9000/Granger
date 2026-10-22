@@ -54,7 +54,7 @@ internal class PlayerTestRig {
         focus: FakeFocusRequester = FakeFocusRequester(),
         speechOutput: SpeechOutput? = null,
         voices: InstalledVoices? = null,
-        readSources: (suspend (String) -> ReadSource?)? = null,
+        readSources: (suspend (String, String) -> ReadSource?)? = null,
         preferredVoice: () -> VoiceId? = { null },
     ): PlayerEngine {
         val player = TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build()

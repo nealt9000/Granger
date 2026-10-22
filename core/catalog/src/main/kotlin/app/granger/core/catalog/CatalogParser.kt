@@ -52,9 +52,12 @@ object CatalogParser {
             .distinctBy { it.id }
             // Two models must never share a target file (compared ignoring case, as SD cards do).
             .distinctBy { it.fileName.lowercase() }
-        val ids = (packs.map { it.id } + models.map { it.id } + books.map { it.id }).toSet()
+        val voices = entries<VoiceEntry>(root, "voices")
+            .filter { valid(it) && it.engine.isNotBlank() }
+            .distinctBy { it.id }
+        val ids = (packs.map { it.id } + models.map { it.id } + books.map { it.id } + voices.map { it.id }).toSet()
         val presets = entries<Preset>(root, "presets").map { preset -> preset.copy(items = preset.items.filter { it in ids }) }
-        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets))
+        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices))
     }
 
     private inline fun <reified T> entries(root: JsonObject, key: String): List<T> =

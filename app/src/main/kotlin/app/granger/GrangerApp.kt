@@ -25,8 +25,22 @@ import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.DownloadsHost
 import app.granger.core.downloads.FileDownloader
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.VoiceUnpacker
 import app.granger.core.downloads.VolumeSource
+import app.granger.core.downloads.file
 import app.granger.core.downloads.WorkManagerScheduler
+import app.granger.core.speech.InstalledVoices
+import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadSource
+import app.granger.core.speech.ReadSourceKey
+import app.granger.core.speech.SherpaSpeech
+import app.granger.core.speech.SystemSpeech
+import app.granger.core.speech.VoiceId
+import app.granger.ebook.BookReadSource
+import app.granger.reader.ArticleReadSource
+import app.granger.settings.SharedVoicePrefs
+import app.granger.settings.VoicePrefs
+import android.util.Log
 import app.granger.core.library.BookIndex
 import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
@@ -250,6 +264,43 @@ class AppContainer(context: Context) {
     /** Cover art as content:// URIs ([ArtworkProvider]), for the session's items, Android Auto and the widget. */
     val artwork: Artwork = Artwork.forContext(context)
 
+    // ---- the voice (Plan V1) ----
+
+    /** Settings → Voice: the chosen voice, speed and the sentence mark. */
+    val voicePrefs: VoicePrefs = SharedVoicePrefs(context)
+
+    /** What can speak now: Granger voices under every volume's `voices/`, then the system engine's offline English voices. */
+    val installedVoices: InstalledVoices by lazy {
+        val dirs = { context.getExternalFilesDirs(null).filterNotNull().map { File(it, "voices") } }
+        val system = SystemSpeech.Factory(context)
+        InstalledVoices(dirs, { system.voices() }, SherpaSpeech.Factory(dirs), system)
+    }
+
+    /**
+     * Reopens what the voice was reading for a restore after process death: an article from its pack, a book through
+     * the opener (that publication stays open for the process; one book at most).
+     */
+    val readSources: suspend (key: String, title: String) -> ReadSource? = { key, title ->
+        when (val k = ReadSourceKey.parse(key)) {
+            is ReadSourceKey.Article -> library.archive(k.packId)?.let { ArticleReadSource(it, k.packId, k.path, title) }
+            is ReadSourceKey.Book -> bookshelf.book(k.bookId)?.let { book ->
+                val file = File(book.filePath)
+                if (file.isFile) bookOpener.open(file)?.let { BookReadSource(it, k.bookId, book.title) } else null
+            }
+            is ReadSourceKey.Text, null -> null
+        }
+    }
+
+    /** Resumes a `voice:` play from the rail: the saved place, read again. */
+    private val resumeVoice: suspend (String) -> Boolean = { sourceKey ->
+        val state = playback.voiceState(sourceKey)
+        val source = state?.let { readSources(sourceKey, it.title) }
+        if (source == null) false else {
+            playerHub.readAloud(source, state.address.let(ReadAddress::decode), VoiceId.decode(state.voiceId))
+            true
+        }
+    }
+
     /** The one way to the players (spec §8); made in [GrangerApp.onCreate], on the main thread. */
     val playerHub: PlayerHub by lazy {
         MediaControllerPlayerHub(
@@ -258,6 +309,10 @@ class AppContainer(context: Context) {
             artwork = { path -> artwork.uri(path) ?: Uri.fromFile(File(path)) },
             // Made on first use (the tree plays through this hub): Android Auto's first browse.
             browse = { autoBrowse },
+            voices = if (Features.READ_ALOUD) installedVoices else null,
+            readSources = readSources,
+            preferredVoice = { voicePrefs.voiceId.value },
+            voiceSpeed = { voicePrefs.speed.value },
         )
     }
 
@@ -272,8 +327,11 @@ class AppContainer(context: Context) {
 
     /** What Android Auto browses, searches and plays; reaches the session through [playerHub]. */
     val autoBrowse: AutoBrowseTree by lazy {
-        AutoBrowseTree(media, playlists, playback, mediaIndex, PlayResumer(media, playlists, playerHub), songs, playerHub, artwork)
+        AutoBrowseTree(media, playlists, playback, mediaIndex, playResumer, songs, playerHub, artwork)
     }
+
+    /** Plays a recent play again (the rail, Android Auto); voices through [resumeVoice]. */
+    val playResumer: PlayResumer by lazy { PlayResumer(media, playlists, playerHub, resumeVoice) }
 
     /** The player's settings (skip intervals, ReplayGain, headset autoplay), shared with the playback service. */
     val playerPrefs: SharedPreferences = context.getSharedPreferences(PlayerSettingsKeys.PREFS, Context.MODE_PRIVATE)
@@ -354,6 +412,10 @@ class AppContainer(context: Context) {
                 fileBookRecord(bookshelf, archiveSidecarDir, record) { appScope.launch { bookIndex.indexPending() } }
             } else if (record.kind == ItemKind.AUDIO) {
                 mediaDownloader.onFileInstalled(record)
+            } else if (record.kind == ItemKind.VOICE) {
+                // The verified zip becomes voices/<id>/ and goes away; the voice list picks the new voice up.
+                VoiceUnpacker.unpack(record.file).onFailure { Log.w("Granger", "Couldn't unpack the voice ${record.itemId}", it) }
+                installedVoices.refresh()
             }
         },
     )

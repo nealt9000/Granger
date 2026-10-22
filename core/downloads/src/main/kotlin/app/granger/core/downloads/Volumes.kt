@@ -20,6 +20,7 @@ data class Volume(
     val booksDir: File get() = File(root, "books")
     val musicDir: File get() = File(root, "music")
     val audiobooksDir: File get() = File(root, "audiobooks")
+    val voicesDir: File get() = File(root, "voices")
 }
 
 fun interface VolumeSource {
@@ -54,6 +55,6 @@ class AndroidVolumes(private val context: Context) : VolumeSource {
     private fun sizeOf(dir: File): Long = dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
 
     private companion object {
-        val GRANGER_DIRS = listOf("packs", "models", "books", "music", "audiobooks")
+        val GRANGER_DIRS = listOf("packs", "models", "books", "music", "audiobooks", "voices")
     }
 }
