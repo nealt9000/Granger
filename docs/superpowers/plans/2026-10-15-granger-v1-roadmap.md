@@ -681,3 +681,21 @@ Still open:
 - `DomainBar` isn't measured on the phone (6 dp, a 1 dp essential tick; the tick hides under 1 % or over 99 %).
 - The `starter` preset stays beside `efficient` and `comprehensive` until H3 decides.
 - The monthly Kiwix regeneration now carries the domains; a new family with no `domain` key is caught by `test_real_family_table_has_a_domain_on_every_row`, and a pack whose domain isn't one of the nine fails the build.
+
+## Carried forward from R3
+
+Built 2026-10-22 on `r3-deep-links` (`2026-10-22-plan-r3-deep-links.md`), rebased onto the V2 and H1 merges; **1871 JVM tests pass**. No schema change (library v11). Neal's Pixel 6 walkthrough the same day, with logs captured:
+- **Passed:** an article citation opens at its section with the cited sentence highlighted; a book citation ("take no thought for the morrow") opens at the passage; a selection sent from a book opens back at it; a chapter citation ("the white seal jungle book") shows Play, plays from that chapter and opens the audiobook at it; old chats' citations still open; a removed book ("Ray C.") gives "That source is no longer in your library."
+- **Not checked yet:** a song citation's Play and album tap (same code as the chapter; "which song on the Holst album is about war?" is the check); the moved-page note (hard to set up by hand).
+
+What R3 leaves for projects 3 and 4: `PassageAddress` (format/parse; `ChatTurn.addresses()`), `CitationOpener.open(address)` for a bare address, and the fallback chain (spec §7).
+
+Neal's findings from the walkthrough, outside R3's scope:
+- **Media needs a cue word to win.** A media card beats the articles only when the question has a media word (`MediaCues`, M3), so "holst mars" and "which movement of the planets is about war?" got wiki cards although the album is on the phone; "the white seal jungle book" reached its card. Candidate cue words: "movement", "piece", "suite", "chapter" (not decided: R2 or a small fix).
+- **"What do I have in my library on X?"** ("on medicine" → "not in your library"; "on philosophy" → a generic answer whose first card was a bash doc) is a question about the library, not a passage search. Research has no answer path for it yet; a decision for Neal (R2, H2 or project 4).
+- **Vocabulary-gap questions still miss:** "what book has a marooned guy wanting a bit of cheese?" (Ben Gunn, *Treasure Island*) gives "not in your library", and Best guess calls it too vague; "a bit of toasted cheese" finds recipes. This is R1's dense retrieval, not merged yet; worth adding to R2's tuning or held-out set.
+- **"Loading model" on nearly every question:** the model unloads after two quiet minutes (`ModelManager.releaseAfterMs = 120_000`); Neal's questions were 2½–6 minutes apart (10 loads in 33 minutes). A longer timer keeps about 2 GB resident longer: a trade-off to decide.
+- **Think deeper (the larger model) has never added value for Neal**, as R0 found; whether it stays is open.
+- **Research UX:** + doesn't start a fresh, clean chat; Back leaves Research across the app instead of going to the chat list (today the list is reached only by deleting the current chat).
+- **V2 follow-up:** with read-aloud on, a speaker icon for the Research chat does nothing when tapped (R3 doesn't touch those lines; the spoken-answer button or the rail's live entry, not yet narrowed down).
+- **E-book reader:** copying and pasting a selection is sometimes jittery and buggy.
