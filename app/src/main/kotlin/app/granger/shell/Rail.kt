@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -66,6 +67,7 @@ import app.granger.theme.GrangerColors
 
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
 enum class RailTool(val label: String, val shown: Boolean) {
+    HOME("Home", true),
     SEARCH("Search", true),
     RESEARCH("Research", Features.RESEARCH),
     LIBRARY("Library", true),
@@ -93,6 +95,7 @@ private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInse
 
 @Composable
 private fun RailTool.painter(): Painter = when (this) {
+    RailTool.HOME -> rememberVectorPainter(Icons.Filled.Home)
     RailTool.SEARCH -> rememberVectorPainter(Icons.Filled.Search)
     RailTool.RESEARCH -> painterResource(R.drawable.ic_research)
     RailTool.LIBRARY -> painterResource(R.drawable.ic_library)

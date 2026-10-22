@@ -82,11 +82,17 @@ class RailTest {
 
     @Test fun narrowRailToolsStillGoStraightToTheirScreens() {
         shell()
+        compose.onNodeWithContentDescription("Home").performClick()
         compose.onNodeWithContentDescription("Search").performClick()
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.waitForIdle()
-        assertThat(calls).containsExactly("tool:SEARCH", "tool:SETTINGS").inOrder()
+        assertThat(calls).containsExactly("tool:HOME", "tool:SEARCH", "tool:SETTINGS").inOrder()
         assertThat(expanded).isFalse()
+    }
+
+    @Test fun homeIsTheFirstTool() {
+        assertThat(RailTool.entries.first()).isEqualTo(RailTool.HOME)
+        assertThat(RailTool.HOME.shown).isTrue()
     }
 
     @Test fun narrowRailMarksOnlyPinnedTilesWithTheFlameDot() {
