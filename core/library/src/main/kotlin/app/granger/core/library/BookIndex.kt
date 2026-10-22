@@ -53,6 +53,9 @@ class BookIndex(
     /** Test hook: runs inside each book's transaction just before it commits. */
     internal var beforeCommit: (bookId: String) -> Unit = {}
 
+    /** A book's indexed chunks (one per spine item, in order); empty until the book is indexed. */
+    suspend fun chunks(bookId: String): List<BookChunk> = dao.chunksOf(bookId)
+
     /** Indexes every OK book not yet indexed. A book that fails stays pending for the next call. */
     suspend fun indexPending() = mutex.withLock {
         withContext(io) {

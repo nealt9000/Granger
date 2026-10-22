@@ -261,6 +261,10 @@ interface BookDao {
     @Query("SELECT * FROM book_chunks WHERE id = :id")
     suspend fun chunk(id: Long): BookChunk?
 
+    /** A book's chunks (one per spine item) in reading order. */
+    @Query("SELECT * FROM book_chunks WHERE bookId = :bookId ORDER BY ordinal")
+    suspend fun chunksOf(bookId: String): List<BookChunk>
+
     /** For queries over `book_text`, which Room doesn't know about; they must select `book_chunks` columns. */
     @RawQuery
     suspend fun chunksMatching(query: SupportSQLiteQuery): List<BookChunk>
