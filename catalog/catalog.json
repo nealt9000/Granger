@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-22T20:34:31Z",
+  "generatedAt": "2026-10-22T22:50:36Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -26662,7 +26662,6 @@
         "wikipedia_en_computer_maxi",
         "wikivoyage_en_all_nopic",
         "wikipedia_en_top_nopic",
-        "wiktionary_en_all_nopic",
         "gc-iliad",
         "gc-odyssey",
         "gc-aeneid",
@@ -27016,7 +27015,6 @@
       "id": "comprehensive",
       "title": "Comprehensive library",
       "items": [
-        "wikipedia_en_medicine_nopic",
         "wikipedia_en_medicine_maxi",
         "wikem_en_all_maxi",
         "medlineplus.gov_en_all",
@@ -27060,26 +27058,21 @@
         "physics.stackexchange.com_en_all",
         "chemistry.stackexchange.com_en_all",
         "biology.stackexchange.com_en_all",
-        "math.stackexchange.com_en_all",
-        "stats.stackexchange.com_en_all",
         "wikipedia_en_computer_maxi",
         "jeffe.cs.illinois.edu_en_all",
         "openwrt.org_en_all",
-        "stackoverflow.com_en_all",
         "superuser.com_en_all",
         "askubuntu.com_en_all",
         "unix.stackexchange.com_en_all",
         "security.stackexchange.com_en_all",
         "networkengineering.stackexchange.com_en_all",
         "raspberrypi.stackexchange.com_en_all",
-        "wikivoyage_en_all_nopic",
         "wikivoyage_en_all_maxi",
         "openstreetmap-wiki_en_all_maxi",
         "wikipedia_en_geography_maxi",
         "travel.stackexchange.com_en_all",
-        "wikipedia_en_top_nopic",
         "wiktionary_en_all_nopic",
-        "wikipedia_en_all_nopic",
+        "wikipedia_en_top1m_nopic",
         "wikibooks_en_all_nopic",
         "wikiversity_en_all_nopic",
         "citizendium.org_en_all_maxi",
@@ -27371,7 +27364,6 @@
         "gc-quo-vadis",
         "wikiquote_en_all_nopic",
         "wikisource_en_all_nopic",
-        "gutenberg_en_lcc-pr",
         "literature.stackexchange.com_en_all",
         "writing.stackexchange.com_en_all",
         "gc-king-james-bible",
@@ -27550,9 +27542,7 @@
           "planetmath.org_en_all",
           "physics.stackexchange.com_en_all",
           "chemistry.stackexchange.com_en_all",
-          "biology.stackexchange.com_en_all",
-          "math.stackexchange.com_en_all",
-          "stats.stackexchange.com_en_all"
+          "biology.stackexchange.com_en_all"
         ]
       },
       {
@@ -27566,7 +27556,6 @@
           "jeffe.cs.illinois.edu_en_all",
           "family:devdocs",
           "openwrt.org_en_all",
-          "stackoverflow.com_en_all",
           "superuser.com_en_all",
           "askubuntu.com_en_all",
           "unix.stackexchange.com_en_all",
@@ -27595,13 +27584,12 @@
         "id": "reference",
         "title": "General reference",
         "essential": [
-          "wikipedia_en_top_nopic",
-          "wiktionary_en_all_nopic"
+          "wikipedia_en_top_nopic"
         ],
         "comprehensive": [
           "wikipedia_en_top_nopic",
           "wiktionary_en_all_nopic",
-          "wikipedia_en_all_nopic",
+          "wikipedia_en_top1m_nopic",
           "wikibooks_en_all_nopic",
           "wikiversity_en_all_nopic",
           "citizendium.org_en_all_maxi",
@@ -27619,7 +27607,6 @@
           "@granger-classics",
           "wikiquote_en_all_nopic",
           "wikisource_en_all_nopic",
-          "gutenberg_en_lcc-pr",
           "literature.stackexchange.com_en_all",
           "writing.stackexchange.com_en_all"
         ]
@@ -27644,7 +27631,19 @@
           "hermeneutics.stackexchange.com_en_all"
         ]
       }
-    ]
+    ],
+    "contains": {
+      "wikipedia_en_all": [
+        "wikipedia_en_*"
+      ],
+      "wikipedia_en_top1m": [
+        "wikipedia_en_top",
+        "wikipedia_en_100"
+      ],
+      "wikipedia_en_top": [
+        "wikipedia_en_100"
+      ]
+    }
   },
   "onboarding": {
     "useCases": [

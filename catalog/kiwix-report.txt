@@ -204,3 +204,15 @@ No family-table row: 1
 Unsafe ids: 0
 
 Failed to pin: 0
+
+Readiness tiers, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):
+  medicine: 1.0 GB / 4.4 GB
+  food: 0.1 GB / 4.9 GB
+  making: 3.6 GB / 12.4 GB
+  science: 2.3 GB / 13.7 GB
+  technology: 0.9 GB / 10.9 GB
+  maps: 0.3 GB / 4.0 GB
+  reference: 2.7 GB / 32.9 GB
+  literature: 0.1 GB / 4.6 GB
+  thought: 0.0 GB / 2.5 GB
+  All: 11.1 GB / 90.3 GB
