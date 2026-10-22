@@ -31,6 +31,8 @@ sealed interface NowPlaying {
         val sourceKey: String, val title: String, val section: String?, val sentence: String, val paragraph: Int,
         val speed: Float, val voiceId: VoiceId, val ended: Boolean = false,
         val music: Music? = null, val musicPlaying: Boolean = false,
+        /** The music under the voice's place within its track, for the Music tab. */
+        val musicPositionMs: Long = 0L, val musicDurationMs: Long = 0L,
     ) : NowPlaying
 }
 

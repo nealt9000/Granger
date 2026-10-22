@@ -195,6 +195,14 @@ class PlayerViewModel(
     fun nextMusic() = hub.nextMusic()
     fun setVoice(id: VoiceId) = hub.setVoice(id)
 
+    /** Music is playing under the voice: the Music tab shows it and its controls drive it, not the voice. */
+    fun musicUnderVoice(): NowPlaying.Voice? = (hub.ui.value.now as? NowPlaying.Voice)?.takeIf { it.music != null }
+
+    /** The Music tab's transport: the music under the voice when there is some (the mini-player's transport stays the voice's), else the player's. */
+    fun musicPlayPause() = if (musicUnderVoice() != null) hub.playPauseMusic() else hub.playPause()
+    fun musicNext() = if (musicUnderVoice() != null) hub.nextMusic() else hub.next()
+    fun musicPrevious() { if (musicUnderVoice() == null) hub.previous() }
+
     fun next() = hub.next()
     fun previous() = hub.previous()
     fun skipBack() = hub.skipBack()

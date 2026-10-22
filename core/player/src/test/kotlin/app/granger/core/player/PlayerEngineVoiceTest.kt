@@ -292,6 +292,7 @@ class PlayerEngineVoiceTest {
         val now = e.ui.value.now as NowPlaying.Voice
         assertThat(now.music?.track?.id).isEqualTo(ids[0])
         assertThat(now.musicPlaying).isTrue()
+        assertThat(now.musicDurationMs).isEqualTo(60_000L)              // the Music tab's bar
         assertThat(e.ui.value.playing).isTrue()
         val under = e.musicUnderPlayer!!
         assertThat(under.playWhenReady).isTrue()

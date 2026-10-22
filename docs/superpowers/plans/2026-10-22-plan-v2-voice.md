@@ -205,8 +205,8 @@ No app code. The candidates are packed with the existing tool and pushed under t
 
 ### Task 10: Pixel 6 walkthrough; roadmap
 
-- [ ] Tell the R1 session; back up both databases; install over the app over Wi-Fi.
-- [ ] Check (spec §10 and this plan):
+- [x] Tell the R1 session; back up both databases; install over the app over Wi-Fi. *2026-10-22: installed twice (the second with the engine-close fix), backups in `files/db-backup-2026-10-22b/` and `-c/`.*
+- [ ] Check (spec §10 and this plan): *Neal's first pass (2026-10-22): years sound right; music under the voice works; the Music tab's play button stuck on "play" and couldn't pause the music under the voice (fixed: the tab now shows the music under the voice live, with its own transport routed to it); words ending in "a" still come out with an "r" ("Australiar"), which is the `ljspeech` model (V1's Rosetta finding) and goes on V3's listening checklist; the mini-player is clunky when both play, a UX matter carried forward; "the rest is fine for now".*
   - An article with years and a range (Rosetta Stone: 1799, 196 BC, 1802) reads them as years; the system voice is unchanged.
   - Both catalog voices Get, pick, speak; the speaker picker; licence and attribution shown; removing the chosen voice falls back with a notice.
   - E-book: the bar button pauses and resumes at the sentence; long press stops; the ⋯ menu in the web reader has both.

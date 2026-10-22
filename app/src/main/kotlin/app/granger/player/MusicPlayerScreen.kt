@@ -85,11 +85,12 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                         tint = if (music.shuffle) GrangerColors.Flame else LocalContentColor.current,
                     )
                 }
-                IconButton(onClick = { control { previous() } }, modifier = Modifier.size(56.dp)) {
+                // The music transport: the player's, or the music under the voice's when the voice reads over it (Plan V2).
+                IconButton(onClick = { control { musicPrevious() } }, modifier = Modifier.size(56.dp)) {
                     Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous track", modifier = Modifier.size(36.dp))
                 }
-                BigPlayPause(ui.playing, { if (live) viewModel.playPause() else viewModel.activate(PlayerMode.MUSIC) })
-                IconButton(onClick = { control { next() } }, modifier = Modifier.size(56.dp)) {
+                BigPlayPause(ui.playing, { if (live) viewModel.musicPlayPause() else viewModel.activate(PlayerMode.MUSIC) })
+                IconButton(onClick = { control { musicNext() } }, modifier = Modifier.size(56.dp)) {
                     Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next track", modifier = Modifier.size(36.dp))
                 }
                 ModeToggle(live, onClick = viewModel::cycleRepeat) {

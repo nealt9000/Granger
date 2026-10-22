@@ -1383,7 +1383,7 @@ class PlayerEngine(
 
     /** Ticks while playing, and while a sleep timer runs; every second, or every 200 ms through the fade. */
     private fun updateTicker() {
-        val want = !released && loaded && (player.isPlaying || sleep.remainingMs != null)
+        val want = !released && loaded && (player.isPlaying || musicUnder?.isPlaying == true || sleep.remainingMs != null)
         if (want == ticking) return
         ticking = want
         ticker.removeCallbacks(tickRunnable)
@@ -1489,10 +1489,13 @@ class PlayerEngine(
                 val p = if (voiceOpen) readAloud.progress.value else null
                 duration = 0L
                 val under = musicUnder
+                val underMusic = under?.let(::musicNow)
                 now = NowPlaying.Voice(
                     src.key, src.title, voiceSection, p?.utterance?.text ?: "", p?.utterance?.paragraph ?: 0, voiceSpeed, id, voiceEnded,
-                    music = under?.let(::musicNow),
+                    music = underMusic,
                     musicPlaying = under != null && under.playWhenReady && under.playbackState != Player.STATE_ENDED,
+                    musicPositionMs = under?.currentPosition?.coerceAtLeast(0L) ?: 0L,
+                    musicDurationMs = under?.duration?.takeIf { it != C.TIME_UNSET && it > 0L } ?: underMusic?.track?.durationMs ?: 0L,
                 )
             }
             mode == Mode.MUSIC -> {
