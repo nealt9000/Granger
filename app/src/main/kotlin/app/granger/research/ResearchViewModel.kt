@@ -6,17 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.BookTarget
 import app.granger.core.ai.ModelManager
 import app.granger.core.ai.ResearchReadiness
-import app.granger.core.books.TextQuote
-import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.ChatTurn
 import app.granger.core.library.Library
 import app.granger.core.library.MediaIndex
-import app.granger.core.library.PackStatus
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.TurnOutcome
@@ -325,43 +321,27 @@ class ResearchViewModel(
         }
     }
 
+    /** Resolves citations; every passage opens through it. */
+    private val opener = CitationOpener(sessions, library, bookshelf, media)
+
+    /** Opens cited passage [n] (1-based) of turn [turnId], as [open] does. */
+    suspend fun open(turnId: Long, n: Int): CitationTarget {
+        val turn = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn ?: return CitationTarget.Gone
+        val passage = turn.shown.getOrNull(n - 1) ?: return CitationTarget.Gone
+        return open(passage, turn.answer, n)
+    }
+
     /**
-     * Opens the cited passage's source in a rail tab, at the passage where it can; [CitationTarget.Gone] when it's gone,
-     * or can't be opened (a storage error is logged, not thrown into the screen's tap handler).
+     * Opens [passage], cited as `[n]` in [answer], at the sentence the answer used where it can; [CitationTarget.Gone]
+     * when it's gone, or can't be opened (a storage error is logged, not thrown into the screen's tap handler).
      */
-    suspend fun open(passage: Passage): CitationTarget = try {
-        target(passage)
+    suspend fun open(passage: Passage, answer: String = "", n: Int = 0): CitationTarget = try {
+        opener.open(passage, answer, n)
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         runCatching { android.util.Log.w("Granger", "Research citation couldn't be opened", e) }
         CitationTarget.Gone
-    }
-
-    private suspend fun target(passage: Passage): CitationTarget {
-        // Checked first: a media card's sourceId is neither a book nor a pack.
-        if (passage.kind == SourceKind.MEDIA) {
-            val work = media.work(passage.sourceId) ?: return CitationTarget.Gone
-            return if (work.isAlbum) CitationTarget.Album(work.id.removePrefix(ALBUM_SOURCE)) else CitationTarget.Audiobook(work.id)
-        }
-        if (!BookIds.isBook(passage.sourceId)) {
-            val pack = library.packs.first().firstOrNull { it.id == passage.sourceId }
-            if (pack == null || pack.status != PackStatus.OK) return CitationTarget.Gone
-            // A catalogue card describes the whole pack, so it opens the pack's main page.
-            val card = passage.kind == SourceKind.CARD
-            val tabId = sessions.openTab(pack.id, if (card) "" else passage.location, passage.sourceTitle)
-            // The tab can vanish between opening and showing it (closed from the rail): the source is gone, say so.
-            if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
-            return CitationTarget.Article(tabId, if (card) null else passage.anchor)
-        }
-        val book = bookshelf.book(passage.sourceId)
-        if (book == null || book.status != PackStatus.OK) return CitationTarget.Gone
-        val tabId = sessions.openTab(book.id, "", book.title)
-        if (citationTab(sessions, tabId) == null) return CitationTarget.Gone
-        val placed = passage.kind == SourceKind.BOOK || (passage.kind == SourceKind.SELECTION && passage.location.isNotEmpty())
-        if (!placed) return CitationTarget.Book(tabId, at = null)
-        val quote = TextQuote("", cutAtWord(passage.text.trim(), BOOK_QUOTE), "")
-        return CitationTarget.Book(tabId, BookTarget(passage.location, passage.progression, quote))
     }
 
     /** Deletes this chat (stopping a running turn) and leaves the view empty. */
@@ -571,7 +551,6 @@ class ResearchViewModel(
         const val MAX_QUESTION = 1_000
         const val TITLE = 60
         const val QUOTE_TITLE = 40
-        const val BOOK_QUOTE = 80
         const val DEEPER_PASSAGES = 8
         private val DEEPENABLE = setOf(TurnOutcome.ANSWERED, TurnOutcome.UNVERIFIED)
         private val RETRYABLE = setOf(TurnOutcome.INTERRUPTED, TurnOutcome.FAILED, TurnOutcome.SEARCH_FAILED)

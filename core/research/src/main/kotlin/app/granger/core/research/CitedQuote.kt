@@ -46,7 +46,7 @@ object CitedQuote {
         val raw = text.substring(best)
         val start = best.first + (raw.length - raw.trimStart().length)
         val sentence = cut(raw.trim())
-        val end = start + sentence.removeSuffix("…").length
+        val end = start + sentence.length
         return Quote(
             before = text.substring((start - CONTEXT).coerceAtLeast(0), start),
             sentence = sentence,
@@ -83,11 +83,11 @@ object CitedQuote {
         return out
     }
 
-    /** At most [MAX_CHARS], cut at a word with "…". */
+    /** At most [MAX_CHARS], cut at a word; no "…", since the quote is matched against the page, not shown. */
     private fun cut(s: String): String {
         if (s.length <= MAX_CHARS) return s
         val head = s.substring(0, MAX_CHARS)
         val space = head.indexOfLast { it.isWhitespace() }
-        return (if (space > 0) head.substring(0, space) else head).trimEnd() + "…"
+        return (if (space > 0) head.substring(0, space) else head).trimEnd()
     }
 }

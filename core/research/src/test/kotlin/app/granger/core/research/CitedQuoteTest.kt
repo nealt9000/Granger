@@ -40,9 +40,8 @@ class CitedQuoteTest {
     @Test fun longQuotesAreCutAtAWord() {
         val long = (1..80).joinToString(" ") { "word$it" } + "."
         val q = CitedQuote.pick("word5 [1]", 1, long)!!.sentence
-        assertThat(q.length).isAtMost(CitedQuote.MAX_CHARS + 1)
-        assertThat(q).endsWith("…")
-        assertThat(long).startsWith(q.removeSuffix("…"))
+        assertThat(q.length).isAtMost(CitedQuote.MAX_CHARS)
+        assertThat(long).startsWith("$q ")
     }
 
     @Test fun contextIsFortyCharsEachSide() {

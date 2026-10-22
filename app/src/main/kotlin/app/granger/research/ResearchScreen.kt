@@ -199,9 +199,9 @@ fun ResearchScreen(
         list.scrollBy(Float.MAX_VALUE / 2)
     }
 
-    fun open(passage: Passage) {
+    fun open(turnId: Long, n: Int) {
         scope.launch {
-            when (val target = viewModel.open(passage)) {
+            when (val target = viewModel.open(turnId, n)) {
                 CitationTarget.Gone -> snackbar.showSnackbar(SOURCE_GONE)
                 else -> onOpenCitation(target)
             }
@@ -318,7 +318,7 @@ fun ResearchScreen(
                         onGuess = { viewModel.bestGuess(row.turn.turn.id) },
                         onReadiness = onReadiness,
                     )
-                    is ThreadRow.Source -> SourceCard(row.n, row.passage, flashing == row.key) { open(row.passage) }
+                    is ThreadRow.Source -> SourceCard(row.n, row.passage, flashing == row.key) { open(row.turnId, row.n) }
                     is ThreadRow.Deeper -> OutlinedButton(
                         onClick = { viewModel.thinkDeeper(row.turnId) },
                         modifier = Modifier.padding(horizontal = 16.dp),

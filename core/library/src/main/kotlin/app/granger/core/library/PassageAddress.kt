@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.research.CitedQuote
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 
@@ -9,7 +10,8 @@ import app.granger.core.research.SourceKind
  *
  * - `article:<packId>/<path>#<anchor>~<quote>` (anchor and quote optional), `pack:<packId>` for a pack's main page;
  * - `book:<origin>:<ref>/<href>@<progression>~<quote>` (quote optional; an empty href is "where it was left");
- * - `track:<id>@<ms>` and `audiobook:<id>@<chapter>/<ms>` ([MediaAddress]), `album:<albumKey>` for a whole album.
+ * - `track:<id>@<ms>` and `audiobook:<id>@<chapter>/<ms>` ([MediaAddress]); `album:<albumKey>` and the bare
+ *   `audiobook:<id>` for a whole album or audiobook (which resumes where it was left).
  *
  * Every field is percent-encoded for `%`, `#`, `~`, `@` and `?` (and `/`, except inside paths and hrefs), so ids holding
  * `:` and paths holding `/` split cleanly.
@@ -45,8 +47,9 @@ sealed interface PassageAddress {
         override fun format() = MediaAddress.track(id, ms)
     }
 
-    data class Audiobook(val id: String, val chapter: Int = 0, val ms: Long = 0) : PassageAddress {
-        override fun format() = MediaAddress.audiobook(id, chapter, ms)
+    /** [chapter] null is the whole audiobook. */
+    data class Audiobook(val id: String, val chapter: Int? = null, val ms: Long = 0) : PassageAddress {
+        override fun format() = if (chapter == null) id else MediaAddress.audiobook(id, chapter, ms)
     }
 
     companion object {
@@ -55,6 +58,7 @@ sealed interface PassageAddress {
         private const val BOOK = "book:"
         private const val ALBUM = "album:"
         private const val TRACK = "track:"
+        private const val AUDIOBOOK = "audiobook:"
         private const val CHAPTER = "chapter:"
         private const val RESERVED = "%#~@?/"
         private const val RESERVED_IN_PATH = "%#~@?"
@@ -62,7 +66,7 @@ sealed interface PassageAddress {
         /** The address of [passage]; [quote] is the cited sentence, when one was picked. */
         fun of(passage: Passage, quote: String? = null): PassageAddress = when (passage.kind) {
             SourceKind.ARTICLE -> Article(passage.sourceId, passage.location, passage.anchor, quote)
-            SourceKind.CARD -> Pack(passage.sourceId)
+            SourceKind.CARD -> if (BookIds.isBook(passage.sourceId)) Book(passage.sourceId, "", 0.0) else Pack(passage.sourceId)
             SourceKind.BOOK -> Book(passage.sourceId, passage.location, passage.progression, quote)
             SourceKind.SELECTION ->
                 if (!BookIds.isBook(passage.sourceId)) Article(passage.sourceId, passage.location, passage.anchor, quote)
@@ -70,6 +74,18 @@ sealed interface PassageAddress {
                 else Book(passage.sourceId, passage.location, passage.progression, quote)
             SourceKind.MEDIA -> media(passage)
         }
+
+        /**
+         * The sentence of [passage] that [answer] used, citing it as `[n]`, with its context; null for the kinds that
+         * don't open at text (cards and media).
+         */
+        fun quoteOf(passage: Passage, answer: String, n: Int): CitedQuote.Quote? =
+            if (passage.kind in QUOTED) CitedQuote.pick(answer, n, passage.text) else null
+
+        /** [passage]'s address as cited `[n]` in [answer]. */
+        fun cited(passage: Passage, answer: String, n: Int): PassageAddress = of(passage, quoteOf(passage, answer, n)?.sentence)
+
+        private val QUOTED = setOf(SourceKind.ARTICLE, SourceKind.BOOK, SourceKind.SELECTION)
 
         /** A media card focused on a part has `location` = the track id or `chapter:<ordinal>`; a whole work has "". */
         private fun media(passage: Passage): PassageAddress {
@@ -89,6 +105,7 @@ sealed interface PassageAddress {
                 s.startsWith(PACK) -> dec(s.removePrefix(PACK))?.takeIf { it.isNotEmpty() }?.let(::Pack)
                 s.startsWith(BOOK) -> book(s.removePrefix(BOOK))
                 s.startsWith(ALBUM) -> dec(s.removePrefix(ALBUM))?.takeIf { it.isNotEmpty() }?.let(::Album)
+                s.startsWith(AUDIOBOOK) && '@' !in s && s.length > AUDIOBOOK.length -> Audiobook(s)
                 else -> when (val m = MediaAddress.parse(s)) {
                     is MediaAddress.Parsed.TrackAt -> Track(m.id, m.ms)
                     is MediaAddress.Parsed.AudiobookAt -> Audiobook(m.id, m.chapter, m.ms)

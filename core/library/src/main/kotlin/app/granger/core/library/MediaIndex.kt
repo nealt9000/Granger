@@ -111,6 +111,9 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
     /** The present album ("album:<albumKey>") or audiobook (its id) with this id; null when it's gone or MISSING. */
     suspend fun work(id: String): MediaWork? = current().workById[id]
 
+    /** The album holding track [trackId], for a song's address that doesn't name its album. */
+    suspend fun workWithPart(trackId: String): MediaWork? = current().works.firstOrNull { trackId in it.value.partIds }?.value
+
     private class Inputs(val tracks: List<Track>, val books: List<Audiobook>, val chapters: List<AudiobookChapter>, val notes: List<AlbumNote>)
 
     /** A field's words, stored once, folded. */

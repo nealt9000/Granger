@@ -789,6 +789,20 @@ class ResearchViewModelTest {
         assertThat(sessions.tabs.value.single { it.id == card.tabId }.path).isEmpty()
     }
 
+    @Test fun aCitationOpensByTurnAndNumberWithTheAnswersQuote() = runTest(main.dispatcher) {
+        library.packList.value = (1..10).map { pack("pack$it") }
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        val first = turn.shown.first()
+        val target = vm.open(turn.id, 1) as CitationTarget.Article
+        assertThat(target.quote).isEqualTo(first.text)
+        assertThat(sessions.tabs.value.single { it.id == target.tabId }.packId).isEqualTo(first.sourceId)
+        assertThat(vm.open(turn.id, 99)).isEqualTo(CitationTarget.Gone)
+        assertThat(vm.open(-1, 1)).isEqualTo(CitationTarget.Gone)
+    }
+
     @Test fun bookCitationOpensAtThePassage() = runTest(main.dispatcher) {
         bookshelf.bookList.value = listOf(book("book:granger:emma", title = "Emma"))
         val vm = vm()
@@ -796,7 +810,7 @@ class ResearchViewModelTest {
         val passage = Passage(SourceKind.BOOK, "book:granger:emma", "Emma", location = "ch1.xhtml", progression = 0.25, text = text)
         val target = vm.open(passage) as CitationTarget.Book
         assertThat(target.at).isEqualTo(
-            BookTarget("ch1.xhtml", 0.25, TextQuote("", "Emma Woodhouse, handsome, clever, and rich, with a comfortable home and happy", "")),
+            BookTarget("ch1.xhtml", 0.25, TextQuote("", text, "")),
         )
         assertThat(sessions.tabs.value.single { it.id == target.tabId }.packId).isEqualTo("book:granger:emma")
         val card = vm.open(passage.copy(kind = SourceKind.CARD)) as CitationTarget.Book

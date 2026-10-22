@@ -30,6 +30,9 @@ data class ChatTurn(
     val guessFellBack: Boolean = false,
 )
 
+/** Where each shown passage lives, as the answer cites it (`[1]` is the first); read-aloud and plans reuse these. */
+fun ChatTurn.addresses(): List<PassageAddress> = shown.mapIndexed { i, passage -> PassageAddress.cited(passage, answer, i + 1) }
+
 data class ChatSummary(val id: Long, val title: String, val updatedAt: Long)
 
 /** Kept Research chats: questions, answers and the passages they cite. */

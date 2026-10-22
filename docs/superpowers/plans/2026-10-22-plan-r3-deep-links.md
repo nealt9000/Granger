@@ -82,7 +82,7 @@ Spec §12 decisions carry over. The builder's calls below are for Neal's review.
    - `pack:<packId>` for a card (the main page)
    - `album:<albumKey>` for a whole-album card
 
-   An audiobook with no part is `audiobook:<id>@0/0`.
+   A whole audiobook is the bare `audiobook:<id>` (it resumes where it was left; `@0/0` would be chapter 0's start).
 3. **The quote rule.** A claim is each answer sentence that cites `[n]`; with no such sentence, the whole answer is the claim.
    Words are folded (lower case, accents off) and stopwords dropped (`Keywords.isStopword`). Each sentence of the passage
    scores its shared content words over √(its content words). Ties go to the earlier sentence, and sentences under 4 words
