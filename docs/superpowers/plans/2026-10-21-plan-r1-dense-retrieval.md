@@ -505,6 +505,15 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
     passage says 0–40: the one declined lost, and a harmful one.
   - **Wrapped up, not adopted** (2026-10-23): +2 multi-step does not pay for −3 ordinary and −1 declined. The code
     stays in `tools/eval/multistep.py` for a later model (E4B, or a stronger splitter) to retry.
+- [x] **Ranking sweep** (2026-10-23, `merge.py sweep r1-dense-1`, Mac only). The app's ranker
+  (`gated g0.78 l1.0 hybrid a0.1 f0.74`): location 65/126, unanswerable empty 58/76, parts@4 5/20.
+  - The 6 found-but-not-chosen: bible-006, bible-007 and literature-004 are already grounded from other passages;
+    the headroom is literature-002 (not-grounded), multi-step-012 and multi-step-020 (declined).
+  - Only `cover` (b0.05/0.10) gains with no loss: location 67, empty 58, parts@4 6–7. It changes two questions:
+    medical-017 (already grounded) and multi-step-020 (gets its passages; ms-3 showed E2B still answering it wrong).
+  - rrf and lower gates reach literature-004 and multi-step-012 but lose 26 of the 58 empty unanswerables, plus five
+    grounded answers.
+  - **Not compelling** (one possible answer at best): no phone run, ranking left as is. `cover` stays in merge.py.
 - [ ] Compare it with `r1-base` (`eval.py report --compare`):
   - grounded, declined, recall@4;
   - the failure table from the R0 results (among the 4 / found but not chosen / never found);
