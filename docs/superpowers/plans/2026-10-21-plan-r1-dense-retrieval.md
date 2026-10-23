@@ -408,8 +408,36 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
 
 ### Task 11: The tuning run and the decision
 
-- [ ] Run the full tuning split with `DENSE_RETRIEVAL` on (`r1-dense`), and grade it in-session against
-  `tools/eval/RUBRIC.md`.
+- [x] Run the full tuning split with `DENSE_RETRIEVAL` on (`r1-dense-1`, 2026-10-22, `--dense on`), and grade it in-session
+  against `tools/eval/RUBRIC.md`. The vectors were the priority packs plus the Classics (353 files, 420 MB on the phone).
+
+  | Tuning split | r1-base | r1-dense-1 | Gate |
+  |---|---|---|---|
+  | Retrieval recall@4 | 25% | 52% | +10 points: **pass** |
+  | Answerable grounded | 53/126 (42%) | 86/126 (68%) | +5 points: **pass** |
+  | Unanswerable declined | 71/76 (93%) | 67/76 (88.2%) | 89%: **fail by one question** |
+  | Send to first words, median / p90 | 14.1 s / 18.4 s | 16.5 s / 22.2 s | ≤ 17.4 s: **pass** |
+  | `ms.dense` (scan + rebuild), median / p90 / max | – | 2.2 s / 3.5 s / 6.1 s | 1 s: **fail** |
+  | Phone vs `merge.py` port, same 4 | – | 201/202 | 200: **pass** |
+  | Found but not chosen / never found | 12 / 82 | 6 / 55 | – |
+  | Think deeper grounded | 2/13 | 3/13 | – |
+
+  The dense scan finished before the keyword search on all 191 questions that used it, so it adds no wait by itself.
+  But the keyword search got slower (median 7.6 → 8.6 s), probably from the two sharing CPU cores.
+
+  **Unanswerable questions the app answered (9):** seven new ones, plus two that `r1-base` already answered
+  (`unanswerable-025` and `unanswerable-045`). In each, dense found passages on the topic but not the question, and E2B
+  answered from them:
+  - the 2018 midterms for 2026;
+  - the 2016 World Series for 2026;
+  - a congresswoman as "your state representative";
+  - a fable's dog as "my neighbor's dog";
+  - the 2019 playoffs for "this season";
+  - Hamlet's food for "his favorite food".
+
+  Their top cosines (0.75–0.83) overlap the answerable ones, so the gate can't separate them. At 0.80 it would empty 1 of
+  the 9 and drop 8 grounded-capable answers. This is the answer model's judgment, not retrieval's.
+- [ ] **Stopped here for Neal**, per the global constraint: grounded rose, but declined fell below 89%.
 - [ ] Compare it with `r1-base` (`eval.py report --compare`):
   - grounded, declined, recall@4;
   - the failure table from the R0 results (among the 4 / found but not chosen / never found);
