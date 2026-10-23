@@ -464,6 +464,24 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
     (3) a ranking sweep for the 8 found-but-not-chosen. Both are measured on the Mac first; then one phone run against
     `r1-dense-1`, only if the gains are compelling. Task 10 runs in parallel on branch `r1-task10`.
   - The phone is held until then.
+- [x] **Multi-step run `ms-2`** (2026-10-23, E2B on the Pixel 6; split prompt v2, per-part dense search on the Mac, combine).
+  Graded in-session against RUBRIC.md (57 new replies).
+
+  | Tuning split | r1-dense-1 | ms-2 |
+  |---|---|---|
+  | Answerable grounded | 86/126 (68%) | 80/126 (63%) |
+  | Unanswerable declined | 67/76 (88%) | 64/76 (84%) |
+  | Retrieval recall@4 | 52% | 47% |
+  | Multi-step grounded | 4/20 | 4/20 |
+  | Ordinary answerable questions split (48) grounded | 37 | 31 |
+
+  - E2B split all 20 multi-step questions, but also 48 ordinary ones and 4 unanswerable ones; no split used a #ref, so
+    round 3 had nothing to do.
+  - Splitting found the facts (the dry run's 13/20), but the combine step lost them: wrong arithmetic (1492→1620 as 20
+    years, 969−950 as 50, 1869→1911 as 22), wrong comparisons (Darwin/Lincoln same birthday called "older"), wrong
+    citations.
+  - **Not compelling:** no gain on multi-step, a loss on the rest. Worth trying only with a stricter split gate and
+    the date arithmetic done in code, not by E2B.
 - [ ] Compare it with `r1-base` (`eval.py report --compare`):
   - grounded, declined, recall@4;
   - the failure table from the R0 results (among the 4 / found but not chosen / never found);

@@ -53,6 +53,33 @@ Question: What is a bowline knot?
 1. What is a bowline knot?
 """
 
+# v2: most questions are simple; a split is asked for only when the answer needs facts from separate articles.
+SPLIT_V2 = """Does answering the question need two or more separate facts that would be in different encyclopedia articles?
+If not, reply exactly: SIMPLE
+If so, write the simple questions, numbered, one fact each. When a question needs an earlier answer, write #1 or #2 for it.
+Don't write a question that repeats the whole question or combines the others.
+Example:
+Question: Who was older, Mozart or Haydn?
+1. When was Mozart born?
+2. When was Haydn born?
+Example:
+Question: What language is spoken in the country where the Taj Mahal is?
+1. In which country is the Taj Mahal?
+2. What language is spoken in #1?
+Example:
+Question: Was Napoleon alive when the Eiffel Tower was built?
+1. When did Napoleon die?
+2. When was the Eiffel Tower built?
+Example:
+Question: How did Julius Caesar die?
+SIMPLE
+Example:
+Question: What does the Rosetta Stone say?
+SIMPLE
+"""
+
+SPLITS = {"v1": SPLIT, "v2": SPLIT_V2}
+
 RULES = """You are Granger's research librarian. Answer the question using only the numbered passages from the user's library below.
 Rules:
 - Answer the question directly in your first sentence, then give the supporting details.
@@ -68,8 +95,8 @@ Rules:
 
 # ---- prompts ----
 
-def split_prompt(question, prior=None):
-    head = SPLIT + ("Previous question: %s\n" % prior if prior else "")
+def split_prompt(question, prior=None, version="v1"):
+    head = SPLITS[version] + ("Previous question: %s\n" % prior if prior else "")
     return head + "Question: %s" % question
 
 
@@ -234,7 +261,7 @@ def base_items(base):
 
 def cmd_split(a):
     (RUNS / a.new).mkdir(parents=True, exist_ok=True)
-    rows = [{"id": id, "prompt": split_prompt(it["question"], it.get("priorQuestion")), "passages": 0}
+    rows = [{"id": id, "prompt": split_prompt(it["question"], it.get("priorQuestion"), a.prompt), "passages": 0}
             for id, it in base_items(a.base).items()]
     answerers.write_jsonl(RUNS / a.new / "split-prompts.jsonl", rows)
     print("%d split prompts -> runs/%s/split-prompts.jsonl" % (len(rows), a.new))
@@ -246,7 +273,8 @@ def parts_of(new):
     out = {}
     for id, r in replies(new, "split").items():
         qs = parse_split(r.get("reply"))
-        if len(qs) >= 2:
+        # A list of statements, or a part twice, is not a split.
+        if len(qs) >= 2 and len(set(qs)) == len(qs) and all(q.endswith("?") for q in qs):
             out[id] = qs
     return out
 
@@ -376,6 +404,8 @@ def main(argv=None):
     s = p.add_subparsers(dest="cmd", required=True)
     for name, f in (("split", cmd_split), ("combine", cmd_combine), ("build", cmd_build)):
         c = s.add_parser(name); c.add_argument("base"); c.add_argument("new"); c.set_defaults(f=f)
+        if name == "split":
+            c.add_argument("--prompt", default="v2", choices=sorted(SPLITS))
     c = s.add_parser("hop"); c.add_argument("base"); c.add_argument("new"); c.add_argument("--round", type=int, required=True)
     c.set_defaults(f=cmd_hop)
     c = s.add_parser("replay"); c.add_argument("new"); c.add_argument("stage"); c.add_argument("--model", required=True)

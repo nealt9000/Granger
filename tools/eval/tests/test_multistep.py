@@ -35,3 +35,8 @@ def test_a_part_under_the_gate_gets_no_passages():
     assert ms.pick([{"cosine": 0.77, "source": "s", "location": "l", "text": "x"}]) == []
     hits = [{"cosine": 0.80 - i / 100, "source": "s", "location": "l%d" % (i // 3), "text": "t%d" % i} for i in range(9)]
     assert [p["text"] for p in ms.pick(hits)] == ["t0", "t1", "t3", "t4"]  # two per document, four in all
+
+
+def test_a_simple_reply_is_no_split():
+    assert ms.parse_split("SIMPLE") == []
+    assert ms.split_prompt("How did he die?", "Who was Caesar?", "v2").endswith("Previous question: Who was Caesar?\nQuestion: How did he die?")
