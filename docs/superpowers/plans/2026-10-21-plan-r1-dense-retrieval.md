@@ -438,6 +438,14 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
   Their top cosines (0.75–0.83) overlap the answerable ones, so the gate can't separate them. At 0.80 it would empty 1 of
   the 9 and drop 8 grounded-capable answers. This is the answer model's judgment, not retrieval's.
 - [ ] **Stopped here for Neal**, per the global constraint: grounded rose, but declined fell below 89%.
+- [x] **Neal's calls (2026-10-23):**
+  - A hedge on weak matches (best dense hit under 0.80) was built and reverted (4f82774, f165089). The replay showed no
+    better experience, and it cost a schema bump.
+  - No year/season mismatch check: Neal prefers fixes that don't need question-specific tricks.
+  - Next: (1) multi-step questions, which are 16 of the 40 answerable misses (4 of 20 grounded; the rest are 82 of 106).
+    (3) a ranking sweep for the 8 found-but-not-chosen. Both are measured on the Mac first; then one phone run against
+    `r1-dense-1`, only if the gains are compelling. Task 10 runs in parallel on branch `r1-task10`.
+  - The phone is held until then.
 - [ ] Compare it with `r1-base` (`eval.py report --compare`):
   - grounded, declined, recall@4;
   - the failure table from the R0 results (among the 4 / found but not chosen / never found);
