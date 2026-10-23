@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="200" android:viewportHeight="200">
+  <path android:fillColor="#E8601C" android:pathData="M100,20 A17,17 0 1 1 99.99,20 Z"/>
+  <group android:rotation="-40" android:pivotX="100" android:pivotY="180">
+    <path android:fillColor="@color/granger_ink" android:pathData="M95.5,74.5 A4.5,4.5 0 0 1 104.5,74.5 V175.5 A4.5,4.5 0 0 1 95.5,175.5 Z"/>
+  </group>
+  <group android:rotation="-20" android:pivotX="100" android:pivotY="180">
+    <path android:fillColor="@color/granger_ink" android:pathData="M95.5,67.5 A4.5,4.5 0 0 1 104.5,67.5 V175.5 A4.5,4.5 0 0 1 95.5,175.5 Z"/>
+  </group>
+  <group android:rotation="0" android:pivotX="100" android:pivotY="180">
+    <path android:fillColor="@color/granger_ink" android:pathData="M95.5,64.5 A4.5,4.5 0 0 1 104.5,64.5 V175.5 A4.5,4.5 0 0 1 95.5,175.5 Z"/>
+  </group>
+  <group android:rotation="20" android:pivotX="100" android:pivotY="180">
+    <path android:fillColor="@color/granger_ink" android:pathData="M95.5,67.5 A4.5,4.5 0 0 1 104.5,67.5 V175.5 A4.5,4.5 0 0 1 95.5,175.5 Z"/>
+  </group>
+  <group android:rotation="40" android:pivotX="100" android:pivotY="180">
+    <path android:fillColor="@color/granger_ink" android:pathData="M95.5,74.5 A4.5,4.5 0 0 1 104.5,74.5 V175.5 A4.5,4.5 0 0 1 95.5,175.5 Z"/>
+  </group>
+</vector>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#0E0E0E</color>
+    <color name="granger_flame">#E8601C</color>
+    <color name="granger_amber">#E8B66B</color>
+    <color name="granger_parchment">#ECE6DA</color>
+    <color name="granger_ink">#140A04</color>
+    <color name="granger_background">#0E0E0E</color>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Requires androidx.core:core-splashscreen. Set as the launcher activity theme; call installSplashScreen() before setContent. -->
+<resources>
+    <style name="Theme.Granger.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/granger_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/granger_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Granger</item>
+    </style>
+</resources>
