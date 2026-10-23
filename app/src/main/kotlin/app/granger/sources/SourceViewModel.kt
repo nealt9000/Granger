@@ -1,5 +1,6 @@
 package app.granger.sources
 
+import app.granger.core.catalog.downloadBytes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -322,7 +323,7 @@ class SourceViewModel(
                 is ModelEntry -> if (item.role != ModelRole.EMBEDDER) "" else if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet"
                 is VoiceEntry -> item.attribution
             }
-            return ItemRow(item.id, item.title, details, description, item.sizeBytes, status(item), packId)
+            return ItemRow(item.id, item.title, details, description, item.downloadBytes, status(item), packId)
         }
         val needle = s.query.trim()
         val kiwix = scope == CatalogScope.KIWIX
@@ -386,7 +387,7 @@ class SourceViewModel(
         val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val todo = items.filter { wanted(status(it)) }
-            PresetRow(preset.id, preset.title, items.size, todo.size, todo.sumOf { it.sizeBytes })
+            PresetRow(preset.id, preset.title, items.size, todo.size, todo.sumOf { it.downloadBytes })
         }
         return SourceUi(
             tab = s.tab,

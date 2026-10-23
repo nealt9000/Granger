@@ -15,6 +15,7 @@ import app.granger.core.ai.LlmBackend
 import app.granger.core.ai.ModelManager
 import app.granger.core.catalog.CatalogRepository
 import app.granger.core.catalog.CatalogSource
+import app.granger.core.catalog.ModelRole
 import app.granger.core.downloads.AndroidVolumes
 import app.granger.core.downloads.DownloadDatabase
 import app.granger.core.downloads.DownloadManager
@@ -25,6 +26,7 @@ import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.DownloadsHost
 import app.granger.core.downloads.FileDownloader
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.VectorDownloads
 import app.granger.core.downloads.VoiceUnpacker
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.file
@@ -140,7 +142,13 @@ import java.util.Base64
 import java.util.concurrent.TimeUnit
 import app.granger.core.library.BookIds
 import app.granger.core.library.DensePassageFinder
+import app.granger.core.library.CombinedVectorSources
 import app.granger.core.library.DirectoryVectorSources
+import app.granger.core.library.ListedVectorSources
+import app.granger.core.library.ListedVectors
+import app.granger.core.research.SourceKind
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import app.granger.core.research.FictionWeight
 import java.util.concurrent.Executors
 
@@ -150,7 +158,11 @@ open class GrangerApp : Application(), DownloadsHost {
     override fun onCreate() {
         super.onCreate()
         if (Features.PLAYER) startMedia()
+        startVectorDownloads()
     }
+
+    /** Search vectors follow their pack or book (Plan R1 Task 10). JVM tests swap this out (`TestGrangerApp`). */
+    protected open fun startVectorDownloads() = container.followVectors()
 
     /**
      * The player hub is made here, not on first use: a playback service the system restarts on its own stops at once
@@ -506,8 +518,57 @@ class AppContainer(context: Context) {
 
     val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex)
 
-    /** Plan R1's vector files, pushed to `files/vectors/` with an index until the catalog lists them (Task 10). */
-    val vectorSources = DirectoryVectorSources(File(context.getExternalFilesDir(null), "vectors"))
+    /** Search vectors follow their pack or book (Plan R1 Task 10): queued when it installs, removed with it. */
+    private val vectorDownloads = VectorDownloads(downloads) { downloadPrefs.wifiOnly }
+
+    /** Keeps the vectors downloads matching the installed items and the catalog, from the cached catalog on. */
+    fun followVectors() {
+        appScope.launch {
+            catalog.load()
+            combine(catalog.state.map { it.catalog }.distinctUntilChanged(), downloads.records) { c, r -> c to r }
+                .collectLatest { (c, r) ->
+                    try {
+                        vectorDownloads.reconcile(c, r)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w("Granger", "Couldn't update the search vectors downloads", e)
+                    }
+                }
+        }
+    }
+
+    /**
+     * Plan R1's vector files: the installed vectors downloads (a pack's under its ZIM name, a Classic's under its book id;
+     * the newest version of each), then any pushed to `files/vectors/` with an index for the eval.
+     */
+    val vectorSources = CombinedVectorSources(
+        ListedVectorSources(::installedVectors, ::installedEmbedderSha),
+        DirectoryVectorSources(File(context.getExternalFilesDir(null), "vectors")),
+    )
+
+    private suspend fun installedVectors(): List<ListedVectors> {
+        val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
+        val byItem = records.groupBy { it.itemId }
+        val packsByPath = library.packs.first().associateBy { it.filePath }
+        return records.filter { it.kind == ItemKind.VECTORS }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+            val parentId = VectorDownloads.parentOf(itemId) ?: return@mapNotNull null
+            val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
+            val file = versions.maxBy { it.createdAt }.file
+            when (parent.kind) {
+                ItemKind.PACK -> packsByPath[parent.filePath]?.name?.ifBlank { null }?.let { ListedVectors(file, SourceKind.ARTICLE, it) }
+                ItemKind.BOOK -> ListedVectors(file, SourceKind.BOOK, BookIds.of(BookOrigin.GRANGER, parentId))
+                else -> null
+            }
+        }
+    }
+
+    /** The installed EmbeddingGemma's sha256, which a vector file must have been embedded with; null if unknown. */
+    private suspend fun installedEmbedderSha(): String? {
+        val embedders = catalog.state.value.catalog?.models.orEmpty().filter { it.role == ModelRole.EMBEDDER }.mapTo(HashSet()) { it.id }
+        return downloads.records.first()
+            .firstOrNull { it.kind == ItemKind.MODEL && it.state == DownloadState.INSTALLED && it.itemId in embedders }?.hash
+    }
 
     /** The scan's threads: each file is split into ranges searched at once. */
     private val vectorPool by lazy { Executors.newFixedThreadPool(4) }

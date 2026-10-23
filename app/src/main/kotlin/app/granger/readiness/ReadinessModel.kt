@@ -1,5 +1,6 @@
 package app.granger.readiness
 
+import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
@@ -8,6 +9,7 @@ import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.VectorDownloads
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Pack
@@ -199,7 +201,7 @@ object ReadinessModel {
             val item = d.missingEssential.first()
             // A domain can hold packs outside its tiers (Stack Overflow in Technology): its bar isn't empty, only its essentials.
             val lead = if (d.installedBytes > 0L) "No essentials yet for" else "Nothing yet for"
-            Signal.EmptyDomain(d.id, item, "$lead ${d.title}. Get ${item.title}, ${formatBytes(item.sizeBytes)}.")
+            Signal.EmptyDomain(d.id, item, "$lead ${d.title}. Get ${item.title}, ${formatBytes(item.downloadBytes)}.")
         }
         val recordByPath = installed.associateBy { it.filePath }
         val stale = packs.sortedBy { it.title.lowercase() }.mapNotNull { pack ->
@@ -228,7 +230,14 @@ object ReadinessModel {
             items[source.ordinal] += count
         }
         val groups = HashSet<String>()
+        val byItem = installed.associateBy { it.itemId }
         for (record in installed) {
+            if (record.kind == ItemKind.VECTORS) {
+                // Search vectors (Plan R1) are part of their item: its source, its count.
+                val parent = VectorDownloads.parentOf(record.itemId)?.let(byItem::get)
+                add(parent?.let(::sourceOf) ?: Source.GRANGER, record.sizeBytes, 0)
+                continue
+            }
             val source = sourceOf(record)
             val group = record.groupId
             val counts = group == null || groups.add(group)

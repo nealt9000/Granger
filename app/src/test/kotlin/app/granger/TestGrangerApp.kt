@@ -12,4 +12,6 @@ class TestGrangerApp : GrangerApp() {
     override fun startMedia() {
         mediaStarted = true
     }
+
+    override fun startVectorDownloads() = Unit
 }

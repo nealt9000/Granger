@@ -11,6 +11,7 @@ import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.Integrity
 import app.granger.core.downloads.IntegrityChecker
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.VectorDownloads
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.library.Book
@@ -147,7 +148,8 @@ class ReadinessViewModel(
     fun repair(key: String) {
         appScope.launch {
             val files = filesOf(key)
-            val damaged = if (key.startsWith(GROUP)) {
+            // A media item, or an item with its search vectors: only the damaged files.
+            val damaged = if (files.size > 1) {
                 val res = results.value
                 withContext(io) {
                     files.filter { r -> res[keyOf(r)] == Integrity.CORRUPTED || quick(r).let { it == Integrity.MISSING || it == Integrity.INCOMPLETE } }
@@ -162,21 +164,28 @@ class ReadinessViewModel(
         }
     }
 
-    /** The installed files a row stands for: one, or every file of a media group. */
+    /** The installed files a row stands for: one with its search vectors (Plan R1), or every file of a media group. */
     private suspend fun filesOf(key: String): List<DownloadRecord> {
         val records = downloads.records.first()
         return if (key.startsWith(GROUP)) {
             val group = key.removePrefix(GROUP)
             records.filter { it.groupId == group && it.state == DownloadState.INSTALLED }
         } else {
-            listOfNotNull(records.firstOrNull { keyOf(it) == key })
+            val record = records.firstOrNull { keyOf(it) == key } ?: return emptyList()
+            listOf(record) + vectorsOf(record, records.filter { it.state == DownloadState.INSTALLED })
         }
     }
+
+    /** [record]'s installed search vectors, when it is a pack or a book. */
+    private fun vectorsOf(record: DownloadRecord, installed: List<DownloadRecord>): List<DownloadRecord> =
+        if (record.kind != ItemKind.PACK && record.kind != ItemKind.BOOK) emptyList()
+        else installed.filter { it.kind == ItemKind.VECTORS && VectorDownloads.parentOf(it.itemId) == record.itemId }
 
     private fun build(records: List<DownloadRecord>, packs: List<Pack>, src: Sources, chk: Checks): ReadinessUi {
         val (vols, prog, res) = chk
         val all = records.filter { it.state == DownloadState.INSTALLED }
-        val (grouped, installed) = all.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
+        // Search vectors (Plan R1) are part of their item's row, not rows of their own.
+        val (grouped, installed) = all.filter { it.kind != ItemKind.VECTORS }.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
         val media = grouped.groupBy { it.groupId!! }.map { (group, files) -> groupRow(group, files, prog, res) }
         val packByPath = packs.associateBy { it.filePath }
         val voiceKeys = installed.filter { it.kind == ItemKind.VOICE }.mapTo(HashSet()) { keyOf(it) }
@@ -184,21 +193,29 @@ class ReadinessViewModel(
             val key = keyOf(record)
             val pack = packByPath[record.filePath]
             val live = quick(record)
-            val status = when {
+            val own = when {
                 // A file that has since gone or shrunk beats any earlier full check.
                 live == Integrity.MISSING || live == Integrity.INCOMPLETE -> live.toStatus()
                 res[key] == Integrity.CORRUPTED -> CheckStatus.CORRUPTED
                 pack?.status == PackStatus.CORRUPT -> CheckStatus.DAMAGED
                 else -> (res[key] ?: live).toStatus()
             }
+            // Its search vectors count in its size and its status: the worst file decides, a damaged pack first.
+            val vectors = vectorsOf(record, all)
+            val statuses = listOf(own) + vectors.map { v ->
+                val q = quick(v)
+                if (q == Integrity.MISSING || q == Integrity.INCOMPLETE) q.toStatus() else (res[keyOf(v)] ?: q).toStatus()
+            }
+            val status = if (own == CheckStatus.DAMAGED) own else WORST_FIRST.firstOrNull { it in statuses } ?: own
+            val files = listOf(record) + vectors
             CheckRow(
                 key = key,
                 title = pack?.title ?: record.title,
                 isModel = record.kind == ItemKind.MODEL,
                 snapshotDate = record.snapshotDate,
-                sizeBytes = record.sizeBytes,
+                sizeBytes = files.sumOf { it.sizeBytes },
                 status = status,
-                verifiedAt = record.verifiedAt,
+                verifiedAt = if (files.all { it.verifiedAt != null }) files.minOf { it.verifiedAt!! } else null,
                 progress = prog[key],
                 canVerify = status != CheckStatus.MISSING && key !in prog,
                 canRepair = status in REPAIRABLE,

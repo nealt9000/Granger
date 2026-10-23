@@ -187,6 +187,48 @@ class ReadinessViewModelTest {
         assertThat(vm.ui.value.packs.single().status).isEqualTo(CheckStatus.MISSING)
     }
 
+    // ---- Plan R1: search vectors are part of their item ----
+
+    private val medVectors = record("med.vectors", DownloadState.INSTALLED, sha256 = "3".repeat(64), kind = ItemKind.VECTORS,
+        filePath = "/internal/vectors/med_333333333333.gvec", sizeBytes = 400)
+
+    @Test fun vectorsAreFoldedIntoTheirItemsRow() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med, medVectors, e2b)
+        quick["med"] = Integrity.VERIFIED
+        quick["med.vectors"] = Integrity.INCOMPLETE
+        val ui = viewModel().ui.value
+        val row = ui.packs.single()
+        assertThat(row.key).isEqualTo(key(med))
+        assertThat(row.sizeBytes).isEqualTo(1_400)
+        assertThat(row.status).isEqualTo(CheckStatus.INCOMPLETE)
+        assertThat(row.canRepair).isTrue()
+        assertThat(ui.models.map { it.key }).containsExactly(key(e2b))
+        // Storage counts them under their item's source, without a second item.
+        val granger = ui.report.storage.single { it.source == Source.GRANGER }
+        assertThat(granger.bytes).isEqualTo(1_400)
+        assertThat(granger.items).isEqualTo(1)
+    }
+
+    @Test fun verifyChecksTheItemAndItsVectors() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med, medVectors)
+        fullResult.complete(Integrity.VERIFIED)
+        val vm = viewModel()
+        vm.verify(key(med))
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsAtLeast("check:med:true", "check:med.vectors:true")
+        assertThat(vm.ui.value.packs.single().status).isEqualTo(CheckStatus.VERIFIED)
+    }
+
+    @Test fun repairFetchesOnlyTheDamagedFile() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(med, medVectors)
+        quick["med.vectors"] = Integrity.MISSING
+        val vm = viewModel()
+        vm.repair(key(med))
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).contains("repair:med.vectors")
+        assertThat(downloads.calls).doesNotContain("repair:med")
+    }
+
     private val bookGroup = "media:librivox:817"
     private val chapters = (1..13).map { n ->
         record("$bookGroup/%03d".format(n), DownloadState.INSTALLED, kind = ItemKind.AUDIO, sizeBytes = 100L * n,

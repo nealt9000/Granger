@@ -14,10 +14,11 @@ import org.junit.rules.TemporaryFolder
 class DirectoryVectorSourcesTest {
     @get:Rule val tmp = TemporaryFolder()
 
-    private fun write(name: String) {
-        VectorFile.write(File(tmp.root, name), listOf(floatArrayOf(1f, 0f, 0f, 0f)), 4, listOf("0".repeat(16)),
-            listOf(ChunkKey("Knot", 0)), Chunkers.VERSION, "0".repeat(64), "0".repeat(64))
-    }
+    private fun write(name: String, chunker: Int = Chunkers.VERSION, embedder: String = "0".repeat(64)): File =
+        File(tmp.root, name).also {
+            VectorFile.write(it, listOf(floatArrayOf(1f, 0f, 0f, 0f)), 4, listOf("0".repeat(16)),
+                listOf(ChunkKey("Knot", 0)), chunker, embedder, "0".repeat(64))
+        }
 
     private fun index(vararg lines: String) = File(tmp.root, DirectoryVectorSources.INDEX).writeText(lines.joinToString("\n"))
 
@@ -48,5 +49,33 @@ class DirectoryVectorSourcesTest {
 
     @Test fun noIndexMeansNoSources() = runTest {
         assertThat(DirectoryVectorSources(tmp.root).current()).isEmpty()
+    }
+
+    @Test fun listedFilesSkipOtherChunkersAndEmbedders() = runTest {
+        val ok = write("med.gvec")
+        val oldChunker = write("old.gvec", chunker = Chunkers.VERSION + 1)
+        val otherEmbedder = write("other.gvec", embedder = "1".repeat(64))
+        val listing = listOf(
+            ListedVectors(ok, SourceKind.ARTICLE, "wikipedia_en_medicine"),
+            ListedVectors(oldChunker, SourceKind.ARTICLE, "old"),
+            ListedVectors(otherEmbedder, SourceKind.BOOK, "book:granger:gc-emma"),
+            ListedVectors(File(tmp.root, "gone.gvec"), SourceKind.ARTICLE, "gone"),
+        )
+        assertThat(ListedVectorSources({ listing }, embedder = { "0".repeat(64) }).current().map { it.target })
+            .containsExactly("wikipedia_en_medicine")
+        // Without a known embedder, any embedder's files are used.
+        assertThat(ListedVectorSources({ listing }).current().map { it.target })
+            .containsExactly("wikipedia_en_medicine", "book:granger:gc-emma").inOrder()
+    }
+
+    @Test fun combinedSourcesKeepTheFirstFileForATarget() = runTest {
+        val downloaded = write("med-catalog.gvec")
+        write("med-pushed.gvec")
+        write("knots.gvec")
+        index("med-pushed.gvec\tARTICLE\twikipedia_en_medicine", "knots.gvec\tARTICLE\twikipedia_en_knots")
+        val catalog = ListedVectorSources({ listOf(ListedVectors(downloaded, SourceKind.ARTICLE, "wikipedia_en_medicine")) })
+        val sources = CombinedVectorSources(catalog, DirectoryVectorSources(tmp.root)).current()
+        assertThat(sources.map { it.target to it.file.file.name })
+            .containsExactly("wikipedia_en_medicine" to "med-catalog.gvec", "wikipedia_en_knots" to "knots.gvec").inOrder()
     }
 }

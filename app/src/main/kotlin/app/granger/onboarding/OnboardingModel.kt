@@ -1,5 +1,6 @@
 package app.granger.onboarding
 
+import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
@@ -17,7 +18,7 @@ data class Line(
     val installed: Boolean,
 ) {
     val count: Int get() = items.size
-    val bytes: Long get() = items.sumOf { it.sizeBytes }
+    val bytes: Long get() = items.sumOf { it.downloadBytes }
 }
 
 /** Efficient or Comprehensive (spec §6, step 3), built from the generated preset of that name. */
@@ -63,7 +64,7 @@ data class ReviewGroup(val title: String, val lines: List<Line>)
 data class Review(val groups: List<ReviewGroup>, val freeBytes: Long) {
     val lines: List<Line> get() = groups.flatMap { it.lines }
     val items: List<CatalogItem> get() = lines.flatMap { it.items }
-    val bytes: Long get() = items.sumOf { it.sizeBytes }
+    val bytes: Long get() = items.sumOf { it.downloadBytes }
     val fits: Boolean get() = bytes <= freeBytes
     val isEmpty: Boolean get() = items.isEmpty()
 }
