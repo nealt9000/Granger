@@ -1,0 +1,14 @@
+{
+ "id": "gc-beowulf",
+ "kind": "book",
+ "fileName": "gc-beowulf_2026-10-17.gvec",
+ "sizeBytes": 34236,
+ "sha256": "8183b4adbe1c4f4dd7af3827c915391cd59b6174b02a2fc8f4da12d5ffdefc38",
+ "count": 116,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c0d88d6633b4d8aa5aee650096199182f602dace5e0852fd2b2729a70f8c5267",
+ "url": null
+}

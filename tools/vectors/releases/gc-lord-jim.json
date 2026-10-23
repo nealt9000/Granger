@@ -1,0 +1,14 @@
+{
+ "id": "gc-lord-jim",
+ "kind": "book",
+ "fileName": "gc-lord-jim_2026-10-17.gvec",
+ "sizeBytes": 174768,
+ "sha256": "a4e57b5f9b24879610e30bf8df94138f28fda4121ca36af1640d82e68bdd2f35",
+ "count": 594,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6510f17aa6d916ae2721a0876735f466ad0c318a0cd23727e8107f506c6f4010",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-arabian-nights-entertainments",
+ "kind": "book",
+ "fileName": "gc-arabian-nights-entertainments_2026-10-17.gvec",
+ "sizeBytes": 269730,
+ "sha256": "d88e3c9b7f6cc9e30feb63cb2a1e760e60edb6fecca41d697269747555f2c865",
+ "count": 917,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b09e218e38e0c0fb6e897d94b8c6a271c5415414ace353026f13475c1fc400ee",
+ "url": null
+}

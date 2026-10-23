@@ -1,0 +1,14 @@
+{
+ "id": "gc-washington-square",
+ "kind": "book",
+ "fileName": "gc-washington-square_2026-10-17.gvec",
+ "sizeBytes": 142722,
+ "sha256": "41182e4bda9718078899b699354e1b61d85241c8d0fbf731017b7195c90ba89b",
+ "count": 485,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "38ff6c3b1a99980a036873ad99037705043bd0f5f32c1de7cbae0d9f316bb9a7",
+ "url": null
+}

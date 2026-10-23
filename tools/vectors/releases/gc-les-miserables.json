@@ -1,0 +1,14 @@
+{
+ "id": "gc-les-miserables",
+ "kind": "book",
+ "fileName": "gc-les-miserables_2026-10-17.gvec",
+ "sizeBytes": 1330482,
+ "sha256": "13a4fba262f551b39da7507e6c3049c04649cc3511d40f6969a90723f7c36a91",
+ "count": 4525,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1b4166673cc774f4eb352d1c12e91778d16d822cf370d3adef3d7845f7a3e6c9",
+ "url": null
+}

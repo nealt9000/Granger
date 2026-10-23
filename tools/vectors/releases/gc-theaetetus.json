@@ -1,0 +1,14 @@
+{
+ "id": "gc-theaetetus",
+ "kind": "book",
+ "fileName": "gc-theaetetus_2026-10-17.gvec",
+ "sizeBytes": 127728,
+ "sha256": "8ce29c6cce7ad4b8a98b08d1f5ff20a0573537b712c060739c00578aad0544a8",
+ "count": 434,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7a1d469a1952a22085759680b52a012746bcc39227c1f892f42df64a46c0d4e6",
+ "url": null
+}

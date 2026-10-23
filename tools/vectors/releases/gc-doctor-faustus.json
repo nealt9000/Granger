@@ -1,0 +1,14 @@
+{
+ "id": "gc-doctor-faustus",
+ "kind": "book",
+ "fileName": "gc-doctor-faustus_2026-10-17.gvec",
+ "sizeBytes": 27474,
+ "sha256": "37edd641114de8d7615709e646214b6987e65ed9e47f3c0d1d1a98ce72db2865",
+ "count": 93,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "867677f9619c199414c0ea0cf6afc64f976a77f40d4853a46ecbb765a07b7734",
+ "url": null
+}

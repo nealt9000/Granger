@@ -1,0 +1,14 @@
+{
+ "id": "gc-nostromo",
+ "kind": "book",
+ "fileName": "gc-nostromo_2026-10-17.gvec",
+ "sizeBytes": 336468,
+ "sha256": "e2071bac11d532c08684306afa620fedea83f69883fed6682188c8ea74ca2062",
+ "count": 1144,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ae68d643351c6d05d3331bed344911b48cb8fff43ae9ab1a2245442c3b8ad98f",
+ "url": null
+}

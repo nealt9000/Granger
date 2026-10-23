@@ -1,0 +1,14 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-5",
+ "kind": "book",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-5_2026-10-17.gvec",
+ "sizeBytes": 138606,
+ "sha256": "12a6181ec5b5fd0e1b3a6d211efc2dd6a0439ae1bc69cfdf02fcdd3b31373c43",
+ "count": 471,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ecc0340a41be78abc84d2d5035ff15fa9f9a3eb3df9afc06f9aafd51afddc23d",
+ "url": null
+}

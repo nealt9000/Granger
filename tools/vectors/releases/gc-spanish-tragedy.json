@@ -1,0 +1,14 @@
+{
+ "id": "gc-spanish-tragedy",
+ "kind": "book",
+ "fileName": "gc-spanish-tragedy_2026-10-17.gvec",
+ "sizeBytes": 62460,
+ "sha256": "91ec043c99c407475b3c6b266222c433053f9b75cfc7d323ff1faf6814a1d2c6",
+ "count": 212,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e5b0a28127fa98c909caa8d90ea01f5b4d1ff9d08d350de175fb1bdca18c9f22",
+ "url": null
+}

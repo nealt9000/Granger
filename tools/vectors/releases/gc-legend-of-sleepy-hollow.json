@@ -1,0 +1,14 @@
+{
+ "id": "gc-legend-of-sleepy-hollow",
+ "kind": "book",
+ "fileName": "gc-legend-of-sleepy-hollow_2026-10-17.gvec",
+ "sizeBytes": 21006,
+ "sha256": "0d24e673583a3c8fa779a99bf50eac4d7cb05b44bab242239c4816cadb4cc81c",
+ "count": 71,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f8bcaec39fafd5937e505ed6b5dfc0c1f8cfec8574c3a6547f80c812b0190f65",
+ "url": null
+}

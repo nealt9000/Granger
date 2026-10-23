@@ -1,0 +1,14 @@
+{
+ "id": "gc-mill-on-the-floss",
+ "kind": "book",
+ "fileName": "gc-mill-on-the-floss_2026-10-17.gvec",
+ "sizeBytes": 437016,
+ "sha256": "768608dc7c7c8de7aaedfc4115d29bcbcd2e3b2452263468e9529dd6fb4d8d45",
+ "count": 1486,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a879182872edd56e13be1fb9816f95d512ec5fe713a1eaa9d669956f5e987ef1",
+ "url": null
+}

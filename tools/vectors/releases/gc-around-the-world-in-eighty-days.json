@@ -1,0 +1,14 @@
+{
+ "id": "gc-around-the-world-in-eighty-days",
+ "kind": "book",
+ "fileName": "gc-around-the-world-in-eighty-days_2026-10-17.gvec",
+ "sizeBytes": 174768,
+ "sha256": "b13a937cfc9dee58480e9bbf6679100eeb5bbcb7092f6556a66c4ff5825f65e3",
+ "count": 594,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b98f2c54f7c3450c605ca372c07bf40e108f9906bd52d282c43e7f45c8a5bf69",
+ "url": null
+}

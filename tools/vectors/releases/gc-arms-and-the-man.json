@@ -1,0 +1,14 @@
+{
+ "id": "gc-arms-and-the-man",
+ "kind": "book",
+ "fileName": "gc-arms-and-the-man_2026-10-17.gvec",
+ "sizeBytes": 70398,
+ "sha256": "1282d474aacd1a13b2836b95e46490275ff04c25c7f21b5771b86be37adb29f9",
+ "count": 239,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9aecf0a31a636b2a05c330f9ca013a88fd48231a42fa4753475c836b5ef476c9",
+ "url": null
+}

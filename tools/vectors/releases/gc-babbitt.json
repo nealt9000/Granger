@@ -1,0 +1,14 @@
+{
+ "id": "gc-babbitt",
+ "kind": "book",
+ "fileName": "gc-babbitt_2026-10-17.gvec",
+ "sizeBytes": 311478,
+ "sha256": "4925a670d7fcfe3ec5fc0286371949e0ac1d00d09d385860d7923e1f47b328b4",
+ "count": 1059,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f8818f05d1e5f103e88218a9d6dc601c2afa1459efbc6e411f5e2849c9138bc3",
+ "url": null
+}

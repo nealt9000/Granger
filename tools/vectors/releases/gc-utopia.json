@@ -1,0 +1,14 @@
+{
+ "id": "gc-utopia",
+ "kind": "book",
+ "fileName": "gc-utopia_2026-10-17.gvec",
+ "sizeBytes": 45996,
+ "sha256": "4777f8846304fa9bb59bc2abbba5852a4cd3dac30bab4cd3db45c04e94a00557",
+ "count": 156,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d3771b0aa9be36c951ad67cfb12e41296cffd12e898d3c32a741f6d3391dd493",
+ "url": null
+}

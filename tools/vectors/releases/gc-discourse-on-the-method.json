@@ -1,0 +1,14 @@
+{
+ "id": "gc-discourse-on-the-method",
+ "kind": "book",
+ "fileName": "gc-discourse-on-the-method_2026-10-17.gvec",
+ "sizeBytes": 26592,
+ "sha256": "b64d6e7ad13427f7dc35a1ebd9837857ef26912bde3e9c9f456b8b5319793aa8",
+ "count": 90,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "adaa2f372a4dcc1a46898ad194862584de15d367eb370a84b14a2aa7f6f69fab",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-bhagavad-gita-the-song-celestial",
+ "kind": "book",
+ "fileName": "gc-bhagavad-gita-the-song-celestial_2026-10-17.gvec",
+ "sizeBytes": 45408,
+ "sha256": "69966bc391651d6ee7f80baa31b3fed2ad8b727d41e1efbccb7cb39080cde7a6",
+ "count": 154,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "51e12598f632dd1c3cb2ba86645c80a136a5bd846d8ccbbdff9158b71fb56117",
+ "url": null
+}

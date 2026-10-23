@@ -1,0 +1,14 @@
+{
+ "id": "gc-don-quixote",
+ "kind": "book",
+ "fileName": "gc-don-quixote_2026-10-17.gvec",
+ "sizeBytes": 726312,
+ "sha256": "e9705381e5917ed240446638253a73dcea199396f9dbc34ed7fa23750fabe5df",
+ "count": 2470,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c987b34892f3c0f4e90e19ba3a561f12353525690df5d36ed4d2ed2646bb8991",
+ "url": null
+}

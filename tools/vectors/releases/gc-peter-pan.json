@@ -1,0 +1,14 @@
+{
+ "id": "gc-peter-pan",
+ "kind": "book",
+ "fileName": "gc-peter-pan_2026-10-17.gvec",
+ "sizeBytes": 129786,
+ "sha256": "b8cd0def9515b2d800b4d624e6fdfbc9496da12e7559aa975cd04da81ab4a9d5",
+ "count": 441,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "893925cf0278b0a2e6d889a3d20fa1b5e4057e624456189eb0271ff99c4a3dc1",
+ "url": null
+}

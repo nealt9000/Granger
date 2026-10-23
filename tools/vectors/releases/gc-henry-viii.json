@@ -1,0 +1,14 @@
+{
+ "id": "gc-henry-viii",
+ "kind": "book",
+ "fileName": "gc-henry-viii_2026-10-17.gvec",
+ "sizeBytes": 70104,
+ "sha256": "5da84e9e5197b5223802840dd128806c4e27bd6f22b86067fe5028156461c1eb",
+ "count": 238,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2bb69a1a82731b708b7f68482ce36d86e2f4b3d18b95f4aafea17530b9be4bff",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-black-beauty",
+ "kind": "book",
+ "fileName": "gc-black-beauty_2026-10-17.gvec",
+ "sizeBytes": 130668,
+ "sha256": "38e80ccf1fce92f2be98e7132b1c969829d62d75a7f09f9b3c56ddc2a8de36db",
+ "count": 444,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0a3937d4930ef30cded9f03f955a7c1f98d08eecc9e5a0b9a10daf43fae05f5b",
+ "url": null
+}

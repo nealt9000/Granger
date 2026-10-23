@@ -1,0 +1,14 @@
+{
+ "id": "gc-tamburlaine-the-great-part-2",
+ "kind": "book",
+ "fileName": "gc-tamburlaine-the-great-part-2_2026-10-17.gvec",
+ "sizeBytes": 42762,
+ "sha256": "ff1f49012e82c3eacd2aece6d1c1d07b2691d363f099972556e4d0c3012fe7fe",
+ "count": 145,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4aee5407838bbb37bc896a4ff4625f87c5213e4e4d36097f6abc0fec1e93b334",
+ "url": null
+}

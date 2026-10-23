@@ -1,0 +1,14 @@
+{
+ "id": "gc-king-james-bible",
+ "kind": "book",
+ "fileName": "gc-king-james-bible_2026-10-17.gvec",
+ "sizeBytes": 2418576,
+ "sha256": "c155388c04d3637849224a34a74675b8ef23c28a8a1cd11aab573c266ed3e9e1",
+ "count": 8226,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "05ef2a871d67b3b75059f99b7f648f6845022ef29651509ed0c025dbaf5884b7",
+ "url": null
+}

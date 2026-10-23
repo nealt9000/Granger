@@ -1,0 +1,14 @@
+{
+ "id": "gc-twenty-thousand-leagues-under-the-sea",
+ "kind": "book",
+ "fileName": "gc-twenty-thousand-leagues-under-the-sea_2026-10-17.gvec",
+ "sizeBytes": 259146,
+ "sha256": "c33f6ec57ce0026e4a966b9db2dd8be30cf4b4623409425cf997e6f38373fdff",
+ "count": 881,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "883950b4d5b1355cbc5b1e1f26c2ce10aacd6d41c5ddad4791f14039274ef58a",
+ "url": null
+}

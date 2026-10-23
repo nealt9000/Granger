@@ -1,0 +1,14 @@
+{
+ "id": "gc-gulliver-s-travels",
+ "kind": "book",
+ "fileName": "gc-gulliver-s-travels_2026-10-17.gvec",
+ "sizeBytes": 155070,
+ "sha256": "5acb217997209d7093f62dd210cb54511c1045e6cb115fbfeab6f27d53e57acf",
+ "count": 527,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "05a009edc9784e7f7100e5af06afa08a1ecbb33d31448fe9849c2d4b58d0ada7",
+ "url": null
+}

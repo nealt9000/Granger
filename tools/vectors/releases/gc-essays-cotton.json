@@ -1,0 +1,14 @@
+{
+ "id": "gc-essays-cotton",
+ "kind": "book",
+ "fileName": "gc-essays-cotton_2026-10-17.gvec",
+ "sizeBytes": 792756,
+ "sha256": "d262478502d2649a4f31010c064446877032ff98fe2885b1fef930b63ff75671",
+ "count": 2696,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "90e91ac88865f7959d19b1071abb616970dd0373fdba9e6591e6adbebcb30497",
+ "url": null
+}

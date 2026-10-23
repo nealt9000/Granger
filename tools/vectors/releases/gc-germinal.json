@@ -1,0 +1,14 @@
+{
+ "id": "gc-germinal",
+ "kind": "book",
+ "fileName": "gc-germinal_2026-10-17.gvec",
+ "sizeBytes": 389388,
+ "sha256": "f11adc299f8728f333174f34b8eef8733be4d71d4aba3a088b787ac6264e4059",
+ "count": 1324,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a52cd92356a5b0d80d399ccfda91a107aafac70d4216336d93344be507285221",
+ "url": null
+}

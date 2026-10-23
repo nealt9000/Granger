@@ -1,0 +1,14 @@
+{
+ "id": "gc-king-richard-ii",
+ "kind": "book",
+ "fileName": "gc-king-richard-ii_2026-10-17.gvec",
+ "sizeBytes": 60696,
+ "sha256": "9d700d278b901d9e1d055491ae9a7a5b9a6875c2c535a444cebe6fe46873b6ae",
+ "count": 206,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "fb00c6036bf0a7dfe3675980addbda2ab31de33c403a73b826ae77149c234355",
+ "url": null
+}

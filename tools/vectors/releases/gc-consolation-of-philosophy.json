@@ -1,0 +1,14 @@
+{
+ "id": "gc-consolation-of-philosophy",
+ "kind": "book",
+ "fileName": "gc-consolation-of-philosophy_2026-10-17.gvec",
+ "sizeBytes": 80100,
+ "sha256": "15b6cd741215d0b65677ff5cc05a5af40a4a6cf431decf1a6ced824171ccec48",
+ "count": 272,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "06b28fa95372dd33a103e09db7010ea8abde87fbc6247b5045cf711feea1bbb4",
+ "url": null
+}

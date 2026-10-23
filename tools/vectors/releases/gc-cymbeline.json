@@ -1,0 +1,14 @@
+{
+ "id": "gc-cymbeline",
+ "kind": "book",
+ "fileName": "gc-cymbeline_2026-10-17.gvec",
+ "sizeBytes": 79218,
+ "sha256": "8f3c7cb993d1166d9ea60c12db2cc22e0b4ec2d5595b302f6eb30cc7d441c6d7",
+ "count": 269,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0802139549ac00f497ed0e0f8edb169a73a385657b9b9a0e11eaf1f356bbaab3",
+ "url": null
+}

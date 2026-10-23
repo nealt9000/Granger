@@ -1,0 +1,14 @@
+{
+ "id": "gc-ethan-frome",
+ "kind": "book",
+ "fileName": "gc-ethan-frome_2026-10-17.gvec",
+ "sizeBytes": 85098,
+ "sha256": "c32402651b51f0c342d3f78d9bd3e02fd4b628d167a0a556774d4c2e41c3b0f6",
+ "count": 289,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3330dfab318ee755db96dbcfd9dabaa508c49687f310139ec0294fbc06c88d75",
+ "url": null
+}

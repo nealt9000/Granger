@@ -1,0 +1,14 @@
+{
+ "id": "gc-our-mutual-friend",
+ "kind": "book",
+ "fileName": "gc-our-mutual-friend_2026-10-17.gvec",
+ "sizeBytes": 857142,
+ "sha256": "55f63c7513db135ee6feeb95fda3ff2cfc8dd26e893999d3c53e6ead7c76f305",
+ "count": 2915,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "251b20b5d00c108f15140370dbb77be027b983c2ddd22b9bfffcd9c0ab31077f",
+ "url": null
+}

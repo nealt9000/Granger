@@ -1,0 +1,14 @@
+{
+ "id": "gc-barchester-towers",
+ "kind": "book",
+ "fileName": "gc-barchester-towers_2026-10-17.gvec",
+ "sizeBytes": 447306,
+ "sha256": "ea40f903db01f0321b79d7fd61b42bdad7f62d0d40426ffd512b4fb79d88f97d",
+ "count": 1521,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a167e47d1208d7794f5b85448a1efe399772d0976a60af8fe2c58970a4f7d189",
+ "url": null
+}

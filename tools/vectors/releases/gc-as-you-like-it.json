@@ -1,0 +1,14 @@
+{
+ "id": "gc-as-you-like-it",
+ "kind": "book",
+ "fileName": "gc-as-you-like-it_2026-10-17.gvec",
+ "sizeBytes": 63342,
+ "sha256": "05387590077a26fb0edb487bfab948aa093c53022fc98d9cf76a491adf760a9a",
+ "count": 215,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "70dc1622b2f0b69cedf185b771b990c776a364b0fe16ecb9b06ad17b02fe30a2",
+ "url": null
+}

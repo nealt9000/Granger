@@ -1,0 +1,14 @@
+{
+ "id": "gc-way-we-live-now",
+ "kind": "book",
+ "fileName": "gc-way-we-live-now_2026-10-17.gvec",
+ "sizeBytes": 658986,
+ "sha256": "2da9fdeca18fb56aaae7a5071daef5011287a87367103a32687645c7ac5cd023",
+ "count": 2241,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cb3cf6c9f8b3c67585e8e9af6d417625c7b4b33d99e6c885f5ac3eba22674481",
+ "url": null
+}

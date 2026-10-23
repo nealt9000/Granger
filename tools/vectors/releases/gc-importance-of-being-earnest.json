@@ -1,0 +1,14 @@
+{
+ "id": "gc-importance-of-being-earnest",
+ "kind": "book",
+ "fileName": "gc-importance-of-being-earnest_2026-10-17.gvec",
+ "sizeBytes": 65988,
+ "sha256": "36b00da3c398cfb65a28f2ce8452f7645695e0316588f29149157305b698b272",
+ "count": 224,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0d7e9458eff548c98bbd109bb5559e99307f55c2f3232b4ab167cbf66ae979da",
+ "url": null
+}

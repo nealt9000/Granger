@@ -1,0 +1,14 @@
+{
+ "id": "gc-blue-bird",
+ "kind": "book",
+ "fileName": "gc-blue-bird_2026-10-17.gvec",
+ "sizeBytes": 100092,
+ "sha256": "2c7181ea46886364dfb1f770af881cf9b692de2fe04c7e0748879141b1329211",
+ "count": 340,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "83a34bcc919e5d1e7fa6f1b1805cde33676cf60c4f6ea3c9c95b153a7df3e674",
+ "url": null
+}

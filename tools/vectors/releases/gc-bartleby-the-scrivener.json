@@ -1,0 +1,14 @@
+{
+ "id": "gc-bartleby-the-scrivener",
+ "kind": "book",
+ "fileName": "gc-bartleby-the-scrivener_2026-10-17.gvec",
+ "sizeBytes": 30120,
+ "sha256": "2d01b3ad046a31b4a1dc9d9930c71e7499398a660a86538eb6d8670b96c0dae4",
+ "count": 102,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e239344322f60e87a4323f143d6c1af22507eccfbe1e5753e9bdb12ce52b3934",
+ "url": null
+}

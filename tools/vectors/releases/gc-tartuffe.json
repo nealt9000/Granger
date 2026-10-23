@@ -1,0 +1,14 @@
+{
+ "id": "gc-tartuffe",
+ "kind": "book",
+ "fileName": "gc-tartuffe_2026-10-17.gvec",
+ "sizeBytes": 48348,
+ "sha256": "f8a242b03ac626cdc39f8367e75c3dadd029426bbed789aeca31ac6f9fd61295",
+ "count": 164,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c752b7e932a8a6f3eaaee40635f1e333a31bd5c0ceeaac41d1fc6ad8c315f9cd",
+ "url": null
+}

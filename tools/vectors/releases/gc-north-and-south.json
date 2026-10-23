@@ -1,0 +1,14 @@
+{
+ "id": "gc-north-and-south",
+ "kind": "book",
+ "fileName": "gc-north-and-south_2026-10-17.gvec",
+ "sizeBytes": 384684,
+ "sha256": "7fc39680713e8e3fc3ef8008e0bd8c3f907406ea65a8d96bf3fbb5fc925c5403",
+ "count": 1308,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "25e08ae451c0a96e60f51088a9d0620f313ccf220b4563d2850055efa9c5e5a0",
+ "url": null
+}

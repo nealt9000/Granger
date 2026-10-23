@@ -1,0 +1,14 @@
+{
+ "id": "gc-all-s-well-that-ends-well",
+ "kind": "book",
+ "fileName": "gc-all-s-well-that-ends-well_2026-10-17.gvec",
+ "sizeBytes": 73338,
+ "sha256": "a7cac2d94e28f69291784d61cab026e320fd008c48c7d08a8b465fd3864cd903",
+ "count": 249,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "65babef0aaccf050ec7e5360b8f59688217c8802bcb3443862942ac4ec358e45",
+ "url": null
+}

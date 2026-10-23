@@ -1,0 +1,14 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-3",
+ "kind": "book",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-3_2026-10-17.gvec",
+ "sizeBytes": 156834,
+ "sha256": "b986559bb5a300f6f0d72de27b9314c106a12f44bafb333383f82ce08ea2f4f1",
+ "count": 533,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3072f0db9cab8fb39dd74f2739ef0bfe89e2a55e09dc1c289f788b9701dbb5df",
+ "url": null
+}

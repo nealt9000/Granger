@@ -732,3 +732,81 @@ def test_real_curated_readiness_names_nine_domains_in_order():
     assert [d["id"] for d in domains] == DOMAIN_IDS
     for d in domains:
         assert d["title"] and d["essential"], d["id"]
+
+
+# --- Plan R1: search vectors ---
+
+EMB = "e" * 64
+
+
+def _vcatalog():
+    def pack(id, zim, date, sha):
+        return {"id": id, "zimName": zim, "snapshotDate": date, "sha256": sha, "sizeBytes": 1000}
+    return {
+        "models": [{"id": "embeddinggemma", "role": "embedder", "sha256": EMB}],
+        "packs": [pack("wikipedia_en_top_nopic", "wikipedia_en_top", "2026-09-14", "a" * 64),
+                  pack("wikipedia_en_top_maxi", "wikipedia_en_top", "2026-09-14", "b" * 64),
+                  pack("wikipedia_en_top_mini", "wikipedia_en_top", "2026-09-14", "c" * 64),
+                  pack("wikipedia_en_knots_maxi", "wikipedia_en_knots", "2026-10-18", "d" * 64)],
+        "books": [{"id": "gc-aeneid", "releaseDate": "2026-10-17", "sha256": "f" * 64, "sizeBytes": 500}],
+    }
+
+
+def _descriptor(id, kind, source, size=40, url=None, embedder=EMB):
+    return {"id": id, "kind": kind, "fileName": f"{id}_x.gvec", "sizeBytes": size, "sha256": "9" * 64, "count": 3, "dims": 256,
+            "dtype": "int8", "chunkerVersion": 1, "embedderSha256": embedder, "sourceSha256": source, "url": url}
+
+
+def test_vectors_go_on_the_exact_source_and_its_flavours_but_not_mini():
+    catalog = _vcatalog()
+    used, lines = cg.attach_vectors(catalog, [_descriptor("wikipedia_en_top_nopic", "pack", "a" * 64),
+                                              _descriptor("gc-aeneid", "book", "f" * 64)],
+                                    release_url="https://github.com/x/releases/download/vectors-1/")
+    by_id = {e["id"]: e.get("vectors") for e in catalog["packs"] + catalog["books"]}
+    assert by_id["wikipedia_en_top_nopic"]["url"] == "https://github.com/x/releases/download/vectors-1/wikipedia_en_top_nopic_x.gvec"
+    assert by_id["wikipedia_en_top_maxi"] == by_id["wikipedia_en_top_nopic"]
+    assert by_id["wikipedia_en_top_mini"] is None
+    assert by_id["gc-aeneid"] == {"url": "https://github.com/x/releases/download/vectors-1/gc-aeneid_x.gvec", "sha256": "9" * 64,
+                                  "sizeBytes": 40, "embedderSha256": EMB, "dims": 256, "dtype": "int8", "chunkerVersion": 1}
+    assert [d["id"] for d in used] == ["wikipedia_en_top_nopic", "gc-aeneid"]
+    assert lines == []
+
+
+def test_vectors_of_another_snapshot_are_reported_not_attached():
+    catalog = _vcatalog()
+    used, lines = cg.attach_vectors(catalog, [_descriptor("wikipedia_en_knots_maxi", "pack", "0" * 64, url="https://h/k.gvec")])
+    assert used == [] and "vectors" not in catalog["packs"][3]
+    assert lines == ["  wikipedia_en_knots_maxi: built from wikipedia_en_knots_maxi_x.gvec, but the catalog has 2026-10-18; rebuild it"]
+
+
+def test_vectors_without_a_url_are_left_out_and_old_ones_replaced():
+    catalog = _vcatalog()
+    catalog["books"][0]["vectors"] = {"url": "https://old"}
+    used, lines = cg.attach_vectors(catalog, [_descriptor("gc-aeneid", "book", "f" * 64)])
+    assert used == [] and "vectors" not in catalog["books"][0]
+    assert lines == ["  gc-aeneid: no https URL, left out"]
+
+
+def test_vectors_from_another_embedder_fail():
+    with pytest.raises(SystemExit):
+        cg.attach_vectors(_vcatalog(), [_descriptor("gc-aeneid", "book", "f" * 64, url="https://h/a.gvec", embedder="0" * 64)])
+
+
+def test_tier_sizes_count_vectors():
+    catalog = {"packs": [{"id": "med", "zimName": "med", "sizeBytes": 1000, "vectors": {"sizeBytes": 50}}], "books": [],
+               "readiness": {"domains": [{"id": "medicine", "essential": ["med"], "comprehensive": ["med"]}]}}
+    assert cg.tier_sizes(catalog)["medicine"] == (1050, 1050)
+
+
+def test_the_vectors_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, capsys):
+    catalog = _vcatalog() | {"generatedAt": "2026-10-22T00:00:00Z"}
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps(catalog))
+    releases = tmp_path / "releases"
+    releases.mkdir()
+    (releases / "gc-aeneid.json").write_text(json.dumps(_descriptor("gc-aeneid", "book", "f" * 64)))
+    cg.main(["vectors", "--releases", str(releases), "--release-url", "https://github.com/x/releases/download/v/", str(path)])
+    out = json.loads(path.read_text())
+    assert out["generatedAt"] > "2026-10-22T00:00:00Z"
+    assert out["books"][0]["vectors"]["url"].endswith("/v/gc-aeneid_x.gvec")
+    assert "vectors on 1 entries from 1 files" in capsys.readouterr().out

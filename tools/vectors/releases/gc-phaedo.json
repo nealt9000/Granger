@@ -1,0 +1,14 @@
+{
+ "id": "gc-phaedo",
+ "kind": "book",
+ "fileName": "gc-phaedo_2026-10-17.gvec",
+ "sizeBytes": 75102,
+ "sha256": "80d9bad6b67ba8be6916aa6fd0d6507c032a4ac981f507d8d63e2616e87a42b3",
+ "count": 255,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "49541264bfaa78670e2d754be019cda8aa839774cd87b79dc8c27dab2a9ad23a",
+ "url": null
+}

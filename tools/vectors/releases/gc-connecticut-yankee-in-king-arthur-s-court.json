@@ -1,0 +1,14 @@
+{
+ "id": "gc-connecticut-yankee-in-king-arthur-s-court",
+ "kind": "book",
+ "fileName": "gc-connecticut-yankee-in-king-arthur-s-court_2026-10-17.gvec",
+ "sizeBytes": 238860,
+ "sha256": "e736e2f36beb118c73a1f3ab24110d73b27d06baabbebfbda7bf583cb05f276f",
+ "count": 812,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ff9bf17164e58ed5b4a64d84a0b9b09dc1fc3ee542be576c6d110e3a3f2b10d3",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-odyssey",
+ "kind": "book",
+ "fileName": "gc-odyssey_2026-10-17.gvec",
+ "sizeBytes": 250914,
+ "sha256": "a55173adff846985e31b324ab4d0395fcb4993b8713896659623ccf4383afedc",
+ "count": 853,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cf08da8a83aa57af15e10cc02f3f8823b49da4080df38cf85beacee775a60568",
+ "url": null
+}

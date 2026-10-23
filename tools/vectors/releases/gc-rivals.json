@@ -1,0 +1,14 @@
+{
+ "id": "gc-rivals",
+ "kind": "book",
+ "fileName": "gc-rivals_2026-10-17.gvec",
+ "sizeBytes": 88038,
+ "sha256": "233b010f302b783e9588da5256dca94bc856627dcd66a7896573502aa1922ac6",
+ "count": 299,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0f59a9d4945fd720e9eab6fdf75c11f5707630db7958491871e4c02df4391ee3",
+ "url": null
+}

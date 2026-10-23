@@ -1,0 +1,14 @@
+{
+ "id": "gc-complete-plays-of-gilbert-and-sullivan",
+ "kind": "book",
+ "fileName": "gc-complete-plays-of-gilbert-and-sullivan_2026-10-17.gvec",
+ "sizeBytes": 151542,
+ "sha256": "02fa26ccc209442292a95a246d465d96948696aa7c884bc31c0fead706d11de6",
+ "count": 515,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "8f69ba264d0fb9290676b8708e8ec7d132f5a9c2df77fc5d3703cfa21b9d6577",
+ "url": null
+}

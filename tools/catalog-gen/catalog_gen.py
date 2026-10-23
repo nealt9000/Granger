@@ -8,6 +8,8 @@ one snapshot by its sha256 from Kiwix's metalink file. Models are listed in cura
   catalog_gen.py build  --curated tools/catalog-gen/curated.json --out catalog/catalog.json
   catalog_gen.py sign   --key ~/.config/granger/catalog-signing.key catalog/catalog.json
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
+  catalog_gen.py vectors --releases tools/vectors/releases --release-url URL catalog/catalog.json
+                                         # puts the search vectors on an already-built catalog (Plan R1)
 
 With a "kiwix" setting in curated.json, every pack in Kiwix's catalog in one of its languages is listed too, when its
 family has a row in the family table (kiwix_families.json) that gives its license and no hold. The curated rows win
@@ -17,6 +19,10 @@ Packs we build ourselves (tools/pack-builder) are listed with a "release" row in
 their release descriptor; the hosted file's size is checked against it. A "books" row names the descriptor
 of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a catalog entry and the
 collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids.
+
+Search vectors (Plan R1): a "vectors" setting in curated.json names the folder of `tools/vectors/build.py`'s release
+descriptors and the release URL their files are uploaded under; each descriptor's vectors go on the entries built from
+its exact source file. `vectors` does the same to a catalog that's already built, with a fresh generatedAt.
 
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
@@ -351,6 +357,13 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                for p in curated["presets"]]
     presets += [{"id": name, "title": "Granger Classics: all books", "items": ids_}
                 for name, ids_ in collections.items()]
+    vector_lines = []
+    if "vectors" in curated:
+        v = curated["vectors"]
+        _, vector_lines = attach_vectors({"packs": packs, "books": books, "models": models},
+                                         vector_descriptors(pathlib.Path(root or REPO_ROOT) / v["releases"]), v.get("releaseUrl"))
+        if report is not None:
+            report += ["", "Search vectors left out:"] + (vector_lines or ["  none"])
     readiness = None
     if "readiness" in curated:
         readiness, tier_presets = readiness_block(curated["readiness"], packs, books, collections)
@@ -374,6 +387,60 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     if onboarding is not None:
         catalog["onboarding"] = onboarding
     return catalog
+
+
+VECTOR_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "dims", "dtype", "chunkerVersion", "embedderSha256",
+               "sourceSha256")
+
+
+def vector_descriptors(folder):
+    """The release descriptors `tools/vectors/build.py` wrote, one per vector file."""
+    out = []
+    for path in sorted(pathlib.Path(folder).glob("*.json")):
+        d = json.loads(path.read_text(encoding="utf-8"))
+        missing = [key for key in VECTOR_KEYS if key not in d]
+        if missing:
+            raise SystemExit(f"{path}: missing {missing}")
+        out.append(d)
+    return out
+
+
+def attach_vectors(catalog, descriptors, release_url=None):
+    """
+    Puts each descriptor's vectors on the catalog entries built from its exact source file (sha256), replacing any
+    earlier ones, and returns (the uploads, report lines). A pack's vectors also go on its other flavours of the same
+    snapshot, which share its text, except `_mini` (lead sections only). A source the catalog no longer lists (another
+    snapshot) is reported, not attached: vectors are valid for one file only. The uploads are the descriptors used.
+    """
+    embedders = {m["sha256"] for m in catalog["models"] if m.get("role") == "embedder"}
+    packs, books = catalog["packs"], catalog.get("books", [])
+    for entry in packs + books:
+        entry.pop("vectors", None)
+    used, lines = [], []
+    for d in descriptors:
+        if d["embedderSha256"] not in embedders:
+            raise SystemExit(f"{d['id']}: embedded by {d['embedderSha256'][:12]}, which is no embedder in the catalog")
+        url = d.get("url") or (release_url.rstrip("/") + "/" + d["fileName"] if release_url else None)
+        if not url or not url.startswith("https://"):
+            lines.append(f"  {d['id']}: no https URL, left out")
+            continue
+        if d["kind"] == "book":
+            targets = [b for b in books if b["id"] == d["id"] and b["sha256"] == d["sourceSha256"]]
+        else:
+            source = next((p for p in packs if p["sha256"] == d["sourceSha256"]), None)
+            targets = [] if source is None else [
+                p for p in packs if p["zimName"] == source["zimName"] and p["snapshotDate"] == source["snapshotDate"]
+                and not p["id"].endswith("_mini")]
+        if not targets:
+            now = [e["snapshotDate"] if "snapshotDate" in e else e.get("releaseDate") for e in packs + books if e["id"] == d["id"]]
+            lines.append(f"  {d['id']}: built from {d['fileName']}, but the catalog has {now[0] if now else 'no such entry'}; rebuild it")
+            continue
+        vectors = {"url": url, "sha256": d["sha256"], "sizeBytes": d["sizeBytes"], "embedderSha256": d["embedderSha256"],
+                   "dims": d["dims"], "dtype": d["dtype"], "chunkerVersion": d["chunkerVersion"]}
+        for entry in targets:
+            entry["vectors"] = dict(vectors)
+        used.append(d)
+    return used, lines
 
 
 def check_token(scope, token, pack_ids, book_ids, families, collections):
@@ -520,7 +587,11 @@ def tier_sizes(catalog):
                 out.append(t)
         return out
 
-    sizes_of = {**{b["id"]: b["sizeBytes"] for b in books}, **{i: p["sizeBytes"] for i, p in packs.items()}}
+    # An item's size counts its search vectors, as the app shows it (Plan R1).
+    def size(e):
+        return e["sizeBytes"] + (e.get("vectors") or {}).get("sizeBytes", 0)
+
+    sizes_of = {**{b["id"]: size(b) for b in books}, **{i: size(p) for i, p in packs.items()}}
     zim_of = {i: p.get("zimName") for i, p in packs.items()}
 
     def total(items):
@@ -581,6 +652,8 @@ def main(argv):
     group = p.add_mutually_exclusive_group(required=True)
     group.add_argument("--key"); group.add_argument("--key-hex")
     p = sub.add_parser("verify"); p.add_argument("--public-key", required=True); p.add_argument("file")
+    p = sub.add_parser("vectors"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
+    p.add_argument("file")
     args = parser.parse_args(argv)
 
     if args.command == "keygen":
@@ -601,6 +674,18 @@ def main(argv):
         hex_seed = args.key_hex or pathlib.Path(args.key).expanduser().read_text().strip()
         sign_file(bytes.fromhex(hex_seed), args.file)
         print(f"wrote {args.file}.sig")
+    elif args.command == "vectors":
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        used, lines = attach_vectors(catalog, vector_descriptors(args.releases), args.release_url)
+        # A fresh date: the app refuses a catalog older than the one it has.
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        entries = sum(1 for e in catalog["packs"] + catalog.get("books", []) if "vectors" in e)
+        print(f"{path}: vectors on {entries} entries from {len(used)} files, "
+              f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
+        for line in lines:
+            print(line)
     elif args.command == "verify":
         public = base64.b64decode(pathlib.Path(args.public_key).read_text().strip())
         if not verify_file(public, args.file):

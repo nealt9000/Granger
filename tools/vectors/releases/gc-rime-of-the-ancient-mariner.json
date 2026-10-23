@@ -1,0 +1,14 @@
+{
+ "id": "gc-rime-of-the-ancient-mariner",
+ "kind": "book",
+ "fileName": "gc-rime-of-the-ancient-mariner_2026-10-17.gvec",
+ "sizeBytes": 4542,
+ "sha256": "db676d23590a8a9c2777dccc21b10155aa71bf67e1a44e172e4b6dba4405c3e0",
+ "count": 15,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d05adca9bbebdc8c6cf57a956b1ef8fbc5c76c90acd6a55ec70cccb10e59d698",
+ "url": null
+}

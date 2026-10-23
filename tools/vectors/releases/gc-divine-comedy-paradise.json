@@ -1,0 +1,14 @@
+{
+ "id": "gc-divine-comedy-paradise",
+ "kind": "book",
+ "fileName": "gc-divine-comedy-paradise_2026-10-17.gvec",
+ "sizeBytes": 127434,
+ "sha256": "44be10805cda5c1e213c24a47cd47d0eae62417ad070ce6e0e4f3a7668fe7077",
+ "count": 433,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "961d0f5cc927243904f8e7aaa731dd31fce8d7d77e3def6a542ce39e43099017",
+ "url": null
+}

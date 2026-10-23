@@ -1,0 +1,14 @@
+{
+ "id": "gc-enquiry-concerning-human-understanding",
+ "kind": "book",
+ "fileName": "gc-enquiry-concerning-human-understanding_2026-10-17.gvec",
+ "sizeBytes": 88038,
+ "sha256": "e9b7646a9029e66a5730f3e985a8be275cbc48242c3ce3908daa0b30b9fd212a",
+ "count": 299,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "09d6117fa232051020ca62805acb56a1483de05b056bc378f494640bee2e6963",
+ "url": null
+}

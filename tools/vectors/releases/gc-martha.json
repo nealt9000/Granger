@@ -1,0 +1,14 @@
+{
+ "id": "gc-martha",
+ "kind": "book",
+ "fileName": "gc-martha_2026-10-17.gvec",
+ "sizeBytes": 39528,
+ "sha256": "0c7e711ad8a3a0f01a4a29fafb671d7b3187445763ba44e79754a5d18fe11486",
+ "count": 134,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "12f7795b86fc01e79d621a7e61bbee24199e1cf778ab35e9db02bff478ac1c13",
+ "url": null
+}

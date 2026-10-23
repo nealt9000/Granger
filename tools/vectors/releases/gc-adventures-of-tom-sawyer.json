@@ -1,0 +1,14 @@
+{
+ "id": "gc-adventures-of-tom-sawyer",
+ "kind": "book",
+ "fileName": "gc-adventures-of-tom-sawyer_2026-10-17.gvec",
+ "sizeBytes": 173298,
+ "sha256": "6781be4d088ab0b9db125c4732828143bd03dc87f5ae97933071e2094dd6cf91",
+ "count": 589,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ae5683e9758a5ab1e1488e4556772512c625bf108326d17eef90531dcf756364",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-king-john",
+ "kind": "book",
+ "fileName": "gc-king-john_2026-10-17.gvec",
+ "sizeBytes": 56580,
+ "sha256": "672343737adf650643ce32f35a02df16de2b1a6ae5ac748f62d1c5f476391994",
+ "count": 192,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b04849bc80bf4633328414188fd4072b078aeeafcc102274f7a10cd8a70953b0",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-sorrows-of-young-werther",
+ "kind": "book",
+ "fileName": "gc-sorrows-of-young-werther_2026-10-17.gvec",
+ "sizeBytes": 74808,
+ "sha256": "64db083d8146f15f2108581f6287f9c7b88c458a5cffdba47a7884187644bd19",
+ "count": 254,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2e2241313d3ffd078435253bb924c122aedc4604c6372918131cbfd8788db9c4",
+ "url": null
+}

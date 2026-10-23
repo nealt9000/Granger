@@ -1,0 +1,14 @@
+{
+ "id": "gc-phaedra",
+ "kind": "book",
+ "fileName": "gc-phaedra_2026-10-17.gvec",
+ "sizeBytes": 16008,
+ "sha256": "8841fd76e679ff66af44e2f70e5ff2b26251a25cb70241146a30560c82a1677d",
+ "count": 54,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dd83d11d2ffb59388f8acd33b47237875e36c24c382837d7eed2506ec294b341",
+ "url": null
+}

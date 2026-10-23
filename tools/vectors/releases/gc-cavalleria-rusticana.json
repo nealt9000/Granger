@@ -1,0 +1,14 @@
+{
+ "id": "gc-cavalleria-rusticana",
+ "kind": "book",
+ "fileName": "gc-cavalleria-rusticana_2026-10-17.gvec",
+ "sizeBytes": 34236,
+ "sha256": "17825d03ab493bad4cc049b37265aa9a220479b1b345473d9bf229a470219854",
+ "count": 116,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "80a07252ad09683369109876a0c2e14061904bf1409801b99c238303f5fd81cb",
+ "url": null
+}

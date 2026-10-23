@@ -1,0 +1,14 @@
+{
+ "id": "gc-great-gatsby",
+ "kind": "book",
+ "fileName": "gc-great-gatsby_2026-10-17.gvec",
+ "sizeBytes": 140370,
+ "sha256": "13eb0449a89fc5005989e6f2d2edf62c0baed6a0d6d002af7d779a7504cc7a49",
+ "count": 477,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d160d54360dc6bd53022c5bcc0c107565374ea4b6abddb12898b4a8516cc5346",
+ "url": null
+}

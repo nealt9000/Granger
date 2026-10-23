@@ -1,0 +1,14 @@
+{
+ "id": "gc-tenant-of-wildfell-hall",
+ "kind": "book",
+ "fileName": "gc-tenant-of-wildfell-hall_2026-10-17.gvec",
+ "sizeBytes": 375276,
+ "sha256": "84ee9f184b642c314aa7ab18227dc584999522623a92800af4952fe169fefa35",
+ "count": 1276,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "97aad6ec1e2b1b0af1145e882502f2ffd8cf76974bd43a69eb039cddac591690",
+ "url": null
+}

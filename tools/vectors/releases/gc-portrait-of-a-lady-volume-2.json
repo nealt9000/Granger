@@ -1,0 +1,14 @@
+{
+ "id": "gc-portrait-of-a-lady-volume-2",
+ "kind": "book",
+ "fileName": "gc-portrait-of-a-lady-volume-2_2026-10-17.gvec",
+ "sizeBytes": 218574,
+ "sha256": "41ed642432eb5ca89419823348d81097d3d157cd99464c8f5692dfe3901f12dd",
+ "count": 743,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b6710cafca7ee9a34d0ceec584c7e4d0cb28b721930d3fe7c2df9212cfbcda6e",
+ "url": null
+}

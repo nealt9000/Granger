@@ -1,0 +1,14 @@
+{
+ "id": "gc-aeneid",
+ "kind": "book",
+ "fileName": "gc-aeneid_2026-10-17.gvec",
+ "sizeBytes": 155070,
+ "sha256": "892695cc45cbc6e27151e90a764a1cbe4cb5f3bc712f1a9b31f502ee130fd7b4",
+ "count": 527,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b77edb12bc7791929405309e96b976859958f0828f505aed690bcc36d093d14b",
+ "url": null
+}

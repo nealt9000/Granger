@@ -1,0 +1,14 @@
+{
+ "id": "gc-ulysses",
+ "kind": "book",
+ "fileName": "gc-ulysses_2026-10-17.gvec",
+ "sizeBytes": 606948,
+ "sha256": "6217e80a5b02a873f5f4b42f50a0f613534b3f3d1b58a9ce0e5d545d18872157",
+ "count": 2064,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "920bc78de839a6388fe817b9fce9c3776f18f1b1301b9bc5089b23fabf4223fa",
+ "url": null
+}

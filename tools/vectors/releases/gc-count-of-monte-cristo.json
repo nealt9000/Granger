@@ -1,0 +1,14 @@
+{
+ "id": "gc-count-of-monte-cristo",
+ "kind": "book",
+ "fileName": "gc-count-of-monte-cristo_2026-10-17.gvec",
+ "sizeBytes": 1274622,
+ "sha256": "647de7a380c6daec20f76d2262a847c5a8444d0b62a93c57a57af342c6d333e5",
+ "count": 4335,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2eb7d911734c48eb2700e03e0f36ab639f2b59436a191466e895366ca3096706",
+ "url": null
+}

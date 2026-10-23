@@ -1,0 +1,14 @@
+{
+ "id": "gc-timon-of-athens",
+ "kind": "book",
+ "fileName": "gc-timon-of-athens_2026-10-17.gvec",
+ "sizeBytes": 58344,
+ "sha256": "971f63135fefc408c06e8ed9f1cf133620828c3105070b7cfc2df320add4f975",
+ "count": 198,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ea19e860930dea69e7728ccb2d1d26549542e554d62f7d1e2c417bb1352c20f5",
+ "url": null
+}

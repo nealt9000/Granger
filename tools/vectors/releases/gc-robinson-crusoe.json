@@ -1,0 +1,14 @@
+{
+ "id": "gc-robinson-crusoe",
+ "kind": "book",
+ "fileName": "gc-robinson-crusoe_2026-10-17.gvec",
+ "sizeBytes": 180060,
+ "sha256": "3d32420df1bc9e173e5a4a7c67cd09867466fac02ae4da63642398f84b89a268",
+ "count": 612,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "fc9d07e38359a777ce0c2399db4e6a4f2ddd4e987841c83826be51ccec80f91f",
+ "url": null
+}

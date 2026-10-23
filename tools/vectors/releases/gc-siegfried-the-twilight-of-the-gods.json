@@ -1,0 +1,14 @@
+{
+ "id": "gc-siegfried-the-twilight-of-the-gods",
+ "kind": "book",
+ "fileName": "gc-siegfried-the-twilight-of-the-gods_2026-10-17.gvec",
+ "sizeBytes": 99504,
+ "sha256": "b62cfd3a5097c36cec81af514073f68d316ed2e8d852fd6e3bbbcefce846b698",
+ "count": 338,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9ca23253c58b6fa335845c473b971c449063e69c746367fc54a1e32fb781298e",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-middlemarch",
+ "kind": "book",
+ "fileName": "gc-middlemarch_2026-10-17.gvec",
+ "sizeBytes": 693972,
+ "sha256": "2e302476452c3204c0b717ab3403517a2e24d0570f259b81d6a60807178c5e5f",
+ "count": 2360,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "159e2c42a69060bf2de9697fbf97a8e9525136d3fa98c15e9571a9f6a34a4ab9",
+ "url": null
+}

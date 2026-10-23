@@ -1,0 +1,14 @@
+{
+ "id": "gc-rhinegold-the-valkyrie",
+ "kind": "book",
+ "fileName": "gc-rhinegold-the-valkyrie_2026-10-17.gvec",
+ "sizeBytes": 59520,
+ "sha256": "e29f272d3844eefd4a6ee78c1a02c803c705132013f39c413114d40a254a5a8f",
+ "count": 202,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "73064f3359d4fa8b6214ae8cf048ebd9d7ebdaee92fbc3c336d203ae9284459c",
+ "url": null
+}

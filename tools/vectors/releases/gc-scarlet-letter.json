@@ -1,0 +1,14 @@
+{
+ "id": "gc-scarlet-letter",
+ "kind": "book",
+ "fileName": "gc-scarlet-letter_2026-10-17.gvec",
+ "sizeBytes": 141546,
+ "sha256": "870dfd0bcf427f769faa85492e21b80e581f24490eee3ae9258aa0c6b6877f90",
+ "count": 481,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "edd5d5635e03d1f2699af98167c9460d02bd3c2630ba2d27d0c2c6b9311faee2",
+ "url": null
+}

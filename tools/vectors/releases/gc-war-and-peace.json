@@ -1,0 +1,14 @@
+{
+ "id": "gc-war-and-peace",
+ "kind": "book",
+ "fileName": "gc-war-and-peace_2026-10-17.gvec",
+ "sizeBytes": 1385460,
+ "sha256": "3c637c66fa7c0c54cc46efb9f444fcb154e87d5935557954a45bc47e5d6abf9a",
+ "count": 4712,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3ca0e2071f989de8a98c749fe03851248bd6de6ed50e98635603d172c68e6e9c",
+ "url": null
+}

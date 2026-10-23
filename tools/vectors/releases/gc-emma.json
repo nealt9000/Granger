@@ -1,0 +1,14 @@
+{
+ "id": "gc-emma",
+ "kind": "book",
+ "fileName": "gc-emma_2026-10-17.gvec",
+ "sizeBytes": 348228,
+ "sha256": "9d45b1fd2f3c30dcce1717919b95232bcee436d2a48d66880a03ed01397ba009",
+ "count": 1184,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1120ece4dedf7b5a87f3dd92bfbf6f2449118f560c30d7f00623d435bfd96708",
+ "url": null
+}

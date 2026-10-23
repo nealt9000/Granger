@@ -1,0 +1,14 @@
+{
+ "id": "gc-ghosts",
+ "kind": "book",
+ "fileName": "gc-ghosts_2026-10-17.gvec",
+ "sizeBytes": 75396,
+ "sha256": "3de91b1390aa92579469096ed499723f71a2ef15729990f446e4a6af623921f0",
+ "count": 256,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d42da8867c2d6f47041f1d2735649223c858006ec3272f6fd3b77725e3e6d0be",
+ "url": null
+}

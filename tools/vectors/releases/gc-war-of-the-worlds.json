@@ -1,0 +1,14 @@
+{
+ "id": "gc-war-of-the-worlds",
+ "kind": "book",
+ "fileName": "gc-war-of-the-worlds_2026-10-17.gvec",
+ "sizeBytes": 146544,
+ "sha256": "6384d89049b9cbe1fcfd570decd9a4a5b657f1a8e2d36628ef280c9b6c2c354c",
+ "count": 498,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9ef3ab68062d1ae71ffaae51704f4e0361ff401aeb23783b75990332a7e11336",
+ "url": null
+}

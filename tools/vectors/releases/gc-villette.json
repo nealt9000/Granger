@@ -1,0 +1,14 @@
+{
+ "id": "gc-villette",
+ "kind": "book",
+ "fileName": "gc-villette_2026-10-17.gvec",
+ "sizeBytes": 441720,
+ "sha256": "ea4dab9908c39b3c5cb534fc0960523a6489d950645ea9d59db2fb79307bcd50",
+ "count": 1502,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3ffb2828bf23b740baa712718f9f847a94b8d894c9e56fdbe440742d738c8910",
+ "url": null
+}

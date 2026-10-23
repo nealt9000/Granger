@@ -1,0 +1,14 @@
+{
+ "id": "gc-treatise-of-human-nature",
+ "kind": "book",
+ "fileName": "gc-treatise-of-human-nature_2026-10-17.gvec",
+ "sizeBytes": 363810,
+ "sha256": "df7a723cc883730d2f63def698b96dabf7df6890dd053ded861740528cceef9e",
+ "count": 1237,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "48ef3bef81e00f588bf64b1395c87809df7783f16c774f64b4b959ceedf090a5",
+ "url": null
+}

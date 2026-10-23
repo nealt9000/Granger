@@ -1,0 +1,14 @@
+{
+ "id": "gc-on-the-nature-of-things",
+ "kind": "book",
+ "fileName": "gc-on-the-nature-of-things_2026-10-17.gvec",
+ "sizeBytes": 70104,
+ "sha256": "f8de94bd3fbe0a1e0eae5113db857730bb8839311a853afb9886536f36b58430",
+ "count": 238,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c9e3374bc2454a7debf0078cfa8b38eaff2af87fa437686e80decf18cc6dd743",
+ "url": null
+}

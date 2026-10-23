@@ -1,0 +1,14 @@
+{
+ "id": "gc-republic",
+ "kind": "book",
+ "fileName": "gc-republic_2026-10-17.gvec",
+ "sizeBytes": 309420,
+ "sha256": "ab5d002405b1d4ae8959db02a035b1b00d23c4fb002defbde73bcfe0c17d9164",
+ "count": 1052,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7aafbe16b049b9d2bb4a2eefdf54df53b8283959b64335b951953d2268266dec",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-odes",
+ "kind": "book",
+ "fileName": "gc-odes_2026-10-17.gvec",
+ "sizeBytes": 48642,
+ "sha256": "1e70bfd76f73045101c854bfa88ce966ae108ca38ebdb79535243cb728edd8db",
+ "count": 165,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "564bb6e902d4693a379564921fdbc8b5ad71a6f1551e4bfd20d354bd831b488e",
+ "url": null
+}

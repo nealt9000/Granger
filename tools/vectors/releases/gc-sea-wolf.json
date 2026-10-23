@@ -1,0 +1,14 @@
+{
+ "id": "gc-sea-wolf",
+ "kind": "book",
+ "fileName": "gc-sea-wolf_2026-10-17.gvec",
+ "sizeBytes": 267378,
+ "sha256": "a851445585c7bcf81fcaee7c62d209739a8c0f7a5ee93764579a2110dd809bd4",
+ "count": 909,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d3c0346be780e2e789895dfe07574e6481240e81aeaddb01984fb8906c225068",
+ "url": null
+}

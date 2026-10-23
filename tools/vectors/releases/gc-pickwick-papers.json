@@ -1,0 +1,14 @@
+{
+ "id": "gc-pickwick-papers",
+ "kind": "book",
+ "fileName": "gc-pickwick-papers_2026-10-17.gvec",
+ "sizeBytes": 799224,
+ "sha256": "cccdc9631043121b592d0fc7a2b0e63baf3487d77de63edc8d088320bcd82498",
+ "count": 2718,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dd3830f9061e2e6633bbd25efda050747322177566e27a3268ec6d9cb7028b43",
+ "url": null
+}

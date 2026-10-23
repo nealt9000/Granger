@@ -1,0 +1,14 @@
+{
+ "id": "gc-titus-andronicus",
+ "kind": "book",
+ "fileName": "gc-titus-andronicus_2026-10-17.gvec",
+ "sizeBytes": 59814,
+ "sha256": "b3e998f479f071e6ca95e360f34541495df6f5be82b0eda53281cff18a07e082",
+ "count": 203,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "95492993221af5fa6b9272c8c80cbc25735405cdbc1d7562f7977619d37b5ac6",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-antony-and-cleopatra",
+ "kind": "book",
+ "fileName": "gc-antony-and-cleopatra_2026-10-17.gvec",
+ "sizeBytes": 87156,
+ "sha256": "9cc6a87da914c78f602d81d7224332c0484f914d13a1d34e7b2099d7d145003a",
+ "count": 296,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "30805670370811c50d31517db75f593954a1921a66c85a9c59fb1fd5b85948ca",
+ "url": null
+}

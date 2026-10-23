@@ -1,0 +1,14 @@
+{
+ "id": "gc-bacchae",
+ "kind": "book",
+ "fileName": "gc-bacchae_2026-10-17.gvec",
+ "sizeBytes": 24240,
+ "sha256": "800e96e48274a20dd515af98a5c5f63f3ff237e74a9e933e102ad784dacd2050",
+ "count": 82,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "739c4be5228029a03fe51d4cd39e60710bb7ff890db13e49459d7168bd77d05f",
+ "url": null
+}

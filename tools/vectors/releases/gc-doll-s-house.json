@@ -1,0 +1,14 @@
+{
+ "id": "gc-doll-s-house",
+ "kind": "book",
+ "fileName": "gc-doll-s-house_2026-10-17.gvec",
+ "sizeBytes": 80394,
+ "sha256": "0aa012077ae41e373a2a5fb4f1f3a11b782a27882fca65d3b0f1df2b31eb8fbd",
+ "count": 273,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "483115db77536366418db204c683832065accd1cbb21d772d66e478fcfda4265",
+ "url": null
+}

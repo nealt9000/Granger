@@ -1,0 +1,14 @@
+{
+ "id": "gc-candide",
+ "kind": "book",
+ "fileName": "gc-candide_2026-10-17.gvec",
+ "sizeBytes": 95682,
+ "sha256": "577911b39bfc5635f2c49390c297b434428863168f73d6e58732bc60b7483bd4",
+ "count": 325,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3d15822a633100782a97e0b4ed5eefdac03d70b9023e2d755cc189f4aa3c6b77",
+ "url": null
+}

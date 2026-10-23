@@ -1,0 +1,14 @@
+{
+ "id": "gc-daisy-miller",
+ "kind": "book",
+ "fileName": "gc-daisy-miller_2026-10-17.gvec",
+ "sizeBytes": 48348,
+ "sha256": "f12d474537cbc727ecda0870b0aa73047c3b926e7ecf304ef09f5129f377453e",
+ "count": 164,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3a63df6327412ef973ab62d9f55fbe9082e838b74bc35354ec2be3ed0d366267",
+ "url": null
+}

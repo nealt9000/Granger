@@ -1,0 +1,14 @@
+{
+ "id": "gc-faust-gounod",
+ "kind": "book",
+ "fileName": "gc-faust-gounod_2026-10-17.gvec",
+ "sizeBytes": 61284,
+ "sha256": "1e20e5a2f75c8bd874b6729b45e667d2c9f4be8ab8009ba403adbc6ab676444d",
+ "count": 208,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c79613554b46944cb996c7ad2af087913ef3adc3ce26199a7a294141fe6b8c6a",
+ "url": null
+}

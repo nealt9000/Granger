@@ -1,0 +1,14 @@
+{
+ "id": "gc-portrait-of-the-artist-as-a-young-man",
+ "kind": "book",
+ "fileName": "gc-portrait-of-the-artist-as-a-young-man_2026-10-17.gvec",
+ "sizeBytes": 194172,
+ "sha256": "3ba2cb27666ac77bc08c9019a23e975bed9eb5c1dbe0cae1bda9d8743fbce94b",
+ "count": 660,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a699ae3c563e723510fc2dbca3a9058211f7c1519ec0c295c42f7129960eb199",
+ "url": null
+}

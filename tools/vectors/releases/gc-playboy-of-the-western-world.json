@@ -1,0 +1,14 @@
+{
+ "id": "gc-playboy-of-the-western-world",
+ "kind": "book",
+ "fileName": "gc-playboy-of-the-western-world_2026-10-17.gvec",
+ "sizeBytes": 62166,
+ "sha256": "2543a5c4b8b55e7adee72623fea58140b1540eeae05415d7f4a95cacf35d4d58",
+ "count": 211,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "54e139350a4f0970983782dbb466e08cc6d367e0a4d77a5373dba5e6e6bfe67f",
+ "url": null
+}

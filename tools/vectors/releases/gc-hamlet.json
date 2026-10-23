@@ -1,0 +1,14 @@
+{
+ "id": "gc-hamlet",
+ "kind": "book",
+ "fileName": "gc-hamlet_2026-10-17.gvec",
+ "sizeBytes": 86568,
+ "sha256": "43e7bc322295095f1eb53fa1ff65a2161d35c6c9aea79ba0746211cacc0a911f",
+ "count": 294,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "bac64efc26e2be59582a44e4c7929c81f47f2ced07a1be1f782e8cce58ca2c68",
+ "url": null
+}

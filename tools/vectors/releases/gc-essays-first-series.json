@@ -1,0 +1,14 @@
+{
+ "id": "gc-essays-first-series",
+ "kind": "book",
+ "fileName": "gc-essays-first-series_2026-10-17.gvec",
+ "sizeBytes": 115380,
+ "sha256": "8485b5da98cbac4beec13e460a59711fddd69c96e7fc87b3e69fac4c7a9c49c3",
+ "count": 392,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "84b251f0680c6e92e8b6b7779f1e4c48878b1f66201bf539fc002388282dcbf0",
+ "url": null
+}

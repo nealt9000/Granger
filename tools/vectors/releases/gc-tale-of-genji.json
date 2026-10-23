@@ -1,0 +1,14 @@
+{
+ "id": "gc-tale-of-genji",
+ "kind": "book",
+ "fileName": "gc-tale-of-genji_2026-10-17.gvec",
+ "sizeBytes": 149190,
+ "sha256": "1bacf9f0f846e613bd8a40b1678780cbc90be4a402f2760423bfa52fd2a628be",
+ "count": 507,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2c470e456afd841068fd8dfcb82171213f140b4f2054d9b320ea5c438bc6d83b",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-duchess-of-malfi",
+ "kind": "book",
+ "fileName": "gc-duchess-of-malfi_2026-10-17.gvec",
+ "sizeBytes": 28062,
+ "sha256": "ca472865ae7ee1f58dc5aae7aabd08b796433cafaf70839f2f1ead867b6ed6b7",
+ "count": 95,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cbac677d4038f7968b84db29086fde7203b7c4519ae5bba82dd3d7d8f3cde709",
+ "url": null
+}

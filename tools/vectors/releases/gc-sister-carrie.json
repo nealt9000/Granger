@@ -1,0 +1,14 @@
+{
+ "id": "gc-sister-carrie",
+ "kind": "book",
+ "fileName": "gc-sister-carrie_2026-10-17.gvec",
+ "sizeBytes": 434958,
+ "sha256": "573fc26eeba41070efb1be54b4a7536b0e2622175da11082890fa421007d3667",
+ "count": 1479,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f4e3c3e2eaeaeb7567140401dfa11afee49f2b4372046baf45ff640062924db9",
+ "url": null
+}

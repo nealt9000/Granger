@@ -1,0 +1,14 @@
+{
+ "id": "gc-pride-and-prejudice",
+ "kind": "book",
+ "fileName": "gc-pride-and-prejudice_2026-10-17.gvec",
+ "sizeBytes": 297366,
+ "sha256": "0698a8b60fdabe86e1e834a6952dfe36b2d36a5665c6c51ded794f2902449676",
+ "count": 1011,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2cd1242da41aae79059cdbf9a706d34a7e26a9b301c4857bbe2d7f278788d2fc",
+ "url": null
+}

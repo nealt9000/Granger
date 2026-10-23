@@ -1,0 +1,14 @@
+{
+ "id": "gc-white-fang",
+ "kind": "book",
+ "fileName": "gc-white-fang_2026-10-17.gvec",
+ "sizeBytes": 182118,
+ "sha256": "e9d4bf9ab81c0aacd0e9b86cd6ce8fa6f2cd9108708090a5e859bd8bcc4164a2",
+ "count": 619,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "00bf559b14a02709798171becd81e8d3aa902b40776f7ec23a33fb548ce1c512",
+ "url": null
+}

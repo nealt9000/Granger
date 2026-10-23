@@ -1,0 +1,14 @@
+{
+ "id": "gc-riders-to-the-sea",
+ "kind": "book",
+ "fileName": "gc-riders-to-the-sea_2026-10-17.gvec",
+ "sizeBytes": 14244,
+ "sha256": "b2b6ceae4b4b25d080a02e560730079d0efe849d869fe8f890e1914ce387374a",
+ "count": 48,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6c932bb8ac2c6201aca60b7f239d069bbd54abb1c70e83c0bc4aaaba11004cda",
+ "url": null
+}

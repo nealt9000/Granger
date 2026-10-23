@@ -1,0 +1,14 @@
+{
+ "id": "gc-merry-wives-of-windsor",
+ "kind": "book",
+ "fileName": "gc-merry-wives-of-windsor_2026-10-17.gvec",
+ "sizeBytes": 72456,
+ "sha256": "f8a4da45c1f190a66532980b311e8f18d0832d26d2804f3f5695c1d169ac364a",
+ "count": 246,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "8f99882a0dcff284016e7fde3dd74885c31a0cc54279276bc185bf5ecad64ea3",
+ "url": null
+}

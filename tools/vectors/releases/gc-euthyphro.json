@@ -1,0 +1,14 @@
+{
+ "id": "gc-euthyphro",
+ "kind": "book",
+ "fileName": "gc-euthyphro_2026-10-17.gvec",
+ "sizeBytes": 21888,
+ "sha256": "1dad00b05593364d08ab1de40255b255dcf19276332b77b36ae7cc49599e34d3",
+ "count": 74,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "65f7c133bbb965d14c8c75b78ea377baa3e051f83174e2caa4e83ab4608582df",
+ "url": null
+}

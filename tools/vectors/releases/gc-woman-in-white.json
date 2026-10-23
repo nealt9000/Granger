@@ -1,0 +1,14 @@
+{
+ "id": "gc-woman-in-white",
+ "kind": "book",
+ "fileName": "gc-woman-in-white_2026-10-17.gvec",
+ "sizeBytes": 544326,
+ "sha256": "4a39bb900b50892068a502e4737b6c827f6b96e0ba933ddfbe86745f79163a8b",
+ "count": 1851,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c52bb5e3fb74f39d28b9833496c85e14b0cfc6b1546c2eb1a46fbcd2eda3c1dd",
+ "url": null
+}

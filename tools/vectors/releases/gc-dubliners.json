@@ -1,0 +1,14 @@
+{
+ "id": "gc-dubliners",
+ "kind": "book",
+ "fileName": "gc-dubliners_2026-10-17.gvec",
+ "sizeBytes": 160362,
+ "sha256": "323edc3cc5b3a3b822273d99458e9b2ac7841734025bc53581ce346edd13d1e3",
+ "count": 545,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9f8ed18b380e4c1163312b338e4be86521c59b6097d9e557c41c9bedee6c9ee3",
+ "url": null
+}

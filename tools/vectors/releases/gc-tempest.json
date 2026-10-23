@@ -1,0 +1,14 @@
+{
+ "id": "gc-tempest",
+ "kind": "book",
+ "fileName": "gc-tempest_2026-10-17.gvec",
+ "sizeBytes": 53640,
+ "sha256": "4401bfd6f358d44c5bf38f83d7d5321dc4717bcdfcf852b21860109bb7e7bcc6",
+ "count": 182,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ef3318242df443eeeeea849e81d917e8a8b78e76a9df9e957d3afd505388dabf",
+ "url": null
+}

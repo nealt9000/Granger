@@ -1,0 +1,14 @@
+{
+ "id": "gc-ideal-husband",
+ "kind": "book",
+ "fileName": "gc-ideal-husband_2026-10-17.gvec",
+ "sizeBytes": 92742,
+ "sha256": "205ea55d48bcf3c3ab7875ef58d5d3db76468507f310a01754a2f265b93331f6",
+ "count": 315,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a5b7fe916f72dd6b075741accd8a4142e75ed2fae608a22c7a0f2c39542255e2",
+ "url": null
+}

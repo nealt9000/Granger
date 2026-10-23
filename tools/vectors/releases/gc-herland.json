@@ -1,0 +1,14 @@
+{
+ "id": "gc-herland",
+ "kind": "book",
+ "fileName": "gc-herland_2026-10-17.gvec",
+ "sizeBytes": 158892,
+ "sha256": "564b79818a12b12f752c76592fb5069ee9253e18be2ba131a962f82ea5707479",
+ "count": 540,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6c5b7f60c164eafa64380c7f853fd04a2cde887556ffa26b5385f39354267675",
+ "url": null
+}

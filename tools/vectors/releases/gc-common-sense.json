@@ -1,0 +1,14 @@
+{
+ "id": "gc-common-sense",
+ "kind": "book",
+ "fileName": "gc-common-sense_2026-10-17.gvec",
+ "sizeBytes": 44232,
+ "sha256": "271beacdf5e5c9e11131c7cc3687d5a5bebd0e1c83035784778a7b8b84080d8b",
+ "count": 150,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "02629ad1f8a07a91884f119259fc58ed718a1bc1e5250a623314131b84b5dab5",
+ "url": null
+}

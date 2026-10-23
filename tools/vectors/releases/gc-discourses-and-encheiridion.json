@@ -1,0 +1,14 @@
+{
+ "id": "gc-discourses-and-encheiridion",
+ "kind": "book",
+ "fileName": "gc-discourses-and-encheiridion_2026-10-17.gvec",
+ "sizeBytes": 82746,
+ "sha256": "65259c6b410879dff47180d27d62b8249d6d3cb3df60fce8e9c59118d6de24b2",
+ "count": 281,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5cde8b6093ee462b506ef1dc797a86f4bda5576b79bc353a364723cee9db1a1d",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-medea",
+ "kind": "book",
+ "fileName": "gc-medea_2026-10-17.gvec",
+ "sizeBytes": 42174,
+ "sha256": "4e13ca3e17f315898eddaf6280ed15f968813aa3f3c9089ed839e963b1064aa7",
+ "count": 143,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "154e3352cb8dd21e72a36fc917d5354d93f95ecd169acad46d117403928cb68e",
+ "url": null
+}

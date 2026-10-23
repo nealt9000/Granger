@@ -1,0 +1,14 @@
+{
+ "id": "gc-mantle-and-other-stories",
+ "kind": "book",
+ "fileName": "gc-mantle-and-other-stories_2026-10-17.gvec",
+ "sizeBytes": 140076,
+ "sha256": "71a2b3fea305aba6c38c0de0205f8fca31ae42259f72096b7943211b404934ef",
+ "count": 476,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4afb4111a4e0ea0163df6390c5554f5b9cb4b6bce17e39f5c4bc5f54ab6dfa69",
+ "url": null
+}

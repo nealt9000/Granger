@@ -1,0 +1,14 @@
+{
+ "id": "gc-kim",
+ "kind": "book",
+ "fileName": "gc-kim_2026-10-17.gvec",
+ "sizeBytes": 266496,
+ "sha256": "5516fa5a04d50132e88c9a256afd5b499ee6161c0b7a563ea18dbb1218e08b55",
+ "count": 906,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "88e0118f845581e5130e0bbf01f4d008a3c28f73f69f7c45b5513b0007890967",
+ "url": null
+}

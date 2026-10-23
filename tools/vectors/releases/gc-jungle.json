@@ -1,0 +1,14 @@
+{
+ "id": "gc-jungle",
+ "kind": "book",
+ "fileName": "gc-jungle_2026-10-17.gvec",
+ "sizeBytes": 250914,
+ "sha256": "6b7f6550fc84f0a3de0493ca36119c130f0168d917beb0f88cb137c5a7c5db73",
+ "count": 853,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dc6334fe37ce04ac04b3a20b3419af85eeec6078b8d8fe998a39641ce770817b",
+ "url": null
+}

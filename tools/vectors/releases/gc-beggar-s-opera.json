@@ -1,0 +1,14 @@
+{
+ "id": "gc-beggar-s-opera",
+ "kind": "book",
+ "fileName": "gc-beggar-s-opera_2026-10-17.gvec",
+ "sizeBytes": 50994,
+ "sha256": "db844d0f029832ddd190d00084d37d0f328a61ec9a6015b4048fc56e2726319f",
+ "count": 173,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "548b966f49b03a1034299a78ba9ff307e17175de1fa99033c9eeb585906499b8",
+ "url": null
+}

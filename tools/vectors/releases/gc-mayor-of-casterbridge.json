@@ -1,0 +1,14 @@
+{
+ "id": "gc-mayor-of-casterbridge",
+ "kind": "book",
+ "fileName": "gc-mayor-of-casterbridge_2026-10-17.gvec",
+ "sizeBytes": 306774,
+ "sha256": "cb98d9d7ddf7e13c43452e90ee6805276bc5eae2f68142983779c379ccd6fe87",
+ "count": 1043,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a367d0d13cb0f40d80de9cd973f817343351867011b2ac45de96386ebf4d510f",
+ "url": null
+}

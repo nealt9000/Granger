@@ -1,0 +1,14 @@
+{
+ "id": "gc-frankenstein",
+ "kind": "book",
+ "fileName": "gc-frankenstein_2026-10-17.gvec",
+ "sizeBytes": 155070,
+ "sha256": "a98406035e594aa57aa44e1d6870e3222ec072b2ac441080cec5ca637fdbd5dc",
+ "count": 527,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9c35b711320d158a04fccf2697964672f34104e735f7e9b33bba7616eeea6a6d",
+ "url": null
+}

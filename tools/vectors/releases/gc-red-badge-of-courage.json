@@ -1,0 +1,14 @@
+{
+ "id": "gc-red-badge-of-courage",
+ "kind": "book",
+ "fileName": "gc-red-badge-of-courage_2026-10-17.gvec",
+ "sizeBytes": 132726,
+ "sha256": "ef1fa0e1d62c35cacd914c94759e68e242f85a4c49151e89cc01909a545b3ab5",
+ "count": 451,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2b1e89ed898f484a0d10d3638b21139ec4e871d19b96ad537635a68712e8281a",
+ "url": null
+}

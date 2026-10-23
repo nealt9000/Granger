@@ -1,0 +1,14 @@
+{
+ "id": "gc-golden-asse",
+ "kind": "book",
+ "fileName": "gc-golden-asse_2026-10-17.gvec",
+ "sizeBytes": 88038,
+ "sha256": "d4be3ee029008cfa58b968c0ef09a9e530bd06ab238932bf77449144f01e4d3a",
+ "count": 299,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "215d95e5274f76a3a432657ce87b2696b4c5ddc69dd719bcc38d6ceb02c2d95d",
+ "url": null
+}

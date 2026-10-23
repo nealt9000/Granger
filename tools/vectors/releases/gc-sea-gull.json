@@ -1,0 +1,14 @@
+{
+ "id": "gc-sea-gull",
+ "kind": "book",
+ "fileName": "gc-sea-gull_2026-10-17.gvec",
+ "sizeBytes": 51582,
+ "sha256": "42fbf84b0027f250fa08b7d33fe0dbc14794bca5288fbd4ff8b9756546450c61",
+ "count": 175,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "45eb965262b3492fe66662d76cde072afcc418adf1ca32bdcaee5327f28b79a1",
+ "url": null
+}

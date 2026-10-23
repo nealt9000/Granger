@@ -1,0 +1,14 @@
+{
+ "id": "gc-dracula",
+ "kind": "book",
+ "fileName": "gc-dracula_2026-10-17.gvec",
+ "sizeBytes": 283548,
+ "sha256": "8109ba1673b335e9cf9392c43f619e6506ae69acdf4d49d93941229b20dbbf0d",
+ "count": 964,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9d1a32d5328d4d4ea6106b11da2acf11c4c2f1c1c004e6de6d9e67e8b3106ef8",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-main-street",
+ "kind": "book",
+ "fileName": "gc-main-street_2026-10-17.gvec",
+ "sizeBytes": 434958,
+ "sha256": "69362ff96aeb92ed41be506bbb2a7119b2cbf018bfdf3f331ac712522d460146",
+ "count": 1479,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f28a4efdbb0cf3adc844c6d99fed2f88c4643559f549d66337d5f0f6744fb89b",
+ "url": null
+}

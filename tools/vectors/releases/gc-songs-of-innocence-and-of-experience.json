@@ -1,0 +1,14 @@
+{
+ "id": "gc-songs-of-innocence-and-of-experience",
+ "kind": "book",
+ "fileName": "gc-songs-of-innocence-and-of-experience_2026-10-17.gvec",
+ "sizeBytes": 23064,
+ "sha256": "5a6a60d4ebf7f2ddf59ac6fc43f1ee31b711be0f30d0fd77953ff9518b005224",
+ "count": 78,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "974a399001c3d8d45af0bb874e753d514ebf225ad342584242aa4a99b02fc8ee",
+ "url": null
+}

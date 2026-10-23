@@ -1,0 +1,14 @@
+{
+ "id": "gc-meno",
+ "kind": "book",
+ "fileName": "gc-meno_2026-10-17.gvec",
+ "sizeBytes": 48642,
+ "sha256": "d03a06ff79a9a314284156371f2a6c111eb5872843cb29f3a2c001adc3528e10",
+ "count": 165,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2f30e3abb9b8faafa4b85e538723940b94746a1070ab5f5f175167f2ac8e673e",
+ "url": null
+}

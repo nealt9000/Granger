@@ -1,0 +1,14 @@
+{
+ "id": "gc-world-as-will-and-idea-volume-1",
+ "kind": "book",
+ "fileName": "gc-world-as-will-and-idea-volume-1_2026-10-17.gvec",
+ "sizeBytes": 217104,
+ "sha256": "09e72049646639be9e9093e5523a705c8e7dee964f7ef84585472151fe5e7836",
+ "count": 738,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3be672a29776964739128ddfecc05735d27fcf2c1b86bb6f4b3630a66214826d",
+ "url": null
+}

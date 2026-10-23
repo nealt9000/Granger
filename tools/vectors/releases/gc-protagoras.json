@@ -1,0 +1,14 @@
+{
+ "id": "gc-protagoras",
+ "kind": "book",
+ "fileName": "gc-protagoras_2026-10-17.gvec",
+ "sizeBytes": 51288,
+ "sha256": "19eb0db7ef57005211da51fa922da63143e36863d52d9c4a9d7fd68582da058a",
+ "count": 174,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "726857251d691ae245700453e98b8bac7c6b2f63fbd658e13205f43ed431cc6d",
+ "url": null
+}

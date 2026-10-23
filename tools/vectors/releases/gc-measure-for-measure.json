@@ -1,0 +1,14 @@
+{
+ "id": "gc-measure-for-measure",
+ "kind": "book",
+ "fileName": "gc-measure-for-measure_2026-10-17.gvec",
+ "sizeBytes": 68634,
+ "sha256": "af23fa3f3c72b6a5f4586765a6521c03e9ffad3fa4d8ca0c3c021f13f734056c",
+ "count": 233,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "64237b31670bf091cb595bc3ae95b018354d6fd93460fffb144165e3b33dc988",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-lysistrata",
+ "kind": "book",
+ "fileName": "gc-lysistrata_2026-10-17.gvec",
+ "sizeBytes": 41586,
+ "sha256": "defa9a94bf4ac5c372774db84faaaa1c73439203b238ff0745378d6c7f01a111",
+ "count": 141,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "828fb744fab28c0125c244e1bcd639bd9054a4503488f3381586c7b1364b0e42",
+ "url": null
+}

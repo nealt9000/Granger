@@ -1,0 +1,14 @@
+{
+ "id": "gc-northanger-abbey",
+ "kind": "book",
+ "fileName": "gc-northanger-abbey_2026-10-17.gvec",
+ "sizeBytes": 150660,
+ "sha256": "5bc92fe7a290c6d5701ece9f73630d0c913f35208e3fa69152ed9bc656c9246c",
+ "count": 512,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "34c5b17cbb9efd3c76eab84c034b371bae98defa8793aa2415d00a8f9c03032c",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-varieties-of-religious-experience",
+ "kind": "book",
+ "fileName": "gc-varieties-of-religious-experience_2026-10-17.gvec",
+ "sizeBytes": 330000,
+ "sha256": "f44cb0df3d1e7c2238474cb65f2bec98219d1064229027625b2362c6ee41fded",
+ "count": 1122,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "8b31c1f3f887c1f3bbb06f5fc1a6a996e9a5564091d9e1572e15bae529fb17d1",
+ "url": null
+}

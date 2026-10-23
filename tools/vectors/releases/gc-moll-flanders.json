@@ -1,0 +1,14 @@
+{
+ "id": "gc-moll-flanders",
+ "kind": "book",
+ "fileName": "gc-moll-flanders_2026-10-17.gvec",
+ "sizeBytes": 268848,
+ "sha256": "70fc2a7c55e789e474543d5b1a7af2ccd5ff5a2cc79c787889d8274b6238a7ab",
+ "count": 914,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a1ff88842d5a19a4aecce0ab7b77195f1b4c004c54f9236251d47351b12764fa",
+ "url": null
+}

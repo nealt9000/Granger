@@ -1,0 +1,14 @@
+{
+ "id": "gc-dhammapada",
+ "kind": "book",
+ "fileName": "gc-dhammapada_2026-10-17.gvec",
+ "sizeBytes": 43056,
+ "sha256": "ef0ba47641dcca5abcd2cd36a30fbe4c1250987d2716d10841fc6c146fa90957",
+ "count": 146,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b25f81fc6cfc164f39de4b19d3e73ebb09745d1c2e84fda8a2e2184b9723f6ee",
+ "url": null
+}

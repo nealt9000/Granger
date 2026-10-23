@@ -1,0 +1,14 @@
+{
+ "id": "gc-salome",
+ "kind": "book",
+ "fileName": "gc-salome_2026-10-17.gvec",
+ "sizeBytes": 32766,
+ "sha256": "badaed3452314f1ced77b8762fd99d164d1fee3e287828a656b1982ce74c079e",
+ "count": 111,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c2eb95e8cc41f5c746a3a6891b5e1cc8642c43bc507e282506579fe56c24e41d",
+ "url": null
+}

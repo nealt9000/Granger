@@ -1,0 +1,14 @@
+{
+ "id": "gc-imitation-of-christ",
+ "kind": "book",
+ "fileName": "gc-imitation-of-christ_2026-10-17.gvec",
+ "sizeBytes": 164478,
+ "sha256": "d340a30b4b306c4b6b9f16dfc21fe06cc6d9ebb1cd08211bba7d258d54dcaa6a",
+ "count": 559,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "399adc8ba500af063f34511605d50ea47ca6168cd194bd4c7ef71c0456c103b1",
+ "url": null
+}

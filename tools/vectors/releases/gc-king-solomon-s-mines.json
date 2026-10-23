@@ -1,0 +1,14 @@
+{
+ "id": "gc-king-solomon-s-mines",
+ "kind": "book",
+ "fileName": "gc-king-solomon-s-mines_2026-10-17.gvec",
+ "sizeBytes": 189762,
+ "sha256": "69065d80b8373426d21fb9336eabaac7c24f6ec08f2d91cc91f5ea767a31ebde",
+ "count": 645,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "89567d011bf0335feb3a0d806e5523164eb7c0c1248b03197abe1a6c45368199",
+ "url": null
+}

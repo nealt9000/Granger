@@ -1,0 +1,14 @@
+{
+ "id": "gc-faust-part-one",
+ "kind": "book",
+ "fileName": "gc-faust-part-one_2026-10-17.gvec",
+ "sizeBytes": 92742,
+ "sha256": "9887f9869d6429dfbe60efd215e72124eb1944c5d3c73cad5066e5a73070c1a9",
+ "count": 315,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "de8b2e15ee14cfdccc4aefcab52e466a4aa4b5ba568b6c3d7af6d3a4813060e4",
+ "url": null
+}

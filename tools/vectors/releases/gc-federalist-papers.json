@@ -1,0 +1,14 @@
+{
+ "id": "gc-federalist-papers",
+ "kind": "book",
+ "fileName": "gc-federalist-papers_2026-10-17.gvec",
+ "sizeBytes": 321768,
+ "sha256": "c1712fd7aa3be16523bec972889c58e6df51ae19f442cddff8db2d25ab8323d5",
+ "count": 1094,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "415fbc7fc78c7f67dafbe4fec3eab883a115db0794579c8ae9cd601e8b512894",
+ "url": null
+}

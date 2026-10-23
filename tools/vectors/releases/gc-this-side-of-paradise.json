@@ -1,0 +1,14 @@
+{
+ "id": "gc-this-side-of-paradise",
+ "kind": "book",
+ "fileName": "gc-this-side-of-paradise_2026-10-17.gvec",
+ "sizeBytes": 223572,
+ "sha256": "4d9494e15ac24ab9080f8e5ff5a4e8ae4321d6f7f3436a4d73c450d48add9b8e",
+ "count": 760,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9b6a57667ac489ce96fc8034b9ced3c010c07e8ca4cd00af833e062c92e2aea6",
+ "url": null
+}

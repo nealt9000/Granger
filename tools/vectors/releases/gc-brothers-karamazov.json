@@ -1,0 +1,14 @@
+{
+ "id": "gc-brothers-karamazov",
+ "kind": "book",
+ "fileName": "gc-brothers-karamazov_2026-10-17.gvec",
+ "sizeBytes": 709554,
+ "sha256": "22e6a79c19b2ffc1d2e6dea0ba2c88c5d4744030eb16a41435e4573b3a45928f",
+ "count": 2413,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5af796d5b36ff66494298667408bc9b35f4465774a564b8a950e401207fc7649",
+ "url": null
+}

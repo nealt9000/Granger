@@ -1,0 +1,14 @@
+{
+ "id": "gc-adventures-of-sherlock-holmes",
+ "kind": "book",
+ "fileName": "gc-adventures-of-sherlock-holmes_2026-10-17.gvec",
+ "sizeBytes": 243270,
+ "sha256": "4a980187d64a4839c227518126237c25f48cc96b13770761aa4628acb5a6eb05",
+ "count": 827,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6f8730a673aa2fe1a789db7050cf4061728a3197332f20f76d9cc28713ec65b9",
+ "url": null
+}

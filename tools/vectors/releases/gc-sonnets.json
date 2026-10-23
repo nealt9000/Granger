@@ -1,0 +1,14 @@
+{
+ "id": "gc-sonnets",
+ "kind": "book",
+ "fileName": "gc-sonnets_2026-10-17.gvec",
+ "sizeBytes": 45702,
+ "sha256": "f1974ceb2ff6b7aefa8e97ed18e8de94c96634641a730f10d2c1164fe4485a7e",
+ "count": 155,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3ee766f097c4d22621b76e625fb6beac70390158a1b95d01b88059891c1c8a3a",
+ "url": null
+}

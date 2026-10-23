@@ -1,0 +1,14 @@
+{
+ "id": "gc-thus-spake-zarathustra",
+ "kind": "book",
+ "fileName": "gc-thus-spake-zarathustra_2026-10-17.gvec",
+ "sizeBytes": 358224,
+ "sha256": "b3a2977705c7976526bd9820ead91dd998639db155da7feba4363af0eb2683c3",
+ "count": 1218,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1f551c71dc82f4eb221540ebe383af40fd4e29a587fe5d9fea4f0f79e12b394a",
+ "url": null
+}

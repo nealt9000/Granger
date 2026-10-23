@@ -1,0 +1,14 @@
+{
+ "id": "gc-merchant-of-venice",
+ "kind": "book",
+ "fileName": "gc-merchant-of-venice_2026-10-17.gvec",
+ "sizeBytes": 60402,
+ "sha256": "76c2342321aeaff090e870b87c0de38a497d0671f357915bc52c16ac26c88dee",
+ "count": 205,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d42b90ada15873f041da222c1bcc76a791b4cd1421ed0403b1f17ea867ea7b41",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-oedipus-the-king-oedipus-at-colonus-antigone",
+ "kind": "book",
+ "fileName": "gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-10-17.gvec",
+ "sizeBytes": 83922,
+ "sha256": "c88a844f06647c0a5091836faf46250dd595db5603dca84cb480f9a376789b57",
+ "count": 285,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e4fe4143ef01f9d2c82aa94520bcb763f201ea688c8704e2f3a1fc3d9154b35c",
+ "url": null
+}

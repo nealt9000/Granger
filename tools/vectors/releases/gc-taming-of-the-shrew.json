@@ -1,0 +1,14 @@
+{
+ "id": "gc-taming-of-the-shrew",
+ "kind": "book",
+ "fileName": "gc-taming-of-the-shrew_2026-10-17.gvec",
+ "sizeBytes": 69516,
+ "sha256": "a657ab23eeb47bd3e2e8224d7da1d8717d4ca321e50e8144908e518f70afd582",
+ "count": 236,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "603f27df57afca7adba754b1dd28e51b660533c931bb7cf1b5bc8a1e6ff31fde",
+ "url": null
+}

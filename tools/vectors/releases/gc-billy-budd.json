@@ -1,0 +1,14 @@
+{
+ "id": "gc-billy-budd",
+ "kind": "book",
+ "fileName": "gc-billy-budd_2026-10-17.gvec",
+ "sizeBytes": 251796,
+ "sha256": "686895bb5ef6ef7c8cd437370b40b59161ed7b5a1093a67e3b5c3e1c6390c366",
+ "count": 856,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6dc12f4a91f225192dc91088d5d3c3ff153c059ef334b67a535e536343f7a51b",
+ "url": null
+}

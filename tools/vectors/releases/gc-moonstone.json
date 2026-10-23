@@ -1,0 +1,14 @@
+{
+ "id": "gc-moonstone",
+ "kind": "book",
+ "fileName": "gc-moonstone_2026-10-17.gvec",
+ "sizeBytes": 448482,
+ "sha256": "1944f588d4dd6567cbb6da3a852dbff482575fac00d68cc7ca370fe5072303e5",
+ "count": 1525,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cab56033ee025ef1ef83f754df71adcf71e0ca973b02d19819ab996d88c859ec",
+ "url": null
+}

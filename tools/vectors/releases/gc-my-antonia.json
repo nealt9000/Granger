@@ -1,0 +1,14 @@
+{
+ "id": "gc-my-antonia",
+ "kind": "book",
+ "fileName": "gc-my-antonia_2026-10-17.gvec",
+ "sizeBytes": 184176,
+ "sha256": "3f1a5fa8014d83926e35720f0d4f0d661482224b68c45d380333570e1ad64da3",
+ "count": 626,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "994d0b9891dbf6492e2cc30f2111f5fc54e9e1de59096d1d160a9bde52ac4a36",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-hard-times",
+ "kind": "book",
+ "fileName": "gc-hard-times_2026-10-17.gvec",
+ "sizeBytes": 262380,
+ "sha256": "940013b395da5c2d43f34dfef74b43a9bf865ac049b55394ed288ac394a65042",
+ "count": 892,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e4b5f45de9ff7558a3343e79c79010552ba938b6fdb6bf731eaf5b132de510a8",
+ "url": null
+}

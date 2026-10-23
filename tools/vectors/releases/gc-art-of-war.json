@@ -1,0 +1,14 @@
+{
+ "id": "gc-art-of-war",
+ "kind": "book",
+ "fileName": "gc-art-of-war_2026-10-17.gvec",
+ "sizeBytes": 126846,
+ "sha256": "224e3b0a7885a8ba454b894e0bfa304dc11caa677c30ecbdb08835cccc69bb88",
+ "count": 431,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "aec8543fe62644c5bfef9e372531087920cc9541278aea17bad3ac2b59ce24c4",
+ "url": null
+}

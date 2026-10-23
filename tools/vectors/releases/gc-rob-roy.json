@@ -1,0 +1,14 @@
+{
+ "id": "gc-rob-roy",
+ "kind": "book",
+ "fileName": "gc-rob-roy_2026-10-17.gvec",
+ "sizeBytes": 396150,
+ "sha256": "617ee6a25bd4b96926300d1d6157f4191b15d5c3658e68b81feac92c762f5db6",
+ "count": 1347,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "63b60a8d28ba999bfd459bc7518af08920a12a90e2c11ef29e414ee1dbfb0996",
+ "url": null
+}

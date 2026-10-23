@@ -1,0 +1,14 @@
+{
+ "id": "gc-swann-s-way",
+ "kind": "book",
+ "fileName": "gc-swann-s-way_2026-10-17.gvec",
+ "sizeBytes": 257382,
+ "sha256": "49f2874402117b26535a2bb8271b9330dc388dbcc710aadf22321561339465a1",
+ "count": 875,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "87f8789b74576f936c1cf085a7260f04c7a0d0b32d0172717d7af51e05614916",
+ "url": null
+}

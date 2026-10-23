@@ -1,0 +1,14 @@
+{
+ "id": "gc-apology",
+ "kind": "book",
+ "fileName": "gc-apology_2026-10-17.gvec",
+ "sizeBytes": 22182,
+ "sha256": "4c34d7d0ef245dd9b71d371e67cd4f7944fec8ea4280798a6f42ef90526e6730",
+ "count": 75,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5818989e2a6e4addf57948af97940237aa6fb148b513862a8899d4e48c824a16",
+ "url": null
+}

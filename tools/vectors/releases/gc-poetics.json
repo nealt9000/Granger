@@ -1,0 +1,14 @@
+{
+ "id": "gc-poetics",
+ "kind": "book",
+ "fileName": "gc-poetics_2026-10-17.gvec",
+ "sizeBytes": 29238,
+ "sha256": "f09e5483efb549a882f552d8f70ae9a6956b9b2e9d8a69be3cb363cc8f5f39c0",
+ "count": 99,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ded6542061c6239bd5881e8ec6b1d07ac6d3b51b230cf34bec1df794aa8c1a38",
+ "url": null
+}

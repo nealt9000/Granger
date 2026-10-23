@@ -1,0 +1,14 @@
+{
+ "id": "gc-father-countess-julie-the-outlaw-the-stronger",
+ "kind": "book",
+ "fileName": "gc-father-countess-julie-the-outlaw-the-stronger_2026-10-17.gvec",
+ "sizeBytes": 116850,
+ "sha256": "a26463f40b1a9108ad652df7efe42214ef4aa24f2096f7cef40ab8776b8ce5e5",
+ "count": 397,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "99e4c828e6bfdc3d78639a430dd249b1ee08aec0bb21bf4b7189cd83d6b5ed63",
+ "url": null
+}

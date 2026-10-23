@@ -1,0 +1,14 @@
+{
+ "id": "gc-prisoner-of-zenda",
+ "kind": "book",
+ "fileName": "gc-prisoner-of-zenda_2026-10-17.gvec",
+ "sizeBytes": 132432,
+ "sha256": "0d73df2d6918289d04258c2b651a78dcedbab87825e2f90ae9c459840d86db45",
+ "count": 450,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7bc24f6d7a68a4f28000be0e985f28377627e125600323e55b3265fc416de417",
+ "url": null
+}

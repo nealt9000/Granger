@@ -1,0 +1,14 @@
+{
+ "id": "gc-trojan-women",
+ "kind": "book",
+ "fileName": "gc-trojan-women_2026-10-17.gvec",
+ "sizeBytes": 45114,
+ "sha256": "94d13c9f0fe83b472c9722d6fb6fe7894cf3ae3f24564f99f28580e0e24e7d26",
+ "count": 153,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "688656d0349cf13555f21c05906e0e92bdda89b55fd903d93d4218daadacb00a",
+ "url": null
+}

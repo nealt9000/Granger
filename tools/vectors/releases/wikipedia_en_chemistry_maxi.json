@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_en_chemistry_maxi",
+ "kind": "pack",
+ "fileName": "wikipedia_en_chemistry_maxi_2026-10-15.gvec",
+ "sizeBytes": 15869084,
+ "sha256": "3949c89b21f42d25581eb56b7b8f19bba5fa3bd961d0037195dc2c405a9a7a6b",
+ "count": 53384,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c197e6d3ce1bdf8838e8abbc63226bd6849a31ec81913bacb779d1d83bcc7d7b",
+ "url": null
+}

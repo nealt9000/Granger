@@ -1,0 +1,14 @@
+{
+ "id": "gc-politics",
+ "kind": "book",
+ "fileName": "gc-politics_2026-10-17.gvec",
+ "sizeBytes": 120378,
+ "sha256": "9856a9f500721bb2a35ca0abc210d3b2898ab08ca58e4774d3006a1c3e75b700",
+ "count": 409,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dfe0c19c2efb2f4678d90c854fb4dbf2eb9135647ab30d290c966513d10c6a02",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-tristram-shandy",
+ "kind": "book",
+ "fileName": "gc-tristram-shandy_2026-10-17.gvec",
+ "sizeBytes": 440544,
+ "sha256": "abc148bd61a068b6f8a8d87880dc3c1a70d1d475d3204fc38cbd681e996651fc",
+ "count": 1498,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e0ee815b61fbbbd5351de5be7584c3bc1e3711212c4611d03fc68b54467e891f",
+ "url": null
+}

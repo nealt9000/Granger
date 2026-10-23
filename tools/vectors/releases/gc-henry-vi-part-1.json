@@ -1,0 +1,14 @@
+{
+ "id": "gc-henry-vi-part-1",
+ "kind": "book",
+ "fileName": "gc-henry-vi-part-1_2026-10-17.gvec",
+ "sizeBytes": 70104,
+ "sha256": "c3e2a26f4d1c19b5b506f18d11276adc0000f576530e0c70144ddedb0d591d8e",
+ "count": 238,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2033dd4c3e064e61f569f3d11277238d8c114301a8b9f4e9bc99a92cd8d473bd",
+ "url": null
+}

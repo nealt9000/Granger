@@ -1,0 +1,14 @@
+{
+ "id": "gc-of-human-bondage",
+ "kind": "book",
+ "fileName": "gc-of-human-bondage_2026-10-17.gvec",
+ "sizeBytes": 545502,
+ "sha256": "ea197725a1dde38a3a6a64d2015a87676b210c09f0aefa12ccaf818c3f52581a",
+ "count": 1855,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d93431a314438d05da4e9c40580309383ebbb5a62a06bef591e1717f1676f8c6",
+ "url": null
+}

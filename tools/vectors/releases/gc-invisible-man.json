@@ -1,0 +1,14 @@
+{
+ "id": "gc-invisible-man",
+ "kind": "book",
+ "fileName": "gc-invisible-man_2026-10-17.gvec",
+ "sizeBytes": 124788,
+ "sha256": "f9462fe85d8d2487eec5a74b5e762ccf0f23ef866ca3a8d54e5b37f57f5b7e0b",
+ "count": 424,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1adce10ab689e7c5b52b98dfdcdb6c32a720f6cb213cfb3b6e21fa7a7d67ac70",
+ "url": null
+}

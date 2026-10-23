@@ -1,0 +1,14 @@
+{
+ "id": "gc-heart-of-darkness",
+ "kind": "book",
+ "fileName": "gc-heart-of-darkness_2026-10-17.gvec",
+ "sizeBytes": 51582,
+ "sha256": "f90c7740dc0467c6a69467e127f304d43f3ab001559060bff3455d929121d98e",
+ "count": 175,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "fe7c909fd1abe6a704fce36705f186442e909cdbb76b388ea6142414d57d0d89",
+ "url": null
+}

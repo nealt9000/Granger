@@ -1,0 +1,14 @@
+{
+ "id": "gc-analects",
+ "kind": "book",
+ "fileName": "gc-analects_2026-10-17.gvec",
+ "sizeBytes": 62460,
+ "sha256": "68aa1d04b1d1cd04a89e3e4633aaea71f3e55496690027741c4b18ac4f0c591a",
+ "count": 212,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "78913c5f47c8859b016fd5388dd8d109b491d25bdef638dcc177eb83ef561927",
+ "url": null
+}

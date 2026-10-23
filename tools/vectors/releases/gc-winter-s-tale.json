@@ -1,0 +1,14 @@
+{
+ "id": "gc-winter-s-tale",
+ "kind": "book",
+ "fileName": "gc-winter-s-tale_2026-10-17.gvec",
+ "sizeBytes": 73044,
+ "sha256": "ba95f4fea0722bab6422af7155755f677092f1cc2b6842a335443035882a80a4",
+ "count": 248,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1365f3e624ec97e91e18ecc740213b69fd568282b2486f98188447137725fd2a",
+ "url": null
+}

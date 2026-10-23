@@ -1,0 +1,14 @@
+{
+ "id": "gc-three-musketeers",
+ "kind": "book",
+ "fileName": "gc-three-musketeers_2026-10-17.gvec",
+ "sizeBytes": 692796,
+ "sha256": "22bd03c8b01d2071be10bf599747adc7578e81a39137d8318e0be57209265810",
+ "count": 2356,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b641c5c65c592681e685f8471914b7d0d1b201df1aabd58cfecf2cb1037ede1a",
+ "url": null
+}

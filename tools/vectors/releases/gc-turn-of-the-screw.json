@@ -1,0 +1,14 @@
+{
+ "id": "gc-turn-of-the-screw",
+ "kind": "book",
+ "fileName": "gc-turn-of-the-screw_2026-10-17.gvec",
+ "sizeBytes": 78042,
+ "sha256": "a6161c87b2f0504df88aed788a2eceb648b316632f41bca40c4f5d0e179bdd25",
+ "count": 265,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "26e63d4717c754261fc14ec3d90b5f4674f12ddb67a4969405084aeebb5bc049",
+ "url": null
+}

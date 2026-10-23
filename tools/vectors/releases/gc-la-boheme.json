@@ -1,0 +1,14 @@
+{
+ "id": "gc-la-boheme",
+ "kind": "book",
+ "fileName": "gc-la-boheme_2026-10-17.gvec",
+ "sizeBytes": 45408,
+ "sha256": "355f2aa2f1ea577d6874838960805aa9ea3476c73a7e17be75240b9d4d6595ae",
+ "count": 154,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2adafafd6d52520a96eb8cf14eea20e8bc0c1f5d1b7fb7b4c016cdae5b9ba6e8",
+ "url": null
+}

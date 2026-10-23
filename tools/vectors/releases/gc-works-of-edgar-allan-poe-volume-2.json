@@ -1,0 +1,14 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-2",
+ "kind": "book",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-2_2026-10-17.gvec",
+ "sizeBytes": 179766,
+ "sha256": "0bba75671cfb715fda4866dd8094de187d2194cb25f0c6960ee85cacf218e35b",
+ "count": 611,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7df77b590cdacd87b13a2a9f5627270700e91f3c1b8d9697a8b767e0b69ed7a3",
+ "url": null
+}

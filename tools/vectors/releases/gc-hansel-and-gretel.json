@@ -1,0 +1,14 @@
+{
+ "id": "gc-hansel-and-gretel",
+ "kind": "book",
+ "fileName": "gc-hansel-and-gretel_2026-10-17.gvec",
+ "sizeBytes": 57168,
+ "sha256": "7aa673b21aea2efe676555052185d29a4458f46119554db89863f2da7f201ab6",
+ "count": 194,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "788e2a05bd0965d35da4c7d532dab090464b778903708f7c573bd17134496f41",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_en_medicine_nopic",
+ "kind": "pack",
+ "fileName": "wikipedia_en_medicine_nopic_2026-10-10.gvec",
+ "sizeBytes": 106815260,
+ "sha256": "5e3f12fd1904b3ca0002661448c9d893125787a67c9e31b968b937e1aacd5dfa",
+ "count": 357165,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "718fadad40b3491be3fa8f95181a948e4d726f97a79a14e0ef1b90c6b2b03625",
+ "url": null
+}

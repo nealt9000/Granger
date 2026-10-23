@@ -1,0 +1,14 @@
+{
+ "id": "gc-christmas-carol",
+ "kind": "book",
+ "fileName": "gc-christmas-carol_2026-10-17.gvec",
+ "sizeBytes": 74808,
+ "sha256": "34dc552ec28b6a7232b6f34afe0e5202cff4a700cc57536716d5c1d7e9ebdd30",
+ "count": 254,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3a99210ce08bf7ad422c3e7d25d1f39af985d48ea26a51f64dc6f6cf83c87c4d",
+ "url": null
+}

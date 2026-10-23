@@ -1,0 +1,14 @@
+{
+ "id": "gc-nicomachean-ethics",
+ "kind": "book",
+ "fileName": "gc-nicomachean-ethics_2026-10-17.gvec",
+ "sizeBytes": 260910,
+ "sha256": "48c3d1e51a8e74b120b60854603899cb2facb4725f3037a1d84077d3d9d87a2e",
+ "count": 887,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "85fdc905a6723ba5eb64a32ac9a3347dd9b5532f0fbd1ca0db122d4ebad406a8",
+ "url": null
+}

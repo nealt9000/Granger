@@ -1,0 +1,14 @@
+{
+ "id": "gc-leaves-of-grass",
+ "kind": "book",
+ "fileName": "gc-leaves-of-grass_2026-10-17.gvec",
+ "sizeBytes": 185646,
+ "sha256": "74d9c3a3cde338809093c4ba53d7dd87df73bf4d35a601e982f17bd763f3d4f3",
+ "count": 631,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "547ada8a3240cf67f41f838a58f9b9f0e2485367c9ef0481cd0287dbc7b678b3",
+ "url": null
+}

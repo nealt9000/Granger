@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_en_mathematics_maxi",
+ "kind": "pack",
+ "fileName": "wikipedia_en_mathematics_maxi_2026-09-15.gvec",
+ "sizeBytes": 41643714,
+ "sha256": "95ff40ac62d46dd95ac579b94b233a0e7e88610889b0476d9de0b99b69e81543",
+ "count": 139785,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "069b5c59f508d795f223e91e875190007e5d9ac23681cf07cfb72ee6d64d5793",
+ "url": null
+}

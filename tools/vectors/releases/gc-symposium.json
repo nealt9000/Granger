@@ -1,0 +1,14 @@
+{
+ "id": "gc-symposium",
+ "kind": "book",
+ "fileName": "gc-symposium_2026-10-17.gvec",
+ "sizeBytes": 44820,
+ "sha256": "9b9cf17a39ddd7a435b8f944a215b89588f9708a2a30c4cb3b0fc899e3510195",
+ "count": 152,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2e94321d64fc00aab94203df4e28f62a0e57f9bb08d52866c18a94a92d1e6089",
+ "url": null
+}

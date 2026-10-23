@@ -1,0 +1,14 @@
+{
+ "id": "gc-age-of-innocence",
+ "kind": "book",
+ "fileName": "gc-age-of-innocence_2026-10-17.gvec",
+ "sizeBytes": 262086,
+ "sha256": "e2d7aec591633d2b3c9e8743e38e3610a603a86ded76658b247b76e76b36b7f7",
+ "count": 891,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "03b5e6444e804d66e815ae0e9565971f036ebb2696d77cbb095edb4ea6aa23ab",
+ "url": null
+}

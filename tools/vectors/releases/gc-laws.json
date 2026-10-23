@@ -1,0 +1,14 @@
+{
+ "id": "gc-laws",
+ "kind": "book",
+ "fileName": "gc-laws_2026-10-17.gvec",
+ "sizeBytes": 342054,
+ "sha256": "a43cf440fe08a124a9140c793e02cb2d7b0eec99a3a58bd735a7c5473991c528",
+ "count": 1163,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "651845d1fbed1b7478512852d1b0942414ee58c83c90cd29c42447e77add50e8",
+ "url": null
+}

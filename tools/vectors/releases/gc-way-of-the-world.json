@@ -1,0 +1,14 @@
+{
+ "id": "gc-way-of-the-world",
+ "kind": "book",
+ "fileName": "gc-way-of-the-world_2026-10-17.gvec",
+ "sizeBytes": 84216,
+ "sha256": "a397aa28e5953b80a9cde78d0951318403bd1f1f58e2e41b00b616bc5bc80308",
+ "count": 286,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "87c3c84ddca9a40351738e85f1d4569e99c397e6a49383881921701a3c392f23",
+ "url": null
+}

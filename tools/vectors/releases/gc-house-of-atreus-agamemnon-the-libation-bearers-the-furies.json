@@ -1,0 +1,14 @@
+{
+ "id": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies",
+ "kind": "book",
+ "fileName": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-10-17.gvec",
+ "sizeBytes": 80100,
+ "sha256": "85ea53c439346960209e241a7e895119153afc77e5a609e1b8c6695efc243565",
+ "count": 272,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "30fd3ab9274679123d0aaab5f9f1146eaaa4195ff5a48367cd0a42ef4b87c31a",
+ "url": null
+}

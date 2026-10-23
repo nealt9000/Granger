@@ -1,0 +1,14 @@
+{
+ "id": "gc-call-of-the-wild",
+ "kind": "book",
+ "fileName": "gc-call-of-the-wild_2026-10-17.gvec",
+ "sizeBytes": 68928,
+ "sha256": "0e77187d0dc33e4d06d29a5d8c58598673063dcc31faff08e69629f046264c36",
+ "count": 234,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "186ea58e335ecbc5af10e5ccaafb466ae8b2616c0a1cef7ed78b2a59f86d4c8b",
+ "url": null
+}

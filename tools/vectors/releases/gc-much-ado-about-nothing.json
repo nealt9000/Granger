@@ -1,0 +1,14 @@
+{
+ "id": "gc-much-ado-about-nothing",
+ "kind": "book",
+ "fileName": "gc-much-ado-about-nothing_2026-10-17.gvec",
+ "sizeBytes": 68634,
+ "sha256": "8f0b3d34b3352b3d901cf9e1a79fb35c052d167595722f6843f749380393c08b",
+ "count": 233,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "24f531a21564abfe602ff9544dd959967dbf40264e55c4393540faeeff642c59",
+ "url": null
+}

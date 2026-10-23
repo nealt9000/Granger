@@ -1,0 +1,14 @@
+{
+ "id": "gc-duenna",
+ "kind": "book",
+ "fileName": "gc-duenna_2026-10-17.gvec",
+ "sizeBytes": 54522,
+ "sha256": "5be68727bad38c0ee323d597e47ff1a7116d23860da5366e41eec8b169a3ede8",
+ "count": 185,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "94d1fa1eeedd2686044fc2572d3b4a8762dcf8a02566763b23ae7987ea286e2e",
+ "url": null
+}

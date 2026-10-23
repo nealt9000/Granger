@@ -1,0 +1,14 @@
+{
+ "id": "gc-great-expectations",
+ "kind": "book",
+ "fileName": "gc-great-expectations_2026-10-17.gvec",
+ "sizeBytes": 450540,
+ "sha256": "8e1374cc9ee5faf9a43e5a9a25049c0455f5c3329cc297490d208fb22ed0aab6",
+ "count": 1532,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "fcab76a6e4685b8aad9b3ae4bb3cd464bc705fe470f2c134856867f0690b8d20",
+ "url": null
+}

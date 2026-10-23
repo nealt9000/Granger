@@ -1,0 +1,14 @@
+{
+ "id": "gc-far-from-the-madding-crowd",
+ "kind": "book",
+ "fileName": "gc-far-from-the-madding-crowd_2026-10-17.gvec",
+ "sizeBytes": 366162,
+ "sha256": "89b90e1a844090426562915c7c134367758b3576ea9500a5bb384638a381f011",
+ "count": 1245,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b4cff8b179a88ae0eb421e21cdc0715f50c894a2bf597058184b974d27a02703",
+ "url": null
+}

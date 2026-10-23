@@ -1,0 +1,14 @@
+{
+ "id": "gc-hebraic-literature-translations-from-the-talmud-midrashim-an",
+ "kind": "book",
+ "fileName": "gc-hebraic-literature-translations-from-the-talmud-midrashim-an_2026-10-17.gvec",
+ "sizeBytes": 344406,
+ "sha256": "223052721adb78bdc46371ba4104a88e08fd8ee874e961569d5560ba31cd042b",
+ "count": 1171,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "24a80a9610ee3946475a13e182cadae1435e70394300b1e31a76f5d1c533996f",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-enemy-of-the-people",
+ "kind": "book",
+ "fileName": "gc-enemy-of-the-people_2026-10-17.gvec",
+ "sizeBytes": 102150,
+ "sha256": "7baf69e33f67dde1bacdaca084d9141aac12864c3683f2085096d01f9c6ed127",
+ "count": 347,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f5c60304746644bbec4d77cfd74fa09240d7e020fe314641063030a293b78460",
+ "url": null
+}

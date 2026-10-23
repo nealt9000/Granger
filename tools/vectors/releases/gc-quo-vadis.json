@@ -1,0 +1,14 @@
+{
+ "id": "gc-quo-vadis",
+ "kind": "book",
+ "fileName": "gc-quo-vadis_2026-10-17.gvec",
+ "sizeBytes": 447600,
+ "sha256": "b68f38e89ed5c3d35f646edab797ed22093fc2e39a0d7aa0029e366600323254",
+ "count": 1522,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "005bf9e427265e27d4cdc4e0236c53f4e0291167bbe76972f922d23db5a49a2e",
+ "url": null
+}

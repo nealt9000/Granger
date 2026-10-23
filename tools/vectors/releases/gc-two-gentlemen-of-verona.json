@@ -1,0 +1,14 @@
+{
+ "id": "gc-two-gentlemen-of-verona",
+ "kind": "book",
+ "fileName": "gc-two-gentlemen-of-verona_2026-10-17.gvec",
+ "sizeBytes": 53640,
+ "sha256": "4f2f889360270ee7aa6e3e737de8b31cf36228dcfc11d09fc15b693dec9d7f5a",
+ "count": 182,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dc6f0593e3608fc04d166afac745d7bf436a301d3fd5cbf5961490ee8379016a",
+ "url": null
+}

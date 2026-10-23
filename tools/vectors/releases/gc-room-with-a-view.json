@@ -1,0 +1,14 @@
+{
+ "id": "gc-room-with-a-view",
+ "kind": "book",
+ "fileName": "gc-room-with-a-view_2026-10-17.gvec",
+ "sizeBytes": 187410,
+ "sha256": "0bbb5fc20b650e565387d2b5da464c9bc59ca4fe78ee2daf1c7b812795e76a62",
+ "count": 637,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "174ccfadb6ebe7cef6dc31b694a411ea22ae09da7a4f462ee4692a2f04c29154",
+ "url": null
+}

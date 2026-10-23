@@ -1,0 +1,14 @@
+{
+ "id": "gc-comedy-of-errors",
+ "kind": "book",
+ "fileName": "gc-comedy-of-errors_2026-10-17.gvec",
+ "sizeBytes": 47172,
+ "sha256": "cc81910fdb543d89a60be5a8fb129b7f5568f6a16e80d5c4b4216d98e652ede5",
+ "count": 160,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "082d57d3f50c52b5374b43083f31348a3642cf65a2a27d58b6378efb53d10a17",
+ "url": null
+}

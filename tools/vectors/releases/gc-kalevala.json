@@ -1,0 +1,14 @@
+{
+ "id": "gc-kalevala",
+ "kind": "book",
+ "fileName": "gc-kalevala_2026-10-17.gvec",
+ "sizeBytes": 316770,
+ "sha256": "7aab7433c8872676a88b9918aebda3459f1112f4fe504e7550f13ce2d5bbd8c6",
+ "count": 1077,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "45abc3d1458befb0a966bc3a7741fc507bb437a3b621d6082cff069158c2e1f6",
+ "url": null
+}

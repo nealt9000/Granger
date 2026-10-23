@@ -1,0 +1,14 @@
+{
+ "id": "gc-walden-and-on-the-duty-of-civil-disobedience",
+ "kind": "book",
+ "fileName": "gc-walden-and-on-the-duty-of-civil-disobedience_2026-10-17.gvec",
+ "sizeBytes": 150072,
+ "sha256": "8d65859ce4a6b60d435d067df71e399026f08f53c4b1d624bb8ed3dec33261fd",
+ "count": 510,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a7f83bdf5ad7515420b865a319e80888064ae3be46afad30a61bb875b375b173",
+ "url": null
+}

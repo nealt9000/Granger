@@ -1,0 +1,14 @@
+{
+ "id": "gc-anna-karenina",
+ "kind": "book",
+ "fileName": "gc-anna-karenina_2026-10-17.gvec",
+ "sizeBytes": 861552,
+ "sha256": "e4c4101a87661841f6f2c6f2fcc0d2a6ffb2430e2865d3868b9de42ddcf35081",
+ "count": 2930,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "de213cb5e743c3f64abb129b4e30d5328dc9fb0d97d6edd983c4346392c00094",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-lyrical-ballads",
+ "kind": "book",
+ "fileName": "gc-lyrical-ballads_2026-10-17.gvec",
+ "sizeBytes": 25416,
+ "sha256": "9b6fadcac62eef5cdcab5a3b3da4a4bf3913bf7c10945bb20a2ca4b9b45d4c8e",
+ "count": 86,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cf2ddd4817bd978a657e7fde5716c575d12bcd3b4af6140246e2f4c5a9234b9e",
+ "url": null
+}

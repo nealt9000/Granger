@@ -1,0 +1,14 @@
+{
+ "id": "gc-social-contract",
+ "kind": "book",
+ "fileName": "gc-social-contract_2026-10-17.gvec",
+ "sizeBytes": 232980,
+ "sha256": "7ed09625b033ad6a35e07d79158e4fea46dddfc8315f24ac08725abc6b3df876",
+ "count": 792,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "03e006e78a48479f45a927fa5e9039f813df408c00ea5aafde108ea59345b492",
+ "url": null
+}

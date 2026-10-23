@@ -1,0 +1,14 @@
+{
+ "id": "internet-encyclopedia-philosophy_en_all",
+ "kind": "pack",
+ "fileName": "internet-encyclopedia-philosophy_en_all_2026-05-28.gvec",
+ "sizeBytes": 14973810,
+ "sha256": "46481c55bb0630c417d6f71444a85eefd33dfa5d5174f2e0a7c429b29185111a",
+ "count": 49278,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "bacbb507e151fafbf21ee5e9d85e89f18064133db44734f38074ff3e8e5d3e7a",
+ "url": null
+}

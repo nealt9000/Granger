@@ -1,0 +1,14 @@
+{
+ "id": "gc-fontainbleau",
+ "kind": "book",
+ "fileName": "gc-fontainbleau_2026-10-17.gvec",
+ "sizeBytes": 57168,
+ "sha256": "3bde4c6aacce8f70782d1e7ab9fbfb09520a4c12e89b889cde36a35326913aa5",
+ "count": 194,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "483ad038fc8f95b8cb2150b58d68744d6c9ee679a66c284864c0e3d931e5768e",
+ "url": null
+}
