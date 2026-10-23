@@ -10,10 +10,19 @@ with these callbacks instead: the five best by val_mel plus `last.ckpt` (what a 
 import logging
 
 import torch
-from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import Callback, ModelCheckpoint
 from piper.train.__main__ import VitsLightningCLI
 from piper.train.vits.dataset import VitsDataModule
 from piper.train.vits.lightning import VitsModel
+
+
+class EmptyMpsCache(Callback):
+    """On MPS the process grew ~0.1 GB an epoch (21 GB → 33 GB by epoch 136) without this: the allocator keeps the
+    blocks of every batch shape it has seen. Emptying the cache once an epoch costs nothing measurable."""
+
+    def on_train_epoch_end(self, trainer, pl_module):
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
 
 
 def main():
@@ -35,6 +44,7 @@ def main():
             filename="snapshot-epoch={epoch}",
             auto_insert_metric_name=False,
         ),
+        EmptyMpsCache(),
     ]
     VitsLightningCLI(VitsModel, VitsDataModule, trainer_defaults={"max_epochs": -1, "callbacks": callbacks})
 
