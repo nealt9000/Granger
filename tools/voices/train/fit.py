@@ -11,8 +11,11 @@ Lightning 2.6 writes a callback's `save_last` only in a step where that callback
 val_mel callback `last.ckpt` went stale whenever val_mel didn't improve (40 minutes behind at epoch 703); a callback of
 its own with no monitor saves it every epoch, overwriting the one file.
 """
+import functools
 import logging
 import os
+import tempfile
+import types
 
 import torch
 from lightning.pytorch.callbacks import Callback, ModelCheckpoint
@@ -30,8 +33,20 @@ class EmptyMpsCache(Callback):
             torch.mps.empty_cache()
 
 
+def checkpoint_temps_beside(directory):
+    """Lightning writes a checkpoint to a temp file (fsspec's `tempfile.mkstemp()`, so /tmp) and moves it into place.
+    Onto a volume that refuses chmod (a RunPod one) the move copies, fails to copy the permissions, and fsspec drops
+    that error but leaves the 0.9 GB temp: 50 GB of /tmp in 20 epochs. Made beside the checkpoints, the move is a
+    rename. Only fsspec's temps move: TMPDIR on that volume breaks the DataLoader workers' sockets (Errno 95)."""
+    import fsspec.implementations.local as local
+
+    local.tempfile = types.SimpleNamespace(mkstemp=functools.partial(tempfile.mkstemp, dir=directory))
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
+    if os.environ.get("GRANGER_CKPT_TMP"):
+        checkpoint_temps_beside(os.environ["GRANGER_CKPT_TMP"])
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
     callbacks = [

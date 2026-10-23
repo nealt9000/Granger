@@ -19,7 +19,9 @@ work="$1"; dataset="$2"; run="$3"; speakers="$4"; shift 4
 python="${PIPER_PYTHON:?set PIPER_PYTHON to the training venv python}"
 data="$work/dataset/$dataset"
 root="$work/runs/$run"
-mkdir -p "$root"
+mkdir -p "$root/.tmp"
+# fit.py makes the checkpoint temp files here, beside the checkpoints (why: fit.py's checkpoint_temps_beside).
+export GRANGER_CKPT_TMP="$root/.tmp"
 
 resume=()
 # Each resume logs to a new lightning_logs/version_N: take the newest last.ckpt by time (version_10 sorts before _9).
