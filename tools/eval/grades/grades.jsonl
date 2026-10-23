@@ -1108,3 +1108,10 @@
 {"id": "medical-034", "kind": "answer", "replyHash": "aff7b392abce38a15ff76605105af580ce3a5f45", "grade": "grounded", "reason": "Borrelia transmitted by blood-feeding Ixodes ticks [2], species from [1,4,5]"}
 {"id": "medical-035", "kind": "answer", "replyHash": "4ffd18e5bc8df3be2bf16fa230a36219f6f39c55", "grade": "grounded", "reason": "Symptom lists taken closely from [1,2,4,5]"}
 {"id": "medical-036", "kind": "answer", "replyHash": "05f3024bab2073b6b4cb6a59d6d8479fd1e3770f", "grade": "not-grounded", "reason": "Lists 'irritation' as a symptom; [5] says irritability; otherwise from [5,6]"}
+{"id": "multi-step-003", "kind": "answer", "replyHash": "ea1e9dcea865523007f3d602c447157296c29089", "grade": "not-grounded", "reason": "Concludes 'still alive' from his 1564 birth year; the 1616 death date is never stated or used."}
+{"id": "multi-step-008", "kind": "answer", "replyHash": "c9e5ed2c947d60516a101bbb78d116d4a74cad17", "grade": "grounded", "reason": "1861 [1] and 24 Nov 1859 [7] both supported; two years earlier follows."}
+{"id": "multi-step-009", "kind": "answer", "replyHash": "97b6d08cf785cb7fdded286035ad7cbdc0c84c10", "grade": "grounded", "reason": "1492 [3,4] and 21 Nov 1620 [5,8] supported; 128 years is right."}
+{"id": "multi-step-012", "kind": "answer", "replyHash": "6f5bc15acfab54509ba7385e2b751a3edd9688ac", "grade": "grounded", "reason": "2 Aug 1776 [1,4] and 9 Nov 1989 [6] supported, historians' view in [1]; one bracket names the worked-out note rather than a passage number, but every fact is cited."}
+{"id": "multi-step-014", "kind": "answer", "replyHash": "e7ab82825ec502ea1d5d193c74672659b9bc9501", "grade": "not-grounded", "reason": "Says 232 years; 1215 [1] to 1347 [6,7] is 132."}
+{"id": "multi-step-019", "kind": "answer", "replyHash": "573669beca978f6ea4c241fa470ef088af54a3a9", "grade": "grounded", "reason": "9 Nov 1989 [6] and accepted/published 1995 [2] supported; after, by 6 years, follows."}
+{"id": "multi-step-020", "kind": "answer", "replyHash": "e328e05f8b118dc69080cb2f39c9e0207ac12232", "grade": "not-grounded", "reason": "Says Darwin didn't see the table; the passages put the table in 1869 and his death in 1882."}

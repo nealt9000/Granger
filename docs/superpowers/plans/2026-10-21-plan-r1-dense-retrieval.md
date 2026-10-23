@@ -482,6 +482,29 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
     citations.
   - **Not compelling:** no gain on multi-step, a loss on the rest. Worth trying only with a stricter split gate and
     the date arithmetic done in code, not by E2B.
+- [x] **Strict run `ms-3`** (2026-10-23, Neal: "try the stricter split with arithmetic in code, and if it doesn't
+  show promise we'll note and wrap up"). Same splits and part answers as `ms-2`; only the combine step re-ran on the phone.
+  - Split gate in code (`multistep.py --strict`): every part found passages, the parts' best passages come from two or
+    more articles, and the question's own passages hadn't reached them all. 72 splits → 24 (10 of 20 multi-step, 12
+    ordinary, 2 unanswerable).
+  - Arithmetic in code: dates and amounts read from the parts' answers; the gap and which came first given to the
+    combine prompt as worked-out facts.
+
+  | Tuning split | r1-dense-1 | ms-2 | ms-3 |
+  |---|---|---|---|
+  | Answerable grounded | 86/126 | 80/126 | 85/126 |
+  | Unanswerable declined | 67/76 | 64/76 | 66/76 |
+  | Multi-step grounded | 4/20 | 4/20 | 6/20 |
+  | Ordinary questions split, grounded | – | 37 → 31 of 48 | 11 → 8 of 12 |
+
+  - Gains: multi-step-008, -012, -019 (with the worked-out gap); lost multi-step-016.
+  - E2B ignored the worked-out fact twice: multi-step-014 says 232 years beside "by 132 years", multi-step-020 says
+    Darwin didn't see the 1869 table beside "13 years" before his death. Some splits ask the wrong part (Shakespeare's
+    birth, not death; Jane Eyre for Austen), which no combine step can fix.
+  - medical-024 (unanswerable) now answers that an ALT of 80 is "within the standard reference range" though its
+    passage says 0–40: the one declined lost, and a harmful one.
+  - **Wrapped up, not adopted** (2026-10-23): +2 multi-step does not pay for −3 ordinary and −1 declined. The code
+    stays in `tools/eval/multistep.py` for a later model (E4B, or a stronger splitter) to retry.
 - [ ] Compare it with `r1-base` (`eval.py report --compare`):
   - grounded, declined, recall@4;
   - the failure table from the R0 results (among the 4 / found but not chosen / never found);

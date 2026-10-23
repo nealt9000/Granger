@@ -8,13 +8,14 @@ each round is: write prompts here, replay them there, read the replies back.
 
   multistep.py split    BASE NEW                # round 1: NEW/split-prompts.jsonl, one per question of BASE
   multistep.py hop      BASE NEW --round N      # rounds 2, 3: the sub-questions whose #refs are answered
-  multistep.py combine  BASE NEW                # round 4: the combined answer prompts
+  multistep.py combine  BASE NEW [--strict]     # round 4: the combined answer prompts (--strict: gate + arithmetic)
   multistep.py replay   NEW STAGE --model FILE  # pushes NEW/STAGE-prompts.jsonl, replays it, pulls NEW/STAGE-replies.jsonl
-  multistep.py build    BASE NEW                # NEW/results.jsonl: BASE's records, multi-step ones answered this way
+  multistep.py build    BASE NEW [--strict]     # NEW/results.jsonl: BASE's records, multi-step ones answered this way
 
 A question the model doesn't split keeps BASE's record, so NEW measures the change as the app would see it.
 """
 import argparse
+import datetime
 import json
 import re
 import shutil
@@ -143,7 +144,100 @@ def _cut(text, limit):
     return (head[:space] if space > 0 else head).rstrip() + "…"
 
 
-def answer_prompt(question, passages, notes=None):
+# ---- strict: the split gate and the arithmetic, in code (Neal, 2026-10-23) ----
+
+MONTHS = {m: n for n, m in enumerate(("january february march april may june july august september october november "
+                                       "december").split(), 1)}
+_M = "(%s)" % "|".join(m.capitalize() for m in MONTHS)
+DATE_MDY = re.compile(_M + r" (\d{1,2}),? (\d{3,4})")
+DATE_DMY = re.compile(r"(\d{1,2}) " + _M + r",? (\d{3,4})")
+YEAR = re.compile(r"\b(\d{1,4})\s*(BC|BCE)\b|\b(1\d{3}|20\d{2})\b")
+AMOUNT = re.compile(r"\b(\d[\d,]*(?:\.\d+)?)\s+([A-Za-z][A-Za-z-]*)")
+
+
+def when(text):
+    """The first date in [text]: (year, month, day), with month and day 0 for a bare year; BC years are negative."""
+    found = []
+    for m in DATE_MDY.finditer(text):
+        found.append((m.start(), (int(m.group(3)), MONTHS[m.group(1).lower()], int(m.group(2)))))
+    for m in DATE_DMY.finditer(text):
+        found.append((m.start(), (int(m.group(3)), MONTHS[m.group(2).lower()], int(m.group(1)))))
+    for m in YEAR.finditer(text):
+        found.append((m.start(), (-int(m.group(1)), 0, 0) if m.group(1) else (int(m.group(3)), 0, 0)))
+    return min(found)[1] if found else None
+
+
+def amount(text):
+    """The first number with a unit in [text]: (value, unit, word), the unit singular and lowercase for comparing."""
+    for m in AMOUNT.finditer(text):
+        try:
+            value = float(m.group(1).replace(",", ""))
+        except ValueError:
+            continue
+        return value, m.group(2).lower().rstrip("s"), m.group(2)
+    return None
+
+
+def _show(d):
+    y, mo, dd = d
+    year = "%d BC" % -y if y < 0 else str(y)
+    return "%s %d, %s" % (list(MONTHS)[mo - 1].capitalize(), dd, year) if mo else year
+
+
+def _num(v):
+    return ("%d" % v) if v == int(v) else ("%g" % v)
+
+
+def worked(notes):
+    """Facts worked out exactly from the parts' answers: the time between dates, which came first, the difference
+    between amounts with the same unit. [notes] are (question, answer) pairs; [] when nothing can be worked out."""
+    out = []
+    parts = [(q, first_sentence(a)) for q, a in notes]
+    for i in range(len(parts)):
+        for j in range(i + 1, len(parts)):
+            (qa, a), (qb, b) = parts[i], parts[j]
+            da, db = when(a), when(b)
+            if da and db and (da[0] != db[0] or (da[1] and db[1])):
+                if da == db:
+                    out.append('"%s" and "%s" give the same date, %s.' % (qa, qb, _show(da)))
+                    continue
+                first, last, fq, lq = (da, db, qa, qb) if da < db else (db, da, qb, qa)
+                if first[1] and last[1]:
+                    d1 = datetime.date(max(first[0], 1), first[1], first[2]) if first[0] > 0 else None
+                    d2 = datetime.date(max(last[0], 1), last[1], last[2]) if last[0] > 0 else None
+                    if d1 and d2:
+                        months = (d2.year - d1.year) * 12 + d2.month - d1.month - (d2.day < d1.day)
+                        span = "%d years and %d months" % divmod(months, 12) if months % 12 else "%d years" % (months // 12)
+                    else:
+                        span = "%d years" % (last[0] - first[0] - (first[0] < 0 < last[0]))
+                else:
+                    span = "%d years" % (last[0] - first[0] - (first[0] < 0 < last[0]))
+                out.append('%s ("%s") is earlier than %s ("%s"), by %s.' % (_show(first), fq, _show(last), lq, span))
+                continue
+            na, nb = amount(a), amount(b)
+            if na and nb and na[1] == nb[1] and na[0] != nb[0]:
+                big, small, bq, sq = (na, nb, qa, qb) if na[0] > nb[0] else (nb, na, qb, qa)
+                out.append('%s %s ("%s") is more than %s %s ("%s"), by %s %s.' % (
+                    _num(big[0]), big[2], bq, _num(small[0]), small[2], sq, _num(round(big[0] - small[0], 6)), big[2]))
+    return out
+
+
+def strict_ok(rec, qs, state):
+    """The split gate: every part found passages, the parts' best passages come from two or more articles, and the
+    whole question's own passages didn't already reach all of those articles."""
+    tops = []
+    for n in range(1, len(qs) + 1):
+        s = state.get("%s#%d" % (rec["id"], n)) or {}
+        if not s.get("passages") or not s.get("answer"):
+            return False
+        tops.append(s["passages"][0]["title"])
+    if len(set(tops)) < 2:
+        return False
+    had = {p.get("title") for p in rec.get("chosen") or []}
+    return not set(tops) <= had
+
+
+def answer_prompt(question, passages, notes=None, facts=None):
     """AnswerPrompt.build without medical, prior or quote; [notes] are the parts' answers, for the combined prompt."""
     lines = [RULES, "Passages:"]
     for i, p in enumerate(passages):
@@ -158,6 +252,10 @@ def answer_prompt(question, passages, notes=None):
     if notes:
         lines.append("Answers to the parts of the question, from the same passages:")
         lines += ["- %s %s" % (q, a) for q, a in notes]
+        lines.append("")
+    if facts:
+        lines.append("Worked out exactly from those answers (use these figures as given, citing the passages they come from):")
+        lines += ["- " + f for f in facts]
         lines.append("")
     lines.append("Question: %s" % question)
     return "\n".join(lines) + "\nAnswer:"
@@ -346,18 +444,30 @@ def cmd_combine(a):
             state[key]["answer"] = None if r.get("outcome") == "declined" or DECLINE in reply else reply
     save_state(a.new, state)
     items, rows = base_items(a.base), []
-    for id, qs in parts_of(a.new).items():
+    for id, qs in used_parts(a).items():
         passages, notes = combined(items[id], qs, state)
         if passages:
-            rows.append({"id": id, "prompt": answer_prompt(items[id]["question"], passages, notes), "passages": len(passages)})
+            facts = worked(notes) if a.strict else None
+            rows.append({"id": id, "prompt": answer_prompt(items[id]["question"], passages, notes, facts),
+                         "passages": len(passages)})
     answerers.write_jsonl(RUNS / a.new / "combine-prompts.jsonl", rows)
     print("%d combined prompts -> runs/%s/combine-prompts.jsonl" % (len(rows), a.new))
     return 0
 
 
+def used_parts(a):
+    """parts_of(NEW), and with --strict only the splits the gate lets through (the rest keep BASE's record)."""
+    parts = parts_of(a.new)
+    if not getattr(a, "strict", False):
+        return parts
+    state = load_state(a.new)
+    base = {r["id"]: r for r in answerers.read_jsonl(RUNS / a.base / "results.jsonl")}
+    return {id: qs for id, qs in parts.items() if strict_ok(base[id], qs, state)}
+
+
 def cmd_build(a):
     state, items = load_state(a.new), base_items(a.base)
-    parts, final = parts_of(a.new), replies(a.new, "combine")
+    parts, final = used_parts(a), replies(a.new, "combine")
     out = []
     for rec in answerers.read_jsonl(RUNS / a.base / "results.jsonl"):
         rec = {k: v for k, v in rec.items() if k not in ("deeper", "guesses", "prompts")}
@@ -406,6 +516,8 @@ def main(argv=None):
         c = s.add_parser(name); c.add_argument("base"); c.add_argument("new"); c.set_defaults(f=f)
         if name == "split":
             c.add_argument("--prompt", default="v2", choices=sorted(SPLITS))
+        else:
+            c.add_argument("--strict", action="store_true", help="the split gate and the arithmetic in code")
     c = s.add_parser("hop"); c.add_argument("base"); c.add_argument("new"); c.add_argument("--round", type=int, required=True)
     c.set_defaults(f=cmd_hop)
     c = s.add_parser("replay"); c.add_argument("new"); c.add_argument("stage"); c.add_argument("--model", required=True)
