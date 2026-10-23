@@ -92,19 +92,75 @@ def _unique(ps):
     return out
 
 
+def _hybrid_scored(question, corpus, cfg, hits, alpha, floor):
+    """hybrid's (passage, score) pairs, best first and unique by text, and the preselected keyword passages."""
+    w = _weight(question, corpus, hits)
+    found, kept, lex = _keyword(question, corpus, cfg, w)
+    cos = {text_key(p): p["cosine"] for p in hits}
+    scored = []
+    for p in kept:
+        c = cos.get(text_key(p))
+        scored.append((p, (alpha * lex(p) + (1 - alpha) * c * _fw(p, w)) if c is not None else alpha * lex(p) + (1 - alpha) * floor))
+    for p in _dense(hits, floor, w):
+        scored.append((p, alpha * replay.scorer(corpus["keywords"])(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * _fw(p, w)))
+    seen, out = set(), []
+    for p, sc in sorted(scored, key=lambda x: -x[1]):
+        k = text_key(p)
+        if k not in seen:
+            seen.add(k)
+            out.append((p, sc))
+    return out, found
+
+
 def hybrid(alpha, floor):
     def rank(question, corpus, cfg, hits):
-        w = _weight(question, corpus, hits)
-        found, kept, lex = _keyword(question, corpus, cfg, w)
-        cos = {text_key(p): p["cosine"] for p in hits}
-        scored = []
-        for p in kept:
-            c = cos.get(text_key(p))
-            scored.append((p, (alpha * lex(p) + (1 - alpha) * c * _fw(p, w)) if c is not None else alpha * lex(p) + (1 - alpha) * floor))
-        for p in _dense(hits, floor, w):
-            scored.append((p, alpha * replay.scorer(corpus["keywords"])(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * _fw(p, w)))
-        ranked = _unique([p for p, _ in sorted(scored, key=lambda x: -x[1])])
-        return _finish(question, ranked, found, cfg)
+        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor)
+        return _finish(question, [p for p, _ in scored], found, cfg)
+    return rank
+
+
+def _content_words(text):
+    return [w.lower() for w in replay.words(text) if w.lower() not in replay.STOPWORDS]
+
+
+def subjects(keywords, passages):
+    """The keywords that name something the search found: every word of the keyword is in some passage's title."""
+    titles = [set(_content_words(p.get("title", ""))) for p in passages]
+    out = []
+    for k in keywords:
+        ws = _content_words(k)
+        if ws and any(all(x in t for x in ws) for t in titles):
+            out.append(k)
+    return out
+
+
+def _mentions(p, keyword):
+    ws = _content_words(keyword)
+    have = set(_content_words(" ".join((p.get("title", ""), p.get("heading", ""), p.get("text", "")))))
+    return bool(ws) and all(x in have for x in ws)
+
+
+def cover(alpha, floor, bonus):
+    """hybrid's order, but the 4 are picked greedily: each pick's score gains [bonus] per subject (see [subjects]) the
+    picks so far don't mention yet, so a question about two things gets passages on both."""
+    def rank(question, corpus, cfg, hits):
+        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor)
+        subs = subjects(corpus["keywords"], [p for p, _ in scored])
+        if len(subs) < 2:
+            return _finish(question, [p for p, _ in scored], found, cfg)
+        per_doc, pool = {}, []
+        for p, sc in scored:
+            k = (p["source"], p.get("location") or "")
+            per_doc[k] = per_doc.get(k, 0) + 1
+            if per_doc[k] <= cfg.per_document:
+                pool.append((p, sc, {s for s in subs if _mentions(p, s)}))
+        picked, covered = [], set()
+        while pool and len(picked) < cfg.small:
+            i = max(range(len(pool)), key=lambda j: pool[j][1] + bonus * len(pool[j][2] - covered))
+            p, _, ss = pool.pop(i)
+            picked.append(p)
+            covered |= ss
+        return _finish(question, picked + [p for p, _, _ in pool], found, cfg)
     return rank
 
 
@@ -170,6 +226,8 @@ def configs():
     out.update({"hybrid a%.1f f%.2f" % (a, f): hybrid(a, f) for a in (0.0, 0.1, 0.2, 0.3, 0.4) for f in floors})
     out.update({"rrf f%.2f" % f: rrf(f) for f in floors})
     out.update({"slots%d f%.2f" % (n, f): slots(n, f) for n in (1, 2) for f in floors})
+    for b in (0.02, 0.05, 0.1, 0.2):
+        out["gated g0.78 l1.0 cover%.2f a0.1 f0.74" % b] = gated(cover(0.1, 0.74, b), 0.78, 1.0)
     for g in (0.74, 0.76, 0.78):
         for lx in (1.0, 1.1, 1.3, 9.0):
             out["gated g%.2f l%.1f hybrid a0.1 f0.74" % (g, lx)] = gated(hybrid(0.1, 0.74), g, lx)
@@ -180,6 +238,10 @@ def configs():
 def evaluate(items, corpus, dense, ranker, cfg=replay.Config()):
     r = replay.evaluate(items, corpus, cfg, lambda q, c, cf: ranker(q, c, cf, dense.get(c["id"], [])))
     r["fiction"] = len(kinds.fiction_intrusions(items, r["chosen"]))
+    # Multi-step questions with a passage for every part of the answer among the 4.
+    multi = [id for id in r["chosen"] if items[id].get("multiStep") and items[id]["answerable"]]
+    r["multi"] = len(multi)
+    r["parts"] = sum(all(any(matches(p, [a]) for p in r["chosen"][id]) for a in items[id]["answers"]) for id in multi)
     return r
 
 
@@ -199,13 +261,13 @@ def domains(items, r):
 def cmd_sweep(a):
     items, corpus, dense = load(a.run)
     base = evaluate(items, corpus, dense, keyword_only())
-    print("config\tlocation\tquote\tempty\tfiction\tkeeps empty")
+    print("config\tlocation\tquote\tempty\tfiction\tparts\tkeeps empty")
     for name, ranker in configs().items():
         if a.only and not name.startswith(a.only):
             continue
         r = evaluate(items, corpus, dense, ranker)
-        print("%s\t%d/%d\t%d\t%d/%d\t%d\t%s" % (name, r["location"], r["answerable"], r["quote"], r["empty"], r["unanswerable"],
-                                              r["fiction"], "yes" if r["empty"] >= base["empty"] else "no"))
+        print("%s\t%d/%d\t%d\t%d/%d\t%d\t%d/%d\t%s" % (name, r["location"], r["answerable"], r["quote"], r["empty"], r["unanswerable"],
+                                                  r["fiction"], r["parts"], r["multi"], "yes" if r["empty"] >= base["empty"] else "no"))
     return 0
 
 

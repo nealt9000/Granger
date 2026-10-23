@@ -57,3 +57,17 @@ def test_slots_reserve_places_for_dense_hits_keyword_ranking_missed():
     hits = [P("Boilers raise steam pressure.", title="Boiler", cosine=0.80)]
     out = merge.slots(1, 0.74)("how does a steam engine work", corpus(lexical, ["steam", "engine"]), CFG, hits)
     assert len(out) == 4 and "Boilers raise steam pressure." in texts(out)
+
+
+def test_cover_picks_a_passage_for_each_subject():
+    lexical = [P("Methuselah lived 969 years %d." % i, title="Methuselah", location="Methuselah#%d" % i) for i in range(4)]
+    noah = P("Noah lived 950 years.", title="Noah", cosine=0.79)
+    hits = [dict(p, cosine=0.84) for p in lexical] + [noah]
+    out = merge.cover(0.1, 0.74, 0.1)("who lived longer, methuselah or noah", corpus(lexical, ["methuselah", "noah"]), CFG, hits)
+    assert len(out) == 4 and "Noah lived 950 years." in texts(out)
+
+
+def test_cover_leaves_a_one_subject_question_in_hybrid_order():
+    lexical = [P("Rust %d is iron oxide." % i, title="Rust", location="Rust#%d" % i) for i in range(5)]
+    c = corpus(lexical, ["rust"])
+    assert texts(merge.cover(0.1, 0.74, 0.1)("what is rust", c, CFG, [])) == texts(merge.hybrid(0.1, 0.74)("what is rust", c, CFG, []))
