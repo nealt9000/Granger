@@ -9,6 +9,6 @@ Reference art and brand packages, one dated folder each, like the specs and plan
 | `2026-10-23-personal-player-concept/` | The first personal-player concept (ElevenLabs) and its navy/parchment palette preview | Superseded by the field recorder the same day |
 | `2026-10-23-field-recorder-concept/` | The field recorder (ElevenLabs, Neal's prompt in the brief §8) and `granger-palette-field-kit.png`, the field-kit palette on two phone screens | **Current reference**; not a shippable asset (generated; shows third-party marks) |
 
-The Vitruvian draft (`tools/brand/`, traced mark, Play icon) lives only on the unmerged branch `p1-brand` and is retired by the brief.
+The Vitruvian draft (`tools/brand/`, traced mark, Play icon) was retired by the brief; its unmerged branch `p1-brand` was deleted on 2026-10-23.
 
 Add a new package as `YYYY-MM-DD-<name>/`.
