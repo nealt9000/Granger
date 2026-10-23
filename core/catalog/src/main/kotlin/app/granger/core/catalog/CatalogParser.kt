@@ -64,7 +64,8 @@ object CatalogParser {
 
     /**
      * The readiness model (Plan H1): a domain with a blank or repeated id is dropped, so is a tier token that names no
-     * pack, book, collection or family in this catalog, and essential items are folded into comprehensive.
+     * pack, book, collection or family in this catalog, and essential items are folded into comprehensive. A `contains`
+     * entry whose key is no pack's ZIM name is dropped (Plan H4).
      */
     private fun readiness(obj: JsonObject, packs: List<PackEntry>, books: List<BookEntry>): Readiness? {
         val parsed = runCatching { json.decodeFromJsonElement<Readiness>(obj) }.getOrNull() ?: return null
@@ -76,7 +77,8 @@ object CatalogParser {
                 val essential = domain.essential.filter(known).distinct()
                 domain.copy(essential = essential, comprehensive = (essential + domain.comprehensive.filter(known)).distinct())
             }
-        return if (domains.isEmpty()) null else Readiness(domains)
+        val zimNames = packs.mapNotNullTo(HashSet()) { it.zimName.ifBlank { null } }
+        return if (domains.isEmpty()) null else Readiness(domains, parsed.contains.filterKeys { it in zimNames })
     }
 
     /** Whether a readiness-style token names something in this catalog. */

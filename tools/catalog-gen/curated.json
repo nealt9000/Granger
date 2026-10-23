@@ -205,7 +205,7 @@
     }
   ],
   "readiness": {
-    "_about": "The readiness tiers (spec 2026-10-21-home-readiness-onboarding-design.md §3.5). An item is a catalog id, \"@<collection>\" (the collection's books whose own domain is this one) or \"family:<name>\" (any pack of the family; the region's map is chosen in onboarding). catalog_gen.py checks every token, folds essential into comprehensive and generates the efficient and comprehensive presets.",
+    "_about": "The readiness tiers (spec 2026-10-21-home-readiness-onboarding-design.md §3.5). An item is a catalog id, \"@<collection>\" (the collection's books whose own domain is this one) or \"family:<name>\" (any pack of the family; the region's map is chosen in onboarding). catalog_gen.py checks every token, folds essential into comprehensive and generates the efficient and comprehensive presets. \"contains\" maps a ZIM name to the ZIM names whose articles it holds (\"prefix*\" allowed): a held pack counts as installed, and the presets and tier sizes leave it out beside its container (Plan H4).",
     "domains": [
       {
         "id": "medicine",
@@ -280,9 +280,7 @@
           "planetmath.org_en_all",
           "physics.stackexchange.com_en_all",
           "chemistry.stackexchange.com_en_all",
-          "biology.stackexchange.com_en_all",
-          "math.stackexchange.com_en_all",
-          "stats.stackexchange.com_en_all"
+          "biology.stackexchange.com_en_all"
         ]
       },
       {
@@ -295,7 +293,6 @@
           "jeffe.cs.illinois.edu_en_all",
           "family:devdocs",
           "openwrt.org_en_all",
-          "stackoverflow.com_en_all",
           "superuser.com_en_all",
           "askubuntu.com_en_all",
           "unix.stackexchange.com_en_all",
@@ -322,11 +319,11 @@
         "id": "reference",
         "title": "General reference",
         "essential": [
-          "wikipedia_en_top_nopic",
-          "wiktionary_en_all_nopic"
+          "wikipedia_en_top_nopic"
         ],
         "comprehensive": [
-          "wikipedia_en_all_nopic",
+          "wiktionary_en_all_nopic",
+          "wikipedia_en_top1m_nopic",
           "wikibooks_en_all_nopic",
           "wikiversity_en_all_nopic",
           "citizendium.org_en_all_maxi",
@@ -343,7 +340,6 @@
         "comprehensive": [
           "wikiquote_en_all_nopic",
           "wikisource_en_all_nopic",
-          "gutenberg_en_lcc-pr",
           "literature.stackexchange.com_en_all",
           "writing.stackexchange.com_en_all"
         ]
@@ -367,7 +363,19 @@
           "hermeneutics.stackexchange.com_en_all"
         ]
       }
-    ]
+    ],
+    "contains": {
+      "wikipedia_en_all": [
+        "wikipedia_en_*"
+      ],
+      "wikipedia_en_top1m": [
+        "wikipedia_en_top",
+        "wikipedia_en_100"
+      ],
+      "wikipedia_en_top": [
+        "wikipedia_en_100"
+      ]
+    }
   },
   "onboarding": {
     "_about": "Onboarding's tables (Plan H3, spec 2026-10-21-home-readiness-onboarding-design.md §6). A use case's items use the readiness grammar (a catalog id, \"@<collection>\" for the collection's books, \"family:<name>\" for any pack of the family); the app shows what each adds beyond the start choice and what is installed. regions.larger names the maps packs that are continents or multi-country areas, so the region picker lists countries first; regions.covered names, per larger pack, the places inside it that have no pack of their own, so searching for one finds the pack (Neal, 2026-10-22: Puerto Rico is in Central America). catalog_gen.py checks every token.",

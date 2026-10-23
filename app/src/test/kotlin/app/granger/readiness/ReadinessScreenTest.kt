@@ -78,7 +78,34 @@ class ReadinessScreenTest {
         compose.onNodeWithText("Granger").assertDoesNotExist()
         scrollTo("Music & audiobooks on the phone")
         compose.onNodeWithText("Not stored by Granger").assertExists()
-        scrollTo("Files")
+        compose.onNodeWithText("Files").assertDoesNotExist()
+        compose.onNodeWithText("Packs").assertDoesNotExist()
+    }
+
+    @Test fun aSourceOpensToItsOwnFiles() {
+        fun row(key: String, title: String, source: Source, status: CheckStatus = CheckStatus.VERIFIED) = CheckRow(
+            key, title, isModel = source == Source.MODELS, snapshotDate = "", sizeBytes = 1_000, status = status, verifiedAt = null,
+            progress = null, canVerify = true, canRepair = status == CheckStatus.MISSING, source = source,
+        )
+        val withFiles = ui(report).copy(
+            models = listOf(row("e2b", "Gemma E2B", Source.MODELS)),
+            packs = listOf(row("top", "Wikipedia Top", Source.KIWIX), row("gone", "WikEM", Source.KIWIX, CheckStatus.MISSING)),
+            report = report.copy(storage = report.storage + StorageRow(Source.MODELS, 2_000_000_000, 1)),
+        )
+        compose.setContent { ReadinessContent(withFiles, onBack = {}, onOpenKiwix = {}, onVerify = {}, onRepair = {}) }
+        scrollTo("Kiwix")
+        compose.onNodeWithText("${formatBytes(2_750_000_000)} · 1 item · 1 needs attention").assertExists()
+        // Closed, the files aren't listed.
+        compose.onNodeWithText("Wikipedia Top").assertDoesNotExist()
+        compose.onNodeWithText("Kiwix").performClick()
+        scrollTo("Wikipedia Top")
+        scrollTo("WikEM")
+        compose.onNodeWithText("Missing: the file isn't there").assertExists()
+        // Another source's files stay behind its own row.
+        compose.onNodeWithText("Gemma E2B").assertDoesNotExist()
+        scrollTo("Kiwix")
+        compose.onNodeWithText("Kiwix").performClick()
+        compose.onNodeWithText("Wikipedia Top").assertDoesNotExist()
     }
 
     @Test fun anOlderCatalogShowsTheRefreshLine() {

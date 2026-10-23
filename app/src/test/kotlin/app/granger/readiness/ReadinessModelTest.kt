@@ -81,6 +81,14 @@ class ReadinessModelTest {
         assertThat(empty.last().item.id).isEqualTo("gc-republic")
     }
 
+    @Test fun aDomainHoldingOnlyPacksOutsideItsEssentialsSaysSo() {
+        // WikEM is comprehensive-only: the bar shows it, so the signal mustn't say "Nothing yet" (Plan H4 walkthrough).
+        val r = report(packs = listOf(installed(wikem)))
+        assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.NONE)
+        val signal = r.signals.filterIsInstance<Signal.EmptyDomain>().single { it.domain == "medicine" }
+        assertThat(signal.text).isEqualTo("No essentials yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
+    }
+
     @Test fun oneEssentialPackMakesBasic() {
         val r = report(packs = listOf(installed(medNopic)))
         val med = domain(r, "medicine")
@@ -229,4 +237,47 @@ class ReadinessModelTest {
         assertThat(r.storage.single { it.source == Source.KIWIX }.bytes).isEqualTo(3_500)
         assertThat(report(cat = null).needsCatalogRefresh).isTrue()
     }
+
+    // --- Plan H4: one entry per ZIM, containment ---
+
+    private val top1m = packEntry("wikipedia_en_top1m_nopic", "wikipedia_en_top1m", "reference", 17_000)
+    private val calibrated = Catalog(
+        1, "2026-10-22T00:00:00Z", packs = listOf(medNopic, medMaxi, wikem, top, top1m),
+        readiness = Readiness(
+            listOf(
+                Domain("medicine", "Medicine & first aid", essential = listOf("wikipedia_en_medicine_nopic"),
+                    comprehensive = listOf("wikipedia_en_medicine_nopic", "wikipedia_en_medicine_maxi", "wikem_en_all_maxi")),
+                Domain("reference", "General reference", essential = listOf("wikipedia_en_top_nopic"),
+                    comprehensive = listOf("wikipedia_en_top_nopic", "wikipedia_en_top1m_nopic")),
+            ),
+            contains = mapOf("wikipedia_en_top1m" to listOf("wikipedia_en_top"), "wikipedia_en_all" to listOf("wikipedia_en_*")),
+        ),
+    )
+
+    @Test fun tierBytesCountEachZimOnceAtItsLargestListedFlavour() {
+        val med = domain(report(cat = calibrated), "medicine")
+        assertThat(med.essentialBytes).isEqualTo(1_000)
+        // WikiMed with pictures (1,800) once, not beside the one without (1,000): 1,800 + 400.
+        assertThat(med.comprehensiveBytes).isEqualTo(2_200)
+    }
+
+    @Test fun aContainedZimCountsNothingBesideItsContainer() {
+        val ref = domain(report(cat = calibrated), "reference")
+        assertThat(ref.essentialBytes).isEqualTo(2_700)
+        assertThat(ref.comprehensiveBytes).isEqualTo(17_000)
+    }
+
+    @Test fun aContainerSatisfiesTheItemsItHolds() {
+        val r = report(packs = listOf(installed(top1m)), cat = calibrated)
+        val ref = domain(r, "reference")
+        assertThat(ref.coverage).isEqualTo(Coverage.COMPREHENSIVE)
+        assertThat(ref.missingEssential).isEmpty()
+        assertThat(r.signals.filterIsInstance<Signal.EmptyDomain>().map { it.domain }).doesNotContain("reference")
+    }
+
+    @Test fun installedBytesStayWhatIsOnThePhone() {
+        val r = report(packs = listOf(installed(top), installed(top1m)), cat = calibrated)
+        assertThat(domain(r, "reference").installedBytes).isEqualTo(19_700)
+    }
 }
+

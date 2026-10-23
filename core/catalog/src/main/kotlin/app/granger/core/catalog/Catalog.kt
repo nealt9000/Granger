@@ -141,7 +141,16 @@ data class Preset(val id: String, val title: String, val items: List<String>)
 
 /** The readiness model (Plan H1, spec §3): the knowledge domains in screen order, each with its tier items. */
 @Serializable
-data class Readiness(val domains: List<Domain> = emptyList())
+data class Readiness(
+    val domains: List<Domain> = emptyList(),
+    /** ZIM name → the ZIM names whose articles it holds, `prefix*` allowed (Plan H4, Decision 5). */
+    val contains: Map<String, List<String>> = emptyMap(),
+) {
+    /** The ZIM names that hold [zimName]'s articles; never [zimName] itself. */
+    fun containers(zimName: String): Set<String> = contains.filterTo(LinkedHashMap()) { (key, held) ->
+        key != zimName && held.any { it == zimName || (it.endsWith("*") && zimName.startsWith(it.dropLast(1))) }
+    }.keys
+}
 
 /**
  * One knowledge domain. A tier item is a catalog id, `@<collection>` (the collection's books whose own [BookEntry.domain]

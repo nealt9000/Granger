@@ -429,7 +429,15 @@ def readiness_block(block, packs, books, collections):
     The catalog's `readiness` object (Plan H1, spec §3.2) and the two presets it generates. Every tier token is checked:
     a catalog id, "@<collection>" (that collection's books of the domain) or "family:<name>" (any pack of the family).
     Essential items are folded into comprehensive. A pack or book whose domain isn't one of the block's ids fails the build.
+    `contains` (Plan H4) maps a ZIM name to the ZIM names it holds ("prefix*" allowed); the presets carry one pack per ZIM
+    (the flavour the bigger tier names) and leave out a ZIM held by another in the same preset.
     """
+    zim_names = {p["zimName"] for p in packs if p.get("zimName")}
+    contains = block.get("contains", {})
+    for key, held in contains.items():
+        for name in [key] + [h for h in held if not h.endswith("*")]:
+            if name not in zim_names:
+                raise SystemExit(f"readiness contains: unknown ZIM {name!r}")
     pack_ids = {p["id"] for p in packs}
     book_ids = {b["id"] for b in books}
     families = {p["family"] for p in packs if p.get("family")}
@@ -462,9 +470,70 @@ def readiness_block(block, packs, books, collections):
     for item in packs + books:
         if item.get("domain") and item["domain"] not in ids:
             raise SystemExit(f"{item['id']}: domain {item['domain']!r} is not in the readiness block")
-    presets = [{"id": "efficient", "title": "Efficient start", "items": list(dict.fromkeys(efficient))},
-               {"id": "comprehensive", "title": "Comprehensive library", "items": list(dict.fromkeys(comprehensive))}]
-    return {"domains": domains}, presets
+    zim_of = {p["id"]: p.get("zimName") for p in packs}
+    presets = [{"id": "efficient", "title": "Efficient start", "items": one_per_zim(efficient, zim_of, contains)},
+               {"id": "comprehensive", "title": "Comprehensive library", "items": one_per_zim(comprehensive, zim_of, contains)}]
+    out = {"domains": domains}
+    if contains:
+        out["contains"] = contains
+    return out, presets
+
+
+def holds(contains, container, zim):
+    """Whether ZIM [container] holds ZIM [zim]'s articles by the `contains` table (Plan H4, Decision 5)."""
+    return zim != container and any(zim == h or (h.endswith("*") and zim.startswith(h[:-1])) for h in contains.get(container, []))
+
+
+def one_per_zim(items, zim_of, contains):
+    """
+    [items] with one pack per ZIM, the last listed (comprehensive's flavour comes after essential's) at the first one's
+    place, and without a ZIM another of them holds. Books and packs without a ZIM name pass through.
+    """
+    last = {zim_of[i]: i for i in items if zim_of.get(i)}
+    names = set(last)
+    out = []
+    for i in dict.fromkeys(items):
+        zim = zim_of.get(i)
+        if not zim:
+            out.append(i)
+        elif last[zim] not in out and not any(holds(contains, c, zim) for c in names):
+            out.append(last[zim])
+    return out
+
+
+def tier_sizes(catalog):
+    """
+    Per readiness domain and for "All", (essential, comprehensive) bytes as the presets count them: one pack per ZIM,
+    a held ZIM left out, `family:` tokens (the region's map) left out.
+    """
+    readiness = catalog.get("readiness") or {}
+    contains = readiness.get("contains", {})
+    packs = {p["id"]: p for p in catalog["packs"]}
+    books = catalog.get("books", [])
+
+    def expand(tokens, domain):
+        out = []
+        for t in tokens:
+            if t.startswith("@"):
+                out += [b["id"] for b in books if b["collection"] == t[1:] and b["domain"] == domain]
+            elif not t.startswith("family:"):
+                out.append(t)
+        return out
+
+    sizes_of = {**{b["id"]: b["sizeBytes"] for b in books}, **{i: p["sizeBytes"] for i, p in packs.items()}}
+    zim_of = {i: p.get("zimName") for i, p in packs.items()}
+
+    def total(items):
+        return sum(sizes_of[i] for i in one_per_zim(items, zim_of, contains))
+
+    sizes, all_e, all_c = {}, [], []
+    for d in readiness.get("domains", []):
+        e, c = expand(d["essential"], d["id"]), expand(d["comprehensive"], d["id"])
+        sizes[d["id"]] = (total(e), total(c))
+        all_e += e
+        all_c += c
+    sizes["All"] = (total(all_e), total(all_c))
+    return sizes
 
 
 def public_key(seed):
@@ -519,6 +588,9 @@ def main(argv):
     elif args.command == "build":
         report = []
         catalog = build(json.loads(pathlib.Path(args.curated).read_text()), report=report)
+        if catalog.get("readiness"):
+            report += ["", "Readiness tiers, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):"]
+            report += [f"  {d}: {e / 1e9:.1f} GB / {c / 1e9:.1f} GB" for d, (e, c) in tier_sizes(catalog).items()]
         out = pathlib.Path(args.out)
         out.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         if report:

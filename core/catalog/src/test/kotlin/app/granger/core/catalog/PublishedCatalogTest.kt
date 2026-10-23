@@ -81,4 +81,21 @@ class PublishedCatalogTest {
         assertThat(catalog.presets.single { it.id == "comprehensive" }.items.size)
             .isAtLeast(catalog.presets.single { it.id == "efficient" }.items.size)
     }
+
+    /** Plan H4: the calibrated tiers and the containment table. */
+    @Test fun publishedCatalogCarriesTheCalibration() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+
+        val readiness = catalog.readiness!!
+        assertThat(readiness.containers("wikipedia_en_top")).contains("wikipedia_en_top1m")
+        val comprehensive = catalog.presets.single { it.id == "comprehensive" }.items
+        assertThat(comprehensive).doesNotContain("stackoverflow.com_en_all")
+        assertThat(comprehensive).contains("wikipedia_en_top1m_nopic")
+        assertThat(comprehensive).doesNotContain("wikipedia_en_top_nopic")
+        // One flavour per ZIM: WikiMed once, with pictures.
+        assertThat(comprehensive).contains("wikipedia_en_medicine_maxi")
+        assertThat(comprehensive).doesNotContain("wikipedia_en_medicine_nopic")
+    }
 }
