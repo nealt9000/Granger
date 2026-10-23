@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_en_knots_maxi",
+ "kind": "pack",
+ "fileName": "wikipedia_en_knots_maxi_2026-10-18.gvec",
+ "sizeBytes": 534264,
+ "sha256": "3955c976d5d906b2b695a408c74c018169005cf23aa9baea6e09a027a844bc1e",
+ "count": 1821,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "29a3ffa52a725d0ef9dd5359d27b864ec8454c61430c0bfb15fd1929f4b73390",
+ "url": null
+}

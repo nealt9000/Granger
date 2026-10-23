@@ -511,5 +511,9 @@
         ]
       }
     }
+  },
+  "vectors": {
+    "releases": "tools/vectors/releases",
+    "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/"
   }
 }
