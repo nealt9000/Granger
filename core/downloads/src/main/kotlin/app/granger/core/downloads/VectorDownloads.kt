@@ -13,7 +13,8 @@ import java.io.File
  * source screen, onboarding, a preset, the library), [reconcile] makes the vectors match:
  * - an item installed at the exact file its catalog entry names, with vectors in that entry, gets them queued on the
  *   same volume (an item installed before its vectors were in the catalog gets them after the next refresh);
- * - vectors whose item has no download record left are removed with their files.
+ * - vectors whose item has no download record left are removed with their files;
+ * - once an item's current vectors are installed, its older versions of them are deleted.
  *
  * An item at another snapshot than the catalog's gets none: vectors are valid only for the file they were built from.
  */
@@ -29,6 +30,10 @@ class VectorDownloads(private val downloads: Downloads, private val wifiOnly: ()
         if (catalog == null) return@withLock
         for (item in catalog.packs + catalog.books) {
             val vectors = item.vectors ?: continue
+            val versions = byItem[itemIdOf(item.id)].orEmpty()
+            if (versions.any { it.hash == vectors.sha256 && it.state == DownloadState.INSTALLED }) {
+                for (old in versions.filter { it.hash != vectors.sha256 && !it.isActive }) downloads.removeVersion(old.itemId, old.hash)
+            }
             val installed = byItem[item.id].orEmpty()
                 .firstOrNull { it.state == DownloadState.INSTALLED && it.hash == item.sha256 } ?: continue
             if (byItem[itemIdOf(item.id)].orEmpty().any { it.hash == vectors.sha256 || it.isActive }) continue

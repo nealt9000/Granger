@@ -119,6 +119,32 @@ class VectorDownloadsTest {
         assertThat(file.exists()).isFalse()
     }
 
+    /** Marks the vectors record of [hash] installed, with its file written. */
+    private suspend fun installVectors(hash: String): File {
+        val record = vectorRecords().single { it.hash == hash }
+        record.file.parentFile!!.mkdirs()
+        record.file.writeText("vectors $hash")
+        dao.upsert(record.copy(state = DownloadState.INSTALLED, bytesDone = record.sizeBytes))
+        return record.file
+    }
+
+    @Test fun newVectorsReplaceTheOldOnceInstalled() = test {
+        install(med)
+        reconcile(catalog(med))
+        val oldFile = installVectors(SHA_V)
+        val SHA_W = "4".repeat(64)
+        val newer = med.copy(vectors = v.copy(url = "https://github.test/vectors-2/med.gvec", sha256 = SHA_W))
+        reconcile(catalog(newer))
+        // The new version is queued; the old one stays in use until it is installed.
+        assertThat(vectorRecords().map { it.hash }).containsExactly(SHA_V, SHA_W)
+        assertThat(oldFile.exists()).isTrue()
+        val newFile = installVectors(SHA_W)
+        reconcile(catalog(newer))
+        assertThat(vectorRecords().map { it.hash }).containsExactly(SHA_W)
+        assertThat(oldFile.exists()).isFalse()
+        assertThat(newFile.exists()).isTrue()
+    }
+
     @Test fun parentOfOnlyNamesVectorsItems() {
         assertThat(VectorDownloads.parentOf("med.vectors")).isEqualTo("med")
         assertThat(VectorDownloads.parentOf("med")).isNull()

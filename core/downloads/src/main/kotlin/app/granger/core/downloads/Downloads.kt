@@ -52,6 +52,9 @@ interface Downloads {
     /** Stops any download and deletes every file and record of [itemId]. */
     suspend fun remove(itemId: String)
 
+    /** Deletes one installed version of [itemId] (its record and file), when it isn't downloading. */
+    suspend fun removeVersion(itemId: String, hash: String)
+
     /** Downloads an installed item again, e.g. after Readiness found it damaged. */
     suspend fun repair(itemId: String)
 
@@ -265,6 +268,14 @@ class DownloadManager(
     }
 
     override suspend fun remove(itemId: String) = mutex.withLock { removeLocked(itemId) }
+
+    override suspend fun removeVersion(itemId: String, hash: String) = mutex.withLock {
+        val record = dao.get(itemId, hash)?.takeUnless { it.isActive } ?: return@withLock
+        // Another version saved at the same path owns the file now.
+        val shared = dao.forItem(itemId).any { it.hash != hash && it.filePath == record.filePath }
+        dao.delete(itemId, hash)
+        if (!shared) withContext(io) { record.file.delete() }
+    }
 
     private suspend fun removeLocked(itemId: String) {
         scheduler.cancel(itemId)

@@ -133,6 +133,7 @@ class FakeDownloads : Downloads {
     override suspend fun retry(itemId: String) { calls += "retry:$itemId" }
     override suspend fun cancel(itemId: String) { calls += "cancel:$itemId" }
     override suspend fun remove(itemId: String) { calls += "remove:$itemId" }
+    override suspend fun removeVersion(itemId: String, hash: String) { calls += "removeVersion:$itemId:$hash" }
     override suspend fun repair(itemId: String) { calls += "repair:$itemId" }
     override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) { calls += "check:$itemId:$verified" }
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
