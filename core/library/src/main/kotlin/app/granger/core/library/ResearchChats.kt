@@ -28,6 +28,8 @@ data class ChatTurn(
     val guess: String = "",
     val guessLarge: Boolean = false,
     val guessFellBack: Boolean = false,
+    /** The answer came from a weak match in the library, so it is shown as a guess. */
+    val weak: Boolean = false,
 )
 
 /** Where each shown passage lives, as the answer cites it (`[1]` is the first); read-aloud and plans reuse these. */
@@ -64,6 +66,7 @@ interface ResearchChats {
         keywords: List<String>,
         shown: List<Passage>,
         candidates: List<Passage>,
+        weak: Boolean = false,
     )
 
     /** Keeps the model's best guess on a declined turn, and bumps the chat's `updatedAt`. */
@@ -113,6 +116,7 @@ class RoomResearchChats(
         guess = guess,
         guessLarge = guessLarge,
         guessFellBack = guessFellBack,
+        weak = weak,
     )
 
     override suspend fun chat(chatId: Long): ChatSummary? = dao.chat(chatId)?.summary()
@@ -140,6 +144,7 @@ class RoomResearchChats(
         keywords: List<String>,
         shown: List<Passage>,
         candidates: List<Passage>,
+        weak: Boolean,
     ) {
         db.withTransaction {
             val turn = dao.turn(turnId) ?: return@withTransaction
@@ -150,6 +155,7 @@ class RoomResearchChats(
                     medical = medical,
                     usedLarge = usedLarge,
                     keywords = keywords.joinToString(KEYWORD_SEPARATOR),
+                    weak = weak,
                 ),
             )
             dao.deletePassages(turnId)

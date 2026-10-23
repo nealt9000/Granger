@@ -280,6 +280,7 @@ class EvalRunner(
             val deeperRequest = ResearchRequest(
                 item.question, prior = prior, priorQuestion = item.priorQuestion,
                 deeperFrom = pool.take(DEEPER_PASSAGES), medicalHint = outcome?.medical ?: false,
+                weakHint = (outcome as? Outcome.Answered)?.weak ?: (outcome as? Outcome.Unverified)?.weak ?: false,
             )
             prompts?.begin("deeper")
             val deeper = execute(pipeline.run(deeperRequest))
@@ -304,7 +305,8 @@ class EvalRunner(
         return JSONObject().put("text", guessed.text).put("ms", run.ms.optLong("total")).put("fellBack", guessed.fellBack)
     }
 
-    private class Described(val outcome: String, val reply: String, val cited: List<Int>, val chosen: List<Passage>)
+    /** [weak]: the answer was from a weak match, which the app shows under its hedge (see `RankingConfig.weakBelow`). */
+    private class Described(val outcome: String, val reply: String, val cited: List<Int>, val chosen: List<Passage>, val weak: Boolean = false)
 
     /** "<reason>: <ExceptionClass>: <message>", so a failed record says what failed. */
     private fun failureText(outcome: Outcome.Failed): String {
@@ -313,8 +315,8 @@ class EvalRunner(
     }
 
     private fun describe(outcome: Outcome?): Described = when (outcome) {
-        is Outcome.Answered -> Described("answered", outcome.text, outcome.cited.sorted(), outcome.passages)
-        is Outcome.Unverified -> Described("unverified", outcome.text, emptyList(), outcome.passages)
+        is Outcome.Answered -> Described("answered", outcome.text, outcome.cited.sorted(), outcome.passages, outcome.weak)
+        is Outcome.Unverified -> Described("unverified", outcome.text, emptyList(), outcome.passages, outcome.weak)
         is Outcome.Declined -> Described("declined", outcome.reply, emptyList(), outcome.passages)
         is Outcome.Failed -> Described("failed", failureText(outcome), emptyList(), emptyList())
         else -> Described("failed", "", emptyList(), emptyList())
@@ -322,7 +324,7 @@ class EvalRunner(
 
     /** Fills a record with the outcome fields and the chosen passages. */
     private fun Described.into(o: JSONObject) {
-        o.put("outcome", outcome).put("reply", reply).put("cited", JSONArray(cited))
+        o.put("outcome", outcome).put("reply", reply).put("cited", JSONArray(cited)).put("weak", weak)
         run {
             o.put("chosen", JSONArray(chosen.map { p ->
                 JSONObject().put("kind", p.kind.name).put("source", sourceName(p)).put("title", p.sourceTitle)

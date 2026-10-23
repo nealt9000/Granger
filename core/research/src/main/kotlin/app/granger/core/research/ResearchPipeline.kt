@@ -73,6 +73,8 @@ data class ResearchRequest(
     val priorQuestion: String? = null,
     val deeperFrom: List<Passage>? = null,
     val medicalHint: Boolean = false,
+    /** Think deeper's: the turn it deepens was a weak match, and so is this one (its passages are the same). */
+    val weakHint: Boolean = false,
 )
 
 /** How a question ended. `passages` are the numbered ones in the prompt; `candidates` are the ranked rest, kept for Think deeper. */
@@ -80,6 +82,7 @@ sealed interface Outcome {
     val medical: Boolean
     val keywords: List<String>
 
+    /** [weak]: the library only loosely matched the question (see [RankingConfig.weakBelow]), so the UI hedges it. */
     data class Answered(
         val text: String,
         val passages: List<Passage>,
@@ -88,6 +91,7 @@ sealed interface Outcome {
         val usedLarge: Boolean,
         override val medical: Boolean,
         override val keywords: List<String>,
+        val weak: Boolean = false,
     ) : Outcome
 
     /**
@@ -109,6 +113,7 @@ sealed interface Outcome {
         val usedLarge: Boolean,
         override val medical: Boolean,
         override val keywords: List<String>,
+        val weak: Boolean = false,
     ) : Outcome
 
     /** A best guess from the model's own knowledge: no passages, no citations. [fellBack] is true when the large model wouldn't load. */
@@ -136,6 +141,8 @@ sealed interface ResearchEvent {
     data object LargeFallback : ResearchEvent
     /** The large model wouldn't load for a best guess, so the small one writes it. */
     data object GuessFallback : ResearchEvent
+    /** The library only loosely matches the question, known before the reply is written, so it streams under the hedge. */
+    data object WeakMatch : ResearchEvent
     data class Done(val outcome: Outcome) : ResearchEvent
 }
 
@@ -172,12 +179,14 @@ class ResearchPipeline(
         val medical: Boolean
         val keywords: List<String>
         val ranked: List<Passage>
+        var weak = false
         val asked = MediaCues.asked(request.question)
         if (request.deeperFrom != null) {
             medical = request.medicalHint
             if (medical) emit(ResearchEvent.Medical)
             keywords = emptyList()
             ranked = request.deeperFrom
+            weak = request.weakHint
         } else {
             val rewrite = rewrite(generator.model, request)
             medical = rewrite.medical == true || request.medicalHint ||
@@ -202,6 +211,8 @@ class ResearchPipeline(
                 emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
                 return@flow
             }
+            // A question about the user's selection is answered from it, however its library search went.
+            weak = request.quote == null && hits?.let { h -> h.maxOf { it.cosine ?: 0.0 } < config.weakBelow } == true
             val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
             val found = Ranking.preselect(all, keywords, config, weight)
             emit(ResearchEvent.Progress(Stage.RANKING))
@@ -234,6 +245,7 @@ class ResearchPipeline(
         }
         var (passages, candidates) = fit(usedLarge)
 
+        if (weak) emit(ResearchEvent.WeakMatch)
         emit(ResearchEvent.Progress(Stage.WRITING))
         var streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
         if (usedLarge && streamed.text == null && streamed.chunks == 0 && streamed.cause is ModelUnavailableException) {
@@ -260,9 +272,9 @@ class ResearchPipeline(
 
         val outcome = when (val check = Citations.check(reply, passages.size)) {
             is CitationCheck.Valid ->
-                Outcome.Answered(reply, passages, check.cited, candidates, usedLarge, medical, keywords)
+                Outcome.Answered(reply, passages, check.cited, candidates, usedLarge, medical, keywords, weak)
             CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords, passages, reply)
-            CitationCheck.Invalid -> Outcome.Unverified(reply, passages, candidates, usedLarge, medical, keywords)
+            CitationCheck.Invalid -> Outcome.Unverified(reply, passages, candidates, usedLarge, medical, keywords, weak)
         }
         emit(ResearchEvent.Done(outcome))
     }

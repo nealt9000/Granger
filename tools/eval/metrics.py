@@ -134,6 +134,16 @@ def compute(items, records, grades):
         s = out["guesses"][model]
         s["goodEnough"] = (graded > 0 and s["confidentlyWrongRate"] <= BAR["guessWrongMax"] and s["rightOrPartlyRate"] >= BAR["guessGoodMin"])
 
+    if any("weak" in r for r in recs):
+        # Plan R1: answers from a weak match are shown as guesses. The bars above count them as answers; this says how
+        # many there were and what an unanswerable one hedged instead of declined comes to.
+        weak_un = sum(1 for r in un if r["outcome"] == "answered" and r.get("weak"))
+        weak_an = [r for r in an if r["outcome"] == "answered" and r.get("weak")]
+        weak_good = sum(1 for r in weak_an if (current_grade(grades, r["id"], "answer", r.get("reply", "")) or {}).get("grade") == "grounded")
+        out["weak"] = {"unanswerable": weak_un, "declinedOrHedgedRate": _rate(handled + weak_un, len(un)),
+                       "answerable": len(weak_an), "answerableGrounded": weak_good,
+                       "groundedUnhedgedRate": _rate(grounded - weak_good, len(an))}
+
     out["timings"] = {"total": _timing(recs, "total"), "firstWords": _timing(recs, "firstWords")}
     out["pass"] = {
         "unanswerable": out["unanswerable"]["rate"] is not None and out["unanswerable"]["rate"] >= BAR["unanswerable"],

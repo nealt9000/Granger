@@ -77,9 +77,10 @@ class ResearchViewModelTest {
         sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
         player: PlayerHub? = null,
         speakAnswers: Boolean = false,
+        pipeline: ResearchPipeline = ResearchPipeline(finder, models),
     ): ResearchViewModel {
         return ResearchViewModel(
-            chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf,
+            chatId, quote, chats, pipeline, manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
             player = player, speakAnswers = { speakAnswers }, now = { 42L },
         )
@@ -282,6 +283,41 @@ class ResearchViewModelTest {
         small.gate.complete(Unit)
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.turns.single().medical).isTrue()
+    }
+
+    /** A pipeline whose dense search finds only [cosine]-close passages (Plan R1). */
+    private fun densePipeline(cosine: Double): ResearchPipeline {
+        models.embedder = app.granger.core.research.PassageEmbedder { texts, _ -> texts.map { floatArrayOf(1f, 0f) } }
+        val hits = listOf(Passage(SourceKind.ARTICLE, "pack1", "Leaves", location = "A/Leaves", text = "Leaves are green.", cosine = cosine))
+        return ResearchPipeline(finder, models, dense = app.granger.core.research.DenseFinder { hits })
+    }
+
+    @Test fun aWeakMatchStreamsAndIsKeptUnderTheHedge() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " And")
+        small.gateAt = 1
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = vm(pipeline = densePipeline(cosine = 0.79), player = hub)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().weak).isTrue()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.ANSWERED)
+        assertThat(turn.weak).isTrue()
+        assertThat(vm.state.value.turns.single().weak).isTrue()
+        vm.readAnswer(turn.id)
+        // The hedge is read first, then the answer without its chip.
+        assertThat(hub.lastSource!!.utterances(null, 10).joinToString(" ") { it.text })
+            .isEqualTo("Your library only loosely matches this. I can't be sure, but if I had to guess: Plants use light. And")
+    }
+
+    @Test fun aStrongMatchHasNoHedge() = runTest(main.dispatcher) {
+        val vm = vm(pipeline = densePipeline(cosine = 0.85))
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().weak).isFalse()
+        assertThat(vm.state.value.turns.single().weak).isFalse()
     }
 
     @Test fun notMedicalHasNoBanner() = runTest(main.dispatcher) {

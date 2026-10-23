@@ -438,6 +438,16 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
   Their top cosines (0.75–0.83) overlap the answerable ones, so the gate can't separate them. At 0.80 it would empty 1 of
   the 9 and drop 8 grounded-capable answers. This is the answer model's judgment, not retrieval's.
 - [ ] **Stopped here for Neal**, per the global constraint: grounded rose, but declined fell below 89%.
+- [x] **Neal's call (2026-10-23): hedge weak matches rather than decline them.** When an answer's best dense hit is under
+  0.80 (`RankingConfig.weakBelow`), the app shows it under "Your library only loosely matches this. I can't be sure, but if
+  I had to guess:" (banner and read-aloud). The point is that the user always knows whether an answer is backed by the
+  library. A selection's question is never weak, and Think deeper keeps its turn's weakness. The flag is stored as
+  `research_turns.weak` (schema 13). Results get `weak`, and `eval.py report` counts hedged answers beside the bars,
+  which still count only declines.
+  - Replayed on `r1-dense-1` (same split, so the held-out set in R2 is the real test): 4 of the 9 answered unanswerable
+    questions get hedged, so declined or hedged is 71 of 76 (93.4%). 21 answerable answers get hedged, 8 of them
+    grounded. Grounded without a hedge is 78 of 126.
+  - Not changed: the answer prompt, and the Best guess button on a decline (still the user's choice).
 - [ ] Compare it with `r1-base` (`eval.py report --compare`):
   - grounded, declined, recall@4;
   - the failure table from the R0 results (among the 4 / found but not chosen / never found);

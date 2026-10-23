@@ -97,6 +97,7 @@ class FakeChats : ResearchChats {
         keywords: List<String>,
         shown: List<Passage>,
         candidates: List<Passage>,
+        weak: Boolean,
     ) {
         failure?.let { throw it }
         val turn = turnList.value.firstOrNull { it.id == turnId } ?: return
@@ -105,7 +106,7 @@ class FakeChats : ResearchChats {
                 if (it.id == turnId) {
                     it.copy(
                         outcome = outcome, answer = answer, medical = medical, usedLarge = usedLarge,
-                        keywords = keywords, shown = shown, candidates = candidates,
+                        keywords = keywords, shown = shown, candidates = candidates, weak = weak,
                     )
                 } else {
                     it
@@ -195,5 +196,8 @@ class FakeResearchModels(val small: ScriptedGenerator = ScriptedGenerator(), var
             small
         }
 
-    override suspend fun embedder(): PassageEmbedder? = null
+    /** Plan R1: a query embedder, for a pipeline with dense retrieval. */
+    var embedder: PassageEmbedder? = null
+
+    override suspend fun embedder(): PassageEmbedder? = embedder
 }

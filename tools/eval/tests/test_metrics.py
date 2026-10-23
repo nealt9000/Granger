@@ -167,3 +167,18 @@ def test_media_metrics_absent_without_media_items():
     items, recs = make()
     out = metrics.compute(items, recs, {})
     assert "media" not in out and set(out["pass"]) == {"unanswerable", "answerable"}
+
+
+def test_weak_answers_are_counted_beside_the_bars():
+    items, recs = make()
+    for r in recs:
+        r["weak"] = r["id"] in ("u2", "a1", "a2")
+    m = metrics.compute(items, recs, grades(a1=("answer", "grounded", "r"), a2=("answer", "grounded", "r"), a4=("answer", "grounded", "r")))
+    assert m["unanswerable"]["handled"] == 2  # the bar still counts declines only
+    assert m["weak"] == {"unanswerable": 1, "declinedOrHedgedRate": 0.75, "answerable": 2, "answerableGrounded": 2,
+                         "groundedUnhedgedRate": 1 / 6}
+
+
+def test_runs_without_the_weak_flag_have_no_weak_block():
+    items, recs = make()
+    assert "weak" not in metrics.compute(items, recs, {})

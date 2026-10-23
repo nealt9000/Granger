@@ -39,6 +39,11 @@ def totals_rows(m):
     for model, g in m["guesses"].items():
         rows.append(row("Best guess %s (%d graded of %d): confidently wrong / right or partly" % (model, g["graded"], g["n"]),
                         "%s / %s" % (pct(g["confidentlyWrongRate"]), pct(g["rightOrPartlyRate"])), "bar at most 10% / at least 60%", g["goodEnough"] if g["graded"] else None))
+    if "weak" in m:
+        w = m["weak"]
+        rows.append(row("Unanswerable declined or hedged (%d hedged)" % w["unanswerable"], pct(w["declinedOrHedgedRate"]), "not gating", None))
+        rows.append(row("Answerable hedged (%d, %d of them grounded); grounded unhedged" % (w["answerable"], w["answerableGrounded"]),
+                        pct(w["groundedUnhedgedRate"]), "not gating", None))
     t = m["timings"]
     rows.append(row("Send to first words, median / p90 (ms)", "%s / %s" % (t["firstWords"]["median"], t["firstWords"]["p90"]), "target 9000", None))
     rows.append(row("Total, median / p90 (ms)", "%s / %s" % (t["total"]["median"], t["total"]["p90"]), "", None))
