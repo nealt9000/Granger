@@ -15,23 +15,6 @@ import org.robolectric.annotation.Config
 class MigrationTest {
     @get:Rule val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), LibraryDatabase::class.java)
 
-    @Test fun migration12To13MarksExistingTurnsAsNotWeak() {
-        helper.createDatabase("migrate13.db", 12).apply {
-            execSQL("INSERT INTO research_chats (id, title, createdAt, updatedAt) VALUES (1, 'Knots', 1, 1)")
-            execSQL(
-                "INSERT INTO research_turns (id, chatId, question, outcome, answer, medical, usedLarge, askedDeeper, keywords, createdAt) " +
-                    "VALUES (1, 1, 'What is a bowline?', 'ANSWERED', 'A loop [1].', 0, 0, 0, 'bowline', 2)",
-            )
-            close()
-        }
-        val db = helper.runMigrationsAndValidate("migrate13.db", 13, true, LibraryDatabase.MIGRATION_12_13)
-        db.query("SELECT answer, weak FROM research_turns").use {
-            assertThat(it.moveToFirst()).isTrue()
-            assertThat(it.getString(0)).isEqualTo("A loop [1].")
-            assertThat(it.getInt(1)).isEqualTo(0)
-        }
-    }
-
     @Test fun migration11To12KeepsRowsAndCreatesHomeTables() {
         helper.createDatabase("migrate12.db", 11).apply {
             execSQL("INSERT INTO recent_plays (`key`, title, playedAt) VALUES ('album:x', 'X', 1)")

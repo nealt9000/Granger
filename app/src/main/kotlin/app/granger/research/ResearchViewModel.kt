@@ -115,8 +115,6 @@ class ResearchViewModel(
         val guessFailed: Boolean = false,
         /** The speaker button's state for this turn (Plan V2): read, pause or resume. */
         val voice: VoiceButton = VoiceButton.IDLE,
-        /** The answer is from a weak match in the library: shown under [AnswerText.WEAK], as it streams too. */
-        val weak: Boolean = false,
     )
 
     data class State(
@@ -159,7 +157,6 @@ class ResearchViewModel(
         val guessing: Boolean = false,
         val guessLarge: Boolean = false,
         val guessFellBack: Boolean = false,
-        val weak: Boolean = false,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -171,7 +168,6 @@ class ResearchViewModel(
         val askedDeeper: Boolean = false,
         val deeperFrom: List<Passage>? = null,
         val medicalHint: Boolean = false,
-        val weakHint: Boolean = false,
     )
 
     // A saved id wins over the route's, even a null one: the chat was deleted.
@@ -268,7 +264,7 @@ class ResearchViewModel(
             val turns = chats.turns(id).first()
             val turn = turns.lastOrNull()?.takeIf { it.id == turnId && it.canDeepen() } ?: return@begin
             val from = (turn.shown + turn.candidates).filter { it.kind != SourceKind.SELECTION }.take(DEEPER_PASSAGES)
-            val ask = Ask(turn.question, turn.quote(), askedDeeper = true, deeperFrom = from, medicalHint = turn.medical, weakHint = turn.weak)
+            val ask = Ask(turn.question, turn.quote(), askedDeeper = true, deeperFrom = from, medicalHint = turn.medical)
             runTurn(id, ask, before = turns.dropLast(1))
         }
     }
@@ -309,7 +305,7 @@ class ResearchViewModel(
                         }
                     }
                     // run() events; guess() doesn't emit them.
-                    ResearchEvent.Medical, ResearchEvent.LargeFallback, ResearchEvent.WeakMatch -> Unit
+                    ResearchEvent.Medical, ResearchEvent.LargeFallback -> Unit
                 }
             }
         }
@@ -437,14 +433,13 @@ class ResearchViewModel(
     /** Stores a PENDING turn, runs the pipeline and settles the turn; [before] are the turns it follows on from. */
     private suspend fun runTurn(chatId: Long, ask: Ask, before: List<ChatTurn>) {
         val prior = before.lastOrNull { it.outcome == TurnOutcome.ANSWERED }?.let { PriorTurn(it.question, it.answer) }
-        val request = ResearchRequest(ask.question, ask.quote, prior, before.lastOrNull()?.question, ask.deeperFrom, ask.medicalHint, ask.weakHint)
+        val request = ResearchRequest(ask.question, ask.quote, prior, before.lastOrNull()?.question, ask.deeperFrom, ask.medicalHint)
         val kept = listOfNotNull(ask.quote)
         var turnId: Long? = null
         var settled = false
         var fellBack = false
         // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
         var medical = ask.medicalHint
-        var weak = false
         try {
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
@@ -456,15 +451,11 @@ class ResearchViewModel(
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> {
                         live.update { it?.copy(partial = event.text) }
-                        speakPartial(turnId, ask.question, medical, weak, event.text)
+                        speakPartial(turnId, ask.question, medical, event.text)
                     }
                     ResearchEvent.Medical -> {
                         medical = true
                         live.update { it?.copy(medical = true) }
-                    }
-                    ResearchEvent.WeakMatch -> {
-                        weak = true
-                        live.update { it?.copy(weak = true) }
                     }
                     ResearchEvent.LargeFallback -> {
                         fellBack = true
@@ -509,12 +500,12 @@ class ResearchViewModel(
     private var streaming: StreamingTextReadSource? = null
 
     /** A new piece of the answer: starts the read on the first one (with the setting on), then feeds it. */
-    private fun speakPartial(turnId: Long?, question: String, medical: Boolean, weak: Boolean, text: String) {
+    private fun speakPartial(turnId: Long?, question: String, medical: Boolean, text: String) {
         val hub = player ?: return
         val id = turnId ?: return
         val source = streaming ?: run {
             if (!speakAnswers()) return
-            StreamingTextReadSource(answerKey(id), question, preface = AnswerText.preface(medical, weak)).also {
+            StreamingTextReadSource(answerKey(id), question, preface = if (medical) AnswerText.MEDICAL else null).also {
                 streaming = it
                 hub.readAloud(it)
             }
@@ -530,7 +521,7 @@ class ResearchViewModel(
         val turn = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn ?: return
         val text = turn.answer.ifBlank { turn.guess }
         if (text.isBlank()) return
-        hub.readAloud(TextReadSource(answerKey(turnId), turn.question, AnswerText.spoken(text, turn.medical, weak = turn.answer.isNotBlank() && turn.weak)))
+        hub.readAloud(TextReadSource(answerKey(turnId), turn.question, AnswerText.spoken(text, turn.medical)))
     }
 
     /** The speaker button while its answer is read: pauses the voice, or resumes it at its sentence. */
@@ -543,11 +534,11 @@ class ResearchViewModel(
         when (outcome) {
             is Outcome.Answered -> chats.finishTurn(
                 turnId, TurnOutcome.ANSWERED, outcome.text, outcome.medical, outcome.usedLarge, outcome.keywords,
-                outcome.passages, outcome.candidates, outcome.weak,
+                outcome.passages, outcome.candidates,
             )
             is Outcome.Unverified -> chats.finishTurn(
                 turnId, TurnOutcome.UNVERIFIED, outcome.text, outcome.medical, outcome.usedLarge, outcome.keywords,
-                outcome.passages, outcome.candidates, outcome.weak,
+                outcome.passages, outcome.candidates,
             )
             is Outcome.Declined ->
                 chats.finishTurn(turnId, TurnOutcome.DECLINED, "", outcome.medical, usedLarge, outcome.keywords, kept, emptyList())
@@ -578,7 +569,6 @@ class ResearchViewModel(
             guessLarge = running?.guessLarge == true,
             guessFellBack = running?.guessFellBack ?: guessFellBack,
             guessFailed = guessFailedId == id && live == null,
-            weak = weak || running?.weak == true,
         )
     }
 

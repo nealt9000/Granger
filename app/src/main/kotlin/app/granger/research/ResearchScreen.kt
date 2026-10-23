@@ -80,7 +80,6 @@ private const val PLACEHOLDER = "Ask about anything in your library"
 private const val DECLINED = "Not in your library."
 private const val UNVERIFIED = "Couldn't answer from these passages."
 private const val MEDICAL = AnswerText.MEDICAL
-private const val WEAK = AnswerText.WEAK
 
 object ResearchTags {
     const val READ_ALOUD = "research_read_aloud"
@@ -401,8 +400,6 @@ private fun AnswerBlock(
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (ui.medical) Banner(MEDICAL)
         if (ui.largeFallback) Banner(LARGE_FALLBACK)
-        // Over the answer as it streams and once it is kept; a weak turn that ends unverified shows only its passages.
-        if (ui.weak && turn.outcome in setOf(TurnOutcome.PENDING, TurnOutcome.ANSWERED)) Banner(WEAK)
         when (turn.outcome) {
             TurnOutcome.PENDING -> {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

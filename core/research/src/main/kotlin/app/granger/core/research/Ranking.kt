@@ -19,11 +19,6 @@ data class RankingConfig(
     val cosineFloor: Double = 0.74,
     val denseGate: Double = 0.78,
     val lexicalGate: Double = 1.0,
-    /**
-     * An answer whose best dense hit is below this is a weak match (Plan R1 Task 11, `r1-dense-1`): two in three such
-     * answers were wrong, against one in six above it, so the answer is shown as a guess.
-     */
-    val weakBelow: Double = 0.80,
 )
 
 /** Picks which passages go into the prompt: a cheap lexical preselect, then a threshold on embeddings or keywords. */

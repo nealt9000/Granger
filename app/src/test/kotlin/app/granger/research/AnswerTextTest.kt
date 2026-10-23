@@ -18,12 +18,6 @@ class AnswerTextTest {
         assertThat(AnswerText.spoken("Rest.", medical = false)).isEqualTo("Rest.")
     }
 
-    @Test fun theWeakMatchHedgeIsSpokenAfterTheMedicalBanner() {
-        assertThat(AnswerText.spoken("Rest [1].", medical = true, weak = true))
-            .isEqualTo("${AnswerText.MEDICAL}\n\n${AnswerText.WEAK}\n\nRest.")
-        assertThat(AnswerText.spoken("Rest.", weak = true)).isEqualTo("${AnswerText.WEAK}\n\nRest.")
-    }
-
     @Test fun splitsCitations() {
         assertThat(AnswerText.segments("A [1] b [2, 3].")).containsExactly(
             Segment.Text("A "), Segment.Cite(1), Segment.Text(" b "), Segment.Cite(2), Segment.Cite(3), Segment.Text("."),

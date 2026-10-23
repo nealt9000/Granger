@@ -34,22 +34,15 @@ object AnswerText {
     /** The banner over a medical answer; spoken first when an answer is read aloud. */
     const val MEDICAL = "Not medical advice. If you can reach emergency services or a professional, do so."
 
-    /** The banner over an answer from a weak match in the library (Plan R1); spoken first too, after [MEDICAL]. */
-    const val WEAK = "Your library only loosely matches this. I can't be sure, but if I had to guess:"
-
-    /** What is read before an answer: [MEDICAL] and [WEAK] as they apply, or null. */
-    fun preface(medical: Boolean, weak: Boolean): String? =
-        listOfNotNull(MEDICAL.takeIf { medical }, WEAK.takeIf { weak }).joinToString("\n\n").ifEmpty { null }
-
     private val HEADING = Regex("""^\s{0,3}#{1,6}\s+""")
     private val LIST_MARK = Regex("""^\s*(?:[-*•]|\d+[.)])\s+""")
     private val SPACE_BEFORE_PUNCTUATION = Regex(""" +([.,;:!?])""")
 
     /**
      * [answer] as the voice reads it (Plan V2): no citation chips, no emphasis marks, headings and list items as
-     * paragraphs of their own, and the [preface] first. Numbers stay as written.
+     * paragraphs of their own, and [MEDICAL] first when [medical]. Numbers stay as written.
      */
-    fun spoken(answer: String, medical: Boolean = false, weak: Boolean = false): String {
+    fun spoken(answer: String, medical: Boolean = false): String {
         val plain = segments(answer).filterIsInstance<Segment.Text>().joinToString("") { it.text }
         val lines = plain.lines().map { line ->
             when {
@@ -63,7 +56,7 @@ object AnswerText {
             .replace(Regex("[ \\t]{2,}"), " ")
             .replace(Regex("\\n{3,}"), "\n\n")
             .trim()
-        return preface(medical, weak)?.let { "$it\n\n$body" } ?: body
+        return if (medical) "$MEDICAL\n\n$body" else body
     }
 
     /** [answer] without its emphasis marks, and the style of each remaining character. */

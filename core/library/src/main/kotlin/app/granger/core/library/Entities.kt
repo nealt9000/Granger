@@ -213,8 +213,6 @@ data class ResearchTurn(
     @ColumnInfo(defaultValue = "''") val guess: String = "",
     @ColumnInfo(defaultValue = "0") val guessLarge: Boolean = false,
     @ColumnInfo(defaultValue = "0") val guessFellBack: Boolean = false,
-    /** The answer came from a weak match in the library (Plan R1), so it is shown as a guess. */
-    @ColumnInfo(defaultValue = "0") val weak: Boolean = false,
 )
 
 enum class PassageRole {

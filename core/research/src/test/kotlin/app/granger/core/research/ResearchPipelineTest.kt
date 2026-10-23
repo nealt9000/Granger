@@ -663,46 +663,4 @@ class ResearchPipelineTest {
         assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
         assertThat(dense.queries).isEmpty()
     }
-
-    @Test
-    fun anAnswerFromAWeakMatchIsMarkedWeakBeforeItIsWritten() = runTest {
-        // Water matches every keyword, so the gate passes; the best dense hit (0.79) is under 0.80.
-        val loose = passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.79)
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(listOf(loose)))
-            .run(ResearchRequest("At what temperature does water boil?")).toList()
-        assertThat((outcome(events) as Outcome.Answered).weak).isTrue()
-        assertThat(events.indexOf(ResearchEvent.WeakMatch)).isLessThan(events.indexOf(ResearchEvent.Progress(Stage.WRITING)))
-    }
-
-    @Test
-    fun anAnswerFromAStrongMatchIsNotWeak() = runTest {
-        val close = passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.80)
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(listOf(close)))
-            .run(ResearchRequest("At what temperature does water boil?")).toList()
-        assertThat((outcome(events) as Outcome.Answered).weak).isFalse()
-        assertThat(events).doesNotContain(ResearchEvent.WeakMatch)
-    }
-
-    @Test
-    fun withoutVectorsNoAnswerIsWeak() = runTest {
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(emptyList()))
-            .run(ResearchRequest("At what temperature does water boil?")).toList()
-        assertThat((outcome(events) as Outcome.Answered).weak).isFalse()
-    }
-
-    @Test
-    fun aQuestionAboutASelectionIsNotWeak() = runTest {
-        val selection = passage("Q", "Water boils sooner on a mountain.", "Selection").copy(kind = SourceKind.SELECTION)
-        val loose = passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.76)
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(listOf(loose)))
-            .run(ResearchRequest("Why does it boil sooner?", quote = selection)).toList()
-        assertThat((outcome(events) as Outcome.Answered).weak).isFalse()
-    }
-
-    @Test
-    fun thinkDeeperKeepsTheTurnsWeakness() = runTest {
-        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator()))
-            .run(ResearchRequest("At what temperature does water boil?", deeperFrom = listOf(water), weakHint = true)).toList()
-        assertThat((outcome(events) as Outcome.Answered).weak).isTrue()
-    }
 }
