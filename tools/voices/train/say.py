@@ -27,6 +27,10 @@ def main():
     p.add_argument("--speakers", type=int, nargs="*")
     p.add_argument("--text", default=TEXT)
     p.add_argument("--threads", type=int, default=2)
+    p.add_argument("--noise", type=float, default=0.667, help="noise_scale (sherpa's default, as the app)")
+    p.add_argument("--noise-w", type=float, default=0.8, help="noise_scale_w: how much durations vary")
+    p.add_argument("--length", type=float, default=1.0, help="length_scale: > 1 is slower")
+    p.add_argument("--tag", default="", help="added to the WAV names")
     a = p.parse_args()
 
     import sherpa_onnx
@@ -41,6 +45,9 @@ def main():
                 model=models[0],
                 tokens=os.path.join(a.voice, "tokens.txt"),
                 data_dir=os.path.join(a.voice, "espeak-ng-data"),
+                noise_scale=a.noise,
+                noise_scale_w=a.noise_w,
+                length_scale=a.length,
             ),
             num_threads=a.threads,
         ),
@@ -53,7 +60,7 @@ def main():
         audio = tts.generate(a.text, sid=sid, speed=1.0)
         elapsed = time.monotonic() - start
         seconds = len(audio.samples) / audio.sample_rate
-        target = os.path.join(a.out, f"{name}-s{sid}.wav")
+        target = os.path.join(a.out, f"{name}-s{sid}{a.tag}.wav")
         soundfile.write(target, audio.samples, audio.sample_rate, subtype="PCM_16")
         print(f"{target}\tspeaker {sid}\t{seconds:.1f} s audio\tRTF {elapsed / seconds:.3f} (this machine)")
 
