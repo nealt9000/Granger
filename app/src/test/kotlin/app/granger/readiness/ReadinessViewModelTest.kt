@@ -75,6 +75,20 @@ class ReadinessViewModelTest {
         assertThat(ui.models.map { it.key }).containsExactly(key(e2b))
     }
 
+    @Test fun everyRowKnowsTheSourceItIsListedUnder() = runTest(main.dispatcher) {
+        val voice = record("vits-piper-en_US-ljspeech-medium", DownloadState.INSTALLED, kind = ItemKind.VOICE, filePath = "/internal/voices/v.zip")
+        val kiwix = record("wikem", DownloadState.INSTALLED).copy(urls = listOf("https://download.kiwix.org/zim/wikem.zim"))
+        downloads.list.value = listOf(med, kiwix, e2b, voice) + chapters
+        library.packList.value = listOf(pack("u-hand", title = "Pushed"))
+        val ui = viewModel().ui.value
+        assertThat(ui.models.single().source).isEqualTo(Source.MODELS)
+        assertThat(ui.voices.single().source).isEqualTo(Source.VOICES)
+        assertThat(ui.media.single().source).isEqualTo(Source.LIBRIVOX)
+        assertThat(ui.packs.associate { it.title to it.source }).containsExactly(
+            "Title med", Source.GRANGER, "Title wikem", Source.KIWIX, "Pushed", Source.KIWIX,
+        )
+    }
+
     @Test fun showsTierRamAndVolumes() = runTest(main.dispatcher) {
         val ui = viewModel().ui.value
         assertThat(ui.loading).isFalse()

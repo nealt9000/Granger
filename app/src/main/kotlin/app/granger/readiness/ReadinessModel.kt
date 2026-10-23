@@ -197,7 +197,9 @@ object ReadinessModel {
     ): List<Signal> {
         val empty = domains.filter { it.coverage == Coverage.NONE && it.missingEssential.isNotEmpty() }.map { d ->
             val item = d.missingEssential.first()
-            Signal.EmptyDomain(d.id, item, "Nothing yet for ${d.title}. Get ${item.title}, ${formatBytes(item.sizeBytes)}.")
+            // A domain can hold packs outside its tiers (Stack Overflow in Technology): its bar isn't empty, only its essentials.
+            val lead = if (d.installedBytes > 0L) "No essentials yet for" else "Nothing yet for"
+            Signal.EmptyDomain(d.id, item, "$lead ${d.title}. Get ${item.title}, ${formatBytes(item.sizeBytes)}.")
         }
         val recordByPath = installed.associateBy { it.filePath }
         val stale = packs.sortedBy { it.title.lowercase() }.mapNotNull { pack ->
@@ -247,7 +249,13 @@ object ReadinessModel {
         }
     }
 
-    private fun sourceOf(record: DownloadRecord): Source {
+    /** Where a pack the ledger doesn't know (pushed by hand) counts: its catalog scope, else Kiwix. */
+    fun sourceOf(pack: Pack, catalog: Catalog?): Source {
+        val entry = catalog?.packs?.let { all -> all.firstOrNull { it.zimUuid == pack.id } ?: all.firstOrNull { it.zimName == pack.name } }
+        return if (entry != null && scopeOf(entry) == CatalogScope.GRANGER) Source.GRANGER else Source.KIWIX
+    }
+
+    fun sourceOf(record: DownloadRecord): Source {
         val host = record.urls.firstOrNull()?.let { runCatching { URI(it).host }.getOrNull() }?.lowercase().orEmpty()
         return when {
             record.kind == ItemKind.MODEL -> Source.MODELS

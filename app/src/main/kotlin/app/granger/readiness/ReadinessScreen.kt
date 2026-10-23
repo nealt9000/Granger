@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,6 +46,9 @@ const val SHOWN_SIGNALS = 3
 /** The signals the screen lists: the first [SHOWN_SIGNALS] until Show all is tapped. */
 fun shownSignals(signals: List<Signal>, showAll: Boolean): List<Signal> = if (showAll) signals else signals.take(SHOWN_SIGNALS)
 
+/** Statuses that make a source say it needs attention. */
+private val TROUBLE = setOf(CheckStatus.INCOMPLETE, CheckStatus.CORRUPTED, CheckStatus.MISSING, CheckStatus.DAMAGED)
+
 /** The status line under a domain's bar. */
 fun coverageText(domain: DomainCoverage): String = when (domain.coverage) {
     // A domain can hold packs outside its tiers (the bar shows them) and still have no essential.
@@ -76,6 +81,7 @@ fun ReadinessContent(
     onRepair: (String) -> Unit,
 ) {
     var showAllSignals by rememberSaveable { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(emptyList<String>()) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -142,42 +148,46 @@ fun ReadinessContent(
                     },
                 )
             }
-            val bySource = ui.report.storage.filter { it.bytes > 0L || it.referencedOnly }
+            // Each source lists its own files, checks included, behind a tap: one list of everything was too long (Plan H4).
+            val files = (ui.models + ui.voices + ui.packs + ui.media).groupBy { it.source }
+            val bySource = ui.report.storage.filter { it.bytes > 0L || it.referencedOnly || !files[it.source].isNullOrEmpty() }
             if (bySource.isNotEmpty()) item(key = "by-source") { Heading("By source") }
-            items(bySource, key = { "source-${it.source.name}" }) { row ->
-                ListItem(
-                    headlineContent = { Text(row.source.title) },
-                    supportingContent = {
-                        Text(
-                            if (row.referencedOnly) "Not stored by Granger"
-                            else "${formatBytes(row.bytes)} · ${row.items} ${if (row.items == 1) "item" else "items"}",
-                        )
-                    },
-                )
-            }
-
-            item(key = "files") { Heading("Files") }
-            item(key = "models") { Heading("AI models") }
-            if (ui.models.isEmpty()) item(key = "no-models") { Empty("No models downloaded.") }
-            items(ui.models, key = { it.key }) { row ->
-                Check(row, onVerify, onRepair)
-                HorizontalDivider()
-            }
-            if (ui.voices.isNotEmpty()) item(key = "voices") { Heading("Voices") }
-            items(ui.voices, key = { it.key }) { row ->
-                Check(row, onVerify, onRepair)
-                HorizontalDivider()
-            }
-            item(key = "packs") { Heading("Packs") }
-            if (ui.packs.isEmpty()) item(key = "no-packs") { Empty("No packs installed.") }
-            items(ui.packs, key = { it.key }) { row ->
-                Check(row, onVerify, onRepair)
-                HorizontalDivider()
-            }
-            if (ui.media.isNotEmpty()) item(key = "media") { Heading("Music & audiobooks") }
-            items(ui.media, key = { it.key }) { row ->
-                Check(row, onVerify, onRepair)
-                HorizontalDivider()
+            for (row in bySource) {
+                val rows = files[row.source].orEmpty()
+                val open = row.source.name in expanded
+                item(key = "source-${row.source.name}") {
+                    val trouble = rows.count { it.status in TROUBLE }
+                    ListItem(
+                        headlineContent = { Text(row.source.title) },
+                        supportingContent = {
+                            Text(
+                                if (row.referencedOnly) "Not stored by Granger"
+                                else listOfNotNull(
+                                    "${formatBytes(row.bytes)} · ${row.items} ${if (row.items == 1) "item" else "items"}",
+                                    if (trouble > 0) "$trouble need${if (trouble == 1) "s" else ""} attention" else null,
+                                ).joinToString(" · "),
+                                color = if (trouble > 0) MaterialTheme.colorScheme.error else Color.Unspecified,
+                            )
+                        },
+                        trailingContent = if (rows.isEmpty()) null else {
+                            {
+                                Icon(
+                                    if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = if (open) "Hide ${row.source.title}" else "Show ${row.source.title}",
+                                )
+                            }
+                        },
+                        modifier = if (rows.isEmpty()) Modifier else Modifier.clickable {
+                            expanded = if (open) expanded - row.source.name else expanded + row.source.name
+                        },
+                    )
+                }
+                if (open) {
+                    items(rows.sortedBy { it.title.lowercase() }, key = { it.key }) { check ->
+                        Check(check, onVerify, onRepair)
+                        HorizontalDivider()
+                    }
+                }
             }
         }
     }

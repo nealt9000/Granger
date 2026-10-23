@@ -49,6 +49,8 @@ data class CheckRow(
     val progress: Float?,
     val canVerify: Boolean,
     val canRepair: Boolean,
+    /** The storage row it's listed under (Plan H4 walkthrough). */
+    val source: Source,
 )
 
 data class ReadinessUi(
@@ -200,6 +202,7 @@ class ReadinessViewModel(
                 progress = prog[key],
                 canVerify = status != CheckStatus.MISSING && key !in prog,
                 canRepair = status in REPAIRABLE,
+                source = ReadinessModel.sourceOf(record),
             )
         }
         val recordedPaths = all.mapTo(HashSet()) { it.filePath }
@@ -219,6 +222,7 @@ class ReadinessViewModel(
                 progress = null,
                 canVerify = false,
                 canRepair = false,
+                source = ReadinessModel.sourceOf(pack, src.catalog),
             )
         }
         return ReadinessUi(
@@ -256,6 +260,7 @@ class ReadinessViewModel(
             progress = prog[key],
             canVerify = statuses.any { it != CheckStatus.MISSING } && key !in prog,
             canRepair = status in REPAIRABLE,
+            source = ReadinessModel.sourceOf(files.first()),
         )
     }
 

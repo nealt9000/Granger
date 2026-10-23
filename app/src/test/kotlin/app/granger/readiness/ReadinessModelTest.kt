@@ -81,6 +81,14 @@ class ReadinessModelTest {
         assertThat(empty.last().item.id).isEqualTo("gc-republic")
     }
 
+    @Test fun aDomainHoldingOnlyPacksOutsideItsEssentialsSaysSo() {
+        // WikEM is comprehensive-only: the bar shows it, so the signal mustn't say "Nothing yet" (Plan H4 walkthrough).
+        val r = report(packs = listOf(installed(wikem)))
+        assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.NONE)
+        val signal = r.signals.filterIsInstance<Signal.EmptyDomain>().single { it.domain == "medicine" }
+        assertThat(signal.text).isEqualTo("No essentials yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
+    }
+
     @Test fun oneEssentialPackMakesBasic() {
         val r = report(packs = listOf(installed(medNopic)))
         val med = domain(r, "medicine")
