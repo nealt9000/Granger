@@ -115,3 +115,41 @@ The export loads in sherpa-onnx 1.13.8 and speaks both speakers at RTF 0.05 on t
 he comes out weaker than 3922, the next reader by ear and minutes is 8699 (Jessica Atha, F, 25.4 min); 6701 (Dayle, M,
 19.6 min) is no longer. Raw clips for listening: `voice-spike-2026-10-21/libritts-samples/` (four per reader, 24 kHz,
 with their text).
+
+## Round 1 (Task 3, 2026-10-22/23): 2 readers, Mac
+
+`granger-v1` from `lj-med_1000.ckpt`, MPS (M2 Max; the rented GPU wasn't needed to learn the recipe), batch 16,
+~72 s an epoch, stopped at epoch 703 (snapshot 699 kept). `val_mel`: 0.451 at epoch 200, 0.426 at 600, 0.423 at 686.
+
+Neal on the phone and Mac WAVs: the tone is `libritts_r`'s; "Australia" is right and "Rosetta" nearly; it runs faster
+than `libritts_r`. What it lacks is **rhythm and emphasis**: books less natural than wikis, word stress often
+awkward ("It was the best of times, it was the worst of times": speaker 0 gets the first half, speaker 1 neither),
+speaker 1 (19 minutes) behind speaker 0 (29). `noise_scale_w` 1.2 read better than 0.6/0.8/1.0 for both
+(`say.py --noise-w`; the app uses sherpa's 0.8). Epochs past ~200 mostly cleaned the audio: rhythm and stress come
+from the duration and pitch the model learns, and 49 minutes from two people is little to learn them from.
+
+## Round 2: many readers, rented GPU
+
+The lever `libritts_r` had: many readers. `granger-v2` is 42 LibriTTS-R readers, 7.5 hours, 5 352 utterances: 3922
+and 4535 whole as speakers 0 and 1, then the 20 men and 20 women with the most usable `train-clean` audio, 10 minutes
+each (`build_dataset.py build --readers 3922 4535 3307:10 6209:10 …`, the list in `dataset/granger-v2/minutes.tsv`).
+The shipped voice keeps speakers 0 and 1; the other 40 teach timing and stress.
+
+It warm-starts from round 1's epoch 699, widened to 42 speakers (`widen_speakers.py`), so both voices and the `en-us`
+adaptation carry over and only the 40 new embedding rows start fresh. `fit.py` writes `last.ckpt` every epoch (Lightning
+2.6 wrote it only when `val_mel` improved, so a disconnect could have lost an hour).
+
+```
+# on the box (a volume at /workspace that survives a restart)
+bash pod_setup.sh /workspace/vt
+# from the Mac
+rsync -a $W/dataset/granger-v2 <box>:/workspace/vt/dataset/
+rsync -a $W/base/granger-v1-e699-42spk.ckpt <box>:/workspace/vt/base/
+rsync -a tools/voices/train/ <box>:/workspace/vt/train/
+# on the box, in tmux
+GRANGER_WARMSTART=/workspace/vt/base/granger-v1-e699-42spk.ckpt GRANGER_SNAPSHOT_EVERY=25 \
+PIPER_PYTHON=/workspace/vt/venv/bin/python /workspace/vt/train/train.sh /workspace/vt granger-v2 granger-v2 42 \
+    --trainer.accelerator gpu --data.batch_size 32 2>&1 | tee /workspace/vt/granger-v2.log
+```
+
+Snapshots come back to the Mac (`rsync`) and export there with `export_voice.py --keep 2`: speakers 0 and 1 only.

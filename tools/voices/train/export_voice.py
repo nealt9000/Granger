@@ -2,7 +2,7 @@
 """Exports a trained checkpoint as a sherpa-onnx Piper voice directory (Plan V3).
 
     export_voice.py --checkpoint <run>/…/last.ckpt --config <dataset>/config.json \\
-        --base <work>/base --out <dir> [--name en_US-granger_libritts-medium] [--speakers 3922=Name …]
+        --base <work>/base --out <dir> [--name en_US-granger_libritts-medium] [--speakers 3922=Name …] [--keep 2]
 
 Writes `<out>/vits-piper-<name>/` with what `SherpaVoice.detect` and `pack_voice.py` want:
 
@@ -15,6 +15,9 @@ Writes `<out>/vits-piper-<name>/` with what `SherpaVoice.detect` and `pack_voice
   single-codepoint phonemes only (sherpa-onnx rejects the file otherwise).
 - `espeak-ng-data/`: copied from sherpa's ljspeech voice (`<base>/sherpa/…`).
 - `MODEL_CARD`: what it was trained from and under which licences (Decision 3).
+
+`--keep N` exports only speakers 0..N-1 (round 2 trains 42 readers to ship 2): the speaker embedding is cut to its
+first N rows and the config's `speaker_id_map` to those ids. Nothing else in the network depends on the count.
 
 Run it with the training venv's Python.
 """
@@ -48,7 +51,7 @@ voice data or weights were used. The voice is distributed under CC BY 4.0's term
 """
 
 
-def export_onnx(checkpoint, target):
+def export_onnx(checkpoint, target, keep=None):
     import torch
     from piper.train.vits.lightning import VitsModel
 
@@ -57,6 +60,9 @@ def export_onnx(checkpoint, target):
     model_g.eval()
     with torch.no_grad():
         model_g.dec.remove_weight_norm()
+        if keep and keep < model_g.n_speakers:
+            model_g.emb_g = torch.nn.Embedding.from_pretrained(model_g.emb_g.weight[:keep].clone())
+            model_g.n_speakers = keep
 
     def infer_forward(text, text_lengths, scales, sid=None):
         return model_g.infer(
@@ -122,6 +128,7 @@ def main():
     p.add_argument("--name", default="en_US-granger_libritts-medium")
     p.add_argument("--epochs", default="", help="for the model card, e.g. '1000 epochs from the base'")
     p.add_argument("--speakers", nargs="*", default=[], help="reader=Name, renaming speaker_id_map keys")
+    p.add_argument("--keep", type=int, help="export only speakers 0..keep-1")
     a = p.parse_args()
 
     with open(a.config, encoding="utf-8") as f:
@@ -132,6 +139,12 @@ def main():
         raise SystemExit("trained with vowel clusters: sherpa-onnx tokenises per codepoint, so this won't work")
     renames = dict(s.split("=", 1) for s in a.speakers)
     readers = list(config.get("speaker_id_map") or {})
+    others = []
+    if a.keep and a.keep < config["num_speakers"]:
+        by_id = sorted(config["speaker_id_map"].items(), key=lambda kv: kv[1])
+        readers, others = [r for r, _ in by_id[: a.keep]], [r for r, _ in by_id[a.keep :]]
+        config["speaker_id_map"] = dict(by_id[: a.keep])
+        config["num_speakers"] = a.keep
     if renames:
         config["speaker_id_map"] = {renames.get(k, k): v for k, v in config["speaker_id_map"].items()}
     config["dataset"] = "granger_libritts"
@@ -139,7 +152,7 @@ def main():
     voice = os.path.join(a.out, "vits-piper-" + a.name)
     os.makedirs(voice, exist_ok=True)
     model_path = os.path.join(voice, a.name + ".onnx")
-    n_speakers = export_onnx(a.checkpoint, model_path)
+    n_speakers = export_onnx(a.checkpoint, model_path, a.keep)
     if n_speakers != config["num_speakers"]:
         raise SystemExit(f"checkpoint has {n_speakers} speakers, config says {config['num_speakers']}")
     meta = add_metadata(model_path, config)
@@ -151,6 +164,8 @@ def main():
         shutil.rmtree(espeak)
     shutil.copytree(os.path.join(a.base, "sherpa", LJSPEECH, "espeak-ng-data"), espeak)
     named = [f"{r} ({renames[r]})" if r in renames else r for r in readers] or ["see config"]
+    if others:
+        named[-1] += f"; trained alongside {len(others)} more for timing and stress ({', '.join(others)})"
     with open(os.path.join(voice, "MODEL_CARD"), "w", encoding="utf-8") as f:
         f.write(
             MODEL_CARD.format(

@@ -10,6 +10,7 @@
 # The first run warm-starts from lj-med_1000.ckpt: every parameter whose shape matches is copied (all of them for one
 # speaker; all but the new speaker embedding and conditioning layers for several), with a fresh optimizer. Run it
 # again with the same run name to resume from last.ckpt; piper1-gpl skips the warm-start on a resume.
+# GRANGER_WARMSTART names another checkpoint to warm-start from (round 2: widen_speakers.py's output).
 #
 # Extra args go to LightningCLI, e.g. --trainer.max_epochs 1200 --trainer.accelerator mps --data.batch_size 16.
 set -euo pipefail
@@ -27,7 +28,7 @@ if [ -n "$last" ]; then
     echo "resuming from $last" >&2
     resume=(--ckpt_path "$last")
 else
-    resume=(--model.warmstart_ckpt "$work/base/lj-med_1000.ckpt")
+    resume=(--model.warmstart_ckpt "${GRANGER_WARMSTART:-$work/base/lj-med_1000.ckpt}")
 fi
 
 exec "$python" "$(dirname "$0")/fit.py" fit \

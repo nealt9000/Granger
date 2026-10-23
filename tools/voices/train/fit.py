@@ -4,10 +4,15 @@
 piper1-gpl's entry point also checkpoints on "val_mos" (UTMOS, which it fetches through torch.hub with
 trust_repo=True); with `--model.mos_metric none` that callback raises at the end of the first epoch, and LightningCLI
 always appends `trainer_defaults` callbacks, so they can't be swapped from the command line. This is the same CLI
-with these callbacks instead: the five best by val_mel plus `last.ckpt` (what a resume needs), and a snapshot every
-100 epochs that is never deleted, for listening at ~200, ~300, … (Task 3).
+with these callbacks instead: the five best by val_mel, `last.ckpt` every epoch (what a resume needs), and a snapshot
+every 100 epochs (GRANGER_SNAPSHOT_EVERY) that is never deleted, for listening at ~200, ~300, … (Task 3).
+
+Lightning 2.6 writes a callback's `save_last` only in a step where that callback saved something else, so on the
+val_mel callback `last.ckpt` went stale whenever val_mel didn't improve (40 minutes behind at epoch 703); a callback of
+its own with no monitor saves it every epoch, overwriting the one file.
 """
 import logging
+import os
 
 import torch
 from lightning.pytorch.callbacks import Callback, ModelCheckpoint
@@ -34,12 +39,12 @@ def main():
             monitor="val_mel",
             mode="min",
             save_top_k=5,
-            save_last=True,
             filename="epoch={epoch}-val_mel={val_mel:.4f}",
             auto_insert_metric_name=False,
         ),
+        ModelCheckpoint(filename="last", save_top_k=1, enable_version_counter=False),
         ModelCheckpoint(
-            every_n_epochs=100,
+            every_n_epochs=int(os.environ.get("GRANGER_SNAPSHOT_EVERY", "100")),
             save_top_k=-1,
             filename="snapshot-epoch={epoch}",
             auto_insert_metric_name=False,

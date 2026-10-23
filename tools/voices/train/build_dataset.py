@@ -2,12 +2,13 @@
 """Builds the training set for the Granger voice from LibriTTS-R (Plan V3).
 
     build_dataset.py list  --libritts <work>/libritts_r [--subsets train-clean-100 train-clean-360] [--readers 3922 4535]
-    build_dataset.py build --libritts <work>/libritts_r --out <work>/dataset/<name> --readers 3922 4535 [--max-minutes 60]
+    build_dataset.py build --libritts <work>/libritts_r --out <work>/dataset/<name> --readers 3922 4535 3307:10 … [--max-minutes 60]
 
 `list` prints each reader's gender, name and minutes of usable audio per subset, most audio first (or only the
 readers given), for choosing speakers (Decision 2).
 
-`build` takes the readers' utterances in order (longest chapters first, until `--max-minutes`), leaves out the
+`build` takes the readers' utterances in order (longest chapters first, until `--max-minutes`, or the minutes after a
+reader's colon: `3307:10`), leaves out the
 utterances whose speech restoration failed and those outside 1–15 s, resamples 24 kHz to 22 050 Hz mono 16-bit
 (`soxr_hq`) into `<out>/wav/`, and writes `<out>/metadata.csv` as piper1-gpl wants it: `<file>.wav|<reader>|<text>`
 for several readers, `<file>.wav|<text>` for one, using LibriTTS-R's normalized text. Piper numbers the speakers in
@@ -108,10 +109,12 @@ def cmd_build(a):
     os.makedirs(wav_dir, exist_ok=True)
     multi = len(a.readers) > 1
     rows, minutes = [], []
-    for reader in a.readers:
+    for spec in a.readers:
+        reader, _, cap = spec.partition(":")
+        cap = float(cap) if cap else a.max_minutes
         total = 0.0
         for utt, wav, seconds, text in usable(utterances(a.libritts, a.subsets, reader), failed):
-            if total + seconds > a.max_minutes * 60:
+            if total + seconds > cap * 60:
                 break
             target = os.path.join(wav_dir, utt + ".wav")
             if not os.path.exists(target):
@@ -137,7 +140,7 @@ def main():
     p.add_argument("command", choices=["list", "build"])
     p.add_argument("--libritts", required=True, help="the directory fetch.py unpacked LibriTTS-R into")
     p.add_argument("--subsets", nargs="+", default=SUBSETS)
-    p.add_argument("--readers", nargs="+", help="LibriTTS reader ids; for build, in speaker-id order")
+    p.add_argument("--readers", nargs="+", help="LibriTTS reader ids; for build, in speaker-id order, each optionally :<minutes>")
     p.add_argument("--out")
     p.add_argument("--max-minutes", type=float, default=60.0, help="per reader")
     p.add_argument("--top", type=int, default=40, help="list: rows to print")
