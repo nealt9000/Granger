@@ -7,8 +7,12 @@ import java.io.File
 /** How a download is verified; archive.org offers sha1 or md5, the catalog uses sha256. */
 enum class HashAlgorithm(val jcaName: String) { SHA256("SHA-256"), SHA1("SHA-1"), MD5("MD5") }
 
-/** [AUDIO]: one file of a LibriVox or archive.org audio item, downloaded as part of a group. [VOICE]: a read-aloud voice's zip, unpacked after verification. */
-enum class ItemKind { PACK, MODEL, BOOK, AUDIO, VOICE }
+/**
+ * [AUDIO]: one file of a LibriVox or archive.org audio item, downloaded as part of a group. [VOICE]: a read-aloud voice's
+ * zip, unpacked after verification. [VECTORS]: a pack's or book's search vectors (Plan R1), which follow it; see
+ * [VectorDownloads]. Stored by name, so a new kind needs no migration.
+ */
+enum class ItemKind { PACK, MODEL, BOOK, AUDIO, VOICE, VECTORS }
 
 enum class DownloadState { QUEUED, RUNNING, FAILED, INSTALLED }
 

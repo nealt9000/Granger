@@ -298,4 +298,44 @@ class CatalogParserTest {
         assertThat(readiness.contains).isEmpty()
         assertThat(readiness.containers("wikipedia_en_top")).isEmpty()
     }
+
+    // --- Plan R1: search vectors ---
+
+    private fun vectors(url: String = "https://github.com/x/releases/download/vectors-1/med.gvec", sha: String = SHA_B, size: String = "4096") =
+        """{"url": "$url", "sha256": "$sha", "sizeBytes": $size, "embedderSha256": "$SHA_A", "dims": 256, "dtype": "int8", "chunkerVersion": 1}"""
+
+    private fun vectorsCatalog(packVectors: String?, bookVectors: String?) = """
+        {"formatVersion": 1, "generatedAt": "2026-10-23T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine").withVectors(packVectors)}],
+         "books": [${book("gc-hamlet", "literature").withVectors(bookVectors)}]}
+    """.trimIndent().toByteArray()
+
+    private fun String.withVectors(v: String?) = if (v == null) this else dropLast(1) + ", \"vectors\": $v}"
+
+    @Test fun packsAndBooksCarryTheirVectorsAndTheirSizeCountsThem() {
+        val catalog = ok(parse(vectorsCatalog(vectors(), vectors(sha = SHA_A, size = "100"))))
+        val med = catalog.packs.single()
+        assertThat(med.vectors!!.sha256).isEqualTo(SHA_B)
+        assertThat(med.vectors!!.dims).isEqualTo(256)
+        assertThat(med.downloadBytes).isEqualTo(1000 + 4096)
+        assertThat((catalog.books.single() as CatalogItem).vectors!!.sizeBytes).isEqualTo(100)
+    }
+
+    @Test fun entriesWithoutVectorsAndOlderCatalogsHaveNone() {
+        val catalog = ok(parse(vectorsCatalog(null, null)))
+        assertThat(catalog.packs.single().vectors).isNull()
+        assertThat(catalog.books.single().downloadBytes).isEqualTo(500)
+        assertThat(ok(parse(catalogWithBooksJson())).items.mapNotNull { it.vectors }).isEmpty()
+    }
+
+    @Test fun badVectorsAreDroppedButTheirEntryIsKept() {
+        val plainHttp = ok(parse(vectorsCatalog(vectors(url = "http://example.com/med.gvec"), vectors(sha = "nope"))))
+        assertThat(plainHttp.packs.single().vectors).isNull()
+        assertThat(plainHttp.books.single().vectors).isNull()
+        // A field of the wrong type fails the whole object's decoding; the entry is read again without it.
+        val wrongType = ok(parse(vectorsCatalog(vectors(size = "\"big\""), "[]")))
+        assertThat(wrongType.packs.map { it.id }).containsExactly("med")
+        assertThat(wrongType.books.map { it.id }).containsExactly("gc-hamlet")
+        assertThat(wrongType.packs.single().vectors).isNull()
+    }
 }

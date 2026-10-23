@@ -41,12 +41,14 @@ object CatalogParser {
         if (generatedAt == null || runCatching { Instant.parse(generatedAt) }.isFailure) {
             return ParseResult.Invalid(CatalogError.MALFORMED)
         }
-        val packs = entries<PackEntry>(root, "packs")
+        val packs = entries<PackEntry>(root, "packs", retryWithout = VECTORS)
             .filter { valid(it) && DATE.matches(it.snapshotDate) }
             .distinctBy { it.id }
-        val books = entries<BookEntry>(root, "books")
+            .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
+        val books = entries<BookEntry>(root, "books", retryWithout = VECTORS)
             .filter { valid(it) && DATE.matches(it.releaseDate) }
             .distinctBy { it.id }
+            .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
         val models = entries<ModelEntry>(root, "models")
             .filter { valid(it) && SAFE_NAME.matches(it.fileName) }
             .distinctBy { it.id }
@@ -114,8 +116,24 @@ object CatalogParser {
         return if (useCases.isEmpty() && larger.isEmpty() && covered.isEmpty()) null else Onboarding(useCases, larger, covered)
     }
 
-    private inline fun <reified T> entries(root: JsonObject, key: String): List<T> =
-        (root[key] as? JsonArray).orEmpty().mapNotNull { runCatching { json.decodeFromJsonElement<T>(it) }.getOrNull() }
+    /** An entry that doesn't decode is dropped; with [retryWithout], it is first tried again without that field. */
+    private inline fun <reified T> entries(root: JsonObject, key: String, retryWithout: String? = null): List<T> =
+        (root[key] as? JsonArray).orEmpty().mapNotNull { element ->
+            runCatching { json.decodeFromJsonElement<T>(element) }.getOrNull()
+                ?: (element as? JsonObject)?.takeIf { retryWithout != null && retryWithout in it }
+                    ?.let { obj -> runCatching { json.decodeFromJsonElement<T>(JsonObject(obj - retryWithout!!)) }.getOrNull() }
+        }
+
+    private const val VECTORS = "vectors"
+
+    /** A vectors object that names a file we can fetch and check, built by a chunker and at dims the phone can scan. */
+    private fun valid(v: VectorsEntry): Boolean =
+        v.url.startsWith("https://") &&
+            SHA256.matches(v.sha256) &&
+            SHA256.matches(v.embedderSha256) &&
+            v.sizeBytes > 0 &&
+            v.dims > 0 &&
+            v.chunkerVersion > 0
 
     private fun valid(item: CatalogItem): Boolean =
         SAFE_NAME.matches(item.id) &&

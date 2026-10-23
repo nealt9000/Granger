@@ -65,6 +65,8 @@ data class PackEntry(
     val family: String = "",
     /** One of the readiness domain ids (spec §3.1), or blank: the pack counts in storage only. Absent in older catalogs. */
     val domain: String = "",
+    /** The pack's search vectors (Plan R1), downloaded with it; null when it has none, and in older catalogs. */
+    val vectors: VectorsEntry? = null,
 ) : CatalogItem
 
 /** An e-book (EPUB) the reader opens. */
@@ -86,7 +88,36 @@ data class BookEntry(
     val published: Int? = null,
     /** The readiness domain the book counts toward (`literature` or `thought` for Classics); blank in older catalogs. */
     val domain: String = "",
+    /** The book's search vectors (Plan R1), downloaded with it; null when it has none, and in older catalogs. */
+    val vectors: VectorsEntry? = null,
 ) : CatalogItem
+
+/**
+ * A pack's or book's precomputed search vectors (Plan R1, spec §4): one `.gvec` file, valid only for that exact pack or
+ * book file and for the embedder whose sha256 is [embedderSha256]. Every field has a default so a malformed object
+ * decodes; the parser drops one that doesn't validate, keeping its entry.
+ */
+@Serializable
+data class VectorsEntry(
+    val url: String = "",
+    val sha256: String = "",
+    val sizeBytes: Long = 0,
+    val embedderSha256: String = "",
+    val dims: Int = 0,
+    val dtype: String = "",
+    val chunkerVersion: Int = 0,
+)
+
+/** The item's search vectors, for the kinds that can have them. */
+val CatalogItem.vectors: VectorsEntry?
+    get() = when (this) {
+        is PackEntry -> vectors
+        is BookEntry -> vectors
+        else -> null
+    }
+
+/** What getting the item downloads: its file and its vectors (spec §4, "their size is shown in the item's size"). */
+val CatalogItem.downloadBytes: Long get() = sizeBytes + (vectors?.sizeBytes ?: 0L)
 
 @Serializable
 enum class ModelRole {
