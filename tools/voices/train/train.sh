@@ -23,7 +23,8 @@ mkdir -p "$root"
 
 resume=()
 # Each resume logs to a new lightning_logs/version_N: take the newest last.ckpt by time (version_10 sorts before _9).
-last="$(find "$root" -name last.ckpt -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -1)"
+# -L: runs/ may be a link to a volume; -exec … + runs no ls when nothing matches (GNU xargs would run a bare ls).
+last="$(find -L "$root" -name last.ckpt -exec ls -t {} + 2>/dev/null | head -1)"
 if [ -n "$last" ]; then
     echo "resuming from $last" >&2
     resume=(--ckpt_path "$last")

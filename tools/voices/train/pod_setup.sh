@@ -13,7 +13,11 @@ mkdir -p "$work/src"
 
 if command -v apt-get >/dev/null; then
     apt-get update -qq
-    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git cmake ninja-build build-essential tmux rsync python3.11-venv python3.11-dev >/dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git cmake ninja-build build-essential tmux rsync python3-venv >/dev/null
+    # Ubuntu 22.04 packages 3.11; 24.04 doesn't, so uv fetches it below
+    if apt-cache show python3.11-venv >/dev/null 2>&1; then
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3.11-venv python3.11-dev >/dev/null
+    fi
 fi
 
 if [ ! -d "$work/src/piper1-gpl" ]; then
@@ -21,17 +25,25 @@ if [ ! -d "$work/src/piper1-gpl" ]; then
 fi
 git -C "$work/src/piper1-gpl" checkout -q "$pin"
 
-[ -x "$work/venv/bin/python" ] || python3.11 -m venv "$work/venv"
+if [ ! -x "$work/venv/bin/python" ]; then
+    if command -v python3.11 >/dev/null; then
+        python3.11 -m venv "$work/venv"
+    else
+        # the recipe was tested on 3.11: uv's standalone build, with headers for the C extensions
+        python3 -m venv "$work/uv" && "$work/uv/bin/pip" install -q uv
+        UV_PYTHON_INSTALL_DIR="$work/python" "$work/uv/bin/uv" venv -q --seed --python 3.11 "$work/venv"
+    fi
+fi
 "$work/venv/bin/pip" install -q --upgrade pip
-"$work/venv/bin/pip" install -q -e "$work/src/piper1-gpl[train]" scikit-build cython
+"$work/venv/bin/pip" install -q -e "$work/src/piper1-gpl[train]" scikit-build cython "cmake>=3.26" ninja
 
 # monotonic alignment, as build_monotonic_align.sh does
 ma="$work/src/piper1-gpl/src/piper/train/vits/monotonic_align"
 mkdir -p "$ma/monotonic_align"
 (cd "$ma" && "$work/venv/bin/cythonize" -q -i core.pyx && mv core*.so monotonic_align/)
 
-# the espeak-ng bridge
-(cd "$work/src/piper1-gpl" && "$work/venv/bin/python" setup.py -q build_ext --inplace)
+# the espeak-ng bridge (it wants CMake ≥ 3.26: Ubuntu 22.04 has 3.22, so the venv's from pip goes first on PATH)
+(cd "$work/src/piper1-gpl" && PATH="$work/venv/bin:$PATH" "$work/venv/bin/python" setup.py -q build_ext --inplace)
 
 "$work/venv/bin/python" - <<'EOF'
 import torch
