@@ -395,12 +395,30 @@ Regenerate on top of its signed catalog (generatedAt 2026-10-22T12:04:01Z or lat
 If the vectors items need a `library.db` change, use version 13. H2 (branch `h2-home`) takes 12. Rebase onto H2 first.
 Do the same before any phone install once an H2 build has run on the Pixel, because a v11 build can't open a v12 database.
 
-- [ ] Parse the optional `vectors` object. An older catalog, or an entry without it, behaves as today. Test with a catalog that
-  has and lacks the field.
-- [ ] Downloading a pack or book in the set also downloads its vectors, verified by sha256 and counted in the item's size.
-  Deleting the item deletes them.
-- [ ] An already-installed item gains its vectors after a catalog refresh, through the same queue, quietly.
-- [ ] Readiness shows a vectors file as part of its item (verified / incomplete / corrupt). There's no separate row.
+- [x] Parse the optional `vectors` object. An older catalog, or an entry without it, behaves as today. Test with a catalog that
+  has and lacks the field. *`VectorsEntry` (url, sha256, sizeBytes, embedderSha256, dims, dtype, chunkerVersion). A bad
+  one is dropped and its entry kept, including one whose field types don't decode. `downloadBytes` is the item plus its
+  vectors.*
+- [x] Downloading a pack or book in the set also downloads its vectors, verified by sha256 and counted in the item's size.
+  Deleting the item deletes them. *`ItemKind.VECTORS`; one record per item, `<id>.vectors`, file
+  `vectors/<id>_<sha12>.gvec` on the item's volume. `VectorDownloads.reconcile` runs on every catalog or records change,
+  so it covers every place an item is installed or removed. Vectors are queued once the item is installed at the catalog's
+  exact sha, and removed when the item has no record left. There's no schema change: downloads.db stores the kind by name,
+  and library.db is untouched. An older vectors version stays on disk until its item is removed; sources use the newest.*
+- [x] An already-installed item gains its vectors after a catalog refresh, through the same queue, quietly.
+- [x] Readiness shows a vectors file as part of its item (verified / incomplete / corrupt). There's no separate row. *The row's
+  size adds the vectors, and its status is the worst file's. Verify checks both files; repair fetches only the damaged
+  one. Under By source, storage counts the vectors under the item's source, as no extra item.*
+- [x] Installed-file wiring: `vectorSources` is the installed vectors downloads (`ListedVectorSources`: a pack's under its ZIM
+  name, a Classic's under `book:granger:<id>`, only files embedded by the installed EmbeddingGemma) and then the adb
+  directory (`DirectoryVectorSources`, kept for the eval). Files cut by another chunker version are skipped.
+- [x] `catalog_gen.py`: `attach_vectors` and the `vectors` command (it rewrites a built catalog with a fresh `generatedAt`), plus
+  a curated `"vectors": {"releases", "releaseUrl"}` setting for `build`. Tier sizes count vectors. The 353 descriptors
+  of the priority build are committed.
+  - Dry run on the signed catalog (2026-10-22T22:50:36Z): vectors on 356 entries (9 packs: top, medicine, chemistry,
+    mathematics in nopic and maxi, plus IEP; and 347 books) from 352 files, 419.2 MB. The largest file is 166.8 MB.
+  - Knots is left out: it was built from 2026-07-20 and the catalog has 2026-10-18. Rebuild it before the upload, or ship
+    without it.
 - [ ] **Neal's OK:** upload the `.gvec` assets to a `vectors-<date>` GitHub release, regenerate, re-sign and push the
   catalog.
 - [ ] On the phone: remove the adb-pushed files, refresh the catalog, and confirm every vectored item downloads its vectors
