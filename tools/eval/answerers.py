@@ -3,6 +3,7 @@
 
   answerers.py prompts BASE                          # runs/BASE/prompts.jsonl: each item's recorded answer prompt
   answerers.py run BASE NEW --model FILE [--push LOCAL] [--backend gpu|cpu]
+                 [--speculative on|off] [--thinking off|config|template] [--max-tokens N]
                                                      # replays them on the phone, then builds runs/NEW
   answerers.py build BASE NEW                        # runs/NEW/results.jsonl from BASE's records and NEW/replay.jsonl
   answerers.py summary NEW [NEW ...] [--only SAMPLED]  # grounded, declined, timings and memory per model
@@ -65,6 +66,23 @@ def cmd_prompts(a):
     return 0
 
 
+# What a replay record keeps in the built run. Plan R4 added the token counts and rates and the memory around the load;
+# older replays lack them.
+REPLAY_KEYS = ("firstWordsMs", "totalMs", "peakRssMb", "loadMs", "raw", "prefillTokens", "prefillTokensPerSecond",
+               "outputTokens", "decodeTokensPerSecond", "memBeforeLoad", "memAfterLoad")
+
+
+def replay_extras(a):
+    """The `am start` extras for the Plan R4 knobs that were given."""
+    out = []
+    for name, value in (("speculative", a.speculative), ("thinking", a.thinking)):
+        if value:
+            out += ["--es", name, value]
+    if a.max_tokens:
+        out += ["--ei", "maxTokens", str(a.max_tokens)]
+    return out
+
+
 def before_answer(rec):
     ms = rec.get("ms") or {}
     return sum(ms.get(k, 0) for k in ("rewrite", "search", "rank"))
@@ -83,7 +101,7 @@ def build(base, new):
             rec.update(runId=new, outcome=r["outcome"], reply=r["reply"],
                        cited="".join("[%d]" % n for n in r["cited"]),
                        ms={"firstWords": pre + r["firstWordsMs"], "total": pre + r["totalMs"]},
-                       replay={k: r[k] for k in ("firstWordsMs", "totalMs", "peakRssMb", "loadMs", "raw") if r.get(k) is not None})
+                       replay={k: r[k] for k in REPLAY_KEYS if r.get(k) is not None})
         out.append(rec)
     shutil.copy(RUNS / base / "dataset.json", RUNS / new / "dataset.json")
     write_jsonl(RUNS / new / "results.jsonl", out)
@@ -116,7 +134,8 @@ def cmd_run(a, runner=adb.real_runner, sleep=adb.time.sleep):
     if rc:
         raise SystemExit("adb push failed: " + o)
     rc, o = runner(["shell", "am", "start", "-S", "-n", adb.PKG + "/.eval.EvalActivity", "--es", "runId", a.new,
-                    "--es", "replay", "r0-prompts.jsonl", "--es", "model", a.model, "--es", "backend", a.backend])
+                    "--es", "replay", "r0-prompts.jsonl", "--es", "model", a.model, "--es", "backend", a.backend]
+                   + replay_extras(a))
     if rc:
         raise SystemExit("could not start the eval activity: " + o)
     adb.wait_done(runner, a.new, sleep)
@@ -143,7 +162,7 @@ def summary(new, grades, only=None):
     multi = [r for r in an if by_id[r["id"]].get("multiStep")]
     multi_g = sum(1 for r in multi if r["outcome"] == "answered" and
                   (grading.current_grade(grades, r["id"], "answer", r.get("reply", "")) or {}).get("grade") == "grounded")
-    load = next((r["loadMs"] for r in replayed if "loadMs" in r), None)
+    load = next((r for r in replayed if "loadMs" in r), {})
     return {
         "run": new,
         "grounded": "%d/%d" % (m["answerable"]["grounded"], m["answerable"]["n"]),
@@ -153,11 +172,27 @@ def summary(new, grades, only=None):
         "unverified": outcome(recs, "unverified"),
         "unanswerableDeclined": "%d/%d" % (m["unanswerable"]["handled"], m["unanswerable"]["n"]),
         "multiStepGrounded": "%d/%d" % (multi_g, len(multi)),
-        "modelFirstWordsMedianMs": metrics.median([r["firstWordsMs"] for r in replayed]),
+        **model_timings(replayed),
         "modelTotalMedianMs": metrics.median([r["totalMs"] for r in replayed]),
         "sendToFirstWordsMedianMs": m["timings"]["firstWords"]["median"],
-        "loadMs": load,
+        "loadMs": load.get("loadMs"),
+        "memAfterLoad": load.get("memAfterLoad"),
         "peakRssMb": max((r["peakRssMb"] for r in replayed), default=None),
+    }
+
+
+def model_timings(replayed):
+    """The model's own first words and decode rate, median and p90 (Plan R4); the rates are None for older replays."""
+    first = [r["firstWordsMs"] for r in replayed]
+    rates = [r["decodeTokensPerSecond"] for r in replayed if r.get("decodeTokensPerSecond") is not None]
+    tokens = [r["outputTokens"] for r in replayed if r.get("outputTokens") is not None]
+    return {
+        "modelFirstWordsMedianMs": metrics.median(first),
+        "modelFirstWordsP90Ms": metrics.percentile(first, 0.9),
+        # A slow reply is the low end of the rate, so its p90 is the 10th percentile.
+        "decodeTokPerSecMedian": metrics.median(rates),
+        "decodeTokPerSecP90": metrics.percentile(rates, 0.1),
+        "outputTokensMedian": metrics.median(tokens),
     }
 
 
@@ -180,7 +215,11 @@ def main(argv=None):
     c = s.add_parser("prompts"); c.add_argument("base"); c.set_defaults(f=cmd_prompts)
     r = s.add_parser("run"); r.add_argument("base"); r.add_argument("new"); r.add_argument("--model", required=True)
     r.add_argument("--push"); r.add_argument("--backend", default="gpu", choices=["gpu", "cpu"])
-    r.add_argument("--sample", type=int, help="replay a fixed random sample of this many prompts"); r.set_defaults(f=cmd_run)
+    r.add_argument("--sample", type=int, help="replay a fixed random sample of this many prompts")
+    r.add_argument("--speculative", choices=["on", "off"], help="speculative decoding (MTP); the runtime's default when not given")
+    r.add_argument("--thinking", choices=["off", "config", "template"], help="switch a reasoning model's thinking off: both ways, or one")
+    r.add_argument("--max-tokens", type=int, help="reply token limit (512 when not given, as the pipeline asks)")
+    r.set_defaults(f=cmd_run)
     b = s.add_parser("build"); b.add_argument("base"); b.add_argument("new"); b.set_defaults(f=cmd_build)
     m = s.add_parser("summary"); m.add_argument("runs", nargs="+")
     m.add_argument("--only", help="restrict to the items this (sampled) run replayed"); m.add_argument("--base", default="r0-base")

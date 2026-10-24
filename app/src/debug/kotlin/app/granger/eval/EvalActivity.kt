@@ -130,24 +130,36 @@ class EvalActivity : ComponentActivity() {
     /**
      * Plan R0, Task 5: `replay` names a prompts file under `eval/`, `model` a .litertlm path (absolute, or under
      * `eval/models/`), `backend` gpu (default) or cpu. Writes `eval/<runId>/replay.jsonl`, then `done`.
+     * Plan R4: `speculative` on|off, `thinking` off|config|template ([PromptReplay.options]), `--ei maxTokens`.
      */
     private fun replay(root: File, runId: String, prompts: String) {
         val modelName = intent.getStringExtra("model").orEmpty()
         val model = if (modelName.startsWith("/")) File(modelName) else File(root, "models/$modelName")
         val backend = if (intent.getStringExtra("backend").equals("cpu", ignoreCase = true)) LlmBackend.CPU else LlmBackend.GPU
+        val speculative = intent.getStringExtra("speculative")
+        val thinking = intent.getStringExtra("thinking")
+        val maxTokens = intent.getIntExtra("maxTokens", PromptReplay.ANSWER_TOKENS)
         val result = EvalSession.start(runId, root, ::log) {
             require(model.canRead()) { "can't read model $model" }
-            val replay = PromptReplay({ path, b -> LiteRtLlmEngine(path, b, cacheDir.path) }, RssMemorySampler()) {
-                android.os.SystemClock.elapsedRealtime()
-            }
+            val options = PromptReplay.options(speculative, thinking)
+            val replay = PromptReplay(
+                { path, b -> LiteRtLlmEngine(path, b, cacheDir.path, options) }, RssMemorySampler(), maxTokens, ::meminfo,
+            ) { android.os.SystemClock.elapsedRealtime() }
             replay.onItem = { id, n, total -> log("$n / $total $id") }
-            log("replay $runId: ${model.name} on $backend")
+            log("replay $runId: ${model.name} on $backend, speculative ${speculative ?: "default"}, thinking ${thinking ?: "default"}, maxTokens $maxTokens")
             val dir = File(root, runId).apply { mkdirs() }
             replay.run(File(root, prompts), model.path, backend, File(dir, "replay.jsonl"))
             File(dir, "done").writeText("done\n")
             log("done $runId")
         }
         if (result != EvalSession.Start.STARTED) log("replay $runId not started: $result")
+    }
+
+    /** This process's memory as `dumpsys meminfo` totals it, in MB: PSS overall and the GPU's share of it. */
+    private fun meminfo(): Map<String, Int> {
+        val info = android.os.Debug.MemoryInfo().also { android.os.Debug.getMemoryInfo(it) }
+        val graphicsKb = info.getMemoryStat("summary.graphics")?.toIntOrNull() ?: 0
+        return mapOf("totalPssMb" to info.totalPss / 1024, "graphicsMb" to graphicsKb / 1024)
     }
 
     private companion object {

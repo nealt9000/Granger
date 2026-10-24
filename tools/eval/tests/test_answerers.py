@@ -30,3 +30,36 @@ def test_prompts_and_build(tmp_path, monkeypatch):
     assert out["a"]["replay"]["loadMs"] == 5000 and "raw" not in out["a"]["replay"]
     assert (out["f"]["cited"], "deeper" in out["f"]) == ("[2]", False)
     assert out["e"]["outcome"] == "declined"  # never reached the model: kept as it was
+
+
+def test_build_keeps_the_r4_fields_when_present(tmp_path, monkeypatch):
+    monkeypatch.setattr(answerers, "RUNS", tmp_path)
+    (tmp_path / "base").mkdir(); (tmp_path / "new").mkdir()
+    (tmp_path / "base" / "dataset.json").write_text("[]")
+    answerers.write_jsonl(tmp_path / "base" / "results.jsonl", [rec("a", ["rewrite", "answer"]), rec("b", ["rewrite", "answer"])])
+    answerers.write_jsonl(tmp_path / "new" / "replay.jsonl", [
+        {"id": "a", "reply": "x [1]", "outcome": "answered", "cited": [1], "firstWordsMs": 900, "totalMs": 4000, "peakRssMb": 1,
+         "loadMs": 6000, "memBeforeLoad": {"totalPssMb": 300}, "memAfterLoad": {"totalPssMb": 2900},
+         "prefillTokens": 1300, "prefillTokensPerSecond": 400.0, "outputTokens": 40, "decodeTokensPerSecond": 12.5},
+        {"id": "b", "reply": "y [2]", "outcome": "answered", "cited": [2], "firstWordsMs": 800, "totalMs": 3000, "peakRssMb": 1},
+    ])
+    out = {r["id"]: r for r in answerers.build("base", "new")}
+    assert out["a"]["replay"]["decodeTokensPerSecond"] == 12.5 and out["a"]["replay"]["memAfterLoad"] == {"totalPssMb": 2900}
+    assert "outputTokens" not in out["b"]["replay"]  # an older replay still builds
+
+
+def test_model_timings():
+    replayed = [{"firstWordsMs": ms, "decodeTokensPerSecond": tps, "outputTokens": 40}
+                for ms, tps in ((1000, 10.0), (2000, 12.0), (3000, 8.0), (4000, 11.0), (9000, 2.0))]
+    t = answerers.model_timings(replayed)
+    assert (t["modelFirstWordsMedianMs"], t["modelFirstWordsP90Ms"]) == (3000, 9000)
+    assert (t["decodeTokPerSecMedian"], t["decodeTokPerSecP90"], t["outputTokensMedian"]) == (10.0, 2.0, 40)
+    old = answerers.model_timings([{"firstWordsMs": 1000}])
+    assert old["decodeTokPerSecMedian"] is None and old["modelFirstWordsMedianMs"] == 1000
+
+
+def test_run_passes_the_r4_extras():
+    import argparse
+    a = argparse.Namespace(speculative="on", thinking="template", max_tokens=256)
+    assert answerers.replay_extras(a) == ["--es", "speculative", "on", "--es", "thinking", "template", "--ei", "maxTokens", "256"]
+    assert answerers.replay_extras(argparse.Namespace(speculative=None, thinking=None, max_tokens=None)) == []

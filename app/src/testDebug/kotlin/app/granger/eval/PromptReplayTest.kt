@@ -1,8 +1,11 @@
 package app.granger.eval
 
+import app.granger.core.ai.GenerationStats
 import app.granger.core.ai.LlmBackend
 import app.granger.core.ai.LlmEngine
+import app.granger.core.ai.LlmOptions
 import app.granger.core.ai.MemorySampler
+import app.granger.core.ai.ThinkingOff
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -20,10 +23,15 @@ import org.robolectric.annotation.Config
 class PromptReplayTest {
     @get:Rule val tmp = TemporaryFolder()
 
-    private class Engine(val reply: (String) -> List<String>) : LlmEngine {
+    private class Engine(val stats: GenerationStats? = null, val reply: (String) -> List<String>) : LlmEngine {
         var loads = 0
+        val maxTokens = mutableListOf<Int>()
         override fun load() { loads++ }
-        override fun generate(prompt: String, maxTokens: Int): Flow<String> = flowOf(*reply(prompt).toTypedArray())
+        override fun generate(prompt: String, maxTokens: Int): Flow<String> {
+            this.maxTokens += maxTokens
+            return flowOf(*reply(prompt).toTypedArray())
+        }
+        override val lastStats get() = stats
         override fun close() = Unit
     }
 
@@ -66,6 +74,43 @@ class PromptReplayTest {
         assertThat(records(out).map { it.getString("id") }).containsExactly("a", "b").inOrder()
         replay.run(prompts("a" to "a", "b" to "b"), "m", LlmBackend.GPU, out)
         assertThat(engine.loads).isEqualTo(1)
+    }
+
+    @Test
+    fun recordsTokenRatesMemoryAndTheTokenLimit() = runTest {
+        val engine = Engine(GenerationStats(1300, 410.5, 42, 9.5)) { listOf("Yes [1].") }
+        val out = tmp.root.resolve("replay.jsonl")
+        var mem = 1000
+        PromptReplay({ _, _ -> engine }, NoMemory, maxTokens = 128, meminfo = { mapOf("totalPssMb" to mem.also { mem += 2000 }) }) { 0L }
+            .run(prompts("a" to "a", "b" to "b"), "m", LlmBackend.GPU, out)
+        val (a, b) = records(out)
+        assertThat(engine.maxTokens).containsExactly(128, 128)
+        assertThat(a.getInt("outputTokens")).isEqualTo(42)
+        assertThat(a.getDouble("decodeTokensPerSecond")).isEqualTo(9.5)
+        assertThat(a.getInt("prefillTokens")).isEqualTo(1300)
+        assertThat(a.getJSONObject("memBeforeLoad").getInt("totalPssMb")).isEqualTo(1000)
+        assertThat(a.getJSONObject("memAfterLoad").getInt("totalPssMb")).isEqualTo(3000)
+        assertThat(b.has("memBeforeLoad")).isFalse()
+    }
+
+    @Test
+    fun anEngineWithoutStatsWritesTheOldRecord() = runTest {
+        val out = tmp.root.resolve("replay.jsonl")
+        PromptReplay({ _, _ -> Engine { listOf("Yes [1].") } }, NoMemory) { 0L }.run(prompts("a" to "a"), "m", LlmBackend.GPU, out)
+        val r = records(out).single()
+        assertThat(r.has("outputTokens")).isFalse()
+        assertThat(r.has("decodeTokensPerSecond")).isFalse()
+        assertThat(r.getString("outcome")).isEqualTo("answered")
+    }
+
+    @Test
+    fun optionsFromTheExtras() {
+        assertThat(PromptReplay.options(null, null)).isEqualTo(LlmOptions(benchmark = true))
+        assertThat(PromptReplay.options("on", "off")).isEqualTo(LlmOptions(true, ThinkingOff.BOTH, benchmark = true))
+        assertThat(PromptReplay.options("off", "template")).isEqualTo(LlmOptions(false, ThinkingOff.TEMPLATE, benchmark = true))
+        assertThat(PromptReplay.options(null, "config").thinkingOff).isEqualTo(ThinkingOff.CONFIG)
+        assertThat(runCatching { PromptReplay.options("yes", null) }.isFailure).isTrue()
+        assertThat(runCatching { PromptReplay.options(null, "none") }.isFailure).isTrue()
     }
 
     @Test

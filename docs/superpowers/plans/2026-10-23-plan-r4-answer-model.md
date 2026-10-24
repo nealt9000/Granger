@@ -84,16 +84,25 @@ Pin each file by commit and sha256 the way `tools/spike/fetch-models.sh` does.
 The replay path (`EvalActivity --es replay`, `PromptReplay`, `tools/eval/answerers.py`) already scores any `.litertlm`
 on recorded prompts without app changes. Add what this round needs:
 
-- [ ] `LiteRtLlmEngine` takes options (default off, so release behavior is unchanged):
+- [x] `LiteRtLlmEngine` takes `LlmOptions` (default: nothing overridden, so release behavior is unchanged):
   - `speculative: Boolean?` → `ConversationConfig.enableSpeculativeDecoding`;
-  - `thinking: Boolean` → `ThinkingConfig` off, or the template's `enable_thinking=false` through `extraContext` (find out
-    which each model honors; record it in this plan).
-- [ ] `EvalActivity` replay extras: `--es speculative on|off`, `--es thinking off`, `--ei maxTokens`.
-- [ ] `PromptReplay` records per item: load ms (first item), first words ms, decode tok/s, output tokens, peak RSS.
-  Note that RSS doesn't count GPU memory (model spike): also record `dumpsys meminfo` totals before and after load.
-- [ ] `answerers.py run` passes the new extras through. `answerers.py summary` prints median / p90 of first words and
-  tok/s next to the grades.
-- [ ] Unit tests: options reach the config; old replays still parse.
+  - `thinkingOff`: `CONFIG` (`ThinkingConfig(enableThinking = false)`), `TEMPLATE` (`extraContext` `enable_thinking=false`)
+    or `BOTH`. Which one each model honors is found in Task 3, on the models that think, and recorded there;
+  - `benchmark`: turns on `ExperimentalFlags.enableBenchmark` while the engine is loaded (restored on close), and each
+    reply's `Conversation.getBenchmarkInfo()` becomes `LlmEngine.lastStats`. Replay only.
+- [x] `EvalActivity` replay extras: `--es speculative on|off`, `--es thinking off|config|template`, `--ei maxTokens`.
+- [x] `PromptReplay` records per item: load ms (first item), first words ms, `prefillTokens`, `prefillTokensPerSecond`,
+  `outputTokens`, `decodeTokensPerSecond`, peak RSS; the first item also has `memBeforeLoad` / `memAfterLoad`
+  (`Debug.MemoryInfo`: total PSS and its graphics share, as `dumpsys meminfo` shows them; RSS misses the GPU).
+- [x] `answerers.py run` passes `--speculative`, `--thinking`, `--max-tokens` through. `answerers.py summary` adds the
+  model's first words median / p90, decode tok/s median / p90 (the slow end) and output tokens.
+- [x] Unit tests: options reach the overrides (`LiteRtOptionsTest`; LiteRT-LM's classes are Java 21, so JVM tests check
+  the pure mapping, not `ConversationConfig`); replay records and extras (`PromptReplayTest`); old replays still build
+  (`test_answerers.py`). 2,070 Gradle tests and 105 eval tests green.
+- **Smoke test on the Pixel 6** (2026-10-24, E2B GPU, 2 prompts, runs `r4-smoke` and `r4-smoke-off`): load 7.0–7.1 s;
+  memory 134 → 1,717 MB PSS after load, 1,210 MB of it graphics; prefill 400–525 tok/s; decode 13.0–16.2 tok/s.
+  **Speculative on vs off made no clear difference** (168-token reply: 14.1 vs 13.6 tok/s; identical replies). Task 3
+  checks whether E2B's MTP drafter is active on the Pixel 6 GPU at all, before counting on it for E4B.
 
 ## Task 2: the prompt sets
 
