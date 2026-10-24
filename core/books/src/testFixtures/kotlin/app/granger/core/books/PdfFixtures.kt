@@ -80,12 +80,12 @@ object PdfFixtures {
         return out
     }
 
-    /** The first 60% of [text]'s bytes. */
+    /** The first 300 bytes of [text]: the header and little else (PdfBox recovers a file cut much later). */
     fun truncated(dir: File, name: String = "broken.pdf"): File {
         val whole = text(dir, "whole-$name")
         val bytes = whole.readBytes()
         whole.delete()
-        return File(dir, name).apply { writeBytes(bytes.copyOf(bytes.size * 6 / 10)) }
+        return File(dir, name).apply { writeBytes(bytes.copyOf(minOf(300, bytes.size))) }
     }
 
     /** [pages] pages of distinct text, several paragraphs each, for chunking tests. */

@@ -3,7 +3,7 @@ package app.granger.core.library
 import androidx.room.withTransaction
 import app.granger.core.books.DrmKind
 import app.granger.core.books.EpubInspector
-import app.granger.core.books.EpubMeta
+import app.granger.core.books.BookMeta
 import app.granger.core.books.Inspection
 import app.granger.core.books.TextDecoding
 import app.granger.core.books.TextToEpub
@@ -170,7 +170,7 @@ class RoomBookshelf(
             if (!zip && !textName && hasExtension(displayName)) return@withContext ImportResult.Unsupported
 
             var epub: File? = null
-            var meta: EpubMeta? = null
+            var meta: BookMeta? = null
             if (zip) {
                 when (val inspection = EpubInspector.inspect(incoming, title)) {
                     is Inspection.Ok -> { epub = incoming; meta = inspection.meta }
@@ -301,7 +301,7 @@ class RoomBookshelf(
 
     /** Upserts the book with fresh metadata and cover; an existing row keeps its id and `addedAt`, and is re-indexed. */
     private suspend fun register(
-        id: String, origin: BookOrigin, ref: String, file: File, meta: EpubMeta, details: BookDetails? = null,
+        id: String, origin: BookOrigin, ref: String, file: File, meta: BookMeta, details: BookDetails? = null,
     ): Book {
         val existing = dao.get(id)
         val book = Book(
@@ -328,7 +328,7 @@ class RoomBookshelf(
     }
 
     /** Writes the cover's raw bytes to `coversDir/<sha1 of id>.<ext>` and removes any older cover; null if none. */
-    private fun writeCover(id: String, meta: EpubMeta, oldPath: String?): String? {
+    private fun writeCover(id: String, meta: BookMeta, oldPath: String?): String? {
         val bytes = meta.cover
         val extension = meta.coverExtension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
         val target = bytes?.let { File(coversDir, "${sha1(id)}.$extension") }

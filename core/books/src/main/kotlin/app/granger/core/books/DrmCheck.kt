@@ -4,7 +4,7 @@ import java.util.zip.ZipFile
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
 
-enum class DrmKind { LCP, ADOBE, OTHER }
+enum class DrmKind { LCP, ADOBE, OTHER, PDF_ENCRYPTED }
 
 object DrmCheck {
     /** Algorithms that only obfuscate embedded fonts; these are allowed. */

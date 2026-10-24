@@ -9,28 +9,6 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 
-class EpubMeta(
-    val title: String,
-    val authors: List<String>,
-    val translators: List<String>,
-    val date: String,
-    val language: String,
-    val subjects: List<String>,
-    val description: String,
-    val identifier: String,
-    val collection: String?,
-    val cover: ByteArray?,
-    val coverExtension: String?,
-    /** Zip paths in reading order. */
-    val spine: List<String>,
-)
-
-sealed interface Inspection {
-    data class Ok(val meta: EpubMeta) : Inspection
-    data class Protected(val kind: DrmKind) : Inspection
-    data class Invalid(val reason: String) : Inspection
-}
-
 object EpubInspector {
     fun inspect(file: File, fallbackTitle: String = file.nameWithoutExtension): Inspection {
         val zip = try {
@@ -93,7 +71,7 @@ object EpubInspector {
             ?.text()?.trim()
             ?: opf.getElementsByTag("meta").firstOrNull { it.attr("name") == "calibre:series" }?.attr("content")?.trim()
         return Inspection.Ok(
-            EpubMeta(
+            BookMeta(
                 title = texts("dc:title").firstOrNull() ?: fallbackTitle,
                 authors = authors,
                 translators = translators,
