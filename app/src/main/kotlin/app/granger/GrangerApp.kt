@@ -163,10 +163,14 @@ open class GrangerApp : Application(), DownloadsHost {
         PdfSupport.init(this)
         if (Features.PLAYER) startMedia()
         startVectorDownloads()
+        resumeDownloads()
     }
 
     /** Search vectors follow their pack or book (Plan R1 Task 10). JVM tests swap this out (`TestGrangerApp`). */
     protected open fun startVectorDownloads() = container.followVectors()
+
+    /** Downloads left queued without a job start again. JVM tests swap this out (`TestGrangerApp`). */
+    protected open fun resumeDownloads() = container.resumeDownloads()
 
     /**
      * The player hub is made here, not on first use: a playback service the system restarts on its own stops at once
@@ -529,6 +533,19 @@ class AppContainer(context: Context) {
 
     /** Search vectors follow their pack or book (Plan R1 Task 10): queued when it installs, removed with it. */
     private val vectorDownloads = VectorDownloads(downloads) { downloadPrefs.wifiOnly }
+
+    /** Schedules unfinished downloads again, keeping those still scheduled; see [Downloads.resume]. */
+    fun resumeDownloads() {
+        appScope.launch {
+            try {
+                downloads.resume()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Couldn't resume the downloads", e)
+            }
+        }
+    }
 
     /** Keeps the vectors downloads matching the installed items and the catalog, from the cached catalog on. */
     fun followVectors() {

@@ -65,6 +65,14 @@ interface Downloads {
     suspend fun setWifiOnly(wifiOnly: Boolean)
 
     /**
+     * Schedules every unfinished download outside a group again, keeping any whose job is still there. A queued record
+     * can outlive its job (seen after a reinstall: 18 vectors downloads stayed queued with no job), and nothing else
+     * would start it. Called once when the app starts. Groups are left as they are: their chains can't be checked
+     * without restarting them.
+     */
+    suspend fun resume()
+
+    /**
      * Queues [specs] (every one with groupId == [groupId]) as one, in list order. Specs whose exact hash is already
      * installed are skipped; one already active is left as it is. One space check covers the bytes still to fetch:
      * everything is queued or nothing. There's no cap: only free space on [volumeRoot] is checked.
@@ -311,6 +319,11 @@ class DownloadManager(
         for ((groupId, records) in pending.filter { it.groupId != null }.groupBy { it.groupId!! }) {
             scheduler.scheduleGroup(groupId, records.sortedBy { it.itemId }, replace = true)
         }
+    }
+
+    override suspend fun resume() = mutex.withLock {
+        val pending = dao.getAll().filter { (it.state == DownloadState.QUEUED || it.state == DownloadState.RUNNING) && it.groupId == null }
+        for (record in pending) scheduler.schedule(record, replace = false)
     }
 }
 

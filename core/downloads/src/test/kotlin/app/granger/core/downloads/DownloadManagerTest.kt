@@ -284,6 +284,19 @@ class DownloadManagerTest {
         assertThat(scheduler.scheduled.filter { it.second }.map { it.first.itemId }).containsExactly("a")
     }
 
+    @Test fun resumeSchedulesUnfinishedDownloadsWithoutReplacingThem() = test {
+        installed(packEntry(id = "old"), "/x/old.zim")
+        manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
+        manager.enqueue(packEntry(id = "f"), internal, wifiOnly = true)
+        dao.setState("f", SHA_1, DownloadState.FAILED, "boom", 0, 0, 9)
+        manager.enqueueGroup("g", listOf(spec().copy(groupId = "g")), internal, wifiOnly = true)
+        val before = scheduler.scheduled.size
+        val groupsBefore = scheduler.groups.size
+        manager.resume()
+        assertThat(scheduler.scheduled.drop(before).map { it.first.itemId to it.second }).containsExactly("a" to false)
+        assertThat(scheduler.groups).hasSize(groupsBefore)
+    }
+
     @Test fun recordCheckSetsAndClearsVerifiedAt() = test {
         installed(packEntry(), "/x/med.zim")
         manager.recordCheck("med", SHA_1, verified = true)

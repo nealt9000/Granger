@@ -137,6 +137,7 @@ class FakeDownloads : Downloads {
     override suspend fun repair(itemId: String) { calls += "repair:$itemId" }
     override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) { calls += "check:$itemId:$verified" }
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
+    override suspend fun resume() { calls += "resume" }
 
     /** Each enqueueGroup call: the group id, its specs in order, and the volume. */
     val enqueuedGroups = mutableListOf<Triple<String, List<DownloadSpec>, File>>()
