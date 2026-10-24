@@ -24,6 +24,7 @@ webkit = "1.14.0"
 jsoup = "1.21.2"
 commonmark = "0.30.0"
 readium = "3.4.0"
+pdfboxAndroid = "2.0.27.0"
 fragmentCompose = "1.9.0"
 desugarJdkLibs = "2.1.5"
 media3 = "1.11.1"
@@ -67,6 +68,8 @@ commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" 
 readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version.ref = "readium" }
 readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version.ref = "readium" }
 readium-navigator = { module = "org.readium.kotlin-toolkit:readium-navigator", version.ref = "readium" }
+readium-adapter-pdfium = { module = "org.readium.kotlin-toolkit:readium-adapter-pdfium", version.ref = "readium" }
+pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragmentCompose" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
