@@ -31,6 +31,11 @@ class ReadingPrefsTest {
         assertThat(scrolled.fit).isEqualTo(org.readium.r2.navigator.preferences.Fit.WIDTH)
         assertThat(ReadingPrefs(theme = ReadingTheme.NIGHT).pdfNight).isTrue()
         assertThat(ReadingPrefs(theme = ReadingTheme.SEPIA).pdfNight).isFalse()
+        // Night and Fit are read only at layout, so either one changes the look and rebuilds the navigator.
+        val day = ReadingPrefs(theme = ReadingTheme.DAY)
+        assertThat(day.copy(theme = ReadingTheme.NIGHT).pdfLook).isNotEqualTo(day.pdfLook)
+        assertThat(day.copy(pdfFitWidth = true).pdfLook).isNotEqualTo(day.pdfLook)
+        assertThat(day.copy(pdfScroll = true).pdfLook).isEqualTo(day.pdfLook)
     }
 
     @Test fun pdfPrefsSurviveTheStore() {

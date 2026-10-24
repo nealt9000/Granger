@@ -221,7 +221,7 @@ class EbookReaderViewModel(
             val targetUsed = savedState.get<Boolean>(TARGET_CONSUMED) == true
             val initial = StartLocator.choose(opened, saved?.locatorJson, target.takeUnless { targetUsed })
             val pdf = opened.conformsTo(Profile.PDF)
-            val factory = if (pdf) BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight) else BookNavigator.Epub(EpubNavigatorFactory(opened))
+            val factory = if (pdf) BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight, prefsStore.prefs.value.pdfFitWidth) else BookNavigator.Epub(EpubNavigatorFactory(opened))
             bookId = book.id
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
@@ -251,7 +251,10 @@ class EbookReaderViewModel(
         }
         viewModelScope.launch {
             prefsStore.prefs.collect { prefs ->
-                (navigatorFactory as? BookNavigator.Pdf)?.night = prefs.pdfNight
+                (navigatorFactory as? BookNavigator.Pdf)?.let {
+                    it.night = prefs.pdfNight
+                    it.fitWidth = prefs.pdfFitWidth
+                }
                 _state.update { it.copy(prefs = prefs) }
             }
         }

@@ -230,6 +230,10 @@ class EbookReaderViewModelTest {
         vm.updatePrefs(vm.state.value.prefs.copy(theme = ReadingTheme.NIGHT))
         testScheduler.advanceUntilIdle()
         assertThat(pdf.night).isTrue()
+        assertThat(pdf.fitWidth).isFalse()
+        vm.updatePrefs(vm.state.value.prefs.copy(pdfFitWidth = true))
+        testScheduler.advanceUntilIdle()
+        assertThat(pdf.fitWidth).isTrue()
     }
 
     @Test fun anEpubIsNotAPdf() = runTest(main.dispatcher) {

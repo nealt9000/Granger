@@ -254,7 +254,7 @@ fun EbookReaderScreen(
                         // The latest place, so a navigator rebuilt after rotation opens where the reader is.
                         fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, listener, config),
                         // PDFium inverts a page only as it lays the document out: Night on a PDF needs a fresh navigator.
-                        look = if (factory is BookNavigator.Pdf && state.prefs.pdfNight) "night" else "",
+                        look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
                         isCleared = { viewModel.isCleared },
                         onReady = { fragment ->
                             fragment.addInputListener(

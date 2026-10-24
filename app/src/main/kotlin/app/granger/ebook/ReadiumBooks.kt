@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
 import app.granger.theme.GrangerColors
+import com.github.barteksc.pdfviewer.util.FitPolicy
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -167,17 +168,22 @@ sealed interface BookNavigator {
     }
 
     /**
-     * A PDF. [night] is read each time PDFium lays the document out: PDFium has no theme, so Night inverts the
-     * page there, and the reader rebuilds the navigator when it changes.
+     * A PDF. [night] and [fitWidth] are read each time PDFium lays the document out, and the reader rebuilds the
+     * navigator when either changes. PDFium has no theme, so Night inverts the page there. Readium leaves the
+     * viewer's fit at its default, every page scaled by the widest one, so one foldout map shrinks every other page
+     * and pushes a page fitted to the width off to the right: each page is fitted on its own instead.
      */
-    class Pdf(publication: Publication, initialNight: Boolean) : BookNavigator {
+    class Pdf(publication: Publication, initialNight: Boolean, initialFitWidth: Boolean = false) : BookNavigator {
         @Volatile var night: Boolean = initialNight
+        @Volatile var fitWidth: Boolean = initialFitWidth
         val factory: PdfiumNavigatorFactory = PdfiumNavigatorFactory(
             publication,
             PdfiumEngineProvider(
                 listener = object : PdfiumEngineProvider.Listener {
                     override fun onConfigurePdfView(configurator: com.github.barteksc.pdfviewer.PDFView.Configurator) {
                         configurator.nightMode(night)
+                            .fitEachPage(true)
+                            .pageFitPolicy(if (fitWidth) FitPolicy.WIDTH else FitPolicy.BOTH)
                     }
                 },
             ),

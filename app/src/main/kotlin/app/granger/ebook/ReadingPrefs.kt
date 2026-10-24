@@ -80,6 +80,9 @@ data class ReadingPrefs(
     /** PDF pages are drawn inverted: Night is the one theme a PDF honours. */
     val pdfNight: Boolean get() = theme == ReadingTheme.NIGHT
 
+    /** What PDFium reads only when it lays a PDF out; the reader rebuilds the navigator when it changes. */
+    val pdfLook: String get() = listOf(if (pdfNight) "night" else "day", if (pdfFitWidth) "width" else "page").joinToString("-")
+
     /** The same preferences with every number inside its range. */
     fun clamped(): ReadingPrefs = copy(
         fontScale = (fontScale.coerceIn(MIN_FONT_SCALE, MAX_FONT_SCALE) / FONT_SCALE_STEP).roundToInt() * FONT_SCALE_STEP,
