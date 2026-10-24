@@ -427,8 +427,18 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
   - The rest build crashed on reverseengineering's 24k-token chunks (the embedder had no length cap; 2,048 now). unix
     was embedded on a RunPod 4090, matching the Mac at cosine ≥ 0.9945. 45 earlier chunks (appropedia 40, maths 3,
     devdocs http 2) were embedded past 2,048 tokens and left as they are.
-- [ ] On the phone: remove the adb-pushed files, refresh the catalog, and confirm every vectored item downloads its vectors
-  and `VectorStore` loads them all.
+- [x] On the phone: remove the adb-pushed files, refresh the catalog, and confirm every vectored item downloads its vectors
+  and `VectorStore` loads them all. Done 2026-10-24 on the Pixel 6:
+  - The 353 pushed files were removed. The catalog refresh (2026-10-24T12:07:05Z) queued the 3 new packs installed through
+    the app (devdocs python, ifixit, physics), which downloaded and verified.
+  - 18 Classics vectors were stuck QUEUED with no WorkManager job, left over from a reinstall. `Downloads.resume()` now
+    reschedules unfinished downloads at app start; with it, all 18 downloaded. 355 vectors downloads are installed.
+  - Packs copied by adb have no download record, so they get no catalog vectors (by design). For the eval, their 18 files
+    were pushed again (16 new packs plus top and medicine, 1.1 GB). Knots on the phone is the 2026-07-20 snapshot and
+    the catalog's vectors are 2026-10-18, so it has none until the pack is updated.
+  - Check run `r1-t10-check` (4 questions, `--dense on`): dense hits came from both routes (physics, chemistry and maths
+    downloaded; history, wikivoyage, top and medicine pushed). **`ms.dense` was 13.8–14.9 s**, against a 2.2 s median
+    in `r1-dense-1` with 420 MB of vectors: the set is now ~1.5 GB, so the scan budget in Task 11 needs a fresh look.
 
 ### Task 11: The tuning run and the decision
 
