@@ -139,17 +139,34 @@ It warm-starts from round 1's epoch 699, widened to 42 speakers (`widen_speakers
 adaptation carry over and only the 40 new embedding rows start fresh. `fit.py` writes `last.ckpt` every epoch (Lightning
 2.6 wrote it only when `val_mel` improved, so a disconnect could have lost an hour).
 
+On RunPod (2026-10-23/24) the `/workspace` network volume survives the pod but refuses `chmod` (git, editable
+installs) and Unix sockets (DataLoader workers), and it's slow for small files. So the venv, dataset and cache go on the
+container disk, which a stop or restart wipes, and only `runs/` lives on the volume, linked in:
+
 ```
-# on the box (a volume at /workspace that survives a restart)
-bash pod_setup.sh /workspace/vt
-# from the Mac
-rsync -a $W/dataset/granger-v2 <box>:/workspace/vt/dataset/
-rsync -a $W/base/granger-v1-e699-42spk.ckpt <box>:/workspace/vt/base/
-rsync -a tools/voices/train/ <box>:/workspace/vt/train/
+# the box: runpod/pytorch:…-ubuntu2404 with an empty Container Start Command (one pod came with a crypto miner there)
+ssh <box> 'mkdir -p /root/vt/train /root/vt/dataset /root/vt/base /workspace/vt/runs && ln -sfn /workspace/vt/runs /root/vt/runs'
+scp tools/voices/train/*.py tools/voices/train/*.sh <box>:/root/vt/train/
+ssh <box> 'bash /root/vt/train/pod_setup.sh /root/vt'    # ~10 min; 3.11 through uv where apt has none
+COPYFILE_DISABLE=1 tar --no-xattrs -C $W/dataset -cf - granger-v2 | ssh <box> 'tar -C /root/vt/dataset -xf -'
+scp $W/base/granger-v1-e699-42spk.ckpt <box>:/root/vt/base/     # the first leg only; later legs resume from runs/
 # on the box, in tmux
-GRANGER_WARMSTART=/workspace/vt/base/granger-v1-e699-42spk.ckpt GRANGER_SNAPSHOT_EVERY=25 \
-PIPER_PYTHON=/workspace/vt/venv/bin/python /workspace/vt/train/train.sh /workspace/vt granger-v2 granger-v2 42 \
-    --trainer.accelerator gpu --data.batch_size 32 2>&1 | tee /workspace/vt/granger-v2.log
+GRANGER_WARMSTART=/root/vt/base/granger-v1-e699-42spk.ckpt GRANGER_SNAPSHOT_EVERY=25 \
+PIPER_PYTHON=/root/vt/venv/bin/python /root/vt/train/train.sh /root/vt granger-v2 granger-v2 42 \
+    --trainer.accelerator gpu --data.batch_size 32 --data.num_workers 8 --trainer.max_epochs 600 \
+    2>&1 | tee -a /workspace/vt/granger-v2.log
 ```
 
-Snapshots come back to the Mac (`rsync`) and export there with `export_voice.py --keep 2`: speakers 0 and 1 only.
+Snapshots come back to the Mac (`scp`) and export there with `export_voice.py --keep 2`: speakers 0 and 1 only.
+
+### Round 2 results (2026-10-23/24, RTX 4090)
+
+~84 s an epoch (150 batches of 32, ~2 it/s, GPU at 100%, 23.7 GB), so ~43 epochs an hour; a checkpoint is 0.9 GB (the
+optimizer and discriminators ride along). `val_mel` on the 42-reader validation set (not comparable with round 1's):
+0.459 at epoch 25, 0.448 at 75, 0.440 at 200, 0.438 at 250, 0.4305 at 356, 0.4286 at 523, 0.4259 at 579.
+
+Neal's listening: epoch 25 lost clarity and mispronounced (42 voices sharing the model), back by 75; 125 better, speaker
+1's gap more pitch inflection than rhythm; 250 to 356 a clear step for both; 600 the best so far and still improving,
+speaker 0 ahead but the gap closing. `noise_scale_w` 1.2 sounded worse than 0.8 on round 2 (round 1 preferred it).
+
+Epoch 600 packs to 80.1 MB (`pack_voice.py`, 77 MB ONNX, RTF ~0.048 on the Mac). The run continues toward 900.
