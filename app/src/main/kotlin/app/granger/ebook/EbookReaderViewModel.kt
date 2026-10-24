@@ -298,6 +298,15 @@ class EbookReaderViewModel(
     }
 
     /** What the rail and Continue call a place: the chapter, or in a PDF its outline entry, else "Page n". */
+    /** A PDF's locator has no title: its bookmark is named by the page, after the outline entry it falls in. */
+    private fun bookmarkText(locator: Locator): String {
+        val page = locator.locations.position
+        if (!_state.value.isPdf || page == null) return locator.title.orEmpty()
+        val ui = _state.value
+        val entry = pdfTocIndex(ui.toc, page)?.let { ui.toc[it].title.ifBlank { null } }
+        return listOfNotNull(entry, "p. $page").joinToString(" · ")
+    }
+
     private fun placeTitle(locator: Locator): String {
         locator.title?.takeIf { it.isNotBlank() }?.let { return it }
         val ui = _state.value
@@ -354,7 +363,7 @@ class EbookReaderViewModel(
                 } else {
                     val now = System.currentTimeMillis()
                     bookshelf.addMark(
-                        BookAnnotation(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), here.title.orEmpty(), "", "", now, now),
+                        BookAnnotation(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), bookmarkText(here), "", "", now, now),
                     )
                 }
             }

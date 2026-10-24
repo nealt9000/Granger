@@ -211,6 +211,16 @@ class EbookReaderViewModelTest {
         assertThat(bookshelf.positionMap.value.getValue("b").chapterTitle).isEqualTo("Page 2")
     }
 
+    @Test fun aPdfBookmarkIsNamedByItsPage() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication(pages = 5)
+        val vm = reader()
+        val positions = kotlinx.coroutines.runBlocking { vm.state.value.publication!!.positions() }
+        vm.onLocator(positions[2])
+        vm.toggleBookmark()
+        advanceUntilIdle()
+        assertThat(bookshelf.markList.value.single().text).isEqualTo("Filters · p. 3")
+    }
+
     @Test fun aPdfsNightFollowsTheTheme() = runTest(main.dispatcher) {
         prefsStore.update(ReadingPrefs(theme = ReadingTheme.DAY))
         opener.publication = app.granger.testPdfPublication()

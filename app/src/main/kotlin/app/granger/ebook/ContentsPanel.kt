@@ -63,7 +63,7 @@ internal fun markPercent(mark: BookAnnotation): Int? = try {
 internal val SidePanelInsets @Composable get() =
     WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.End + WindowInsetsSides.Bottom)
 
-/** A side sheet from the right with Contents, Bookmarks and Highlights; a tap on a row navigates and closes it. */
+/** A side sheet from the right with Contents, Bookmarks and (not for a PDF) Highlights; a tap on a row navigates and closes it. */
 @Composable
 fun ContentsPanel(
     state: EbookUi,
@@ -80,7 +80,8 @@ fun ContentsPanel(
         ) {
             Column(Modifier.windowInsetsPadding(SidePanelInsets)) {
                 TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface) {
-                    listOf("Contents", "Bookmarks", "Highlights").forEachIndexed { i, label ->
+                    // A PDF can't be highlighted (Readium's PDF navigator has no selection), so it has no Highlights tab.
+                    listOf("Contents", "Bookmarks", "Highlights").take(if (state.isPdf) 2 else 3).forEachIndexed { i, label ->
                         Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, maxLines = 1) })
                     }
                 }
