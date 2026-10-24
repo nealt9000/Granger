@@ -26,7 +26,13 @@ R0 kept E2B because no other model did better on the Pixel 6. Three things have 
 2. **Latency:** no fixed number. A slower, better model is likely acceptable; Neal decides by feel on the phone (Task 7).
 3. **Licences:** anything is fine while in development. Shipping a model under a non-Apache/MIT licence (LFM's) needs his
    word at the time.
-4. **Think deeper goes.** One answer model for every question (Task 8).
+4. **Think deeper goes.** No button and no second pass. One answer model for every question (Task 8), unless Task 4b
+   shows that picking the model per question is worth it (2026-10-24):
+   - the pick happens once, when the first prompt is sent, since that's when the model loads today anyway;
+   - it can't use the answer model (that's what's being chosen): the embedder, which is already loaded for the query,
+     or plain rules;
+   - one model is loaded at a time; a follow-up in the same chat stays on the loaded model unless it clearly needs the
+     other one.
 5. **The test round covers three directions together:**
    - A: a better small answerer at about E2B's speed;
    - B: one stronger answerer (about 4B), sped up with MTP where it exists;
@@ -42,6 +48,9 @@ R0 kept E2B because no other model did better on the Pixel 6. Three things have 
 - **The phone:** nothing runs on the Pixel until R1 is merged and its session hands the phone over. Back up both databases
   before any install. R4's code tasks rebase onto main after R1 merges.
 - Pass bars, as before: 80% answerable grounded, 90% unanswerable declined (89% gate).
+- **Dense latency is part of the decision.** With the whole vector set on the phone (about 1.5 GB), `ms.dense` was
+  13.8–14.9 s per question (R1 `r1-t10-check`, 2026-10-24); it was 2.2 s at 420 MB. `DENSE_RETRIEVAL` stays off until
+  that comes down. Record `ms.dense` in every full-pipeline run here.
 
 ## Candidates
 
@@ -118,6 +127,25 @@ From r1-dense-1's recorded prompts (`PromptRecorder` stages), so every model see
 - [ ] **Cut to 2** (plus E2B). The rule: more grounded than E2B by 3 or more of 28, and no more than 1 unanswerable answered
   of 12. If none clears it, say so and stop at Task 5 for Neal.
 
+## Task 4b: is a per-question model pick worth it? (Neal, 2026-10-24)
+
+Decide from Task 4's grades before building anything.
+
+- [ ] **Best case:** from sample-40's per-question grades for E2B and each finalist, count grounded answers and
+  unanswerables answered if every question went to whichever model did better (ties go to the faster one). Compare
+  with each model on its own.
+- [ ] **Stop here** if the best case beats the best single model by fewer than 3 of 28 grounded, or answers more
+  unanswerables. Then Task 8 goes ahead with one model.
+- [ ] **The signal**, only if the best case is worth it. Label each tuning question "fast model is enough" or "needs the
+  stronger one" from the grades, then try:
+  - the embedder: nearest-centroid or a cosine threshold, as Task 5's medical flag does (the two can share the code);
+  - plain rules: comparison and arithmetic words, numbers, more than one named entity, length.
+  Report each signal's routed result against the best case and against the best single model, offline.
+- [ ] **Cost on the phone:** the load time of each model from cold (Task 3 measures it), and how often a follow-up
+  would have to switch models on the tuning split's follow-up chains.
+- [ ] **For Neal:** a table (one model vs routed, grounded, unanswerables answered, first words median / p90, switches).
+  If he takes routing, Task 8 keeps two model paths behind the pick instead of removing the second one.
+
 ## Task 5: the rewrite without the answer model (offline first)
 
 Today E2B writes keywords and a medical flag before every search (about 2.2 s, about 60 tokens). Measure whether the
@@ -154,8 +182,9 @@ After Neal's pick:
 
 - [ ] The catalog: the chosen model as the one Research model (`role` small), pinned by commit and sha256; the E4B
   `large` entry removed; `curated.json` presets updated; re-signed (whoever is second regenerates on top).
-- [ ] Remove Think deeper: the button, the swap path in `ModelsAdapter`, the `THINK_DEEPER` tier, the `deeper` and
-  `guess-large` eval phases. Keep the best-guess path on the one model.
+- [ ] Remove Think deeper: the button, the `THINK_DEEPER` tier, the `deeper` and `guess-large` eval phases. Keep the
+  best-guess path on the one model. The swap path in `ModelsAdapter` goes too, unless Neal took routing in Task 4b; then it
+  becomes the per-question pick, at first send only.
 - [ ] If Task 5 passed: the medical flag and first-question keywords move off the model in `ResearchPipeline`.
 - [ ] `ResearchScreen`'s "needs the Gemma 4 E2B model" message follows the model.
 - [ ] Roadmap: an R4 row; "Carried forward from R4" (per-phone models for newer phones, the licence call if an LFM
