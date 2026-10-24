@@ -331,13 +331,25 @@ class RoomBookshelf(
             register(BookIds.of(BookOrigin.PACK, ref), BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
         }
 
+    /**
+     * A pack document can't come back without its pack, so unlike a removed book it leaves nothing behind: no tab on
+     * the rail or card in Continue saying "Removed book", no History row, place, bookmarks or index text.
+     */
     override suspend fun removePackDocuments(zimId: String): Unit = withContext(io) {
         val prefix = "$zimId/"
+        val sessions = db.sessionDao()
         for (book in dao.getAll()) {
             if (book.origin != BookOrigin.PACK || !book.sourceRef.startsWith(prefix)) continue
             File(book.filePath).delete()
             book.coverPath?.let { File(it).delete() }
-            dao.delete(book.id)
+            db.withTransaction {
+                sessions.deleteTabsForPack(book.id)
+                sessions.deleteHistoryForPack(book.id)
+                dao.deletePosition(book.id)
+                dao.deleteMarks(book.id)
+                dao.deleteChunks(book.id)
+                dao.delete(book.id)
+            }
         }
     }
 

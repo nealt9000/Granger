@@ -238,6 +238,12 @@ interface BookDao {
     @Query("SELECT * FROM book_positions")
     fun observePositions(): Flow<List<BookPosition>>
 
+    @Query("DELETE FROM book_positions WHERE bookId = :bookId")
+    suspend fun deletePosition(bookId: String)
+
+    @Query("DELETE FROM book_marks WHERE bookId = :bookId")
+    suspend fun deleteMarks(bookId: String)
+
     @Query("SELECT * FROM book_marks WHERE bookId = :bookId ORDER BY createdAt, id")
     fun observeMarks(bookId: String): Flow<List<BookAnnotation>>
 

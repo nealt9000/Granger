@@ -114,9 +114,19 @@ class BookshelfTest {
         val shelves = RoomShelves(db, StubLibrary(emptyList()), pdfShelf, RoomMediaLibrary(db))
         assertThat(shelves.shelves.first().flatMap { s -> s.collections.flatMap { it.books } }).isEmpty()
 
+        val sessions = RoomReadingSessions(db)
+        sessions.openTab(book.id, "", book.title)
+        pdfShelf.savePosition(book.id, "{}", 0.5, "Page 2")
+        pdfShelf.addMark(BookAnnotation(0, book.id, MarkKind.BOOKMARK, "{}", "p. 2", "", "", 1, 1))
+
         pdfShelf.removePackDocuments("zim1")
         assertThat(pdfShelf.book(book.id)).isNull()
         assertThat(file.exists()).isFalse()
+        // Gone with its pack: no "Removed book" tab in the rail or Continue, no History row, place or bookmark.
+        assertThat(sessions.railTabs(10).first()).isEmpty()
+        assertThat(sessions.history.first()).isEmpty()
+        assertThat(pdfShelf.position(book.id)).isNull()
+        assertThat(pdfShelf.marks(book.id).first()).isEmpty()
     }
 
     @Test fun aPackDocumentTitledByItsPathTakesThePdfsOwnTitle() = test {
