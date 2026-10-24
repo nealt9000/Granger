@@ -62,7 +62,7 @@ enum class ArchiveTab(val title: String) { BROWSE("Browse"), INSTALLED("Installe
 data class ArchiveRow(
     val identifier: String,
     val title: String,
-    /** Creator · year on Browse; the file size on Installed. */
+    /** Creator · year on Browse; the file size on Installed, with the PDF beside a text after it. */
     val details: String,
     /** A guess from the search formats (or the file extension): its file is a placeholder, never downloaded. */
     val preview: Offer?,
@@ -575,10 +575,12 @@ class ArchiveViewModel(
                 identifier ?: return@mapNotNull null
                 val versions = all.filterNot { ArchiveDownloads.isPdfCopy(it.itemId) }.ifEmpty { all }
                 val latest = versions.last()
+                // The PDF beside a text is counted too: "561 KB + PDF 109 MB".
+                val pdf = all.lastOrNull { ArchiveDownloads.isPdfCopy(it.itemId) }?.takeIf { it !in versions }
                 ArchiveRow(
                     identifier = identifier,
                     title = latest.title.ifBlank { identifier },
-                    details = formatBytes(latest.sizeBytes),
+                    details = listOfNotNull(formatBytes(latest.sizeBytes), pdf?.let { "PDF ${formatBytes(it.sizeBytes)}" }).joinToString(" + "),
                     preview = previewOf(identifier, latest.filePath),
                     status = statusOf(identifier, ours),
                 )

@@ -22,6 +22,7 @@ import app.granger.core.media.FileTags
 import app.granger.core.media.MediaManifest
 import app.granger.core.media.MediaManifests
 import app.granger.core.media.TagReader
+import app.granger.formatBytes
 import app.granger.media.MediaDownloader
 import app.granger.media.MediaDownloads
 import app.granger.media.MediaFixtures
@@ -549,6 +550,24 @@ class ArchiveViewModelTest {
         vm.retry()
         settle { vm.ui.value.rows.isNotEmpty() }
         assertThat(vm.ui.value.error).isNull()
+    }
+
+    @Test fun anInstalledRowCountsThePdfBesideItsText() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(
+            record("archive-org:both", DownloadState.INSTALLED, kind = ItemKind.BOOK, sizeBytes = 561_000, title = "Both"),
+            record("archive-org:both#pdf", DownloadState.INSTALLED, kind = ItemKind.BOOK, sizeBytes = 109_000_000, title = "Both (PDF)"),
+            record("archive-org:scan#pdf", DownloadState.INSTALLED, kind = ItemKind.BOOK, sizeBytes = 84_000_000, title = "Scan (PDF)"),
+            record("archive-org:text", DownloadState.INSTALLED, kind = ItemKind.BOOK, sizeBytes = 9_000_000, title = "Text"),
+        )
+        val vm = viewModel()
+        vm.setTab(ArchiveTab.INSTALLED)
+        testScheduler.advanceUntilIdle()
+        val details = vm.ui.value.rows.associate { it.identifier to it.details }
+        assertThat(details).containsExactly(
+            "both", "${formatBytes(561_000)} + PDF ${formatBytes(109_000_000)}",
+            "scan", formatBytes(84_000_000),
+            "text", formatBytes(9_000_000),
+        )
     }
 
     @Test fun openItemOfflineShowsTheError() = runTest(main.dispatcher) {
