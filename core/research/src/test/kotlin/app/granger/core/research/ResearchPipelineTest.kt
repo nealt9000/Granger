@@ -67,6 +67,18 @@ class ResearchPipelineTest {
         (events.last() as ResearchEvent.Done).outcome
 
     @Test
+    fun plainRewriteAsksNoModelForAFirstQuestionButDoesForAFollowUp() = runTest {
+        val gen = FakeGenerator()
+        val finder = FakeFinder(listOf(water))
+        val pipeline = ResearchPipeline(finder, FakeModels(gen, embedder = embedder), rewritePlain = true)
+        val out = outcome(pipeline.run(ResearchRequest("At what temperature does water boil?")).toList()) as Outcome.Answered
+        assertThat(out.keywords).containsExactly("temperature", "water", "boil").inOrder()
+        assertThat(gen.prompts.filter { it.startsWith("Turn the question") }).isEmpty()
+        pipeline.run(ResearchRequest("And on a mountain?", priorQuestion = "At what temperature does water boil?")).toList()
+        assertThat(gen.prompts.filter { it.startsWith("Turn the question") }).hasSize(1)
+    }
+
+    @Test
     fun answersWithValidCitations() = runTest {
         val gen = FakeGenerator()
         val finder = FakeFinder(listOf(water))

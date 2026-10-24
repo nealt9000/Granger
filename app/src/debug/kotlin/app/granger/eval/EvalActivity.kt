@@ -82,6 +82,8 @@ class EvalActivity : ComponentActivity() {
         val groups = intent.getStringExtra("groups")
         // Plan R0, Task 4: the rewrite variant that gives keywords alternates.
         val alternates = intent.getStringExtra("rewrite") == "alternates"
+        // Plan R4, Task 5: first questions get the plain keywords and the lexicon's flag, with no model call.
+        val plain = intent.getStringExtra("rewrite") == "plain"
         // Fiction weighting is the app's (the catalog's literature books, 0.7) unless `fiction` is `off`, or names a file
         // under eval/ of fiction book ids, one per line (Plan R0, Task 6); `fictionWeight` sets the weight.
         val fictionWeight = intent.getStringExtra("fictionWeight")?.toDoubleOrNull() ?: FictionWeight.DEFAULT
@@ -107,10 +109,10 @@ class EvalActivity : ComponentActivity() {
             val dense = if (denseOn) RecordingDenseFinder(c.denseFinder, clock) else null
             c.embedderWanted.set(denseOn)
             try {
-                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, sourceWeight = fiction, dense = dense)
+                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, sourceWeight = fiction, dense = dense)
                 val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}" +
+                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plain) ", rewrite=plain" else ""}" +
                     "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
                 runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             } finally {

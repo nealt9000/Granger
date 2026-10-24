@@ -147,6 +147,11 @@ class ResearchPipeline(
     private val rewriteTimeoutMs: Long = 5_000,
     /** Plan R0's debug variant: the rewrite may give each keyword alternates (see [Rewrite.prompt]). Off in the app. */
     private val rewriteAlternates: Boolean = false,
+    /**
+     * Plan R4's debug variant: a first question gets [Keywords.extract] and the medical lexicon, with no model call; a
+     * follow-up still asks the model, to fold in the earlier turn. Off in the app.
+     */
+    private val rewritePlain: Boolean = false,
     /** See [SourceWeight]; the app passes [FictionWeight]. */
     private val sourceWeight: SourceWeight? = null,
     /**
@@ -340,6 +345,9 @@ class ResearchPipeline(
      * The medical lexicon decides whenever the model didn't say.
      */
     private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest): RewriteResult {
+        if (rewritePlain && request.priorQuestion == null) {
+            return RewriteResult(Keywords.extract(request.question), Medical.looksMedical(request.question))
+        }
         val parsed = try {
             var result: RewriteResult? = null
             // The timeout runs from the model being free to start, not from asking: another chat may hold it first.

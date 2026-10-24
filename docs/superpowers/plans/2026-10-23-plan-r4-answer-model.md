@@ -175,15 +175,35 @@ Decide from Task 4's grades before building anything.
 ## Task 5: the rewrite without the answer model (offline first)
 
 Today E2B writes keywords and a medical flag before every search (about 2.2 s, about 60 tokens). Measure whether the
-answer model can be freed of it:
+answer model can be freed of it. Offline: `tools/eval/rewrite.py medical|keywords r1-dense-1` (2026-10-24).
 
-- [ ] **Medical flag by the embedder:** EmbeddingGemma is already loaded for the query. Nearest-centroid (or a cosine
-  threshold) over labeled medical / not-medical questions. Labels: the tuning split's questions plus about 100 written
-  ones per side (a subagent writes them; not the tuning questions). Compare with E2B's flags on the tuning split.
-  The bar: it misses no medical question E2B catches.
-- [ ] **Keywords without a model** for first questions: stop words out, noun phrases and names kept, the question's
-  quoted titles kept. Compare the keyword lists with E2B's on the tuning split, then on the phone: a full-pipeline run
-  (`--es rewrite plain`, a new mode) and recall@4 against r1-dense-1. Dense retrieval embeds the raw question, so the
+- [x] **Medical flag by the embedder.** The pipeline's flag today is the model's line OR the `Medical` lexicon OR
+  `PersonalMedical.strong`; without the model it is the lexicon, the phrasings and the embedder. Labels:
+  `tools/eval/sets/medical-labels.jsonl`, 212 questions (106 per side) written by a subagent that didn't see the tuning
+  set; 8 that came out close to a tuning question (similarity ≥ 0.8) were dropped. EmbeddingGemma's query vector
+  (`task: search result | query:`, 256 dims, the one dense retrieval already computes) against the two label centroids,
+  threshold 0. On the tuning split (40 medical by the dataset):
+
+  | Flag | Medical caught | Flagged, not medical |
+  |---|---|---|
+  | E2B pipeline (model, lexicon, phrasings) | 39/40 | 4 |
+  | the model's line alone | 38/40 | 4 |
+  | lexicon and phrasings (no model) | 34/40 | 0 |
+  | **lexicon, phrasings and centroid** | **40/40** | **1** (knots-002) |
+  | lexicon, phrasings and 5 nearest labels | 40/40 | 27 |
+
+  It meets the bar (misses nothing E2B catches), but **with almost no margin**: the 6 medical questions only the
+  centroid catches score +0.003 to +0.049 (medical-030, -039, -033, -029, -032, -027), and the highest non-medical is
+  +0.002. Held out on the labels by fold it misses 4 of 106 and wrongly flags 4. The phone runs the int4 build, so
+  before relying on it: score the same questions with the phone's own query vectors (as `rerank.py phone` does) and
+  check the 6 stay above 0. The lexicon was tuned on the tuning split, so its 34/40 flatters it.
+- [x] **Keywords without a model, offline:** `Keywords.extract` (the pipeline's fallback) keeps 94% of the question words
+  E2B uses (all of them for 157 of 191 first questions). But E2B adds words that aren't in the question for 156 of 191:
+  names and terms ("charlotte perkins gilman", "rayleigh scattering", "nephrolithiasis") and filler ("timeline",
+  "prediction"). Only recall can say whether that matters.
+- [ ] **Keywords without a model, on the phone:** `--es rewrite plain` (added: `ResearchPipeline.rewritePlain`; a first
+  question gets `Keywords.extract` and the lexicon's flag with no model call, a follow-up still asks the model). A
+  full-pipeline run with dense on, recall@4 and `ms` against r1-dense-1. Dense retrieval embeds the raw question, so the
   keyword search matters less than it did in R0.
 - [ ] **Follow-ups** still need a model to fold in the earlier turn. Options, timed in Task 3: the answer model itself,
   or a small rewrite model kept loaded next to it (memory measured with both loaded).
