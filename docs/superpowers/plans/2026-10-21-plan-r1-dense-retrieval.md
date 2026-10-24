@@ -421,6 +421,12 @@ Do the same before any phone install once an H2 build has run on the Pixel, beca
     without it.
 - [ ] **Neal's OK:** upload the `.gvec` assets to a `vectors-<date>` GitHub release, regenerate, re-sign and push the
   catalog.
+  - 2026-10-23: the priority packs and the Classics (353 files, 419.7 MB) on `vectors-2026-10-23`; 357 entries.
+  - 2026-10-24: the other 19 packs (3.28M chunks, 1.06 GB) on the same release, which now has the whole set: 372 files,
+    1,480.5 MB, vectors on 380 entries. Re-signed on main; **not pushed** (Neal's call).
+  - The rest build crashed on reverseengineering's 24k-token chunks (the embedder had no length cap; 2,048 now). unix
+    was embedded on a RunPod 4090, matching the Mac at cosine ≥ 0.9945. 45 earlier chunks (appropedia 40, maths 3,
+    devdocs http 2) were embedded past 2,048 tokens and left as they are.
 - [ ] On the phone: remove the adb-pushed files, refresh the catalog, and confirm every vectored item downloads its vectors
   and `VectorStore` loads them all.
 

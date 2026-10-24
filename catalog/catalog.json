@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-23T12:58:04Z",
+  "generatedAt": "2026-10-24T12:07:05Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -85,7 +85,16 @@
       "zimName": "wikem_en_all",
       "featured": true,
       "family": "wikem",
-      "domain": "medicine"
+      "domain": "medicine",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikem_en_all_maxi_2026-07-24.gvec",
+        "sha256": "3ac793999ffae46ffc9e37c890296bbe77c044aac2580acd87f2e8f2afb30f2d",
+        "sizeBytes": 12246267,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_top_nopic",
@@ -283,7 +292,16 @@
       "zimName": "wikivoyage_en_all",
       "featured": true,
       "family": "wikivoyage",
-      "domain": "maps"
+      "domain": "maps",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikivoyage_en_all_nopic_2026-09-13.gvec",
+        "sha256": "1ad7631b760639f7b0acfbd7ae3887b5f32bc830869de1656cb28b543e85389c",
+        "sizeBytes": 145732314,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wiktionary_en_all_nopic",
@@ -352,7 +370,16 @@
       "zimName": "wikipedia_en_physics",
       "featured": true,
       "family": "wikipedia",
-      "domain": "science"
+      "domain": "science",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikipedia_en_physics_maxi_2026-10-14.gvec",
+        "sha256": "4bbea85d78a8de99c402eabd067f87becc65a8b6b94f692921ff8fb65685f6e8",
+        "sizeBytes": 38834562,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_chemistry_maxi",
@@ -470,7 +497,16 @@
       "featured": true,
       "family": "ifixit",
       "domain": "making",
-      "nonCommercial": true
+      "nonCommercial": true,
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/ifixit_en_all_2025-12-21.gvec",
+        "sha256": "f75b86e31f3986054169805dcd3e576d687a96f6b3cadd21c5a6d48b3a4880f7",
+        "sizeBytes": 186492808,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "alexandria.dk_en_all",
@@ -1278,7 +1314,16 @@
       "zimName": "appropedia_en_all",
       "featured": false,
       "family": "appropedia",
-      "domain": "food"
+      "domain": "food",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/appropedia_en_all_maxi_2026-02-26.gvec",
+        "sha256": "adef4dafbf0d978883a97f883fd62b71de0fcbf3866b691dde5946a9dd76a1a1",
+        "sizeBytes": 55765730,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "armypubs_en_all",
@@ -1320,7 +1365,16 @@
       "zimName": "based.cooking_en_all",
       "featured": false,
       "family": "based.cooking",
-      "domain": "food"
+      "domain": "food",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/based.cooking_en_all_2026-08-11.gvec",
+        "sha256": "cfc095a083b02b15d01678fe786c9755144f2d09fbd72bf4c9a27aa9b1a1f85e",
+        "sizeBytes": 476155,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "cd3wdproject.org_en_all",
@@ -1425,7 +1479,16 @@
       "zimName": "foss.cooking_en_all",
       "featured": false,
       "family": "foss.cooking",
-      "domain": "food"
+      "domain": "food",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/foss.cooking_en_all_2026-05-06.gvec",
+        "sha256": "4164ab9a440522917c57919931c186977e4b172a1e48c95f4e0e6b418f4db7df",
+        "sizeBytes": 610165,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "gardenology_en_all",
@@ -7236,7 +7299,16 @@
       "zimName": "wikem_en_all",
       "featured": false,
       "family": "wikem",
-      "domain": "medicine"
+      "domain": "medicine",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikem_en_all_maxi_2026-07-24.gvec",
+        "sha256": "3ac793999ffae46ffc9e37c890296bbe77c044aac2580acd87f2e8f2afb30f2d",
+        "sizeBytes": 12246267,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wikivet.net_en_all_maxi",
@@ -7743,7 +7815,16 @@
       "zimName": "devdocs_en_bash",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_bash_2026-10-05.gvec",
+        "sha256": "d8c9509dc534727d6b5456c31cb811b5970a03e8ac6587e41a110a3a56401db6",
+        "sizeBytes": 138099,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "devdocs_en_bazel",
@@ -7911,7 +7992,16 @@
       "zimName": "devdocs_en_c",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_c_2026-10-05.gvec",
+        "sha256": "950909093b67c78932e2188eeec7340fa32833cf891d6ef91bab4063f4d73848",
+        "sizeBytes": 577301,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "devdocs_en_cpp",
@@ -9130,7 +9220,16 @@
       "zimName": "devdocs_en_git",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_git_2026-10-02.gvec",
+        "sha256": "08ff968c596a81426332abe061c0fb5575f276b9d80fd8c40918d390ad8a87d5",
+        "sizeBytes": 1053218,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "devdocs_en_gnu-fortran",
@@ -9614,7 +9713,16 @@
       "zimName": "devdocs_en_http",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_http_2026-10-01.gvec",
+        "sha256": "070d3ef49fec99722844fc8960f69d7c67c3c8ca965b516dba69c7d7108f7fbc",
+        "sizeBytes": 889921,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "devdocs_en_i3",
@@ -9761,7 +9869,16 @@
       "zimName": "devdocs_en_javascript",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_javascript_2026-10-01.gvec",
+        "sha256": "335eb4623f0602f87ae58df4cd45248abf136c6b7985e053f1e7ed3a3fc063de",
+        "sizeBytes": 2899317,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "devdocs_en_jekyll",
@@ -11546,7 +11663,16 @@
       "zimName": "devdocs_en_python",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_python_2026-08-02.gvec",
+        "sha256": "242b803864660b6da15fb46961334374615bbfc1077a95f8ed0b874f41b3be5d",
+        "sizeBytes": 2222580,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "docs.python.org_en_all",
@@ -12386,7 +12512,16 @@
       "zimName": "devdocs_en_sqlite",
       "featured": false,
       "family": "devdocs",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/devdocs_en_sqlite_2026-10-01.gvec",
+        "sha256": "5220acf9c8836db488ba4d11e9931480fc85dd59c721231149fe34c336af3697",
+        "sizeBytes": 1293660,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "devdocs_en_statsmodels",
@@ -14108,7 +14243,16 @@
       "zimName": "cs.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/cs.stackexchange.com_en_all_2026-10-19.gvec",
+        "sha256": "89e0d2f7119acb2381b8daf80c1793ae418fd90e1bae2c2698873d28da06dd67",
+        "sizeBytes": 69983801,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "conlang.stackexchange.com_en_all",
@@ -16040,7 +16184,16 @@
       "zimName": "reverseengineering.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/reverseengineering.stackexchange.com_en_all_2026-10-20.gvec",
+        "sha256": "c773786e468a4aaee458d51a30b8ffca353c6919015b2ac8c44c32a9ed9ae94d",
+        "sizeBytes": 13825553,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "robotics.stackexchange.com_en_all",
@@ -16292,7 +16445,16 @@
       "zimName": "softwareengineering.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/softwareengineering.stackexchange.com_en_all_2026-10-19.gvec",
+        "sha256": "3cf6453b63f98d8961bdcd20521454919fcfe7b269185ade9d15907f7dd71df6",
+        "sizeBytes": 100854640,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "sqa.stackexchange.com_en_all",
@@ -16838,7 +17000,16 @@
       "zimName": "unix.stackexchange.com_en_all",
       "featured": false,
       "family": "stack_exchange",
-      "domain": "technology"
+      "domain": "technology",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/unix.stackexchange.com_en_all_2026-10-19.gvec",
+        "sha256": "e67f4441644b6f6d102a4ab09f24546a2b143890507bec3003498cef295f1230",
+        "sizeBytes": 337492834,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "ux.stackexchange.com_en_all",
@@ -17908,7 +18079,16 @@
       "zimName": "wikipedia_en_history",
       "featured": false,
       "family": "wikipedia",
-      "domain": "thought"
+      "domain": "thought",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikipedia_en_history_nopic_2026-10-12.gvec",
+        "sha256": "0e699b8675099834df1e66ae71a8e0fb02dec2fc32426de184340b73fee58a2c",
+        "sizeBytes": 89393024,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_history_nopic",
@@ -17931,7 +18111,16 @@
       "zimName": "wikipedia_en_history",
       "featured": false,
       "family": "wikipedia",
-      "domain": "thought"
+      "domain": "thought",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikipedia_en_history_nopic_2026-10-12.gvec",
+        "sha256": "0e699b8675099834df1e66ae71a8e0fb02dec2fc32426de184340b73fee58a2c",
+        "sizeBytes": 89393024,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_ice-hockey_maxi",
@@ -18235,7 +18424,16 @@
       "zimName": "wikipedia_en_physics",
       "featured": false,
       "family": "wikipedia",
-      "domain": "science"
+      "domain": "science",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikipedia_en_physics_maxi_2026-10-14.gvec",
+        "sha256": "4bbea85d78a8de99c402eabd067f87becc65a8b6b94f692921ff8fb65685f6e8",
+        "sizeBytes": 38834562,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "psiram_en_all_maxi",
@@ -18930,7 +19128,16 @@
       "zimName": "wikivoyage_en_all",
       "featured": false,
       "family": "wikivoyage",
-      "domain": "maps"
+      "domain": "maps",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikivoyage_en_all_nopic_2026-09-13.gvec",
+        "sha256": "1ad7631b760639f7b0acfbd7ae3887b5f32bc830869de1656cb28b543e85389c",
+        "sizeBytes": 145732314,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      }
     },
     {
       "id": "wikivoyage_en_europe_maxi",
