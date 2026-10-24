@@ -34,7 +34,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | H3 | Onboarding | Welcome (the brand), This phone, Pick a start (Efficient / Comprehensive from the readiness model), Your situation (region → maps and Wikivoyage; use-case chips), Review and start → Home; "Set up suggestions again" in Settings. Billing and the telemetry opt-in stay in Plan 10 | **Built, brand pending:** `2026-10-22-plan-h3-onboarding.md` (2026-10-22; 1936 JVM tests; Neal's Pixel 6 walkthrough passed every step with two fixes: one line per ZIM flavour, an installed flavour covers the other). Task 5, the Welcome brand, now has its direction (`2026-10-23-brand-vision-design.md`) and waits on the mark from Claude Design; the catalog with the onboarding tables is signed on the branch |
 | H4 | Readiness calibration | The tiers at about 90 GB (Comprehensive 90.3 GB, Efficient 11.1 GB, plus the region's map): Stack Overflow, Gutenberg LCC-PR and math/stats Stack Exchange leave the tiers, Top 1M replaces the full Wikipedia, Wiktionary moves to comprehensive; tier bytes count one entry per ZIM; `readiness.contains` (a pack inside an installed one counts as held); the presets carry one flavour per ZIM. From "Carried forward from H1" and H3. The walkthrough added: each By source row opens to its own files (the Files lists go) | **Done:** `2026-10-22-plan-h4-readiness-calibration.md` (2026-10-23; 1949 JVM tests, 50 catalog-gen tests; Neal's Pixel 6 walkthrough: "looking better across the board"; see Carried forward) |
 | S1 | Slim and Park | Slim (swap a pack for a smaller flavour of the same family, same `zimName`, bookmarks and places kept); Park only if Neal is sold on it (2026-10-21: not yet; the anti-goal is a user thinking they hold something they don't). Spec to write | Needs a decision |
-| P2 | The PDF pass | PDFs in the e-book reader (Readium's PDFium adapter: page, outline, bookmarks, place; no selection or highlights), PDF import (encrypted refused), archive.org Get PDF (Text PDF first) and PDF-only items with a 100 MB prompt and Don't ask again, PDFs in Kiwix packs as pack documents, page text in the book index for Search and Research (scans marked Not searchable); library v13 | **Built, Pixel 6 walkthrough pending:** `2026-10-23-plan-p2-pdf.md` (2026-10-24; 1999 JVM tests; branch `p2-pdf`) |
+| P2 | The PDF pass | PDFs in the e-book reader (Readium's PDFium adapter: page, outline, bookmarks, place; no selection or highlights), PDF import (encrypted refused), archive.org Get PDF (Text PDF first) and PDF-only items with a 100 MB prompt and Don't ask again, PDFs in Kiwix packs as pack documents, page text in the book index for Search and Research (scans marked Not searchable); library v13 | **Walkthrough passed, merge pending:** `2026-10-23-plan-p2-pdf.md` (2026-10-24; 2006 JVM tests; a 318-page archive.org Text PDF indexes in 31 s on the Pixel 6; branch `p2-pdf`) |
 | 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), **Supporter instead of Pro** (brand brief §6, 2026-10-23: one-time, extras only, import free for everyone; replaces import gating), onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | Release config, signing, Play listing (incl. the Play policy check for the archive.org source and non-commercial packs), internal track | |
 
@@ -172,7 +172,7 @@ Fixed after the walkthrough:
 Still open:
 - Readium's edge tap can still be trapped by other content that overflows by less than a page (a wide table, `<pre>`); swiping works.
 - Image width relies on ReadiumCSS's non-important `max-width: 100%`; a book that sets `max-width: none` on images can overflow.
-- OCR text is plain: page headers and hyphenation from the scan stay inline. PDF-only items wait for the PDF pass. No thumbnails in results.
+- OCR text is plain: page headers and hyphenation from the scan stay inline. PDF-only items wait for the PDF pass (done in P2: Get PDF). No thumbnails in results.
 - Archive.org items have no versions, so there is no Updates tab; a file archive.org re-derives later is not offered as an update.
 - Plan 11: the Play policy check for this source.
 - Minor polish deferred from the reviews: the filtered view's Get re-check and query both use `year`, which some items lack (they need the waiver); the archive tests wait in real time on the IO dispatcher; silent failure when no browser is installed; "PDF: coming soon" sits below the buttons rather than beside Get.
@@ -563,7 +563,7 @@ Builder's calls (see the plan and the Task 3 report):
 - Users can't make folders yet.
 
 Still open:
-- Some Kiwix packs are mostly PDFs (irp.fas.org military medicine). They open, but show little until the reader handles PDFs (the PDF pass, still unscheduled).
+- Some Kiwix packs are mostly PDFs (irp.fas.org military medicine). They open, but show little until the reader handles PDFs (done in P2: a tapped PDF opens in the e-book reader).
 - The DevDocs Contents button stays pinned over the page once you scroll.
 
 ## Carried forward from R0
@@ -772,10 +772,24 @@ Still open:
 - The H1 "Granger Classics" leftover pack record now shows under the Granger source as Missing (one tap opens it) rather than under Files.
 - A source with hundreds of files (Granger's 347 Classics) lists them all when opened; there is no search or paging inside a source.
 
-## Carried forward from P2 (so far)
+## Carried forward from P2
 
-- Pixel 6 walkthrough (Plan P2 Task 9) not yet run: import, reading (Night inversion legibility, rotation, process death), the 300-page indexing time (bar: under 60 s), Search and Research opening at the page, archive.org Get PDF and the prompt, a pack PDF (irp.fas.org or the water pack). The device test `KiwixZimArchiveTest.aPdfEntryHasItsSizeAndCopiesOutWhole` runs with it.
-- A PDF link tapped before its pack's archive is open (the first link on a cold start) loads in the WebView and shows nothing; the next tap opens it. A `DownloadListener` fallback would catch it.
+Walkthrough on the Pixel 6, 2026-10-24 (both databases backed up to `files/db-backup-2026-10-24-p2/`). Passed: the 12→13 migration on Neal's library; `KiwixZimArchiveTest` on the phone (13/13, with the PDF copy-out); import of a real 318-page archive.org Text PDF, a scan and an owner-password copy (refused); place through rotation, process death and a cold start; Contents, bookmarks, Page by page and Scroll, Whole page and Width, Night on text and scan pages; Search "floodproofing" → "p. 12" → opens at p. 12; Research cites p. 128 and p. 204 and opens there; indexing 31 s for 318 pages (bar 60 s), 11 s for a 630-page archive.org PDF, and a kill mid-index resumes on the next launch; archive.org Get · 561 KB and Get PDF · 109 MB, the prompt, Don't ask again and the Settings switch, two books with "(PDF)", Remove takes both; an irp.fas.org pack PDF opens on the first tap after a cold start, Back returns to the article, History reopens it at its page.
+
+Fixed during the walkthrough:
+- archive.org OCR writes a line-end hyphen as `¬`; the text joiner now takes it (and soft and Unicode hyphens). "flood¬ / proofing" had been indexed as two words.
+- An import wasn't indexed until the next launch (EPUBs too); an import now starts the indexer.
+- A PDF bookmark read "Bookmark · 46%"; it is named by outline entry and page. Contents has no Highlights tab on a PDF.
+- One foldout page (a 943 pt map in a 607 pt book) shrank every page under Whole page and pushed Width pages off to the right: Readium leaves AndroidPdfViewer's fit at "every page scaled by the widest". Each page is fitted on its own now.
+- Research source cards for a PDF now name the page (spec §6.2 had it; the build missed it).
+- The 100 MB prompt's "Don't ask again" label didn't tick the box; the whole row toggles.
+- zimit packs title a PDF entry with its path; a pack PDF takes the PDF's own title ("Emergency Childbirth") then its file name.
+
+Still open:
+- Removing a pack removes its pack documents: unit-tested, not tried on the phone (it would delete a real pack).
+- The archive.org Installed tab's row for an item with text and PDF shows the text's size only.
+- A PDF link tapped before its pack's archive is open loads in the WebView and shows nothing. Not reproduced on the phone (the article's own load opens the archive first); a `DownloadListener` fallback would close it.
+- Research answered "41,000 acres of saltwater wetlands" from a sentence about acres to be restricted (p. 204; the total is 40,000 on p. 12): an answer-quality case for R4, not a PDF bug.
 - Not in this pass (spec §2, §7): read-aloud of PDFs, selection and highlights on PDF pages, in-book search in an open PDF, indexing pack PDFs, OCR, dense vectors for PDF chunks (R2 should take `PdfText` chunks).
-- Night on a PDF rebuilds the navigator (PDFium only inverts at layout); Sepia reads as Day on PDFs.
+- Night and Fit on a PDF rebuild the navigator (PDFium reads both only at layout); Sepia reads as Day on PDFs.
 - Home cards now name EPUB chapters by their order among chapters with text ("Chapter n"); the old label used the chunk ordinal, which restarts per chapter.
