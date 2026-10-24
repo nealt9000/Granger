@@ -78,6 +78,7 @@ def embed(work, model_box):
         if model_box[0] is None:
             from sentence_transformers import SentenceTransformer
             model_box[0] = SentenceTransformer(MODEL, device="mps")
+            model_box[0].max_seq_length = 2048  # the model's context; unset it is unbounded and long chunks overflow MPS
         part = chunks[start:start + SHARD]
         texts = [doc_text(c["title"], c["heading"], c["text"]) for c in part]
         order = sorted(range(len(texts)), key=lambda i: -len(texts[i]))  # similar lengths batch faster
