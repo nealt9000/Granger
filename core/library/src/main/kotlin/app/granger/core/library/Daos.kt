@@ -163,6 +163,13 @@ interface SessionDao {
     @Query("DELETE FROM history WHERE packId = :packId")
     suspend fun deleteHistoryForPack(packId: String)
 
+    /** Tabs of pack documents ([prefix] is `book:pack:`) whose book row is gone. */
+    @Query("DELETE FROM reading_tabs WHERE packId LIKE :prefix || '%' AND packId NOT IN (SELECT id FROM books)")
+    suspend fun deleteOrphanTabs(prefix: String)
+
+    @Query("DELETE FROM history WHERE packId LIKE :prefix || '%' AND packId NOT IN (SELECT id FROM books)")
+    suspend fun deleteOrphanHistory(prefix: String)
+
     @Upsert
     suspend fun upsertRecentSearch(search: RecentSearch)
 
@@ -243,6 +250,12 @@ interface BookDao {
 
     @Query("DELETE FROM book_marks WHERE bookId = :bookId")
     suspend fun deleteMarks(bookId: String)
+
+    @Query("DELETE FROM book_positions WHERE bookId LIKE :prefix || '%' AND bookId NOT IN (SELECT id FROM books)")
+    suspend fun deleteOrphanPositions(prefix: String)
+
+    @Query("DELETE FROM book_marks WHERE bookId LIKE :prefix || '%' AND bookId NOT IN (SELECT id FROM books)")
+    suspend fun deleteOrphanMarks(prefix: String)
 
     @Query("SELECT * FROM book_marks WHERE bookId = :bookId ORDER BY createdAt, id")
     fun observeMarks(bookId: String): Flow<List<BookAnnotation>>

@@ -129,6 +129,21 @@ class BookshelfTest {
         assertThat(pdfShelf.marks(book.id).first()).isEmpty()
     }
 
+    @Test fun refreshForgetsWhatARemovedPackDocumentLeftBehind() = test {
+        val sessions = RoomReadingSessions(db)
+        val gone = BookIds.of(BookOrigin.PACK, "zim1/docs/old.pdf")
+        sessions.openTab(gone, "", "Old")
+        pdfShelf.savePosition(gone, "{}", 0.5, "Page 2")
+        val kept = BookIds.of(BookOrigin.IMPORT, "removed")
+        sessions.openTab(kept, "", "Removed import")
+
+        pdfShelf.refresh()
+        // The pack document's rows go; a removed book's tab stays, to say "Removed book".
+        assertThat(sessions.railTabs(10).first().map { it.packId }).containsExactly(kept)
+        assertThat(sessions.history.first().map { it.packId }).containsExactly(kept)
+        assertThat(pdfShelf.position(gone)).isNull()
+    }
+
     @Test fun aPackDocumentTitledByItsPathTakesThePdfsOwnTitle() = test {
         val named = PdfFixtures.text(File(booksDir, "packs/zim1"), "a.pdf")
         assertThat(pdfShelf.registerPackDocument("zim1", "site/docs/water.pdf", "site/docs/water.pdf", named)!!.title)

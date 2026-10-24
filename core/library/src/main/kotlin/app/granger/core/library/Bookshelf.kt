@@ -245,6 +245,7 @@ class RoomBookshelf(
     }
 
     override suspend fun refresh(): Unit = withContext(io) {
+        forgetRemovedPackDocuments()
         val known = dao.getAll()
         for (book in known) {
             val status = when {
@@ -350,6 +351,21 @@ class RoomBookshelf(
                 dao.deleteChunks(book.id)
                 dao.delete(book.id)
             }
+        }
+    }
+
+    /**
+     * What [removePackDocuments] leaves when it didn't run to the end (or ran before it cleared tabs and places): rows
+     * for pack documents whose book is gone.
+     */
+    private suspend fun forgetRemovedPackDocuments() {
+        val prefix = BookIds.of(BookOrigin.PACK, "")
+        val sessions = db.sessionDao()
+        db.withTransaction {
+            sessions.deleteOrphanTabs(prefix)
+            sessions.deleteOrphanHistory(prefix)
+            dao.deleteOrphanPositions(prefix)
+            dao.deleteOrphanMarks(prefix)
         }
     }
 
