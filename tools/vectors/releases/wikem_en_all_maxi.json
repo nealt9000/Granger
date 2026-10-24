@@ -1,0 +1,14 @@
+{
+ "id": "wikem_en_all_maxi",
+ "kind": "pack",
+ "fileName": "wikem_en_all_maxi_2026-07-24.gvec",
+ "sizeBytes": 12246267,
+ "sha256": "3ac793999ffae46ffc9e37c890296bbe77c044aac2580acd87f2e8f2afb30f2d",
+ "count": 40977,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7bbdd705544616df1ff37f8b4e0e5382e7b4d92532feecea42227af4169fbd7f",
+ "url": null
+}

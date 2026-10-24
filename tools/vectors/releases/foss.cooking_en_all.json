@@ -1,0 +1,14 @@
+{
+ "id": "foss.cooking_en_all",
+ "kind": "pack",
+ "fileName": "foss.cooking_en_all_2026-05-06.gvec",
+ "sizeBytes": 610165,
+ "sha256": "4164ab9a440522917c57919931c186977e4b172a1e48c95f4e0e6b418f4db7df",
+ "count": 1896,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1b6722fe3260382a67c6e3a0bdec3531d440fecc135f31de9966a32375f94ba3",
+ "url": null
+}

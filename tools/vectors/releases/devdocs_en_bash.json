@@ -1,0 +1,14 @@
+{
+ "id": "devdocs_en_bash",
+ "kind": "pack",
+ "fileName": "devdocs_en_bash_2026-10-05.gvec",
+ "sizeBytes": 138099,
+ "sha256": "d8c9509dc534727d6b5456c31cb811b5970a03e8ac6587e41a110a3a56401db6",
+ "count": 464,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ea4afb04ddf90f31363829ef9fa2485405dc05bd1fc62b4626245fe70c24735d",
+ "url": null
+}

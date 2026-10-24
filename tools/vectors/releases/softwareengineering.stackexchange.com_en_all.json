@@ -1,0 +1,14 @@
+{
+ "id": "softwareengineering.stackexchange.com_en_all",
+ "kind": "pack",
+ "fileName": "softwareengineering.stackexchange.com_en_all_2026-10-19.gvec",
+ "sizeBytes": 100854640,
+ "sha256": "3cf6453b63f98d8961bdcd20521454919fcfe7b269185ade9d15907f7dd71df6",
+ "count": 293162,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dd188889ff8d7df9db27115c1349ea079ccd620930a3e37045e3b5c9965ba4b8",
+ "url": null
+}

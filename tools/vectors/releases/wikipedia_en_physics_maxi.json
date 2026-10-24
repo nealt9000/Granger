@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_en_physics_maxi",
+ "kind": "pack",
+ "fileName": "wikipedia_en_physics_maxi_2026-10-14.gvec",
+ "sizeBytes": 38834562,
+ "sha256": "4bbea85d78a8de99c402eabd067f87becc65a8b6b94f692921ff8fb65685f6e8",
+ "count": 130668,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2751c32efda00e18093e7ff4934269fcf916b6f0c7e5f2304efa83699d25442f",
+ "url": null
+}

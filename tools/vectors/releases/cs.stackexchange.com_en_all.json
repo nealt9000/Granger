@@ -1,0 +1,14 @@
+{
+ "id": "cs.stackexchange.com_en_all",
+ "kind": "pack",
+ "fileName": "cs.stackexchange.com_en_all_2026-10-19.gvec",
+ "sizeBytes": 69983801,
+ "sha256": "89e0d2f7119acb2381b8daf80c1793ae418fd90e1bae2c2698873d28da06dd67",
+ "count": 203328,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "da38ae0389fe56d229382da09654b2a7e14ba1a133e628e34e501c2693dc0f9b",
+ "url": null
+}

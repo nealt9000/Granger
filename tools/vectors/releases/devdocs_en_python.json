@@ -1,0 +1,14 @@
+{
+ "id": "devdocs_en_python",
+ "kind": "pack",
+ "fileName": "devdocs_en_python_2026-08-02.gvec",
+ "sizeBytes": 2222580,
+ "sha256": "242b803864660b6da15fb46961334374615bbfc1077a95f8ed0b874f41b3be5d",
+ "count": 7553,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "289e5d3e0e8c3d3470bf183e5c913be3be0b61a730ce52a247c23812799baa51",
+ "url": null
+}

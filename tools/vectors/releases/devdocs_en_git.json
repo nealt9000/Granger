@@ -1,0 +1,14 @@
+{
+ "id": "devdocs_en_git",
+ "kind": "pack",
+ "fileName": "devdocs_en_git_2026-10-02.gvec",
+ "sizeBytes": 1053218,
+ "sha256": "08ff968c596a81426332abe061c0fb5575f276b9d80fd8c40918d390ad8a87d5",
+ "count": 3633,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9f458df135af723d54279b0a55cffe8428b4f6453adeeef830635a01f63f5a6a",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "appropedia_en_all_maxi",
+ "kind": "pack",
+ "fileName": "appropedia_en_all_maxi_2026-02-26.gvec",
+ "sizeBytes": 55765730,
+ "sha256": "adef4dafbf0d978883a97f883fd62b71de0fcbf3866b691dde5946a9dd76a1a1",
+ "count": 177525,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dcf200ba723c27397e1c9a2e4891ff91fa13993df1fa285315190d8525a53469",
+ "url": null
+}

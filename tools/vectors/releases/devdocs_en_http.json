@@ -1,0 +1,14 @@
+{
+ "id": "devdocs_en_http",
+ "kind": "pack",
+ "fileName": "devdocs_en_http_2026-10-01.gvec",
+ "sizeBytes": 889921,
+ "sha256": "070d3ef49fec99722844fc8960f69d7c67c3c8ca965b516dba69c7d7108f7fbc",
+ "count": 2937,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "738f2c9992d20b90757320a81d3cb9df67cc716f13f99074d3d181b1977d6551",
+ "url": null
+}

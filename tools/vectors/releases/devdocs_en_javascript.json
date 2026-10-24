@@ -1,0 +1,14 @@
+{
+ "id": "devdocs_en_javascript",
+ "kind": "pack",
+ "fileName": "devdocs_en_javascript_2026-10-01.gvec",
+ "sizeBytes": 2899317,
+ "sha256": "335eb4623f0602f87ae58df4cd45248abf136c6b7985e053f1e7ed3a3fc063de",
+ "count": 9382,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a4a70cffdc68d2c70d40ff6bd55bf42c70d2e18c2445e5b481b22d6b9495f344",
+ "url": null
+}

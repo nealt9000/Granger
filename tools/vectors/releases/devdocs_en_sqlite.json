@@ -1,0 +1,14 @@
+{
+ "id": "devdocs_en_sqlite",
+ "kind": "pack",
+ "fileName": "devdocs_en_sqlite_2026-10-01.gvec",
+ "sizeBytes": 1293660,
+ "sha256": "5220acf9c8836db488ba4d11e9931480fc85dd59c721231149fe34c336af3697",
+ "count": 4495,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d83fda4ba97a83a68d8c369cf1b2f3185a1d2683e5acdeca79be365df690f538",
+ "url": null
+}
