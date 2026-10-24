@@ -140,7 +140,7 @@ fun LibraryScreen(
                         Text("Get packs from Granger or Kiwix", style = MaterialTheme.typography.bodyMedium)
                         Text("Or copy .zim files into $packsFolder", style = MaterialTheme.typography.bodySmall)
                         if (Features.IMPORT) {
-                            Text("Or import your own EPUB, TXT or Markdown books", style = MaterialTheme.typography.bodySmall)
+                            Text("Or import your own EPUB, PDF, TXT or Markdown books", style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -269,7 +269,7 @@ internal fun missingMediaText(shownTypeIds: List<String>): String? {
 }
 
 private val IMPORT_TYPES = arrayOf(
-    "application/epub+zip", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
+    "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
 )
 
 /** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */

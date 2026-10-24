@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.granger.core.library.Book
+import app.granger.core.library.BookFormat
 import app.granger.shell.rememberRailCover
 
 private val TileBackground = Color(0xFF141210)
@@ -62,4 +63,11 @@ private fun TitleTile(title: String) {
             Box(Modifier.padding(top = 10.dp).width(28.dp).height(2.dp).background(TileRule))
         }
     }
+}
+
+/** What a book's cell says about its format: nothing for an e-book; "PDF", and whether a scan can't be searched. */
+fun formatLabel(book: Book): String? = when {
+    book.format != BookFormat.PDF -> null
+    book.searchable -> "PDF"
+    else -> "PDF · Not searchable"
 }

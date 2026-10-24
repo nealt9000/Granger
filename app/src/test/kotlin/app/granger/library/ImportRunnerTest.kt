@@ -48,6 +48,21 @@ class ImportRunnerTest {
         assertThat(summary.problems).containsExactly("b.epub is damaged or isn't a complete e-book.")
     }
 
+    @Test fun aPdfImportsAndAnEncryptedOneSaysWhy() = runTest {
+        val shelf = ScriptedShelf(
+            mapOf(
+                "water.pdf" to ImportResult.Imported("1"),
+                "locked.pdf" to ImportResult.Protected(DrmKind.PDF_ENCRYPTED),
+                "book.epub" to ImportResult.Imported("3"),
+            ),
+        )
+        val summary = runner(shelf).run(listOf("water.pdf", "locked.pdf", "book.epub").map(::uri))
+        assertThat(summary.imported).isEqualTo(2)
+        assertThat(summary.problems).containsExactly(
+            "locked.pdf is password-protected or encrypted. Granger can't open it and won't remove the protection.",
+        )
+    }
+
     @Test fun summaryCountsAndNamesProblems() = runTest {
         val shelf = ScriptedShelf(
             mapOf(

@@ -296,6 +296,9 @@ private fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLongC
             overflow = TextOverflow.Ellipsis,
             minLines = 2,
         )
+        formatLabel(book)?.let {
+            Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         when (book.status) {
             PackStatus.OK -> LinearProgressIndicator(
                 progress = { (progress ?: 0.0).toFloat().coerceIn(0f, 1f) },
