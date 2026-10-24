@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.BookTarget
 import app.granger.audiobooks.AudiobookCover
 import app.granger.audiobooks.UNKNOWN_AUTHOR
+import app.granger.core.books.PdfText
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Albums
 import app.granger.core.library.ArtistHit
@@ -175,6 +176,7 @@ fun SearchScreen(
                         supportingContent = {
                             Column {
                                 if (hit.author.isNotBlank()) Text(hit.author)
+                                PdfText.pageOf(hit.href)?.let { Text("p. $it") }
                                 if (hit.snippet.isNotBlank()) {
                                     Text(AnnotatedString.fromHtml(hit.snippet), maxLines = 3, overflow = TextOverflow.Ellipsis)
                                 }

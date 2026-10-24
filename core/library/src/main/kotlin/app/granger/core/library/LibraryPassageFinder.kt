@@ -178,7 +178,7 @@ class LibraryPassageFinder(
         val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot(Keywords::isStopword).toSet()
         if (keywordWords.isEmpty()) return emptyList()
         val books = try {
-            bookshelf.books.first().filter { it.status == PackStatus.OK }
+            bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -197,7 +197,7 @@ class LibraryPassageFinder(
 
     private suspend fun cards(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
         val books = try {
-            bookshelf.books.first().filter { it.status == PackStatus.OK }
+            bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -214,7 +214,7 @@ class LibraryPassageFinder(
                 val text = lines(
                     "Title" to book.title, "Author" to book.author, "Translator" to book.translator,
                     "Published" to book.date, "Subjects" to book.subjects, "Collection" to collections[book.id].orEmpty(),
-                    "In your library as" to "e-book",
+                    "In your library as" to if (book.format == BookFormat.PDF) "PDF" else "e-book",
                 )
                 Passage(
                     SourceKind.CARD, book.id, book.title, location = "", text = text,

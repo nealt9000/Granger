@@ -35,5 +35,7 @@ object PlatformPdfCovers : PdfCovers {
     } catch (_: Exception) {
         // A PDF the platform renderer rejects (some it can't parse that PDFium can) just has no cover.
         null
+    } catch (_: OutOfMemoryError) {
+        null
     }
 }

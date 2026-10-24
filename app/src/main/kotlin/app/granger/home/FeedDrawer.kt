@@ -3,6 +3,7 @@ package app.granger.home
 import app.granger.core.library.Book
 import app.granger.core.library.BookChunk
 import app.granger.core.library.BookHit
+import app.granger.core.library.chunkLabel
 import app.granger.core.library.FeedKind
 import app.granger.core.library.HomeFeed
 import app.granger.core.library.LibrarySearch
@@ -46,10 +47,11 @@ class FeedDrawer(
         scope.books.isNotEmpty() -> scope.books.shuffled(random).take(CARDS).map { book ->
             // Poetry, scripture and philosophy are for dipping into: a random chapter. A novel or a play is a
             // suggestion: it opens at the start, or where the reader left off (Neal, 2026-10-22).
-            val chunk = if (dipsIn(book)) chunksOf(book.id).takeIf { it.isNotEmpty() }?.let { it[random.nextInt(it.size)] } else null
+            val chunks = if (dipsIn(book)) chunksOf(book.id) else emptyList()
+            val chunk = chunks.takeIf { it.isNotEmpty() }?.let { it[random.nextInt(it.size)] }
             Card(
                 title = book.title,
-                subtitle = listOfNotNull(chunk?.let { "Chapter ${it.ordinal + 1}" }, book.author.ifBlank { null }).joinToString(" · "),
+                subtitle = listOfNotNull(chunk?.let { chunkLabel(book, it.href, chunks) }, book.author.ifBlank { null }).joinToString(" · "),
                 target = CardTarget.Book(book.id, chunk?.href, chunk?.progression ?: 0.0),
                 imagePath = book.coverPath,
             )

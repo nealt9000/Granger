@@ -5,7 +5,9 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
+import app.granger.core.books.PdfText
 import app.granger.core.books.Snippets
+import app.granger.core.books.TextChunk
 import app.granger.core.books.TextQuote
 import app.granger.core.books.XhtmlText
 import app.granger.core.research.Keywords
@@ -31,6 +33,14 @@ data class BookHit(
     val quote: TextQuote? = null,
 )
 
+/**
+ * What a chunk of [book] at [href] is called on a card: "Page 12" in a PDF; in an EPUB, "Chapter n" by the order of
+ * the chapters with text among [chunks] (the book's chunks in reading order).
+ */
+fun chunkLabel(book: Book, href: String, chunks: List<BookChunk>): String =
+    PdfText.pageOf(href)?.takeIf { book.format == BookFormat.PDF }?.let { "Page $it" }
+        ?: "Chapter ${chunks.map { it.href }.distinct().indexOf(href) + 1}"
+
 /** A book chunk that matches some of the words asked about, with its text. */
 data class BookPassage(val book: Book, val href: String, val progression: Double, val text: String)
 
@@ -53,7 +63,7 @@ class BookIndex(
     /** Test hook: runs inside each book's transaction just before it commits. */
     internal var beforeCommit: (bookId: String) -> Unit = {}
 
-    /** A book's indexed chunks (one per spine item, in order); empty until the book is indexed. */
+    /** A book's indexed chunks, in reading order; empty until the book is indexed. */
     suspend fun chunks(bookId: String): List<BookChunk> = dao.chunksOf(bookId)
 
     /** Indexes every OK book not yet indexed. A book that fails stays pending for the next call. */
@@ -88,7 +98,7 @@ class BookIndex(
             val snippetQuery = words.joinToString(" ")
             kept.groupBy { it.bookId }.flatMap { (bookId, hits) ->
                 val book = dao.get(bookId) ?: return@flatMap emptyList()
-                val texts = chunkTexts(book.filePath, hits)
+                val texts = chunkTexts(book, hits)
                 hits.map { chunk ->
                     BookHit(
                         bookId = book.id,
@@ -163,7 +173,7 @@ class BookIndex(
                 val book = dao.get(id) ?: return@forEach
                 // One damaged book drops only its own passages.
                 val read = try {
-                    chunkTexts(book.filePath, hits)
+                    chunkTexts(book, hits)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -213,12 +223,32 @@ class BookIndex(
     private suspend fun index(book: Book) {
         val file = File(book.filePath)
         if (!file.isFile) return
+        if (book.format == BookFormat.PDF) return indexPdf(book, file)
         val spine = (EpubInspector.inspect(file) as? Inspection.Ok)?.meta?.spine ?: return
+        write(book, XhtmlText.all(file, spine), searchable = true)
+    }
+
+    /**
+     * A PDF's text is read before the transaction: a long scan takes tens of seconds to extract, and holding the
+     * write lock that long would stall every save of a reading place. A PDF with no text layer is marked unsearchable.
+     */
+    private suspend fun indexPdf(book: Book, file: File) {
+        val chunks = PdfText.open(file)?.use { reader ->
+            if (!reader.hasTextLayer()) {
+                emptyList()
+            } else {
+                (1..reader.pageCount).flatMap { reader.chunks(PdfText.href(it)) }
+            }
+        } ?: return
+        write(book, chunks.asSequence(), searchable = chunks.isNotEmpty())
+    }
+
+    private suspend fun write(book: Book, chunks: Sequence<TextChunk>, searchable: Boolean) {
         db.withTransaction {
             dao.deleteChunks(book.id)
             val insert = db.openHelper.writableDatabase.compileStatement("INSERT INTO book_text(docid, text) VALUES(?, ?)")
             insert.use { statement ->
-                for (chunk in XhtmlText.all(file, spine)) {
+                for (chunk in chunks) {
                     val id = dao.insertChunk(BookChunk(0, book.id, chunk.href, chunk.ordinal, chunk.progression))
                     statement.clearBindings()
                     statement.bindLong(1, id)
@@ -228,7 +258,7 @@ class BookIndex(
             }
             beforeCommit(book.id)
             // A re-download or refresh while the file was being read means this text may be stale: stay pending.
-            if (dao.get(book.id) == book) dao.setIndexed(book.id, now())
+            if (dao.get(book.id) == book) dao.setIndexedSearchable(book.id, now(), searchable)
         }
     }
 
@@ -238,9 +268,16 @@ class BookIndex(
             if (it.moveToFirst()) it.getLong(0) else 0L
         }
 
-    /** Re-extracts the text of [hits], opening the book's zip once; a missing file or chunk gives no entry. */
-    private fun chunkTexts(path: String, hits: List<BookChunk>): Map<Long, String> {
-        val zip = try { ZipFile(path) } catch (_: IOException) { return emptyMap() }
+    /** Re-extracts the text of [hits], opening the book's file once; a missing file or chunk gives no entry. */
+    private fun chunkTexts(book: Book, hits: List<BookChunk>): Map<Long, String> {
+        if (book.format == BookFormat.PDF) {
+            val reader = PdfText.open(File(book.filePath)) ?: return emptyMap()
+            return reader.use {
+                val byHref = hits.map { it.href }.distinct().associateWith { href -> reader.chunks(href) }
+                hits.mapNotNull { chunk -> byHref[chunk.href]?.getOrNull(chunk.ordinal)?.let { chunk.id to it.text } }.toMap()
+            }
+        }
+        val zip = try { ZipFile(book.filePath) } catch (_: IOException) { return emptyMap() }
         return zip.use {
             val byHref = hits.map { it.href }.distinct().associateWith { href -> XhtmlText.chunks(zip, href) }
             hits.mapNotNull { chunk -> byHref[chunk.href]?.getOrNull(chunk.ordinal)?.let { chunk.id to it.text } }.toMap()

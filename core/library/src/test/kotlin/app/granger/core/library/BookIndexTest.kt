@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -24,11 +25,66 @@ class BookIndexTest {
     private val booksDir by lazy { tmp.newFolder("books") }
     private val grangerDir by lazy { File(booksDir, "granger").apply { mkdirs() } }
     private val shelf by lazy {
-        RoomBookshelf(db, { listOf(booksDir) }, { File(booksDir, "imports") }, File(tmp.root, "covers"), dispatcher)
+        // Robolectric has no real file descriptors for the platform's PDF renderer.
+        RoomBookshelf(db, { listOf(booksDir) }, { File(booksDir, "imports") }, File(tmp.root, "covers"), dispatcher,
+            pdfCovers = { _, _ -> null })
     }
     private val index = BookIndex(db, dispatcher, now = { 5L })
 
     @After fun close() = db.close()
+
+    @org.junit.Before fun pdfBox() = PdfFixtures.init(androidx.test.core.app.ApplicationProvider.getApplicationContext())
+
+    private suspend fun addPdf(ref: String, file: File): Book =
+        shelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, ref)!!
+
+    @Test fun aPdfIsIndexedByPage() = test {
+        val water = addPdf("water", PdfFixtures.text(File(booksDir, "archive-org"), "water.pdf"))
+        index.indexPending()
+
+        val hit = index.search("slow sand filter").single()
+        assertThat(hit.bookId).isEqualTo(water.id)
+        assertThat(hit.href).isEqualTo("page/2")
+        assertThat(hit.snippet).contains("<b>")
+        assertThat(hit.quote).isNotNull()
+        val passage = index.passages(listOf("sand filter")).single()
+        assertThat(passage.href).isEqualTo("page/2")
+        assertThat(passage.text).contains("ninety percent")
+        val book = shelf.book(water.id)!!
+        assertThat(book.indexedAt).isEqualTo(5L)
+        assertThat(book.searchable).isTrue()
+        // Running heads aren't in the index.
+        assertThat(index.search("water book")).isEmpty()
+    }
+
+    @Test fun aScanIsMarkedUnsearchableAndIndexesNothing() = test {
+        val scan = addPdf("scan", PdfFixtures.imageOnly(File(booksDir, "archive-org"), "scan.pdf"))
+        index.indexPending()
+        val book = shelf.book(scan.id)!!
+        assertThat(book.indexedAt).isEqualTo(5L)
+        assertThat(book.searchable).isFalse()
+        assertThat(index.chunks(scan.id)).isEmpty()
+    }
+
+    @Test fun packDocumentsAreNeverIndexed() = test {
+        val file = PdfFixtures.text(File(booksDir, "packs/z"), "doc.pdf")
+        val doc = shelf.registerPackDocument("z", "docs/water.pdf", "Water", file)!!
+        index.indexPending()
+        assertThat(shelf.book(doc.id)!!.indexedAt).isNull()
+        assertThat(index.search("slow sand filter")).isEmpty()
+    }
+
+    @Test fun chunkLabelsNameThePageOrTheChapter() = test {
+        val water = addPdf("water", PdfFixtures.text(File(booksDir, "archive-org"), "water.pdf"))
+        val moby = add("moby", "<p>Call me Ishmael.</p>", "<p>The whale surfaced at dawn.</p>", "<p>The end.</p>")
+        index.indexPending()
+        val pdf = shelf.book(water.id)!!
+        assertThat(chunkLabel(pdf, "page/2", index.chunks(pdf.id))).isEqualTo("Page 2")
+        val chunks = index.chunks(moby.id)
+        assertThat(chunks.map { it.href })
+            .containsExactly("OEBPS/c001.xhtml", "OEBPS/c002.xhtml", "OEBPS/c003.xhtml").inOrder()
+        assertThat(chunkLabel(moby, "OEBPS/c003.xhtml", chunks)).isEqualTo("Chapter 3")
+    }
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 

@@ -216,11 +216,15 @@ interface BookDao {
     @Query("UPDATE books SET status = :status WHERE id = :id")
     suspend fun setStatus(id: String, status: PackStatus)
 
-    @Query("SELECT * FROM books WHERE status = 'OK' AND indexedAt IS NULL")
+    /** Pack documents are never indexed (Plan P2): their packs' own search covers the pack. */
+    @Query("SELECT * FROM books WHERE status = 'OK' AND indexedAt IS NULL AND origin != 'PACK'")
     suspend fun notIndexed(): List<Book>
 
     @Query("UPDATE books SET indexedAt = :at WHERE id = :id")
     suspend fun setIndexed(id: String, at: Long)
+
+    @Query("UPDATE books SET indexedAt = :at, searchable = :searchable WHERE id = :id")
+    suspend fun setIndexedSearchable(id: String, at: Long, searchable: Boolean)
 
     @Query("UPDATE books SET indexedAt = NULL")
     suspend fun clearIndexed()
@@ -261,8 +265,8 @@ interface BookDao {
     @Query("SELECT * FROM book_chunks WHERE id = :id")
     suspend fun chunk(id: Long): BookChunk?
 
-    /** A book's chunks (one per spine item) in reading order. */
-    @Query("SELECT * FROM book_chunks WHERE bookId = :bookId ORDER BY ordinal")
+    /** A book's chunks in reading order (they are inserted in order; `ordinal` restarts in each chapter or page). */
+    @Query("SELECT * FROM book_chunks WHERE bookId = :bookId ORDER BY id")
     suspend fun chunksOf(bookId: String): List<BookChunk>
 
     /** For queries over `book_text`, which Room doesn't know about; they must select `book_chunks` columns. */
