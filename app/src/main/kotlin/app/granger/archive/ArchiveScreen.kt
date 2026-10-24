@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -51,6 +52,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -195,8 +197,12 @@ internal fun LargeDownloadDialog(confirm: ConfirmLarge, onDownload: (dontAskAgai
         onDismissRequest = onDismiss,
         title = { Text("This ${confirm.title} is ${app.granger.formatBytes(confirm.bytes)}. Download it?") },
         text = {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                androidx.compose.material3.Checkbox(checked = dontAsk, onCheckedChange = { dontAsk = it })
+            // The whole row toggles, not just the box: the label is the bigger target.
+            Row(
+                Modifier.fillMaxWidth().toggleable(value = dontAsk, role = Role.Checkbox) { dontAsk = it },
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                androidx.compose.material3.Checkbox(checked = dontAsk, onCheckedChange = null)
                 Text("Don't ask again")
             }
         },
