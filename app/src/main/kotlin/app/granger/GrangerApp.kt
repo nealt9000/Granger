@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.Settings
+import app.granger.core.books.PdfSupport
 import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.DeviceTiers
 import app.granger.core.ai.InstalledModels
@@ -157,6 +158,8 @@ open class GrangerApp : Application(), DownloadsHost {
 
     override fun onCreate() {
         super.onCreate()
+        // Only keeps the context: PdfBox reads its font metrics from assets on the first PDF.
+        PdfSupport.init(this)
         if (Features.PLAYER) startMedia()
         startVectorDownloads()
     }

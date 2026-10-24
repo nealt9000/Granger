@@ -21,7 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AlbumNote::class, RailPin::class,
         HomeFeed::class, HomeDraw::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -179,6 +179,14 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Plan P2: a book's format (`EPUB` for every book so far) and whether its text could be indexed. */
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE books ADD COLUMN format TEXT NOT NULL DEFAULT 'EPUB'")
+                db.execSQL("ALTER TABLE books ADD COLUMN searchable INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+
         /**
          * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
          * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
@@ -224,7 +232,7 @@ abstract class LibraryDatabase : RoomDatabase() {
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
                 .addMigrations(
                     MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-                    MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
+                    MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
                 )
                 .addCallback(SeedCallback)
                 .build()

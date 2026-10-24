@@ -122,7 +122,13 @@ data class HistoryEntry(val packId: String, val path: String, val title: String,
 @Entity(tableName = "recent_searches")
 data class RecentSearch(@PrimaryKey val query: String, val searchedAt: Long)
 
-/** An e-book on the shelf. [sourceRef] is the catalog id, the import's sha256, or the archive.org identifier. */
+/** What a book file is; the reader, the inspector and the index each pick their path by it. */
+enum class BookFormat { EPUB, PDF }
+
+/**
+ * An e-book on the shelf. [sourceRef] is the catalog id, the import's sha256, the archive.org identifier (with `#pdf`
+ * for an item's PDF beside its text), or `<zimId>/<path>` for a pack document.
+ */
 @Entity(tableName = "books")
 data class Book(
     @PrimaryKey val id: String,
@@ -143,6 +149,9 @@ data class Book(
     /** When the text was last put into the `book_text` index; null if not indexed. */
     val indexedAt: Long?,
     val addedAt: Long,
+    val format: BookFormat = BookFormat.EPUB,
+    /** False for a PDF found at indexing to have no text layer (a scan); nothing of it is in the index. */
+    val searchable: Boolean = true,
 )
 
 /** Where the reader left off in a book. [locatorJson] is opaque to the library. */

@@ -105,7 +105,7 @@ class LibraryViewModelTest {
         val vm = vm()
         vm.import(listOf("a.epub", "bad.epub", "b.epub").map { Uri.parse("content://docs/$it") })
         testScheduler.advanceUntilIdle()
-        assertThat(vm.notice.value).isEqualTo("Imported 2 books. bad.epub isn't an EPUB, TXT or Markdown file.")
+        assertThat(vm.notice.value).isEqualTo("Imported 2 books. bad.epub isn't an EPUB, PDF, TXT or Markdown file.")
         vm.dismissNotice()
         assertThat(vm.notice.value).isNull()
     }

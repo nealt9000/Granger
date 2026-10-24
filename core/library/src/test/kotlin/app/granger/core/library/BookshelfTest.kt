@@ -3,6 +3,7 @@ package app.granger.core.library
 import app.granger.core.books.DrmKind
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
+import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -35,6 +36,88 @@ class BookshelfTest {
     private val shelf by lazy { RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }) }
 
     @After fun close() = db.close()
+
+    @org.junit.Before fun pdfBox() = PdfFixtures.init(androidx.test.core.app.ApplicationProvider.getApplicationContext())
+
+    private val pngCover = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 9, 9)
+    private val pdfShelf by lazy {
+        RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, pdfCovers = { _, _ -> pngCover })
+    }
+
+    @Test fun importsAPdf() = test {
+        val source = PdfFixtures.text(src)
+        val result = pdfShelf.import("water.pdf") { source.inputStream() }
+        val book = pdfShelf.book((result as ImportResult.Imported).bookId)!!
+        assertThat(book.format).isEqualTo(BookFormat.PDF)
+        assertThat(book.title).isEqualTo(PdfFixtures.TITLE)
+        assertThat(book.author).isEqualTo("A. Field")
+        assertThat(book.filePath).endsWith("-The-Water-Book.pdf")
+        assertThat(File(book.filePath).readBytes()).isEqualTo(source.readBytes())
+        assertThat(File(book.coverPath!!).readBytes()).isEqualTo(pngCover)
+        assertThat(book.coverPath).endsWith(".png")
+        assertThat(book.searchable).isTrue()
+        assertThat(pdfShelf.import("water.pdf") { source.inputStream() }).isEqualTo(ImportResult.AlreadyThere(book.id))
+        assertThat(importFiles().filter { it.startsWith(".incoming-") }).isEmpty()
+    }
+
+    @Test fun refusesAnEncryptedPdf() = test {
+        val source = PdfFixtures.encrypted(src)
+        val result = pdfShelf.import("locked.pdf") { source.inputStream() }
+        assertThat(result).isEqualTo(ImportResult.Protected(DrmKind.PDF_ENCRYPTED))
+        assertThat(result.message("locked.pdf")).isEqualTo(
+            "locked.pdf is password-protected or encrypted. Granger can't open it and won't remove the protection.",
+        )
+        assertThat(importFiles()).isEmpty()
+    }
+
+    @Test fun refusesATruncatedPdf() = test {
+        val source = PdfFixtures.truncated(src)
+        assertThat(pdfShelf.import("broken.pdf") { source.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
+        assertThat(importFiles()).isEmpty()
+        assertThat(pdfShelf.books.first()).isEmpty()
+    }
+
+    @Test fun addDownloadedRegistersAPdf() = test {
+        val file = PdfFixtures.text(archiveDir, "steam_1908.pdf")
+        val book = pdfShelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, "steam_1908#pdf",
+            BookDetails("Steam Engines (PDF)", "A. Watt", "1908", emptyList(), "", ""))!!
+        assertThat(book.id).isEqualTo("book:archive-org:steam_1908#pdf")
+        assertThat(book.format).isEqualTo(BookFormat.PDF)
+        assertThat(book.title).isEqualTo("Steam Engines (PDF)")
+        // Removing it leaves a text download of the same item alone.
+        val txt = File(archiveDir, "steam_1908.txt").apply { writeText("text") }
+        assertThat(pdfShelf.remove(book.id)).isTrue()
+        assertThat(file.exists()).isFalse()
+        assertThat(txt.exists()).isTrue()
+    }
+
+    @Test fun refreshFindsAStrayPdfButNotPackDocuments() = test {
+        importDir.mkdirs()
+        val stray = PdfFixtures.text(importDir, "abc-water.pdf")
+        PdfFixtures.text(File(booksDir, "packs/zim1"), "doc.pdf")
+        pdfShelf.refresh()
+        val books = pdfShelf.books.first()
+        assertThat(books.map { it.filePath }).containsExactly(stray.absolutePath)
+        assertThat(books.single().format).isEqualTo(BookFormat.PDF)
+        assertThat(books.single().origin).isEqualTo(BookOrigin.IMPORT)
+    }
+
+    @Test fun packDocumentsAreHiddenBooksRemovedWithTheirPack() = test {
+        val file = PdfFixtures.text(File(booksDir, "packs/zim1"), "doc.pdf")
+        val book = pdfShelf.registerPackDocument("zim1", "docs/water.pdf", "Water treatment", file)!!
+        assertThat(book.id).isEqualTo("book:pack:zim1/docs/water.pdf")
+        assertThat(book.origin).isEqualTo(BookOrigin.PACK)
+        assertThat(book.title).isEqualTo("Water treatment")
+        assertThat(book.onShelf).isFalse()
+        assertThat(pdfShelf.book(book.id)).isNotNull()
+
+        val shelves = RoomShelves(db, StubLibrary(emptyList()), pdfShelf, RoomMediaLibrary(db))
+        assertThat(shelves.shelves.first().flatMap { s -> s.collections.flatMap { it.books } }).isEmpty()
+
+        pdfShelf.removePackDocuments("zim1")
+        assertThat(pdfShelf.book(book.id)).isNull()
+        assertThat(file.exists()).isFalse()
+    }
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
@@ -233,9 +316,9 @@ class BookshelfTest {
         assertThat(shelf.import("empty.epub") { empty.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
 
         val binary = File(src, "scan.pdf").apply { writeBytes(byteArrayOf(0x25, 0x50, 0x44, 0x46, 0, 1, 2, 0)) }
-        val unsupported = shelf.import("scan.pdf") { binary.inputStream() }
-        assertThat(unsupported).isEqualTo(ImportResult.Unsupported)
-        assertThat(unsupported.message("scan.pdf")).isEqualTo("scan.pdf isn't an EPUB, TXT or Markdown file.")
+        assertThat(shelf.import("scan.pdf") { binary.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
+        assertThat(ImportResult.Unsupported.message("story.docx"))
+            .isEqualTo("story.docx isn't an EPUB, PDF, TXT or Markdown file.")
 
         assertThat(importFiles()).isEmpty()
         assertThat(shelf.books.first()).isEmpty()
@@ -265,12 +348,12 @@ class BookshelfTest {
         assertThat(small.import("book.epub") { epub.inputStream() }).isInstanceOf(ImportResult.Imported::class.java)
     }
 
-    @Test fun pdfRenamedEpubIsUnsupported() = test {
+    @Test fun aBrokenPdfIsDamagedWhateverItsName() = test {
         val pdf = File(src, "paper.epub").apply { writeText("%PDF-1.7\nplain looking text without zero bytes") }
-        assertThat(shelf.import("paper.epub") { pdf.inputStream() }).isEqualTo(ImportResult.Unsupported)
-        // Whatever it's called.
-        assertThat(shelf.import("paper.txt") { pdf.inputStream() }).isEqualTo(ImportResult.Unsupported)
-        assertThat(shelf.import("paper") { pdf.inputStream() }).isEqualTo(ImportResult.Unsupported)
+        assertThat(shelf.import("paper.epub") { pdf.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
+        // Whatever it's called: the header decides, not the name.
+        assertThat(shelf.import("paper.txt") { pdf.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
+        assertThat(shelf.import("paper") { pdf.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
         assertThat(importFiles()).isEmpty()
         assertThat(shelf.books.first()).isEmpty()
     }

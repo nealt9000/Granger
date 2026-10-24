@@ -6,6 +6,8 @@ import app.granger.core.library.Filing
 import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.BookDetails
+import app.granger.core.library.BookFormat
+import app.granger.core.library.BookIds
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.BookPosition
 import app.granger.core.library.Bookshelf
@@ -261,6 +263,21 @@ class FakeBookshelf : Bookshelf {
         removed += id
         bookList.update { list -> list.filterNot { it.id == id } }
         return true
+    }
+
+    /** Pack documents registered, as (zimId, path, title); each becomes a PDF book whose file is the one given. */
+    val packDocuments = mutableListOf<Triple<String, String, String>>()
+    override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book {
+        packDocuments += Triple(zimId, path, title)
+        val book = book(BookIds.of(BookOrigin.PACK, "$zimId/$path"), title).copy(
+            origin = BookOrigin.PACK, sourceRef = "$zimId/$path", filePath = file.absolutePath, format = BookFormat.PDF,
+        )
+        bookList.update { list -> list.filterNot { it.id == book.id } + book }
+        return book
+    }
+
+    override suspend fun removePackDocuments(zimId: String) {
+        bookList.update { list -> list.filterNot { it.origin == BookOrigin.PACK && it.sourceRef.startsWith("$zimId/") } }
     }
 
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) {

@@ -1,10 +1,11 @@
 package app.granger.core.library
 
 import androidx.room.withTransaction
+import app.granger.core.books.BookMeta
 import app.granger.core.books.DrmKind
 import app.granger.core.books.EpubInspector
-import app.granger.core.books.BookMeta
 import app.granger.core.books.Inspection
+import app.granger.core.books.PdfInspector
 import app.granger.core.books.TextDecoding
 import app.granger.core.books.TextToEpub
 import java.io.File
@@ -34,8 +35,12 @@ sealed interface ImportResult {
     /** The message to show the user about the file called [name]; null when nothing went wrong. */
     fun message(name: String): String? = when (this) {
         is Imported, is AlreadyThere -> null
-        is Protected -> "$name is copy-protected (DRM). Granger can't open it and won't remove the protection."
-        Unsupported -> "$name isn't an EPUB, TXT or Markdown file."
+        is Protected -> if (kind == DrmKind.PDF_ENCRYPTED) {
+            "$name is password-protected or encrypted. Granger can't open it and won't remove the protection."
+        } else {
+            "$name is copy-protected (DRM). Granger can't open it and won't remove the protection."
+        }
+        Unsupported -> "$name isn't an EPUB, PDF, TXT or Markdown file."
         is Damaged -> "$name is damaged or isn't a complete e-book."
     }
 }
@@ -56,11 +61,12 @@ interface Bookshelf {
     val positions: Flow<Map<String, BookPosition>>
     suspend fun book(id: String): Book?
 
-    /** Re-checks every book's file and registers EPUBs found in the books folders that have no row. */
+    /** Re-checks every book's file and registers EPUBs and PDFs found in the books folders that have no row. */
     suspend fun refresh()
 
     /**
-     * Registers a finished download of [origin] with source reference [ref]; null if the file isn't a readable EPUB.
+     * Registers a finished download of [origin] with source reference [ref]; null if the file isn't a readable EPUB
+     * or PDF.
      * A `.txt` file is converted to an EPUB beside it (null if it is over the size limit). Non-blank [details]
      * fields win over the EPUB's own metadata.
      */
@@ -75,6 +81,15 @@ interface Bookshelf {
 
     /** Deletes the file, cover and search text; the position and marks are kept. False if the file can't be deleted. */
     suspend fun remove(id: String): Boolean
+
+    /**
+     * Registers [file], a PDF copied out of pack [zimId] at [path], as a pack document titled [title]: a hidden book
+     * ([BookOrigin.PACK]) so it keeps its place and shows on the rail. Null if the file isn't a readable PDF.
+     */
+    suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book?
+
+    /** Removes every pack document of [zimId], with its file and cover (the pack itself is going). */
+    suspend fun removePackDocuments(zimId: String)
 
     suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String)
     suspend fun position(bookId: String): BookPosition?
@@ -97,6 +112,7 @@ class RoomBookshelf(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val maxTextBytes: Long = 20L * 1024 * 1024,
+    private val pdfCovers: PdfCovers = PlatformPdfCovers,
 ) : Bookshelf {
     private val dao = db.bookDao()
 
@@ -109,6 +125,10 @@ class RoomBookshelf(
 
     override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? =
         withContext(io) {
+            if (isPdfName(file.name)) {
+                val meta = (PdfInspector.inspect(file) as? Inspection.Ok)?.meta ?: return@withContext null
+                return@withContext register(BookIds.of(origin, ref), origin, ref, file, meta, details, BookFormat.PDF)
+            }
             val epub = if (file.extension.equals("txt", ignoreCase = true)) {
                 convertText(file, details?.title?.takeIf { it.isNotBlank() }) ?: return@withContext null
             } else {
@@ -164,7 +184,15 @@ class RoomBookshelf(
             val head = incoming.inputStream().use { input ->
                 ByteArray(SNIFF_BYTES).let { buf -> buf.copyOf(input.read(buf).coerceAtLeast(0)) }
             }
-            if (head.startsWith(PDF_MAGIC)) return@withContext ImportResult.Unsupported
+            if (head.startsWith(PDF_MAGIC)) {
+                val meta = when (val inspection = PdfInspector.inspect(incoming, title)) {
+                    is Inspection.Ok -> inspection.meta
+                    is Inspection.Protected -> return@withContext ImportResult.Protected(inspection.kind)
+                    is Inspection.Invalid -> return@withContext ImportResult.Damaged(inspection.reason)
+                }
+                val target = File(dir, "${sha.take(12)}-${sanitise(meta.title)}.pdf")
+                return@withContext place(incoming, target, id, sha, meta, BookFormat.PDF, existing)
+            }
             val zip = head.startsWith(ZIP_MAGIC)
             // Not a zip: only a text name, or no extension at all, is worth reading as text (a .epub, .pdf, .html isn't).
             if (!zip && !textName && hasExtension(displayName)) return@withContext ImportResult.Unsupported
@@ -193,21 +221,27 @@ class RoomBookshelf(
                 }
             }
 
-            val target = File(dir, "${sha.take(12)}-${sanitise(title)}.epub")
-            Files.move(epub.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            try {
-                register(id, BookOrigin.IMPORT, sha, target, meta)
-            } catch (e: Throwable) {
-                target.delete()
-                throw e
-            }
-            // A re-import replaces a damaged or misplaced copy; don't leave the old one as a stray.
-            if (existing != null && existing.filePath != target.absolutePath) File(existing.filePath).delete()
-            ImportResult.Imported(id)
+            place(epub, File(dir, "${sha.take(12)}-${sanitise(title)}.epub"), id, sha, meta, BookFormat.EPUB, existing)
         } finally {
             incoming.delete()
             converted.delete()
         }
+    }
+
+    /** Moves an inspected import to [target] and registers it. */
+    private suspend fun place(
+        file: File, target: File, id: String, sha: String, meta: BookMeta, format: BookFormat, existing: Book?,
+    ): ImportResult {
+        Files.move(file.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        try {
+            register(id, BookOrigin.IMPORT, sha, target, meta, format = format)
+        } catch (e: Throwable) {
+            target.delete()
+            throw e
+        }
+        // A re-import replaces a damaged or misplaced copy; don't leave the old one as a stray.
+        if (existing != null && existing.filePath != target.absolutePath) File(existing.filePath).delete()
+        return ImportResult.Imported(id)
     }
 
     override suspend fun refresh(): Unit = withContext(io) {
@@ -216,7 +250,7 @@ class RoomBookshelf(
             val status = when {
                 !File(book.filePath).exists() -> PackStatus.MISSING
                 // A damaged file stays damaged until it inspects cleanly; a returning file is otherwise OK.
-                book.status == PackStatus.CORRUPT && EpubInspector.inspect(File(book.filePath)) !is Inspection.Ok ->
+                book.status == PackStatus.CORRUPT && inspect(File(book.filePath)) !is Inspection.Ok ->
                     PackStatus.CORRUPT
                 else -> PackStatus.OK
             }
@@ -257,8 +291,8 @@ class RoomBookshelf(
             // Older snapshots of a download can be left behind: keep a row whose file is still there, else take the newest.
             if (existing != null && File(existing.filePath).exists()) continue
             val file = group.maxBy { it.third.name }.third
-            when (val inspection = EpubInspector.inspect(file)) {
-                is Inspection.Ok -> register(id, origin, ref, file, inspection.meta)
+            when (val inspection = inspect(file)) {
+                is Inspection.Ok -> register(id, origin, ref, file, inspection.meta, format = formatOf(file))
                 else -> dao.upsert(
                     (existing ?: unreadable(id, origin, ref, file)).copy(
                         filePath = file.absolutePath, sizeBytes = file.length(), status = PackStatus.CORRUPT,
@@ -273,7 +307,7 @@ class RoomBookshelf(
         val file = File(book.filePath)
         if (file.exists() && !file.delete()) return@withContext false
         // A converted text book's source stays beside it; left alone, the next refresh() would convert it again.
-        if (book.origin == BookOrigin.ARCHIVE_ORG) {
+        if (book.origin == BookOrigin.ARCHIVE_ORG && book.format == BookFormat.EPUB) {
             val txt = File(file.parentFile, file.nameWithoutExtension + ".txt")
             if (txt.exists() && !txt.delete()) return@withContext false
         }
@@ -283,6 +317,25 @@ class RoomBookshelf(
             dao.delete(id)
         }
         true
+    }
+
+    override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book? =
+        withContext(io) {
+            val meta = (PdfInspector.inspect(file, title) as? Inspection.Ok)?.meta ?: return@withContext null
+            val ref = "$zimId/$path"
+            // The entry's title, not the PDF's own: it is what the article linked to.
+            val details = BookDetails(title, "", "", emptyList(), "", "")
+            register(BookIds.of(BookOrigin.PACK, ref), BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
+        }
+
+    override suspend fun removePackDocuments(zimId: String): Unit = withContext(io) {
+        val prefix = "$zimId/"
+        for (book in dao.getAll()) {
+            if (book.origin != BookOrigin.PACK || !book.sourceRef.startsWith(prefix)) continue
+            File(book.filePath).delete()
+            book.coverPath?.let { File(it).delete() }
+            dao.delete(book.id)
+        }
     }
 
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) {
@@ -302,6 +355,7 @@ class RoomBookshelf(
     /** Upserts the book with fresh metadata and cover; an existing row keeps its id and `addedAt`, and is re-indexed. */
     private suspend fun register(
         id: String, origin: BookOrigin, ref: String, file: File, meta: BookMeta, details: BookDetails? = null,
+        format: BookFormat = BookFormat.EPUB,
     ): Book {
         val existing = dao.get(id)
         val book = Book(
@@ -317,20 +371,29 @@ class RoomBookshelf(
             subjects = details?.subjects?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() }?.joinToString("; ")
                 ?: meta.subjects.joinToString("; "),
             description = details?.description.orElse(meta.description),
-            coverPath = writeCover(id, meta, existing?.coverPath),
+            coverPath = writeCover(id, if (format == BookFormat.PDF) pdfCover(file) else meta.cover,
+                if (format == BookFormat.PDF) "png" else meta.coverExtension, existing?.coverPath),
             sizeBytes = file.length(),
             status = PackStatus.OK,
             indexedAt = null,
             addedAt = existing?.addedAt ?: now(),
+            format = format,
         )
         dao.upsert(book)
         return book
     }
 
+    private fun pdfCover(file: File): ByteArray? = pdfCovers.firstPage(file, COVER_HEIGHT_PX)
+
+    /** The inspector for [file]'s format, by its name. */
+    private fun inspect(file: File): Inspection =
+        if (isPdfName(file.name)) PdfInspector.inspect(file) else EpubInspector.inspect(file)
+
+    private fun formatOf(file: File) = if (isPdfName(file.name)) BookFormat.PDF else BookFormat.EPUB
+
     /** Writes the cover's raw bytes to `coversDir/<sha1 of id>.<ext>` and removes any older cover; null if none. */
-    private fun writeCover(id: String, meta: BookMeta, oldPath: String?): String? {
-        val bytes = meta.cover
-        val extension = meta.coverExtension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
+    private fun writeCover(id: String, bytes: ByteArray?, coverExtension: String?, oldPath: String?): String? {
+        val extension = coverExtension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
         val target = bytes?.let { File(coversDir, "${sha1(id)}.$extension") }
         if (oldPath != null && oldPath != target?.absolutePath) File(oldPath).delete()
         if (target == null) return null
@@ -350,10 +413,11 @@ class RoomBookshelf(
         sizeBytes = file.length(), status = PackStatus.CORRUPT, indexedAt = null, addedAt = now(),
     )
 
-    /** `.epub` files in [dir] that no row points at; partial `.incoming-*` files are skipped. */
+    /** `.epub` and `.pdf` files in [dir] that no row points at; partial `.incoming-*` files are skipped. */
     private fun strays(dir: File, knownPaths: Set<String>): List<File> =
         dir.listFiles().orEmpty().filter {
-            it.isFile && it.name.endsWith(".epub", ignoreCase = true) && !it.name.startsWith(".incoming-") &&
+            it.isFile && (it.name.endsWith(".epub", ignoreCase = true) || isPdfName(it.name)) &&
+                !it.name.startsWith(".incoming-") &&
                 it.absolutePath !in knownPaths
         }
 
@@ -364,6 +428,9 @@ class RoomBookshelf(
         val PDF_MAGIC = "%PDF".toByteArray()
         val UNSAFE = Regex("[^A-Za-z0-9._-]+")
         val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
+        const val COVER_HEIGHT_PX = 600
+
+        fun isPdfName(name: String) = name.endsWith(".pdf", ignoreCase = true)
 
         fun String?.orElse(fallback: String) = this?.takeIf { it.isNotBlank() } ?: fallback
 

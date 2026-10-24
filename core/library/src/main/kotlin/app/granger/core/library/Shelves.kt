@@ -174,7 +174,7 @@ class RoomShelves(
         val items = combine(library.packs, bookshelf.books, media.tracks, media.audiobooks) { packs, books, tracks, audiobooks ->
             val origins = HashMap<String, MediaOrigin>()
             tracks.forEach { origins.putIfAbsent(it.albumKey, it.origin) }
-            Items(packs, books, Albums.summaries(tracks), audiobooks, origins)
+            Items(packs, books.filter { it.onShelf }, Albums.summaries(tracks), audiobooks, origins)
         }
         return combine(items, dao.observeMediaTypes(), dao.observeCollections(), dao.observePlacements()) { it, _, _, _ -> it }
     }

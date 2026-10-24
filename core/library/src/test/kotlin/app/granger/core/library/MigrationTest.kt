@@ -15,6 +15,25 @@ import org.robolectric.annotation.Config
 class MigrationTest {
     @get:Rule val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), LibraryDatabase::class.java)
 
+    @Test fun migration12To13GivesEveryBookEpubAndSearchable() {
+        helper.createDatabase("migrate13.db", 12).apply {
+            execSQL(
+                "INSERT INTO books (id, origin, sourceRef, filePath, title, author, translator, date, language, subjects, " +
+                    "description, coverPath, sizeBytes, status, indexedAt, addedAt) VALUES ('book:granger:hamlet', 'GRANGER', " +
+                    "'hamlet', '/b/hamlet.epub', 'Hamlet', 'W. S.', '', '', 'en', '', '', NULL, 10, 'OK', 5, 1)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate13.db", 13, true, LibraryDatabase.MIGRATION_12_13)
+        db.query("SELECT title, format, searchable, indexedAt FROM books").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getString(0)).isEqualTo("Hamlet")
+            assertThat(it.getString(1)).isEqualTo("EPUB")
+            assertThat(it.getInt(2)).isEqualTo(1)
+            assertThat(it.getLong(3)).isEqualTo(5)
+        }
+    }
+
     @Test fun migration11To12KeepsRowsAndCreatesHomeTables() {
         helper.createDatabase("migrate12.db", 11).apply {
             execSQL("INSERT INTO recent_plays (`key`, title, playedAt) VALUES ('album:x', 'X', 1)")
