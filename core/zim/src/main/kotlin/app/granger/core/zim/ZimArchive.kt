@@ -14,6 +14,9 @@ data class ZimMetadata(
 /** One entry's content after following redirects; [path] is the final entry's path. */
 class ZimItem(val path: String, val mimeType: String, val bytes: ByteArray)
 
+/** What an entry is, without its content: for a PDF that may be hundreds of MB (Plan P2). */
+data class ZimEntry(val path: String, val title: String, val mimeType: String, val sizeBytes: Long)
+
 /**
  * A title suggestion or full-text result. Only full-text results carry a [snippet] (HTML with `<b>`
  * highlights) and a [score].
@@ -34,6 +37,20 @@ interface ZimArchive : Closeable {
     fun resolvePath(path: String): String?
 
     fun read(path: String): ZimItem?
+
+    /** [path]'s entry after redirects, without reading its content; null when there is no such entry. */
+    fun entry(path: String): ZimEntry? = read(path)?.let { ZimEntry(it.path, it.path.substringAfterLast('/'), it.mimeType, it.bytes.size.toLong()) }
+
+    /**
+     * Writes [path]'s content to [out], streamed where the archive allows it, never whole in memory for a large
+     * stored entry. False when there is no such entry or the copy failed ([out] is then removed).
+     */
+    fun copyTo(path: String, out: File): Boolean = try {
+        read(path)?.let { out.writeBytes(it.bytes); true } ?: false
+    } catch (e: java.io.IOException) {
+        out.delete()
+        false
+    }
 
     /** The path of a random article, or null when the pack has none (or is closed). */
     fun randomPath(): String?

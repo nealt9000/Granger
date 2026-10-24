@@ -372,6 +372,15 @@ class RoomLibraryTest {
         assertThat(packs().map { it.id }).containsExactly("u-b")
     }
 
+    @Test fun removingAPackRunsTheRemovedHook() = test {
+        val gone = mutableListOf<String>()
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        zim(internal, "a.zim", "u-a")
+        hooked.refresh()
+        assertThat(hooked.remove("u-a")).isTrue()
+        assertThat(gone).containsExactly("u-a")
+    }
+
     @Test fun removeWorksForMissingAndUnknownPacks() = test {
         val file = zim(sdCard, "a.zim", "u-a")
         library.refresh()

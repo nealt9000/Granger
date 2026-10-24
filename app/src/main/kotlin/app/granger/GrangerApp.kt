@@ -42,6 +42,7 @@ import app.granger.core.speech.TextReadSource
 import app.granger.core.speech.VoiceId
 import app.granger.ebook.BookReadSource
 import app.granger.reader.ArticleReadSource
+import app.granger.reader.PackDocuments
 import app.granger.settings.SharedVoicePrefs
 import app.granger.settings.VoicePrefs
 import android.util.Log
@@ -261,13 +262,17 @@ class AppContainer(context: Context) {
     }
 
     private val libraryDb = LibraryDatabase.create(context)
-    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs)
+    // A removed pack takes its PDFs (pack documents, Plan P2) with it.
+    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it) })
     val bookshelf: Bookshelf = RoomBookshelf(
         libraryDb, bookDirs,
         importDir = { File(context.getExternalFilesDir(null) ?: context.filesDir, "books/imports") },
         coversDir = File(context.filesDir, "covers"),
     )
     val bookIndex = BookIndex(libraryDb)
+
+    /** PDFs inside Kiwix packs, copied out to the internal volume's `books/packs` when tapped (Plan P2). */
+    val packDocuments = PackDocuments(bookshelf, library::archive, dir = { File(bookDirs().first(), "packs") })
 
     /** Set by the first activity start in this process: the book scan and index pass run once per process. */
     val booksScannedThisProcess = AtomicBoolean(false)

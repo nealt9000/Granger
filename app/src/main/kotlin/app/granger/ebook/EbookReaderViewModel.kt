@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
+import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
@@ -134,6 +135,8 @@ class EbookReaderViewModel(
     /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
     private val player: PlayerHub? = null,
     private val now: () -> Long = System::currentTimeMillis,
+    /** Brings back a missing file it can (a pack document, copied out of its pack again; Plan P2); false if not. */
+    private val restore: suspend (Book) -> Boolean = { false },
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -204,7 +207,7 @@ class EbookReaderViewModel(
             val book = bookshelf.book(tab.packId) ?: return@launch fail(BOOK_GONE)
             _state.update { it.copy(title = book.title) }
             val file = File(book.filePath)
-            if (!withContext(io) { file.isFile }) return@launch fail(BOOK_GONE)
+            if (!withContext(io) { file.isFile } && !(restore(book) && withContext(io) { file.isFile })) return@launch fail(BOOK_GONE)
             // Not cancellable, and recorded the moment it opens, so a publication is never lost: whichever comes
             // second, the open finishing or this view model being cleared, closes it.
             val opened = try {

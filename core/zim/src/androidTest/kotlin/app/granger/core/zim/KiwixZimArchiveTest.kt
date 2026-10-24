@@ -96,6 +96,19 @@ class KiwixZimArchiveTest {
         assertThat(archive.search("C++", 5).map { it.path }).contains("C++")
     }
 
+    @Test fun aPdfEntryHasItsSizeAndCopiesOutWhole() {
+        val entry = archive.entry("docs/water.pdf")!!
+        assertThat(entry.mimeType).isEqualTo("application/pdf")
+        assertThat(entry.title).isEqualTo("Water treatment")
+        val bytes = archive.read("docs/water.pdf")!!.bytes
+        assertThat(entry.sizeBytes).isEqualTo(bytes.size.toLong())
+        val out = java.io.File(TestZim.context.cacheDir, "water-copy.pdf").apply { delete() }
+        assertThat(archive.copyTo("docs/water.pdf", out)).isTrue()
+        assertThat(out.readBytes()).isEqualTo(bytes)
+        assertThat(archive.copyTo("Nope", java.io.File(TestZim.context.cacheDir, "nope.pdf"))).isFalse()
+        out.delete()
+    }
+
     @Test fun callsAfterCloseReturnEmpty() {
         archive.close()
         assertThat(archive.read("index")).isNull()

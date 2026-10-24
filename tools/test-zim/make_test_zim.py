@@ -16,6 +16,33 @@ PNG = base64.b64decode(
 CSS = "body { font-family: serif; } h1 { color: #333; }"
 
 
+def tiny_pdf(text: str) -> bytes:
+    """A one-page PDF with [text] in Helvetica, written by hand so the builder needs no PDF library (Plan P2)."""
+    stream = f"BT /F1 18 Tf 72 720 Td ({text}) Tj ET".encode()
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+        b"<< /Length %d >>\nstream\n" % len(stream) + stream + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for i, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += b"%d 0 obj\n" % i + body + b"\nendobj\n"
+    xref = len(out)
+    out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objects) + 1)
+    for offset in offsets:
+        out += b"%010d 00000 n \n" % offset
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(objects) + 1, xref)
+    return bytes(out)
+
+
+# A PDF in the pack, as Nautilus-style packs hold them: tapping a link to it opens the e-book reader.
+WATER_PDF = tiny_pdf("Boil water for one minute.")
+
+
 def page(title: str, body: str) -> str:
     return (
         '<!DOCTYPE html><html><head><meta charset="utf-8">'
@@ -81,6 +108,7 @@ def build(out: Path) -> None:
             creator.add_item(Entry(path, title, "text/html", html, True))
         creator.add_item(Entry("style.css", "", "text/css", CSS, False))
         creator.add_item(Entry("leaf.png", "", "image/png", PNG, False))
+        creator.add_item(Entry("docs/water.pdf", "Water treatment", "application/pdf", WATER_PDF, False))
         creator.add_redirection("Plants", "Plants", "Photosynthesis", {Hint.FRONT_ARTICLE: True})
         creator.add_illustration(48, PNG)
         for name, value in [

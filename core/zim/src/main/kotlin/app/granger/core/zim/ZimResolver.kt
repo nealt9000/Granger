@@ -16,6 +16,8 @@ sealed interface LinkAction {
     data class Redirect(val url: String) : LinkAction
     /** Leave the app (system browser, mail, maps). */
     data class External(val url: String) : LinkAction
+    /** A document the WebView can't show (a PDF): the e-book reader opens it (Plan P2). */
+    data class OpenDocument(val packId: String, val path: String) : LinkAction
     /** javascript:, file:, intent: and anything else unsafe. */
     data object Ignore : LinkAction
 }
@@ -44,7 +46,9 @@ class ZimResolver(
             }
         // Runs on the main thread: only an already-open archive is consulted. On a miss the WebView
         // loads the URL and shouldInterceptRequest serves it from a background thread.
-        val target = cachedArchiveFor(zim.packId)?.resolvePath(zim.path) ?: return LinkAction.Load
+        val archive = cachedArchiveFor(zim.packId) ?: return LinkAction.Load
+        val target = archive.resolvePath(zim.path) ?: return LinkAction.Load
+        if (isPdf(archive.entry(target)?.mimeType)) return LinkAction.OpenDocument(zim.packId, target)
         return if (target == zim.path) {
             LinkAction.Load
         } else {
@@ -55,6 +59,8 @@ class ZimResolver(
     companion object {
         private val EXTERNAL_SCHEMES = setOf("http", "https", "mailto", "tel", "geo")
         private val TEXT_TYPES = setOf("application/javascript", "application/json", "application/xml", "image/svg+xml")
+
+        fun isPdf(mimeType: String?): Boolean = mimeType != null && splitMimeType(mimeType).first == "application/pdf"
 
         /** Splits `text/html; charset=utf-8` into the MIME type and encoding WebResourceResponse wants. */
         fun splitMimeType(raw: String): Pair<String, String?> {

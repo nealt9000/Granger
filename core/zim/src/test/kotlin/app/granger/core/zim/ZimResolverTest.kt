@@ -12,8 +12,9 @@ class ZimResolverTest {
             "style.css" to ("text/css" to "body{}"),
             "leaf.png" to ("image/png" to "PNG"),
             "app.js" to ("application/javascript" to "1"),
+            "docs/water.pdf" to ("application/pdf" to "%PDF-1.4"),
         ),
-        redirects = mapOf("Plants" to "Photosynthesis"),
+        redirects = mapOf("Plants" to "Photosynthesis", "Water" to "docs/water.pdf"),
     )
     private val resolver = ZimResolver(archiveFor = { id -> archive.takeIf { id == "p" } })
 
@@ -50,6 +51,24 @@ class ZimResolverTest {
         assertThat(resolver.response(ZimUrls.forEntry("p", "Nope"))).isEqualTo(ZimResponse.NotFound)
         assertThat(resolver.response(ZimUrls.forEntry("other", "index"))).isEqualTo(ZimResponse.NotFound)
         assertThat(resolver.response("https://zim.granger.invalid/p/")).isEqualTo(ZimResponse.NotFound)
+    }
+
+    @Test fun aTappedPdfOpensAsADocument() {
+        assertThat(resolver.linkAction(ZimUrls.forEntry("p", "docs/water.pdf")))
+            .isEqualTo(LinkAction.OpenDocument("p", "docs/water.pdf"))
+        // Through a redirect, the document is the target.
+        assertThat(resolver.linkAction(ZimUrls.forEntry("p", "Water"))).isEqualTo(LinkAction.OpenDocument("p", "docs/water.pdf"))
+        assertThat(resolver.linkAction(ZimUrls.forEntry("p", "index"))).isEqualTo(LinkAction.Load)
+        assertThat(ZimResolver.isPdf("application/pdf; charset=binary")).isTrue()
+        assertThat(ZimResolver.isPdf("text/html")).isFalse()
+    }
+
+    @Test fun copyToWritesTheEntry() {
+        val out = java.io.File.createTempFile("doc", ".pdf").apply { delete() }
+        assertThat(archive.copyTo("docs/water.pdf", out)).isTrue()
+        assertThat(out.readText()).isEqualTo("%PDF-1.4")
+        assertThat(archive.copyTo("Nope", out.resolveSibling("none.pdf"))).isFalse()
+        out.delete()
     }
 
     @Test fun everythingElseIsBlocked() {

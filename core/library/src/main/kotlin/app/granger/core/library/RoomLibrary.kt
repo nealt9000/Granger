@@ -22,6 +22,8 @@ class RoomLibrary(
     private val packDirs: () -> List<File>,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
+    /** Runs after a pack is removed: its pack documents (Plan P2) go too. */
+    private val onRemoved: suspend (packId: String) -> Unit = {},
 ) : Library {
     private val packDao = db.packDao()
     private val bookmarkDao = db.bookmarkDao()
@@ -126,6 +128,7 @@ class RoomLibrary(
                 sessionDao.deleteTabsForPack(packId)
                 packDao.delete(packId)
             }
+            onRemoved(packId)
             true
         }
     }

@@ -4,6 +4,9 @@ import org.kiwix.libzim.Archive
 import org.kiwix.libzim.Query
 import org.kiwix.libzim.Searcher
 import org.kiwix.libzim.SuggestionSearcher
+import java.io.File
+import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -49,6 +52,55 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         if (!archive.hasEntryByPath(path)) return@reading null
         val item = archive.getEntryByPath(path).getItem(true)
         ZimItem(item.path, item.mimetype, item.data.data)
+    }
+
+    override fun entry(path: String): ZimEntry? = reading(null) {
+        if (!archive.hasEntryByPath(path)) return@reading null
+        val item = archive.getEntryByPath(path).getItem(true)
+        ZimEntry(item.path, item.title, item.mimetype, item.size)
+    }
+
+    /**
+     * A stored (uncompressed) entry, as PDFs in a ZIM usually are, is copied as a byte range of the `.zim` file
+     * itself; a compressed one has no such range and is read whole, as [read] does.
+     */
+    override fun copyTo(path: String, out: File): Boolean {
+        val source = reading(null) {
+            if (!archive.hasEntryByPath(path)) return@reading null
+            val item = archive.getEntryByPath(path).getItem(true)
+            val direct = item.directAccessInformation
+            if (direct != null && direct.filename.isNotEmpty()) {
+                Source.Range(File(direct.filename), direct.offset, item.size)
+            } else {
+                Source.Bytes(item.data.data)
+            }
+        } ?: return false
+        return try {
+            out.parentFile?.mkdirs()
+            when (source) {
+                is Source.Bytes -> out.writeBytes(source.bytes)
+                is Source.Range -> RandomAccessFile(source.file, "r").use { zim ->
+                    FileOutputStream(out).use { stream ->
+                        val channel = zim.channel
+                        var done = 0L
+                        while (done < source.size) {
+                            val n = channel.transferTo(source.offset + done, source.size - done, stream.channel)
+                            if (n <= 0) throw java.io.IOException("Short copy of $path at $done of ${source.size}")
+                            done += n
+                        }
+                    }
+                }
+            }
+            true
+        } catch (e: Exception) {
+            out.delete()
+            false
+        }
+    }
+
+    private sealed interface Source {
+        class Range(val file: File, val offset: Long, val size: Long) : Source
+        class Bytes(val bytes: ByteArray) : Source
     }
 
     override fun suggest(query: String, limit: Int): List<ZimHit> = reading(emptyList()) {

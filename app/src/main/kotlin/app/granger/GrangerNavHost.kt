@@ -77,6 +77,7 @@ import app.granger.music.MusicNav
 import app.granger.music.MusicScreen
 import app.granger.music.MusicViewModel
 import app.granger.music.PlaylistScreen
+import app.granger.reader.PackDocuments
 import app.granger.reader.ReaderScreen
 import app.granger.reader.ReaderViewModel
 import app.granger.readiness.ReadinessScreen
@@ -485,6 +486,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             SelectionBridge.dictionaryAvailable = false
         }
     }
+    /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page. */
+    suspend fun openPackDocument(packId: String, path: String) {
+        when (val opened = container.packDocuments.open(packId, path)) {
+            is PackDocuments.Opened.Ready -> {
+                val tab = container.sessions.openTab(opened.book.id, "", opened.book.title).let { container.sessions.tab(it) } ?: return
+                nav.showTab(tab, keepCurrent = true)
+            }
+            is PackDocuments.Opened.Failed -> android.widget.Toast.makeText(appContext, opened.message, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
     /** Opens [word]'s Wiktionary entry over the book, so Back returns to the page; false when there is none. */
     suspend fun lookUpInWiktionary(packId: String, word: String): Boolean {
         val hit = withContext(Dispatchers.IO) { container.library.archive(packId)?.suggest(word, 5) }
@@ -733,6 +745,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     showChromeRequest = showChromeRequest,
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onResearch = { text, packId, path, title -> nav.navigate(ResearchRoute.about(text, packId, title, path)) },
+                    onOpenDocument = { packId, path -> scope.launch { openPackDocument(packId, path) } },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -746,6 +759,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.readingPrefs, container.appScope,
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
+                            restore = container.packDocuments::restore,
                         )
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
