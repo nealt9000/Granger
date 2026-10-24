@@ -39,6 +39,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
+import org.readium.r2.shared.publication.Publication.Profile
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
@@ -85,6 +86,12 @@ data class EbookUi(
     val reading: BookReading? = null,
     /** What the bottom bar's voice button does now: start, pause or resume. */
     val voice: VoiceButton = VoiceButton.IDLE,
+    /**
+     * A PDF (Plan P2): pages as printed. Readium's PDF navigator draws no decorations and has no selection, so
+     * highlights, notes, the selection menu, in-book search and read-aloud are off, and the text settings are the
+     * PDF ones.
+     */
+    val isPdf: Boolean = false,
 )
 
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
@@ -153,7 +160,7 @@ class EbookReaderViewModel(
     private var searchJob: Job? = null
 
     /** Builds the navigator fragment; set with the publication, before the state shows it. */
-    var navigatorFactory: EpubNavigatorFactory? = null
+    var navigatorFactory: BookNavigator? = null
         private set
 
     /** The open book's id; set with [navigatorFactory]. */
@@ -210,7 +217,8 @@ class EbookReaderViewModel(
             // The route keeps its target after process death; once used, the saved place wins, not the old search hit.
             val targetUsed = savedState.get<Boolean>(TARGET_CONSUMED) == true
             val initial = StartLocator.choose(opened, saved?.locatorJson, target.takeUnless { targetUsed })
-            val factory = EpubNavigatorFactory(opened)
+            val pdf = opened.conformsTo(Profile.PDF)
+            val factory = if (pdf) BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight) else BookNavigator.Epub(EpubNavigatorFactory(opened))
             bookId = book.id
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
@@ -218,7 +226,10 @@ class EbookReaderViewModel(
             // A search hit's text is marked where the reader lands, as an in-book search hit is.
             val hit = initial?.takeIf { !targetUsed && target?.quote != null && it.text.highlight != null }
             _state.update {
-                it.copy(loading = false, publication = opened, initial = initial, searchHit = hit, toc = flatten(opened.tableOfContents, 0)).derived()
+                it.copy(
+                    loading = false, publication = opened, initial = initial, searchHit = hit,
+                    toc = flatten(opened.tableOfContents, 0), isPdf = pdf,
+                ).derived()
             }
             savedState[TARGET_CONSUMED] = true
             launch { bookshelf.marks(book.id).collect(::onMarks) }
@@ -236,7 +247,10 @@ class EbookReaderViewModel(
             }
         }
         viewModelScope.launch {
-            prefsStore.prefs.collect { prefs -> _state.update { it.copy(prefs = prefs) } }
+            prefsStore.prefs.collect { prefs ->
+                (navigatorFactory as? BookNavigator.Pdf)?.night = prefs.pdfNight
+                _state.update { it.copy(prefs = prefs) }
+            }
         }
     }
 
@@ -276,8 +290,17 @@ class EbookReaderViewModel(
             id,
             locator.toJSON().toString(),
             locator.locations.totalProgression ?: 0.0,
-            locator.title.orEmpty(),
+            placeTitle(locator),
         )
+    }
+
+    /** What the rail and Continue call a place: the chapter, or in a PDF its outline entry, else "Page n". */
+    private fun placeTitle(locator: Locator): String {
+        locator.title?.takeIf { it.isNotBlank() }?.let { return it }
+        val ui = _state.value
+        if (!ui.isPdf) return ""
+        val page = locator.locations.position ?: return ""
+        return pdfTocIndex(ui.toc, page)?.let { ui.toc[it].title.ifBlank { null } } ?: "Page $page"
     }
 
     private fun flatten(links: List<Link>, depth: Int): List<TocRow> =
@@ -299,7 +322,12 @@ class EbookReaderViewModel(
     /** Fills in what follows from the place, the contents and the bookmarks. */
     private fun EbookUi.derived(): EbookUi {
         val here = locator ?: return copy(currentTocIndex = null, isBookmarkedHere = false)
-        val index = toc.indexOfLast { row -> Url(row.href)?.let { sameFile(it, here.href) } == true }.takeIf { it >= 0 }
+        val index = if (isPdf) {
+            // One file: the row is the last outline entry at or before the page.
+            here.locations.position?.let { pdfTocIndex(toc, it) }
+        } else {
+            toc.indexOfLast { row -> Url(row.href)?.let { sameFile(it, here.href) } == true }.takeIf { it >= 0 }
+        }
         val marked = bookmarks.any { m -> parse(m.locatorJson)?.let { isSamePlace(it, here) } == true }
         return copy(currentTocIndex = index, isBookmarkedHere = marked)
     }
@@ -548,4 +576,21 @@ class EbookReaderViewModel(
         const val VOICE_MOVE_GRACE_MS = 1_500L
         const val TARGET_CONSUMED = "targetConsumed"
     }
+}
+
+/** The PDF page a contents row opens at (its `#page=n`); null if it names none. */
+internal fun pdfPageOf(href: String): Int? = href.substringAfter("#page=", "").takeIf { it.isNotEmpty() }?.toIntOrNull()
+
+/** The last contents row at or before [page] in a PDF's outline; null when the page comes before them all. */
+internal fun pdfTocIndex(toc: List<TocRow>, page: Int): Int? {
+    var best: Int? = null
+    var bestPage = 0
+    toc.forEachIndexed { i, row ->
+        val p = pdfPageOf(row.href) ?: return@forEachIndexed
+        if (p <= page && p >= bestPage) {
+            best = i
+            bestPage = p
+        }
+    }
+    return best
 }

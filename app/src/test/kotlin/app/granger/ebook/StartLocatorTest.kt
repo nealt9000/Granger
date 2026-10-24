@@ -2,6 +2,7 @@ package app.granger.ebook
 
 import app.granger.BookTarget
 import app.granger.core.books.TextQuote
+import app.granger.testPdfPublication
 import app.granger.testPublication
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -25,6 +26,19 @@ class StartLocatorTest {
             title = "Saved",
             locations = Locator.Locations(progression = progression, totalProgression = total),
         ).toJSON().toString()
+
+    @Test fun aPdfTargetOpensAtItsPageWithoutTheQuote() = runTest {
+        val pdf = testPdfPublication(pages = 3)
+        val quote = TextQuote("before ", "sand filter", " after")
+        val at = StartLocator.choose(pdf, null, BookTarget("page/2", 0.4, quote))!!
+        assertThat(at.locations.position).isEqualTo(2)
+        assertThat(at.locations.fragments).containsExactly("page=2")
+        assertThat(at.text.highlight).isNull()
+        // Past the last page (an older edition's index): the last page.
+        assertThat(StartLocator.choose(pdf, null, BookTarget("page/9", 0.0))!!.locations.position).isEqualTo(3)
+        // Not a page: the saved place, else the start.
+        assertThat(StartLocator.choose(pdf, null, BookTarget("OEBPS/c.xhtml", 0.0))).isNull()
+    }
 
     @Test fun startLocatorPrefersRouteTargetThenSavedThenStart() = runTest {
         val saved = savedJson("c003.xhtml", progression = 0.25)

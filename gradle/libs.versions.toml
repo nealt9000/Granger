@@ -25,6 +25,8 @@ jsoup = "1.21.2"
 commonmark = "0.30.0"
 readium = "3.4.0"
 pdfboxAndroid = "2.0.27.0"
+# The one readium-adapter-pdfium 3.4.0 depends on; named only to compile against PDFView.Configurator.
+androidPdfViewer = "3.2.8"
 fragmentCompose = "1.9.0"
 desugarJdkLibs = "2.1.5"
 media3 = "1.11.1"
@@ -69,6 +71,7 @@ readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version
 readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version.ref = "readium" }
 readium-navigator = { module = "org.readium.kotlin-toolkit:readium-navigator", version.ref = "readium" }
 readium-adapter-pdfium = { module = "org.readium.kotlin-toolkit:readium-adapter-pdfium", version.ref = "readium" }
+android-pdf-viewer = { module = "com.github.marain87:AndroidPdfViewer", version.ref = "androidPdfViewer" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragmentCompose" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }

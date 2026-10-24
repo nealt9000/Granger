@@ -23,7 +23,7 @@ class ForeignFragment : Fragment()
 class ReadiumFragmentFactoryTest {
     private val navigatorClass = EpubNavigatorFragment::class.java.name
     private val loader = javaClass.classLoader!!
-    private val factory = EpubNavigatorFactory(testPublication())
+    private val factory = BookNavigator.Epub(EpubNavigatorFactory(testPublication()))
     private val builds = object : FragmentFactory() {
         override fun instantiate(classLoader: ClassLoader, className: String): Fragment = MarkerFragment()
     }
@@ -41,7 +41,7 @@ class ReadiumFragmentFactoryTest {
 
     @Test fun fragmentsPairedWithAnotherBookGiveAStandIn() {
         OpenBooks.current = "b" to factory
-        OpenBooks.navigatorFragments = EpubNavigatorFactory(testPublication()) to builds
+        OpenBooks.navigatorFragments = BookNavigator.Epub(EpubNavigatorFactory(testPublication())) to builds
         assertThat(ReadiumFragmentFactory().instantiate(loader, navigatorClass)).isInstanceOf(NavigatorStandIn::class.java)
         OpenBooks.navigatorFragments = null
         assertThat(ReadiumFragmentFactory().instantiate(loader, navigatorClass)).isInstanceOf(NavigatorStandIn::class.java)
@@ -61,7 +61,7 @@ class ReadiumFragmentFactoryTest {
     }
 
     @Test fun releaseForgetsOnlyItsOwnFactory() {
-        val other = EpubNavigatorFactory(testPublication())
+        val other = BookNavigator.Epub(EpubNavigatorFactory(testPublication()))
         OpenBooks.current = "b" to other
         OpenBooks.navigatorFragments = other to builds
         OpenBooks.release(factory)

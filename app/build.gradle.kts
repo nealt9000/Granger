@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.readium.streamer)
     implementation(libs.readium.navigator)
     implementation(libs.readium.adapter.pdfium)
+    implementation(libs.android.pdf.viewer)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.glance.appwidget)   // the home-screen player widget
     coreLibraryDesugaring(libs.desugar.jdk.libs)

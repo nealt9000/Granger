@@ -1,3 +1,5 @@
+@file:OptIn(org.readium.r2.shared.ExperimentalReadiumApi::class)
+
 package app.granger.ebook
 
 import android.content.ActivityNotFoundException
@@ -53,9 +55,13 @@ import app.granger.reader.readerPageInsets
 import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import org.readium.adapter.pdfium.navigator.PdfiumNavigatorFragment
 import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.Decoration
+import org.readium.r2.navigator.OverflowableNavigator
+import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
@@ -93,7 +99,9 @@ fun EbookReaderScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var navigator by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
+    var navigator by remember { mutableStateOf<VisualNavigator?>(null) }
+    // Decorations, the selection and page JavaScript are the EPUB navigator's only (Plan P2): null for a PDF.
+    val epub = navigator as? EpubNavigatorFragment
     val scope = rememberCoroutineScope()
     val appContext = LocalContext.current.applicationContext
     // Outlives a rotation inside the restored navigator, so it holds nothing tied to an activity.
@@ -130,9 +138,9 @@ fun EbookReaderScreen(
     }
     // The voice's sentence: decorated, and the page turned to it while the reader follows. Every sentence is asked
     // for (a paragraph can run over the page): a sentence already on the page moves nothing.
-    LaunchedEffect(navigator, state.reading?.locator) {
+    LaunchedEffect(epub, state.reading?.locator) {
         val reading = state.reading
-        navigator?.applyDecorations(
+        epub?.applyDecorations(
             listOfNotNull(reading?.let { Decoration("voice", it.locator, Decoration.Style.Highlight(tint = READING_TINT)) }), VOICE_GROUP,
         )
     }
@@ -147,8 +155,8 @@ fun EbookReaderScreen(
         navigator?.let { fragment -> viewModel.navigation.collect { fragment.go(it, animated = false) } }
     }
     // The selection menu's taps: read the selection, act, then clear it and close the menu, then say what went wrong.
-    LaunchedEffect(navigator) {
-        val fragment = navigator ?: return@LaunchedEffect
+    LaunchedEffect(epub) {
+        val fragment = epub ?: return@LaunchedEffect
         val effectScope = this
         viewModel.selectionActions.collect { request ->
             var message: String? = null
@@ -184,16 +192,16 @@ fun EbookReaderScreen(
         }
     }
     // Highlights are drawn again whenever they change, and on every new navigator (rotation builds one).
-    LaunchedEffect(navigator, state.decorations) {
-        navigator?.applyDecorations(state.decorations, HIGHLIGHT_GROUP)
+    LaunchedEffect(epub, state.decorations) {
+        epub?.applyDecorations(state.decorations, HIGHLIGHT_GROUP)
     }
-    LaunchedEffect(navigator, state.searchHit) {
+    LaunchedEffect(epub, state.searchHit) {
         val hit = state.searchHit?.let { Decoration("search-hit", it, Decoration.Style.Highlight(tint = SEARCH_HIT_TINT)) }
-        navigator?.applyDecorations(listOfNotNull(hit), SEARCH_GROUP)
+        epub?.applyDecorations(listOfNotNull(hit), SEARCH_GROUP)
     }
     // One tap listener per navigator instance; a tap on a drawn highlight opens its sheet.
-    DisposableEffect(navigator) {
-        val fragment = navigator
+    DisposableEffect(epub) {
+        val fragment = epub
         val listener = object : DecorableNavigator.Listener {
             override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
                 val id = event.decoration.id.toLongOrNull() ?: return false
@@ -207,7 +215,12 @@ fun EbookReaderScreen(
     // Back closes an open panel first, then leaves the reader.
     BackHandler(enabled = state.panel != null) { viewModel.open(null) }
     LaunchedEffect(navigator, state.prefs) {
-        navigator?.submitPreferences(state.prefs.toEpub())
+        when (val shown = navigator) {
+            is EpubNavigatorFragment -> shown.submitPreferences(state.prefs.toEpub())
+            // The only PDF navigator the reader builds is PDFium's (BookNavigator.Pdf).
+            is PdfNavigatorFragment<*, *> -> @Suppress("UNCHECKED_CAST") (shown as PdfiumNavigatorFragment).submitPreferences(state.prefs.toPdfium())
+            else -> Unit
+        }
     }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -220,7 +233,7 @@ fun EbookReaderScreen(
                     title = state.title,
                     onBack = onBack,
                     onContents = { viewModel.open(Panel.CONTENTS) },
-                    onSearch = { viewModel.open(Panel.SEARCH) },
+                    onSearch = if (state.isPdf) null else ({ viewModel.open(Panel.SEARCH) }),
                 )
             }
             // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
@@ -239,15 +252,14 @@ fun EbookReaderScreen(
                         bookId = bookId,
                         factory = factory,
                         // The latest place, so a navigator rebuilt after rotation opens where the reader is.
-                        initial = state.locator ?: state.initial,
-                        prefs = state.prefs.toEpub(),
-                        listener = listener,
-                        config = config,
+                        fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, listener, config),
+                        // PDFium inverts a page only as it lays the document out: Night on a PDF needs a fresh navigator.
+                        look = if (factory is BookNavigator.Pdf && state.prefs.pdfNight) "night" else "",
                         isCleared = { viewModel.isCleared },
                         onReady = { fragment ->
                             fragment.addInputListener(
                                 DirectionalNavigationAdapter(
-                                    fragment,
+                                    fragment as OverflowableNavigator,
                                     minimumHorizontalEdgeSize = 0.0,
                                     horizontalEdgeThresholdPercent = EDGE_FRACTION,
                                     animatedTransition = true,
@@ -276,8 +288,8 @@ fun EbookReaderScreen(
                             viewModel.stopReading()
                             scope.launch { snackbar.showSnackbar("Stopped reading") }
                         },
-                        onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
-                            val fragment = navigator
+                        onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER || state.isPdf) null else ({
+                            val fragment = epub
                             scope.launch {
                                 // The page's first words place the voice; Readium's first visible element is the
                                 // fallback (it can be the paragraph that ran over from the page before).
@@ -300,7 +312,11 @@ fun EbookReaderScreen(
         }
         when (state.panel) {
             Panel.CONTENTS -> ContentsPanel(state, viewModel::goTo, viewModel::goToMark, onDismiss = { viewModel.open(null) })
-            Panel.SETTINGS -> TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+            Panel.SETTINGS -> if (state.isPdf) {
+                PdfSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+            } else {
+                TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+            }
             Panel.SEARCH -> BookSearchPanel(state.search, viewModel::search, viewModel::goToHit, onDismiss = { viewModel.open(null) })
             null -> Unit
         }
@@ -345,9 +361,32 @@ private suspend fun define(
     }
 }
 
+/**
+ * What builds the navigator for [factory]'s format, at [initial]. Remembered on its inputs, so it is rebuilt
+ * whenever the place changes and a navigator restored after rotation opens there.
+ */
+@Composable
+private fun navigatorFragments(
+    factory: BookNavigator,
+    initial: org.readium.r2.shared.publication.Locator?,
+    prefs: ReadingPrefs,
+    listener: EpubNavigatorFragment.Listener,
+    config: EpubNavigatorFragment.Configuration,
+): androidx.fragment.app.FragmentFactory = remember(factory, initial, prefs, listener, config) {
+    when (factory) {
+        is BookNavigator.Epub -> factory.factory.createFragmentFactory(
+            initialLocator = initial,
+            initialPreferences = prefs.toEpub(),
+            listener = listener,
+            configuration = config,
+        )
+        is BookNavigator.Pdf -> factory.factory.createFragmentFactory(initialLocator = initial, initialPreferences = prefs.toPdfium())
+    }
+}
+
 /** Toggles the chrome on a tap in the middle of the page; edge taps are left to page turning. */
 private class MiddleTapListener(
-    private val navigator: EpubNavigatorFragment,
+    private val navigator: VisualNavigator,
     private val onToggle: () -> Unit,
 ) : InputListener {
     override fun onTap(event: TapEvent): Boolean {

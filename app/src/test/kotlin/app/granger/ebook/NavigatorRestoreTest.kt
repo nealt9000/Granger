@@ -93,7 +93,7 @@ class NavigatorRestoreTest {
 
     @Test fun theStandInSurvivesTheRelaunchWithItsPagesDropped() {
         val saved = savedWithNavigator()
-        RestoreHostActivity.factory = ReadiumFragmentFactory(PagerParent::class.java.name)
+        RestoreHostActivity.factory = ReadiumFragmentFactory(setOf(PagerParent::class.java.name))
         val activity = relaunch(saved).get()
         val standIn = activity.supportFragmentManager.findFragmentByTag(tag)
         assertThat(standIn).isInstanceOf(NavigatorStandIn::class.java)
@@ -103,7 +103,7 @@ class NavigatorRestoreTest {
 
     @Test fun theActivityDropsTheStandInBeforeOnStart() {
         val saved = savedWithNavigator()
-        RestoreHostActivity.factory = ReadiumFragmentFactory(PagerParent::class.java.name)
+        RestoreHostActivity.factory = ReadiumFragmentFactory(setOf(PagerParent::class.java.name))
         RestoreHostActivity.drop = true
         val activity = relaunch(saved).get()
         assertThat(activity.supportFragmentManager.findFragmentByTag(tag)).isNull()

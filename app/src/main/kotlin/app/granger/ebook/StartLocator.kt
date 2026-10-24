@@ -1,12 +1,14 @@
 package app.granger.ebook
 
 import app.granger.BookTarget
+import app.granger.core.books.PdfText
 import kotlinx.coroutines.CancellationException
 import org.json.JSONObject
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
+import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.mediatype.MediaType
 
@@ -18,7 +20,10 @@ object StartLocator {
      * outside the reading order, and never throws on a garbled saved locator.
      */
     suspend fun choose(publication: Publication, savedJson: String?, target: BookTarget?): Locator? {
-        if (target != null) {
+        if (target != null && publication.conformsTo(Publication.Profile.PDF)) {
+            // A PDF's index hrefs name a page ("page/12"); the quote can't be found on a drawn page, so it's dropped.
+            pdfPage(publication, target.href)?.let { return it }
+        } else if (target != null) {
             // Targets come from the book index: decoded zip paths ("OEBPS/Chapter 1.xhtml"), not URLs.
             val path = target.href.substringBefore('#')
             val fragment = target.href.substringAfter('#', "").takeIf { it.isNotEmpty() }
@@ -57,6 +62,20 @@ object StartLocator {
         } catch (e: Exception) {
             null
         }
+    }
+
+    /** The locator of the page [href] names, clamped to the last page; null if it names none. */
+    private suspend fun pdfPage(publication: Publication, href: String): Locator? {
+        val page = PdfText.pageOf(href) ?: return null
+        val positions = try {
+            publication.positions()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return null
+        }
+        if (positions.isEmpty()) return null
+        return positions[page.coerceIn(1, positions.size) - 1]
     }
 
     private fun parse(json: String?): Locator? {

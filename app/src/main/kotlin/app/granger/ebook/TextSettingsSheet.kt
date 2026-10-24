@@ -77,6 +77,30 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
     }
 }
 
+/**
+ * A PDF's settings (Plan P2): its pages are drawn as printed, so there is no type to set; only how pages follow
+ * each other, how one fits the screen, and Day or Night (PDFium inverts the page; Sepia reads as Day here).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PdfSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Setting("Pages") {
+                Chips(listOf(false to "Page by page", true to "Scroll"), prefs.pdfScroll) { onChange(prefs.copy(pdfScroll = it)) }
+            }
+            Setting("Fit") {
+                Chips(listOf(false to "Whole page", true to "Width"), prefs.pdfFitWidth) { onChange(prefs.copy(pdfFitWidth = it)) }
+            }
+            Setting("Theme") {
+                Chips(listOf(false to "Day", true to "Night"), prefs.pdfNight) { night ->
+                    onChange(prefs.copy(theme = if (night) ReadingTheme.NIGHT else ReadingTheme.DAY))
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun Setting(label: String, content: @Composable () -> Unit) {
     Column {

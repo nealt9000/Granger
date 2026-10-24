@@ -38,6 +38,7 @@ import app.granger.settings.OpenTo
 import app.granger.settings.RailSide
 import app.granger.shell.RailHidden
 import org.readium.r2.shared.publication.Link
+import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.publication.Metadata
 import org.readium.r2.shared.publication.Publication
@@ -329,6 +330,45 @@ fun testPublication(
         positionsServiceFactory = PerResourcePositionsService.createFactory(MediaType.XHTML)
     },
 )
+
+/**
+ * A PDF publication of [pages] pages, as Readium's PDF parser makes one: one reading-order item, positions one per
+ * page (with the `page=n` fragment), and an outline of [outline] (title to 1-based page) as `#page=n` links.
+ */
+fun testPdfPublication(
+    title: String = "The Water Book",
+    pages: Int = 5,
+    outline: List<Pair<String, Int>> = listOf("Boiling" to 1, "Filters" to 2, "Storage" to 4),
+): Publication {
+    val href = Url("doc.pdf")!!
+    val positions = (1..pages).map { n ->
+        Locator(
+            href = href,
+            mediaType = MediaType.PDF,
+            locations = Locator.Locations(
+                fragments = listOf("page=$n"),
+                position = n,
+                progression = (n - 1).toDouble() / pages,
+                totalProgression = (n - 1).toDouble() / pages,
+            ),
+        )
+    }
+    return Publication(
+        manifest = Manifest(
+            metadata = Metadata(localizedTitle = LocalizedString(title), conformsTo = setOf(Publication.Profile.PDF)),
+            readingOrder = listOf(Link(href, mediaType = MediaType.PDF)),
+            tableOfContents = outline.map { (t, page) -> Link(Url("doc.pdf#page=$page")!!, title = t) },
+        ),
+        container = TrackingContainer(),
+        servicesBuilder = Publication.ServicesBuilder().apply {
+            positionsServiceFactory = {
+                object : org.readium.r2.shared.publication.services.PositionsService {
+                    override suspend fun positionsByReadingOrder(): List<List<Locator>> = listOf(positions)
+                }
+            }
+        },
+    )
+}
 
 /**
  * A publication whose chapters have XHTML bodies ([chapters]: path to markup inside `<body>`), with Readium's content

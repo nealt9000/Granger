@@ -37,6 +37,7 @@ import org.junit.runner.RunWith
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.mediatype.MediaType
 import org.robolectric.RobolectricTestRunner
@@ -185,6 +186,46 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.reading!!.locator.text.highlight).isEqualTo("Second sentence.")
         assertThat(vm.state.value.reading!!.following).isTrue()
         assertThat(hub.calls).isEmpty()
+    }
+
+    @Test fun aPdfOpensWithItsOutlineAndNamesThePlaceByIt() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication(pages = 5)
+        val vm = reader()
+        val state = vm.state.value
+        assertThat(state.isPdf).isTrue()
+        assertThat(vm.navigatorFactory).isInstanceOf(BookNavigator.Pdf::class.java)
+        assertThat(state.toc.map { it.title }).containsExactly("Boiling", "Filters", "Storage").inOrder()
+        val positions = kotlinx.coroutines.runBlocking { state.publication!!.positions() }
+
+        vm.onLocator(positions[2]) // Page 3: inside "Filters", which starts on page 2.
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(1)
+        testScheduler.advanceUntilIdle()
+        assertThat(bookshelf.positionMap.value.getValue("b").chapterTitle).isEqualTo("Filters")
+
+        val untitled = app.granger.testPdfPublication(pages = 5, outline = listOf("Storage" to 4))
+        opener.publication = untitled
+        val bare = reader()
+        val page2 = kotlinx.coroutines.runBlocking { untitled.positions() }[1]
+        bare.onLocator(page2)
+        testScheduler.advanceUntilIdle()
+        assertThat(bookshelf.positionMap.value.getValue("b").chapterTitle).isEqualTo("Page 2")
+    }
+
+    @Test fun aPdfsNightFollowsTheTheme() = runTest(main.dispatcher) {
+        prefsStore.update(ReadingPrefs(theme = ReadingTheme.DAY))
+        opener.publication = app.granger.testPdfPublication()
+        val vm = reader()
+        val pdf = vm.navigatorFactory as BookNavigator.Pdf
+        assertThat(pdf.night).isFalse()
+        vm.updatePrefs(vm.state.value.prefs.copy(theme = ReadingTheme.NIGHT))
+        testScheduler.advanceUntilIdle()
+        assertThat(pdf.night).isTrue()
+    }
+
+    @Test fun anEpubIsNotAPdf() = runTest(main.dispatcher) {
+        val vm = reader()
+        assertThat(vm.state.value.isPdf).isFalse()
+        assertThat(vm.navigatorFactory).isInstanceOf(BookNavigator.Epub::class.java)
     }
 
     @Test fun opensAtSavedPosition() = runTest(main.dispatcher) {

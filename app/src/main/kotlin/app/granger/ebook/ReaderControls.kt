@@ -54,7 +54,7 @@ import org.readium.r2.shared.publication.Locator
 /** Back, the book's title, Contents and Search. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EbookTopBar(title: String, onBack: () -> Unit, onContents: () -> Unit, onSearch: () -> Unit) {
+fun EbookTopBar(title: String, onBack: () -> Unit, onContents: () -> Unit, onSearch: (() -> Unit)?) {
     TopAppBar(
         windowInsets = ReaderTopBarInsets,
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) },
@@ -63,7 +63,8 @@ fun EbookTopBar(title: String, onBack: () -> Unit, onContents: () -> Unit, onSea
         },
         actions = {
             IconButton(onClick = onContents) { Icon(Icons.Filled.Menu, contentDescription = "Contents") }
-            IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search in book") }
+            // No in-book search for a PDF (Plan P2): Search finds its pages from the library index instead.
+            if (onSearch != null) IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search in book") }
         },
     )
 }

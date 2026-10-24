@@ -20,6 +20,27 @@ class ReadingPrefsTest {
     private val shared = ApplicationProvider.getApplicationContext<Context>()
         .getSharedPreferences("reading-test", Context.MODE_PRIVATE)
 
+    @Test fun toPdfiumMapsPagesFitAndNight() {
+        val paged = ReadingPrefs().toPdfium()
+        assertThat(paged.scroll).isFalse()
+        assertThat(paged.scrollAxis).isEqualTo(org.readium.r2.navigator.preferences.Axis.HORIZONTAL)
+        assertThat(paged.fit).isEqualTo(org.readium.r2.navigator.preferences.Fit.CONTAIN)
+        val scrolled = ReadingPrefs(pdfScroll = true, pdfFitWidth = true).toPdfium()
+        assertThat(scrolled.scroll).isTrue()
+        assertThat(scrolled.scrollAxis).isEqualTo(org.readium.r2.navigator.preferences.Axis.VERTICAL)
+        assertThat(scrolled.fit).isEqualTo(org.readium.r2.navigator.preferences.Fit.WIDTH)
+        assertThat(ReadingPrefs(theme = ReadingTheme.NIGHT).pdfNight).isTrue()
+        assertThat(ReadingPrefs(theme = ReadingTheme.SEPIA).pdfNight).isFalse()
+    }
+
+    @Test fun pdfPrefsSurviveTheStore() {
+        val store = ReadingPrefsStore(shared)
+        store.update(ReadingPrefs(pdfScroll = true, pdfFitWidth = true))
+        val again = ReadingPrefsStore(shared).prefs.value
+        assertThat(again.pdfScroll).isTrue()
+        assertThat(again.pdfFitWidth).isTrue()
+    }
+
     @Test fun toEpubOverridesPublisherStylesAndPaginates() {
         val epub = ReadingPrefs(
             typeface = Typeface.SANS, fontScale = 1.25, lineHeight = 1.8, margins = 1.5,

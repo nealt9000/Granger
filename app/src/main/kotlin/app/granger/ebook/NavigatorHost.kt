@@ -13,52 +13,42 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
+import androidx.fragment.app.FragmentFactory
 import app.granger.R
-import org.readium.r2.navigator.epub.EpubNavigatorFactory
-import org.readium.r2.navigator.epub.EpubNavigatorFragment
-import org.readium.r2.navigator.epub.EpubPreferences
-import org.readium.r2.shared.publication.Locator
+import org.readium.r2.navigator.VisualNavigator
 
 /** The fragment container; one id, so the fragment manager restores a navigator into it after rotation. */
 private val ContainerId = R.id.readium_navigator_container
 
-private fun navigatorTag(bookId: String) = "readium:$bookId"
+private fun navigatorTag(bookId: String, look: String) = if (look.isEmpty()) "readium:$bookId" else "readium:$bookId:$look"
 
 /**
- * Readium's navigator fragment in a [FragmentContainerView]. The fragment is committed only when the container
- * doesn't already hold a live navigator for [bookId], so after rotation the one the system restored is reused.
- * A stand-in or foreign fragment there (a [NavigatorStandIn] the activity didn't drop, or another book's) is replaced. Leaving the
- * screen removes the fragment; rotating keeps it. [initial] is where a new navigator opens: the reader passes the
- * latest place, so a navigator rebuilt after rotation opens there too. [onReady] gets every navigator shown.
+ * Readium's navigator fragment (EPUB or PDF) in a [FragmentContainerView]. The fragment is committed only when the
+ * container doesn't already hold a live navigator for [bookId], so after rotation the one the system restored is
+ * reused. A stand-in or foreign fragment there (a [NavigatorStandIn] the activity didn't drop, or another book's) is
+ * replaced. Leaving the screen removes the fragment; rotating keeps it. [fragments] builds a new navigator; the reader
+ * rebuilds it whenever the place changes, so a navigator rebuilt after rotation opens at the latest place.
+ * A change of [look] replaces the navigator with a fresh one (a PDF's Night, which PDFium only applies on layout).
+ * [onReady] gets every navigator shown.
  */
 @SuppressLint("RestrictedApi") // FragmentManager.onContainerAvailable, as androidx.fragment.compose.AndroidFragment uses it.
 @Composable
 fun NavigatorHost(
     bookId: String,
-    factory: EpubNavigatorFactory,
-    initial: Locator?,
-    prefs: EpubPreferences,
-    listener: EpubNavigatorFragment.Listener,
-    config: EpubNavigatorFragment.Configuration,
-    onReady: (EpubNavigatorFragment) -> Unit,
+    factory: BookNavigator,
+    fragments: FragmentFactory,
+    onReady: (VisualNavigator) -> Unit,
     modifier: Modifier = Modifier,
+    look: String = "",
     /** True once the reader's view model is cleared: a screen still composing on its way out claims nothing. */
     isCleared: () -> Boolean = { false },
 ) {
     val activity = LocalContext.current.findFragmentActivity()
     val fragmentManager = activity.supportFragmentManager
     val ready by rememberUpdatedState(onReady)
-    // Deliberately rebuilt whenever the place changes (initial is the latest locator), so a restored navigator opens there.
-    val fragments = remember(factory, initial, prefs, listener, config) {
-        factory.createFragmentFactory(
-            initialLocator = initial,
-            initialPreferences = prefs,
-            listener = listener,
-            configuration = config,
-        )
-    }
     // What ReadiumFragmentFactory builds a restored navigator with. This reader is current again, too, when it
     // returns to the top after another reader of the same book took over and was cleared.
     SideEffect {
@@ -73,15 +63,15 @@ fun NavigatorHost(
         factory = { context -> FragmentContainerView(context).apply { id = ContainerId }.also { holder[0] = it } },
     )
 
-    DisposableEffect(fragmentManager, bookId, factory) {
+    DisposableEffect(fragmentManager, bookId, factory, look) {
         val container = holder[0]
         if (container == null) {
             Log.e("Granger", "E-book navigator container missing; the book can't be shown")
             return@DisposableEffect onDispose {}
         }
         if (fragmentManager.isDestroyed) return@DisposableEffect onDispose {}
-        val tag = navigatorTag(bookId)
-        var navigator = fragmentManager.findFragmentByTag(tag) as? EpubNavigatorFragment
+        val tag = navigatorTag(bookId, look)
+        var navigator: Fragment? = fragmentManager.findFragmentByTag(tag)?.takeIf { it is VisualNavigator }
         if (navigator != null) {
             // Restored before this container existed: its view was created detached; attach it here.
             if (navigator.view?.parent == null) fragmentManager.onContainerAvailable(container)
@@ -93,13 +83,13 @@ fun NavigatorHost(
             fragmentManager.fragments
                 .filter { it.id == ContainerId || it.tag == tag }
                 .forEach { transaction.remove(it) }
-            val fresh = fragments.instantiate(activity.classLoader, EpubNavigatorFragment::class.java.name) as EpubNavigatorFragment
+            val fresh = fragments.instantiate(activity.classLoader, factory.fragmentClass)
             transaction.add(container, fresh, tag)
             if (fragmentManager.isStateSaved) transaction.commitNowAllowingStateLoss() else transaction.commitNow()
             navigator = fresh
         }
-        ready(navigator)
-        val shown: EpubNavigatorFragment = navigator
+        ready(navigator as VisualNavigator)
+        val shown: Fragment = navigator
         onDispose {
             // Rotation keeps the fragment so the system restores it into the next activity.
             if (!activity.isChangingConfigurations && !fragmentManager.isDestroyed && shown.isAdded) {

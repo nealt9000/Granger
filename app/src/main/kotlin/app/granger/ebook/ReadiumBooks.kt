@@ -18,8 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
+import org.readium.adapter.pdfium.navigator.PdfiumEngineProvider
+import org.readium.adapter.pdfium.navigator.PdfiumNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.epub.css.Color as CssColor
 import org.readium.r2.navigator.epub.css.RsProperties
 import org.readium.r2.shared.ExperimentalReadiumApi
@@ -109,13 +113,13 @@ interface BookOpener {
 
 /**
  * Readium's streamer over a local file. The HTTP client is only a constructor argument: nothing is fetched,
- * because every book is a file on the phone. PDFs are not supported ([DefaultPublicationParser]'s `pdfFactory` is null).
+ * because every book is a file on the phone. PDFs open through PDFium (Plan P2).
  */
 class ReadiumBookOpener(context: Context) : BookOpener {
     private val httpClient = DefaultHttpClient()
     private val assetRetriever = AssetRetriever(context.contentResolver, httpClient)
     private val publicationOpener = PublicationOpener(
-        DefaultPublicationParser(context.applicationContext, httpClient, assetRetriever, pdfFactory = null),
+        DefaultPublicationParser(context.applicationContext, httpClient, assetRetriever, pdfFactory = PdfiumDocumentFactory(context.applicationContext)),
     )
 
     override suspend fun open(file: File): Publication? {
@@ -150,37 +154,77 @@ class ReadiumBookOpener(context: Context) : BookOpener {
 }
 
 /**
+ * What builds an open book's navigator: Readium's EPUB navigator, or its PDF navigator over PDFium. One per open
+ * book; [OpenBooks] and [NavigatorHost] compare them by identity.
+ */
+@OptIn(ExperimentalReadiumApi::class)
+sealed interface BookNavigator {
+    /** The navigator fragment's class, as the fragment manager restores it. */
+    val fragmentClass: String
+
+    class Epub(val factory: EpubNavigatorFactory) : BookNavigator {
+        override val fragmentClass: String = EpubNavigatorFragment::class.java.name
+    }
+
+    /**
+     * A PDF. [night] is read each time PDFium lays the document out: PDFium has no theme, so Night inverts the
+     * page there, and the reader rebuilds the navigator when it changes.
+     */
+    class Pdf(publication: Publication, initialNight: Boolean) : BookNavigator {
+        @Volatile var night: Boolean = initialNight
+        val factory: PdfiumNavigatorFactory = PdfiumNavigatorFactory(
+            publication,
+            PdfiumEngineProvider(
+                listener = object : PdfiumEngineProvider.Listener {
+                    override fun onConfigurePdfView(configurator: com.github.barteksc.pdfviewer.PDFView.Configurator) {
+                        configurator.nightMode(night)
+                    }
+                },
+            ),
+        )
+        override val fragmentClass: String = PdfNavigatorFragment::class.java.name
+    }
+
+    companion object {
+        /** The class names of every navigator fragment the reader can show. */
+        val fragmentClasses: Set<String> = setOf(EpubNavigatorFragment::class.java.name, PdfNavigatorFragment::class.java.name)
+    }
+}
+
+/**
  * The book whose navigator may be on screen, process-wide, so [ReadiumFragmentFactory] can rebuild the navigator
  * fragment the system restores after rotation. The view model sets [current] once the book is open and clears it
  * when it is cleared; [NavigatorHost] keeps [navigatorFragments] up to date with the latest place and settings.
  */
 object OpenBooks {
     /** The book id and its navigator factory. Null after process death, until the reader opens the book again. */
-    @Volatile var current: Pair<String, EpubNavigatorFactory>? = null
+    @Volatile var current: Pair<String, BookNavigator>? = null
 
     /** What builds the navigator fragment for the factory it is paired with. */
-    @Volatile internal var navigatorFragments: Pair<EpubNavigatorFactory, FragmentFactory>? = null
+    @Volatile internal var navigatorFragments: Pair<BookNavigator, FragmentFactory>? = null
 
     /** Forgets [factory]'s book, unless another book (or another reader of the same book) has replaced it. */
-    fun release(factory: EpubNavigatorFactory) {
+    fun release(factory: BookNavigator) {
         if (current?.second === factory) current = null
         if (navigatorFragments?.first === factory) navigatorFragments = null
     }
 }
 
 /**
- * Installed on the activity's fragment manager before `super.onCreate`, so a restored [EpubNavigatorFragment]
- * is built from the open book. With nothing open (the process died and the book isn't reopened yet) it returns a
+ * Installed on the activity's fragment manager before `super.onCreate`, so a restored navigator fragment (EPUB or
+ * PDF) is built from the open book. With nothing open (the process died and the book isn't reopened yet) it returns a
  * [NavigatorStandIn], which the activity drops right after `super.onCreate` ([dropNavigatorStandIns]); should one
  * survive, [NavigatorHost] replaces it once the book is open. Every other class is built as usual.
  */
 class ReadiumFragmentFactory(
-    /** The class built from the open book; a parameter only so tests can stand a plain fragment in for it. */
-    private val navigatorClass: String = EpubNavigatorFragment::class.java.name,
+    /** The classes built from the open book; a parameter only so tests can stand a plain fragment in for them. */
+    private val navigatorClasses: Set<String> = BookNavigator.fragmentClasses,
 ) : FragmentFactory() {
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
-        if (className != navigatorClass) return super.instantiate(classLoader, className)
+        if (className !in navigatorClasses) return super.instantiate(classLoader, className)
         val open = OpenBooks.current ?: return NavigatorStandIn()
+        // A restored fragment of the other format (a book swapped while the process was away) can't be rebuilt.
+        if (open.second.fragmentClass != className && className in BookNavigator.fragmentClasses) return NavigatorStandIn()
         val fragments = OpenBooks.navigatorFragments?.takeIf { it.first === open.second } ?: return NavigatorStandIn()
         return fragments.second.instantiate(classLoader, className)
     }

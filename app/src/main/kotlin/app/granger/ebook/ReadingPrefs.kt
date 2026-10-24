@@ -6,8 +6,11 @@ import app.granger.theme.GrangerColors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.readium.adapter.pdfium.navigator.PdfiumPreferences
 import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.preferences.Axis
 import org.readium.r2.navigator.preferences.Color
+import org.readium.r2.navigator.preferences.Fit
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.TextAlign
 import org.readium.r2.navigator.preferences.Theme
@@ -30,6 +33,10 @@ data class ReadingPrefs(
     val margins: Double = 1.0,
     val align: Align = Align.START,
     val theme: ReadingTheme = ReadingTheme.NIGHT,
+    /** PDFs: pages scroll on continuously instead of turning one at a time. */
+    val pdfScroll: Boolean = false,
+    /** PDFs: a page fills the width (scroll down it) instead of fitting whole on screen. */
+    val pdfFitWidth: Boolean = false,
 ) {
     /**
      * Readium's preferences. Publisher styles are always off so the reader's choices win over the book's CSS
@@ -58,6 +65,21 @@ data class ReadingPrefs(
         scroll = false,
     )
 
+    /**
+     * PDFium's preferences. A page turns sideways, or scrolls down when [pdfScroll]; its colours are the document's
+     * own, but for Night, which [PdfiumEngineProvider]'s configure hook inverts (PDFium has no theme of its own).
+     */
+    @OptIn(org.readium.r2.shared.ExperimentalReadiumApi::class)
+    fun toPdfium(): PdfiumPreferences = PdfiumPreferences(
+        fit = if (pdfFitWidth) Fit.WIDTH else Fit.CONTAIN,
+        pageSpacing = PDF_PAGE_SPACING,
+        scroll = pdfScroll,
+        scrollAxis = if (pdfScroll) Axis.VERTICAL else Axis.HORIZONTAL,
+    )
+
+    /** PDF pages are drawn inverted: Night is the one theme a PDF honours. */
+    val pdfNight: Boolean get() = theme == ReadingTheme.NIGHT
+
     /** The same preferences with every number inside its range. */
     fun clamped(): ReadingPrefs = copy(
         fontScale = (fontScale.coerceIn(MIN_FONT_SCALE, MAX_FONT_SCALE) / FONT_SCALE_STEP).roundToInt() * FONT_SCALE_STEP,
@@ -73,6 +95,7 @@ data class ReadingPrefs(
         const val MAX_LINE_HEIGHT = 2.0
         const val MIN_MARGINS = 0.5
         const val MAX_MARGINS = 2.0
+        const val PDF_PAGE_SPACING = 8.0
     }
 }
 
@@ -91,6 +114,8 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             .putString(KEY_MARGINS, clamped.margins.toString())
             .putString(KEY_ALIGN, clamped.align.name)
             .putString(KEY_THEME, clamped.theme.name)
+            .putBoolean(KEY_PDF_SCROLL, clamped.pdfScroll)
+            .putBoolean(KEY_PDF_FIT_WIDTH, clamped.pdfFitWidth)
             .apply()
     }
 
@@ -104,6 +129,8 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             margins = double(KEY_MARGINS, d.margins),
             align = enumOr(shared.getString(KEY_ALIGN, null), d.align),
             theme = enumOr(shared.getString(KEY_THEME, null), d.theme),
+            pdfScroll = shared.getBoolean(KEY_PDF_SCROLL, d.pdfScroll),
+            pdfFitWidth = shared.getBoolean(KEY_PDF_FIT_WIDTH, d.pdfFitWidth),
         ).clamped()
     }
 
@@ -117,5 +144,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
         const val KEY_MARGINS = "margins"
         const val KEY_ALIGN = "align"
         const val KEY_THEME = "theme"
+        const val KEY_PDF_SCROLL = "pdf_scroll"
+        const val KEY_PDF_FIT_WIDTH = "pdf_fit_width"
     }
 }
