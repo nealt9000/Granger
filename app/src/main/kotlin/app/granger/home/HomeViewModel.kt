@@ -6,6 +6,7 @@ import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
+import app.granger.core.library.onShelf
 import app.granger.core.library.Albums
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.FeedKind
@@ -95,7 +96,8 @@ class HomeViewModel(
     private val mediaItems = combine(media.tracks, media.audiobooks) { tracks, audiobooks -> Albums.summaries(tracks) to audiobooks }
     private val snapshot: Flow<LibrarySnapshot> =
         combine(library.packs, bookshelf.books, shelves.shelves, mediaItems, catalog.state) { packs, books, shelfList, (albums, audiobooks), c ->
-            LibrarySnapshot(packs, books, shelfList, albums, audiobooks, c.catalog)
+            // Pack documents (Plan P2) belong to their packs: no feed draws them as books.
+            LibrarySnapshot(packs, books.filter { it.onShelf }, shelfList, albums, audiobooks, c.catalog)
         }
 
     private class Planned(val feed: HomeFeed, val scope: Resolved)
