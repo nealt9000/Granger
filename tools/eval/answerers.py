@@ -2,7 +2,7 @@
 """Answer models compared on the same prompts (Plan R0, Task 5).
 
   answerers.py prompts BASE                          # runs/BASE/prompts.jsonl: each item's recorded answer prompt
-  answerers.py run BASE NEW --model FILE [--push LOCAL] [--backend gpu|cpu]
+  answerers.py run BASE NEW --model FILE [--push LOCAL] [--backend gpu|cpu] [--sample N | --set NAME]
                  [--speculative on|off] [--thinking off|config|template] [--max-tokens N]
                                                      # replays them on the phone, then builds runs/NEW
   answerers.py build BASE NEW                        # runs/NEW/results.jsonl from BASE's records and NEW/replay.jsonl
@@ -12,6 +12,9 @@ The prompts are the ones BASE's ranking built, so only the model changes. NEW's 
 outcome and citations replaced (Think deeper and best guesses dropped), so `eval.py worksheet/report` work on them
 and an unchanged reply keeps its grade. Their timings estimate send to first words as BASE's rewrite, search and rank
 plus the replay's own time to first words; the model swap that a different answer model would add is reported apart.
+
+`--set NAME` replays the ids in `sets/NAME.json` (Plan R4: speed-10, sample-40, full; `speed-rewrite` replays rewrite
+prompts, which only time the model and leave no results to build).
 """
 import argparse
 import json
@@ -26,6 +29,7 @@ import metrics
 
 HERE = Path(__file__).resolve().parent
 RUNS = HERE / "runs"
+SETS = HERE / "sets"
 GRADES = HERE / "grades" / "grades.jsonl"
 
 
@@ -37,26 +41,40 @@ def write_jsonl(path, rows):
     Path(path).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
 
 
-def answer_prompt(rec):
-    """The last `answer` stage prompt: a follow-up's prior question has its own, earlier one."""
-    ps = [p for p in rec.get("prompts") or [] if p["stage"] == "answer"]
+def answer_prompt(rec, stage="answer"):
+    """The last `answer` (or `rewrite`) stage prompt: a follow-up's prior question has its own, earlier one."""
+    ps = [p for p in rec.get("prompts") or [] if p["stage"] == stage]
     return ps[-1]["prompt"] if ps else None
 
 
 SAMPLE_SEED = 5
 
 
-def prompts(base, sample=None):
-    """Every recorded answer prompt, or a fixed random `sample` of them (the same ids for every model)."""
+def prompts(base, sample=None, ids=None, stage="answer"):
+    """Every recorded answer prompt, a fixed random `sample` of them (the same ids for every model), or those of `ids`.
+    A rewrite prompt has no passages."""
     rows = []
     for rec in read_jsonl(RUNS / base / "results.jsonl"):
-        p = answer_prompt(rec)
+        p = answer_prompt(rec, stage)
         if p is not None:
-            rows.append({"id": rec["id"], "prompt": p, "passages": len(rec.get("chosen") or [])})
+            rows.append({"id": rec["id"], "prompt": p, "passages": len(rec.get("chosen") or []) if stage == "answer" else 0})
     if sample:
         keep = {r["id"] for r in random.Random(SAMPLE_SEED).sample(rows, sample)}
         rows = [r for r in rows if r["id"] in keep]
+    if ids is not None:
+        missing = set(ids) - {r["id"] for r in rows}
+        if missing:
+            raise SystemExit("no %s prompt in runs/%s for %s" % (stage, base, ", ".join(sorted(missing))))
+        rows = [r for r in rows if r["id"] in set(ids)]
     return rows
+
+
+def load_set(name, base):
+    """sets/NAME.json: `{base, stage, ids}`; its base must be the run's."""
+    s = json.loads((SETS / (name + ".json")).read_text(encoding="utf-8"))
+    if s["base"] != base:
+        raise SystemExit("set %s was cut from runs/%s, not %s" % (name, s["base"], base))
+    return s
 
 
 def cmd_prompts(a):
@@ -65,6 +83,8 @@ def cmd_prompts(a):
     print("%d prompts -> runs/%s/prompts.jsonl" % (len(rows), a.base))
     return 0
 
+
+REWRITE_TOKENS = 32  # ResearchPipeline.REWRITE_TOKENS (alternates off)
 
 # What a replay record keeps in the built run. Plan R4 added the token counts and rates and the memory around the load;
 # older replays lack them.
@@ -114,7 +134,11 @@ def cmd_build(a):
 
 
 def cmd_run(a, runner=adb.real_runner, sleep=adb.time.sleep):
-    rows = prompts(a.base, a.sample)
+    chosen = load_set(a.set, a.base) if getattr(a, "set", None) else {"stage": "answer", "ids": None}
+    rewrite = chosen["stage"] == "rewrite"
+    if rewrite and not a.max_tokens:
+        a.max_tokens = REWRITE_TOKENS
+    rows = prompts(a.base, a.sample, chosen["ids"], chosen["stage"])
     local = RUNS / a.base / "prompts.jsonl"
     write_jsonl(local, rows)
     adb.check_front(runner)
@@ -142,6 +166,9 @@ def cmd_run(a, runner=adb.real_runner, sleep=adb.time.sleep):
     rc, o = runner(["pull", "%s/%s/replay.jsonl" % (adb.REMOTE, a.new), str(RUNS / a.new) + "/"])
     if rc:
         raise SystemExit("adb pull failed: " + o)
+    if rewrite:
+        print(json.dumps({"run": a.new, **model_timings(read_jsonl(RUNS / a.new / "replay.jsonl"))}))
+        return 0
     print("%d records -> runs/%s/results.jsonl" % (len(build(a.base, a.new)), a.new))
     return 0
 
@@ -215,7 +242,9 @@ def main(argv=None):
     c = s.add_parser("prompts"); c.add_argument("base"); c.set_defaults(f=cmd_prompts)
     r = s.add_parser("run"); r.add_argument("base"); r.add_argument("new"); r.add_argument("--model", required=True)
     r.add_argument("--push"); r.add_argument("--backend", default="gpu", choices=["gpu", "cpu"])
-    r.add_argument("--sample", type=int, help="replay a fixed random sample of this many prompts")
+    pick = r.add_mutually_exclusive_group()
+    pick.add_argument("--sample", type=int, help="replay a fixed random sample of this many prompts")
+    pick.add_argument("--set", help="replay the prompts of sets/SET.json")
     r.add_argument("--speculative", choices=["on", "off"], help="speculative decoding (MTP); the runtime's default when not given")
     r.add_argument("--thinking", choices=["off", "config", "template"], help="switch a reasoning model's thinking off: both ways, or one")
     r.add_argument("--max-tokens", type=int, help="reply token limit (512 when not given, as the pipeline asks)")

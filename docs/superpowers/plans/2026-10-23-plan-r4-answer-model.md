@@ -106,15 +106,32 @@ on recorded prompts without app changes. Add what this round needs:
 
 ## Task 2: the prompt sets
 
-From r1-dense-1's recorded prompts (`PromptRecorder` stages), so every model sees the passages R1's app chose:
+From r1-dense-1's recorded prompts (`PromptRecorder` stages), so every model sees the passages R1's app chose. Each set is
+an id list in `tools/eval/sets/<name>.json` (`{base, stage, ids, note}`), replayed with `answerers.py run r1-dense-1 NEW
+--set <name>`. A rewrite set gets the pipeline's 32-token limit and only times the model (nothing to build).
 
-- [ ] **speed-10:** 10 answer prompts of median length, plus 10 rewrite prompts (5 first questions, 5 follow-ups).
-- [ ] **sample-40:** R0's fixed sample ids (28 answerable, 12 unanswerable) re-cut from r1-dense-1, swapping in replacements
-  so it holds at least 5 multi-step, 5 arithmetic or comparison, 3 medical and the 9 unanswerables E2B answered.
-  Write the ids down here before any model runs.
-- [ ] **full:** all 189-or-so answer prompts of r1-dense-1 (those that reached a model).
-- [ ] Check that the recorded prompt is model-neutral: the Gemma chat template is applied by the runtime from the model
-  file, not baked into the prompt text. If it's baked in, strip it for the replay.
+- [x] **speed-10:** the 10 answer prompts nearest the median length (6,335 characters): vocab-gap-005, who-wrote-007,
+  history-004, geography-general-001, multi-step-007, medical-002, medical-003, medical-011, physics-001, physics-002.
+  **speed-rewrite:** 5 first-question rewrite prompts nearest the median and 5 follow-ups: follow-up-001, -004, -005,
+  -008, -010, medical-020, medical-029, medical-036, unanswerable-045, unanswerable-055.
+- [x] **sample-40** (28 answerable, 12 unanswerable). R0's `--sample 40` ids (seed 5) kept where they still reach a model
+  in r1-dense-1: 32 of 40 (the 8 lost are unanswerables declined before the model). Out: 4 easy grounded answerables
+  (bible-004, chemistry-002, follow-up-010, history-001). In: multi-step-002, -003, -004, -010, and the unanswerables
+  E2B answered that weren't in it (follow-up-011, medical-027, medical-029, unanswerable-025, -026, -041, -042, -054).
+  It holds 7 multi-step, 6 arithmetic or comparison (multi-step-001, -002, -003, -004, -010, -017), 5 medical
+  answerables (medical-012, -016, -018, -020, -035) and all 9 unanswerables E2B answered. The ids:
+  bible-001, bible-002, bible-008, vocab-gap-004, vocab-gap-009, who-wrote-007, who-wrote-009, follow-up-002,
+  follow-up-003, follow-up-005, follow-up-011, history-005, science-006, literature-002, geography-general-003,
+  multi-step-001, -002, -003, -004, -007, -010, -017, medical-012, -016, -018, -020, -027, -029, -035, unanswerable-017,
+  -025, -026, -041, -042, -045, -050, -054, -055, words-003, chemistry-001.
+  **E2B in r1-dense-1 on it:** 14/28 grounded, 11 not grounded, 2 declined, 1 unverified; **3/12 unanswerables
+  declined** (by construction: 9 of the 12 are ones it answered). Task 4's rule "no more than 1 unanswerable answered
+  of 12" is therefore a high bar against a control at 9; it stands unless Neal says otherwise.
+- [x] **full:** the 142 answer prompts of r1-dense-1 (not 189: 60 items were declined before the model, with no passages).
+- [x] The recorded prompt is model-neutral: plain instructions, passages and `Question: … Answer:`, with no chat-template
+  tokens (`<start_of_turn>`, `<|turn>`, `<bos>`, `<|im_start|>`); LiteRT-LM applies each model's template from its file.
+- `answerers.py`: `--set` (exclusive with `--sample`), `prompts(ids=, stage=)`; tests for both and for the committed
+  sets' shape. 107 eval tests green.
 
 ## Task 3: the speed screen (Pixel 6)
 

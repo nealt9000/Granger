@@ -1,0 +1,17 @@
+{
+ "base": "r1-dense-1",
+ "stage": "rewrite",
+ "ids": [
+  "follow-up-001",
+  "follow-up-004",
+  "follow-up-005",
+  "follow-up-008",
+  "follow-up-010",
+  "medical-020",
+  "medical-029",
+  "unanswerable-045",
+  "medical-036",
+  "unanswerable-055"
+ ],
+ "note": "Plan R4 Task 2: the 5 first-question rewrite prompts nearest the median length (821 characters) and 5 follow-ups (852)."
+}

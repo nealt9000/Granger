@@ -63,3 +63,31 @@ def test_run_passes_the_r4_extras():
     a = argparse.Namespace(speculative="on", thinking="template", max_tokens=256)
     assert answerers.replay_extras(a) == ["--es", "speculative", "on", "--es", "thinking", "template", "--ei", "maxTokens", "256"]
     assert answerers.replay_extras(argparse.Namespace(speculative=None, thinking=None, max_tokens=None)) == []
+
+
+def test_prompts_by_ids_and_stage(tmp_path, monkeypatch):
+    monkeypatch.setattr(answerers, "RUNS", tmp_path)
+    (tmp_path / "base").mkdir()
+    answerers.write_jsonl(tmp_path / "base" / "results.jsonl", [
+        rec("a", ["rewrite", "answer"]), rec("f", ["prior-rewrite", "prior-answer", "rewrite", "answer"]), rec("e", ["rewrite"])])
+    assert [r["id"] for r in answerers.prompts("base", ids=["f"])] == ["f"]
+    assert answerers.prompts("base", ids=["e", "f"], stage="rewrite") == [
+        {"id": "f", "prompt": "rewrite f", "passages": 0}, {"id": "e", "prompt": "rewrite e", "passages": 0}]
+    try:
+        answerers.prompts("base", ids=["e"])  # e never reached the answer model
+        assert False
+    except SystemExit as ex:
+        assert "e" in str(ex)
+
+
+def test_the_committed_sets_are_well_formed():
+    for path in sorted(answerers.SETS.glob("*.json")):
+        s = json.loads(path.read_text(encoding="utf-8"))
+        assert s["stage"] in ("answer", "rewrite") and s["base"] and s["ids"], path
+        assert len(set(s["ids"])) == len(s["ids"]), path
+    assert answerers.load_set("sample-40", "r1-dense-1")["stage"] == "answer"
+    try:
+        answerers.load_set("sample-40", "r0-base")
+        assert False
+    except SystemExit:
+        pass
