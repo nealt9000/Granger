@@ -32,7 +32,20 @@ class ImportRunnerTest {
 
     private fun uri(name: String) = Uri.parse("content://docs/$name")
     private fun runner(shelf: Bookshelf, open: (Uri) -> InputStream? = { ByteArrayInputStream(ByteArray(1)) }) =
-        ImportRunner(shelf, open) { it.lastPathSegment.orEmpty() }
+        ImportRunner(shelf, open, nameOf = { it.lastPathSegment.orEmpty() })
+
+    @Test fun aBatchThatAddsABookAsksForIndexingOnce() = runTest {
+        var calls = 0
+        val shelf = ScriptedShelf(mapOf("a.pdf" to ImportResult.Imported("1"), "b.pdf" to ImportResult.Imported("2")))
+        ImportRunner(shelf, { ByteArrayInputStream(ByteArray(1)) }, { it.lastPathSegment.orEmpty() }, onImported = { calls++ })
+            .run(listOf(uri("a.pdf"), uri("b.pdf")))
+        assertThat(calls).isEqualTo(1)
+
+        val none = ScriptedShelf(mapOf("c.pdf" to ImportResult.Protected(DrmKind.PDF_ENCRYPTED)))
+        ImportRunner(none, { ByteArrayInputStream(ByteArray(1)) }, { it.lastPathSegment.orEmpty() }, onImported = { calls++ })
+            .run(listOf(uri("c.pdf")))
+        assertThat(calls).isEqualTo(1)
+    }
 
     @Test fun oneBadFileDoesNotStopTheOthers() = runTest {
         val shelf = ScriptedShelf(

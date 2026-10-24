@@ -233,7 +233,10 @@ class BookIndex(
      * write lock that long would stall every save of a reading place. A PDF with no text layer is marked unsearchable.
      */
     private suspend fun indexPdf(book: Book, file: File) {
+        val started = System.nanoTime()
+        var pages = 0
         val chunks = PdfText.open(file)?.use { reader ->
+            pages = reader.pageCount
             if (!reader.hasTextLayer()) {
                 emptyList()
             } else {
@@ -241,6 +244,8 @@ class BookIndex(
             }
         } ?: return
         write(book, chunks.asSequence(), searchable = chunks.isNotEmpty())
+        val ms = (System.nanoTime() - started) / 1_000_000
+        runCatching { android.util.Log.i("Granger", "Indexed PDF ${book.id}: $pages pages, ${chunks.size} chunks in $ms ms") }
     }
 
     private suspend fun write(book: Book, chunks: Sequence<TextChunk>, searchable: Boolean) {

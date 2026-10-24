@@ -18,12 +18,14 @@ data class ImportSummary(val imported: Int, val alreadyThere: Int, val problems:
 
 /**
  * Imports the files a user picked, one at a time. Whatever goes wrong with a file (an unreadable URI, a revoked
- * permission, a book the importer chokes on) is a problem line for that file; the rest still import.
+ * permission, a book the importer chokes on) is a problem line for that file; the rest still import. [onImported] runs
+ * once after a batch that added a book, so its text is indexed now rather than at the next launch.
  */
 class ImportRunner(
     private val bookshelf: Bookshelf,
     private val open: (Uri) -> InputStream?,
     private val nameOf: (Uri) -> String,
+    private val onImported: () -> Unit = {},
 ) {
     suspend fun run(uris: List<Uri>): ImportSummary {
         var imported = 0
@@ -48,6 +50,7 @@ class ImportRunner(
                 problems += ImportResult.Damaged(e.message.orEmpty()).message(name).orEmpty()
             }
         }
+        if (imported > 0) onImported()
         return ImportSummary(imported, alreadyThere, problems)
     }
 }

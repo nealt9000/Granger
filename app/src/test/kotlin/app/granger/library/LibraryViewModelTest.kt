@@ -37,7 +37,7 @@ class LibraryViewModelTest {
     }
 
     private fun TestScope.vm() =
-        LibraryViewModel(shelves, library, ImportRunner(ImportingShelf(), { java.io.ByteArrayInputStream(ByteArray(1)) }) { it.lastPathSegment.orEmpty() }, appScope = this)
+        LibraryViewModel(shelves, library, ImportRunner(ImportingShelf(), { java.io.ByteArrayInputStream(ByteArray(1)) }, nameOf = { it.lastPathSegment.orEmpty() }), appScope = this)
 
     private fun shelf(type: String, vararg collections: Pair<String, Int>) = Shelf(
         MediaType(type.lowercase(), type, builtIn = true, sortOrder = 0),
