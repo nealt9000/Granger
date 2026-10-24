@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
 import app.granger.core.research.SourceKind
 import app.granger.core.zim.ZimArchive
@@ -30,7 +31,8 @@ class LibraryPassageFinderTest {
     private val dispatcher = StandardTestDispatcher()
     private val booksDir by lazy { tmp.newFolder("books") }
     private val shelf by lazy {
-        RoomBookshelf(db, { listOf(booksDir) }, { File(booksDir, "imports") }, File(tmp.root, "covers"), dispatcher)
+        // Robolectric has no real file descriptors for the platform's PDF renderer.
+        RoomBookshelf(db, { listOf(booksDir) }, { File(booksDir, "imports") }, File(tmp.root, "covers"), dispatcher, pdfCovers = { _, _ -> null })
     }
     private val index = BookIndex(db, dispatcher)
 
@@ -269,6 +271,16 @@ class LibraryPassageFinderTest {
         assertThat(p.location).isEqualTo("OEBPS/c001.xhtml")
         assertThat(p.text).contains("whale")
         assertThat(p.meta.collection).isEqualTo("Classics")
+    }
+
+    @Test fun aPdfPassageIsHeadedByItsPage() = test {
+        PdfFixtures.init(androidx.test.core.app.ApplicationProvider.getApplicationContext())
+        val file = PdfFixtures.text(File(booksDir, "archive-org").apply { mkdirs() }, "water.pdf")
+        val book = shelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, "water")!!
+        index.indexPending()
+        val p = finder(emptyList(), emptyMap(), books = listOf(book)).find(listOf("slow sand filter")).single { it.kind == SourceKind.BOOK }
+        assertThat(p.location).isEqualTo("page/2")
+        assertThat(p.heading).isEqualTo("p. 2")
     }
 
     @Test fun throwingArchiveDoesNotSinkTheRest() = test {

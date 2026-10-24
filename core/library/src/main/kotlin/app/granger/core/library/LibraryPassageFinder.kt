@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.books.PdfText
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
@@ -163,6 +164,8 @@ class LibraryPassageFinder(
                     sourceTitle = it.book.title,
                     location = it.href,
                     progression = it.progression,
+                    // A PDF's page is its source card's heading, so the citation says where it is.
+                    heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
                     text = it.text,
                     meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
                 )
