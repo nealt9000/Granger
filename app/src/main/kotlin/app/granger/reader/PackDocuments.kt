@@ -41,7 +41,7 @@ class PackDocuments(
                 return@withContext Opened.Failed("Couldn't open this PDF: copying it out of the pack failed.")
             }
         }
-        val book = bookshelf.registerPackDocument(packId, entry.path, entry.title.ifBlank { entry.path.substringAfterLast('/') }, file)
+        val book = bookshelf.registerPackDocument(packId, entry.path, entry.title, file)
             ?: return@withContext Opened.Failed("Couldn't open this PDF: it is damaged or protected.")
         Opened.Ready(book)
     }

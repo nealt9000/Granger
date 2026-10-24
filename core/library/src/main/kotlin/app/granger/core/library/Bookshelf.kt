@@ -321,10 +321,13 @@ class RoomBookshelf(
 
     override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book? =
         withContext(io) {
-            val meta = (PdfInspector.inspect(file, title) as? Inspection.Ok)?.meta ?: return@withContext null
+            // The entry's title when it is one: zimit packs title a PDF entry with its path, and then the PDF's own
+            // title ("Emergency Childbirth") or failing that its file name reads better.
+            val entryTitle = title.trim().takeUnless { it.isEmpty() || it == path || '/' in it }
+            val fallback = path.substringAfterLast('/').substringBeforeLast('.')
+            val meta = (PdfInspector.inspect(file, entryTitle ?: fallback) as? Inspection.Ok)?.meta ?: return@withContext null
             val ref = "$zimId/$path"
-            // The entry's title, not the PDF's own: it is what the article linked to.
-            val details = BookDetails(title, "", "", emptyList(), "", "")
+            val details = BookDetails(entryTitle ?: meta.title, "", "", emptyList(), "", "")
             register(BookIds.of(BookOrigin.PACK, ref), BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
         }
 

@@ -119,6 +119,14 @@ class BookshelfTest {
         assertThat(file.exists()).isFalse()
     }
 
+    @Test fun aPackDocumentTitledByItsPathTakesThePdfsOwnTitle() = test {
+        val named = PdfFixtures.text(File(booksDir, "packs/zim1"), "a.pdf")
+        assertThat(pdfShelf.registerPackDocument("zim1", "site/docs/water.pdf", "site/docs/water.pdf", named)!!.title)
+            .isEqualTo(PdfFixtures.TITLE)
+        val untitled = PdfFixtures.imageOnly(File(booksDir, "packs/zim1"), "b.pdf")
+        assertThat(pdfShelf.registerPackDocument("zim1", "site/docs/scan.pdf", "", untitled)!!.title).isEqualTo("scan")
+    }
+
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
     private fun sha256(file: File) =
