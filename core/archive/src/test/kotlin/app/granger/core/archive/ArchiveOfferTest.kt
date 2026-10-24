@@ -49,13 +49,42 @@ class ArchiveOfferTest {
         assertThat(offer).isEqualTo(Offer.LendOnly)
     }
 
-    @Test fun scanOnlyItemOffersOcrTextAndSaysPdf() {
+    @Test fun scanOnlyItemOffersOcrTextAndThePdf() {
         val offer = ArchiveOffers.choose(fixtureItem("scientific-american-1881-10-15", "item-scan-only.json"))
         assertThat(offer).isInstanceOf(Offer.Download::class.java)
         offer as Offer.Download
         assertThat(offer.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(offer.alsoPdf).isTrue()
         assertThat(offer.file.name).endsWith("_djvu.txt")
+        assertThat(offer.pdf!!.format).isEqualTo("Text PDF")
+        assertThat(offer.pdf!!.name).endsWith(".pdf")
+    }
+
+    @Test fun pdfFormatPreference() {
+        val offer = ArchiveOffers.choose(
+            item(
+                file("a_jp2.pdf", "Image Container PDF", "derivative", size = 300),
+                file("a_text.pdf", "Text PDF", "derivative", size = 90),
+                file("a_extra.pdf", "Additional Text PDF", "derivative", size = 95),
+                file("a_text2.pdf", "Text PDF", "derivative", size = 120),
+            ),
+        ) as Offer.Download
+        assertThat(offer.kind).isEqualTo(TextKind.PDF)
+        assertThat(offer.file.name).isEqualTo("a_text.pdf")
+        assertThat(offer.pdf).isNull()
+        // Without a Text PDF, the Additional one; without either, the image-only one.
+        assertThat((ArchiveOffers.choose(item(file("b.pdf", "Image Container PDF"), file("c.pdf", "Additional Text PDF"))) as Offer.Download).file.name)
+            .isEqualTo("c.pdf")
+        assertThat((ArchiveOffers.choose(item(file("b.pdf", "Image Container PDF"))) as Offer.Download).file.name).isEqualTo("b.pdf")
+    }
+
+    @Test fun noSizeCapOnPdfs() {
+        val offer = ArchiveOffers.choose(item(file("a.pdf", "Text PDF", size = 400L * 1000 * 1000))) as Offer.Download
+        assertThat(offer.kind).isEqualTo(TextKind.PDF)
+    }
+
+    @Test fun lcpPdfsAreNeverOffered() {
+        assertThat(ArchiveOffers.choose(item(file("a.lcpdf", "LCP Encrypted PDF")))).isEqualTo(Offer.Nothing)
+        assertThat(ArchiveOffers.choose(item(file("a.pdf", "Text PDF", isPrivate = true)))).isEqualTo(Offer.LendOnly)
     }
 
     @Test fun originalTextBeatsOcr() {
@@ -64,7 +93,7 @@ class ArchiveOfferTest {
         ) as Offer.Download
         assertThat(offer.kind).isEqualTo(TextKind.TEXT)
         assertThat(offer.file.name).isEqualTo("a.txt")
-        assertThat(offer.alsoPdf).isTrue()
+        assertThat(offer.pdf!!.name).isEqualTo("a.pdf")
     }
 
     @Test fun largestEpubWins() {
@@ -72,7 +101,7 @@ class ArchiveOfferTest {
             item(file("small.epub", "EPUB", size = 10), file("big.epub", "EPUB", size = 50)),
         ) as Offer.Download
         assertThat(offer.file.name).isEqualTo("big.epub")
-        assertThat(offer.alsoPdf).isFalse()
+        assertThat(offer.pdf).isNull()
     }
 
     @Test fun md5AloneIsEnough() {
@@ -83,8 +112,8 @@ class ArchiveOfferTest {
     @Test fun fileWithoutAnyChecksumIsNotOffered() {
         assertThat(ArchiveOffers.choose(item(file("a.epub", "EPUB", sha1 = null, md5 = null)))).isEqualTo(Offer.Nothing)
         assertThat(
-            ArchiveOffers.choose(item(file("a.epub", "EPUB", sha1 = null), file("a.pdf", "Text PDF"))),
-        ).isEqualTo(Offer.PdfOnly)
+            (ArchiveOffers.choose(item(file("a.epub", "EPUB", sha1 = null), file("a.pdf", "Text PDF"))) as Offer.Download).kind,
+        ).isEqualTo(TextKind.PDF)
     }
 
     @Test fun fileWithoutASizeIsNotOffered() {
@@ -122,7 +151,7 @@ class ArchiveOfferTest {
             item(file("a.txt", "Text", size = 1_001), file("a_djvu.txt", "DjVuTXT", "derivative", size = 2_000), file("a.pdf", "Text PDF")),
             maxTextBytes = limit,
         )
-        assertThat(big).isEqualTo(Offer.PdfOnly)
+        assertThat((big as Offer.Download).kind).isEqualTo(TextKind.PDF)
         assertThat(ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT", size = 1_001)), maxTextBytes = limit)).isEqualTo(Offer.Nothing)
         val atLimit = ArchiveOffers.choose(item(file("a_djvu.txt", "DjVuTXT", size = 1_000)), maxTextBytes = limit) as Offer.Download
         assertThat(atLimit.kind).isEqualTo(TextKind.OCR_TEXT)
@@ -143,13 +172,14 @@ class ArchiveOfferTest {
     }
 
     @Test fun aPrivateMetadataFileDoesNotMakeAnItemLendOnly() {
-        assertThat(ArchiveOffers.choose(item(file("x_meta.txt", "Metadata", isPrivate = true), file("a.pdf", "Text PDF"))))
-            .isEqualTo(Offer.PdfOnly)
+        assertThat((ArchiveOffers.choose(item(file("x_meta.txt", "Metadata", isPrivate = true), file("a.pdf", "Text PDF"))) as Offer.Download).kind)
+            .isEqualTo(TextKind.PDF)
         assertThat(ArchiveOffers.choose(item(file("a.txt", "Text", isPrivate = true)))).isEqualTo(Offer.LendOnly)
     }
 
-    @Test fun pdfOnlyItem() {
-        assertThat(ArchiveOffers.choose(item(file("a.pdf", "Text PDF")))).isEqualTo(Offer.PdfOnly)
+    @Test fun pdfOnlyItemDownloadsThePdf() {
+        assertThat(ArchiveOffers.choose(item(file("a.pdf", "Text PDF"))))
+            .isEqualTo(Offer.Download(file("a.pdf", "Text PDF"), TextKind.PDF))
     }
 
     @Test fun noFilesOffersNothing() {
@@ -170,9 +200,11 @@ class ArchiveOfferTest {
         assertThat((ArchiveOffers.preview(doc(listOf("EPUB"))) as Offer.Download).kind).isEqualTo(TextKind.EPUB)
         val ocr = ArchiveOffers.preview(doc(listOf("DjVuTXT", "Text PDF"))) as Offer.Download
         assertThat(ocr.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(ocr.alsoPdf).isTrue()
+        assertThat(ocr.pdf).isNotNull()
+        assertThat((ArchiveOffers.preview(doc(listOf("DjVuTXT"))) as Offer.Download).pdf).isNull()
         assertThat(ArchiveOffers.preview(doc(listOf("EPUB"), restricted = true))).isEqualTo(Offer.LendOnly)
-        assertThat(ArchiveOffers.preview(doc(listOf("Text PDF")))).isEqualTo(Offer.PdfOnly)
+        assertThat((ArchiveOffers.preview(doc(listOf("Text PDF"))) as Offer.Download).kind).isEqualTo(TextKind.PDF)
+        assertThat(ArchiveOffers.preview(doc(listOf("LCP Encrypted PDF")))).isNull()
         assertThat(ArchiveOffers.preview(doc(emptyList()))).isNull()
     }
 }

@@ -154,6 +154,11 @@ fun SettingsScreen(
                             supportingContent = { Text("Turn off to use mobile data") },
                             trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
                         )
+                        ListItem(
+                            headlineContent = { Text("Ask before downloads over 100 MB") },
+                            supportingContent = { Text("Turn off to get large scans and comic runs without a prompt") },
+                            trailingContent = { Switch(checked = ui.askBeforeLarge, onCheckedChange = viewModel::setAskBeforeLarge) },
+                        )
                         HorizontalDivider()
                     }
                     "archive" -> {

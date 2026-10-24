@@ -178,4 +178,8 @@ class FakeVolumes(var volumes: List<Volume>) : VolumeSource {
     override fun list() = volumes
 }
 
-class FakePrefs(override var wifiOnly: Boolean = true, override var volumePath: String? = null) : DownloadPrefs
+class FakePrefs(
+    override var wifiOnly: Boolean = true,
+    override var volumePath: String? = null,
+    override var askBeforeLarge: Boolean = true,
+) : DownloadPrefs

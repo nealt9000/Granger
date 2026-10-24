@@ -41,6 +41,8 @@ data class SettingsUi(
     val volumes: List<VolumeRow> = emptyList(),
     val selectedVolume: String? = null,
     val wifiOnly: Boolean = true,
+    /** Get asks before a download over 100 MB (Plan P2). */
+    val askBeforeLarge: Boolean = true,
     /** The archive.org waiver is accepted: searches there show everything, not only public domain. */
     val archiveEverything: Boolean = false,
 )
@@ -65,11 +67,12 @@ class SettingsViewModel(
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
     private val selectedPath = MutableStateFlow(prefs.volumePath)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
+    private val askBeforeLarge = MutableStateFlow(prefs.askBeforeLarge)
 
     val ui: StateFlow<SettingsUi> =
-        combine(volumeList, downloads.records, selectedPath, wifiOnly, archivePrefs.waiverAccepted) { list, records, path, wifi, archive ->
+        combine(volumeList, downloads.records, selectedPath, combine(wifiOnly, askBeforeLarge, ::Pair), archivePrefs.waiverAccepted) { list, records, path, (wifi, ask), archive ->
             val rows = volumeRows(list, records)
-            SettingsUi(rows, rows.firstOrNull { it.path == path }?.path ?: rows.firstOrNull()?.path, wifi, archive)
+            SettingsUi(rows, rows.firstOrNull { it.path == path }?.path ?: rows.firstOrNull()?.path, wifi, ask, archive)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUi())
 
     val railSide: StateFlow<RailSide> = appearancePrefs.railSide
@@ -88,6 +91,11 @@ class SettingsViewModel(
         wifiOnly.value = value
         prefs.wifiOnly = value
         appScope.launch { downloads.setWifiOnly(value) }
+    }
+
+    fun setAskBeforeLarge(value: Boolean) {
+        askBeforeLarge.value = value
+        prefs.askBeforeLarge = value
     }
 
     fun selectVolume(path: String) {

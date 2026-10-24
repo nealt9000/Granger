@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -81,7 +82,13 @@ data class ItemSheet(
     /** An audio item's files in and in all ("Downloading: 3 of 7"); 0 and 0 for texts or before the item is known. */
     val filesDone: Int = 0,
     val filesTotal: Int = 0,
+    /** The PDF beside a text download (Plan P2): its size, and where its own download stands. */
+    val pdfSizeBytes: Long? = null,
+    val pdfStatus: ItemStatus = ItemStatus.NotInstalled,
 )
+
+/** A Get over 100 MB waiting for the user's yes (Plan P2): [pdf] when it's the PDF beside the item's text. */
+data class ConfirmLarge(val identifier: String, val pdf: Boolean, val bytes: Long, val title: String)
 
 data class ArchiveUi(
     val tab: ArchiveTab = ArchiveTab.BROWSE,
@@ -102,6 +109,7 @@ data class ArchiveUi(
     val sheetAudio: AudioOffer? = null,
     /** Filtered, for a kind with no usable recording date (spoken word before the waiver): nothing is searched or shown. */
     val waiverNeeded: Boolean = false,
+    val confirm: ConfirmLarge? = null,
 )
 
 /**
@@ -157,6 +165,7 @@ class ArchiveViewModel(
         val error: String? = null,
         val sheet: Sheet? = null,
         val notice: String? = null,
+        val confirm: ConfirmLarge? = null,
     )
 
     private val state = MutableStateFlow(State(shelf = ArchiveShelf.first(kind), filtered = !prefs.waiverAccepted.value))
@@ -253,10 +262,25 @@ class ArchiveViewModel(
         state.update { it.copy(sheet = null) }
     }
 
-    fun get(identifier: String) {
+    /** Gets the item's download, or with [pdf] the PDF beside its text; one over 100 MB asks first ([confirm]). */
+    fun get(identifier: String, pdf: Boolean = false) = get(identifier, pdf, confirmed = false)
+
+    /** Yes to [ArchiveUi.confirm]; [dontAskAgain] turns the prompt off (Settings turns it back on). */
+    fun confirmLarge(dontAskAgain: Boolean) {
+        val confirm = state.value.confirm ?: return
+        state.update { it.copy(confirm = null) }
+        if (dontAskAgain) downloadPrefs.askBeforeLarge = false
+        get(confirm.identifier, confirm.pdf, confirmed = true)
+    }
+
+    fun dismissLarge() {
+        state.update { it.copy(confirm = null) }
+    }
+
+    private fun get(identifier: String, pdf: Boolean, confirmed: Boolean) {
         appScope.launch {
             val notice = try {
-                if (audio) fetchAndGetAudio(identifier) else fetchAndEnqueue(identifier)
+                if (audio) fetchAndGetAudio(identifier) else fetchAndEnqueue(identifier, pdf, confirmed)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -272,8 +296,14 @@ class ArchiveViewModel(
             return
         }
         appScope.launch {
+            // The sheet acts on the item: its text and the PDF beside it go together.
             downloads.cancel(ArchiveDownloads.itemId(identifier))
-            withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
+            downloads.cancel(ArchiveDownloads.pdfItemId(identifier))
+            val kept = downloads.records.first().any {
+                ArchiveDownloads.identifierOf(it.itemId) == identifier && it.state == DownloadState.INSTALLED
+            }
+            // An installed download keeps the sidecar it is filed (and repaired) with.
+            if (!kept) withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
         }
     }
 
@@ -282,7 +312,14 @@ class ArchiveViewModel(
             appScope.launch { media!!.retry(groupOf(identifier)) }
             return
         }
-        appScope.launch { downloads.retry(ArchiveDownloads.itemId(identifier)) }
+        appScope.launch {
+            downloads.retry(ArchiveDownloads.itemId(identifier))
+            // The PDF beside the text only when it is the one that failed.
+            val pdf = ArchiveDownloads.pdfItemId(identifier)
+            if (downloads.records.first().any { it.itemId == pdf && statusOf(identifier, listOf(it), pdf = true) is ItemStatus.Failed }) {
+                downloads.retry(pdf)
+            }
+        }
     }
 
     /**
@@ -300,7 +337,9 @@ class ArchiveViewModel(
         }
         appScope.launch {
             downloads.remove(ArchiveDownloads.itemId(identifier))
+            downloads.remove(ArchiveDownloads.pdfItemId(identifier))
             bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier))
+            bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier + ArchiveDownloads.PDF_SUFFIX))
             withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
         }
     }
@@ -348,28 +387,40 @@ class ArchiveViewModel(
         }
     }
 
-    /** Returns the notice to show, or null when the download is on its way. */
-    private suspend fun fetchAndEnqueue(identifier: String): String? {
+    /**
+     * Returns the notice to show, or null when the download is on its way or waits on [ArchiveUi.confirm]. With
+     * [pdf], the download is the PDF beside the item's text, a second book; without, the item's own download.
+     */
+    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean): String? {
         // Only fetched metadata is downloaded from: a preview's file is a placeholder.
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier || !ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
         val offer = ArchiveOffers.choose(item) as? Offer.Download ?: return NOTHING_TO_DOWNLOAD
+        if (pdf && offer.pdf == null) return NOTHING_TO_DOWNLOAD
         // The live preference, not the screen's: the waiver may have been withdrawn since this item was reached.
         if (!prefs.waiverAccepted.value && !ArchiveOffers.isPublicDomain(item)) return NOT_PUBLIC_DOMAIN
         val all = withContext(io) { volumes.list() }
         val volume = all.firstOrNull { it.root.path == downloadPrefs.volumePath } ?: all.firstOrNull()
             ?: return "No storage is available right now."
-        val spec = ArchiveDownloads.spec(item, offer, client)
-        // Written first: the download may finish before enqueue returns.
-        val sidecar = withContext(io) { ArchiveDownloads.writeSidecar(sidecarDir(), item, offer.kind) }
+        val spec = ArchiveDownloads.spec(item, offer, client, pdfCopy = pdf)
+        if (!confirmed && downloadPrefs.askBeforeLarge && spec.sizeBytes > DownloadPrefs.LARGE_DOWNLOAD_BYTES) {
+            val isPdf = pdf || offer.kind == TextKind.PDF
+            state.update { it.copy(confirm = ConfirmLarge(identifier, pdf, spec.sizeBytes, if (isPdf) "PDF" else "download")) }
+            return null
+        }
+        // Written first: the download may finish before enqueue returns. The PDF beside a text shares the item's
+        // sidecar: it is written only when there is none, and never deleted here (the text's book is filed with it).
+        val existing = ArchiveDownloads.sidecarFile(sidecarDir(), identifier)
+        val ownsSidecar = !pdf || !withContext(io) { existing.exists() }
+        val sidecar = if (ownsSidecar) withContext(io) { ArchiveDownloads.writeSidecar(sidecarDir(), item, offer.kind) } else existing
         val result = try {
             downloads.enqueue(spec, volume.root, downloadPrefs.wifiOnly)
         } catch (e: Throwable) {
-            withContext(NonCancellable + io) { sidecar.delete() }
+            if (ownsSidecar) withContext(NonCancellable + io) { sidecar.delete() }
             throw e
         }
         // A refused enqueue leaves no sidecar; an installed book keeps its (now refreshed) one for later repairs.
-        if (result is EnqueueResult.NoSpace || result is EnqueueResult.OverCap) {
+        if (ownsSidecar && (result is EnqueueResult.NoSpace || result is EnqueueResult.OverCap)) {
             withContext(io) { sidecar.delete() }
         }
         return when (result) {
@@ -519,9 +570,10 @@ class ArchiveViewModel(
                     status = statusOf(doc.identifier, ours),
                 )
             }
-            // Built from the ledger alone, so it works offline.
-            ArchiveTab.INSTALLED -> ours.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
-                val identifier = ArchiveDownloads.identifierOf(itemId) ?: return@mapNotNull null
+            // Built from the ledger alone, so it works offline. An item's text and the PDF beside it are one row.
+            ArchiveTab.INSTALLED -> ours.groupBy { ArchiveDownloads.identifierOf(it.itemId) }.mapNotNull { (identifier, all) ->
+                identifier ?: return@mapNotNull null
+                val versions = all.filterNot { ArchiveDownloads.isPdfCopy(it.itemId) }.ifEmpty { all }
                 val latest = versions.last()
                 ArchiveRow(
                     identifier = identifier,
@@ -552,14 +604,19 @@ class ArchiveViewModel(
                     sizeBytes = (sheet.offer as? Offer.Download)?.file?.sizeBytes,
                     error = sheet.error,
                     status = statusOf(sheet.identifier, ours),
+                    pdfSizeBytes = (sheet.offer as? Offer.Download)?.pdf?.sizeBytes,
+                    pdfStatus = statusOf(sheet.identifier, ours, pdf = true),
                 )
             },
             notice = s.notice,
+            confirm = s.confirm,
         )
     }
 
-    private fun statusOf(identifier: String, records: List<DownloadRecord>): ItemStatus {
-        val versions = records.filter { it.itemId == ArchiveDownloads.itemId(identifier) }
+    /** Where the item's own download stands, or with [pdf] the PDF's beside its text. */
+    private fun statusOf(identifier: String, records: List<DownloadRecord>, pdf: Boolean = false): ItemStatus {
+        val itemId = if (pdf) ArchiveDownloads.pdfItemId(identifier) else ArchiveDownloads.itemId(identifier)
+        val versions = records.filter { it.itemId == itemId }
         versions.firstOrNull { it.isActive }?.let { active ->
             return when (active.state) {
                 DownloadState.QUEUED -> ItemStatus.Queued(active.wifiOnly, active.error)
@@ -579,9 +636,10 @@ class ArchiveViewModel(
         val kind = fromSidecar ?: when (File(path).extension.lowercase()) {
             "epub" -> TextKind.EPUB
             "txt" -> TextKind.TEXT
+            "pdf" -> TextKind.PDF
             else -> return null
         }
-        return Offer.Download(PLACEHOLDER, kind, alsoPdf = false)
+        return Offer.Download(PLACEHOLDER, kind)
     }
 
     private fun messageOf(e: Exception): String = (e as? ArchiveError)?.message ?: OFFLINE

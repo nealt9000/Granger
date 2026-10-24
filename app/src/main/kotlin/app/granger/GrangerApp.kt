@@ -202,7 +202,7 @@ internal suspend fun onBookInstalled(
 ) {
     try {
         if (bookshelf.addDownloaded(file, origin, ref, details) == null) {
-            android.util.Log.w("Granger", "Downloaded book $ref is not a readable EPUB")
+            android.util.Log.w("Granger", "Downloaded book $ref is not a readable EPUB or PDF")
             return
         }
         startIndexing()
@@ -221,11 +221,12 @@ internal suspend fun onBookInstalled(
 internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, record: DownloadRecord, startIndexing: () -> Unit) {
     val identifier = ArchiveDownloads.identifierOf(record.itemId)
     val sidecar = identifier?.takeIf { ArchiveQuery.isValidIdentifier(it) }?.let { ArchiveDownloads.sidecarFile(sidecarDir, it) }
+    val details = sidecar?.let { ArchiveDownloads.readSidecar(it)?.first }
     onBookInstalled(
         bookshelf, File(record.filePath),
         if (identifier != null) BookOrigin.ARCHIVE_ORG else BookOrigin.GRANGER,
-        identifier ?: record.itemId,
-        sidecar?.let { ArchiveDownloads.readSidecar(it)?.first },
+        ArchiveDownloads.bookRefOf(record.itemId) ?: record.itemId,
+        if (ArchiveDownloads.isPdfCopy(record.itemId)) details?.let(ArchiveDownloads::pdfCopyDetails) else details,
         startIndexing,
     )
 }

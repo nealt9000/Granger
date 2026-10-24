@@ -154,7 +154,7 @@ class ArchiveViewModelTest {
         // The search-time guess: OCR text, with a PDF alongside.
         val preview = ui.rows.first().preview as Offer.Download
         assertThat(preview.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(preview.alsoPdf).isTrue()
+        assertThat(preview.pdf).isNotNull()
         assertThat(ui.canLoadMore).isTrue()
         assertThat(ui.error).isNull()
     }
@@ -295,8 +295,10 @@ class ArchiveViewModelTest {
         assertThat(sheet.item!!.identifier).isEqualTo(scanId)
         val offer = sheet.offer as Offer.Download
         assertThat(offer.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(offer.alsoPdf).isTrue()
+        assertThat(offer.pdf).isNotNull()
         assertThat(sheet.sizeBytes).isEqualTo(251_326L)
+        assertThat(sheet.pdfSizeBytes).isEqualTo(11_034_655L)
+        assertThat(sheet.pdfStatus).isEqualTo(ItemStatus.NotInstalled)
         assertThat(sheet.status).isEqualTo(ItemStatus.NotInstalled)
         vm.closeItem()
         testScheduler.advanceUntilIdle()
@@ -319,6 +321,61 @@ class ArchiveViewModelTest {
         assertThat(sidecar.exists()).isTrue()
         assertThat(ArchiveDownloads.readSidecar(sidecar)!!.second).isEqualTo(TextKind.EPUB)
         assertThat(vm.ui.value.notice).isNull()
+    }
+
+    @Test fun getPdfQueuesThePdfBesideTheTextAsItsOwnDownload() = runTest(main.dispatcher) {
+        val vm = viewModel()
+        vm.openItem(scanId)
+        settle { vm.ui.value.sheet?.loading == false }
+        vm.get(scanId)
+        settle { downloads.enqueuedSpecs.size == 1 }
+        vm.get(scanId, pdf = true)
+        settle { downloads.enqueuedSpecs.size == 2 }
+        val (text, pdf) = downloads.enqueuedSpecs
+        assertThat(text.itemId).isEqualTo("archive-org:$scanId")
+        assertThat(text.relativePath).isEqualTo("books/archive-org/$scanId.txt")
+        assertThat(pdf.itemId).isEqualTo("archive-org:$scanId#pdf")
+        assertThat(pdf.relativePath).isEqualTo("books/archive-org/$scanId.pdf")
+        assertThat(pdf.sizeBytes).isEqualTo(11_034_655L)
+        // The PDF's download leaves the text's sidecar as it was.
+        assertThat(ArchiveDownloads.readSidecar(File(sidecars, "$scanId.json"))!!.second).isEqualTo(TextKind.OCR_TEXT)
+        settle { vm.ui.value.sheet?.pdfStatus is ItemStatus.Queued }
+        assertThat(vm.ui.value.sheet!!.status).isInstanceOf(ItemStatus.Queued::class.java)
+        // Remove takes both downloads and both books.
+        vm.remove(scanId)
+        settle { downloads.list.value.isEmpty() }
+        assertThat(bookshelf.removed).containsExactly("book:archive-org:$scanId", "book:archive-org:$scanId#pdf")
+    }
+
+    @Test fun aLargeDownloadAsksFirstAndDontAskAgainSticks() = runTest(main.dispatcher) {
+        val serve = itemBody
+        itemBody = { id -> if (id == scanId) serve(id).replace("\"size\":\"11034655\"", "\"size\":\"212000000\"") else serve(id) }
+        val vm = viewModel()
+        vm.get(scanId, pdf = true)
+        settle { vm.ui.value.confirm != null }
+        assertThat(vm.ui.value.confirm).isEqualTo(ConfirmLarge(scanId, pdf = true, bytes = 212_000_000L, title = "PDF"))
+        assertThat(downloads.enqueuedSpecs).isEmpty()
+        vm.dismissLarge()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.confirm).isNull()
+        assertThat(downloads.enqueuedSpecs).isEmpty()
+
+        vm.get(scanId, pdf = true)
+        settle { vm.ui.value.confirm != null }
+        vm.confirmLarge(dontAskAgain = true)
+        settle { downloads.enqueuedSpecs.isNotEmpty() }
+        assertThat(downloads.enqueuedSpecs.single().itemId).isEqualTo("archive-org:$scanId#pdf")
+        assertThat(downloadPrefs.askBeforeLarge).isFalse()
+    }
+
+    @Test fun withTheSettingOffALargeDownloadGoesStraightIn() = runTest(main.dispatcher) {
+        downloadPrefs.askBeforeLarge = false
+        val serve = itemBody
+        itemBody = { id -> if (id == scanId) serve(id).replace("\"size\":\"11034655\"", "\"size\":\"212000000\"") else serve(id) }
+        val vm = viewModel()
+        vm.get(scanId, pdf = true)
+        settle { downloads.enqueuedSpecs.isNotEmpty() }
+        assertThat(vm.ui.value.confirm).isNull()
     }
 
     @Test fun getUsesTheSheetItemWithoutFetchingAgain() = runTest(main.dispatcher) {
@@ -526,7 +583,8 @@ class ArchiveViewModelTest {
         vm.retryDownload("b")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.calls).containsAtLeast("remove:archive-org:$epubId", "cancel:archive-org:a", "retry:archive-org:b")
-        assertThat(bookshelf.removed).containsExactly("book:archive-org:$epubId")
+        // The item's book, and the PDF beside its text should there be one (Plan P2).
+        assertThat(bookshelf.removed).containsExactly("book:archive-org:$epubId", "book:archive-org:$epubId#pdf")
     }
 
     // --- Archive.org audio (Plan M2, Task 8) ---

@@ -146,6 +146,10 @@ fun ArchiveScreen(
                 beforeDownload()
                 viewModel.get(sheet.identifier)
             },
+            onGetPdf = {
+                beforeDownload()
+                viewModel.get(sheet.identifier, pdf = true)
+            },
             onCancel = { viewModel.cancel(sheet.identifier) },
             onRetry = { viewModel.retryDownload(sheet.identifier) },
             onRemove = { confirmRemove = sheet.identifier to (sheet.item?.title?.ifBlank { null } ?: sheet.identifier) },
@@ -156,6 +160,10 @@ fun ArchiveScreen(
                 onOpenInLibrary(sheet.identifier)
             },
         )
+    }
+
+    ui.confirm?.let { confirm ->
+        LargeDownloadDialog(confirm, onDownload = viewModel::confirmLarge, onDismiss = viewModel::dismissLarge)
     }
 
     confirmRemove?.let { (identifier, title) ->
@@ -177,6 +185,24 @@ fun ArchiveScreen(
             dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text("Keep") } },
         )
     }
+}
+
+/** "This PDF is 212 MB. Download it?", with Don't ask again (Plan P2: big scans and comic runs are welcome, once warned). */
+@Composable
+internal fun LargeDownloadDialog(confirm: ConfirmLarge, onDownload: (dontAskAgain: Boolean) -> Unit, onDismiss: () -> Unit) {
+    var dontAsk by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("This ${confirm.title} is ${app.granger.formatBytes(confirm.bytes)}. Download it?") },
+        text = {
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                androidx.compose.material3.Checkbox(checked = dontAsk, onCheckedChange = { dontAsk = it })
+                Text("Don't ask again")
+            }
+        },
+        confirmButton = { TextButton(onClick = { onDownload(dontAsk) }) { Text("Download") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 /** The screen without its view model: the list, the filter note and the waiver dialog. */

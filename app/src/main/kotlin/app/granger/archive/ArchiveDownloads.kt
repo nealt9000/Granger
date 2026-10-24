@@ -16,27 +16,52 @@ import kotlinx.serialization.json.Json
 /** Builds archive.org download specs and keeps the item metadata that the finished download is filed with. */
 object ArchiveDownloads {
     const val PREFIX = "archive-org:"
+    /**
+     * Marks the PDF got beside an item's text (Plan P2): its own download and its own book, so the text and the
+     * scan sit side by side. A PDF-only item's PDF is the item's one download and has no suffix.
+     */
+    const val PDF_SUFFIX = "#pdf"
     private const val OCR_NOTE = "OCR text from a scan: may have errors. "
     private val json = Json { ignoreUnknownKeys = true }
 
     fun itemId(identifier: String) = PREFIX + identifier
 
-    fun identifierOf(itemId: String): String? = if (itemId.startsWith(PREFIX)) itemId.removePrefix(PREFIX) else null
+    /** The download of the PDF beside [identifier]'s text. */
+    fun pdfItemId(identifier: String) = PREFIX + identifier + PDF_SUFFIX
 
-    fun spec(item: ArchiveItem, offer: Offer.Download, client: ArchiveOrgClient): DownloadSpec {
+    /** The item's identifier, for its text download and the PDF beside it alike. */
+    fun identifierOf(itemId: String): String? =
+        if (itemId.startsWith(PREFIX)) itemId.removePrefix(PREFIX).removeSuffix(PDF_SUFFIX) else null
+
+    fun isPdfCopy(itemId: String): Boolean = itemId.startsWith(PREFIX) && itemId.endsWith(PDF_SUFFIX)
+
+    /** The book's source ref for a download: the identifier, with [PDF_SUFFIX] for the PDF beside a text. */
+    fun bookRefOf(itemId: String): String? = identifierOf(itemId)?.let { if (isPdfCopy(itemId)) it + PDF_SUFFIX else it }
+
+    /** The PDF beside a text is filed as its own book: "(PDF)" after the title, and none of the OCR text's note. */
+    fun pdfCopyDetails(details: BookDetails): BookDetails =
+        details.copy(title = "${details.title} (PDF)", description = details.description.removePrefix(OCR_NOTE))
+
+    /** The spec for [offer]'s main file, or with [pdfCopy] for the PDF beside its text ([Offer.Download.pdf]). */
+    fun spec(item: ArchiveItem, offer: Offer.Download, client: ArchiveOrgClient, pdfCopy: Boolean = false): DownloadSpec {
         val identifier = item.identifier
         require(ArchiveQuery.isValidIdentifier(identifier)) { "Bad archive.org identifier" }
-        val file = offer.file
+        val file = if (pdfCopy) requireNotNull(offer.pdf) { "No PDF beside this item's text" } else offer.file
         val (hash, algorithm) = when {
             !file.sha1.isNullOrBlank() -> file.sha1!! to HashAlgorithm.SHA1
             !file.md5.isNullOrBlank() -> file.md5!! to HashAlgorithm.MD5
             else -> throw IllegalArgumentException("File has neither sha1 nor md5")
         }
-        val extension = if (offer.kind == TextKind.EPUB) "epub" else "txt"
+        val extension = when {
+            pdfCopy || offer.kind == TextKind.PDF -> "pdf"
+            offer.kind == TextKind.EPUB -> "epub"
+            else -> "txt"
+        }
+        val title = item.title.ifBlank { identifier }
         return DownloadSpec(
-            itemId = itemId(identifier),
+            itemId = if (pdfCopy) pdfItemId(identifier) else itemId(identifier),
             kind = ItemKind.BOOK,
-            title = item.title.ifBlank { identifier },
+            title = if (pdfCopy) "$title (PDF)" else title,
             urls = listOf(client.downloadUrl(identifier, file.name)),
             sizeBytes = file.sizeBytes ?: 0L,
             hash = hash,

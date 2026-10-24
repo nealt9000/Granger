@@ -34,7 +34,7 @@ class ArchiveDownloadsTest {
     private val epub: ArchiveFile = item.files.single { it.format == "EPUB" }
 
     @Test fun epubSpecUsesSha1AndTheArchivePath() {
-        val spec = ArchiveDownloads.spec(item, Offer.Download(epub, TextKind.EPUB, false), client)
+        val spec = ArchiveDownloads.spec(item, Offer.Download(epub, TextKind.EPUB), client)
         assertThat(spec.itemId).isEqualTo("archive-org:$id")
         assertThat(spec.relativePath).isEqualTo("books/archive-org/$id.epub")
         assertThat(spec.hashAlgorithm).isEqualTo(HashAlgorithm.SHA1)
@@ -47,27 +47,58 @@ class ArchiveDownloadsTest {
 
     @Test fun md5IsUsedWhenThereIsNoSha1() {
         val file = epub.copy(sha1 = null)
-        val spec = ArchiveDownloads.spec(item, Offer.Download(file, TextKind.EPUB, false), client)
+        val spec = ArchiveDownloads.spec(item, Offer.Download(file, TextKind.EPUB), client)
         assertThat(spec.hashAlgorithm).isEqualTo(HashAlgorithm.MD5)
         assertThat(spec.hash).isEqualTo(epub.md5)
     }
 
     @Test fun ocrTextGoesToATxtPathAndSaysSoInTheDescription() {
-        val spec = ArchiveDownloads.spec(item, Offer.Download(epub, TextKind.OCR_TEXT, false), client)
+        val spec = ArchiveDownloads.spec(item, Offer.Download(epub, TextKind.OCR_TEXT), client)
         assertThat(spec.relativePath).isEqualTo("books/archive-org/$id.txt")
         val details = ArchiveDownloads.details(item.copy(description = "A book."), TextKind.OCR_TEXT)
         assertThat(details.description).isEqualTo("OCR text from a scan: may have errors. A book.")
         assertThat(ArchiveDownloads.details(item.copy(description = "A book."), TextKind.EPUB).description).isEqualTo("A book.")
     }
 
+    @Test fun aPdfOnlyItemDownloadsItsPdfAsTheItem() {
+        val pdf = item.files.first { it.format == "Text PDF" }
+        val spec = ArchiveDownloads.spec(item, Offer.Download(pdf, TextKind.PDF), client)
+        assertThat(spec.itemId).isEqualTo("archive-org:$id")
+        assertThat(spec.relativePath).isEqualTo("books/archive-org/$id.pdf")
+        assertThat(spec.hash).isEqualTo(pdf.sha1)
+        assertThat(spec.sizeBytes).isEqualTo(pdf.sizeBytes)
+    }
+
+    @Test fun thePdfBesideATextIsItsOwnDownloadAndBook() {
+        val pdf = item.files.first { it.format == "Text PDF" }
+        val spec = ArchiveDownloads.spec(item, Offer.Download(epub, TextKind.OCR_TEXT, pdf = pdf), client, pdfCopy = true)
+        assertThat(spec.itemId).isEqualTo("archive-org:$id#pdf")
+        assertThat(spec.relativePath).isEqualTo("books/archive-org/$id.pdf")
+        assertThat(spec.urls).containsExactly(client.downloadUrl(id, pdf.name))
+        assertThat(spec.title).endsWith(" (PDF)")
+        assertThat(ArchiveDownloads.identifierOf(spec.itemId)).isEqualTo(id)
+        assertThat(ArchiveDownloads.isPdfCopy(spec.itemId)).isTrue()
+        assertThat(ArchiveDownloads.bookRefOf(spec.itemId)).isEqualTo("$id#pdf")
+        assertThat(ArchiveDownloads.bookRefOf("archive-org:$id")).isEqualTo(id)
+        val details = ArchiveDownloads.pdfCopyDetails(ArchiveDownloads.details(item.copy(title = "Steam", description = "A book."), TextKind.OCR_TEXT))
+        assertThat(details.title).isEqualTo("Steam (PDF)")
+        assertThat(details.description).isEqualTo("A book.")
+    }
+
+    @Test fun sidecarRoundTripsAPdfKind() {
+        val dir = File(tmp.root, "books/archive-org")
+        val file = ArchiveDownloads.writeSidecar(dir, item, TextKind.PDF)
+        assertThat(ArchiveDownloads.readSidecar(file)!!.second).isEqualTo(TextKind.PDF)
+    }
+
     @Test fun blankTitleFallsBackToTheIdentifier() {
-        val spec = ArchiveDownloads.spec(item.copy(title = " "), Offer.Download(epub, TextKind.EPUB, false), client)
+        val spec = ArchiveDownloads.spec(item.copy(title = " "), Offer.Download(epub, TextKind.EPUB), client)
         assertThat(spec.title).isEqualTo(id)
     }
 
     @Test fun badIdentifierIsRefused() {
         assertThrows(IllegalArgumentException::class.java) {
-            ArchiveDownloads.spec(item.copy(identifier = "../x"), Offer.Download(epub, TextKind.EPUB, false), client)
+            ArchiveDownloads.spec(item.copy(identifier = "../x"), Offer.Download(epub, TextKind.EPUB), client)
         }
     }
 

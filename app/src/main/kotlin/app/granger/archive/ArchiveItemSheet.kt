@@ -33,9 +33,9 @@ internal fun offerLabel(offer: Offer?): String? = when (offer) {
     is Offer.Download -> when (offer.kind) {
         app.granger.core.archive.TextKind.EPUB -> "EPUB"
         app.granger.core.archive.TextKind.TEXT -> "Plain text"
-        app.granger.core.archive.TextKind.OCR_TEXT -> "OCR text: may have errors"
+        app.granger.core.archive.TextKind.OCR_TEXT -> if (offer.pdf != null) "OCR text: may have errors · PDF" else "OCR text: may have errors"
+        app.granger.core.archive.TextKind.PDF -> "PDF"
     }
-    Offer.PdfOnly -> "PDF: coming soon"
     Offer.LendOnly -> "Borrow on archive.org"
     Offer.Nothing -> "No downloadable text"
     null -> null
@@ -66,6 +66,8 @@ internal fun ArchiveItemSheet(
     onRemove: () -> Unit,
     onOpenInBrowser: () -> Unit,
     onDismiss: () -> Unit,
+    /** Gets the PDF beside the item's text, as a second book (Plan P2). */
+    onGetPdf: () -> Unit = {},
     /** An item got from the other audio view ([ItemStatus.InLibrary]): open it there. */
     onOpenInLibrary: () -> Unit = {},
 ) {
@@ -94,12 +96,7 @@ internal fun ArchiveItemSheet(
                     Text(item.description, maxLines = 6, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
                 }
                 val label = audioLabel(audio) ?: offerLabel(sheet.offer)
-                if (label != null) {
-                    Text(
-                        listOfNotNull(label, sheet.sizeBytes?.let { formatBytes(it) }).joinToString(" · "),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
+                if (label != null) Text(label, style = MaterialTheme.typography.labelLarge)
             }
             val downloading = sheet.status is ItemStatus.Queued || sheet.status is ItemStatus.Downloading
             if (downloading && sheet.filesTotal > 0) {
@@ -108,10 +105,19 @@ internal fun ArchiveItemSheet(
             ItemStatusText(sheet.status)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 SheetButtons(sheet, audio, onGet, onCancel, onRetry, onRemove, onOpenInBrowser, onOpenInLibrary)
-            }
-            val offer = sheet.offer
-            if (offer is Offer.Download && offer.alsoPdf) {
-                Text("PDF: coming soon", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // The PDF beside the text, side by side with Get: its own download, and its own book once in.
+                if (sheet.pdfSizeBytes != null && sheet.status !is ItemStatus.InLibrary) {
+                    when (sheet.pdfStatus) {
+                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text("Get PDF · ${formatBytes(sheet.pdfSizeBytes)}") }
+                        ItemStatus.Installed, ItemStatus.UpdateAvailable ->
+                            Text("PDF in your library", style = MaterialTheme.typography.bodySmall)
+                        else -> Text(
+                            "PDF: " + pdfStatusText(sheet.pdfStatus),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
             OutlinedButton(onClick = onOpenInBrowser) { Text("View on archive.org") }
             Box(Modifier.padding(bottom = 16.dp))
@@ -146,9 +152,19 @@ private fun SheetButtons(
         else -> when {
             audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text("Get") }
             audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
-            sheet.offer is Offer.Download -> Button(onClick = onGet) { Text("Get") }
+            sheet.offer is Offer.Download -> Button(onClick = onGet) {
+                Text(sheet.sizeBytes?.let { "Get · ${formatBytes(it)}" } ?: "Get")
+            }
             sheet.offer == Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
             else -> Unit
         }
     }
+}
+
+/** Where the PDF's own download stands, in a few words; the sheet's Cancel and Retry act on both downloads. */
+private fun pdfStatusText(status: ItemStatus): String = when (status) {
+    is ItemStatus.Queued -> "queued"
+    is ItemStatus.Downloading -> "downloading, ${(status.fraction * 100).toInt()}%"
+    is ItemStatus.Failed -> "failed"
+    else -> ""
 }

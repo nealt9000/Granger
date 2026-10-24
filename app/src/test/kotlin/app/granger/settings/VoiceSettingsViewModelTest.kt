@@ -54,6 +54,7 @@ class VoiceSettingsViewModelTest {
     private val downloadPrefs = object : DownloadPrefs {
         override var wifiOnly = true
         override var volumePath: String? = null
+        override var askBeforeLarge = true
     }
 
     private fun voiceDir(root: File, id: String) {
