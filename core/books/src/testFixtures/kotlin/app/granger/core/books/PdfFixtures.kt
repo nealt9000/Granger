@@ -24,7 +24,10 @@ object PdfFixtures {
 
     fun init(context: Context) = PDFBoxResourceLoader.init(context)
 
-    /** Three pages with an outline, an info dictionary, a running head and footer, and a hyphen at a line end on page 2. */
+    /**
+     * Three pages with an outline, an info dictionary, a running head and footer, a hyphen at a line end on page 2,
+     * and archive.org OCR's `¬` line-end hyphen on page 3.
+     */
     fun text(dir: File, name: String = "water.pdf"): File = write(dir, name) { doc ->
         doc.documentInformation.apply {
             title = TITLE
@@ -44,7 +47,8 @@ object PdfFixtures {
             ),
             listOf(
                 "Storage",
-                "Store treated water in clean, covered containers away from sunlight.",
+                "Store treated water in clean, covered con\u00ac",
+                "tainers away from sunlight.",
             ),
         )
         val outline = PDDocumentOutline()

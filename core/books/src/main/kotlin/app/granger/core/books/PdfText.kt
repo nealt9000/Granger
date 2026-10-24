@@ -105,7 +105,10 @@ object PdfText {
         }
     }
 
-    /** Lines into paragraphs (split at blank lines), with a hyphen at a line end joined to a lowercase next line. */
+    /**
+     * Lines into paragraphs (split at blank lines), with a hyphen at a line end joined to a lowercase next line.
+     * archive.org's OCR writes that hyphen as `¬`, and some PDFs use a soft or Unicode hyphen.
+     */
     private fun paragraphs(lines: List<String>): List<String> {
         val out = ArrayList<String>()
         val current = StringBuilder()
@@ -118,7 +121,7 @@ object PdfText {
                 flush()
                 continue
             }
-            val hyphenated = current.length > 1 && current.endsWith("-") && current[current.length - 2].isLetter() &&
+            val hyphenated = current.length > 1 && current.last() in HYPHENS && current[current.length - 2].isLetter() &&
                 line.first().isLowerCase()
             when {
                 current.isEmpty() -> current.append(line)
@@ -134,6 +137,7 @@ object PdfText {
     private fun normalise(line: String) = line.replace(DIGITS, "#").lowercase()
 
     private val DIGITS = Regex("\\d+")
+    private val HYPHENS = setOf('-', '\u00ac', '\u00ad', '\u2010')
     private const val EDGE_LINES = 2
     private const val NEIGHBOURS = 2
     private const val TEXT_LAYER_PAGES = 20

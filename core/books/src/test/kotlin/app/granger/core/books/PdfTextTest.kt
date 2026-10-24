@@ -40,6 +40,12 @@ class PdfTextTest {
         assertThat(text).doesNotContain("exam-")
     }
 
+    @Test fun archiveOrgNotSignHyphensJoin() {
+        val text = PdfText.chunks(PdfFixtures.text(tmp.root), "page/3").joinToString(" ") { it.text }
+        assertThat(text).contains("covered containers")
+        assertThat(text).doesNotContain("\u00ac")
+    }
+
     @Test fun repeatedHeadsAndFootersAreDropped() {
         val text = PdfText.all(PdfFixtures.text(tmp.root)).joinToString(" ") { it.text }
         assertThat(text).doesNotContain(PdfFixtures.HEAD)
