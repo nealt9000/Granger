@@ -4,7 +4,11 @@ import java.security.MessageDigest
 
 /** What pack-time vectors are tied to: the chunkers' output version and each chunk's text hash. */
 object Chunkers {
-    /** Bump on any change to the output of [app.granger.core.books.XhtmlChunks] or [app.granger.core.research.HtmlPassages]. */
+    /**
+     * Bump on any change to the output of [app.granger.core.books.XhtmlChunks] or [app.granger.core.research.HtmlPassages].
+     * PDF page chunks (`PdfText` in `:core:books`, Plan P2) have no pack-time vectors and aren't covered; R2 versions
+     * them when books get vectors on the phone.
+     */
     const val VERSION = 1
 
     /**
