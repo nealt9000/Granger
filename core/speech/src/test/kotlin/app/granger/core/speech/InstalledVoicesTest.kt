@@ -13,9 +13,10 @@ class InstalledVoicesTest {
     private val systemVoice = Voice(VoiceId.System("com.google.android.tts", "en-us-x-iom-local"), "en-us-x-iom-local (en-US)", "en-US")
     private val noFactory = object : SpeechFactory { override suspend fun open(voice: Voice): Speech = throw SpeechException("not in this test") }
 
-    private fun voiceDir(root: File, name: String) {
+    private fun voiceDir(root: File, name: String, config: String? = null) {
         val d = File(root, name).also { it.mkdirs() }
         File(d, "$name.onnx").writeText("x"); File(d, "tokens.txt").writeText("x"); File(d, "espeak-ng-data").mkdirs()
+        if (config != null) File(d, "$name.onnx.json").writeText(config)
     }
 
     @Test
@@ -62,8 +63,40 @@ class InstalledVoicesTest {
     }
 
     @Test
+    fun aVoiceWithNamedSpeakersListsEachSpeaker() = runTest {
+        val volume = tmp.newFolder("v")
+        val dir = "vits-piper-en_US-granger_libritts-medium"
+        voiceDir(File(volume, "voices"), dir, """{"num_speakers": 2, "speaker_id_map": {"Martin": 1, "Maggie": 0}, "audio": {}}""")
+        val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { emptyList() }, noFactory, noFactory)
+        val list = voices.refresh()
+        assertThat(list.map { it.id }).containsExactly(VoiceId.Granger(dir, 0), VoiceId.Granger(dir, 1)).inOrder()
+        assertThat(list.map { it.title }).containsExactly("Granger voice (Maggie)", "Granger voice (Martin)").inOrder()
+        assertThat(list.map { it.speakers }).containsExactly(2, 2)
+        // A saved speaker the voice no longer has falls back to the same voice, not to another one.
+        assertThat(voices.preferred(VoiceId.Granger(dir, 7))?.id).isEqualTo(VoiceId.Granger(dir, 0))
+        assertThat(voices.preferred(VoiceId.Granger(dir, 1))?.id).isEqualTo(VoiceId.Granger(dir, 1))
+    }
+
+    @Test
+    fun readerNumbersAreNotNamesSoTheVoiceIsListedOnce() = runTest {
+        val volume = tmp.newFolder("v")
+        voiceDir(File(volume, "voices"), "vits-piper-en_US-libritts-high", """{"num_speakers": 3, "speaker_id_map": {"3922": 0, "4535": 1, "14": 2}}""")
+        voiceDir(File(volume, "voices"), "vits-piper-en_US-ljspeech-medium", """{"num_speakers": 1, "speaker_id_map": {}}""")
+        val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { emptyList() }, noFactory, noFactory)
+        assertThat(voices.refresh().map { it.id }).containsExactly(
+            VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), VoiceId.Granger("vits-piper-en_US-libritts-high"),
+        ).inOrder()
+    }
+
+    @Test
     fun voiceIdsRoundTripAndRejectJunk() {
-        for (id in listOf(systemVoice.id, VoiceId.Granger("vits-piper-en_US-ljspeech-medium"))) assertThat(VoiceId.decode(id.encode())).isEqualTo(id)
+        for (id in listOf(systemVoice.id, VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), VoiceId.Granger("vits-piper-en_US-granger_libritts-medium", 1))) {
+            assertThat(VoiceId.decode(id.encode())).isEqualTo(id)
+        }
+        // Speaker 0 is written as V1 wrote every Granger voice, so V1's saved choices still decode.
+        assertThat(VoiceId.Granger("d", 0).encode()).isEqualTo("granger:d")
+        assertThat(VoiceId.Granger("d", 1).encode()).isEqualTo("granger:d@1")
+        assertThat(VoiceId.decode("granger:d@x")).isEqualTo(VoiceId.Granger("d@x"))
         assertThat(VoiceId.decode("system:only-engine")).isNull()
         assertThat(VoiceId.decode("granger:")).isNull()
         assertThat(VoiceId.decode("kokoro:x")).isNull()

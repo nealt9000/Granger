@@ -88,8 +88,8 @@ class VoiceSettingsViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.catalog.single().installed).isTrue()
 
-        vm.choose(VoiceId.Granger(entry.id))
-        assertThat(prefs.voiceId.value).isEqualTo(VoiceId.Granger(entry.id))
+        vm.choose(VoiceId.Granger(entry.id, speaker = 1))      // a second speaker of the voice: removing the voice clears it too
+        assertThat(prefs.voiceId.value).isEqualTo(VoiceId.Granger(entry.id, speaker = 1))
         vm.setSpeed(1.3f)
         vm.setMarkSentence(false)
         testScheduler.advanceUntilIdle()

@@ -9,9 +9,12 @@ sealed interface VoiceId {
         override fun encode() = "system:$engine:$name"
     }
 
-    /** A Granger voice: the directory under `voices/` it was unpacked into. */
-    data class Granger(val dir: String) : VoiceId {
-        override fun encode() = "granger:$dir"
+    /**
+     * A Granger voice: the directory under `voices/` it was unpacked into, and which of its speakers. Speaker 0 is
+     * written `granger:<dir>` as V1 wrote every Granger voice; another is `granger:<dir>@<n>`.
+     */
+    data class Granger(val dir: String, val speaker: Int = 0) : VoiceId {
+        override fun encode() = if (speaker == 0) "granger:$dir" else "granger:$dir@$speaker"
     }
 
     fun encode(): String
@@ -21,7 +24,10 @@ sealed interface VoiceId {
             val parts = s.split(':', limit = 3)
             return when {
                 parts.size == 3 && parts[0] == "system" && parts[1].isNotEmpty() && parts[2].isNotEmpty() -> System(parts[1], parts[2])
-                parts.size == 2 && parts[0] == "granger" && parts[1].isNotEmpty() -> Granger(parts[1])
+                parts.size == 2 && parts[0] == "granger" && parts[1].isNotEmpty() -> {
+                    val speaker = parts[1].substringAfterLast('@', "").toIntOrNull()?.takeIf { it >= 0 }
+                    if (speaker != null) Granger(parts[1].substringBeforeLast('@'), speaker) else Granger(parts[1])
+                }
                 else -> null
             }
         }

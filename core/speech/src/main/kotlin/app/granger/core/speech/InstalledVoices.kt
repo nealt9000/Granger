@@ -27,12 +27,19 @@ class InstalledVoices(
         val local = withContext(io) { voicesDirs().flatMap { SherpaVoice.list(it) } }
             .distinctBy { it.id }
             .sortedWith(compareBy<SherpaVoice> { rank(it.id) }.thenBy { it.id })
-            .map { Voice(VoiceId.Granger(it.id), SherpaSpeech.title(it.id), "en-US") }
+            .flatMap { voice ->
+                val names = SherpaVoice.speakerNames(voice)
+                if (names.isEmpty()) listOf(Voice(VoiceId.Granger(voice.id), SherpaSpeech.title(voice.id), "en-US"))
+                else names.mapIndexed { i, name -> Voice(VoiceId.Granger(voice.id, i), SherpaSpeech.speakerTitle(name), "en-US", speakers = names.size) }
+            }
         val remote = runCatching { systemVoices() }.getOrDefault(emptyList())
         return (local + remote).also { _voices.value = it }
     }
 
-    fun preferred(wanted: VoiceId?): Voice? = voices.value.firstOrNull { it.id == wanted } ?: voices.value.firstOrNull()
+    /** The [wanted] voice; else, for a speaker the voice no longer has, the same voice's first speaker; else the first. */
+    fun preferred(wanted: VoiceId?): Voice? = voices.value.firstOrNull { it.id == wanted }
+        ?: (wanted as? VoiceId.Granger)?.let { w -> voices.value.firstOrNull { (it.id as? VoiceId.Granger)?.dir == w.dir } }
+        ?: voices.value.firstOrNull()
 
     fun factoryFor(id: VoiceId): SpeechFactory = when (id) {
         is VoiceId.Granger -> granger
@@ -43,15 +50,16 @@ class InstalledVoices(
 
     companion object {
         /**
-         * The order Granger voices are offered in when nothing is chosen: the catalog's voice, then any other Piper
-         * voice, then the rest (a Kokoro build is too slow to read with on the phone: V0, RTF 1.5–2.2).
+         * The order Granger voices are offered in when nothing is chosen: the catalog's voices in catalog order, then
+         * any other Piper voice, then the rest (a Kokoro build is too slow to read with on the phone: V0, RTF 1.5–2.2).
          */
         fun rank(id: String): Int = when {
-            id == CATALOG_VOICE -> 0
-            id.startsWith("vits-piper-") -> 1
-            else -> 2
+            id in CATALOG_VOICES -> CATALOG_VOICES.indexOf(id)
+            id.startsWith("vits-piper-") -> CATALOG_VOICES.size
+            else -> CATALOG_VOICES.size + 1
         }
 
-        const val CATALOG_VOICE = "vits-piper-en_US-ljspeech-medium"
+        /** The catalog's voices (`tools/catalog-gen/curated.json`), in its order. */
+        val CATALOG_VOICES = listOf("vits-piper-en_US-ljspeech-medium", "vits-piper-en_US-granger_libritts-medium")
     }
 }

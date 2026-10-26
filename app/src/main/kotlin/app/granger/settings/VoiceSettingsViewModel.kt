@@ -114,7 +114,7 @@ class VoiceSettingsViewModel(
             withContext(io) {
                 for (dir in installedDirs()) File(dir, entry.id).deleteRecursively()
             }
-            if (prefs.voiceId.value == VoiceId.Granger(entry.id)) prefs.setVoice(null)
+            if ((prefs.voiceId.value as? VoiceId.Granger)?.dir == entry.id) prefs.setVoice(null)
             installed.refresh()
         }
     }

@@ -69,6 +69,20 @@ sealed interface SherpaVoice {
             return if (all.any { it.name == "lexicon-us-en.txt" }) all.filterNot { it.name == "lexicon-gb-en.txt" } else all
         }
 
+        /**
+         * The speakers' names by speaker id, from the Piper config beside the model (`<model>.onnx.json`'s
+         * `speaker_id_map`), or empty when the voice has one speaker or its speakers are only reader numbers (a
+         * LibriTTS voice as trained): those are listed once, as speaker 0.
+         */
+        fun speakerNames(voice: SherpaVoice): List<String> {
+            if (voice !is Piper) return emptyList()
+            val config = File(voice.model.path + ".json").takeIf { it.isFile } ?: return emptyList()
+            val map = Regex("\"speaker_id_map\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return emptyList()
+            val byId = Regex("\"([^\"]+)\"\\s*:\\s*(\\d+)").findAll(map).associate { it.groupValues[2].toInt() to it.groupValues[1] }
+            if (byId.size < 2 || byId.values.any { name -> name.all { it.isDigit() } }) return emptyList()
+            return (0 until byId.size).map { byId[it] ?: return emptyList() }
+        }
+
         /** Every voice directly under [root], by id. */
         fun list(root: File): List<SherpaVoice> =
             root.listFiles().orEmpty().filter { it.isDirectory }.sortedBy { it.name }.mapNotNull(::detect)

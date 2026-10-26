@@ -16,7 +16,7 @@ class SherpaSpeech internal constructor(
     private val pronunciations: Map<String, String> = Pronunciations.builtIn,
 ) : Speech {
     override fun synthesize(text: String, speed: Float): Flow<Pcm> =
-        tts.synthesize(spoken(text), speaker = 0, speed = speed).map { Pcm(it, tts.sampleRate) }
+        tts.synthesize(spoken(text), speaker = (voice.id as? VoiceId.Granger)?.speaker ?: 0, speed = speed).map { Pcm(it, tts.sampleRate) }
 
     /** What the engine is handed for [text]. */
     internal fun spoken(text: String): String = Pronunciations.apply(SpokenText.forPiper(text), pronunciations)
@@ -46,5 +46,8 @@ class SherpaSpeech internal constructor(
         }
 
         fun title(dir: String): String = "Granger voice (${shortName(dir)})"
+
+        /** A named speaker's title: "Granger voice (Maggie)". */
+        fun speakerTitle(name: String): String = "Granger voice ($name)"
     }
 }
