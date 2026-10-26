@@ -10,6 +10,6 @@ Reference art and brand packages, one dated folder each, like the specs and plan
 | `2026-10-23-field-recorder-concept/` | The field recorder (ElevenLabs, Neal's prompt in the brief §8) and `granger-palette-field-kit.png`, the field-kit palette on two phone screens | **Current reference**; not a shippable asset (generated; shows third-party marks) |
 | `2026-10-26-mark-sketches/` | Neal's three favourite mark sketches (ElevenLabs): a book fused with a cassette and a squared G | **The chosen mark** (2026-10-26): sketch C, its clean redraw (`granger-mark-from-sketch-c.svg`, the overlay against the sketch, `redraw_sketch_c.py`). The app's drawables come from `tools/brand/make_drawables.py`. The sketches are generated, not shippable |
 
-The Vitruvian draft (`tools/brand/`, traced mark, Play icon) was retired by the brief; its unmerged branch `p1-brand` was deleted on 2026-10-23.
+The Vitruvian draft (its own `tools/brand/` scripts, a traced mark, a Play icon; today's `tools/brand/` is the new mark's) was retired by the brief; its unmerged branch `p1-brand` was deleted on 2026-10-23.
 
 Add a new package as `YYYY-MM-DD-<name>/`.
