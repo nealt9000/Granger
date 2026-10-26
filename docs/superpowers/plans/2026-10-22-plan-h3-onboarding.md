@@ -118,8 +118,8 @@
 
 ### Task 5: The brand (after Neal's decision)
 
-- [ ] Replace `BrandLockup`'s assets with the chosen mark and lockup (dark and light), and the launcher icon if the decision includes it; the Welcome line.
-- [ ] **Commit.** `Onboarding: the brand on Welcome`
+- [x] Replace `BrandLockup`'s assets with the chosen mark and lockup (dark and light), and the launcher icon if the decision includes it; the Welcome line. *(2026-10-26: the mark from Neal's sketch C in lantern over the stencil wordmark; launcher in field paper on enamel, themed icon from the same paths; the Welcome line is the vision sentence; Settings' About takes the lockup and drops "Civilization, backed up.". The app is still dark-only, so "light" waits for the theme pass.)*
+- [x] **Commit.** `Onboarding: the brand on Welcome`
 
 ### Task 6: Walkthrough; roadmap
 

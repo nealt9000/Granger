@@ -34,6 +34,11 @@ object GrangerColors {
     val TertiaryContainer = Color(0xFF4A3410)
     val OnTertiaryContainer = Color(0xFFFFE2B8)
     val Scrim = Color(0xFF000000)
+
+    // The field kit (brand brief §8). Only the brand uses them until the theme pass gives Granger its Field and Night schemes.
+    val Enamel = Color(0xFF2E4A45)
+    val Lantern = Color(0xFFF0A35E)
+    val FieldPaper = Color(0xFFEFE4D0)
 }
 
 val GrangerColorScheme = darkColorScheme(
