@@ -57,17 +57,73 @@ about 900 characters of instructions.
 
 ## Task 1: where the 16 s goes, and dense latency
 
-- [ ] One full-pipeline run on the tuning split with dense on and the whole vector set (the phone has it since R1
+- [x] One full-pipeline run on the tuning split with dense on and the whole vector set (the phone has it since R1
   Task 10). Record each stage: rewrite, keyword search, dense search, rank, first words.
-- [ ] Profile dense search on the phone: time to read the files from storage against the cosine work itself (cold and
+- [x] Profile dense search on the phone: time to read the files from storage against the cosine work itself (cold and
   warm), per pack.
 - [ ] Try the cheap fixes first, in order, and keep the first that brings dense under 3 s with recall@4 within 1 point:
   - keep the vector files open and warm between questions;
   - a 64-dim first pass over all chunks, then 256 dims on the top 2,000;
   - search only the packs the keywords hit, plus books.
-- [ ] Profile the 8.3 s keyword search the same way. It may be the bigger win.
+- [x] Profile the 8.3 s keyword search the same way. It may be the bigger win.
 - **Gate:** dense retrieval can be on by default when median send to first words with it is no slower than without it
   in r1-dense-1 (16.5 s).
+
+### Done (2026-10-26)
+
+The **gate is met:** send to first words is 12.7 s median with dense on and the whole vector set. Keyword search is the
+step that changed, not dense.
+
+**Runs:**
+- `r5-t1-base`: the instrumented build, before the fix;
+- `r5-t1-kw` / `r5-t1-kw2`: sample-40, before and after;
+- `r5-t1-fast`: the whole split, after the fix.
+
+| Median (p90), whole split | r1-dense-1 | r5-t1-base | r5-t1-fast |
+|---|---|---|---|
+| Rewrite | 3.1 s (4.7) | 3.9 s (5.1) | 4.0 s (5.1) |
+| Keyword search | — | 8.8 s (11.6) | **1.8 s (2.3)** |
+| Dense search, alongside | 2.2 s (3.5) | 3.0 s (4.5) | 2.4 s (3.6) |
+| Search (both) | 8.6 s (11.5) | 8.8 s (11.7) | **2.7 s (4.8)** |
+| Send to first words | 16.5 s (21.2) | 18.3 s (23.2) | **12.7 s (16.6)** |
+
+**Dense search was never the problem.** The 14 s in R1's `r1-t10-check` doesn't reproduce. With all 1.6 GB of vectors
+it takes 2.4 s, made of:
+- 0.9 s for the scan over about 5.5 million vectors;
+- 1.2 s for rebuilding passages from ZIM articles and EPUB chapters;
+- 0.2 s for listing the files.
+
+In `r5-t1-base` dense finished before keyword search on every question. The cheap dense fixes weren't tried.
+
+**Keyword search was the slow step.** It cost about 2 s per keyword: 5.5 s with 2 keywords, 10.8 s with 5. On
+sample-40 the split was:
+- full-text search of 33 packs, 4 at a time: 4.6 s, of which Wikipedia Top took 2.4 s;
+- catalogue cards: 1.7 s;
+- book search: 1.4 s;
+- reading the chosen articles: 0.5 s.
+
+**Fixes** (commit e336100; this is the app's own path, not a debug flag):
+- ZIM full-text hits are fetched without snippets. Research never shows them, and libzim builds each one from the
+  article. The Search screen and Home keep theirs.
+- Books, catalogue cards and media cards run alongside the packs' full-text search.
+- The card patterns are compiled once per search instead of once per book and field.
+
+**Result:**
+- Keyword search went from 8.8 s to 1.8 s.
+- 176 questions got the same keywords from the rewrite in both runs, and all 176 found exactly the same passages.
+- Dense is now the longer of the two searches on 161 of 191 questions.
+
+**A crash found along the way:** a SIGSEGV in `Xapian::Database::get_doccount` under `Search.getResults` (sample-40,
+question 31). libzim's `Query`, `Search` and `SearchIterator` were left to their finalizers, which free them on the
+finalizer thread outside the archive's search lock. They are now disposed under the lock. No crash since, over the whole
+split (about 2,000 searches). This also affects the release app.
+
+**What's left in the 12.7 s:**
+- the rewrite, 4.0 s: Task 6;
+- search, 2.7 s, now dense-bound: scan plus rebuild;
+- E2B from the prompt to first words, about 5 s: Task 3's shorter prompt.
+
+The phone's rewrite and answer were about 0.8 s slower in both of today's runs than in r1-dense-1.
 
 ## Task 2: how often do the passages hold the answer? (offline)
 
