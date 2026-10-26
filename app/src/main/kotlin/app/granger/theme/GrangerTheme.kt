@@ -133,7 +133,7 @@ val LocalGrangerExtras = staticCompositionLocalOf { NightExtras }
 @Composable
 fun GrangerTheme(night: Boolean = true, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalGrangerExtras provides if (night) NightExtras else FieldExtras) {
-        MaterialTheme(colorScheme = if (night) NightColors else FieldColors, content = content)
+        MaterialTheme(colorScheme = if (night) NightColors else FieldColors, typography = GrangerTypography, content = content)
     }
 }
 

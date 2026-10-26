@@ -92,9 +92,9 @@
 
 ### Task 4: The type
 
-- [ ] Spectral (Regular, Italic, Medium, SemiBold) and Courier Prime (Regular, Bold) TTFs in `res/font`, licences in `docs/superpowers/brand/fonts/`; `GrangerTypography` per Decision 7; `GrangerTheme` passes it.
-- [ ] Shots at 360 dp: the rail, Home's chips and strip, the mini player, Settings, Welcome; fix clipping (shorter labels or `maxLines` + ellipsis, never smaller than Material's sizes).
-- [ ] **Commit.** `Theme: Spectral and Courier Prime`
+- [x] Spectral (Regular, Italic, Medium, SemiBold) and Courier Prime (Regular, Bold) TTFs in `res/font`, licences in `docs/superpowers/brand/fonts/`; `GrangerTypography` per Decision 7; `GrangerTheme` passes it.
+- [x] Shots at 360 dp: the rail, Home's chips and strip, the mini player, Settings, Welcome; fix clipping (shorter labels or `maxLines` + ellipsis, never smaller than Material's sizes). *(Built: headlines medium, titles semibold; nothing clipped in the shots at 360 dp; about 1.2 MB of fonts.)*
+- [x] **Commit.** `Theme: Spectral and Courier Prime`
 
 ### Task 5: The brand's own touches
 
