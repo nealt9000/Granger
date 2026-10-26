@@ -108,6 +108,8 @@ val NightColors: ColorScheme = darkColorScheme(
 /** The brand's roles Material has no slot for (Plan T1, Decision 2). */
 @Immutable
 data class GrangerExtras(
+    /** Night or Field, for the few views that must be told (the reader's WebView darkens pages only at night). */
+    val night: Boolean,
     /** The command-line status voice, `> offline. ready.` */
     val status: Color,
     /** Play buttons and playback progress. */
@@ -122,8 +124,8 @@ data class GrangerExtras(
     val coverRule: Color = FieldKit.Lantern,
 )
 
-val FieldExtras = GrangerExtras(status = FieldKit.Enamel, play = FieldKit.Enamel, brass = FieldKit.Brass, mark = FieldKit.Enamel)
-val NightExtras = GrangerExtras(status = FieldKit.Phosphor, play = FieldKit.Lantern, brass = FieldKit.Brass, mark = FieldKit.Lantern)
+val FieldExtras = GrangerExtras(night = false, status = FieldKit.Enamel, play = FieldKit.Enamel, brass = FieldKit.Brass, mark = FieldKit.Enamel)
+val NightExtras = GrangerExtras(night = true, status = FieldKit.Phosphor, play = FieldKit.Lantern, brass = FieldKit.Brass, mark = FieldKit.Lantern)
 
 val LocalGrangerExtras = staticCompositionLocalOf { NightExtras }
 
@@ -138,42 +140,4 @@ fun GrangerTheme(night: Boolean = true, content: @Composable () -> Unit) {
 object GrangerTheme {
     val extras: GrangerExtras
         @Composable @ReadOnlyComposable get() = LocalGrangerExtras.current
-}
-
-/**
- * The retired flame palette's names, now pointing at Night so nothing changes look before Task 2 moves each reader onto the scheme.
- * Deleted at the end of Plan T1 Task 2.
- */
-@Deprecated("Read MaterialTheme.colorScheme or GrangerTheme.extras (Plan T1, Decision 3)")
-object GrangerColors {
-    val Flame = NightColors.primary
-    val OnFlame = NightColors.onPrimary
-    val Background = NightColors.background
-    val Surface = NightColors.surface
-    val SurfaceVariant = NightColors.surfaceContainer
-    val SurfaceHigh = NightColors.surfaceContainerHigh
-    val OnSurface = NightColors.onSurface
-    val OnSurfaceVariant = NightColors.onSurfaceVariant
-    val Outline = NightColors.outline
-    val OutlineVariant = NightColors.outlineVariant
-    val Error = NightColors.error
-    val OnError = NightColors.onError
-    val SurfaceLowest = NightColors.surfaceContainerLowest
-    val SurfaceLow = NightColors.surfaceContainerLow
-    val SurfaceHighest = NightColors.surfaceContainerHighest
-    val SurfaceDim = NightColors.surfaceDim
-    val SurfaceBright = NightColors.surfaceBright
-    val InverseSurface = NightColors.inverseSurface
-    val InverseOnSurface = NightColors.inverseOnSurface
-    val InversePrimary = NightColors.inversePrimary
-    val SecondaryContainer = NightColors.secondaryContainer
-    val OnSecondaryContainer = NightColors.onSecondaryContainer
-    val Tertiary = NightColors.tertiary
-    val OnTertiary = NightColors.onTertiary
-    val TertiaryContainer = NightColors.tertiaryContainer
-    val OnTertiaryContainer = NightColors.onTertiaryContainer
-    val Scrim = NightColors.scrim
-    val Enamel = FieldKit.Enamel
-    val Lantern = FieldKit.Lantern
-    val FieldPaper = FieldKit.Paper
 }

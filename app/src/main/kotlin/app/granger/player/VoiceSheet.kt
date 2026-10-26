@@ -49,7 +49,6 @@ import app.granger.core.player.SleepSetting
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.Voice
 import app.granger.core.speech.VoiceId
-import app.granger.theme.GrangerColors
 import kotlin.math.roundToInt
 
 object VoiceSheetTags {
@@ -119,7 +118,7 @@ fun VoiceSheet(
                 FilledIconButton(
                     onClick = onPlayPause,
                     modifier = Modifier.size(64.dp).testTag(VoiceSheetTags.PLAY_PAUSE),
-                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = GrangerColors.Flame),
+                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary),
                 ) { PlayPauseIcon(ui.playing) }
                 IconButton(onClick = onNextParagraph) { Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next paragraph") }
             }
@@ -141,7 +140,7 @@ fun VoiceSheet(
                 Text(
                     ui.sleepRemainingMs?.let { "Stops in ${formatTime(it)}" } ?: "Off",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (ui.sleepRemainingMs != null) GrangerColors.Flame else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (ui.sleepRemainingMs != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -195,7 +194,7 @@ private fun SpeedRow(speed: Float, onSpeed: (Float) -> Unit) {
         onValueChangeFinished = { onSpeed(value) },
         valueRange = PlayerViewModel.VOICE_SPEEDS.first()..PlayerViewModel.VOICE_SPEEDS.last(),
         steps = PlayerViewModel.VOICE_SPEEDS.size - 2,
-        colors = SliderDefaults.colors(thumbColor = GrangerColors.Flame, activeTrackColor = GrangerColors.Flame),
+        colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
         modifier = Modifier.fillMaxWidth().testTag(VoiceSheetTags.SPEED).semantics { contentDescription = "Reading speed" },
     )
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -231,7 +230,7 @@ private fun MusicRow(music: NowPlaying.Music, playing: Boolean, mixLevel: Float,
         value = level,
         onValueChange = { level = it; onMix(it) },
         valueRange = 0f..1f,
-        colors = SliderDefaults.colors(thumbColor = GrangerColors.Flame, activeTrackColor = GrangerColors.Flame),
+        colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
         modifier = Modifier.fillMaxWidth().testTag(VoiceSheetTags.MIX).semantics { contentDescription = "Music under the voice" },
     )
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

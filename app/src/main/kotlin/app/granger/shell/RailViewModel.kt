@@ -40,7 +40,7 @@ data class RailTabUi(
     val initial: Char,
     /** False when the pack is missing, damaged or gone; the tile is greyed out. */
     val available: Boolean,
-    /** The tab the reader is showing; outlined in flame. */
+    /** The tab the reader is showing; outlined in the accent. */
     val current: Boolean,
     /** A book's cover image file, drawn instead of the letter tile when it can be decoded. */
     val coverPath: String? = null,

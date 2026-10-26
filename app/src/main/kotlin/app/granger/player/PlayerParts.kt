@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import app.granger.R
 import app.granger.core.player.NowPlaying
 import app.granger.shell.rememberRailCover
-import app.granger.theme.GrangerColors
 
 /** What both players show at the top: the cover and two lines. */
 internal data class NowInfo(val title: String, val subtitle: String, val coverPath: String?)
@@ -62,7 +61,7 @@ internal fun PlayerCover(path: String?, book: Boolean, size: Dp, modifier: Modif
     val cover = rememberRailCover(path, size)
     val shape = RoundedCornerShape(if (size > 100.dp) 12.dp else 6.dp)
     Box(
-        modifier.size(size).clip(shape).background(GrangerColors.SurfaceHigh),
+        modifier.size(size).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
         if (cover != null) {
@@ -71,7 +70,7 @@ internal fun PlayerCover(path: String?, book: Boolean, size: Dp, modifier: Modif
             Icon(
                 painterResource(if (voice) R.drawable.ic_library else if (book) R.drawable.ic_headphones else R.drawable.ic_music_note),
                 contentDescription = null,
-                tint = GrangerColors.OnSurfaceVariant,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(size / 2),
             )
         }
@@ -106,9 +105,9 @@ internal fun SeekBar(positionMs: Long, durationMs: Long, onSeek: (Long) -> Unit,
             },
             enabled = duration > 0L,
             colors = SliderDefaults.colors(
-                thumbColor = GrangerColors.Flame,
-                activeTrackColor = GrangerColors.Flame,
-                inactiveTrackColor = GrangerColors.OutlineVariant,
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant,
             ),
             modifier = Modifier.fillMaxWidth().testTag(PlayerTags.SEEK).semantics { contentDescription = label },
         )

@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.granger.R
 import app.granger.core.library.Track
-import app.granger.theme.GrangerColors
 
 /** A queue row; [key] stays with the song while it is dragged, even when the same song is queued twice. */
 private data class QueueItem(val key: Int, val track: Track)
@@ -144,7 +143,7 @@ private fun ReorderableQueue(
                 onPlay = { if (dragKey == null) onPlay(index) },
                 modifier = Modifier
                     .then(if (dragging) Modifier.zIndex(1f).graphicsLayer { translationY = dragOffset } else Modifier.animateItem())
-                    .background(if (dragging) GrangerColors.SurfaceHigh else MaterialTheme.colorScheme.surfaceContainerLow),
+                    .background(if (dragging) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow),
             )
         }
     }
@@ -202,7 +201,7 @@ private fun QueueRow(
         Column(Modifier.weight(1f)) {
             Text(
                 track.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge,
-                color = if (playing) GrangerColors.Flame else MaterialTheme.colorScheme.onSurface,
+                color = if (playing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 track.artists.ifBlank { track.albumArtists }, maxLines = 1, overflow = TextOverflow.Ellipsis,

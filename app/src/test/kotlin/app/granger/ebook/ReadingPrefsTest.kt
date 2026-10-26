@@ -3,7 +3,7 @@ package app.granger.ebook
 import android.content.Context
 import androidx.compose.ui.graphics.toArgb
 import androidx.test.core.app.ApplicationProvider
-import app.granger.theme.GrangerColors
+import app.granger.theme.NightColors
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,15 +69,15 @@ class ReadingPrefsTest {
     @Test fun nightUsesAppColours() {
         val epub = ReadingPrefs(theme = ReadingTheme.NIGHT).toEpub()
         assertThat(epub.theme).isEqualTo(Theme.DARK)
-        assertThat(epub.backgroundColor).isEqualTo(Color(GrangerColors.Background.toArgb()))
-        assertThat(epub.textColor).isEqualTo(Color(GrangerColors.OnSurface.toArgb()))
+        assertThat(epub.backgroundColor).isEqualTo(Color(NightColors.background.toArgb()))
+        assertThat(epub.textColor).isEqualTo(Color(NightColors.onSurface.toArgb()))
         // Day and sepia keep Readium's own theme colours.
         assertThat(ReadingPrefs(theme = ReadingTheme.DAY).toEpub().backgroundColor).isNull()
     }
 
-    @Test fun linksUseTheAppAccentInEveryTheme() {
+    @Test fun linksUseTheBookLinkColourInEveryTheme() {
         // ReadiumCSS night mode would otherwise paint links #63caff: blue on black.
-        val accent = org.readium.r2.navigator.epub.css.Color.Int(GrangerColors.Flame.toArgb())
+        val accent = org.readium.r2.navigator.epub.css.Color.Int(BookLink)
         val css = readerConfiguration().readiumCssRsProperties
         assertThat(css.linkColor).isEqualTo(accent)
         assertThat(css.visitedColor).isEqualTo(accent)

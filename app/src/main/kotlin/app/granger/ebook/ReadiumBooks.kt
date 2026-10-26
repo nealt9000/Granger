@@ -7,11 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
-import app.granger.theme.GrangerColors
 import com.github.barteksc.pdfviewer.util.FitPolicy
 import java.io.File
 import kotlinx.coroutines.CancellationException
@@ -46,13 +44,19 @@ import org.readium.r2.streamer.PublicationOpener
 import org.readium.r2.streamer.parser.DefaultPublicationParser
 
 /**
+ * Book links: a burnt lantern that reads on the Day, Sepia and Night pages alike (at least 3.8:1 on each; the retired
+ * flame managed 3.1). One colour, because the navigator's configuration is fixed when a book opens.
+ */
+const val BookLink: Int = 0xFFB8662A.toInt()
+
+/**
  * The navigator's configuration. ReadiumCSS night mode paints links #63caff, which beats the theme's text colour;
- * links take the app's accent instead, in every theme, visited or not. Readium's own inset padding is off: it reads
+ * links take [BookLink] instead, in every theme, visited or not. Readium's own inset padding is off: it reads
  * the window's cutout directly, and would add the notch again below the reader's top bar. The reader pads the page
  * itself (readerPageInsets), the same way as the web reader's.
  */
 fun readerConfiguration(): EpubNavigatorFragment.Configuration {
-    val accent = CssColor.Int(GrangerColors.Flame.toArgb())
+    val accent = CssColor.Int(BookLink)
     return EpubNavigatorFragment.Configuration(
         readiumCssRsProperties = RsProperties(linkColor = accent, visitedColor = accent),
         selectionActionModeCallback = SelectionMenu(),

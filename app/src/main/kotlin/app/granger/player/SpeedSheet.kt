@@ -27,7 +27,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import app.granger.theme.GrangerColors
 import kotlin.math.roundToInt
 
 /** [speed] snapped to the sheet's 0.1 steps within 0.5–3.0×. */
@@ -61,7 +60,7 @@ fun SpeedSheet(speed: Float, onSpeed: (Float) -> Unit, onDismiss: () -> Unit) {
                 onValueChangeFinished = { onSpeed(value) },
                 valueRange = PlayerViewModel.SPEEDS.first()..PlayerViewModel.SPEEDS.last(),
                 steps = PlayerViewModel.SPEEDS.size - 2,
-                colors = SliderDefaults.colors(thumbColor = GrangerColors.Flame, activeTrackColor = GrangerColors.Flame),
+                colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
                 modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Playback speed" },
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

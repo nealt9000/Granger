@@ -48,7 +48,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.reader.ReaderTopBarInsets
 import app.granger.shell.SafeDrawingIgnoringBars
-import app.granger.theme.GrangerColors
 import org.readium.r2.shared.publication.Locator
 
 /** Back, the book's title, Contents and Search. */
@@ -70,7 +69,7 @@ fun EbookTopBar(title: String, onBack: () -> Unit, onContents: () -> Unit, onSea
 }
 
 /**
- * Headphones to start the voice; while this book is read, a pause or play glyph in flame: a tap pauses or resumes at
+ * Headphones to start the voice; while this book is read, a pause or play glyph in the accent: a tap pauses or resumes at
  * the sentence, a long press stops (Plan V2). Not an [IconButton]: it has no long press.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -98,7 +97,7 @@ private fun VoiceBarButton(voice: VoiceButton, onReadAloud: () -> Unit, onPauseR
         Icon(
             painterResource(icon),
             contentDescription = label,
-            tint = if (voice == VoiceButton.IDLE) LocalContentColor.current else GrangerColors.Flame,
+            tint = if (voice == VoiceButton.IDLE) LocalContentColor.current else MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -155,7 +154,7 @@ fun EbookBottomBar(
                         onSeek(it.toDouble())
                     }
                 },
-                colors = SliderDefaults.colors(thumbColor = GrangerColors.Flame, activeTrackColor = GrangerColors.Flame),
+                colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onContents) { Icon(Icons.Filled.Menu, contentDescription = "Contents") }
@@ -163,7 +162,7 @@ fun EbookBottomBar(
                 if (onReadAloud != null) VoiceBarButton(voice, onReadAloud, onPauseResume, onStop)
                 IconButton(onClick = onBookmark) {
                     if (bookmarked) {
-                        Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = GrangerColors.Flame)
+                        Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = MaterialTheme.colorScheme.primary)
                     } else {
                         Icon(Icons.Outlined.Star, contentDescription = "Add bookmark")
                     }

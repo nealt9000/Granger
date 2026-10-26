@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +38,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import app.granger.theme.GrangerColors
 
 /** A side sheet from the right: a search box and the hits in context. A tap on a row jumps there. */
 @Composable
@@ -51,7 +51,7 @@ fun BookSearchPanel(
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { if (ui.query.isEmpty()) focus.requestFocus() }
     Box(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxSize().background(GrangerColors.Scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
         Surface(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
             color = MaterialTheme.colorScheme.surface,
@@ -68,7 +68,7 @@ fun BookSearchPanel(
                 )
                 when {
                     ui.running -> Box(Modifier.fillMaxWidth().padding(24.dp), Alignment.Center) {
-                        CircularProgressIndicator(color = GrangerColors.Flame)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                     ui.query.isNotBlank() && ui.results.isEmpty() -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
                         Text("Nothing found for “${ui.query.trim()}”.", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -85,7 +85,7 @@ fun BookSearchPanel(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                 }
-                                Text(inContext(row), maxLines = 4, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                                Text(inContext(row, MaterialTheme.colorScheme.primary), maxLines = 4, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
@@ -96,8 +96,8 @@ fun BookSearchPanel(
 }
 
 /** The hit with its surroundings, the match in bold. */
-private fun inContext(row: BookSearchRow): AnnotatedString = buildAnnotatedString {
+private fun inContext(row: BookSearchRow, accent: Color): AnnotatedString = buildAnnotatedString {
     append(row.before)
-    withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = GrangerColors.Flame)) { append(row.match) }
+    withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = accent)) { append(row.match) }
     append(row.after)
 }

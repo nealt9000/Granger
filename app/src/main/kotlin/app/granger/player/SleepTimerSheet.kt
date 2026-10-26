@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.granger.core.player.SleepSetting
-import app.granger.theme.GrangerColors
 
 /**
  * The sleep timer: 5–60 minutes or the end of the chapter, with a fade over the last seconds (the engine's). While one
@@ -31,7 +30,7 @@ fun SleepTimerSheet(remainingMs: Long?, onStart: (SleepSetting) -> Unit, onCance
             if (remainingMs != null) {
                 Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Stops in ${formatTime(remainingMs)}", style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Flame,
+                        "Stops in ${formatTime(remainingMs)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f),
                     )
                     TextButton(onClick = onCancel) { Text("Cancel timer") }

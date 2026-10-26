@@ -41,7 +41,6 @@ import app.granger.R
 import app.granger.library.SourceLink
 import app.granger.music.EmptyMedia
 import app.granger.shell.rememberRailCover
-import app.granger.theme.GrangerColors
 
 internal const val UNKNOWN_AUTHOR = "Unknown author"
 
@@ -50,14 +49,14 @@ internal const val UNKNOWN_AUTHOR = "Unknown author"
 fun AudiobookCover(path: String?, modifier: Modifier = Modifier) {
     val cover = rememberRailCover(path, 180.dp)
     Box(
-        modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(GrangerColors.SurfaceHigh),
+        modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
             Icon(
-                painterResource(R.drawable.ic_headphones), contentDescription = null, tint = GrangerColors.OnSurfaceVariant,
+                painterResource(R.drawable.ic_headphones), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(40.dp),
             )
         }

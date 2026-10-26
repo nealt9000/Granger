@@ -48,7 +48,6 @@ import app.granger.core.library.Track
 import app.granger.library.MovePackDialog
 import app.granger.player.formatTime
 import app.granger.shell.rememberRailCover
-import app.granger.theme.GrangerColors
 
 /** Where the music screens lead. */
 data class MusicNav(
@@ -170,14 +169,14 @@ fun SongRow(
 fun AlbumCover(path: String?, modifier: Modifier = Modifier) {
     val cover = rememberRailCover(path, 180.dp)
     Box(
-        modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(GrangerColors.SurfaceHigh),
+        modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
             Icon(
-                painterResource(R.drawable.ic_music_note), contentDescription = null, tint = GrangerColors.OnSurfaceVariant,
+                painterResource(R.drawable.ic_music_note), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(40.dp),
             )
         }

@@ -13,7 +13,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import app.granger.ebook.SelectionBridge
-import app.granger.theme.GrangerColors
+import app.granger.theme.FieldColors
+import app.granger.theme.NightColors
 import org.json.JSONTokener
 
 /** What the text-selection menu offers besides the system's own Copy. [READ_ALOUD] hands over the selection's block (JSON), not its text. */
@@ -35,6 +36,7 @@ class ReaderWebView(
     onToggleChrome: () -> Unit = {},
     private val onSelectionAction: (SelectionAction, String) -> Unit = { _, _ -> },
     onUserScroll: () -> Unit = {},
+    night: Boolean = true,
 ) : WebView(context) {
     init {
         // Compose's AndroidView adds views with wrap-content params, which puts WebView in "zero layout height" mode:
@@ -50,15 +52,16 @@ class ReaderWebView(
         // holds INTERNET for downloads. Intercepted ZIM responses are unaffected by this setting.
         settings.blockNetworkLoads = true
         settings.safeBrowsingEnabled = false
-        // With the app theme's isLightTheme=false, pages that don't style themselves for dark are darkened.
+        // In Night, pages that don't style themselves for dark are darkened (the window theme must say dark too, which
+        // MainActivity sets from the same choice); in Field they show as published (Plan T1, Decision 5).
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
             try {
-                WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, night)
             } catch (e: UnsupportedOperationException) {
                 // Reported as supported but refused (a framework and WebView APK that disagree): pages keep their own colours.
             }
         }
-        setBackgroundColor(GrangerColors.Background.toArgb()) // no white flash before the first page paints
+        setBackgroundColor((if (night) NightColors else FieldColors).background.toArgb()) // no wrong-colour flash before the first page paints
         addJavascriptInterface(GrangerBridge(onToggleChrome, onUserScroll), ReaderPageScript.BRIDGE_NAME)
         webViewClient = client
     }

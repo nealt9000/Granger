@@ -34,7 +34,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.BookAnnotation
-import app.granger.theme.GrangerColors
 
 /**
  * A bottom sheet for one highlight: its colour, its note and Delete. A colour tap saves at once; the note is
@@ -80,12 +79,13 @@ fun HighlightSheet(
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = onDelete) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-                TextButton(onClick = { save(); onDismiss() }) { Text("Done", color = GrangerColors.Flame) }
+                TextButton(onClick = { save(); onDismiss() }) { Text("Done", color = MaterialTheme.colorScheme.primary) }
             }
         }
     }
 }
 
 /** A ring around the chosen swatch. */
+@Composable
 private fun Modifier.ring(selected: Boolean): Modifier =
-    if (selected) border(2.dp, GrangerColors.Flame, CircleShape) else this
+    if (selected) border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else this

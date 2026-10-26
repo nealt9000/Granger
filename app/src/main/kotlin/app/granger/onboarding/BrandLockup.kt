@@ -1,6 +1,7 @@
 package app.granger.onboarding
 
 import androidx.compose.foundation.Image
+import app.granger.theme.GrangerTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -15,7 +16,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.R
-import app.granger.theme.GrangerColors
 
 /**
  * The brand (brand brief §8): the mark, the tape whose right half is the G resting on two books, in lantern over GRANGER in the
@@ -28,7 +28,7 @@ fun BrandLockup(modifier: Modifier = Modifier, markWidth: Dp = 128.dp) {
             painterResource(R.drawable.granger_mark),
             contentDescription = null,
             modifier = Modifier.width(markWidth).aspectRatio(MARK_ASPECT),
-            colorFilter = ColorFilter.tint(GrangerColors.Lantern),
+            colorFilter = ColorFilter.tint(GrangerTheme.extras.mark),
         )
         Spacer(Modifier.height(markWidth * 0.16f))
         Image(

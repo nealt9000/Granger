@@ -2,7 +2,7 @@ package app.granger.ebook
 
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.toArgb
-import app.granger.theme.GrangerColors
+import app.granger.theme.NightColors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,8 +48,8 @@ data class ReadingPrefs(
             ReadingTheme.SEPIA -> Theme.SEPIA
             ReadingTheme.NIGHT -> Theme.DARK
         },
-        backgroundColor = if (theme == ReadingTheme.NIGHT) Color(GrangerColors.Background.toArgb()) else null,
-        textColor = if (theme == ReadingTheme.NIGHT) Color(GrangerColors.OnSurface.toArgb()) else null,
+        backgroundColor = if (theme == ReadingTheme.NIGHT) Color(NightColors.background.toArgb()) else null,
+        textColor = if (theme == ReadingTheme.NIGHT) Color(NightColors.onSurface.toArgb()) else null,
         fontFamily = when (typeface) {
             Typeface.SERIF -> FontFamily.SERIF
             Typeface.SANS -> FontFamily.SANS_SERIF
