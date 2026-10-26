@@ -60,9 +60,11 @@ def check_front(runner):
 
 
 def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
-    """Polls for the phone's eval/<run_id>/done marker; stops on its failed marker, the app gone on two polls in a row
-    (killed for memory while loading a model: it leaves no marker), repeated adb errors or the time limit."""
+    """Polls for the phone's eval/<run_id>/done marker; stops on its failed marker, the app's process gone or replaced on
+    two polls in a row (killed for memory while loading a model: it leaves no marker, and a widget or job may start a new
+    process at once), repeated adb errors or the time limit."""
     waited = errors = gone = 0
+    first_pid = None
     while True:
         rc, o = runner(["shell", "ls", "%s/%s/done" % (REMOTE, run_id)])
         if rc == 0:
@@ -73,7 +75,11 @@ def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_e
             if frc == 0 and fo.strip() and "no such file" not in fo.lower() and not is_adb_error(fo):
                 raise SystemExit("the eval failed on the phone: " + fo.strip())
             prc, po = runner(["shell", "pidof", PKG])
-            gone = gone + 1 if prc == 1 and not po.strip() and not is_adb_error(po) else 0
+            pid = po.strip() if prc == 0 and not is_adb_error(po) else None
+            if first_pid is None and pid:
+                first_pid = pid
+            dead = (prc == 1 and not po.strip()) or (first_pid is not None and pid is not None and pid != first_pid)
+            gone = gone + 1 if dead and not is_adb_error(po) else 0
             if gone >= 2:
                 raise SystemExit("the app died during eval %s (no process on two polls; see logcat for lowmemorykiller)" % run_id)
         else:
