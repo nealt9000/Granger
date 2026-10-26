@@ -42,7 +42,7 @@
    | surfaceContainer lowest → highest | `#F7EFE2` `#F2E8D7` `#E9DCC6` `#E3D5BC` `#DCCCB0` | `#121516` `#1C2122` gunmetal `#24292A` `#2C3233` `#353C3D` |
    | surfaceVariant / onSurfaceVariant | `#E3D5BC` / `#4A4239` | `#2C3233` / `#B9B3A6` |
    | outline / outlineVariant | `#7A6E5F` / `#CDBFA6` | `#7F8786` / `#3A4243` |
-   | error / onError | `#A3361F` / paper | `#FF8A7A` / `#2A0A06` |
+   | error / onError | `#962E19` / paper (was `#A3361F`: 4.3:1 on the highest container) | `#FF8A7A` / `#2A0A06` |
    | inverseSurface / inverseOn / inversePrimary | gunmetal / paper / phosphor | paper / ink / enamel |
 
    `GrangerExtras`: `status` (phosphor on Night, enamel on Field: the `> offline. ready.` voice), `play` (lantern on Night, enamel on Field), `brass` (fills and rules only, never text), `coverTile` / `coverText` / `coverRule` (the generated book covers: gunmetal, paper and lantern in both themes, since a cover is an object, not chrome), `mark` (lantern on Night, enamel on Field).
@@ -72,9 +72,9 @@
 
 ### Task 1: The two schemes
 
-- [ ] `FieldKit` tokens, `FieldColors`, `NightColors`, `GrangerExtras` + `LocalGrangerExtras`, `GrangerTheme(night, content)`; keep `GrangerColors` for now (Task 2 removes it) but point its brand entries at `FieldKit`.
-- [ ] `ThemeContrastTest`: every text role on each background it's used with passes 4.5:1, outlines 3:1, in both schemes; adjust the starting values where one fails and record the change in Decision 2.
-- [ ] **Commit.** `Theme: Field and Night schemes from the field kit`
+- [x] `FieldKit` tokens, `FieldColors`, `NightColors`, `GrangerExtras` + `LocalGrangerExtras`, `GrangerTheme(night, content)`; keep `GrangerColors` for now (Task 2 removes it) but point its brand entries at `FieldKit`.
+- [x] `GrangerThemeTest` (the contrast checks): every text role on each background it's used with passes 4.5:1, outlines 3:1, in both schemes; adjust the starting values where one fails and record the change in Decision 2.
+- [x] **Commit.** `Theme: Field and Night schemes from the field kit`
 
 ### Task 2: Every screen reads the theme
 
