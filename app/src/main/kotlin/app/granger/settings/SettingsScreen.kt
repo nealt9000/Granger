@@ -1,13 +1,11 @@
 package app.granger.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,13 +38,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import app.granger.archive.WaiverDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.BuildConfig
-import app.granger.R
+import app.granger.onboarding.BrandLockup
 import app.granger.formatBytes
 
 /**
@@ -320,9 +317,8 @@ private fun About() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Image(painterResource(R.drawable.granger_mark), contentDescription = null, modifier = Modifier.size(56.dp))
-        Text("GRANGER", style = MaterialTheme.typography.titleMedium)
-        Text("Civilization, backed up.", style = MaterialTheme.typography.bodyMedium)
+        BrandLockup(markWidth = 64.dp)
+        Text("Everything worth knowing, yours to keep.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium)
         Text(
             "Version ${BuildConfig.VERSION_NAME}",
             style = MaterialTheme.typography.bodySmall,

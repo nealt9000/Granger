@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -42,7 +43,8 @@ class OnboardingScreenTest {
 
     @Test fun welcomeHasTheBrandGetStartedAndSkip() {
         show(OnboardingUi(step = Step.WELCOME))
-        compose.onNodeWithText("Granger").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Granger").assertIsDisplayed()
+        compose.onNodeWithText("Everything worth knowing, yours to keep.").assertIsDisplayed()
         compose.onNodeWithText("Get started").performClick()
         compose.onNodeWithText("Skip").performClick()
         assertThat(calls).containsExactly("next", "skip").inOrder()

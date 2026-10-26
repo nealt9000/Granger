@@ -1,6 +1,6 @@
 # Granger brand and vision
 
-**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. The mark, final palette and tagline are still to be made in Claude Design against this brief.
+**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** the mark is chosen (§8, The mark) and ships in H3 Task 5; the final palette and the tagline are still open.
 **Reference art:** `docs/superpowers/brand/` (dated folders; the current reference is `2026-10-23-field-recorder-concept/`).
 **Unblocks:** H3 Task 5 (the Welcome brand), Plan 10 (billing, now on the fair deal below), Plan 11 (the store listing), and the UI pass that follows the roadmap's features.
 
@@ -119,7 +119,9 @@ Two themes, both first class: **Field** (light: paper and enamel, for daylight) 
 
 **Type:** Spectral (OFL) for reading and headings; Courier Prime (OFL) for labels, counters and the command line; a stencil face for the wordmark only (OFL candidates: Big Shoulders Stencil, Saira Stencil One). All bundled, never downloaded.
 
-**The mark (brief for Claude Design):**
+**The mark (chosen 2026-10-26):** a cassette whose right half is the G, its bar an arrow pointing back into the tape, resting on two books: your own media and the world's knowledge, with a G that isn't anyone else's. Neal picked it from ElevenLabs sketches after four drawn rounds in Claude Design missed (an appliance, a letter, a house, a plant; a lantern, a roundel, a briefcase; spray signs; weaker copies of the sketches). The sketch was traced and redrawn as clean geometry (`docs/superpowers/brand/2026-10-26-mark-sketches/`); `tools/brand/make_drawables.py` writes the launcher, themed and in-app drawables from it and the wordmark (Big Shoulders Stencil 800, drawn as paths). Good enough for beta and v1; at 24–32 px the page lines fill in, so a notification icon would need a simpler cut.
+
+**The brief it answered:**
 - Must read at 48 px as a launcher icon and as Android's monochrome themed icon.
 - Says *a thing you own and carry that holds the world's knowledge*. Directions: the field recorder's front reduced to a cassette window and one knob; a stencilled G cut like a toggle slot; a granary silhouette; a book opening its pages like wings.
 - No literal flame, no Vitruvian figure in a circle (both earlier drafts are retired: the flame reads as catastrophe, the figure as a peace sign at small sizes).
@@ -139,8 +141,8 @@ Principles for the UI pass once the roadmap's features land; each traces to the 
 
 ## 10. What this unblocks, in order
 
-1. **Claude Design:** the mark, lockup, final palette and tagline against §8 (Neal).
-2. **H3 Task 5:** `BrandLockup` takes the chosen mark and lockup; the Welcome line is the vision sentence (§1); the launcher icon and splash change with it.
+1. **Claude Design:** the mark and lockup (done 2026-10-26, from Neal's sketch); the final palette and tagline (open).
+2. **H3 Task 5 (done 2026-10-26):** `BrandLockup` takes the chosen mark and lockup; the Welcome line is the vision sentence (§1); the launcher icon (and with it the system splash) changes with it.
 3. **Theme pass (new plan):** `GrangerTheme` gains Field and Night from the palette; the reader and players follow.
 4. **Plan 10 rewrite:** Supporter instead of Pro (§6); billing + the telemetry opt-in slot into onboarding.
 5. **Plan 11 / store listing:** the fair deal, the Grange story, screenshots in the new theme.
@@ -148,7 +150,7 @@ Principles for the UI pass once the roadmap's features land; each traces to the 
 
 ## 11. Open
 
-- The mark, the tagline and the final palette (Claude Design).
+- The tagline and the final palette (Claude Design).
 - The supporter price and exactly which extras it carries (Plan 10).
 - Organisation form for income: sole proprietor, LLC, or a public-benefit company with a nonprofit partner for grants (needs advice).
 - Basecamp hardware: off-the-shelf mini PC vs a single-board computer; the model it runs; whether institutions get it first.

@@ -134,9 +134,11 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome() {
     item {
         Column(Modifier.fillMaxWidth().padding(top = 48.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             BrandLockup()
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(28.dp))
+            Text("Everything worth knowing, yours to keep.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(12.dp))
             Text(
-                "A library that works with no signal: encyclopedias, books, maps and manuals, on your phone.",
+                "Encyclopedias, books, maps and manuals beside your own music, audiobooks and e-books: on your phone, working with no signal.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
