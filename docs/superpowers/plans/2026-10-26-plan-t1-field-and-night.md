@@ -104,7 +104,7 @@
 
 ### Task 6: Walkthrough; roadmap
 
-- [ ] Publish the shot set (both themes, every main screen) for Neal; take his notes.
+- [x] Publish the shot set (both themes, every main screen) for Neal; take his notes. *(2026-10-26: the "Field and Night: the app" artboard on the Granger mark canvas, https://claude.ai/artifact/GVXXLW2AJyfeCppiDv46H7; notes pending.)*
 - [ ] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark.
 - [ ] Roadmap row T1 → Done; brief §10 step 3 marked done.
 - [ ] **Commit.** `Roadmap: T1 done`
