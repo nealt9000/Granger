@@ -169,4 +169,10 @@ Neal's listening: epoch 25 lost clarity and mispronounced (42 voices sharing the
 1's gap more pitch inflection than rhythm; 250 to 356 a clear step for both; 600 the best so far and still improving,
 speaker 0 ahead but the gap closing. `noise_scale_w` 1.2 sounded worse than 0.8 on round 2 (round 1 preferred it).
 
-Epoch 600 packs to 80.1 MB (`pack_voice.py`, 77 MB ONNX, RTF ~0.048 on the Mac). The run continues toward 900.
+Epoch 600 packs to 80.1 MB (`pack_voice.py`, 77 MB ONNX, RTF ~0.048 on the Mac).
+
+A third leg (2026-10-24, another 4090, ~104 s an epoch) took it from 600 to 900: `val_mel` 0.4248 at 606, 0.4240 at
+639, 0.4229 at 721, 0.4220 at 731, **0.4205 at 796**, then nothing lower to 900 (0.4209 at 888). Neal: 700 a clear step
+for speaker 1 over 600, a slight one for speaker 0. **Shipped: `epoch=796-val_mel=0.4205`** for both speakers (797 epochs
+of round 2 on 699 of round 1), packed to 80,117,604 bytes, sha256 `4bd3a3f1…a793c`. The pod removed itself at the end
+(`runpodctl remove pod`, with a read/write API key on the pod).

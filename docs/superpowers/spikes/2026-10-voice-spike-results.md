@@ -238,3 +238,14 @@ Newer engines in sherpa-onnx 1.13.8's model release, for a later spike of their 
 **On the phone for the listening session:** `vits-piper-en_US-norman-medium`, `-kusal-medium`, `-kristin-medium`, `-john-medium` (and the two `libritts-high` builds, for the ear only) under `files/voices/`; the spike's `libritts_r` and Kokoro directories were removed. Settings → Voice lists each as "Granger voice (<name>)". Neal's ratings, 1–5 as in V0:
 
 Neal's verdict (2026-10-22, Tom Sawyer on the phone, flipping between voices): **`libritts-high` is the clear stand-out; norman, kusal, kristin and john sound no better than `ljspeech`.** So the medium LibriVox voices don't earn a catalog slot, and the question becomes how to get `libritts`'s sound at a cost between its and `ljspeech`'s (see the V2 plan's follow-up).
+
+## Trained voice (V3, 2026-10-26)
+
+Plan V3's own medium voice, `vits-piper-en_US-granger_libritts-medium` (round 2, checkpoint `epoch=796-val_mel=0.4205`, speakers 0 and 1 = LibriTTS-R readers 3922 and 4535; the recipe and the training story are in `tools/voices/train/README.md`). Measured through the real player as above (`run-voice.sh … --ez service true --es voice granger:vits-piper-en_US-granger_libritts-medium`, speaker 0, the three passages × 3), the Pixel 6 on battery, from the engine's `Voice: synth` lines (`tools/spike/voice/v3-granger-*.log`):
+
+| Run | Screen (per sentence) | Sentences | Synth s | Audio s | RTF | Worst sentence RTF | Stalls |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| granger_libritts, screen off | 57 off | 57 | 69.0 | 429.0 | **0.16** | 0.22 | none: 57 sentences in 456 s |
+| granger_libritts, screen on | 47 on, 10 off | 57 | 43.0 | 427.7 | **0.10** | 0.18 | none: 57 sentences in 454 s |
+
+**Read:** a pass, at `ljspeech`'s cost (0.17 off, 0.12 on, V1), as a medium model of the same size should be: the bar is 0.5. The ten "off" sentences in the screen-on run are the display timing out partway, not a fault.

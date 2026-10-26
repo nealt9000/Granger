@@ -44,12 +44,12 @@ The Pixel 6 is shared. The V2 session (granger-1d) holds it for a 4-thread `libr
 
 ### Task 3: The fine-tune
 
-- [ ] On the GPU (or MPS; record which and why): start from the `ljspeech-medium` checkpoint, multi-speaker (Decision 1), checkpoint each epoch. Export at ~200 epochs, listen (push to the phone), continue in steps; stop when another few hundred epochs stop improving. Keep the loss curve and the epoch chosen in the README.
-- [ ] Export the final model, pack the voice directory, push it to the phone.
+- [x] On the GPU (or MPS; record which and why): start from the `ljspeech-medium` checkpoint, multi-speaker (Decision 1), checkpoint each epoch. Export at ~200 epochs, listen (push to the phone), continue in steps; stop when another few hundred epochs stop improving. Keep the loss curve and the epoch chosen in the README.
+- [x] Export the final model, pack the voice directory, push it to the phone.
 
 ### Task 4: Numbers and listening
 
-- [ ] RTF through the real player, screen on and off (`run-voice.sh`); it must come in like `ljspeech` (≈ 0.12–0.2). Record the table in `docs/superpowers/spikes/2026-10-voice-spike-results.md` under a "Trained voice (V3)" heading.
+- [x] RTF through the real player, screen on and off (`run-voice.sh`); it must come in like `ljspeech` (≈ 0.12–0.2). Record the table in `docs/superpowers/spikes/2026-10-voice-spike-results.md` under a "Trained voice (V3)" heading.
 - [ ] Neal's ratings beside `ljspeech` and `libritts_r` (naturalness, names and numbers, pacing; books at 0.8× and 1.0×, an article), and one sentence with **Australia, Rosetta and area** in it: `ljspeech` ends such words with an "r" ("Australiar"), the phonemes are right, so the model is what must fix it. If it doesn't reach `libritts_r`, say what's short (more epochs, more data, another speaker) and whether another round is worth it.
 
 ### Task 5: Into the catalog (with the V2 session)
