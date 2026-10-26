@@ -73,6 +73,7 @@ fun SettingsScreen(
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val railSide by viewModel.railSide.collectAsStateWithLifecycle()
     val openTo by viewModel.openTo.collectAsStateWithLifecycle()
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
     val media = viewModel.media
     val listState = rememberLazyListState()
     var scrolled by rememberSaveable { mutableStateOf(false) }
@@ -141,7 +142,7 @@ fun SettingsScreen(
                         HorizontalDivider()
                     }
                     "appearance" -> {
-                        AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo)
+                        AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
                         HorizontalDivider()
                     }
                     "storage" -> StorageSection(ui, viewModel::selectVolume)
@@ -225,16 +226,20 @@ private fun rememberMediaControls(media: MediaSettings, onPermissionChecked: () 
     }
 }
 
-/** "Toolbar side": Left or Right, applied at once (the shell reads the same preference). */
+/** "Theme", "Toolbar side" and "Open to", each applied at once (the activity and the shell read the same preferences). */
 @Composable
 internal fun AppearanceSection(
     side: RailSide,
     onSide: (RailSide) -> Unit,
     openTo: OpenTo = OpenTo.RESUME,
     onOpenTo: (OpenTo) -> Unit = {},
+    theme: ThemeChoice = ThemeChoice.SYSTEM,
+    onTheme: (ThemeChoice) -> Unit = {},
 ) {
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text("Appearance", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        Text("Theme", modifier = Modifier.padding(top = 8.dp))
+        RadioGroup(ThemeChoice.entries, theme, { it.label }, onTheme)
         Text("Toolbar side", modifier = Modifier.padding(top = 8.dp))
         RadioGroup(RailSide.entries, side, { it.label }, onSide)
         Text("Open to", modifier = Modifier.padding(top = 8.dp))
@@ -263,6 +268,12 @@ private fun <T> RadioGroup(choices: List<T>, chosen: T, label: (T) -> String, on
 private val RailSide.label get() = when (this) {
     RailSide.LEFT -> "Left"
     RailSide.RIGHT -> "Right"
+}
+
+private val ThemeChoice.label get() = when (this) {
+    ThemeChoice.SYSTEM -> "Follow the phone"
+    ThemeChoice.FIELD -> "Field (light)"
+    ThemeChoice.NIGHT -> "Night (dark)"
 }
 
 private val OpenTo.label get() = when (this) {

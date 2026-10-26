@@ -86,9 +86,9 @@
 
 ### Task 3: The setting and the window
 
-- [ ] `ThemeChoice { SYSTEM, FIELD, NIGHT }` in `AppearancePrefs` (default SYSTEM); Settings → Appearance "Theme": Follow the phone · Field · Night; `SettingsViewModel` passes it through; tests as for `railSide`.
-- [ ] `MainActivity`: resolve the choice with `isSystemInDarkTheme()`, `GrangerTheme(night)`, `enableEdgeToEdge` with the matching `SystemBarStyle`, window background from the scheme; `values/themes.xml` Field (`isLightTheme=true`, paper), `values-night/themes.xml` Night (night `#181C1D`), so the first frame matches the phone; a setting that disagrees repaints the window in `onCreate` before `setContent`.
-- [ ] **Commit.** `Appearance: Theme (follow the phone, Field, Night)`
+- [x] `ThemeChoice { SYSTEM, FIELD, NIGHT }` in `AppearancePrefs` (default SYSTEM); Settings → Appearance "Theme": Follow the phone · Field · Night; `SettingsViewModel` passes it through; tests as for `railSide`.
+- [x] `MainActivity`: resolve the choice with `isSystemInDarkTheme()`, `GrangerTheme(night)`, `enableEdgeToEdge` with the matching `SystemBarStyle`, window background from the scheme; `values/themes.xml` Field (`isLightTheme=true`, paper), `values-night/themes.xml` Night (night `#181C1D`), so the first frame matches the phone; a setting that disagrees repaints the window in `onCreate` before `setContent`. *(Built: `setTheme` before `super.onCreate` from the choice; a later change, or the phone's mode under Follow the phone, `recreate()`s, which also rebuilds the reader's WebView in the new theme. Labels: Follow the phone · Field (light) · Night (dark).)*
+- [x] **Commit.** `Appearance: Theme (follow the phone, Field, Night)`
 
 ### Task 4: The type
 

@@ -77,6 +77,7 @@ class SettingsViewModel(
 
     val railSide: StateFlow<RailSide> = appearancePrefs.railSide
     val openTo: StateFlow<OpenTo> = appearancePrefs.openTo
+    val theme: StateFlow<ThemeChoice> = appearancePrefs.theme
 
     init {
         refreshVolumes()
@@ -117,6 +118,11 @@ class SettingsViewModel(
 
     fun setOpenTo(openTo: OpenTo) {
         appearancePrefs.setOpenTo(openTo)
+    }
+
+    /** MainActivity watches the same preference and repaints in the new theme. */
+    fun setTheme(theme: ThemeChoice) {
+        appearancePrefs.setTheme(theme)
     }
 }
 

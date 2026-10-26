@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="granger_background">#0E0E0E</color>
+    <!-- The window behind Compose: Field paper and Night (brand brief §8). -->
+    <color name="granger_field">#EFE4D0</color>
+    <color name="granger_night">#181C1D</color>
     <!-- Enamel, the brand colour (brand brief §8): the launcher icon's background. -->
     <color name="ic_launcher_background">#2E4A45</color>
 </resources>

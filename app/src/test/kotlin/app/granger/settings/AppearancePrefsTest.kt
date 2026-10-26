@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "w400dp-h800dp") // Tall enough for the whole Appearance section.
 class AppearancePrefsTest {
     @get:Rule val compose = createComposeRule()
 
@@ -56,12 +56,39 @@ class AppearancePrefsTest {
 
     @Test fun openToRowsChooseAtOnce() {
         var openTo by mutableStateOf(OpenTo.RESUME)
-        compose.setContent { AppearanceSection(RailSide.LEFT, {}, openTo) { openTo = it } }
+        compose.setContent { AppearanceSection(RailSide.LEFT, {}, openTo, onOpenTo = { openTo = it }) }
         compose.onNodeWithText("Open to").assertExists()
         compose.onNodeWithText("Where I left off").assertIsSelected()
         compose.onNodeWithText("Home").assertIsNotSelected().performClick()
         compose.runOnIdle { assertThat(openTo).isEqualTo(OpenTo.HOME) }
         compose.onNodeWithText("Home").assertIsSelected()
+    }
+
+    @Test fun themeFollowsThePhoneByDefaultAndIsSaved() {
+        val prefs = SharedAppearancePrefs(shared)
+        assertThat(prefs.theme.value).isEqualTo(ThemeChoice.SYSTEM)
+        prefs.setTheme(ThemeChoice.FIELD)
+        assertThat(SharedAppearancePrefs(shared).theme.value).isEqualTo(ThemeChoice.FIELD)
+        shared.edit().putString("theme", "SEPIA").commit()
+        assertThat(SharedAppearancePrefs(shared).theme.value).isEqualTo(ThemeChoice.SYSTEM)
+    }
+
+    @Test fun themeChoiceResolvesAgainstThePhone() {
+        assertThat(ThemeChoice.SYSTEM.night(phoneDark = true)).isTrue()
+        assertThat(ThemeChoice.SYSTEM.night(phoneDark = false)).isFalse()
+        assertThat(ThemeChoice.FIELD.night(phoneDark = true)).isFalse()
+        assertThat(ThemeChoice.NIGHT.night(phoneDark = false)).isTrue()
+    }
+
+    @Test fun themeRowsChooseAtOnce() {
+        var theme by mutableStateOf(ThemeChoice.SYSTEM)
+        compose.setContent { AppearanceSection(RailSide.LEFT, {}, theme = theme, onTheme = { theme = it }) }
+        compose.onNodeWithText("Theme").assertExists()
+        compose.onNodeWithText("Follow the phone").assertIsSelected()
+        compose.onNodeWithText("Night (dark)").assertIsNotSelected().performClick()
+        compose.runOnIdle { assertThat(theme).isEqualTo(ThemeChoice.NIGHT) }
+        compose.onNodeWithText("Field (light)").performClick()
+        compose.runOnIdle { assertThat(theme).isEqualTo(ThemeChoice.FIELD) }
     }
 
     @Test fun toolbarSideRowsChooseAtOnce() {

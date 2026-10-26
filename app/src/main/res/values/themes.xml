@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark only. isLightTheme=false also tells the reader's WebView to darken pages that don't style themselves. -->
-    <style name="Theme.Granger" parent="@android:style/Theme.Material.NoActionBar">
+    <!--
+    Field and Night (Plan T1). Theme.Granger is the launch theme: Field here, Night in values-night, so the splash and the
+    first frame match the phone. MainActivity then sets the user's choice from Settings → Appearance before its window
+    exists. isLightTheme=false is also what lets the reader's WebView darken pages in Night.
+    -->
+    <style name="Theme.Granger.Field" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:isLightTheme">true</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowBackground">@color/granger_field</item>
+    </style>
+
+    <style name="Theme.Granger.Night" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:isLightTheme">false</item>
         <item name="android:forceDarkAllowed">false</item>
-        <item name="android:windowBackground">@color/granger_background</item>
+        <item name="android:windowBackground">@color/granger_night</item>
     </style>
+
+    <style name="Theme.Granger" parent="Theme.Granger.Field" />
 </resources>
