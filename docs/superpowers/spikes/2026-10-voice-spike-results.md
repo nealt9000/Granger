@@ -249,3 +249,5 @@ Plan V3's own medium voice, `vits-piper-en_US-granger_libritts-medium` (round 2,
 | granger_libritts, screen on | 47 on, 10 off | 57 | 43.0 | 427.7 | **0.10** | 0.18 | none: 57 sentences in 454 s |
 
 **Read:** a pass, at `ljspeech`'s cost (0.17 off, 0.12 on, V1), as a medium model of the same size should be: the bar is 0.5. The ten "off" sentences in the screen-on run are the display timing out partway, not a fault.
+
+**Neal's listening (2026-10-26):** much faster than `libritts-high`, but still well short of it in the naturalness of inflection and flow. Good enough to ship for now. Speaker names: speaker 0 (reader 3922) **Maggie**, speaker 1 (reader 4535) **Martin**. The gap is the model, not the phone: sherpa-onnx renders the same samples on any hardware, and the speed only decides whether it keeps up. Closing it means a bigger or better-trained model (more data per speaker, a second fine-tune stage on the two speakers alone), not a faster phone.
