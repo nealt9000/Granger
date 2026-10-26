@@ -2,6 +2,8 @@ package app.granger.eval
 
 import app.granger.core.library.DensePassageFinder
 import app.granger.core.library.DenseTimings
+import app.granger.core.library.KeywordTimings
+import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Outcome
@@ -43,17 +45,25 @@ class RecordingFinder(private val inner: PassageFinder, private val clock: () ->
         private set
     var ms: Long? = null
         private set
+    /** Plan R5 Task 1: the split of [ms], when the finder is the app's [LibraryPassageFinder]. */
+    var timings: KeywordTimings? = null
+        private set
 
     fun reset() {
         keywords = emptyList()
         passages = emptyList()
         ms = null
+        timings = null
     }
 
     override suspend fun find(keywords: List<String>): List<Passage> {
         this.keywords = keywords
         val start = clock()
-        return inner.find(keywords).also { passages = it; ms = clock() - start }
+        return inner.find(keywords).also {
+            passages = it
+            ms = clock() - start
+            timings = (inner as? LibraryPassageFinder)?.lastTimings
+        }
     }
 
     /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
@@ -274,6 +284,11 @@ class EvalRunner(
         finder.ms?.let { main.ms.put("keywordSearch", it) }
         dense?.timings?.let { t ->
             main.ms.put("denseSources", t.sourcesMs).put("denseScan", t.scanMs).put("denseRebuild", t.rebuildMs)
+        }
+        finder.timings?.let { t ->
+            main.ms.put("kwFulltext", t.fulltextMs).put("kwRead", t.readMs).put("kwBooks", t.booksMs)
+                .put("kwCards", t.cardsMs).put("kwMedia", t.mediaMs)
+            main.ms.put("kwPacks", JSONObject(t.packMs as Map<*, *>))
         }
         val outcome = main.outcome
         val keywords = outcome?.keywords.orEmpty()

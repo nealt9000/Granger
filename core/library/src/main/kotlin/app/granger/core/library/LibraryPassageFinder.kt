@@ -17,6 +17,17 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * One [LibraryPassageFinder.find]'s time in milliseconds (Plan R5 Task 1): the full-text search of every pack, reading
+ * and splitting the chosen articles, the book search, the catalogue cards and the media cards; and each pack's own
+ * search time by pack name (packs run [LibraryPassageFinder]'s `searchParallelism` at a time, so these overlap).
+ */
+data class KeywordTimings(
+    val fulltextMs: Long, val readMs: Long, val booksMs: Long, val cardsMs: Long, val mediaMs: Long,
+    val packMs: Map<String, Long>,
+)
 
 /**
  * Finds passages for Research in four places: full-text hits in ZIM articles, matching chunks of e-books, short
@@ -42,14 +53,32 @@ class LibraryPassageFinder(
     private val media: MediaIndex? = null,
     private val mediaCards: Int = 2,
     private val searchParallelism: Int = 4,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) : PassageFinder {
+    /** The last [find]'s timings (Plan R5 Task 1); null before the first, or when it had no keywords. */
+    @Volatile var lastTimings: KeywordTimings? = null
+        private set
+
+    private val packMs = ConcurrentHashMap<String, Long>()
+    @Volatile private var fulltextMs = 0L
+
     override suspend fun find(keywords: List<String>): List<Passage> {
+        lastTimings = null
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
+        packMs.clear()
         val collections = shelves.collectionNames()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
+        val start = clock()
         val articles = withoutClassicsTwins(articles(words, packs, collections), packs)
-        return articles + books(words, collections) + cards(words, packs, collections) + mediaCards(words)
+        val read = clock()
+        val books = books(words, collections)
+        val booked = clock()
+        val cards = cards(words, packs, collections)
+        val carded = clock()
+        val media = mediaCards(words)
+        lastTimings = KeywordTimings(fulltextMs, read - start - fulltextMs, booked - read, carded - booked, clock() - carded, packMs.toMap())
+        return articles + books + cards + media
     }
 
     /**
@@ -103,12 +132,15 @@ class LibraryPassageFinder(
         withContext(io) {
             // Packs are searched [searchParallelism] at a time: one after another, search time grew with every pack added.
             val searching = io.limitedParallelism(searchParallelism)
+            val searchStart = clock()
             val hits = packs.filter { it.hasFulltextIndex }.map { pack ->
                 async(searching) {
                     try {
+                        val packStart = clock()
                         val archive = library.archive(pack.id) ?: return@async emptyList()
                         words.flatMap { archive.search(it, perPack) }
                             .groupBy { it.path }.values.map { same -> Triple(pack, archive, same.maxBy { it.score }) }
+                            .also { packMs[pack.name] = clock() - packStart }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (_: Exception) {
@@ -116,6 +148,7 @@ class LibraryPassageFinder(
                     }
                 }
             }.awaitAll().flatten()
+            fulltextMs = clock() - searchStart
             hits.sortedByDescending { it.third.score }.take(docs).flatMap { (pack, archive, hit) ->
                 try {
                     articlePassages(pack, archive, hit, collections[pack.id].orEmpty())
