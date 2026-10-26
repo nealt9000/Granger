@@ -53,8 +53,9 @@ SAMPLE_SEED = 5
 def prompts(base, sample=None, ids=None, stage="answer"):
     """Every recorded answer prompt, a fixed random `sample` of them (the same ids for every model), or those of `ids`.
     A rewrite prompt has no passages."""
-    rows = []
+    rows, known = [], set()
     for rec in read_jsonl(RUNS / base / "results.jsonl"):
+        known.add(rec["id"])
         p = answer_prompt(rec, stage)
         if p is not None:
             rows.append({"id": rec["id"], "prompt": p, "passages": len(rec.get("chosen") or []) if stage == "answer" else 0})
@@ -62,7 +63,8 @@ def prompts(base, sample=None, ids=None, stage="answer"):
         keep = {r["id"] for r in random.Random(SAMPLE_SEED).sample(rows, sample)}
         rows = [r for r in rows if r["id"] in keep]
     if ids is not None:
-        missing = set(ids) - {r["id"] for r in rows}
+        # In a passages.py variant, an id with a record but no prompt (the gate left it nothing) is skipped.
+        missing = set(ids) - (known if (RUNS / base / "variant.json").exists() else {r["id"] for r in rows})
         if missing:
             raise SystemExit("no %s prompt in runs/%s for %s" % (stage, base, ", ".join(sorted(missing))))
         rows = [r for r in rows if r["id"] in set(ids)]
@@ -70,9 +72,11 @@ def prompts(base, sample=None, ids=None, stage="answer"):
 
 
 def load_set(name, base):
-    """sets/NAME.json: `{base, stage, ids}`; its base must be the run's."""
+    """sets/NAME.json: `{base, stage, ids}`; its base must be the run's, or the run a passages.py variant of it."""
     s = json.loads((SETS / (name + ".json")).read_text(encoding="utf-8"))
-    if s["base"] != base:
+    variant = RUNS / base / "variant.json"
+    origin = json.loads(variant.read_text(encoding="utf-8"))["from"] if variant.exists() else base
+    if s["base"] not in (base, origin):
         raise SystemExit("set %s was cut from runs/%s, not %s" % (name, s["base"], base))
     return s
 

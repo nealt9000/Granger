@@ -91,3 +91,12 @@ def test_the_committed_sets_are_well_formed():
         assert False
     except SystemExit:
         pass
+
+
+def test_a_passages_variant_skips_an_item_the_gate_emptied_and_accepts_its_origins_sets(tmp_path, monkeypatch):
+    monkeypatch.setattr(answerers, "RUNS", tmp_path)
+    (tmp_path / "v").mkdir()
+    answerers.write_jsonl(tmp_path / "v" / "results.jsonl", [rec("a", ["rewrite", "answer"]), rec("e", ["rewrite"])])
+    (tmp_path / "v" / "variant.json").write_text(json.dumps({"from": "r1-dense-1"}))
+    assert [r["id"] for r in answerers.prompts("v", ids=["a", "e"])] == ["a"]
+    assert answerers.load_set("sample-40", "v")["stage"] == "answer"
