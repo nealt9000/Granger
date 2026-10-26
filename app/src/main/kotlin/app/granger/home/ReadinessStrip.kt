@@ -20,7 +20,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.granger.readiness.Coverage
+import app.granger.formatBytes
 import app.granger.readiness.ReadinessReport
+import app.granger.theme.GrangerTheme
 
 /** How solid a domain's dot is (spec §5): None faint, Basic half, Comprehensive full. */
 fun dotAlpha(coverage: Coverage): Float = when (coverage) {
@@ -33,7 +35,16 @@ fun dotAlpha(coverage: Coverage): Float = when (coverage) {
 fun stripText(report: ReadinessReport): String = report.signals.firstOrNull()?.text
     ?: if (report.needsCatalogRefresh) "Refresh the catalog to see your coverage." else "Ready."
 
-/** Nine dots coloured by status and one suggestion sentence; the whole strip opens Readiness. */
+/**
+ * The command-line status voice (brand brief §8; Plan T1, Task 5): what Granger holds on this phone, which all works
+ * with no signal. Null with nothing held. The phone's own media is referenced, not held, so it doesn't count.
+ */
+fun stripStatus(report: ReadinessReport): String? {
+    val held = report.storage.filterNot { it.referencedOnly }.sumOf { it.bytes }
+    return if (held > 0) "> ${formatBytes(held)} here, ready offline." else null
+}
+
+/** The status line, nine dots coloured by status and one suggestion sentence; the whole strip opens Readiness. */
 @Composable
 fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
@@ -44,6 +55,9 @@ fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modif
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        stripStatus(report)?.let { status ->
+            Text(status, style = MaterialTheme.typography.labelMedium, color = GrangerTheme.extras.status)
+        }
         if (report.domains.isNotEmpty()) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (domain in report.domains) {

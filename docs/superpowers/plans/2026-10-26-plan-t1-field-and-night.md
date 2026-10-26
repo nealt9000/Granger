@@ -98,9 +98,9 @@
 
 ### Task 5: The brand's own touches
 
-- [ ] The status voice: Home's readiness strip and the Library's storage line get one Courier Prime status line in `extras.status` (`> offline. 11.1 GB on this phone.`), wording from the facts already on screen, nothing new computed.
-- [ ] About: the lockup in `extras.mark`, "Everything worth knowing, yours to keep.", version, GPL line (as H3 Task 5 left it, now themed).
-- [ ] **Commit.** `Theme: the status voice and the themed lockup`
+- [x] The status voice: Home's readiness strip gets one Courier Prime status line in `extras.status`, from the storage the report already holds (the phone's own media doesn't count). *(Built: `> 11 GB here, ready offline.`, short enough for one line at 360 dp; "offline." alone would claim the phone has no signal, which isn't the fact. The Library has no storage line to carry one, so the UI pass decides where else the voice goes.)*
+- [x] About: the lockup in `extras.mark`, "Everything worth knowing, yours to keep.", version, GPL line (as H3 Task 5 left it, now themed).
+- [x] **Commit.** `Theme: the status voice and the themed lockup`
 
 ### Task 6: Walkthrough; roadmap
 

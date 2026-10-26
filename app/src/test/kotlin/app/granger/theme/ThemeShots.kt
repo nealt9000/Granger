@@ -36,6 +36,8 @@ import app.granger.readiness.Coverage
 import app.granger.readiness.DomainCoverage
 import app.granger.readiness.ReadinessReport
 import app.granger.readiness.Signal
+import app.granger.readiness.Source
+import app.granger.readiness.StorageRow
 import app.granger.shell.GrangerShell
 import app.granger.shell.RailEntry
 import app.granger.shell.RailEntryActions
@@ -81,7 +83,7 @@ class ThemeShots {
     private val report = ReadinessReport(
         domains = ids.mapIndexed { i, id -> DomainCoverage(id, id, if (i < 3) Coverage.BASIC else Coverage.NONE, 0, 100, 400, emptyList()) },
         signals = listOf(Signal.Unsearchable("p", "Owls can't be searched: the pack has no index.")),
-        storage = emptyList(),
+        storage = listOf(StorageRow(Source.KIWIX, 11_100_000_000, 40)),
         needsCatalogRefresh = false,
     )
     private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = true), at = 5L, pinned = true)

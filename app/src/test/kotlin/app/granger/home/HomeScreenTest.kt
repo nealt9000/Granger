@@ -15,6 +15,9 @@ import app.granger.readiness.Coverage
 import app.granger.readiness.DomainCoverage
 import app.granger.readiness.ReadinessReport
 import app.granger.readiness.Signal
+import app.granger.formatBytes
+import app.granger.readiness.Source
+import app.granger.readiness.StorageRow
 import app.granger.shell.RailEntry
 import app.granger.shell.RailTabUi
 import com.google.common.truth.Truth.assertThat
@@ -85,6 +88,20 @@ class HomeScreenTest {
         }
         compose.onNodeWithText("Setting up · 2 of 5 · 1.0 KB of 4.0 KB").performClick()
         assertThat(calls).containsExactly("setup")
+    }
+
+    @Test fun theStatusLineCountsWhatThePhoneHoldsNotItsOwnMedia() {
+        assertThat(stripStatus(report)).isNull()
+        val held = report.copy(
+            storage = listOf(
+                StorageRow(Source.KIWIX, 11_100_000_000, 40),
+                StorageRow(Source.GRANGER, 400_000_000, 3),
+                StorageRow(Source.values().last(), 9_000_000_000, 900, referencedOnly = true),
+            ),
+        )
+        assertThat(stripStatus(held)).isEqualTo("> ${formatBytes(11_500_000_000)} here, ready offline.")
+        show(HomeUi(strip = held))
+        compose.onNodeWithText("> ${formatBytes(11_500_000_000)} here, ready offline.").assertIsDisplayed()
     }
 
     @Test fun anEmptyRailShowsNoContinue() {
