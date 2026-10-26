@@ -88,6 +88,7 @@ class DensePassageFinderTest {
         assertThat(reef.anchor).isEqualTo("Uses")
         assertThat(reef.text).isEqualTo(reefUses.text)
         assertThat(reef.cosine!!).isWithin(0.05).of(0.99)
+        assertThat(finder.lastTimings!!.let { it.rows to it.files }).isEqualTo(2L to 1)
     }
 
     @Test fun aStaleChunkIsDroppedAndCounted() = test {

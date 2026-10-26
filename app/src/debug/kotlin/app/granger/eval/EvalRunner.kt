@@ -1,5 +1,7 @@
 package app.granger.eval
 
+import app.granger.core.library.DensePassageFinder
+import app.granger.core.library.DenseTimings
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Outcome
@@ -30,21 +32,28 @@ import org.json.JSONObject
 fun evalSourceName(packNames: Map<String, String>): (Passage) -> String =
     { p -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
 
-/** Wraps the real finder and keeps the last call's keywords and passages, for the record's `found` list. */
-class RecordingFinder(private val inner: PassageFinder) : PassageFinder {
+/**
+ * Wraps the real finder and keeps the last call's keywords and passages, for the record's `found` list, and how long it
+ * took (`ms.keywordSearch`, Plan R5 Task 1: `ms.search` also covers the dense side running alongside).
+ */
+class RecordingFinder(private val inner: PassageFinder, private val clock: () -> Long = { System.nanoTime() / 1_000_000 }) : PassageFinder {
     var keywords: List<String> = emptyList()
         private set
     var passages: List<Passage> = emptyList()
+        private set
+    var ms: Long? = null
         private set
 
     fun reset() {
         keywords = emptyList()
         passages = emptyList()
+        ms = null
     }
 
     override suspend fun find(keywords: List<String>): List<Passage> {
         this.keywords = keywords
-        return inner.find(keywords).also { passages = it }
+        val start = clock()
+        return inner.find(keywords).also { passages = it; ms = clock() - start }
     }
 
     /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
@@ -60,15 +69,23 @@ class RecordingDenseFinder(private val inner: DenseFinder, private val clock: ()
         private set
     var ms: Long? = null
         private set
+    /** Plan R5 Task 1: the split of [ms], when the finder is the app's [DensePassageFinder]. */
+    var timings: DenseTimings? = null
+        private set
 
     fun reset() {
         passages = emptyList()
         ms = null
+        timings = null
     }
 
     override suspend fun find(query: FloatArray): List<Passage> {
         val start = clock()
-        return inner.find(query).also { passages = it; ms = clock() - start }
+        return inner.find(query).also {
+            passages = it
+            ms = clock() - start
+            timings = (inner as? DensePassageFinder)?.lastTimings
+        }
     }
 }
 
@@ -254,6 +271,10 @@ class EvalRunner(
         prompts?.begin("main")
         val main = execute(pipeline.run(request))
         dense?.ms?.let { main.ms.put("dense", it) }
+        finder.ms?.let { main.ms.put("keywordSearch", it) }
+        dense?.timings?.let { t ->
+            main.ms.put("denseSources", t.sourcesMs).put("denseScan", t.scanMs).put("denseRebuild", t.rebuildMs)
+        }
         val outcome = main.outcome
         val keywords = outcome?.keywords.orEmpty()
         val fallbackKeywords = Keywords.extract(listOfNotNull(item.question, item.priorQuestion).joinToString(" "))
