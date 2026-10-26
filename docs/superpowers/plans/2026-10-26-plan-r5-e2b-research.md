@@ -129,15 +129,65 @@ The phone's rewrite and answer were about 0.8 s slower in both of today's runs t
 
 This is the ceiling for Tasks 3–5.
 
-- [ ] For each answerable item of r1-dense-1, mark whether the chosen passages contain the reference answer (the
+- [x] For each answerable item of r1-dense-1, mark whether the chosen passages contain the reference answer (the
   dataset's `answers`, matched loosely, by hand where unsure).
-- [ ] For the 20 multi-step items, mark each fact separately (both people's dates, both events' years).
-- [ ] Table: answer in passages and grounded / not grounded / declined; for multi-step, both facts present, one, or
+- [x] For the 20 multi-step items, mark each fact separately (both people's dates, both events' years).
+- [x] Table: answer in passages and grounded / not grounded / declined; for multi-step, both facts present, one, or
   none.
 - **Read-out:**
   - if the answer is usually there when E2B misses, the work is in Tasks 3–5;
   - if multi-step usually has only one fact, per-entity search (one query per named person or work) comes before Task
     4.
+
+### Done (2026-10-26)
+
+**Method:**
+- `tools/eval/coverage.py r1-dense-1` matches each dataset quote, folded, against the chosen passages.
+- A grounded single-fact reply counts as holding the answer, since the rubric requires every claim to be supported by a
+  cited passage.
+- The rest were marked by hand in `sets/coverage-hand.jsonl`: 19 single-fact items and all 20 multi-step items, fact by
+  fact. Literal matching was far too strict: the answer is often in other words, or in the same article from another
+  pack.
+
+**Single fact (106):**
+
+| Answer | Grounded | Not grounded | Declined | Other | Total |
+|---|---|---|---|---|---|
+| In a chosen passage | 82 | 9 | 0 | 0 | 91 |
+| Right article or book, wrong part | 0 | 4 | 0 | 0 | 4 |
+| Not there | 0 | 7 | 3 | 1 | 11 |
+| Total | 82 | 20 | 3 | 1 | 106 |
+
+**Multi-step (20)**, by the kind of combination:
+
+| Facts in passages | Grounded | Not grounded | Declined | Total | Of which years |
+|---|---|---|---|---|---|
+| Both | 4 | 4 | 1 | 9 | 8 (3 grounded) |
+| One | 0 | 4 | 5 | 9 | 6 |
+| None | 0 | 1 | 1 | 2 | 1 |
+
+The 20 split into 15 years, 3 quantities and 2 chains.
+
+**Read-out:**
+- **When the answer is there, E2B mostly gets it:** 82 of 91 single-fact items. Its 9 misreadings:
+  - wrong number or ranking from the passage: Curie's "five Nobels", China first, "two other novels";
+  - leading with an off-topic passage: vocab-gap-001, bible-005;
+  - not giving the literal answer: who-wrote-006 and -009, medical-019;
+  - a false "the passages don't say": science-006.
+- **When the answer isn't there, E2B answers anyway:** 11 of 15 such items got a not-grounded reply, and only 3
+  declined. This is the unanswerables' failure on answerable questions, so Tasks 3 and 5 aim at both.
+- **The 80% bar can't be reached by the answer step alone.** Answerable grounded is 86/126 (68%) today. If E2B were
+  right on every item whose passages hold the answer, it would be at most 91 + 9 = 100/126 (79%), just under the 101
+  needed. So retrieval has to improve too:
+  - the 4 "right book, wrong part" items are long chapters, from Gulliver, Tom Sawyer, Sun Tzu and Nineteen Eighty-Four;
+  - the 11 misses are mostly word definitions (words-001, -002), novel openings (literature-001, -002) and Bible verse
+    locations.
+- **Multi-step splits into two halves:**
+  - 8 of the 15 year questions have both facts, and E2B is grounded on 3. Year arithmetic in code (Task 4) can reach at
+    most 5 more, which would give multi-step 9/20 against today's 4/20.
+  - The other 7 year questions have one fact or none. They need per-entity search (one query per named person or work)
+    before Task 4 can help them.
+  - Both are worth doing. Per-entity search is added to Task 4 as its first step.
 
 ## Task 3: fewer, tighter passages
 
@@ -157,6 +207,9 @@ This is the ceiling for Tasks 3–5.
 Only if Task 2 shows that multi-step questions usually have both facts in the passages, or once per-entity search makes
 them so.
 
+- [ ] **Per-entity search first** (Task 2: 7 of the 15 year questions have only one fact in the passages): for a
+  question with cue words, one extra search per named person or work (from the rewrite's keywords), and each entity's
+  best passage kept among the chosen ones. Measure on the 20 multi-step items how many then have both facts.
 - [ ] **Facts from the passages:**
   - regex for the regular cases: Wikipedia lead lifespans (`Name (30 August 1797 – 1 February 1851)`), "born / died /
     published / founded / built in <year>";
