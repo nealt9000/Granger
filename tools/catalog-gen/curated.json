@@ -202,6 +202,20 @@
       "url": "https://github.com/nealt9000/Granger/releases/download/voices-v1/vits-piper-en_US-ljspeech-medium.zip",
       "license": "Public domain (LJ Speech); model by Rhasspy Piper, MIT",
       "attribution": "Voice trained on the LJ Speech dataset (public domain) by the Piper project; spoken through sherpa-onnx (Apache-2.0); espeak-ng data (GPL-3.0)."
+    },
+    {
+      "id": "vits-piper-en_US-granger_libritts-medium",
+      "title": "Granger voice (Maggie & Martin)",
+      "engine": "piper",
+      "language": "en-US",
+      "speakers": 2,
+      "sampleRate": 22050,
+      "sizeBytes": 80117618,
+      "unpackedBytes": 95055032,
+      "sha256": "026125012f3c755043ceab3ae857376136db2a51a52a46f15692cd2536f97bc0",
+      "url": "https://github.com/nealt9000/Granger/releases/download/voices-v1/vits-piper-en_US-granger_libritts-medium.zip",
+      "license": "CC BY 4.0 (LibriTTS-R); fine-tuned from Piper's LJ Speech model (public domain)",
+      "attribution": "Trained for Granger on LibriTTS-R (Koizumi et al., 2023; CC BY 4.0) speakers 3922 (Maggie) and 4535 (Martin), LibriVox readers, with 40 more for timing; fine-tuned from Piper's LJ Speech model (public domain) with piper1-gpl (GPL-3.0); spoken through sherpa-onnx (Apache-2.0); espeak-ng data (GPL-3.0)."
     }
   ],
   "readiness": {

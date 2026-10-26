@@ -174,5 +174,6 @@ Epoch 600 packs to 80.1 MB (`pack_voice.py`, 77 MB ONNX, RTF ~0.048 on the Mac).
 A third leg (2026-10-24, another 4090, ~104 s an epoch) took it from 600 to 900: `val_mel` 0.4248 at 606, 0.4240 at
 639, 0.4229 at 721, 0.4220 at 731, **0.4205 at 796**, then nothing lower to 900 (0.4209 at 888). Neal: 700 a clear step
 for speaker 1 over 600, a slight one for speaker 0. **Shipped: `epoch=796-val_mel=0.4205`** for both speakers (797 epochs
-of round 2 on 699 of round 1), packed to 80,117,604 bytes, sha256 `4bd3a3f1…a793c`. The pod removed itself at the end
+of round 2 on 699 of round 1), exported with `--speakers 3922=Maggie 4535=Martin` and packed to 80,117,618 bytes, sha256 `02612501…f97bc0`
+(release `voices-v1`). The pod removed itself at the end
 (`runpodctl remove pod`, with a read/write API key on the pod).

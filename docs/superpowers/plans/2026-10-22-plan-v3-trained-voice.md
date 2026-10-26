@@ -50,9 +50,9 @@ The Pixel 6 is shared. The V2 session (granger-1d) holds it for a 4-thread `libr
 ### Task 4: Numbers and listening
 
 - [x] RTF through the real player, screen on and off (`run-voice.sh`); it must come in like `ljspeech` (≈ 0.12–0.2). Record the table in `docs/superpowers/spikes/2026-10-voice-spike-results.md` under a "Trained voice (V3)" heading.
-- [ ] Neal's ratings beside `ljspeech` and `libritts_r` (naturalness, names and numbers, pacing; books at 0.8× and 1.0×, an article), and one sentence with **Australia, Rosetta and area** in it: `ljspeech` ends such words with an "r" ("Australiar"), the phonemes are right, so the model is what must fix it. If it doesn't reach `libritts_r`, say what's short (more epochs, more data, another speaker) and whether another round is worth it.
+- [x] Neal's ratings beside `ljspeech` and `libritts_r` (naturalness, names and numbers, pacing; books at 0.8× and 1.0×, an article), and one sentence with **Australia, Rosetta and area** in it: `ljspeech` ends such words with an "r" ("Australiar"), the phonemes are right, so the model is what must fix it. If it doesn't reach `libritts_r`, say what's short (more epochs, more data, another speaker) and whether another round is worth it.
 
 ### Task 5: Into the catalog (with the V2 session)
 
-- [ ] `pack_voice.py` zip, its sha256 and sizes; upload to GitHub release `voices-v1` (`gh release upload`, Neal's word first); `curated.json` entry with the licence and attribution (Decision 3) and the named speakers; the V2 session's speaker plumbing (its Task 3) if the voice is multi-speaker; `catalog_gen.py build`, `sign`, `verify`, commit on `main`, push (Neal's word).
-- [ ] The roadmap: a V3 row, and a note in "Carried forward from V2".
+- [x] `pack_voice.py` zip, its sha256 and sizes; upload to GitHub release `voices-v1` (`gh release upload`, Neal's word first); `curated.json` entry with the licence and attribution (Decision 3) and the named speakers; the V2 session's speaker plumbing (its Task 3) if the voice is multi-speaker; `catalog_gen.py build`, `sign`, `verify`, commit on `main`, push (Neal's word).
+- [x] The roadmap: a V3 row, and a note in "Carried forward from V2".
