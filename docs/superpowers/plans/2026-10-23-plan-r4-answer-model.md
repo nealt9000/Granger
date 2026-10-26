@@ -133,16 +133,44 @@ an id list in `tools/eval/sets/<name>.json` (`{base, stage, ids, note}`), replay
 - `answerers.py`: `--set` (exclusive with `--sample`), `prompts(ids=, stage=)`; tests for both and for the committed
   sets' shape. 107 eval tests green.
 
-## Task 3: the speed screen (Pixel 6)
+## Task 3: the speed screen (Pixel 6) — done 2026-10-26: only E2B is fast enough
 
-- [ ] Run speed-10 on every candidate, GPU first; CPU too where GPU fails or is slower (E4B decoded faster on CPU in the
-  model spike). E2B and E4B with and without MTP.
-- [ ] Table: load, first words median / p90, tok/s, output tokens, peak memory, errors, and whether the output is usable
-  (no prompt echo, no thinking text, follows the `NOT IN LIBRARY` and `[n]` format).
-- [ ] **Cut:** a model whose answer first words median is over 12 s (E2B today: about 4 s; this leaves room for Neal's
-  "slower but better"), whose peak memory with the embedder loaded is over 4.5 GB (56% of the Pixel's 8 GB), or whose
-  output isn't usable after one prompt fix. At most 5 go on.
-- [ ] Rewrite prompts on the small rewrite candidates: time and keyword quality by eye against E2B's.
+- [x] speed-10 on every candidate (runs `r4-s-*`, `r4-rw-*`; files pinned by commit in `~/granger-models/r4/fetch.sh`,
+  sha256 in `SHA256SUMS` there), GPU first, CPU where GPU failed. E2B and E4B with and without MTP.
+- [x] The table (model first words, decode tok/s median, output tokens median, memory after load as total PSS / GPU):
+
+  | Model | Load | First words med / p90 | Prefill tok/s | Decode tok/s | Out | Memory | Output | Verdict |
+  |---|---|---|---|---|---|---|---|---|
+  | **E2B GPU** | 30 s cold, 7–8 s warm | **2.9 / 3.3 s** | 451 | 14.0 | 110 | 1.6 / 1.2 GB | usable | **keep** |
+  | E2B GPU, MTP on | 28 s | 3.8 / 5.3 s | | 10.2 | 110 | 1.7 / 1.2 GB | identical replies | MTP slower |
+  | E4B GPU, MTP off / on | 67 / 12 s | 14.9 / 14.5 s | 87 | 2.9 / 2.8 | 126 | 3.1–3.2 / 2.7 GB | usable, identical | over 12 s |
+  | E4B CPU (`gemma-4-E4B-it.litertlm`) | — | — | | | | | | killed for memory while loading |
+  | MiniCPM5-2B int4 GPU | 29 s | 15.3 / 16.3 s | 85 | 6.3 | 82 | 2.9 / 2.1 GB | usable, good | over 12 s |
+  | Qwen3.5-2B int8 GPU | — | — | | | | | | killed for memory while loading (as in R0) |
+  | Qwen3.5-2B int8 CPU, thinking off | 53 s | 28.1 / 30.9 s | 46 | 6.3 | 192 | 1.7 GB | echoes "Question: … Answer:", drops citations | cut |
+  | LFM2.5-2.6B int4 GPU | 40 s | 109 / 120 s | 107 | 5.3 | 512 | 3.3 / 2.5 GB | 512 tokens that decode to nothing | cut |
+  | Qwen3.5-4B mixed int4 GPU, thinking off | — | — | | | | | | killed for memory while loading |
+  | SmolLM3-3B q4 GPU, thinking off | 28 s | 146 / 156 s | | 4.2 | 512 | 3.1 / 2.5 GB | never stops; leading blank lines and "Answer:" | cut |
+  | Ministral-3-3B q4 GPU | 33 s | 47 / 52 s | | 2.5 | 121 | 3.5 / 3.0 GB | usable | over 12 s |
+  | Phi-4-mini q8 GPU | — | — | | | | | | killed for memory while loading |
+
+- [x] **Cut:** everything but E2B. The deciding number is prefill: the answer prompt is about 1,250 tokens and only E2B
+  reads it fast (451 tok/s; the next best is 107), so every other model is past 12 s before its first word.
+- **MTP (speculative decoding) does nothing useful on the Pixel 6 GPU:** replies are byte-identical with it on and off,
+  E4B decodes no faster (2.8 vs 2.9 tok/s) and E2B is slower with it (10.2 vs 14.0). Leave `enableSpeculativeDecoding`
+  at its default (off for E2B).
+- [x] **Rewrite models** (speed-rewrite, 32 tokens): E2B takes 1.0 s to first words and about 2.3 s in all; its replay
+  matches r1-dense-1's recorded rewrite word for word. LFM2.5-350M (0.5 s, 1.2 GB) and Qwen3-0.6B (1.7 s, 2.4 GB) mostly
+  copy the prompt's worked example ("longitude, marine chronometer…") instead of rewriting the question; Qwen3.5-0.8B
+  was killed for memory (4.7 GB RSS). None can take the rewrite off E2B.
+- **Gotchas found on the way:** LiteRT-LM writes a compiled weight cache per model into the app's cache dir (1–2.4 GB
+  each, never removed); seven candidates filled the phone and Phi-4's first try failed on it. The eval runner now stops
+  when the app dies or its process is replaced (the player widget restarts the app after a memory kill).
+
+**So Tasks 4–8 have no candidate to test against E2B.** The round continues as a plan built around E2B (Neal,
+2026-10-26): fewer, tighter passages behind a relevance gate; year arithmetic in code, after measuring how often the
+passages hold both facts; a short per-passage check pass; the rewrite off the model (Task 5); and dense latency.
+Tasks 4, 4b, 6 and 7 are dropped; Task 8 (Think deeper removed) stays.
 
 ## Task 4: quality on sample-40
 
