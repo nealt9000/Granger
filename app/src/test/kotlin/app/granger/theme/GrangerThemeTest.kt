@@ -70,6 +70,8 @@ class GrangerThemeTest {
             check(name, "play on background", x.play, s.background, 3.0)
             check(name, "onPrimary on play", s.onPrimary, x.play, 4.5)
             check(name, "mark on background", x.mark, s.background, 3.0)
+            check(name, "pupils in the eyes", x.markPupils, x.markEyes, 3.0)
+            check(name, "eyes in the owl", x.markEyes, x.mark, 1.5)
         }
         check("Covers", "cover text on tile", FieldExtras.coverText, FieldExtras.coverTile, 4.5)
     }

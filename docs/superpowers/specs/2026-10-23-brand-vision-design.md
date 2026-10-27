@@ -1,6 +1,6 @@
 # Granger brand and vision
 
-**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** the mark is chosen (§8, The mark) and ships in H3 Task 5; the final palette and the tagline are still open.
+**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** a first mark (the cassette on books) shipped in H3 Task 5. **2026-10-27:** Neal replaced it with the owl in the G (§8, The mark), which ships with Plan T1; the final palette and the tagline are still open.
 **Reference art:** `docs/superpowers/brand/` (dated folders; the current reference is `2026-10-23-field-recorder-concept/`).
 **Unblocks:** H3 Task 5 (the Welcome brand), Plan 10 (billing, now on the fair deal below), Plan 11 (the store listing), and the UI pass that follows the roadmap's features.
 
@@ -15,6 +15,8 @@ Granger puts the world's reference knowledge, literature and a local librarian o
 A *grange* is a granary: the store a farm lays up against lean seasons, so a bad winter doesn't decide who eats. Granger is that store for knowledge, filled while times are good and there when they aren't.
 
 The Granger movement gave the name its spine. In the 1860s–70s, American farmers organised as the Grange to take on the railroad and grain-elevator monopolies, which set their own rates and could cut a farmer off from market on a whim. The "Granger Laws" they won were among the first limits on that kind of power. A cooperative of ordinary people refusing to depend on a provider that could shut them out: that is Granger's quarrel with rented media and tethered knowledge, 150 years early.
+
+The mark carries the first story. Farmers left owl holes in their barn gables so barn owls would nest inside and keep the rats off the grain: the owl guards the store. It also sees in the dark, which is the point of Granger when the network goes down. Lead with the owl hole when the mark needs explaining. Granger plus an owl invites a jump to Hermione Granger and Hogwarts owls; it is not a legal problem, but the granary story should always come first, and Granger never uses wizarding imagery.
 
 There is a quieter layer too. In *Fahrenheit 451*, Granger leads the book people, exiles who each carry a book in memory so no one can take it, and who walk back to rebuild when the burning stops. Tell that story in our own words: the novel is in copyright, so never quote it at length, use its covers, or suggest the estate endorses Granger.
 
@@ -119,7 +121,27 @@ Two themes, both first class: **Field** (light: paper and enamel, for daylight) 
 
 **Type:** Spectral (OFL) for reading and headings; Courier Prime (OFL) for labels, counters and the command line; a stencil face for the wordmark only (OFL candidates: Big Shoulders Stencil, Saira Stencil One). All bundled, never downloaded.
 
-**The mark (chosen 2026-10-26):** a cassette whose right half is the G, its bar an arrow pointing back into the tape, resting on two books: your own media and the world's knowledge, with a G that isn't anyone else's. Neal picked it from ElevenLabs sketches after four drawn rounds in Claude Design missed (an appliance, a letter, a house, a plant; a lantern, a roundel, a briefcase; spray signs; weaker copies of the sketches). The sketch was traced and redrawn as clean geometry (`docs/superpowers/brand/2026-10-26-mark-sketches/`); `tools/brand/make_drawables.py` writes the launcher, themed and in-app drawables from it and the wordmark (Big Shoulders Stencil 800, drawn as paths). Good enough for beta and v1; at 24–32 px the page lines fill in, so a notification icon would need a simpler cut.
+**The mark (chosen 2026-10-27): the owl in the G.** A stern, flat owl sits inside a capital G whose lower curve is three wing bands, with a square spur. It reads as a guardian of the store that keeps watch at night: the granary story (§2) told in one picture. Neal drew it in ElevenLabs from the cassette mark, then picked one of his sketches (`docs/superpowers/brand/2026-10-27-owl-mark/`). It was traced and cleaned as geometry, not redrawn by hand:
+- the rim and the crescent's inner edge are true circles fitted to his lines;
+- each cut between the bands follows arcs fitted to its own edges;
+- the head, eyes and pupils are mirrored about the beak.
+
+The pipeline is reproducible, in `redraw/`. It replaces the first mark (2026-10-26), a cassette whose right half was a G, resting on two books (`2026-10-26-mark-sketches/`). That mark said what Granger holds; the owl says why it exists. The music side now lives in the product and the copy, not the mark.
+
+Colours:
+- **The eyes are the lantern.** Lantern whites with dark pupils, in both themes. The mark has three layers (eyes, pupils, body), so the eyes can glow while the body takes the theme colour.
+- **Night:** a paper owl.
+- **Field:** an enamel owl.
+- **Launcher (option C):** a paper owl with lantern eyes on enamel.
+- **Themed icon:** one colour, eyes cut out.
+
+`tools/brand/make_drawables.py` writes all of these, and the wordmark (Big Shoulders Stencil 800, drawn as paths). Night is the brand's face: lead store art and Welcome with it.
+
+Rules for the owl:
+- **A mark, not a mascot.** It doesn't talk, wave, wear things or become the librarian's avatar.
+- **Keep it angular, stern, flat and one colour.** Never green, never round, never cute. Duolingo owns the friendly app owl.
+- **No star or sparkle beside it.** A four-point sparkle reads as the generic AI icon, and a star in the crescent's mouth echoes the star and crescent.
+- **A notification icon, when one is needed,** is a simpler cut (Neal's perch sketch, `sketch-owl-perch.png`, or the head alone). The full mark holds at 24 px, but its cuts turn to texture.
 
 **The brief it answered:**
 - Must read at 48 px as a launcher icon and as Android's monochrome themed icon.

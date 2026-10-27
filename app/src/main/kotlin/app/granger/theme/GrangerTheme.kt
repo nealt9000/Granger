@@ -116,16 +116,20 @@ data class GrangerExtras(
     val play: Color,
     /** Fills, icons and rules; never text on paper (3.0:1). */
     val brass: Color,
-    /** The mark in the lockup. */
+    /** The mark in the lockup: the owl and the G, its eyes (always lantern) and its pupils. */
     val mark: Color,
+    val markEyes: Color,
+    val markPupils: Color,
     /** Generated book covers: an object, so the same in both themes. */
     val coverTile: Color = FieldKit.Gunmetal,
     val coverText: Color = FieldKit.Paper,
     val coverRule: Color = FieldKit.Lantern,
 )
 
-val FieldExtras = GrangerExtras(night = false, status = FieldKit.Enamel, play = FieldKit.Enamel, brass = FieldKit.Brass, mark = FieldKit.Enamel)
-val NightExtras = GrangerExtras(night = true, status = FieldKit.Phosphor, play = FieldKit.Lantern, brass = FieldKit.Brass, mark = FieldKit.Lantern)
+val FieldExtras = GrangerExtras(night = false, status = FieldKit.Enamel, play = FieldKit.Enamel, brass = FieldKit.Brass,
+    mark = FieldKit.Enamel, markEyes = FieldKit.Lantern, markPupils = FieldKit.Enamel)
+val NightExtras = GrangerExtras(night = true, status = FieldKit.Phosphor, play = FieldKit.Lantern, brass = FieldKit.Brass,
+    mark = FieldKit.Paper, markEyes = FieldKit.Lantern, markPupils = FieldKit.Night)
 
 val LocalGrangerExtras = staticCompositionLocalOf { NightExtras }
 
