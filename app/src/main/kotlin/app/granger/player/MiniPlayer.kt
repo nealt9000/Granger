@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import app.granger.R
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerUi
-import app.granger.theme.GrangerColors
 
 /** The mini-player's height, the same for music and audiobooks (spec §8). */
 val MiniPlayerHeight = 64.dp
@@ -80,7 +79,7 @@ fun MiniPlayer(
     val book = now is NowPlaying.Book
     val voice = now is NowPlaying.Voice
     Surface(
-        color = GrangerColors.SurfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier.fillMaxWidth().testTag(MiniPlayerTags.ROOT),
     ) {
         Column(Modifier.fillMaxWidth().height(MiniPlayerHeight)) {
@@ -125,8 +124,8 @@ fun MiniPlayer(
                 LinearProgressIndicator(
                     progress = { fraction(ui.positionMs, ui.durationMs) },
                     modifier = Modifier.fillMaxSize(),
-                    color = GrangerColors.Flame,
-                    trackColor = GrangerColors.OutlineVariant,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
                     drawStopIndicator = {},
                     gapSize = 0.dp,
                 )

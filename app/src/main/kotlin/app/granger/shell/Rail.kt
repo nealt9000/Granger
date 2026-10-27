@@ -63,7 +63,6 @@ import androidx.compose.ui.unit.dp
 import app.granger.Features
 import app.granger.R
 import app.granger.settings.RailSide
-import app.granger.theme.GrangerColors
 
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
 enum class RailTool(val label: String, val shown: Boolean) {
@@ -135,7 +134,7 @@ private val RailEntry.description: String
 
 /**
  * The always-there 56 dp rail: tool icons, one column of tiles for the rail's list (covers and letter tiles for
- * articles and books, icons for the rest; a flame dot on pinned ones), History, Settings. Only the tools go straight to
+ * articles and books, icons for the rest; an accent dot on pinned ones), History, Settings. Only the tools go straight to
  * their screens. The tiles and History are too little to tell apart here, so tapping them (or the rail's background)
  * calls [onExpand]: the full rail, where they have titles and open. A long press on a tile offers [actions].
  */
@@ -152,7 +151,7 @@ internal fun NarrowRail(
     Column(
         Modifier
             .fillMaxHeight()
-            .background(GrangerColors.Surface)
+            .background(MaterialTheme.colorScheme.surface)
             // Tapping the rail's background opens the expanded rail.
             .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onExpand)
             .windowInsetsPadding(railInsets(side))
@@ -170,7 +169,7 @@ internal fun NarrowRail(
         ) {
             rail.entries.forEach { entry -> EntryTile(entry, onExpand, actions) }
             IconButton(onClick = onExpand) {
-                Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = GrangerColors.OnSurfaceVariant)
+                Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         ToolIcon(RailTool.SETTINGS, selected == RailTool.SETTINGS) { onTool(RailTool.SETTINGS) }
@@ -200,7 +199,7 @@ internal fun ExpandedRail(
     Column(
         Modifier
             .fillMaxHeight()
-            .background(GrangerColors.SurfaceVariant)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             // Swallow taps on the panel so they don't reach the scrim beneath it.
             .clickable(remember { MutableInteractionSource() }, indication = null) {}
             .windowInsetsPadding(railInsets(side))
@@ -243,14 +242,14 @@ private fun ToolIcon(tool: RailTool, selected: Boolean, onClick: () -> Unit) {
         Icon(
             tool.painter(),
             contentDescription = tool.label,
-            tint = if (selected) GrangerColors.Flame else GrangerColors.OnSurfaceVariant,
+            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
 private fun RailDivider(modifier: Modifier) {
-    HorizontalDivider(modifier.padding(vertical = 8.dp), color = GrangerColors.OutlineVariant)
+    HorizontalDivider(modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant)
 }
 
 @Composable
@@ -258,14 +257,14 @@ private fun SectionLabel(text: String) {
     Text(
         text,
         style = MaterialTheme.typography.labelMedium,
-        color = GrangerColors.Outline,
+        color = MaterialTheme.colorScheme.outline,
         modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
     )
 }
 
 @Composable
 private fun LabelledRow(icon: Painter, label: String, selected: Boolean, onClick: () -> Unit) {
-    val tint = if (selected) GrangerColors.Flame else GrangerColors.OnSurfaceVariant
+    val tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -274,7 +273,7 @@ private fun LabelledRow(icon: Painter, label: String, selected: Boolean, onClick
         Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
         Text(
             label,
-            color = if (selected) GrangerColors.Flame else GrangerColors.OnSurface,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -282,7 +281,7 @@ private fun LabelledRow(icon: Painter, label: String, selected: Boolean, onClick
     }
 }
 
-/** The small flame dot on a pinned item's tile or icon, at its top corner. */
+/** The small accent dot on a pinned item's tile or icon, at its top corner. */
 @Composable
 private fun PinDot(modifier: Modifier) {
     Box(
@@ -290,12 +289,12 @@ private fun PinDot(modifier: Modifier) {
             .offset(x = 3.dp, y = (-3).dp)
             .size(8.dp)
             .clip(CircleShape)
-            .background(GrangerColors.Flame)
+            .background(MaterialTheme.colorScheme.primary)
             .testTag(PIN_DOT_TAG),
     )
 }
 
-/** [content] with the flame dot over its top end corner when [pinned]. */
+/** [content] with the accent dot over its top end corner when [pinned]. */
 @Composable
 private fun WithPinDot(pinned: Boolean, content: @Composable () -> Unit) {
     Box {
@@ -304,7 +303,7 @@ private fun WithPinDot(pinned: Boolean, content: @Composable () -> Unit) {
     }
 }
 
-/** A tab's letter tile; the current tab is outlined in flame, an unavailable one greyed out. */
+/** A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out. */
 @Composable
 private fun LetterTile(tab: RailTabUi, size: Int = 36) {
     val shape = RoundedCornerShape(8.dp)
@@ -313,15 +312,15 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
             .size(size.dp)
             .alpha(if (tab.available) 1f else 0.4f)
             .clip(shape)
-            .background(GrangerColors.SurfaceHigh)
-            .then(if (tab.current) Modifier.border(2.dp, GrangerColors.Flame, shape) else Modifier),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         val cover = if (tab.coverPath != null) rememberRailCover(tab.coverPath, size.dp) else null
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Text(tab.initial.toString(), color = GrangerColors.OnSurface, fontWeight = FontWeight.SemiBold)
+            Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -330,10 +329,10 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
 @Composable
 private fun IconTile(entry: RailEntry) {
     Box(
-        Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).background(GrangerColors.SurfaceHigh),
+        Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(entry.painter(), contentDescription = null, tint = GrangerColors.OnSurfaceVariant, modifier = Modifier.size(18.dp))
+        Icon(entry.painter(), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
     }
 }
 
@@ -416,14 +415,14 @@ private fun TabRowContent(entry: RailEntry.Tab) {
             Text(
                 tab.title,
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (tab.current) GrangerColors.Flame else GrangerColors.OnSurface,
+                color = if (tab.current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 if (tab.available) tab.subtitle else "${tab.subtitle} · not available",
                 style = MaterialTheme.typography.bodySmall,
-                color = GrangerColors.OnSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -450,11 +449,11 @@ private fun EntryRowContent(entry: RailEntry) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         WithPinDot(entry.pinned) {
-            Icon(entry.painter(), contentDescription = null, tint = GrangerColors.OnSurfaceVariant, modifier = Modifier.size(20.dp))
+            Icon(entry.painter(), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
         Text(
             label,
-            color = GrangerColors.OnSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

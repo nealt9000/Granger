@@ -49,6 +49,7 @@ import app.granger.media.DownloadControls
 import app.granger.media.citedMark
 import app.granger.media.citedTint
 import app.granger.player.formatTime
+import app.granger.theme.readout
 
 /**
  * One audiobook: cover and details, progress, Play/Resume, "Mark as finished", its chapters (tap: play from there)
@@ -129,7 +130,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                 ListItem(
                     modifier = Modifier.citedTint(citedMarked && chapter.ordinal == markedChapter)
                         .clickable(enabled = loaded.playable) { vm.playChapter(book.id, chapter) },
-                    leadingContent = { Text("${chapter.ordinal + 1}", style = MaterialTheme.typography.labelLarge) },
+                    leadingContent = { Text("${chapter.ordinal + 1}", style = MaterialTheme.typography.labelLarge.readout) },
                     headlineContent = {
                         Text(
                             chapter.title.ifBlank { "Chapter ${chapter.ordinal + 1}" }, maxLines = 2, overflow = TextOverflow.Ellipsis,
@@ -137,7 +138,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                             color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    trailingContent = { Text(formatTime(chapter.durationMs), style = MaterialTheme.typography.labelMedium) },
+                    trailingContent = { Text(formatTime(chapter.durationMs), style = MaterialTheme.typography.labelMedium.readout) },
                 )
             }
             item { HorizontalDivider(Modifier.padding(top = 8.dp)) }

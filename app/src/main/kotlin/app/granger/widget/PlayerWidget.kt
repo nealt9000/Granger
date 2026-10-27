@@ -45,12 +45,13 @@ import androidx.glance.semantics.testTag
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
+import androidx.glance.color.ColorProvider
 import app.granger.Features
 import app.granger.GrangerApp
 import app.granger.MainActivity
 import app.granger.R
-import app.granger.theme.GrangerColors
+import app.granger.theme.FieldColors
+import app.granger.theme.NightColors
 import java.io.File
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -100,9 +101,13 @@ class PlayerWidget : GlanceAppWidget() {
     }
 }
 
-private val Background = ColorProvider(GrangerColors.SurfaceVariant)
-private val OnSurface = ColorProvider(GrangerColors.OnSurface)
-private val OnSurfaceVariant = ColorProvider(GrangerColors.OnSurfaceVariant)
+// A home-screen widget sits on the launcher, which follows the phone, so it takes Field by day and Night by night (Plan T1, Decision 4).
+private val Background = ColorProvider(day = FieldColors.surfaceContainer, night = NightColors.surfaceContainer)
+private val OnSurface = ColorProvider(day = FieldColors.onSurface, night = NightColors.onSurface)
+private val OnSurfaceVariant = ColorProvider(day = FieldColors.onSurfaceVariant, night = NightColors.onSurfaceVariant)
+private val Accent = ColorProvider(day = FieldColors.primary, night = NightColors.primary)
+private val Track = ColorProvider(day = FieldColors.outlineVariant, night = NightColors.outlineVariant)
+private val CoverGround = ColorProvider(day = FieldColors.surfaceContainerHigh, night = NightColors.surfaceContainerHigh)
 
 /** The Player screen of Granger, opened by the cover and text. */
 internal fun openPlayerAction(context: Context): Action = actionStartActivity(MainActivity.openPlayerIntent(context))
@@ -171,8 +176,8 @@ fun PlayerWidgetContent(model: WidgetModel, cover: ImageProvider?) {
                 LinearProgressIndicator(
                     progress = model.progress,
                     modifier = GlanceModifier.fillMaxWidth().height(3.dp).semantics { testTag = PlayerWidgetTags.PROGRESS },
-                    color = ColorProvider(GrangerColors.Flame),
-                    backgroundColor = ColorProvider(GrangerColors.OutlineVariant),
+                    color = Accent,
+                    backgroundColor = Track,
                 )
             }
         }
@@ -186,7 +191,7 @@ private fun Cover(cover: ImageProvider?, book: Boolean, sizeDp: Int, open: Actio
     if (cover != null) {
         Image(cover, contentDescription = "Open player", contentScale = ContentScale.Crop, modifier = modifier)
     } else {
-        Box(modifier.background(ColorProvider(GrangerColors.SurfaceHigh)), contentAlignment = Alignment.Center) {
+        Box(modifier.background(CoverGround), contentAlignment = Alignment.Center) {
             Image(
                 ImageProvider(if (book) R.drawable.ic_headphones else R.drawable.ic_music_note), contentDescription = null,
                 colorFilter = ColorFilter.tint(OnSurfaceVariant), modifier = GlanceModifier.size((sizeDp / 2).dp),

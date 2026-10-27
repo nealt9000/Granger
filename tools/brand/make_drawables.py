@@ -1,34 +1,42 @@
-"""Write the brand's Android vector drawables from granger-mark.svg and the stencil wordmark.
+"""Write the brand's Android vector drawables from granger-mark.svg and the wordmark.
 
-    ~/.venvs/granger-vectors/bin/python -I tools/brand/make_drawables.py <BigShouldersStencil[opsz,wght].ttf>
+    ~/.venvs/granger-vectors/bin/python -I tools/brand/make_drawables.py app/src/main/res/font/spectral_semibold.ttf
 
-The mark (granger-mark.svg) is Neal's sketch C redrawn as clean geometry; the redraw and the sketch live in
-docs/superpowers/brand/2026-10-26-mark-sketches/. The wordmark is GRANGER set in Big Shoulders Stencil (OFL,
-licence beside this script) at weight 800 and drawn as paths, so the app bundles no font for it. Needs fontTools.
+The mark (granger-mark.svg) is the owl in the G, Neal's sketch traced and cleaned as geometry; the sketch and the
+pipeline live in docs/superpowers/brand/2026-10-27-owl-mark/. It has three layers: the eye whites, the pupils and the
+body (the G and the owl). The wordmark is GRANGER in Spectral SemiBold capitals (OFL,
+docs/superpowers/brand/fonts), spaced wide and drawn as paths so it is the same everywhere. Needs fontTools.
 """
 import re
 import sys
 from pathlib import Path
 
-from fontTools.pens.boundsPen import BoundsPen
+from fontTools.pens.boundsPen import BoundsPen, ControlBoundsPen
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
+from fontTools.svgLib.path import parse_path
 from fontTools.ttLib import TTFont
-from fontTools.varLib.instancer import instantiateVariableFont
 
 HERE = Path(__file__).resolve().parent
 RES = HERE.parent.parent / "app" / "src" / "main" / "res"
 
-PAPER = "#FFEFE4D0"  # field paper, the mark on the enamel launcher background
+PAPER = "#FFEFE4D0"  # field paper: the owl on the enamel launcher background (brand brief §8, launcher option C)
+LANTERN = "#FFF0A35E"  # the eyes
+NIGHT = "#FF181C1D"  # the pupils
 WHITE = "#FFFFFFFF"  # tinted where it is drawn
 
-# The mark's content box in the SVG's coordinates (the 1080x1000 trace frame).
-MARK_BOX = (50, 52, 1030, 965)
+# The launcher's mark: the rim circle's diameter in the 108 dp adaptive icon (inside the 66 dp safe zone).
+LAUNCHER_DIAMETER = 58
 
 
-def mark_paths():
+def mark_layers():
+    """{"eyes": d, "pupils": d, "mark": d} and the square viewBox side; the viewBox is centred on the rim circle."""
     svg = (HERE / "granger-mark.svg").read_text()
-    return re.findall(r'<path fill-rule="evenodd" d="([^"]+)"/>', svg)
+    side = float(re.search(r'viewBox="0 0 ([\d.]+) ', svg).group(1))
+    layers = {"mark": re.findall(r'<path fill-rule="evenodd" d="([^"]+)"/>', svg)[0]}
+    for name in ("eyes", "pupils"):
+        layers[name] = re.search(rf'<path class="{name}" fill-rule="evenodd" d="([^"]+)"/>', svg).group(1)
+    return layers, side
 
 
 def vector(width_dp, height_dp, vw, vh, body):
@@ -41,25 +49,60 @@ def vector(width_dp, height_dp, vw, vh, body):
     )
 
 
-def group(paths, color, scale, tx, ty):
+def split(d):
+    """One path per outline with the holes inside it. A compiled resource string holds at most 32,767 characters,
+    and the whole mark is longer, so it can't be one pathData."""
+    subs = ["M" + s for s in d.split("M") if s.strip()]
+
+    def box(sub):
+        pen = ControlBoundsPen(None)
+        parse_path(sub, pen)
+        return pen.bounds
+
+    boxes = [box(s) for s in subs]
+    inside = lambda a, b: a != b and b[0] <= a[0] and b[1] <= a[1] and a[2] <= b[2] and a[3] <= b[3]
+    outers = [i for i, a in enumerate(boxes) if not any(inside(a, b) for b in boxes)]
+    area = lambda b: (b[2] - b[0]) * (b[3] - b[1])
+    owner = {j: min((i for i in outers if inside(boxes[j], boxes[i])), key=lambda i: area(boxes[i]))
+             for j in range(len(subs)) if j not in outers}  # each hole goes with the smallest outline around it
+    out = ["".join(subs[k] for k in [i] + [j for j, o in owner.items() if o == i]) for i in outers]
+    assert sum(len(x) for x in out) == len(d) and max(len(x) for x in out) < 32000, "split lost or kept too much"
+    return out
+
+
+def group(paths, scale, tx, ty):
+    """paths: (pathData, colour) in drawing order."""
     out = f'    <group android:scaleX="{scale:.5f}" android:scaleY="{scale:.5f}" android:translateX="{tx:.3f}" android:translateY="{ty:.3f}">\n'
-    for d in paths:
-        out += f'        <path android:fillColor="{color}" android:fillType="evenOdd" android:pathData="{d}" />\n'
+    for d, color in paths:
+        for part in split(d):
+            out += f'        <path android:fillColor="{color}" android:fillType="evenOdd" android:pathData="{part}" />\n'
     return out + "    </group>\n"
 
 
-def mark_in(viewport, diameter, color):
-    """The mark centred in a square viewport, scaled so its box fits a circle of `diameter` (the adaptive-icon safe zone)."""
-    x0, y0, x1, y1 = MARK_BOX
-    w, h = x1 - x0, y1 - y0
-    scale = diameter / (w * w + h * h) ** 0.5
-    tx = viewport / 2 - scale * (x0 + w / 2)
-    ty = viewport / 2 - scale * (y0 + h / 2)
-    return group(mark_paths(), color, scale, tx, ty)
+def bounds(d):
+    pen = ControlBoundsPen(None)
+    parse_path(d, pen)
+    return pen.bounds
 
 
-def wordmark(font_path, text="GRANGER", tracking=0.06):
-    font = instantiateVariableFont(TTFont(font_path), {"wght": 800, "opsz": 72})
+def owl_alone(layers):
+    """The owl without the G (the smallest outline around the eyes), for the status bar, where the whole mark is too small
+    to read: brand brief §8."""
+    px0, py0, px1, py1 = bounds(layers["pupils"])
+    inside = lambda b: b[0] <= px0 and b[1] <= py0 and px1 <= b[2] and py1 <= b[3]
+    area = lambda b: (b[2] - b[0]) * (b[3] - b[1])
+    return min((part for part in split(layers["mark"]) if inside(bounds(part))), key=lambda part: area(bounds(part)))
+
+
+def mark_in(viewport, diameter, paths, side):
+    """The mark centred in a square viewport, scaled so its rim circle is `diameter` across."""
+    scale = diameter / side
+    t = viewport / 2 - scale * side / 2
+    return group(paths, scale, t, t)
+
+
+def wordmark(font_path, text="GRANGER", tracking=0.12):
+    font = TTFont(font_path)
     gs, cmap = font.getGlyphSet(), font.getBestCmap()
     upm = font["head"].unitsPerEm
     ascent = font["OS/2"].sCapHeight or font["hhea"].ascent
@@ -79,26 +122,37 @@ def wordmark(font_path, text="GRANGER", tracking=0.06):
 
 def main():
     font_path = sys.argv[1]
-    paths = mark_paths()
+    layers, side = mark_layers()
+    L = round(side)
 
-    # Launcher: paper mark in the 66 dp safe zone of the 108 dp adaptive icon, on the enamel background colour.
-    (RES / "drawable" / "ic_launcher_foreground.xml").write_text(vector(108, 108, 108, 108, mark_in(108, 64, PAPER)))
-    (RES / "drawable" / "ic_launcher_monochrome.xml").write_text(vector(108, 108, 108, 108, mark_in(108, 64, WHITE)))
+    # Launcher (option C): a paper owl with lantern eyes and dark pupils on the enamel background colour.
+    launcher = [(layers["eyes"], LANTERN), (layers["pupils"], NIGHT), (layers["mark"], PAPER)]
+    (RES / "drawable" / "ic_launcher_foreground.xml").write_text(vector(108, 108, 108, 108, mark_in(108, LAUNCHER_DIAMETER, launcher, side)))
+    # Themed icon: one colour, the eyes cut out and the pupils solid.
+    mono = [(layers["pupils"], WHITE), (layers["mark"], WHITE)]
+    (RES / "drawable" / "ic_launcher_monochrome.xml").write_text(vector(108, 108, 108, 108, mark_in(108, LAUNCHER_DIAMETER, mono, side)))
 
-    # In-app mark: its own box, white, tinted by the caller.
-    x0, y0, x1, y1 = MARK_BOX
-    w, h = x1 - x0, y1 - y0
-    (RES / "drawable" / "granger_mark.xml").write_text(
-        vector(round(w / 10), round(h / 10), w, h, group(paths, WHITE, 1.0, -x0, -y0)))
+    # In-app mark: one white drawable per layer on the same square viewport, stacked and tinted by the caller.
+    for name, res in (("mark", "granger_mark"), ("eyes", "granger_mark_eyes"), ("pupils", "granger_mark_pupils")):
+        (RES / "drawable" / f"{res}.xml").write_text(vector(48, 48, L, L, group([(layers[name], WHITE)], 1.0, 0, 0)))
 
-    # Wordmark: GRANGER in the stencil, white, tinted by the caller.
+    # Notification icon: the owl alone, white, its eyes cut out and the pupils in them, 20 dp tall in the 24 dp
+    # canvas. Media3's playback notification takes it by this name in place of its music note.
+    owl = owl_alone(layers)
+    x0, y0, x1, y1 = bounds(owl)
+    scale = 20 / (y1 - y0)
+    tx, ty = 12 - scale * (x0 + x1) / 2, 2 - scale * y0
+    (RES / "drawable" / "media3_notification_small_icon.xml").write_text(
+        vector(24, 24, 24, 24, group([(owl, WHITE), (layers["pupils"], WHITE)], scale, tx, ty)))
+
+    # Wordmark: GRANGER in Spectral caps, white, tinted by the caller.
     d, (bx0, by0, bx1, by1) = wordmark(font_path)
     ww, wh = bx1 - bx0, by1 - by0
     body = (f'    <group android:translateX="{-bx0:.1f}" android:translateY="{-by0:.1f}">\n'
             f'        <path android:fillColor="{WHITE}" android:pathData="{d}" />\n    </group>\n')
     (RES / "drawable" / "granger_wordmark.xml").write_text(
         vector(round(ww / wh * 24, 1), 24, round(ww), round(wh), body))
-    print(f"mark {w}x{h}; wordmark {ww:.0f}x{wh:.0f} units")
+    print(f"mark {L}x{L}; wordmark {ww:.0f}x{wh:.0f} units")
 
 
 if __name__ == "__main__":

@@ -36,7 +36,6 @@ import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
-import app.granger.theme.GrangerColors
 
 /**
  * The music player (Auxio-style): cover, title/artist/album, seek bar, transport, shuffle, repeat and the queue.
@@ -65,7 +64,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                 )
                 Text(
                     music.track.artists.ifBlank { music.track.albumArtists }, style = MaterialTheme.typography.bodyLarge,
-                    color = GrangerColors.Flame, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     Albums.title(music.track), style = MaterialTheme.typography.bodyMedium,
@@ -82,7 +81,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     Icon(
                         painterResource(R.drawable.ic_shuffle),
                         contentDescription = if (music.shuffle) "Shuffle on" else "Shuffle off",
-                        tint = if (music.shuffle) GrangerColors.Flame else LocalContentColor.current,
+                        tint = if (music.shuffle) MaterialTheme.colorScheme.primary else LocalContentColor.current,
                     )
                 }
                 // The music transport: the player's, or the music under the voice's when the voice reads over it (Plan V2).
@@ -97,7 +96,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     Icon(
                         painterResource(if (music.repeat == 2) R.drawable.ic_repeat_one else R.drawable.ic_repeat),
                         contentDescription = when (music.repeat) { 1 -> "Repeat all"; 2 -> "Repeat one"; else -> "Repeat off" },
-                        tint = if (music.repeat != 0) GrangerColors.Flame else LocalContentColor.current,
+                        tint = if (music.repeat != 0) MaterialTheme.colorScheme.primary else LocalContentColor.current,
                     )
                 }
             }

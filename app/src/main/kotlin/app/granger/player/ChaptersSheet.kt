@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.AudiobookChapter
-import app.granger.theme.GrangerColors
+import app.granger.theme.readout
 
-/** The book's chapters with their lengths; the current one in flame. Picking one jumps to its start ([onPick] gets its ordinal). */
+/** The book's chapters with their lengths; the current one in the accent. Picking one jumps to its start ([onPick] gets its ordinal). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChaptersSheet(chapters: List<AudiobookChapter>, currentOrdinal: Int, onPick: (Int) -> Unit, onDismiss: () -> Unit) {
@@ -46,18 +46,18 @@ fun ChaptersSheet(chapters: List<AudiobookChapter>, currentOrdinal: Int, onPick:
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            "${chapter.ordinal + 1}", style = MaterialTheme.typography.labelLarge,
-                            color = if (current) GrangerColors.Flame else MaterialTheme.colorScheme.onSurfaceVariant,
+                            "${chapter.ordinal + 1}", style = MaterialTheme.typography.labelLarge.readout,
+                            color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.width(36.dp),
                         )
                         Text(
                             chapter.title.ifBlank { "Chapter ${chapter.ordinal + 1}" }, maxLines = 2, overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if (current) GrangerColors.Flame else MaterialTheme.colorScheme.onSurface,
+                            color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f),
                         )
                         Spacer(Modifier.width(12.dp))
-                        Text(formatTime(chapter.durationMs), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(formatTime(chapter.durationMs), style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

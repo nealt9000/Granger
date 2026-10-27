@@ -36,6 +36,7 @@ import app.granger.ebook.BookOpener
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.OpenTo
 import app.granger.settings.RailSide
+import app.granger.settings.ThemeChoice
 import app.granger.shell.RailHidden
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
@@ -444,11 +445,14 @@ class FakeRailHidden : RailHidden {
 }
 
 /** [AppearancePrefs] in memory. */
-class FakeAppearancePrefs(side: RailSide = RailSide.LEFT, openTo: OpenTo = OpenTo.RESUME) : AppearancePrefs {
+class FakeAppearancePrefs(side: RailSide = RailSide.LEFT, openTo: OpenTo = OpenTo.RESUME, theme: ThemeChoice = ThemeChoice.SYSTEM) : AppearancePrefs {
     private val state = MutableStateFlow(side)
     override val railSide: StateFlow<RailSide> = state
     override fun setRailSide(side: RailSide) { state.value = side }
     private val openToState = MutableStateFlow(openTo)
     override val openTo: StateFlow<OpenTo> = openToState
     override fun setOpenTo(openTo: OpenTo) { openToState.value = openTo }
+    private val themeState = MutableStateFlow(theme)
+    override val theme: StateFlow<ThemeChoice> = themeState
+    override fun setTheme(theme: ThemeChoice) { themeState.value = theme }
 }

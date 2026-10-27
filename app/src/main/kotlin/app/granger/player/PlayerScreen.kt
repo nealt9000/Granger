@@ -42,7 +42,6 @@ import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
-import app.granger.theme.GrangerColors
 
 /**
  * [PlayerRoute][app.granger.PlayerRoute]: a Music and an Audiobooks tab (spec §8: one player, one active mode, each
@@ -178,14 +177,14 @@ internal fun PlayerTopBar(label: String, onClose: () -> Unit) {
     )
 }
 
-/** The big flame play/pause button both players centre their controls on. */
+/** The big accent play/pause button both players centre their controls on. */
 @Composable
 internal fun BigPlayPause(playing: Boolean, onClick: () -> Unit, size: Dp = 72.dp) {
     FilledIconButton(
         onClick = onClick,
         modifier = Modifier.size(size),
         shape = CircleShape,
-        colors = IconButtonDefaults.filledIconButtonColors(containerColor = GrangerColors.Flame, contentColor = GrangerColors.OnFlame),
+        colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
     ) {
         PlayPauseIcon(playing, Modifier.size(size / 2))
     }

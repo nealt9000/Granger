@@ -1,6 +1,7 @@
 package app.granger.media
 
 import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import app.granger.theme.GrangerColors
 import kotlinx.coroutines.delay
 
 /** How long a cited song or chapter stays marked after its page opens (as a Research source card flashes). */
@@ -36,4 +36,5 @@ fun citedMark(list: LazyListState, index: Int?): Boolean {
 }
 
 /** The cited row's tint while [marked]. */
-fun Modifier.citedTint(marked: Boolean): Modifier = if (marked) background(GrangerColors.Flame.copy(alpha = 0.15f)) else this
+@Composable
+fun Modifier.citedTint(marked: Boolean): Modifier = if (marked) background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)) else this

@@ -8,7 +8,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import app.granger.theme.GrangerColors
+import app.granger.theme.NightColors
 import app.granger.theme.GrangerTheme
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,7 @@ class PlayerContentColorTest {
         return best
     }
 
-    private val onSurface = GrangerColors.OnSurface.let { 0.2126f * it.red + 0.7152f * it.green + 0.0722f * it.blue }
+    private val onSurface = NightColors.onSurface.let { 0.2126f * it.red + 0.7152f * it.green + 0.0722f * it.blue }
 
     private fun assertBright(node: SemanticsNodeInteraction, what: String, atLeast: Float = onSurface * 0.8f) {
         assertWithMessage("$what brightness").that(node.brightest()).isAtLeast(atLeast)

@@ -11,6 +11,18 @@ enum class RailSide { LEFT, RIGHT }
 /** Where the app opens after a normal close (Plan H2): where you left off (the default), or Home. */
 enum class OpenTo { RESUME, HOME }
 
+/** Field (light) or Night (dark), or whichever the phone is in (Plan T1, Decision 1). */
+enum class ThemeChoice {
+    SYSTEM, FIELD, NIGHT;
+
+    /** Whether this choice is Night, given whether the phone is in dark mode. */
+    fun night(phoneDark: Boolean): Boolean = when (this) {
+        SYSTEM -> phoneDark
+        FIELD -> false
+        NIGHT -> true
+    }
+}
+
 /** Settings → Appearance. */
 interface AppearancePrefs {
     /** Left by default. */
@@ -20,6 +32,10 @@ interface AppearancePrefs {
     /** [OpenTo.RESUME] by default. */
     val openTo: StateFlow<OpenTo>
     fun setOpenTo(openTo: OpenTo)
+
+    /** [ThemeChoice.SYSTEM] by default. */
+    val theme: StateFlow<ThemeChoice>
+    fun setTheme(theme: ThemeChoice)
 }
 
 class SharedAppearancePrefs(private val prefs: SharedPreferences) : AppearancePrefs {
@@ -47,8 +63,20 @@ class SharedAppearancePrefs(private val prefs: SharedPreferences) : AppearancePr
         openToState.value = openTo
     }
 
+    private val themeState = MutableStateFlow(
+        prefs.getString(KEY_THEME, null)?.let { stored -> ThemeChoice.entries.firstOrNull { it.name == stored } } ?: ThemeChoice.SYSTEM,
+    )
+
+    override val theme: StateFlow<ThemeChoice> = themeState
+
+    override fun setTheme(theme: ThemeChoice) {
+        prefs.edit().putString(KEY_THEME, theme.name).apply()
+        themeState.value = theme
+    }
+
     private companion object {
         const val KEY_RAIL_SIDE = "railSide"
         const val KEY_OPEN_TO = "openTo"
+        const val KEY_THEME = "theme"
     }
 }

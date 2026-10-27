@@ -3,6 +3,14 @@ package app.granger
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
+import android.graphics.Color
+import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -43,10 +51,23 @@ class MainActivity : FragmentActivity() {
     /** Null while the launch decision reads Room; the screen stays blank (background colour) meanwhile. */
     private val start = mutableStateOf<StartScreen?>(null)
 
+    /** The theme this activity was created in; a different choice later recreates it (Plan T1, Task 3). */
+    private var createdNight = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The user's theme before the window exists, so the first frame, the bars and the reader's WebView all agree.
+        createdNight = (application as GrangerApp).container.appearancePrefs.theme.value.night(phoneDark())
+        setTheme(if (createdNight) R.style.Theme_Granger_Night else R.style.Theme_Granger_Field)
+        (application as GrangerApp).container.readingPrefs.setAppNight(createdNight)
         // Before super.onCreate, which restores fragments: the e-book navigator is rebuilt from the open book.
         supportFragmentManager.fragmentFactory = ReadiumFragmentFactory()
         super.onCreate(savedInstanceState)
+        val bars = if (createdNight) {
+            SystemBarStyle.dark(Color.TRANSPARENT)
+        } else {
+            SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+        }
+        enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
         // After process death a restored navigator is a stand-in with nothing to show; drop it before onStart
         // moves it on, so nothing restored waits on a container Compose hasn't made yet.
         dropNavigatorStandIns(supportFragmentManager)
@@ -77,7 +98,14 @@ class MainActivity : FragmentActivity() {
             }
         }
         setContent {
-            GrangerTheme {
+            val choice by container.appearancePrefs.theme.collectAsState()
+            val night = choice.night(isSystemInDarkTheme())
+            // A change in Settings (or the phone's mode under "Follow the phone") repaints the window and the WebView too.
+            LaunchedEffect(night) {
+                container.readingPrefs.setAppNight(night)
+                if (night != createdNight) recreate()
+            }
+            GrangerTheme(night = night) {
                 val decided = start.value
                 if (decided == null) {
                     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
@@ -87,6 +115,9 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+
+    private fun phoneDark(): Boolean =
+        (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
     /** Uses the Room rows from the last scan, plus a check that the pack's or book's file still exists. */
     private suspend fun decide(clean: Boolean, booted: Boolean, firstRun: Boolean): StartScreen {

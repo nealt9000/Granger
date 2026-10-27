@@ -48,7 +48,6 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import app.granger.settings.RailSide
-import app.granger.theme.GrangerColors
 
 /**
  * [WindowInsets.safeDrawing], except that the status and navigation bars count where they would be even while
@@ -143,7 +142,7 @@ fun GrangerShell(
                     .then(if (railVisible) Modifier.consumeWindowInsets(SafeDrawingIgnoringBars.only(side.insetSide)) else Modifier),
             ) {
                 if (miniPlayer != null) {
-                    Box(Modifier.fillMaxWidth().background(GrangerColors.SurfaceVariant).windowInsetsPadding(TopInsets)) { miniPlayer() }
+                    Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).windowInsetsPadding(TopInsets)) { miniPlayer() }
                 }
                 Box(
                     Modifier
@@ -171,7 +170,7 @@ fun GrangerShell(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .background(GrangerColors.Background.copy(alpha = 0.6f))
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6f))
                     .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onToggleExpanded),
             )
         }

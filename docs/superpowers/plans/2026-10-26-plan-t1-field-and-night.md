@@ -42,11 +42,11 @@
    | surfaceContainer lowest → highest | `#F7EFE2` `#F2E8D7` `#E9DCC6` `#E3D5BC` `#DCCCB0` | `#121516` `#1C2122` gunmetal `#24292A` `#2C3233` `#353C3D` |
    | surfaceVariant / onSurfaceVariant | `#E3D5BC` / `#4A4239` | `#2C3233` / `#B9B3A6` |
    | outline / outlineVariant | `#7A6E5F` / `#CDBFA6` | `#7F8786` / `#3A4243` |
-   | error / onError | `#A3361F` / paper | `#FF8A7A` / `#2A0A06` |
+   | error / onError | `#962E19` / paper (was `#A3361F`: 4.3:1 on the highest container) | `#FF8A7A` / `#2A0A06` |
    | inverseSurface / inverseOn / inversePrimary | gunmetal / paper / phosphor | paper / ink / enamel |
 
    `GrangerExtras`: `status` (phosphor on Night, enamel on Field: the `> offline. ready.` voice), `play` (lantern on Night, enamel on Field), `brass` (fills and rules only, never text), `coverTile` / `coverText` / `coverRule` (the generated book covers: gunmetal, paper and lantern in both themes, since a cover is an object, not chrome), `mark` (lantern on Night, enamel on Field).
-3. **One mapping for the call sites.** `Flame` → `primary`; `OnFlame` → `onPrimary`; `Background` → `background`; `Surface` → `surface`; `SurfaceVariant` → `surfaceContainer`; `SurfaceHigh` → `surfaceContainerHigh`; `SurfaceHighest`/`SurfaceLow`/`SurfaceLowest`/`SurfaceDim`/`SurfaceBright` → the same-named roles; `OnSurface` → `onSurface`; `OnSurfaceVariant` → `onSurfaceVariant`; `Outline`/`OutlineVariant` → the same; `Error`/`OnError` → the same; `Scrim` → `scrim`; `Tertiary*` → `tertiary*`; `SecondaryContainer`/`OnSecondaryContainer` → the same; `Inverse*` → the same. A top-level `val` that read the palette becomes a `@Composable` getter or moves inside the composable. Where the flame meant "play" (the play/pause buttons, progress fills) it becomes `extras.play`. `GrangerColors` is deleted when the last reader goes, so nothing can reach the retired palette.
+3. **One mapping for the call sites.** `Flame` → `primary`; `OnFlame` → `onPrimary`; `Background` → `background`; `Surface` → `surface`; `SurfaceVariant` → `surfaceContainer`; `SurfaceHigh` → `surfaceContainerHigh`; `SurfaceHighest`/`SurfaceLow`/`SurfaceLowest`/`SurfaceDim`/`SurfaceBright` → the same-named roles; `OnSurface` → `onSurface`; `OnSurfaceVariant` → `onSurfaceVariant`; `Outline`/`OutlineVariant` → the same; `Error`/`OnError` → the same; `Scrim` → `scrim`; `Tertiary*` → `tertiary*`; `SecondaryContainer`/`OnSecondaryContainer` → the same; `Inverse*` → the same. A top-level `val` that read the palette becomes a `@Composable` getter or moves inside the composable. Where the flame meant "play" (the play/pause buttons, progress fills) it takes `primary` too: `extras.play` equals `primary` in both schemes, so one role is enough until they diverge. *(Built: e-book links take a fixed burnt lantern `#B8662A`, 3.8:1 or better on Day, Sepia and Night pages; the read-aloud tint is lantern at 40%.)* `GrangerColors` is deleted when the last reader goes, so nothing can reach the retired palette.
 4. **The widget follows the phone, not the setting.** Glance's `ColorProvider(day, night)` takes the Field and Night values; a home-screen widget sits on the launcher, which follows the system.
 5. **Night darkens the web; Field doesn't.** `ReaderWebView` sets `WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, night)` from the resolved theme instead of relying on the window's `isLightTheme`, and paints its background from the scheme before the first page. In Field, Kiwix pages show as published (mostly white), which is what daylight wants.
 6. **The e-book reader keeps its own Day / Sepia / Night.** Its Night takes the Night scheme's background and text; its accent (selection, highlights' default) takes the current scheme's primary. Day and Sepia stay as they are: they're the book's page, not the app's.
@@ -72,42 +72,45 @@
 
 ### Task 1: The two schemes
 
-- [ ] `FieldKit` tokens, `FieldColors`, `NightColors`, `GrangerExtras` + `LocalGrangerExtras`, `GrangerTheme(night, content)`; keep `GrangerColors` for now (Task 2 removes it) but point its brand entries at `FieldKit`.
-- [ ] `ThemeContrastTest`: every text role on each background it's used with passes 4.5:1, outlines 3:1, in both schemes; adjust the starting values where one fails and record the change in Decision 2.
-- [ ] **Commit.** `Theme: Field and Night schemes from the field kit`
+- [x] `FieldKit` tokens, `FieldColors`, `NightColors`, `GrangerExtras` + `LocalGrangerExtras`, `GrangerTheme(night, content)`; keep `GrangerColors` for now (Task 2 removes it) but point its brand entries at `FieldKit`.
+- [x] `GrangerThemeTest` (the contrast checks): every text role on each background it's used with passes 4.5:1, outlines 3:1, in both schemes; adjust the starting values where one fails and record the change in Decision 2.
+- [x] **Commit.** `Theme: Field and Night schemes from the field kit`
 
 ### Task 2: Every screen reads the theme
 
-- [ ] Replace each `GrangerColors.*` read per Decision 3 (28 files); top-level palette vals become composable reads; the flame-as-play sites take `extras.play`; `BookCover` takes the cover extras; `BrandLockup` takes `extras.mark`.
-- [ ] The non-Compose four: the widget's day/night `ColorProvider`s (Decision 4); `ReaderWebView`'s background and darkening (Decision 5) from a `night` parameter; `ReadingPrefs` NIGHT and `ReadiumBooks`' accent (Decision 6).
-- [ ] Delete `GrangerColors`; grep for `0E0E0E`, `E8601C`, `GrangerColors` returns nothing in `app/src/main`.
-- [ ] Shots of Home, Library, the reader, the music player, the audiobook player, Research and Settings in both themes; fix what reads wrong.
-- [ ] **Commit.** `Theme: every screen reads the scheme; the flame palette is gone`
+- [x] Replace each `GrangerColors.*` read per Decision 3 (28 files); top-level palette vals become composable reads; the flame-as-play sites take `extras.play`; `BookCover` takes the cover extras; `BrandLockup` takes `extras.mark`.
+- [x] The non-Compose four: the widget's day/night `ColorProvider`s (Decision 4); `ReaderWebView`'s background and darkening (Decision 5) from a `night` parameter; `ReadingPrefs` NIGHT and `ReadiumBooks`' accent (Decision 6).
+- [x] Delete `GrangerColors`; grep for `0E0E0E`, `E8601C`, `GrangerColors` returns nothing in `app/src/main`.
+- [x] Shots of Home, Library, the reader, the music player, the audiobook player, Research and Settings in both themes; fix what reads wrong.
+- [x] **Commit.** `Theme: every screen reads the scheme; the flame palette is gone`
 
 ### Task 3: The setting and the window
 
-- [ ] `ThemeChoice { SYSTEM, FIELD, NIGHT }` in `AppearancePrefs` (default SYSTEM); Settings → Appearance "Theme": Follow the phone · Field · Night; `SettingsViewModel` passes it through; tests as for `railSide`.
-- [ ] `MainActivity`: resolve the choice with `isSystemInDarkTheme()`, `GrangerTheme(night)`, `enableEdgeToEdge` with the matching `SystemBarStyle`, window background from the scheme; `values/themes.xml` Field (`isLightTheme=true`, paper), `values-night/themes.xml` Night (night `#181C1D`), so the first frame matches the phone; a setting that disagrees repaints the window in `onCreate` before `setContent`.
-- [ ] **Commit.** `Appearance: Theme (follow the phone, Field, Night)`
+- [x] `ThemeChoice { SYSTEM, FIELD, NIGHT }` in `AppearancePrefs` (default SYSTEM); Settings → Appearance "Theme": Follow the phone · Field · Night; `SettingsViewModel` passes it through; tests as for `railSide`.
+- [x] `MainActivity`: resolve the choice with `isSystemInDarkTheme()`, `GrangerTheme(night)`, `enableEdgeToEdge` with the matching `SystemBarStyle`, window background from the scheme; `values/themes.xml` Field (`isLightTheme=true`, paper), `values-night/themes.xml` Night (night `#181C1D`), so the first frame matches the phone; a setting that disagrees repaints the window in `onCreate` before `setContent`. *(Built: `setTheme` before `super.onCreate` from the choice; a later change, or the phone's mode under Follow the phone, `recreate()`s, which also rebuilds the reader's WebView in the new theme. Labels: Follow the phone · Field (light) · Night (dark).)*
+- [x] **Commit.** `Appearance: Theme (follow the phone, Field, Night)`
 
 ### Task 4: The type
 
-- [ ] Spectral (Regular, Italic, Medium, SemiBold) and Courier Prime (Regular, Bold) TTFs in `res/font`, licences in `docs/superpowers/brand/fonts/`; `GrangerTypography` per Decision 7; `GrangerTheme` passes it.
-- [ ] Shots at 360 dp: the rail, Home's chips and strip, the mini player, Settings, Welcome; fix clipping (shorter labels or `maxLines` + ellipsis, never smaller than Material's sizes).
-- [ ] **Commit.** `Theme: Spectral and Courier Prime`
+- [x] Spectral (Regular, Italic, Medium, SemiBold) and Courier Prime (Regular, Bold) TTFs in `res/font`, licences in `docs/superpowers/brand/fonts/`; `GrangerTypography` per Decision 7; `GrangerTheme` passes it.
+- [x] Shots at 360 dp: the rail, Home's chips and strip, the mini player, Settings, Welcome; fix clipping (shorter labels or `maxLines` + ellipsis, never smaller than Material's sizes). *(Built: headlines medium, titles semibold; nothing clipped in the shots at 360 dp; about 1.2 MB of fonts.)*
+- [x] **Commit.** `Theme: Spectral and Courier Prime`
 
 ### Task 5: The brand's own touches
 
-- [ ] The status voice: Home's readiness strip and the Library's storage line get one Courier Prime status line in `extras.status` (`> offline. 11.1 GB on this phone.`), wording from the facts already on screen, nothing new computed.
-- [ ] About: the lockup in `extras.mark`, "Everything worth knowing, yours to keep.", version, GPL line (as H3 Task 5 left it, now themed).
-- [ ] **Commit.** `Theme: the status voice and the themed lockup`
+- [x] The status voice: Home's readiness strip gets one Courier Prime status line in `extras.status`, from the storage the report already holds (the phone's own media doesn't count). *(Built: `> 11 GB here, ready offline.`, short enough for one line at 360 dp; "offline." alone would claim the phone has no signal, which isn't the fact. The Library has no storage line to carry one, so the UI pass decides where else the voice goes.)*
+- [x] About: the lockup in `extras.mark`, "Everything worth knowing, yours to keep.", version, GPL line (as H3 Task 5 left it, now themed).
+- [x] Tagline and wordmark (2026-10-27): "The world's knowledge. Yours to keep." (two lines on Welcome), GRANGER in Spectral caps from `make_drawables.py`, and the mission line "Knowledge is a human right." in About; the stencil licence removed.
+- [x] **Commit.** `Theme: the status voice and the themed lockup`
 
 ### Task 6: Walkthrough; roadmap
 
-- [ ] Publish the shot set (both themes, every main screen) for Neal; take his notes.
-- [ ] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark.
-- [ ] Roadmap row T1 → Done; brief §10 step 3 marked done.
-- [ ] **Commit.** `Roadmap: T1 done`
+- [x] Publish the shot set (both themes, every main screen) for Neal; take his notes. *(2026-10-26: the "Field and Night: the app" artboard on the Granger mark canvas, https://claude.ai/artifact/GVXXLW2AJyfeCppiDv46H7; notes pending.)*
+- [x] The owl mark rides along (Neal, 2026-10-27; brief §8, The mark). `make_drawables.py` writes three layers (eyes, pupils, body), each outline its own `<path>` because a compiled resource string holds at most 32,767 characters. Launcher option C: a paper owl, lantern eyes, enamel ground. The lockup stacks the layers: the eyes in `extras.markEyes`, the pupils in `extras.markPupils`, the body in `extras.mark` (enamel in Field, paper in Night).
+- [x] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark; the new launcher icon and the themed icon on the home screen; the owl in the status bar and on the playback notification.
+- [x] Walkthrough notes (Neal, 2026-10-27), fixed on the branch: every check passed; Courier on every Material label felt awkward, so labels are Spectral and Courier stays for the status line and readouts; the e-reader gains Match app (the default) beside its own Day, Sepia and Night; the palette was close but not there, so options A, B and C were rendered on the app's screens and A's Field with C's Night went on the phone and was kept.
+- [x] Roadmap row T1 → Done; brief §10 step 3 marked done.
+- [x] **Commit.** `Roadmap: T1 done`
 
 ## Order and size
 

@@ -17,7 +17,6 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.em
-import app.granger.theme.GrangerColors
 
 /** An answer split into its words and its `[n]` citations; `*italic*` and `**bold**` become styles, other Markdown stays as typed. */
 object AnswerText {
@@ -130,14 +129,16 @@ object AnswerText {
     }
 }
 
-/** [answer] with each citation drawn as a small raised flame chip; tapping one calls [onCite] with its number. */
+/** [answer] with each citation drawn as a small raised chip in the accent; tapping one calls [onCite] with its number. */
 @Composable
 internal fun AnswerBody(answer: String, onCite: (Int) -> Unit, modifier: Modifier = Modifier) {
     val cite by rememberUpdatedState(onCite)
-    val text = remember(answer) {
+    val chipText = MaterialTheme.colorScheme.primary
+    val chipGround = MaterialTheme.colorScheme.surfaceContainerHigh
+    val text = remember(answer, chipText, chipGround) {
         val chip = SpanStyle(
-            color = GrangerColors.Flame,
-            background = GrangerColors.SurfaceHigh,
+            color = chipText,
+            background = chipGround,
             fontWeight = FontWeight.SemiBold,
             fontSize = 0.75.em,
             baselineShift = BaselineShift.Superscript,
@@ -158,5 +159,5 @@ internal fun AnswerBody(answer: String, onCite: (Int) -> Unit, modifier: Modifie
             }
         }
     }
-    Text(text, modifier, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.OnSurface)
+    Text(text, modifier, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
 }

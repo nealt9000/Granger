@@ -33,7 +33,11 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         // Robolectric reads FileDescriptor internals by reflection, which JDK 17+ blocks by default.
-        unitTests.all { it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED") }
+        unitTests.all {
+            it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
+            // ThemeShots renders the main screens to PNGs only when asked: ./gradlew testDebugUnitTest --tests '*ThemeShots*' -PthemeShots
+            it.systemProperty("granger.themeShots", if (project.hasProperty("themeShots")) layout.buildDirectory.dir("theme-shots").get().asFile.path else "")
+        }
     }
     compileOptions {
         // Readium's AARs require it (checkDebugAarMetadata).

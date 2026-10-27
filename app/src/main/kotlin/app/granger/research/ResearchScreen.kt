@@ -68,7 +68,6 @@ import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
 import app.granger.research.ResearchViewModel.TurnUi
-import app.granger.theme.GrangerColors
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import app.granger.R
@@ -389,7 +388,7 @@ private fun AnswerBlock(
             TurnOutcome.PENDING -> {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = GrangerColors.OnSurfaceVariant) }
+                    ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
             }
@@ -403,11 +402,11 @@ private fun AnswerBlock(
                 if (ui.guessing) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = GrangerColors.OnSurfaceVariant) }
+                        ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
                 if (ui.guessFailed) {
-                    Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
+                    Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                     OutlinedButton(onClick = onReadiness) { Text("Readiness") }
                 }
                 val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
@@ -421,15 +420,15 @@ private fun AnswerBlock(
                 }
             }
             TurnOutcome.INTERRUPTED -> {
-                Text(INTERRUPTED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.OnSurfaceVariant)
+                Text(INTERRUPTED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
             }
             TurnOutcome.SEARCH_FAILED -> {
-                Text(SEARCH_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
+                Text(SEARCH_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
             }
             TurnOutcome.FAILED -> {
-                Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = GrangerColors.Error)
+                Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = onReadiness) { Text("Readiness") }
             }
         }
@@ -449,13 +448,13 @@ private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: 
         ) {
             when (voice) {
                 VoiceButton.IDLE -> Icon(painterResource(R.drawable.ic_headphones), contentDescription = "Read answer")
-                VoiceButton.READING -> Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause reading", tint = GrangerColors.Flame)
-                VoiceButton.PAUSED -> Icon(painterResource(R.drawable.ic_play), contentDescription = "Resume reading", tint = GrangerColors.Flame)
+                VoiceButton.READING -> Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause reading", tint = MaterialTheme.colorScheme.primary)
+                VoiceButton.PAUSED -> Icon(painterResource(R.drawable.ic_play), contentDescription = "Resume reading", tint = MaterialTheme.colorScheme.primary)
             }
         }
         if (voice != VoiceButton.IDLE) {
             Text(
-                if (voice == VoiceButton.READING) "Reading" else "Paused", style = MaterialTheme.typography.labelMedium, color = GrangerColors.Flame,
+                if (voice == VoiceButton.READING) "Reading" else "Paused", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary,
             )
             TextButton(onClick = onStop, modifier = Modifier.testTag(ResearchTags.STOP_READING)) { Text("Stop") }
         }
@@ -489,10 +488,10 @@ private fun QuestionBubble(question: String) {
         Text(
             question,
             style = MaterialTheme.typography.bodyLarge,
-            color = GrangerColors.OnSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .widthIn(max = 560.dp)
-                .background(GrangerColors.SurfaceHigh, RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(16.dp))
                 .padding(horizontal = 14.dp, vertical = 10.dp),
         )
     }
@@ -504,24 +503,24 @@ private fun QuoteCard(passage: Passage, modifier: Modifier = Modifier) {
     Column(
         modifier
             .fillMaxWidth()
-            .background(GrangerColors.SurfaceVariant, RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(8.dp))
             .padding(12.dp),
     ) {
         Text(
             "“${passage.text.trim()}”",
             style = MaterialTheme.typography.bodyMedium,
-            color = GrangerColors.OnSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 4,
             overflow = TextOverflow.Ellipsis,
         )
         if (passage.sourceTitle.isNotBlank()) {
-            Text(passage.sourceTitle, style = MaterialTheme.typography.labelMedium, color = GrangerColors.Outline)
+            Text(passage.sourceTitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 /**
- * Cited passage [n]: its source and the first lines of its text; outlined in flame while [flash]. [onPlay], for a song,
+ * Cited passage [n]: its source and the first lines of its text; outlined in the accent while [flash]. [onPlay], for a song,
  * album, chapter or audiobook, shows a Play button that plays it without leaving Research.
  */
 @Composable
@@ -532,8 +531,8 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
         Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .background(GrangerColors.Surface, shape)
-            .border(if (flash) 2.dp else 1.dp, if (flash) GrangerColors.Flame else GrangerColors.OutlineVariant, shape)
+            .background(MaterialTheme.colorScheme.surface, shape)
+            .border(if (flash) 2.dp else 1.dp, if (flash) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, shape)
             .clickable(onClick = onOpen)
             .padding(12.dp),
     ) {
@@ -541,7 +540,7 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
             Text(
                 "$n · ${passage.sourceTitle}",
                 style = MaterialTheme.typography.titleSmall,
-                color = GrangerColors.OnSurface,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
@@ -551,7 +550,7 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
                     Icon(
                         painterResource(R.drawable.ic_play),
                         contentDescription = "Play ${passage.heading.ifBlank { passage.sourceTitle }}",
-                        tint = GrangerColors.Flame,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -560,7 +559,7 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
             Text(
                 byline,
                 style = MaterialTheme.typography.labelMedium,
-                color = GrangerColors.Outline,
+                color = MaterialTheme.colorScheme.outline,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -568,7 +567,7 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
         Text(
             passage.text.trim(),
             style = MaterialTheme.typography.bodySmall,
-            color = GrangerColors.OnSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
         )
@@ -580,10 +579,10 @@ private fun Banner(text: String) {
     Text(
         text,
         style = MaterialTheme.typography.bodyMedium,
-        color = GrangerColors.OnTertiaryContainer,
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
         modifier = Modifier
             .fillMaxWidth()
-            .background(GrangerColors.TertiaryContainer, RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(8.dp))
             .padding(12.dp),
     )
 }
@@ -592,7 +591,7 @@ private fun Banner(text: String) {
 @Composable
 private fun Notice(text: String, action: String? = null, onAction: () -> Unit = {}) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = GrangerColors.OnSurfaceVariant)
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (action != null) OutlinedButton(onClick = onAction) { Text(action) }
     }
 }

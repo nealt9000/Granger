@@ -39,9 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.BookAnnotation
-import app.granger.theme.GrangerColors
 import org.json.JSONObject
 import org.readium.r2.shared.publication.Locator
+import app.granger.theme.readout
 
 /** The swatch for a highlight colour name. */
 internal fun highlightColor(name: String): Color = Color(HighlightColors.argb(name))
@@ -73,7 +73,7 @@ fun ContentsPanel(
 ) {
     var tab by remember { mutableIntStateOf(0) }
     Box(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxSize().background(GrangerColors.Scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
         Surface(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
             color = MaterialTheme.colorScheme.surface,
@@ -91,7 +91,7 @@ fun ContentsPanel(
                             val current = i == state.currentTocIndex
                             Text(
                                 row.title.ifEmpty { "Untitled" },
-                                color = if (current) GrangerColors.Flame else MaterialTheme.colorScheme.onSurface,
+                                color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.fillMaxWidth().clickable { onGoTo(row.href) }
                                     .padding(start = (16 + 16 * row.depth).dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
@@ -103,7 +103,7 @@ fun ContentsPanel(
                             Column(Modifier.fillMaxWidth().clickable { onMark(mark) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
                                 Text(mark.text.ifEmpty { "Bookmark" }, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 markPercent(mark)?.let {
-                                    Text("$it%", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("$it%", style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }

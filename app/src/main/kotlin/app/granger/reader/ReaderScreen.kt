@@ -94,13 +94,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.Features
+import app.granger.theme.GrangerTheme
 import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.player.VoiceButton
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
 import app.granger.shell.SafeDrawingIgnoringBars
-import app.granger.theme.GrangerColors
 import kotlinx.coroutines.launch
 
 /** Find-in-page results: [active] is 0-based. */
@@ -128,6 +128,7 @@ fun ReaderScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val night = GrangerTheme.extras.night
     var webView by remember { mutableStateOf<ReaderWebView?>(null) }
     // Set when Back loads the tab's previous page from its stored stack: once shown, the WebView's history is cleared
     // so it holds only that page, and the next Back goes on down the stored stack instead of forward again.
@@ -278,6 +279,7 @@ fun ReaderScreen(
                             ReaderWebView(
                                 context = context,
                                 client = client,
+                                night = night,
                                 onToggleChrome = viewModel::toggleChrome,
                                 onSelectionAction = { action, text ->
                                     when (action) {
@@ -439,19 +441,19 @@ private fun PackSearchBox(label: String, onClick: () -> Unit, modifier: Modifier
         modifier
             .height(40.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(GrangerColors.SurfaceHigh)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .clickable(onClickLabel = "Search", role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Filled.Search, contentDescription = null, Modifier.size(20.dp), tint = GrangerColors.OnSurfaceVariant)
+        Icon(Icons.Filled.Search, contentDescription = null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(8.dp))
         Text(
             label,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyLarge,
-            color = GrangerColors.OnSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
