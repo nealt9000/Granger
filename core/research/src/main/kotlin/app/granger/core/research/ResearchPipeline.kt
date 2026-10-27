@@ -165,6 +165,11 @@ class ResearchPipeline(
      * answer's passages ([Entities.reserve]). Off in the app.
      */
     private val reserveNamed: Boolean = false,
+    /**
+     * Plan R5 Task 4's second debug variant: a question that compares dates gets the dates of the things it names and
+     * the sums between them worked out in code ([YearFacts]), after the passages. Off in the app.
+     */
+    private val yearFacts: Boolean = false,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
@@ -240,17 +245,19 @@ class ResearchPipeline(
             return@flow
         }
         val pool = (listOfNotNull(quote) + capped.filter { it != quote }).take(config.large)
+        fun worked(passages: List<Passage>): String? =
+            if (yearFacts && quote == null && Entities.asked(request.question)) YearFacts.block(request.question, keywords, passages) else null
         /** The passages that fit the prompt for the large or the small model; the rest stay candidates for Think deeper. */
         fun fit(large: Boolean): Pair<List<Passage>, List<Passage>> {
             val wanted = pool.take(if (large) config.large else config.small)
             // Dropped for the prompt's budget, a passage can't be cited.
-            val fitted = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null)
+            val fitted = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null, worked(wanted))
             return fitted to pool.drop(fitted.size)
         }
         var (passages, candidates) = fit(usedLarge)
 
         emit(ResearchEvent.Progress(Stage.WRITING))
-        var streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
+        var streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null, worked(passages)), stop)
         if (usedLarge && streamed.text == null && streamed.chunks == 0 && streamed.cause is ModelUnavailableException) {
             // The large model wouldn't reload for this reply (it can be released between the rewrite and the answer):
             // answer with the small one, as when it fails to load at the start.
@@ -264,7 +271,7 @@ class ResearchPipeline(
             usedLarge = false
             model = small
             fit(false).let { passages = it.first; candidates = it.second }
-            streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
+            streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null, worked(passages)), stop)
         }
         val reply = streamed.text
         if (reply == null) {

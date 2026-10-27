@@ -46,7 +46,7 @@ def cmd_validate(a):
 
 def cmd_run(a):
     items = dataset.load(a.dataset)
-    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities)
+    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts)
     print("results in %s (%d items in the dataset)" % (out, len(items)))
     return 0
 
@@ -97,6 +97,7 @@ def main(argv=None):
     r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"])
     r.add_argument("--rewrite", choices=["alternates", "plain"], help="a debug rewrite variant (Plan R0; plain: Plan R5 Task 6)")
     r.add_argument("--entities", choices=["on"], help="each thing a date question names gets a passage (Plan R5 Task 4)")
+    r.add_argument("--facts", choices=["on"], help="dates and the sums between them worked out in code (Plan R5 Task 4)")
     r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
     r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)

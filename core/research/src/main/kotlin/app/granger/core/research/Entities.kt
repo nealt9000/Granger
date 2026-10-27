@@ -21,6 +21,8 @@ object Entities {
         "was", "were", "did", "does", "do", "who", "how", "is", "are", "what", "when", "could", "which", "if", "in",
         "the", "a", "an", "i",
     )
+    /** Lower-case words inside a person's name: "Miguel de Cervantes", "Ludwig van Beethoven". */
+    private val PARTICLES = setOf("de", "da", "di", "del", "della", "van", "von", "der", "la", "le", "du", "dos", "das", "bin", "ibn")
     private val TOKEN = Regex("[\\p{L}\\p{N}][\\p{L}\\p{N}'’.-]*")
     private val POSSESSIVE = Regex("['’]s$")
     private val MARKS = Regex("\\p{M}+")
@@ -36,7 +38,11 @@ object Entities {
      * The names in [question]: runs of capitalised words ("Abraham Lincoln", "On the Origin of Species", with "of" and
      * "the" inside a run), then the rewrite's [keywords] for a question typed in lower case. Folded, in order, once each.
      */
-    fun named(question: String, keywords: List<String>): List<String> {
+    fun named(question: String, keywords: List<String>): List<String> =
+        (runs(question) + keywords).map(::fold).filter { it.isNotBlank() && it !in OPENERS }.distinct()
+
+    /** The runs of capitalised words in [question], as written: see [named]. */
+    fun runs(question: String): List<String> {
         val runs = mutableListOf<String>()
         val run = mutableListOf<String>()
         val tokens = TOKEN.findAll(question).toList()
@@ -59,7 +65,7 @@ object Entities {
             if (!adjacent) close()
         }
         close()
-        return (runs + keywords).map(::fold).filter { it.isNotBlank() && it !in OPENERS }.distinct()
+        return runs.filter { fold(it) !in OPENERS }
     }
 
     /**
@@ -72,7 +78,7 @@ object Entities {
         val t = fold(title)
         if (t == name) return 3
         val words = title.trim().split(SPACES)
-        val proper = words.all { it.first().isUpperCase() || (name.contains(' ') && fold(it) in setOf("of", "the")) }
+        val proper = words.all { it.first().isUpperCase() || fold(it) in PARTICLES || (name.contains(' ') && fold(it) in setOf("of", "the")) }
         if (t.endsWith(" $name") && proper) return 2
         if (t.substringBefore(" (").trim() == name && t.contains(" (")) return 1
         return 0
