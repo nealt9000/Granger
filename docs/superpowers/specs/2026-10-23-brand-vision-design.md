@@ -146,7 +146,7 @@ Rules for the owl:
 - **A mark, not a mascot.** It doesn't talk, wave, wear things or become the librarian's avatar.
 - **Keep it angular, stern, flat and one colour.** Never green, never round, never cute. Duolingo owns the friendly app owl.
 - **No star or sparkle beside it.** A four-point sparkle reads as the generic AI icon, and a star in the crescent's mouth echoes the star and crescent.
-- **A notification icon, when one is needed,** is a simpler cut (Neal's perch sketch, `sketch-owl-perch.png`, or the head alone). The full mark holds at 24 px, but its cuts turn to texture.
+- **The notification icon is the owl alone** (2026-10-27): the G dropped, eyes cut out with the pupils in them, 20 dp tall in the 24 dp canvas (`media3_notification_small_icon`, which replaces Media3's music note on the playback notification). The full mark holds at 24 px, but in the status bar the owl shrinks to a smudge. Downloads keep Android's own download arrow. The perch sketch stays in reserve.
 
 **The brief it answered:**
 - Must read at 48 px as a launcher icon and as Android's monochrome themed icon.

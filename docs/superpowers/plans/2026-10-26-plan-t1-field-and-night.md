@@ -107,7 +107,7 @@
 
 - [x] Publish the shot set (both themes, every main screen) for Neal; take his notes. *(2026-10-26: the "Field and Night: the app" artboard on the Granger mark canvas, https://claude.ai/artifact/GVXXLW2AJyfeCppiDv46H7; notes pending.)*
 - [x] The owl mark rides along (Neal, 2026-10-27; brief §8, The mark). `make_drawables.py` writes three layers (eyes, pupils, body), each outline its own `<path>` because a compiled resource string holds at most 32,767 characters. Launcher option C: a paper owl, lantern eyes, enamel ground. The lockup stacks the layers: the eyes in `extras.markEyes`, the pupils in `extras.markPupils`, the body in `extras.mark` (enamel in Field, paper in Night).
-- [ ] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark; the new launcher icon and the themed icon on the home screen.
+- [ ] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark; the new launcher icon and the themed icon on the home screen; the owl in the status bar and on the playback notification.
 - [ ] Roadmap row T1 → Done; brief §10 step 3 marked done.
 - [ ] **Commit.** `Roadmap: T1 done`
 

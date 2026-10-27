@@ -79,6 +79,21 @@ def group(paths, scale, tx, ty):
     return out + "    </group>\n"
 
 
+def bounds(d):
+    pen = ControlBoundsPen(None)
+    parse_path(d, pen)
+    return pen.bounds
+
+
+def owl_alone(layers):
+    """The owl without the G (the smallest outline around the eyes), for the status bar, where the whole mark is too small
+    to read: brand brief §8."""
+    px0, py0, px1, py1 = bounds(layers["pupils"])
+    inside = lambda b: b[0] <= px0 and b[1] <= py0 and px1 <= b[2] and py1 <= b[3]
+    area = lambda b: (b[2] - b[0]) * (b[3] - b[1])
+    return min((part for part in split(layers["mark"]) if inside(bounds(part))), key=lambda part: area(bounds(part)))
+
+
 def mark_in(viewport, diameter, paths, side):
     """The mark centred in a square viewport, scaled so its rim circle is `diameter` across."""
     scale = diameter / side
@@ -120,6 +135,15 @@ def main():
     # In-app mark: one white drawable per layer on the same square viewport, stacked and tinted by the caller.
     for name, res in (("mark", "granger_mark"), ("eyes", "granger_mark_eyes"), ("pupils", "granger_mark_pupils")):
         (RES / "drawable" / f"{res}.xml").write_text(vector(48, 48, L, L, group([(layers[name], WHITE)], 1.0, 0, 0)))
+
+    # Notification icon: the owl alone, white, its eyes cut out and the pupils in them, 20 dp tall in the 24 dp
+    # canvas. Media3's playback notification takes it by this name in place of its music note.
+    owl = owl_alone(layers)
+    x0, y0, x1, y1 = bounds(owl)
+    scale = 20 / (y1 - y0)
+    tx, ty = 12 - scale * (x0 + x1) / 2, 2 - scale * y0
+    (RES / "drawable" / "media3_notification_small_icon.xml").write_text(
+        vector(24, 24, 24, 24, group([(owl, WHITE), (layers["pupils"], WHITE)], scale, tx, ty)))
 
     # Wordmark: GRANGER in Spectral caps, white, tinted by the caller.
     d, (bx0, by0, bx1, by1) = wordmark(font_path)
