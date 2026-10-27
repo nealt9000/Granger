@@ -12,7 +12,6 @@ import app.granger.core.ai.DeviceTier
 import app.granger.core.ai.InstalledModels
 import app.granger.core.ai.LlmEngine
 import app.granger.core.ai.LlmEngineFactory
-import app.granger.core.ai.LlmSize
 import app.granger.core.ai.ModelManager
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.ai.TextEmbedderFactory
@@ -61,7 +60,7 @@ class ResearchViewModelTest {
     private val library = FakeLibrary()
     private val bookshelf = FakeBookshelf()
     private val mediaLibrary = FakeMediaLibrary()
-    private val installed = MutableStateFlow(InstalledModels(small = File("small"), large = File("large")))
+    private val installed = MutableStateFlow(InstalledModels(llm = File("small")))
 
     private val quote = Passage(
         SourceKind.SELECTION, "pack1", "Article 1", location = "A/Art1",
@@ -127,7 +126,7 @@ class ResearchViewModelTest {
         assertThat(hub.lastSource!!.key).isEqualTo("text:answer:${chats.turnList.value.last().id}")
     }
 
-    private fun TestScope.manager(llms: LlmEngineFactory, tier: DeviceTier = DeviceTier.THINK_DEEPER) = ModelManager(
+    private fun TestScope.manager(llms: LlmEngineFactory, tier: DeviceTier = DeviceTier.ASK) = ModelManager(
         tier, installed, llms, TextEmbedderFactory { error("no embedder") }, backgroundScope,
         useEmbedder = { false }, io = StandardTestDispatcher(testScheduler),
     )
@@ -239,6 +238,18 @@ class ResearchViewModelTest {
         assertThat(restored.state.value.quote).isNull()
     }
 
+    @Test fun aNewChatIsCreatedWhenTheHandleHoldsTheRoutesArguments() = runTest(main.dispatcher) {
+        // Navigation puts ResearchRoute's fields in the handle: a new chat's route has chatId 0.
+        val routeArgs = mapOf<String, Any?>("chatId" to 0L, "quote" to null)
+        vm(savedState = SavedStateHandle(routeArgs)).ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        vm(savedState = SavedStateHandle(routeArgs)).ask("Who wrote Hamlet?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.chats.value.map { it.title }).containsExactly("How do plants use light?", "Who wrote Hamlet?")
+        assertThat(chats.turnList.value.map { it.chatId }.distinct()).hasSize(2)
+        assertThat(chats.turnList.value.map { it.chatId }).doesNotContain(0L)
+    }
+
     @Test fun aDeletedChatStaysGoneAfterProcessDeath() = runTest(main.dispatcher) {
         val chatId = chats.create("How do plants use light?")
         val savedState = SavedStateHandle()
@@ -294,14 +305,53 @@ class ResearchViewModelTest {
     }
 
     /** A question the library can't answer: the finder has nothing, so the turn is declined. */
+    /** A declined turn whose automatic guess the model failed to load for, so the Best guess button is back. */
     private suspend fun TestScope.declined(vm: ResearchViewModel, question: String = "Why is the sky green?"): Long {
         finder.passages = emptyList()
+        models.failsFrom = models.loads + 2 // the answer's load passes; the guess's fails
         vm.ask(question)
         testScheduler.advanceUntilIdle()
+        models.failsFrom = Int.MAX_VALUE
         return chats.turnList.value.last().id
     }
 
-    @Test fun declineOffersBestGuess() = runTest(main.dispatcher) {
+    @Test fun aDeclineGoesOnToTheBestGuess() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(ui.offersGuess).isFalse()
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theAutomaticGuessStreamsUnderTheDeclinedTurn() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        small.gateAt = 1
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(live.guessing).isTrue()
+        assertThat(live.partial).isEqualTo("Probably ")
+    }
+
+    @Test fun aMedicalDeclineDoesntGuess() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: burn\nmedical: yes"
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("How do I treat a burn?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().guess).isEmpty()
+        assertThat(models.loads).isEqualTo(1)
+    }
+
+    @Test fun aDeclineWhoseGuessFailedOffersBestGuess() = runTest(main.dispatcher) {
         val vm = vm()
         declined(vm)
         val ui = vm.state.value.turns.single()
@@ -346,7 +396,7 @@ class ResearchViewModelTest {
     }
 
     @Test fun bestGuessStoresTextAndHidesTheButton() = runTest(main.dispatcher) {
-        models.large = ScriptedGenerator(listOf("Probably ", "Rayleigh scattering."))
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
         val vm = vm()
         val id = declined(vm)
         vm.bestGuess(id)
@@ -354,8 +404,6 @@ class ResearchViewModelTest {
         val turn = chats.turnList.value.single()
         assertThat(turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         assertThat(turn.guess).isEqualTo("Probably Rayleigh scattering.")
-        assertThat(turn.guessLarge).isTrue()
-        assertThat(turn.guessFellBack).isFalse()
         assertThat(vm.state.value.turns.single().offersGuess).isFalse()
         assertThat(vm.state.value.running).isFalse()
     }
@@ -377,57 +425,6 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.turns.single().turn.candidates).isEmpty()
     }
 
-    @Test fun largeGuessShowsTheWaitNote() = runTest(main.dispatcher) {
-        val large = ScriptedGenerator(listOf("Large ", "guess."))
-        large.gateAt = 1
-        models.large = large
-        val vm = vm()
-        val id = declined(vm)
-        vm.bestGuess(id)
-        testScheduler.advanceUntilIdle()
-        val live = vm.state.value.turns.single()
-        assertThat(live.guessing).isTrue()
-        assertThat(live.guessLarge).isTrue()
-        large.gate.complete(Unit)
-        testScheduler.advanceUntilIdle()
-        val turn = chats.turnList.value.single()
-        assertThat(turn.guess).isEqualTo("Large guess.")
-        assertThat(turn.guessLarge).isTrue()
-        assertThat(small.answerPrompts).isEmpty()
-    }
-
-    @Test fun phoneBelowThinkDeeperTierGuessesWithSmall() = runTest(main.dispatcher) {
-        val large = ScriptedGenerator(listOf("Large guess."))
-        models.large = large
-        small.answer = listOf("Small guess.")
-        val vm = vm(manager = manager(LlmEngineFactory { _, _ -> error("no engine") }, DeviceTier.ASK))
-        val id = declined(vm)
-        vm.bestGuess(id)
-        testScheduler.advanceUntilIdle()
-        val turn = chats.turnList.value.single()
-        assertThat(turn.guess).isEqualTo("Small guess.")
-        assertThat(turn.guessLarge).isFalse()
-        assertThat(turn.guessFellBack).isFalse()
-        assertThat(large.prompts).isEmpty()
-    }
-
-    @Test fun guessFallbackShowsTheNote() = runTest(main.dispatcher) {
-        small.answer = listOf("Small ", "guess.")
-        small.gateAt = 1
-        val vm = vm()
-        val id = declined(vm)
-        vm.bestGuess(id)
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.state.value.turns.single().guessFellBack).isTrue()
-        small.gate.complete(Unit)
-        testScheduler.advanceUntilIdle()
-        val turn = chats.turnList.value.single()
-        assertThat(turn.guess).isEqualTo("Small guess.")
-        assertThat(turn.guessLarge).isFalse()
-        assertThat(turn.guessFellBack).isTrue()
-        assertThat(vm.state.value.turns.single().guessFellBack).isTrue()
-    }
-
     @Test fun stopDuringGuessKeepsTheTextSoFar() = runTest(main.dispatcher) {
         small.answer = listOf("Maybe", " plants", " more")
         small.gateAt = 1
@@ -445,8 +442,8 @@ class ResearchViewModelTest {
 
     @Test fun guessInterruptedByProcessDeathOffersTheButtonAgain() = runTest(main.dispatcher) {
         val chatId = chats.create("Why is the sky green?")
-        val turnId = chats.startTurn(chatId, "Why is the sky green?", askedDeeper = false, quote = null)
-        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, false, emptyList(), emptyList(), emptyList())
+        val turnId = chats.startTurn(chatId, "Why is the sky green?", quote = null)
+        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, emptyList(), emptyList(), emptyList())
         val vm = vm(chatId = chatId)
         testScheduler.advanceUntilIdle()
         val ui = vm.state.value.turns.single()
@@ -478,7 +475,7 @@ class ResearchViewModelTest {
     @Test fun theModelIsReleasedAQuietSpellAfterEachTurn() = runTest(main.dispatcher) {
         val llm = ClosingLlm()
         val manager = manager(LlmEngineFactory { _, _ -> llm })
-        manager.engine(LlmSize.SMALL) // as the turn's pipeline would
+        manager.engine() // as the turn's pipeline would
         val vm = vm(manager = manager)
         vm.ask("How do plants use light?")
         testScheduler.advanceUntilIdle()
@@ -494,7 +491,7 @@ class ResearchViewModelTest {
     @Test fun aBackgroundReleaseMidTurnWaitsForTheTurnsEnd() = runTest(main.dispatcher) {
         val llm = ClosingLlm()
         val manager = manager(LlmEngineFactory { _, _ -> llm })
-        manager.engine(LlmSize.SMALL)
+        manager.engine()
         small.answer = listOf("Plants use light [1].", " And")
         small.gateAt = 1
         val vm = vm(manager = manager)
@@ -561,7 +558,7 @@ class ResearchViewModelTest {
 
     @Test fun pendingTurnFromAnEarlierProcessShowsInterrupted() = runTest(main.dispatcher) {
         val chatId = chats.create("How do plants use light?")
-        val stale = chats.startTurn(chatId, "How do plants use light?", askedDeeper = false, quote = null)
+        val stale = chats.startTurn(chatId, "How do plants use light?", quote = null)
         chats.interruptPending()
         val vm = vm(chatId = chatId)
         testScheduler.advanceUntilIdle()
@@ -601,7 +598,7 @@ class ResearchViewModelTest {
     }
 
     @Test fun aModelFailureStaysFailed() = runTest(main.dispatcher) {
-        models.smallFails = true
+        models.fails = true
         val vm = vm()
         vm.ask("How do plants use light?")
         testScheduler.advanceUntilIdle()
@@ -611,7 +608,7 @@ class ResearchViewModelTest {
     @Test fun failedGuessShowsTheModelNotice() = runTest(main.dispatcher) {
         val vm = vm()
         val id = declined(vm)
-        models.smallFails = true
+        models.fails = true
         vm.bestGuess(id)
         testScheduler.advanceUntilIdle()
         val ui = vm.state.value.turns.single()
@@ -620,7 +617,7 @@ class ResearchViewModelTest {
         assertThat(ui.turn.guess).isEmpty()
         assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         // The notice isn't stored: the next try starts clean.
-        models.smallFails = false
+        models.fails = false
         vm.bestGuess(id)
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.turns.single().guessFailed).isFalse()
@@ -720,43 +717,6 @@ class ResearchViewModelTest {
         assertThat(small.prompts.first()).contains("Question: $question")
     }
 
-    @Test fun thinkDeeperUsesShownAndCandidates() = runTest(main.dispatcher) {
-        val large = ScriptedGenerator(listOf("Light drives photosynthesis [2][7]."))
-        models.large = large
-        val vm = vm()
-        vm.ask("How do plants use light?")
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.state.value.canThinkDeeper).isTrue()
-        val first = chats.turnList.value.single()
-        vm.thinkDeeper(first.id)
-        testScheduler.advanceUntilIdle()
-        assertThat(finder.calls).isEqualTo(1)
-        val deeper = chats.turnList.value.last()
-        assertThat(deeper.question).isEqualTo(first.question)
-        assertThat(deeper.askedDeeper).isTrue()
-        assertThat(deeper.usedLarge).isTrue()
-        assertThat(deeper.outcome).isEqualTo(TurnOutcome.ANSWERED)
-        assertThat(deeper.shown).containsExactlyElementsIn(first.shown + first.candidates).inOrder()
-        assertThat(deeper.shown).hasSize(8)
-        assertThat(large.answerPrompts).hasSize(1)
-        assertThat(vm.state.value.turns.last().largeFallback).isFalse()
-        assertThat(vm.state.value.canThinkDeeper).isFalse()
-    }
-
-    @Test fun thinkDeeperFallbackIsFlagged() = runTest(main.dispatcher) {
-        val vm = vm()
-        vm.ask("How do plants use light?")
-        testScheduler.advanceUntilIdle()
-        vm.thinkDeeper(chats.turnList.value.single().id)
-        testScheduler.advanceUntilIdle()
-        val deeper = chats.turnList.value.last()
-        assertThat(deeper.askedDeeper).isTrue()
-        assertThat(deeper.usedLarge).isFalse()
-        assertThat(deeper.outcome).isEqualTo(TurnOutcome.ANSWERED)
-        assertThat(vm.state.value.turns.last().largeFallback).isTrue()
-        assertThat(vm.state.value.turns.first().largeFallback).isFalse()
-    }
-
     @Test fun openingACitationWhoseSourceIsGoneSaysSo() = runTest(main.dispatcher) {
         val vm = vm()
         val bookPassage = Passage(SourceKind.BOOK, "book:granger:emma", "Emma", location = "ch1.xhtml", text = "Emma Woodhouse")
@@ -834,7 +794,7 @@ class ResearchViewModelTest {
     private fun keptTurnCiting(card: Passage) {
         chats.chats.value = listOf(ChatSummary(7, "Music", 1L))
         chats.turnList.value = listOf(
-            ChatTurn(1, 7, "Which?", TurnOutcome.ANSWERED, "That one [1].", false, false, false, emptyList(), listOf(card), emptyList(), 1L),
+            ChatTurn(1, 7, "Which?", TurnOutcome.ANSWERED, "That one [1].", false, emptyList(), listOf(card), emptyList(), 1L),
         )
     }
 
@@ -988,6 +948,5 @@ class ResearchViewModelTest {
         val vm = vm()
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.readiness).isEqualTo(ResearchReadiness.MODELS_MISSING)
-        assertThat(vm.state.value.canThinkDeeper).isFalse()
     }
 }

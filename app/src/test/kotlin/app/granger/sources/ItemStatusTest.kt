@@ -17,7 +17,7 @@ import org.junit.Test
 class ItemStatusTest {
     private val med = packEntry("med")
     private val e2b = modelEntry("e2b")
-    private val tier = DeviceTier.THINK_DEEPER
+    private val tier = DeviceTier.ASK
 
     @Test fun nothingYet() {
         assertThat(statusOf(med, emptyList(), emptyList(), tier)).isEqualTo(ItemStatus.NotInstalled)
@@ -71,7 +71,6 @@ class ItemStatusTest {
     @Test fun modelsTooBigForThePhone() {
         val e4b = modelEntry("e4b", role = ModelRole.LARGE)
         assertThat(statusOf(e4b, emptyList(), emptyList(), DeviceTier.ASK)).isEqualTo(ItemStatus.NeedsMoreMemory)
-        assertThat(statusOf(e4b, emptyList(), emptyList(), DeviceTier.THINK_DEEPER)).isEqualTo(ItemStatus.NotInstalled)
         assertThat(statusOf(e2b, emptyList(), emptyList(), DeviceTier.LIBRARY_ONLY)).isEqualTo(ItemStatus.NeedsMoreMemory)
         assertThat(statusOf(e2b, emptyList(), emptyList(), DeviceTier.ASK)).isEqualTo(ItemStatus.NotInstalled)
     }

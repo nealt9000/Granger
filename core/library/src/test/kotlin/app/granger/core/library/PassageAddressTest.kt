@@ -86,7 +86,7 @@ class PassageAddressTest {
         assertThat(PassageAddress.cited(article, "Champollion read the hieroglyphs [1].", 1))
             .isEqualTo(Article("pk", "A/Rosetta_Stone", "s", "Champollion read its hieroglyphs in 1822 after years of work."))
         assertThat(PassageAddress.cited(article.copy(kind = SourceKind.CARD), "Champollion [1]", 1)).isEqualTo(Pack("pk"))
-        val turn = ChatTurn(1, 1, "q", TurnOutcome.ANSWERED, "Found in 1799 [1]. Read in 1822 [2].", false, false, false,
+        val turn = ChatTurn(1, 1, "q", TurnOutcome.ANSWERED, "Found in 1799 [1]. Read in 1822 [2].", false,
             emptyList(), listOf(article, article.copy(sourceId = "pk2")), emptyList(), 0L)
         assertThat(turn.addresses().map { (it as Article).quote })
             .containsExactly("The stone was found in 1799.", "Champollion read its hieroglyphs in 1822 after years of work.").inOrder()

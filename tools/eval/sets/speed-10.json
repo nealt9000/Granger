@@ -1,0 +1,17 @@
+{
+ "base": "r1-dense-1",
+ "stage": "answer",
+ "ids": [
+  "vocab-gap-005",
+  "who-wrote-007",
+  "history-004",
+  "geography-general-001",
+  "multi-step-007",
+  "medical-002",
+  "medical-003",
+  "medical-011",
+  "physics-001",
+  "physics-002"
+ ],
+ "note": "Plan R4 Task 2: the 10 answer prompts nearest the median length (5512 characters)."
+}

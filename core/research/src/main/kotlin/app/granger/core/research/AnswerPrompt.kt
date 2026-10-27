@@ -21,17 +21,20 @@ object AnswerPrompt {
     }
 
     /** [passages] from the start, as many as fit [MAX_TOKENS]: the last are dropped first, and the first always stays. */
-    fun fit(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): List<Passage> {
+    fun fit(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean, worked: String? = null): List<Passage> {
         var kept = passages
-        while (kept.size > 1 && estimateTokens(render(question, kept, medical, prior, hasQuote)) > MAX_TOKENS) kept = kept.dropLast(1)
+        while (kept.size > 1 && estimateTokens(render(question, kept, medical, prior, hasQuote, worked)) > MAX_TOKENS) kept = kept.dropLast(1)
         return kept
     }
 
-    /** The prompt for the passages that [fit]; the pipeline numbers its citations by the same list. */
-    fun build(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): String =
-        render(question, fit(question, passages, medical, prior, hasQuote), medical, prior, hasQuote)
+    /**
+     * The prompt for the passages that [fit]; the pipeline numbers its citations by the same list. [worked] is Plan R5
+     * Task 4's block of dates and the sums between them ([YearFacts.block]), put after the passages.
+     */
+    fun build(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean, worked: String? = null): String =
+        render(question, fit(question, passages, medical, prior, hasQuote, worked), medical, prior, hasQuote, worked)
 
-    private fun render(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean): String =
+    private fun render(question: String, passages: List<Passage>, medical: Boolean, prior: PriorTurn?, hasQuote: Boolean, worked: String? = null): String =
         buildString {
             appendLine("You are Granger's research librarian. Answer the question using only the numbered passages from the user's library below.")
             appendLine("Rules:")
@@ -59,6 +62,10 @@ object AnswerPrompt {
                 appendLine(cut(p.text, limit))
             }
             appendLine()
+            if (worked != null) {
+                appendLine(worked)
+                appendLine()
+            }
             if (hasQuote) appendLine("The user selected passage [1] and is asking about it.")
             appendLine("Question: $question")
             append("Answer:")

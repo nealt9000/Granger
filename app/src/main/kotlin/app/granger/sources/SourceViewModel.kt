@@ -320,7 +320,12 @@ class SourceViewModel(
                 is PackEntry -> item.description
                 is BookEntry -> item.description
                 // Research embeds its questions with it once dense retrieval is on (Plan R1); until then nothing uses it.
-                is ModelEntry -> if (item.role != ModelRole.EMBEDDER) "" else if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet"
+                // The large model's catalog entry stays, but Research no longer uses it (Plan R5 Task 8).
+                is ModelEntry -> when (item.role) {
+                    ModelRole.SMALL -> ""
+                    ModelRole.LARGE -> "Not used"
+                    ModelRole.EMBEDDER -> if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet"
+                }
                 is VoiceEntry -> item.attribution
             }
             return ItemRow(item.id, item.title, details, description, item.downloadBytes, status(item), packId)

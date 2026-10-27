@@ -76,12 +76,12 @@ class FakeChats : ResearchChats {
         return id
     }
 
-    override suspend fun startTurn(chatId: Long, question: String, askedDeeper: Boolean, quote: Passage?): Long {
+    override suspend fun startTurn(chatId: Long, question: String, quote: Passage?): Long {
         failure?.let { throw it }
         val id = nextTurn++
         turnList.update {
             it + ChatTurn(
-                id, chatId, question, TurnOutcome.PENDING, "", false, false, askedDeeper, emptyList(),
+                id, chatId, question, TurnOutcome.PENDING, "", false, emptyList(),
                 listOfNotNull(quote), emptyList(), ++clock,
             )
         }
@@ -93,7 +93,6 @@ class FakeChats : ResearchChats {
         outcome: TurnOutcome,
         answer: String,
         medical: Boolean,
-        usedLarge: Boolean,
         keywords: List<String>,
         shown: List<Passage>,
         candidates: List<Passage>,
@@ -104,7 +103,7 @@ class FakeChats : ResearchChats {
             list.map {
                 if (it.id == turnId) {
                     it.copy(
-                        outcome = outcome, answer = answer, medical = medical, usedLarge = usedLarge,
+                        outcome = outcome, answer = answer, medical = medical,
                         keywords = keywords, shown = shown, candidates = candidates,
                     )
                 } else {
@@ -116,11 +115,9 @@ class FakeChats : ResearchChats {
         chats.update { list -> list.map { if (it.id == turn.chatId) it.copy(updatedAt = time) else it } }
     }
 
-    override suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean) {
+    override suspend fun setGuess(turnId: Long, text: String) {
         failure?.let { throw it }
-        turnList.update { list ->
-            list.map { if (it.id == turnId) it.copy(guess = text, guessLarge = usedLarge, guessFellBack = fellBack) else it }
-        }
+        turnList.update { list -> list.map { if (it.id == turnId) it.copy(guess = text) else it } }
     }
 
     override suspend fun interruptPending(): Int {
@@ -182,18 +179,17 @@ class ScriptedGenerator(
     }
 }
 
-/** The small model always loads; the large one only when [large] is set. No embedder: ranking is lexical. */
-class FakeResearchModels(val small: ScriptedGenerator = ScriptedGenerator(), var large: ScriptedGenerator? = null) : ResearchModels {
-    /** When set, even the small model won't load. */
-    var smallFails = false
+/** The model loads unless [fails] is set, or from load number [failsFrom] on. No embedder: ranking is lexical. */
+class FakeResearchModels(val model: ScriptedGenerator = ScriptedGenerator()) : ResearchModels {
+    var fails = false
+    var failsFrom = Int.MAX_VALUE
+    var loads = 0
+        private set
 
-    override suspend fun generator(deeper: Boolean): TextGenerator =
-        if (deeper) {
-            large ?: throw ModelUnavailableException("large model failed")
-        } else {
-            if (smallFails) throw ModelUnavailableException("small model failed")
-            small
-        }
+    override suspend fun generator(): TextGenerator {
+        if (fails || ++loads >= failsFrom) throw ModelUnavailableException("model failed")
+        return model
+    }
 
     override suspend fun embedder(): PassageEmbedder? = null
 }

@@ -20,13 +20,13 @@ class InstalledModelsTest {
     private fun model(id: String, state: DownloadState = DownloadState.INSTALLED, path: String = "/m/$id.litertlm", updatedAt: Long = 1) =
         record(id, state, kind = ItemKind.MODEL, filePath = path).copy(updatedAt = updatedAt)
 
-    @Test fun mapsRolesByCatalogId() {
+    @Test fun mapsRolesByCatalogIdAndLeavesOutTheLargeModel() {
         val installed = installedModelsOf(
             listOf(model("e2b"), model("e4b"), model("gemma-embed"), record("e2b-pack", DownloadState.INSTALLED)),
             models,
         ) { true }
         assertThat(installed).isEqualTo(
-            InstalledModels(File("/m/e2b.litertlm"), File("/m/e4b.litertlm"), File("/m/gemma-embed.litertlm")),
+            InstalledModels(File("/m/e2b.litertlm"), File("/m/gemma-embed.litertlm")),
         )
     }
 
@@ -43,6 +43,6 @@ class InstalledModelsTest {
             listOf(model("e2b", path = "/m/old.litertlm", updatedAt = 5), model("e2b", path = "/m/new.litertlm", updatedAt = 9)),
             models,
         ) { true }
-        assertThat(installed.small).isEqualTo(File("/m/new.litertlm"))
+        assertThat(installed.llm).isEqualTo(File("/m/new.litertlm"))
     }
 }

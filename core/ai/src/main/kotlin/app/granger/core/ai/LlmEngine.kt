@@ -11,8 +11,7 @@ interface LlmEngine : AutoCloseable {
 
     /** Streams the reply as text chunks (roughly one token each), stopping natively after [maxTokens]. */
     fun generate(prompt: String, maxTokens: Int): Flow<String>
-}
 
-fun interface LlmEngineFactory {
-    fun create(modelPath: String, backend: LlmBackend): LlmEngine
+    /** The last finished [generate]'s token counts and rates, when the engine measures them ([LlmOptions.benchmark]). */
+    val lastStats: GenerationStats? get() = null
 }

@@ -60,8 +60,11 @@ def check_front(runner):
 
 
 def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
-    """Polls for the phone's eval/<run_id>/done marker; stops on its failed marker, repeated adb errors or the time limit."""
-    waited = errors = 0
+    """Polls for the phone's eval/<run_id>/done marker; stops on its failed marker, the app's process gone or replaced on
+    two polls in a row (killed for memory while loading a model: it leaves no marker, and a widget or job may start a new
+    process at once), repeated adb errors or the time limit."""
+    waited = errors = gone = 0
+    first_pid = None
     while True:
         rc, o = runner(["shell", "ls", "%s/%s/done" % (REMOTE, run_id)])
         if rc == 0:
@@ -71,6 +74,14 @@ def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_e
             frc, fo = runner(["shell", "cat", "%s/%s/failed" % (REMOTE, run_id)])
             if frc == 0 and fo.strip() and "no such file" not in fo.lower() and not is_adb_error(fo):
                 raise SystemExit("the eval failed on the phone: " + fo.strip())
+            prc, po = runner(["shell", "pidof", PKG])
+            pid = po.strip() if prc == 0 and not is_adb_error(po) else None
+            if first_pid is None and pid:
+                first_pid = pid
+            dead = (prc == 1 and not po.strip()) or (first_pid is not None and pid is not None and pid != first_pid)
+            gone = gone + 1 if dead and not is_adb_error(po) else 0
+            if gone >= 2:
+                raise SystemExit("the app died during eval %s (no process on two polls; see logcat for lowmemorykiller)" % run_id)
         else:
             errors += 1
             if errors >= max_errors:
@@ -81,7 +92,7 @@ def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_e
         waited += POLL_SECONDS
 
 
-def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, fiction=None, dense=None, sleep=time.sleep,
+def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, fiction=None, dense=None, entities=None, facts=None, sleep=time.sleep,
              max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
     check_front(runner)
     runs_dir = Path(runs_dir)
@@ -104,7 +115,7 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     # -S stops the app first, so the eval screen starts fresh with these extras (a screen left over from an install or
     # an earlier run would otherwise take the intent and never begin).
     start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
-    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite), ("dense", dense)):
+    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite), ("dense", dense), ("entities", entities), ("facts", facts)):
         if val:
             start += ["--es", key, val]
     if fiction:

@@ -30,8 +30,9 @@ def totals_rows(m):
         row("Retrieval recall@4", pct(r["recallAt4"]), "not gating", None),
         row("Answer found but not chosen / never found", "%d / %d" % (r["foundNotChosen"], r["neverFound"]), "not gating", None),
         row("Medical flag accuracy / recall", "%s / %s" % (pct(f["accuracy"]), pct(f["recall"])), "recall aim 95%", None if f["recall"] is None else f["recall"] >= 0.95),
-        row("Think deeper grounded (%d of %d)" % (d["grounded"], d["n"]), pct(d["rate"]), "E4B bar 80%", None if d["rate"] is None else d["rate"] >= 0.8),
     ]
+    if d["n"]:  # Think deeper, in runs from before it was removed (Plan R5 Task 8)
+        rows.append(row("Think deeper grounded (%d of %d)" % (d["grounded"], d["n"]), pct(d["rate"]), "E4B bar 80%", d["rate"] >= 0.8))
     if "media" in m:
         c, i = m["media"]["cited"], m["media"]["intrusion"]
         rows.append(row("Media cited (%d of %d)" % (c["hit"], c["n"]), pct(c["rate"]), "bar 80% (8 of 10)", m["pass"]["mediaCited"]))

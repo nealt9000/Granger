@@ -12,9 +12,9 @@ class SettledTest {
     private val card = Passage(SourceKind.BOOK, "1", "Hamlet", location = "c1", text = "To be.")
 
     private fun state(outcome: TurnOutcome, shown: List<Passage>, running: Boolean = false): ResearchViewModel.State {
-        val turn = ChatTurn(1, 1, "q", outcome, "a [1]", false, false, false, emptyList(), shown, emptyList(), 0)
-        val ui = ResearchViewModel.TurnUi(turn, null, null, largeFallback = false, medical = false)
-        return ResearchViewModel.State(1, "t", listOf(ui), running, ResearchReadiness.READY, false, null, emptyList())
+        val turn = ChatTurn(1, 1, "q", outcome, "a [1]", false, emptyList(), shown, emptyList(), 0)
+        val ui = ResearchViewModel.TurnUi(turn, null, null, medical = false)
+        return ResearchViewModel.State(1, "t", listOf(ui), running, ResearchReadiness.READY, null, emptyList())
     }
 
     @Test fun lastScrollWaitsForTheSourceCards() {

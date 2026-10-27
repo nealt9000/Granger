@@ -49,7 +49,7 @@ class ReadinessViewModelTest {
 
     private fun TestScope.viewModel(): ReadinessViewModel {
         val vm = ReadinessViewModel(
-            downloads, library, bookshelf, catalog, volumes, DeviceTier.THINK_DEEPER, totalRamBytes = 7_974_752_256, appScope = this,
+            downloads, library, bookshelf, catalog, volumes, DeviceTier.ASK, totalRamBytes = 7_974_752_256, appScope = this,
             io = main.dispatcher,
             quick = { quick[it.itemId] ?: Integrity.SIZE_OK },
             full = { _, progress ->
@@ -92,7 +92,7 @@ class ReadinessViewModelTest {
     @Test fun showsTierRamAndVolumes() = runTest(main.dispatcher) {
         val ui = viewModel().ui.value
         assertThat(ui.loading).isFalse()
-        assertThat(ui.tier).isEqualTo(DeviceTier.THINK_DEEPER)
+        assertThat(ui.tier).isEqualTo(DeviceTier.ASK)
         assertThat(ui.totalRamBytes).isEqualTo(7_974_752_256)
         assertThat(ui.volumes.single().freeBytes).isEqualTo(9_000)
     }

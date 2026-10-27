@@ -22,20 +22,15 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
-enum class LlmSize { SMALL, LARGE }
-
 /** Model files currently on disk; null means not installed. */
-data class InstalledModels(val small: File? = null, val large: File? = null, val embedder: File? = null)
+data class InstalledModels(val llm: File? = null, val embedder: File? = null)
 
 enum class ResearchReadiness { UNSUPPORTED, MODELS_MISSING, READY }
 
-/** Loading a model failed. A null [size] means the embedder. */
-class ModelLoadException(val size: LlmSize?, cause: Throwable) : Exception(cause)
+/** Loading the LLM or the embedder failed. */
+class ModelLoadException(cause: Throwable) : Exception(cause)
 
-/**
- * Keeps at most one LLM resident. The embedder may stay loaded only beside the small model; the large one
- * needs the memory. Everything is released after a quiet spell ([releaseSoon]).
- */
+/** Keeps the LLM, and the embedder beside it, resident while in use; both are released after a quiet spell ([releaseSoon]). */
 class ModelManager(
     private val tier: DeviceTier,
     private val installed: Flow<InstalledModels>,
@@ -56,19 +51,14 @@ class ModelManager(
         .map {
             when {
                 !supported -> ResearchReadiness.UNSUPPORTED
-                it.small == null -> ResearchReadiness.MODELS_MISSING
+                it.llm == null -> ResearchReadiness.MODELS_MISSING
                 else -> ResearchReadiness.READY
             }
         }
         .stateIn(scope, SharingStarted.Eagerly, if (supported) ResearchReadiness.MODELS_MISSING else ResearchReadiness.UNSUPPORTED)
 
-    val canThinkDeeper: StateFlow<Boolean> = installed
-        .map { tier == DeviceTier.THINK_DEEPER && it.large != null }
-        .stateIn(scope, SharingStarted.Eagerly, false)
-
     private val lock = Mutex()
     private var llm: LlmEngine? = null
-    private var llmSize: LlmSize? = null
     private var embedder: TextEmbedder? = null
     @Volatile private var releaseJob: Job? = null
 
@@ -77,21 +67,13 @@ class ModelManager(
     private var holds = 0
     private var pending = Pending.NONE
 
-    /** The resident engine for [size], swapping out the other one first. Throws [ModelLoadException]. */
-    suspend fun engine(size: LlmSize): LlmEngine {
-        // Only the Think deeper tier has room for the large model.
-        if (size == LlmSize.LARGE && tier < DeviceTier.THINK_DEEPER) {
-            throw ModelLoadException(size, IllegalStateException("This phone's tier ($tier) can't run the large model"))
-        }
+    /** The resident engine, loading it first if needed. Throws [ModelLoadException]. */
+    suspend fun engine(): LlmEngine {
         cancelRelease()
         return lock.withLock {
-            val resident = llm
-            if (resident != null && llmSize == size) return@withLock resident
-            // Checked before closing, so asking for a model that isn't there leaves the resident one loaded.
-            val file = installedFile(size)
-                ?: throw ModelLoadException(size, IllegalStateException("$size model is not installed"))
-            closeLlm()
-            if (size == LlmSize.LARGE) closeEmbedder()
+            llm?.let { return@withLock it }
+            val file = installedFile()
+                ?: throw ModelLoadException(IllegalStateException("The model is not installed"))
             try {
                 // Store inside the block: withContext drops its result if the caller was cancelled meanwhile,
                 // and a blocking load can't be interrupted, so the loaded model must not be orphaned.
@@ -104,30 +86,26 @@ class ModelManager(
                         throw t
                     }
                     llm = e
-                    llmSize = size
                 }
             } catch (c: CancellationException) {
                 throw c
             } catch (t: Throwable) {
-                throw ModelLoadException(size, t)
+                throw ModelLoadException(t)
             }
             coroutineContext.ensureActive()
             checkNotNull(llm)
         }
     }
 
-    /** [size]'s file once it is listed, or null when it isn't within [installWaitMs] (a question asked right after launch waits). */
-    private suspend fun installedFile(size: LlmSize): File? {
-        fun of(models: InstalledModels) = if (size == LlmSize.SMALL) models.small else models.large
-        return withTimeoutOrNull(installWaitMs) { of(installed.first { of(it) != null }) }
-    }
+    /** The model's file once it is listed, or null when it isn't within [installWaitMs] (a question asked right after launch waits). */
+    private suspend fun installedFile(): File? =
+        withTimeoutOrNull(installWaitMs) { installed.first { it.llm != null }.llm }
 
-    /** The embedder, or null (disabled, not installed, large model resident, or failed to load: callers rank lexically). */
+    /** The embedder, or null (disabled, not installed, or failed to load: callers rank lexically). */
     suspend fun embedder(): TextEmbedder? {
         if (!useEmbedder()) return null
         cancelRelease()
         return lock.withLock {
-            if (llmSize == LlmSize.LARGE) return@withLock null
             embedder?.let { return@withLock it }
             val file = installed.first().embedder ?: return@withLock null
             try {
@@ -147,7 +125,7 @@ class ModelManager(
                 throw c
             } catch (t: Throwable) {
                 // Logging must never break ranking (android.util.Log is absent in unit tests).
-                runCatching { android.util.Log.w("Granger", "Embedder failed to load; ranking lexically", ModelLoadException(null, t)) }
+                runCatching { android.util.Log.w("Granger", "Embedder failed to load; ranking lexically", ModelLoadException(t)) }
                 null
             }
         }
@@ -235,7 +213,6 @@ class ModelManager(
     private fun closeLlm() {
         runCatching { llm?.close() }
         llm = null
-        llmSize = null
     }
 
     private fun closeEmbedder() {
