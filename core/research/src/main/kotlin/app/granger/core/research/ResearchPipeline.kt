@@ -157,7 +157,7 @@ class ResearchPipeline(
     /** See [SourceWeight]; the app passes [FictionWeight]. */
     private val sourceWeight: SourceWeight? = null,
     /**
-     * Dense retrieval (Plan R1): the question (after the prior one, when there is one) is embedded and searched by
+     * Dense retrieval (Plan R1): the question (after the prior one, when it [FollowUp.refersBack]) is embedded and searched by
      * meaning alongside the keyword search, and [Ranking.hybrid] merges the two. Without it, or when the embedder or
      * the vectors aren't there, ranking is the keyword ranking.
      */
@@ -412,7 +412,8 @@ class ResearchPipeline(
         if (embedder == null) {
             null
         } else {
-            val text = listOfNotNull(request.priorQuestion, request.question).joinToString(" ")
+            val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
+            val text = listOfNotNull(prior, request.question).joinToString(" ")
             finder.find(embedder.embed(listOf(text), isQuery = true).single()).takeIf { it.isNotEmpty() }
         }
     } catch (e: CancellationException) {

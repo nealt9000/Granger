@@ -428,6 +428,23 @@ The bars still aren't met: grounded 72% (80%), declines 83% (90%), first words 1
 For the feel test, the app now runs what was measured: `DENSE_RETRIEVAL = true`, with entity passages and year facts on
 in `GrangerApp`.
 
+### Feel test, first pass (2026-10-27)
+
+Neal asked 21 questions in one chat: "mostly poor", with many easy ones declined. Response time "totally usable".
+
+- **10 declines were a bug.** The app sends every question after a chat's first with the one before it, and dense
+  embedded the two together. A question that stood alone was searched under the prior topic, and ranking kept nothing.
+  Replayed on their own (`r5-t7-feel`), 9 of the 10 answered. Replayed with their prior question (`r5-t7-chain`),
+  all 10 declined. The eval's follow-ups all lean on their prior question, so it never showed.
+- **Fix:** `FollowUp.refersBack` (a pronoun that points back, or "and…" / "what about…") decides whether dense adds the
+  prior question. With the fix (`r5-t7-chain2`), 8 of the 10 answer; the eval's 11 follow-ups are unchanged
+  (`r5-t7-fu`). E2B's rewrite still sees the prior question.
+- **Replies once fixed:** about 11 of 21 good (Oswald, Fahrenheit 451, 165°F, Charlotte's Web, The Lion King, ethanol
+  conversion), about 7 poor (Venera 8 for the first landing, the 1994 album, the national anthem without its lyrics,
+  Gandalf, a red-headed orphan as Red Riding Hood).
+- **Neal's idea:** when nothing is found, offer "nothing in your library, but my best guess is…". The Best guess button
+  already does this on a tap; E2B's guess for the snakes question was sensible.
+
 ## Task 8: Think deeper removed (from R4 Task 8)
 
 - [ ] Remove the button, the second pass and E4B as a model role. The catalog keeps E4B's entry until Neal says otherwise.

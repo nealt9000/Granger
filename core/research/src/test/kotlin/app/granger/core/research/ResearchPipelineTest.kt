@@ -635,9 +635,19 @@ class ResearchPipelineTest {
         val out = outcome(events) as Outcome.Answered
         // Water matches every keyword (0.1 × 1.1 + 0.9 × the 0.74 floor); boiling is by meaning alone (0.9 × 0.85).
         assertThat(out.passages).containsExactly(water, boiling).inOrder()
-        // The prior question comes first in the query, as Task 3 chose; only the query is embedded.
-        assertThat(embedded).containsExactly("Tell me about water At what temperature does water boil?")
+        // A question that stands alone is embedded alone (Plan R5 Task 7); only the query is embedded.
+        assertThat(embedded).containsExactly("At what temperature does water boil?")
         assertThat(dense.queries).hasSize(1)
+    }
+
+    @Test
+    fun aFollowUpIsEmbeddedAfterItsPriorQuestion() = runTest {
+        val embedded = mutableListOf<String>()
+        val queryEmbedder = PassageEmbedder { texts, _ -> embedded += texts; texts.map { floatArrayOf(1f, 0f) } }
+        ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = queryEmbedder), dense = FakeDense(emptyList()))
+            .run(ResearchRequest("At what temperature does it boil?", priorQuestion = "Tell me about water")).toList()
+        // The prior question comes first in the query, as Plan R1 Task 3 chose.
+        assertThat(embedded).containsExactly("Tell me about water At what temperature does it boil?")
     }
 
     @Test
