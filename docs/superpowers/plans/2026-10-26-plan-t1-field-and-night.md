@@ -107,9 +107,10 @@
 
 - [x] Publish the shot set (both themes, every main screen) for Neal; take his notes. *(2026-10-26: the "Field and Night: the app" artboard on the Granger mark canvas, https://claude.ai/artifact/GVXXLW2AJyfeCppiDv46H7; notes pending.)*
 - [x] The owl mark rides along (Neal, 2026-10-27; brief §8, The mark). `make_drawables.py` writes three layers (eyes, pupils, body), each outline its own `<path>` because a compiled resource string holds at most 32,767 characters. Launcher option C: a paper owl, lantern eyes, enamel ground. The lockup stacks the layers: the eyes in `extras.markEyes`, the pupils in `extras.markPupils`, the body in `extras.mark` (enamel in Field, paper in Night).
-- [ ] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark; the new launcher icon and the themed icon on the home screen; the owl in the status bar and on the playback notification.
-- [ ] Roadmap row T1 → Done; brief §10 step 3 marked done.
-- [ ] **Commit.** `Roadmap: T1 done`
+- [x] On the Pixel once Research hands it back (ask on the channel; back up both databases first): switch Field ↔ Night ↔ Follow the phone, open a Kiwix page in each, play music and an audiobook, open an e-book in its Night, check the widget in the phone's light and dark; the new launcher icon and the themed icon on the home screen; the owl in the status bar and on the playback notification.
+- [x] Walkthrough notes (Neal, 2026-10-27), fixed on the branch: every check passed; Courier on every Material label felt awkward, so labels are Spectral and Courier stays for the status line and readouts; the e-reader gains Match app (the default) beside its own Day, Sepia and Night; the palette was close but not there, so options A, B and C were rendered on the app's screens and A's Field with C's Night went on the phone and was kept.
+- [x] Roadmap row T1 → Done; brief §10 step 3 marked done.
+- [x] **Commit.** `Roadmap: T1 done`
 
 ## Order and size
 
