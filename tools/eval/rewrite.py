@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The rewrite without the answer model, offline (Plan R4, Task 5).
 
-  rewrite.py medical RUN [--labels sets/medical-labels.jsonl]   # the medical flag by the embedder, against E2B's
+  rewrite.py medical RUN [--labels sets/medical-labels.jsonl] [--vectors FILE]   # the medical flag by the embedder
   rewrite.py keywords RUN                                       # plain keywords against E2B's, first questions
 
 Today E2B's rewrite gives keywords and a medical flag before every search. The pipeline's flag is the model's OR the
@@ -116,6 +116,17 @@ def embed(texts):
     return v / np.linalg.norm(v, axis=1, keepdims=True)
 
 
+def embed_from(path):
+    """embed() from a file of the phone's own query vectors ({"text", "v"} per line, `EvalActivity`'s `embed` mode)."""
+    import numpy as np
+    known = {r["text"]: r["v"] for r in read_jsonl(path)}
+
+    def lookup(texts):
+        v = np.asarray([known[" ".join(t.split())] for t in texts], float)[:, :DIMS]
+        return v / np.linalg.norm(v, axis=1, keepdims=True)
+    return lookup
+
+
 def centroid_scores(train, labels, test):
     """cos(medical centroid) - cos(other centroid) per test vector."""
     import numpy as np
@@ -151,7 +162,7 @@ def cmd_medical(a):
     recs = {r["id"]: r for r in read_jsonl(RUNS / a.run / "results.jsonl")}
     labels = read_jsonl(a.labels)
     y = [l["medical"] for l in labels]
-    vecs = embed([l["q"] for l in labels] + [i["question"] for i in items])
+    vecs = (embed_from(a.vectors) if a.vectors else embed)([l["q"] for l in labels] + [i["question"] for i in items])
     lv, tv = vecs[:len(labels)], vecs[len(labels):]
     rows = []
     for name, scorer in (("centroid", centroid_scores), ("knn5", knn_scores)):
@@ -212,7 +223,7 @@ def cmd_keywords(a):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     s = p.add_subparsers(dest="cmd", required=True)
-    m = s.add_parser("medical"); m.add_argument("run"); m.add_argument("--labels", default=LABELS); m.set_defaults(f=cmd_medical)
+    m = s.add_parser("medical"); m.add_argument("run"); m.add_argument("--labels", default=LABELS); m.add_argument("--vectors", help="the phone's query vectors (Plan R5 Task 6) instead of the Mac's"); m.set_defaults(f=cmd_medical)
     k = s.add_parser("keywords"); k.add_argument("run"); k.add_argument("-v", "--verbose", action="store_true")
     k.set_defaults(f=cmd_keywords)
     a = p.parse_args(argv)

@@ -77,6 +77,7 @@ class EvalActivity : ComponentActivity() {
             return
         }
         intent.getStringExtra("replay")?.let { replay(root, runId, it); return }
+        intent.getStringExtra("embed")?.let { embed(root, runId, it); return }
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
@@ -159,6 +160,37 @@ class EvalActivity : ComponentActivity() {
             log("done $runId")
         }
         if (result != EvalSession.Start.STARTED) log("replay $runId not started: $result")
+    }
+
+    /**
+     * Plan R5, Task 6: `embed` names a file under `eval/` of texts, one per line; writes `eval/<runId>/vectors.jsonl`,
+     * each text's query vector from the app's own embedder ({"text", "v"}), then `done`.
+     */
+    private fun embed(root: File, runId: String, texts: String) {
+        val c = (application as GrangerApp).container
+        val result = EvalSession.start(runId, root, ::log) {
+            c.catalog.load()
+            c.embedderWanted.set(true)
+            try {
+                val embedder = checkNotNull(ModelsAdapter(c.modelManager).embedder()) { "no embedder installed" }
+                val lines = File(root, texts).readLines().filter { it.isNotBlank() }
+                val dir = File(root, runId).apply { mkdirs() }
+                File(dir, "vectors.jsonl").bufferedWriter().use { out ->
+                    lines.chunked(16).forEachIndexed { k, batch ->
+                        log("${k * 16} / ${lines.size}")
+                        embedder.embed(batch, isQuery = true).zip(batch).forEach { (v, t) ->
+                            out.write(org.json.JSONObject().put("text", t).put("v", org.json.JSONArray(v.toList())).toString())
+                            out.write("\n")
+                        }
+                    }
+                }
+            } finally {
+                c.embedderWanted.set(DENSE_RETRIEVAL)
+            }
+            File(root, "$runId/done").writeText("done\n")
+            log("done $runId")
+        }
+        if (result != EvalSession.Start.STARTED) log("embed $runId not started: $result")
     }
 
     /** This process's memory as `dumpsys meminfo` totals it, in MB: PSS overall and the GPU's share of it. */
