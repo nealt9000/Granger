@@ -152,6 +152,8 @@ class ResearchPipeline(
      * follow-up still asks the model, to fold in the earlier turn. Off in the app.
      */
     private val rewritePlain: Boolean = false,
+    /** Plan R5 Task 6: with [rewritePlain], a follow-up too gets [Keywords.extract] of it and its prior question. */
+    private val rewritePlainFollowUps: Boolean = false,
     /** See [SourceWeight]; the app passes [FictionWeight]. */
     private val sourceWeight: SourceWeight? = null,
     /**
@@ -364,6 +366,10 @@ class ResearchPipeline(
     private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest): RewriteResult {
         if (rewritePlain && request.priorQuestion == null) {
             return RewriteResult(Keywords.extract(request.question), Medical.looksMedical(request.question))
+        }
+        if (rewritePlain && rewritePlainFollowUps) {
+            val text = listOfNotNull(request.question, request.priorQuestion).joinToString(" ")
+            return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
         }
         val parsed = try {
             var result: RewriteResult? = null

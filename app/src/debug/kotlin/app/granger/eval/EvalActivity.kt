@@ -84,7 +84,9 @@ class EvalActivity : ComponentActivity() {
         // Plan R0, Task 4: the rewrite variant that gives keywords alternates.
         val alternates = intent.getStringExtra("rewrite") == "alternates"
         // Plan R4, Task 5: first questions get the plain keywords and the lexicon's flag, with no model call.
-        val plain = intent.getStringExtra("rewrite") == "plain"
+        val plain = intent.getStringExtra("rewrite") in setOf("plain", "plain-all")
+        // Plan R5, Task 6: follow-ups plain too, from the question and its prior one.
+        val plainAll = intent.getStringExtra("rewrite") == "plain-all"
         // Plan R5, Task 4: each thing a date question names gets a place among the passages.
         val named = intent.getStringExtra("entities") == "on"
         // Plan R5, Task 4: the dates of those things, and the sums between them, worked out in code.
@@ -114,10 +116,10 @@ class EvalActivity : ComponentActivity() {
             val dense = if (denseOn) RecordingDenseFinder(c.denseFinder, clock) else null
             c.embedderWanted.set(denseOn)
             try {
-                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense)
+                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense)
                 val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}" +
+                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}" +
                     "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
                 runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             } finally {

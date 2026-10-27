@@ -95,7 +95,7 @@ def main(argv=None):
     v = s.add_parser("validate"); v.add_argument("dataset"); v.add_argument("--packs"); v.add_argument("--books"); v.add_argument("--media"); v.set_defaults(f=cmd_validate)
     r = s.add_parser("run"); r.add_argument("dataset"); r.add_argument("--run-id", required=True)
     r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"])
-    r.add_argument("--rewrite", choices=["alternates", "plain"], help="a debug rewrite variant (Plan R0; plain: Plan R5 Task 6)")
+    r.add_argument("--rewrite", choices=["alternates", "plain", "plain-all"], help="a debug rewrite variant (Plan R0; plain: first questions without the model, plain-all: follow-ups too; Plan R5 Task 6)")
     r.add_argument("--entities", choices=["on"], help="each thing a date question names gets a passage (Plan R5 Task 4)")
     r.add_argument("--facts", choices=["on"], help="dates and the sums between them worked out in code (Plan R5 Task 4)")
     r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
