@@ -122,7 +122,21 @@ The prompt that made it (Neal's revision):
 | Leather | `#5B3322` | Secondary accent | 8.6:1 on paper |
 | Dusk | `#354059` | Maps, a cool counterweight | 8.2:1 on paper |
 
-Two themes, both first class: **Field** (light: paper and enamel, for daylight) and **Night** (gunmetal, lantern and phosphor). The app's current near-black `#0E0E0E` and flame orange `#E8601C` retire, as does the first concept's navy and parchment.
+**Revised 2026-10-27, after the phone walkthrough** (Neal: the first set read a little "national park sign" and hadn't caught up with the owl; options A, B and C compared on the app's own screens in `docs/superpowers/brand/2026-10-27-palette/`; he chose A's Field with C's Night):
+
+| Token | Hex | Use | Contrast |
+| --- | --- | --- | --- |
+| Night ground | `#12211E` | Night background: the launcher's enamel, deepened, so app and icon are one family | Paper on it 13.2:1 |
+| Night cards | `#172A26` · `#1C322E` · `#233B36` | Night containers, low to high | — |
+| Field paper | `#F3EEE4` | Field background: lighter, less yellow | — |
+| Field cards | `#F0EADF` · `#E8E1D3` · `#E1D9C9` | Field containers, low to high | — |
+| Graphite | `#3A4243` | Field secondary (replaces leather) | — |
+| Burnt lantern | `#8A4F1C` | Field tertiary (replaces dusk) | Paper on it 5.2:1 |
+| Field play | `#94531E` | Play buttons and progress in Field: lantern deepened to read on paper | Paper on it 4.7:1 |
+
+Lantern `#F0A35E` stays Night's primary and play colour and the owl's eyes everywhere; enamel stays Field's primary and the launcher ground. The tokens above are `FieldColors` and `NightColors` in `app/theme/GrangerTheme.kt`.
+
+Two themes, both first class: **Field** (light: paper and enamel, for daylight) and **Night** (deep enamel, lantern and phosphor). The app's current near-black `#0E0E0E` and flame orange `#E8601C` retire, as does the first concept's navy and parchment.
 
 **Type:** Spectral (OFL) for reading and headings; Courier Prime (OFL) for labels, counters and the command line; the wordmark is Spectral SemiBold capitals, spaced 0.12 em (chosen 2026-10-27 over Big Shoulders, Barlow, Chakra Petch, Archivo and Space Grotesk: the books and the brand share one voice, and the plain owl beside it carries the edge). All bundled, never downloaded.
 
@@ -168,16 +182,15 @@ Principles for the UI pass once the roadmap's features land; each traces to the 
 
 ## 10. What this unblocks, in order
 
-1. **Claude Design:** the mark and lockup (done 2026-10-26, from Neal's sketch); the tagline and wordmark (done 2026-10-27); the final palette (open).
+1. **Claude Design:** the mark and lockup (done 2026-10-26, from Neal's sketch); the tagline and wordmark, and the palette (done 2026-10-27).
 2. **H3 Task 5 (done 2026-10-26):** `BrandLockup` takes the chosen mark and lockup; the Welcome line is the vision sentence (§1); the launcher icon (and with it the system splash) changes with it.
-3. **Theme pass (new plan):** `GrangerTheme` gains Field and Night from the palette; the reader and players follow.
+3. **Theme pass (Plan T1, done 2026-10-27):** `GrangerTheme` gains Field and Night from the palette; the reader and players follow.
 4. **Plan 10 rewrite:** Supporter instead of Pro (§6); billing + the telemetry opt-in slot into onboarding.
 5. **Plan 11 / store listing:** the fair deal, the Grange story, screenshots in the new theme.
 6. **Basecamp:** its own spec when the app's roadmap is done; this brief fixes its name and rules only.
 
 ## 11. Open
 
-- The final palette (Claude Design).
 - The supporter price and exactly which extras it carries (Plan 10).
 - Organisation form for income: sole proprietor, LLC, or a public-benefit company with a nonprofit partner for grants (needs advice).
 - Basecamp hardware: off-the-shelf mini PC vs a single-board computer; the model it runs; whether institutions get it first.
