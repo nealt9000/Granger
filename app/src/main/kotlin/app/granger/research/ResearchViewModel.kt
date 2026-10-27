@@ -236,37 +236,41 @@ class ResearchViewModel(
     }
 
     /**
-     * Asks the model for its own best guess at a declined turn's question. The guess is kept on that turn when it
-     * finishes or is stopped; if the app dies first nothing is kept and the button returns. Never for a medical turn.
+     * Asks the model for its own best guess at a declined turn's question. A declined turn that may have one gets it by
+     * itself (see [runTurn]); this is the button, for a turn whose guess was stopped, failed or never came. The guess is
+     * kept on that turn when it finishes or is stopped; if the app dies first nothing is kept and the button returns.
+     * Never for a medical turn.
      */
     fun bestGuess(turnId: Long) {
         if (live.value != null) return
         val id = chat.value ?: return
-        begin {
-            val turns = chats.turns(id).first()
-            val at = turns.indexOfFirst { it.id == turnId }
-            val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return@begin
-            live.value = Live(turnId, null, null, guessing = true)
-            var settled = false
-            // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
-            pipeline.guess(turn.question, turns.getOrNull(at - 1)?.question) { stopRequested }.flowOn(cpu).collect { event ->
-                when (event) {
-                    is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
-                    is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
-                    is ResearchEvent.Done -> {
-                        val outcome = event.outcome
-                        if (outcome is Outcome.Guessed && !settled) {
-                            settled = true
-                            withContext(NonCancellable) { chats.setGuess(turnId, outcome.text) }
-                        } else if (outcome is Outcome.Failed) {
-                            outcome.cause?.let { runCatching { android.util.Log.w("Granger", "Research guess failed", it) } }
-                            // Only the model can fail a guess (it does no search); say so, without storing it.
-                            guessFailed.value = turnId
-                        }
+        begin { guess(id, turnId) }
+    }
+
+    private suspend fun guess(chatId: Long, turnId: Long) {
+        val turns = chats.turns(chatId).first()
+        val at = turns.indexOfFirst { it.id == turnId }
+        val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return
+        live.value = Live(turnId, null, null, guessing = true)
+        var settled = false
+        // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
+        pipeline.guess(turn.question, turns.getOrNull(at - 1)?.question) { stopRequested }.flowOn(cpu).collect { event ->
+            when (event) {
+                is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
+                is ResearchEvent.Partial -> live.update { it?.copy(partial = event.text) }
+                is ResearchEvent.Done -> {
+                    val outcome = event.outcome
+                    if (outcome is Outcome.Guessed && !settled) {
+                        settled = true
+                        withContext(NonCancellable) { chats.setGuess(turnId, outcome.text) }
+                    } else if (outcome is Outcome.Failed) {
+                        outcome.cause?.let { runCatching { android.util.Log.w("Granger", "Research guess failed", it) } }
+                        // Only the model can fail a guess (it does no search); say so, without storing it.
+                        guessFailed.value = turnId
                     }
-                    // A run() event; guess() doesn't emit it.
-                    ResearchEvent.Medical -> Unit
                 }
+                // A run() event; guess() doesn't emit it.
+                ResearchEvent.Medical -> Unit
             }
         }
     }
@@ -399,6 +403,9 @@ class ResearchViewModel(
         var settled = false
         // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
         var medical = false
+        // Neal's feel test (Plan R5): a decline goes straight on to the model's best guess, under its label, rather than
+        // stopping at "Not in your library". Not for a medical turn, a question about a selection, or a stopped one.
+        var guessNext = false
         try {
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
@@ -420,6 +427,7 @@ class ResearchViewModel(
                         (event.outcome as? Outcome.Failed)?.cause?.let { runCatching { android.util.Log.w("Granger", "Research turn failed", it) } }
                         settle(checkNotNull(turnId), event.outcome, kept)
                         settled = true
+                        guessNext = event.outcome.let { it is Outcome.Declined && !it.medical } && ask.quote == null && !stopRequested
                     }
                 }
             }
@@ -446,6 +454,7 @@ class ResearchViewModel(
             streaming?.complete()
             streaming = null
         }
+        if (guessNext) guess(chatId, checkNotNull(turnId))
     }
 
     // ---- read aloud (Plan V2) ----

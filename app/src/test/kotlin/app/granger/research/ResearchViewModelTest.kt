@@ -305,14 +305,53 @@ class ResearchViewModelTest {
     }
 
     /** A question the library can't answer: the finder has nothing, so the turn is declined. */
+    /** A declined turn whose automatic guess the model failed to load for, so the Best guess button is back. */
     private suspend fun TestScope.declined(vm: ResearchViewModel, question: String = "Why is the sky green?"): Long {
         finder.passages = emptyList()
+        models.failsFrom = models.loads + 2 // the answer's load passes; the guess's fails
         vm.ask(question)
         testScheduler.advanceUntilIdle()
+        models.failsFrom = Int.MAX_VALUE
         return chats.turnList.value.last().id
     }
 
-    @Test fun declineOffersBestGuess() = runTest(main.dispatcher) {
+    @Test fun aDeclineGoesOnToTheBestGuess() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(ui.offersGuess).isFalse()
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theAutomaticGuessStreamsUnderTheDeclinedTurn() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        small.gateAt = 1
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(live.guessing).isTrue()
+        assertThat(live.partial).isEqualTo("Probably ")
+    }
+
+    @Test fun aMedicalDeclineDoesntGuess() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: burn\nmedical: yes"
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("How do I treat a burn?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.turnList.value.single().guess).isEmpty()
+        assertThat(models.loads).isEqualTo(1)
+    }
+
+    @Test fun aDeclineWhoseGuessFailedOffersBestGuess() = runTest(main.dispatcher) {
         val vm = vm()
         declined(vm)
         val ui = vm.state.value.turns.single()

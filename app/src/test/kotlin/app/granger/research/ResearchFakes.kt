@@ -179,12 +179,15 @@ class ScriptedGenerator(
     }
 }
 
-/** The model loads unless [fails] is set. No embedder: ranking is lexical. */
+/** The model loads unless [fails] is set, or from load number [failsFrom] on. No embedder: ranking is lexical. */
 class FakeResearchModels(val model: ScriptedGenerator = ScriptedGenerator()) : ResearchModels {
     var fails = false
+    var failsFrom = Int.MAX_VALUE
+    var loads = 0
+        private set
 
     override suspend fun generator(): TextGenerator {
-        if (fails) throw ModelUnavailableException("model failed")
+        if (fails || ++loads >= failsFrom) throw ModelUnavailableException("model failed")
         return model
     }
 
