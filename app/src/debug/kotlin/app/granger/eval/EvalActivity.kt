@@ -166,7 +166,8 @@ class EvalActivity : ComponentActivity() {
 
     /**
      * Plan R5, Task 6: `embed` names a file under `eval/` of texts, one per line; writes `eval/<runId>/vectors.jsonl`,
-     * each text's query vector from the app's own embedder ({"text", "v"}), then `done`.
+     * each text's query vector from the app's own embedder ({"text", "v"}), then `done`. Task 7: each batch's time goes
+     * to `eval/<runId>/timing.jsonl` ({"n", "ms"}), to cost trimming's sentences at question time.
      */
     private fun embed(root: File, runId: String, texts: String) {
         val c = (application as GrangerApp).container
@@ -177,15 +178,18 @@ class EvalActivity : ComponentActivity() {
                 val embedder = checkNotNull(ModelsAdapter(c.modelManager).embedder()) { "no embedder installed" }
                 val lines = File(root, texts).readLines().filter { it.isNotBlank() }
                 val dir = File(root, runId).apply { mkdirs() }
-                File(dir, "vectors.jsonl").bufferedWriter().use { out ->
+                File(dir, "timing.jsonl").bufferedWriter().use { timing -> File(dir, "vectors.jsonl").bufferedWriter().use { out ->
                     lines.chunked(16).forEachIndexed { k, batch ->
                         log("${k * 16} / ${lines.size}")
-                        embedder.embed(batch, isQuery = true).zip(batch).forEach { (v, t) ->
+                        val start = android.os.SystemClock.elapsedRealtime()
+                        val vectors = embedder.embed(batch, isQuery = true)
+                        timing.write("{\"n\":${batch.size},\"ms\":${android.os.SystemClock.elapsedRealtime() - start}}\n")
+                        vectors.zip(batch).forEach { (v, t) ->
                             out.write(org.json.JSONObject().put("text", t).put("v", org.json.JSONArray(v.toList())).toString())
                             out.write("\n")
                         }
                     }
-                }
+                } }
             } finally {
                 c.embedderWanted.set(DENSE_RETRIEVAL)
             }
