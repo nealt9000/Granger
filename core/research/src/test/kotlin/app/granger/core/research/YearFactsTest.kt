@@ -55,6 +55,16 @@ class YearFactsTest {
         assertThat(block("multi-step-020")).contains("In 1869 (Dmitri Mendeleev), Charles Darwin was alive, aged 59 or 60")
     }
 
+    @Test fun anEventNamedInAnotherArticleTakesTheYearAfterTheName() {
+        // Columbus's own lead is cut before 1492; Madoc's passage has "before Christopher Columbus's voyage in 1492".
+        assertThat(block("multi-step-011")).contains("Niccolò Machiavelli was alive, aged 22 or 23")
+    }
+
+    @Test fun noBlockWhenTheAskedEventIsntDated() {
+        // The periodic table's 1869 isn't in these passages; Mendeleev's death would answer another question.
+        assertThat(block("multi-step-018")).isNull()
+    }
+
     @Test fun noBlockWithoutTwoDatedThings() {
         // The King James Bible's year isn't there; Noah's 950 is a count of years, and "1800 BC" isn't a year we count.
         assertThat(block("multi-step-003")).isNull()
@@ -62,6 +72,8 @@ class YearFactsTest {
         assertThat(block("bible-003")).isNull()
         assertThat(block("history-004")).isNull()
         assertThat(block("medical-010")).isNull()
+        // "cosmology" was a keyword, not in the question.
+        assertThat(block("science-004")).isNull()
     }
 
     @Test fun lifespans() {

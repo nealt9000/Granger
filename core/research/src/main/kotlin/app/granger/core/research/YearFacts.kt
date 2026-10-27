@@ -98,7 +98,8 @@ object YearFacts {
     fun things(question: String, keywords: List<String>, passages: List<Passage>): List<Thing> {
         // The question's own names; the rewrite's keywords only for a question typed in lower case ("periodic table"
         // is a keyword, but in the question it is what Mendeleev did).
-        val names = Entities.runs(question).ifEmpty { keywords }.map(::fold).distinct()
+        // A keyword must be in the question itself: "how old is the universe" was given "cosmology".
+        val names = Entities.runs(question).ifEmpty { keywords.filter { fold(question).contains(fold(it)) } }.map(::fold).distinct()
         val words = eventWords(question, names)
         val texts = passages.map { it.text.take(SEEN_CHARS) }
         val out = mutableListOf<Thing>()
@@ -135,6 +136,11 @@ object YearFacts {
             if (thing.event != null && (thing.event!!.year == thing.born?.year || thing.event!!.year == thing.died?.year) && thing.born != null) {
                 thing = thing.copy(event = null, eventAt = 0, quote = "")
             }
+            // The question asks about this thing's event and the passages don't date it: its lifespan would answer
+            // another question (r5-t4-facts: "In 1911, Mendeleev had died" for his periodic table; Columbus's death for
+            // his landfall). Without it the block is left out rather than misleading.
+            // Only a word of the groups asks for an event: "could Jane Austen have read" doesn't.
+            if (mine.any { w -> GROUPS.any { w in it } } && thing.event == null && thing.born != null) return emptyList()
             if (thing.born != null || thing.event != null) out += thing
         }
         return out
@@ -304,12 +310,11 @@ object YearFacts {
                 val at = if (range != null) {
                     range.groups[2]!!.range.first
                 } else {
-                    val after = YEAR.findAll(s).firstOrNull { it.range.first > found.first().range.first }
-                    (after ?: YEAR.find(s)!!).range.first
+                    // In another article, the first year after the name: "Madoc ... sailed to the Americas in 1170, over
+                    // 300 years before Christopher Columbus's voyage in 1492" is 1492 for Columbus.
+                    val from = if (own) found.first().range.first else folded.indexOf(name)
+                    (YEAR.findAll(s).firstOrNull { it.range.first > from } ?: if (own) YEAR.find(s) else null)?.range?.first ?: continue
                 }
-                // In another article the name comes before the year: "Madoc ... sailed to the Americas in 1170, over 300
-                // years before Christopher Columbus" is Madoc's date, not Columbus's.
-                if (!own && folded.indexOf(name) > at) continue
                 // A person's own birth or death year is their lifespan, not the event; a year BC isn't one we can count.
                 if (s.substring(at, at + 4).toInt() in lifeYears || BC.matchesAt(s, at + 4)) continue
                 val d = dateIn(s, at) ?: continue

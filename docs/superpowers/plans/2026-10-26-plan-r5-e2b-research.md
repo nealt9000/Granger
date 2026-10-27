@@ -243,18 +243,50 @@ them so.
 - [x] **Per-entity search first** (Task 2: 7 of the 15 year questions have only one fact in the passages): for a
   question with cue words, one extra search per named person or work (from the rewrite's keywords), and each entity's
   best passage kept among the chosen ones. Measure on the 20 multi-step items how many then have both facts.
-- [ ] **Facts from the passages:**
+- [x] **Facts from the passages:**
   - regex for the regular cases: Wikipedia lead lifespans (`Name (30 August 1797 – 1 February 1851)`), "born / died /
     published / founded / built in <year>";
   - E2B for the rest, as a short extraction pass: `name | event | year` lines from the passages, about 30 tokens.
-- [ ] **When to add them:** cue words ("how old", "years after / before", "how long", "older", "younger", "alive when",
+- [x] **When to add them:** cue words ("how old", "years after / before", "how long", "older", "younger", "alive when",
   "before or after", "by how much", "lived longer"), kept loose: an unneeded facts block costs a few tokens.
-- [ ] **Code computes** every difference, order and "alive at that date" between the extracted facts and adds them as a
+- [x] **Code computes** every difference, order and "alive at that date" between the extracted facts and adds them as a
   numbered facts block, citing the passage each year came from: "Frankenstein (1818) [2] came out after Jane Austen died
   (1817) [1]: 1 year after." E2B cites the block's sources.
-- [ ] Unit tests for the extractor and the arithmetic on real passage text.
+- [x] Unit tests for the extractor and the arithmetic on real passage text.
 - **Gate:** multi-step grounded on the tuning split (r1-dense-1: 4/20), with no regressions on the other items.
 - Out: quantities with units (ocean depth against Everest, light to the Moon) and chains; E2B keeps those.
+
+### Done (2026-10-27)
+
+**Result** (the 23 questions with cue words, dense on, `--entities on --facts on`; runs `r5-t4-facts`, `facts2` for the
+last fixes):
+
+| | r1-dense-1 | entities only (`ent3`) | entities + facts |
+|---|---|---|---|
+| Multi-step grounded (18 cued) | 3 | 2 | **9** |
+| Multi-step declined | 7 | 3 | 2 |
+| The 7 other cued questions | 6 grounded, 1 declined | same | same |
+
+- The other 179 questions have no cue words, so neither flag touches them. Multi-step on the whole tuning split goes
+  from 4/20 to **10/20** (016, not cued, grounded as before). Gate met.
+- Still wrong: 004 ("Lincoln was older", with "born on the same day" spelled out in the block), 003 (no year for the
+  King James Bible), 010 (Noah's 950 is only in Genesis), 015 (light to the Moon, out of scope), 018 (the periodic
+  table's 1869 isn't in the passages). 002 and 012 decline.
+- First words: the block is about 100–150 tokens, under 0.5 s of prefill.
+
+**`YearFacts.kt`** (in `core/research`; tests on the real passages in `src/test/resources/year-questions.tsv`):
+- Names are the question's runs of capitals (the rewrite's keywords for a lower-case question, only those in the
+  question). Each content word belongs to the name it follows ("Columbus reached"; "publishing X" to the name after).
+- A person's dates: the lifespan in their article's lead, brackets and "[O.S. …]" handled.
+- An event: the sentence sharing the name's words (word groups: published/came out, reached/landfall/voyages, fell,
+  proof, won, president/serving, sealed, periodic table…), in the name's own article or, in another, the first year
+  after the name. An end word takes a range's last year ("from 1961 to 1989"). A work with no such sentence takes its
+  lead's first year. Years BC and the person's own birth and death years are skipped.
+- If the question asks for a name's event and the passages don't date it, there is no block: the first run said "In
+  1911, Mendeleev had died" for 018 and compared deaths for 011, and E2B followed both.
+- Code then writes the gaps: event to event ("Mayflower (1620) came about 128 years after Christopher Columbus
+  (1492) [1][2]"), a person at an event (alive and aged, not yet born, or dead N years), and two lifespans (born,
+  died, ages at death). Exact when both dates have a day, "about" otherwise.
 
 ### Progress (2026-10-27)
 
