@@ -163,13 +163,13 @@ class ResearchPipeline(
      */
     private val dense: DenseFinder? = null,
     /**
-     * Plan R5 Task 4's debug variant: a question that compares dates gives each thing it names a place among the
-     * answer's passages ([Entities.reserve]). Off in the app.
+     * Plan R5 Task 4: a question that compares dates gives each thing it names a place among the
+     * answer's passages ([Entities.reserve]). On in the app from Plan R5 Task 7.
      */
     private val reserveNamed: Boolean = false,
     /**
-     * Plan R5 Task 4's second debug variant: a question that compares dates gets the dates of the things it names and
-     * the sums between them worked out in code ([YearFacts]), after the passages. Off in the app.
+     * Plan R5 Task 4: a question that compares dates gets the dates of the things it names and
+     * the sums between them worked out in code ([YearFacts]), after the passages. On in the app from Plan R5 Task 7.
      */
     private val yearFacts: Boolean = false,
 ) {

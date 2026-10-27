@@ -239,10 +239,10 @@ internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, reco
 /**
  * Whether Research also searches by meaning (Plan R1): the question is embedded (0.12 s on the Pixel 6's GPU) and
  * scanned against the installed packs' and books' vector files, alongside the keyword search, and [Ranking.hybrid]
- * merges the two. Off until Plan R1 Task 11's tuning run decides. Reranking found passages with the embedder stays off:
- * a query plus 12 passages took 4.2–4.7 s on the GPU (Plan 8 Task 9).
+ * merges the two. On from Plan R5 Task 7: every R5 measurement ran with it. Reranking found passages with the
+ * embedder stays off: a query plus 12 passages took 4.2–4.7 s on the GPU (Plan 8 Task 9).
  */
-const val DENSE_RETRIEVAL = false
+const val DENSE_RETRIEVAL = true
 
 /** Where the embedding model runs: the GPU, about twice as fast as the CPU on the Pixel 6. */
 val EMBEDDER_BACKEND = LlmBackend.GPU
@@ -613,5 +613,6 @@ class AppContainer(context: Context) {
     val research = ResearchPipeline(
         passageFinder, ModelsAdapter(modelManager), rankingConfig,
         sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
+        reserveNamed = true, yearFacts = true,
     )
 }

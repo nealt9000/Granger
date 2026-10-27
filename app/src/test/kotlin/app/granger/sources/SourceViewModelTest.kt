@@ -1,5 +1,6 @@
 package app.granger.sources
 
+import app.granger.DENSE_RETRIEVAL
 import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.bookEntry
@@ -98,7 +99,7 @@ class SourceViewModelTest {
         assertThat(ui.sections.map { it.title }).containsExactly("AI models")
     }
 
-    @Test fun unusedEmbedderSaysNotUsedYet() = runTest(main.dispatcher) {
+    @Test fun theEmbedderSaysWhetherResearchUsesIt() = runTest(main.dispatcher) {
         val vm = SourceViewModel(
             CatalogScope.MODELS, FakeCatalogSource(catalogOf(models = listOf(e2b, modelEntry("gemma-embed", ModelRole.EMBEDDER)))),
             downloads, library, bookshelf, volumes, prefs, DeviceTier.THINK_DEEPER, appScope = this, io = main.dispatcher,
@@ -106,7 +107,7 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("gemma-embed").description).isEqualTo("Not used yet")
+        assertThat(rows.getValue("gemma-embed").description).isEqualTo(if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet")
         assertThat(rows.getValue("e2b").description).isEmpty()
     }
 

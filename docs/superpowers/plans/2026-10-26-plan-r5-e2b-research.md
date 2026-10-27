@@ -391,9 +391,42 @@ runs, or adjacent words that make a title) and drop the filler words, plus a med
 
 ## Task 7: the whole split, together
 
-- [ ] The kept variants together on the tuning split: grounded, declined, multi-step, medical, send to first words
+- [x] The kept variants together on the tuning split: grounded, declined, multi-step, medical, send to first words
   median and p90. Against the pass bars and r1-dense-1.
 - [ ] Neal's feel test on the phone with the release build path (no debug flags): 15 questions of his own.
+
+### Run (2026-10-27)
+
+What was kept: Task 4's entity passages and year facts, with dense on and E2B's rewrite. The gate is out (Task 3), and so
+are the check pass (Task 5) and plain keywords (Task 6). **Trim is out too.** Its embed cost, timed on the Pixel (debug
+`embed` mode, 336 sentences from 10 real answer prompts, about 34 a question), is 1.9 s per batch of 16 when cool and
+5.6 s when warm. That's about 4 s a question to save 0.9 s.
+
+Run `r5-t7-all` (full tuning split, `--dense on --entities on --facts on`; 48 new replies graded):
+
+| | r1-dense-1 | r5-t7-all | bar |
+|---|---|---|---|
+| Answerable grounded | 86/126 (68%) | **91/126 (72%)** | 80% |
+| Multi-step grounded | 4/20 | **11/20** | |
+| Unanswerables declined | 67/76 (88%) | 63/76 (83%) | 90% |
+| Medical flag recall | 98% | 95% | aim 95% |
+| Recall@4 | 52% | 48% | |
+| First words, median / p90 | 16.5 / 22.2 s | 12.1 / 23.7 s | 9 s |
+| First words without the Think deeper reloads | 16.2 / 19.1 s | **11.9 / 13.9 s** | 9 s |
+
+- **Gains (11):** 7 multi-step, plus bible-005, vocab-gap-001, medical-018 and medical-019.
+- **Losses (6):** history-001, geography-general-001, geography-003, medical-002, knots-001 and knots-002. Two of them
+  are strict calls: "torn down" for "fell", and one wrong passage number for the Tibetan name. They were graded by
+  different graders from r1-dense-1's, so ±2 is noise.
+- **Declines down 4:** r5-t1-fast (same search, no entities or facts) also declines 63. This comes from Task 1's search
+  changes, not from Task 4. The unanswerables now answered are 001, 035, 057, 058 and 059.
+- **The p90 is Think deeper's.** The rewrite that follows a Think deeper question waits for E2B to load again after E4B:
+  14.1 s median against 3.8 s. Leave those 18 out and p90 is 13.9 s. Task 8 removes the cost along with the button.
+
+The bars still aren't met: grounded 72% (80%), declines 83% (90%), first words 11.9 s (9 s).
+
+For the feel test, the app now runs what was measured: `DENSE_RETRIEVAL = true`, with entity passages and year facts on
+in `GrangerApp`.
 
 ## Task 8: Think deeper removed (from R4 Task 8)
 
