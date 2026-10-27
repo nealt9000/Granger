@@ -6,6 +6,8 @@
   passages.py variant BASE NEW --mode gate|trim|both [--threshold T] [--chars 500]
                                                            # runs/NEW: BASE with each answer prompt rebuilt
   answerers.py run NEW NEW-e2b --model gemma-4-E2B-it-gpu.litertlm --set sample-40   # replays it
+  passages.py check BASE NEW                                # Task 5: runs/NEW asks which passages answer, for replay
+  passages.py filter BASE CHECKED-e2b NEW                   # runs/NEW: only the passages the check named
 
 The answer step is all that changes, so instead of a debug flag through the whole pipeline the prompts BASE's ranking
 built are rebuilt here and replayed through `answerers.py` (as Plan R4 compared models):
@@ -238,6 +240,84 @@ def cmd_variant(a):
     return 0
 
 
+# --- the check pass (Task 5) -----------------------------------------------------------------------------------------
+
+CHECK = ("Below are numbered passages from a library, and a question.\n\nPassages:\n%s\n\nQuestion: %s\n\n"
+         "Which passages contain the answer to the question, or facts needed to work it out? "
+         "Reply with only their numbers, comma-separated, or the word none.\nPassages:")
+
+
+def check_prompt(prompt):
+    """The answer prompt's passages and question, asked which passages answer it."""
+    head, passages, tail = split_prompt(prompt)
+    question = tail.partition("Question:")[2].partition("\nAnswer:")[0].strip()
+    blocks = "\n\n".join("[%d] %s\n%s" % (n, h, b) for n, (h, b) in enumerate(passages, 1))
+    prior = re.search(r"^Earlier in this conversation:\nQ: (.*)$", head, re.M)
+    if prior:  # a follow-up: "how long did it take him" needs who
+        question = "%s (follows: %s)" % (question, prior.group(1).strip())
+    return CHECK % (blocks, question)
+
+
+def parse_check(reply, n):
+    """The passage numbers the check kept (1-based, in range), [] for none, or None when the reply is neither."""
+    text = (reply or "").strip().lower()
+    nums = [int(x) for x in re.findall(r"\d+", text) if 0 < int(x) <= n]
+    if nums:
+        return sorted(set(nums))
+    return [] if "none" in text else None
+
+
+def cmd_check(a):
+    """runs/NEW: BASE with each answer prompt replaced by its check prompt, to replay with --max-tokens 16."""
+    out_dir = RUNS / a.new
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = []
+    for rec in read_jsonl(RUNS / a.base / "results.jsonl"):
+        rec = {k: v for k, v in rec.items() if k not in ("deeper", "guesses")}
+        if answerers.answer_prompt(rec) is not None and rec.get("chosen"):
+            set_prompt(rec, check_prompt(answerers.answer_prompt(rec)))
+        out.append(rec)
+    shutil.copy(RUNS / a.base / "dataset.json", out_dir / "dataset.json")
+    answerers.write_jsonl(out_dir / "results.jsonl", out)
+    (out_dir / "variant.json").write_text(json.dumps({"from": a.base, "mode": "check-prompt"}), encoding="utf-8")
+    print("runs/%s: check prompts" % a.new)
+    return 0
+
+
+def cmd_filter(a):
+    """runs/NEW: BASE's answer prompts keeping only the passages CHECKED's replay named; "none" declines without the
+    model; a reply that is neither keeps every passage."""
+    replies = {r["id"]: r for r in read_jsonl(RUNS / a.checked / "replay.jsonl")}
+    out_dir = RUNS / a.new
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out, counts = [], {"none": 0, "kept some": 0, "kept all": 0, "unparsed": 0, "not checked": 0}
+    for rec in read_jsonl(RUNS / a.base / "results.jsonl"):
+        rec = {k: v for k, v in rec.items() if k not in ("deeper", "guesses")}
+        prompt, chosen = answerers.answer_prompt(rec), rec.get("chosen") or []
+        if prompt is not None and chosen:
+            r = replies.get(rec["id"])
+            keep = parse_check(r["reply"], len(chosen)) if r else None
+            if r is None:
+                counts["not checked"] += 1
+            elif keep is None:
+                counts["unparsed"] += 1
+            elif not keep:
+                counts["none"] += 1
+                rec["prompts"] = [p for p in rec["prompts"] if p["stage"] != "answer"]
+                rec.update(outcome="declined", reply="", cited="", chosen=[])
+            else:
+                counts["kept all" if len(keep) == len(chosen) else "kept some"] += 1
+                head, passages, tail = split_prompt(prompt)
+                set_prompt(rec, join_prompt(head, [passages[k - 1] for k in keep], tail))
+                rec["chosen"] = [chosen[k - 1] for k in keep]
+        out.append(rec)
+    shutil.copy(RUNS / a.base / "dataset.json", out_dir / "dataset.json")
+    answerers.write_jsonl(out_dir / "results.jsonl", out)
+    (out_dir / "variant.json").write_text(json.dumps({"from": a.base, "mode": "check", "checked": a.checked}), encoding="utf-8")
+    print(json.dumps(counts))
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     s = p.add_subparsers(dest="cmd", required=True)
@@ -247,6 +327,9 @@ def main(argv=None):
     v = s.add_parser("variant"); v.add_argument("base"); v.add_argument("new")
     v.add_argument("--mode", required=True, choices=["gate", "trim", "both"]); v.add_argument("--threshold", type=float)
     v.add_argument("--chars", type=int, default=500); v.set_defaults(f=cmd_variant)
+    c = s.add_parser("check"); c.add_argument("base"); c.add_argument("new"); c.set_defaults(f=cmd_check)
+    fl = s.add_parser("filter"); fl.add_argument("base"); fl.add_argument("checked"); fl.add_argument("new")
+    fl.set_defaults(f=cmd_filter)
     a = p.parse_args(argv)
     return a.f(a)
 

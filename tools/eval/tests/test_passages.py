@@ -33,3 +33,13 @@ def test_the_gate_drops_low_passages_renumbers_and_empties_to_a_decline():
     prompt, chosen = passages.rebuild(rec, {}, score, "gate", 0.7, 500)
     assert "[1] Frankenstein" in prompt and "[2]" not in prompt and chosen == [rec["chosen"][1]]
     assert passages.rebuild(rec, {}, score, "gate", 0.95, 500) == (None, [])
+
+
+def test_the_check_prompt_and_its_reply():
+    prompt = "Rules\nPassages:\n[1] A\nalpha text\n\n[2] B\nbeta text\n\nQuestion: what is beta?\nAnswer:"
+    c = passages.check_prompt(prompt)
+    assert "[1] A\nalpha text\n\n[2] B\nbeta text" in c and "Question: what is beta?" in c and c.endswith("Passages:")
+    assert passages.parse_check(" 2", 2) == [2]
+    assert passages.parse_check("1, 2, 7", 2) == [1, 2]
+    assert passages.parse_check("None", 2) == []
+    assert passages.parse_check("I can't tell", 2) is None

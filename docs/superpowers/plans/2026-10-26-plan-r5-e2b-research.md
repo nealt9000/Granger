@@ -322,12 +322,28 @@ right for 5 of the 10; the others need the sentence that shares the question's w
 
 E2B's fast reading makes a second short call affordable.
 
-- [ ] One call after ranking: the question and the numbered (trimmed) passages, "Which passages answer the question?
+- [x] One call after ranking: the question and the numbered (trimmed) passages, "Which passages answer the question?
   Reply with their numbers, or none." About 2 s at 600 tokens. "none" declines without the answer call; otherwise only
   those passages go on.
-- [ ] Compare with Task 3's gate alone on sample-40: unanswerables declined, grounded, first words.
+- [x] Compare with Task 3's gate alone on sample-40: unanswerables declined, grounded, first words.
 - **Gate:** at least 3 more unanswerables declined of 12, with grounded no lower. Otherwise drop it: it costs a call on
   every question.
+
+### Done (2026-10-27): dropped
+
+Measured offline on sample-40 like Task 3 (`passages.py check` and `filter`, replayed with `answerers.py`; runs
+`r5-t5-check-e2b`, `r5-t5-filter-e2b`). The check prompt is the answer prompt's passages and question (with the earlier
+question for a follow-up), "Which passages contain the answer to the question, or facts needed to work it out? Reply
+with only their numbers, comma-separated, or the word none."
+
+- **It mostly names the passages the answer would cite.** It said "none" on 5 of 40, and 3 of those were already
+  declined by the answer step. Of the 9 unanswerables E2B answered, it named passages for 8.
+- **Unanswerables declined: 3 → 4 of 12** (medical-029). The gate needs +3.
+- Three more answerable questions declined (vocab-gap-009, multi-step-007, multi-step-017; none was grounded before).
+  The rest weren't graded: the decline count already fails the gate.
+- **Cost: about 2.9 s on every question** (2.8 s to its first token: it reads the same ~1,250 tokens again).
+
+So E2B can't tell an on-topic passage from one that answers any better when asked separately than when answering.
 
 ## Task 6: the rewrite without the model
 
