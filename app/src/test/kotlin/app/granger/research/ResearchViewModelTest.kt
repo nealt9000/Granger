@@ -239,6 +239,18 @@ class ResearchViewModelTest {
         assertThat(restored.state.value.quote).isNull()
     }
 
+    @Test fun aNewChatIsCreatedWhenTheHandleHoldsTheRoutesArguments() = runTest(main.dispatcher) {
+        // Navigation puts ResearchRoute's fields in the handle: a new chat's route has chatId 0.
+        val routeArgs = mapOf<String, Any?>("chatId" to 0L, "quote" to null)
+        vm(savedState = SavedStateHandle(routeArgs)).ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        vm(savedState = SavedStateHandle(routeArgs)).ask("Who wrote Hamlet?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.chats.value.map { it.title }).containsExactly("How do plants use light?", "Who wrote Hamlet?")
+        assertThat(chats.turnList.value.map { it.chatId }.distinct()).hasSize(2)
+        assertThat(chats.turnList.value.map { it.chatId }).doesNotContain(0L)
+    }
+
     @Test fun aDeletedChatStaysGoneAfterProcessDeath() = runTest(main.dispatcher) {
         val chatId = chats.create("How do plants use light?")
         val savedState = SavedStateHandle()

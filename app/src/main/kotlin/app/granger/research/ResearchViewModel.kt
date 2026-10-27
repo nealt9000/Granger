@@ -582,8 +582,10 @@ class ResearchViewModel(
         fun answerKey(turnId: Long) = "text:answer:$turnId"
         fun answerTurnId(key: String): Long? = key.removePrefix("text:answer:").takeIf { it != key }?.toLongOrNull()
 
-        const val CHAT_ID = "chatId"
-        const val QUOTE_USED = "quoteUsed"
+        // Not "chatId": the handle also holds the route's arguments, and ResearchRoute's chatId is 0 for a new chat, which
+        // read as a saved chat 0 that was never created (every new chat reopened it, 22–27 Oct).
+        const val CHAT_ID = "research.chatId"
+        const val QUOTE_USED = "research.quoteUsed"
         const val RECENT_CHATS = 10
         /** Longer questions are cut, so a pasted wall of text can't overflow the prompt. */
         const val MAX_QUESTION = 1_000
