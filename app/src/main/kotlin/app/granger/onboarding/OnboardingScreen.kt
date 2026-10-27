@@ -138,7 +138,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome() {
             Text("The world’s knowledge.\nYours to keep.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(12.dp))
             Text(
-                "Encyclopedias, books, maps and manuals beside your own music, audiobooks and e-books: on your phone, working with no signal.",
+                "Encyclopedias, maps, manuals, books and your own music, with a reader and a librarian you can ask: all on your phone, all working with no signal.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
