@@ -1142,3 +1142,10 @@
 {"id": "multi-step-017", "kind": "answer", "replyHash": "5f63af218d64ab6963c22a99d6274d5c4c2a0034", "grade": "not-grounded", "reason": "The 30-mile figure is not in passage 3, which only says lightning can strike 10 miles from rain."}
 {"id": "medical-035", "kind": "answer", "replyHash": "d958ab3e420abb2d97271b73959ff8aa127db495", "grade": "grounded", "reason": "Lists signs and red flags drawn closely from passages 1-4, with nothing added."}
 {"id": "bible-008", "kind": "answer", "replyHash": "2fdeecf10f5ba63b94b0d5f3126a222d4e972a9c", "grade": "not-grounded", "reason": "Credits the Quran with the Wikipedia commentary on haram and never says what the verse actually says about drinking and gambling."}
+{"id": "multi-step-001", "kind": "answer", "replyHash": "b5d41a9cba588f3769596ece582c69a827bb8712", "grade": "grounded", "reason": "20 at publication, from passage 4's 'published ... 1 January 1818, when she was 20'."}
+{"id": "multi-step-004", "kind": "answer", "replyHash": "8122f20383e51b422ff426be64e2f97bd0c17090", "grade": "not-grounded", "reason": "Says Lincoln was older while citing the same birth date for both; the facts block said the same day."}
+{"id": "multi-step-005", "kind": "answer", "replyHash": "fc6d2c0f7c478390a513ce07dc626982713115e2", "grade": "grounded", "reason": "Both death dates cited to the passages that hold them, one day apart."}
+{"id": "multi-step-009", "kind": "answer", "replyHash": "111c27995e86b43b24f114c2d3a54949b414e22e", "grade": "grounded", "reason": "128 years, from 1492 [2] and 1620 [1]."}
+{"id": "multi-step-011", "kind": "answer", "replyHash": "03c26b0c7f836c02446f1e4d83fc009444f1e13c", "grade": "grounded", "reason": "Alive: Machiavelli's dates cited to [2] and [3]; Columbus's voyages to [1]."}
+{"id": "multi-step-013", "kind": "answer", "replyHash": "fd4528dfaa1ca64619d82f23b4828a0d968db129", "grade": "grounded", "reason": "23 years, from 1859 [2] and his death in 1882 [1]."}
+{"id": "multi-step-018", "kind": "answer", "replyHash": "f28fab65afe5a4983179217249338cad4b1494f6", "grade": "grounded", "reason": "42 years, citing the periodic table [3] and the 1911 Nobel [2]."}

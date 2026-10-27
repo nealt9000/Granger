@@ -60,8 +60,25 @@ class EntitiesTest {
     }
 
     @Test fun aNameAlreadyInTheTopKeepsItsPlaceAndNothingMoves() {
-        val ranked = listOf(p("Charles Darwin", "Voyage"), p("Abraham Lincoln"), p("X"), p("Y"), p("Charles Darwin"))
+        val ranked = listOf(p("Charles Darwin"), p("Abraham Lincoln"), p("X"), p("Y"), p("Charles Darwin", "Voyage"))
         assertThat(Entities.reserve(ranked, ranked, listOf("charles darwin", "abraham lincoln"), keep = 4)).isEqualTo(ranked)
+    }
+
+    @Test fun theArticlesFirstOpeningPassageTakesTheSameArticlesPlace() {
+        // Magna Carta's lead in two passages, as the finder reads them; ranking kept the second.
+        val first = p("Magna Carta", text = "Magna Carta ... sealed by King John on 15 June 1215")
+        val second = p("Magna Carta", text = "After John's death ... reissued the document in 1216")
+        val ranked = listOf(p("Black Death"), second, p("X"), p("Y"))
+        val out = Entities.reserve(ranked, pool = listOf(first, second, p("Black Death")), names = listOf("magna carta", "black death"), keep = 4)
+        assertThat(out.take(4)).containsExactly(p("Black Death"), first, p("X"), p("Y")).inOrder()
+        assertThat(out.drop(4)).containsExactly(second)
+    }
+
+    @Test fun aBookOfTheSameNameIsNotTheArticle() {
+        val book = Passage(SourceKind.BOOK, "pg84", "Frankenstein", location = "c01.xhtml", text = "Letter 1 ...")
+        val ranked = listOf(p("Mary Shelley"), book, p("X"), p("Y"))
+        val out = Entities.reserve(ranked, ranked + p("Frankenstein"), listOf("mary shelley", "frankenstein"), keep = 4)
+        assertThat(out.take(4)).containsExactly(p("Mary Shelley"), book, p("X"), p("Frankenstein")).inOrder()
     }
 
     @Test fun anEmptyRankingStaysADecline() {

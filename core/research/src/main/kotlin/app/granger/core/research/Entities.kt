@@ -79,39 +79,44 @@ object Entities {
     }
 
     /**
-     * [ranked] with up to [slots] of its first [keep] places given to the named things: for each name in turn, the best
-     * passage of the article that names it best, from [ranked] and then [pool] (an article's opening passage first,
-     * as that's where the dates are). A passage ranking already keeps in the first [keep] counts as that name's. The
-     * passages it displaces move down, in order, so nothing is lost for Think deeper.
+     * [ranked] with up to [slots] of its first [keep] places given to the named things. For each name in turn the pick
+     * is the article that names it best, and its first opening passage: [pool] lists an article's passages in reading
+     * order, and a Wikipedia lead's dates are in its first one (r5-t4-ent: Magna Carta's second lead passage has 1216,
+     * not 1215). The pick takes the place of another passage of its article in the first [keep], or else of the last
+     * passage there that isn't a pick. The passages it displaces move down, in order, so nothing is lost for Think deeper.
      */
     fun reserve(ranked: List<Passage>, pool: List<Passage>, names: List<String>, keep: Int, slots: Int = 2): List<Passage> {
-        val candidates = (ranked + pool).distinctBy { Ranking.textKey(it) }
+        // Nothing ranked is a decline (the gates found nothing good enough); a name doesn't overturn that.
+        if (ranked.isEmpty()) return ranked
+        val candidates = (pool + ranked).distinctBy { Ranking.textKey(it) }
         val picks = mutableListOf<Passage>()
         for (name in names) {
             if (picks.size == slots) break
-            val best = candidates
+            // sortedWith is stable: among equals, the earlier passage in reading order wins.
+            // Articles only: the dates are in an article's lead, not in a chapter of the work itself (r5-t4-ent2 took a
+            // chunk of the novel Frankenstein and lost its 1818).
+            val pick = candidates
+                .filter { it.kind == SourceKind.ARTICLE }
                 .map { it to match(it.sourceTitle, name) }
                 .filter { it.second > 0 }
                 .sortedWith(compareByDescending<Pair<Passage, Int>> { it.second }.thenBy { if (opens(it.first)) 0 else 1 })
                 .firstOrNull()?.first ?: continue
-            val inTop = ranked.take(keep).firstOrNull { it.sourceId == best.sourceId && it.location == best.location }
-            val pick = inTop ?: best
-            if (picks.none { it.sourceId == pick.sourceId && it.location == pick.location }) picks += pick
+            if (picks.none { sameArticle(it, pick) }) picks += pick
         }
-        // Nothing ranked is a decline (the gates found nothing good enough); a name doesn't overturn that.
-        if (picks.isEmpty() || ranked.isEmpty()) return ranked
         val top = ranked.take(keep).toMutableList()
-        for (pick in picks.filter { it !in top }) {
-            if (top.size < keep) {
-                top += pick
-                continue
+        for (pick in picks) {
+            if (pick in top) continue
+            val same = top.indexOfFirst { sameArticle(it, pick) && it !in picks }
+            when {
+                same >= 0 -> top[same] = pick
+                top.size < keep -> top += pick
+                else -> top[top.indices.lastOrNull { top[it] !in picks } ?: break] = pick
             }
-            val out = top.indices.lastOrNull { top[it] !in picks } ?: break
-            top[out] = pick
         }
-        val order = ranked.take(keep).filter { it in top } + top.filter { it !in ranked.take(keep) }
-        return order + ranked.filter { it !in order }
+        return top + ranked.filter { it !in top }
     }
+
+    private fun sameArticle(a: Passage, b: Passage): Boolean = a.sourceId == b.sourceId && a.location == b.location
 
     private fun opens(p: Passage): Boolean = p.heading.isBlank() || fold(p.heading) == fold(p.sourceTitle)
 
