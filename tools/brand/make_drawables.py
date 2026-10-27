@@ -1,11 +1,11 @@
-"""Write the brand's Android vector drawables from granger-mark.svg and the stencil wordmark.
+"""Write the brand's Android vector drawables from granger-mark.svg and the wordmark.
 
-    ~/.venvs/granger-vectors/bin/python -I tools/brand/make_drawables.py <BigShouldersStencil[opsz,wght].ttf>
+    ~/.venvs/granger-vectors/bin/python -I tools/brand/make_drawables.py app/src/main/res/font/spectral_semibold.ttf
 
 The mark (granger-mark.svg) is the owl in the G, Neal's sketch traced and cleaned as geometry; the sketch and the
 pipeline live in docs/superpowers/brand/2026-10-27-owl-mark/. It has three layers: the eye whites, the pupils and the
-body (the G and the owl). The wordmark is GRANGER set in Big Shoulders Stencil (OFL,
-licence beside this script) at weight 800 and drawn as paths, so the app bundles no font for it. Needs fontTools.
+body (the G and the owl). The wordmark is GRANGER in Spectral SemiBold capitals (OFL,
+docs/superpowers/brand/fonts), spaced wide and drawn as paths so it is the same everywhere. Needs fontTools.
 """
 import re
 import sys
@@ -16,7 +16,6 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.svgLib.path import parse_path
 from fontTools.ttLib import TTFont
-from fontTools.varLib.instancer import instantiateVariableFont
 
 HERE = Path(__file__).resolve().parent
 RES = HERE.parent.parent / "app" / "src" / "main" / "res"
@@ -87,8 +86,8 @@ def mark_in(viewport, diameter, paths, side):
     return group(paths, scale, t, t)
 
 
-def wordmark(font_path, text="GRANGER", tracking=0.06):
-    font = instantiateVariableFont(TTFont(font_path), {"wght": 800, "opsz": 72})
+def wordmark(font_path, text="GRANGER", tracking=0.12):
+    font = TTFont(font_path)
     gs, cmap = font.getGlyphSet(), font.getBestCmap()
     upm = font["head"].unitsPerEm
     ascent = font["OS/2"].sCapHeight or font["hhea"].ascent
@@ -122,7 +121,7 @@ def main():
     for name, res in (("mark", "granger_mark"), ("eyes", "granger_mark_eyes"), ("pupils", "granger_mark_pupils")):
         (RES / "drawable" / f"{res}.xml").write_text(vector(48, 48, L, L, group([(layers[name], WHITE)], 1.0, 0, 0)))
 
-    # Wordmark: GRANGER in the stencil, white, tinted by the caller.
+    # Wordmark: GRANGER in Spectral caps, white, tinted by the caller.
     d, (bx0, by0, bx1, by1) = wordmark(font_path)
     ww, wh = bx1 - bx0, by1 - by0
     body = (f'    <group android:translateX="{-bx0:.1f}" android:translateY="{-by0:.1f}">\n'

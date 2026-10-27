@@ -100,6 +100,7 @@
 
 - [x] The status voice: Home's readiness strip gets one Courier Prime status line in `extras.status`, from the storage the report already holds (the phone's own media doesn't count). *(Built: `> 11 GB here, ready offline.`, short enough for one line at 360 dp; "offline." alone would claim the phone has no signal, which isn't the fact. The Library has no storage line to carry one, so the UI pass decides where else the voice goes.)*
 - [x] About: the lockup in `extras.mark`, "Everything worth knowing, yours to keep.", version, GPL line (as H3 Task 5 left it, now themed).
+- [x] Tagline and wordmark (2026-10-27): "The world's knowledge. Yours to keep." (two lines on Welcome), GRANGER in Spectral caps from `make_drawables.py`, and the mission line "Knowledge is a human right." in About; the stencil licence removed.
 - [x] **Commit.** `Theme: the status voice and the themed lockup`
 
 ### Task 6: Walkthrough; roadmap

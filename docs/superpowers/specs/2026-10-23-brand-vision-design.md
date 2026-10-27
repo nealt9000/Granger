@@ -1,12 +1,12 @@
 # Granger brand and vision
 
-**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** a first mark (the cassette on books) shipped in H3 Task 5. **2026-10-27:** Neal replaced it with the owl in the G (§8, The mark), which ships with Plan T1; the final palette and the tagline are still open.
+**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** a first mark (the cassette on books) shipped in H3 Task 5. **2026-10-27:** Neal replaced it with the owl in the G (§8, The mark), which ships with Plan T1. The same day he chose the tagline (§3) and moved the wordmark from the stencil to Spectral capitals (§8, Type); the final palette is still open.
 **Reference art:** `docs/superpowers/brand/` (dated folders; the current reference is `2026-10-23-field-recorder-concept/`).
 **Unblocks:** H3 Task 5 (the Welcome brand), Plan 10 (billing, now on the fair deal below), Plan 11 (the store listing), and the UI pass that follows the roadmap's features.
 
 ## 1. Vision
 
-**Everything worth knowing, yours to keep.**
+**The world's knowledge. Yours to keep.**
 
 Granger puts the world's reference knowledge, literature and a local librarian on a device you own, right beside your own music, audiobooks and e-books. The librarian knows both: it answers from the encyclopedia and from your shelf, cites either, and plays the recording it cites. Nothing is rented, nothing needs an account, and nothing can be switched off by whoever made it. Because it is yours, it works anywhere: on a plane, in a tent, in a classroom with no signal, after a storm takes the network down.
 
@@ -32,7 +32,12 @@ There is a quieter layer too. In *Fahrenheit 451*, Granger leads the book people
 Streaming services traded the best possible experience for the best possible shareholder returns. Granger offers all the features with none of the strings attached to you or your wallet; the product never gets worse to make someone else money.
 
 **Retired:** "Civilization, backed up." It frames Granger as an archive for after the end and puts fear first.
-**Tagline candidates** (pick in Claude Design next to the mark): *Knowledge you keep.* (recommended: a keep is also a stronghold) · *Everything worth knowing. Yours to keep.* · *The library you carry.*
+**Tagline (chosen 2026-10-27):** *The world's knowledge. Yours to keep.* It says what Granger is in one breath: the scale ("the world's knowledge"), ownership first ("yours") and the granary and the book-keepers ("to keep"). It sits under the lockup, on Welcome (as two lines) and in About.
+**Mission line:** *Knowledge is a human right.* It says why Granger exists, not what it is, so it opens About, the manifesto, the non-profit and grants side and Basecamp, never the logo. (It sits close to Wikimedia's and the Internet Archive's slogans, so it stays a belief, not a slogan.)
+**Description, where there's room:** name the content, not a rival: *"Encyclopedias, books, maps and manuals beside your own music, audiobooks and e-books: on your phone, working with no signal."*
+**Never name Google** (or any search engine or streaming service) in the brand. In comparisons and press, "the internet's reference shelf, without the internet" makes the point without tying Granger to a competitor.
+**Passed over:** *Knowledge you keep.* (no scale); *Knowledge sovereignty* ("sovereign" carries the sovereign-citizen and crypto crowds, and "data sovereignty" is enterprise jargon and an Indigenous movement's own term; the idea stays in body copy: "your library answers to you"); *Everything you'd ask the internet. No internet.* (overclaims).
+**Retired with the stencil:** *Everything worth knowing, yours to keep.*, the H3 Welcome line.
 
 ## 4. The fair deal
 
@@ -97,7 +102,7 @@ The prompt that made it (Neal's revision):
 
 **What carries into the brand:**
 - **The command line.** The screen's `> ready.` is Granger's status voice: short lowercase lines in mono, phosphor on dark ("> offline. ready.", "> 3 sources."). For state, never for content.
-- **The stencil.** GRANGER is stencilled, not engraved: a wordmark you could spray onto your own kit.
+- **The stencil** (retired from the wordmark 2026-10-27). The owl's wing cuts already carry it; a stencilled word beside them doubled the cuts and read as army surplus. Stencil stays available for kit and merch, never the lockup.
 - **Hardware controls.** Labelled toggles and knobs (MUSIC, FIELD, ARCHIVE, OFFLINE) suggest how modes and the rail can look: physical, labelled, few.
 - **The mix tape.** Your own collection sits in the deck, at the centre of the device.
 - **Every culture and era, and the tools to use them.** Knowledge you act on, not knowledge on display.
@@ -119,7 +124,7 @@ The prompt that made it (Neal's revision):
 
 Two themes, both first class: **Field** (light: paper and enamel, for daylight) and **Night** (gunmetal, lantern and phosphor). The app's current near-black `#0E0E0E` and flame orange `#E8601C` retire, as does the first concept's navy and parchment.
 
-**Type:** Spectral (OFL) for reading and headings; Courier Prime (OFL) for labels, counters and the command line; a stencil face for the wordmark only (OFL candidates: Big Shoulders Stencil, Saira Stencil One). All bundled, never downloaded.
+**Type:** Spectral (OFL) for reading and headings; Courier Prime (OFL) for labels, counters and the command line; the wordmark is Spectral SemiBold capitals, spaced 0.12 em (chosen 2026-10-27 over Big Shoulders, Barlow, Chakra Petch, Archivo and Space Grotesk: the books and the brand share one voice, and the plain owl beside it carries the edge). All bundled, never downloaded.
 
 **The mark (chosen 2026-10-27): the owl in the G.** A stern, flat owl sits inside a capital G whose lower curve is three wing bands, with a square spur. It reads as a guardian of the store that keeps watch at night: the granary story (§2) told in one picture. Neal drew it in ElevenLabs from the cassette mark, then picked one of his sketches (`docs/superpowers/brand/2026-10-27-owl-mark/`). It was traced and cleaned as geometry, not redrawn by hand:
 - the rim and the crescent's inner edge are true circles fitted to his lines;
@@ -135,7 +140,7 @@ Colours:
 - **Launcher (option C):** a paper owl with lantern eyes on enamel.
 - **Themed icon:** one colour, eyes cut out.
 
-`tools/brand/make_drawables.py` writes all of these, and the wordmark (Big Shoulders Stencil 800, drawn as paths). Night is the brand's face: lead store art and Welcome with it.
+`tools/brand/make_drawables.py` writes all of these, and the wordmark (Spectral SemiBold caps, drawn as paths). Night is the brand's face: lead store art and Welcome with it.
 
 Rules for the owl:
 - **A mark, not a mascot.** It doesn't talk, wave, wear things or become the librarian's avatar.
@@ -147,7 +152,7 @@ Rules for the owl:
 - Must read at 48 px as a launcher icon and as Android's monochrome themed icon.
 - Says *a thing you own and carry that holds the world's knowledge*. Directions: the field recorder's front reduced to a cassette window and one knob; a stencilled G cut like a toggle slot; a granary silhouette; a book opening its pages like wings.
 - No literal flame, no Vitruvian figure in a circle (both earlier drafts are retired: the flame reads as catastrophe, the figure as a peace sign at small sizes).
-- Lockup: the mark with GRANGER in the stencil; the tagline in Courier Prime.
+- Lockup: the mark with GRANGER in the stencil; the tagline in Courier Prime. (Superseded 2026-10-27: GRANGER in Spectral caps; the tagline in Spectral.)
 
 ## 9. What the brand asks of the UI
 
@@ -163,7 +168,7 @@ Principles for the UI pass once the roadmap's features land; each traces to the 
 
 ## 10. What this unblocks, in order
 
-1. **Claude Design:** the mark and lockup (done 2026-10-26, from Neal's sketch); the final palette and tagline (open).
+1. **Claude Design:** the mark and lockup (done 2026-10-26, from Neal's sketch); the tagline and wordmark (done 2026-10-27); the final palette (open).
 2. **H3 Task 5 (done 2026-10-26):** `BrandLockup` takes the chosen mark and lockup; the Welcome line is the vision sentence (§1); the launcher icon (and with it the system splash) changes with it.
 3. **Theme pass (new plan):** `GrangerTheme` gains Field and Night from the palette; the reader and players follow.
 4. **Plan 10 rewrite:** Supporter instead of Pro (§6); billing + the telemetry opt-in slot into onboarding.
@@ -172,7 +177,7 @@ Principles for the UI pass once the roadmap's features land; each traces to the 
 
 ## 11. Open
 
-- The tagline and the final palette (Claude Design).
+- The final palette (Claude Design).
 - The supporter price and exactly which extras it carries (Plan 10).
 - Organisation form for income: sole proprietor, LLC, or a public-benefit company with a nonprofit partner for grants (needs advice).
 - Basecamp hardware: off-the-shelf mini PC vs a single-board computer; the model it runs; whether institutions get it first.

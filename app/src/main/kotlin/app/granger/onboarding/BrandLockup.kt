@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import app.granger.R
 
 /**
- * The brand (brand brief §8): the mark, the owl in the G with lantern eyes, over GRANGER in the stencil. All are vectors
+ * The brand (brand brief §8): the mark, the owl in the G with lantern eyes, over GRANGER in Spectral caps. All are vectors
  * from `tools/brand/make_drawables.py`, drawn white and tinted here; the mark is three layers (eyes, pupils, body).
  */
 @Composable
@@ -37,7 +37,7 @@ fun BrandLockup(modifier: Modifier = Modifier, markWidth: Dp = 128.dp) {
         Image(
             painterResource(R.drawable.granger_wordmark),
             contentDescription = "Granger",
-            modifier = Modifier.width(markWidth * 1.25f).aspectRatio(WORDMARK_ASPECT),
+            modifier = Modifier.width(markWidth * 1.6f).aspectRatio(WORDMARK_ASPECT),
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
         )
     }
@@ -52,4 +52,4 @@ private fun BoxScope.MarkLayer(res: Int, color: Color) = Image(
 )
 
 // The wordmark's viewport (tools/brand/make_drawables.py prints it); the mark's is square.
-private const val WORDMARK_ASPECT = 7132f / 1636f
+private const val WORDMARK_ASPECT = 5833f / 680f

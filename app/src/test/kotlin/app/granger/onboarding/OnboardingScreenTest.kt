@@ -44,7 +44,7 @@ class OnboardingScreenTest {
     @Test fun welcomeHasTheBrandGetStartedAndSkip() {
         show(OnboardingUi(step = Step.WELCOME))
         compose.onNodeWithContentDescription("Granger").assertIsDisplayed()
-        compose.onNodeWithText("Everything worth knowing, yours to keep.").assertIsDisplayed()
+        compose.onNodeWithText("The world’s knowledge.\nYours to keep.").assertIsDisplayed()
         compose.onNodeWithText("Get started").performClick()
         compose.onNodeWithText("Skip").performClick()
         assertThat(calls).containsExactly("next", "skip").inOrder()

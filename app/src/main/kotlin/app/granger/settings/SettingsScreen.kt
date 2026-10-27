@@ -39,6 +39,7 @@ import app.granger.archive.WaiverDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -329,7 +330,12 @@ private fun About() {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         BrandLockup(markWidth = 64.dp)
-        Text("Everything worth knowing, yours to keep.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium)
+        Text("The world’s knowledge. Yours to keep.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium)
+        Text(
+            "Knowledge is a human right.",
+            style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Text(
             "Version ${BuildConfig.VERSION_NAME}",
             style = MaterialTheme.typography.bodySmall,
