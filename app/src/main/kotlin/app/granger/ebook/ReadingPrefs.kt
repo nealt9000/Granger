@@ -2,6 +2,7 @@ package app.granger.ebook
 
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.toArgb
+import app.granger.theme.FieldColors
 import app.granger.theme.NightColors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,8 @@ import org.readium.r2.navigator.preferences.TextAlign
 import org.readium.r2.navigator.preferences.Theme
 import kotlin.math.roundToInt
 
-enum class ReadingTheme { DAY, SEPIA, NIGHT }
+/** [APP] follows the app's theme (Field or Night, Settings → Appearance); the others are the reader's own. */
+enum class ReadingTheme { APP, DAY, SEPIA, NIGHT }
 
 enum class Typeface { SERIF, SANS }
 
@@ -32,7 +34,9 @@ data class ReadingPrefs(
     /** 0.5..2.0. */
     val margins: Double = 1.0,
     val align: Align = Align.START,
-    val theme: ReadingTheme = ReadingTheme.NIGHT,
+    val theme: ReadingTheme = ReadingTheme.APP,
+    /** Whether the app is in Night now; not saved, the store is told it ([ReadingPrefsStore.setAppNight]). */
+    val appNight: Boolean = true,
     /** PDFs: pages scroll on continuously instead of turning one at a time. */
     val pdfScroll: Boolean = false,
     /** PDFs: a page fills the width (scroll down it) instead of fitting whole on screen. */
@@ -43,13 +47,22 @@ data class ReadingPrefs(
      * (Gutenberg's blue links on black among them), and books are paginated, never scrolled.
      */
     fun toEpub(): EpubPreferences = EpubPreferences(
-        theme = when (theme) {
-            ReadingTheme.DAY -> Theme.LIGHT
-            ReadingTheme.SEPIA -> Theme.SEPIA
-            ReadingTheme.NIGHT -> Theme.DARK
+        theme = when {
+            pageNight -> Theme.DARK
+            theme == ReadingTheme.SEPIA -> Theme.SEPIA
+            else -> Theme.LIGHT
         },
-        backgroundColor = if (theme == ReadingTheme.NIGHT) Color(NightColors.background.toArgb()) else null,
-        textColor = if (theme == ReadingTheme.NIGHT) Color(NightColors.onSurface.toArgb()) else null,
+        // Night is the app's Night; Match app in Field is the app's paper and ink. Day and Sepia keep Readium's own.
+        backgroundColor = when {
+            pageNight -> Color(NightColors.background.toArgb())
+            theme == ReadingTheme.APP -> Color(FieldColors.background.toArgb())
+            else -> null
+        },
+        textColor = when {
+            pageNight -> Color(NightColors.onSurface.toArgb())
+            theme == ReadingTheme.APP -> Color(FieldColors.onSurface.toArgb())
+            else -> null
+        },
         fontFamily = when (typeface) {
             Typeface.SERIF -> FontFamily.SERIF
             Typeface.SANS -> FontFamily.SANS_SERIF
@@ -77,8 +90,11 @@ data class ReadingPrefs(
         scrollAxis = if (pdfScroll) Axis.VERTICAL else Axis.HORIZONTAL,
     )
 
+    /** The page is Night: chosen, or Match app while the app is in Night. */
+    val pageNight: Boolean get() = theme == ReadingTheme.NIGHT || (theme == ReadingTheme.APP && appNight)
+
     /** PDF pages are drawn inverted: Night is the one theme a PDF honours. */
-    val pdfNight: Boolean get() = theme == ReadingTheme.NIGHT
+    val pdfNight: Boolean get() = pageNight
 
     /** What PDFium reads only when it lays a PDF out; the reader rebuilds the navigator when it changes. */
     val pdfLook: String get() = listOf(if (pdfNight) "night" else "day", if (pdfFitWidth) "width" else "page").joinToString("-")
@@ -107,8 +123,13 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
     private val state = MutableStateFlow(read())
     val prefs: StateFlow<ReadingPrefs> = state.asStateFlow()
 
+    /** The app's theme now (MainActivity, at creation and on every change); Match app follows it. */
+    fun setAppNight(night: Boolean) {
+        if (state.value.appNight != night) state.value = state.value.copy(appNight = night)
+    }
+
     fun update(p: ReadingPrefs) {
-        val clamped = p.clamped()
+        val clamped = p.clamped().copy(appNight = state.value.appNight)
         state.value = clamped
         shared.edit()
             .putString(KEY_TYPEFACE, clamped.typeface.name)

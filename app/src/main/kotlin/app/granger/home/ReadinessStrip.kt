@@ -23,6 +23,7 @@ import app.granger.readiness.Coverage
 import app.granger.formatBytes
 import app.granger.readiness.ReadinessReport
 import app.granger.theme.GrangerTheme
+import app.granger.theme.status
 
 /** How solid a domain's dot is (spec §5): None faint, Basic half, Comprehensive full. */
 fun dotAlpha(coverage: Coverage): Float = when (coverage) {
@@ -56,7 +57,7 @@ fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modif
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         stripStatus(report)?.let { status ->
-            Text(status, style = MaterialTheme.typography.labelMedium, color = GrangerTheme.extras.status)
+            Text(status, style = MaterialTheme.typography.labelMedium.status, color = GrangerTheme.extras.status)
         }
         if (report.domains.isNotEmpty()) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

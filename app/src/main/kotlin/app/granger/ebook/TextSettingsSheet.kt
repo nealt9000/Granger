@@ -69,7 +69,7 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
             }
             Setting("Theme") {
                 Chips(
-                    listOf(ReadingTheme.DAY to "Day", ReadingTheme.SEPIA to "Sepia", ReadingTheme.NIGHT to "Night"),
+                    listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.SEPIA to "Sepia", ReadingTheme.NIGHT to "Night"),
                     prefs.theme,
                 ) { onChange(prefs.copy(theme = it)) }
             }
@@ -79,7 +79,7 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
 
 /**
  * A PDF's settings (Plan P2): its pages are drawn as printed, so there is no type to set; only how pages follow
- * each other, how one fits the screen, and Day or Night (PDFium inverts the page; Sepia reads as Day here).
+ * each other, how one fits the screen, and the theme: Match app, Day or Night (PDFium inverts the page for Night).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,8 +93,10 @@ fun PdfSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDi
                 Chips(listOf(false to "Whole page", true to "Width"), prefs.pdfFitWidth) { onChange(prefs.copy(pdfFitWidth = it)) }
             }
             Setting("Theme") {
-                Chips(listOf(false to "Day", true to "Night"), prefs.pdfNight) { night ->
-                    onChange(prefs.copy(theme = if (night) ReadingTheme.NIGHT else ReadingTheme.DAY))
+                // Sepia reads as Day on a PDF, so it shows as Day here.
+                val shown = if (prefs.theme == ReadingTheme.SEPIA) ReadingTheme.DAY else prefs.theme
+                Chips(listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.NIGHT to "Night"), shown) {
+                    onChange(prefs.copy(theme = it))
                 }
             }
         }

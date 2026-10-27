@@ -3,6 +3,7 @@ package app.granger.ebook
 import android.content.Context
 import androidx.compose.ui.graphics.toArgb
 import androidx.test.core.app.ApplicationProvider
+import app.granger.theme.FieldColors
 import app.granger.theme.NightColors
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -73,6 +74,34 @@ class ReadingPrefsTest {
         assertThat(epub.textColor).isEqualTo(Color(NightColors.onSurface.toArgb()))
         // Day and sepia keep Readium's own theme colours.
         assertThat(ReadingPrefs(theme = ReadingTheme.DAY).toEpub().backgroundColor).isNull()
+    }
+
+    @Test fun matchAppFollowsTheAppsTheme() {
+        assertThat(ReadingPrefs().theme).isEqualTo(ReadingTheme.APP)
+        val night = ReadingPrefs(theme = ReadingTheme.APP, appNight = true)
+        assertThat(night.toEpub().theme).isEqualTo(Theme.DARK)
+        assertThat(night.toEpub().backgroundColor).isEqualTo(Color(NightColors.background.toArgb()))
+        assertThat(night.pdfNight).isTrue()
+        // In Field the page is the app's paper and ink, not Readium's white.
+        val field = night.copy(appNight = false)
+        assertThat(field.toEpub().theme).isEqualTo(Theme.LIGHT)
+        assertThat(field.toEpub().backgroundColor).isEqualTo(Color(FieldColors.background.toArgb()))
+        assertThat(field.toEpub().textColor).isEqualTo(Color(FieldColors.onSurface.toArgb()))
+        assertThat(field.pdfNight).isFalse()
+        assertThat(field.pdfLook).isNotEqualTo(night.pdfLook)
+        // The reader's own choices ignore the app.
+        assertThat(ReadingPrefs(theme = ReadingTheme.NIGHT, appNight = false).pdfNight).isTrue()
+        assertThat(ReadingPrefs(theme = ReadingTheme.DAY, appNight = true).toEpub().theme).isEqualTo(Theme.LIGHT)
+    }
+
+    @Test fun storeTracksTheAppWithoutSavingIt() {
+        val store = ReadingPrefsStore(shared)
+        store.setAppNight(false)
+        assertThat(store.prefs.value.appNight).isFalse()
+        // A change in the reader keeps the app's state, and a new store starts from its default again.
+        store.update(store.prefs.value.copy(fontScale = 1.5))
+        assertThat(store.prefs.value.appNight).isFalse()
+        assertThat(ReadingPrefsStore(shared).prefs.value.appNight).isTrue()
     }
 
     @Test fun linksUseTheBookLinkColourInEveryTheme() {

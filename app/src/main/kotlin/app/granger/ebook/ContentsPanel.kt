@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import app.granger.core.library.BookAnnotation
 import org.json.JSONObject
 import org.readium.r2.shared.publication.Locator
+import app.granger.theme.readout
 
 /** The swatch for a highlight colour name. */
 internal fun highlightColor(name: String): Color = Color(HighlightColors.argb(name))
@@ -102,7 +103,7 @@ fun ContentsPanel(
                             Column(Modifier.fillMaxWidth().clickable { onMark(mark) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
                                 Text(mark.text.ifEmpty { "Bookmark" }, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 markPercent(mark)?.let {
-                                    Text("$it%", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("$it%", style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }

@@ -45,6 +45,7 @@ import app.granger.core.library.AudiobookChapter
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
+import app.granger.theme.readout
 
 /** The sheets the audiobook player opens; saved so a rotation keeps the open one. */
 private enum class BookSheet { CHAPTERS, SPEED, SLEEP, BOOKMARKS }
@@ -185,7 +186,7 @@ private fun BookProgressLine(progress: BookProgress) {
         val percent = (fraction(progress.positionMs, progress.durationMs) * 100).toInt()
         Text(
             "Book: ${formatTime(progress.positionMs)} of ${formatTime(progress.durationMs)} · $percent%",
-            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

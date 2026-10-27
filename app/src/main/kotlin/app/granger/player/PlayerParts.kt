@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import app.granger.R
 import app.granger.core.player.NowPlaying
 import app.granger.shell.rememberRailCover
+import app.granger.theme.readout
 
 /** What both players show at the top: the cover and two lines. */
 internal data class NowInfo(val title: String, val subtitle: String, val coverPath: String?)
@@ -112,7 +113,7 @@ internal fun SeekBar(positionMs: Long, durationMs: Long, onSeek: (Long) -> Unit,
             modifier = Modifier.fillMaxWidth().testTag(PlayerTags.SEEK).semantics { contentDescription = label },
         )
         Row(Modifier.fillMaxWidth()) {
-            val style = MaterialTheme.typography.labelMedium
+            val style = MaterialTheme.typography.labelMedium.readout
             Text(formatTime((shown * duration).toLong()), style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.weight(1f))
             Text(formatTime(duration), style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)

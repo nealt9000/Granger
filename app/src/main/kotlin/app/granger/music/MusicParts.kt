@@ -48,6 +48,7 @@ import app.granger.core.library.Track
 import app.granger.library.MovePackDialog
 import app.granger.player.formatTime
 import app.granger.shell.rememberRailCover
+import app.granger.theme.readout
 
 /** Where the music screens lead. */
 data class MusicNav(
@@ -148,7 +149,7 @@ fun SongRow(
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             },
-            trailingContent = { Text(formatTime(track.durationMs), style = MaterialTheme.typography.labelMedium) },
+            trailingContent = { Text(formatTime(track.durationMs), style = MaterialTheme.typography.labelMedium.readout) },
         )
         DropdownMenu(menu, { menu = false }) {
             val close = { menu = false }

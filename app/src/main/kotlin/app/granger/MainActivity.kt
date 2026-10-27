@@ -58,6 +58,7 @@ class MainActivity : FragmentActivity() {
         // The user's theme before the window exists, so the first frame, the bars and the reader's WebView all agree.
         createdNight = (application as GrangerApp).container.appearancePrefs.theme.value.night(phoneDark())
         setTheme(if (createdNight) R.style.Theme_Granger_Night else R.style.Theme_Granger_Field)
+        (application as GrangerApp).container.readingPrefs.setAppNight(createdNight)
         // Before super.onCreate, which restores fragments: the e-book navigator is rebuilt from the open book.
         supportFragmentManager.fragmentFactory = ReadiumFragmentFactory()
         super.onCreate(savedInstanceState)
@@ -100,7 +101,10 @@ class MainActivity : FragmentActivity() {
             val choice by container.appearancePrefs.theme.collectAsState()
             val night = choice.night(isSystemInDarkTheme())
             // A change in Settings (or the phone's mode under "Follow the phone") repaints the window and the WebView too.
-            LaunchedEffect(night) { if (night != createdNight) recreate() }
+            LaunchedEffect(night) {
+                container.readingPrefs.setAppNight(night)
+                if (night != createdNight) recreate()
+            }
             GrangerTheme(night = night) {
                 val decided = start.value
                 if (decided == null) {
