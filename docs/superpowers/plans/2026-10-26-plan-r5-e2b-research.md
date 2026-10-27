@@ -240,7 +240,7 @@ Sample-40 on E2B (28 answerable, 12 unanswerable; 27 new replies graded):
 Only if Task 2 shows that multi-step questions usually have both facts in the passages, or once per-entity search makes
 them so.
 
-- [ ] **Per-entity search first** (Task 2: 7 of the 15 year questions have only one fact in the passages): for a
+- [x] **Per-entity search first** (Task 2: 7 of the 15 year questions have only one fact in the passages): for a
   question with cue words, one extra search per named person or work (from the rewrite's keywords), and each entity's
   best passage kept among the chosen ones. Measure on the 20 multi-step items how many then have both facts.
 - [ ] **Facts from the passages:**
@@ -255,6 +255,36 @@ them so.
 - [ ] Unit tests for the extractor and the arithmetic on real passage text.
 - **Gate:** multi-step grounded on the tuning split (r1-dense-1: 4/20), with no regressions on the other items.
 - Out: quantities with units (ocean depth against Everest, light to the Moon) and chains; E2B keeps those.
+
+### Progress (2026-10-27)
+
+**Per-entity passages** (`Entities.kt`, debug flag `--entities on`; runs `r5-t4-ent` → `ent3`, 23 cued questions).
+No extra search was needed: in 5 of the 7 year questions missing a fact, the named article was already among the
+keyword passages and ranking dropped it. So a question with cue words gets up to 2 of its 4 places reserved: for each
+name (runs of capitals in the question, then the rewrite's keywords), the article whose title names it (exact, or a
+proper name ending in it: "Dmitri Mendeleev"), and that article's *first* opening passage, where a Wikipedia lead's
+dates are. Two fixes on the way: the first pick took whichever lead passage ranked best (Magna Carta's 1216 one, not
+1215), and an e-book of *Frankenstein* counted as the article.
+
+- Year questions with both facts in the passages: **8 → 11 of 15** (008, 014, 019, 020 gained; 003 still lacks
+  Shakespeare's death, 010 Noah's 950 is only in Genesis, 012 is declined by the gates before any pick, 018's 1869 is
+  in another article).
+- No change on the 7 cued questions that aren't multi-step (all 7 grounded or declined as before).
+- Alone it doesn't raise grounded (multi-step on the cued 18: 3 → 2). E2B now answers where it declined (008, 014,
+  019), but does the arithmetic wrong: 1492 → 1620 is "20 years", 1215 → 1346 "about 100".
+
+**The facts block's ceiling** (hand-written, as a perfect extractor would; `oracle.py` in the session scratchpad, runs
+`r5-t4-oracle-e2b` and `r5-t4-oracle2-e2b`): one line before the question, "Worked out from the passages: X (year) [n];
+Y (year) [m]: N years later."
+- On r1-dense-1's passages (years-8): grounded 3 → 6 of 8.
+- On the entity passages (years-11): grounded 2 → **9 of 11**. Only 002 and 020 (both "could X have…") still decline.
+- First words unchanged (the block is about 40 tokens).
+- With the other multi-step items as in r1-dense-1, multi-step would go from 4/20 to about 10/20.
+
+**What a real extractor has to find**, from these 11: lifespans (the lead's "(30 August 1797 – 1 February 1851)") for 7,
+and an event year for 10: Frankenstein 1818, *Origin* 1859, Lincoln president 1861, Columbus 1492, Mayflower 1620,
+Magna Carta 1215, Black Death 1346, Fermat proof 1994, Berlin Wall 1989, periodic table 1869. The lead's first year is
+right for 5 of the 10; the others need the sentence that shares the question's words ("reached", "fell", "proof").
 
 ## Task 5: a check pass
 
