@@ -354,12 +354,40 @@ R4 Task 5 offline found:
 
 No small rewrite model works (R4 Task 3).
 
-- [ ] Score the medical flag with the phone's own query vectors (the int4 embedder) and check the 6 margin questions
+- [x] Score the medical flag with the phone's own query vectors (the int4 embedder) and check the 6 margin questions
   stay above 0. If they do, put it in the pipeline in place of the model's `medical:` line.
-- [ ] Full-pipeline run with `--es rewrite plain` (first questions plain, follow-ups still on E2B): recall@4 and time
+- [x] Full-pipeline run with `--es rewrite plain` (first questions plain, follow-ups still on E2B): recall@4 and time
   against r1-dense-1. Then a variant where follow-ups are plain too (keywords from the question and the prior question);
   dense already embeds both.
 - **Gate:** recall@4 within 2 points of r1-dense-1 for about 3 s saved. If plain loses more, keep E2B's rewrite.
+
+### Done (2026-10-27): E2B's rewrite stays
+
+**Medical flag on the phone's vectors** (run `r5-t6-embed`: the 212 labels and 202 questions embedded on the Pixel by
+the debug `embed` mode). Lexicon, or strong, or centroid above 0 catches 39 of 40 with no false flags; E2B's `medical:`
+line catches 39 with 4 false flags. But medical-033 ("what did apoplexy mean in old books") scores −0.012, so one of the 6
+margin questions falls below 0. The other medical questions with no lexicon word score +0.004 to +0.006, and the top
+non-medical question (knots-002) scores −0.001. That margin is too thin to put in the pipeline. Without it, the plain run's
+lexicon-only flag catches 34 of 40 (85%).
+
+**Plain keywords, full split** (`r5-t6-plain`; follow-ups still on E2B). Against `r5-t1-fast`, which runs the same code
+with E2B's rewrite:
+
+| | recall@4 (126) | rewrite median | first words median / p90 |
+|---|---|---|---|
+| r1-dense-1 | 65 (51.6%) | 3.1 s | 16.5 / 22.2 s |
+| r5-t1-fast (E2B) | 61 (48.4%) | 4.0 s | 12.7 / 16.9 s |
+| r5-t6-plain | 58 (46.0%) | 0 | **8.2 / 13.8 s** |
+
+- **It saves about 4.5 s to first words**, under the 9 s target for the first time.
+- **But recall is 2.4 points below the same code, and 5.6 below r1-dense-1.** It lost 7 and gained 4. The losses are
+  mostly names split into words (berlin wall, king james bible, treasure island, half life) and the terms E2B adds
+  ("rayleigh scattering", "iron oxide"). Question filler words stay in too (mean, actually, already, still, called).
+- **Follow-ups plain too** (`r5-t6-plainall`, the 11 follow-ups): 7 of 10 against 8, and about 2 s more saved. It lost
+  follow-up-006: "who first climbed it" needs E2B to resolve the prior "tallest mountain in the world" to Everest.
+
+As written, the gate fails, so E2B's rewrite stays. A second try would need plain keywords to keep names whole (capital
+runs, or adjacent words that make a title) and drop the filler words, plus a medical flag with a real margin.
 
 ## Task 7: the whole split, together
 
