@@ -191,16 +191,49 @@ The 20 split into 15 years, 3 quantities and 2 chains.
 
 ## Task 3: fewer, tighter passages
 
-- [ ] **Relevance gate:** drop a chosen passage whose dense cosine to the question is under a threshold (set on the
+- [x] **Relevance gate:** drop a chosen passage whose dense cosine to the question is under a threshold (set on the
   tuning split so no grounded answer loses its passage). Count how many unanswerables then reach the model with no
   passages and decline.
-- [ ] **Sentence trimming:** keep each passage's best sentences by the embedder's cosine to the question, plus one
+- [x] **Sentence trimming:** keep each passage's best sentences by the embedder's cosine to the question, plus one
   either side, up to about 500 characters, so the prompt drops from about 1,250 tokens to about 600.
   - This needs the embedder on the trimmed sentences at question time. Time it: the cost the spec turned down was about
     4 s for 12 passages, and here it is 4 passages split into sentences.
-- [ ] Debug flags `--es passages gate|trim|both`; replay sample-40 through the full pipeline for each.
+- [x] Debug flags `--es passages gate|trim|both`; replay sample-40 through the full pipeline for each.
+  - Done offline instead: `passages.py` rebuilds r1-dense-1's answer prompts and `answerers.py` replays them on E2B.
+    Only the answer step changes, so a pipeline flag would have bought nothing but time.
 - **Gate:** keep a variant if grounded doesn't drop and unanswerables declined rises, or if grounded rises by 3 or more
   of 28. Report first words too; a shorter prompt should save about 1.5 s.
+
+### Done (2026-10-26)
+
+Scores are EmbeddingGemma's on the Mac (`passages.py score r1-dense-1`). Passage cosines are bunched: the lowest cited
+passage of a grounded reply is 0.7316, and answered unanswerables have a median top cosine of 0.805 against 0.835 for
+grounded replies. The gate's threshold (0.7315) drops 56 passages on the split and empties 2 items (1 answerable).
+
+Sample-40 on E2B (28 answerable, 12 unanswerable; 27 new replies graded):
+
+| Variant | Grounded | Not grounded | Answerable declined | Unanswerables declined | Prompt tokens (median) |
+|---|---|---|---|---|---|
+| base (= r1-dense-1) | 14 | 11 | 3 | 3/12 | 1,262 |
+| gate | 14 | 10 | 4 | 4/12 | 1,244 |
+| trim (500 chars) | 14 | 10 | 4 | 5/12 | 724 |
+| both | 12 | 12 | 4 | 5/12 | 691 |
+
+- **Gate: dropped.** One more decline, within noise. The cosine doesn't separate a passage that answers from one that
+  is merely on topic, so no threshold that keeps the grounded replies' passages removes much.
+- **Trim: passes, narrowly.** Grounded holds at 14 but through swaps: who-wrote-009 and science-006 become grounded;
+  history-005 (E2B read "Thomas Young" as "young scholars" once the sentence lost its context) and multi-step-001 (a
+  citation slip) are lost. Two more unanswerables decline. All of it is within the 1–2 noise band. On the whole split
+  the literal answer quote falls out of the trimmed text in 7 of 66 items.
+- **Both: fails** (grounded −2).
+- **Speed** (speed-10, phone cooled to under 37 °C before each run): send-to-first-words of the model step falls from
+  2.61 s to 1.68 s median (prefill 1,257 → 680 tokens; 520 → 459 tok/s, as a shorter prompt carries the fixed cost over
+  fewer tokens). So trim saves about 0.9 s, not 1.5 s. The first sample-40 runs were throttled (206–267 tok/s), so
+  their times aren't used.
+- **Not yet measured: the embedder on the phone.** Trimming needs every sentence of the 4 passages embedded at question
+  time (about 30 short texts). From the spec's 4 s for 12 passages, a rough guess is about 1 s, which would cancel the
+  saving. It has to be timed before trim goes into the app; if it costs more than about 0.5 s, trim buys only the
+  declines, which are within noise.
 
 ## Task 4: year arithmetic in code
 
