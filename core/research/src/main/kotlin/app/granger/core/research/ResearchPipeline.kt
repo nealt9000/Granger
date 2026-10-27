@@ -160,6 +160,11 @@ class ResearchPipeline(
      * the vectors aren't there, ranking is the keyword ranking.
      */
     private val dense: DenseFinder? = null,
+    /**
+     * Plan R5 Task 4's debug variant: a question that compares dates gives each thing it names a place among the
+     * answer's passages ([Entities.reserve]). Off in the app.
+     */
+    private val reserveNamed: Boolean = false,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
@@ -212,7 +217,12 @@ class ResearchPipeline(
             emit(ResearchEvent.Progress(Stage.RANKING))
             ranked = try {
                 val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight) }
-                Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight), found, asked)
+                val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight), found, asked)
+                if (reserveNamed && Entities.asked(request.question)) {
+                    Entities.reserve(lifted, all + hits.orEmpty(), Entities.named(request.question, keywords), config.small)
+                } else {
+                    lifted
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
