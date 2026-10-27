@@ -8,10 +8,14 @@
 `<raw>/qc.tsv`: per take its word error rate against the script line, its speaking rate (characters per second of
 trimmed speech), its peak, and a verdict. A take passes with a WER of at most `MAX_WER` (one wrong word in a short
 line; Whisper's digits are spelled out first), a rate within `RATE` of its speaker's median (catching rushed, dragged or runaway takes), 1–15 s of speech,
-and no clipping. Lines with no passing take go to `<raw>/retake.txt` for `generate.py --take N --only`.
+no clipping, and a clean ending. Qwen3 often stops while the last sound is still decaying: a take without a tail
+must end quiet (its last `END_SECONDS` under `END_DB`, with no drop from speech straight to digital silence). A take
+read with generate.py's `--tail` is cut in the pause before the tail (the longest run under `GAP_DB` between the
+line's last word and the tail's first, from Whisper's word times; at least `MIN_GAP` long), and fails without one.
+Lines with no passing take go to `<raw>/retake.txt` for `generate.py --take N --only`.
 
-`build` takes each line's best passing take (lowest WER, then the rate nearest the median), trims the silence to
-`PAD` seconds each side, evens the loudness (RMS to `TARGET_DBFS`, peaks held under -1 dBFS), resamples 24 kHz to
+`build` takes each line's best passing take (lowest WER, then the rate nearest the median), cuts off any tail, trims
+the silence to `PAD` seconds each side, fades the last `FADE` seconds, evens the loudness (RMS to `TARGET_DBFS`, peaks held under -1 dBFS), resamples 24 kHz to
 22 050 Hz mono 16-bit (`soxr_hq`, as `build_dataset.py`), and writes `<out>/wav/` and `<out>/metadata.csv`
 (`<file>.wav|<speaker>|<text>`, the script's text) plus `<out>/minutes.tsv`. Speakers are numbered in the order of
 `--speakers` (default: the script files' order, sorted).
@@ -32,6 +36,8 @@ MIN_SECONDS, MAX_SECONDS = 1.0, 15.0
 TOP_DB, PAD = 40, 0.12
 TARGET_DBFS, PEAK_DBFS = -20.0, -1.0
 SAMPLE_RATE = 22050
+END_SECONDS, END_DB = 0.06, -55.0
+GAP_DB, MIN_GAP, KEEP_GAP, FADE = -55.0, 0.05, 0.25, 0.01
 
 # British and American spellings Whisper may swap; folded before scoring.
 SPELLING = [(r"(?<=[a-z]{3})our\b", "or"), (r"ise\b", "ize"), (r"ised\b", "ized"), (r"ising\b", "izing"), (r"tre\b", "ter"),
@@ -95,6 +101,38 @@ def speech_bounds(audio, rate):
     return max(0, a - pad), min(len(audio), b + pad)
 
 
+def envelope(audio, rate, frame=0.01):
+    import numpy as np
+
+    n = int(frame * rate)
+    return np.array([20 * np.log10(np.sqrt(np.mean(audio[i:i + n] ** 2)) + 1e-9) for i in range(0, len(audio) - n + 1, n)])
+
+
+def ending_ok(audio, rate):
+    env = envelope(audio, rate)
+    if len(env) < 10:
+        return False
+    abrupt = any(env[i] > -45 and env[i + 1:i + 4].min() < -90 for i in range(len(env) - 10, len(env) - 1))
+    return env[-int(END_SECONDS / 0.01):].max() <= END_DB and not abrupt
+
+
+def tail_cut(audio, rate, timed, tail_words):
+    """Seconds to cut at: inside the longest quiet run between the line's last word and the tail, or None."""
+    if len(timed) <= tail_words:
+        return None
+    lo, hi = timed[-tail_words - 1]["end"] - 0.05, timed[-tail_words]["start"] + 0.05
+    start = max(0, int(lo * rate))
+    env = envelope(audio[start:int(hi * rate)], rate)
+    best, run = (0, 0), 0
+    for i, db in enumerate(env):
+        run = run + 1 if db < GAP_DB else 0
+        if run > best[1]:
+            best = (i - run + 1, run)
+    if best[1] * 0.01 < MIN_GAP:
+        return None
+    return start / rate + best[0] * 0.01 + min(best[1] * 0.01 * 0.6, KEEP_GAP)
+
+
 def check(args):
     import jiwer
     import mlx_whisper
@@ -108,32 +146,57 @@ def check(args):
         with open(cache_path, encoding="utf-8") as f:
             for row in f:
                 r = json.loads(row)
-                cache[r["file"]] = r["text"]
+                cache[r["file"]] = r
     cache_file = open(cache_path, "a", encoding="utf-8")
+    tails = {}
+    log_path = os.path.join(args.raw, "log.jsonl")
+    if os.path.exists(log_path):
+        with open(log_path, encoding="utf-8") as f:
+            for row in f:
+                r = json.loads(row)
+                if "seconds" in r:
+                    tails[f"{r['id']}_t{r['take']}.wav"] = r.get("tail", "")
 
     rows = []
     all_takes = takes(args.raw, lines)
     for n, (line_id, take, path) in enumerate(all_takes):
         name = os.path.basename(path)
-        if name not in cache:
+        tail = tails.get(name, "")
+        if name not in cache or (tail and "words" not in cache[name]):
             result = mlx_whisper.transcribe(path, path_or_hf_repo=args.asr, language="en",
-                                            condition_on_previous_text=False)
-            cache[name] = result["text"].strip()
-            cache_file.write(json.dumps({"file": name, "text": cache[name]}) + "\n")
+                                            condition_on_previous_text=False, word_timestamps=bool(tail))
+            cache[name] = {"file": name, "text": result["text"].strip()}
+            if tail:
+                cache[name]["words"] = [{"word": w["word"], "start": w["start"], "end": w["end"]}
+                                        for s in result["segments"] for w in s["words"]]
+            cache_file.write(json.dumps(cache[name]) + "\n")
             cache_file.flush()
             if (n + 1) % 100 == 0:
                 print(f"{n + 1}/{len(all_takes)} transcribed", file=sys.stderr, flush=True)
         audio, rate = soundfile.read(path, dtype="float32")
         if audio.ndim > 1:
             audio = audio.mean(axis=1)
+        speaker, text = lines[line_id]
+        heard = cache[name]["text"]
+        ref, hyp = words(text), words(heard)
+        cut, ending = None, True
+        if tail:
+            tail_ws = words(tail)
+            if hyp[-len(tail_ws):] == tail_ws:
+                hyp = hyp[:-len(tail_ws)]
+                cut = tail_cut(audio, rate, cache[name]["words"], len(tail_ws))
+            ending = cut is not None
+            if cut is not None:
+                audio = audio[:int(cut * rate)]
+        else:
+            ending = ending_ok(audio, rate)
         a, b = speech_bounds(audio, rate)
         seconds = (b - a) / rate
-        speaker, text = lines[line_id]
-        ref, hyp = words(text), words(cache[name])
         wrong = round(jiwer.wer(" ".join(ref), " ".join(hyp)) * len(ref)) if hyp else len(ref)
         rows.append({"id": line_id, "take": take, "speaker": speaker, "file": name, "seconds": seconds,
                      "rate": len(text) / seconds if seconds else 0, "wer": wrong / len(ref), "wrong": wrong,
-                     "peak": float(np.max(np.abs(audio))) if len(audio) else 0.0, "heard": cache[name]})
+                     "peak": float(np.max(np.abs(audio))) if len(audio) else 0.0, "heard": heard,
+                     "ending": ending, "cut": f"{cut:.3f}" if cut is not None else ""})
 
     medians = {s: statistics.median([r["rate"] for r in rows if r["speaker"] == s] or [1]) for s in speakers}
     for r in rows:
@@ -147,9 +210,11 @@ def check(args):
             reasons.append("length")
         if r["peak"] >= 0.999:
             reasons.append("clipped")
+        if not r["ending"]:
+            reasons.append("tail" if tails.get(r["file"]) else "ending")
         r["verdict"] = ",".join(reasons) or "ok"
 
-    fields = ["id", "take", "speaker", "file", "verdict", "wer", "wrong", "seconds", "rate", "peak", "heard"]
+    fields = ["id", "take", "speaker", "file", "verdict", "wer", "wrong", "seconds", "rate", "peak", "cut", "heard"]
     with open(os.path.join(args.raw, "qc.tsv"), "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fields, delimiter="\t", extrasaction="ignore", lineterminator="\n")
         w.writeheader()
@@ -197,8 +262,12 @@ def build(args):
         audio, rate = soundfile.read(os.path.join(args.raw, r["file"]), dtype="float32")
         if audio.ndim > 1:
             audio = audio.mean(axis=1)
+        if r["cut"]:
+            audio = audio[:int(float(r["cut"]) * rate)]
         a, b = speech_bounds(audio, rate)
         audio = audio[a:b]
+        fade = int(FADE * rate)
+        audio[-fade:] *= np.linspace(1, 0, fade)
         rms = float(np.sqrt(np.mean(audio**2))) or 1e-9
         gain = min(10 ** (TARGET_DBFS / 20) / rms, 10 ** (PEAK_DBFS / 20) / (float(np.max(np.abs(audio))) or 1e-9))
         audio = librosa.resample(audio * gain, orig_sr=rate, target_sr=SAMPLE_RATE, res_type="soxr_hq")

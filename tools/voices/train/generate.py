@@ -9,7 +9,9 @@ reference clip and its exact transcript. Lines go round-robin across speakers, o
 serial). Writes `<out>/<id>_t<take>.wav` (24 kHz mono, as the server returns it) and appends one JSON line per
 request to `<out>/log.jsonl` (seed, wall time, audio seconds) so the data can be traced and regenerated. A WAV that
 exists is skipped, so rerunning resumes. `--take N` with `--only` (ids that failed qc.py) makes retakes with fresh
-seeds. Standard library only.
+seeds. `--tail "Yes."` reads a short throwaway sentence after each line: Qwen3 often stops while the last sound
+is still decaying, and with the tail the line ends naturally, then qc.py cuts in the pause before it. Standard
+library only.
 """
 import argparse
 import json
@@ -50,6 +52,7 @@ def main():
     p.add_argument("--server", default="http://127.0.0.1:8080")
     p.add_argument("--model", default="qwen3-clone")
     p.add_argument("--timeout", type=float, default=180)
+    p.add_argument("--tail", default="", help='a throwaway sentence read after each line, e.g. "Yes."')
     args = p.parse_args()
 
     speakers = args.speakers or sorted(f[:-4] for f in os.listdir(args.script) if f.endswith(".tsv"))
@@ -73,7 +76,7 @@ def main():
         seed = seed_for(line_id, args.take)
         start = time.time()
         try:
-            data = speak(args.server, args.model, speaker, text, seed, args.timeout)
+            data = speak(args.server, args.model, speaker, f"{text} {args.tail}".strip(), seed, args.timeout)
         except Exception as e:  # a runaway or a server hiccup: log it, qc.py sees the line missing
             log.write(json.dumps({"id": line_id, "take": args.take, "seed": seed, "error": str(e)}) + "\n")
             log.flush()
@@ -86,7 +89,7 @@ def main():
             seconds = w.getnframes() / w.getframerate()
         os.replace(target + ".tmp", target)
         log.write(json.dumps({"id": line_id, "speaker": speaker, "take": args.take, "seed": seed, "model": args.model,
-                              "wall": round(wall, 2), "seconds": round(seconds, 2), "text": text}) + "\n")
+                              "wall": round(wall, 2), "seconds": round(seconds, 2), "text": text, "tail": args.tail}) + "\n")
         log.flush()
         done += 1
         audio_total += seconds
