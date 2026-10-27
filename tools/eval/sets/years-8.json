@@ -1,0 +1,15 @@
+{
+  "stage": "answer",
+  "base": "r1-dense-1",
+  "ids": [
+    "multi-step-001",
+    "multi-step-002",
+    "multi-step-004",
+    "multi-step-005",
+    "multi-step-009",
+    "multi-step-011",
+    "multi-step-013",
+    "multi-step-018"
+  ],
+  "about": "Plan R5 Task 4: the 8 year questions whose r1-dense-1 passages hold both facts"
+}

@@ -85,10 +85,6 @@ object ResearchTags {
     const val STOP_READING = "research_stop_reading"
 }
 private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
-private const val BEST_GUESS_WAIT = "This takes about half a minute"
-private const val BEST_GUESS_FALLBACK = "The large model couldn't load, so this guess is from the standard one."
-private const val THINK_DEEPER = "Think deeper (about 30 s)"
-private const val LARGE_FALLBACK = "Think deeper couldn't load the large model, so this answer is from the standard one."
 private const val MODELS_MISSING = "Research needs the Gemma 4 E2B model. Get it in Settings → Models."
 private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
 private const val SEARCH_FAILED = "Couldn't search your library. Try again."
@@ -125,10 +121,6 @@ private sealed interface ThreadRow {
         override val key get() = sourceKey(turnId, n)
     }
 
-    data class Deeper(val turnId: Long) : ThreadRow {
-        override val key get() = "deeper:$turnId"
-    }
-
     data object RecentHeader : ThreadRow {
         override val key get() = "recent"
     }
@@ -151,8 +143,6 @@ private fun rows(state: ResearchViewModel.State): List<ThreadRow> = buildList {
             turn.shown.forEachIndexed { i, passage -> add(ThreadRow.Source(turn.id, i + 1, passage)) }
         }
     }
-    val last = state.turns.lastOrNull()
-    if (last != null && state.canThinkDeeper) add(ThreadRow.Deeper(last.turn.id))
     if (state.turns.isEmpty() && state.recentChats.isNotEmpty()) {
         add(ThreadRow.RecentHeader)
         state.recentChats.forEach { add(ThreadRow.Recent(it)) }
@@ -186,7 +176,7 @@ fun ResearchScreen(
     // Follow the reply as it streams, unless the user has scrolled up to read. Saved, like the list's position, so
     // rotation or Back from a citation leaves the thread where the user was.
     var follow by rememberSaveable { mutableStateOf(true) }
-    // How many turns this screen has shown; more means a new turn started (Send, Think deeper, Retry) or a chat loaded.
+    // How many turns this screen has shown; more means a new turn started (Send, Retry) or a chat loaded.
     var seenTurns by rememberSaveable { mutableIntStateOf(-1) }
     // Set by the user's own drags only, so the screen's scrolls never turn following off.
     var userScrolling by remember { mutableStateOf(false) }
@@ -325,10 +315,6 @@ fun ResearchScreen(
                         row.n, row.passage, flashing == row.key, onOpen = { open(row.turnId, row.n) },
                         onPlay = if (viewModel.canPlay && row.passage.kind == SourceKind.MEDIA) ({ play(row.turnId, row.n) }) else null,
                     )
-                    is ThreadRow.Deeper -> OutlinedButton(
-                        onClick = { viewModel.thinkDeeper(row.turnId) },
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    ) { Text(THINK_DEEPER) }
                     ThreadRow.RecentHeader -> Text(
                         "Recent chats",
                         style = MaterialTheme.typography.labelLarge,
@@ -398,7 +384,6 @@ private fun AnswerBlock(
     val turn = ui.turn
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (ui.medical) Banner(MEDICAL)
-        if (ui.largeFallback) Banner(LARGE_FALLBACK)
         when (turn.outcome) {
             TurnOutcome.PENDING -> {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -419,15 +404,11 @@ private fun AnswerBlock(
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
-                    if (ui.guessLarge) {
-                        Text(BEST_GUESS_WAIT, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
                 }
                 if (ui.guessFailed) {
                     Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                     OutlinedButton(onClick = onReadiness) { Text("Readiness") }
                 }
-                if (ui.guessFellBack) Banner(BEST_GUESS_FALLBACK)
                 val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
                 if (guessText.isNotBlank()) GuessCard(guessText)
                 if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)

@@ -13,19 +13,17 @@ class DeviceTierTest {
         assertThat(DeviceTiers.forTotalRam(5_480_000_000L)).isEqualTo(DeviceTier.ASK)
     }
 
-    @Test fun eightGbPixel6GetsThinkDeeper() {
-        assertThat(DeviceTiers.forTotalRam(7_300_000_000L)).isEqualTo(DeviceTier.THINK_DEEPER)
-        assertThat(DeviceTiers.forTotalRam(7_650_000_000L)).isEqualTo(DeviceTier.THINK_DEEPER)
+    @Test fun eightGbPixel6GetsAsk() {
+        assertThat(DeviceTiers.forTotalRam(7_300_000_000L)).isEqualTo(DeviceTier.ASK)
+        assertThat(DeviceTiers.forTotalRam(7_650_000_000L)).isEqualTo(DeviceTier.ASK)
     }
 
-    @Test fun twelveGbPhoneGetsThinkDeeper() {
-        assertThat(DeviceTiers.forTotalRam(11_400_000_000L)).isEqualTo(DeviceTier.THINK_DEEPER)
+    @Test fun twelveGbPhoneGetsAsk() {
+        assertThat(DeviceTiers.forTotalRam(11_400_000_000L)).isEqualTo(DeviceTier.ASK)
     }
 
     @Test fun boundariesAreInclusive() {
         assertThat(DeviceTiers.forTotalRam(DeviceTiers.ASK_MIN_BYTES)).isEqualTo(DeviceTier.ASK)
         assertThat(DeviceTiers.forTotalRam(DeviceTiers.ASK_MIN_BYTES - 1)).isEqualTo(DeviceTier.LIBRARY_ONLY)
-        assertThat(DeviceTiers.forTotalRam(DeviceTiers.THINK_DEEPER_MIN_BYTES)).isEqualTo(DeviceTier.THINK_DEEPER)
-        assertThat(DeviceTiers.forTotalRam(DeviceTiers.THINK_DEEPER_MIN_BYTES - 1)).isEqualTo(DeviceTier.ASK)
     }
 }

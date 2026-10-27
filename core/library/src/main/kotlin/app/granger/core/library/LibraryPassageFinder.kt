@@ -15,8 +15,20 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * One [LibraryPassageFinder.find]'s time in milliseconds (Plan R5 Task 1): the full-text search of every pack, reading
+ * and splitting the chosen articles, the book search, the catalogue cards and the media cards; and each pack's own
+ * search time by pack name (packs run [LibraryPassageFinder]'s `searchParallelism` at a time, so these overlap).
+ */
+data class KeywordTimings(
+    val fulltextMs: Long, val readMs: Long, val booksMs: Long, val cardsMs: Long, val mediaMs: Long,
+    val packMs: Map<String, Long>,
+)
 
 /**
  * Finds passages for Research in four places: full-text hits in ZIM articles, matching chunks of e-books, short
@@ -42,14 +54,37 @@ class LibraryPassageFinder(
     private val media: MediaIndex? = null,
     private val mediaCards: Int = 2,
     private val searchParallelism: Int = 4,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) : PassageFinder {
+    /** The last [find]'s timings (Plan R5 Task 1); null before the first, or when it had no keywords. */
+    @Volatile var lastTimings: KeywordTimings? = null
+        private set
+
+    private val packMs = ConcurrentHashMap<String, Long>()
+    @Volatile private var fulltextMs = 0L
+
     override suspend fun find(keywords: List<String>): List<Passage> {
+        lastTimings = null
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
+        packMs.clear()
         val collections = shelves.collectionNames()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
-        val articles = withoutClassicsTwins(articles(words, packs, collections), packs)
-        return articles + books(words, collections) + cards(words, packs, collections) + mediaCards(words)
+        // The four searches don't depend on each other: books, cards and media run alongside the packs' full-text search.
+        return coroutineScope {
+            val articles = async { timed { withoutClassicsTwins(articles(words, packs, collections), packs) } }
+            val books = async { timed { books(words, collections) } }
+            val cards = async { timed { cards(words, packs, collections) } }
+            val media = async { timed { mediaCards(words) } }
+            val (a, b, c, m) = awaitAll(articles, books, cards, media)
+            lastTimings = KeywordTimings(fulltextMs, a.second - fulltextMs, b.second, c.second, m.second, packMs.toMap())
+            a.first + b.first + c.first + m.first
+        }
+    }
+
+    private suspend fun timed(block: suspend () -> List<Passage>): Pair<List<Passage>, Long> {
+        val start = clock()
+        return block().let { it to clock() - start }
     }
 
     /**
@@ -103,12 +138,16 @@ class LibraryPassageFinder(
         withContext(io) {
             // Packs are searched [searchParallelism] at a time: one after another, search time grew with every pack added.
             val searching = io.limitedParallelism(searchParallelism)
+            val searchStart = clock()
             val hits = packs.filter { it.hasFulltextIndex }.map { pack ->
                 async(searching) {
                     try {
+                        val packStart = clock()
                         val archive = library.archive(pack.id) ?: return@async emptyList()
-                        words.flatMap { archive.search(it, perPack) }
+                        // Research never shows a snippet, and libzim builds each one from the article.
+                        words.flatMap { archive.searchWithoutSnippets(it, perPack) }
                             .groupBy { it.path }.values.map { same -> Triple(pack, archive, same.maxBy { it.score }) }
+                            .also { packMs[pack.name] = clock() - packStart }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (_: Exception) {
@@ -116,6 +155,7 @@ class LibraryPassageFinder(
                     }
                 }
             }.awaitAll().flatten()
+            fulltextMs = clock() - searchStart
             hits.sortedByDescending { it.third.score }.take(docs).flatMap { (pack, archive, hit) ->
                 try {
                     articlePassages(pack, archive, hit, collections[pack.id].orEmpty())
@@ -211,9 +251,10 @@ class LibraryPassageFinder(
     }
 
     private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
+        val mentions = mentions(words)
         val made = books.mapNotNull { book ->
             attempt {
-                if (!mentions(words, book.title, book.author, book.subjects, book.description)) return@attempt null
+                if (!mentions(arrayOf(book.title, book.author, book.subjects, book.description))) return@attempt null
                 val text = lines(
                     "Title" to book.title, "Author" to book.author, "Translator" to book.translator,
                     "Published" to book.date, "Subjects" to book.subjects, "Collection" to collections[book.id].orEmpty(),
@@ -226,7 +267,7 @@ class LibraryPassageFinder(
             }
         } + packs.mapNotNull { pack ->
             attempt {
-                if (!mentions(words, pack.title, pack.description)) return@attempt null
+                if (!mentions(arrayOf(pack.title, pack.description))) return@attempt null
                 val text = lines(
                     "Title" to pack.title, "Description" to pack.description, "Date" to pack.date,
                     "Collection" to collections[pack.id].orEmpty(), "In your library as" to "web pack",
@@ -249,15 +290,18 @@ class LibraryPassageFinder(
     private fun lines(vararg fields: Pair<String, String>): String =
         fields.filter { it.second.isNotBlank() }.joinToString("\n") { (label, value) -> "$label: ${value.trim()}" }
 
-    /** Whether every word of some keyword appears in the fields, as whole words. */
-    private fun mentions(keywords: List<String>, vararg fields: String): Boolean =
-        keywords.any { keyword ->
-            val words = Keywords.words(keyword)
-            words.isNotEmpty() && words.all { word ->
-                val whole = Regex("(?<![\\p{L}\\p{N}])${Regex.escape(word)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
-                fields.any { whole.containsMatchIn(it) }
+    /**
+     * Whether every word of some keyword appears in the fields, as whole words. The patterns are compiled once per
+     * search, not once per book and field.
+     */
+    private fun mentions(keywords: List<String>): (Array<out String>) -> Boolean {
+        val patterns = keywords.map { keyword ->
+            Keywords.words(keyword).map { word ->
+                Regex("(?<![\\p{L}\\p{N}])${Regex.escape(word)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
             }
-        }
+        }.filter { it.isNotEmpty() }
+        return { fields -> patterns.any { words -> words.all { whole -> fields.any { whole.containsMatchIn(it) } } } }
+    }
 
     private companion object {
         const val NAMED_BOOKS = 3

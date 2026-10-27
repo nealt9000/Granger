@@ -1,0 +1,39 @@
+{"id": "bible-001", "run": "r1-dense-1", "facts": ["no", "no", "no"], "why": "Wikipedia passages paraphrase 'wine is a mocker' but name no verse or location, and none is from the KJV."}
+{"id": "vocab-gap-001", "run": "r1-dense-1", "facts": ["passage"], "why": "Passage [3] gives Leviticus 19:28 in translation: no cutting in your flesh for the dead, no tattooed inscription."}
+{"id": "vocab-gap-002", "run": "r1-dense-1", "facts": ["no"], "why": "No passages chosen."}
+{"id": "vocab-gap-003", "run": "r1-dense-1", "facts": ["no", "no"], "why": "No passage mentions render unto Caesar or paying tribute."}
+{"id": "vocab-gap-009", "run": "r1-dense-1", "facts": ["no"], "why": "Mill bio and peer-pressure pages only; nothing on social tyranny and none from On Liberty."}
+{"id": "vocab-gap-010", "run": "r1-dense-1", "facts": ["article"], "why": "[1] says only that espionage matters, with no five kinds of spies; [3] is from the Art of War book but a different chapter."}
+{"id": "who-wrote-004", "run": "r1-dense-1", "facts": ["article", "article"], "why": "[2] is from the Nineteen Eighty-Four article but never names Orwell."}
+{"id": "follow-up-005", "run": "r1-dense-1", "facts": ["passage"], "why": "Passage [1] gives the 1903 Physics and 1911 Chemistry prizes and says she was the first to win twice."}
+{"id": "science-006", "run": "r1-dense-1", "facts": ["passage"], "why": "Passage [1]: the blue whale is believed to be the largest animal ever to have lived."}
+{"id": "literature-001", "run": "r1-dense-1", "facts": ["no"], "why": "Wikipedia summaries only; no opening line and no text from the novel itself."}
+{"id": "literature-002", "run": "r1-dense-1", "facts": ["no"], "why": "Passages from other Holmes books and Wikipedia; no Afghanistan line, nothing from A Study in Scarlet."}
+{"id": "literature-005", "run": "r1-dense-1", "facts": ["article"], "why": "Gulliver's Travels passages, but none states six inches; [4] gives only a 12:1 ratio."}
+{"id": "literature-006", "run": "r1-dense-1", "facts": ["article", "article"], "why": "Fence-chapter passages show the start ([3]) and Tom feigning exclusivity ([1]), but not the trading or the three coats."}
+{"id": "geography-general-003", "run": "r1-dense-1", "facts": ["passage"], "why": "Passage [4] says China is second-most populous after India; [1] lists India first too."}
+{"id": "geography-general-004", "run": "r1-dense-1", "facts": ["no"], "why": "[1] says only that the Amazon and Nile dispute the title; no passage states the Nile is the longest, and none is from the Nile article."}
+{"id": "medical-018", "run": "r1-dense-1", "facts": ["no"], "why": "General foodborne-illness passages; no mention of poultry, chicken or Campylobacter."}
+{"id": "words-001", "run": "r1-dense-1", "facts": ["no"], "why": "Play text and Wikipedia only; no definition of wherefore."}
+{"id": "words-002", "run": "r1-dense-1", "facts": ["no"], "why": "Usage examples only; no passage defines betimes as early."}
+{"id": "medical-032", "run": "r1-dense-1", "facts": ["no"], "why": "Only 'epidemic dropsy is a form of edema' from argemone poisoning; never says dropsy is the old name for edema, and none is from the Edema article."}
+{"id": "multi-step-001", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[1] gives birth 30 August 1797; [4] gives publication 1 January 1818."}
+{"id": "multi-step-002", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[4] gives Austen's death 18 July 1817; [3] gives Frankenstein published 1 January 1818."}
+{"id": "multi-step-003", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "years", "why": "[3] gives Shakespeare's death 1616; [1] mentions the KJV translation but no year, and no KJV article passage."}
+{"id": "multi-step-004", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[1] gives Darwin born 12 February 1809; [2] gives Lincoln born February 12, 1809."}
+{"id": "multi-step-005", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[1] and [2] give Cervantes died 22 April 1616; [4] gives Shakespeare died 23 April 1616."}
+{"id": "multi-step-006", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "chain", "why": "[1] says Alexander was tutored by Aristotle; no passage says Aristotle studied under Plato, and none is from the Aristotle article."}
+{"id": "multi-step-007", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "chain", "why": "[1] says the author is Colombian; no passage names Bogota or is from the Colombia article."}
+{"id": "multi-step-008", "run": "r1-dense-1", "facts": ["no", "passage"], "kind": "years", "why": "No passage gives the 1859 Origin date; [2] gives Lincoln serving from 1861."}
+{"id": "multi-step-009", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[2] (Columbus Day) gives landfall October 12, 1492 and [4] gives 1492; [1] gives the Mayflower in 1620."}
+{"id": "multi-step-010", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "years", "why": "[1]/[2] give Methuselah's 969 years; no passage gives Noah's 950-year lifespan, and none is from the KJV book."}
+{"id": "multi-step-011", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[2]/[3] give Machiavelli born 3 May 1469; [1] gives Columbus sailing August 1492."}
+{"id": "multi-step-012", "run": "r1-dense-1", "facts": ["no", "no"], "kind": "years", "why": "No passages were chosen."}
+{"id": "multi-step-013", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[4] (IEP) gives Origin published November 24, 1859 ([2] gives 1859); [1] gives Darwin died 19 April 1882."}
+{"id": "multi-step-014", "run": "r1-dense-1", "facts": ["no", "passage"], "kind": "years", "why": "No passage gives the 1215 Magna Carta date; [4] gives the Black Death in Europe from 1346."}
+{"id": "multi-step-015", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "quantity", "why": "[1] gives 384,399 km; no passage gives the speed of light value ([2] only mentions its first measurement)."}
+{"id": "multi-step-016", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "quantity", "why": "[1] (Mariana Trench, top wiki) gives max depth 10,935 m; [2] gives Everest 8,848.86 m."}
+{"id": "multi-step-017", "run": "r1-dense-1", "facts": ["no", "no"], "kind": "quantity", "why": "No passage gives the speed of sound or light; passages only say lightning causes thunder."}
+{"id": "multi-step-018", "run": "r1-dense-1", "facts": ["passage", "passage"], "kind": "years", "why": "[3] gives Mendeleev's table in 1869; [2] gives Curie's 1911 Nobel Prize in Chemistry."}
+{"id": "multi-step-019", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "years", "why": "[1] gives Wiles's proof released 1994; no passage gives the Berlin Wall's 1989 fall."}
+{"id": "multi-step-020", "run": "r1-dense-1", "facts": ["passage", "no"], "kind": "years", "why": "[2] gives Mendeleev's table in 1869; no passage gives Darwin's 1882 death or is from his article."}

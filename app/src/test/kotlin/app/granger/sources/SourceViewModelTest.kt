@@ -1,5 +1,6 @@
 package app.granger.sources
 
+import app.granger.DENSE_RETRIEVAL
 import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.bookEntry
@@ -54,7 +55,7 @@ class SourceViewModelTest {
 
     private fun TestScope.viewModel(
         scope: CatalogScope = CatalogScope.GRANGER,
-        tier: DeviceTier = DeviceTier.THINK_DEEPER,
+        tier: DeviceTier = DeviceTier.ASK,
     ): SourceViewModel {
         val vm = SourceViewModel(scope, catalog, downloads, library, bookshelf, volumes, prefs, tier, appScope = this, io = main.dispatcher)
         backgroundScope.launch { vm.ui.collect {} }
@@ -84,7 +85,7 @@ class SourceViewModelTest {
         val ifixit = packEntry("ifixit", category = "How-to", license = "CC BY-NC-SA 3.0", nonCommercial = true)
         val vm = SourceViewModel(
             CatalogScope.GRANGER, FakeCatalogSource(catalogOf(packs = listOf(ifixit, med))), downloads, library, bookshelf,
-            volumes, prefs, DeviceTier.THINK_DEEPER, appScope = this, io = main.dispatcher,
+            volumes, prefs, DeviceTier.ASK, appScope = this, io = main.dispatcher,
         )
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
@@ -98,15 +99,28 @@ class SourceViewModelTest {
         assertThat(ui.sections.map { it.title }).containsExactly("AI models")
     }
 
-    @Test fun unusedEmbedderSaysNotUsedYet() = runTest(main.dispatcher) {
+    @Test fun theEmbedderSaysWhetherResearchUsesIt() = runTest(main.dispatcher) {
         val vm = SourceViewModel(
             CatalogScope.MODELS, FakeCatalogSource(catalogOf(models = listOf(e2b, modelEntry("gemma-embed", ModelRole.EMBEDDER)))),
-            downloads, library, bookshelf, volumes, prefs, DeviceTier.THINK_DEEPER, appScope = this, io = main.dispatcher,
+            downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this, io = main.dispatcher,
         )
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("gemma-embed").description).isEqualTo("Not used yet")
+        assertThat(rows.getValue("gemma-embed").description).isEqualTo(if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet")
+        assertThat(rows.getValue("e2b").description).isEmpty()
+    }
+
+    @Test fun theLargeModelSaysItIsNotUsed() = runTest(main.dispatcher) {
+        val vm = SourceViewModel(
+            CatalogScope.MODELS, FakeCatalogSource(catalogOf(models = listOf(e2b, modelEntry("e4b", ModelRole.LARGE)))),
+            downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this, io = main.dispatcher,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        assertThat(rows.getValue("e4b").description).isEqualTo("Not used")
+        assertThat(rows.getValue("e4b").status).isEqualTo(ItemStatus.NeedsMoreMemory)
         assertThat(rows.getValue("e2b").description).isEmpty()
     }
 
@@ -488,7 +502,7 @@ class SourceViewModelTest {
 
     private fun TestScope.domainViewModel(domain: String?): SourceViewModel {
         val vm = SourceViewModel(
-            CatalogScope.KIWIX, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.THINK_DEEPER,
+            CatalogScope.KIWIX, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK,
             appScope = this, io = main.dispatcher, domain = domain,
         )
         backgroundScope.launch { vm.ui.collect {} }

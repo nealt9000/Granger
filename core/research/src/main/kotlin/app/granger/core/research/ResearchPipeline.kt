@@ -43,7 +43,7 @@ fun interface PassageEmbedder {
 
 /** Loads the on-device models. [generator] throws [ModelUnavailableException] when the model can't load. */
 interface ResearchModels {
-    suspend fun generator(deeper: Boolean): TextGenerator
+    suspend fun generator(): TextGenerator
     suspend fun embedder(): PassageEmbedder?
 }
 
@@ -62,20 +62,15 @@ enum class Stage { LOADING_MODEL, SEARCHING, RANKING, WRITING }
 /** [SEARCH_FAILED] is the library search or its storage failing; [MODEL_UNAVAILABLE] is the model. */
 enum class FailReason { MODEL_UNAVAILABLE, SEARCH_FAILED }
 
-/**
- * One question. [quote] is the user's selection and always becomes passage [1]. With [deeperFrom] set, retrieval
- * is skipped and those passages (up to 8) go to the large model.
- */
+/** One question. [quote] is the user's selection and always becomes passage [1]. */
 data class ResearchRequest(
     val question: String,
     val quote: Passage? = null,
     val prior: PriorTurn? = null,
     val priorQuestion: String? = null,
-    val deeperFrom: List<Passage>? = null,
-    val medicalHint: Boolean = false,
 )
 
-/** How a question ended. `passages` are the numbered ones in the prompt; `candidates` are the ranked rest, kept for Think deeper. */
+/** How a question ended. `passages` are the numbered ones in the prompt; `candidates` are the ranked rest of the pool. */
 sealed interface Outcome {
     val medical: Boolean
     val keywords: List<String>
@@ -85,7 +80,6 @@ sealed interface Outcome {
         val passages: List<Passage>,
         val cited: Set<Int>,
         val candidates: List<Passage>,
-        val usedLarge: Boolean,
         override val medical: Boolean,
         override val keywords: List<String>,
     ) : Outcome
@@ -106,13 +100,12 @@ sealed interface Outcome {
         val text: String,
         val passages: List<Passage>,
         val candidates: List<Passage>,
-        val usedLarge: Boolean,
         override val medical: Boolean,
         override val keywords: List<String>,
     ) : Outcome
 
-    /** A best guess from the model's own knowledge: no passages, no citations. [fellBack] is true when the large model wouldn't load. */
-    data class Guessed(val text: String, val usedLarge: Boolean, val fellBack: Boolean) : Outcome {
+    /** A best guess from the model's own knowledge: no passages, no citations. */
+    data class Guessed(val text: String) : Outcome {
         override val medical: Boolean get() = false
         override val keywords: List<String> get() = emptyList()
     }
@@ -132,10 +125,6 @@ sealed interface ResearchEvent {
     data class Partial(val text: String) : ResearchEvent
     /** The question is medical, known before the reply is written, so the answer shows its banner as it streams. */
     data object Medical : ResearchEvent
-    /** The large model wouldn't load, so the small one answers. */
-    data object LargeFallback : ResearchEvent
-    /** The large model wouldn't load for a best guess, so the small one writes it. */
-    data object GuessFallback : ResearchEvent
     data class Done(val outcome: Outcome) : ResearchEvent
 }
 
@@ -147,74 +136,82 @@ class ResearchPipeline(
     private val rewriteTimeoutMs: Long = 5_000,
     /** Plan R0's debug variant: the rewrite may give each keyword alternates (see [Rewrite.prompt]). Off in the app. */
     private val rewriteAlternates: Boolean = false,
+    /**
+     * Plan R4's debug variant: a first question gets [Keywords.extract] and the medical lexicon, with no model call; a
+     * follow-up still asks the model, to fold in the earlier turn. Off in the app.
+     */
+    private val rewritePlain: Boolean = false,
+    /** Plan R5 Task 6: with [rewritePlain], a follow-up too gets [Keywords.extract] of it and its prior question. */
+    private val rewritePlainFollowUps: Boolean = false,
     /** See [SourceWeight]; the app passes [FictionWeight]. */
     private val sourceWeight: SourceWeight? = null,
     /**
-     * Dense retrieval (Plan R1): the question (after the prior one, when there is one) is embedded and searched by
+     * Dense retrieval (Plan R1): the question (after the prior one, when it [FollowUp.refersBack]) is embedded and searched by
      * meaning alongside the keyword search, and [Ranking.hybrid] merges the two. Without it, or when the embedder or
      * the vectors aren't there, ranking is the keyword ranking.
      */
     private val dense: DenseFinder? = null,
+    /**
+     * Plan R5 Task 4: a question that compares dates gives each thing it names a place among the
+     * answer's passages ([Entities.reserve]). On in the app from Plan R5 Task 7.
+     */
+    private val reserveNamed: Boolean = false,
+    /**
+     * Plan R5 Task 4: a question that compares dates gets the dates of the things it names and
+     * the sums between them worked out in code ([YearFacts]), after the passages. On in the app from Plan R5 Task 7.
+     */
+    private val yearFacts: Boolean = false,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
-        val deeper = request.deeperFrom != null
-        var loadFailure: Throwable? = null
-        val generator = loadGenerator(deeper, onFailure = { loadFailure = it })
-        if (generator == null) {
-            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, request.medicalHint, emptyList(), loadFailure)))
+        val model = try {
+            models.generator()
+        } catch (e: ModelUnavailableException) {
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), e)))
             return@flow
         }
-        var usedLarge = deeper && generator.large
-        var model = generator.model
 
-        val medical: Boolean
-        val keywords: List<String>
-        val ranked: List<Passage>
         val asked = MediaCues.asked(request.question)
-        if (request.deeperFrom != null) {
-            medical = request.medicalHint
-            if (medical) emit(ResearchEvent.Medical)
-            keywords = emptyList()
-            ranked = request.deeperFrom
-        } else {
-            val rewrite = rewrite(generator.model, request)
-            medical = rewrite.medical == true || request.medicalHint ||
-                Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
-            if (medical) emit(ResearchEvent.Medical)
-            keywords = rewrite.keywords
-            if (request.quote == null && PersonalMedical.matches(request.question, medical)) {
-                // One person's own health: the app's medical copy, whatever the library holds. No search, no answer.
-                emit(ResearchEvent.Done(Outcome.Declined(medical = true, keywords)))
-                return@flow
+        val rewrite = rewrite(model, request)
+        val medical = rewrite.medical == true || Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
+        if (medical) emit(ResearchEvent.Medical)
+        val keywords = rewrite.keywords
+        if (request.quote == null && PersonalMedical.matches(request.question, medical)) {
+            // One person's own health: the app's medical copy, whatever the library holds. No search, no answer.
+            emit(ResearchEvent.Done(Outcome.Declined(medical = true, keywords)))
+            return@flow
+        }
+        emit(ResearchEvent.Progress(Stage.SEARCHING))
+        var hits: List<Passage>? = null
+        val all = try {
+            coroutineScope {
+                val byMeaning = dense?.let { d -> async { denseHits(d, request) } }
+                finder.find(Keywords.searchTerms(keywords)).also { hits = byMeaning?.await() }
             }
-            emit(ResearchEvent.Progress(Stage.SEARCHING))
-            var hits: List<Passage>? = null
-            val all = try {
-                coroutineScope {
-                    val byMeaning = dense?.let { d -> async { denseHits(d, request) } }
-                    finder.find(Keywords.searchTerms(keywords)).also { hits = byMeaning?.await() }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
-                return@flow
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
+            return@flow
+        }
+        val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
+        val found = Ranking.preselect(all, keywords, config, weight)
+        emit(ResearchEvent.Progress(Stage.RANKING))
+        val ranked = try {
+            val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight) }
+            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight), found, asked)
+            if (reserveNamed && Entities.asked(request.question)) {
+                Entities.reserve(lifted, all + hits.orEmpty(), Entities.named(request.question, keywords), config.small)
+            } else {
+                lifted
             }
-            val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
-            val found = Ranking.preselect(all, keywords, config, weight)
-            emit(ResearchEvent.Progress(Stage.RANKING))
-            ranked = try {
-                val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight) }
-                Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight), found, asked)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                // The embedder failed: a model failure, reported with what the pipeline knows.
-                emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, e)))
-                return@flow
-            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // The embedder failed: a model failure, reported with what the pipeline knows.
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, e)))
+            return@flow
         }
 
         val quote = request.quote
@@ -225,32 +222,15 @@ class ResearchPipeline(
             return@flow
         }
         val pool = (listOfNotNull(quote) + capped.filter { it != quote }).take(config.large)
-        /** The passages that fit the prompt for the large or the small model; the rest stay candidates for Think deeper. */
-        fun fit(large: Boolean): Pair<List<Passage>, List<Passage>> {
-            val wanted = pool.take(if (large) config.large else config.small)
-            // Dropped for the prompt's budget, a passage can't be cited.
-            val fitted = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null)
-            return fitted to pool.drop(fitted.size)
-        }
-        var (passages, candidates) = fit(usedLarge)
+        fun worked(passages: List<Passage>): String? =
+            if (yearFacts && quote == null && Entities.asked(request.question)) YearFacts.block(request.question, keywords, passages) else null
+        val wanted = pool.take(config.small)
+        // Dropped for the prompt's budget, a passage can't be cited; the rest of the pool stays as candidates.
+        val passages = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null, worked(wanted))
+        val candidates = pool.drop(passages.size)
 
         emit(ResearchEvent.Progress(Stage.WRITING))
-        var streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
-        if (usedLarge && streamed.text == null && streamed.chunks == 0 && streamed.cause is ModelUnavailableException) {
-            // The large model wouldn't reload for this reply (it can be released between the rewrite and the answer):
-            // answer with the small one, as when it fails to load at the start.
-            val small = try {
-                models.generator(deeper = false)
-            } catch (e: ModelUnavailableException) {
-                emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, e)))
-                return@flow
-            }
-            emit(ResearchEvent.LargeFallback)
-            usedLarge = false
-            model = small
-            fit(false).let { passages = it.first; candidates = it.second }
-            streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null), stop)
-        }
+        val streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null, worked(passages)), stop)
         val reply = streamed.text
         if (reply == null) {
             // Reported here, not thrown: a failure would reach the collector without the flags the pipeline knows.
@@ -260,37 +240,35 @@ class ResearchPipeline(
 
         val outcome = when (val check = Citations.check(reply, passages.size)) {
             is CitationCheck.Valid ->
-                Outcome.Answered(reply, passages, check.cited, candidates, usedLarge, medical, keywords)
+                Outcome.Answered(reply, passages, check.cited, candidates, medical, keywords)
             CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords, passages, reply)
-            CitationCheck.Invalid -> Outcome.Unverified(reply, passages, candidates, usedLarge, medical, keywords)
+            CitationCheck.Invalid -> Outcome.Unverified(reply, passages, candidates, medical, keywords)
         }
         emit(ResearchEvent.Done(outcome))
     }
 
     /** A best guess with no passages: loads the model, streams the reply, and ends with [Outcome.Guessed]. */
-    fun guess(question: String, priorQuestion: String?, large: Boolean, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
+    fun guess(question: String, priorQuestion: String?, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
-        var fellBack = false
-        var loadFailure: Throwable? = null
-        val generator = loadGenerator(large, onFailure = { loadFailure = it }) { fellBack = true; emit(ResearchEvent.GuessFallback) }
-        if (generator == null) {
-            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), loadFailure)))
+        val model = try {
+            models.generator()
+        } catch (e: ModelUnavailableException) {
+            emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), e)))
             return@flow
         }
         emit(ResearchEvent.Progress(Stage.WRITING))
-        val streamed = streamReply(generator.model, GuessPrompt.build(question, priorQuestion), stop)
+        val streamed = streamReply(model, GuessPrompt.build(question, priorQuestion), stop)
         val reply = streamed.text
         if (reply == null) {
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), streamed.cause)))
             return@flow
         }
-        emit(ResearchEvent.Done(Outcome.Guessed(reply, generator.large, fellBack)))
+        emit(ResearchEvent.Done(Outcome.Guessed(reply)))
     }
 
     /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far, or the failure. */
     private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): StreamResult {
         var failure: Throwable? = null
-        var chunks = 0
         val text = model.generate(prompt, ANSWER_TOKENS)
             .catch { e ->
                 if (e is CancellationException) throw e
@@ -301,45 +279,28 @@ class ResearchPipeline(
                 !stop()
             }
             .fold("") { soFar, chunk ->
-                chunks++
                 val text = soFar + chunk
                 emit(ResearchEvent.Partial(text))
                 text
             }
-        return if (failure != null) StreamResult(null, failure, chunks) else StreamResult(text, null, chunks)
+        return if (failure != null) StreamResult(null, failure) else StreamResult(text, null)
     }
 
-    /** [text] is null when the model failed with [cause]; [chunks] is how many pieces of the reply arrived first. */
-    private class StreamResult(val text: String?, val cause: Throwable?, val chunks: Int)
-
-    private class Loaded(val model: TextGenerator, val large: Boolean)
-
-    /** Null when even the small model won't load. */
-    private suspend fun FlowCollector<ResearchEvent>.loadGenerator(
-        deeper: Boolean,
-        onFailure: (Throwable) -> Unit = {},
-        onFallback: suspend () -> Unit = { emit(ResearchEvent.LargeFallback) },
-    ): Loaded? {
-        if (deeper) {
-            try {
-                return Loaded(models.generator(deeper = true), large = true)
-            } catch (e: ModelUnavailableException) {
-                onFallback()
-            }
-        }
-        return try {
-            Loaded(models.generator(deeper = false), large = false)
-        } catch (e: ModelUnavailableException) {
-            onFailure(e)
-            null
-        }
-    }
+    /** [text] is null when the model failed with [cause]. */
+    private class StreamResult(val text: String?, val cause: Throwable?)
 
     /**
      * The model's keywords, or the plain keyword fallback when it times out, errors, or replies with nothing usable.
      * The medical lexicon decides whenever the model didn't say.
      */
     private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest): RewriteResult {
+        if (rewritePlain && request.priorQuestion == null) {
+            return RewriteResult(Keywords.extract(request.question), Medical.looksMedical(request.question))
+        }
+        if (rewritePlain && rewritePlainFollowUps) {
+            val text = listOfNotNull(request.question, request.priorQuestion).joinToString(" ")
+            return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
+        }
         val parsed = try {
             var result: RewriteResult? = null
             // The timeout runs from the model being free to start, not from asking: another chat may hold it first.
@@ -381,7 +342,8 @@ class ResearchPipeline(
         if (embedder == null) {
             null
         } else {
-            val text = listOfNotNull(request.priorQuestion, request.question).joinToString(" ")
+            val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
+            val text = listOfNotNull(prior, request.question).joinToString(" ")
             finder.find(embedder.embed(listOf(text), isQuery = true).single()).takeIf { it.isNotEmpty() }
         }
     } catch (e: CancellationException) {

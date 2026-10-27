@@ -32,6 +32,9 @@ fun interface VectorSources {
     suspend fun current(): List<VectorSource>
 }
 
+/** One [DensePassageFinder.find]'s time in milliseconds: listing the vector files, the scan, and rebuilding the hits. */
+data class DenseTimings(val sourcesMs: Long, val scanMs: Long, val rebuildMs: Long, val rows: Long, val files: Int)
+
 /**
  * Finds passages by meaning: the [k] best vectors over every installed pack and book that has a vector file, turned back
  * into [Passage]s by re-chunking their article or chapter, just as [LibraryPassageFinder] builds them. A rebuilt chunk
@@ -45,10 +48,17 @@ class DensePassageFinder(
     private val pool: ExecutorService,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val k: Int = 24,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) : DenseFinder {
     val mismatches = AtomicInteger()
 
+    /** The last [find]'s timings (Plan R5 Task 1); null before the first, or when it found no usable vector file. */
+    @Volatile var lastTimings: DenseTimings? = null
+        private set
+
     override suspend fun find(query: FloatArray): List<Passage> = withContext(io) {
+        val start = clock()
+        lastTimings = null
         val packs = library.packs.first().filter { it.status == PackStatus.OK && it.name.isNotBlank() }
             .groupBy { it.name }.mapValues { (_, same) -> same.maxBy { it.date } }
         val books = bookshelf.books.first().filter { it.status == PackStatus.OK }.associateBy { it.id }
@@ -62,7 +72,10 @@ class DensePassageFinder(
         if (usable.isEmpty()) return@withContext emptyList()
         val byFile = usable.associateBy { it.file }
         val dims = usable.groupBy { it.file.header.dims }.maxBy { it.value.size }.key
-        val hits = VectorSearch.top(query, usable.map { it.file }.filter { it.header.dims == dims }, k, pool)
+        val searched = usable.map { it.file }.filter { it.header.dims == dims }
+        val listed = clock()
+        val hits = VectorSearch.top(query, searched, k, pool)
+        val scanned = clock()
         val collections = shelves.collectionNames()
         val rebuilt = HashMap<VectorHit, Passage>()
         hits.groupBy { byFile.getValue(it.file) }.forEach { (source, sourceHits) ->
@@ -81,6 +94,7 @@ class DensePassageFinder(
                 // One damaged source drops only its own passages.
             }
         }
+        lastTimings = DenseTimings(listed - start, scanned - listed, clock() - scanned, searched.sumOf { it.header.count.toLong() }, searched.size)
         hits.mapNotNull { rebuilt[it] }
     }
 

@@ -1,0 +1,18 @@
+{
+  "stage": "answer",
+  "base": "r5-t4-ent3",
+  "ids": [
+    "multi-step-001",
+    "multi-step-002",
+    "multi-step-004",
+    "multi-step-005",
+    "multi-step-008",
+    "multi-step-009",
+    "multi-step-011",
+    "multi-step-013",
+    "multi-step-014",
+    "multi-step-019",
+    "multi-step-020"
+  ],
+  "about": "Plan R5 Task 4: the 11 year questions whose r5-t4-ent3 passages hold both facts"
+}

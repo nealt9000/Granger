@@ -211,7 +211,7 @@ class LibraryPassageFinderTest {
         // Each archive's search waits until both searches have started: one after another, this would time out.
         val started = java.util.concurrent.CountDownLatch(2)
         fun waiting(id: String) = object : ZimArchive by FakeZimArchive(id) {
-            override fun search(query: String, limit: Int): List<ZimHit> {
+            override fun searchWithoutSnippets(query: String, limit: Int): List<ZimHit> {
                 started.countDown()
                 check(started.await(5, java.util.concurrent.TimeUnit.SECONDS)) { "searches ran one at a time" }
                 return listOf(ZimHit("index", id, score = 1))

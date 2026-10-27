@@ -162,3 +162,37 @@ def test_start_stops_the_app_first_so_the_screen_starts_fresh(tmp_path):
     adb.run_eval(fake, ds, "r1", tmp_path / "runs", sleep=lambda s: None)
     start = next(c for c in fake.calls if "am" in c and "start" in c)
     assert "-S" in start and start[start.index("--es") + 1:start.index("--es") + 3] == ["runId", "r1"]
+
+
+def test_a_dead_app_stops_the_wait(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+
+    class Dead(Fake):
+        def __call__(self, args):
+            if "pidof" in args:
+                self.calls.append(args)
+                return 1, ""
+            return super().__call__(args)
+
+    f = Dead(done_after=99)
+    with pytest.raises(SystemExit, match="app died"):
+        adb.run_eval(f, ds, "r1", tmp_path / "runs", sleep=lambda s: None)
+    assert sum("pidof" in c for c in f.calls) == 2
+
+
+def test_a_replaced_app_process_stops_the_wait(tmp_path):
+    ds = tmp_path / "d.json"
+    ds.write_text("[]")
+
+    class Replaced(Fake):
+        pids = iter(["4065", "6830", "6830"])
+
+        def __call__(self, args):
+            if "pidof" in args:
+                self.calls.append(args)
+                return 0, next(self.pids) + "\n"
+            return super().__call__(args)
+
+    with pytest.raises(SystemExit, match="app died"):
+        adb.run_eval(Replaced(done_after=99), ds, "r1", tmp_path / "runs", sleep=lambda s: None)

@@ -53,10 +53,13 @@ class ModelsAdapterTest {
     private val engines = mutableListOf<GatedLlm>()
     private val embedders = mutableListOf<CountingEmbedder>()
 
-    private fun TestScope.adapter(installed: InstalledModels): Pair<ModelsAdapter, ModelManager> {
+    private fun TestScope.adapter(installed: InstalledModels): Pair<ModelsAdapter, ModelManager> =
+        adapter(MutableStateFlow(installed))
+
+    private fun TestScope.adapter(installed: MutableStateFlow<InstalledModels>): Pair<ModelsAdapter, ModelManager> {
         val io = StandardTestDispatcher(testScheduler)
         val manager = ModelManager(
-            DeviceTier.THINK_DEEPER, MutableStateFlow(installed),
+            DeviceTier.ASK, installed,
             LlmEngineFactory { path, _: LlmBackend -> GatedLlm(path).also { engines += it } },
             TextEmbedderFactory { CountingEmbedder().also { embedders += it } },
             backgroundScope, useEmbedder = { true }, io = io,
@@ -65,8 +68,8 @@ class ModelsAdapterTest {
     }
 
     @Test fun aSecondGenerationWaitsForTheFirst() = runTest {
-        val (adapter, _) = adapter(InstalledModels(small = File("small")))
-        val generator = adapter.generator(deeper = false)
+        val (adapter, _) = adapter(InstalledModels(llm = File("small")))
+        val generator = adapter.generator()
         val heard = mutableListOf<String>()
         launch { generator.generate("a", 16).collect { heard += "a:$it" } }
         advanceUntilIdle()
@@ -79,8 +82,8 @@ class ModelsAdapterTest {
     }
 
     @Test fun aGenerationSaysItIsReadyOnlyOnceTheModelIsFree() = runTest {
-        val (adapter, _) = adapter(InstalledModels(small = File("small")))
-        val generator = adapter.generator(deeper = false)
+        val (adapter, _) = adapter(InstalledModels(llm = File("small")))
+        val generator = adapter.generator()
         launch { generator.generate("a", 16).toList() }
         advanceUntilIdle()
         var ready = false
@@ -92,27 +95,9 @@ class ModelsAdapterTest {
         assertThat(ready).isTrue()
     }
 
-    @Test fun anotherChatsSwapWaitsUntilTheReplyIsDone() = runTest {
-        val (adapter, _) = adapter(InstalledModels(small = File("small"), large = File("large")))
-        val small = adapter.generator(deeper = false)
-        var reply: List<String>? = null
-        launch { reply = small.generate("q", 16).toList() }
-        advanceUntilIdle()
-        // A second chat's Think deeper would load the large model, closing the small one mid-reply.
-        launch { adapter.generator(deeper = true) }
-        advanceUntilIdle()
-        assertThat(engines.map { it.path }).containsExactly("small")
-        assertThat(engines.single().closed).isFalse()
-        engines.single().gate.complete(Unit)
-        advanceUntilIdle()
-        assertThat(reply).containsExactly("one ", "two").inOrder()
-        assertThat(engines.map { it.path }).containsExactly("small", "large").inOrder()
-        assertThat(engines.first().closed).isTrue()
-    }
-
     @Test fun releaseRequestedMidGenerationWaitsForTheReply() = runTest {
-        val (adapter, manager) = adapter(InstalledModels(small = File("small")))
-        val generator = adapter.generator(deeper = false)
+        val (adapter, manager) = adapter(InstalledModels(llm = File("small")))
+        val generator = adapter.generator()
         var reply: List<String>? = null
         launch { reply = generator.generate("q", 16).toList() }
         advanceUntilIdle()
@@ -126,18 +111,14 @@ class ModelsAdapterTest {
         assertThat(engines.single().closed).isTrue()
     }
 
-    @Test fun deeperUsesTheLargeModel() = runTest {
-        val (adapter, _) = adapter(InstalledModels(small = File("small"), large = File("large")))
-        adapter.generator(deeper = true)
-        assertThat(engines.single().path).isEqualTo("large")
-    }
-
     @Test fun aModelThatWontLoadIsUnavailableAndNotHeld() = runTest {
-        val (adapter, manager) = adapter(InstalledModels(small = File("small"), large = File("broken")))
-        val error = runCatching { adapter.generator(deeper = true) }.exceptionOrNull()
+        val installed = MutableStateFlow(InstalledModels(llm = File("broken")))
+        val (adapter, manager) = adapter(installed)
+        val error = runCatching { adapter.generator() }.exceptionOrNull()
         assertThat(error).isInstanceOf(ModelUnavailableException::class.java)
-        val small = adapter.generator(deeper = false)
-        launch { small.generate("q", 16).toList() }
+        installed.value = InstalledModels(llm = File("small"))
+        val generator = adapter.generator()
+        launch { generator.generate("q", 16).toList() }
         advanceUntilIdle()
         engines.last().gate.complete(Unit)
         advanceUntilIdle()
@@ -148,7 +129,7 @@ class ModelsAdapterTest {
     }
 
     @Test fun embedderEmbedsAndLetsGo() = runTest {
-        val (adapter, manager) = adapter(InstalledModels(small = File("small"), embedder = File("emb")))
+        val (adapter, manager) = adapter(InstalledModels(llm = File("small"), embedder = File("emb")))
         val embedder = checkNotNull(adapter.embedder())
         assertThat(embedder.embed(listOf("a", "b"), isQuery = false)).hasSize(2)
         manager.releaseNow()
@@ -157,7 +138,7 @@ class ModelsAdapterTest {
     }
 
     @Test fun noEmbedderInstalledMeansNone() = runTest {
-        val (adapter, _) = adapter(InstalledModels(small = File("small")))
+        val (adapter, _) = adapter(InstalledModels(llm = File("small")))
         assertThat(adapter.embedder()).isNull()
     }
 }

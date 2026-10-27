@@ -17,9 +17,8 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class ModelManagerTest {
     private val small = File("small.litertlm")
-    private val large = File("large.litertlm")
     private val emb = File("emb.litertlm")
-    private val all = InstalledModels(small, large, emb)
+    private val all = InstalledModels(small, emb)
 
     private class Rig(
         val manager: ModelManager,
@@ -29,7 +28,7 @@ class ModelManagerTest {
     )
 
     private fun TestScope.rig(
-        tier: DeviceTier = DeviceTier.THINK_DEEPER,
+        tier: DeviceTier = DeviceTier.ASK,
         models: InstalledModels = all,
         useEmbedder: Boolean = true,
         failLoadFor: Map<String, Throwable> = emptyMap(),
@@ -51,53 +50,23 @@ class ModelManagerTest {
         val r = rig(tier = DeviceTier.ASK, models = InstalledModels())
         runCurrent()
         assertThat(r.manager.readiness.value).isEqualTo(ResearchReadiness.MODELS_MISSING)
-        r.installed.value = InstalledModels(small = small)
+        r.installed.value = InstalledModels(llm = small)
         runCurrent()
         assertThat(r.manager.readiness.value).isEqualTo(ResearchReadiness.READY)
     }
 
-    @Test fun thinkDeeperNeedsTierAndLargeFile() = runTest {
-        val r = rig(models = InstalledModels(small = small))
-        runCurrent()
-        assertThat(r.manager.canThinkDeeper.value).isFalse()
-        r.installed.value = all
-        runCurrent()
-        assertThat(r.manager.canThinkDeeper.value).isTrue()
-        val ask = rig(tier = DeviceTier.ASK)
-        runCurrent()
-        assertThat(ask.manager.canThinkDeeper.value).isFalse()
-    }
-
     @Test fun sameSizeIsReused() = runTest {
         val r = rig()
-        val a = r.manager.engine(LlmSize.SMALL)
-        val b = r.manager.engine(LlmSize.SMALL)
+        val a = r.manager.engine()
+        val b = r.manager.engine()
         assertThat(b).isSameInstanceAs(a)
         assertThat(r.llms.events.count { it.startsWith("create") }).isEqualTo(1)
-    }
-
-    @Test fun swappingClosesTheOldModelFirst() = runTest {
-        val r = rig()
-        r.manager.engine(LlmSize.SMALL)
-        r.manager.engine(LlmSize.LARGE)
-        val e = r.llms.events
-        assertThat(e.indexOf("close ${small.path}")).isLessThan(e.indexOf("load ${large.path}"))
-        assertThat(r.llms.maxOpen).isEqualTo(1)
-    }
-
-    @Test fun aMissingFileLeavesTheResidentModelLoaded() = runTest {
-        val r = rig(models = InstalledModels(small = small, embedder = emb))
-        val resident = r.manager.engine(LlmSize.SMALL)
-        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
-        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
-        assertThat(r.llms.openEngines).hasSize(1)
-        assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
     }
 
     @Test fun loadRightAfterLaunchWaitsForTheModelList() = runTest {
         // At startup the list is empty until the catalog has loaded from its cache.
         val r = rig(models = InstalledModels())
-        val engine = async { r.manager.engine(LlmSize.SMALL) }
+        val engine = async { r.manager.engine() }
         runCurrent()
         assertThat(engine.isCompleted).isFalse()
         r.installed.value = all
@@ -105,43 +74,24 @@ class ModelManagerTest {
         assertThat(r.llms.events).contains("load ${small.path}")
     }
 
-    @Test fun largeIsRefusedBelowTheThinkDeeperTier() = runTest {
-        val r = rig(tier = DeviceTier.ASK)
-        val resident = r.manager.engine(LlmSize.SMALL)
-        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
-        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
-        assertThat(r.llms.events.none { it.contains(large.path) }).isTrue()
-        assertThat(r.manager.engine(LlmSize.SMALL)).isSameInstanceAs(resident)
-    }
-
-    @Test fun largeClosesTheEmbedder() = runTest {
-        val r = rig()
-        r.manager.engine(LlmSize.SMALL)
-        assertThat(r.manager.embedder()).isNotNull()
-        r.manager.engine(LlmSize.LARGE)
-        assertThat(r.embedders.single().closed).isTrue()
-    }
-
-    @Test fun embedderOnlyAlongsideSmall() = runTest {
-        val r = rig()
-        r.manager.engine(LlmSize.LARGE)
-        assertThat(r.manager.embedder()).isNull()
-        assertThat(r.embedders).isEmpty()
+    @Test fun aMissingFileThrowsModelLoadException() = runTest {
+        val r = rig(models = InstalledModels(embedder = emb))
+        val ex = runCatching { r.manager.engine() }.exceptionOrNull()
+        assertThat(ex).isInstanceOf(ModelLoadException::class.java)
+        assertThat(r.llms.openEngines).isEmpty()
     }
 
     @Test fun loadFailureThrowsModelLoadExceptionAndLeavesNothingResident() = runTest {
         val boom = IllegalStateException("boom")
-        val r = rig(failLoadFor = mapOf(large.path to boom))
-        r.manager.engine(LlmSize.SMALL)
-        val ex = runCatching { r.manager.engine(LlmSize.LARGE) }.exceptionOrNull() as ModelLoadException
-        assertThat(ex.size).isEqualTo(LlmSize.LARGE)
+        val r = rig(failLoadFor = mapOf(small.path to boom))
+        val ex = runCatching { r.manager.engine() }.exceptionOrNull() as ModelLoadException
         assertThat(ex.cause).hasMessageThat().isEqualTo("boom")
         assertThat(r.llms.openEngines).isEmpty()
     }
 
     @Test fun releaseSoonClosesAfterTheDelay() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         r.manager.embedder()
         r.manager.releaseSoon()
         advanceTimeBy(119_000)
@@ -154,10 +104,10 @@ class ModelManagerTest {
 
     @Test fun useBeforeTheDelayCancelsRelease() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         r.manager.releaseSoon()
         advanceTimeBy(60_000)
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         advanceTimeBy(200_000)
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1)
@@ -165,7 +115,7 @@ class ModelManagerTest {
 
     @Test fun embedderDisabledGivesNull() = runTest {
         val r = rig(useEmbedder = false)
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         assertThat(r.manager.embedder()).isNull()
         assertThat(r.embedders).isEmpty()
     }
@@ -180,11 +130,11 @@ class ModelManagerTest {
                 }.also { created += it }
         }
         val m = ModelManager(DeviceTier.ASK, MutableStateFlow(all), llms, { FakeEmbedder() }, backgroundScope, { true }, io = StandardTestDispatcher(testScheduler))
-        job = launch { m.engine(LlmSize.SMALL) }
+        job = launch { m.engine() }
         runCurrent()
         assertThat(job.isCancelled).isTrue()
         // Nothing orphaned: the loaded engine is the resident one, and the next call reuses it.
-        val again = m.engine(LlmSize.SMALL)
+        val again = m.engine()
         assertThat(llms.created).hasSize(1)
         assertThat(again).isSameInstanceAs(llms.created.single())
     }
@@ -205,16 +155,16 @@ class ModelManagerTest {
 
     @Test fun releaseNowThenEngineKeepsTheEngine() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         r.manager.releaseNow()
-        val e = r.manager.engine(LlmSize.SMALL)
+        val e = r.manager.engine()
         runCurrent()
         assertThat(r.llms.openEngines).containsExactly(e)
     }
 
     @Test fun releaseNowWhileHeldWaitsForLetGo() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         val letGo = r.manager.hold()
         r.manager.releaseNow()
         runCurrent()
@@ -226,11 +176,11 @@ class ModelManagerTest {
 
     @Test fun releaseNowWhileHeldSurvivesALaterUse() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         val turn = r.manager.hold()
         r.manager.releaseNow() // the app went to the background mid-turn
         val answer = r.manager.hold()
-        r.manager.engine(LlmSize.SMALL) // the same turn's next stage
+        r.manager.engine() // the same turn's next stage
         answer()
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1)
@@ -241,7 +191,7 @@ class ModelManagerTest {
 
     @Test fun releaseRequestedMidTurnIsDroppedWhenAppReturns() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         val turn = r.manager.hold()
         r.manager.releaseNow() // the app went to the background mid-turn...
         r.manager.appReturned() // ...and came back before the turn ended
@@ -255,7 +205,7 @@ class ModelManagerTest {
 
     @Test fun appReturningKeepsTheQuietSpellRelease() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         val turn = r.manager.hold()
         r.manager.releaseSoon() // the turn's end asks for a quiet-spell release
         r.manager.appReturned()
@@ -267,7 +217,7 @@ class ModelManagerTest {
 
     @Test fun releaseSoonTimerWhileHeldWaitsForLetGo() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         val letGo = r.manager.hold()
         r.manager.releaseSoon()
         advanceTimeBy(150_000)
@@ -283,7 +233,7 @@ class ModelManagerTest {
 
     @Test fun letGoTwiceCountsOnce() = runTest {
         val r = rig()
-        r.manager.engine(LlmSize.SMALL)
+        r.manager.engine()
         val a = r.manager.hold()
         val b = r.manager.hold()
         r.manager.releaseNow()

@@ -107,34 +107,55 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         if (query.isBlank()) return@reading emptyList()
         synchronized(searchLock) {
             val suggester = suggester ?: SuggestionSearcher(archive).also { suggester = it }
-            val results = suggester.suggest(query.trim()).getResults(0, limit)
-            buildList {
-                while (results.hasNext()) {
-                    val item = results.next()
-                    add(ZimHit(item.path, item.title))
+            val search = suggester.suggest(query.trim())
+            val results = search.getResults(0, limit)
+            try {
+                buildList {
+                    while (results.hasNext()) {
+                        val item = results.next()
+                        add(ZimHit(item.path, item.title))
+                    }
                 }
+            } finally {
+                results.dispose()
+                search.dispose()
             }
         }
     }
 
-    override fun search(query: String, limit: Int): List<ZimHit> = reading(emptyList()) {
+    override fun search(query: String, limit: Int): List<ZimHit> = search(query, limit, snippets = true)
+
+    override fun searchWithoutSnippets(query: String, limit: Int): List<ZimHit> = search(query, limit, snippets = false)
+
+    private fun search(query: String, limit: Int, snippets: Boolean): List<ZimHit> = reading(emptyList()) {
         if (!hasFulltextIndex || query.isBlank()) return@reading emptyList()
         synchronized(searchLock) {
             val searcher = searcher ?: Searcher(archive).also { searcher = it }
-            val results = searcher.search(Query(query.trim())).getResults(0, limit)
-            buildList {
-                while (results.hasNext()) {
-                    // libkiwix's getters describe the entry the *next* call to next() returns,
-                    // so read them before advancing.
-                    val hit = ZimHit(
-                        path = results.path,
-                        title = results.title,
-                        snippet = results.snippet?.takeIf { it.isNotBlank() },
-                        score = results.score,
-                    )
-                    results.next()
-                    add(hit)
+            val q = Query(query.trim())
+            val search = searcher.search(q)
+            val results = search.getResults(0, limit)
+            try {
+                buildList {
+                    while (results.hasNext()) {
+                        // libkiwix's getters describe the entry the *next* call to next() returns,
+                        // so read them before advancing.
+                        val hit = ZimHit(
+                            path = results.path,
+                            title = results.title,
+                            snippet = if (snippets) results.snippet?.takeIf { it.isNotBlank() } else null,
+                            score = results.score,
+                        )
+                        results.next()
+                        add(hit)
+                    }
                 }
+            } finally {
+                // Disposed here, under the lock: left to their finalizers, they would be freed on the finalizer thread
+                // while the next search uses the same Xapian database, whose reference counts aren't thread-safe
+                // (a SIGSEGV in Xapian::Database::get_doccount during Plan R5 Task 1).
+                results.dispose()
+                search.dispose()
+                q.dispose()
             }
         }
     }

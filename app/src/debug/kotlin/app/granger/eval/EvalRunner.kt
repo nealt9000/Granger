@@ -1,5 +1,9 @@
 package app.granger.eval
 
+import app.granger.core.library.DensePassageFinder
+import app.granger.core.library.DenseTimings
+import app.granger.core.library.KeywordTimings
+import app.granger.core.library.LibraryPassageFinder
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Outcome
@@ -30,21 +34,36 @@ import org.json.JSONObject
 fun evalSourceName(packNames: Map<String, String>): (Passage) -> String =
     { p -> if (p.kind == SourceKind.ARTICLE) packNames[p.sourceId]?.ifBlank { null } ?: p.sourceId else p.sourceId }
 
-/** Wraps the real finder and keeps the last call's keywords and passages, for the record's `found` list. */
-class RecordingFinder(private val inner: PassageFinder) : PassageFinder {
+/**
+ * Wraps the real finder and keeps the last call's keywords and passages, for the record's `found` list, and how long it
+ * took (`ms.keywordSearch`, Plan R5 Task 1: `ms.search` also covers the dense side running alongside).
+ */
+class RecordingFinder(private val inner: PassageFinder, private val clock: () -> Long = { System.nanoTime() / 1_000_000 }) : PassageFinder {
     var keywords: List<String> = emptyList()
         private set
     var passages: List<Passage> = emptyList()
+        private set
+    var ms: Long? = null
+        private set
+    /** Plan R5 Task 1: the split of [ms], when the finder is the app's [LibraryPassageFinder]. */
+    var timings: KeywordTimings? = null
         private set
 
     fun reset() {
         keywords = emptyList()
         passages = emptyList()
+        ms = null
+        timings = null
     }
 
     override suspend fun find(keywords: List<String>): List<Passage> {
         this.keywords = keywords
-        return inner.find(keywords).also { passages = it }
+        val start = clock()
+        return inner.find(keywords).also {
+            passages = it
+            ms = clock() - start
+            timings = (inner as? LibraryPassageFinder)?.lastTimings
+        }
     }
 
     /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
@@ -60,22 +79,30 @@ class RecordingDenseFinder(private val inner: DenseFinder, private val clock: ()
         private set
     var ms: Long? = null
         private set
+    /** Plan R5 Task 1: the split of [ms], when the finder is the app's [DensePassageFinder]. */
+    var timings: DenseTimings? = null
+        private set
 
     fun reset() {
         passages = emptyList()
         ms = null
+        timings = null
     }
 
     override suspend fun find(query: FloatArray): List<Passage> {
         val start = clock()
-        return inner.find(query).also { passages = it; ms = clock() - start }
+        return inner.find(query).also {
+            passages = it
+            ms = clock() - start
+            timings = (inner as? DensePassageFinder)?.lastTimings
+        }
     }
 }
 
 /**
  * Wraps the models the pipeline uses and keeps, for the current item, every prompt sent and the reply it streamed back.
  * The stage comes from where the runner is ([begin] before each pipeline run), not from the prompt text: within a
- * main run the calls are the rewrite, the answer, and (large model unavailable) a retry of the answer.
+ * main run the calls are the rewrite and the answer.
  */
 class PromptRecorder(private val inner: ResearchModels) : ResearchModels {
     private class Entry(val stage: String, val prompt: String) { val output = StringBuilder() }
@@ -89,7 +116,7 @@ class PromptRecorder(private val inner: ResearchModels) : ResearchModels {
         synchronized(entries) { entries.clear(); phase = "main"; calls = 0 }
     }
 
-    /** Starts a pipeline run of [phase]: "prior", "main", "deeper", "guess-small" or "guess-large". */
+    /** Starts a pipeline run of [phase]: "prior", "main" or "guess-small". */
     fun begin(phase: String) {
         synchronized(entries) { this.phase = phase; calls = 0 }
     }
@@ -102,17 +129,16 @@ class PromptRecorder(private val inner: ResearchModels) : ResearchModels {
     private fun stage(): String = synchronized(entries) {
         val n = ++calls
         when (phase) {
-            "deeper" -> if (n == 1) "deeper" else "answer-retry"
-            "guess-small", "guess-large" -> phase
+            "guess-small" -> phase
             else -> {
-                val base = when (n) { 1 -> "rewrite"; 2 -> "answer"; else -> "answer-retry" }
+                val base = if (n == 1) "rewrite" else "answer"
                 if (phase == "prior") "prior-$base" else base
             }
         }
     }
 
-    override suspend fun generator(deeper: Boolean): TextGenerator {
-        val real = inner.generator(deeper)
+    override suspend fun generator(): TextGenerator {
+        val real = inner.generator()
         return object : TextGenerator {
             override fun generate(prompt: String, maxTokens: Int): Flow<String> = record(prompt, real.generate(prompt, maxTokens))
 
@@ -226,7 +252,7 @@ class EvalRunner(
                         Stage.WRITING -> "rank" to stageStart
                         Stage.LOADING_MODEL -> null
                     }
-                    // A deeper run skips retrieval: it has no SEARCHING or RANKING, so WRITING must not claim a rank time.
+                    // A guess skips retrieval: it has no SEARCHING or RANKING, so WRITING must not claim a rank time.
                     if (key != null && !(event.stage == Stage.WRITING && !ms.has("search"))) ms.put(key.first, now - key.second)
                     stageStart = now
                 }
@@ -254,6 +280,15 @@ class EvalRunner(
         prompts?.begin("main")
         val main = execute(pipeline.run(request))
         dense?.ms?.let { main.ms.put("dense", it) }
+        finder.ms?.let { main.ms.put("keywordSearch", it) }
+        dense?.timings?.let { t ->
+            main.ms.put("denseSources", t.sourcesMs).put("denseScan", t.scanMs).put("denseRebuild", t.rebuildMs)
+        }
+        finder.timings?.let { t ->
+            main.ms.put("kwFulltext", t.fulltextMs).put("kwRead", t.readMs).put("kwBooks", t.booksMs)
+                .put("kwCards", t.cardsMs).put("kwMedia", t.mediaMs)
+            main.ms.put("kwPacks", JSONObject(t.packMs as Map<*, *>))
+        }
         val outcome = main.outcome
         val keywords = outcome?.keywords.orEmpty()
         val fallbackKeywords = Keywords.extract(listOfNotNull(item.question, item.priorQuestion).joinToString(" "))
@@ -270,38 +305,19 @@ class EvalRunner(
         describe(outcome).into(record)
         record.put("ms", main.ms)
 
-        val pool = when (outcome) {
-            is Outcome.Answered -> outcome.passages + outcome.candidates
-            is Outcome.Unverified -> outcome.passages + outcome.candidates
-            else -> emptyList()
-        }
-        if (item.multiStep && pool.isNotEmpty()) {
-            // Think deeper as the app does it: the same pool (up to 8), no search, the large model.
-            val deeperRequest = ResearchRequest(
-                item.question, prior = prior, priorQuestion = item.priorQuestion,
-                deeperFrom = pool.take(DEEPER_PASSAGES), medicalHint = outcome?.medical ?: false,
-            )
-            prompts?.begin("deeper")
-            val deeper = execute(pipeline.run(deeperRequest))
-            val d = JSONObject()
-            describe(deeper.outcome).into(d)
-            record.put("deeper", d.put("ms", deeper.ms))
-        }
-        if (outcome is Outcome.Declined && !outcome.medical && (guesses.small || guesses.large)) {
-            val g = JSONObject()
-            if (guesses.small) guess(item, large = false)?.let { g.put("small", it) }
-            if (guesses.large) guess(item, large = true)?.let { g.put("large", it) }
-            if (g.length() > 0) record.put("guesses", g)
+        if (outcome is Outcome.Declined && !outcome.medical && guesses == GuessModels.SMALL) {
+            // Under "small", as tools/eval names the model's guesses.
+            guess(item)?.let { record.put("guesses", JSONObject().put("small", it)) }
         }
         prompts?.let { record.put("prompts", it.toJson()) }
         return record
     }
 
-    private suspend fun guess(item: EvalItem, large: Boolean): JSONObject? {
-        prompts?.begin(if (large) "guess-large" else "guess-small")
-        val run = execute(pipeline.guess(item.question, item.priorQuestion, large))
+    private suspend fun guess(item: EvalItem): JSONObject? {
+        prompts?.begin("guess-small")
+        val run = execute(pipeline.guess(item.question, item.priorQuestion))
         val guessed = run.outcome as? Outcome.Guessed ?: return null
-        return JSONObject().put("text", guessed.text).put("ms", run.ms.optLong("total")).put("fellBack", guessed.fellBack)
+        return JSONObject().put("text", guessed.text).put("ms", run.ms.optLong("total"))
     }
 
     private class Described(val outcome: String, val reply: String, val cited: List<Int>, val chosen: List<Passage>)
@@ -334,6 +350,5 @@ class EvalRunner(
     companion object {
         const val FOUND_CAP = 60
         const val CORPUS_FILE = "found.jsonl"
-        const val DEEPER_PASSAGES = 8
     }
 }

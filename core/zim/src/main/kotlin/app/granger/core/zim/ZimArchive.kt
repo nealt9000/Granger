@@ -60,6 +60,9 @@ interface ZimArchive : Closeable {
     /** Full-text search; empty when the pack has no full-text index. */
     fun search(query: String, limit: Int): List<ZimHit>
 
+    /** [search] without snippets, which may each mean reading the article: for callers that only want the hits. */
+    fun searchWithoutSnippets(query: String, limit: Int): List<ZimHit> = search(query, limit)
+
     override fun close()
 }
 

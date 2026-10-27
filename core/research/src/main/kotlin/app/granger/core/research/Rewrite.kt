@@ -12,10 +12,12 @@ object Rewrite {
     private const val MAX_ALTERNATES = 2
     private val BRACKETS = Regex("\\(([^)]*)\\)?")
     private val SPACES = Regex("\\s+")
-    private val META_WORDS = Regex(
-        "\\b(definitions?|meanings?|etymology|origins?|history|facts|references?|problems|explanation|overview|information|info|scriptures?|teachings|texts?|passages?|quotes?|quotations?|excerpts?)\\b",
-        RegexOption.IGNORE_CASE,
-    )
+    private const val META = "(definitions?|meanings?|etymology|origins?|history|facts|references?|problems|explanation|overview|information|info|scriptures?|teachings|texts?|passages?|quotes?|quotations?|excerpts?)"
+    /**
+     * A word about the question at either end of a keyword ("betimes meaning", "origins of chess"); one inside a name
+     * stays ("on the origin of species": r1-dense-1 searched "on the of species").
+     */
+    private val META_WORDS = Regex("^$META(\\s+(of|for)\\b)?\\s*|\\s*\\b$META$", RegexOption.IGNORE_CASE)
 
     /**
      * With [alternates] (Plan R0's debug variant), a keyword may carry up to [MAX_ALTERNATES] other words the source
@@ -50,7 +52,10 @@ object Rewrite {
         if (line.trim().startsWith("<") || line.contains("comma-separated", ignoreCase = true)) return null
         val original = (if (alternates) splitOutsideBrackets(line) else line.split(',')).map { it.trim() }.filter { it.isNotEmpty() }
         if (original.isEmpty()) return null
-        fun clean(k: String) = META_WORDS.replace(k, " ").replace(SPACES, " ").trim()
+        fun clean(k: String): String {
+            var out = k.replace(SPACES, " ").trim()
+            while (true) out = META_WORDS.replace(out, "").trim().takeIf { it != out } ?: return out
+        }
         val cleaned = original
             .map { k ->
                 if (!alternates) return@map clean(k)

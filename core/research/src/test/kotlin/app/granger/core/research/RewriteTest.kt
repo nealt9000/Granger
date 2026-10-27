@@ -75,6 +75,11 @@ class RewriteTest {
             .containsExactly("betimes", "word").inOrder()
     }
 
+    @Test fun aMetaWordInsideANameStays() {
+        assertThat(Rewrite.parse("keywords: on the origin of species, origins of chess, darwin history facts")!!.keywords)
+            .containsExactly("on the origin of species", "chess", "darwin").inOrder()
+    }
+
     @Test fun allMetaKeepsOriginal() {
         assertThat(Rewrite.parse("keywords: history, facts")!!.keywords).containsExactly("history", "facts").inOrder()
     }
