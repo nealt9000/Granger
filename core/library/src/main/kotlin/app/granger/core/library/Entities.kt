@@ -205,7 +205,11 @@ data class ResearchChat(
     val updatedAt: Long,
 )
 
-/** One question and its answer in a chat. [keywords] is `"; "`-joined; blank when there are none. */
+/**
+ * One question and its answer in a chat. [keywords] is `"; "`-joined; blank when there are none. [usedLarge],
+ * [askedDeeper], [guessLarge] and [guessFellBack] were for Think deeper and the large model, both since removed
+ * (Plan R5 Task 8); the columns stay, so the schema is unchanged, and are written false.
+ */
 @Entity(tableName = "research_turns", indices = [Index("chatId")])
 data class ResearchTurn(
     @PrimaryKey(autoGenerate = true) val id: Long,
@@ -227,7 +231,7 @@ data class ResearchTurn(
 enum class PassageRole {
     /** The numbered passages given to the model, in order. */
     SHOWN,
-    /** Extras kept for Think deeper. */
+    /** The ranked passages after the shown ones, not given to the model. */
     CANDIDATE,
 }
 

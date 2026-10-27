@@ -89,7 +89,7 @@ object Entities {
      * is the article that names it best, and its first opening passage: [pool] lists an article's passages in reading
      * order, and a Wikipedia lead's dates are in its first one (r5-t4-ent: Magna Carta's second lead passage has 1216,
      * not 1215). The pick takes the place of another passage of its article in the first [keep], or else of the last
-     * passage there that isn't a pick. The passages it displaces move down, in order, so nothing is lost for Think deeper.
+     * passage there that isn't a pick. The passages it displaces move down, in order, so they stay among the candidates.
      */
     fun reserve(ranked: List<Passage>, pool: List<Passage>, names: List<String>, keep: Int, slots: Int = 2): List<Passage> {
         // Nothing ranked is a decline (the gates found nothing good enough); a name doesn't overturn that.

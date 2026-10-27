@@ -32,8 +32,8 @@ import kotlinx.coroutines.launch
 /**
  * Debug-only: runs an eval dataset through the real Research pipeline and writes one JSON record per question.
  * `tools/eval` pushes `files/eval/dataset.json` and starts this with string extras `runId`, `ids` and `groups`
- * (comma-joined, optional) and `guesses` (none|small|large|both). Results go to `files/eval/<runId>/results.jsonl`,
- * then an empty `done` file. Logs `Eval:` lines under the Granger tag.
+ * (comma-joined, optional) and `guesses` (none|small; an older script's large or both means small). Results go to
+ * `files/eval/<runId>/results.jsonl`, then an empty `done` file. Logs `Eval:` lines under the Granger tag.
  */
 class EvalActivity : ComponentActivity() {
     private var status by mutableStateOf("starting")

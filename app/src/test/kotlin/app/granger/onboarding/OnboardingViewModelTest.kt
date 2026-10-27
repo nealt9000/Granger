@@ -54,7 +54,7 @@ class OnboardingViewModelTest {
         ),
     ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("wikem_en_all_maxi"))), larger = listOf("maps_en_europe")))
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.THINK_DEEPER): OnboardingViewModel {
+    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
             io = main.dispatcher, now = { 42 },
@@ -79,8 +79,8 @@ class OnboardingViewModelTest {
     @Test fun thisPhoneWordsTheTierAndResearch() = runTest(main.dispatcher) {
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine).startsWith("A library phone, with about 7 GB")
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine).contains("needs a phone with 6 GB")
-        assertThat(viewModel(DeviceTier.THINK_DEEPER).ui.value.phone.tierLine).contains("think deeper")
-        assertThat(viewModel(DeviceTier.THINK_DEEPER).ui.value.phone.volumes.single().label).isEqualTo("Internal storage")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine).startsWith("A library and research phone, with about 7 GB")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.volumes.single().label).isEqualTo("Internal storage")
     }
 
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {

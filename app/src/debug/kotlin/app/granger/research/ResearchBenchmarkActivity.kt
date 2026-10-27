@@ -22,7 +22,6 @@ import androidx.lifecycle.lifecycleScope
 import app.granger.GrangerApp
 import app.granger.core.ai.LiteRtTextEmbedder
 import app.granger.core.ai.LlmBackend
-import app.granger.core.ai.LlmSize
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Outcome
@@ -86,7 +85,7 @@ class ResearchBenchmarkActivity : ComponentActivity() {
     private suspend fun run() {
         val c = (application as GrangerApp).container
         val models = c.installedModels.first()
-        log("models small=${models.small?.name} large=${models.large?.name} embedder=${models.embedder?.name}")
+        log("models llm=${models.llm?.name} embedder=${models.embedder?.name}")
         c.modelManager.releaseNow()
 
         intent.getStringExtra("cosines")?.let { name ->
@@ -141,7 +140,7 @@ class ResearchBenchmarkActivity : ComponentActivity() {
         val recorder = Recorder(ModelsAdapter(c.modelManager))
         recorder.dump = java.io.File(getExternalFilesDir(null), "research-candidates.jsonl").apply { delete() }
         val pipeline = ResearchPipeline(recorder.finder(c.passageFinder), recorder, c.rankingConfig)
-        val loadMs = timed { c.modelManager.engine(LlmSize.SMALL); c.modelManager.embedder() }
+        val loadMs = timed { c.modelManager.engine(); c.modelManager.embedder() }
         log("(b) E2B${if (c.modelManager.embedder() != null) " + embedder" else ""} loaded in $loadMs ms")
         for ((question, prior) in ANSWERABLE.map { it to null } + FOLLOW_UPS + UNANSWERABLE.map { it to null }) {
             val kind = if (question in UNANSWERABLE) "unanswerable" else "answerable"
@@ -266,7 +265,7 @@ class ResearchBenchmarkActivity : ComponentActivity() {
             }
         }
 
-        override suspend fun generator(deeper: Boolean) = inner.generator(deeper)
+        override suspend fun generator() = inner.generator()
 
         override suspend fun embedder(): PassageEmbedder? {
             val embedder = inner.embedder() ?: return null

@@ -1,7 +1,6 @@
 package app.granger.research
 
 import app.granger.core.ai.InstalledModels
-import app.granger.core.ai.LlmSize
 import app.granger.core.ai.ModelLoadException
 import app.granger.core.ai.ModelManager
 import app.granger.core.catalog.ModelEntry
@@ -25,7 +24,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * The model files on disk: INSTALLED model records, each given the role of the catalog entry with the same id.
- * When a role has several, the newest wins.
+ * When a role has several, the newest wins. A LARGE-role model is not used, so it is left out.
  */
 fun installedModelsOf(
     records: List<DownloadRecord>,
@@ -38,13 +37,13 @@ fun installedModelsOf(
         .filter { exists(File(it.filePath)) }
         .groupBy { roles.getValue(it.itemId) }
         .mapValues { (_, list) -> File(list.maxBy { it.updatedAt }.filePath) }
-    return InstalledModels(newest[ModelRole.SMALL], newest[ModelRole.LARGE], newest[ModelRole.EMBEDDER])
+    return InstalledModels(newest[ModelRole.SMALL], newest[ModelRole.EMBEDDER])
 }
 
 /**
  * Research's view of [ModelManager]. Every generation and embedding holds the models, so a release asked for
  * meanwhile (the app going to the background) waits until the work is done. They also take [models] in turn: two
- * chats can be open at once, and one's swap to the other model size would close the engine the other is using.
+ * chats can be open at once, and the model runs one reply at a time.
  */
 class ModelsAdapter(
     private val manager: ModelManager,
@@ -52,10 +51,9 @@ class ModelsAdapter(
     /** One model use at a time, across every adapter in the process. */
     private val models: Mutex = MODELS_IN_USE,
 ) : ResearchModels {
-    override suspend fun generator(deeper: Boolean): TextGenerator {
-        val size = if (deeper) LlmSize.LARGE else LlmSize.SMALL
+    override suspend fun generator(): TextGenerator {
         // Load now, so a model that won't load is reported here rather than mid-answer.
-        inTurn { engine(size) }
+        inTurn { engine() }
         return object : TextGenerator {
             override fun generate(prompt: String, maxTokens: Int): Flow<String> = generate(prompt, maxTokens) {}
 
@@ -63,7 +61,7 @@ class ModelsAdapter(
                 // Until the reply is done or cancelled.
                 inTurn {
                     // Fetched per reply: a release between replies closes the engine, and this loads it again.
-                    val engine = engine(size)
+                    val engine = engine()
                     // The models are free and loaded: the pipeline's rewrite timeout starts here, not at the wait.
                     onReady()
                     emitAll(engine.generate(prompt, maxTokens))
@@ -82,10 +80,10 @@ class ModelsAdapter(
         }
     }
 
-    private suspend fun engine(size: LlmSize) = try {
-        manager.engine(size)
+    private suspend fun engine() = try {
+        manager.engine()
     } catch (e: ModelLoadException) {
-        throw ModelUnavailableException("The $size model won't load", e)
+        throw ModelUnavailableException("The model won't load", e)
     }
 
     /** Runs [block] holding the models, once no other generation or embedding is running. */

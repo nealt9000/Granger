@@ -447,7 +447,20 @@ Neal asked 21 questions in one chat: "mostly poor", with many easy ones declined
 
 ## Task 8: Think deeper removed (from R4 Task 8)
 
-- [ ] Remove the button, the second pass and E4B as a model role. The catalog keeps E4B's entry until Neal says otherwise.
+- [x] Remove the button, the second pass and E4B as a model role. The catalog keeps E4B's entry until Neal says otherwise.
+
+### Done (2026-10-27)
+
+- **Gone:** the button and `thinkDeeper()`; the pipeline's `deeperFrom` path; `medicalHint` (only Think deeper set it); the
+  large-model fallbacks and their banners; the guess with the large model. Best guess stays, on E2B.
+- **Models:** one LLM. `LlmSize` is gone and `InstalledModels` is `(llm, embedder)`, so the embedder always sits beside
+  E2B. `installedModelsOf` ignores LARGE-role entries.
+- **Tiers:** LIBRARY_ONLY and ASK. The onboarding and readiness strings follow.
+- **Sources:** E4B's row says "Not used" and can't be downloaded on any phone; an installed copy can still be deleted.
+  The catalog entry stays.
+- **Storage:** the API drops `askedDeeper`, `usedLarge`, `guessLarge` and `guessFellBack`. The columns stay, written
+  false, so there's no migration.
+- **Eval:** no deeper phase; `--guesses` is none|small. The report still reads old runs' deeper records.
 
 ## Not in this plan
 

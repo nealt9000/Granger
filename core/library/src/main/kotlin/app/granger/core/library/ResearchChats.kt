@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-/** One question in a chat. The large-model fallback notice shows when [askedDeeper] and not [usedLarge]. */
+/** One question in a chat. */
 data class ChatTurn(
     val id: Long,
     val chatId: Long,
@@ -16,18 +16,14 @@ data class ChatTurn(
     val outcome: TurnOutcome,
     val answer: String,
     val medical: Boolean,
-    val usedLarge: Boolean,
-    val askedDeeper: Boolean,
     val keywords: List<String>,
     /** The numbered passages given to the model, in order. */
     val shown: List<Passage>,
-    /** Extras kept for Think deeper. */
+    /** The ranked passages after [shown], not given to the model. */
     val candidates: List<Passage>,
     val createdAt: Long,
     /** The model's own best guess after a decline; blank until asked (never a source-backed answer). */
     val guess: String = "",
-    val guessLarge: Boolean = false,
-    val guessFellBack: Boolean = false,
 )
 
 /** Where each shown passage lives, as the answer cites it (`[1]` is the first); read-aloud and plans reuse these. */
@@ -52,7 +48,7 @@ interface ResearchChats {
     suspend fun create(title: String): Long
 
     /** Adds a PENDING turn. A [quote] is stored as the first SHOWN passage. */
-    suspend fun startTurn(chatId: Long, question: String, askedDeeper: Boolean, quote: Passage?): Long
+    suspend fun startTurn(chatId: Long, question: String, quote: Passage?): Long
 
     /** Settles a turn, replaces its passages and bumps the chat's `updatedAt`. */
     suspend fun finishTurn(
@@ -60,14 +56,13 @@ interface ResearchChats {
         outcome: TurnOutcome,
         answer: String,
         medical: Boolean,
-        usedLarge: Boolean,
         keywords: List<String>,
         shown: List<Passage>,
         candidates: List<Passage>,
     )
 
     /** Keeps the model's best guess on a declined turn, and bumps the chat's `updatedAt`. */
-    suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean)
+    suspend fun setGuess(turnId: Long, text: String)
 
     /** Marks every PENDING turn INTERRUPTED (the app died mid-answer); returns how many. */
     suspend fun interruptPending(): Int
@@ -104,15 +99,11 @@ class RoomResearchChats(
         outcome = outcome,
         answer = answer,
         medical = medical,
-        usedLarge = usedLarge,
-        askedDeeper = askedDeeper,
         keywords = if (keywords.isEmpty()) emptyList() else keywords.split(KEYWORD_SEPARATOR),
         shown = rows.filter { it.role == PassageRole.SHOWN }.map { it.toPassage() },
         candidates = rows.filter { it.role == PassageRole.CANDIDATE }.map { it.toPassage() },
         createdAt = createdAt,
         guess = guess,
-        guessLarge = guessLarge,
-        guessFellBack = guessFellBack,
     )
 
     override suspend fun chat(chatId: Long): ChatSummary? = dao.chat(chatId)?.summary()
@@ -122,10 +113,10 @@ class RoomResearchChats(
         return dao.insertChat(ResearchChat(0, title, time, time))
     }
 
-    override suspend fun startTurn(chatId: Long, question: String, askedDeeper: Boolean, quote: Passage?): Long =
+    override suspend fun startTurn(chatId: Long, question: String, quote: Passage?): Long =
         db.withTransaction {
             val turnId = dao.insertTurn(
-                ResearchTurn(0, chatId, question, TurnOutcome.PENDING, "", false, false, askedDeeper, "", now()),
+                ResearchTurn(0, chatId, question, TurnOutcome.PENDING, "", false, false, false, "", now()),
             )
             if (quote != null) dao.insertPassages(listOf(quote.toRow(turnId, 1, PassageRole.SHOWN)))
             turnId
@@ -136,7 +127,6 @@ class RoomResearchChats(
         outcome: TurnOutcome,
         answer: String,
         medical: Boolean,
-        usedLarge: Boolean,
         keywords: List<String>,
         shown: List<Passage>,
         candidates: List<Passage>,
@@ -148,7 +138,6 @@ class RoomResearchChats(
                     outcome = outcome,
                     answer = answer,
                     medical = medical,
-                    usedLarge = usedLarge,
                     keywords = keywords.joinToString(KEYWORD_SEPARATOR),
                 ),
             )
@@ -162,10 +151,10 @@ class RoomResearchChats(
         }
     }
 
-    override suspend fun setGuess(turnId: Long, text: String, usedLarge: Boolean, fellBack: Boolean) {
+    override suspend fun setGuess(turnId: Long, text: String) {
         db.withTransaction {
             val turn = dao.turn(turnId) ?: return@withTransaction
-            dao.updateTurn(turn.copy(guess = text, guessLarge = usedLarge, guessFellBack = fellBack))
+            dao.updateTurn(turn.copy(guess = text))
             dao.touchChat(turn.chatId, now())
         }
     }

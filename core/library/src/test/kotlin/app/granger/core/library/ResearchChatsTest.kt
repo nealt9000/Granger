@@ -36,7 +36,7 @@ class ResearchChatsTest {
 
     @Test fun turnRoundTripsWithPassagesInOrder() = runTest {
         val chatId = chats.create("Why is the sky blue?")
-        val turnId = chats.startTurn(chatId, "Why is the sky blue?", askedDeeper = true, quote = null)
+        val turnId = chats.startTurn(chatId, "Why is the sky blue?", quote = null)
         val shown = listOf(
             passage(SourceKind.ARTICLE, 1, anchor = "Rayleigh"),
             passage(SourceKind.BOOK, 2, progression = 0.42),
@@ -44,13 +44,13 @@ class ResearchChatsTest {
             passage(SourceKind.SELECTION, 4),
         )
         val candidates = listOf(passage(SourceKind.ARTICLE, 5), passage(SourceKind.BOOK, 6, progression = 0.9))
-        chats.finishTurn(turnId, TurnOutcome.ANSWERED, "Scattering [1].", true, false, listOf("sky", "blue light"), shown, candidates)
+        chats.finishTurn(turnId, TurnOutcome.ANSWERED, "Scattering [1].", true, listOf("sky", "blue light"), shown, candidates)
 
         val turn = chats.turns(chatId).first().single()
         assertThat(turn).isEqualTo(
             ChatTurn(
                 id = turnId, chatId = chatId, question = "Why is the sky blue?", outcome = TurnOutcome.ANSWERED,
-                answer = "Scattering [1].", medical = true, usedLarge = false, askedDeeper = true,
+                answer = "Scattering [1].", medical = true,
                 keywords = listOf("sky", "blue light"), shown = shown, candidates = candidates, createdAt = turn.createdAt,
             ),
         )
@@ -58,9 +58,9 @@ class ResearchChatsTest {
 
     @Test fun mediaPassagesRoundTrip() = runTest {
         val chatId = chats.create("Who composed The Planets?")
-        val turnId = chats.startTurn(chatId, "Who composed The Planets?", askedDeeper = false, quote = null)
+        val turnId = chats.startTurn(chatId, "Who composed The Planets?", quote = null)
         val media = passage(SourceKind.MEDIA, 1).copy(sourceId = "album:gustav holst|the planets", location = "", packTitle = "Your music")
-        chats.finishTurn(turnId, TurnOutcome.ANSWERED, "Holst [1].", false, false, listOf("planets"), listOf(media), listOf(passage(SourceKind.MEDIA, 2)))
+        chats.finishTurn(turnId, TurnOutcome.ANSWERED, "Holst [1].", false, listOf("planets"), listOf(media), listOf(passage(SourceKind.MEDIA, 2)))
         val turn = chats.turns(chatId).first().single()
         assertThat(turn.shown).containsExactly(media)
         assertThat(turn.candidates.single().kind).isEqualTo(SourceKind.MEDIA)
@@ -68,15 +68,15 @@ class ResearchChatsTest {
 
     @Test fun emptyKeywordsRoundTripAsEmpty() = runTest {
         val chatId = chats.create("q")
-        val turnId = chats.startTurn(chatId, "q", false, null)
-        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, false, emptyList(), emptyList(), emptyList())
+        val turnId = chats.startTurn(chatId, "q", null)
+        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, emptyList(), emptyList(), emptyList())
         assertThat(chats.turns(chatId).first().single().keywords).isEmpty()
     }
 
     @Test fun quoteIsStoredAsPassageOne() = runTest {
         val chatId = chats.create("q")
         val quote = passage(SourceKind.SELECTION, 9)
-        chats.startTurn(chatId, "q", false, quote)
+        chats.startTurn(chatId, "q", quote)
         val turn = chats.turns(chatId).first().single()
         assertThat(turn.outcome).isEqualTo(TurnOutcome.PENDING)
         assertThat(turn.shown).containsExactly(quote)
@@ -86,8 +86,8 @@ class ResearchChatsTest {
         val a = chats.create("A")
         val b = chats.create("B")
         assertThat(chats.recent(10).first().map { it.id }).containsExactly(b, a).inOrder()
-        val turn = chats.startTurn(a, "q", false, null)
-        chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, false, emptyList(), emptyList(), emptyList())
+        val turn = chats.startTurn(a, "q", null)
+        chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, emptyList(), emptyList(), emptyList())
         assertThat(chats.recent(10).first().map { it.id }).containsExactly(a, b).inOrder()
         assertThat(chats.recent(1).first()).hasSize(1)
     }
@@ -95,8 +95,8 @@ class ResearchChatsTest {
     @Test fun finishingATurnBumpsTheChat() = runTest {
         val id = chats.create("A")
         val before = chats.chat(id)!!.updatedAt
-        val turn = chats.startTurn(id, "q", false, null)
-        chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, false, emptyList(), emptyList(), emptyList())
+        val turn = chats.startTurn(id, "q", null)
+        chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, emptyList(), emptyList(), emptyList())
         assertThat(chats.chat(id)!!.updatedAt).isGreaterThan(before)
         assertThat(chats.chat(id)!!.title).isEqualTo("A")
         assertThat(chats.chat(999)).isNull()
@@ -104,17 +104,17 @@ class ResearchChatsTest {
 
     @Test fun finishReplacesThePassages() = runTest {
         val id = chats.create("A")
-        val turn = chats.startTurn(id, "q", false, passage(SourceKind.SELECTION, 1))
+        val turn = chats.startTurn(id, "q", passage(SourceKind.SELECTION, 1))
         val shown = listOf(passage(SourceKind.CARD, 2))
-        chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, false, emptyList(), shown, emptyList())
+        chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, emptyList(), shown, emptyList())
         assertThat(chats.turns(id).first().single().shown).isEqualTo(shown)
     }
 
     @Test fun interruptPendingMarksOnlyPending() = runTest {
         val id = chats.create("A")
-        val done = chats.startTurn(id, "q1", false, null)
-        chats.finishTurn(done, TurnOutcome.ANSWERED, "x", false, false, emptyList(), emptyList(), emptyList())
-        chats.startTurn(id, "q2", false, null)
+        val done = chats.startTurn(id, "q1", null)
+        chats.finishTurn(done, TurnOutcome.ANSWERED, "x", false, emptyList(), emptyList(), emptyList())
+        chats.startTurn(id, "q2", null)
         assertThat(chats.interruptPending()).isEqualTo(1)
         assertThat(chats.turns(id).first().map { it.outcome })
             .containsExactly(TurnOutcome.ANSWERED, TurnOutcome.INTERRUPTED).inOrder()
@@ -124,9 +124,9 @@ class ResearchChatsTest {
     @Test fun deleteRemovesTurnsAndPassages() = runTest {
         val id = chats.create("A")
         val other = chats.create("B")
-        val t1 = chats.startTurn(id, "q", false, passage(SourceKind.SELECTION, 1))
-        chats.finishTurn(t1, TurnOutcome.ANSWERED, "x", false, false, emptyList(), listOf(passage(SourceKind.CARD, 2)), emptyList())
-        chats.startTurn(other, "q", false, passage(SourceKind.SELECTION, 3))
+        val t1 = chats.startTurn(id, "q", passage(SourceKind.SELECTION, 1))
+        chats.finishTurn(t1, TurnOutcome.ANSWERED, "x", false, emptyList(), listOf(passage(SourceKind.CARD, 2)), emptyList())
+        chats.startTurn(other, "q", passage(SourceKind.SELECTION, 3))
         chats.delete(id)
         assertThat(chats.chat(id)).isNull()
         assertThat(chats.turns(id).first()).isEmpty()
@@ -139,19 +139,15 @@ class ResearchChatsTest {
 
     @Test fun setGuessIsReadBack() = runTest {
         val chatId = chats.create("q")
-        val turnId = chats.startTurn(chatId, "q", askedDeeper = false, quote = null)
-        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, false, emptyList(), emptyList(), emptyList())
+        val turnId = chats.startTurn(chatId, "q", quote = null)
+        chats.finishTurn(turnId, TurnOutcome.DECLINED, "", false, emptyList(), emptyList(), emptyList())
         val before = chats.turns(chatId).first().single()
         assertThat(before.guess).isEmpty()
-        assertThat(before.guessLarge).isFalse()
-        assertThat(before.guessFellBack).isFalse()
 
-        chats.setGuess(turnId, "Probably chlorophyll.", usedLarge = true, fellBack = true)
+        chats.setGuess(turnId, "Probably chlorophyll.")
 
         val turn = chats.turns(chatId).first().single()
         assertThat(turn.guess).isEqualTo("Probably chlorophyll.")
-        assertThat(turn.guessLarge).isTrue()
-        assertThat(turn.guessFellBack).isTrue()
         assertThat(turn.outcome).isEqualTo(TurnOutcome.DECLINED)
     }
 }

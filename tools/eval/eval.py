@@ -2,7 +2,7 @@
 """Drives the Research eval (docs/superpowers/specs/2026-10-17-research-eval-design.md).
 
   eval.py validate dataset/tune.json [--packs DIR] [--books DIR] [--media EXPORT.json]   # EXPORT from media_library.py
-  eval.py run dataset/tune.json --run-id ID [--ids a,b] [--groups g1,g2] [--guesses none|small|large|both] [--rewrite alternates] [--fiction FILE]
+  eval.py run dataset/tune.json --run-id ID [--ids a,b] [--groups g1,g2] [--guesses none|small] [--rewrite alternates] [--fiction FILE]
   eval.py worksheet ID                       # runs/ID/worksheet.md: replies that still need a grade
   eval.py report --dataset-only dataset/tune.json dataset/heldout.json
   eval.py report ID [--totals-only] [--compare OTHER]
@@ -94,7 +94,7 @@ def main(argv=None):
     s = p.add_subparsers(dest="cmd", required=True)
     v = s.add_parser("validate"); v.add_argument("dataset"); v.add_argument("--packs"); v.add_argument("--books"); v.add_argument("--media"); v.set_defaults(f=cmd_validate)
     r = s.add_parser("run"); r.add_argument("dataset"); r.add_argument("--run-id", required=True)
-    r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small", "large", "both"])
+    r.add_argument("--fresh", action="store_true", help="wipe the run on the phone first instead of resuming it"); r.add_argument("--ids"); r.add_argument("--groups"); r.add_argument("--guesses", default="none", choices=["none", "small"])
     r.add_argument("--rewrite", choices=["alternates", "plain", "plain-all"], help="a debug rewrite variant (Plan R0; plain: first questions without the model, plain-all: follow-ups too; Plan R5 Task 6)")
     r.add_argument("--entities", choices=["on"], help="each thing a date question names gets a passage (Plan R5 Task 4)")
     r.add_argument("--facts", choices=["on"], help="dates and the sums between them worked out in code (Plan R5 Task 4)")

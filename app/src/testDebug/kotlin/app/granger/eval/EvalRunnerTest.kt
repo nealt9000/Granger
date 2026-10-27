@@ -38,8 +38,8 @@ class EvalRunnerTest {
         }
     }
 
-    private class Models(val small: Gen, val large: Gen) : ResearchModels {
-        override suspend fun generator(deeper: Boolean): TextGenerator = if (deeper) large else small
+    private class Models(val small: Gen) : ResearchModels {
+        override suspend fun generator(): TextGenerator = small
         override suspend fun embedder(): PassageEmbedder? = null
     }
 
@@ -49,11 +49,10 @@ class EvalRunnerTest {
 
     private var ticks = 0L
     private val small = Gen("small")
-    private val large = Gen("large")
 
     private fun runner(results: List<Passage> = listOf(water), source: (Passage) -> String = { it.sourceId }, small: Gen = this.small): EvalRunner {
         val finder = RecordingFinder(Finder(results))
-        val prompts = PromptRecorder(Models(small, large))
+        val prompts = PromptRecorder(Models(small))
         return EvalRunner(ResearchPipeline(finder, prompts), finder, source, prompts) { ticks += 10; ticks }
     }
 
@@ -101,7 +100,7 @@ class EvalRunnerTest {
     fun aDenseRunRecordsItsHitsWithCosinesAndTheScanTime() = runTest {
         val boiling = Passage(SourceKind.ARTICLE, "wikipedia_en_top", "Boiling", location = "Boiling", text = "Boiling turns a liquid to vapour.", cosine = 0.86)
         val models = object : ResearchModels {
-            override suspend fun generator(deeper: Boolean): TextGenerator = small
+            override suspend fun generator(): TextGenerator = small
             override suspend fun embedder(): PassageEmbedder = PassageEmbedder { texts, _ -> texts.map { floatArrayOf(1f) } }
         }
         val finder = RecordingFinder(Finder(listOf(water)))
@@ -128,17 +127,13 @@ class EvalRunnerTest {
     }
 
     @Test
-    fun promptStagesCoverPriorDeeperAndGuesses() = runTest {
+    fun promptStagesCoverPriorAndGuess() = runTest {
         val declining = Gen("small") { if (it.contains("Passages:")) "NOT IN LIBRARY" else "Maybe." }
         val out = File(tmp.root, "r/results.jsonl")
-        runner(small = declining).run(listOf(item("d", prior = "Before?")), out, GuessModels.BOTH)
+        runner(small = declining).run(listOf(item("d", prior = "Before?")), out, GuessModels.SMALL)
         val p = records(out).single().getJSONArray("prompts")
         assertThat((0 until p.length()).map { p.getJSONObject(it).getString("stage") })
-            .containsExactly("prior-rewrite", "prior-answer", "rewrite", "answer", "guess-small", "guess-large").inOrder()
-        val deeperOut = File(tmp.root, "r2/results.jsonl")
-        runner().run(listOf(item("m", multiStep = true)), deeperOut, GuessModels.NONE)
-        val q = records(deeperOut).single().getJSONArray("prompts")
-        assertThat((0 until q.length()).map { q.getJSONObject(it).getString("stage") }).containsExactly("rewrite", "answer", "deeper").inOrder()
+            .containsExactly("prior-rewrite", "prior-answer", "rewrite", "answer", "guess-small").inOrder()
     }
 
     @Test
@@ -151,7 +146,7 @@ class EvalRunnerTest {
     @Test
     fun recorderForwardsOnReadyAndChunks() = runTest {
         val inner = object : ResearchModels {
-            override suspend fun generator(deeper: Boolean) = object : TextGenerator {
+            override suspend fun generator() = object : TextGenerator {
                 override fun generate(prompt: String, maxTokens: Int): Flow<String> = flowOf("a", "b")
                 override fun generate(prompt: String, maxTokens: Int, onReady: () -> Unit): Flow<String> = flowOf("c", "d").onStart { onReady(); ready = true }
             }
@@ -159,7 +154,7 @@ class EvalRunnerTest {
         }
         val rec = PromptRecorder(inner)
         var fired = false
-        val chunks = rec.generator(false).generate("p", 5) { fired = true }.toList()
+        val chunks = rec.generator().generate("p", 5) { fired = true }.toList()
         assertThat(fired).isTrue()
         assertThat(ready).isTrue()
         assertThat(chunks).containsExactly("c", "d").inOrder()
@@ -171,7 +166,7 @@ class EvalRunnerTest {
     @Test
     fun aFailedRecordKeepsThePromptsItHas() = runTest {
         val finder = RecordingFinder(PassageFinder { throw IllegalStateException("disk I/O error") })
-        val prompts = PromptRecorder(Models(small, large))
+        val prompts = PromptRecorder(Models(small))
         val out = File(tmp.root, "rf/results.jsonl")
         EvalRunner(ResearchPipeline(finder, prompts), finder, { it.sourceId }, prompts) { ticks += 10; ticks }.run(listOf(item("a")), out, GuessModels.NONE)
         val r = records(out).single()
@@ -211,36 +206,20 @@ class EvalRunnerTest {
     }
 
     @Test
-    fun multiStepItemAlsoRunsThinkDeeperOnTheSamePool() = runTest {
-        val out = File(tmp.root, "r/results.jsonl")
-        runner().run(listOf(item("m", multiStep = true)), out, GuessModels.NONE)
-        val r = records(out).single()
-        val deeper = r.getJSONObject("deeper")
-        assertThat(deeper.getString("outcome")).isEqualTo("answered")
-        assertThat(deeper.getJSONArray("chosen").getJSONObject(0).getString("text")).contains("100 degrees")
-        assertThat(large.prompts).hasSize(1) // the large model answers; no second rewrite
-        assertThat(large.prompts[0]).contains("100 degrees")
-        assertThat(deeper.has("ms")).isTrue()
-    }
-
-    @Test
     fun declinedItemGetsRequestedGuesses() = runTest {
         val declining = Gen("small") { if (it.contains("Passages:")) "NOT IN LIBRARY" else "Maybe 100 degrees." }
         val out = File(tmp.root, "r/results.jsonl")
-        runner(small = declining).run(listOf(item("d")), out, GuessModels.BOTH)
+        runner(small = declining).run(listOf(item("d")), out, GuessModels.SMALL)
         val r = records(out).single()
         assertThat(r.getString("outcome")).isEqualTo("declined")
         val g = r.getJSONObject("guesses")
         assertThat(g.getJSONObject("small").getString("text")).isNotEmpty()
-        assertThat(g.getJSONObject("small").getBoolean("fellBack")).isFalse()
-        assertThat(g.getJSONObject("large").getString("text")).isNotEmpty()
-        assertThat(g.getJSONObject("large").has("ms")).isTrue()
+        assertThat(g.getJSONObject("small").has("ms")).isTrue()
+        assertThat(g.has("large")).isFalse()
 
-        val only = File(tmp.root, "r2/results.jsonl")
-        runner(small = declining).run(listOf(item("d")), only, GuessModels.SMALL)
-        val g2 = records(only).single().getJSONObject("guesses")
-        assertThat(g2.has("small")).isTrue()
-        assertThat(g2.has("large")).isFalse()
+        val none = File(tmp.root, "r2/results.jsonl")
+        runner(small = declining).run(listOf(item("d")), none, GuessModels.NONE)
+        assertThat(records(none).single().has("guesses")).isFalse()
     }
 
     @Test
@@ -257,7 +236,7 @@ class EvalRunnerTest {
     @Test
     fun answeredItemGetsNoGuesses() = runTest {
         val out = File(tmp.root, "r/results.jsonl")
-        runner().run(listOf(item("a")), out, GuessModels.BOTH)
+        runner().run(listOf(item("a")), out, GuessModels.SMALL)
         assertThat(records(out).single().has("guesses")).isFalse()
     }
 
@@ -291,7 +270,9 @@ class EvalRunnerTest {
         assertThat(EvalJson.filter(items, "b", null).map { it.id }).containsExactly("b")
         assertThat(EvalJson.filter(items, null, "x,z").map { it.id }).containsExactly("a")
         assertThat(EvalJson.filter(items, "", "").map { it.id }).containsExactly("a", "b")
-        assertThat(GuessModels.parse("both")).isEqualTo(GuessModels.BOTH)
+        assertThat(GuessModels.parse("small")).isEqualTo(GuessModels.SMALL)
+        assertThat(GuessModels.parse("both")).isEqualTo(GuessModels.SMALL) // older scripts
+        assertThat(GuessModels.parse("large")).isEqualTo(GuessModels.SMALL)
         assertThat(GuessModels.parse(null)).isEqualTo(GuessModels.NONE)
     }
 
@@ -305,7 +286,7 @@ class EvalRunnerTest {
     @Test
     fun aFailedRecordNamesTheReasonAndException() = runTest {
         val finder = RecordingFinder(PassageFinder { throw IllegalStateException("disk I/O error") })
-        val runner = EvalRunner(ResearchPipeline(finder, Models(small, large)), finder, { it.sourceId }) { ticks += 10; ticks }
+        val runner = EvalRunner(ResearchPipeline(finder, Models(small)), finder, { it.sourceId }) { ticks += 10; ticks }
         val out = File(tmp.root, "rf/results.jsonl")
         runner.run(listOf(item("a")), out, GuessModels.NONE)
         val r = records(out).single()

@@ -66,5 +66,6 @@ fun installedPackId(entry: PackEntry, records: List<DownloadRecord>, packs: List
 
 fun DeviceTier.canRun(role: ModelRole): Boolean = when (role) {
     ModelRole.SMALL, ModelRole.EMBEDDER -> this >= DeviceTier.ASK
-    ModelRole.LARGE -> this >= DeviceTier.THINK_DEEPER
+    // Gemma 4 E4B: too slow and too big on the phones measured (Plan R5 Task 8), and nothing uses it.
+    ModelRole.LARGE -> false
 }

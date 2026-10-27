@@ -177,13 +177,12 @@ class OnboardingViewModel(
         return when (tier) {
             DeviceTier.LIBRARY_ONLY -> "A library phone, with about $gb GB of memory."
             DeviceTier.ASK -> "A library and research phone, with about $gb GB of memory."
-            DeviceTier.THINK_DEEPER -> "A library and research phone that can also think deeper, with about $gb GB of memory."
         }
     }
 
     private fun researchLine(): String? = when (tier) {
         DeviceTier.LIBRARY_ONLY -> "Research, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library."
-        DeviceTier.ASK, DeviceTier.THINK_DEEPER -> "Research, the AI librarian, is coming in a later release; this phone can run it."
+        DeviceTier.ASK -> "Research, the AI librarian, is coming in a later release; this phone can run it."
     }
 
     fun refreshVolumes() {

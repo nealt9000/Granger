@@ -14,12 +14,16 @@ data class EvalItem(
     val priorQuestion: String?,
 )
 
-/** Which best guesses to ask for after a declined question. */
-enum class GuessModels(val small: Boolean, val large: Boolean) {
-    NONE(false, false), SMALL(true, false), LARGE(false, true), BOTH(true, true);
+/** Whether to ask the model for a best guess after a declined question. */
+enum class GuessModels {
+    NONE, SMALL;
 
     companion object {
-        fun parse(text: String?): GuessModels = entries.firstOrNull { it.name.equals(text?.trim(), ignoreCase = true) } ?: NONE
+        /** "small"; "large" and "both", from before the large model was removed, ask the one model too. */
+        fun parse(text: String?): GuessModels = when (text?.trim()?.lowercase()) {
+            "small", "large", "both" -> SMALL
+            else -> NONE
+        }
     }
 }
 

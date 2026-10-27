@@ -102,7 +102,7 @@ class RecordingDenseFinder(private val inner: DenseFinder, private val clock: ()
 /**
  * Wraps the models the pipeline uses and keeps, for the current item, every prompt sent and the reply it streamed back.
  * The stage comes from where the runner is ([begin] before each pipeline run), not from the prompt text: within a
- * main run the calls are the rewrite, the answer, and (large model unavailable) a retry of the answer.
+ * main run the calls are the rewrite and the answer.
  */
 class PromptRecorder(private val inner: ResearchModels) : ResearchModels {
     private class Entry(val stage: String, val prompt: String) { val output = StringBuilder() }
@@ -116,7 +116,7 @@ class PromptRecorder(private val inner: ResearchModels) : ResearchModels {
         synchronized(entries) { entries.clear(); phase = "main"; calls = 0 }
     }
 
-    /** Starts a pipeline run of [phase]: "prior", "main", "deeper", "guess-small" or "guess-large". */
+    /** Starts a pipeline run of [phase]: "prior", "main" or "guess-small". */
     fun begin(phase: String) {
         synchronized(entries) { this.phase = phase; calls = 0 }
     }
@@ -129,17 +129,16 @@ class PromptRecorder(private val inner: ResearchModels) : ResearchModels {
     private fun stage(): String = synchronized(entries) {
         val n = ++calls
         when (phase) {
-            "deeper" -> if (n == 1) "deeper" else "answer-retry"
-            "guess-small", "guess-large" -> phase
+            "guess-small" -> phase
             else -> {
-                val base = when (n) { 1 -> "rewrite"; 2 -> "answer"; else -> "answer-retry" }
+                val base = if (n == 1) "rewrite" else "answer"
                 if (phase == "prior") "prior-$base" else base
             }
         }
     }
 
-    override suspend fun generator(deeper: Boolean): TextGenerator {
-        val real = inner.generator(deeper)
+    override suspend fun generator(): TextGenerator {
+        val real = inner.generator()
         return object : TextGenerator {
             override fun generate(prompt: String, maxTokens: Int): Flow<String> = record(prompt, real.generate(prompt, maxTokens))
 
@@ -253,7 +252,7 @@ class EvalRunner(
                         Stage.WRITING -> "rank" to stageStart
                         Stage.LOADING_MODEL -> null
                     }
-                    // A deeper run skips retrieval: it has no SEARCHING or RANKING, so WRITING must not claim a rank time.
+                    // A guess skips retrieval: it has no SEARCHING or RANKING, so WRITING must not claim a rank time.
                     if (key != null && !(event.stage == Stage.WRITING && !ms.has("search"))) ms.put(key.first, now - key.second)
                     stageStart = now
                 }
@@ -306,38 +305,19 @@ class EvalRunner(
         describe(outcome).into(record)
         record.put("ms", main.ms)
 
-        val pool = when (outcome) {
-            is Outcome.Answered -> outcome.passages + outcome.candidates
-            is Outcome.Unverified -> outcome.passages + outcome.candidates
-            else -> emptyList()
-        }
-        if (item.multiStep && pool.isNotEmpty()) {
-            // Think deeper as the app does it: the same pool (up to 8), no search, the large model.
-            val deeperRequest = ResearchRequest(
-                item.question, prior = prior, priorQuestion = item.priorQuestion,
-                deeperFrom = pool.take(DEEPER_PASSAGES), medicalHint = outcome?.medical ?: false,
-            )
-            prompts?.begin("deeper")
-            val deeper = execute(pipeline.run(deeperRequest))
-            val d = JSONObject()
-            describe(deeper.outcome).into(d)
-            record.put("deeper", d.put("ms", deeper.ms))
-        }
-        if (outcome is Outcome.Declined && !outcome.medical && (guesses.small || guesses.large)) {
-            val g = JSONObject()
-            if (guesses.small) guess(item, large = false)?.let { g.put("small", it) }
-            if (guesses.large) guess(item, large = true)?.let { g.put("large", it) }
-            if (g.length() > 0) record.put("guesses", g)
+        if (outcome is Outcome.Declined && !outcome.medical && guesses == GuessModels.SMALL) {
+            // Under "small", as tools/eval names the model's guesses.
+            guess(item)?.let { record.put("guesses", JSONObject().put("small", it)) }
         }
         prompts?.let { record.put("prompts", it.toJson()) }
         return record
     }
 
-    private suspend fun guess(item: EvalItem, large: Boolean): JSONObject? {
-        prompts?.begin(if (large) "guess-large" else "guess-small")
-        val run = execute(pipeline.guess(item.question, item.priorQuestion, large))
+    private suspend fun guess(item: EvalItem): JSONObject? {
+        prompts?.begin("guess-small")
+        val run = execute(pipeline.guess(item.question, item.priorQuestion))
         val guessed = run.outcome as? Outcome.Guessed ?: return null
-        return JSONObject().put("text", guessed.text).put("ms", run.ms.optLong("total")).put("fellBack", guessed.fellBack)
+        return JSONObject().put("text", guessed.text).put("ms", run.ms.optLong("total"))
     }
 
     private class Described(val outcome: String, val reply: String, val cited: List<Int>, val chosen: List<Passage>)
@@ -370,6 +350,5 @@ class EvalRunner(
     companion object {
         const val FOUND_CAP = 60
         const val CORPUS_FILE = "found.jsonl"
-        const val DEEPER_PASSAGES = 8
     }
 }

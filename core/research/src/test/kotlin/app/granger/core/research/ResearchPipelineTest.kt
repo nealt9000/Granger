@@ -38,15 +38,9 @@ class ResearchPipelineTest {
 
     private class FakeModels(
         val small: TextGenerator?,
-        val large: TextGenerator? = null,
         val embedder: PassageEmbedder? = null,
     ) : ResearchModels {
-        val requested = mutableListOf<Boolean>()
-        override suspend fun generator(deeper: Boolean): TextGenerator {
-            requested += deeper
-            val g = if (deeper) large else small
-            return g ?: throw ModelUnavailableException("no model")
-        }
+        override suspend fun generator(): TextGenerator = small ?: throw ModelUnavailableException("no model")
         override suspend fun embedder(): PassageEmbedder? = embedder
     }
 
@@ -88,7 +82,6 @@ class ResearchPipelineTest {
         assertThat(out.cited).containsExactly(1)
         assertThat(out.text).isEqualTo("Water boils at 100 °C [1].")
         assertThat(out.passages).containsExactly(water)
-        assertThat(out.usedLarge).isFalse()
         assertThat(out.keywords).containsExactly("water", "boils").inOrder()
         assertThat(finder.calls).containsExactly(listOf("water", "boils"))
         assertThat(gen.maxTokens).containsExactly(32, 512).inOrder()
@@ -262,16 +255,6 @@ class ResearchPipelineTest {
     }
 
     @Test
-    fun deeperFlagsMedicalFromTheHint() = runTest {
-        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
-        val large = FakeGenerator(answer = { flowOf("Deep answer [8].") })
-        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator(), large = large))
-            .run(ResearchRequest("Why?", deeperFrom = eight, medicalHint = true)).toList()
-        assertThat(events.indexOf(ResearchEvent.Medical)).isLessThan(events.indexOfFirst { it is ResearchEvent.Partial })
-        assertThat(events).contains(ResearchEvent.Medical)
-    }
-
-    @Test
     fun notMedicalIsNotFlagged() = runTest {
         val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder))
             .run(ResearchRequest("At what temperature does water boil?")).toList()
@@ -386,44 +369,6 @@ class ResearchPipelineTest {
     }
 
     @Test
-    fun deeperSkipsRetrievalAndUsesEight() = runTest {
-        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
-        val small = FakeGenerator()
-        val large = FakeGenerator(answer = { flowOf("Deep answer [8].") })
-        val finder = FakeFinder(listOf(water))
-        val models = FakeModels(small, large = large)
-        val events = ResearchPipeline(finder, models)
-            .run(ResearchRequest("At what temperature does water boil?", deeperFrom = eight, medicalHint = true)).toList()
-        assertThat(finder.calls).isEmpty()
-        assertThat(models.requested).containsExactly(true)
-        assertThat(small.prompts).isEmpty()
-        assertThat(large.prompts).hasSize(1)
-        assertThat(large.prompts.single()).contains("[8] Deep 8")
-        val out = outcome(events) as Outcome.Answered
-        assertThat(out.usedLarge).isTrue()
-        assertThat(out.cited).containsExactly(8)
-        assertThat(out.passages).isEqualTo(eight)
-        assertThat(out.candidates).isEmpty()
-        assertThat(out.medical).isTrue()
-        assertThat(out.keywords).isEmpty()
-    }
-
-    @Test
-    fun largeLoadFailureFallsBackToSmall() = runTest {
-        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
-        val small = FakeGenerator()
-        val models = FakeModels(small, large = null)
-        val events = ResearchPipeline(FakeFinder(emptyList()), models)
-            .run(ResearchRequest("Why?", deeperFrom = eight)).toList()
-        assertThat(events).contains(ResearchEvent.LargeFallback)
-        assertThat(models.requested).containsExactly(true, false).inOrder()
-        val out = outcome(events) as Outcome.Answered
-        assertThat(out.usedLarge).isFalse()
-        assertThat(out.passages).isEqualTo(eight.take(4))
-        assertThat(out.candidates).isEqualTo(eight.drop(4))
-    }
-
-    @Test
     fun smallLoadFailureFails() = runTest {
         val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(small = null))
             .run(ResearchRequest("At what temperature does water boil?")).toList()
@@ -444,7 +389,7 @@ class ResearchPipelineTest {
     fun guessStreamsPartialsThenGuessed() = runTest {
         val gen = FakeGenerator(answer = { flowOf("Probably ", "Paris.") })
         val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(gen))
-            .guess("Capital of France?", priorQuestion = null, large = false).toList()
+            .guess("Capital of France?", priorQuestion = null).toList()
         assertThat(events.take(2)).containsExactly(
             ResearchEvent.Progress(Stage.LOADING_MODEL),
             ResearchEvent.Progress(Stage.WRITING),
@@ -453,8 +398,6 @@ class ResearchPipelineTest {
             .containsExactly("Probably ", "Probably Paris.").inOrder()
         val out = outcome(events) as Outcome.Guessed
         assertThat(out.text).isEqualTo("Probably Paris.")
-        assertThat(out.usedLarge).isFalse()
-        assertThat(out.fellBack).isFalse()
         assertThat(out.medical).isFalse()
         assertThat(out.keywords).isEmpty()
         assertThat(gen.maxTokens).containsExactly(512)
@@ -464,18 +407,8 @@ class ResearchPipelineTest {
     fun guessNeverCallsTheFinder() = runTest {
         val finder = FakeFinder(listOf(water))
         ResearchPipeline(finder, FakeModels(FakeGenerator()))
-            .guess("Anything?", priorQuestion = "Before?", large = false).toList()
+            .guess("Anything?", priorQuestion = "Before?").toList()
         assertThat(finder.calls).isEmpty()
-    }
-
-    @Test
-    fun guessFallsBackToSmallWhenLargeWontLoad() = runTest {
-        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = FakeGenerator(), large = null))
-            .guess("Anything?", priorQuestion = null, large = true).toList()
-        assertThat(events).contains(ResearchEvent.GuessFallback)
-        val out = outcome(events) as Outcome.Guessed
-        assertThat(out.fellBack).isTrue()
-        assertThat(out.usedLarge).isFalse()
     }
 
     @Test
@@ -483,45 +416,18 @@ class ResearchPipelineTest {
         val gen = FakeGenerator(answer = { flowOf("One ", "two ", "three") })
         var chunks = 0
         val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(gen))
-            .guess("Count?", priorQuestion = null, large = false, stop = { ++chunks >= 2 }).toList()
+            .guess("Count?", priorQuestion = null, stop = { ++chunks >= 2 }).toList()
         assertThat((outcome(events) as Outcome.Guessed).text).isEqualTo("One two ")
     }
 
     @Test
     fun guessWithNoModelFails() = runTest {
         val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = null))
-            .guess("Anything?", priorQuestion = null, large = false).toList()
+            .guess("Anything?", priorQuestion = null).toList()
         val failed = outcome(events) as Outcome.Failed
         assertThat(failed.reason).isEqualTo(FailReason.MODEL_UNAVAILABLE)
         assertThat(failed.keywords).isEmpty()
         assertThat(failed.cause).isInstanceOf(ModelUnavailableException::class.java)
-    }
-
-    @Test
-    fun guessUsesTheLargeModelWhenItLoads() = runTest {
-        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(small = FakeGenerator(), large = FakeGenerator()))
-            .guess("Anything?", priorQuestion = null, large = true).toList()
-        assertThat(events).doesNotContain(ResearchEvent.GuessFallback)
-        val out = outcome(events) as Outcome.Guessed
-        assertThat(out.usedLarge).isTrue()
-        assertThat(out.fellBack).isFalse()
-    }
-
-    @Test
-    fun largeReloadFailureMidAnswerFallsBackToSmall() = runTest {
-        val eight = (1..8).map { passage("D$it", "Deep passage $it.", "Deep $it") }
-        val small = FakeGenerator(answer = { flowOf("Small answer [1].") })
-        // The large model loaded for the request but won't reload when the reply starts.
-        val large = FakeGenerator(answer = { flow { throw ModelUnavailableException("won't reload") } })
-        val models = FakeModels(small, large = large)
-        val events = ResearchPipeline(FakeFinder(emptyList()), models)
-            .run(ResearchRequest("Why?", deeperFrom = eight)).toList()
-        assertThat(events).contains(ResearchEvent.LargeFallback)
-        val out = outcome(events) as Outcome.Answered
-        assertThat(out.text).isEqualTo("Small answer [1].")
-        assertThat(out.usedLarge).isFalse()
-        assertThat(out.passages).isEqualTo(eight.take(4))
-        assertThat(out.candidates).isEqualTo(eight.drop(4))
     }
 
     @Test
