@@ -7,7 +7,7 @@
 `check` transcribes every take with Whisper (through mlx-whisper, cached in `<raw>/asr.jsonl`) and writes
 `<raw>/qc.tsv`: per take its word error rate against the script line, its speaking rate (characters per second of
 trimmed speech), its peak, and a verdict. A take passes with a WER of at most `MAX_WER` (one wrong word in a short
-line; Whisper's digits are spelled out first), a rate within `RATE` of its speaker's median (catching rushed, dragged or runaway takes), 1–15 s of speech,
+line, never more than `MAX_WRONG`; Whisper's digits are spelled out first), a rate within `RATE` of its speaker's median (catching rushed, dragged or runaway takes), 1–18 s of speech,
 no clipping, and a clean ending. Qwen3 often stops while the last sound is still decaying: a take without a tail
 must end quiet (its last `END_SECONDS` under `END_DB`, with no drop from speech straight to digital silence). A take
 read with generate.py's `--tail` is cut in the pause before the tail (the longest run under `GAP_DB` between the
@@ -30,9 +30,9 @@ import re
 import statistics
 import sys
 
-MAX_WER, MAX_WRONG_SHORT = 0.10, 1
+MAX_WER, MAX_WRONG_SHORT, MAX_WRONG = 0.10, 1, 2  # MAX_WRONG caps round 2's long passages
 RATE, RATE_SHORT, SHORT_CHARS = 0.30, 0.60, 50  # headings and short questions vary more
-MIN_SECONDS, MAX_SECONDS = 1.0, 15.0
+MIN_SECONDS, MAX_SECONDS = 1.0, 18.0  # round 2's passages run to about 14 s
 TOP_DB, PAD = 40, 0.12
 TARGET_DBFS, PEAK_DBFS = -20.0, -1.0
 SAMPLE_RATE = 22050
@@ -201,7 +201,7 @@ def check(args):
     medians = {s: statistics.median([r["rate"] for r in rows if r["speaker"] == s] or [1]) for s in speakers}
     for r in rows:
         reasons = []
-        if r["wer"] > MAX_WER and r["wrong"] > MAX_WRONG_SHORT:
+        if (r["wer"] > MAX_WER and r["wrong"] > MAX_WRONG_SHORT) or r["wrong"] > MAX_WRONG:
             reasons.append("words")
         short = len(lines[r["id"]][1]) < SHORT_CHARS
         if abs(r["rate"] / medians[r["speaker"]] - 1) > (RATE_SHORT if short else RATE):
