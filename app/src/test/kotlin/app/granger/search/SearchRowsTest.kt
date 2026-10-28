@@ -2,6 +2,7 @@ package app.granger.search
 
 import app.granger.core.library.ArtistHit
 import app.granger.core.library.Audiobook
+import app.granger.core.library.BookHit
 import app.granger.core.library.MediaNames
 import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
@@ -26,5 +27,26 @@ class SearchRowsTest {
         assertThat(SearchRows.showAll(SearchGroup.TITLES, 12, capped = false)).isEqualTo("Show all 12 titles")
         assertThat(SearchRows.showAll(SearchGroup.SONGS, 25, capped = true)).isEqualTo("Show the first 25 songs")
         assertThat(SearchRows.showFewer(SearchGroup.FULL_TEXT)).isEqualTo("Show fewer article matches")
+        assertThat(SearchRows.showAll(SearchGroup.BOOKS, 9, capped = false)).isEqualTo("Show all 9 books")
+    }
+
+    @Test fun aBookSaysHowManyPlacesMatched() {
+        val emma = BookHit("b:emma", "Emma", "Jane Austen", "ch2", 0.0, "", matches = 3)
+        assertThat(SearchRows.bookLine(emma)).isEqualTo("Jane Austen · 3 matches")
+        assertThat(SearchRows.bookLine(emma.copy(matches = 1))).isEqualTo("Jane Austen")
+        assertThat(SearchRows.bookLine(emma.copy(author = ""))).isEqualTo("3 matches")
+    }
+
+    @Test fun aSnippetMatchesWhenItHoldsAQueryWordOrAMark() {
+        // libkiwix's mark counts, stemmed or not.
+        assertThat(SearchRows.snippetMatches("the <b>apocalyptic</b> visions", "apocalypse")).isTrue()
+        // Case and accents don't count, and tags don't hide a word.
+        assertThat(SearchRows.snippetMatches("Ève <i>Apocalypse</i> now", "apocalypse eve")).isTrue()
+        assertThat(SearchRows.snippetMatches("APOCALYPSE", "apocalypse")).isTrue()
+        assertThat(SearchRows.snippetMatches("Caf&eacute; &amp; apocalypse", "Apocalypse")).isTrue()
+        // Page chrome without the query is not a match.
+        assertThat(SearchRows.snippetMatches("Categories: 1st-century books | Authority control: VIAF", "apocalypse")).isFalse()
+        assertThat(SearchRows.snippetMatches("Reputation 1,204 <span>Badges</span>", "apocalypse")).isFalse()
+        assertThat(SearchRows.snippetMatches("<b> </b>menu", "apocalypse")).isFalse()
     }
 }

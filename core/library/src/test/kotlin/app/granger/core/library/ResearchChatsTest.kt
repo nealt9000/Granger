@@ -137,6 +137,22 @@ class ResearchChatsTest {
         }
     }
 
+    @Test fun deleteAllRemovesEveryChatWithItsTurnsAndPassages() = runTest {
+        for (title in listOf("A", "B")) {
+            val id = chats.create(title)
+            val turn = chats.startTurn(id, "q", passage(SourceKind.SELECTION, 1))
+            chats.finishTurn(turn, TurnOutcome.ANSWERED, "x", false, emptyList(), listOf(passage(SourceKind.CARD, 2)), emptyList())
+        }
+        chats.deleteAll()
+        assertThat(chats.recent(10).first()).isEmpty()
+        for (table in listOf("research_chats", "research_turns", "research_passages")) {
+            db.query("SELECT COUNT(*) FROM $table", null).use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(0)
+            }
+        }
+    }
+
     @Test fun setGuessIsReadBack() = runTest {
         val chatId = chats.create("q")
         val turnId = chats.startTurn(chatId, "q", quote = null)

@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,8 +56,7 @@ import app.granger.core.library.CollectionRow
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 
-/** "Media" (media types, each expanding to its collections) and "Archive sources". */
-@OptIn(ExperimentalMaterial3Api::class)
+/** What the phone holds, by kind (Plan U3b Decision 4); getting more is in Get more, what's coming in Downloads. */
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel,
@@ -65,10 +68,13 @@ fun LibraryScreen(
     onOpenMusic: (collectionId: String?) -> Unit,
     /** An Audiobooks collection's shelf, or "All audiobooks" (null). */
     onOpenAudiobooks: (collectionId: String?) -> Unit,
-    onOpenSource: (SourceLink) -> Unit,
     onSearch: () -> Unit,
-    onHistory: () -> Unit,
     onReadiness: () -> Unit,
+    /** What's coming or stopped in Downloads; the icon shows a badge while it isn't 0. */
+    downloadsBadge: Int = 0,
+    onDownloads: () -> Unit = {},
+    /** Where sources live (Plan U3b Decision 2). */
+    onGetMore: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -89,28 +95,66 @@ fun LibraryScreen(
         snackbar.showSnackbar(text)
         viewModel.dismissNotice()
     }
-    var menuOpen by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         viewModel.import(uris)
     }
-    // Media type ids the user has collapsed; all start expanded.
+    LibraryContent(
+        ui, packsFolder, snackbar, onOpenCollection, onOpenMusic, onOpenAudiobooks, onSearch, onReadiness,
+        downloadsBadge, onDownloads, onGetMore, onImport = { picker.launch(IMPORT_TYPES) },
+    )
+}
+
+/**
+ * The header (Search, Downloads with its badge, Get more, and Readiness and Import books… in the overflow) and one row
+ * per kind, each opening to its collections. Null [ui] is still loading.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LibraryContent(
+    ui: LibraryUi?,
+    packsFolder: String,
+    snackbar: SnackbarHostState,
+    onOpenCollection: (collectionId: String) -> Unit,
+    onOpenMusic: (collectionId: String?) -> Unit,
+    onOpenAudiobooks: (collectionId: String?) -> Unit,
+    onSearch: () -> Unit,
+    onReadiness: () -> Unit,
+    downloadsBadge: Int,
+    onDownloads: () -> Unit,
+    onGetMore: () -> Unit,
+    onImport: () -> Unit,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    // Kind row ids the user has collapsed; all start expanded.
     var collapsed by rememberSaveable { mutableStateOf(emptyList<String>()) }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text("Library") },
+                // One line: on a narrow phone the actions leave it short, and a word broken in two reads worse.
+                title = { Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
-                    IconButton(onClick = onHistory) { Icon(painterResource(R.drawable.ic_history), contentDescription = "History") }
-                    IconButton(onClick = onReadiness) { Icon(Icons.Filled.CheckCircle, contentDescription = "Readiness") }
-                    if (Features.IMPORT) Box {
+                    IconButton(onClick = onDownloads) {
+                        BadgedBox(badge = { if (downloadsBadge > 0) Badge { Text("$downloadsBadge") } }) {
+                            Icon(painterResource(R.drawable.ic_download), contentDescription = "Downloads")
+                        }
+                    }
+                    IconButton(onClick = onGetMore) { Icon(Icons.Filled.Add, contentDescription = "Get more") }
+                    // Readiness is in the overflow so the title fits at 360 dp (Plan U3b Decision 4).
+                    Box {
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             DropdownMenuItem(
-                                text = { Text("Import books…") },
-                                onClick = { menuOpen = false; picker.launch(IMPORT_TYPES) },
+                                text = { Text("Readiness") },
+                                onClick = { menuOpen = false; onReadiness() },
                             )
+                            if (Features.IMPORT) {
+                                DropdownMenuItem(
+                                    text = { Text("Import books…") },
+                                    onClick = { menuOpen = false; onImport() },
+                                )
+                            }
                         }
                     }
                 },
@@ -119,7 +163,6 @@ fun LibraryScreen(
     ) { padding ->
         val loaded = ui ?: return@Scaffold
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
-            item { SectionHeader("Media") }
             if (loaded.emptyLibrary) {
                 item {
                     Column(
@@ -128,7 +171,7 @@ fun LibraryScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text("No packs installed yet.", style = MaterialTheme.typography.titleMedium)
-                        Text("Get packs from Granger or Kiwix", style = MaterialTheme.typography.bodyMedium)
+                        TextButton(onClick = onGetMore) { Text("Get packs and books →") }
                         Text("Or copy .zim files into $packsFolder", style = MaterialTheme.typography.bodySmall)
                         if (Features.IMPORT) {
                             Text("Or import your own EPUB, PDF, TXT or Markdown books", style = MaterialTheme.typography.bodySmall)
@@ -136,13 +179,13 @@ fun LibraryScreen(
                     }
                 }
             }
-            for (shelf in loaded.media) {
-                val id = shelf.mediaType.id
+            for (kind in loaded.kinds) {
+                val id = kind.id
                 val open = id !in collapsed
-                item(key = "type:$id") {
+                item(key = "kind:$id") {
                     ListItem(
                         modifier = Modifier.clickable { collapsed = if (open) collapsed + id else collapsed - id },
-                        headlineContent = { Text(shelf.mediaType.name, style = MaterialTheme.typography.titleMedium) },
+                        headlineContent = { Text(kind.title, style = MaterialTheme.typography.titleMedium) },
                         trailingContent = {
                             Icon(
                                 if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -153,21 +196,21 @@ fun LibraryScreen(
                 }
                 // Music opens its own tabs: "All music" first, then each collection scoped to its albums. Audiobooks
                 // does the same with its shelf: "All audiobooks", then each collection scoped to its audiobooks.
-                val music = id == MUSIC_TYPE_ID
-                val audiobooks = id == AUDIOBOOKS_TYPE_ID
+                val music = kind.mediaTypeId == MUSIC_TYPE_ID
+                val audiobooks = kind.mediaTypeId == AUDIOBOOKS_TYPE_ID
                 if (open && (music || audiobooks)) {
                     item(key = if (music) "all-music" else "all-audiobooks") {
                         ListItem(
                             modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
                             headlineContent = { Text(if (music) ALL_MUSIC else ALL_AUDIOBOOKS) },
                             supportingContent = {
-                                Text(countText(0, 0, shelf.allCollections.sumOf { it.albums.size }, shelf.allCollections.sumOf { it.audiobooks.size }))
+                                Text(countText(0, 0, kind.allCollections.sumOf { it.albums.size }, kind.allCollections.sumOf { it.audiobooks.size }))
                             },
                         )
                     }
                 }
                 // A folder (Kiwix) is one row; it opens the folder screen, which lists its children.
-                if (open) for (row in shelf.collections) {
+                if (open) for (row in kind.collections) {
                     item(key = "collection:${row.collection.id}") {
                         ListItem(
                             modifier = Modifier
@@ -186,18 +229,6 @@ fun LibraryScreen(
                     }
                 }
                 item(key = "divider:$id") { HorizontalDivider() }
-            }
-            item { SectionHeader("Archive sources") }
-            for (group in loaded.sources) {
-                item(key = "source-group:${group.title}") { GroupHeader(group.title) }
-                for (source in group.links) {
-                    item(key = "source:${source.name}") {
-                        ListItem(
-                            modifier = Modifier.clickable { onOpenSource(source) }.padding(start = 16.dp),
-                            headlineContent = { Text(source.title) },
-                        )
-                    }
-                }
             }
         }
     }
@@ -230,24 +261,4 @@ fun displayNameOf(context: Context, uri: Uri): String {
         null
     }
     return queried?.takeIf { it.isNotBlank() } ?: uri.lastPathSegment.orEmpty()
-}
-
-@Composable
-private fun GroupHeader(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp),
-    )
-}
-
-@Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-    )
 }

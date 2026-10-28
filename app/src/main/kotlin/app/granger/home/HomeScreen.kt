@@ -73,7 +73,8 @@ fun HomeScreen(
     onOpenTab: (Long) -> Unit,
     onPlay: (RailEntry.Play) -> Unit,
     onOpenCard: (Card) -> Unit,
-    onOpenSetup: () -> Unit = {},
+    /** The setup bar opens Downloads, where a failed file is retried (Plan U3b Decision 1). */
+    onOpenDownloads: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -81,7 +82,7 @@ fun HomeScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val actions = remember(viewModel) { FeedActions(viewModel::addFeed, viewModel::removeFeed, viewModel::moveFeed) }
-    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenSetup)
+    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +94,8 @@ fun HomeContent(
     onPlay: (RailEntry.Play) -> Unit,
     onOpenCard: (Card) -> Unit = {},
     actions: FeedActions = FeedActions(),
-    onOpenSetup: () -> Unit = {},
+    /** The setup bar opens Downloads, where a failed file is retried (Plan U3b Decision 1). */
+    onOpenDownloads: () -> Unit = {},
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -108,7 +110,7 @@ fun HomeContent(
             item(key = "strip") { ReadinessStrip(ui.strip, onReadiness) }
             ui.setup?.let { setup ->
                 item(key = "setup") {
-                    Column(Modifier.fillMaxWidth().clickable(onClick = onOpenSetup).padding(horizontal = 16.dp, vertical = 8.dp).testTag("setup-strip")) {
+                    Column(Modifier.fillMaxWidth().clickable(onClick = onOpenDownloads).padding(horizontal = 16.dp, vertical = 8.dp).testTag("setup-strip")) {
                         LinearProgressIndicator(progress = { setup.fraction }, modifier = Modifier.fillMaxWidth())
                         Text(setupText(setup), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 6.dp))
                     }
@@ -225,7 +227,7 @@ private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
 
 @Composable
 private fun PlayCard(entry: RailEntry.Play, onClick: () -> Unit) {
-    Card(title = entry.title, subtitle = "Play again", enabled = true, onClick = onClick) {
+    Card(title = entry.title, subtitle = entry.kind, enabled = true, onClick = onClick) {
         IconTile(rememberVectorPainter(Icons.Filled.PlayArrow))
     }
 }
@@ -312,8 +314,8 @@ internal fun Card(title: String, subtitle: String, enabled: Boolean, onClick: ()
     }
 }
 
-/** "Setting up · 3 of 14 · 1.2 GB of 9.8 GB", with the failures when there are any. */
+/** "Setting up · 3 of 14 · 1.2 GB of 9.8 GB", with the failures when there are any; Retry is in Downloads. */
 fun setupText(setup: SetupProgress): String {
     val base = "Setting up · ${setup.done} of ${setup.total} · ${app.granger.formatBytes(setup.bytesDone)} of ${app.granger.formatBytes(setup.bytes)}"
-    return if (setup.failed > 0) "$base · ${setup.failed} failed, tap to retry" else base
+    return if (setup.failed > 0) "$base · ${setup.failed} failed" else base
 }

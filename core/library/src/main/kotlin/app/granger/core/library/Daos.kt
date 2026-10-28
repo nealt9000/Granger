@@ -163,6 +163,13 @@ interface SessionDao {
     @Query("DELETE FROM history WHERE packId = :packId")
     suspend fun deleteHistoryForPack(packId: String)
 
+    @Query("DELETE FROM history")
+    suspend fun deleteAllHistory()
+
+    /** Takes every tab but [keep] off the rail. */
+    @Query("UPDATE reading_tabs SET onRail = 0 WHERE onRail = 1 AND id NOT IN (:keep)")
+    suspend fun closeTabsExcept(keep: Collection<Long>)
+
     /** Tabs of pack documents ([prefix] is `book:pack:`) whose book row is gone. */
     @Query("DELETE FROM reading_tabs WHERE packId LIKE :prefix || '%' AND packId NOT IN (SELECT id FROM books)")
     suspend fun deleteOrphanTabs(prefix: String)
@@ -185,6 +192,9 @@ interface SessionDao {
 
     @Query("DELETE FROM recent_searches WHERE query = :query")
     suspend fun deleteRecentSearch(query: String)
+
+    @Query("DELETE FROM recent_searches WHERE query NOT IN (:keep)")
+    suspend fun deleteAllRecentSearches(keep: Collection<String>)
 
     /** Newest pin first; a tie (the same millisecond) goes to the later insert. */
     @Query("SELECT * FROM rail_pins ORDER BY pinnedAt DESC, rowid DESC")
@@ -339,6 +349,16 @@ interface ResearchDao {
 
     @Query("DELETE FROM research_chats WHERE id = :id")
     suspend fun deleteChat(id: Long)
+
+    @Query("DELETE FROM research_passages")
+    suspend fun deleteAllPassages()
+
+    @Query("DELETE FROM research_turns")
+    suspend fun deleteAllTurns()
+
+    /** Every chat; delete [deleteAllPassages] and [deleteAllTurns] first, in the same transaction. */
+    @Query("DELETE FROM research_chats")
+    suspend fun deleteAllChats()
 }
 
 /** Home's feeds and their daily draws (Plan H2). */

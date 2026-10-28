@@ -7,6 +7,7 @@ import app.granger.core.library.Bookshelf
 import app.granger.core.library.ImportResult
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
+import app.granger.book
 import app.granger.pack
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.MediaType
@@ -49,19 +50,6 @@ class LibraryViewModelTest {
         },
     )
 
-    @Test fun sourcesAreGroupedByMediaType() = runTest(main.dispatcher) {
-        val vm = vm()
-        val ui = vm.ui.filterNotNull().first()
-        assertThat(ui.sources).containsExactly(
-            SourceGroup("Literature", listOf(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG)),
-            SourceGroup("Audiobooks", listOf(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN)),
-            SourceGroup("Music", listOf(SourceLink.ARCHIVE_ORG_MUSIC)),
-        ).inOrder()
-        // Every audio source is named for what it is: "Archive.org" under each header.
-        assertThat(SourceLink.ARCHIVE_ORG_SPOKEN.title).isEqualTo("Archive.org")
-        assertThat(SourceLink.ARCHIVE_ORG_MUSIC.title).isEqualTo("Archive.org")
-    }
-
     @Test fun refreshRescansTheLibrary() = runTest(main.dispatcher) {
         val vm = vm()
         vm.refresh()
@@ -70,14 +58,47 @@ class LibraryViewModelTest {
         assertThat(library.refreshes).isEqualTo(2)
     }
 
-    @Test fun showsShelvesAndSources() = runTest(main.dispatcher) {
-        shelves.shelfList.value = listOf(shelf("Literature", "Wikipedia" to 3, "Medicine" to 1))
+    @Test fun literatureSplitsIntoReferenceAndBooks() = runTest(main.dispatcher) {
+        val folder = CollectionRow(
+            ShelfCollection("c:kiwix", "Kiwix", "literature", userCreated = false, defaultKey = "kiwix"), emptyList(),
+            children = shelf("Literature", "Wikipedia" to 3).collections,
+        )
+        val classics = bookRow("Granger Classics", 2)
+        val mine = bookRow("My books", 1)
+        val granger = shelf("Literature", "Granger packs" to 1).collections.single()
+        shelves.shelfList.value = listOf(
+            shelf("Music", "Phone" to 1),
+            shelf("Literature").copy(collections = listOf(classics, granger, folder, mine)),
+            shelf("Maps", "OpenStreetMap" to 1),
+            shelf("Audiobooks", "LibriVox" to 1),
+        )
         val ui = vm().ui.filterNotNull().first()
-        assertThat(ui.media.map { it.mediaType.name }).containsExactly("Literature")
-        assertThat(ui.media.single().collections.map { it.packs.size }).containsExactly(3, 1).inOrder()
-        assertThat(ui.sources.map { it.title }).containsExactly("Literature", "Audiobooks", "Music").inOrder()
+        assertThat(ui.kinds.map { it.title })
+            .containsExactly("Encyclopedias & reference", "Books", "Maps", "Audiobooks", "Music").inOrder()
+        assertThat(ui.kinds[0].collections.map { it.collection.name }).containsExactly("Granger packs", "Kiwix").inOrder()
+        assertThat(ui.kinds[1].collections.map { it.collection.name }).containsExactly("Granger Classics", "My books").inOrder()
+        // Each keeps its own collapse id; both are filed under Literature.
+        assertThat(ui.kinds.map { it.id }).containsExactly(REFERENCE_KIND, BOOKS_KIND, "maps", "audiobooks", "music").inOrder()
+        assertThat(ui.kinds.take(2).map { it.mediaTypeId }).containsExactly("literature", "literature")
         assertThat(ui.emptyLibrary).isFalse()
     }
+
+    @Test fun aKindWithNothingInItIsLeftOut() = runTest(main.dispatcher) {
+        shelves.shelfList.value = listOf(shelf("Literature", "Wikipedia" to 3, "Medicine" to 1))
+        val ui = vm().ui.filterNotNull().first()
+        assertThat(ui.kinds.map { it.title }).containsExactly("Encyclopedias & reference")
+        assertThat(ui.kinds.single().collections.map { it.packs.size }).containsExactly(3, 1).inOrder()
+    }
+
+    @Test fun anotherMediaTypeComesAfterTheBuiltInOnes() {
+        val kinds = libraryKinds(listOf(shelf("Video", "Lectures" to 1), shelf("Maps", "OpenStreetMap" to 1)))
+        assertThat(kinds.map { it.title }).containsExactly("Maps", "Video").inOrder()
+    }
+
+    private fun bookRow(name: String, count: Int) = CollectionRow(
+        ShelfCollection("c:$name", name, "literature", userCreated = false, defaultKey = name), emptyList(),
+        books = List(count) { book("$name-$it") },
+    )
 
     @Test fun theKiwixFolderIsOneRowCountingItsChildren() = runTest(main.dispatcher) {
         val kiwix = shelf("Literature", "Wikipedia" to 3, "DevDocs" to 2).collections
@@ -87,9 +108,10 @@ class LibraryViewModelTest {
         )
         val classics = shelf("Literature", "Granger Classics" to 1).collections.single()
         shelves.shelfList.value = listOf(shelf("Literature").copy(collections = listOf(classics, folder)))
-        val literature = vm().ui.filterNotNull().first().media.single()
-        assertThat(literature.collections.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix").inOrder()
-        val row = literature.collections[1]
+        // Both hold packs: Encyclopedias & reference.
+        val reference = vm().ui.filterNotNull().first().kinds.single()
+        assertThat(reference.collections.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix").inOrder()
+        val row = reference.collections[1]
         assertThat(row.isFolder).isTrue()
         assertThat(rowCountText(row)).isEqualTo("5 packs")
         assertThat(rowCountText(classics)).isEqualTo("1 pack")
@@ -98,7 +120,7 @@ class LibraryViewModelTest {
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.emptyLibrary).isTrue()
-        assertThat(ui.sources.flatMap { it.links }).hasSize(SourceLink.entries.size)
+        assertThat(ui.kinds).isEmpty()
     }
 
     @Test fun importSummaryIsShown() = runTest(main.dispatcher) {

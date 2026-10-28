@@ -176,6 +176,29 @@ class ReaderViewModelTest {
         assertThat(tab.title).isEqualTo("Photosynthesis")
     }
 
+    @Test fun theTabKeepsThePagesTitleWithoutItsSite() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        vm.onPageShown(url("Photosynthesis"), "Photosynthesis - Wikipedia")
+        testScheduler.advanceUntilIdle()
+        assertThat(sessions.tab(1)!!.title).isEqualTo("Photosynthesis")
+        assertThat(vm.state.value.page!!.title).isEqualTo("Photosynthesis")
+        // The pack's own title as a suffix goes too; the fake pack is called "p".
+        vm.onPageShown(url("C++"), "C++ - p")
+        testScheduler.advanceUntilIdle()
+        assertThat(sessions.tab(1)!!.title).isEqualTo("C++")
+    }
+
+    @Test fun thePacksMainPageIsCalledByThePack() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        // The fake pack "p" has its main entry at "index".
+        vm.onPageShown(url("index"), "Welcome to the library")
+        testScheduler.advanceUntilIdle()
+        assertThat(sessions.tab(1)!!.title).isEqualTo("p")
+        vm.onPageShown(url("Photosynthesis"), "Main Page")
+        testScheduler.advanceUntilIdle()
+        assertThat(sessions.tab(1)!!.title).isEqualTo("p")
+    }
+
     /** Shows each of [paths] in turn, as following links does. */
     private fun TestScope.show(vm: ReaderViewModel, vararg paths: String) {
         for (path in paths) {

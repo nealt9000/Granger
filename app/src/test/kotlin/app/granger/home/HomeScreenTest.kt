@@ -82,12 +82,22 @@ class HomeScreenTest {
         assertThat(calls).containsExactly("tab:1", "play:album:Blue").inOrder()
     }
 
+    @Test fun aPlaySaysWhatKindItIs() {
+        val book = RailEntry.Play("audiobook:phone:1", "The Jungle Book", at = 2L)
+        val page = RailEntry.Play("voice:u1/Cat", "Cat", at = 3L)
+        show(HomeUi(strip = report, continueCards = listOf(blue, book, page)))
+        compose.onNodeWithText("Album").assertExists()
+        compose.onNodeWithText("Audiobook").assertExists()
+        compose.onNodeWithText("Read aloud").assertExists()
+        compose.onNodeWithText("Play again").assertDoesNotExist()
+    }
+
     @Test fun theSetupStripShowsProgressAndOpensTheDownloads() {
         compose.setContent {
-            HomeContent(HomeUi(strip = report, setup = SetupProgress(2, 5, 1_000, 4_000, 0)), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenSetup = { calls += "setup" })
+            HomeContent(HomeUi(strip = report, setup = SetupProgress(2, 5, 1_000, 4_000, 0)), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenDownloads = { calls += "downloads" })
         }
         compose.onNodeWithText("Setting up · 2 of 5 · 1.0 KB of 4.0 KB").performClick()
-        assertThat(calls).containsExactly("setup")
+        assertThat(calls).containsExactly("downloads")
     }
 
     @Test fun theStatusLineCountsWhatThePhoneHoldsNotItsOwnMedia() {

@@ -5,7 +5,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.Uri
 import android.os.SystemClock
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -167,7 +169,7 @@ internal class DownloadNotifications(private val context: Context) {
     private fun build(title: String, done: Long, total: Long): Notification {
         val percent = if (total > 0) (done * 100 / total).toInt() else 0
         val open = context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
-            PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(context, 0, downloadsIntent(it), PendingIntent.FLAG_IMMUTABLE)
         }
         return Notification.Builder(context, CHANNEL)
             .setSmallIcon(android.R.drawable.stat_sys_download)
@@ -184,3 +186,15 @@ internal class DownloadNotifications(private val context: Context) {
         const val CHANNEL = "downloads"
     }
 }
+
+/** The link a download notification opens: the app's Downloads screen (Plan U3b Decision 1). */
+const val DOWNLOADS_LINK = "granger://downloads"
+
+/**
+ * The app's [launch] intent, made to open Downloads: [DOWNLOADS_LINK] as its data, for the activity to read. The
+ * intent is explicit, so the link needs no intent filter. A running app gets it in onNewIntent rather than a second
+ * activity on top.
+ */
+internal fun downloadsIntent(launch: Intent): Intent = Intent(launch)
+    .setData(Uri.parse(DOWNLOADS_LINK))
+    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)

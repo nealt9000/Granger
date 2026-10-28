@@ -61,6 +61,8 @@ import kotlinx.coroutines.launch
 fun CollectionScreen(
     viewModel: CollectionViewModel,
     onOpened: (tabId: Long) -> Unit,
+    /** Opens an installed pack: the NavHost's one way to (Plan U3b Decision 3). */
+    onOpenPack: (packId: String) -> Unit,
     /** Opens the Granger source, where the e-books that replace a superseded pack are. */
     onGetBooks: () -> Unit,
     /** A folder's child collection. */
@@ -134,7 +136,7 @@ fun CollectionScreen(
                         PackRow(
                             pack,
                             replaced = pack.id in superseded,
-                            onClick = { scope.launch { viewModel.open(pack)?.let(onOpened) } },
+                            onClick = { onOpenPack(pack.id) },
                             onLongClick = { packMenu = true },
                             onGetBooks = onGetBooks,
                         )

@@ -131,6 +131,12 @@ class FakeChats : ResearchChats {
         chats.update { list -> list.filterNot { it.id == chatId } }
         turnList.update { list -> list.filterNot { it.chatId == chatId } }
     }
+
+    override suspend fun deleteAll() {
+        failure?.let { throw it }
+        chats.value = emptyList()
+        turnList.value = emptyList()
+    }
 }
 
 class FakeFinder(var passages: List<Passage> = (1..10).map(::article)) : PassageFinder {

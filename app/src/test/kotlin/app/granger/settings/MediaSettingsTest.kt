@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
@@ -294,12 +295,6 @@ class MediaSettingsTest {
         assertThat(toggled).containsExactly(true)
     }
 
-    @Test fun mediaSectionIndexComesFromTheKeys() {
-        assertThat(settingsIndexOf(MEDIA_SECTION_KEY)).isEqualTo(7)
-        assertThat(settingsIndexOf("appearance")).isEqualTo(3)
-        assertThat(settingsIndexOf("models")).isEqualTo(0)
-    }
-
     private class MemorySharing : OtherAppsSharing {
         var on = false
         override fun isEnabled() = on
@@ -312,31 +307,20 @@ class MediaSettingsTest {
         override fun withdraw() {}
     }
 
-    /** SettingsRoute(media = true): the screen opens at Music & audiobooks, found by its key. */
-    @OptIn(ExperimentalTestApi::class)
-    private fun openSettings(scrollToMedia: Boolean, check: androidx.compose.ui.test.ComposeUiTest.() -> Unit) = runComposeUiTest {
-        val vm = SettingsViewModel(
-            FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(), FakeAppearancePrefs(),
-            appScope = CoroutineScope(Dispatchers.Unconfined),
-            mediaSettings = { scope ->
-                MediaSettings(folders, grants, prefs, MemorySharing(), scanner = { ScanSummary(0, 0) }, scope = scope)
-            },
-        )
-        setContent { SettingsScreen(vm, onModels = {}, onReadiness = {}, onBack = {}, scrollToMedia = scrollToMedia) }
-        waitForIdle()
-        check()
-    }
+    private fun settingsViewModel() = SettingsViewModel(
+        FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(), FakeAppearancePrefs(),
+        appScope = CoroutineScope(Dispatchers.Unconfined),
+        mediaSettings = { scope -> MediaSettings(folders, grants, prefs, MemorySharing(), scanner = { ScanSummary(0, 0) }, scope = scope) },
+    )
 
+    /** MediaSettingsRoute: Music & audiobooks on its own screen (Plan U3b Decision 9). */
     @OptIn(ExperimentalTestApi::class)
-    @Test fun settingsOpensAtTheMediaSectionByKey() = openSettings(scrollToMedia = true) {
+    @Test fun musicAndAudiobooksIsItsOwnScreen() = runComposeUiTest {
+        var back = 0
+        setContent { MediaSettingsScreen(settingsViewModel(), onBack = { back++ }) }
         onNodeWithText("Music & audiobooks").assertIsDisplayed()
         onNodeWithText("Find music and audiobooks on this phone").assertIsDisplayed()
-        // Scrolled past the rows above it.
-        onNodeWithText("Models").assertDoesNotExist()
-    }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test fun settingsOpensAtTheTopWithoutTheMediaFlag() = openSettings(scrollToMedia = false) {
-        onNodeWithText("Models").assertIsDisplayed()
+        onNodeWithContentDescription("Back").performClick()
+        assertThat(back).isEqualTo(1)
     }
 }

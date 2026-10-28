@@ -59,4 +59,17 @@ class AskLandingTest {
         compose.onNodeWithText("who wrote 1984?").performClick()
         assertThat(opened).containsExactly(2L)
     }
+
+    @Test fun theChatsSheetDeletesAllChatsAfterAsking() {
+        var deleted = 0
+        val chats = listOf(app.granger.core.library.ChatSummary(3, "how do you grow cassava?", 30))
+        compose.setContent { ChatsSheet(chats, onDismiss = {}, onDeleteAll = { deleted++ }) {} }
+        compose.onNodeWithText("Delete all chats").performClick()
+        compose.onNodeWithText("Delete all chats?").assertIsDisplayed()
+        compose.onNodeWithText("Keep").performClick()
+        assertThat(deleted).isEqualTo(0)
+        compose.onNodeWithText("Delete all chats").performClick()
+        compose.onNodeWithText("Delete all").performClick()
+        assertThat(deleted).isEqualTo(1)
+    }
 }

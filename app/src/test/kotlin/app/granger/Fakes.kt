@@ -37,7 +37,9 @@ import app.granger.settings.AppearancePrefs
 import app.granger.settings.OpenTo
 import app.granger.settings.RailSide
 import app.granger.settings.ThemeChoice
+import app.granger.shell.RailFour
 import app.granger.shell.RailHidden
+import app.granger.shell.RailOrder
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Manifest
@@ -215,6 +217,13 @@ class FakeReadingSessions : ReadingSessions {
         val trimmed = query.trim()
         searches.update { it - trimmed }
         searchRows.update { rows -> rows.filterNot { it.query == trimmed } }
+    }
+
+    override suspend fun clearHistory(keepTabIds: Set<Long>, keepSearches: Set<String>) {
+        historyList.value = emptyList()
+        searches.update { list -> list.filter { it in keepSearches } }
+        searchRows.update { rows -> rows.filter { it.query in keepSearches } }
+        tabs.update { list -> list.map { if (it.id in keepTabIds) it else it.copy(onRail = false) } }
     }
 }
 
@@ -441,7 +450,18 @@ class FakeRailPins : RailPins {
 /** [RailHidden] in memory. */
 class FakeRailHidden : RailHidden {
     override val hidden = MutableStateFlow<Map<String, Long>>(emptyMap())
+    override val clearedAt = MutableStateFlow(0L)
     override fun hide(key: String, at: Long) = hidden.update { it + (key to at) }
+    override fun clear(at: Long) {
+        hidden.value = emptyMap()
+        clearedAt.value = at
+    }
+}
+
+/** [RailOrder] in memory; null until the rail seeds it. */
+class FakeRailOrder(four: RailFour? = null) : RailOrder {
+    override val four = MutableStateFlow(four)
+    override fun save(four: RailFour) { this.four.value = four }
 }
 
 /** [AppearancePrefs] in memory. */

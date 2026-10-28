@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -252,7 +253,14 @@ fun ResearchScreen(
 
     var chatsOpen by remember { mutableStateOf(false) }
     if (chatsOpen) {
-        ChatsSheet(state.recentChats.filter { it.id != state.chatId }, onDismiss = { chatsOpen = false }) { id ->
+        ChatsSheet(
+            state.recentChats.filter { it.id != state.chatId },
+            onDismiss = { chatsOpen = false },
+            onDeleteAll = {
+                chatsOpen = false
+                viewModel.deleteAllChats()
+            },
+        ) { id ->
             chatsOpen = false
             onOpenChat(id)
         }
@@ -602,10 +610,14 @@ private fun Banner(text: String) {
     )
 }
 
-/** The recent chats, from the top bar's Chats button; picking one opens it over this chat, so Back returns here. */
+/**
+ * The recent chats, from the top bar's Chats button; picking one opens it over this chat, so Back returns here.
+ * Delete all chats asks first, then calls [onDeleteAll] (Plan U3b Decision 7).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onOpen: (Long) -> Unit) {
+internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onDeleteAll: () -> Unit = {}, onOpen: (Long) -> Unit) {
+    var confirm by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Text(
             "Recent chats",
@@ -613,7 +625,7 @@ internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onOpen:
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
         )
-        LazyColumn {
+        LazyColumn(Modifier.weight(1f, fill = false)) {
             items(chats, key = { it.id }) { chat ->
                 ListItem(
                     modifier = Modifier.clickable { onOpen(chat.id) },
@@ -621,6 +633,21 @@ internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onOpen:
                 )
             }
         }
+        TextButton(onClick = { confirm = true }, modifier = Modifier.padding(horizontal = 8.dp)) { Text("Delete all chats") }
+    }
+    if (confirm) {
+        AlertDialog(
+            onDismissRequest = { confirm = false },
+            title = { Text("Delete all chats?") },
+            text = { Text("Every chat goes, this one too, with its answers and sources.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirm = false
+                    onDeleteAll()
+                }) { Text("Delete all") }
+            },
+            dismissButton = { TextButton(onClick = { confirm = false }) { Text("Keep") } },
+        )
     }
 }
 

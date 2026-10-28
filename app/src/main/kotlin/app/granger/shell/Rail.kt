@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -94,10 +93,11 @@ private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInse
 
 @Composable
 private fun RailTool.painter(): Painter = when (this) {
-    RailTool.HOME -> rememberVectorPainter(Icons.Filled.Home)
+    // The owl in the G (Plan U3b Decision 5); an open book is the Library, and ic_library stays for articles.
+    RailTool.HOME -> painterResource(R.drawable.ic_owl)
     RailTool.SEARCH -> rememberVectorPainter(Icons.Filled.Search)
     RailTool.RESEARCH -> painterResource(R.drawable.ic_research)
-    RailTool.LIBRARY -> painterResource(R.drawable.ic_library)
+    RailTool.LIBRARY -> painterResource(R.drawable.ic_library_books_open)
     RailTool.PLAYER -> rememberVectorPainter(Icons.Filled.PlayArrow)
     RailTool.SETTINGS -> rememberVectorPainter(Icons.Filled.Settings)
 }
@@ -125,7 +125,7 @@ private fun RailEntry.painter(): Painter = when (this) {
 /** What TalkBack reads for an item's tile in the narrow rail. */
 private val RailEntry.description: String
     get() = when (this) {
-        is RailEntry.Tab -> if (tab.available) tab.title else "${tab.title}, not available"
+        is RailEntry.Tab -> (if (tab.available) tab.title else "${tab.title}, not available") + if (tab.readingAloud) ", reading aloud" else ""
         is RailEntry.Search -> "Recent search: $query"
         is RailEntry.Chat -> "Ask chat: $title"
         is RailEntry.Play -> "Play again: $title"
@@ -134,9 +134,9 @@ private val RailEntry.description: String
 
 /**
  * The always-there 56 dp rail: tool icons, one column of tiles for the rail's list (covers and letter tiles for
- * articles and books, icons for the rest; an accent dot on pinned ones), History, Settings. Only the tools go straight to
- * their screens. The tiles and History are too little to tell apart here, so tapping them (or the rail's background)
- * calls [onExpand]: the full rail, where they have titles and open. A long press on a tile offers [actions].
+ * articles and books, icons for the rest; an accent dot on pinned ones), History, Settings. A tile opens its item and
+ * History opens History (Plan U3b Decision 6: the four are few enough to know by sight). Tapping the rail's background
+ * calls [onExpand]: the full rail, with titles. A long press on a tile offers [actions].
  */
 @Composable
 internal fun NarrowRail(
@@ -147,6 +147,12 @@ internal fun NarrowRail(
     onTool: (RailTool) -> Unit,
     actions: RailEntryActions,
     side: RailSide = RailSide.LEFT,
+    onTab: (Long) -> Unit = {},
+    onHistory: () -> Unit = {},
+    onSearch: (String) -> Unit = {},
+    onChat: (Long) -> Unit = {},
+    onPlay: (RailEntry.Play) -> Unit = {},
+    onReading: (RailEntry.Reading) -> Unit = {},
 ) {
     Column(
         Modifier
@@ -167,8 +173,10 @@ internal fun NarrowRail(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            rail.entries.forEach { entry -> EntryTile(entry, onExpand, actions) }
-            IconButton(onClick = onExpand) {
+            rail.entries.forEach { entry ->
+                EntryTile(entry, openAction(entry, onTab, onSearch, onChat, onPlay, onReading), actions)
+            }
+            IconButton(onClick = onHistory) {
                 Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -210,20 +218,8 @@ internal fun ExpandedRail(
         RailDivider(Modifier.fillMaxWidth().padding(horizontal = 12.dp))
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             if (rail.entries.any { it.pinned }) SectionLabel("Pinned")
-            val context = LocalContext.current
             rail.entries.forEach { entry ->
-                val open: () -> Unit = when (entry) {
-                    is RailEntry.Tab -> {
-                        {
-                            if (entry.tab.available) onTab(entry.tab.tabId)
-                            else Toast.makeText(context, UNAVAILABLE_MESSAGE, Toast.LENGTH_LONG).show()
-                        }
-                    }
-                    is RailEntry.Search -> { { onSearch(entry.query) } }
-                    is RailEntry.Chat -> { { onChat(entry.chatId) } }
-                    is RailEntry.Play -> { { onPlay(entry) } }
-                    is RailEntry.Reading -> { { onReading(entry) } }
-                }
+                val open = openAction(entry, onTab, onSearch, onChat, onPlay, onReading)
                 EntryTarget(entry, actions, open, onClickLabel = "Open", Modifier.fillMaxWidth()) {
                     if (entry is RailEntry.Tab) TabRowContent(entry) else EntryRowContent(entry)
                 }
@@ -233,6 +229,31 @@ internal fun ExpandedRail(
         LabelledRow(RailTool.SETTINGS.painter(), RailTool.SETTINGS.label, selected == RailTool.SETTINGS) {
             onTool(RailTool.SETTINGS)
         }
+    }
+}
+
+/** What a tap on [entry] does in either rail; an unavailable tab says so instead of opening. */
+@Composable
+private fun openAction(
+    entry: RailEntry,
+    onTab: (Long) -> Unit,
+    onSearch: (String) -> Unit,
+    onChat: (Long) -> Unit,
+    onPlay: (RailEntry.Play) -> Unit,
+    onReading: (RailEntry.Reading) -> Unit,
+): () -> Unit {
+    val context = LocalContext.current
+    return when (entry) {
+        is RailEntry.Tab -> {
+            {
+                if (entry.tab.available) onTab(entry.tab.tabId)
+                else Toast.makeText(context, UNAVAILABLE_MESSAGE, Toast.LENGTH_LONG).show()
+            }
+        }
+        is RailEntry.Search -> { { onSearch(entry.query) } }
+        is RailEntry.Chat -> { { onChat(entry.chatId) } }
+        is RailEntry.Play -> { { onPlay(entry) } }
+        is RailEntry.Reading -> { { onReading(entry) } }
     }
 }
 
@@ -303,25 +324,47 @@ private fun WithPinDot(pinned: Boolean, content: @Composable () -> Unit) {
     }
 }
 
-/** A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out. */
+/**
+ * A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out, and one the voice is
+ * reading wears a speaker badge at its bottom corner (Plan U3b, Neal's walkthrough: one entry per book).
+ */
 @Composable
 private fun LetterTile(tab: RailTabUi, size: Int = 36) {
     val shape = RoundedCornerShape(8.dp)
+    Box {
+        Box(
+            Modifier
+                .size(size.dp)
+                .alpha(if (tab.available) 1f else 0.4f)
+                .clip(shape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
+            contentAlignment = Alignment.Center,
+        ) {
+            val cover = if (tab.coverPath != null) rememberRailCover(tab.coverPath, size.dp) else null
+            if (cover != null) {
+                Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            } else {
+                Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        if (tab.readingAloud) ReadingBadge(Modifier.align(Alignment.BottomEnd))
+    }
+}
+
+/** The small speaker on a tab the voice is reading. */
+@Composable
+private fun ReadingBadge(modifier: Modifier) {
     Box(
-        Modifier
-            .size(size.dp)
-            .alpha(if (tab.available) 1f else 0.4f)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
+        modifier
+            .offset(x = 3.dp, y = 3.dp)
+            .size(16.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .testTag(READING_BADGE_TAG),
         contentAlignment = Alignment.Center,
     ) {
-        val cover = if (tab.coverPath != null) rememberRailCover(tab.coverPath, size.dp) else null
-        if (cover != null) {
-            Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        } else {
-            Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
-        }
+        Icon(painterResource(R.drawable.ic_voice), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(10.dp))
     }
 }
 
@@ -339,6 +382,8 @@ private fun IconTile(entry: RailEntry) {
 private const val UNAVAILABLE_MESSAGE = "This pack or book isn't available. Check that it's still on the phone or SD card."
 
 internal const val PIN_DOT_TAG = "railPinDot"
+
+internal const val READING_BADGE_TAG = "railReadingBadge"
 
 /** Tap calls [onClick]; a long press offers Pin to top (or Unpin), then Remove from rail. Both are labelled for TalkBack. */
 @OptIn(ExperimentalFoundationApi::class)
@@ -384,15 +429,15 @@ private fun EntryTarget(
     }
 }
 
-/** A narrow-rail tile; a tap opens the full rail (which says if a tab is unavailable). */
+/** A narrow-rail tile; a tap opens its item ([onOpen]). */
 @Composable
-private fun EntryTile(entry: RailEntry, onExpand: () -> Unit, actions: RailEntryActions) {
+private fun EntryTile(entry: RailEntry, onOpen: () -> Unit, actions: RailEntryActions) {
     val description = entry.description
     val modifier = Modifier.semantics {
         contentDescription = description
         if (entry.pinned) stateDescription = "Pinned"
     }
-    EntryTarget(entry, actions, onExpand, onClickLabel = "Show the full rail", semantics = modifier) {
+    EntryTarget(entry, actions, onOpen, onClickLabel = "Open", semantics = modifier) {
         WithPinDot(entry.pinned) {
             if (entry is RailEntry.Tab) LetterTile(entry.tab) else IconTile(entry)
         }
@@ -420,7 +465,7 @@ private fun TabRowContent(entry: RailEntry.Tab) {
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                if (tab.available) tab.subtitle else "${tab.subtitle} · not available",
+                (if (tab.available) tab.subtitle else "${tab.subtitle} · not available") + if (tab.readingAloud) " · reading aloud" else "",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

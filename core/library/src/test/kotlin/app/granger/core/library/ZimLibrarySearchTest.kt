@@ -115,6 +115,46 @@ class ZimLibrarySearchTest {
         assertThat(hits.map { it.path }).containsExactly("Georgia_on_My_Mind")
     }
 
+    @Test fun aTitleThatIsTheQueryComesFirstThenOnesStartingWithIt() = test {
+        install("wiki.zim", FakeZimArchive(
+            "u-wiki", "Wikipedia",
+            suggestions = listOf(
+                ZimHit("215_Cassiopeia", "215 Cassiopeia solar apocalypse computer"),
+                ZimHit("Apocalypse_Now", "Apocalypse Now"),
+                ZimHit("Apocalypse", "Apocalypse"),
+            ),
+        ))
+        install("ideas.zim", FakeZimArchive("u-ideas", "Ideas", suggestions = listOf(ZimHit("Apocalyptic", "Après l'Apocalypse"), ZimHit("Apo", "ÀPOCALYPSE"))))
+        library.refresh()
+        val hits = ZimLibrarySearch(library, io = dispatcher).titles("apocalypse").hits.map { it.title }
+        // Case and accents don't count; within a rank, the turns across packs keep their order.
+        assertThat(hits.take(3)).containsExactly("ÀPOCALYPSE", "Apocalypse", "Apocalypse Now").inOrder()
+        assertThat(hits.drop(3)).containsAtLeast("215 Cassiopeia solar apocalypse computer", "Après l'Apocalypse", "Aspirin")
+    }
+
+    @Test fun titlesLoseTheirSiteBeforeTheyAreRanked() = test {
+        install("cooking.zim", FakeZimArchive(
+            "u-cook", "based.cooking LukeSmith",
+            suggestions = listOf(ZimHit("apple-strudel/", "Apple Strudel | Based Cooking"), ZimHit("apple-pie/", "Apple Pie | Based Cooking")),
+        ))
+        library.refresh()
+        val hits = ZimLibrarySearch(library, io = dispatcher).titles("apple pie").hits.filter { it.packId == "u-cook" }
+        assertThat(hits.map { it.title }).containsExactly("Apple Pie", "Apple Strudel").inOrder()
+    }
+
+    @Test fun indexPagesAreLeftOutOfTitlesAndText() = test {
+        install("se.zim", FakeZimArchive(
+            "u-se", "Worldbuilding",
+            suggestions = listOf(ZimHit("users/7/apocalypse", "User apocalypse"), ZimHit("questions/12/the-end", "The apocalypse")),
+            results = listOf(ZimHit("users/7/apocalypse", "User apocalypse", "s", 99), ZimHit("tags/apocalypse", "apocalypse", "s", 98),
+                ZimHit("questions/12/the-end", "The apocalypse", "s", 97)),
+        ))
+        library.refresh()
+        val wide = ZimLibrarySearch(library, io = dispatcher)
+        assertThat(wide.titles("apocalypse").hits.filter { it.packId == "u-se" }.map { it.path }).containsExactly("questions/12/the-end")
+        assertThat(wide.fullText("apocalypse").filter { it.packId == "u-se" }.map { it.path }).containsExactly("questions/12/the-end")
+    }
+
     @Test fun blankQueriesSearchNothing() = test {
         assertThat(search.titles("  ").hits).isEmpty()
         assertThat(search.fullText("")).isEmpty()

@@ -3,6 +3,7 @@ package app.granger.shell
 import app.granger.FakeBookshelf
 import app.granger.FakeLibrary
 import app.granger.FakeRailHidden
+import app.granger.FakeRailOrder
 import app.granger.FakeRailPins
 import app.granger.book
 import app.granger.core.library.BookPosition
@@ -43,12 +44,13 @@ class RailViewModelTest {
     private val hub = FakePlayerHub()
     private val pins = FakeRailPins()
     private val hidden = FakeRailHidden()
+    private val order = FakeRailOrder()
     private val playRows = mutableMapOf<String, RecentPlay>()
 
     private val voice = MutableStateFlow<app.granger.core.player.NowPlaying.Voice?>(null)
 
     private fun vm() = RailViewModel(
-        sessions, library, bookshelf, chats, current, pins, hidden, plays,
+        sessions, library, bookshelf, chats, current, pins, hidden, order, plays,
         recentPlay = { playRows[it] }, resumer = PlayResumer(media, playlists, hub), voice = voice,
     )
 
@@ -81,9 +83,9 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(1, "gone", "x-ray"), tab(2, "b", "Aspirin"), tab(3, "a", "Hamlet"))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.tabs).containsExactly(
-            RailTabUi(3, "Hamlet", "Classics", 'H', available = true, current = false, coverPath = null),
-            RailTabUi(2, "Aspirin", "WikiMed", 'A', available = false, current = false, coverPath = null),
-            RailTabUi(1, "x-ray", HistoryViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null),
+            RailTabUi(3, "Hamlet", "Classics", 'H', available = true, current = false, coverPath = null, packId = "a", path = "Hamlet"),
+            RailTabUi(2, "Aspirin", "WikiMed", 'A', available = false, current = false, coverPath = null, packId = "b", path = "Aspirin"),
+            RailTabUi(1, "x-ray", HistoryViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null, packId = "gone", path = "x-ray"),
         ).inOrder()
     }
 
@@ -97,25 +99,160 @@ class RailViewModelTest {
         assertThat(vm.ui.first { it.tabs.any { t -> t.current && t.tabId == 1L } }.tabs.count { it.current }).isEqualTo(1)
     }
 
-    @Test fun entriesMergeAllKindsNewestFirst() = runTest(main.dispatcher) {
+    @Test fun theFirstRunSeedsTheFourWithTheNewestOfAllKinds() = runTest(main.dispatcher) {
         sessions.tabs.value = listOf(tab(9, "a", "Owls", openedAt = 250))
         sessions.searchRows.value = listOf(RecentSearch("aspirin", 300), RecentSearch("hamlet", 100))
         chats.chats.value = listOf(ChatSummary(1, "Why tides?", 200), ChatSummary(2, "Who was Emma?", 400))
         plays.value = listOf(RecentPlay("album:artist|abbey road|music/", "Abbey Road", 350))
-        val ui = vm().ui.first { it.entries.size == 6 }
+        val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.entries.map { it.key }).containsExactly(
-            "chat:2", "play:album:artist|abbey road|music/", "search:aspirin", "tab:9", "chat:1", "search:hamlet",
+            "chat:2", "play:album:artist|abbey road|music/", "search:aspirin", "tab:9",
         ).inOrder()
         assertThat(ui.entries.none { it.pinned }).isTrue()
         assertThat(ui.entries[1]).isEqualTo(RailEntry.Play("album:artist|abbey road|music/", "Abbey Road", 350))
+        assertThat(order.four.value).isEqualTo(RailFour(ui.entries.map { it.key }, 400))
+        // Home's Continue isn't cut to four.
+        assertThat(ui.recent.map { it.key }).containsExactly(
+            "chat:2", "play:album:artist|abbey road|music/", "search:aspirin", "tab:9", "chat:1", "search:hamlet",
+        ).inOrder()
     }
 
-    @Test fun unpinnedListIsCappedAtTwelve() = runTest(main.dispatcher) {
-        sessions.searchRows.value = (1..10).map { RecentSearch("q$it", it * 10L) }
-        chats.chats.value = (1..10).map { ChatSummary(it.toLong(), "c$it", it * 10L + 5) }
-        val ui = vm().ui.first { it.entries.isNotEmpty() }
-        assertThat(ui.entries).hasSize(RailViewModel.UNPINNED)
-        assertThat(ui.entries.map { it.at }).containsExactly(105L, 100L, 95L, 90L, 85L, 80L, 75L, 70L, 65L, 60L, 55L, 50L).inOrder()
+    private fun searches(vararg queries: Pair<String, Long>) {
+        sessions.searchRows.value = queries.map { (q, at) -> RecentSearch(q, at) }.sortedByDescending { it.searchedAt }
+    }
+
+    private val RailUi.keys get() = entries.map { it.key.removePrefix(RailEntry.SEARCH) }
+
+    @Test fun openingAnItemAlreadyInTheFourDoesntMoveIt() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4)
+        val vm = vm()
+        assertThat(vm.ui.first { it.entries.size == 4 }.keys).containsExactly("d", "c", "b", "a").inOrder()
+        searches("a" to 10, "b" to 2, "c" to 3, "d" to 4)
+        val ui = vm.ui.first { it.recent.first().at == 10L }
+        assertThat(ui.keys).containsExactly("d", "c", "b", "a").inOrder()
+    }
+
+    @Test fun aFifthEntersAtTheTopAndPushesTheOldestOut() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4)
+        val vm = vm()
+        vm.ui.first { it.entries.size == 4 }
+        // b opened again first: it stays put, so a is still the oldest to arrive.
+        searches("a" to 1, "b" to 5, "c" to 3, "d" to 4)
+        vm.ui.first { it.recent.first().at == 5L }
+        searches("a" to 1, "b" to 5, "c" to 3, "d" to 4, "e" to 6)
+        assertThat(vm.ui.first { "e" in it.keys }.keys).containsExactly("e", "d", "c", "b").inOrder()
+        // One pushed out comes back at the top when it's opened again.
+        searches("a" to 7, "b" to 5, "c" to 3, "d" to 4, "e" to 6)
+        assertThat(vm.ui.first { "a" in it.keys }.keys).containsExactly("a", "e", "d", "c").inOrder()
+    }
+
+    @Test fun pinsAreUnaffectedByTheFour() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5)
+        val vm = vm()
+        vm.ui.first { it.entries.size == 4 }
+        assertThat(vm.pin(RailEntry.Search("c", 3))).isNull()
+        // c goes up with the pins; a fills its slot at the bottom, so the rest don't move.
+        assertThat(vm.ui.first { it.entries.any { e -> e.pinned } }.keys).containsExactly("c", "e", "d", "b", "a").inOrder()
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6, "g" to 7)
+        val ui = vm.ui.first { "g" in it.keys }
+        assertThat(ui.keys).containsExactly("c", "g", "f", "e", "d").inOrder()
+        assertThat(ui.entries.first().pinned).isTrue()
+    }
+
+    @Test fun aRemovedEntryIsReplacedByTheNextNewestAtTheBottom() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5)
+        val vm = vm()
+        assertThat(vm.ui.first { it.entries.size == 4 }.keys).containsExactly("e", "d", "c", "b").inOrder()
+        vm.remove(RailEntry.Search("d", 4))
+        assertThat(vm.ui.first { "d" !in it.keys }.keys).containsExactly("e", "c", "b", "a").inOrder()
+    }
+
+    @Test fun aHiddenEntryLeavesTheFourAndComesBackAtTheTopWhenUsedAgain() = runTest(main.dispatcher) {
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 10))
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4)
+        val vm = vm()
+        assertThat(vm.ui.first { it.entries.size == 4 }.keys).containsExactly("chat:1", "d", "c", "b").inOrder()
+        vm.remove(RailEntry.Chat(1, "Tides", 10))
+        assertThat(vm.ui.first { "chat:1" !in it.keys }.keys).containsExactly("d", "c", "b", "a").inOrder()
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 20))
+        assertThat(vm.ui.first { "chat:1" in it.keys }.keys).containsExactly("chat:1", "d", "c", "b").inOrder()
+    }
+
+    /**
+     * Plan U3b, Neal's walkthrough: after Clear history nothing from before it shows, not even to fill a slot a remove
+     * left; chats stay in Ask but leave the rail. Something opened after it does show.
+     */
+    @Test fun afterClearingNothingOlderShowsOrBackfills() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        val current = sessions.openTab("a", "Owls", "Owls")
+        sessions.openTab("a", "Bats", "Bats")
+        searches("a" to 1)
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 1), ChatSummary(2, "Rivers", 2))
+        plays.value = listOf(RecentPlay("songs", "", 3))       // as if its delete hadn't landed yet
+        val vm = vm()
+        vm.ui.first { it.entries.size == 4 }
+        hidden.clear(at = 2_000)
+        sessions.clearHistory(keepTabIds = setOf(current))
+        // The tab Clear kept stays; the chats and the play are off the rail and out of Continue.
+        val ui = vm.ui.first { it.entries.size == 1 }
+        assertThat(ui.keys).containsExactly("tab:$current")
+        assertThat(ui.recent.map { it.key }).containsExactly("tab:$current")
+        assertThat(chats.chats.value).hasSize(2)
+        vm.remove(ui.entries.single())
+        val empty = vm.ui.first { it.entries.isEmpty() }
+        assertThat(empty.recent).isEmpty()
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 3_000), ChatSummary(2, "Rivers", 2))
+        val after = vm.ui.first { it.entries.isNotEmpty() }
+        assertThat(after.keys).containsExactly("chat:1")
+        assertThat(after.recent.map { it.key }).containsExactly("chat:1")
+    }
+
+    /** Plan U3b, Neal's walkthrough: a book read aloud is one entry, its tab with a badge; no Reading or voice Play row. */
+    @Test fun aBookReadAloudShowsOnceAsItsBadgedTab() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        bookshelf.bookList.value = listOf(book("book:granger:1", "Emma"))
+        sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma", openedAt = 10).copy(path = ""), tab(5, "a", "Owls", openedAt = 20))
+        plays.value = listOf(RecentPlay("voice:book:book:granger:1", "Emma", 50), RecentPlay("voice:pack:a/Owls", "Owls", 40))
+        val vm = vm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        // A past reading of a book whose tab is on the rail isn't listed again.
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5", "tab:4").inOrder()
+        assertThat(vm.ui.value.recent.none { it is RailEntry.Play }).isTrue()
+
+        voice.value = app.granger.core.player.NowPlaying.Voice("book:book:granger:1", "Emma", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.filterIsInstance<RailEntry.Reading>()).isEmpty()
+        assertThat(vm.ui.value.tabs.map { it.tabId to it.readingAloud }).containsExactly(5L to false, 4L to true).inOrder()
+
+        // An article's tab is matched by its pack and page.
+        voice.value = voice.value!!.copy(sourceKey = "pack:a/Owls", title = "Owls")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.tabs.map { it.tabId to it.readingAloud }).containsExactly(5L to true, 4L to false).inOrder()
+        collecting.cancel()
+    }
+
+    @Test fun aVoiceSourceWithoutATabKeepsItsReadingRow() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20))
+        plays.value = listOf(RecentPlay("voice:text:answer:1", "Why tides?", 50))
+        val vm = vm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        voice.value = app.granger.core.player.NowPlaying.Voice("text:answer:1", "Why tides?", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+        testScheduler.advanceUntilIdle()
+        // The Reading row heads the list; its own "Play again" waits until the voice is done.
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1", "tab:5").inOrder()
+        assertThat(vm.ui.value.tabs.single().readingAloud).isFalse()
+        voice.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("play:voice:text:answer:1", "tab:5").inOrder()
+        collecting.cancel()
+    }
+
+    @Test fun aSavedOrderIsKeptAcrossLaunches() = runTest(main.dispatcher) {
+        order.four.value = RailFour(listOf("search:b", "search:a"), seenAt = 10)
+        searches("a" to 1, "b" to 2, "c" to 3)
+        assertThat(vm().ui.first { it.entries.size == 3 }.keys).containsExactly("b", "a", "c").inOrder()
     }
 
     @Test fun pinnedComeFirstInPinOrder() = runTest(main.dispatcher) {
@@ -127,7 +264,7 @@ class RailViewModelTest {
         assertThat(vm.pin(tabEntry)).isNull()
         assertThat(vm.pin(RailEntry.Chat(4, "Tides", 20))).isNull()
         val ui = vm.ui.first { it.entries.count { e -> e.pinned } == 2 }
-        // Newest pin on top, then the rest newest first.
+        // Newest pin on top, then the four.
         assertThat(ui.entries.map { it.key to it.pinned }).containsExactly(
             "chat:4" to true, "tab:1" to true, "search:cats" to false,
         ).inOrder()
@@ -174,8 +311,8 @@ class RailViewModelTest {
         plays.value = listOf(RecentPlay("songs", "", 7))
         playRows["songs"] = plays.value.single()
         val vm = vm()
-        vm.ui.first { it.entries.size == 5 }.entries.forEach { vm.pin(it) }
-        vm.ui.first { it.entries.all { e -> e.pinned } }
+        vm.ui.first { it.recent.size == 5 }.recent.forEach { vm.pin(it) }
+        vm.ui.first { it.entries.size == 5 && it.entries.all { e -> e.pinned } }
 
         sessions.closeTab(1) // closed elsewhere, e.g. its pack was removed
         sessions.forgetSearch("cats")
@@ -205,7 +342,7 @@ class RailViewModelTest {
     @Test fun seventhPinShowsTheLimitNotice() = runTest(main.dispatcher) {
         sessions.searchRows.value = (1..7).map { RecentSearch("q$it", it.toLong()) }
         val vm = vm()
-        vm.ui.first { it.entries.size == 7 }
+        vm.ui.first { it.recent.size == 7 }
         for (i in 1..6) assertThat(vm.pin(RailEntry.Search("q$i", i.toLong()))).isNull()
         assertThat(vm.pin(RailEntry.Search("q7", 7))).isEqualTo(RailViewModel.PINS_FULL)
         assertThat(RailViewModel.PINS_FULL).contains("Unpin one first")

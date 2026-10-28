@@ -46,18 +46,6 @@ class CollectionViewModelTest {
     private fun TestScope.vm(id: String) =
         CollectionViewModel(id, shelves, library, sessions, bookshelf, downloads, appScope = this, archiveSidecarDir = sidecars)
 
-    @Test fun openStartsATabAtTheLastReadPath() = runTest(main.dispatcher) {
-        val p = pack("wiki", "Wikipedia")
-        show(collection("c1", false, p))
-        library.lastRead["wiki"] = "A/Ada"
-        val tab = vm("c1").open(p)
-        assertThat(tab).isNotNull()
-        val opened = sessions.tab(tab!!)!!
-        assertThat(opened.packId).isEqualTo("wiki")
-        assertThat(opened.path).isEqualTo("A/Ada")
-        assertThat(opened.title).isEqualTo("Wikipedia")
-    }
-
     private fun kiwix(vararg children: CollectionRow) =
         CollectionRow(ShelfCollection("c:kiwix", "Kiwix", "lit", false, defaultKey = "kiwix"), emptyList(), children = children.toList())
 
@@ -92,16 +80,6 @@ class CollectionViewModelTest {
         // A folder with nothing left to offer isn't listed.
         assertThat(moveChoices(shelves.map { it.copy(collections = listOf(kiwix(collection("c:devdocs", false)))) }, "c:devdocs", false))
             .containsExactly(MoveChoice.Header("Literature"), MoveChoice.NewCollection("lit", "Literature")).inOrder()
-    }
-
-    @Test fun openUnavailablePackDoesNothing() = runTest(main.dispatcher) {
-        val missing = pack("gone", status = PackStatus.MISSING)
-        val noStart = pack("blank")
-        show(collection("c1", false, missing, noStart))
-        val vm = vm("c1")
-        assertThat(vm.open(missing)).isNull()
-        assertThat(vm.open(noStart)).isNull()
-        assertThat(sessions.tabs.value).isEmpty()
     }
 
     @Test fun renameAndDeleteOnlyForUserCollections() = runTest(main.dispatcher) {

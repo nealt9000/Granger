@@ -6,8 +6,10 @@ import app.granger.core.library.BookHit
 import app.granger.core.library.chunkLabel
 import app.granger.core.library.FeedKind
 import app.granger.core.library.HomeFeed
+import app.granger.core.library.IndexPages
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.Pack
+import app.granger.core.library.PageTitles
 import app.granger.core.zim.ZimArchive
 import java.time.LocalDate
 import kotlin.random.Random
@@ -63,6 +65,8 @@ class FeedDrawer(
                 val pack = scope.packs[random.nextInt(scope.packs.size)]
                 val archive = archiveOf(pack) ?: return@repeat
                 val path = archive.randomPath() ?: return@repeat
+                // A user or tag list isn't a page to suggest (Plan U3b Decision 10).
+                if (IndexPages.isIndex(path)) return@repeat
                 val key = "${pack.id}/$path"
                 if (key in cards) return@repeat
                 cards[key] = articleCard(archive, pack, path)
@@ -85,7 +89,7 @@ class FeedDrawer(
     private fun articleCard(archive: ZimArchive, pack: Pack, path: String): Card {
         val html = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) }
         return Card(
-            title = html?.let { pageTitle(it) } ?: pathTitle(path),
+            title = html?.let { pageTitle(it, pack.title) } ?: pathTitle(path),
             subtitle = pack.title,
             target = CardTarget.Article(pack.id, path),
             imagePath = html?.let { thumbnail(archive, path, it) },
@@ -103,7 +107,7 @@ class FeedDrawer(
         val path = DayPage.paths(day).firstNotNullOfOrNull { archive.resolvePath(it) }
         val page = path?.let { archive.read(it) }?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8)) }
         if (path == null || page == null || page.isEmpty) {
-            return archive.search(title, SEARCH_LIMIT).shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) }
+            return archive.search(title, SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) }
         }
         fun pick(lines: List<String>, n: Int, section: String) =
             lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
@@ -115,7 +119,9 @@ class FeedDrawer(
         if (scope.packs.size == 1 || (scope.packs.isNotEmpty() && scope.books.isEmpty())) {
             for (pack in scope.packs) {
                 val archive = archiveOf(pack) ?: continue
-                archive.search(query, SEARCH_LIMIT).mapTo(cards) { Card(it.title, pack.title, CardTarget.Article(pack.id, it.path)) }
+                archive.search(query, SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.mapTo(cards) {
+                    Card(PageTitles.clean(it.title, pack.title), pack.title, CardTarget.Article(pack.id, it.path))
+                }
             }
         } else if (scope.packs.isNotEmpty()) {
             // The whole library: every pack at once, through the library search.
@@ -152,11 +158,10 @@ class FeedDrawer(
         target = CardTarget.Book(hit.bookId, hit.href, hit.progression),
     )
 
-    /** The page's `<title>` (Wikipedia's suffix dropped), else null. */
-    private fun pageTitle(html: String): String? {
+    /** The page's `<title>` without its site ([PageTitles]), else null. */
+    private fun pageTitle(html: String, packTitle: String): String? {
         val doc = Jsoup.parse(html)
-        return doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }
-            .replace(Regex("\\s+[-–—]\\s+Wikipedia$"), "").trim().ifBlank { null }
+        return doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }.trim().ifBlank { null }?.let { PageTitles.clean(it, packTitle) }
     }
 
     private fun pathTitle(path: String) = path.substringAfterLast('/').replace('_', ' ')

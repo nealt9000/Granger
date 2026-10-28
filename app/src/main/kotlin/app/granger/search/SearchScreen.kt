@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,12 +31,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,9 +54,11 @@ import app.granger.core.library.ArtistHit
 import app.granger.core.library.Audiobook
 import app.granger.core.library.BookHit
 import app.granger.core.library.SearchHit
+import app.granger.core.library.SearchText
 import app.granger.core.library.Track
 import app.granger.music.AlbumCover
 import app.granger.music.MusicCatalog
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,6 +93,16 @@ fun SearchScreen(
     }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    /** Submitting or scrolling puts the keyboard away, so the results have the screen (Plan U3b Decision 10). */
+    fun dropKeyboard() {
+        keyboard?.hide()
+        focusManager.clearFocus()
+    }
+    LaunchedEffect(list) {
+        snapshotFlow { list.isScrollInProgress }.filter { it }.collect { dropKeyboard() }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,6 +115,8 @@ fun SearchScreen(
                         onValueChange = viewModel::onQueryChange,
                         placeholder = { Text("Search your library") },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { dropKeyboard() }),
                         modifier = Modifier.fillMaxWidth().focusRequester(focus),
                     )
                 },
@@ -128,6 +148,37 @@ fun SearchScreen(
                         supportingContent = { Text(hit.packTitle) },
                     )
                 }
+                if (state.fullText.isNotEmpty()) item { SectionHeader("Articles") }
+                results(state, SearchGroup.FULL_TEXT, state.fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
+                    ListItem(
+                        modifier = Modifier.clickable { open(hit) },
+                        headlineContent = { Text(hit.title) },
+                        supportingContent = {
+                            Column {
+                                hit.snippet?.let {
+                                    Text(AnnotatedString.fromHtml(it), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                                }
+                                Text(hit.packTitle)
+                            }
+                        },
+                    )
+                }
+                if (state.books.isNotEmpty()) item { SectionHeader("Books") }
+                results(state, SearchGroup.BOOKS, state.books, { _, hit -> "b:${hit.bookId}" }, ::toggle) { hit ->
+                    ListItem(
+                        modifier = Modifier.clickable { open(hit) },
+                        headlineContent = { Text(hit.bookTitle) },
+                        supportingContent = {
+                            Column {
+                                SearchRows.bookLine(hit).takeIf { it.isNotBlank() }?.let { Text(it) }
+                                PdfText.pageOf(hit.href)?.let { Text("p. $it") }
+                                if (hit.snippet.isNotBlank()) {
+                                    Text(AnnotatedString.fromHtml(hit.snippet), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                        },
+                    )
+                }
                 val music = state.media
                 if (music.artists.isNotEmpty() || music.albums.isNotEmpty() || music.songs.isNotEmpty()) {
                     item { SectionHeader("Music") }
@@ -152,37 +203,6 @@ fun SearchScreen(
                     MediaRow(book.title, SearchRows.audiobook(book), { AudiobookCover(book.coverPath, it) }) {
                         media { onOpenAudiobook(book.id) }
                     }
-                }
-                if (state.fullText.isNotEmpty()) item { SectionHeader("In article text") }
-                results(state, SearchGroup.FULL_TEXT, state.fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
-                    ListItem(
-                        modifier = Modifier.clickable { open(hit) },
-                        headlineContent = { Text(hit.title) },
-                        supportingContent = {
-                            Column {
-                                hit.snippet?.let {
-                                    Text(AnnotatedString.fromHtml(it), maxLines = 3, overflow = TextOverflow.Ellipsis)
-                                }
-                                Text(hit.packTitle)
-                            }
-                        },
-                    )
-                }
-                if (state.books.isNotEmpty()) item { SectionHeader("In books") }
-                results(state, SearchGroup.BOOKS, state.books, { index, _ -> "b:$index" }, ::toggle) { hit ->
-                    ListItem(
-                        modifier = Modifier.clickable { open(hit) },
-                        headlineContent = { Text(hit.bookTitle) },
-                        supportingContent = {
-                            Column {
-                                if (hit.author.isNotBlank()) Text(hit.author)
-                                PdfText.pageOf(hit.href)?.let { Text("p. $it") }
-                                if (hit.snippet.isNotBlank()) {
-                                    Text(AnnotatedString.fromHtml(hit.snippet), maxLines = 3, overflow = TextOverflow.Ellipsis)
-                                }
-                            }
-                        },
-                    )
                 }
             }
         }
@@ -231,6 +251,29 @@ internal object SearchRows {
         if (capped) "Show the first $count ${group.noun}" else "Show all $count ${group.noun}"
 
     fun showFewer(group: SearchGroup) = "Show fewer ${group.noun}"
+
+    /** A book result's line under its title: the author, and "3 matches" when the book matched in more than one place. */
+    fun bookLine(hit: BookHit): String =
+        listOfNotNull(hit.author.ifBlank { null }, if (hit.matches > 1) "${hit.matches} matches" else null).joinToString(" · ")
+
+    /**
+     * Whether an article's [snippet] shows the match, so it's worth showing: it holds one of [query]'s words, case and
+     * accents aside, or a libkiwix `<b>` mark (which also marks a stemmed match, "apocalyptic" for "apocalypse"). A
+     * snippet of page chrome (category footers, menus, profile stats) has neither, and the row shows title and pack only
+     * (Plan U3b Decision 10).
+     */
+    fun snippetMatches(snippet: String, query: String): Boolean {
+        if (BOLD.containsMatchIn(snippet)) return true
+        val text = SearchText.fold(plainText(snippet))
+        return SearchText.words(query).any { it in text }
+    }
+
+    private val BOLD = Regex("<b>\\s*[^<\\s]", RegexOption.IGNORE_CASE)
+    private val TAG = Regex("<[^>]*>")
+    private val ENTITIES = mapOf("&amp;" to "&", "&lt;" to "<", "&gt;" to ">", "&quot;" to "\"", "&#39;" to "'", "&nbsp;" to " ")
+
+    private fun plainText(html: String): String =
+        ENTITIES.entries.fold(TAG.replace(html, " ")) { text, (entity, char) -> text.replace(entity, char) }
 }
 
 @Composable

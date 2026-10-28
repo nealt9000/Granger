@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import app.granger.core.downloads.DOWNLOADS_LINK
 import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.ebook.ReadiumFragmentFactory
@@ -47,6 +48,9 @@ class MainActivity : FragmentActivity() {
 
     /** Counts requests to show the Player (the home-screen widget's body); each new one opens it. */
     private val openPlayer = mutableIntStateOf(0)
+
+    /** Counts requests to show Downloads (a download notification's tap); each new one opens it. */
+    private val openDownloads = mutableIntStateOf(0)
 
     /** Null while the launch decision reads Room; the screen stays blank (background colour) meanwhile. */
     private val start = mutableStateOf<StartScreen?>(null)
@@ -83,6 +87,7 @@ class MainActivity : FragmentActivity() {
         }
         // Not on a re-creation: the intent that started this activity was already handled then.
         if (savedInstanceState == null && opensPlayer(intent)) openPlayer.intValue++
+        if (savedInstanceState == null && opensDownloads(intent)) openDownloads.intValue++
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -110,7 +115,9 @@ class MainActivity : FragmentActivity() {
                 if (decided == null) {
                     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
                 } else {
-                    GrangerNavHost(container, decided, openPlayerRequests = openPlayer.intValue)
+                    GrangerNavHost(
+                        container, decided, openPlayerRequests = openPlayer.intValue, openDownloadsRequests = openDownloads.intValue,
+                    )
                 }
             }
         }
@@ -136,6 +143,7 @@ class MainActivity : FragmentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (opensPlayer(intent)) openPlayer.intValue++
+        if (opensDownloads(intent)) openDownloads.intValue++
     }
 
     override fun onStart() {
@@ -177,6 +185,11 @@ class MainActivity : FragmentActivity() {
         internal fun opensPlayer(intent: Intent?): Boolean = Features.PLAYER && intent != null &&
             intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0 &&
             intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false)
+
+        /** A download notification's tap ([DOWNLOADS_LINK]), and not a relaunch from Recents. */
+        internal fun opensDownloads(intent: Intent?): Boolean = intent != null &&
+            intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0 &&
+            intent.data?.toString() == DOWNLOADS_LINK
     }
 }
 

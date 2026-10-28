@@ -199,6 +199,10 @@ interface PlaybackDao {
     @Query("SELECT * FROM recent_plays WHERE `key` = :key")
     suspend fun recentPlay(key: String): RecentPlay?
 
+    /** Clear history forgets every play (Plan U3b, Neal's walkthrough); saved places and bookmarks stay. */
+    @Query("DELETE FROM recent_plays")
+    suspend fun deleteRecentPlays()
+
     /** A folder already added keeps its first [MediaFolder.addedAt]. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFolder(folder: MediaFolder)

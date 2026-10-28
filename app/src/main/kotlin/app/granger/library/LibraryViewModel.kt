@@ -2,6 +2,7 @@ package app.granger.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.core.library.CollectionRow
 import app.granger.core.library.Library
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
@@ -14,24 +15,53 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** An archive source the Library links to. The three archive.org links are its texts, spoken-word and music views. */
+/**
+ * An archive source the empty Music and Audiobooks screens link to. The three archive.org links are its texts,
+ * spoken-word and music views.
+ */
 enum class SourceLink(val title: String) {
     GRANGER("Granger"), KIWIX("Kiwix"), ARCHIVE_ORG("Archive.org"),
     LIBRIVOX("LibriVox"), ARCHIVE_ORG_SPOKEN("Archive.org"), ARCHIVE_ORG_MUSIC("Archive.org"),
 }
 
-/** The archive sources of one media type, under its header (spec §3.4). */
-data class SourceGroup(val title: String /* "Literature" | "Audiobooks" | "Music" */, val links: List<SourceLink>)
+/**
+ * One Library row: a kind of thing the phone holds, opening to its collections (Plan U3b Decision 4). [mediaTypeId] is
+ * the media type its collections are filed under; [id] keeps its collapsed state.
+ */
+data class KindRow(val id: String, val title: String, val mediaTypeId: String, val collections: List<CollectionRow>) {
+    /** Every collection here, each folder followed by its children. */
+    val allCollections: List<CollectionRow> get() = collections.flatMap { it.withChildren }
+}
 
-/** The Library's two sections: [media] (media types with their collections) and the archive [sources] by media type. */
-data class LibraryUi(val media: List<Shelf>, val sources: List<SourceGroup>, val emptyLibrary: Boolean)
+/** The Library: what the phone holds, by kind. */
+data class LibraryUi(val kinds: List<KindRow>, val emptyLibrary: Boolean)
 
-/** Every archive source, grouped by the media type it brings. */
-val SOURCE_GROUPS = listOf(
-    SourceGroup("Literature", listOf(SourceLink.GRANGER, SourceLink.KIWIX, SourceLink.ARCHIVE_ORG)),
-    SourceGroup("Audiobooks", listOf(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN)),
-    SourceGroup("Music", listOf(SourceLink.ARCHIVE_ORG_MUSIC)),
-)
+const val REFERENCE_KIND = "reference"
+const val BOOKS_KIND = "books"
+
+/**
+ * The Library's rows, each only when it holds something. Literature splits in two: its packs (the Kiwix folder, and
+ * any collection with a pack in it) are Encyclopedias & reference, its book collections are Books. Maps, Audiobooks
+ * and Music follow; any other media type (Video, one the user made) comes after, in its own order. No schema change:
+ * the media types stay as they are.
+ */
+fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
+    val byId = shelves.associateBy { it.mediaType.id }
+    val literature = byId[LITERATURE]?.collections.orEmpty()
+    val (reference, books) = literature.partition { row -> row.isFolder || row.withChildren.any { it.packs.isNotEmpty() } }
+    val rest = shelves.filter { it.mediaType.id != LITERATURE }
+        .sortedBy { FOLLOWING.indexOf(it.mediaType.id).let { i -> if (i < 0) FOLLOWING.size else i } }
+    return listOf(
+        KindRow(REFERENCE_KIND, "Encyclopedias & reference", LITERATURE, reference),
+        KindRow(BOOKS_KIND, "Books", LITERATURE, books),
+    ).filter { it.collections.isNotEmpty() } +
+        rest.map { KindRow(it.mediaType.id, it.mediaType.name, it.mediaType.id, it.collections) }
+}
+
+private const val LITERATURE = "literature"
+
+/** The built-in media types after Literature's two rows, in the Library's order. */
+private val FOLLOWING = listOf("maps", "audiobooks", "music")
 
 class LibraryViewModel(
     shelves: Shelves,
@@ -58,7 +88,7 @@ class LibraryViewModel(
 
     /** Null until the first load finishes. */
     val ui: StateFlow<LibraryUi?> = shelves.shelves
-        .map { LibraryUi(it, SOURCE_GROUPS, emptyLibrary = it.isEmpty()) }
+        .map { LibraryUi(libraryKinds(it), emptyLibrary = it.isEmpty()) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Re-scan pack folders; called whenever the screen resumes (an SD card may have come back). */

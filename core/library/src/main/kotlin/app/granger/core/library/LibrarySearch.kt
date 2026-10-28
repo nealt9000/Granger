@@ -37,11 +37,21 @@ class ZimLibrarySearch(
     private val titleLimit: Int = TITLE_LIMIT,
 ) : LibrarySearch {
     // The packs take turns, each in its own order, so a big pack can't push the others below the first few or past the limit.
+    // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10).
     override suspend fun titles(query: String): TitleResults {
         val packs = across(query) { it.suggest(query, titlesPerPack) }
         val turns = packs.maxOfOrNull { it.hits.size } ?: 0
         val all = (0 until turns).flatMap { turn -> packs.mapNotNull { it.hits.getOrNull(turn)?.second } }
-        return TitleResults(all.take(titleLimit), more = all.size > titleLimit || packs.any { it.returned >= titlesPerPack })
+        val q = SearchText.fold(query.trim())
+        val ranked = all.sortedBy { hit ->
+            val title = SearchText.fold(hit.title)
+            when {
+                title == q -> 0
+                title.startsWith(q) -> 1
+                else -> 2
+            }
+        }
+        return TitleResults(ranked.take(titleLimit), more = all.size > titleLimit || packs.any { it.returned >= titlesPerPack })
     }
 
     override suspend fun fullText(query: String): List<SearchHit> =
@@ -56,7 +66,10 @@ class ZimLibrarySearch(
     /** One pack's hits; [returned] counts them as the pack gave them, before redirects are merged. */
     private class PackHits(val hits: List<Pair<ZimHit, SearchHit>>, val returned: Int)
 
-    /** Runs [run] on each OK pack, in library order; a pack that fails is skipped so the others still answer. */
+    /**
+     * Runs [run] on each OK pack, in library order; a pack that fails is skipped so the others still answer. Index pages
+     * (user and tag lists, [IndexPages]) are left out, and titles lose their site ([PageTitles]) before they're ranked.
+     */
     private suspend fun across(query: String, run: (ZimArchive) -> List<ZimHit>): List<PackHits> {
         if (query.isBlank()) return emptyList()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
@@ -68,7 +81,8 @@ class ZimLibrarySearch(
                 // reader keys bookmarks and positions by the real path, and list each article once.
                 val found = hits.map { hit -> hit.copy(path = archive.resolvePath(hit.path) ?: hit.path) }
                     .distinctBy { it.path }
-                    .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, hit.title, hit.snippet) }
+                    .filterNot { IndexPages.isIndex(it.path) }
+                    .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, PageTitles.clean(hit.title, pack.title), hit.snippet) }
                 PackHits(found, returned = hits.size)
             }
         }

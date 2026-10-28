@@ -19,6 +19,8 @@ import app.granger.core.catalog.Preset
 import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
+import app.granger.core.downloads.ItemKind
+import app.granger.core.catalog.VectorsEntry
 import app.granger.modelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.pack
@@ -274,6 +276,40 @@ class SourceViewModelTest {
         assertThat(vm.rowIds()).isEmpty()
     }
 
+    @Test fun anInstalledPackRowOpensItsLibraryPack() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("u-med"))
+        val rows = viewModel().ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        // Open (Plan U3b Decision 3) needs the pack the entry is installed as; one not installed has none.
+        assertThat(rows.getValue("med").status).isEqualTo(ItemStatus.Installed)
+        assertThat(rows.getValue("med").packId).isEqualTo("u-med")
+        assertThat(rows.getValue("top").packId).isNull()
+    }
+
+    @Test fun packRowsSayHowAskSearchesThem() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                packs = listOf(
+                    packEntry("med").copy(vectors = VectorsEntry(url = "https://a.test/med.gvec")),
+                    packEntry("top"),
+                    packEntry("bare").copy(hasFulltextIndex = false),
+                    packEntry("idx").copy(hasFulltextIndex = false),
+                    packEntry("osm").copy(family = "maps", hasFulltextIndex = false),
+                ),
+                models = listOf(e2b),
+            ),
+        )
+        // Vectors installed for a pack the catalog no longer lists them for still count.
+        downloads.list.value = listOf(record("idx.vectors", DownloadState.INSTALLED, kind = ItemKind.VECTORS))
+        val vm = viewModel()
+        val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        assertThat(rows.getValue("med").ask).isEqualTo(AskReach.MEANING)
+        assertThat(rows.getValue("top").ask).isEqualTo(AskReach.KEYWORDS)
+        assertThat(rows.getValue("bare").ask).isEqualTo(AskReach.NONE)
+        assertThat(rows.getValue("idx").ask).isEqualTo(AskReach.MEANING)
+        assertThat(rows.getValue("osm").ask).isNull()
+        assertThat(viewModel(CatalogScope.MODELS).ui.value.sections.flatMap { it.rows }.single().ask).isNull()
+    }
+
     @Test fun updatesTabShowsOnlyUpdates() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("u-med"))
         downloads.list.value = listOf(
@@ -363,6 +399,52 @@ class SourceViewModelTest {
         assertThat(novels.map { it.id }).containsExactly("emma", "persuasion").inOrder()
         assertThat(novels.first().details).isEqualTo("An Author · Public domain")
         assertThat(viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }).isEmpty()
+    }
+
+    @Test fun grangerBookCategoriesFoldPastEight() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(books = (1..12).map { bookEntry("n$it", "Novels") } + listOf(bookEntry("hamlet", "Plays"))),
+        )
+        val vm = viewModel()
+        val novels = vm.ui.value.sections.first { it.title == "Novels" }
+        assertThat(novels.rows).hasSize(SourceViewModel.FOLDED_ROWS)
+        assertThat(novels.total).isEqualTo(12)
+        assertThat(novels.foldable).isTrue()
+        assertThat(novels.noun).isEqualTo("books")
+        assertThat(vm.ui.value.sections.first { it.title == "Plays" }.foldable).isFalse()
+        vm.toggleSection("Novels")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.first { it.title == "Novels" }.rows).hasSize(12)
+        // A search shows every match unfolded.
+        vm.toggleSection("Novels")
+        vm.setQuery("Book n")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.first { it.title == "Novels" }.let { it.rows.size to it.foldable }).isEqualTo(12 to false)
+    }
+
+    @Test fun presetsCountByKindAndSayWhatsOnThePhone() = runTest(main.dispatcher) {
+        val starter = viewModel().ui.value.presets.single()
+        assertThat(listOf(starter.packs, starter.books, starter.others)).containsExactly(3, 0, 1).inOrder()
+        assertThat(PresetText.summary(starter)).isEqualTo("3 packs and 1 model · ${app.granger.formatBytes(5_000)}")
+        assertThat(PresetText.status(starter)).isEqualTo("4 of 4 to get")
+
+        library.packList.value = listOf(pack("u-med"))
+        downloads.list.value = listOf(record("top", DownloadState.RUNNING))
+        val partway = viewModel().ui.value.presets.single()
+        assertThat(PresetText.status(partway)).isEqualTo("1 downloading · 2 of 4 to get")
+
+        library.packList.value = listOf(pack("u-med"), pack("u-top"), pack("u-voyage"))
+        downloads.list.value = listOf(record("e2b", DownloadState.INSTALLED, sha256 = e2b.sha256))
+        assertThat(PresetText.status(viewModel().ui.value.presets.single())).isEqualTo("All on this phone")
+    }
+
+    @Test fun presetLinesReadAsPlanned() {
+        val efficient = PresetRow("e", "Efficient start", 359, 0, 0, packs = 12, books = 347, totalBytes = 17_700_000_000)
+        assertThat(PresetText.summary(efficient)).startsWith("12 packs and 347 books · ")
+        assertThat(PresetText.summary(efficient.copy(packs = 1, books = 0))).startsWith("1 pack · ")
+        assertThat(PresetText.summary(efficient.copy(others = 2))).startsWith("12 packs, 347 books and 2 models · ")
+        assertThat(PresetText.status(efficient.copy(downloading = 359))).isEqualTo("359 downloading")
+        assertThat(PresetText.status(efficient.copy(onPhone = 359))).isEqualTo("All on this phone")
     }
 
     @Test fun classicsPresetComesFirst() = runTest(main.dispatcher) {

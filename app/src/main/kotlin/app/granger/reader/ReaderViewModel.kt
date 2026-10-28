@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Library
+import app.granger.core.library.PageTitles
 import app.granger.core.library.ReadingSessions
 import app.granger.core.player.NowPlaying
 import app.granger.player.VoiceButton
@@ -238,7 +239,11 @@ class ReaderViewModel(
     suspend fun onPageShown(url: String, documentTitle: String?): Float? {
         val pack = packId ?: return null
         val zim = ZimUrls.parse(url)?.takeIf { it.packId == pack } ?: return null
-        val title = documentTitle?.takeIf { it.isNotBlank() } ?: titleFromPath(zim.path)
+        // The tab keeps the page's title without its site, "Apocalypse" for "Apocalypse - Wikipedia", and the pack's
+        // main page is called by the pack, not "Main Page" (Plan U3b Decision 11).
+        val mainPage = zim.path == archive?.mainPath
+        val title = documentTitle?.takeIf { it.isNotBlank() }?.let { PageTitles.clean(it, _state.value.packTitle, mainPage) }
+            ?: titleFromPath(zim.path)
         val shown = Page(zim.path, title)
         page.value = shown
         if (citedPath != null && citedPath != zim.path) citedPath = null

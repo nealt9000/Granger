@@ -6,11 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -19,9 +21,11 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -67,16 +71,39 @@ class RailTest {
         ) { Box(Modifier.fillMaxSize()) }
     }
 
-    /** Every item is a tile here, too little to tell apart: a tap opens the full rail, as does History. */
-    @Test fun tappingATileOrHistoryInTheNarrowRailOpensTheFullRailInstead() {
+    /** The four are few enough to know by sight: a tile opens its item (Plan U3b Decision 6). */
+    @Test fun tappingATileInTheNarrowRailOpensIt() {
         shell()
-        for (description in listOf("Owls", "Gone, not available", "Recent search: cats", "Ask chat: About owls", "Play again: Blue", "History")) {
-            expanded = false
-            compose.waitForIdle()
+        val tiles = listOf(
+            "Owls" to "tab:1", "Recent search: cats" to "search:cats", "Ask chat: About owls" to "chat:7", "Play again: Blue" to "play:album:Blue",
+        )
+        for ((description, call) in tiles) {
             compose.onNodeWithContentDescription(description).performClick()
             compose.waitForIdle()
-            assertThat(expanded).isTrue()
+            assertThat(calls.last()).isEqualTo(call)
         }
+        // An unavailable tab says so instead of opening.
+        compose.onNodeWithContentDescription("Gone, not available").performClick()
+        compose.waitForIdle()
+        assertThat(calls).hasSize(tiles.size)
+        assertThat(expanded).isFalse()
+    }
+
+    @Test fun historyOpensTheHistoryScreen() {
+        shell()
+        compose.onNodeWithContentDescription("History").performClick()
+        compose.waitForIdle()
+        assertThat(calls).containsExactly("history")
+        assertThat(expanded).isFalse()
+    }
+
+    @Test fun tappingTheNarrowRailsBackgroundOpensTheFullRail() {
+        rail = RailUi(listOf(cats))
+        shell()
+        // Below History, above Settings: the rail's empty space.
+        compose.onRoot().performTouchInput { click(Offset(28.dp.toPx(), 600.dp.toPx())) }
+        compose.waitForIdle()
+        assertThat(expanded).isTrue()
         assertThat(calls).isEmpty()
     }
 
@@ -100,6 +127,18 @@ class RailTest {
         compose.onAllNodesWithTag(PIN_DOT_TAG, useUnmergedTree = true).assertCountEquals(1)
         val pinned = compose.onNodeWithContentDescription("Owls").fetchSemanticsNode()
         assertThat(pinned.config.getOrNull(SemanticsProperties.StateDescription)).isEqualTo("Pinned")
+    }
+
+    /** Plan U3b, Neal's walkthrough: the tab being read aloud wears a speaker badge and says so, in both rails. */
+    @Test fun aTabReadAloudWearsTheBadgeAndSaysSo() {
+        rail = RailUi(listOf(owls.copy(tab = owls.tab.copy(readingAloud = true)), cats))
+        shell()
+        compose.onAllNodesWithTag(READING_BADGE_TAG, useUnmergedTree = true).assertCountEquals(1)
+        compose.onNodeWithContentDescription("Owls, reading aloud").performClick()
+        assertThat(calls).containsExactly("tab:1")
+        expanded = true
+        compose.waitForIdle()
+        compose.onNodeWithText("Birds of the world · reading aloud").assertExists()
     }
 
     @Test fun everyTileAndRowHasTalkBackLabels() {

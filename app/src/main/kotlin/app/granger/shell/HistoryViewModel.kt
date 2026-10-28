@@ -8,11 +8,13 @@ import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
+import app.granger.core.library.RailPins
 import app.granger.core.library.ReadingSessions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -21,6 +23,11 @@ class HistoryViewModel(
     private val sessions: ReadingSessions,
     private val library: Library,
     bookshelf: Bookshelf,
+    private val pins: RailPins,
+    private val hidden: RailHidden,
+    /** Forgets every recorded play (`PlaybackDao.deleteRecentPlays`). */
+    private val forgetPlays: suspend () -> Unit = {},
+    private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     data class Row(val packId: String, val path: String, val title: String, val packTitle: String, val available: Boolean)
 
@@ -53,6 +60,23 @@ class HistoryViewModel(
         viewModelScope.launch { library.setBookmarked(row.packId, row.path, row.title, false) }
     }
 
+    /**
+     * Clear history (Plan U3b Decision 7): History, recent searches and plays go, and every reading tab leaves the rail
+     * but the pinned ones and [keepTabIds] (the page you came from). Pinned searches stay with their pins. The rail's
+     * cut-off moves to now, so nothing unpinned from before (an Ask chat, a play) shows there or in Continue again
+     * (Plan U3b, Neal's walkthrough). Reading places, bookmarks, Saved and the chats themselves stay.
+     */
+    fun clear(keepTabIds: Set<Long>) {
+        hidden.clear(now())
+        viewModelScope.launch {
+            forgetPlays()
+            val pinned = pins.pins.first().map { it.key }
+            val tabs = pinned.filter { it.startsWith(RailEntry.TAB) }.mapNotNull { it.removePrefix(RailEntry.TAB).toLongOrNull() }
+            val searches = pinned.filter { it.startsWith(RailEntry.SEARCH) }.map { it.removePrefix(RailEntry.SEARCH) }
+            sessions.clearHistory(keepTabIds + tabs, searches.toSet())
+        }
+    }
+
     private fun row(packId: String, path: String, title: String, packs: Map<String, Pack>, books: Map<String, Book>): Row {
         if (BookIds.isBook(packId)) {
             val book = books[packId]
@@ -64,6 +88,12 @@ class HistoryViewModel(
     }
 
     companion object {
+        /**
+         * What Clear history keeps from the back stack under History, given each entry's reading tab (null for other
+         * screens), bottom first: only the nearest, the page you came from (Plan U3b, Neal's walkthrough).
+         */
+        fun keptTab(backStackTabIds: List<Long?>): Set<Long> = setOfNotNull(backStackTabIds.lastOrNull { it != null })
+
         const val REMOVED_PACK = "Removed pack"
         const val REMOVED_BOOK = "Removed book"
     }

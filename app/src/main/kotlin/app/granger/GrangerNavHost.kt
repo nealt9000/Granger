@@ -52,6 +52,9 @@ import app.granger.core.library.BookIds
 import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
+import app.granger.downloads.DownloadsModel
+import app.granger.downloads.DownloadsScreen
+import app.granger.downloads.DownloadsViewModel
 import app.granger.ebook.Dictionary
 import app.granger.ebook.DictionaryChoice
 import app.granger.ebook.EbookReaderScreen
@@ -91,6 +94,7 @@ import app.granger.media.PlayResumer
 import app.granger.settings.ComponentOtherAppsSharing
 import app.granger.settings.DaoMediaFolders
 import app.granger.settings.MediaSettings
+import app.granger.settings.MediaSettingsScreen
 import app.granger.settings.ResolverFolderGrants
 import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
@@ -117,6 +121,8 @@ import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
 import app.granger.sources.CatalogScope
+import app.granger.sources.GetMoreLink
+import app.granger.sources.GetMoreScreen
 import app.granger.sources.SourceScreen
 import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.CancellationException
@@ -237,6 +243,24 @@ fun NavController.showTab(
 
 fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = true }
 
+/** Where sources live: Kiwix, books, audiobooks and music, models (Plan U3b Decision 2). */
+@Serializable object GetMoreRoute
+
+/** Where each Get more row goes: today's source screens. */
+internal fun routeOf(link: GetMoreLink): Any = when (link) {
+    GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
+    GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
+    GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
+    GetMoreLink.LIBRIVOX -> LibriVoxRoute
+    GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
+    GetMoreLink.ARCHIVE_ORG_MUSIC -> ArchiveRoute(ArchiveKind.MUSIC)
+    GetMoreLink.MODELS -> SourceRoute(CatalogScope.MODELS)
+}
+
+fun NavController.openGetMore(link: GetMoreLink) {
+    if (link == GetMoreLink.LIBRIVOX) openLibriVox() else navigate(routeOf(link))
+}
+
 /** Where each Library source link goes (spec §3.4): the archive.org links open its texts, spoken-word or music view. */
 internal fun routeOf(link: SourceLink): Any = when (link) {
     SourceLink.GRANGER -> SourceRoute(CatalogScope.GRANGER)
@@ -259,20 +283,28 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
     if (kind == ArchiveKind.MUSIC) AudiobookRoute("audiobook:${MediaManifest.ARCHIVE_ORG}:$identifier")
     else AlbumRoute(Albums.itemKey(MediaManifest.ARCHIVE_ORG, identifier))
 /** [media] opens it at the Music & audiobooks section. */
-@Serializable data class SettingsRoute(val media: Boolean = false)
+@Serializable object SettingsRoute
+/** Settings → Music & audiobooks, its own screen (Plan U3b Decision 9). */
+@Serializable object MediaSettingsRoute
 @Serializable object ReadinessRoute
+/** What's downloading, what stopped and what landed today (Plan U3b Decision 1). */
+@Serializable object DownloadsRoute
 /** Settings → Voice (Plan V1). */
 @Serializable object VoiceRoute
 
-/** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
-internal fun railToolOf(destination: NavDestination): RailTool? = when {
+/**
+ * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
+ * to, except Models ([sourceScope] is a [SourceRoute]'s scope), which stays with Settings (Plan U3b Decision 2).
+ */
+internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
+    destination.hasRoute<SourceRoute>() -> if (sourceScope == CatalogScope.MODELS) RailTool.SETTINGS else RailTool.LIBRARY
     destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
-        destination.hasRoute<LibriVoxRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
+        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() ||
+        destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
-        destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
     destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
     else -> null
 }
@@ -370,7 +402,7 @@ private class CurrentTab : ViewModel() {
 }
 
 @Composable
-fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0) {
+fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0, openDownloadsRequests: Int = 0) {
     val nav = rememberNavController()
     val shell = rememberShellState()
     // True only for the first resume navigation; read when that navigation's transitions are chosen.
@@ -380,7 +412,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val railViewModel = viewModel {
         RailViewModel(
             container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id,
-            container.railPins, container.railHidden,
+            container.railPins, container.railHidden, container.railOrder,
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) container.playResumer else null,
@@ -442,6 +474,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     // The home-screen widget's body: each request (a new count) shows the Player, over whatever the launch opened.
     LaunchedEffect(openPlayerRequests) { if (openPlayerRequests > 0 && Features.PLAYER) nav.showPlayer() }
+    // A download notification's tap: Downloads, over whatever the launch opened.
+    LaunchedEffect(openDownloadsRequests) { if (openDownloadsRequests > 0) nav.navigate(DownloadsRoute) { launchSingleTop = true } }
+    // The Library header's badge: what's coming or stopped.
+    val downloadsBadge by remember { container.downloads.records.map { DownloadsModel.of(it, since = Long.MAX_VALUE).badge } }
+        .collectAsStateWithLifecycle(0)
 
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
     val scope = rememberCoroutineScope()
@@ -449,6 +486,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val songs = container.songs
     fun showTab(tabId: Long) {
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
+    }
+
+    /** The one way an installed pack opens: from the Library, a source's Open and Downloads (Plan U3b Decision 3). */
+    fun openPack(packId: String) {
+        scope.launch {
+            val tabId = app.granger.library.openPack(container.library, container.sessions, packId) ?: return@launch
+            container.sessions.tab(tabId)?.let { nav.showTab(it) }
+        }
     }
 
     /** Opens the page the voice is reading (an article in its tab, a book in its reader); null when the key names neither. */
@@ -512,7 +557,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         return true
     }
 
-    val selected = destination?.let(::railToolOf)
+    val selected = entry?.let { e ->
+        railToolOf(e.destination, if (e.destination.hasRoute<SourceRoute>()) e.toRoute<SourceRoute>().scope else null)
+    }
 
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
@@ -579,7 +626,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 RailTool.HOME -> if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
-                RailTool.SETTINGS -> nav.navigate(SettingsRoute()) { launchSingleTop = true }
+                RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
                 RailTool.PLAYER -> nav.togglePlayer()
             }
@@ -655,10 +702,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },
                     onOpenAudiobooks = { id -> nav.navigate(AudiobookShelfRoute(id)) },
-                    onOpenSource = nav::openSource,
                     onSearch = { nav.navigate(SearchRoute()) },
-                    onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
+                    downloadsBadge = downloadsBadge,
+                    onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
+                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -671,6 +719,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onOpened = ::showTab,
+                    onOpenPack = ::openPack,
                     onGetBooks = { nav.navigate(SourceRoute(CatalogScope.GRANGER)) },
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onBack = { nav.popBackStack() },
@@ -684,7 +733,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 onFolder = { nav.navigate(FolderRoute(it)) },
                 onBack = { nav.popBackStack() },
                 onOpenSource = nav::openSource,
-                onMediaSettings = { nav.navigate(SettingsRoute(media = true)) },
+                onMediaSettings = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
             )
             val removeDownload: (String) -> Unit = { group -> container.appScope.launch { container.mediaDownloader.remove(group) } }
             // The detail pages aren't scoped to a collection: their routes carry none.
@@ -725,7 +774,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBook = { nav.navigate(AudiobookRoute(it)) },
                     onBack = { nav.popBackStack() },
                     onOpenSource = nav::openSource,
-                    onMediaSettings = { nav.navigate(SettingsRoute(media = true)) },
+                    onMediaSettings = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
                 )
             }
             composable<AudiobookRoute> { backStackEntry ->
@@ -853,9 +902,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<HistoryRoute> {
                 HistoryScreen(
-                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library, container.bookshelf) },
+                    viewModel = viewModel {
+                        HistoryViewModel(
+                            container.sessions, container.library, container.bookshelf, container.railPins, container.railHidden,
+                            forgetPlays = container.playback::deleteRecentPlays,
+                        )
+                    },
                     onOpenTab = ::showTab,
                     onBack = { nav.popBackStack() },
+                    // The page you came from: Back returns to it, so Clear history keeps that tab alone (Plan U3b Decision 7).
+                    keepTabIds = { HistoryViewModel.keptTab(nav.currentBackStack.value.map { it.readingTabId() }) },
                 )
             }
             composable<SourceRoute> { backStackEntry ->
@@ -870,6 +926,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
+                    onOpenPack = ::openPack,
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->
@@ -899,25 +956,35 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<SettingsRoute> { backStackEntry ->
+            composable<SettingsRoute> {
                 SettingsScreen(
                     viewModel = viewModel {
                         SettingsViewModel(
                             container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
                             container.appScope,
-                            mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
                             refreshVoices = { if (Features.PLAYER && Features.READ_ALOUD) container.installedVoices.refresh() },
                         )
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
-                    onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
                         .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
                         ?.title ?: "No offline voice on this phone",
-                    scrollToMedia = backStackEntry.toRoute<SettingsRoute>().media,
+                    onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
+                )
+            }
+            composable<MediaSettingsRoute> {
+                MediaSettingsScreen(
+                    viewModel = viewModel {
+                        SettingsViewModel(
+                            container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
+                            container.appScope,
+                            mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
+                        )
+                    },
+                    onBack = { nav.popBackStack() },
                     onPermissionChecked = { if (Features.PLAYER) container.phoneMediaScans.recheckPermission() },
                 )
             }
@@ -954,7 +1021,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
-                    onOpenSetup = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
+                    onOpenDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
                     onOpenCard = { card ->
@@ -986,6 +1053,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onDone = { nav.popBackStack() },
                     onSeeDomain = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                 )
+            }
+            composable<DownloadsRoute> {
+                DownloadsScreen(
+                    viewModel = viewModel {
+                        DownloadsViewModel(container.downloads, container.library, container.bookshelf, container.sessions, container.appScope)
+                    },
+                    onBack = { nav.popBackStack() },
+                    onOpened = ::showTab,
+                    onOpenPack = ::openPack,
+                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                )
+            }
+            composable<GetMoreRoute> {
+                GetMoreScreen(onOpen = nav::openGetMore, onBack = { nav.popBackStack() })
             }
             composable<ReadinessRoute> {
                 ReadinessScreen(

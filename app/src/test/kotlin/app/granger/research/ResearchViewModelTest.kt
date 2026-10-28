@@ -260,6 +260,22 @@ class ResearchViewModelTest {
         assertThat(restored.state.value.chatId).isNull()
     }
 
+    @Test fun deleteAllChatsLeavesAFreshChat() = runTest(main.dispatcher) {
+        val chatId = chats.create("How do plants use light?")
+        chats.create("Who wrote Hamlet?")
+        val vm = vm(chatId = chatId)
+        testScheduler.advanceUntilIdle()
+        vm.deleteAllChats()
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.chats.value).isEmpty()
+        assertThat(vm.state.value.chatId).isNull()
+        assertThat(vm.state.value.turns).isEmpty()
+        // The next question starts a new chat.
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        assertThat(chats.chats.value.map { it.title }).containsExactly("Why is the sky blue?")
+    }
+
     @Test fun stopKeepsAValidlyCitedPartial() = runTest(main.dispatcher) {
         small.answer = listOf("Plants use light [1].", " And", " more [9].")
         small.gateAt = 1

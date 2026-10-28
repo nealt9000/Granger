@@ -20,11 +20,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.FilterChip
@@ -66,7 +69,7 @@ private fun moreKey(index: Int, section: Section) = "more-$index-${section.title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) {
+fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, onOpenPack: (packId: String) -> Unit = {}) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
@@ -226,12 +229,13 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit) 
                         onCancel = { viewModel.cancel(row.id) },
                         onRetry = { viewModel.retry(row.id) },
                         onRemove = { confirmRemove = row },
+                        onOpen = { row.packId?.let(onOpenPack) },
                     )
                     HorizontalDivider()
                 }
                 if (section.foldable) {
                     item(key = moreKey(index, section)) {
-                        val text = if (section.rows.size < section.total) "Show all ${section.total} packs" else "Show fewer packs"
+                        val text = if (section.rows.size < section.total) "Show all ${section.total} ${section.noun}" else "Show fewer ${section.noun}"
                         ListItem(
                             modifier = Modifier.clickable { toggle(index, section) },
                             headlineContent = { Text(text, color = MaterialTheme.colorScheme.primary) },
@@ -275,18 +279,25 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
     ListItem(
         headlineContent = { Text("${preset.title} set") },
         supportingContent = {
-            Text(
-                if (preset.remainingCount == 0) "All ${preset.itemCount} items are here or on their way."
-                else "${preset.remainingCount} of ${preset.itemCount} items to get · ${formatBytes(preset.remainingBytes)}",
-            )
+            Column {
+                Text(PresetText.summary(preset))
+                Text(PresetText.status(preset))
+            }
         },
         trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text("Get all") } },
     )
 }
 
+/**
+ * An installed pack opens here, where it's managed (Plan U3b Decision 3): Open is the row's action and Remove is in its
+ * overflow. An installed item the library doesn't hold as a pack (a book, a model) keeps Remove as its action.
+ */
 @Composable
-private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit) {
+internal fun CatalogItemRow(
+    row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit = {},
+) {
     val status = row.status
+    val opens = row.packId != null
     ListItem(
         headlineContent = { Text(row.title) },
         supportingContent = {
@@ -295,22 +306,31 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
                     Text(row.description, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
+                row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(status)
             }
         },
         trailingContent = {
             when (status) {
                 ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text("Get") }
-                ItemStatus.UpdateAvailable -> Row {
-                    TextButton(onClick = onRemove) { Text("Remove") }
+                ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (opens) TextButton(onClick = onOpen) { Text("Open") } else TextButton(onClick = onRemove) { Text("Remove") }
                     TextButton(onClick = onGet) { Text("Update") }
+                    if (opens) RemoveMenu(row.title, onRemove)
                 }
                 is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
                 is ItemStatus.Failed -> Row {
                     TextButton(onClick = onCancel) { Text("Cancel") }
                     TextButton(onClick = onRetry) { Text("Retry") }
                 }
-                ItemStatus.Installed -> TextButton(onClick = onRemove) { Text("Remove") }
+                ItemStatus.Installed -> if (opens) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = onOpen) { Text("Open") }
+                        RemoveMenu(row.title, onRemove)
+                    }
+                } else {
+                    TextButton(onClick = onRemove) { Text("Remove") }
+                }
                 is ItemStatus.Partial -> Row {
                     TextButton(onClick = onRemove) { Text("Remove") }
                     TextButton(onClick = onGet) { Text("Get the rest") }
@@ -319,6 +339,18 @@ private fun CatalogItemRow(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit
             }
         },
     )
+}
+
+/** A row's overflow, holding Remove (which still asks first). */
+@Composable
+private fun RemoveMenu(title: String, onRemove: () -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More for $title") }
+        DropdownMenu(open, { open = false }) {
+            DropdownMenuItem(text = { Text("Remove") }, onClick = { open = false; onRemove() })
+        }
+    }
 }
 
 /** The status line under an item: queue or progress, failure, installed. Shared with the archive.org rows. */

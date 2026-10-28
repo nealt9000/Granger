@@ -55,16 +55,6 @@ class CollectionViewModel(
     val targets: StateFlow<List<Shelf>> =
         shelves.shelves.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /**
-     * Opens [pack] at its last-read page in a rail tab and returns the tab id, or null when the pack can't be
-     * read. The tab is titled with the pack until the page reports its own title.
-     */
-    suspend fun open(pack: Pack): Long? {
-        if (pack.status != PackStatus.OK) return null
-        val path = library.startPath(pack.id) ?: return null
-        return sessions.openTab(pack.id, path, pack.title)
-    }
-
     /** Opens [book] in its rail tab (one per book) and returns the tab id; null, and nothing happens, unless it is readable. */
     suspend fun openBook(book: Book): Long? {
         if (book.status != PackStatus.OK) return null
