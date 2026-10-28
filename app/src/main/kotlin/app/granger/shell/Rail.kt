@@ -1,6 +1,7 @@
 package app.granger.shell
 
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
@@ -69,7 +69,8 @@ enum class RailTool(val label: String, val shown: Boolean) {
     SEARCH("Search", true),
     RESEARCH("Ask", Features.RESEARCH),
     LIBRARY("Library", true),
-    PLAYER("Player", Features.PLAYER),
+    /** Your player and your audio collection (Plan U2 Decision 4). */
+    LISTEN("Listen", Features.PLAYER),
     SETTINGS("Settings", true),
 }
 
@@ -91,15 +92,24 @@ private fun topTools(showResearch: Boolean) =
 @Composable
 private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInsetsSides.Vertical + side.insetSide)
 
+/**
+ * The tool's own drawable; null for Search and Settings, which use Material's vectors. The owl in the G is Home (Plan
+ * U3b Decision 5); an open book is the Library, and ic_library stays for articles. Listen is library_music, a stack of
+ * records: the player and the collection (Plan U2 Decision 4).
+ */
+@DrawableRes
+internal fun RailTool.drawable(): Int? = when (this) {
+    RailTool.HOME -> R.drawable.ic_owl
+    RailTool.RESEARCH -> R.drawable.ic_research
+    RailTool.LIBRARY -> R.drawable.ic_library_books_open
+    RailTool.LISTEN -> R.drawable.ic_headphones
+    RailTool.SEARCH, RailTool.SETTINGS -> null
+}
+
 @Composable
-private fun RailTool.painter(): Painter = when (this) {
-    // The owl in the G (Plan U3b Decision 5); an open book is the Library, and ic_library stays for articles.
-    RailTool.HOME -> painterResource(R.drawable.ic_owl)
-    RailTool.SEARCH -> rememberVectorPainter(Icons.Filled.Search)
-    RailTool.RESEARCH -> painterResource(R.drawable.ic_research)
-    RailTool.LIBRARY -> painterResource(R.drawable.ic_library_books_open)
-    RailTool.PLAYER -> rememberVectorPainter(Icons.Filled.PlayArrow)
+private fun RailTool.painter(): Painter = drawable()?.let { painterResource(it) } ?: when (this) {
     RailTool.SETTINGS -> rememberVectorPainter(Icons.Filled.Settings)
+    else -> rememberVectorPainter(Icons.Filled.Search)
 }
 
 /**

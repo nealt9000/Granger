@@ -11,7 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -41,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -307,10 +310,12 @@ class MediaSettingsTest {
         override fun withdraw() {}
     }
 
-    private fun settingsViewModel() = SettingsViewModel(
+    private fun settingsViewModel(audiobooks: Flow<Boolean> = flowOf(true)) = SettingsViewModel(
         FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(), FakeAppearancePrefs(),
         appScope = CoroutineScope(Dispatchers.Unconfined),
-        mediaSettings = { scope -> MediaSettings(folders, grants, prefs, MemorySharing(), scanner = { ScanSummary(0, 0) }, scope = scope) },
+        mediaSettings = { scope ->
+            MediaSettings(folders, grants, prefs, MemorySharing(), scanner = { ScanSummary(0, 0) }, scope = scope, audiobooks = audiobooks)
+        },
     )
 
     /** MediaSettingsRoute: Music & audiobooks on its own screen (Plan U3b Decision 9). */
@@ -322,5 +327,29 @@ class MediaSettingsTest {
         onNodeWithText("Find music and audiobooks on this phone").assertIsDisplayed()
         onNodeWithContentDescription("Back").performClick()
         assertThat(back).isEqualTo(1)
+    }
+
+    /**
+     * Plan U2 Decision 7: without an audiobook the screen is Music and the audiobook skip settings are hidden; they
+     * come back with the first one.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    @Test fun theSkipSettingsWaitForAnAudiobook() = runComposeUiTest {
+        val audiobooks = MutableStateFlow(false)
+        setContent { MediaSettingsScreen(settingsViewModel(audiobooks), onBack = {}) }
+        onNodeWithText("Music").assertIsDisplayed()
+        // The list's end, where ReplayGain, the skip settings and the headset row are.
+        onNode(hasScrollAction()).performScrollToKey("media-headset")
+        onNodeWithText("Play when headphones connect").assertExists()
+        assertThat(onAllNodes(hasText("Skip back")).fetchSemanticsNodes()).isEmpty()
+        assertThat(onAllNodes(hasText("Skip forward")).fetchSemanticsNodes()).isEmpty()
+
+        audiobooks.value = true
+        waitForIdle()
+        onNodeWithText("Music & audiobooks").assertIsDisplayed()
+        onNode(hasScrollAction()).performScrollToKey("media-skip-back")
+        onNodeWithText("Skip back").assertExists()
+        onNode(hasScrollAction()).performScrollToKey("media-skip-forward")
+        onNodeWithText("Skip forward").assertExists()
     }
 }

@@ -6,6 +6,7 @@ import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.Track
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadChapter
 import app.granger.core.speech.ReadSource
 import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +17,13 @@ data class PlaySource(val key: String, val title: String)
 sealed interface NowPlaying {
     data object Idle : NowPlaying
 
-    /** [index] is the track's position in the queue as [PlayerHub.queue] lists it (play order). [repeat]: 0 off, 1 all, 2 one. */
-    data class Music(val track: Track, val index: Int, val queueSize: Int, val shuffle: Boolean, val repeat: Int) : NowPlaying
+    /**
+     * [index] is the track's position in the queue as [PlayerHub.queue] lists it (play order). [repeat]: 0 off, 1 all,
+     * 2 one. [source] is the [PlaySource.key] the queue was played from ("album:<albumKey>", …; empty when unknown).
+     */
+    data class Music(
+        val track: Track, val index: Int, val queueSize: Int, val shuffle: Boolean, val repeat: Int, val source: String = "",
+    ) : NowPlaying
 
     data class Book(val book: Audiobook, val chapter: AudiobookChapter, val chapterCount: Int, val speed: Float,
                     val skipSilence: Boolean, val volumeBoostMb: Int) : NowPlaying
@@ -48,7 +54,7 @@ data class PlayerUi(val now: NowPlaying, val playing: Boolean, val positionMs: L
     }
 }
 
-/** The player's two tabs (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. The voice is a third mode without a tab. */
+/** The media modes (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. The voice is a third mode, with the player's Reader tab. */
 enum class PlayerMode { MUSIC, AUDIOBOOK }
 
 /**
@@ -74,17 +80,21 @@ data class SavedBook(
     val finished: Boolean,
 )
 
+/** The voice's source's chapters (Plan U2, Reader's Chapters sheet) and the one the voice is in (null before the first). */
+data class VoiceChapters(val chapters: List<ReadChapter>, val current: Int?)
+
 /** The last thing the voice read, at the sentence it stopped on. */
 data class SavedVoice(val sourceKey: String, val title: String, val section: String?, val address: ReadAddress, val speed: Float, val voiceId: VoiceId?)
 
 /**
  * Each mode's saved state, read from the db without loading anything into the player; it follows every save.
  * [music]/[book]/[voice] are null for a mode never used. [lastMode] is the tab last loaded (what a restore brings
- * back), null when the voice was last ([lastWasVoice]). [loaded] is false until the db has been read once.
+ * back), null when the voice was last ([lastWasVoice]). [lastMedia] is the media mode last loaded, kept while the
+ * voice reads (it names the player's media tab, Plan U2). [loaded] is false until the db has been read once.
  */
 data class SavedModes(
     val music: SavedMusic?, val book: SavedBook?, val lastMode: PlayerMode?, val loaded: Boolean = true,
-    val voice: SavedVoice? = null, val lastWasVoice: Boolean = false,
+    val voice: SavedVoice? = null, val lastWasVoice: Boolean = false, val lastMedia: PlayerMode? = lastMode,
 ) {
     companion object {
         val UNKNOWN = SavedModes(null, null, null, loaded = false)
@@ -131,8 +141,18 @@ interface PlayerHub {
     /** Stops the voice and empties the player, saving its place. No-op when the voice isn't the active mode. */
     fun stopVoice()
 
+    /**
+     * Stops whatever plays (an album's Stop, Plan U2 Decision 8): its place is saved, as a switch saves it, and the
+     * player empties. Listen's card and the media tab still offer the saved queue. No-op with nothing loaded.
+     */
+    fun stop()
+
     /** Voice only: by paragraph and by sentence. [jumpTo] moves the voice to an address of its source. */
     fun nextParagraph(); fun previousParagraph(); fun nextSentence(); fun previousSentence(); fun jumpTo(address: ReadAddress)
+
+    /** The voice's chapters, read from its source; null while the voice isn't the mode. [jumpToChapter] goes to one's first sentence. */
+    suspend fun voiceChapters(): VoiceChapters?
+    fun jumpToChapter(index: Int)
 
     /**
      * Music under the voice (Plan V2). Starting the voice while music plays keeps the music at [setMixLevel]'s level
@@ -198,6 +218,8 @@ object PlayerSettingsKeys {
 
     // Kept by the engine, not settings: which player to restore and when it was paused (survive process death).
     internal const val LAST_MODE = "last_mode"
+    /** The media mode last loaded ([LAST_MODE] without the voice): music or audiobook. */
+    internal const val LAST_MEDIA = "last_media"
     internal const val LAST_AUDIOBOOK = "last_audiobook"
     internal const val LAST_VOICE = "last_voice"
     internal const val PAUSED_AT = "paused_at"

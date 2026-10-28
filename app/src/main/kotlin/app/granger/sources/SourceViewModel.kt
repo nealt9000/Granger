@@ -408,7 +408,7 @@ class SourceViewModel(
             val texts = when (item) {
                 // The ZIM name too, so "stackoverflow" finds Stack Overflow.
                 is PackEntry -> listOf(item.title, item.description, item.zimName)
-                is BookEntry -> listOf(item.title, item.description)
+                is BookEntry -> listOf(item.title, item.author, item.description)
                 else -> listOf(item.title)
             }
             return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })

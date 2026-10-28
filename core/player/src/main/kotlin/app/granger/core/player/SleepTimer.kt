@@ -19,22 +19,28 @@ class SleepTimer(private val now: () -> Long) {
     private var setting: SleepSetting? = null
     private var endsAt = 0L
     private var chapterEndsIn: () -> Long? = { null }
+    private var estimated = false
 
     /**
      * Starts (or restarts) the timer. [chapterEndsInMs] is used only for [SleepSetting.EndOfChapter]: it returns the
      * wall-clock milliseconds left until the current chapter ends, or null when unknown. It is read every time the
      * timer is queried, so a seek, a chapter change or a speed change moves the end. The caller accounts for speed
      * (chapter time left ÷ speed).
+     *
+     * [estimated]: the chapter's end is only a guess (the voice, Plan U2, knows sentences left, not time), so it is
+     * shown but never acted on: the timer neither fades nor expires, and the caller stops at the real end itself.
      */
-    fun start(setting: SleepSetting, chapterEndsInMs: () -> Long?) {
+    fun start(setting: SleepSetting, estimated: Boolean = false, chapterEndsInMs: () -> Long?) {
         this.setting = setting
         chapterEndsIn = chapterEndsInMs
+        this.estimated = estimated && setting is SleepSetting.EndOfChapter
         if (setting is SleepSetting.After) endsAt = now() + setting.ms
     }
 
     fun cancel() {
         setting = null
         chapterEndsIn = { null }
+        estimated = false
     }
 
     /**
@@ -54,12 +60,13 @@ class SleepTimer(private val now: () -> Long) {
      */
     fun volume(): Float? {
         if (setting == null) return null
+        if (estimated) return 1f
         val left = remainingMs ?: return 1f
         return if (left >= FADE_MS) 1f else left.toFloat() / FADE_MS
     }
 
-    /** True once a running timer has 0 ms left. Stays true until [cancel] or a new [start]. */
-    fun expired(): Boolean = remainingMs?.let { it <= 0L } ?: false
+    /** True once a running timer has 0 ms left (never for an estimated end). Stays true until [cancel] or a new [start]. */
+    fun expired(): Boolean = !estimated && remainingMs?.let { it <= 0L } ?: false
 
     private companion object {
         const val FADE_MS = 10_000L

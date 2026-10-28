@@ -66,6 +66,15 @@ class ReadAloudEngine(
     private val _stats = MutableSharedFlow<SentenceStat>(extraBufferCapacity = 64)
     /** Every sentence synthesized (not served from the cache), for the log and the screen-off run. */
     val stats: SharedFlow<SentenceStat> = _stats.asSharedFlow()
+    private val _held = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    /** The voice stopped itself before a sentence [holdBefore] named, once everything before it was heard. */
+    val held: SharedFlow<Unit> = _held.asSharedFlow()
+
+    /**
+     * Asked before each sentence is heard (Plan U2, End of chapter): true stops the voice there, after the sentences
+     * before it have played out, with [progress] on the sentence not read (so play goes on from it).
+     */
+    var holdBefore: (suspend (Utterance) -> Boolean)? = null
 
     private val lock = Mutex()
     private var source: ReadSource? = null
@@ -225,15 +234,27 @@ class ReadAloudEngine(
         jobs = scope.launch {
             val producer = launch { produce(s, from, spoken, queuedMs) }
             try {
+                var writtenMs = 0L                           // since the output was flushed (every launch follows a flush)
                 for ((i, pcm) in spoken) {
-                    index = i
                     val u = buffer[i]
+                    if (holdBefore?.invoke(u) == true) {
+                        drain(writtenMs)
+                        index = i
+                        _progress.value = progressAt(i)
+                        output.pause()
+                        output.flush()
+                        _playing.value = false
+                        _held.tryEmit(Unit)
+                        return@launch
+                    }
+                    index = i
                     _progress.value = progressAt(i)
                     if (pcm != null) {
                         output.open(pcm.sampleRate)
                         output.write(pcm)
                         queuedMs.value -= pcm.durationMs
-                        if (u.pauseAfterMs > 0) output.write(Pcm.silence(u.pauseAfterMs, pcm.sampleRate))
+                        writtenMs += pcm.durationMs
+                        if (u.pauseAfterMs > 0) { output.write(Pcm.silence(u.pauseAfterMs, pcm.sampleRate)); writtenMs += u.pauseAfterMs }
                     }
                 }
                 // The source is finished.
@@ -244,6 +265,13 @@ class ReadAloudEngine(
                 producer.cancel()
             }
         }
+    }
+
+    /** Waits, bounded, until the output has played the [writtenMs] written to it, so a hold doesn't cut the last sentence short. */
+    private suspend fun drain(writtenMs: Long) {
+        val limit = (writtenMs - output.playedMs).coerceAtLeast(0L) + DRAIN_SLACK_MS
+        var waited = 0L
+        while (output.playedMs < writtenMs && waited < limit) { delay(DRAIN_POLL_MS); waited += DRAIN_POLL_MS }
     }
 
     /** Synthesizes from [from] onward into [spoken], fetching more of the source as it goes, until the source ends. */
@@ -280,5 +308,10 @@ class ReadAloudEngine(
             _errors.tryEmit(e as? SpeechException ?: SpeechException("Synthesis failed: ${e.message}", e))
             null
         }
+    }
+
+    private companion object {
+        const val DRAIN_POLL_MS = 50L
+        const val DRAIN_SLACK_MS = 1_000L
     }
 }

@@ -50,8 +50,8 @@ class LibriVoxRouteTest {
         compose.runOnIdle {
             val destination = nav.currentDestination!!
             assertThat(destination.hasRoute<LibriVoxRoute>()).isTrue()
-            // It's a Library source, like Archive.org.
-            assertThat(railToolOf(destination)).isEqualTo(RailTool.LIBRARY)
+            // It's an audio source, like Archive.org's spoken word: Listen's (Plan U2 Decision 4).
+            assertThat(railToolOf(destination)).isEqualTo(RailTool.LISTEN)
             // Back returns to the note.
             assertThat(nav.previousBackStackEntry?.destination?.hasRoute<ArchiveRoute>()).isTrue()
         }

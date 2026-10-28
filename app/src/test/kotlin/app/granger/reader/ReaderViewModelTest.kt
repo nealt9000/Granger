@@ -7,6 +7,7 @@ import app.granger.FakeZimArchive
 import app.granger.MainDispatcherRule
 import app.granger.core.library.Bookmark
 import app.granger.core.library.ReadingTab
+import app.granger.core.speech.ReadAddress
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimUrls
 import com.google.common.truth.Truth.assertThat
@@ -45,10 +46,12 @@ class ReaderViewModelTest {
         <html><body><h1 id="t">Photosynthesis</h1><p>Plants make sugar. They use light.</p><h2 id="Overview">Overview</h2><p>Second paragraph here.</p></body></html>
     """.trimIndent()
 
-    private fun TestScope.readingReader(hub: app.granger.player.FakePlayerHub): ReaderViewModel {
+    private fun TestScope.readingReader(
+        hub: app.granger.player.FakePlayerHub, savedPlace: suspend (String) -> ReadAddress? = { null },
+    ): ReaderViewModel {
         library.archives["p"] = FakeZimArchive("p", setOf("index", "Photosynthesis", "Other"), contents = mapOf("Photosynthesis" to article))
         sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
-        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, player = hub)
+        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, player = hub, savedPlace = savedPlace)
         testScheduler.advanceUntilIdle()
         launch { vm.onPageShown(url("Photosynthesis"), "Photosynthesis") }
         testScheduler.advanceUntilIdle()
@@ -94,6 +97,24 @@ class ReaderViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#g1:0")
         hub.calls.clear()
+        vm.readAloud(null)
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#t:0")
+    }
+
+    @Test fun listenGoesOnFromTheArticlesSavedPlaceUnlessThePageIsPastIt() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        var saved: ReadAddress? = ReadAddress.Article("p", "Photosynthesis", "g1", 1)        // "They use light."
+        val vm = readingReader(hub) { key -> saved.takeIf { key == "pack:p/Photosynthesis" } }
+        vm.readAloud(BlockRef("g1", "Plants make sugar."))                                   // at the top: before the saved place
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#g1:1")
+        hub.calls.clear()
+        vm.readAloud(BlockRef("g3", "Second paragraph here."))                               // scrolled past it
+        testScheduler.advanceUntilIdle()
+        assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#g3:0")
+        hub.calls.clear()
+        saved = ReadAddress.Article("p", "Photosynthesis", "gone", 0)                         // a place the page no longer has
         vm.readAloud(null)
         testScheduler.advanceUntilIdle()
         assertThat(hub.calls).containsExactly("readAloud:pack:p/Photosynthesis@pack:p/Photosynthesis#t:0")

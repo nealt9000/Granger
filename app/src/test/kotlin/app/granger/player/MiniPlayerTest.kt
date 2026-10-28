@@ -2,6 +2,8 @@ package app.granger.player
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -17,7 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.granger.LibraryRoute
-import app.granger.PlayerRoute
+import app.granger.ListenPlayerRoute
 import app.granger.SearchRoute
 import app.granger.core.player.PlayerUi
 import app.granger.togglePlayer
@@ -107,10 +109,10 @@ class MiniPlayerTest {
             NavHost(nav, startDestination = LibraryRoute()) {
                 composable<LibraryRoute> {}
                 composable<SearchRoute> {}
-                composable<PlayerRoute> {}
+                composable<ListenPlayerRoute> {}
             }
         }
-        fun onPlayer() = nav.currentDestination?.hasRoute<PlayerRoute>() == true
+        fun onPlayer() = nav.currentDestination?.hasRoute<ListenPlayerRoute>() == true
 
         compose.runOnIdle { nav.togglePlayer() }
         compose.runOnIdle { assertThat(onPlayer()).isTrue() }
@@ -131,6 +133,40 @@ class MiniPlayerTest {
             assertThat(onPlayer()).isTrue()
             assertThat(nav.previousBackStackEntry?.destination?.hasRoute<LibraryRoute>()).isTrue()
         }
+    }
+
+    @Test fun theTapOpensThePlayerOnTheLiveTab() {
+        val hub = FakePlayerHub(voiceUi())
+        val vm = PlayerViewModel(hub)
+        lateinit var nav: NavHostController
+        compose.setContent {
+            nav = rememberNavController()
+            androidx.compose.foundation.layout.Column {
+                MiniPlayer(voiceUi(), onPlayPause = {}, onSecondary = {}, onOpen = { nav.togglePlayer(vm) })
+                NavHost(nav, startDestination = LibraryRoute()) {
+                    composable<LibraryRoute> {}
+                    composable<ListenPlayerRoute> { ListenPlayerScreen(vm, onClose = { nav.popBackStack() }) }
+                }
+            }
+        }
+        fun tap() = compose.onNodeWithTag(MiniPlayerTags.TITLE, useUnmergedTree = true).performClick()
+
+        // The voice: Reader, never a sheet.
+        tap()
+        compose.onNodeWithTag(ListenTabTags.READER).assertIsSelected()
+        compose.onNodeWithTag(ReaderTags.SENTENCE).assertExists()
+        // Another tab picked, then closed and opened again: back on what's live.
+        compose.onNodeWithTag(ListenTabTags.MEDIA).performClick()
+        tap()
+        compose.runOnIdle { assertThat(nav.currentDestination?.hasRoute<LibraryRoute>()).isTrue() }
+        tap()
+        compose.onNodeWithTag(ListenTabTags.READER).assertIsSelected()
+        // Music live: the media tab.
+        tap()
+        hub.ui.value = musicUi()
+        tap()
+        compose.onNodeWithTag(ListenTabTags.MEDIA).assertIsSelected()
+        compose.onNodeWithText("Song A").assertExists()
     }
 
     @Test fun miniPlayerPlacementFollowsTheReaderChrome() {

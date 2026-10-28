@@ -48,7 +48,7 @@ class PlayerContentColorTest {
 
     @Test fun musicPlayerIconsAndTextUseTheThemeContentColour() {
         val vm = PlayerViewModel(FakePlayerHub(musicUi()))
-        compose.setContent { GrangerTheme { PlayerScreen(vm, onClose = {}) } }
+        compose.setContent { GrangerTheme { ListenPlayerScreen(vm, onClose = {}) } }
 
         for (d in listOf("Previous track", "Next track", "Shuffle off", "Repeat off", "Close player")) {
             assertBright(compose.onNodeWithContentDescription(d), d)
@@ -60,7 +60,7 @@ class PlayerContentColorTest {
         val book = audiobook("b", title = "The Book")
         val chapters = listOf(chapter(book, 0, 60_000L), chapter(book, 1, 60_000L))
         val vm = PlayerViewModel(FakePlayerHub(bookUi(book, chapters[0], chapterCount = 2)), chapters = { MutableStateFlow(chapters) })
-        compose.setContent { GrangerTheme { PlayerScreen(vm, onClose = {}) } }
+        compose.setContent { GrangerTheme { ListenPlayerScreen(vm, onClose = {}) } }
 
         for (d in listOf("Back 30 seconds", "Forward 30 seconds", "Next chapter", "Chapters", "Add bookmark", "Bookmarks", "Sleep timer")) {
             assertBright(compose.onNodeWithContentDescription(d), d)

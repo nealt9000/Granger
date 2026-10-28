@@ -62,6 +62,8 @@ fun SettingsScreen(
     voiceSummary: String = "",
     /** Settings → Music & audiobooks. */
     onMediaSettings: (() -> Unit)? = null,
+    /** The phone holds an audiobook: the row reads "Music & audiobooks", else "Music" (Plan U2 Decision 7). */
+    audiobooks: Boolean = false,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -126,7 +128,7 @@ fun SettingsScreen(
             if (onVoice != null || onMediaSettings != null) item(key = "listening") {
                 SettingsHeader("Reading & listening")
                 if (onVoice != null) LinkRow("Voice", voiceSummary.ifBlank { "Read aloud" }, onVoice)
-                if (onMediaSettings != null) LinkRow("Music & audiobooks", "Folders on this phone, and the player", onMediaSettings)
+                if (onMediaSettings != null) LinkRow(mediaSettingsTitle(audiobooks), "Folders on this phone, and the player", onMediaSettings)
                 HorizontalDivider()
             }
             item(key = "ask") {
@@ -155,17 +157,17 @@ fun SettingsScreen(
 @Composable
 fun MediaSettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onPermissionChecked: () -> Unit = {}) {
     val media = viewModel.media
+    val controls = media?.let { rememberMediaControls(it, onPermissionChecked) }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Music & audiobooks") },
+                title = { Text(mediaSettingsTitle(controls?.ui?.audiobooks == true)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
             )
         },
     ) { padding ->
-        val controls = media?.let { rememberMediaControls(it, onPermissionChecked) }
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             if (media != null && controls != null) {
                 mediaSettingsSection(
@@ -185,6 +187,9 @@ fun MediaSettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onPerm
         }
     }
 }
+
+/** Settings' Music row and screen: audiobooks are named only once there's one on the phone (Plan U2 Decision 7). */
+internal fun mediaSettingsTitle(audiobooks: Boolean): String = if (audiobooks) "Music & audiobooks" else "Music"
 
 /** A section's heading, as Appearance and Music & audiobooks have always drawn theirs. */
 @Composable

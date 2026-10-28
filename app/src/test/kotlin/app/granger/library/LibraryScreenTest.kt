@@ -31,7 +31,7 @@ class LibraryScreenTest {
     private fun show(ui: LibraryUi, badge: Int = 0) = compose.setContent {
         LibraryContent(
             ui, "/packs", SnackbarHostState(),
-            onOpenCollection = { calls += "collection:$it" }, onOpenMusic = {}, onOpenAudiobooks = {},
+            onOpenCollection = { calls += "collection:$it" },
             onSearch = { calls += "search" }, onReadiness = { calls += "readiness" }, downloadsBadge = badge,
             onDownloads = { calls += "downloads" }, onGetMore = { calls += "more" }, onImport = {},
         )

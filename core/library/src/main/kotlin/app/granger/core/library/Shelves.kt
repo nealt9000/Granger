@@ -33,6 +33,24 @@ data class CollectionRow(
     val withChildren: List<CollectionRow> get() = listOf(this) + children
 }
 
+/**
+ * Which audio the shelves hold (Plan U2 Decision 7): an album or an audiobook that can play (status OK), in any media
+ * type or collection. Without an audiobook the app says nothing about audiobooks; LibriVox is the way to add one.
+ */
+data class AudioShelves(val music: Boolean, val audiobooks: Boolean) {
+    companion object {
+        val NONE = AudioShelves(music = false, audiobooks = false)
+
+        fun of(shelves: List<Shelf>): AudioShelves {
+            val rows = shelves.flatMap { it.allCollections }
+            return AudioShelves(
+                music = rows.any { row -> row.albums.any { it.status == PackStatus.OK } },
+                audiobooks = rows.any { row -> row.audiobooks.any { it.status == PackStatus.OK } },
+            )
+        }
+    }
+}
+
 /** The library's media type, collection and placement structure. */
 interface Shelves {
     /**
@@ -40,6 +58,9 @@ interface Shelves {
      * app-made ones hidden. A folder is one row carrying its children, and is hidden when they're all empty.
      */
     val shelves: Flow<List<Shelf>>
+
+    /** [AudioShelves] of [shelves]: what drives Listen's shelves, the player's media tab and Settings' Music row. */
+    val audioShelves: Flow<AudioShelves> get() = shelves.map(AudioShelves::of).distinctUntilChanged()
 
     /** One collection with its packs and books (a folder with its non-empty children), or null if it doesn't exist. */
     fun collection(id: String): Flow<CollectionRow?>

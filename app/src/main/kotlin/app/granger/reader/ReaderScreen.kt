@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -81,6 +82,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -96,6 +98,7 @@ import app.granger.Features
 import app.granger.theme.GrangerTheme
 import app.granger.R
 import app.granger.core.zim.ZimHit
+import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
@@ -355,9 +358,9 @@ fun ReaderScreen(
 
 /**
  * The reader's top bar, in order: ← (Back within the tab), Home when the pack has a main page, the pack's search box,
- * the bookmark star and ⋯ with Random article and Find in page. It shows no page title: [pageTitle] is what TalkBack
- * reads for the bar. With an error ([showMenu] false) only ← is left. The star and Find wait for a page
- * ([showPageActions]).
+ * Listen (with Stop beside it while this page is read), the bookmark star and ⋯ with Random article and Find in page.
+ * It shows no page title: [pageTitle] is what TalkBack reads for the bar. With an error ([showMenu] false) only ← is
+ * left. Listen, the star and Find wait for a page ([showPageActions]).
  */
 @Composable
 internal fun ReaderTopBar(
@@ -373,9 +376,9 @@ internal fun ReaderTopBar(
     onRandom: () -> Unit,
     onFind: () -> Unit,
     onToggleBookmark: () -> Unit,
-    /** The ⋯ menu's voice entries (Plan V2): Read aloud, or Pause / Resume reading plus Stop reading. */
+    /** Listen, or Pause / Play plus Stop while this page is read (Plan U2 Decision 6). */
     voice: VoiceButton = VoiceButton.IDLE,
-    /** Starts the voice on this page (Plan V1); null leaves the entries out. */
+    /** Starts the voice on this page (Plan V1); null leaves Listen out. */
     onReadAloud: (() -> Unit)? = null,
     onPauseResume: () -> Unit = {},
     onStop: () -> Unit = {},
@@ -397,11 +400,15 @@ internal fun ReaderTopBar(
                 IconButton(onClick = onHome) { Icon(painterResource(R.drawable.ic_menu_book), contentDescription = mainPageLabel(packTitle)) }
             }
             if (showMenu) {
-                PackSearchBox(searchLabel(packTitle), onSearchPack, Modifier.weight(1f).padding(horizontal = 4.dp))
+                PackSearchBox(searchLabels(packTitle), onSearchPack, Modifier.weight(1f).padding(horizontal = 4.dp))
             } else {
                 Spacer(Modifier.weight(1f))
             }
-            if (showPageActions) {
+            if (showPageActions && onReadAloud != null) ListenButtons(voice, onReadAloud, onPauseResume, onStop)
+            // While this page is read, Stop takes the star's place and the star goes into ⋯, so the bar is never
+            // wider than it is idle and the search box keeps its room at 360 dp.
+            val listening = showPageActions && onReadAloud != null && voice != VoiceButton.IDLE
+            if (showPageActions && !listening) {
                 IconButton(onClick = onToggleBookmark) {
                     if (bookmarked) {
                         Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = MaterialTheme.colorScheme.primary)
@@ -417,16 +424,11 @@ internal fun ReaderTopBar(
                     if (showPageActions) {
                         DropdownMenuItem(text = { Text("Find in page") }, onClick = { menuOpen = false; onFind() })
                     }
-                    if (showPageActions && onReadAloud != null) {
-                        if (voice == VoiceButton.IDLE) {
-                            DropdownMenuItem(text = { Text("Read aloud") }, onClick = { menuOpen = false; onReadAloud() })
-                        } else {
-                            DropdownMenuItem(
-                                text = { Text(if (voice == VoiceButton.READING) "Pause reading" else "Resume reading") },
-                                onClick = { menuOpen = false; onPauseResume() },
-                            )
-                            DropdownMenuItem(text = { Text("Stop reading") }, onClick = { menuOpen = false; onStop() })
-                        }
+                    if (listening) {
+                        DropdownMenuItem(
+                            text = { Text(if (bookmarked) "Remove bookmark" else "Add bookmark") },
+                            onClick = { menuOpen = false; onToggleBookmark() },
+                        )
                     }
                 }
             }
@@ -434,9 +436,12 @@ internal fun ReaderTopBar(
     }
 }
 
-/** "Search <pack>" in a rounded box; read-only, a tap opens the pack search (see [PackSearchPanel]). */
+/**
+ * "Search <pack>" in a rounded box, or the first of [labels] that fits; read-only, a tap opens the pack search (see
+ * [PackSearchPanel]).
+ */
 @Composable
-private fun PackSearchBox(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun PackSearchBox(labels: List<String>, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier
             .height(40.dp)
@@ -448,13 +453,21 @@ private fun PackSearchBox(label: String, onClick: () -> Unit, modifier: Modifier
     ) {
         Icon(Icons.Filled.Search, contentDescription = null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(8.dp))
-        Text(
-            label,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // The longest of "Search Wikipedia", "Wikipedia" and "Search" that fits, rather than "Search Wi…": with Listen
+        // on the bar a phone has room for about the pack's name, and 360 dp for "Search" (Plan U2 Task 5).
+        BoxWithConstraints(Modifier.weight(1f)) {
+            val style = MaterialTheme.typography.bodyLarge
+            val measurer = rememberTextMeasurer()
+            val shown = labels.firstOrNull { measurer.measure(it, style, maxLines = 1).size.width <= constraints.maxWidth } ?: labels.last()
+            Text(
+                shown,
+                Modifier.semantics { if (shown != labels.first()) contentDescription = labels.first() },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = style,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -463,6 +476,9 @@ private fun PackSearchBox(label: String, onClick: () -> Unit, modifier: Modifier
 internal fun mainPageLabel(packTitle: String?) = if (packTitle != null) "$packTitle: main page" else "Main page"
 
 private fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"
+
+/** The search box's labels, longest first: "Search Wikipedia", "Wikipedia", "Search". */
+internal fun searchLabels(packTitle: String?) = listOfNotNull(searchLabel(packTitle), packTitle, "Search")
 
 /** The search field in place of the top bar, with the results listed under it. */
 @OptIn(ExperimentalMaterial3Api::class)

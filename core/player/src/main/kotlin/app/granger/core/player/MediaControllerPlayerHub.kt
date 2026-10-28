@@ -128,11 +128,15 @@ class MediaControllerPlayerHub(
     override fun playAudiobook(id: String, at: AudioBookmark?) = send { it.playAudiobook(id, at) }
     override fun readAloud(source: ReadSource, from: ReadAddress?, voice: VoiceId?) = send { it.readAloud(source, from, voice) }
     override fun stopVoice() { PlaybackService.engine.value?.stopVoice() }
+    // No service running, nothing plays: don't start one just to stop it.
+    override fun stop() { PlaybackService.engine.value?.stop() }
     override fun nextParagraph() = send { it.nextParagraph() }
     override fun previousParagraph() = send { it.previousParagraph() }
     override fun nextSentence() = send { it.nextSentence() }
     override fun previousSentence() = send { it.previousSentence() }
     override fun jumpTo(address: ReadAddress) = send { it.jumpTo(address) }
+    override suspend fun voiceChapters(): VoiceChapters? = PlaybackService.engine.value?.voiceChapters()
+    override fun jumpToChapter(index: Int) = send { it.jumpToChapter(index) }
     override fun setMixLevel(level: Float) = send { it.setMixLevel(level) }
     override fun playPauseMusic() = send { it.playPauseMusic() }
     override fun nextMusic() = send { it.nextMusic() }

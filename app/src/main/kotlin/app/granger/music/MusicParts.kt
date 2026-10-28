@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,6 +48,7 @@ import app.granger.core.library.Albums
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Track
 import app.granger.library.MovePackDialog
+import app.granger.player.PlayingBars
 import app.granger.player.formatTime
 import app.granger.shell.rememberRailCover
 import app.granger.theme.readout
@@ -117,7 +120,11 @@ fun MusicDialogHost(vm: MusicViewModel, dialogs: MusicDialogs) {
     }
 }
 
-/** A song row. A MISSING track is dimmed and can't be played, but still opens its menu. */
+/**
+ * A song row. A MISSING track is dimmed and can't be played, but still opens its menu. [playing] marks the player's
+ * current song (Plan U2 Decision 8): null for any other, true while it's heard, false while paused. The mark is the
+ * [PlayingBars] in place of [leading], and the title in the accent colour.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongRow(
@@ -128,6 +135,7 @@ fun SongRow(
     onPlay: () -> Unit,
     leading: String? = null,
     showAlbum: Boolean = true,
+    playing: Boolean? = null,
     extraMenu: @Composable (close: () -> Unit) -> Unit = {},
 ) {
     val playable = track.status == PackStatus.OK
@@ -138,10 +146,22 @@ fun SongRow(
                 .combinedClickable(onClick = { if (playable) onPlay() }, onLongClick = { menu = true })
                 .alpha(if (playable) 1f else 0.4f),
             // A fixed, right-aligned column, so titles line up whether the number is "9", "10" or blank.
-            leadingContent = leading?.let {
-                { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.width(28.dp)) }
+            leadingContent = when {
+                playing != null && leading != null -> {
+                    { Box(Modifier.width(28.dp), contentAlignment = Alignment.CenterEnd) { PlayingBars(heard = playing) } }
+                }
+                leading != null -> {
+                    { Text(leading, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.width(28.dp)) }
+                }
+                playing != null -> { { PlayingBars(heard = playing) } }
+                else -> null
             },
-            headlineContent = { Text(trackTitle(track), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            headlineContent = {
+                Text(
+                    trackTitle(track), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    color = if (playing != null) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                )
+            },
             supportingContent = {
                 val parts = listOfNotNull(trackArtist(track), if (showAlbum) trackAlbum(track) else null)
                 Text(
@@ -220,11 +240,22 @@ fun AlbumMenu(album: AlbumSummary, open: Boolean, onClose: () -> Unit, vm: Music
     }
 }
 
-/** "Play" and "Shuffle" over a list of tracks. */
+/**
+ * "Play" and "Shuffle" over a list of tracks. With [onStop] (the album page, while its queue plays), Play is "Stop"
+ * instead, and stops the player; once stopped it's Play again (Plan U2 Decision 8).
+ */
 @Composable
-fun PlayShuffleRow(enabled: Boolean, onPlay: () -> Unit, onShuffle: () -> Unit, modifier: Modifier = Modifier) {
+fun PlayShuffleRow(enabled: Boolean, onPlay: () -> Unit, onShuffle: () -> Unit, modifier: Modifier = Modifier, onStop: (() -> Unit)? = null) {
     Row(modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(onClick = onPlay, enabled = enabled) { Text("Play") }
+        if (onStop != null) {
+            Button(onClick = onStop) {
+                Icon(painterResource(R.drawable.ic_stop), contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Stop")
+            }
+        } else {
+            Button(onClick = onPlay, enabled = enabled) { Text("Play") }
+        }
         OutlinedButton(onClick = onShuffle, enabled = enabled) { Text("Shuffle") }
     }
 }

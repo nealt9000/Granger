@@ -1,5 +1,13 @@
 package app.granger.player
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,6 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -121,8 +132,44 @@ internal fun SeekBar(positionMs: Long, durationMs: Long, onSeek: (Long) -> Unit,
     }
 }
 
+/** Each bar's half-cycle and its start offset (ms): out of step, so the three never move as one. */
+private val BAR_TIMINGS = listOf(420 to 0, 560 to 180, 480 to 90)
+
+/** The bars' heights while paused: a still equalizer. */
+private val STILL_BARS = listOf(0.45f, 0.85f, 0.6f)
+
+/**
+ * The playing mark (Plan U2 Decision 8): an equalizer, its three bars rising and falling while [heard], still while
+ * paused. The album's track list and the queue sheet put it on the current song.
+ */
+@Composable
+fun PlayingBars(heard: Boolean, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.primary) {
+    val heights = if (heard) {
+        val transition = rememberInfiniteTransition(label = "playing")
+        BAR_TIMINGS.map { (ms, offset) ->
+            transition.animateFloat(
+                initialValue = 0.25f, targetValue = 1f,
+                animationSpec = infiniteRepeatable(tween(ms, easing = LinearEasing), RepeatMode.Reverse, StartOffset(offset)),
+                label = "bar",
+            )
+        }.map { it.value }
+    } else {
+        STILL_BARS
+    }
+    Canvas(
+        modifier.size(16.dp).testTag(PlayerTags.PLAYING).semantics { contentDescription = if (heard) "Playing" else "Paused" },
+    ) {
+        val bar = size.width / 5
+        heights.forEachIndexed { i, h ->
+            val height = size.height * h
+            drawRect(color, topLeft = Offset(bar * (i * 2), size.height - height), size = Size(bar, height))
+        }
+    }
+}
+
 object PlayerTags {
     const val SEEK = "player_seek"
     const val BOOK_PROGRESS = "player_book_progress"
     const val QUEUE_ROW = "queue_row"
+    const val PLAYING = "player_playing_bars"
 }

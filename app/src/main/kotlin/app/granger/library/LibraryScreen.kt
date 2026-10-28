@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -56,7 +57,7 @@ import app.granger.core.library.CollectionRow
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 
-/** What the phone holds, by kind (Plan U3b Decision 4); getting more is in Get more, what's coming in Downloads. */
+/** What the phone holds to read, by kind (Plan U3b Decision 4; music and audiobooks are Listen's, U2); getting more is in Get more, what's coming in Downloads. */
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel,
@@ -64,10 +65,6 @@ fun LibraryScreen(
     /** Shown once as a snackbar, e.g. why the app didn't resume reading. */
     notice: String?,
     onOpenCollection: (collectionId: String) -> Unit,
-    /** A Music collection, or "All music" (null). */
-    onOpenMusic: (collectionId: String?) -> Unit,
-    /** An Audiobooks collection's shelf, or "All audiobooks" (null). */
-    onOpenAudiobooks: (collectionId: String?) -> Unit,
     onSearch: () -> Unit,
     onReadiness: () -> Unit,
     /** What's coming or stopped in Downloads; the icon shows a badge while it isn't 0. */
@@ -99,7 +96,7 @@ fun LibraryScreen(
         viewModel.import(uris)
     }
     LibraryContent(
-        ui, packsFolder, snackbar, onOpenCollection, onOpenMusic, onOpenAudiobooks, onSearch, onReadiness,
+        ui, packsFolder, snackbar, onOpenCollection, onSearch, onReadiness,
         downloadsBadge, onDownloads, onGetMore, onImport = { picker.launch(IMPORT_TYPES) },
     )
 }
@@ -115,8 +112,6 @@ fun LibraryContent(
     packsFolder: String,
     snackbar: SnackbarHostState,
     onOpenCollection: (collectionId: String) -> Unit,
-    onOpenMusic: (collectionId: String?) -> Unit,
-    onOpenAudiobooks: (collectionId: String?) -> Unit,
     onSearch: () -> Unit,
     onReadiness: () -> Unit,
     downloadsBadge: Int,
@@ -180,58 +175,76 @@ fun LibraryContent(
                 }
             }
             for (kind in loaded.kinds) {
-                val id = kind.id
-                val open = id !in collapsed
-                item(key = "kind:$id") {
-                    ListItem(
-                        modifier = Modifier.clickable { collapsed = if (open) collapsed + id else collapsed - id },
-                        headlineContent = { Text(kind.title, style = MaterialTheme.typography.titleMedium) },
-                        trailingContent = {
-                            Icon(
-                                if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                contentDescription = if (open) "Collapse" else "Expand",
-                            )
-                        },
-                    )
-                }
-                // Music opens its own tabs: "All music" first, then each collection scoped to its albums. Audiobooks
-                // does the same with its shelf: "All audiobooks", then each collection scoped to its audiobooks.
-                val music = kind.mediaTypeId == MUSIC_TYPE_ID
-                val audiobooks = kind.mediaTypeId == AUDIOBOOKS_TYPE_ID
-                if (open && (music || audiobooks)) {
-                    item(key = if (music) "all-music" else "all-audiobooks") {
-                        ListItem(
-                            modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
-                            headlineContent = { Text(if (music) ALL_MUSIC else ALL_AUDIOBOOKS) },
-                            supportingContent = {
-                                Text(countText(0, 0, kind.allCollections.sumOf { it.albums.size }, kind.allCollections.sumOf { it.audiobooks.size }))
-                            },
-                        )
-                    }
-                }
-                // A folder (Kiwix) is one row; it opens the folder screen, which lists its children.
-                if (open) for (row in kind.collections) {
-                    item(key = "collection:${row.collection.id}") {
-                        ListItem(
-                            modifier = Modifier
-                                .clickable {
-                                    when {
-                                        row.isFolder -> onOpenCollection(row.collection.id)
-                                        music -> onOpenMusic(row.collection.id)
-                                        audiobooks -> onOpenAudiobooks(row.collection.id)
-                                        else -> onOpenCollection(row.collection.id)
-                                    }
-                                }
-                                .padding(start = 16.dp),
-                            headlineContent = { Text(row.collection.name) },
-                            supportingContent = { Text(rowCountText(row)) },
-                        )
-                    }
-                }
-                item(key = "divider:$id") { HorizontalDivider() }
+                kindRows(kind, open = kind.id !in collapsed, onToggle = { open ->
+                    collapsed = if (open) collapsed + kind.id else collapsed - kind.id
+                }, onOpenCollection = onOpenCollection)
             }
         }
     }
+}
+
+/**
+ * One kind's row (a tap collapses or expands it; [open] is whether it's expanded), then, while open, its collections
+ * and a divider. Music opens its own tabs: "All music" first, then each collection scoped to its albums. Audiobooks
+ * does the same with its shelf: "All audiobooks", then each collection scoped to its audiobooks. The Library and
+ * Listen share it (Plan U2 Decision 4).
+ */
+internal fun LazyListScope.kindRows(
+    kind: KindRow,
+    open: Boolean,
+    onToggle: (open: Boolean) -> Unit,
+    onOpenCollection: (collectionId: String) -> Unit,
+    /** A Music collection, or "All music" (null). */
+    onOpenMusic: (collectionId: String?) -> Unit = {},
+    /** An Audiobooks collection's shelf, or "All audiobooks" (null). */
+    onOpenAudiobooks: (collectionId: String?) -> Unit = {},
+) {
+    val id = kind.id
+    item(key = "kind:$id") {
+        ListItem(
+            modifier = Modifier.clickable { onToggle(open) },
+            headlineContent = { Text(kind.title, style = MaterialTheme.typography.titleMedium) },
+            trailingContent = {
+                Icon(
+                    if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = if (open) "Collapse" else "Expand",
+                )
+            },
+        )
+    }
+    val music = kind.mediaTypeId == MUSIC_TYPE_ID
+    val audiobooks = kind.mediaTypeId == AUDIOBOOKS_TYPE_ID
+    if (open && (music || audiobooks)) {
+        item(key = if (music) "all-music" else "all-audiobooks") {
+            ListItem(
+                modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
+                headlineContent = { Text(if (music) ALL_MUSIC else ALL_AUDIOBOOKS) },
+                supportingContent = {
+                    Text(countText(0, 0, kind.allCollections.sumOf { it.albums.size }, kind.allCollections.sumOf { it.audiobooks.size }))
+                },
+            )
+        }
+    }
+    // A folder (Kiwix) is one row; it opens the folder screen, which lists its children.
+    if (open) for (row in kind.collections) {
+        item(key = "collection:${row.collection.id}") {
+            ListItem(
+                modifier = Modifier
+                    .clickable {
+                        when {
+                            row.isFolder -> onOpenCollection(row.collection.id)
+                            music -> onOpenMusic(row.collection.id)
+                            audiobooks -> onOpenAudiobooks(row.collection.id)
+                            else -> onOpenCollection(row.collection.id)
+                        }
+                    }
+                    .padding(start = 16.dp),
+                headlineContent = { Text(row.collection.name) },
+                supportingContent = { Text(rowCountText(row)) },
+            )
+        }
+    }
+    item(key = "divider:$id") { HorizontalDivider() }
 }
 
 private val IMPORT_TYPES = arrayOf(

@@ -28,7 +28,7 @@ class PlayerViewModelTest {
         vm.secondary()
         assertThat(hub.calls).containsExactly("previousSentence")
         assertThat(vm.voiceNow()?.title).isEqualTo("Rosetta Stone")
-        assertThat(modeOf(hub.ui.value.now)).isNull()                 // no Player tab for the voice
+        assertThat(modeOf(hub.ui.value.now)).isNull()                 // not a media mode: the voice's tab is Reader
 
         hub.ui.value = app.granger.core.player.PlayerUi.IDLE
         hub.calls.clear()
@@ -130,22 +130,27 @@ class PlayerViewModelTest {
         assertThat(vm.skipForwardS()).isEqualTo(60)
     }
 
-    @Test fun tabsFollowTheActiveModeUntilPickedAndPickingCallsNothing() {
+    @Test fun tabsFollowWhatsLiveUntilPickedAndPickingCallsNothing() {
         val hub = FakePlayerHub(musicUi())
         val vm = PlayerViewModel(hub)
-        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.MUSIC)
-        vm.selectTab(app.granger.core.player.PlayerMode.AUDIOBOOK)
-        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.AUDIOBOOK)
-        vm.selectTab(app.granger.core.player.PlayerMode.MUSIC)
+        assertThat(vm.tab()).isEqualTo(ListenTab.MEDIA)
+        assertThat(vm.mediaMode()).isEqualTo(app.granger.core.player.PlayerMode.MUSIC)
+        vm.selectTab(ListenTab.READER)
+        assertThat(vm.tab()).isEqualTo(ListenTab.READER)
         vm.resetTab()
+        assertThat(vm.tab()).isEqualTo(ListenTab.MEDIA)
+        hub.ui.value = voiceUi()
+        assertThat(vm.tab()).isEqualTo(ListenTab.READER)
         assertThat(hub.calls).isEmpty()
 
-        // Idle: the mode last used.
+        // Idle: the tab last used, and the media mode last played.
         hub.ui.value = app.granger.core.player.PlayerUi.IDLE
         hub.saved.value = app.granger.core.player.SavedModes(null, null, app.granger.core.player.PlayerMode.AUDIOBOOK)
-        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.AUDIOBOOK)
-        hub.saved.value = app.granger.core.player.SavedModes(null, null, null)
-        assertThat(vm.tab()).isEqualTo(app.granger.core.player.PlayerMode.MUSIC)
+        assertThat(vm.tab()).isEqualTo(ListenTab.MEDIA)
+        assertThat(vm.mediaMode()).isEqualTo(app.granger.core.player.PlayerMode.AUDIOBOOK)
+        hub.saved.value = app.granger.core.player.SavedModes(null, null, null, lastWasVoice = true)
+        assertThat(vm.tab()).isEqualTo(ListenTab.READER)
+        assertThat(vm.mediaMode()).isEqualTo(app.granger.core.player.PlayerMode.MUSIC)
     }
 
     @Test fun activatingSwitchesThenDoesThePressedControl() {

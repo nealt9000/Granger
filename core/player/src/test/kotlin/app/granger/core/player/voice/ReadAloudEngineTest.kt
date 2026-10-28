@@ -79,6 +79,29 @@ class ReadAloudEngineTest {
     }
 
     @Test
+    fun holdBeforeStopsOnceTheSentencesBeforeItAreHeardAndPlayGoesOnFromIt() = runTest {
+        val out = FakeOutput(); val speech = FakeSpeech()
+        val engine = ReadAloudEngine(out, backgroundScope)
+        var held = 0
+        backgroundScope.launch { engine.held.collect { held++ } }
+        engine.holdBefore = { it.text == "Seven eight." }
+        engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
+        out.release(100); settle()
+        // Everything up to "Six." and its pause went out; nothing of "Seven eight." did.
+        assertThat(out.written).hasSize(6)
+        assertThat(held).isEqualTo(1)
+        assertThat(engine.playing.value).isFalse()
+        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Seven eight.")
+        assertThat(out.events.takeLast(2)).containsExactly("pause", "flush").inOrder()
+
+        engine.holdBefore = null
+        engine.play()
+        settle()
+        assertThat(out.written).hasSize(12)
+        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Ten.")
+    }
+
+    @Test
     fun lookAheadStaysWithinTwoSentences() = runTest {
         val out = FakeOutput(); val speech = FakeSpeech()
         val engine = ReadAloudEngine(out, backgroundScope, lookAheadSentences = 2)

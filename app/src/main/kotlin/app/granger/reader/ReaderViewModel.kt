@@ -15,6 +15,7 @@ import app.granger.core.speech.ReadSourceKey
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimUrls
+import app.granger.voice.listenStart
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -53,6 +54,8 @@ class ReaderViewModel(
     /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
     private val player: PlayerHub? = null,
     private val quote: String? = null,
+    /** A text's saved place (Plan U2): Listen goes on from it when the page is at or before it ([listenStart]). */
+    private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
@@ -174,7 +177,10 @@ class ReaderViewModel(
     private fun sourceFor(pack: String, p: Page, archive: ZimArchive): ArticleReadSource =
         source?.takeIf { it.packId == pack && it.path == p.path } ?: ArticleReadSource(archive, pack, p.path, p.title, io).also { source = it }
 
-    /** Starts the voice on this page at [from] (a block the page named), else at the article's first sentence. */
+    /**
+     * Starts the voice on this page at [from] (the first block the page shows), else at the article's first sentence;
+     * at the article's saved place instead when that is further on ([listenStart]).
+     */
     fun readAloud(from: BlockRef?) {
         val hub = player ?: return
         val pack = packId ?: return
@@ -182,7 +188,8 @@ class ReaderViewModel(
         val archive = archive ?: return
         viewModelScope.launch {
             val src = sourceFor(pack, p, archive)
-            val address = from?.let { src.addressAt(it.id, it.offset) } ?: src.firstAddress() ?: return@launch
+            val visible = from?.let { src.addressAt(it.id, it.offset) } ?: src.firstAddress() ?: return@launch
+            val address = listenStart(src, visible, runCatching { savedPlace(src.key) }.getOrNull())
             following = true
             hub.readAloud(src, address)
         }

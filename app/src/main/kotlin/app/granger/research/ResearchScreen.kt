@@ -62,7 +62,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -76,6 +75,7 @@ import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
 import app.granger.formatBytes
+import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import app.granger.research.ResearchViewModel.TurnUi
 import kotlinx.coroutines.delay
@@ -86,10 +86,6 @@ private const val DECLINED = "Not in your library."
 private const val UNVERIFIED = "Couldn't answer from these passages."
 private const val MEDICAL = AnswerText.MEDICAL
 
-object ResearchTags {
-    const val READ_ALOUD = "research_read_aloud"
-    const val STOP_READING = "research_stop_reading"
-}
 private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
 private const val MODELS_MISSING = "Ask needs the librarian on this phone. Get it in Settings → Models."
 private const val INTRO = "Ask a question; the librarian answers from your library and shows where each part came from. " +
@@ -459,29 +455,12 @@ private fun AnswerBlock(
 }
 
 /**
- * The speaker button under an answer (Plan V2): reads it aloud through the player; while this answer is read, a
- * tap pauses or resumes and Stop ends it. Hidden only while a turn runs and nothing is being read.
+ * Listen under an answer (Plan U2 Decision 6): reads it aloud through the player; while this answer is read, Pause or
+ * Play and a separate Stop. Hidden only while a turn runs and nothing is being read.
  */
 @Composable
 private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            onClick = { if (voice == VoiceButton.IDLE) onRead() else onPauseResume() },
-            modifier = Modifier.testTag(ResearchTags.READ_ALOUD),
-        ) {
-            when (voice) {
-                VoiceButton.IDLE -> Icon(painterResource(R.drawable.ic_headphones), contentDescription = "Read answer")
-                VoiceButton.READING -> Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause reading", tint = MaterialTheme.colorScheme.primary)
-                VoiceButton.PAUSED -> Icon(painterResource(R.drawable.ic_play), contentDescription = "Resume reading", tint = MaterialTheme.colorScheme.primary)
-            }
-        }
-        if (voice != VoiceButton.IDLE) {
-            Text(
-                if (voice == VoiceButton.READING) "Reading" else "Paused", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary,
-            )
-            TextButton(onClick = onStop, modifier = Modifier.testTag(ResearchTags.STOP_READING)) { Text("Stop") }
-        }
-    }
+    Row(verticalAlignment = Alignment.CenterVertically) { ListenButtons(voice, onRead, onPauseResume, onStop) }
 }
 
 /** The model's own guess, outlined and set apart from cited answers; it has no sources, so no chips or cards. */

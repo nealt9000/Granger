@@ -5,6 +5,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +58,8 @@ import app.granger.core.library.PackStatus
 import kotlinx.coroutines.launch
 
 /**
- * One collection's packs. Tap opens a pack in a reader tab; long-press organises or removes it. A folder (Kiwix)
+ * One collection's packs and books; the books can be found by title or author, sorted, and in Granger Classics
+ * browsed by kind. Tap opens a pack in a reader tab; long-press organises or removes it. A folder (Kiwix)
  * lists its collections instead, as the Library does, each opening its own screen; a folder has no menu.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -73,6 +79,8 @@ fun CollectionScreen(
     val targets by viewModel.targets.collectAsStateWithLifecycle()
     val positions by viewModel.positions.collectAsStateWithLifecycle()
     val superseded by viewModel.superseded.collectAsStateWithLifecycle()
+    val shown by viewModel.books.collectAsStateWithLifecycle()
+    val sort by viewModel.sort.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     // The collection disappears when its last pack moves out or it is deleted; leave once it has been seen.
     var seen by remember { mutableStateOf(false) }
@@ -154,7 +162,52 @@ fun CollectionScreen(
                     HorizontalDivider()
                 }
             }
-            items(loaded.books, key = { "book:${it.id}" }) { book ->
+            if (shown.total > 0) {
+                item(key = "find", span = { GridItemSpan(maxLineSpan) }, contentType = "find") {
+                    OutlinedTextField(
+                        value = viewModel.findText,
+                        onValueChange = viewModel::setQuery,
+                        placeholder = { Text("Find a title or author") },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        trailingIcon = if (viewModel.findText.isEmpty()) null else {
+                            { IconButton(onClick = { viewModel.setQuery("") }) { Icon(Icons.Filled.Close, contentDescription = "Clear") } }
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+                item(key = "sort", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
+                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(BookSort.entries, key = { it.name }) { option ->
+                            FilterChip(selected = sort == option, onClick = { viewModel.setSort(option) }, label = { Text(option.label) })
+                        }
+                    }
+                }
+                // Granger Classics: the catalog's kinds (novels, drama, philosophy, …); one chip shows that kind alone.
+                if (shown.categories.isNotEmpty()) item(key = "categories", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
+                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        item(key = "all") {
+                            FilterChip(selected = shown.category == null, onClick = { viewModel.setCategory(null) }, label = { Text("All") })
+                        }
+                        items(shown.categories, key = { it }) { category ->
+                            FilterChip(
+                                selected = shown.category == category,
+                                onClick = { viewModel.setCategory(if (shown.category == category) null else category) },
+                                label = { Text(category) },
+                            )
+                        }
+                    }
+                }
+                if (shown.books.isEmpty()) item(key = "none", span = { GridItemSpan(maxLineSpan) }, contentType = "none") {
+                    Text(
+                        "No books match.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+                    )
+                }
+            }
+            items(shown.books, key = { "book:${it.id}" }, contentType = { "book" }) { book ->
                 Box(Modifier.padding(horizontal = 8.dp)) {
                     var bookMenu by remember { mutableStateOf(false) }
                     BookCell(
@@ -280,7 +333,7 @@ private fun PackRow(pack: Pack, replaced: Boolean, onClick: () -> Unit, onLongCl
     )
 }
 
-/** A book in the grid: its cover, title (two lines) and a thin bar for how far through it the reader is. */
+/** A book in the grid: its cover, title (two lines), author (one) and a thin bar for how far through it the reader is. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLongClick: () -> Unit) {
@@ -297,6 +350,15 @@ private fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLongC
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             minLines = 2,
+        )
+        // Always one line, blank or not, so the covers in a row stay level.
+        Text(
+            book.author,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            minLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         formatLabel(book)?.let {
             Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

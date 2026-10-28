@@ -32,7 +32,7 @@ import app.granger.media.MediaPermissionStatus
 const val SHOW_IN_OTHER_APPS_TAG = "media-other-apps-switch"
 
 /**
- * Settings → Music & audiobooks: phone access, picked folders, "Rescan now", and the player's settings. Stateless:
+ * Settings → Music (& audiobooks): phone access, picked folders, "Rescan now", and the player's settings. Stateless:
  * the screen ([MediaSettingsScreen], which has the title) owns the permission prompt and the folder picker.
  */
 fun LazyListScope.mediaSettingsSection(
@@ -142,11 +142,14 @@ fun LazyListScope.mediaSettingsSection(
             onSelect = onReplayGain,
         )
     }
-    item(key = "media-skip-back") {
-        ChoiceRow("Skip back", "Audiobooks", MediaSettings.SKIP_CHOICES, ui.skipBackS, { "$it s" }, onSkipBack)
-    }
-    item(key = "media-skip-forward") {
-        ChoiceRow("Skip forward", "Audiobooks", MediaSettings.SKIP_CHOICES, ui.skipForwardS, { "$it s" }, onSkipForward)
+    // Audiobook-only: hidden until there's an audiobook (Plan U2 Decision 7).
+    if (ui.audiobooks) {
+        item(key = "media-skip-back") {
+            ChoiceRow("Skip back", "Audiobooks", MediaSettings.SKIP_CHOICES, ui.skipBackS, { "$it s" }, onSkipBack)
+        }
+        item(key = "media-skip-forward") {
+            ChoiceRow("Skip forward", "Audiobooks", MediaSettings.SKIP_CHOICES, ui.skipForwardS, { "$it s" }, onSkipForward)
+        }
     }
     item(key = "media-headset") {
         ListItem(

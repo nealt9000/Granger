@@ -7,6 +7,7 @@ import app.granger.core.player.voice.SpeechOutput
 import app.granger.core.speech.InstalledVoices
 import app.granger.core.speech.Pcm
 import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadChapter
 import app.granger.core.speech.ReadSource
 import app.granger.core.speech.Speech
 import app.granger.core.speech.SpeechFactory
@@ -49,9 +50,9 @@ class PlayerEngineVoiceTest {
         val events = mutableListOf<String>()
         var written = 0
         override var volume = 1f
-        override val playedMs = 0L
+        override var playedMs = 0L                  // heard as soon as written
         override fun open(sampleRate: Int) {}
-        override suspend fun write(pcm: Pcm) { gate.receive(); written++ }
+        override suspend fun write(pcm: Pcm) { gate.receive(); written++; playedMs += pcm.durationMs }
         override fun play() { events += "play" }
         override fun pause() { events += "pause" }
         override fun flush() { events += "flush" }
@@ -71,6 +72,15 @@ class PlayerEngineVoiceTest {
     private val sources = mutableMapOf<String, ReadSource>()
     private fun source(key: String = "text:article", title: String = "Rosetta Stone", body: String = text): ReadSource =
         TextReadSource(key, title, body).also { sources[key] = it }
+
+    /** The text with each paragraph a chapter, as a book's contents or an article's sections would make it. */
+    private class ChapteredSource(private val text: TextReadSource) : ReadSource by text {
+        override suspend fun chapters() = listOf(ReadChapter("First"), ReadChapter("Second"), ReadChapter("Third"))
+        override suspend fun chapterStart(index: Int): ReadAddress? = if (index in 0..2) ReadAddress.Text(key, index, 0) else null
+        override suspend fun chapterAt(at: ReadAddress): Int? = (at as? ReadAddress.Text)?.block
+    }
+
+    private fun chaptered(): ReadSource = ChapteredSource(TextReadSource("text:chaptered", "Chaptered", text)).also { sources[it.key] = it }
 
     private fun engine(): PlayerEngine = rig.engine(focus = focus, speechOutput = output, voices = voices, readSources = { key, _ -> sources[key] })
 
@@ -108,6 +118,60 @@ class PlayerEngineVoiceTest {
         assertThat(e.chapterSteps).isTrue()
         assertThat(e.address()).startsWith("text:text:article#")
         assertThat(e.voiceProgress.value?.utterance?.text).isAnyOf("Three four five.", "Six.")
+    }
+
+    @Test fun endOfChapterStopsTheVoiceAtTheChaptersEndNotAtTheEstimate() {
+        val e = engine()
+        e.readAloud(chaptered(), null, null)
+        rig.idle(); e.untilReady(); speak(2)            // "One two." heard; "Three four five." is being written
+        e.startSleepTimer(SleepSetting.EndOfChapter)
+        rig.idle()
+        // The countdown is an estimate (two sentences left × a sentence's time): shown, but it isn't what stops the voice.
+        assertThat(e.ui.value.sleepRemainingMs).isNotNull()
+        speak(4)                                        // "Three four five.", "Six." and their pauses play out
+        assertThat(e.ui.value.playing).isFalse()
+        assertThat(output.written).isEqualTo(6)         // nothing of the next chapter was heard
+        assertThat(speeches[0].spoken.take(3)).containsExactly("One two.", "Three four five.", "Six.").inOrder()
+        assertThat(e.voiceProgress.value?.utterance?.text).isEqualTo("Seven eight.")
+        assertThat(e.ui.value.sleepRemainingMs).isNull()
+        // The place saved is the next chapter's start, and play goes on from it.
+        val state = runBlocking { rig.playback.voiceState("text:chaptered") }!!
+        assertThat(ReadAddress.decode(state.address)).isEqualTo(ReadAddress.Text("text:chaptered", 1, 0))
+        e.playPause()
+        rig.idle(); speak(2)
+        assertThat(e.ui.value.playing).isTrue()
+        assertThat(e.voiceProgress.value?.utterance?.text).isEqualTo("Nine.")
+    }
+
+    @Test fun aPickedChapterMovesEndOfChapterAndTheTextsEndIsTheLastOnesEnd() {
+        val e = engine()
+        e.readAloud(chaptered(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        assertThat(runBlocking { e.voiceChapters() }).isEqualTo(VoiceChapters(listOf(ReadChapter("First"), ReadChapter("Second"), ReadChapter("Third")), 0))
+        e.startSleepTimer(SleepSetting.EndOfChapter)
+        e.jumpToChapter(2)                              // → "Ten.", the last chapter: End of chapter now waits for it
+        rig.idle()
+        assertThat(e.voiceProgress.value?.utterance?.text).isEqualTo("Ten.")
+        assertThat(runBlocking { e.voiceChapters() }?.current).isEqualTo(2)
+        assertThat(e.ui.value.sleepRemainingMs).isNotNull()
+        speak(2)
+        assertThat(e.ui.value.playing).isFalse()
+        assertThat((e.ui.value.now as NowPlaying.Voice).ended).isTrue()
+        assertThat(e.ui.value.sleepRemainingMs).isNull()
+    }
+
+    @Test fun endOfChapterOnTextWithoutChaptersWaitsForTheEnd() {
+        val e = engine()
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        assertThat(runBlocking { e.voiceChapters() }?.chapters).isEmpty()
+        e.startSleepTimer(SleepSetting.EndOfChapter)
+        rig.idle()
+        speak(4)
+        assertThat(e.ui.value.playing).isTrue()         // a paragraph's end is no chapter's
+        speak(8)
+        assertThat((e.ui.value.now as NowPlaying.Voice).ended).isTrue()
+        assertThat(e.ui.value.sleepRemainingMs).isNull()
     }
 
     @Test fun theVoiceEndsPausedAndPlayReadsItAgainThenPausePauses() {
@@ -395,6 +459,23 @@ class PlayerEngineVoiceTest {
         assertThat(runBlocking { rig.playback.voiceState("text:article") }).isNotNull()
         val music = runBlocking { rig.playback.musicState() }!!
         assertThat(music.index).isEqualTo(1)                                   // saved from under the voice
+    }
+
+    @Test fun theLastMediaModeOutlastsTheVoice() {
+        val e = engine()
+        e.saved                                         // read lazily: the first read starts it
+        val book = rig.fakeBook("b", 5_000)
+        e.playAudiobook(book.id)
+        rig.idle()
+        assertThat(e.saved.value.lastMedia).isEqualTo(PlayerMode.AUDIOBOOK)
+
+        // The voice is now the last mode, but the media tab still names the audiobook (Plan U2).
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        val saved = e.saved.value
+        assertThat(saved.lastWasVoice).isTrue()
+        assertThat(saved.lastMode).isNull()
+        assertThat(saved.lastMedia).isEqualTo(PlayerMode.AUDIOBOOK)
     }
 
     @Test fun aCallPausesBothAndItsEndResumesBoth() {

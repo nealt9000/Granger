@@ -118,6 +118,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
             onPlay = viewModel::playQueueItem,
             onDismiss = { showQueue = false },
             editable = live,
+            heard = live && ui.playing,
         )
     }
 }

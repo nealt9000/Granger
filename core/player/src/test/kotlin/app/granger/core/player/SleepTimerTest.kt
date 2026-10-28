@@ -43,6 +43,21 @@ class SleepTimerTest {
         assertThat(timer.expired()).isTrue()
     }
 
+    @Test fun anEstimatedEndIsShownButNeverFadesOrExpires() {
+        var chapterEndsIn = 30_000L
+        timer.start(SleepSetting.EndOfChapter, estimated = true) { chapterEndsIn }
+        assertThat(timer.remainingMs).isEqualTo(30_000L)
+        chapterEndsIn = 5_000L
+        assertThat(timer.volume()).isEqualTo(1f)
+        chapterEndsIn = 0L
+        assertThat(timer.remainingMs).isEqualTo(0L)
+        assertThat(timer.expired()).isFalse()                  // the caller stops at the real end itself
+        // Only End of chapter can be an estimate; a new start clears it.
+        timer.start(SleepSetting.After(1_000L), estimated = true) { null }
+        clock = 1_000L
+        assertThat(timer.expired()).isTrue()
+    }
+
     @Test fun endOfChapterWithUnknownChapterKeepsFullVolume() {
         timer.start(SleepSetting.EndOfChapter) { null }
         assertThat(timer.remainingMs).isNull()

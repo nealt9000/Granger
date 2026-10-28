@@ -7,13 +7,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-/** One search result. [snippet] is HTML with `<b>` highlights, set only for full-text results. */
+/**
+ * One search result. [snippet] is HTML with `<b>` highlights, set only for full-text results. A book in Titles has its
+ * id as [packId], an empty [path], its collection as [packTitle] and its [author].
+ */
 data class SearchHit(
     val packId: String,
     val packTitle: String,
     val path: String,
     val title: String,
     val snippet: String? = null,
+    val author: String = "",
 )
 
 /** Title hits, and [more] when the search stopped short, so more titles may match than are listed. */
@@ -35,23 +39,40 @@ class ZimLibrarySearch(
     private val titlesPerPack: Int = TITLES_PER_PACK,
     private val fullTextLimit: Int = FULL_TEXT_LIMIT,
     private val titleLimit: Int = TITLE_LIMIT,
+    /** The books Titles lists by title or author; none when null. */
+    private val bookshelf: Bookshelf? = null,
 ) : LibrarySearch {
     // The packs take turns, each in its own order, so a big pack can't push the others below the first few or past the limit.
-    // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10).
+    // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10). Books on the
+    // shelf go ahead of pack titles of the same rank, and a book found by its author after any title containing the
+    // query (Plan U2 Decision 1).
     override suspend fun titles(query: String): TitleResults {
+        if (query.isBlank()) return TitleResults(emptyList())
+        val books = bookTitles(query)
         val packs = across(query) { it.suggest(query, titlesPerPack) }
         val turns = packs.maxOfOrNull { it.hits.size } ?: 0
         val all = (0 until turns).flatMap { turn -> packs.mapNotNull { it.hits.getOrNull(turn)?.second } }
         val q = SearchText.fold(query.trim())
-        val ranked = all.sortedBy { hit ->
+        val ranked = all.map { hit ->
             val title = SearchText.fold(hit.title)
-            when {
-                title == q -> 0
-                title.startsWith(q) -> 1
-                else -> 2
+            val rank = when {
+                title == q -> BookTitleSearch.Rank.EXACT
+                title.startsWith(q) -> BookTitleSearch.Rank.STARTS_WITH
+                else -> null
             }
+            rank to hit
         }
-        return TitleResults(ranked.take(titleLimit), more = all.size > titleLimit || packs.any { it.returned >= titlesPerPack })
+        // Stable: books before packs within a rank, and pack titles that are neither last, in their turn order.
+        val merged = (books + ranked).sortedBy { (rank, _) -> rank?.ordinal ?: BookTitleSearch.Rank.entries.size }.map { it.second }
+        return TitleResults(merged.take(titleLimit), more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack })
+    }
+
+    /** The shelf's books matching [query] by title or author, as title hits that open the book. */
+    private suspend fun bookTitles(query: String): List<Pair<BookTitleSearch.Rank?, SearchHit>> {
+        val shelf = bookshelf?.books?.first() ?: return emptyList()
+        return BookTitleSearch.search(shelf, query).map { (rank, book) ->
+            rank to SearchHit(book.id, Filing.defaultName(Filing.defaultKey(book), book), "", book.title, author = book.author)
+        }
     }
 
     override suspend fun fullText(query: String): List<SearchHit> =

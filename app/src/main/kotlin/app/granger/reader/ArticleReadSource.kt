@@ -4,6 +4,7 @@ import app.granger.core.research.ArticleText
 import app.granger.core.speech.Block
 import app.granger.core.speech.BlockKind
 import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadChapter
 import app.granger.core.speech.ReadSource
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.speech.Utterance
@@ -32,12 +33,17 @@ class ArticleReadSource(
     override val key: String = ReadSourceKey.article(packId, path)
     private val lock = Mutex()
     private var loaded: List<Utterance>? = null
+    private var sections: List<Section> = emptyList()
+
+    /** A section the Chapters sheet lists: its title and the index of its first utterance. */
+    private class Section(val title: String, val start: Int)
 
     private suspend fun all(): List<Utterance> = lock.withLock {
         loaded ?: withContext(io) {
             val item = archive.read(path)
             val html = item?.let { String(it.bytes, charsetOf(it.mimeType)) }.orEmpty()
-            val blocks = ArticleText.blocks(html).map {
+            val article = ArticleText.blocks(html)
+            val blocks = article.map {
                 Block(
                     it.id,
                     when {
@@ -49,8 +55,23 @@ class ArticleReadSource(
                     it.text,
                 )
             }
-            Utterances.fromBlocks(blocks) { blockId, n -> ReadAddress.Article(packId, path, blockId, n) }
+            val list = Utterances.fromBlocks(blocks) { blockId, n -> ReadAddress.Article(packId, path, blockId, n) }
+            sections = sectionsOf(list, article.filter { it.isHeading }.associate { it.id to (it.tag[1] - '0') })
+            list
         }.also { loaded = it }
+    }
+
+    /**
+     * An article's chapters are its top-level sections: the headings of the highest level under the title (on
+     * Wikipedia the h2s; their h3s stay inside them). What comes before the first one (the lead) is a section of its
+     * own under the article's title. An article without such headings has no sections: it is read as one.
+     */
+    private fun sectionsOf(list: List<Utterance>, levels: Map<String, Int>): List<Section> {
+        val headings = list.withIndex().filter { (_, u) -> u.kind == UtteranceKind.HEADING && u.text != title }
+            .mapNotNull { (i, u) -> levels[(u.address as ReadAddress.Article).blockId]?.let { Triple(i, u, it) } }
+        val top = headings.minOfOrNull { it.third } ?: return emptyList()
+        val out = headings.filter { it.third == top }.map { (i, u, _) -> Section(u.text, i) }
+        return if (out.first().start > 0) listOf(Section(title, 0)) + out else out
     }
 
     override suspend fun sectionTitle(at: ReadAddress): String? {
@@ -69,6 +90,25 @@ class ArticleReadSource(
     override suspend fun locate(address: ReadAddress): ReadAddress? {
         val list = all()
         return indexOf(list, address)?.let { list[it].address }
+    }
+
+    override suspend fun chapters(): List<ReadChapter> { all(); return sections.map { ReadChapter(it.title) } }
+
+    override suspend fun chapterStart(index: Int): ReadAddress? {
+        val list = all()
+        return sections.getOrNull(index)?.let { list[it.start].address }
+    }
+
+    override suspend fun chapterAt(at: ReadAddress): Int? {
+        val i = indexOf(all(), at) ?: return null
+        return sections.indexOfLast { it.start <= i }.takeIf { it >= 0 }
+    }
+
+    override suspend fun compare(a: ReadAddress, b: ReadAddress): Int? {
+        val list = all()
+        val i = indexOf(list, a) ?: return null
+        val j = indexOf(list, b) ?: return null
+        return i.compareTo(j)
     }
 
     /** The first utterance of the whole article, or null for an article with no readable text. */

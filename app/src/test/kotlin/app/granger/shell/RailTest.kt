@@ -117,6 +117,19 @@ class RailTest {
         assertThat(expanded).isFalse()
     }
 
+    /** The Player tool is Listen: your player and your collection, a stack of records (Plan U2 Decision 4). */
+    @Test fun listenIsTheToolForThePlayerAndTheCollection() {
+        assertThat(RailTool.LISTEN.label).isEqualTo("Listen")
+        assertThat(RailTool.entries.map { it.label }).doesNotContain("Player")
+        assertThat(RailTool.LISTEN.drawable()).isEqualTo(app.granger.R.drawable.ic_headphones)
+        // Home, Library and Listen each have their own mark.
+        assertThat(listOf(RailTool.HOME, RailTool.LIBRARY, RailTool.LISTEN).map { it.drawable() }.toSet()).hasSize(3)
+        shell()
+        compose.onNodeWithContentDescription("Listen").performClick()
+        compose.waitForIdle()
+        assertThat(calls).containsExactly("tool:LISTEN")
+    }
+
     @Test fun homeIsTheFirstTool() {
         assertThat(RailTool.entries.first()).isEqualTo(RailTool.HOME)
         assertThat(RailTool.HOME.shown).isTrue()

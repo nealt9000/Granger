@@ -1,15 +1,23 @@
 package app.granger.search
 
+import app.granger.FakeBookshelf
+import app.granger.FakeLibrary
 import app.granger.FakeReadingSessions
+import app.granger.FakeZimArchive
+import app.granger.book
+import app.granger.pack
 import app.granger.MainDispatcherRule
 import app.granger.BookTarget
 import app.granger.core.books.TextQuote
 import app.granger.core.library.BookHit
+import app.granger.core.library.BookIds
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.ArtistHit
 import app.granger.core.library.MediaResults
 import app.granger.core.library.SearchHit
 import app.granger.core.library.TitleResults
+import app.granger.core.library.ZimLibrarySearch
+import app.granger.core.zim.ZimHit
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -203,6 +211,45 @@ class SearchViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.fullText.map { it.path }).containsExactly("Leaf")
         assertThat(vm.state.value.media).isEqualTo(holst)
+    }
+
+    @Test fun peterPanPutsTheBookFirstInTitlesAndOpensIt() = runTest(main.dispatcher) {
+        val library = FakeLibrary().apply {
+            packList.value = listOf(pack("wiki", "Wikipedia"))
+            archives["wiki"] = FakeZimArchive(
+                "wiki",
+                suggestions = listOf(ZimHit("Peter_Pan", "Peter Pan"), ZimHit("Peter_Pan_(2003_film)", "Peter Pan (2003 film)")),
+            )
+        }
+        val shelf = FakeBookshelf().apply { bookList.value = listOf(book("book:granger:peter_pan", "Peter Pan", "J. M. Barrie")) }
+        val vm = SearchViewModel(ZimLibrarySearch(library, io = main.dispatcher, bookshelf = shelf), sessions, "")
+        vm.onQueryChange("peter pan")
+        testScheduler.advanceUntilIdle()
+
+        val titles = vm.state.value.titles
+        assertThat(titles.map { it.packId to it.title }).containsExactly(
+            "book:granger:peter_pan" to "Peter Pan", "wiki" to "Peter Pan", "wiki" to "Peter Pan (2003 film)",
+        ).inOrder()
+        assertThat(titles.first().author).isEqualTo("J. M. Barrie")
+        // A book id, so the tab opens in the book reader.
+        assertThat(BookIds.isBook(titles.first().packId)).isTrue()
+        val id = vm.open(titles.first())
+        val tab = sessions.tabs.value.single()
+        assertThat(tab.id).isEqualTo(id)
+        assertThat(listOf(tab.packId, tab.path, tab.title)).containsExactly("book:granger:peter_pan", "", "Peter Pan").inOrder()
+    }
+
+    @Test fun booksArriveBeforeArticleText() = runTest(main.dispatcher) {
+        val gate = CompletableDeferred<Unit>().also { search.fullTextGate = it }
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.books.map { it.bookTitle }).containsExactly("Emma")
+        assertThat(vm.state.value.fullText).isEmpty()
+        assertThat(vm.state.value.searching).isTrue()
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.searching).isFalse()
     }
 
     @Test fun blankQueryClearsMedia() = runTest(main.dispatcher) {
