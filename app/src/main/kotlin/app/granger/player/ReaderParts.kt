@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +36,7 @@ import app.granger.core.player.NowPlaying
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.Voice
 import app.granger.core.speech.VoiceId
+import app.granger.settings.splitVoices
 import kotlin.math.roundToInt
 
 // The pieces of the player's Reader tab (Plan U2 Decision 5), once the voice's sheet (Plan V2).
@@ -49,6 +52,7 @@ object ReaderTags {
     const val MUSIC_PLAY_PAUSE = "reader_music_play_pause"
     const val MUSIC_NEXT = "reader_music_next"
     const val VOICE_CHIP = "reader_voice"
+    const val MORE_VOICES = "reader_more_voices"
     const val SPEED = "reader_speed"
     const val STOP = "reader_stop"
     const val OPEN = "reader_open"
@@ -107,19 +111,27 @@ internal fun SpeedRow(speed: Float, onSpeed: (Float) -> Unit) {
     }
 }
 
-/** The installed voices as chips; the one reading is selected. */
+/**
+ * The installed voices as chips; the one reading is selected. As in Settings, the Granger voices and the one reading are
+ * listed, and every other system voice waits behind a "System voices (N)" chip (Plan U2 Decision 9).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VoiceRow(voices: List<Voice>, chosen: VoiceId, onVoice: (VoiceId) -> Unit) {
+    var showMore by remember { mutableStateOf(false) }
+    val (shown, more) = splitVoices(voices, chosen)
     Text("Voice", style = MaterialTheme.typography.bodyLarge)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        voices.forEach { v ->
+        (if (showMore) shown + more else shown).forEach { v ->
             FilterChip(
                 selected = v.id == chosen,
                 onClick = { if (v.id != chosen) onVoice(v.id) },
                 label = { Text(v.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 modifier = Modifier.testTag(ReaderTags.VOICE_CHIP),
             )
+        }
+        if (more.isNotEmpty() && !showMore) {
+            AssistChip(onClick = { showMore = true }, label = { Text("System voices (${more.size})") }, modifier = Modifier.testTag(ReaderTags.MORE_VOICES))
         }
     }
 }

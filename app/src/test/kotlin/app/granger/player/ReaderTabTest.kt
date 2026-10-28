@@ -1,5 +1,6 @@
 package app.granger.player
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -96,8 +97,17 @@ class ReaderTabTest {
     @Test fun pickingAnotherVoiceAsksForItAndTheChosenOneIsInert() {
         reader(voiceUi())
         compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP)[0].performScrollTo().performClick()   // the one reading: inert
+        compose.onNodeWithTag(ReaderTags.MORE_VOICES).performScrollTo().performClick()
         compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP)[1].performScrollTo().performClick()
         assertThat(calls).containsExactly("voice:system:com.google.android.tts:en-us-x-iob-local")
+    }
+
+    @Test fun systemVoicesWaitBehindOneChip() {
+        reader(voiceUi())
+        compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP).assertCountEquals(1)
+        compose.onNodeWithTag(ReaderTags.MORE_VOICES).performScrollTo().assertTextEquals("System voices (1)").performClick()
+        compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP).assertCountEquals(2)
+        compose.onAllNodesWithTag(ReaderTags.MORE_VOICES).assertCountEquals(0)
     }
 
     @Test fun chaptersListTheTextsChaptersWithTheCurrentOneAndAPickMovesTheVoice() {
