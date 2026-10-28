@@ -8,7 +8,6 @@ import app.granger.MainDispatcherRule
 import app.granger.book
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
-import app.granger.pack
 import app.granger.record
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.launch
@@ -44,16 +43,11 @@ class DownloadsViewModelTest {
         assertThat(vm.ui.value.stopped.map { it.key }).containsExactly("item:b")
     }
 
-    @Test fun openShowsAPackAtItsLastReadPageAndABookFromItsPlace() = runTest(main.dispatcher) {
-        library.packList.value = listOf(pack("wiki", "Wikipedia"))
-        library.lastRead["wiki"] = "A/Ada"
-        val vm = vm()
-        val packTab = vm.open(DownloadRow("item:wiki", "Wikipedia", RowState.DONE, 1, 1, open = OpenTarget.Pack("wiki")))!!
-        assertThat(sessions.tab(packTab)!!.path).isEqualTo("A/Ada")
+    @Test fun openBookShowsItInItsTab() = runTest(main.dispatcher) {
         bookshelf.bookList.value = listOf(book("book:granger:emma", "Emma"))
-        val bookTab = vm.open(DownloadRow("item:emma", "Emma", RowState.DONE, 1, 1, open = OpenTarget.Book("book:granger:emma")))!!
-        assertThat(sessions.tab(bookTab)!!.packId).isEqualTo("book:granger:emma")
-        assertThat(vm.open(DownloadRow("item:m", "M", RowState.DONE, 1, 1))).isNull()
+        val tab = vm().openBook(OpenTarget.Book("book:granger:emma"), "Emma")
+        assertThat(sessions.tab(tab)!!.packId).isEqualTo("book:granger:emma")
+        assertThat(sessions.tab(tab)!!.title).isEqualTo("Emma")
     }
 
     @Test fun aRecordFinishedTodayIsDoneToday() = runTest(main.dispatcher) {

@@ -36,14 +36,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.downloads.DownloadState
 import kotlinx.coroutines.launch
 
-/** [onOpened] shows the tab a finished pack or book opened in; [onGetMore] goes where more can be got. */
+/**
+ * [onOpenPack] opens a finished pack the NavHost's one way (Plan U3b Decision 3); [onOpened] shows the tab a finished
+ * book opened in; [onGetMore] goes where more can be got.
+ */
 @Composable
-fun DownloadsScreen(viewModel: DownloadsViewModel, onBack: () -> Unit, onOpened: (tabId: Long) -> Unit, onGetMore: () -> Unit) {
+fun DownloadsScreen(
+    viewModel: DownloadsViewModel,
+    onBack: () -> Unit,
+    onOpened: (tabId: Long) -> Unit,
+    onOpenPack: (packId: String) -> Unit,
+    onGetMore: () -> Unit,
+) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     DownloadsContent(
         ui, onBack, viewModel::cancel, viewModel::retry,
-        onOpen = { row -> scope.launch { viewModel.open(row)?.let(onOpened) } },
+        onOpen = { row ->
+            when (val target = row.open) {
+                is OpenTarget.Pack -> onOpenPack(target.packId)
+                is OpenTarget.Book -> scope.launch { viewModel.openBook(target, row.title).let(onOpened) }
+                null -> Unit
+            }
+        },
         onGetMore = onGetMore,
     )
 }

@@ -18,8 +18,11 @@ import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.VoiceEntry
 import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
+import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.VectorDownloads
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.isActive
@@ -61,8 +64,10 @@ data class ItemRow(
     val description: String,
     val sizeBytes: Long,
     val status: ItemStatus,
-    /** The library pack this entry is installed as, if any. */
+    /** The library pack this entry is installed as, if any: Open opens it (Plan U3b Decision 3). */
     val packId: String?,
+    /** How Ask can search this pack; null for anything else, and for maps. */
+    val ask: AskReach? = null,
 )
 
 /**
@@ -303,6 +308,9 @@ class SourceViewModel(
         // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
         val recordsById = records.groupBy { it.itemId }
         val statuses = HashMap<String, ItemStatus>()
+        val installedVectorParents = records
+            .filter { it.kind == ItemKind.VECTORS && it.state == DownloadState.INSTALLED }
+            .mapNotNullTo(HashSet()) { VectorDownloads.parentOf(it.itemId) }
         fun status(item: CatalogItem): ItemStatus =
             statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
         fun row(item: CatalogItem): ItemRow {
@@ -328,7 +336,8 @@ class SourceViewModel(
                 }
                 is VoiceEntry -> item.attribution
             }
-            return ItemRow(item.id, item.title, details, description, item.downloadBytes, status(item), packId)
+            val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
+            return ItemRow(item.id, item.title, details, description, item.downloadBytes, status(item), packId, ask)
         }
         val needle = s.query.trim()
         val kiwix = scope == CatalogScope.KIWIX

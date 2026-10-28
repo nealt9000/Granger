@@ -196,12 +196,17 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 2: Get more, and Open on installed packs
 
-- [ ] `GetMoreScreen` (`GetMoreRoute`): the four sections of Decision 2, each row opening today's `SourceRoute` / `ArchiveRoute` / `LibriVoxRoute`.
-- [ ] `railToolOf`: the source routes → LIBRARY (MODELS stays SETTINGS). Update `LibriVoxRouteTest` and `SourceRoutesTest`.
-- [ ] `CatalogItemRow`: Installed → **Open** (primary), with Remove in a row overflow. Do the same for UpdateAvailable (Open, Update, overflow Remove). Move `openPack(packId)` to the NavHost, used by `CollectionViewModel` and `SourceScreen`.
-- [ ] The Ask line per pack (Decision 8): `askReach` and its row text. `AskReachTest` covers the three outcomes and maps.
-- [ ] Tests: `GetMoreScreenTest` (sections, each row's route); `SourceViewModelTest` (Open on installed rows).
-- [ ] **Commit.** `Get more: the sources in one place; installed packs open; Ask's reach on each pack`
+- [x] `GetMoreScreen` (`GetMoreRoute`): the four sections of Decision 2, each row opening today's `SourceRoute` / `ArchiveRoute` / `LibriVoxRoute`.
+  *(Built: `GetMoreLink` and `GET_MORE_SECTIONS` in `sources/GetMoreScreen.kt`, routed by `routeOf(GetMoreLink)` in the NavHost. Doors so far: a "+" "Get more" icon in the Library header (Task 3 settles the header) and Downloads' empty state. Readiness's See still opens Kiwix, as planned. Home has no suggestion line yet, so it has no door.)*
+- [x] `railToolOf`: the source routes → LIBRARY (MODELS stays SETTINGS). Update `LibriVoxRouteTest` and `SourceRoutesTest`.
+  *(Built: `railToolOf(destination, sourceScope)`: the NavHost passes a `SourceRoute`'s scope, so Models stays SETTINGS. LibriVox was already LIBRARY and `LibriVoxRouteTest` passes unchanged. The route cases are in `GetMoreScreenTest` rather than `SourceRoutesTest`, since they need a NavDestination.)*
+- [x] `CatalogItemRow`: Installed → **Open** (primary), with Remove in a row overflow. Do the same for UpdateAvailable (Open, Update, overflow Remove). Move `openPack(packId)` to the NavHost, used by `CollectionViewModel` and `SourceScreen`.
+  *(Built: `library/OpenPack.kt` holds `openPack(library, sessions, packId)`, and the NavHost's `openPack` uses it to show the tab. CollectionScreen, SourceScreen and Downloads all open packs through it. `CollectionViewModel.open` is gone, and its two tests moved to `OpenPackTest`. Open shows only on rows with a library pack. Installed Granger books, models and voices keep Remove.)*
+- [x] The Ask line per pack (Decision 8): `askReach` and its row text. `AskReachTest` covers the three outcomes and maps.
+  *(Built: `askReach(entry, installedVectorParents)`. A pack row in any scope shows it as its own line under the details. Maps are `family == "maps"`, as in Readiness.)*
+- [x] Tests: `GetMoreScreenTest` (sections, each row's route); `SourceViewModelTest` (Open on installed rows).
+  *(Built: `GetMoreScreenTest` also covers `CatalogItemRow`: Open, the overflow's Remove, Update.)*
+- [x] **Commit.** `Get more: the sources in one place; installed packs open; Ask's reach on each pack`
 
 ### Task 3: The Library by kind, and the icons
 

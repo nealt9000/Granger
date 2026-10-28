@@ -19,6 +19,8 @@ import app.granger.core.catalog.Preset
 import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.EnqueueResult
+import app.granger.core.downloads.ItemKind
+import app.granger.core.catalog.VectorsEntry
 import app.granger.modelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.pack
@@ -272,6 +274,40 @@ class SourceViewModelTest {
         downloads.list.value = emptyList()
         testScheduler.advanceUntilIdle()
         assertThat(vm.rowIds()).isEmpty()
+    }
+
+    @Test fun anInstalledPackRowOpensItsLibraryPack() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("u-med"))
+        val rows = viewModel().ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        // Open (Plan U3b Decision 3) needs the pack the entry is installed as; one not installed has none.
+        assertThat(rows.getValue("med").status).isEqualTo(ItemStatus.Installed)
+        assertThat(rows.getValue("med").packId).isEqualTo("u-med")
+        assertThat(rows.getValue("top").packId).isNull()
+    }
+
+    @Test fun packRowsSayHowAskSearchesThem() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                packs = listOf(
+                    packEntry("med").copy(vectors = VectorsEntry(url = "https://a.test/med.gvec")),
+                    packEntry("top"),
+                    packEntry("bare").copy(hasFulltextIndex = false),
+                    packEntry("idx").copy(hasFulltextIndex = false),
+                    packEntry("osm").copy(family = "maps", hasFulltextIndex = false),
+                ),
+                models = listOf(e2b),
+            ),
+        )
+        // Vectors installed for a pack the catalog no longer lists them for still count.
+        downloads.list.value = listOf(record("idx.vectors", DownloadState.INSTALLED, kind = ItemKind.VECTORS))
+        val vm = viewModel()
+        val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        assertThat(rows.getValue("med").ask).isEqualTo(AskReach.MEANING)
+        assertThat(rows.getValue("top").ask).isEqualTo(AskReach.KEYWORDS)
+        assertThat(rows.getValue("bare").ask).isEqualTo(AskReach.NONE)
+        assertThat(rows.getValue("idx").ask).isEqualTo(AskReach.MEANING)
+        assertThat(rows.getValue("osm").ask).isNull()
+        assertThat(viewModel(CatalogScope.MODELS).ui.value.sections.flatMap { it.rows }.single().ask).isNull()
     }
 
     @Test fun updatesTabShowsOnlyUpdates() = runTest(main.dispatcher) {

@@ -24,7 +24,7 @@ fun startOfToday(): Long = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).
  */
 class DownloadsViewModel(
     private val downloads: Downloads,
-    private val library: Library,
+    library: Library,
     bookshelf: Bookshelf,
     private val sessions: ReadingSessions,
     private val appScope: CoroutineScope,
@@ -50,13 +50,6 @@ class DownloadsViewModel(
         }
     }
 
-    /**
-     * Opens a finished pack (at its last-read page) or book in a rail tab and returns the tab id, as the Library does;
-     * null when the row opens nothing.
-     */
-    suspend fun open(row: DownloadRow): Long? = when (val target = row.open) {
-        is OpenTarget.Pack -> library.startPath(target.packId)?.let { sessions.openTab(target.packId, it, row.title) }
-        is OpenTarget.Book -> sessions.openTab(target.bookId, "", row.title)
-        null -> null
-    }
+    /** Opens a finished book in its rail tab and returns the tab id. Packs open through the NavHost's openPack. */
+    suspend fun openBook(target: OpenTarget.Book, title: String): Long = sessions.openTab(target.bookId, "", title)
 }

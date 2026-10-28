@@ -120,6 +120,8 @@ import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
 import app.granger.sources.CatalogScope
+import app.granger.sources.GetMoreLink
+import app.granger.sources.GetMoreScreen
 import app.granger.sources.SourceScreen
 import app.granger.sources.SourceViewModel
 import kotlinx.coroutines.CancellationException
@@ -240,6 +242,24 @@ fun NavController.showTab(
 
 fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = true }
 
+/** Where sources live: Kiwix, books, audiobooks and music, models (Plan U3b Decision 2). */
+@Serializable object GetMoreRoute
+
+/** Where each Get more row goes: today's source screens. */
+internal fun routeOf(link: GetMoreLink): Any = when (link) {
+    GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
+    GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
+    GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
+    GetMoreLink.LIBRIVOX -> LibriVoxRoute
+    GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
+    GetMoreLink.ARCHIVE_ORG_MUSIC -> ArchiveRoute(ArchiveKind.MUSIC)
+    GetMoreLink.MODELS -> SourceRoute(CatalogScope.MODELS)
+}
+
+fun NavController.openGetMore(link: GetMoreLink) {
+    if (link == GetMoreLink.LIBRIVOX) openLibriVox() else navigate(routeOf(link))
+}
+
 /** Where each Library source link goes (spec §3.4): the archive.org links open its texts, spoken-word or music view. */
 internal fun routeOf(link: SourceLink): Any = when (link) {
     SourceLink.GRANGER -> SourceRoute(CatalogScope.GRANGER)
@@ -269,16 +289,19 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 /** Settings → Voice (Plan V1). */
 @Serializable object VoiceRoute
 
-/** The rail tool a destination belongs to: archive sources are part of the Library, as is everything they lead to. */
-internal fun railToolOf(destination: NavDestination): RailTool? = when {
+/**
+ * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
+ * to, except Models ([sourceScope] is a [SourceRoute]'s scope), which stays with Settings (Plan U3b Decision 2).
+ */
+internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
+    destination.hasRoute<SourceRoute>() -> if (sourceScope == CatalogScope.MODELS) RailTool.SETTINGS else RailTool.LIBRARY
     destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
-        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.isMusic() ||
-        destination.isAudiobooks() -> RailTool.LIBRARY
+        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() ||
+        destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
-        destination.hasRoute<SourceRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.SETTINGS
     destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
     else -> null
 }
@@ -462,6 +485,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
 
+    /** The one way an installed pack opens: from the Library, a source's Open and Downloads (Plan U3b Decision 3). */
+    fun openPack(packId: String) {
+        scope.launch {
+            val tabId = app.granger.library.openPack(container.library, container.sessions, packId) ?: return@launch
+            container.sessions.tab(tabId)?.let { nav.showTab(it) }
+        }
+    }
+
     /** Opens the page the voice is reading (an article in its tab, a book in its reader); null when the key names neither. */
     suspend fun openVoiceSource(voice: NowPlaying.Voice): Unit? {
         val tabId = when (val key = ReadSourceKey.parse(voice.sourceKey)) {
@@ -523,7 +554,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         return true
     }
 
-    val selected = destination?.let(::railToolOf)
+    val selected = entry?.let { e ->
+        railToolOf(e.destination, if (e.destination.hasRoute<SourceRoute>()) e.toRoute<SourceRoute>().scope else null)
+    }
 
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
@@ -672,6 +705,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     downloadsBadge = downloadsBadge,
                     onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
+                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -684,6 +718,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onOpened = ::showTab,
+                    onOpenPack = ::openPack,
                     onGetBooks = { nav.navigate(SourceRoute(CatalogScope.GRANGER)) },
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onBack = { nav.popBackStack() },
@@ -883,6 +918,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
+                    onOpenPack = ::openPack,
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->
@@ -1007,9 +1043,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,
-                    // Get more (Plan U3b Task 2) takes this over; Kiwix is where Readiness sends people today.
-                    onGetMore = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
+                    onOpenPack = ::openPack,
+                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
                 )
+            }
+            composable<GetMoreRoute> {
+                GetMoreScreen(onOpen = nav::openGetMore, onBack = { nav.popBackStack() })
             }
             composable<ReadinessRoute> {
                 ReadinessScreen(

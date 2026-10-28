@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -74,6 +75,8 @@ fun LibraryScreen(
     /** What's coming or stopped in Downloads; the icon shows a badge while it isn't 0. */
     downloadsBadge: Int = 0,
     onDownloads: () -> Unit = {},
+    /** Where sources live (Plan U3b Decision 2). */
+    onGetMore: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -113,6 +116,7 @@ fun LibraryScreen(
                             Icon(painterResource(R.drawable.ic_download), contentDescription = "Downloads")
                         }
                     }
+                    IconButton(onClick = onGetMore) { Icon(Icons.Filled.Add, contentDescription = "Get more") }
                     IconButton(onClick = onReadiness) { Icon(Icons.Filled.CheckCircle, contentDescription = "Readiness") }
                     if (Features.IMPORT) Box {
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
