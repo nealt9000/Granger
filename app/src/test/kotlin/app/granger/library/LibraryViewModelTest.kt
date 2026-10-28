@@ -73,12 +73,12 @@ class LibraryViewModelTest {
             shelf("Audiobooks", "LibriVox" to 1),
         )
         val ui = vm().ui.filterNotNull().first()
-        assertThat(ui.kinds.map { it.title })
-            .containsExactly("Encyclopedias & reference", "Books", "Maps", "Audiobooks", "Music").inOrder()
+        // Music and Audiobooks are Listen's (Plan U2 Decision 4).
+        assertThat(ui.kinds.map { it.title }).containsExactly("Encyclopedias & reference", "Books", "Maps").inOrder()
         assertThat(ui.kinds[0].collections.map { it.collection.name }).containsExactly("Granger packs", "Kiwix").inOrder()
         assertThat(ui.kinds[1].collections.map { it.collection.name }).containsExactly("Granger Classics", "My books").inOrder()
         // Each keeps its own collapse id; both are filed under Literature.
-        assertThat(ui.kinds.map { it.id }).containsExactly(REFERENCE_KIND, BOOKS_KIND, "maps", "audiobooks", "music").inOrder()
+        assertThat(ui.kinds.map { it.id }).containsExactly(REFERENCE_KIND, BOOKS_KIND, "maps").inOrder()
         assertThat(ui.kinds.take(2).map { it.mediaTypeId }).containsExactly("literature", "literature")
         assertThat(ui.emptyLibrary).isFalse()
     }
@@ -115,6 +115,23 @@ class LibraryViewModelTest {
         assertThat(row.isFolder).isTrue()
         assertThat(rowCountText(row)).isEqualTo("5 packs")
         assertThat(rowCountText(classics)).isEqualTo("1 pack")
+    }
+
+    @Test fun noAudioKindsAndMusicAloneLeavesTheLibraryEmpty() = runTest(main.dispatcher) {
+        shelves.shelfList.value = listOf(shelf("Music", "Phone" to 1), shelf("Audiobooks", "LibriVox" to 1))
+        val ui = vm().ui.filterNotNull().first()
+        assertThat(ui.kinds).isEmpty()
+        // Its empty state stays text-only: get packs and books.
+        assertThat(ui.emptyLibrary).isTrue()
+        assertThat(libraryKinds(listOf(shelf("Music", "Phone" to 1), shelf("Video", "Lectures" to 1))).map { it.id }).containsExactly("video")
+    }
+
+    @Test fun listenHasMusicThenAudiobooksEachOnlyWithSomething() {
+        val shelves = listOf(shelf("Audiobooks", "LibriVox" to 1), shelf("Literature", "Wikipedia" to 1), shelf("Music", "Phone" to 2))
+        assertThat(listenKinds(shelves).map { it.title }).containsExactly("Music", "Audiobooks").inOrder()
+        assertThat(listenKinds(shelves).map { it.mediaTypeId }).containsExactly("music", "audiobooks").inOrder()
+        assertThat(listenKinds(listOf(shelf("Audiobooks", "LibriVox" to 1), shelf("Music"))).map { it.id }).containsExactly("audiobooks")
+        assertThat(listenKinds(listOf(shelf("Literature", "Wikipedia" to 1)))).isEmpty()
     }
 
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {

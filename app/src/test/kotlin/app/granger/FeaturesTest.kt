@@ -12,6 +12,6 @@ class FeaturesTest {
 
     @Test fun playerIsOnWithItsRailTool() {
         assertThat(Features.PLAYER).isTrue()
-        assertThat(app.granger.shell.RailTool.PLAYER.shown).isTrue()
+        assertThat(app.granger.shell.RailTool.LISTEN.shown).isTrue()
     }
 }

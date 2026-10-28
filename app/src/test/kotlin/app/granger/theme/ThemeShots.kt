@@ -1,6 +1,31 @@
 package app.granger.theme
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import app.granger.R
+import app.granger.library.KindRow
+import app.granger.listen.CardKind
+import app.granger.listen.ListenActions
+import app.granger.listen.ListenContent
+import app.granger.listen.ListenUi
+import app.granger.listen.NowPlayingCard
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
@@ -133,7 +158,7 @@ class ThemeShots {
         ) {
             LibraryContent(
                 LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, wikipedia)))), false),
-                "/packs", SnackbarHostState(), {}, {}, {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
+                "/packs", SnackbarHostState(), {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
             )
         }
     }
@@ -151,4 +176,80 @@ class ThemeShots {
     @Test fun miniPlayer() = shoot("mini") { MiniPlayer(musicUi(), onPlayPause = {}, onSecondary = {}, onOpen = {}) }
 
     @Test fun welcome() = shoot("welcome") { OnboardingContent(OnboardingUi(step = Step.WELCOME), OnboardingActions()) }
+
+    @Test fun listen() = shoot("listen") {
+        val phone = CollectionRow(ShelfCollection("c:phone", "Phone", "music", false, defaultKey = "phone"), emptyList(), albums = emptyList())
+        val librivox = CollectionRow(ShelfCollection("c:lv", "LibriVox", "audiobooks", false, defaultKey = "lv"), emptyList(), audiobooks = listOf(audiobook("t")))
+        val card = NowPlayingCard("Now playing", "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true)
+        GrangerShell(
+            rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            ListenContent(
+                ListenUi(card, listOf(KindRow("music", "Music", "music", listOf(phone)), KindRow("audiobooks", "Audiobooks", "audiobooks", listOf(librivox)))),
+                ListenActions(),
+            )
+        }
+    }
+
+    @Test fun listenEmpty() = shoot("listen-empty") {
+        GrangerShell(
+            rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) { ListenContent(ListenUi(null, emptyList()), ListenActions()) }
+    }
+
+    /**
+     * Listen's icon beside the other rail tools (Plan U2 Task 3), one PNG: Field on the left, Night on the right, and in
+     * each the wired library_music, then the two candidates (headphones over a phone, headphones). Each column is the
+     * narrow rail's tools with Listen selected at the foot, and the full rail's Listen row at 20 dp.
+     */
+    @Config(qualifiers = "w720dp-h520dp-xxhdpi")
+    @Test fun listenIcons() {
+        val candidates = listOf(
+            "library_music" to R.drawable.ic_listen,
+            "device" to R.drawable.ic_listen_alt_device,
+            "headphones" to R.drawable.ic_listen_alt_headphones,
+        )
+        compose.setContent {
+            Row(Modifier.fillMaxSize()) {
+                for (night in listOf(false, true)) GrangerTheme(night = night) {
+                    Row(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
+                        for ((name, icon) in candidates) IconColumn(name, icon, Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+        File(out).mkdirs()
+        File(out, "listen-icons.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Composable
+    private fun IconColumn(name: String, listen: Int, modifier: Modifier) {
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
+        val tools = listOf(
+            "Home" to painterResource(R.drawable.ic_owl),
+            "Search" to rememberVectorPainter(Icons.Filled.Search),
+            "Ask" to painterResource(R.drawable.ic_research),
+            "Library" to painterResource(R.drawable.ic_library_books_open),
+            "Listen" to painterResource(listen),
+            "Settings" to rememberVectorPainter(Icons.Filled.Settings),
+        )
+        Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            for ((label, painter) in tools) {
+                IconButton(onClick = {}) { Icon(painter, contentDescription = label, tint = muted) }
+            }
+            // Selected, as the rail draws the tool you're in.
+            IconButton(onClick = {}) { Icon(painterResource(listen), contentDescription = "Listen", tint = MaterialTheme.colorScheme.primary) }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(painterResource(listen), contentDescription = null, tint = muted, modifier = Modifier.size(20.dp))
+                Text("Listen", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+    }
 }

@@ -68,6 +68,10 @@ import app.granger.library.LibraryScreen
 import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
 import app.granger.library.SourceLink
+import app.granger.listen.ListenActions
+import app.granger.listen.ListenScreen
+import app.granger.listen.ListenViewModel
+import app.granger.widget.playFromWidget
 import app.granger.audiobooks.AudiobookScreen
 import app.granger.audiobooks.AudiobookShelfScreen
 import app.granger.audiobooks.AudiobooksViewModel
@@ -294,27 +298,33 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 
 /**
  * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
- * to, except Models ([sourceScope] is a [SourceRoute]'s scope), which stays with Settings (Plan U3b Decision 2).
+ * to, except Models ([sourceScope] is a [SourceRoute]'s scope), which stays with Settings (Plan U3b Decision 2). Music,
+ * audiobooks, the player and the audio sources (LibriVox, and Archive.org's spoken word and music: [archiveKind] is an
+ * [ArchiveRoute]'s kind) are Listen's (Plan U2 Decision 4).
  */
-internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null): RailTool? = when {
+internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
     destination.hasRoute<SourceRoute>() -> if (sourceScope == CatalogScope.MODELS) RailTool.SETTINGS else RailTool.LIBRARY
-    destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
-        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() ||
-        destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
+    destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
+    destination.hasRoute<ListenRoute>() || destination.hasRoute<PlayerRoute>() || destination.hasRoute<LibriVoxRoute>() ||
+        destination.isMusic() || destination.isAudiobooks() -> RailTool.LISTEN
+    destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() ||
+        destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
     destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
-    destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
     else -> null
 }
+
+/** Listen's home (Plan U2 Decision 4): the Now playing card and the Music and Audiobooks shelves. The tool's landing. */
+@Serializable object ListenRoute
 
 /** The full-screen player, music or audiobook, whichever is loaded (spec §8). */
 @Serializable object PlayerRoute
 
 /**
- * The Player tool: opens the full-screen player, or returns from it (to the mini-player) when it's on top. With the
- * player further down the back stack it is brought back up rather than stacked a second time.
+ * The mini-player's tap: opens the full-screen player, or returns from it (to the mini-player) when it's on top. With
+ * the player further down the back stack it is brought back up rather than stacked a second time.
  */
 fun NavController.togglePlayer() {
     when {
@@ -558,12 +568,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
 
     val selected = entry?.let { e ->
-        railToolOf(e.destination, if (e.destination.hasRoute<SourceRoute>()) e.toRoute<SourceRoute>().scope else null)
+        railToolOf(
+            e.destination,
+            sourceScope = if (e.destination.hasRoute<SourceRoute>()) e.toRoute<SourceRoute>().scope else null,
+            archiveKind = if (e.destination.hasRoute<ArchiveRoute>()) e.toRoute<ArchiveRoute>().kind else null,
+        )
     }
 
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
-        onPlayer = destination?.hasRoute<PlayerRoute>() == true,
+        // Listen's home has the Now playing card instead.
+        onPlayer = destination?.hasRoute<PlayerRoute>() == true || destination?.hasRoute<ListenRoute>() == true,
         reading = readerTabId != null,
         railVisible = shell.railVisible,
     )
@@ -628,7 +643,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
-                RailTool.PLAYER -> nav.togglePlayer()
+                RailTool.LISTEN -> if (!nav.popBackStack<ListenRoute>(inclusive = false)) nav.navigate(ListenRoute) { launchSingleTop = true }
             }
         },
         onTab = ::showTab,
@@ -700,8 +715,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
-                    onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },
-                    onOpenAudiobooks = { id -> nav.navigate(AudiobookShelfRoute(id)) },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     downloadsBadge = downloadsBadge,
@@ -993,6 +1006,27 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 composable<PlayerRoute> {
                     PlayerScreen(player, onClose = { nav.popBackStack() }, onShelf = { nav.openShelfFromPlayer(it) })
                 }
+            }
+            composable<ListenRoute> {
+                ListenScreen(
+                    viewModel { if (Features.PLAYER) ListenViewModel(container.shelves, container.playerHub) else ListenViewModel(container.shelves) },
+                    ListenActions(
+                        // The voice's full view is still its sheet, as from the mini-player.
+                        onOpenPlayer = { if (player?.voiceNow() != null) voiceSheet = true else nav.showPlayer() },
+                        // As the widget's play: the live item, else what the card says would resume.
+                        onPlayPause = {
+                            if (Features.PLAYER) scope.launch {
+                                playFromWidget(container.playerHub, resumeVoice = { key, title -> container.playResumer.resume(key, title) })
+                            }
+                        },
+                        onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },
+                        onOpenAudiobooks = { id -> nav.navigate(AudiobookShelfRoute(id)) },
+                        onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
+                        onOpenSource = nav::openGetMore,
+                        onFindOnPhone = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
+                        onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                    ),
+                )
             }
             composable<VoiceRoute> {
                 VoiceSettingsScreen(

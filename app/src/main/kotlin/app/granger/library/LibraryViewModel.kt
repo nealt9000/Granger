@@ -2,10 +2,12 @@ package app.granger.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Library
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
+import app.granger.music.MUSIC_TYPE_ID
 import android.net.Uri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * An archive source the empty Music and Audiobooks screens link to. The three archive.org links are its texts,
+ * An archive source the empty Music and Audiobooks screens (and an empty Listen) link to. The three archive.org links are its texts,
  * spoken-word and music views.
  */
 enum class SourceLink(val title: String) {
@@ -41,15 +43,15 @@ const val BOOKS_KIND = "books"
 
 /**
  * The Library's rows, each only when it holds something. Literature splits in two: its packs (the Kiwix folder, and
- * any collection with a pack in it) are Encyclopedias & reference, its book collections are Books. Maps, Audiobooks
- * and Music follow; any other media type (Video, one the user made) comes after, in its own order. No schema change:
- * the media types stay as they are.
+ * any collection with a pack in it) are Encyclopedias & reference, its book collections are Books. Maps follows; any
+ * other media type (Video, one the user made) comes after, in its own order. Music and Audiobooks are Listen's
+ * ([listenKinds], Plan U2 Decision 4). No schema change: the media types stay as they are.
  */
 fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
     val byId = shelves.associateBy { it.mediaType.id }
     val literature = byId[LITERATURE]?.collections.orEmpty()
     val (reference, books) = literature.partition { row -> row.isFolder || row.withChildren.any { it.packs.isNotEmpty() } }
-    val rest = shelves.filter { it.mediaType.id != LITERATURE }
+    val rest = shelves.filter { it.mediaType.id != LITERATURE && it.mediaType.id !in AUDIO_TYPE_IDS }
         .sortedBy { FOLLOWING.indexOf(it.mediaType.id).let { i -> if (i < 0) FOLLOWING.size else i } }
     return listOf(
         KindRow(REFERENCE_KIND, "Encyclopedias & reference", LITERATURE, reference),
@@ -58,10 +60,23 @@ fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
         rest.map { KindRow(it.mediaType.id, it.mediaType.name, it.mediaType.id, it.collections) }
 }
 
+/**
+ * Listen's shelves (Plan U2 Decision 4): Music, then Audiobooks, each only when it holds something (the shelves leave
+ * out an empty media type). Podcasts join them once they exist.
+ */
+fun listenKinds(shelves: List<Shelf>): List<KindRow> {
+    val byId = shelves.associateBy { it.mediaType.id }
+    return AUDIO_TYPE_IDS.mapNotNull { id -> byId[id]?.let { KindRow(id, it.mediaType.name, id, it.collections) } }
+        .filter { it.collections.isNotEmpty() }
+}
+
 private const val LITERATURE = "literature"
 
 /** The built-in media types after Literature's two rows, in the Library's order. */
-private val FOLLOWING = listOf("maps", "audiobooks", "music")
+private val FOLLOWING = listOf("maps")
+
+/** The media types Listen holds rather than the Library, in Listen's order. */
+private val AUDIO_TYPE_IDS = listOf(MUSIC_TYPE_ID, AUDIOBOOKS_TYPE_ID)
 
 class LibraryViewModel(
     shelves: Shelves,
@@ -88,7 +103,8 @@ class LibraryViewModel(
 
     /** Null until the first load finishes. */
     val ui: StateFlow<LibraryUi?> = shelves.shelves
-        .map { LibraryUi(libraryKinds(it), emptyLibrary = it.isEmpty()) }
+        // Empty means no text or maps: music alone doesn't fill the Library, it fills Listen.
+        .map { shelves -> libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty()) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Re-scan pack folders; called whenever the screen resumes (an SD card may have come back). */
