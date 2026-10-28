@@ -53,6 +53,7 @@ class OnboardingActions(
     val onRefreshCatalog: () -> Unit = {},
     val onChooseStart: (String?) -> Unit = {},
     val onToggleLine: (String) -> Unit = {},
+    val onToggleAsk: () -> Unit = {},
     val onRegionQuery: (String) -> Unit = {},
     val onChooseRegion: (String?) -> Unit = {},
     val onToggleUseCase: (String) -> Unit = {},
@@ -78,6 +79,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
         OnboardingActions(
             onNext = viewModel::next, onBack = viewModel::back, onSkip = viewModel::skip, onStart = viewModel::start,
             onRefreshCatalog = viewModel::refreshCatalog, onChooseStart = viewModel::chooseStart, onToggleLine = viewModel::toggleLine,
+            onToggleAsk = viewModel::toggleAsk,
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
@@ -200,6 +202,25 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
                 ) { actions.onChooseStart(choice.id) }
             }
             Choice("Neither, I'll choose later", "Home and the Library are yours either way.", selected = ui.startId == null) { actions.onChooseStart(null) }
+        }
+    }
+    ui.askLine?.let { ask ->
+        // Offered under every choice, Neither included: Granger Classics alone is enough to ask (Plan U3a Decision 2).
+        item(key = "ask") {
+            Row(
+                Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ui.askChosen, role = Role.Checkbox) { actions.onToggleAsk() }.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = ui.askChosen, onCheckedChange = null)
+                Column(Modifier.padding(start = 8.dp).weight(1f)) {
+                    Text("${ask.title} · ${formatBytes(ask.bytes)}")
+                    Text(
+                        "The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
     val start = ui.start ?: return

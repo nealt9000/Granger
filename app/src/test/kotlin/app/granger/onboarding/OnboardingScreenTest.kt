@@ -27,7 +27,7 @@ class OnboardingScreenTest {
     private val calls = mutableListOf<String>()
     private val actions = OnboardingActions(
         onNext = { calls += "next" }, onBack = { calls += "back" }, onSkip = { calls += "skip" }, onStart = { calls += "start" },
-        onRefreshCatalog = { calls += "refresh" }, onChooseStart = { calls += "start:$it" }, onToggleLine = { calls += "line:$it" },
+        onRefreshCatalog = { calls += "refresh" }, onChooseStart = { calls += "start:$it" }, onToggleLine = { calls += "line:$it" }, onToggleAsk = { calls += "ask" },
         onRegionQuery = { calls += "query:$it" }, onChooseRegion = { calls += "region:$it" }, onToggleUseCase = { calls += "case:$it" },
         onSeeDomain = { calls += "see:$it" }, onWifiOnly = { calls += "wifi:$it" }, onChooseVolume = { calls += "volume:$it" },
     )
@@ -57,6 +57,14 @@ class OnboardingScreenTest {
         compose.onNodeWithText("Internal storage: 10 KB free of 64 KB").assertIsDisplayed()
         compose.onNodeWithText("Back").performClick()
         assertThat(calls).containsExactly("back")
+    }
+
+    @Test fun pickAStartOffersAskUnderTheChoices() {
+        val ask = Line(OnboardingModel.ASK, "Ask (Preview)", listOf(app.granger.modelEntry("e2b", size = 2_200_000_000)), installed = false)
+        show(OnboardingUi(step = Step.START, noCatalog = false, startId = null, askLine = ask, askChosen = true))
+        compose.onNodeWithText("Ask (Preview) · 2.2 GB").assertIsDisplayed().assertIsOn().performClick()
+        compose.onNodeWithText("The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.").assertIsDisplayed()
+        assertThat(calls).containsExactly("ask")
     }
 
     @Test fun pickAStartShowsTheFetchWhileTheCatalogArrives() {

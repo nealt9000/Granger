@@ -34,7 +34,7 @@ enum class Step { WELCOME, PHONE, START, SITUATION, REVIEW }
 /** This phone (step 2). */
 data class PhoneUi(
     val tierLine: String,
-    /** Why Research is or isn't available; null when the tier can run it. */
+    /** Whether this phone can run Ask, and where to get it; null when there's nothing to say. */
     val researchLine: String?,
     val volumes: List<Volume>,
     val efficientBytes: Long,
@@ -58,6 +58,9 @@ data class OnboardingUi(
     val region: Region? = null,
     val additions: List<Addition> = emptyList(),
     val useCaseIds: Set<String> = emptySet(),
+    /** Ask's models, offered under the start choices; null where Ask can't run or the catalog has none. */
+    val askLine: Line? = null,
+    val askChosen: Boolean = true,
     val review: Review = Review(emptyList(), 0),
     val wifiOnly: Boolean = true,
     val volumePath: String? = null,
@@ -80,6 +83,7 @@ class OnboardingViewModel(
     private val tier: DeviceTier,
     private val totalRamBytes: Long,
     private val onboardingPrefs: OnboardingPrefs,
+    private val dense: Boolean = app.granger.DENSE_RETRIEVAL,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
@@ -91,6 +95,7 @@ class OnboardingViewModel(
     private val regionQuery = MutableStateFlow("")
     private val regionId = MutableStateFlow<String?>(null)
     private val useCaseIds = MutableStateFlow<Set<String>>(emptySet())
+    private val askChosen = MutableStateFlow(true)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<String?>(null)
@@ -101,15 +106,15 @@ class OnboardingViewModel(
     private val done = MutableStateFlow(false)
 
     private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
-    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>)
+    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
         Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
     }
-    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds) { values ->
+    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen) { values ->
         @Suppress("UNCHECKED_CAST")
-        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>)
+        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean)
     }
     private val setup = combine(wifiOnly, volumePath, notice, ::Setup)
 
@@ -152,7 +157,8 @@ class OnboardingViewModel(
         val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen) }.orEmpty()
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
         val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: f.volumes.firstOrNull()
-        val review = OnboardingModel.review(start, c.unticked, region, picked, volume?.freeBytes ?: 0L)
+        val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
+        val review = OnboardingModel.review(start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen })
         return OnboardingUi(
             step = c.step,
             noCatalog = catalog == null,
@@ -160,7 +166,7 @@ class OnboardingViewModel(
             catalogFailed = f.failed,
             phone = PhoneUi(
                 tierLine = tierLine(),
-                researchLine = researchLine(),
+                researchLine = researchLine(offered = askLine != null),
                 volumes = f.volumes,
                 efficientBytes = starts.firstOrNull { it.id == OnboardingModel.EFFICIENT }?.bytes() ?: 0L,
                 comprehensiveBytes = starts.firstOrNull { it.id == OnboardingModel.COMPREHENSIVE }?.bytes() ?: 0L,
@@ -173,6 +179,8 @@ class OnboardingViewModel(
             region = region,
             additions = additions,
             useCaseIds = c.useCaseIds,
+            askLine = askLine,
+            askChosen = c.askChosen,
             review = review,
             wifiOnly = s.wifiOnly,
             volumePath = volume?.root?.path,
@@ -180,17 +188,16 @@ class OnboardingViewModel(
         )
     }
 
-    private fun tierLine(): String {
-        val gb = (totalRamBytes / (1024.0 * 1024 * 1024)).let { kotlin.math.round(it).toInt() }
-        return when (tier) {
-            DeviceTier.LIBRARY_ONLY -> "A library phone, with about $gb GB of memory."
-            DeviceTier.ASK -> "A library and research phone, with about $gb GB of memory."
-        }
+    /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
+    private fun tierLine(): String = when (tier) {
+        DeviceTier.LIBRARY_ONLY -> "A library phone, with ${formatBytes(totalRamBytes)} of memory."
+        DeviceTier.ASK -> "A library phone that can run Ask, with ${formatBytes(totalRamBytes)} of memory."
     }
 
-    private fun researchLine(): String? = when (tier) {
-        DeviceTier.LIBRARY_ONLY -> "Research, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library."
-        DeviceTier.ASK -> "Research, the AI librarian, is coming in a later release; this phone can run it."
+    /** [offered]: Pick a start offers Ask's models. */
+    private fun researchLine(offered: Boolean): String = when (tier) {
+        DeviceTier.LIBRARY_ONLY -> "Ask, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library."
+        DeviceTier.ASK -> if (offered) "Ask, the librarian, runs on this phone. You can get it on the next screen." else "Ask, the librarian, runs on this phone."
     }
 
     fun refreshVolumes() {
@@ -217,6 +224,8 @@ class OnboardingViewModel(
     fun setRegionQuery(query: String) { regionQuery.value = query }
 
     fun chooseRegion(packId: String?) { regionId.value = packId }
+
+    fun toggleAsk() = askChosen.update { !it }
 
     fun toggleUseCase(id: String) = useCaseIds.update { if (id in it) it - id else it + id }
 

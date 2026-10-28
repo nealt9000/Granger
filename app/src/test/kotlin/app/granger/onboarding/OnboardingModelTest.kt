@@ -2,9 +2,12 @@ package app.granger.onboarding
 
 import app.granger.bookEntry
 import app.granger.catalogOf
+import app.granger.core.ai.DeviceTier
+import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.Onboarding
 import app.granger.core.catalog.Preset
 import app.granger.core.catalog.UseCase
+import app.granger.modelEntry
 import app.granger.packEntry
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -107,5 +110,40 @@ class OnboardingModelTest {
 
         // Nothing chosen at all.
         assertThat(OnboardingModel.review(null, emptySet(), null, emptyList(), 1).isEmpty).isTrue()
+    }
+
+    private val e2b = modelEntry("gemma-4-e2b-gpu", ModelRole.SMALL, size = 2_000)
+    private val e4b = modelEntry("gemma-4-e4b-gpu", ModelRole.LARGE, size = 3_000)
+    private val embedder = modelEntry("embeddinggemma-2-text-270m", ModelRole.EMBEDDER, size = 160)
+    private val withModels = catalog.copy(models = listOf(e4b, e2b, embedder))
+
+    @Test fun askIsTheAnsweringModelPlusTheEmbedderWhenDense() {
+        val line = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())!!
+        assertThat(line.id).isEqualTo(OnboardingModel.ASK)
+        assertThat(line.title).isEqualTo("Ask (Preview)")
+        assertThat(line.items.map { it.id }).containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m").inOrder()
+        assertThat(line.bytes).isEqualTo(2_160)
+        assertThat(OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = false, installed = emptySet())!!.items.map { it.id })
+            .containsExactly("gemma-4-e2b-gpu")
+    }
+
+    @Test fun askIsNotOfferedWhereItCantRunOrHasNoModel() {
+        assertThat(OnboardingModel.askLine(withModels, DeviceTier.LIBRARY_ONLY, dense = true, installed = emptySet())).isNull()
+        // A release build's catalog drops unevaluated models: nothing to offer.
+        assertThat(OnboardingModel.askLine(catalog, DeviceTier.ASK, dense = true, installed = emptySet())).isNull()
+        assertThat(OnboardingModel.askLine(catalog.copy(models = listOf(embedder)), DeviceTier.ASK, dense = true, installed = emptySet())).isNull()
+    }
+
+    @Test fun askLeavesOutWhatIsInstalledAndVanishesWhenAllIs() {
+        val line = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = setOf("gemma-4-e2b-gpu"))!!
+        assertThat(line.items.map { it.id }).containsExactly("embeddinggemma-2-text-270m")
+        assertThat(OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = setOf("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m"))).isNull()
+    }
+
+    @Test fun theReviewListsAskAsItsOwnGroup() {
+        val ask = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())
+        val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 10_000, ask)
+        assertThat(review.groups.map { it.title }).containsExactly("Ask (Preview)")
+        assertThat(review.bytes).isEqualTo(2_160)
     }
 }

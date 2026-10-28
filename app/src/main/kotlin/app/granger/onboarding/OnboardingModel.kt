@@ -1,11 +1,13 @@
 package app.granger.onboarding
 
-import app.granger.core.catalog.downloadBytes
+import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
+import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.UseCase
+import app.granger.core.catalog.downloadBytes
 
 /**
  * One row the user can untick: a pack, or a collection's books folded together ([count] > 1). [installed] rows are on
@@ -73,6 +75,7 @@ data class Review(val groups: List<ReviewGroup>, val freeBytes: Long) {
 object OnboardingModel {
     const val EFFICIENT = "efficient"
     const val COMPREHENSIVE = "comprehensive"
+    const val ASK = "ask"
 
     /** The two start choices, each from its generated preset; a catalog without them (older) gives an empty list. */
     fun startChoices(catalog: Catalog, installed: Set<String>): List<StartChoice> {
@@ -85,6 +88,19 @@ object OnboardingModel {
             val items = preset.items.mapNotNull { catalog.item(it) }
             StartChoice(id, preset.title, blurbs.getValue(id), lines(items, installed))
         }
+    }
+
+    /**
+     * Ask's models as one line (Plan U3a Decision 2): the answering model, plus the embedder when [dense] retrieval is on,
+     * less what's installed. Null on a phone that can't run Ask, in a catalog with no answering model (release builds
+     * today), or when everything is on the phone already.
+     */
+    fun askLine(catalog: Catalog, tier: DeviceTier, dense: Boolean, installed: Set<String>): Line? {
+        if (tier < DeviceTier.ASK) return null
+        val answerer = catalog.models.firstOrNull { it.role == ModelRole.SMALL } ?: return null
+        val embedder = if (dense) catalog.models.firstOrNull { it.role == ModelRole.EMBEDDER } else null
+        val items = listOfNotNull(answerer, embedder).filter { it.id !in installed }
+        return if (items.isEmpty()) null else Line(ASK, "Ask (Preview)", items, installed = false)
     }
 
     /** The maps family split by [app.granger.core.catalog.Onboarding.larger], each list by title, plus the covered places. */
@@ -115,6 +131,7 @@ object OnboardingModel {
         region: Region?,
         additions: List<Addition>,
         freeBytes: Long,
+        ask: Line? = null,
     ): Review {
         val seen = HashSet<String>()
         fun List<Line>.fresh(): List<Line> = mapNotNull { line ->
@@ -123,6 +140,7 @@ object OnboardingModel {
         }
         val groups = buildList {
             start?.let { s -> s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(s.title, it)) } }
+            ask?.let { listOf(it).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             region?.takeUnless { it.installed }?.let { r ->
                 listOf(Line(r.pack.id, r.title, listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }
                     ?.let { add(ReviewGroup("Your region", it)) }

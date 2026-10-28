@@ -45,7 +45,7 @@
 1. **Fetch once, quietly, on a fresh install.** The onboarding VM calls `catalog.refresh()` when `load()` leaves no catalog. Pick a start shows "Getting the list of packs…" with a progress indicator while it runs. On failure it shows "Couldn't reach the catalog. Check the connection and try again." with **Try again**, and **Next** still works ("Neither" is chosen). A cached catalog is never refreshed by onboarding, so a re-run of Set up suggestions again stays offline.
 2. **Ask's models are a line in Pick a start, not a preset.** On an ASK phone whose build catalog has a SMALL model, Pick a start shows a separate checkbox under the three choices: **"Ask (Preview) · 2.2 GB"**, ticked by default (D4). Under it: "The librarian answers questions from your library, on this phone. It's a preview: it can be wrong." The line holds the SMALL model plus the EMBEDDER when `DENSE_RETRIEVAL` is on, with sizes from the catalog. It's ticked under Neither too: someone who skips the packs can still ask Granger Classics. Review shows it as its own group, "Ask (Preview)". On LIBRARY_ONLY phones, or with no SMALL model in the catalog (today's release builds), the line doesn't appear.
 3. **The Phone step tells the truth.**
-   - ASK: "A library and Ask phone, with 8.0 GB of memory." / "Ask, the librarian, runs on this phone. You can get it on the next screen."
+   - ASK: "A library phone that can run Ask, with 8.0 GB of memory." / "Ask, the librarian, runs on this phone. You can get it on the next screen." *(Built: the second sentence drops when the catalog offers no models, as in release builds today.)*
    - LIBRARY_ONLY keeps its line, with "Research" read as "Ask".
    - Memory goes through `formatBytes` in both places.
 4. **Region and Uses become two steps.** `Step` becomes `WELCOME, PHONE, START, REGION, USES, REVIEW`. Each step gets its own `LazyListState`, so every step opens at the top.
@@ -92,20 +92,20 @@
 
 ### Task 1: The catalog arrives by itself
 
-- [ ] Record the baseline: `./gradlew testDebugUnitTest :core:research:test`, with the count in the commit message.
-- [ ] `OnboardingViewModel` init: after `load()`, if `catalog.state.value.catalog == null`, `refresh()`. Expose `catalogFetch: Idle | Fetching | Failed` in `OnboardingUi`.
-- [ ] `OnboardingScreen.start()`: Fetching → progress + "Getting the list of packs…". Failed → the sentence + **Try again**. The old Refresh message goes. The Phone step's Efficient line appears once the catalog lands.
-- [ ] Tests (`OnboardingViewModelTest`): no cache → refresh is called once; cache present → never called; failure → Failed, and Next still advances with Neither.
-- [ ] **Commit.** `Onboarding: fetch the catalog on a fresh install`
+- [x] Record the baseline: `./gradlew testDebugUnitTest :core:research:test`, with the count in the commit message.
+- [x] `OnboardingViewModel` init: after `load()`, if `catalog.state.value.catalog == null`, `refresh()`. Expose `catalogFetch: Idle | Fetching | Failed` in `OnboardingUi`.
+- [x] `OnboardingScreen.start()`: Fetching → progress + "Getting the list of packs…". Failed → the sentence + **Try again**. The old Refresh message goes. The Phone step's Efficient line appears once the catalog lands.
+- [x] Tests (`OnboardingViewModelTest`): no cache → refresh is called once; cache present → never called; failure → Failed, and Next still advances with Neither.
+- [x] **Commit.** `Onboarding: fetch the catalog on a fresh install`
 
 ### Task 2: Ask in onboarding, and the Phone step
 
-- [ ] `OnboardingModel.askLine(catalog, tier, dense: Boolean): AskLine?`: the SMALL model plus the EMBEDDER when `dense`, with the summed size; null on LIBRARY_ONLY, with no SMALL model, or when both are installed.
-- [ ] VM: `askChosen` defaults to true. `review()` adds the "Ask (Preview)" group when the line exists and is chosen. Start enqueues it in the same group.
-- [ ] Screen: the checkbox under the three choices, with the two-sentence lead (Decision 2).
-- [ ] `tierLine()` / `researchLine()` as Decision 3. Memory through `formatBytes`.
-- [ ] Tests (`OnboardingModelTest`): line present on ASK with models; absent on LIBRARY_ONLY; absent with no SMALL; EMBEDDER only with `dense`; sizes summed; ticked under Neither. (`OnboardingViewModelTest`): Review includes the group; unticking removes it.
-- [ ] **Commit.** `Onboarding: offer Ask (Preview) on phones that can run it`
+- [x] `OnboardingModel.askLine(catalog, tier, dense: Boolean): AskLine?`: the SMALL model plus the EMBEDDER when `dense`, with the summed size; null on LIBRARY_ONLY, with no SMALL model, or when both are installed.
+- [x] VM: `askChosen` defaults to true. `review()` adds the "Ask (Preview)" group when the line exists and is chosen. Start enqueues it in the same group.
+- [x] Screen: the checkbox under the three choices, with the two-sentence lead (Decision 2).
+- [x] `tierLine()` / `researchLine()` as Decision 3. Memory through `formatBytes`.
+- [x] Tests (`OnboardingModelTest`): line present on ASK with models; absent on LIBRARY_ONLY; absent with no SMALL; EMBEDDER only with `dense`; sizes summed; ticked under Neither. (`OnboardingViewModelTest`): Review includes the group; unticking removes it.
+- [x] **Commit.** `Onboarding: offer Ask (Preview) on phones that can run it`
 
 ### Task 3: Region and Uses
 

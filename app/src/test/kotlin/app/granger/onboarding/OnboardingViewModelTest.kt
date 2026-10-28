@@ -97,11 +97,37 @@ class OnboardingViewModelTest {
         assertThat(enqueued).isEmpty()
     }
 
-    @Test fun thisPhoneWordsTheTierAndResearch() = runTest(main.dispatcher) {
-        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine).startsWith("A library phone, with about 7 GB")
+    @Test fun thisPhoneWordsTheTierAndAskAsReadinessDoes() = runTest(main.dispatcher) {
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine).isEqualTo("A library phone, with 8.0 GB of memory.")
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine).contains("needs a phone with 6 GB")
-        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine).startsWith("A library and research phone, with about 7 GB")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine).isEqualTo("A library phone that can run Ask, with 8.0 GB of memory.")
+        // No models in this catalog (a release build's): Ask runs here, but there's nothing to get on the next screen.
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.researchLine).isEqualTo("Ask, the librarian, runs on this phone.")
         assertThat(viewModel(DeviceTier.ASK).ui.value.phone.volumes.single().label).isEqualTo("Internal storage")
+    }
+
+    @Test fun askIsOfferedTickedAndGoesIntoTheReviewAndTheGroup() = runTest(main.dispatcher) {
+        val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
+        catalog.mutable.value = CatalogState(catalog = full.copy(models = listOf(e2b)))
+        val vm = viewModel(DeviceTier.ASK)
+        assertThat(vm.ui.value.phone.researchLine).endsWith("You can get it on the next screen.")
+        assertThat(vm.ui.value.askLine!!.bytes).isEqualTo(2_000)
+        assertThat(vm.ui.value.askChosen).isTrue()
+        // Under Neither too: Ask needs no preset.
+        vm.chooseStart(null); settle()
+        assertThat(vm.ui.value.review.groups.map { it.title }).containsExactly("Ask (Preview)")
+        vm.start(); settle()
+        assertThat(enqueued.single().second).containsExactly("gemma-4-e2b-gpu")
+    }
+
+    @Test fun untickingAskTakesItOutOfTheReview() = runTest(main.dispatcher) {
+        val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
+        catalog.mutable.value = CatalogState(catalog = full.copy(models = listOf(e2b)))
+        val vm = viewModel(DeviceTier.ASK)
+        vm.toggleAsk(); settle()
+        assertThat(vm.ui.value.askChosen).isFalse()
+        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Ask (Preview)")
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.askLine).isNull()
     }
 
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {
