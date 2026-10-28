@@ -17,8 +17,13 @@ data class PlaySource(val key: String, val title: String)
 sealed interface NowPlaying {
     data object Idle : NowPlaying
 
-    /** [index] is the track's position in the queue as [PlayerHub.queue] lists it (play order). [repeat]: 0 off, 1 all, 2 one. */
-    data class Music(val track: Track, val index: Int, val queueSize: Int, val shuffle: Boolean, val repeat: Int) : NowPlaying
+    /**
+     * [index] is the track's position in the queue as [PlayerHub.queue] lists it (play order). [repeat]: 0 off, 1 all,
+     * 2 one. [source] is the [PlaySource.key] the queue was played from ("album:<albumKey>", …; empty when unknown).
+     */
+    data class Music(
+        val track: Track, val index: Int, val queueSize: Int, val shuffle: Boolean, val repeat: Int, val source: String = "",
+    ) : NowPlaying
 
     data class Book(val book: Audiobook, val chapter: AudiobookChapter, val chapterCount: Int, val speed: Float,
                     val skipSilence: Boolean, val volumeBoostMb: Int) : NowPlaying
@@ -135,6 +140,12 @@ interface PlayerHub {
 
     /** Stops the voice and empties the player, saving its place. No-op when the voice isn't the active mode. */
     fun stopVoice()
+
+    /**
+     * Stops whatever plays (an album's Stop, Plan U2 Decision 8): its place is saved, as a switch saves it, and the
+     * player empties. Listen's card and the media tab still offer the saved queue. No-op with nothing loaded.
+     */
+    fun stop()
 
     /** Voice only: by paragraph and by sentence. [jumpTo] moves the voice to an address of its source. */
     fun nextParagraph(); fun previousParagraph(); fun nextSentence(); fun previousSentence(); fun jumpTo(address: ReadAddress)

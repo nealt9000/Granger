@@ -36,11 +36,15 @@ import app.granger.media.citedMark
 import app.granger.media.citedTint
 import app.granger.player.formatTime
 
-/** One album: cover, details, Play/Shuffle, and its tracks in disc/track order. */
+/**
+ * One album: cover, details, Play/Shuffle, and its tracks in disc/track order. The player's current song is marked
+ * wherever it was played from, and follows Next from anywhere; Play is Stop while this album's queue plays.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: String? = null) {
     val page by remember(albumKey) { vm.album(albumKey) }.collectAsStateWithLifecycle(null)
+    val now by vm.musicNow.collectAsStateWithLifecycle()
     val dialogs = remember { MusicDialogs() }
     var menu by remember { mutableStateOf(false) }
     val loaded = page
@@ -93,6 +97,7 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
                     enabled = loaded.tracks.any { it.status == PackStatus.OK },
                     onPlay = { vm.play(loaded.tracks, null, source) },
                     onShuffle = { vm.play(loaded.tracks, null, source, shuffle = true) },
+                    onStop = if (now?.playingAlbum(album) == true) vm::stop else null,
                 )
             }
             items(rows, key = { row -> if (row is AlbumRow.Song) row.track.id else "disc:${(row as AlbumRow.Disc).number}" }) { row ->
@@ -104,6 +109,7 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
                     is AlbumRow.Song -> Box(Modifier.citedTint(citedMarked && row.track.id == marked)) {
                         SongRow(
                             row.track, vm, dialogs, nav, onPlay = { vm.play(loaded.tracks, row.index, source) }, leading = row.number, showAlbum = false,
+                            playing = now?.takeIf { it.trackId == row.track.id }?.playing,
                         )
                     }
                 }

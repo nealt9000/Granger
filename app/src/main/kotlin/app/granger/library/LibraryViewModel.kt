@@ -3,6 +3,7 @@ package app.granger.library
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
+import app.granger.core.library.AudioShelves
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Library
 import app.granger.core.library.Shelf
@@ -61,12 +62,16 @@ fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
 }
 
 /**
- * Listen's shelves (Plan U2 Decision 4): Music, then Audiobooks, each only when it holds something (the shelves leave
- * out an empty media type). Podcasts join them once they exist.
+ * Listen's shelves (Plan U2 Decisions 4 and 7): Music, then Audiobooks, each only when it holds something that plays
+ * ([AudioShelves]: an audiobook that's missing or won't open doesn't make a shelf). Podcasts join them once
+ * they exist.
  */
 fun listenKinds(shelves: List<Shelf>): List<KindRow> {
     val byId = shelves.associateBy { it.mediaType.id }
-    return AUDIO_TYPE_IDS.mapNotNull { id -> byId[id]?.let { KindRow(id, it.mediaType.name, id, it.collections) } }
+    val audio = AudioShelves.of(shelves)
+    val held = mapOf(MUSIC_TYPE_ID to audio.music, AUDIOBOOKS_TYPE_ID to audio.audiobooks)
+    return AUDIO_TYPE_IDS.filter { held[it] == true }
+        .mapNotNull { id -> byId[id]?.let { KindRow(id, it.mediaType.name, id, it.collections) } }
         .filter { it.collections.isNotEmpty() }
 }
 

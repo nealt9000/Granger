@@ -14,24 +14,28 @@ class SplitVoicesTest {
     private val all = listOf(granger, usA, usB, gb, au)
 
     @Test
-    fun grangerVoicesAndThePhonesRegionAreShownTheRestFolded() {
-        val (shown, more) = splitVoices(all, chosen = null, deviceTag = "en-US")
-        assertThat(shown).containsExactly(granger, usA, usB).inOrder()
-        assertThat(more).containsExactly(gb, au).inOrder()
+    fun grangerVoicesAreShownAndEverySystemVoiceIsFolded() {
+        val (shown, more) = splitVoices(all, chosen = granger.id)
+        assertThat(shown).containsExactly(granger)
+        assertThat(more).containsExactly(usA, usB, gb, au).inOrder()
+        // Nothing chosen: the first voice reads, and it's a Granger one.
+        assertThat(splitVoices(all, chosen = null)).isEqualTo(listOf(granger) to listOf(usA, usB, gb, au))
     }
 
     @Test
-    fun theChosenVoiceIsAlwaysShown() {
-        val (shown, more) = splitVoices(all, chosen = au.id, deviceTag = "en-US")
-        assertThat(shown).containsExactly(granger, usA, usB, au).inOrder()
-        assertThat(more).containsExactly(gb)
+    fun aChosenSystemVoiceStaysOutsideTheFold() {
+        val (shown, more) = splitVoices(all, chosen = au.id)
+        assertThat(shown).containsExactly(granger, au).inOrder()
+        assertThat(more).containsExactly(usA, usB, gb).inOrder()
     }
 
     @Test
-    fun aPhoneOutsideTheEnglishRegionsStillSeesOneSystemVoice() {
-        val (shown, more) = splitVoices(all, chosen = null, deviceTag = "de-DE")
-        assertThat(shown).containsExactly(granger, usA).inOrder()
-        assertThat(more).containsExactly(usB, gb, au).inOrder()
-        assertThat(splitVoices(listOf(granger), null, "de-DE")).isEqualTo(listOf(granger) to emptyList<Voice>())
+    fun withOnlySystemVoicesTheOneThatReadsIsShown() {
+        val system = listOf(usA, usB, gb, au)
+        assertThat(splitVoices(system, chosen = null)).isEqualTo(listOf(usA) to listOf(usB, gb, au))
+        // A chosen voice that's gone: the first one reads instead.
+        assertThat(splitVoices(system, chosen = VoiceId.System("tts", "gone"))).isEqualTo(listOf(usA) to listOf(usB, gb, au))
+        assertThat(splitVoices(listOf(granger), null)).isEqualTo(listOf(granger) to emptyList<Voice>())
+        assertThat(splitVoices(emptyList(), null)).isEqualTo(emptyList<Voice>() to emptyList<Voice>())
     }
 }

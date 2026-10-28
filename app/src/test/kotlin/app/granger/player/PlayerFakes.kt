@@ -56,6 +56,7 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
         lastSource = source
     }
     override fun stopVoice() { calls += "stopVoice" }
+    override fun stop() { calls += "stop" }
     override fun nextParagraph() { calls += "nextParagraph" }
     override fun previousParagraph() { calls += "previousParagraph" }
     override fun nextSentence() { calls += "nextSentence" }

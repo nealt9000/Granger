@@ -13,8 +13,10 @@ import app.granger.core.library.Playlists
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
 import app.granger.core.library.Track
+import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlaySource
 import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerUi
 import app.granger.core.downloads.DownloadRecord
 import app.granger.media.MediaDownloads
 import app.granger.sources.ItemStatus
@@ -93,6 +95,24 @@ data class MusicUi(
     /** Always every playlist: playlists aren't scoped to a collection. */
     val playlists: List<Playlist>,
 )
+
+/**
+ * The music the player holds, as the album page marks it (Plan U2 Decision 8): [trackId] is the current track, [source]
+ * the [PlaySource.key] its queue was played from, [playing] whether it's heard; [underVoice] when it plays under the voice.
+ */
+data class MusicNow(val trackId: String, val source: String, val playing: Boolean, val underVoice: Boolean = false) {
+    /** [album]'s queue is playing: its Play becomes Stop. Not under the voice, where Stop would end the reading too. */
+    fun playingAlbum(album: AlbumSummary): Boolean = !underVoice && playing && source == MusicSources.album(album).key
+
+    companion object {
+        /** Null when no music is loaded. */
+        fun of(ui: PlayerUi): MusicNow? = when (val now = ui.now) {
+            is NowPlaying.Music -> MusicNow(now.track.id, now.source, ui.playing)
+            is NowPlaying.Voice -> now.music?.let { MusicNow(it.track.id, it.source, now.musicPlaying, underVoice = true) }
+            else -> null
+        }
+    }
+}
 
 /** `RecentPlay` keys and titles for what a play started from. */
 object MusicSources {
@@ -333,6 +353,10 @@ class MusicViewModel(
         .map { all -> all.filter { it.mediaType.id == MUSIC_TYPE_ID } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** What the player holds, for the album page's playing mark and its Play/Stop; the position's ticks don't change it. */
+    val musicNow: StateFlow<MusicNow?> = hub.ui.map(MusicNow::of).distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MusicNow.of(hub.ui.value))
+
     /** Every playlist, for "Add to playlist". */
     val allPlaylists: StateFlow<List<Playlist>> =
         playlists.all.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -370,6 +394,9 @@ class MusicViewModel(
         val (ids, start) = MusicCatalog.playable(tracks, tapped) ?: return
         hub.playTracks(ids, start, shuffle, source)
     }
+
+    /** The album's Stop: the player stops (not a pause) and empties, its place saved. */
+    fun stop() = hub.stop()
 
     fun playNext(tracks: List<Track>) {
         playableIds(tracks).takeIf { it.isNotEmpty() }?.let(hub::playNext)

@@ -40,7 +40,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.speech.Voice
 import app.granger.core.speech.VoiceId
 import app.granger.formatBytes
-import java.util.Locale
 
 object VoiceSettingsTags {
     const val VOICE_ROW = "voice_row"
@@ -86,9 +85,9 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                     )
                 }
             }
-            // The Granger voices and the system voices in the phone's own language and region are listed; the system
-            // engine's other English regions (a dozen more codes) stay behind one row until asked for.
-            val (shown, more) = splitVoices(ui.voices, ui.chosen, Locale.getDefault().toLanguageTag())
+            // The Granger voices are listed, and the system voice that reads if it is one; every other system voice
+            // (the engine lists dozens) stays behind one row until asked for (Plan U2 Decision 9).
+            val (shown, more) = splitVoices(ui.voices, ui.chosen)
             val list = if (showMore) shown + more else shown
             items(list.size, key = { "voice-${list[it].id.encode()}" }) { i ->
                 val voice = list[i]
@@ -103,7 +102,7 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
             if (more.isNotEmpty() && !showMore) {
                 item(key = "more-voices") {
                     TextButton(onClick = { showMore = true }, modifier = Modifier.padding(horizontal = 4.dp).testTag(VoiceSettingsTags.MORE)) {
-                        Text("Other system voices (${more.size})")
+                        Text("System voices (${more.size})")
                     }
                 }
             }
@@ -169,14 +168,13 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
 }
 
 /**
- * The voices to list first and the ones behind "Other system voices": every Granger voice, every system voice in
- * [deviceTag]'s language and region (else the first system voice, so one is always offered), and the chosen voice
- * wherever it is; the other system voices go second.
+ * The voices to list first and the ones behind "System voices": every Granger voice, plus the voice in use when it's a
+ * system one ([chosen] if it's installed, else the first voice, which is what reads then); every other system voice
+ * goes second.
  */
-internal fun splitVoices(voices: List<Voice>, chosen: VoiceId?, deviceTag: String): Pair<List<Voice>, List<Voice>> {
-    val system = voices.filter { it.id is VoiceId.System }
-    val local = system.filter { it.language.equals(deviceTag, ignoreCase = true) }.ifEmpty { system.take(1) }
-    val shown = voices.filter { it.id is VoiceId.Granger || it in local || it.id == chosen }
+internal fun splitVoices(voices: List<Voice>, chosen: VoiceId?): Pair<List<Voice>, List<Voice>> {
+    val inUse = voices.firstOrNull { it.id == chosen } ?: voices.firstOrNull()
+    val shown = voices.filter { it.id is VoiceId.Granger || it == inUse }
     return shown to voices.filterNot { it in shown }
 }
 

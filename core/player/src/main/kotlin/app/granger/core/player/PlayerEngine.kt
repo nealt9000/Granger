@@ -548,6 +548,12 @@ class PlayerEngine(
         refresh()
     }
 
+    override fun stop() = submit {
+        if (mode == Mode.NONE) return@submit
+        stopCurrent()
+        refresh()
+    }
+
     override fun nextParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) { Log.i(VOICE_TAG, "Voice: next paragraph"); readAloud.nextParagraph() } }
     override fun previousParagraph() = submit { if (mode == Mode.VOICE && voiceOpen) { Log.i(VOICE_TAG, "Voice: previous paragraph"); readAloud.previousParagraph() } }
     override fun nextSentence() = submit { if (mode == Mode.VOICE && voiceOpen) readAloud.nextSentence() }
@@ -910,7 +916,7 @@ class PlayerEngine(
     private fun musicNow(p: Player): NowPlaying.Music? {
         val q = musicQueue ?: return null
         val track = tracks[p.currentMediaItem?.mediaId ?: q.ids[q.index]] ?: return null
-        return NowPlaying.Music(track, q.playOrder.indexOf(q.index), q.ids.size, q.shuffle, q.repeat)
+        return NowPlaying.Music(track, q.playOrder.indexOf(q.index), q.ids.size, q.shuffle, q.repeat, sourceKey)
     }
 
     override fun setSpeed(speed: Float) = submit {

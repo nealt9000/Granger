@@ -47,6 +47,7 @@ import app.granger.librivox.LibriVoxScreen
 import app.granger.librivox.LibriVoxViewModel
 import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.Albums
+import app.granger.core.library.AudioShelves
 import app.granger.core.library.BookIds
 import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
@@ -447,6 +448,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 deleteBookmark = container.playback::deleteBookmark,
                 skipBackSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_BACK_S, PlayerViewModel.DEFAULT_SKIP_S) },
                 skipForwardSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, PlayerViewModel.DEFAULT_SKIP_S) },
+                audiobooks = container.shelves.audioShelves.map { it.audiobooks },
             )
         }
     } else {
@@ -985,6 +987,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
                         ?.title ?: "No offline voice on this phone",
                     onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
+                    audiobooks = remember { container.shelves.audioShelves }.collectAsStateWithLifecycle(AudioShelves.NONE).value.audiobooks,
                 )
             }
             composable<MediaSettingsRoute> {
@@ -1143,4 +1146,5 @@ private fun mediaSettings(container: AppContainer, context: Context, scope: Coro
     },
     scope = scope,
     work = container.appScope,
+    audiobooks = container.shelves.audioShelves.map { it.audiobooks },
 )

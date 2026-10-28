@@ -9,8 +9,11 @@ import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
 import app.granger.book
 import app.granger.pack
+import app.granger.player.audiobook
+import app.granger.core.library.AlbumSummary
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.MediaType
+import app.granger.core.library.PackStatus
 import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
 import com.google.common.truth.Truth.assertThat
@@ -126,12 +129,25 @@ class LibraryViewModelTest {
         assertThat(libraryKinds(listOf(shelf("Music", "Phone" to 1), shelf("Video", "Lectures" to 1))).map { it.id }).containsExactly("video")
     }
 
+    /** An audio shelf: each Music collection holds an album, each Audiobooks one an audiobook, with [status]. */
+    private fun audio(type: String, vararg names: String, status: PackStatus = PackStatus.OK) = Shelf(
+        MediaType(type.lowercase(), type, builtIn = true, sortOrder = 0),
+        names.map { name ->
+            val collection = ShelfCollection("c:$name", name, type.lowercase(), userCreated = false, defaultKey = name)
+            if (type == "Music") CollectionRow(collection, emptyList(), albums = listOf(AlbumSummary(name, name, "Artist", "", "", 1, 0L, null, status)))
+            else CollectionRow(collection, emptyList(), audiobooks = listOf(audiobook(name).copy(status = status)))
+        },
+    )
+
     @Test fun listenHasMusicThenAudiobooksEachOnlyWithSomething() {
-        val shelves = listOf(shelf("Audiobooks", "LibriVox" to 1), shelf("Literature", "Wikipedia" to 1), shelf("Music", "Phone" to 2))
+        val shelves = listOf(audio("Audiobooks", "LibriVox"), shelf("Literature", "Wikipedia" to 1), audio("Music", "Phone", "Archive.org"))
         assertThat(listenKinds(shelves).map { it.title }).containsExactly("Music", "Audiobooks").inOrder()
         assertThat(listenKinds(shelves).map { it.mediaTypeId }).containsExactly("music", "audiobooks").inOrder()
-        assertThat(listenKinds(listOf(shelf("Audiobooks", "LibriVox" to 1), shelf("Music"))).map { it.id }).containsExactly("audiobooks")
+        assertThat(listenKinds(listOf(audio("Audiobooks", "LibriVox"), audio("Music"))).map { it.id }).containsExactly("audiobooks")
         assertThat(listenKinds(listOf(shelf("Literature", "Wikipedia" to 1)))).isEmpty()
+        // Plan U2 Decision 7: only an audiobook that plays makes the shelf.
+        assertThat(listenKinds(listOf(audio("Audiobooks", "LibriVox", status = PackStatus.MISSING), audio("Music", "Phone"))).map { it.id })
+            .containsExactly("music")
     }
 
     @Test fun emptyLibraryIsFlagged() = runTest(main.dispatcher) {

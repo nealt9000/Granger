@@ -639,6 +639,35 @@ class PlayerEngineTest {
         assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
     }
 
+    /**
+     * Plan U2 Decision 8: the music names the queue's source (the album page's Play/Stop reads it), and Stop saves the
+     * place and empties the player (not a pause).
+     */
+    @Test fun musicNamesItsSourceAndStopEmptiesThePlayer() {
+        val ids = musicFixtures()
+        val engine = newEngine()
+        engine.stop()                                                   // nothing loaded: nothing happens
+        idle()
+        assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+
+        engine.playTracks(ids, 0, false, PlaySource("album:artist|album", "Album"))
+        idle()
+        assertThat((engine.ui.value.now as NowPlaying.Music).source).isEqualTo("album:artist|album")
+        engine.next()
+        idle()
+        assertThat((engine.ui.value.now as NowPlaying.Music).source).isEqualTo("album:artist|album")
+        run(engine.player).untilPosition(1, 700)
+
+        engine.stop()
+        idle()
+        assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+        assertThat(engine.player.mediaItemCount).isEqualTo(0)
+        val saved = runBlocking { playback.musicState() }!!
+        assertThat(saved.index).isEqualTo(1)
+        assertThat(saved.positionMs).isAtLeast(600L)                  // its place was saved first
+        assertThat(saved.sourceKey).isEqualTo("album:artist|album")
+    }
+
     /** Restored (not played), a finished book stays finished through its next saves; playing it un-finishes it. */
     @Test fun restoredFinishedBookStaysFinishedUntilPlayed() {
         val ids = musicFixtures()

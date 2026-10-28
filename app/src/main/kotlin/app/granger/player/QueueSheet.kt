@@ -52,7 +52,8 @@ private data class QueueItem(val key: Int, val track: Track)
 /**
  * The music queue in play order. Long-press a song and drag to move it ([onMove] with play-order positions, once, on
  * release); the cross removes it ([onRemove]), except the last song; a tap plays it ([onPlay]). [current] is the
- * playing song's position. Not [editable] (the saved queue of the inactive tab): just the list.
+ * playing song's position, marked with [PlayingBars] (moving while [heard]). Not [editable] (the saved queue of the
+ * inactive tab): just the list.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,18 +65,19 @@ fun QueueSheet(
     onDismiss: () -> Unit,
     editable: Boolean = true,
     onPlay: (Int) -> Unit = {},
+    heard: Boolean = false,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding()) {
             Text("Queue", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-            if (editable) ReorderableQueue(queue, current, onMove, onRemove, onPlay) else ReadOnlyQueue(queue, current)
+            if (editable) ReorderableQueue(queue, current, heard, onMove, onRemove, onPlay) else ReadOnlyQueue(queue, current)
         }
     }
 }
 
 @Composable
 private fun ReorderableQueue(
-    queue: List<Track>, current: Int, onMove: (Int, Int) -> Unit, onRemove: (Int) -> Unit, onPlay: (Int) -> Unit,
+    queue: List<Track>, current: Int, heard: Boolean, onMove: (Int, Int) -> Unit, onRemove: (Int) -> Unit, onPlay: (Int) -> Unit,
 ) {
     var items by remember { mutableStateOf(queue.mapIndexed { i, t -> QueueItem(i, t) }) }
     var dragKey by remember { mutableStateOf<Int?>(null) }
@@ -135,6 +137,7 @@ private fun ReorderableQueue(
             QueueRow(
                 item.track,
                 playing = playing,
+                heard = heard,
                 canRemove = items.size > 1,
                 canMoveUp = index > 0,
                 canMoveDown = index < items.size - 1,
@@ -168,6 +171,7 @@ private fun LazyListState.itemAt(y: Int) = layoutInfo.visibleItemsInfo.firstOrNu
 private fun QueueRow(
     track: Track,
     playing: Boolean,
+    heard: Boolean = false,
     editable: Boolean = true,
     canRemove: Boolean,
     canMoveUp: Boolean,
@@ -198,6 +202,10 @@ private fun QueueRow(
         }
         PlayerCover(track.coverPath, book = false, size = 40.dp)
         Spacer(Modifier.width(12.dp))
+        if (playing) {
+            PlayingBars(heard)
+            Spacer(Modifier.width(12.dp))
+        }
         Column(Modifier.weight(1f)) {
             Text(
                 track.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge,

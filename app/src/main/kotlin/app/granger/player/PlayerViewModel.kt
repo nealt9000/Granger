@@ -91,9 +91,14 @@ fun modeOf(now: NowPlaying): PlayerMode? = when (now) {
  */
 enum class ListenTab { READER, MEDIA }
 
-/** What the media tab holds: the live media mode (music under the voice counts), else the last one played, else Music. */
-fun mediaMode(now: NowPlaying, saved: SavedModes): PlayerMode =
-    modeOf(now) ?: (now as? NowPlaying.Voice)?.music?.let { PlayerMode.MUSIC } ?: saved.lastMedia ?: PlayerMode.MUSIC
+/**
+ * What the media tab holds: the live media mode (music under the voice counts), else the last one played, else Music.
+ * Without an audiobook on the phone ([audiobooks] false) the last one played being an audiobook doesn't count: the tab
+ * is never Audiobook then (Plan U2 Decision 7).
+ */
+fun mediaMode(now: NowPlaying, saved: SavedModes, audiobooks: Boolean = true): PlayerMode =
+    modeOf(now) ?: (now as? NowPlaying.Voice)?.music?.let { PlayerMode.MUSIC }
+        ?: saved.lastMedia?.takeIf { it != PlayerMode.AUDIOBOOK || audiobooks } ?: PlayerMode.MUSIC
 
 /**
  * The player's tab: the one picked, else what's live (the voice: Reader; music or an audiobook: the media tab), else
@@ -124,7 +129,7 @@ fun SavedBook.progress(): BookProgress = bookProgress(chapters, chapter, inChapt
 /**
  * The mini-player and the full player's tabs. Everything goes through [hub]; [chapters] and [bookmarks] read the
  * library for the loaded audiobook, and [skipBackSeconds]/[skipForwardSeconds] are the audiobook skip settings (for
- * the buttons' labels).
+ * the buttons' labels). [audiobooks] is whether the phone holds an audiobook ([AudioShelves][app.granger.core.library.AudioShelves]).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlayerViewModel(
@@ -134,9 +139,13 @@ class PlayerViewModel(
     private val deleteBookmark: suspend (AudioBookmark) -> Unit = {},
     private val skipBackSeconds: () -> Int = { DEFAULT_SKIP_S },
     private val skipForwardSeconds: () -> Int = { DEFAULT_SKIP_S },
+    audiobooks: Flow<Boolean> = flowOf(true),
 ) : ViewModel() {
     val ui: StateFlow<PlayerUi> = hub.ui
     val queue: StateFlow<List<Track>> = hub.queue
+
+    /** The phone holds an audiobook; true until the shelves first load, so a saved Audiobook tab doesn't flicker. */
+    val hasAudiobooks: StateFlow<Boolean> = audiobooks.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     /** Every mode's saved state: the media tab, when its mode isn't live, and Reader's Resume show one. */
     val saved: StateFlow<SavedModes> = hub.saved
@@ -155,7 +164,7 @@ class PlayerViewModel(
     fun tab(): ListenTab = listenTab(_pickedTab.value, hub.ui.value.now, hub.saved.value)
 
     /** The media tab's mode now: Music or Audiobook. */
-    fun mediaMode(): PlayerMode = mediaMode(hub.ui.value.now, hub.saved.value)
+    fun mediaMode(): PlayerMode = mediaMode(hub.ui.value.now, hub.saved.value, hasAudiobooks.value)
 
     /**
      * A control pressed on the inactive tab: [mode] becomes the active one, loaded from its saved state and playing

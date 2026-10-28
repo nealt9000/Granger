@@ -73,8 +73,9 @@ fun ListenPlayerScreen(
     val queue by viewModel.queue.collectAsStateWithLifecycle()
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     val picked by viewModel.pickedTab.collectAsStateWithLifecycle()
+    val audiobooks by viewModel.hasAudiobooks.collectAsStateWithLifecycle()
     val tab = listenTab(picked, ui.now, saved)
-    val media = mediaMode(ui.now, saved)
+    val media = mediaMode(ui.now, saved, audiobooks)
     val live = modeOf(ui.now) == media
     // A Surface, like the Scaffold every other screen sits in: it provides onBackground as LocalContentColor, without
     // which every untinted Icon and uncoloured Text here falls back to black on the dark background.

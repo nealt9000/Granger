@@ -2,8 +2,11 @@ package app.granger.listen
 
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
+import app.granger.core.library.AlbumSummary
+import app.granger.core.library.AudioShelves
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.MediaType
+import app.granger.core.library.PackStatus
 import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
 import app.granger.core.player.SavedModes
@@ -38,9 +41,16 @@ class ListenViewModelTest {
 
     private fun vm() = ListenViewModel(shelves, hub)
 
-    private fun shelf(type: String, vararg names: String) = Shelf(
+    private fun album(key: String, status: PackStatus = PackStatus.OK) = AlbumSummary(key, key, "Artist", "", "", 1, 0L, null, status)
+
+    /** A Music shelf's rows hold an album each, any other shelf's an audiobook each, with [status]. */
+    private fun shelf(type: String, vararg names: String, status: PackStatus = PackStatus.OK) = Shelf(
         MediaType(type.lowercase(), type, builtIn = true, sortOrder = 0),
-        names.map { CollectionRow(ShelfCollection("c:$it", it, type.lowercase(), userCreated = false, defaultKey = it), emptyList(), audiobooks = listOf(audiobook(it))) },
+        names.map {
+            val collection = ShelfCollection("c:$it", it, type.lowercase(), userCreated = false, defaultKey = it)
+            if (type == "Music") CollectionRow(collection, emptyList(), albums = listOf(album(it, status)))
+            else CollectionRow(collection, emptyList(), audiobooks = listOf(audiobook(it).copy(status = status)))
+        },
     )
 
     @Test fun theShelvesAreMusicThenAudiobooksAndOnlyAudio() = runTest(main.dispatcher) {
@@ -54,6 +64,18 @@ class ListenViewModelTest {
     @Test fun aShelfShowsOnlyWhenItHoldsSomething() = runTest(main.dispatcher) {
         shelves.shelfList.value = listOf(shelf("Music", "Phone"), shelf("Audiobooks"))
         assertThat(vm().ui.filterNotNull().first().shelves.map { it.id }).containsExactly("music")
+    }
+
+    /** Plan U2 Decision 7: an audiobook that can't play (missing, or its file won't open) doesn't make the shelf. */
+    @Test fun audiobooksShowOnlyWithOneThatPlays() = runTest(main.dispatcher) {
+        shelves.shelfList.value = listOf(shelf("Music", "Phone"), shelf("Audiobooks", "LibriVox", status = PackStatus.MISSING))
+        assertThat(vm().ui.filterNotNull().first().shelves.map { it.id }).containsExactly("music")
+        assertThat(shelves.audioShelves.first()).isEqualTo(AudioShelves(music = true, audiobooks = false))
+
+        shelves.shelfList.value = listOf(shelf("Music", "Phone", status = PackStatus.CORRUPT), shelf("Audiobooks", "LibriVox"))
+        assertThat(vm().ui.filterNotNull().first().shelves.map { it.id }).containsExactly("audiobooks")
+        assertThat(shelves.audioShelves.first()).isEqualTo(AudioShelves(music = false, audiobooks = true))
+        assertThat(AudioShelves.of(emptyList())).isEqualTo(AudioShelves.NONE)
     }
 
     @Test fun withNoAudioListenIsEmptyAndHasNoCard() = runTest(main.dispatcher) {

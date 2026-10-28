@@ -29,6 +29,7 @@ import app.granger.core.player.SavedVoice
 import app.granger.core.speech.ReadAddress
 import app.granger.theme.GrangerTheme
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,8 +54,8 @@ class ListenTabsTest {
 
     private val shelves = mutableListOf<PlayerMode>()
 
-    private fun show(hub: FakePlayerHub): PlayerViewModel {
-        val vm = PlayerViewModel(hub)
+    private fun show(hub: FakePlayerHub, audiobooks: Boolean = true): PlayerViewModel {
+        val vm = PlayerViewModel(hub, audiobooks = flowOf(audiobooks))
         compose.setContent { GrangerTheme { ListenPlayerScreen(vm, onClose = {}, onShelf = { shelves += it }) } }
         return vm
     }
@@ -75,6 +76,10 @@ class ListenTabsTest {
         // Neither ever played.
         assertThat(mediaMode(idle, SavedModes(null, null, null))).isEqualTo(PlayerMode.MUSIC)
         assertThat(mediaMode(voice, SavedModes.UNKNOWN)).isEqualTo(PlayerMode.MUSIC)
+        // Plan U2 Decision 7: without an audiobook on the phone the last one played doesn't name the tab.
+        assertThat(mediaMode(idle, SavedModes(null, null, PlayerMode.AUDIOBOOK), audiobooks = false)).isEqualTo(PlayerMode.MUSIC)
+        assertThat(mediaMode(voice, SavedModes(null, null, null, lastWasVoice = true, lastMedia = PlayerMode.AUDIOBOOK), audiobooks = false))
+            .isEqualTo(PlayerMode.MUSIC)
         assertThat(tabTitle(ListenTab.MEDIA, PlayerMode.AUDIOBOOK)).isEqualTo("Audiobook")
         assertThat(tabTitle(ListenTab.READER, PlayerMode.AUDIOBOOK)).isEqualTo("Reader")
     }
@@ -89,6 +94,14 @@ class ListenTabsTest {
         assertThat(listenTab(null, NowPlaying.Idle, none)).isEqualTo(ListenTab.MEDIA)
         // Picked wins over all of them.
         assertThat(listenTab(ListenTab.MEDIA, voiceUi().now, none)).isEqualTo(ListenTab.MEDIA)
+    }
+
+    @Test fun withoutAnAudiobookTheMediaTabIsMusic() {
+        val hub = FakePlayerHub().apply { saved.value = SavedModes(savedMusic, savedBook, PlayerMode.AUDIOBOOK) }
+        val vm = show(hub, audiobooks = false)
+        mediaTitle("Music")
+        assertThat(vm.mediaMode()).isEqualTo(PlayerMode.MUSIC)
+        compose.onNodeWithText("Song B").assertExists()             // the saved queue, paused
     }
 
     @Test fun twoTabsAndSwitchingCallsNothing() {

@@ -42,7 +42,7 @@ class SettingsScreenTest {
 
     private val calls = mutableListOf<String>()
 
-    private fun show(listening: Boolean = true) = compose.setContent {
+    private fun show(listening: Boolean = true, audiobooks: Boolean = true) = compose.setContent {
         SettingsScreen(
             SettingsViewModel(
                 FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(), FakeAppearancePrefs(),
@@ -53,6 +53,7 @@ class SettingsScreenTest {
             onBack = {},
             onVoice = if (listening) ({ calls += "voice" }) else null,
             onMediaSettings = if (listening) ({ calls += "media" }) else null,
+            audiobooks = audiobooks,
         )
     }
 
@@ -70,6 +71,14 @@ class SettingsScreenTest {
         compose.onNodeWithText("Readiness").assertDoesNotExist()
         for (row in listOf("Set up suggestions again", "Voice", "Music & audiobooks", "Models")) compose.onNodeWithText(row).performClick()
         assertThat(calls).containsExactly("setup", "voice", "media", "models").inOrder()
+    }
+
+    /** Plan U2 Decision 7: audiobooks are named only once there's one on the phone. */
+    @Test fun withoutAnAudiobookTheRowIsMusic() {
+        show(audiobooks = false)
+        compose.onNodeWithText("Music").performClick()
+        compose.onNodeWithText("Music & audiobooks").assertDoesNotExist()
+        assertThat(calls).containsExactly("media")
     }
 
     @Test fun withoutVoiceOrMusicThereIsNoReadingAndListening() {

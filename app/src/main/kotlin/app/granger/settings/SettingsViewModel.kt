@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -194,6 +195,8 @@ data class MediaSettingsUi(
     val headsetAutoplay: Boolean = false,
     /** Downloaded media show read-only in the Files app and other apps' pickers (the documents provider is enabled). */
     val showInOtherApps: Boolean = false,
+    /** The phone holds an audiobook: the screen is "Music & audiobooks" and has the skip settings (Plan U2 Decision 7). */
+    val audiobooks: Boolean = false,
 )
 
 /** The "Show in other apps" switch: whether the documents provider is enabled. */
@@ -212,6 +215,7 @@ class ComponentOtherAppsSharing(private val context: Context) : OtherAppsSharing
  * Settings → Music & audiobooks: the audio permission's status (the screen asks; this only shows it), the picked
  * folders, "Rescan now", and the player's settings in [prefs] ([PlayerSettingsKeys], read by the playback service).
  * [scope] holds the UI state; [work] runs folder changes and scans, which should finish after the screen is gone.
+ * [audiobooks] is whether the phone holds an audiobook ([app.granger.core.library.AudioShelves]).
  */
 class MediaSettings(
     private val folders: MediaFolders,
@@ -222,6 +226,7 @@ class MediaSettings(
     scope: CoroutineScope,
     private val work: CoroutineScope = scope,
     private val now: () -> Long = System::currentTimeMillis,
+    audiobooks: Flow<Boolean> = flowOf(false),
 ) {
     private data class Player(val replayGain: ReplayGainMode, val skipBackS: Int, val skipForwardS: Int, val headsetAutoplay: Boolean)
 
@@ -230,7 +235,7 @@ class MediaSettings(
     private val player = MutableStateFlow(readPlayer())
     private val shared = MutableStateFlow(sharing.isEnabled())
 
-    val ui: StateFlow<MediaSettingsUi> = combine(folders.all, permission, scan, player, shared) { list, status, scanState, p, on ->
+    val ui: StateFlow<MediaSettingsUi> = combine(folders.all, permission, scan, combine(player, audiobooks, ::Pair), shared) { list, status, scanState, (p, books), on ->
         MediaSettingsUi(
             permission = status,
             folders = list.map { FolderRow(it.uri, folderName(it.uri), it.audiobooks) },
@@ -240,6 +245,7 @@ class MediaSettings(
             skipForwardS = p.skipForwardS,
             headsetAutoplay = p.headsetAutoplay,
             showInOtherApps = on,
+            audiobooks = books,
         )
     }.stateIn(
         scope, SharingStarted.WhileSubscribed(5_000),
