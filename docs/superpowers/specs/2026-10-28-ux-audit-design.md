@@ -2,7 +2,7 @@
 
 2026-10-28 · Neal Thompson (decisions) · walked and written up by Claude
 
-Status: **draft, decisions open** (§7). U1 in the roadmap. It specs U2 (Listen, §6) and sets the work list for U3 (the overhaul, §5). Raw notes: `docs/superpowers/u1-notes.md`. Screenshots: `docs/superpowers/u1-shots/library/` (Neal's install, 35 GB, Field) and `u1-shots/fresh/` (Granger Fresh, empty, Night).
+Status: **D1–D4 decided** (Neal, 2026-10-28, all as recommended); D5 and D6 open (§7). U1 in the roadmap. It specs U2 (Listen, §6) and sets the work list for U3 (the overhaul, §5). Raw notes: `docs/superpowers/u1-notes.md`. Screenshots: `docs/superpowers/u1-shots/library/` (Neal's install, 35 GB, Field) and `u1-shots/fresh/` (Granger Fresh, empty, Night).
 
 ## 1. Why, and how it was walked
 
@@ -143,11 +143,11 @@ From the roadmap row (Neal, 2026-10-27), shaped by what the walk showed:
 
 ## 7. Decisions for Neal
 
-| # | Decision | Recommendation |
+| # | Decision | Recommendation · status |
 |---|---|---|
-| D1 | The rail's recents | Keep up to 4 **open** items (the book, article, chat or album you're in now), always labelled in the drawer, never reordering on open. History moves to Home's Continue and a History screen. |
-| D2 | Where sources and downloads live | **Get more** and **Downloads** as screens off the Library header, with a downloads badge on the Library tool while something is in flight. Not rail tools. |
-| D3 | Reading chrome | Slide away on scroll and back on tap, as an overlay with no reflow. Replaces P1's held full-screen task. |
-| D4 | The model in onboarding | Ticked by default on ASK-tier phones as Ask (Preview). F1's release flag still decides whether friends see it. |
-| D5 | The tool's name | "Ask" in the rail and on its screen. "Research" stays in code. |
-| D6 | Search grouping (carried forward since Plan 5) | By kind (Titles, Articles, Books, Music), not by collection, with the source on each row. |
+| D1 | The rail's recents | Keep up to 4 **open** items (the book, article, chat or album you're in now), always labelled in the drawer, never reordering on open. History moves to Home's Continue and a History screen. **Decided (Neal, 2026-10-28).** |
+| D2 | Where sources and downloads live | **Get more** and **Downloads** as screens off the Library header, with a downloads badge on the Library tool while something is in flight. Not rail tools. **Decided (Neal, 2026-10-28).** |
+| D3 | Reading chrome | Slide away on scroll and back on tap, as an overlay with no reflow. Replaces P1's held full-screen task. **Decided (Neal, 2026-10-28).** |
+| D4 | The model in onboarding | Ticked by default on ASK-tier phones as Ask (Preview). F1's release flag still decides whether friends see it. **Decided (Neal, 2026-10-28).** |
+| D5 | The tool's name | "Ask" in the rail and on its screen. "Research" stays in code. Open. |
+| D6 | Search grouping (carried forward since Plan 5) | By kind (Titles, Articles, Books, Music), not by collection, with the source on each row. Open. |
