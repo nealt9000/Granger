@@ -126,6 +126,11 @@ Sized to land as three plans so each can ship to the phone and be walked:
 - One reader toolbar for wiki, e-book and PDF: Back, title, Contents, Find, Aa, Listen, Bookmark, overflow. Listen is one icon everywhere, with pause and stop.
 - Chrome that slides away on scroll and comes back on a tap, without reflowing the page (D3).
 - Pack home gets a book icon or the pack's name, not a house.
+- **Browse gets its own rail tool (Neal, U2 walkthrough 2026-10-28).** Wiki and Kiwix packs move out of the Library behind their own icon, above the Library's open book, because browsing a linked site and reading a book through are different experiences (as Listen split audio from text). The Library becomes books. To settle in U3c's plan:
+  - the name (Browse, Wikis, …) and the icon (a globe, a compass, …);
+  - where maps go, since they're packs but aren't browsed like a wiki;
+  - a seven-tool rail (Home, Search, Ask, Browse, Library, Listen, Settings): fits at Pixel 6 height; check a smaller phone;
+  - what the Library holds then (Classics, My books, Archive.org texts) and what Get more, Readiness and Downloads light.
 
 U3 ends with a fresh-install walkthrough a friend could follow without Neal (the roadmap's bar), on the Pixel 6 and one other phone.
 
