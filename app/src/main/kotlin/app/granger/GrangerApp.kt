@@ -411,7 +411,7 @@ class AppContainer(context: Context) {
         prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE),
         bootCount = { Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1) },
     )
-    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex)
+    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf)
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
     val totalRamBytes: Long = ActivityManager.MemoryInfo()

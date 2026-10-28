@@ -132,6 +132,29 @@ class ZimLibrarySearchTest {
         assertThat(hits.drop(3)).containsAtLeast("215 Cassiopeia solar apocalypse computer", "Après l'Apocalypse", "Aspirin")
     }
 
+    @Test fun booksOnTheShelfAreTitlesAheadOfPackTitlesOfTheSameRank() = test {
+        install("wiki.zim", FakeZimArchive(
+            "u-wiki", "Wikipedia",
+            suggestions = listOf(ZimHit("Peter_Pan", "Peter Pan"), ZimHit("Peter_Pan_(2003_film)", "Peter Pan (2003 film)"), ZimHit("Barrie", "J. M. Barrie")),
+        ))
+        library.refresh()
+        val peterPan = book("peter_pan", title = "Peter Pan").copy(author = "J. M. Barrie")
+        val doc = book("doc", origin = BookOrigin.PACK, title = "Peter Pan")
+        val withBooks = ZimLibrarySearch(library, io = dispatcher, bookshelf = StubBookshelf(listOf(doc, peterPan)))
+
+        val hits = withBooks.titles("peter pan").hits
+        assertThat(hits.map { it.packId to it.title }.take(3)).containsExactly(
+            peterPan.id to "Peter Pan", "u-wiki" to "Peter Pan", "u-wiki" to "Peter Pan (2003 film)",
+        ).inOrder()
+        // A book opens as a book: its id and no path, with its author and collection for the row.
+        val row = hits.first()
+        assertThat(listOf(row.path, row.author, row.packTitle)).containsExactly("", "J. M. Barrie", "Granger Classics").inOrder()
+        // Found by its author, after the pack title that is the query.
+        assertThat(withBooks.titles("j. m. barrie").hits.map { it.title }.take(2)).containsExactly("J. M. Barrie", "Peter Pan").inOrder()
+        assertThat(withBooks.titles("pan").hits.map { it.title }).contains("Peter Pan")
+        assertThat(search.titles("peter pan").hits.map { it.packId }).doesNotContain(peterPan.id)
+    }
+
     @Test fun titlesLoseTheirSiteBeforeTheyAreRanked() = test {
         install("cooking.zim", FakeZimArchive(
             "u-cook", "based.cooking LukeSmith",

@@ -52,8 +52,8 @@ suspend fun MediaIndex.searchForGroups(query: String): MediaResults = search(
 )
 
 /**
- * Search over titles, then music and audiobooks, then article text, then books (shown as Titles, Articles, Books, Music,
- * Audiobooks). [initialQuery] (for example text selected in the reader, or a
+ * Search over titles (books on the shelf among them), then music and audiobooks, then books, then article text (shown
+ * as Titles, Articles, Books, Music, Audiobooks). [initialQuery] (for example text selected in the reader, or a
  * recent search) is searched straight away; opening a hit remembers the query and opens a rail tab.
  */
 @OptIn(FlowPreview::class)
@@ -136,6 +136,12 @@ class SearchViewModel(
                         .cap(SearchGroup.SONGS, found.songs.size).cap(SearchGroup.AUDIOBOOKS, found.audiobooks.size)
                     it.copy(media = found, capped = capped)
                 }
+                // Books come before article text: the book index answers in a moment, full text over big packs may not.
+                // One row per book (Plan U3b Decision 10); the search's cap counts its hits, as it stopped on those.
+                val books = search.books(q)
+                _state.update {
+                    it.copy(books = books.distinctBy { hit -> hit.bookId }, capped = it.capped.cap(SearchGroup.BOOKS, books.size))
+                }
                 val shown = titles.hits.map { it.packId to it.path }.toSet()
                 // Counted before the titles are taken out: the search stopped at its limit either way.
                 val allText = search.fullText(q)
@@ -143,13 +149,9 @@ class SearchViewModel(
                     it.copy(
                         fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown }
                             .map { hit -> hit.copy(snippet = hit.snippet?.takeIf { s -> SearchRows.snippetMatches(s, q) }) },
+                        searching = false,
                         capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),
                     )
-                }
-                // One row per book (Plan U3b Decision 10); the search's cap counts its hits, as it stopped on those.
-                val books = search.books(q)
-                _state.update {
-                    it.copy(books = books.distinctBy { hit -> hit.bookId }, searching = false, capped = it.capped.cap(SearchGroup.BOOKS, books.size))
                 }
             }
         }

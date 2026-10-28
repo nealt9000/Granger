@@ -122,6 +122,34 @@ class BookIndexTest {
         assertThat(index.search("fox", limit = 2).map { it.bookId }).containsExactly(many.id, many.id)
     }
 
+    @Test fun thePhraseRanksAboveTheWordsApartWhateverTheIndexingOrder() = test {
+        // Indexed first, and each says "peter" and "pan" more often than the book that has them together.
+        val early = (1..4).map { n ->
+            add("early$n", "<p>Peter Peter Peter climbed the hill, and a pan pan pan fell from the shelf.</p>", title = "Early $n")
+        }
+        index.indexPending()
+        val peterPan = add("peter_pan", "<p>All children, except one, grow up.</p>", "<p>Peter Pan flew in at the window.</p>", title = "Peter Pan")
+        index.indexPending()
+
+        val hits = index.search("peter pan", limit = 4, perBook = 3)
+        assertThat(hits.first().bookId).isEqualTo(peterPan.id)
+        assertThat(hits.first().href).isEqualTo("OEBPS/c002.xhtml")
+        // The words apart still match, ranked after the phrase, up to the limit.
+        assertThat(hits.drop(1).map { it.bookId }).containsExactlyElementsIn(early.take(3).map { it.id }).inOrder()
+        // Out of order there's no phrase: every book with both words, by rank.
+        assertThat(index.search("pan peter").map { it.bookId }).containsExactlyElementsIn(early.map { it.id } + peterPan.id)
+    }
+
+    @Test fun onlyTheLastWordIsAPrefix() = test {
+        val pans = add("pans", "<p>Peter panicked at the sight.</p>")
+        add("petersons", "<p>The Petersons kept a pan by the door.</p>")
+        index.indexPending()
+
+        // "pan" is a prefix (panicked), "peter" a whole word (not Petersons).
+        assertThat(index.search("peter pan").map { it.bookId }).containsExactly(pans.id)
+        assertThat(index.search("peters pan").map { it.bookId }).isEmpty()
+    }
+
     @Test fun indexingIsResumableAndIdempotent() = test {
         val a = add("alpha", "<p>apples everywhere</p>")
         index.indexPending()

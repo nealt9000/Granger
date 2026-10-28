@@ -76,28 +76,28 @@ class BookIndex(
         }
     }
 
+    /**
+     * The places in books matching [query], best first: its words as a phrase, the last a prefix ("peter pan*"), rank
+     * above chunks holding the words apart, each tier in BM25 order (the ranking [passages] uses). The top [limit]
+     * chunks are kept, at most [perBook] from one book, grouped under the book of each one's best chunk.
+     */
     suspend fun search(query: String, limit: Int = LIMIT, perBook: Int = 3): List<BookHit> {
         // Quotes would end the phrase early; a typed trailing `*` is dropped since the last word gets one anyway.
         val words = query.split(WHITESPACE).map { it.replace("\"", "").trimEnd('*') }
             .filter { word -> word.any { it.isLetterOrDigit() } }
         if (words.isEmpty()) return emptyList()
-        val match = words.mapIndexed { i, w -> if (i == words.lastIndex) "\"$w*\"" else "\"$w\"" }.joinToString(" ")
+        val phrase = "\"${words.joinToString(" ")}*\""
+        val apart = words.mapIndexed { i, w -> if (i == words.lastIndex) "\"$w*\"" else "\"$w\"" }.joinToString(" ")
         return withContext(io) {
-            val chunks = try {
-                dao.chunksMatching(
-                    SimpleSQLiteQuery(
-                        "SELECT c.* FROM book_text t JOIN book_chunks c ON c.id = t.docid WHERE book_text MATCH ? LIMIT 400",
-                        arrayOf(match),
-                    ),
-                )
-            } catch (_: SQLException) {
-                emptyList()
-            }
-            val byBook = chunks.groupBy { it.bookId }
-            val kept = byBook.values
-                .sortedByDescending { it.size }
-                .flatMap { it.take(perBook) }
-                .take(limit)
+            val inPhrase = scores(listOf(phrase), bookId = null)
+            val all = if (words.size == 1) inPhrase else scores(listOf(apart), bookId = null)
+            val ranked = all.keys.sortedWith(
+                compareByDescending<Long> { it in inPhrase }
+                    .thenByDescending { (inPhrase[it] ?: 0.0) + all.getValue(it) }
+                    .thenBy { it },
+            )
+            val kept = topChunks(ranked, limit, perBook)
+            val counts = matchCounts(apart, kept.map { it.bookId }.distinct())
             val snippetQuery = words.joinToString(" ")
             kept.groupBy { it.bookId }.flatMap { (bookId, hits) ->
                 val book = dao.get(bookId) ?: return@flatMap emptyList()
@@ -111,11 +111,29 @@ class BookIndex(
                         progression = chunk.progression,
                         snippet = texts[chunk.id]?.let { Snippets.around(it, snippetQuery) }.orEmpty(),
                         quote = texts[chunk.id]?.let { Snippets.quote(it, snippetQuery) },
-                        matches = byBook[book.id]?.size ?: 1,
+                        matches = counts[book.id] ?: hits.size,
                     )
                 }
             }
         }
+    }
+
+    /** How many chunks of each of [bookIds] match [match]; empty for a bad query. */
+    private fun matchCounts(match: String, bookIds: List<String>): Map<String, Int> {
+        if (bookIds.isEmpty()) return emptyMap()
+        val counts = HashMap<String, Int>()
+        try {
+            db.openHelper.readableDatabase.query(
+                SimpleSQLiteQuery(
+                    "SELECT c.bookId, COUNT(*) FROM book_text t JOIN book_chunks c ON c.id = t.docid " +
+                        "WHERE book_text MATCH ? AND c.bookId IN (${bookIds.joinToString(",") { "?" }}) GROUP BY c.bookId",
+                    arrayOf<Any>(match, *bookIds.toTypedArray()),
+                ),
+            ).use { c -> while (c.moveToNext()) counts[c.getString(0)] = c.getInt(1) }
+        } catch (_: SQLException) {
+            // No counts; each hit counts its own book's listed chunks.
+        }
+        return counts
     }
 
     /**
@@ -137,41 +155,9 @@ class BookIndex(
             .map { words -> words.joinToString(" ") { "\"$it\"" } }
         if (matches.isEmpty()) return emptyList()
         return withContext(io) {
-            val scores = HashMap<Long, Double>()
-            val sql = db.openHelper.readableDatabase
-            val scope = if (bookId == null) "" else " AND docid IN (SELECT id FROM book_chunks WHERE bookId = ?)"
-            for (match in matches) {
-                try {
-                    // Rows come in docid order, so a word matching more than 3000 chunks scores only its first 3000.
-                    sql.query(
-                        SimpleSQLiteQuery(
-                            "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ?$scope LIMIT 3000",
-                            if (bookId == null) arrayOf<Any>(match) else arrayOf<Any>(match, bookId),
-                        ),
-                    ).use { c ->
-                        while (c.moveToNext()) scores.merge(c.getLong(0), bm25(c.getBlob(1)), Double::plus)
-                    }
-                } catch (_: SQLException) {
-                    // No candidates for this keyword.
-                }
-            }
+            val scores = scores(matches, bookId)
             val ranked = scores.entries.sortedWith(compareByDescending<Map.Entry<Long, Double>> { it.value }.thenBy { it.key })
-            // Rows load in rank order, 200 ids at a time, until [limit] are kept. Orphans of re-indexed books have no row.
-            val perBookCount = HashMap<String, Int>()
-            val chunks = ArrayList<BookChunk>()
-            for (ids in ranked.map { it.key }.chunked(200)) {
-                if (chunks.size >= limit) break
-                val rows = try {
-                    dao.chunksMatching(SimpleSQLiteQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
-                } catch (_: SQLException) {
-                    break
-                }.associateBy { it.id }
-                for (id in ids) {
-                    if (chunks.size >= limit) break
-                    val chunk = rows[id] ?: continue
-                    if (perBookCount.merge(chunk.bookId, 1, Int::plus)!! <= perBook) chunks.add(chunk)
-                }
-            }
+            val chunks = topChunks(ranked.map { it.key }, limit, perBook)
             val texts = HashMap<Long, BookPassage>()
             chunks.groupBy { it.bookId }.forEach { (id, hits) ->
                 val book = dao.get(id) ?: return@forEach
@@ -187,6 +173,53 @@ class BookIndex(
             }
             chunks.mapNotNull { texts[it.id] }
         }
+    }
+
+    /**
+     * Each chunk matching any of [matches] (FTS4 queries), scored by the sum of its BM25 over the ones it matches;
+     * within [bookId] when it's set. A bad query adds nothing.
+     */
+    private fun scores(matches: List<String>, bookId: String?): Map<Long, Double> {
+        val scores = HashMap<Long, Double>()
+        val sql = db.openHelper.readableDatabase
+        val scope = if (bookId == null) "" else " AND docid IN (SELECT id FROM book_chunks WHERE bookId = ?)"
+        for (match in matches) {
+            try {
+                // Rows come in docid order, so a word matching more than 3000 chunks scores only its first 3000.
+                sql.query(
+                    SimpleSQLiteQuery(
+                        "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ?$scope LIMIT 3000",
+                        if (bookId == null) arrayOf<Any>(match) else arrayOf<Any>(match, bookId),
+                    ),
+                ).use { c ->
+                    while (c.moveToNext()) scores.merge(c.getLong(0), bm25(c.getBlob(1)), Double::plus)
+                }
+            } catch (_: SQLException) {
+                // No candidates for this query.
+            }
+        }
+        return scores
+    }
+
+    /** The chunks of [ranked] ids, in that order, until [limit] are kept, at most [perBook] from one book. */
+    private suspend fun topChunks(ranked: List<Long>, limit: Int, perBook: Int): List<BookChunk> {
+        // Rows load in rank order, 200 ids at a time. Orphans of re-indexed books have no row.
+        val perBookCount = HashMap<String, Int>()
+        val chunks = ArrayList<BookChunk>()
+        for (ids in ranked.chunked(200)) {
+            if (chunks.size >= limit) break
+            val rows = try {
+                dao.chunksMatching(SimpleSQLiteQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
+            } catch (_: SQLException) {
+                break
+            }.associateBy { it.id }
+            for (id in ids) {
+                if (chunks.size >= limit) break
+                val chunk = rows[id] ?: continue
+                if (perBookCount.merge(chunk.bookId, 1, Int::plus)!! <= perBook) chunks.add(chunk)
+            }
+        }
+        return chunks
     }
 
     /** Clears out `book_text` when orphaned rows dominate it, then re-indexes every book. */

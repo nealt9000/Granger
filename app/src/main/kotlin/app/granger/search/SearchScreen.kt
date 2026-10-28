@@ -145,7 +145,8 @@ fun SearchScreen(
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.title) },
-                        supportingContent = { Text(hit.packTitle) },
+                        // A book reads "J. M. Barrie · Granger Classics".
+                        supportingContent = { Text(listOf(hit.author, hit.packTitle).filter { it.isNotBlank() }.joinToString(" · ")) },
                     )
                 }
                 if (state.fullText.isNotEmpty()) item { SectionHeader("Articles") }
