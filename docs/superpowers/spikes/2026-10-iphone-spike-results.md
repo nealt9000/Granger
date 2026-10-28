@@ -1109,9 +1109,24 @@ Kotlin's own guide says Compose Multiplatform pulls in `stat`/`fstat` (reason `0
 
 **The rest of the shared logic (estimate, from §1):** `:core:catalog`'s parser and model (plain kotlinx) plus the signature check through a CryptoKit `@objc` shim, about a day. `:core:library`'s ~1,060 pure lines (filing, passage finders, ranking, `DirectoryVectorSources`) the same way as here, a day or two; its ~2,100 Room-tangled lines and ~1,020 DAO/entity lines move only with Room KMP (§2b), several days including the 11 migrations and `BookIndex`'s raw FTS4 queries. The ~620 lines of download rules and `ReadinessModel` (279), about a day. So a shared core of roughly 6–8k lines is a one-to-two-week plan, not a rewrite.
 
-## 5. The UI route trial
+## 5. The UI route trial (2026-10-28, Xcode 27.1, iOS 27.1 Simulator, Compose Multiplatform 1.12.2)
 
-*Pending Xcode.*
+Two shells with the same content: a Library list in Field colours with Spectral, a "Search by meaning" box that calls the shared core (`CoreDemo` in `spikes/i0/kmp-core/shared`: `VectorSearch` over a 20,000-row, 256-dim `.gvec` it writes on first use, `ArticleText.blocks`, `YearFacts.lifespan`), and a reader holding a `WKWebView` with a ZIM-like article. Code: `spikes/i0/ui-swiftui/` (A) and `spikes/i0/ui-compose/` + `spikes/i0/kmp-core/compose-shell/` (B); see `spikes/i0/README.md`. Shots (iPhone 17 Simulator; the iOS 27.1 runtime won't create an iPhone 16 Plus simulator, which says nothing about the real phone): `docs/superpowers/spikes/i0-shots/`.
+
+| | A: SwiftUI over a KMP framework | B: Compose Multiplatform |
+| --- | --- | --- |
+| Builds and runs | Yes | Yes, after adding `CADisableMinimumFrameDurationOnPhone` to Info.plist (Compose aborts at launch without it) |
+| Shared core from the UI | Plain Objective-C export: `List<String>` → `[String]`, nullability kept, a `suspend fun` → a completion handler that Swift calls with `try await`; Kotlin default arguments are lost. Workable as is; SKIE would add Swift enums, sealed classes and `Flow` → `AsyncSequence` | Direct Kotlin calls, and `suspend` in `LaunchedEffect` / `rememberCoroutineScope`, as on Android |
+| Search (20,000 rows, Simulator) | 40 ms | 35 ms (same core) |
+| The reader (`WKWebView`) | `UIViewRepresentable`, ~10 lines | `UIKitView`, ~10 lines; renders the same |
+| Navigation and Back | The system bar: iOS 27's round back button, swipe-from-edge back, large titles, for free | Ours: a `TopAppBar` and a text "‹ Library"; swipe-back, large titles and the system look must be built or imitated |
+| Fonts and theme | Spectral via `UIAppFonts`; the system grouped-list style shows through | Spectral via Compose resources; looks like the Android app (Material 3 on Field colours) |
+| Release size (arm64, unsigned) | **5.6 MB binary, 1.8 MB zipped** | **35.6 MB binary, 10.5 MB zipped**: Compose's renderer (Skia) adds ~30 MB, ~9 MB of download |
+| Build | Gradle for the framework, Xcode for the app | The same; the release link needs a 6 GB Gradle heap (2 GB ran out) |
+
+**How much Android UI carries over:** `:app` is 25,572 lines. Files with no Android-platform imports (no `android.*`, Media3, WebKit, WorkManager, Room, Glance, Readium, libkiwix, LiteRT) hold about 14,300 lines; files importing Compose hold about 15,400. Under B most of those 14k lines (screens, view models, theme, navigation) move to common code with `R.*` resources and a few Android calls swapped; under A they are rewritten in SwiftUI. Either way the platform-bound parts are native: the web reader host (`WKWebView` + a `zim:` scheme), the e-book reader (Readium Swift), the players (AVFoundation), downloads, and the system integrations (§2).
+
+**Builder's lean (Neal decides in Task 8):** B, Compose Multiplatform for the screens, with native views for the readers and the player. One developer keeps one UI, and U3 is still reshaping it; the field-kit brand is a custom look anyway, so "not native" costs less here than in a stock-iOS app. Its costs are real: ~9 MB more download, the back-swipe and navigation feel to rebuild (try it on the iPhone 16 Plus), and Compose-on-iOS text selection and accessibility (VoiceOver) to verify before committing. A wins if the iPhone version should feel like an iOS app first, and it costs a second UI kept in step with every Android change.
 
 ## 7. iPhone numbers
 
