@@ -142,6 +142,38 @@ class SearchViewModelTest {
         assertThat(vm.state.value.books).isEmpty()
     }
 
+    @Test fun aSnippetWithoutTheQueryIsDroppedButTheHitStays() = runTest(main.dispatcher) {
+        search.fullText = listOf(
+            SearchHit("p", "Pack", "Leaf", "Leaf", "<b>photo</b>synthesis in leaves"),
+            SearchHit("se", "Parenting", "questions/1/x", "Night feeds", "Reputation 1,204 · Badges · Member for 6 years"),
+            SearchHit("p", "Pack", "Café", "Café", "A <i>PHÓTO</i> of the café"),
+        )
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.fullText.map { it.title to it.snippet }).containsExactly(
+            "Leaf" to "<b>photo</b>synthesis in leaves",
+            "Night feeds" to null,
+            "Café" to "A <i>PHÓTO</i> of the café",
+        ).inOrder()
+    }
+
+    @Test fun bookHitsGroupByBookKeepingTheFirst() = runTest(main.dispatcher) {
+        fun hit(id: String, title: String, href: String, matches: Int) =
+            BookHit(id, title, "", href, 0.0, "<b>photo</b> $href", matches = matches)
+        search.bookHits = listOf(
+            hit("b:emma", "Emma", "ch2", 3), hit("b:emma", "Emma", "ch5", 3), hit("b:idiot", "The Idiot", "p1", 1), hit("b:emma", "Emma", "ch9", 3),
+        )
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        val books = vm.state.value.books
+        assertThat(books.map { it.bookTitle to it.href }).containsExactly("Emma" to "ch2", "The Idiot" to "p1").inOrder()
+        assertThat(books.map { it.matches }).containsExactly(3, 1).inOrder()
+        // The tap opens the book at its first match.
+        assertThat(vm.openBook(books.first()).second.href).isEqualTo("ch2")
+    }
+
     @Test fun openingABookHitRecordsTheSearchAndTargetsTheHit() = runTest(main.dispatcher) {
         val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange(" photo ")

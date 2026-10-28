@@ -107,6 +107,17 @@ class FeedDrawerTest {
         assertThat(drawn.cards.map { it.title }.toSet()).hasSize(FeedDrawer.CARDS)
     }
 
+    @Test fun userAndTagPagesAreNotDrawn() = runTest {
+        val se = FakeZimArchive(
+            uuid = "u3", paths = setOf("index", "users/7/apocalypse"), random = "users/7/apocalypse",
+            results = listOf(ZimHit("users/7/apocalypse", "User apocalypse"), ZimHit("tags/end", "end"), ZimHit("questions/1/end", "The end")),
+        )
+        val drawer = FeedDrawer({ se }, { emptyList() }, { emptyList() }, librarySearch)
+        val scope = Resolved("Worldbuilding", packs = listOf(pack("u3", "Worldbuilding")))
+        assertThat(drawer.draw(feed(FeedKind.RANDOM), scope, day)).isNull()
+        assertThat(drawer.draw(feed(FeedKind.SEARCH, "end"), scope, day)!!.cards.map { it.title }).containsExactly("The end")
+    }
+
     @Test fun searchRotatesWithTheDayAndFiltersBooksToTheScope() = runTest {
         val scope = Resolved("Wikipedia", packs = listOf(wikipedia))
         val today = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day)!!

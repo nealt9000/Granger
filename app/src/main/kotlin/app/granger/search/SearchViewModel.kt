@@ -39,7 +39,7 @@ enum class SearchGroup(val preview: Int, val fetch: Int, val noun: String) {
     SONGS(5, MEDIA_FETCH, "songs"),
     AUDIOBOOKS(5, MEDIA_FETCH, "audiobooks"),
     FULL_TEXT(8, ZimLibrarySearch.FULL_TEXT_LIMIT, "article matches"),
-    BOOKS(8, BookIndex.LIMIT, "book matches"),
+    BOOKS(8, BookIndex.LIMIT, "books"),
 }
 
 private const val MEDIA_FETCH = 25
@@ -52,7 +52,8 @@ suspend fun MediaIndex.searchForGroups(query: String): MediaResults = search(
 )
 
 /**
- * Search over titles, then music and audiobooks, then article text, then books. [initialQuery] (for example text selected in the reader, or a
+ * Search over titles, then music and audiobooks, then article text, then books (shown as Titles, Articles, Books, Music,
+ * Audiobooks). [initialQuery] (for example text selected in the reader, or a
  * recent search) is searched straight away; opening a hit remembers the query and opens a rail tab.
  */
 @OptIn(FlowPreview::class)
@@ -67,9 +68,9 @@ class SearchViewModel(
         val titles: List<SearchHit> = emptyList(),
         /** Music and audiobooks, shown after [titles]. */
         val media: MediaResults = MediaResults(),
-        /** Full-text hits whose article is not already in [titles]. */
+        /** Full-text hits whose article is not already in [titles]; a snippet without the query in it is dropped. */
         val fullText: List<SearchHit> = emptyList(),
-        /** Hits inside books, after the article sections. */
+        /** Hits inside books, one per book: its first (best) hit, which says how many places [BookHit.matches]. */
         val books: List<BookHit> = emptyList(),
         val searching: Boolean = false,
         /** Recent searches, newest first; shown while the field is empty. */
@@ -140,12 +141,16 @@ class SearchViewModel(
                 val allText = search.fullText(q)
                 _state.update {
                     it.copy(
-                        fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown },
+                        fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown }
+                            .map { hit -> hit.copy(snippet = hit.snippet?.takeIf { s -> SearchRows.snippetMatches(s, q) }) },
                         capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),
                     )
                 }
+                // One row per book (Plan U3b Decision 10); the search's cap counts its hits, as it stopped on those.
                 val books = search.books(q)
-                _state.update { it.copy(books = books, searching = false, capped = it.capped.cap(SearchGroup.BOOKS, books.size)) }
+                _state.update {
+                    it.copy(books = books.distinctBy { hit -> hit.bookId }, searching = false, capped = it.capped.cap(SearchGroup.BOOKS, books.size))
+                }
             }
         }
     }

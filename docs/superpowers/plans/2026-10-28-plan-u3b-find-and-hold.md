@@ -269,11 +269,15 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 7: Search by kind
 
-- [ ] `IndexPages.isIndex(path)`: confirm the SE ZIM paths on the phone first (`users/…`, `tags/…`, the questions and users index pages), then test the patterns in `IndexPagesTest`.
-- [ ] `ZimLibrarySearch`: filter `isIndex` from titles and full text. Rank titles: exact, then starts-with, then the rest. `ZimLibrarySearchTest`.
-- [ ] Snippets: drop one without a query word (case- and accent-insensitive; the libkiwix `<b>` marks count). Book hits group by book (`SearchViewModel`), with the best snippet and a count. `SearchViewModelTest`, `SearchRowsTest`.
-- [ ] Headings: Titles, Articles, Books, Music, Audiobooks. `ImeAction.Search`; drop the keyboard on submit and on the first scroll.
-- [ ] **Commit.** `Search by kind: clean titles first, no index pages, books grouped, snippets that match`
+- [x] `IndexPages.isIndex(path)`: confirm the SE ZIM paths on the phone first (`users/…`, `tags/…`, the questions and users index pages), then test the patterns in `IndexPagesTest`.
+  *(Built: `CL/IndexPages.kt`. The paths were read with libzim on the Mac from the real packs (2026-10-28), not on the phone: Stack Exchange's `users`, `tags`, `questions` (also its main page), their `_page=N` pages, `users/…`, `tags/…` and the `a/<id>` answer stubs; iFixit's `User/…` people pages. A leading "/" or an old "A/" / "C/" namespace is ignored. The KDoc keeps the facts.)*
+- [x] `ZimLibrarySearch`: filter `isIndex` from titles and full text. Rank titles: exact, then starts-with, then the rest. `ZimLibrarySearchTest`.
+  *(Built: the ranking is a stable sort after the packs' turns, so within a rank today's order holds. Case and accents fold through a new `CL/SearchText` (`fold`, `words`). Feeds leave index pages out too (`FeedDrawer`: random pages and per-pack search), with `FeedDrawerTest.userAndTagPagesAreNotDrawn`.)*
+- [x] Snippets: drop one without a query word (case- and accent-insensitive; the libkiwix `<b>` marks count). Book hits group by book (`SearchViewModel`), with the best snippet and a count. `SearchViewModelTest`, `SearchRowsTest`.
+  *(Built: `SearchRows.snippetMatches(snippet, query)`: a non-empty `<b>` mark counts (libkiwix marks stemmed matches), else a query word in the text with its tags stripped. The count is `BookHit.matches`, set by `BookIndex.search` from all the book's matching chunks (of the first 400), since only three per book are fetched. The book row reads "Jane Austen · 3 matches"; Show all counts "books".)*
+- [x] Headings: Titles, Articles, Books, Music, Audiobooks. `ImeAction.Search`; drop the keyboard on submit and on the first scroll.
+  *(Built: the groups now show in that order, Music and Audiobooks last. A scroll that starts hides the keyboard and clears the field's focus; `SearchShowAllTest.searchingOrScrollingPutsTheKeyboardAway`.)*
+- [x] **Commit.** `Search by kind: clean titles first, no index pages, books grouped, snippets that match`
 
 ### Task 8: Titles without their site
 

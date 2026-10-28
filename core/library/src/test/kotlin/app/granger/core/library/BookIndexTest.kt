@@ -117,6 +117,8 @@ class BookIndexTest {
 
         val hits = index.search("fox", limit = 4, perBook = 3)
         assertThat(hits.map { it.bookId }).containsExactly(many.id, many.id, many.id, few.id).inOrder()
+        // Each hit says how many places its book matched, though only three are listed.
+        assertThat(hits.map { it.matches }).containsExactly(4, 4, 4, 1).inOrder()
         assertThat(index.search("fox", limit = 2).map { it.bookId }).containsExactly(many.id, many.id)
     }
 

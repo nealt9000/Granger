@@ -1,13 +1,21 @@
 package app.granger.search
 
 import android.os.Looper
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.text.input.ImeAction
 import app.granger.FakeReadingSessions
 import app.granger.core.library.LibrarySearch
 import app.granger.core.library.SearchHit
@@ -85,5 +93,20 @@ class SearchShowAllTest {
         show(3)
         compose.onNodeWithText("Title 3").assertExists()
         compose.onNodeWithText("Show all", substring = true).assertDoesNotExist()
+    }
+
+    @Test fun searchingOrScrollingPutsTheKeyboardAway() {
+        show(30)
+        val field = compose.onNode(hasSetTextAction())
+        field.assert(SemanticsMatcher.expectValue(SemanticsProperties.ImeAction, ImeAction.Search))
+        field.performClick()
+        field.assertIsFocused()
+        field.performImeAction()
+        field.assertIsNotFocused()
+        field.performClick()
+        field.assertIsFocused()
+        list.performScrollToNode(hasText("Show all 30 titles"))
+        compose.waitForIdle()
+        field.assertIsNotFocused()
     }
 }

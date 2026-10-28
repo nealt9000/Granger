@@ -31,6 +31,8 @@ data class BookHit(
     val snippet: String,
     /** The match itself, for the reader to find and mark on the page; null if the text couldn't be read. */
     val quote: TextQuote? = null,
+    /** How many places in the book match, of the first few hundred found; Search shows it when one book has several. */
+    val matches: Int = 1,
 )
 
 /**
@@ -91,7 +93,8 @@ class BookIndex(
             } catch (_: SQLException) {
                 emptyList()
             }
-            val kept = chunks.groupBy { it.bookId }.values
+            val byBook = chunks.groupBy { it.bookId }
+            val kept = byBook.values
                 .sortedByDescending { it.size }
                 .flatMap { it.take(perBook) }
                 .take(limit)
@@ -108,6 +111,7 @@ class BookIndex(
                         progression = chunk.progression,
                         snippet = texts[chunk.id]?.let { Snippets.around(it, snippetQuery) }.orEmpty(),
                         quote = texts[chunk.id]?.let { Snippets.quote(it, snippetQuery) },
+                        matches = byBook[book.id]?.size ?: 1,
                     )
                 }
             }
