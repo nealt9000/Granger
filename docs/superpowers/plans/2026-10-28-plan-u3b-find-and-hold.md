@@ -105,6 +105,7 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
      - **Audiobooks**, **Music**: unchanged.
    - Done in the screen and view model by splitting Literature's rows by `isFolder`/pack versus book collection. No schema change; the media types stay.
    - Header: Search, Downloads (with badge), Get more, Readiness (a gauge icon labelled "Readiness", not a check mark), overflow (Import books…). History moves to the rail's History icon.
+     *(Changed: at 360 dp the five actions squeezed the title to "Li…", so Readiness moved into the overflow: Readiness, then Import books… when import is on. The overflow always shows now.)*
 5. **Icons say what they open** (W3, W4, B8).
    - The rail's **Home is the owl**: the monochrome mark from `ic_launcher_monochrome`, tinted like the other tools.
    - **Library is an open book**: a new `ic_library_books_open` vector, Material "auto_stories". `ic_library` stays for article tabs.

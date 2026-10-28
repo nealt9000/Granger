@@ -39,13 +39,16 @@ class LibraryScreenTest {
 
     private fun SemanticsNodeInteraction.left() = getBoundsInRoot().left
 
-    @Test fun theHeaderIsSearchDownloadsGetMoreReadinessMore() {
+    @Test fun theHeaderIsSearchDownloadsGetMoreMore() {
         show(LibraryUi(emptyList(), emptyLibrary = false))
-        val lefts = listOf("Search", "Downloads", "Get more", "Readiness", "More").map { compose.onNodeWithContentDescription(it).left() }
+        val lefts = listOf("Search", "Downloads", "Get more", "More").map { compose.onNodeWithContentDescription(it).left() }
         assertThat(lefts).isInStrictOrder()
-        // History is the rail's.
+        // History is the rail's; Readiness is in the overflow, so the title fits at 360 dp.
         compose.onNodeWithContentDescription("History").assertDoesNotExist()
-        for (d in listOf("Search", "Downloads", "Get more", "Readiness")) compose.onNodeWithContentDescription(d).performClick()
+        compose.onNodeWithContentDescription("Readiness").assertDoesNotExist()
+        for (d in listOf("Search", "Downloads", "Get more")) compose.onNodeWithContentDescription(d).performClick()
+        compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithText("Readiness").performClick()
         assertThat(calls).containsExactly("search", "downloads", "more", "readiness").inOrder()
     }
 

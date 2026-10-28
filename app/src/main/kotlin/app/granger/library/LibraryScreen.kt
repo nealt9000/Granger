@@ -105,7 +105,7 @@ fun LibraryScreen(
 }
 
 /**
- * The header (Search, Downloads with its badge, Get more, Readiness, and Import books… in the overflow) and one row
+ * The header (Search, Downloads with its badge, Get more, and Readiness and Import books… in the overflow) and one row
  * per kind, each opening to its collections. Null [ui] is still loading.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,7 +131,7 @@ fun LibraryContent(
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                // One line: on a narrow phone the five actions leave it short, and a word broken in two reads worse.
+                // One line: on a narrow phone the actions leave it short, and a word broken in two reads worse.
                 title = { Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
@@ -141,14 +141,20 @@ fun LibraryContent(
                         }
                     }
                     IconButton(onClick = onGetMore) { Icon(Icons.Filled.Add, contentDescription = "Get more") }
-                    IconButton(onClick = onReadiness) { Icon(painterResource(R.drawable.ic_speed), contentDescription = "Readiness") }
-                    if (Features.IMPORT) Box {
+                    // Readiness is in the overflow so the title fits at 360 dp (Plan U3b Decision 4).
+                    Box {
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             DropdownMenuItem(
-                                text = { Text("Import books…") },
-                                onClick = { menuOpen = false; onImport() },
+                                text = { Text("Readiness") },
+                                onClick = { menuOpen = false; onReadiness() },
                             )
+                            if (Features.IMPORT) {
+                                DropdownMenuItem(
+                                    text = { Text("Import books…") },
+                                    onClick = { menuOpen = false; onImport() },
+                                )
+                            }
                         }
                     }
                 },
