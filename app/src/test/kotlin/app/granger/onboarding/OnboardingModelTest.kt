@@ -93,7 +93,7 @@ class OnboardingModelTest {
         val region = OnboardingModel.regions(catalog, installed).countries.first { it.title == "Peru" }
         val additions = OnboardingModel.additions(catalog, installed, chosen = start.chosen().flatMap { it.items }.map { it.id }.toSet())
         val review = OnboardingModel.review(start, unticked = setOf("wikipedia_en_medicine_nopic"), region, additions, freeBytes = 10_000)
-        assertThat(review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region", "Your situation").inOrder()
+        assertThat(review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region", "What you'll use it for").inOrder()
         assertThat(review.items.map { it.id }).containsExactly(
             "gc-bible", "wikipedia_en_medicine_maxi", "gc-hamlet", "maps_en_peru", "mdwiki_en_all_nopic", "wikivoyage_en_all_maxi",
         )
@@ -116,6 +116,21 @@ class OnboardingModelTest {
     private val e4b = modelEntry("gemma-4-e4b-gpu", ModelRole.LARGE, size = 3_000)
     private val embedder = modelEntry("embeddinggemma-2-text-270m", ModelRole.EMBEDDER, size = 160)
     private val withModels = catalog.copy(models = listOf(e4b, e2b, embedder))
+
+    @Test fun theSuggestedRegionIsThePhonesCountryByNameOrAlias() {
+        val us = packEntry("maps_en_usa", size = 9_000).copy(family = "maps", title = "United States of America")
+        val gb = packEntry("maps_en_uk", size = 1_000).copy(family = "maps", title = "United Kingdom")
+        val sn = packEntry("maps_en_senegal", size = 100).copy(family = "maps", title = "Senegal and Gambia")
+        val regions = OnboardingModel.regions(catalog.copy(packs = catalog.packs + us + gb + sn), emptySet())
+        assertThat(OnboardingModel.suggestedRegion(regions, "FR")!!.title).isEqualTo("France")
+        assertThat(OnboardingModel.suggestedRegion(regions, "gb")!!.title).isEqualTo("United Kingdom")
+        assertThat(OnboardingModel.suggestedRegion(regions, "US")!!.title).isEqualTo("United States of America")
+        assertThat(OnboardingModel.suggestedRegion(regions, "GM")!!.title).isEqualTo("Senegal and Gambia")
+        // No pack of its own, an unknown code, no code: nothing suggested. Larger areas are never suggested.
+        assertThat(OnboardingModel.suggestedRegion(regions, "IN")).isNull()
+        assertThat(OnboardingModel.suggestedRegion(regions, "ZZ")).isNull()
+        assertThat(OnboardingModel.suggestedRegion(regions, "")).isNull()
+    }
 
     @Test fun askIsTheAnsweringModelPlusTheEmbedderWhenDense() {
         val line = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())!!

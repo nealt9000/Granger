@@ -115,6 +115,32 @@ object OnboardingModel {
         return Regions(countries = maps.filter { it.pack.id !in larger }, larger = maps.filter { it.pack.id in larger }, places = places)
     }
 
+    /**
+     * The map of where the phone is (Plan U3a Decision 4): the country pack titled with the phone's country in English,
+     * else the one [REGION_ALIASES] names for it. Null for an unknown code or a country with no pack of its own.
+     */
+    fun suggestedRegion(regions: Regions, countryCode: String): Region? {
+        val code = countryCode.uppercase()
+        if (code.isBlank()) return null
+        val name = java.util.Locale("", code).getDisplayCountry(java.util.Locale.ENGLISH)
+        val titles = listOfNotNull(name.takeIf { it.isNotBlank() && it != code }, REGION_ALIASES[code])
+        return titles.firstNotNullOfOrNull { t -> regions.countries.firstOrNull { it.place == null && it.pack.title.equals(t, ignoreCase = true) } }
+    }
+
+    /**
+     * Country codes whose map pack the catalog titles differently from the phone's English name for the country (checked
+     * against the catalog's 193 maps titles, 2026-10-28), or that share a pack with a neighbour.
+     */
+    val REGION_ALIASES = mapOf(
+        "US" to "United States of America", "RU" to "Russian Federation", "CZ" to "Czech Republic", "TR" to "Turkey",
+        "CD" to "Dem. Rep. of Congo (Kinshasa)", "CG" to "Rep. of Congo (Brazzaville)", "CI" to "Ivory Coast",
+        "BA" to "Bosnia-Herzegovina", "MK" to "Macedonia", "MM" to "Myanmar (a.k.a. Burma)", "TL" to "East Timor",
+        "KM" to "Comores", "ST" to "Sao Tome and Principe", "SZ" to "Swaziland", "WF" to "Wallis et Futuna", "XK" to "Kosovo",
+        "GG" to "Guernsey and Jersey", "JE" to "Guernsey and Jersey", "HT" to "Haiti and Dominican Republic", "DO" to "Haiti and Dominican Republic",
+        "IL" to "Israel and Palestine", "PS" to "Israel and Palestine", "SN" to "Senegal and Gambia", "GM" to "Senegal and Gambia",
+        "MY" to "Malaysia, Singapore and Brunei", "SG" to "Malaysia, Singapore and Brunei", "BN" to "Malaysia, Singapore and Brunei",
+    )
+
     /** Each use case's lines beyond [chosen] item ids and [installed] ones; a use case left with nothing is kept with no lines. */
     fun additions(catalog: Catalog, installed: Set<String>, chosen: Set<String>): List<Addition> =
         catalog.onboarding?.useCases.orEmpty().map { useCase ->
@@ -146,7 +172,7 @@ object OnboardingModel {
                     ?.let { add(ReviewGroup("Your region", it)) }
             }
             val useCaseLines = additions.flatMap { it.lines }.fresh()
-            if (useCaseLines.isNotEmpty()) add(ReviewGroup("Your situation", useCaseLines))
+            if (useCaseLines.isNotEmpty()) add(ReviewGroup("What you'll use it for", useCaseLines))
         }
         return Review(groups, freeBytes)
     }

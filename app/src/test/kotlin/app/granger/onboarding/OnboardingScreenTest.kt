@@ -1,13 +1,18 @@
 package app.granger.onboarding
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import app.granger.core.catalog.UseCase
 import app.granger.packEntry
@@ -89,16 +94,44 @@ class OnboardingScreenTest {
         assertThat(calls).containsExactly("start:null", "line:wikipedia_en_medicine_nopic").inOrder()
     }
 
-    @Test fun yourSituationSearchesRegionsAndTogglesChips() {
+    @Test fun yourRegionSearchesAndPicks() {
         val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
-        val addition = Addition(UseCase("medical", "Medical work", "Clinical.", listOf("x")), listOf(line))
-        show(OnboardingUi(step = Step.SITUATION, noCatalog = false, regions = regions, additions = listOf(addition)))
+        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions))
         compose.onNodeWithText("Country or area").performTextInput("pe")
         compose.onNodeWithText("Peru · 500 B").performClick()
+        compose.onNodeWithText("Medical work").assertDoesNotExist()
+        assertThat(calls).containsExactly("query:pe", "region:maps_en_peru").inOrder()
+    }
+
+    @Test fun yourRegionShowsTheSuggestionAndNoRegionClearsIt() {
+        val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
+        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions, region = Region(peru, installed = false), regionSuggested = true))
+        compose.onNodeWithText("Suggested from this phone").assertIsDisplayed()
+        compose.onNodeWithText("Peru · 500 B").assertIsDisplayed()
+        compose.onNodeWithText("No region").performClick()
+        assertThat(calls).containsExactly("region:null")
+    }
+
+    @Test fun usesTogglesChipsOnItsOwnScreen() {
+        val addition = Addition(UseCase("medical", "Medical work", "Clinical.", listOf("x")), listOf(line))
+        show(OnboardingUi(step = Step.USES, noCatalog = false, additions = listOf(addition)))
+        compose.onNodeWithText("Country or area").assertDoesNotExist()
         compose.onNodeWithText("Medical work").performClick()
         compose.onNodeWithText("Clinical. Adds 1.0 KB · 1 item.").assertIsDisplayed()
         compose.onNodeWithText("See").performClick()
-        assertThat(calls).containsExactly("query:pe", "region:maps_en_peru", "case:medical", "see:medicine").inOrder()
+        assertThat(calls).containsExactly("case:medical", "see:medicine").inOrder()
+    }
+
+    @Test fun everyStepOpensAtItsTop() {
+        val many = (1..40).map { Region(packEntry("maps_en_c$it", size = 100).copy(family = "maps", title = "Country $it"), installed = false) }
+        var ui by mutableStateOf(OnboardingUi(step = Step.START, noCatalog = false, starts = listOf(efficient), startId = "efficient", regions = Regions(many, many.take(10)), regionQuery = "Country"))
+        compose.setContent { OnboardingContent(ui, actions) }
+        compose.onNodeWithTag("onboarding-list").performScrollToIndex(2)
+        ui = ui.copy(step = Step.REGION)
+        compose.onNodeWithText("A map of where you are, for finding your way with no signal.").assertIsDisplayed()
+        compose.onNodeWithTag("onboarding-list").performScrollToIndex(30)
+        ui = ui.copy(step = Step.USES)
+        compose.onNodeWithText("Add packs for what you'll use Granger for. You can change this later in Settings.").assertIsDisplayed()
     }
 
     @Test fun reviewListsGroupsTheTotalWifiAndStart() {

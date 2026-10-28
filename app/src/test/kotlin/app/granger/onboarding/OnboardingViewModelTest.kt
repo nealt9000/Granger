@@ -54,10 +54,10 @@ class OnboardingViewModelTest {
         ),
     ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("wikem_en_all_maxi"))), larger = listOf("maps_en_europe")))
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK): OnboardingViewModel {
+    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = ""): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
-            io = main.dispatcher, now = { 42 },
+            countryCode = country, io = main.dispatcher, now = { 42 },
             enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); enqueueResult },
         )
         backgroundScope.launch { vm.ui.collect {} }
@@ -89,7 +89,7 @@ class OnboardingViewModelTest {
         assertThat(vm.ui.value.catalogFailed).isTrue()
         vm.refreshCatalog(); settle()
         assertThat(catalog.refreshes).isEqualTo(2)
-        repeat(4) { vm.next() }; settle()
+        repeat(5) { vm.next() }; settle()
         assertThat(vm.ui.value.step).isEqualTo(Step.REVIEW)
         assertThat(vm.ui.value.review.isEmpty).isTrue()
         vm.start(); settle()
@@ -128,6 +128,24 @@ class OnboardingViewModelTest {
         assertThat(vm.ui.value.askChosen).isFalse()
         assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Ask (Preview)")
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.askLine).isNull()
+    }
+
+    @Test fun thePhonesCountryIsSuggestedUntilTheUserPicks() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        val vm = viewModel(country = "PE")
+        assertThat(vm.ui.value.region!!.title).isEqualTo("Peru")
+        assertThat(vm.ui.value.regionSuggested).isTrue()
+        assertThat(vm.ui.value.review.groups.map { it.title }).contains("Your region")
+        vm.chooseRegion(null); settle()
+        assertThat(vm.ui.value.region).isNull()
+        assertThat(vm.ui.value.regionSuggested).isFalse()
+        vm.next(); vm.back(); settle() // a cleared suggestion stays cleared
+        assertThat(vm.ui.value.region).isNull()
+        vm.chooseRegion("maps_en_europe"); settle()
+        assertThat(vm.ui.value.region!!.title).isEqualTo("Europe")
+        assertThat(vm.ui.value.regionSuggested).isFalse()
+        // A country with no pack suggests nothing.
+        assertThat(viewModel(country = "IN").ui.value.region).isNull()
     }
 
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {

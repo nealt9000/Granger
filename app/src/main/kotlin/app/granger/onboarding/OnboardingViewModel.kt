@@ -28,8 +28,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** The five screens (spec §6). */
-enum class Step { WELCOME, PHONE, START, SITUATION, REVIEW }
+/** The six screens (spec §6; Region and Uses split in Plan U3a). */
+enum class Step { WELCOME, PHONE, START, REGION, USES, REVIEW }
 
 /** This phone (step 2). */
 data class PhoneUi(
@@ -56,6 +56,8 @@ data class OnboardingUi(
     val regions: Regions = Regions(emptyList(), emptyList()),
     val regionQuery: String = "",
     val region: Region? = null,
+    /** [region] is the one suggested from the phone's country, not one the user picked. */
+    val regionSuggested: Boolean = false,
     val additions: List<Addition> = emptyList(),
     val useCaseIds: Set<String> = emptySet(),
     /** Ask's models, offered under the start choices; null where Ask can't run or the catalog has none. */
@@ -84,6 +86,7 @@ class OnboardingViewModel(
     private val totalRamBytes: Long,
     private val onboardingPrefs: OnboardingPrefs,
     private val dense: Boolean = app.granger.DENSE_RETRIEVAL,
+    private val countryCode: String = java.util.Locale.getDefault().country,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
@@ -93,7 +96,8 @@ class OnboardingViewModel(
     private val startId = MutableStateFlow<String?>(OnboardingModel.EFFICIENT)
     private val unticked = MutableStateFlow<Set<String>>(emptySet())
     private val regionQuery = MutableStateFlow("")
-    private val regionId = MutableStateFlow<String?>(null)
+    /** The user's pick, or [UNCHOSEN] until they pick (the suggestion stands until then; null is "No region"). */
+    private val regionId = MutableStateFlow<String?>(UNCHOSEN)
     private val useCaseIds = MutableStateFlow<Set<String>>(emptySet())
     private val askChosen = MutableStateFlow(true)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
@@ -151,7 +155,9 @@ class OnboardingViewModel(
         val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed) }.orEmpty()
         val start = starts.firstOrNull { it.id == c.startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
-        val region = (regions.countries + regions.larger).firstOrNull { it.pack.id == c.regionId }
+        val suggested = c.regionId == UNCHOSEN
+        val region = if (suggested) OnboardingModel.suggestedRegion(regions, countryCode)
+            else (regions.countries + regions.larger).firstOrNull { it.pack.id == c.regionId }
         val chosen = start?.chosen(c.unticked).orEmpty().flatMap { it.items }.mapTo(HashSet()) { it.id }
         region?.let { chosen += it.pack.id }
         val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen) }.orEmpty()
@@ -177,6 +183,7 @@ class OnboardingViewModel(
             regions = regions.matching(c.regionQuery),
             regionQuery = c.regionQuery,
             region = region,
+            regionSuggested = suggested && region != null,
             additions = additions,
             useCaseIds = c.useCaseIds,
             askLine = askLine,
@@ -273,6 +280,9 @@ class OnboardingViewModel(
     }
 
     companion object {
+        /** [regionId] before the user has picked: the phone's country stands. */
+        private const val UNCHOSEN = "\u0000unchosen"
+
         /** The readiness domain a use case's "See" opens on the Kiwix screen. */
         val DOMAIN_OF = mapOf(
             "offgrid" to "food", "travel" to "maps", "study" to "science", "build" to "making",

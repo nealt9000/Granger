@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
@@ -34,6 +35,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -92,7 +94,8 @@ private val Step.title: String
         Step.WELCOME -> "Welcome"
         Step.PHONE -> "This phone"
         Step.START -> "Pick a start"
-        Step.SITUATION -> "Your situation"
+        Step.REGION -> "Your region"
+        Step.USES -> "What you'll use it for"
         Step.REVIEW -> "Review and start"
     }
 
@@ -122,13 +125,21 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
             }
         },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("onboarding-list"), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)) {
-            when (ui.step) {
-                Step.WELCOME -> welcome()
-                Step.PHONE -> phone(ui)
-                Step.START -> start(ui, actions)
-                Step.SITUATION -> situation(ui, actions)
-                Step.REVIEW -> review(ui, actions)
+        // A scroll position per step, so every step opens at its top (Plan U3a Decision 4).
+        key(ui.step) {
+            LazyColumn(
+                Modifier.padding(padding).fillMaxSize().testTag("onboarding-list"),
+                state = rememberLazyListState(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            ) {
+                when (ui.step) {
+                    Step.WELCOME -> welcome()
+                    Step.PHONE -> phone(ui)
+                    Step.START -> start(ui, actions)
+                    Step.REGION -> region(ui, actions)
+                    Step.USES -> uses(ui, actions)
+                    Step.REVIEW -> review(ui, actions)
+                }
             }
         }
     }
@@ -253,8 +264,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
     }
 }
 
-private fun androidx.compose.foundation.lazy.LazyListScope.situation(ui: OnboardingUi, actions: OnboardingActions) {
-    item { Text("Your region", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: OnboardingUi, actions: OnboardingActions) {
+    item { Text("A map of where you are, for finding your way with no signal.", style = MaterialTheme.typography.bodyMedium) }
     item {
         OutlinedTextField(
             value = ui.regionQuery,
@@ -265,6 +276,9 @@ private fun androidx.compose.foundation.lazy.LazyListScope.situation(ui: Onboard
         )
     }
     ui.region?.let { region ->
+        if (ui.regionSuggested) {
+            item { Text("Suggested from this phone", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+        }
         item {
             Text("${region.title} · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(top = 8.dp))
         }
@@ -274,8 +288,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.situation(ui: Onboard
     items(shown.countries.take(if (ui.regionQuery.isBlank()) 12 else 40), key = { "c-${it.pack.id}" }) { RegionRow(it, ui, actions) }
     if (shown.larger.isNotEmpty()) item { Text("Larger areas", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
     items(shown.larger, key = { "l-${it.pack.id}" }) { RegionRow(it, ui, actions) }
+}
 
-    item { Text("What you'll use it for", Modifier.padding(top = 24.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi, actions: OnboardingActions) {
+    item { Text("Add packs for what you'll use Granger for. You can change this later in Settings.", style = MaterialTheme.typography.bodyMedium) }
     items(ui.additions, key = { it.useCase.id }) { addition ->
         val on = addition.useCase.id in ui.useCaseIds
         Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {

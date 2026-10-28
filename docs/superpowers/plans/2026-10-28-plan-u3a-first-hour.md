@@ -50,7 +50,7 @@
    - Memory goes through `formatBytes` in both places.
 4. **Region and Uses become two steps.** `Step` becomes `WELCOME, PHONE, START, REGION, USES, REVIEW`. Each step gets its own `LazyListState`, so every step opens at the top.
    - Region: the field, then **Suggested**: the pack whose title matches the phone's country (`Locale.getDefault().country` → `Locale("", cc).getDisplayCountry(Locale.ENGLISH)`, compared case-insensitively against the title and a small alias table for catalog names that differ, e.g. "United States" ↔ "US"/"USA"; the implementer checks the live catalog's maps titles and fills the table). Below it, the larger area that contains it if `catalog.onboarding` says so, otherwise the larger areas list. Then the alphabetical countries as today.
-   - **The suggestion is preselected** (it's a map of where the phone is). "No region" deselects it.
+   - **The suggestion is preselected** (it's a map of where the phone is). "No region" deselects it. *(Built: the alias table maps 27 codes, checked against all 193 maps titles with the JDK's English names; larger areas are never suggested; India has no pack of its own, so nothing is suggested there.)*
    - Uses: the chips as today, on their own screen, with a one-line lead: "Add packs for what you'll use Granger for. You can change this later in Settings."
 5. **Review names what's in it.** The first group is titled with the preset's title only when the picked items equal the preset's items; otherwise **"Your picks"**. The total line uses the same sum as Home's setup bar. Task 4 finds why Review said 318 MB and Home said 244 MB on the same picks, and makes them agree.
 6. **Start leaves at once.** Start disables itself and shows a small progress indicator in the button. `enqueueGroup`'s per-item DAO calls go in one Room transaction (`withTransaction`), and `scheduleGroup` runs on `Dispatchers.Default`. Home's setup bar already shows progress, so navigating the moment the records are written is enough. Target: under 1 s from tap to Home for the Efficient start on the Pixel 6, measured in Task 4.
@@ -109,11 +109,11 @@
 
 ### Task 3: Region and Uses
 
-- [ ] `Step.REGION` and `Step.USES` replace `SITUATION`, with titles "Your region" and "What you'll use it for". Back and Next walk six steps. Each step remembers its own `LazyListState`.
-- [ ] `OnboardingModel.suggestedRegion(regions, countryCode)`: the display-country match plus `REGION_ALIASES`. Check the maps titles in `catalog/catalog.json` and add aliases for every mismatch among the 20 most populous countries and the UK.
-- [ ] VM: `regionId` preselects the suggestion once the catalog is there, unless the user has chosen. The Region screen shows Suggested first.
-- [ ] Tests: suggestion found for US/GB/DE (whatever the catalog names them), none for an unknown code; preselected; "No region" clears it and it stays cleared; each step opens at the top (`OnboardingScreenTest`).
-- [ ] **Commit.** `Onboarding: Region (suggested from the phone) and Uses as two steps`
+- [x] `Step.REGION` and `Step.USES` replace `SITUATION`, with titles "Your region" and "What you'll use it for". Back and Next walk six steps. Each step remembers its own `LazyListState`.
+- [x] `OnboardingModel.suggestedRegion(regions, countryCode)`: the display-country match plus `REGION_ALIASES`. Check the maps titles in `catalog/catalog.json` and add aliases for every mismatch among the 20 most populous countries and the UK.
+- [x] VM: `regionId` preselects the suggestion once the catalog is there, unless the user has chosen. The Region screen shows Suggested first.
+- [x] Tests: suggestion found for US/GB/DE (whatever the catalog names them), none for an unknown code; preselected; "No region" clears it and it stays cleared; each step opens at the top (`OnboardingScreenTest`).
+- [x] **Commit.** `Onboarding: Region (suggested from the phone) and Uses as two steps`
 
 ### Task 4: Review and Start
 
