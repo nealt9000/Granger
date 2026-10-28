@@ -104,6 +104,9 @@ data class MusicNow(val trackId: String, val source: String, val playing: Boolea
     /** [album]'s queue is playing: its Play becomes Stop. Not under the voice, where Stop would end the reading too. */
     fun playingAlbum(album: AlbumSummary): Boolean = !underVoice && playing && source == MusicSources.album(album).key
 
+    /** [album]'s queue is loaded but paused: its Play resumes it rather than starting over. */
+    fun pausedAlbum(album: AlbumSummary): Boolean = !underVoice && !playing && source == MusicSources.album(album).key
+
     companion object {
         /** Null when no music is loaded. */
         fun of(ui: PlayerUi): MusicNow? = when (val now = ui.now) {
@@ -397,6 +400,9 @@ class MusicViewModel(
 
     /** The album's Stop: the player stops (not a pause) and empties, its place saved. */
     fun stop() = hub.stop()
+
+    /** The paused album's Play: carries on where it paused. */
+    fun resume() = hub.playPause()
 
     fun playNext(tracks: List<Track>) {
         playableIds(tracks).takeIf { it.isNotEmpty() }?.let(hub::playNext)

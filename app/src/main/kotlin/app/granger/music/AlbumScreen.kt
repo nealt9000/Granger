@@ -95,7 +95,7 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
             item {
                 PlayShuffleRow(
                     enabled = loaded.tracks.any { it.status == PackStatus.OK },
-                    onPlay = { vm.play(loaded.tracks, null, source) },
+                    onPlay = { if (now?.pausedAlbum(album) == true) vm.resume() else vm.play(loaded.tracks, null, source) },
                     onShuffle = { vm.play(loaded.tracks, null, source, shuffle = true) },
                     onStop = if (now?.playingAlbum(album) == true) vm::stop else null,
                 )

@@ -107,6 +107,14 @@ class AlbumPlayingTest {
         compose.onAllNodes(hasText("Stop")).assertCountEquals(0)
     }
 
+    @Test fun pausedPlayCarriesOnRatherThanStartingOver() {
+        show()
+        playing(songs[1], heard = false, index = 1)
+        compose.onNodeWithText("Play").performClick()
+        assertThat(hub.calls.last()).isEqualTo("playPause")
+        assertThat(hub.calls).doesNotContain("playTracks")
+    }
+
     @Test fun aSongPlayedFromElsewhereIsMarkedButTheAlbumKeepsPlay() {
         show()
         playing(songs[2], source = "playlist:7", index = 0)
