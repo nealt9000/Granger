@@ -59,10 +59,16 @@ class OnboardingScreenTest {
         assertThat(calls).containsExactly("back")
     }
 
-    @Test fun pickAStartWithoutACatalogOffersARefresh() {
-        show(OnboardingUi(step = Step.START, noCatalog = true))
-        compose.onNodeWithText("Refresh the catalog to see the choices.").assertIsDisplayed()
-        compose.onNodeWithText("Refresh").performClick()
+    @Test fun pickAStartShowsTheFetchWhileTheCatalogArrives() {
+        show(OnboardingUi(step = Step.START, noCatalog = true, refreshing = true))
+        compose.onNodeWithText("Getting the list of packs…").assertIsDisplayed()
+        compose.onNodeWithText("Refresh the catalog to see the choices.").assertDoesNotExist()
+    }
+
+    @Test fun pickAStartOffersTryAgainWhenTheFetchFailed() {
+        show(OnboardingUi(step = Step.START, noCatalog = true, catalogFailed = true))
+        compose.onNodeWithText("Couldn't reach the catalog. Check the connection and try again.").assertIsDisplayed()
+        compose.onNodeWithText("Try again").performClick()
         assertThat(calls).containsExactly("refresh")
     }
 

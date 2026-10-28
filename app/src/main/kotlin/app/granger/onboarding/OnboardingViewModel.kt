@@ -43,9 +43,11 @@ data class PhoneUi(
 
 data class OnboardingUi(
     val step: Step = Step.WELCOME,
-    /** No cached catalog yet: Pick a start can only offer a refresh. */
+    /** No catalog yet: Pick a start shows the fetch (fresh install) or why it failed. */
     val noCatalog: Boolean = true,
     val refreshing: Boolean = false,
+    /** The fetch onboarding started failed; Pick a start offers Try again, and Next still works. */
+    val catalogFailed: Boolean = false,
     val phone: PhoneUi = PhoneUi("", null, emptyList(), 0, 0),
     val starts: List<StartChoice> = emptyList(),
     /** [OnboardingModel.EFFICIENT], [OnboardingModel.COMPREHENSIVE], or null for "I'll choose later". */
@@ -98,12 +100,12 @@ class OnboardingViewModel(
     val finished: StateFlow<Boolean> get() = done
     private val done = MutableStateFlow(false)
 
-    private class Facts(val catalog: Catalog?, val refreshing: Boolean, val installed: Set<String>, val volumes: List<Volume>)
+    private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
     private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
-        Facts(c.catalog, c.refreshing, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
+        Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
     }
     private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds) { values ->
         @Suppress("UNCHECKED_CAST")
@@ -115,7 +117,12 @@ class OnboardingViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnboardingUi())
 
     init {
-        viewModelScope.launch { catalog.load() }
+        viewModelScope.launch {
+            catalog.load()
+            // A fresh install has no cache: fetch it once (Plan U3a Decision 1). A cached one is never refreshed here,
+            // so Set up suggestions again stays offline.
+            if (catalog.state.value.catalog == null) catalog.refresh()
+        }
         refreshVolumes()
     }
 
@@ -150,6 +157,7 @@ class OnboardingViewModel(
             step = c.step,
             noCatalog = catalog == null,
             refreshing = f.refreshing,
+            catalogFailed = f.failed,
             phone = PhoneUi(
                 tierLine = tierLine(),
                 researchLine = researchLine(),

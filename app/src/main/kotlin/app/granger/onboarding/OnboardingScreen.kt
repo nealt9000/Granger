@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -168,10 +170,21 @@ private fun androidx.compose.foundation.lazy.LazyListScope.phone(ui: OnboardingU
 private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingUi, actions: OnboardingActions) {
     if (ui.noCatalog) {
         item {
-            Column {
-                Text("Refresh the catalog to see the choices.", style = MaterialTheme.typography.bodyLarge)
-                Button(onClick = actions.onRefreshCatalog, enabled = !ui.refreshing, modifier = Modifier.padding(top = 12.dp)) {
-                    Text(if (ui.refreshing) "Refreshing…" else "Refresh")
+            if (ui.catalogFailed) {
+                Column {
+                    Text("Couldn't reach the catalog. Check the connection and try again.", style = MaterialTheme.typography.bodyLarge)
+                    Button(onClick = actions.onRefreshCatalog, modifier = Modifier.padding(top = 12.dp)) { Text("Try again") }
+                    Text(
+                        "Or tap Next: Home and the Library are yours either way.",
+                        Modifier.padding(top = 12.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Text("Getting the list of packs…", Modifier.padding(start = 12.dp), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

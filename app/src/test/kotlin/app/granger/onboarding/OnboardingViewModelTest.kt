@@ -67,13 +67,34 @@ class OnboardingViewModelTest {
 
     private fun TestScope.settle() = testScheduler.advanceUntilIdle()
 
-    @Test fun withoutACatalogTheStartStepAsksForARefresh() = runTest(main.dispatcher) {
+    @Test fun aFreshInstallFetchesTheCatalogOnce() = runTest(main.dispatcher) {
         val vm = viewModel()
-        assertThat(vm.ui.value.noCatalog).isTrue()
-        assertThat(vm.ui.value.starts).isEmpty()
-        vm.refreshCatalog(); settle()
-        assertThat(catalog.refreshes).isEqualTo(1)
         assertThat(catalog.loads).isEqualTo(1)
+        assertThat(catalog.refreshes).isEqualTo(1)
+        assertThat(vm.ui.value.noCatalog).isTrue()
+        assertThat(vm.ui.value.catalogFailed).isFalse()
+        assertThat(vm.ui.value.starts).isEmpty()
+    }
+
+    @Test fun aCachedCatalogIsNeverRefreshedByOnboarding() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        viewModel()
+        assertThat(catalog.loads).isEqualTo(1)
+        assertThat(catalog.refreshes).isEqualTo(0)
+    }
+
+    @Test fun aFailedFetchOffersTryAgainAndNextStillReachesTheEnd() = runTest(main.dispatcher) {
+        catalog.onRefresh = { catalog.mutable.value = CatalogState(error = app.granger.core.catalog.CatalogError.NETWORK) }
+        val vm = viewModel()
+        assertThat(vm.ui.value.catalogFailed).isTrue()
+        vm.refreshCatalog(); settle()
+        assertThat(catalog.refreshes).isEqualTo(2)
+        repeat(4) { vm.next() }; settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.REVIEW)
+        assertThat(vm.ui.value.review.isEmpty).isTrue()
+        vm.start(); settle()
+        assertThat(vm.finished.value).isTrue()
+        assertThat(enqueued).isEmpty()
     }
 
     @Test fun thisPhoneWordsTheTierAndResearch() = runTest(main.dispatcher) {
