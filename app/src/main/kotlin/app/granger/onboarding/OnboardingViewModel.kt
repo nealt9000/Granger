@@ -65,6 +65,8 @@ data class OnboardingUi(
     /** Ask's models, offered under the start choices; null where Ask can't run or the catalog has none. */
     val askLine: Line? = null,
     val askChosen: Boolean = true,
+    /** Encyclopedias without their pictures: the space-saving fallback. */
+    val saveSpace: Boolean = false,
     /** A Granger voice for reading aloud, offered beside Ask; null where read-aloud is off or one is installed. */
     val voiceLine: Line? = null,
     val voiceChosen: Boolean = true,
@@ -109,6 +111,7 @@ class OnboardingViewModel(
     private val useCaseIds = MutableStateFlow<Set<String>>(emptySet())
     private val askChosen = MutableStateFlow(true)
     private val voiceChosen = MutableStateFlow(true)
+    private val saveSpace = MutableStateFlow(false)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<String?>(null)
@@ -120,15 +123,15 @@ class OnboardingViewModel(
     private val done = MutableStateFlow(false)
 
     private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
-    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean)
+    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
         Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
     }
-    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen) { values ->
+    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen, saveSpace) { values ->
         @Suppress("UNCHECKED_CAST")
-        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean)
+        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean, values[8] as Boolean)
     }
     private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
@@ -162,7 +165,7 @@ class OnboardingViewModel(
 
     private fun build(f: Facts, c: Choices, s: Setup): OnboardingUi {
         val catalog = f.catalog
-        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed) }.orEmpty()
+        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, c.saveSpace) }.orEmpty()
         val start = starts.firstOrNull { it.id == c.startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
         val suggestion = OnboardingModel.suggestedRegion(regions, countryCode)
@@ -203,6 +206,7 @@ class OnboardingViewModel(
             useCaseIds = c.useCaseIds,
             askLine = askLine,
             askChosen = c.askChosen,
+            saveSpace = c.saveSpace,
             voiceLine = voiceLine,
             voiceChosen = c.voiceChosen,
             review = review,
@@ -253,6 +257,8 @@ class OnboardingViewModel(
     fun toggleAsk() = askChosen.update { !it }
 
     fun toggleVoice() = voiceChosen.update { !it }
+
+    fun toggleSaveSpace() = saveSpace.update { !it }
 
     fun toggleUseCase(id: String) = useCaseIds.update { if (id in it) it - id else it + id }
 

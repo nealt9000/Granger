@@ -196,4 +196,14 @@ class OnboardingModelTest {
         assertThat(review.groups.single().title).isEqualTo("Read aloud")
         assertThat(review.groups.single().lines.single().title).isEqualTo("Granger voice (Maggie & Martin)")
     }
+
+    @Test fun saveSpaceSwapsEachPackForItsNoPicturesFlavour() {
+        val pictures = catalog.copy(presets = listOf(Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "gc-bible"))))
+        val withPictures = OnboardingModel.startChoices(pictures, emptySet()).single()
+        assertThat(withPictures.lines.map { it.id }).containsExactly("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "collection:granger-classics").inOrder()
+        val saving = OnboardingModel.startChoices(pictures, emptySet(), saveSpace = true).single()
+        // WikEM has no no-pictures flavour: it stays.
+        assertThat(saving.lines.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "wikem_en_all_maxi", "collection:granger-classics").inOrder()
+        assertThat(saving.bytes()).isLessThan(withPictures.bytes())
+    }
 }

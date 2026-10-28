@@ -82,15 +82,19 @@ object OnboardingModel {
     const val VOICE = "voice"
     const val VOICE_ID = "vits-piper-en_US-granger_libritts-medium"
 
-    /** The two start choices, each from its generated preset; a catalog without them (older) gives an empty list. */
-    fun startChoices(catalog: Catalog, installed: Set<String>): List<StartChoice> {
+    /**
+     * The two start choices, each from its generated preset; a catalog without them (older) gives an empty list.
+     * [saveSpace] swaps each pack for its no-pictures flavour where the catalog has one (Neal, 2026-10-28: pictures are
+     * the default, no-pictures the space-saving fallback).
+     */
+    fun startChoices(catalog: Catalog, installed: Set<String>, saveSpace: Boolean = false): List<StartChoice> {
         val blurbs = mapOf(
             EFFICIENT to "The essentials of every domain: enough to answer most questions, in the least space.",
             COMPREHENSIVE to "Everything the readiness model counts, for a phone that can hold it.",
         )
         return listOf(EFFICIENT, COMPREHENSIVE).mapNotNull { id ->
             val preset = catalog.presets.firstOrNull { it.id == id } ?: return@mapNotNull null
-            val items = preset.items.mapNotNull { catalog.item(it) }
+            val items = preset.items.mapNotNull { catalog.item(it) }.map { if (saveSpace) withoutPictures(catalog, it) else it }.distinctBy { it.id }
             StartChoice(id, preset.title, blurbs.getValue(id), lines(items, installed))
         }
     }
@@ -114,6 +118,12 @@ object OnboardingModel {
         if (catalog.voices.any { it.id in installed }) return null
         val voice = catalog.voices.firstOrNull { it.id == VOICE_ID } ?: catalog.voices.firstOrNull() ?: return null
         return Line(VOICE, "Read aloud", listOf(voice), installed = false)
+    }
+
+    /** [item]'s no-pictures flavour (`…_nopic`, same ZIM), or [item] itself. */
+    fun withoutPictures(catalog: Catalog, item: CatalogItem): CatalogItem {
+        if (item !is PackEntry || item.zimName.isBlank() || item.id.endsWith("_nopic")) return item
+        return catalog.packs.firstOrNull { it.zimName == item.zimName && it.id.endsWith("_nopic") } ?: item
     }
 
     /** The maps family split by [app.granger.core.catalog.Onboarding.larger], each list by title, plus the covered places. */

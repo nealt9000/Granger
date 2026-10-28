@@ -58,6 +58,7 @@ class OnboardingActions(
     val onToggleLine: (String) -> Unit = {},
     val onToggleAsk: () -> Unit = {},
     val onToggleVoice: () -> Unit = {},
+    val onToggleSaveSpace: () -> Unit = {},
     val onRegionQuery: (String) -> Unit = {},
     val onChooseRegion: (String?) -> Unit = {},
     val onToggleUseCase: (String) -> Unit = {},
@@ -85,6 +86,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
             onRefreshCatalog = viewModel::refreshCatalog, onChooseStart = viewModel::chooseStart, onToggleLine = viewModel::toggleLine,
             onToggleAsk = viewModel::toggleAsk,
             onToggleVoice = viewModel::toggleVoice,
+            onToggleSaveSpace = viewModel::toggleSaveSpace,
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
@@ -236,6 +238,18 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
         }
     }
     val start = ui.start ?: return
+    item(key = "save-space") {
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ui.saveSpace, role = Role.Switch) { actions.onToggleSaveSpace() },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("Save space")
+                Text("Encyclopedias without their pictures: the same articles, a poorer read.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Switch(checked = ui.saveSpace, onCheckedChange = null)
+        }
+    }
     item { HorizontalDivider(Modifier.padding(vertical = 12.dp)) }
     items(start.lines, key = { it.id }) { line ->
         val ticked = line.id !in ui.unticked

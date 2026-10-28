@@ -317,12 +317,12 @@ fun NavController.openShelfFromPlayer(mode: PlayerMode) {
 internal data class ResearchOpening(val route: ResearchRoute, val replacesChatOnTop: Boolean)
 
 /**
- * Ask's one rule for + and Back (Plan U3a Decision 9): a kept chat picked on Ask's landing ([fromLanding]) is pushed
- * over it, so Back returns to the landing and Back again leaves Ask; a new chat (+, the rail's tool) replaces a chat on
- * top. A reader's "Ask about this" is pushed over the reader by its own route.
+ * Ask's one rule for + and Back (Plan U3a Decision 9, revised after Neal's walkthrough): a kept chat picked from the
+ * Chats sheet ([fromChats]) is pushed over the chat it was picked in, so Back returns there; + and the rail's tool
+ * replace a chat on top with a fresh, empty one. A reader's "Ask about this" is pushed over the reader by its own route.
  */
-internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean, fromLanding: Boolean = false) =
-    ResearchOpening(route, replacesChatOnTop = researchOnTop && !fromLanding)
+internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean, fromChats: Boolean = false) =
+    ResearchOpening(route, replacesChatOnTop = researchOnTop && !fromChats)
 
 /**
  * A Research chat: [chatId] opens a kept one, 0 starts a new one. [quote] is a reader's selection, from [quoteSourceId]
@@ -528,9 +528,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
     }
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
-    fun openResearch(route: ResearchRoute, fromLanding: Boolean = false) {
+    fun openResearch(route: ResearchRoute, fromChats: Boolean = false) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
-        val open = researchOpening(route, researchOnTop, fromLanding)
+        val open = researchOpening(route, researchOnTop, fromChats)
         nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
@@ -846,7 +846,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         }
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) },
-                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId), fromLanding = true) },
+                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId), fromChats = true) },
                     onNewChat = { openResearch(ResearchRoute()) },
                     onBack = { nav.popBackStack() },
                 )

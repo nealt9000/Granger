@@ -37,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,6 +46,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -130,13 +132,6 @@ private sealed interface ThreadRow {
         override val key get() = "intro"
     }
 
-    data object RecentHeader : ThreadRow {
-        override val key get() = "recent"
-    }
-
-    data class Recent(val chat: ChatSummary) : ThreadRow {
-        override val key get() = "chat:${chat.id}"
-    }
 }
 
 private fun sourceKey(turnId: Long, n: Int) = "source:$turnId:$n"
@@ -152,12 +147,8 @@ private fun rows(state: ResearchViewModel.State): List<ThreadRow> = buildList {
             turn.shown.forEachIndexed { i, passage -> add(ThreadRow.Source(turn.id, i + 1, passage)) }
         }
     }
-    // The landing: what Ask is, above the recent chats (Plan U3a Decision 8). Not over a reader's quote.
+    // A new chat says what Ask is (Plan U3a Decision 8); not over a reader's quote. Recent chats are in the Chats sheet.
     if (state.turns.isEmpty() && state.quote == null) add(ThreadRow.Intro)
-    if (state.turns.isEmpty() && state.recentChats.isNotEmpty()) {
-        add(ThreadRow.RecentHeader)
-        state.recentChats.forEach { add(ThreadRow.Recent(it)) }
-    }
 }
 
 /**
@@ -259,6 +250,14 @@ fun ResearchScreen(
         wasLive = live
     }
 
+    var chatsOpen by remember { mutableStateOf(false) }
+    if (chatsOpen) {
+        ChatsSheet(state.recentChats.filter { it.id != state.chatId }, onDismiss = { chatsOpen = false }) { id ->
+            chatsOpen = false
+            onOpenChat(id)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -267,10 +266,12 @@ fun ResearchScreen(
                 },
                 title = { AskTitle() },
                 actions = {
-                    // On the landing you're already in a new chat: + there only looked broken (Neal, U3a walkthrough).
-                    if (state.turns.isNotEmpty() || state.chatId != null) {
-                        IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = "New chat") }
+                    // Recent chats live behind their own button, not in the new chat (Neal, U3a walkthrough).
+                    val others = state.recentChats.filter { it.id != state.chatId }
+                    if (others.isNotEmpty()) {
+                        IconButton(onClick = { chatsOpen = true }) { Icon(painterResource(R.drawable.ic_history), contentDescription = "Chats") }
                     }
+                    IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = "New chat") }
                     var menu by remember { mutableStateOf(false) }
                     Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
@@ -338,16 +339,6 @@ fun ResearchScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
-                    )
-                    ThreadRow.RecentHeader -> Text(
-                        "Recent chats",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
-                    )
-                    is ThreadRow.Recent -> ListItem(
-                        modifier = Modifier.clickable { onOpenChat(row.chat.id) },
-                        headlineContent = { Text(row.chat.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
                     )
                 }
             }
@@ -609,6 +600,28 @@ private fun Banner(text: String) {
             .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(8.dp))
             .padding(12.dp),
     )
+}
+
+/** The recent chats, from the top bar's Chats button; picking one opens it over this chat, so Back returns here. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onOpen: (Long) -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Text(
+            "Recent chats",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
+        )
+        LazyColumn {
+            items(chats, key = { it.id }) { chat ->
+                ListItem(
+                    modifier = Modifier.clickable { onOpen(chat.id) },
+                    headlineContent = { Text(chat.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                )
+            }
+        }
+    }
 }
 
 /** "Ask" with its Preview tag (Plan U3a Decisions 7–8). */

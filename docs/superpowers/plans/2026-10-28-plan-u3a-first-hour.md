@@ -146,6 +146,13 @@
 - [x] Readiness no longer flags a map as "can't be searched: the pack has no index" (maps family).
 - [x] **Commit.** `Onboarding offers the Granger voice; Ask's + only in a chat; maps aren't unsearchable`
 
+### Task 6c: Ask's chats, and pictures by default (Neal, 2026-10-28)
+
+- [x] Ask: + always opens a fresh, empty chat (the intro and the field, nothing else). Recent chats leave the new chat for a **Chats** sheet behind a history button in the top bar; a chat picked there is pushed, so Back returns to the chat it was picked in. (Neal: "+ should be like sending a fresh message in a new window; recent chats in the new chat space is confusing.")
+- [x] Pictures by default (W2): the presets take the with-pictures flavour of WikiMed, Wikivoyage, Best of Wikipedia (Efficient) and Wikibooks, Wikiversity, Wikiquote, Wikisource, History (Comprehensive); Top 1M stays without pictures (its pictures add 32 GB). Efficient 11.9 → 17.7 GB, Comprehensive 91.5 → 101.5 GB. The flavours share their search vectors, so Ask loses nothing. Patched in `curated.json` and `catalog/catalog.json` (not rebuilt: a rebuild re-pins every snapshot and could orphan vectors), re-signed; the catalog-gen tier target is now 18 / 103 GB.
+- [x] Pick a start's **Save space** switch swaps each pack for its no-pictures flavour.
+- [x] **Commit.** `Ask: + opens a fresh chat, recent chats in a sheet; pictures by default, Save space for none`
+
 ### Task 7: Walkthrough (Neal, Pixel 6, Granger Fresh)
 
 - [ ] `adb uninstall app.granger.fresh` then `./gradlew installDebug -Pfresh`. Walk it with Wi-Fi on:

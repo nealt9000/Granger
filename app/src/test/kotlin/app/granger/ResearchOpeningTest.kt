@@ -12,15 +12,14 @@ class ResearchOpeningTest {
         assertThat(researchOpening(ResearchRoute(), researchOnTop = false).replacesChatOnTop).isFalse()
     }
 
-    @Test fun aChatPickedOnTheLandingIsPushedSoBackReturnsThere() {
-        val open = researchOpening(ResearchRoute(chatId = 7), researchOnTop = true, fromLanding = true)
+    @Test fun aChatPickedFromTheChatsSheetIsPushedSoBackReturnsThere() {
+        val open = researchOpening(ResearchRoute(chatId = 7), researchOnTop = true, fromChats = true)
         assertThat(open.route.chatId).isEqualTo(7)
         assertThat(open.replacesChatOnTop).isFalse()
     }
 
-    @Test fun plusFromAChatReplacesItWithAFreshLanding() {
-        // + in chat 7 (pushed over the landing): an empty landing takes its place, so Back goes to the first
-        // landing and Back again leaves Ask.
+    @Test fun plusReplacesTheChatWithAFreshEmptyOne() {
+        // + in chat 7: a fresh, empty chat takes its place on top.
         val open = researchOpening(ResearchRoute(), researchOnTop = true)
         assertThat(open.route).isEqualTo(ResearchRoute())
         assertThat(open.replacesChatOnTop).isTrue()

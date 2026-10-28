@@ -722,8 +722,9 @@ def test_real_curated_tiers_fit_the_target():
         pytest.skip("the published catalog predates the calibration (Plan H4)")
     sizes = cg.tier_sizes(published)
     efficient, comprehensive = sizes["All"]
-    assert efficient < 12e9
-    assert comprehensive < 95e9
+    # With pictures by default (Neal, 2026-10-28: no-pictures packs are the space-saving fallback): 17.7 / 101.5 GB.
+    assert efficient < 18e9
+    assert comprehensive < 103e9
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():

@@ -50,4 +50,13 @@ class AskLandingTest {
         compose.onNodeWithText("Try again").performClick()
         assertThat(gets).isEqualTo(1)
     }
+
+    @Test fun theChatsSheetListsRecentChatsAndOpensOne() {
+        val opened = mutableListOf<Long>()
+        val chats = listOf(app.granger.core.library.ChatSummary(3, "how do you grow cassava?", 30), app.granger.core.library.ChatSummary(2, "who wrote 1984?", 20))
+        compose.setContent { ChatsSheet(chats, onDismiss = {}) { opened += it } }
+        compose.onNodeWithText("Recent chats").assertIsDisplayed()
+        compose.onNodeWithText("who wrote 1984?").performClick()
+        assertThat(opened).containsExactly(2L)
+    }
 }

@@ -182,8 +182,8 @@
       "items": [
         "gemma-4-e2b-gpu",
         "embeddinggemma-2-text-270m",
-        "wikipedia_en_medicine_nopic",
-        "wikipedia_en_top_nopic",
+        "wikipedia_en_medicine_maxi",
+        "wikipedia_en_top_maxi",
         "@granger-classics"
       ]
     }
@@ -225,7 +225,7 @@
         "id": "medicine",
         "title": "Medicine & first aid",
         "essential": [
-          "wikipedia_en_medicine_nopic"
+          "wikipedia_en_medicine_maxi"
         ],
         "comprehensive": [
           "wikipedia_en_medicine_maxi",
@@ -320,7 +320,7 @@
         "title": "Maps, places & travel",
         "essential": [
           "family:maps",
-          "wikivoyage_en_all_nopic"
+          "wikivoyage_en_all_maxi"
         ],
         "comprehensive": [
           "wikivoyage_en_all_maxi",
@@ -333,13 +333,13 @@
         "id": "reference",
         "title": "General reference",
         "essential": [
-          "wikipedia_en_top_nopic"
+          "wikipedia_en_top_maxi"
         ],
         "comprehensive": [
           "wiktionary_en_all_nopic",
           "wikipedia_en_top1m_nopic",
-          "wikibooks_en_all_nopic",
-          "wikiversity_en_all_nopic",
+          "wikibooks_en_all_maxi",
+          "wikiversity_en_all_maxi",
           "citizendium.org_en_all_maxi",
           "english.stackexchange.com_en_all",
           "ell.stackexchange.com_en_all"
@@ -352,8 +352,8 @@
           "@granger-classics"
         ],
         "comprehensive": [
-          "wikiquote_en_all_nopic",
-          "wikisource_en_all_nopic",
+          "wikiquote_en_all_maxi",
+          "wikisource_en_all_maxi",
           "literature.stackexchange.com_en_all",
           "writing.stackexchange.com_en_all"
         ]
@@ -366,7 +366,7 @@
         ],
         "comprehensive": [
           "internet-encyclopedia-philosophy_en_all",
-          "wikipedia_en_history_nopic",
+          "wikipedia_en_history_maxi",
           "philosophy.stackexchange.com_en_all",
           "history.stackexchange.com_en_all",
           "christianity.stackexchange.com_en_all",
