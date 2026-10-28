@@ -89,8 +89,10 @@ class FakeCatalogSource(catalog: Catalog? = null) : CatalogSource {
     override val state: StateFlow<CatalogState> = mutable
     var loads = 0
     var refreshes = 0
+    /** Runs on each refresh, e.g. to set the state a failed fetch leaves. */
+    var onRefresh: () -> Unit = {}
     override suspend fun load() { loads++ }
-    override suspend fun refresh() { refreshes++ }
+    override suspend fun refresh() { refreshes++; onRefresh() }
 }
 
 class FakeDownloads : Downloads {

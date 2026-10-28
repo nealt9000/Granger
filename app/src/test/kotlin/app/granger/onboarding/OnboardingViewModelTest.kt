@@ -54,10 +54,10 @@ class OnboardingViewModelTest {
         ),
     ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("wikem_en_all_maxi"))), larger = listOf("maps_en_europe")))
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK): OnboardingViewModel {
+    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
-            io = main.dispatcher, now = { 42 },
+            countryCode = country, offerVoice = offerVoice, io = main.dispatcher, now = { 42 },
             enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); enqueueResult },
         )
         backgroundScope.launch { vm.ui.collect {} }
@@ -67,20 +67,129 @@ class OnboardingViewModelTest {
 
     private fun TestScope.settle() = testScheduler.advanceUntilIdle()
 
-    @Test fun withoutACatalogTheStartStepAsksForARefresh() = runTest(main.dispatcher) {
+    @Test fun aFreshInstallFetchesTheCatalogOnce() = runTest(main.dispatcher) {
         val vm = viewModel()
-        assertThat(vm.ui.value.noCatalog).isTrue()
-        assertThat(vm.ui.value.starts).isEmpty()
-        vm.refreshCatalog(); settle()
-        assertThat(catalog.refreshes).isEqualTo(1)
         assertThat(catalog.loads).isEqualTo(1)
+        assertThat(catalog.refreshes).isEqualTo(1)
+        assertThat(vm.ui.value.noCatalog).isTrue()
+        assertThat(vm.ui.value.catalogFailed).isFalse()
+        assertThat(vm.ui.value.starts).isEmpty()
     }
 
-    @Test fun thisPhoneWordsTheTierAndResearch() = runTest(main.dispatcher) {
-        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine).startsWith("A library phone, with about 7 GB")
+    @Test fun aCachedCatalogIsNeverRefreshedByOnboarding() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        viewModel()
+        assertThat(catalog.loads).isEqualTo(1)
+        assertThat(catalog.refreshes).isEqualTo(0)
+    }
+
+    @Test fun aFailedFetchOffersTryAgainAndNextStillReachesTheEnd() = runTest(main.dispatcher) {
+        catalog.onRefresh = { catalog.mutable.value = CatalogState(error = app.granger.core.catalog.CatalogError.NETWORK) }
+        val vm = viewModel()
+        assertThat(vm.ui.value.catalogFailed).isTrue()
+        vm.refreshCatalog(); settle()
+        assertThat(catalog.refreshes).isEqualTo(2)
+        repeat(5) { vm.next() }; settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.REVIEW)
+        assertThat(vm.ui.value.review.isEmpty).isTrue()
+        vm.start(); settle()
+        assertThat(vm.finished.value).isTrue()
+        assertThat(enqueued).isEmpty()
+    }
+
+    @Test fun thisPhoneWordsTheTierAndAskAsReadinessDoes() = runTest(main.dispatcher) {
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine).isEqualTo("A library phone, with 8.0 GB of memory.")
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine).contains("needs a phone with 6 GB")
-        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine).startsWith("A library and research phone, with about 7 GB")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine).isEqualTo("A library phone that can run Ask, with 8.0 GB of memory.")
+        // No models in this catalog (a release build's): Ask runs here, but there's nothing to get on the next screen.
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.researchLine).isEqualTo("Ask, the librarian, runs on this phone.")
         assertThat(viewModel(DeviceTier.ASK).ui.value.phone.volumes.single().label).isEqualTo("Internal storage")
+    }
+
+    @Test fun askIsOfferedTickedAndGoesIntoTheReviewAndTheGroup() = runTest(main.dispatcher) {
+        val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
+        catalog.mutable.value = CatalogState(catalog = full.copy(models = listOf(e2b)))
+        val vm = viewModel(DeviceTier.ASK)
+        assertThat(vm.ui.value.phone.researchLine).endsWith("You can get it on the next screen.")
+        assertThat(vm.ui.value.askLine!!.bytes).isEqualTo(2_000)
+        assertThat(vm.ui.value.askChosen).isTrue()
+        // Under Neither too: Ask needs no preset.
+        vm.chooseStart(null); settle()
+        assertThat(vm.ui.value.review.groups.map { it.title }).containsExactly("Ask (Preview)")
+        vm.start(); settle()
+        assertThat(enqueued.single().second).containsExactly("gemma-4-e2b-gpu")
+    }
+
+    @Test fun untickingAskTakesItOutOfTheReview() = runTest(main.dispatcher) {
+        val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
+        catalog.mutable.value = CatalogState(catalog = full.copy(models = listOf(e2b)))
+        val vm = viewModel(DeviceTier.ASK)
+        vm.toggleAsk(); settle()
+        assertThat(vm.ui.value.askChosen).isFalse()
+        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Ask (Preview)")
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.askLine).isNull()
+    }
+
+    @Test fun thePhonesCountryIsSuggestedUntilTheUserPicks() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        val vm = viewModel(country = "PE")
+        assertThat(vm.ui.value.region!!.title).isEqualTo("Peru")
+        assertThat(vm.ui.value.regionSuggested).isTrue()
+        assertThat(vm.ui.value.review.groups.map { it.title }).contains("Your region")
+        vm.chooseRegion(null); settle()
+        assertThat(vm.ui.value.region).isNull()
+        assertThat(vm.ui.value.regionSuggested).isFalse()
+        vm.next(); vm.back(); settle() // a cleared suggestion stays cleared
+        assertThat(vm.ui.value.region).isNull()
+        vm.chooseRegion("maps_en_europe"); settle()
+        assertThat(vm.ui.value.region!!.title).isEqualTo("Europe")
+        assertThat(vm.ui.value.regionSuggested).isFalse()
+        // A country with no pack suggests nothing.
+        assertThat(viewModel(country = "IN").ui.value.region).isNull()
+    }
+
+    @Test fun startWaitsOnceAndIgnoresASecondTap() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val vm = OnboardingViewModel(
+            catalog, library, downloads, volumes, prefs, DeviceTier.ASK, totalRamBytes = 1, onboardingPrefs,
+            countryCode = "", io = main.dispatcher, now = { 42 },
+            enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); gate.await(); EnqueueResult.Queued },
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        settle()
+        vm.start(); settle()
+        assertThat(vm.ui.value.starting).isTrue()
+        vm.start(); settle()
+        gate.complete(Unit); settle()
+        assertThat(enqueued).hasSize(1)
+        assertThat(vm.finished.value).isTrue()
+    }
+
+    @Test fun aBigSuggestedMapIsOfferedNotPreselected() = runTest(main.dispatcher) {
+        val usa = packEntry("maps_en_usa", size = 17_000_000_000).copy(family = "maps", title = "United States of America")
+        catalog.mutable.value = CatalogState(catalog = full.copy(packs = full.packs + usa))
+        val vm = viewModel(country = "US")
+        assertThat(vm.ui.value.region).isNull()
+        assertThat(vm.ui.value.suggestion!!.title).isEqualTo("United States of America")
+        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Your region")
+        vm.chooseRegion("maps_en_usa"); settle()
+        assertThat(vm.ui.value.region!!.title).isEqualTo("United States of America")
+    }
+
+    @Test fun theVoiceIsOfferedTickedAndCanBeLeftOut() = runTest(main.dispatcher) {
+        val maggie = app.granger.core.catalog.VoiceEntry(
+            id = OnboardingModel.VOICE_ID, title = "Granger voice (Maggie & Martin)", engine = "piper", language = "en-US",
+            sizeBytes = 80, sha256 = "d".repeat(64), url = "https://v.test/v.zip", license = "CC BY 4.0",
+        )
+        catalog.mutable.value = CatalogState(catalog = full.copy(voices = listOf(maggie)))
+        val vm = viewModel()
+        assertThat(vm.ui.value.voiceLine!!.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
+        assertThat(vm.ui.value.review.groups.map { it.title }).contains("Read aloud")
+        vm.toggleVoice(); settle()
+        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Read aloud")
+        // Read-aloud off in this build: no line.
+        assertThat(viewModel(offerVoice = false).ui.value.voiceLine).isNull()
     }
 
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {
@@ -114,7 +223,7 @@ class OnboardingViewModelTest {
         vm.toggleUseCase("medical"); settle()
         val ui = vm.ui.value
         assertThat(ui.additions.single().lines).isEmpty() // WikEM is installed: the chip adds nothing.
-        assertThat(ui.review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region").inOrder()
+        assertThat(ui.review.groups.map { it.title }).containsExactly("Your picks", "Your region").inOrder() // Classics unticked: no longer the preset
         assertThat(ui.review.items.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "maps_en_peru")
         assertThat(ui.review.bytes).isEqualTo(1_500)
         assertThat(ui.review.fits).isTrue()

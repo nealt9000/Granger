@@ -21,7 +21,7 @@
         android:name=".GrangerApp"
         tools:replace="android:allowBackup,android:label"
         android:allowBackup="false"
-        android:label="Granger"
+        android:label="${appLabel}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Granger">
@@ -51,7 +51,7 @@
         <!-- "Show in other apps": downloaded media, read-only. Off until the Settings switch enables it. -->
         <provider
             android:name=".media.MediaDocumentsProvider"
-            android:authorities="app.granger.media.documents"
+            android:authorities="${applicationId}.media.documents"
             android:exported="true"
             android:enabled="false"
             android:grantUriPermissions="true"
@@ -63,7 +63,7 @@
         <!-- Cover art for Android Auto, the widget and the session, read-only (images under the media roots only). -->
         <provider
             android:name=".media.ArtworkProvider"
-            android:authorities="app.granger.artwork"
+            android:authorities="${applicationId}.artwork"
             android:exported="true"
             android:grantUriPermissions="false" />
     </application>

@@ -12,7 +12,7 @@ enum class SelectionAction(val label: String) {
     NOTE("Note"),
     DEFINE("Define"),
     SEARCH("Search"),
-    RESEARCH("Research"),
+    RESEARCH("Ask"),
     READ_ALOUD("Read from here"),
 }
 

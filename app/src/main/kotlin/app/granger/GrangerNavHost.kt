@@ -316,7 +316,13 @@ fun NavController.openShelfFromPlayer(mode: PlayerMode) {
 /** How [route] is opened: [replacesChatOnTop] drops a Research chat on top first (its view model would otherwise stay). */
 internal data class ResearchOpening(val route: ResearchRoute, val replacesChatOnTop: Boolean)
 
-internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean) = ResearchOpening(route, researchOnTop)
+/**
+ * Ask's one rule for + and Back (Plan U3a Decision 9, revised after Neal's walkthrough): a kept chat picked from the
+ * Chats sheet ([fromChats]) is pushed over the chat it was picked in, so Back returns there; + and the rail's tool
+ * replace a chat on top with a fresh, empty one. A reader's "Ask about this" is pushed over the reader by its own route.
+ */
+internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean, fromChats: Boolean = false) =
+    ResearchOpening(route, replacesChatOnTop = researchOnTop && !fromChats)
 
 /**
  * A Research chat: [chatId] opens a kept one, 0 starts a new one. [quote] is a reader's selection, from [quoteSourceId]
@@ -522,9 +528,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
     }
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
-    fun openResearch(route: ResearchRoute) {
+    fun openResearch(route: ResearchRoute, fromChats: Boolean = false) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
-        val open = researchOpening(route, researchOnTop)
+        val open = researchOpening(route, researchOnTop, fromChats)
         nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
@@ -560,7 +566,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     GrangerShell(
         rail = rail,
         expanded = shell.expanded,
-        railVisible = shell.railVisible,
+        // No rail during onboarding: a first run can't wander into empty tools (Plan U3a Decision 12).
+        railVisible = shell.railVisible && destination?.hasRoute<OnboardingRoute>() != true,
         selected = selected,
         onToggleExpanded = { shell.expanded = !shell.expanded },
         onEdgeSwipe = {
@@ -652,7 +659,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
-                    onMediaSettings = if (Features.PLAYER) ({ nav.navigate(SettingsRoute(media = true)) }) else null,
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -831,8 +837,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onSearch = { keywords -> nav.navigate(SearchRoute(keywords)) },
                     onGetModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
+                    librarian = container.librarian.ui.collectAsStateWithLifecycle(null).value,
+                    onGetLibrarian = {
+                        container.appScope.launch {
+                            container.librarian.get()?.let { problem ->
+                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem, Toast.LENGTH_LONG).show() }
+                            }
+                        }
+                    },
                     onReadiness = { nav.navigate(ReadinessRoute) },
-                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId), fromChats = true) },
                     onNewChat = { openResearch(ResearchRoute()) },
                     onBack = { nav.popBackStack() },
                 )
@@ -892,6 +906,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
                             container.appScope,
                             mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
+                            refreshVoices = { if (Features.PLAYER && Features.READ_ALOUD) container.installedVoices.refresh() },
                         )
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },

@@ -28,13 +28,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** The five screens (spec §6). */
-enum class Step { WELCOME, PHONE, START, SITUATION, REVIEW }
+/** The six screens (spec §6; Region and Uses split in Plan U3a). */
+enum class Step { WELCOME, PHONE, START, REGION, USES, REVIEW }
 
 /** This phone (step 2). */
 data class PhoneUi(
     val tierLine: String,
-    /** Why Research is or isn't available; null when the tier can run it. */
+    /** Whether this phone can run Ask, and where to get it; null when there's nothing to say. */
     val researchLine: String?,
     val volumes: List<Volume>,
     val efficientBytes: Long,
@@ -43,9 +43,11 @@ data class PhoneUi(
 
 data class OnboardingUi(
     val step: Step = Step.WELCOME,
-    /** No cached catalog yet: Pick a start can only offer a refresh. */
+    /** No catalog yet: Pick a start shows the fetch (fresh install) or why it failed. */
     val noCatalog: Boolean = true,
     val refreshing: Boolean = false,
+    /** The fetch onboarding started failed; Pick a start offers Try again, and Next still works. */
+    val catalogFailed: Boolean = false,
     val phone: PhoneUi = PhoneUi("", null, emptyList(), 0, 0),
     val starts: List<StartChoice> = emptyList(),
     /** [OnboardingModel.EFFICIENT], [OnboardingModel.COMPREHENSIVE], or null for "I'll choose later". */
@@ -54,12 +56,26 @@ data class OnboardingUi(
     val regions: Regions = Regions(emptyList(), emptyList()),
     val regionQuery: String = "",
     val region: Region? = null,
+    /** [region] is the one suggested from the phone's country, not one the user picked. */
+    val regionSuggested: Boolean = false,
+    /** The phone's country's map, offered first in the list when it was too big to preselect (or was cleared). */
+    val suggestion: Region? = null,
     val additions: List<Addition> = emptyList(),
     val useCaseIds: Set<String> = emptySet(),
+    /** Ask's models, offered under the start choices; null where Ask can't run or the catalog has none. */
+    val askLine: Line? = null,
+    val askChosen: Boolean = true,
+    /** Encyclopedias without their pictures: the space-saving fallback. */
+    val saveSpace: Boolean = false,
+    /** A Granger voice for reading aloud, offered beside Ask; null where read-aloud is off or one is installed. */
+    val voiceLine: Line? = null,
+    val voiceChosen: Boolean = true,
     val review: Review = Review(emptyList(), 0),
     val wifiOnly: Boolean = true,
     val volumePath: String? = null,
     val notice: String? = null,
+    /** Start was tapped and the downloads are being written; the button waits. */
+    val starting: Boolean = false,
 ) {
     val start: StartChoice? get() = starts.firstOrNull { it.id == startId }
     val chosenVolume: Volume? get() = phone.volumes.firstOrNull { it.root.path == volumePath } ?: phone.volumes.firstOrNull()
@@ -78,6 +94,9 @@ class OnboardingViewModel(
     private val tier: DeviceTier,
     private val totalRamBytes: Long,
     private val onboardingPrefs: OnboardingPrefs,
+    private val dense: Boolean = app.granger.DENSE_RETRIEVAL,
+    private val countryCode: String = java.util.Locale.getDefault().country,
+    private val offerVoice: Boolean = app.granger.Features.READ_ALOUD && app.granger.Features.PLAYER,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
@@ -87,35 +106,45 @@ class OnboardingViewModel(
     private val startId = MutableStateFlow<String?>(OnboardingModel.EFFICIENT)
     private val unticked = MutableStateFlow<Set<String>>(emptySet())
     private val regionQuery = MutableStateFlow("")
-    private val regionId = MutableStateFlow<String?>(null)
+    /** The user's pick, or [UNCHOSEN] until they pick (the suggestion stands until then; null is "No region"). */
+    private val regionId = MutableStateFlow<String?>(UNCHOSEN)
     private val useCaseIds = MutableStateFlow<Set<String>>(emptySet())
+    private val askChosen = MutableStateFlow(true)
+    private val voiceChosen = MutableStateFlow(true)
+    private val saveSpace = MutableStateFlow(false)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<String?>(null)
+    private val starting = MutableStateFlow(false)
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
 
     /** Set once Start or Skip has finished; the screen then leaves. */
     val finished: StateFlow<Boolean> get() = done
     private val done = MutableStateFlow(false)
 
-    private class Facts(val catalog: Catalog?, val refreshing: Boolean, val installed: Set<String>, val volumes: List<Volume>)
-    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>)
-    private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?)
+    private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
+    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean)
+    private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
-        Facts(c.catalog, c.refreshing, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
+        Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
     }
-    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds) { values ->
+    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen, saveSpace) { values ->
         @Suppress("UNCHECKED_CAST")
-        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>)
+        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean, values[8] as Boolean)
     }
-    private val setup = combine(wifiOnly, volumePath, notice, ::Setup)
+    private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
     val ui: StateFlow<OnboardingUi> = combine(facts, choices, setup) { f, c, s -> build(f, c, s) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnboardingUi())
 
     init {
-        viewModelScope.launch { catalog.load() }
+        viewModelScope.launch {
+            catalog.load()
+            // A fresh install has no cache: fetch it once (Plan U3a Decision 1). A cached one is never refreshed here,
+            // so Set up suggestions again stays offline.
+            if (catalog.state.value.catalog == null) catalog.refresh()
+        }
         refreshVolumes()
     }
 
@@ -136,23 +165,31 @@ class OnboardingViewModel(
 
     private fun build(f: Facts, c: Choices, s: Setup): OnboardingUi {
         val catalog = f.catalog
-        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed) }.orEmpty()
+        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, c.saveSpace) }.orEmpty()
         val start = starts.firstOrNull { it.id == c.startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
-        val region = (regions.countries + regions.larger).firstOrNull { it.pack.id == c.regionId }
+        val suggestion = OnboardingModel.suggestedRegion(regions, countryCode)
+        val suggested = c.regionId == UNCHOSEN
+        val region = if (suggested) suggestion?.takeIf { it.bytes <= OnboardingModel.PRESELECT_MAX_BYTES }
+            else (regions.countries + regions.larger).firstOrNull { it.pack.id == c.regionId }
         val chosen = start?.chosen(c.unticked).orEmpty().flatMap { it.items }.mapTo(HashSet()) { it.id }
         region?.let { chosen += it.pack.id }
         val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen) }.orEmpty()
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
         val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: f.volumes.firstOrNull()
-        val review = OnboardingModel.review(start, c.unticked, region, picked, volume?.freeBytes ?: 0L)
+        val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
+        val voiceLine = catalog?.takeIf { offerVoice }?.let { OnboardingModel.voiceLine(it, f.installed) }
+        val review = OnboardingModel.review(
+            start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
+        )
         return OnboardingUi(
             step = c.step,
             noCatalog = catalog == null,
             refreshing = f.refreshing,
+            catalogFailed = f.failed,
             phone = PhoneUi(
                 tierLine = tierLine(),
-                researchLine = researchLine(),
+                researchLine = researchLine(offered = askLine != null),
                 volumes = f.volumes,
                 efficientBytes = starts.firstOrNull { it.id == OnboardingModel.EFFICIENT }?.bytes() ?: 0L,
                 comprehensiveBytes = starts.firstOrNull { it.id == OnboardingModel.COMPREHENSIVE }?.bytes() ?: 0L,
@@ -163,26 +200,33 @@ class OnboardingViewModel(
             regions = regions.matching(c.regionQuery),
             regionQuery = c.regionQuery,
             region = region,
+            regionSuggested = suggested && region != null,
+            suggestion = suggestion,
             additions = additions,
             useCaseIds = c.useCaseIds,
+            askLine = askLine,
+            askChosen = c.askChosen,
+            saveSpace = c.saveSpace,
+            voiceLine = voiceLine,
+            voiceChosen = c.voiceChosen,
             review = review,
             wifiOnly = s.wifiOnly,
             volumePath = volume?.root?.path,
             notice = s.notice,
+            starting = s.starting,
         )
     }
 
-    private fun tierLine(): String {
-        val gb = (totalRamBytes / (1024.0 * 1024 * 1024)).let { kotlin.math.round(it).toInt() }
-        return when (tier) {
-            DeviceTier.LIBRARY_ONLY -> "A library phone, with about $gb GB of memory."
-            DeviceTier.ASK -> "A library and research phone, with about $gb GB of memory."
-        }
+    /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
+    private fun tierLine(): String = when (tier) {
+        DeviceTier.LIBRARY_ONLY -> "A library phone, with ${formatBytes(totalRamBytes)} of memory."
+        DeviceTier.ASK -> "A library phone that can run Ask, with ${formatBytes(totalRamBytes)} of memory."
     }
 
-    private fun researchLine(): String? = when (tier) {
-        DeviceTier.LIBRARY_ONLY -> "Research, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library."
-        DeviceTier.ASK -> "Research, the AI librarian, is coming in a later release; this phone can run it."
+    /** [offered]: Pick a start offers Ask's models. */
+    private fun researchLine(offered: Boolean): String = when (tier) {
+        DeviceTier.LIBRARY_ONLY -> "Ask, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library."
+        DeviceTier.ASK -> if (offered) "Ask, the librarian, runs on this phone. You can get it on the next screen." else "Ask, the librarian, runs on this phone."
     }
 
     fun refreshVolumes() {
@@ -210,6 +254,12 @@ class OnboardingViewModel(
 
     fun chooseRegion(packId: String?) { regionId.value = packId }
 
+    fun toggleAsk() = askChosen.update { !it }
+
+    fun toggleVoice() = voiceChosen.update { !it }
+
+    fun toggleSaveSpace() = saveSpace.update { !it }
+
     fun toggleUseCase(id: String) = useCaseIds.update { if (id in it) it - id else it + id }
 
     fun setWifiOnly(on: Boolean) {
@@ -232,6 +282,7 @@ class OnboardingViewModel(
 
     /** Queues the review as one group and finishes; a refusal stays on the review with its notice. */
     fun start() {
+        if (starting.value) return
         viewModelScope.launch {
             val review = ui.value.review
             // The setting flows, not the built UI: a tap on the switch right before Start must count.
@@ -241,12 +292,14 @@ class OnboardingViewModel(
                 return@launch
             }
             val group = "onboarding:${now()}"
+            starting.value = true
             val problem = when (val result = enqueue(group, review.items, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace -> "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)} or untick something."
                 is EnqueueResult.OverCap -> "That would bring your downloads to ${formatBytes(result.wouldUseBytes)}, over the ${formatBytes(result.capBytes)} limit."
             }
             if (problem != null) {
+                starting.value = false
                 notice.value = problem
                 return@launch
             }
@@ -256,6 +309,9 @@ class OnboardingViewModel(
     }
 
     companion object {
+        /** [regionId] before the user has picked: the phone's country stands. */
+        private const val UNCHOSEN = "\u0000unchosen"
+
         /** The readiness domain a use case's "See" opens on the Kiwix screen. */
         val DOMAIN_OF = mapOf(
             "offgrid" to "food", "travel" to "maps", "study" to "science", "build" to "making",

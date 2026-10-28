@@ -176,6 +176,12 @@ class ReadinessModelTest {
         assertThat(unsearchable.text).isEqualTo("Title ifixit_en_all can't be searched: the pack has no index.")
     }
 
+    @Test fun aMapWithoutAnIndexIsNotUnsearchable() {
+        val map = packEntry("maps_en_central-america", "maps_en_central-america", "maps", 1_700, family = "maps", fts = false)
+        val r = report(packs = listOf(installed(map)), cat = catalog.copy(packs = catalog.packs + map))
+        assertThat(r.signals.filterIsInstance<Signal.Unsearchable>()).isEmpty()
+    }
+
     @Test fun aRecentPackOrOneTheCatalogHasNoNewerSnapshotForIsNotStale() {
         val recent = installed(medNopic, date = "2026-06-01")
         val oldButNewest = installed(top, date = "2025-01-10")

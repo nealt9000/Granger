@@ -14,6 +14,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["appLabel"] = "Granger"
         buildConfigField(
             "String", "CATALOG_URL",
             "\"https://raw.githubusercontent.com/nealt9000/Granger/main/catalog/catalog.json\"",
@@ -22,6 +23,16 @@ android {
             "String", "CATALOG_PUBLIC_KEY",
             "\"${rootProject.file("catalog/public-key.txt").readText().trim()}\"",
         )
+    }
+    buildTypes {
+        // A second debug install beside the first, with its own empty data, for fresh-install walkthroughs:
+        // ./gradlew installDebug -Pfresh
+        getByName("debug") {
+            if (project.hasProperty("fresh")) {
+                applicationIdSuffix = ".fresh"
+                manifestPlaceholders["appLabel"] = "Granger Fresh"
+            }
+        }
     }
     buildFeatures {
         compose = true

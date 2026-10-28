@@ -17,6 +17,7 @@ import android.provider.DocumentsContract.Document
 import android.provider.DocumentsContract.Root
 import android.provider.DocumentsProvider
 import androidx.annotation.VisibleForTesting
+import app.granger.BuildConfig
 import app.granger.R
 import app.granger.core.downloads.Volume
 import app.granger.core.media.MediaManifests
@@ -113,7 +114,7 @@ class MediaDocumentsProvider : DocumentsProvider() {
 
 /** Turns [MediaDocumentsProvider] on and off, and tells the Files app when what it shows has changed. */
 object MediaSharing {
-    const val AUTHORITY = "app.granger.media.documents"
+    const val AUTHORITY = BuildConfig.APPLICATION_ID + ".media.documents"
 
     private fun component(context: Context) = ComponentName(context, MediaDocumentsProvider::class.java)
 

@@ -68,7 +68,7 @@ import app.granger.settings.RailSide
 enum class RailTool(val label: String, val shown: Boolean) {
     HOME("Home", true),
     SEARCH("Search", true),
-    RESEARCH("Research", Features.RESEARCH),
+    RESEARCH("Ask", Features.RESEARCH),
     LIBRARY("Library", true),
     PLAYER("Player", Features.PLAYER),
     SETTINGS("Settings", true),
@@ -127,7 +127,7 @@ private val RailEntry.description: String
     get() = when (this) {
         is RailEntry.Tab -> if (tab.available) tab.title else "${tab.title}, not available"
         is RailEntry.Search -> "Recent search: $query"
-        is RailEntry.Chat -> "Research chat: $title"
+        is RailEntry.Chat -> "Ask chat: $title"
         is RailEntry.Play -> "Play again: $title"
         is RailEntry.Reading -> "Reading aloud: $title"
     }

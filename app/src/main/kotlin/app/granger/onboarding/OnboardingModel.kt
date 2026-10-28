@@ -1,11 +1,14 @@
 package app.granger.onboarding
 
-import app.granger.core.catalog.downloadBytes
+import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.UseCase
+import app.granger.core.catalog.downloadBytes
+import app.granger.core.catalog.vectors
+import app.granger.research.Librarian
 
 /**
  * One row the user can untick: a pack, or a collection's books folded together ([count] > 1). [installed] rows are on
@@ -65,6 +68,8 @@ data class Review(val groups: List<ReviewGroup>, val freeBytes: Long) {
     val lines: List<Line> get() = groups.flatMap { it.lines }
     val items: List<CatalogItem> get() = lines.flatMap { it.items }
     val bytes: Long get() = items.sumOf { it.downloadBytes }
+    /** The part of [bytes] that is Ask's search indexes (`.gvec`), fetched after their packs. */
+    val indexBytes: Long get() = items.sumOf { it.vectors?.sizeBytes ?: 0L }
     val fits: Boolean get() = bytes <= freeBytes
     val isEmpty: Boolean get() = items.isEmpty()
 }
@@ -73,18 +78,52 @@ data class Review(val groups: List<ReviewGroup>, val freeBytes: Long) {
 object OnboardingModel {
     const val EFFICIENT = "efficient"
     const val COMPREHENSIVE = "comprehensive"
+    const val ASK = "ask"
+    const val VOICE = "voice"
+    const val VOICE_ID = "vits-piper-en_US-granger_libritts-medium"
 
-    /** The two start choices, each from its generated preset; a catalog without them (older) gives an empty list. */
-    fun startChoices(catalog: Catalog, installed: Set<String>): List<StartChoice> {
+    /**
+     * The two start choices, each from its generated preset; a catalog without them (older) gives an empty list.
+     * [saveSpace] swaps each pack for its no-pictures flavour where the catalog has one (Neal, 2026-10-28: pictures are
+     * the default, no-pictures the space-saving fallback).
+     */
+    fun startChoices(catalog: Catalog, installed: Set<String>, saveSpace: Boolean = false): List<StartChoice> {
         val blurbs = mapOf(
             EFFICIENT to "The essentials of every domain: enough to answer most questions, in the least space.",
             COMPREHENSIVE to "Everything the readiness model counts, for a phone that can hold it.",
         )
         return listOf(EFFICIENT, COMPREHENSIVE).mapNotNull { id ->
             val preset = catalog.presets.firstOrNull { it.id == id } ?: return@mapNotNull null
-            val items = preset.items.mapNotNull { catalog.item(it) }
+            val items = preset.items.mapNotNull { catalog.item(it) }.map { if (saveSpace) withoutPictures(catalog, it) else it }.distinctBy { it.id }
             StartChoice(id, preset.title, blurbs.getValue(id), lines(items, installed))
         }
+    }
+
+    /**
+     * Ask's models as one line (Plan U3a Decision 2): the answering model, plus the embedder when [dense] retrieval is on,
+     * less what's installed. Null on a phone that can't run Ask, in a catalog with no answering model (release builds
+     * today), or when everything is on the phone already.
+     */
+    fun askLine(catalog: Catalog, tier: DeviceTier, dense: Boolean, installed: Set<String>): Line? {
+        if (tier < DeviceTier.ASK) return null
+        val items = Librarian.models(catalog, dense).filter { it.id !in installed }
+        return if (items.isEmpty()) null else Line(ASK, "Ask (Preview)", items, installed = false)
+    }
+
+    /**
+     * The voice offered in Pick a start (Plan U3a, Neal's walkthrough): the catalog's Granger voice of [VOICE_ID], else
+     * its first, as one "Read aloud" line. Null with no voices in the catalog or when any catalog voice is installed.
+     */
+    fun voiceLine(catalog: Catalog, installed: Set<String>): Line? {
+        if (catalog.voices.any { it.id in installed }) return null
+        val voice = catalog.voices.firstOrNull { it.id == VOICE_ID } ?: catalog.voices.firstOrNull() ?: return null
+        return Line(VOICE, "Read aloud", listOf(voice), installed = false)
+    }
+
+    /** [item]'s no-pictures flavour (`…_nopic`, same ZIM), or [item] itself. */
+    fun withoutPictures(catalog: Catalog, item: CatalogItem): CatalogItem {
+        if (item !is PackEntry || item.zimName.isBlank() || item.id.endsWith("_nopic")) return item
+        return catalog.packs.firstOrNull { it.zimName == item.zimName && it.id.endsWith("_nopic") } ?: item
     }
 
     /** The maps family split by [app.granger.core.catalog.Onboarding.larger], each list by title, plus the covered places. */
@@ -98,6 +137,35 @@ object OnboardingModel {
         }.sortedBy { it.title.lowercase() }
         return Regions(countries = maps.filter { it.pack.id !in larger }, larger = maps.filter { it.pack.id in larger }, places = places)
     }
+
+    /**
+     * The map of where the phone is (Plan U3a Decision 4): the country pack titled with the phone's country in English,
+     * else the one [REGION_ALIASES] names for it. Null for an unknown code or a country with no pack of its own.
+     */
+    fun suggestedRegion(regions: Regions, countryCode: String): Region? {
+        val code = countryCode.uppercase()
+        if (code.isBlank()) return null
+        val name = java.util.Locale("", code).getDisplayCountry(java.util.Locale.ENGLISH)
+        val titles = listOfNotNull(name.takeIf { it.isNotBlank() && it != code }, REGION_ALIASES[code])
+        return titles.firstNotNullOfOrNull { t -> regions.countries.firstOrNull { it.place == null && it.pack.title.equals(t, ignoreCase = true) } }
+    }
+
+    /**
+     * Country codes whose map pack the catalog titles differently from the phone's English name for the country (checked
+     * against the catalog's 193 maps titles, 2026-10-28), or that share a pack with a neighbour.
+     */
+    /** A suggested map larger than this is offered, not preselected: the US map alone is 17 GB. */
+    const val PRESELECT_MAX_BYTES = 2_000_000_000L
+
+    val REGION_ALIASES = mapOf(
+        "US" to "United States of America", "RU" to "Russian Federation", "CZ" to "Czech Republic", "TR" to "Turkey",
+        "CD" to "Dem. Rep. of Congo (Kinshasa)", "CG" to "Rep. of Congo (Brazzaville)", "CI" to "Ivory Coast",
+        "BA" to "Bosnia-Herzegovina", "MK" to "Macedonia", "MM" to "Myanmar (a.k.a. Burma)", "TL" to "East Timor",
+        "KM" to "Comores", "ST" to "Sao Tome and Principe", "SZ" to "Swaziland", "WF" to "Wallis et Futuna", "XK" to "Kosovo",
+        "GG" to "Guernsey and Jersey", "JE" to "Guernsey and Jersey", "HT" to "Haiti and Dominican Republic", "DO" to "Haiti and Dominican Republic",
+        "IL" to "Israel and Palestine", "PS" to "Israel and Palestine", "SN" to "Senegal and Gambia", "GM" to "Senegal and Gambia",
+        "MY" to "Malaysia, Singapore and Brunei", "SG" to "Malaysia, Singapore and Brunei", "BN" to "Malaysia, Singapore and Brunei",
+    )
 
     /** Each use case's lines beyond [chosen] item ids and [installed] ones; a use case left with nothing is kept with no lines. */
     fun additions(catalog: Catalog, installed: Set<String>, chosen: Set<String>): List<Addition> =
@@ -115,6 +183,8 @@ object OnboardingModel {
         region: Region?,
         additions: List<Addition>,
         freeBytes: Long,
+        ask: Line? = null,
+        voice: Line? = null,
     ): Review {
         val seen = HashSet<String>()
         fun List<Line>.fresh(): List<Line> = mapNotNull { line ->
@@ -122,13 +192,20 @@ object OnboardingModel {
             if (items.isEmpty()) null else line.copy(items = items)
         }
         val groups = buildList {
-            start?.let { s -> s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(s.title, it)) } }
+            start?.let { s ->
+                // The preset's name only while it is the preset: trimmed, it's the user's own (Plan U3a Decision 5).
+                val whole = s.lines.none { !it.installed && it.id in unticked }
+                s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) s.title else "Your picks", it)) }
+            }
+            // Under its own heading the line is "The librarian", not "Ask (Preview)" twice.
+            voice?.let { v -> listOf(v.copy(title = v.items.single().title)).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(v.title, it)) } }
+            ask?.let { listOf(it.copy(title = "The librarian")).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             region?.takeUnless { it.installed }?.let { r ->
                 listOf(Line(r.pack.id, r.title, listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }
                     ?.let { add(ReviewGroup("Your region", it)) }
             }
             val useCaseLines = additions.flatMap { it.lines }.fresh()
-            if (useCaseLines.isNotEmpty()) add(ReviewGroup("Your situation", useCaseLines))
+            if (useCaseLines.isNotEmpty()) add(ReviewGroup("What you'll use it for", useCaseLines))
         }
         return Review(groups, freeBytes)
     }

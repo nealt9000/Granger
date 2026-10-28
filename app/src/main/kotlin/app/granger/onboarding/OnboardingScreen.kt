@@ -9,13 +9,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -51,6 +56,9 @@ class OnboardingActions(
     val onRefreshCatalog: () -> Unit = {},
     val onChooseStart: (String?) -> Unit = {},
     val onToggleLine: (String) -> Unit = {},
+    val onToggleAsk: () -> Unit = {},
+    val onToggleVoice: () -> Unit = {},
+    val onToggleSaveSpace: () -> Unit = {},
     val onRegionQuery: (String) -> Unit = {},
     val onChooseRegion: (String?) -> Unit = {},
     val onToggleUseCase: (String) -> Unit = {},
@@ -76,6 +84,9 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
         OnboardingActions(
             onNext = viewModel::next, onBack = viewModel::back, onSkip = viewModel::skip, onStart = viewModel::start,
             onRefreshCatalog = viewModel::refreshCatalog, onChooseStart = viewModel::chooseStart, onToggleLine = viewModel::toggleLine,
+            onToggleAsk = viewModel::toggleAsk,
+            onToggleVoice = viewModel::toggleVoice,
+            onToggleSaveSpace = viewModel::toggleSaveSpace,
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
@@ -88,7 +99,8 @@ private val Step.title: String
         Step.WELCOME -> "Welcome"
         Step.PHONE -> "This phone"
         Step.START -> "Pick a start"
-        Step.SITUATION -> "Your situation"
+        Step.REGION -> "Your region"
+        Step.USES -> "What you'll use it for"
         Step.REVIEW -> "Review and start"
     }
 
@@ -107,7 +119,13 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
                 if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text("Back") } else Spacer(Modifier)
                 when (ui.step) {
                     Step.WELCOME -> Button(onClick = actions.onNext) { Text("Get started") }
-                    Step.REVIEW -> Button(onClick = actions.onStart) { Text(if (ui.review.isEmpty) "Finish" else "Start") }
+                    Step.REVIEW -> Button(onClick = actions.onStart, enabled = !ui.starting) {
+                        if (ui.starting) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                        }
+                        Text(if (ui.review.isEmpty) "Finish" else if (ui.starting) "Starting…" else "Start")
+                    }
                     else -> Button(onClick = actions.onNext) { Text("Next") }
                 }
             }
@@ -118,13 +136,21 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
             }
         },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("onboarding-list"), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)) {
-            when (ui.step) {
-                Step.WELCOME -> welcome()
-                Step.PHONE -> phone(ui)
-                Step.START -> start(ui, actions)
-                Step.SITUATION -> situation(ui, actions)
-                Step.REVIEW -> review(ui, actions)
+        // A scroll position per step, so every step opens at its top (Plan U3a Decision 4).
+        key(ui.step) {
+            LazyColumn(
+                Modifier.padding(padding).fillMaxSize().testTag("onboarding-list"),
+                state = rememberLazyListState(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            ) {
+                when (ui.step) {
+                    Step.WELCOME -> welcome()
+                    Step.PHONE -> phone(ui)
+                    Step.START -> start(ui, actions)
+                    Step.REGION -> region(ui, actions)
+                    Step.USES -> uses(ui, actions)
+                    Step.REVIEW -> review(ui, actions)
+                }
             }
         }
     }
@@ -168,10 +194,21 @@ private fun androidx.compose.foundation.lazy.LazyListScope.phone(ui: OnboardingU
 private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingUi, actions: OnboardingActions) {
     if (ui.noCatalog) {
         item {
-            Column {
-                Text("Refresh the catalog to see the choices.", style = MaterialTheme.typography.bodyLarge)
-                Button(onClick = actions.onRefreshCatalog, enabled = !ui.refreshing, modifier = Modifier.padding(top = 12.dp)) {
-                    Text(if (ui.refreshing) "Refreshing…" else "Refresh")
+            if (ui.catalogFailed) {
+                Column {
+                    Text("Couldn't reach the catalog. Check the connection and try again.", style = MaterialTheme.typography.bodyLarge)
+                    Button(onClick = actions.onRefreshCatalog, modifier = Modifier.padding(top = 12.dp)) { Text("Try again") }
+                    Text(
+                        "Or tap Next: Home and the Library are yours either way.",
+                        Modifier.padding(top = 12.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Text("Getting the list of packs…", Modifier.padding(start = 12.dp), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -189,7 +226,30 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
             Choice("Neither, I'll choose later", "Home and the Library are yours either way.", selected = ui.startId == null) { actions.onChooseStart(null) }
         }
     }
+    ui.askLine?.let { ask ->
+        // Offered under every choice, Neither included: Granger Classics alone is enough to ask (Plan U3a Decision 2).
+        item(key = "ask") {
+            Extra("${ask.title} · ${formatBytes(ask.bytes)}", "The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.", ui.askChosen, actions.onToggleAsk)
+        }
+    }
+    ui.voiceLine?.let { voice ->
+        item(key = "voice") {
+            Extra("${voice.title} · ${formatBytes(voice.bytes)}", "A Granger voice reads books and articles to you, with no signal.", ui.voiceChosen, actions.onToggleVoice)
+        }
+    }
     val start = ui.start ?: return
+    item(key = "save-space") {
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ui.saveSpace, role = Role.Switch) { actions.onToggleSaveSpace() },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("Save space")
+                Text("Encyclopedias without their pictures: the same articles, a poorer read.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Switch(checked = ui.saveSpace, onCheckedChange = null)
+        }
+    }
     item { HorizontalDivider(Modifier.padding(vertical = 12.dp)) }
     items(start.lines, key = { it.id }) { line ->
         val ticked = line.id !in ui.unticked
@@ -219,8 +279,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
     }
 }
 
-private fun androidx.compose.foundation.lazy.LazyListScope.situation(ui: OnboardingUi, actions: OnboardingActions) {
-    item { Text("Your region", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: OnboardingUi, actions: OnboardingActions) {
+    item { Text("A map of where you are, for finding your way with no signal.", style = MaterialTheme.typography.bodyMedium) }
     item {
         OutlinedTextField(
             value = ui.regionQuery,
@@ -231,17 +291,28 @@ private fun androidx.compose.foundation.lazy.LazyListScope.situation(ui: Onboard
         )
     }
     ui.region?.let { region ->
+        if (ui.regionSuggested) {
+            item { Text("Suggested from this phone", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+        }
         item {
             Text("${region.title} · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(top = 8.dp))
         }
         item { TextButton(onClick = { actions.onChooseRegion(null) }) { Text("No region") } }
     }
+    val offered = ui.suggestion?.takeIf { ui.region == null && ui.regionQuery.isBlank() }
+    offered?.let { suggestion ->
+        item { Text("Suggested from this phone", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+        item(key = "suggested") { RegionRow(suggestion, ui, actions) }
+        item { Text("Other countries", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+    }
     val shown = if (ui.regionQuery.isBlank() && ui.region != null) Regions(emptyList(), emptyList()) else ui.regions
     items(shown.countries.take(if (ui.regionQuery.isBlank()) 12 else 40), key = { "c-${it.pack.id}" }) { RegionRow(it, ui, actions) }
     if (shown.larger.isNotEmpty()) item { Text("Larger areas", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
     items(shown.larger, key = { "l-${it.pack.id}" }) { RegionRow(it, ui, actions) }
+}
 
-    item { Text("What you'll use it for", Modifier.padding(top = 24.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi, actions: OnboardingActions) {
+    item { Text("Add packs for what you'll use Granger for. You can change this later in Settings.", style = MaterialTheme.typography.bodyMedium) }
     items(ui.additions, key = { it.useCase.id }) { addition ->
         val on = addition.useCase.id in ui.useCaseIds
         Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
@@ -289,11 +360,20 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
     }
     if (!ui.review.isEmpty) {
         item {
-            Text(
-                "${formatBytes(ui.review.bytes)} of ${formatBytes(ui.review.freeBytes)} free",
-                Modifier.padding(top = 12.dp),
-                color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
-            )
+            Column(Modifier.padding(top = 12.dp)) {
+                Text(
+                    "${formatBytes(ui.review.bytes)} of ${formatBytes(ui.review.freeBytes)} free",
+                    color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
+                )
+                // Home's setup bar counts the files only; say what the difference is (Plan U3a Decision 5).
+                if (ui.review.indexBytes > 0L) {
+                    Text(
+                        "Includes ${formatBytes(ui.review.indexBytes)} of indexes for Ask, fetched after their packs.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
         item {
             Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -312,6 +392,21 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
                     Text("${volume.label} · ${formatBytes(volume.freeBytes)} free", Modifier.padding(start = 8.dp))
                 }
             }
+        }
+    }
+}
+
+/** A ticked-by-default extra under the start choices: Ask, the voice. */
+@Composable
+private fun Extra(title: String, blurb: String, ticked: Boolean, onToggle: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ticked, role = Role.Checkbox) { onToggle() }.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(checked = ticked, onCheckedChange = null)
+        Column(Modifier.padding(start = 8.dp).weight(1f)) {
+            Text(title)
+            Text(blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

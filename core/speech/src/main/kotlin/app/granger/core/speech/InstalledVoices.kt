@@ -59,7 +59,7 @@ class InstalledVoices(
             else -> CATALOG_VOICES.size + 1
         }
 
-        /** The catalog's voices (`tools/catalog-gen/curated.json`), in its order. */
-        val CATALOG_VOICES = listOf("vits-piper-en_US-ljspeech-medium", "vits-piper-en_US-granger_libritts-medium")
+        /** The catalog's voices, best first: Maggie & Martin (V3, Neal's pick) lead, so with no choice made it reads (U3a). */
+        val CATALOG_VOICES = listOf("vits-piper-en_US-granger_libritts-medium", "vits-piper-en_US-ljspeech-medium")
     }
 }

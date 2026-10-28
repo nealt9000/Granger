@@ -6,25 +6,20 @@ import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import app.granger.Features
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,10 +44,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.Features
 import app.granger.R
-import app.granger.core.library.CollectionRow
 import app.granger.audiobooks.ALL_AUDIOBOOKS
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
+import app.granger.core.library.CollectionRow
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 
@@ -73,11 +69,6 @@ fun LibraryScreen(
     onSearch: () -> Unit,
     onHistory: () -> Unit,
     onReadiness: () -> Unit,
-    /**
-     * Settings → Music & audiobooks. Empty media types are hidden, so while Music or Audiobooks has nothing on it a
-     * row at the end of Media says so and links there. Null: no link (the player is off).
-     */
-    onMediaSettings: (() -> Unit)? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -196,14 +187,6 @@ fun LibraryScreen(
                 }
                 item(key = "divider:$id") { HorizontalDivider() }
             }
-            val shownTypes = loaded.media.map { it.mediaType.id }
-            val missing = missingMediaText(shownTypes)
-            if (onMediaSettings != null && missing != null) {
-                item(key = "media-hint") {
-                    MediaHintRow(missing, mediaHintLinks(shownTypes), onOpenSource, onMediaSettings)
-                    HorizontalDivider()
-                }
-            }
             item { SectionHeader("Archive sources") }
             for (group in loaded.sources) {
                 item(key = "source-group:${group.title}") { GroupHeader(group.title) }
@@ -217,54 +200,6 @@ fun LibraryScreen(
                 }
             }
         }
-    }
-}
-
-/**
- * The row that says Music or Audiobooks has nothing yet: links to the missing types' download sources and to
- * Settings → Music & audiobooks (phone media). Tapping the row itself opens Settings, as before.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun MediaHintRow(text: String, links: List<SourceLink>, onOpenSource: (SourceLink) -> Unit, onMediaSettings: () -> Unit) {
-    ListItem(
-        modifier = Modifier.clickable(onClick = onMediaSettings),
-        headlineContent = { Text(text) },
-        supportingContent = {
-            Column {
-                Text("Download them, or find them on this phone or add a folder in Settings")
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (link in links) OutlinedButton(onClick = { onOpenSource(link) }) { Text(hintLabel(link)) }
-                    TextButton(onClick = onMediaSettings) { Text("Settings") }
-                }
-            }
-        },
-        trailingContent = { Icon(painterResource(R.drawable.ic_music_note), contentDescription = null) },
-    )
-}
-
-/** The download sources of the media types not on the shelves: Audiobooks' first, then Music's. */
-internal fun mediaHintLinks(shownTypeIds: List<String>): List<SourceLink> = buildList {
-    if (AUDIOBOOKS_TYPE_ID !in shownTypeIds) addAll(SOURCE_GROUPS.first { it.title == "Audiobooks" }.links)
-    if (MUSIC_TYPE_ID !in shownTypeIds) addAll(SOURCE_GROUPS.first { it.title == "Music" }.links)
-}
-
-/** A source's name where it stands without its header, as in the hint row's buttons. */
-internal fun hintLabel(link: SourceLink): String = when (link) {
-    SourceLink.ARCHIVE_ORG_SPOKEN -> "Archive.org audiobooks"
-    SourceLink.ARCHIVE_ORG_MUSIC -> "Archive.org music"
-    else -> link.title
-}
-
-/** What the media-settings row says, given the media types on the shelves; null when Music and Audiobooks both show. */
-internal fun missingMediaText(shownTypeIds: List<String>): String? {
-    val music = MUSIC_TYPE_ID in shownTypeIds
-    val audiobooks = AUDIOBOOKS_TYPE_ID in shownTypeIds
-    return when {
-        !music && !audiobooks -> "No music or audiobooks yet"
-        !music -> "No music yet"
-        !audiobooks -> "No audiobooks yet"
-        else -> null
     }
 }
 

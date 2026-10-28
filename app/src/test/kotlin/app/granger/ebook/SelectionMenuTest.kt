@@ -89,9 +89,9 @@ class SelectionMenuTest {
 
     @Test fun researchActionShownOnlyWhenAvailable() {
         SelectionBridge.researchAvailable = false
-        assertThat(shown().visibleTitles()).doesNotContain("Research")
+        assertThat(shown().visibleTitles()).doesNotContain("Ask")
         SelectionBridge.researchAvailable = true
-        assertThat(shown().visibleTitles()).containsExactly("Copy", "Highlight", "Note", "Search", "Research").inOrder()
+        assertThat(shown().visibleTitles()).containsExactly("Copy", "Highlight", "Note", "Search", "Ask").inOrder()
     }
 
     @Test fun noInquireLabelLeft() {

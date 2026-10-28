@@ -2,9 +2,12 @@ package app.granger.onboarding
 
 import app.granger.bookEntry
 import app.granger.catalogOf
+import app.granger.core.ai.DeviceTier
+import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.Onboarding
 import app.granger.core.catalog.Preset
 import app.granger.core.catalog.UseCase
+import app.granger.modelEntry
 import app.granger.packEntry
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -90,7 +93,7 @@ class OnboardingModelTest {
         val region = OnboardingModel.regions(catalog, installed).countries.first { it.title == "Peru" }
         val additions = OnboardingModel.additions(catalog, installed, chosen = start.chosen().flatMap { it.items }.map { it.id }.toSet())
         val review = OnboardingModel.review(start, unticked = setOf("wikipedia_en_medicine_nopic"), region, additions, freeBytes = 10_000)
-        assertThat(review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region", "Your situation").inOrder()
+        assertThat(review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region", "What you'll use it for").inOrder()
         assertThat(review.items.map { it.id }).containsExactly(
             "gc-bible", "wikipedia_en_medicine_maxi", "gc-hamlet", "maps_en_peru", "mdwiki_en_all_nopic", "wikivoyage_en_all_maxi",
         )
@@ -107,5 +110,100 @@ class OnboardingModelTest {
 
         // Nothing chosen at all.
         assertThat(OnboardingModel.review(null, emptySet(), null, emptyList(), 1).isEmpty).isTrue()
+    }
+
+    private val e2b = modelEntry("gemma-4-e2b-gpu", ModelRole.SMALL, size = 2_000)
+    private val e4b = modelEntry("gemma-4-e4b-gpu", ModelRole.LARGE, size = 3_000)
+    private val embedder = modelEntry("embeddinggemma-2-text-270m", ModelRole.EMBEDDER, size = 160)
+    private val withModels = catalog.copy(models = listOf(e4b, e2b, embedder))
+
+    @Test fun theReviewKeepsThePresetsNameOnlyWhileItIsWhole() {
+        val efficient = OnboardingModel.startChoices(catalog, emptySet()).first { it.id == "efficient" }
+        assertThat(OnboardingModel.review(efficient, emptySet(), null, emptyList(), 10_000).groups.single().title).isEqualTo("Efficient start")
+        val trimmed = OnboardingModel.review(efficient, setOf("wikipedia_en_medicine_nopic"), null, emptyList(), 10_000)
+        assertThat(trimmed.groups.single().title).isEqualTo("Your picks")
+    }
+
+    @Test fun theReviewSaysHowMuchIsAsksIndexes() {
+        val vectors = app.granger.core.catalog.VectorsEntry(sizeBytes = 70)
+        val withIndex = med.copy(vectors = vectors)
+        val review = OnboardingModel.review(null, emptySet(), Region(withIndex, installed = false), emptyList(), 10_000)
+        assertThat(review.bytes).isEqualTo(1_070)
+        assertThat(review.indexBytes).isEqualTo(70)
+    }
+
+    @Test fun theSuggestedRegionIsThePhonesCountryByNameOrAlias() {
+        val us = packEntry("maps_en_usa", size = 9_000).copy(family = "maps", title = "United States of America")
+        val gb = packEntry("maps_en_uk", size = 1_000).copy(family = "maps", title = "United Kingdom")
+        val sn = packEntry("maps_en_senegal", size = 100).copy(family = "maps", title = "Senegal and Gambia")
+        val regions = OnboardingModel.regions(catalog.copy(packs = catalog.packs + us + gb + sn), emptySet())
+        assertThat(OnboardingModel.suggestedRegion(regions, "FR")!!.title).isEqualTo("France")
+        assertThat(OnboardingModel.suggestedRegion(regions, "gb")!!.title).isEqualTo("United Kingdom")
+        assertThat(OnboardingModel.suggestedRegion(regions, "US")!!.title).isEqualTo("United States of America")
+        assertThat(OnboardingModel.suggestedRegion(regions, "GM")!!.title).isEqualTo("Senegal and Gambia")
+        // No pack of its own, an unknown code, no code: nothing suggested. Larger areas are never suggested.
+        assertThat(OnboardingModel.suggestedRegion(regions, "IN")).isNull()
+        assertThat(OnboardingModel.suggestedRegion(regions, "ZZ")).isNull()
+        assertThat(OnboardingModel.suggestedRegion(regions, "")).isNull()
+    }
+
+    @Test fun askIsTheAnsweringModelPlusTheEmbedderWhenDense() {
+        val line = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())!!
+        assertThat(line.id).isEqualTo(OnboardingModel.ASK)
+        assertThat(line.title).isEqualTo("Ask (Preview)")
+        assertThat(line.items.map { it.id }).containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m").inOrder()
+        assertThat(line.bytes).isEqualTo(2_160)
+        assertThat(OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = false, installed = emptySet())!!.items.map { it.id })
+            .containsExactly("gemma-4-e2b-gpu")
+    }
+
+    @Test fun askIsNotOfferedWhereItCantRunOrHasNoModel() {
+        assertThat(OnboardingModel.askLine(withModels, DeviceTier.LIBRARY_ONLY, dense = true, installed = emptySet())).isNull()
+        // A release build's catalog drops unevaluated models: nothing to offer.
+        assertThat(OnboardingModel.askLine(catalog, DeviceTier.ASK, dense = true, installed = emptySet())).isNull()
+        assertThat(OnboardingModel.askLine(catalog.copy(models = listOf(embedder)), DeviceTier.ASK, dense = true, installed = emptySet())).isNull()
+    }
+
+    @Test fun askLeavesOutWhatIsInstalledAndVanishesWhenAllIs() {
+        val line = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = setOf("gemma-4-e2b-gpu"))!!
+        assertThat(line.items.map { it.id }).containsExactly("embeddinggemma-2-text-270m")
+        assertThat(OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = setOf("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m"))).isNull()
+    }
+
+    @Test fun theReviewListsAskAsItsOwnGroup() {
+        val ask = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())
+        val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 10_000, ask)
+        assertThat(review.groups.map { it.title }).containsExactly("Ask (Preview)")
+        assertThat(review.groups.single().lines.single().title).isEqualTo("The librarian")
+        assertThat(review.bytes).isEqualTo(2_160)
+    }
+
+    private fun voice(id: String, title: String, size: Long) = app.granger.core.catalog.VoiceEntry(
+        id = id, title = title, engine = "piper", language = "en-US", sizeBytes = size, sha256 = "d".repeat(64),
+        url = "https://v.test/$id.zip", license = "CC BY 4.0",
+    )
+    private val ljspeech = voice("vits-piper-en_US-ljspeech-medium", "Granger voice (ljspeech)", 67)
+    private val maggie = voice(OnboardingModel.VOICE_ID, "Granger voice (Maggie & Martin)", 80)
+
+    @Test fun theVoiceLineIsMaggieAndMartinUntilAnyCatalogVoiceIsHere() {
+        val withVoices = catalog.copy(voices = listOf(ljspeech, maggie))
+        val line = OnboardingModel.voiceLine(withVoices, emptySet())!!
+        assertThat(line.title).isEqualTo("Read aloud")
+        assertThat(line.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
+        assertThat(OnboardingModel.voiceLine(withVoices, setOf(ljspeech.id))).isNull()
+        assertThat(OnboardingModel.voiceLine(catalog, emptySet())).isNull()
+        val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 1_000, voice = line)
+        assertThat(review.groups.single().title).isEqualTo("Read aloud")
+        assertThat(review.groups.single().lines.single().title).isEqualTo("Granger voice (Maggie & Martin)")
+    }
+
+    @Test fun saveSpaceSwapsEachPackForItsNoPicturesFlavour() {
+        val pictures = catalog.copy(presets = listOf(Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "gc-bible"))))
+        val withPictures = OnboardingModel.startChoices(pictures, emptySet()).single()
+        assertThat(withPictures.lines.map { it.id }).containsExactly("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "collection:granger-classics").inOrder()
+        val saving = OnboardingModel.startChoices(pictures, emptySet(), saveSpace = true).single()
+        // WikEM has no no-pictures flavour: it stays.
+        assertThat(saving.lines.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "wikem_en_all_maxi", "collection:granger-classics").inOrder()
+        assertThat(saving.bytes()).isLessThan(withPictures.bytes())
     }
 }

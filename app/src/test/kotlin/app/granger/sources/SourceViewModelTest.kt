@@ -107,7 +107,7 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("gemma-embed").description).isEqualTo(if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet")
+        assertThat(rows.getValue("gemma-embed").description).isEqualTo(if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet")
         assertThat(rows.getValue("e2b").description).isEmpty()
     }
 

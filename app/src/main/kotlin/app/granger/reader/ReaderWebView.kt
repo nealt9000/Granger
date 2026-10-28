@@ -20,7 +20,7 @@ import org.json.JSONTokener
 /** What the text-selection menu offers besides the system's own Copy. [READ_ALOUD] hands over the selection's block (JSON), not its text. */
 enum class SelectionAction(val label: String) {
     SEARCH("Search"),
-    RESEARCH("Research"),
+    RESEARCH("Ask"),
     READ_ALOUD("Read from here"),
 }
 

@@ -34,6 +34,10 @@ interface DownloadDao {
     @Upsert
     suspend fun upsert(record: DownloadRecord)
 
+    /** Many records in one transaction (an onboarding group can be hundreds). */
+    @Upsert
+    suspend fun upsertAll(records: List<DownloadRecord>)
+
     @Query("DELETE FROM downloads WHERE itemId = :itemId AND hash = :hash")
     suspend fun delete(itemId: String, hash: String)
 

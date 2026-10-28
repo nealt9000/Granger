@@ -194,8 +194,8 @@ fun ReadinessContent(
 }
 
 private fun tierText(tier: DeviceTier) = when (tier) {
-    DeviceTier.LIBRARY_ONLY -> "Library only: Research needs a phone with 6 GB of memory"
-    DeviceTier.ASK -> "Library and Research"
+    DeviceTier.LIBRARY_ONLY -> "Library only: Ask needs a phone with 6 GB of memory"
+    DeviceTier.ASK -> "Library and Ask"
 }
 
 @Composable

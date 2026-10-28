@@ -38,11 +38,16 @@ class InstalledVoicesTest {
         voiceDir(File(volume, "voices"), "kokoro-int8-multi-lang-v1_1")       // first by name, last by rank
         voiceDir(File(volume, "voices"), "vits-piper-en_US-libritts_r-medium")
         voiceDir(File(volume, "voices"), "vits-piper-en_US-ljspeech-medium")
+        voiceDir(File(volume, "voices"), "vits-piper-en_US-granger_libritts-medium")
         val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { listOf(systemVoice) }, noFactory, noFactory)
         voices.refresh()
-        assertThat(voices.voices.value.map { (it.id as? VoiceId.Granger)?.dir ?: "system" })
-            .containsExactly("vits-piper-en_US-ljspeech-medium", "vits-piper-en_US-libritts_r-medium", "kokoro-int8-multi-lang-v1_1", "system").inOrder()
-        assertThat(voices.preferred(null)?.id).isEqualTo(VoiceId.Granger("vits-piper-en_US-ljspeech-medium"))
+        assertThat(voices.voices.value.map { (it.id as? VoiceId.Granger)?.dir ?: "system" }.distinct())
+            .containsExactly(
+                "vits-piper-en_US-granger_libritts-medium", "vits-piper-en_US-ljspeech-medium", "vits-piper-en_US-libritts_r-medium",
+                "kokoro-int8-multi-lang-v1_1", "system",
+            ).inOrder()
+        // Maggie & Martin lead when nothing is chosen (U3a); a voice dir with no speaker names is one voice.
+        assertThat((voices.preferred(null)?.id as VoiceId.Granger).dir).isEqualTo("vits-piper-en_US-granger_libritts-medium")
     }
 
     @Test
