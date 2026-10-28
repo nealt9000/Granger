@@ -109,23 +109,4 @@ class LibraryViewModelTest {
         vm.dismissNotice()
         assertThat(vm.notice.value).isNull()
     }
-
-    @Test fun mediaSettingsHintNamesWhatIsMissing() {
-        assertThat(missingMediaText(listOf("zim"))).isEqualTo("No music or audiobooks yet")
-        assertThat(missingMediaText(listOf("music"))).isEqualTo("No audiobooks yet")
-        assertThat(missingMediaText(listOf("audiobooks", "zim"))).isEqualTo("No music yet")
-        assertThat(missingMediaText(listOf("music", "audiobooks"))).isNull()
-    }
-
-    @Test fun mediaHintOffersTheMissingTypesSources() {
-        assertThat(mediaHintLinks(listOf("zim")))
-            .containsExactly(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN, SourceLink.ARCHIVE_ORG_MUSIC).inOrder()
-        assertThat(mediaHintLinks(listOf("music"))).containsExactly(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN).inOrder()
-        assertThat(mediaHintLinks(listOf("audiobooks"))).containsExactly(SourceLink.ARCHIVE_ORG_MUSIC)
-        assertThat(mediaHintLinks(listOf("music", "audiobooks"))).isEmpty()
-        // The hint's buttons sit side by side, so the two archive.org views say which they are.
-        assertThat(hintLabel(SourceLink.ARCHIVE_ORG_SPOKEN)).isEqualTo("Archive.org audiobooks")
-        assertThat(hintLabel(SourceLink.ARCHIVE_ORG_MUSIC)).isEqualTo("Archive.org music")
-        assertThat(hintLabel(SourceLink.LIBRIVOX)).isEqualTo("LibriVox")
-    }
 }

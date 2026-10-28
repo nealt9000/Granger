@@ -566,7 +566,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     GrangerShell(
         rail = rail,
         expanded = shell.expanded,
-        railVisible = shell.railVisible,
+        // No rail during onboarding: a first run can't wander into empty tools (Plan U3a Decision 12).
+        railVisible = shell.railVisible && destination?.hasRoute<OnboardingRoute>() != true,
         selected = selected,
         onToggleExpanded = { shell.expanded = !shell.expanded },
         onEdgeSwipe = {
@@ -658,7 +659,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
-                    onMediaSettings = if (Features.PLAYER) ({ nav.navigate(SettingsRoute(media = true)) }) else null,
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -906,6 +906,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
                             container.appScope,
                             mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
+                            refreshVoices = { if (Features.PLAYER && Features.READ_ALOUD) container.installedVoices.refresh() },
                         )
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },

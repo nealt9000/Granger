@@ -61,6 +61,11 @@ class SettingsViewModel(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** Builds the "Music & audiobooks" section's model on this view model's scope; null hides the section. */
     mediaSettings: ((CoroutineScope) -> MediaSettings)? = null,
+    /**
+     * Lists the voices for the Voice row's summary, which reads the shared list: nothing else fills it until Voice opens,
+     * a voice installs or Read aloud starts (Plan U3a Decision 10).
+     */
+    private val refreshVoices: suspend () -> Unit = {},
 ) : ViewModel() {
     val media: MediaSettings? = mediaSettings?.invoke(viewModelScope)
 
@@ -81,6 +86,7 @@ class SettingsViewModel(
 
     init {
         refreshVolumes()
+        viewModelScope.launch { withContext(io) { runCatching { refreshVoices() } } }
     }
 
     /** Free space changes outside the app; called on resume. */

@@ -39,6 +39,13 @@ class SettingsViewModelTest {
         return vm
     }
 
+    @Test fun openingSettingsListsTheVoicesForTheVoiceRow() = runTest(main.dispatcher) {
+        var refreshes = 0
+        SettingsViewModel(downloads, volumes, prefs, archivePrefs, appearancePrefs, appScope = this, io = main.dispatcher, refreshVoices = { refreshes++ })
+        testScheduler.advanceUntilIdle()
+        assertThat(refreshes).isEqualTo(1)
+    }
+
     @Test fun choicesPersistAndReachDownloads() = runTest(main.dispatcher) {
         val vm = viewModel()
         assertThat(vm.ui.value.selectedVolume).isEqualTo("/internal")

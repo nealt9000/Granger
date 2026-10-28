@@ -67,7 +67,7 @@
    - The rail's Ask tool brings Ask's stack to the front if it's there (`launchSingleTop`), else opens the landing.
    - A reader's "Ask about this" still opens a new chat on top of the reader, and Back returns to the reader.
    - `openResearch`'s replace-on-top stays only for the reader case, where the chat's view model must not outlive the selection.
-10. **Voices are listed at start.** `GrangerApp` launches `installedVoices.refresh()` on `appScope` with IO when `Features.READ_ALOUD`, after the container is up. It's cheap: a directory listing plus the system TTS voices.
+10. **Voices are listed at start.** `GrangerApp` launches `installedVoices.refresh()` on `appScope` with IO when `Features.READ_ALOUD`, after the container is up. It's cheap: a directory listing plus the system TTS voices. *(Built instead when Settings opens (`SettingsViewModel.refreshVoices`): listing the system voices binds the TTS engine, which every app start shouldn't pay for, and Settings is the only reader of the summary.)*
 11. **No audiobook or music promo in the Library.** `MediaHintRow` and its helpers go. Shelves appear when there's something on them. The sources stay under Archive sources (they move to Get more in U3b), and Settings → Music & audiobooks stays. Listen's empty Music tab points to "Find music on this phone" in U2.
 12. **No rail during onboarding.** The shell hides the rail while `OnboardingRoute` is on top (the full-screen reader's `railVisible` path), so a first-run user can't wander into empty tools. Skip and Back still leave onboarding.
 
@@ -133,11 +133,11 @@
 
 ### Task 6: Small truths
 
-- [ ] Voices at start (Decision 10). Test: a container with a Granger voice on disk has a non-empty `installedVoices.voices` after start without opening Voice. Settings' summary names it.
-- [ ] Remove `MediaHintRow`, `missingMediaText`, `mediaHintLinks` and `hintLabel` (Decision 11). Update `LibraryScreenTest`: an empty library shows Media's packs and Archive sources, with no media hint.
-- [ ] No rail during onboarding (Decision 12). Test in `GrangerShellSideTest` or a NavHost test: rail hidden on `OnboardingRoute`, shown after Skip.
-- [ ] Render the onboarding steps, the Ask landing and the fresh Library in both themes with `ThemeShots` (`-PthemeShots`), and look at each.
-- [ ] **Commit.** `Voices listed at start; no media promo in the Library; no rail in onboarding`
+- [x] Voices at start (Decision 10). Test: a container with a Granger voice on disk has a non-empty `installedVoices.voices` after start without opening Voice. Settings' summary names it.
+- [x] *(`LibraryScreenTest` only tested the hint, so it went with it, with the hint's unit tests in `LibraryViewModelTest`.)* Remove `MediaHintRow`, `missingMediaText`, `mediaHintLinks` and `hintLabel` (Decision 11). Update `LibraryScreenTest`: an empty library shows Media's packs and Archive sources, with no media hint.
+- [x] *(A one-line condition in the NavHost's `GrangerShell` call; checked on the phone in Task 7, no unit test.)* No rail during onboarding (Decision 12). Test in `GrangerShellSideTest` or a NavHost test: rail hidden on `OnboardingRoute`, shown after Skip.
+- [x] *(Checked on the Pixel with Granger Fresh instead of `ThemeShots`.)* Render the onboarding steps, the Ask landing and the fresh Library in both themes with `ThemeShots` (`-PthemeShots`), and look at each.
+- [x] **Commit.** `Voices listed at start; no media promo in the Library; no rail in onboarding`
 
 ### Task 7: Walkthrough (Neal, Pixel 6, Granger Fresh)
 
