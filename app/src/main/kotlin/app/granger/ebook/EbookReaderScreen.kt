@@ -75,7 +75,6 @@ private const val VOICE_LOG = "GrangerVoice"
 
 object EbookTags {
     const val FOLLOW = "ebook_follow"
-    const val VOICE = "ebook_voice"
 }
 
 /**

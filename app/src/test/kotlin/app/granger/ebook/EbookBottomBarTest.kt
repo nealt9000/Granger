@@ -1,11 +1,13 @@
 package app.granger.ebook
 
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import app.granger.player.ListenTags
 import app.granger.player.VoiceButton
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -14,7 +16,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** The e-book bar's voice button (Plan V2): headphones start, a tap pauses or resumes, a long press stops. */
+/** The e-book bar's Listen (Plan U2 Decision 6): headphones start; while this book is read, Pause or Play and a separate Stop. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class EbookBottomBarTest {
@@ -30,25 +32,32 @@ class EbookBottomBarTest {
         )
     }
 
-    @Test fun idleStartsTheVoiceAndNeverStops() {
+    @Test fun idleShowsListenAndNoStop() {
         bar(VoiceButton.IDLE)
-        compose.onNodeWithContentDescription("Read aloud").performClick()
-        compose.onNodeWithTag(EbookTags.VOICE).performTouchInput { longClick() }   // no long-press action: a long press is a tap
-        assertThat(calls).doesNotContain("stop")
-        assertThat(calls).doesNotContain("pauseResume")
-        assertThat(calls.first()).isEqualTo("start")
+        compose.onNodeWithContentDescription("Listen").performClick()
+        compose.onNodeWithContentDescription("Stop").assertDoesNotExist()
+        assertThat(calls).containsExactly("start")
     }
 
-    @Test fun readingPausesOnATapAndStopsOnALongPress() {
+    @Test fun readingPausesOnATapAndStopIsItsOwnButton() {
         bar(VoiceButton.READING)
-        compose.onNodeWithContentDescription("Pause reading").performClick()
-        compose.onNodeWithTag(EbookTags.VOICE).performTouchInput { longClick() }
+        compose.onNodeWithContentDescription("Pause").performClick()
+        compose.onNodeWithContentDescription("Stop").performClick()
         assertThat(calls).containsExactly("pauseResume", "stop").inOrder()
+        assertThat(compose.onNodeWithContentDescription("Pause").getBoundsInRoot().left)
+            .isLessThan(compose.onNodeWithContentDescription("Stop").getBoundsInRoot().left)
     }
 
-    @Test fun pausedResumesOnATap() {
+    @Test fun aLongPressNoLongerStops() {
+        bar(VoiceButton.READING)
+        compose.onNodeWithTag(ListenTags.LISTEN).performTouchInput { longClick() }
+        assertThat(calls).doesNotContain("stop")
+    }
+
+    @Test fun pausedPlaysOnATap() {
         bar(VoiceButton.PAUSED)
-        compose.onNodeWithContentDescription("Resume reading").performClick()
+        compose.onNodeWithContentDescription("Play").performClick()
+        compose.onNodeWithContentDescription("Stop").assertExists()
         assertThat(calls).containsExactly("pauseResume")
     }
 }

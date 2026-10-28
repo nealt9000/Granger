@@ -1,18 +1,10 @@
 package app.granger.ebook
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
+import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
@@ -26,9 +18,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.ui.res.painterResource
-import app.granger.R
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -69,40 +58,6 @@ fun EbookTopBar(title: String, onBack: () -> Unit, onContents: () -> Unit, onSea
 }
 
 /**
- * Headphones to start the voice; while this book is read, a pause or play glyph in the accent: a tap pauses or resumes at
- * the sentence, a long press stops (Plan V2). Not an [IconButton]: it has no long press.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun VoiceBarButton(voice: VoiceButton, onReadAloud: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit) {
-    val (icon, label) = when (voice) {
-        VoiceButton.IDLE -> R.drawable.ic_headphones to "Read aloud"
-        VoiceButton.READING -> R.drawable.ic_pause to "Pause reading"
-        VoiceButton.PAUSED -> R.drawable.ic_play to "Resume reading"
-    }
-    Box(
-        Modifier
-            .minimumInteractiveComponentSize()
-            .size(40.dp)
-            .clip(CircleShape)
-            .combinedClickable(
-                role = Role.Button,
-                onClick = { if (voice == VoiceButton.IDLE) onReadAloud() else onPauseResume() },
-                onLongClick = if (voice == VoiceButton.IDLE) null else onStop,
-                onLongClickLabel = "Stop reading",
-            )
-            .testTag(EbookTags.VOICE),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painterResource(icon),
-            contentDescription = label,
-            tint = if (voice == VoiceButton.IDLE) LocalContentColor.current else MaterialTheme.colorScheme.primary,
-        )
-    }
-}
-
-/**
  * The progress label over a slider through the whole book, and the reader bar under it. The slider follows
  * [locator] until the finger is down; the jump happens once, on release.
  */
@@ -118,7 +73,7 @@ fun EbookBottomBar(
     modifier: Modifier = Modifier,
     /** Starts the voice on this page (Plan V1); null leaves the slot empty. */
     onReadAloud: (() -> Unit)? = null,
-    /** What the button does while this book is read (Plan V2): a tap pauses or resumes, a long press stops. */
+    /** What Listen does while this book is read (Plan U2 Decision 6): a tap pauses or resumes; Stop sits beside it. */
     voice: VoiceButton = VoiceButton.IDLE,
     onPauseResume: () -> Unit = {},
     onStop: () -> Unit = {},
@@ -159,7 +114,7 @@ fun EbookBottomBar(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onContents) { Icon(Icons.Filled.Menu, contentDescription = "Contents") }
                 IconButton(onClick = onTextSettings) { Text("Aa", style = MaterialTheme.typography.titleMedium) }
-                if (onReadAloud != null) VoiceBarButton(voice, onReadAloud, onPauseResume, onStop)
+                if (onReadAloud != null) ListenButtons(voice, onReadAloud, onPauseResume, onStop)
                 IconButton(onClick = onBookmark) {
                     if (bookmarked) {
                         Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = MaterialTheme.colorScheme.primary)
