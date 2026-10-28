@@ -2,6 +2,7 @@ package app.granger.media
 
 import android.content.Context
 import android.net.Uri
+import app.granger.BuildConfig
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -88,7 +89,7 @@ class Artwork(private val roots: () -> List<File>, private val key: () -> ByteAr
     }
 
     companion object {
-        const val AUTHORITY = "app.granger.artwork"
+        const val AUTHORITY = BuildConfig.APPLICATION_ID + ".artwork"
 
         private const val HMAC = "HmacSHA256"
         private const val MAC_BYTES = 16
