@@ -39,7 +39,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
@@ -394,7 +393,8 @@ internal fun ReaderTopBar(
         ) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
             if (showMenu && hasHome) {
-                IconButton(onClick = onHome) { Icon(Icons.Filled.Home, contentDescription = "Home") }
+                // The pack's main page: a book, not a house, which is the app's Home (Plan U3b Decision 5).
+                IconButton(onClick = onHome) { Icon(painterResource(R.drawable.ic_menu_book), contentDescription = mainPageLabel(packTitle)) }
             }
             if (showMenu) {
                 PackSearchBox(searchLabel(packTitle), onSearchPack, Modifier.weight(1f).padding(horizontal = 4.dp))
@@ -459,6 +459,9 @@ private fun PackSearchBox(label: String, onClick: () -> Unit, modifier: Modifier
 }
 
 /** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
+/** What TalkBack reads for the main-page button: "Wikipedia: main page". */
+internal fun mainPageLabel(packTitle: String?) = if (packTitle != null) "$packTitle: main page" else "Main page"
+
 private fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"
 
 /** The search field in place of the top bar, with the results listed under it. */

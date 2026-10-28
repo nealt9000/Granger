@@ -132,6 +132,10 @@ def main():
     mono = [(layers["pupils"], WHITE), (layers["mark"], WHITE)]
     (RES / "drawable" / "ic_launcher_monochrome.xml").write_text(vector(108, 108, 108, 108, mark_in(108, LAUNCHER_DIAMETER, mono, side)))
 
+    # The rail's Home tool (Plan U3b Decision 5): the themed icon's one-colour mark, without the adaptive icon's padding,
+    # its rim 22 dp across in a 24 dp canvas like Material's icons, tinted like the other tools.
+    (RES / "drawable" / "ic_owl.xml").write_text(vector(24, 24, 24, 24, mark_in(24, 22, mono, side)))
+
     # In-app mark: one white drawable per layer on the same square viewport, stacked and tinted by the caller.
     for name, res in (("mark", "granger_mark"), ("eyes", "granger_mark_eyes"), ("pupils", "granger_mark_pupils")):
         (RES / "drawable" / f"{res}.xml").write_text(vector(48, 48, L, L, group([(layers[name], WHITE)], 1.0, 0, 0)))

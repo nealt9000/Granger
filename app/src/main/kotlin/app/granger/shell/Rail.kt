@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -94,10 +93,11 @@ private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInse
 
 @Composable
 private fun RailTool.painter(): Painter = when (this) {
-    RailTool.HOME -> rememberVectorPainter(Icons.Filled.Home)
+    // The owl in the G (Plan U3b Decision 5); an open book is the Library, and ic_library stays for articles.
+    RailTool.HOME -> painterResource(R.drawable.ic_owl)
     RailTool.SEARCH -> rememberVectorPainter(Icons.Filled.Search)
     RailTool.RESEARCH -> painterResource(R.drawable.ic_research)
-    RailTool.LIBRARY -> painterResource(R.drawable.ic_library)
+    RailTool.LIBRARY -> painterResource(R.drawable.ic_library_books_open)
     RailTool.PLAYER -> rememberVectorPainter(Icons.Filled.PlayArrow)
     RailTool.SETTINGS -> rememberVectorPainter(Icons.Filled.Settings)
 }

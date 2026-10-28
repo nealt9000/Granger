@@ -78,11 +78,11 @@ class ReaderTopBarTest {
         compose.onNodeWithContentDescription("Photosynthesis").assertExists()
     }
 
-    @Test fun barOrderIsBackHomeSearchStarMore() {
+    @Test fun barOrderIsBackMainPageSearchStarMore() {
         bar()
         val lefts = listOf(
             compose.onNodeWithContentDescription("Back").left(),
-            compose.onNodeWithContentDescription("Home").left(),
+            compose.onNodeWithContentDescription("Wikipedia: main page").left(),
             compose.onNodeWithText("Search Wikipedia").left(),
             compose.onNodeWithContentDescription("Add bookmark").left(),
             compose.onNodeWithContentDescription("More").left(),
@@ -108,9 +108,17 @@ class ReaderTopBarTest {
         compose.onNodeWithText("Home").assertDoesNotExist()
     }
 
+    @Test fun theMainPageButtonNamesThePackNotHome() {
+        bar(packTitle = "Wikipedia")
+        compose.onNodeWithContentDescription("Wikipedia: main page").assertExists()
+        // Home is the app's (the rail's owl), not the pack's.
+        compose.onNodeWithContentDescription("Home").assertDoesNotExist()
+        assertThat(mainPageLabel(null)).isEqualTo("Main page")
+    }
+
     @Test fun homeHiddenWhenThePackHasNone() {
         bar(hasHome = false)
-        compose.onNodeWithContentDescription("Home").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Wikipedia: main page").assertDoesNotExist()
         compose.onNodeWithContentDescription("Back").assertExists()
     }
 

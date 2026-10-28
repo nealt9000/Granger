@@ -3,6 +3,7 @@ package app.granger.theme
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,18 +13,27 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import app.granger.book
+import app.granger.core.library.CollectionRow
 import app.granger.core.library.FeedKind
 import app.granger.core.library.HomeFeed
+import app.granger.core.library.MediaType
+import app.granger.core.library.Shelf
+import app.granger.core.library.ShelfCollection
 import app.granger.home.Card
 import app.granger.home.CardTarget
 import app.granger.home.Drawn
 import app.granger.home.FeedUi
 import app.granger.home.HomeContent
 import app.granger.home.HomeUi
+import app.granger.library.LibraryContent
+import app.granger.library.LibraryUi
+import app.granger.library.libraryKinds
 import app.granger.onboarding.OnboardingActions
 import app.granger.onboarding.OnboardingContent
 import app.granger.onboarding.OnboardingUi
 import app.granger.onboarding.Step
+import app.granger.pack
 import app.granger.player.FakePlayerHub
 import app.granger.player.MiniPlayer
 import app.granger.player.PlayerScreen
@@ -42,6 +52,7 @@ import app.granger.shell.GrangerShell
 import app.granger.shell.RailEntry
 import app.granger.shell.RailEntryActions
 import app.granger.shell.RailTabUi
+import app.granger.shell.RailTool
 import app.granger.shell.RailUi
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -110,6 +121,21 @@ class ThemeShots {
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) { Box(Modifier.fillMaxSize()) }
+    }
+
+    @Test fun library() = shoot("library") {
+        val wikipedia = CollectionRow(ShelfCollection("c:kiwix", "Kiwix", "literature", false, defaultKey = "kiwix"), listOf(pack("w")))
+        val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = listOf(book("b")))
+        GrangerShell(
+            rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            LibraryContent(
+                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, wikipedia)))), false),
+                "/packs", SnackbarHostState(), {}, {}, {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
+            )
+        }
     }
 
     @Test fun musicPlayer() = shoot("music") { PlayerScreen(PlayerViewModel(FakePlayerHub(musicUi())), onClose = {}) }
