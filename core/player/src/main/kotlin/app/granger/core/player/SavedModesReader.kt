@@ -81,13 +81,17 @@ internal class SavedModesReader(
             .distinctUntilChanged()
         val voice = combine(prefChanges(), playback.observeVoiceStates()) { _, states -> lastVoice(prefs, states) }
             .distinctUntilChanged()
-        val lastMode = prefChanges().map { prefs.getString(PlayerSettingsKeys.LAST_MODE, null) }.distinctUntilChanged()
-        return combine(music, book, voice, lastMode) { m, b, v, last ->
+        val lastMode = prefChanges()
+            .map { prefs.getString(PlayerSettingsKeys.LAST_MODE, null) to prefs.getString(PlayerSettingsKeys.LAST_MEDIA, null) }
+            .distinctUntilChanged()
+        return combine(music, book, voice, lastMode) { m, b, v, (last, media) ->
             SavedModes(
                 m, b,
-                lastMode = when (last) { MODE_MUSIC -> PlayerMode.MUSIC; MODE_BOOK -> PlayerMode.AUDIOBOOK; else -> null },
+                lastMode = modeOf(last),
                 voice = v,
                 lastWasVoice = last == MODE_VOICE,
+                // Written before LAST_MEDIA existed: the last mode, when it was a media one.
+                lastMedia = modeOf(media) ?: modeOf(last),
             )
         }.distinctUntilChanged()
     }
@@ -132,10 +136,12 @@ internal class SavedModesReader(
         )
     }
 
+    private fun modeOf(pref: String?): PlayerMode? = when (pref) { MODE_MUSIC -> PlayerMode.MUSIC; MODE_BOOK -> PlayerMode.AUDIOBOOK; else -> null }
+
     /** Emits once now, then whenever the engine's last-mode, last-book or last-voice pref changes. */
     private fun prefChanges(): Flow<Unit> = callbackFlow {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PlayerSettingsKeys.LAST_MODE || key == PlayerSettingsKeys.LAST_AUDIOBOOK || key == PlayerSettingsKeys.LAST_VOICE) trySend(Unit)
+            if (key == PlayerSettingsKeys.LAST_MODE || key == PlayerSettingsKeys.LAST_MEDIA || key == PlayerSettingsKeys.LAST_AUDIOBOOK || key == PlayerSettingsKeys.LAST_VOICE) trySend(Unit)
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
         trySend(Unit)

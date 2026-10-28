@@ -48,7 +48,7 @@ data class PlayerUi(val now: NowPlaying, val playing: Boolean, val positionMs: L
     }
 }
 
-/** The player's two tabs (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. The voice is a third mode without a tab. */
+/** The media modes (spec §8): one ExoPlayer, one mode active at a time, each with its own saved state. The voice is a third mode, with the player's Reader tab. */
 enum class PlayerMode { MUSIC, AUDIOBOOK }
 
 /**
@@ -80,11 +80,12 @@ data class SavedVoice(val sourceKey: String, val title: String, val section: Str
 /**
  * Each mode's saved state, read from the db without loading anything into the player; it follows every save.
  * [music]/[book]/[voice] are null for a mode never used. [lastMode] is the tab last loaded (what a restore brings
- * back), null when the voice was last ([lastWasVoice]). [loaded] is false until the db has been read once.
+ * back), null when the voice was last ([lastWasVoice]). [lastMedia] is the media mode last loaded, kept while the
+ * voice reads (it names the player's media tab, Plan U2). [loaded] is false until the db has been read once.
  */
 data class SavedModes(
     val music: SavedMusic?, val book: SavedBook?, val lastMode: PlayerMode?, val loaded: Boolean = true,
-    val voice: SavedVoice? = null, val lastWasVoice: Boolean = false,
+    val voice: SavedVoice? = null, val lastWasVoice: Boolean = false, val lastMedia: PlayerMode? = lastMode,
 ) {
     companion object {
         val UNKNOWN = SavedModes(null, null, null, loaded = false)
@@ -198,6 +199,8 @@ object PlayerSettingsKeys {
 
     // Kept by the engine, not settings: which player to restore and when it was paused (survive process death).
     internal const val LAST_MODE = "last_mode"
+    /** The media mode last loaded ([LAST_MODE] without the voice): music or audiobook. */
+    internal const val LAST_MEDIA = "last_media"
     internal const val LAST_AUDIOBOOK = "last_audiobook"
     internal const val LAST_VOICE = "last_voice"
     internal const val PAUSED_AT = "paused_at"

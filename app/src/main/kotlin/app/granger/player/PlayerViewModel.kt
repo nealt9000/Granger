@@ -77,16 +77,32 @@ fun bookProgressAt(
     return if (finished) progress.copy(positionMs = progress.durationMs) else progress
 }
 
-/** The tab [now] belongs to; null when idle, and for the voice, which has no tab (its full view is a sheet, V2). */
+/** The media mode [now] is; null when idle, and for the voice, whose tab is Reader. */
 fun modeOf(now: NowPlaying): PlayerMode? = when (now) {
     is NowPlaying.Music -> PlayerMode.MUSIC
     is NowPlaying.Book -> PlayerMode.AUDIOBOOK
     is NowPlaying.Voice, NowPlaying.Idle -> null
 }
 
-/** The Player's tab: the one picked, else the active mode, else the mode last used, else Music. */
-fun playerTab(picked: PlayerMode?, now: NowPlaying, lastMode: PlayerMode?): PlayerMode =
-    picked ?: modeOf(now) ?: lastMode ?: PlayerMode.MUSIC
+/**
+ * The full player's two tabs (Plan U2 Decision 4): Reader, the voice's player, and the media tab, which is Music or
+ * Audiobook ([mediaMode]). Switching between music and audiobooks happens on Listen's shelves, not with a third tab.
+ */
+enum class ListenTab { READER, MEDIA }
+
+/** What the media tab holds: the live media mode (music under the voice counts), else the last one played, else Music. */
+fun mediaMode(now: NowPlaying, saved: SavedModes): PlayerMode =
+    modeOf(now) ?: (now as? NowPlaying.Voice)?.music?.let { PlayerMode.MUSIC } ?: saved.lastMedia ?: PlayerMode.MUSIC
+
+/**
+ * The player's tab: the one picked, else what's live (the voice: Reader; music or an audiobook: the media tab), else
+ * the one last used, else the media tab (titled Music, with its shelf link).
+ */
+fun listenTab(picked: ListenTab?, now: NowPlaying, saved: SavedModes): ListenTab = picked ?: when (now) {
+    is NowPlaying.Voice -> ListenTab.READER
+    is NowPlaying.Music, is NowPlaying.Book -> ListenTab.MEDIA
+    NowPlaying.Idle -> if (saved.lastWasVoice) ListenTab.READER else ListenTab.MEDIA
+}
 
 /** The saved queue as the music player shows it: paused at its saved track and position. */
 fun SavedMusic.toUi(): PlayerUi = PlayerUi(
@@ -105,7 +121,7 @@ fun SavedBook.progress(): BookProgress = bookProgress(chapters, chapter, inChapt
     .let { if (finished) it.copy(positionMs = it.durationMs) else it }
 
 /**
- * The mini-player and both full-screen players. Everything goes through [hub]; [chapters] and [bookmarks] read the
+ * The mini-player and the full player's tabs. Everything goes through [hub]; [chapters] and [bookmarks] read the
  * library for the loaded audiobook, and [skipBackSeconds]/[skipForwardSeconds] are the audiobook skip settings (for
  * the buttons' labels).
  */
@@ -121,21 +137,24 @@ class PlayerViewModel(
     val ui: StateFlow<PlayerUi> = hub.ui
     val queue: StateFlow<List<Track>> = hub.queue
 
-    /** Both modes' saved states: the Player's inactive tab shows one. */
+    /** Every mode's saved state: the media tab, when its mode isn't live, and Reader's Resume show one. */
     val saved: StateFlow<SavedModes> = hub.saved
 
-    private val _pickedTab = MutableStateFlow<PlayerMode?>(null)
+    private val _pickedTab = MutableStateFlow<ListenTab?>(null)
 
-    /** The tab the user picked in the Player, or null for the default ([playerTab]). Picking one plays nothing. */
-    val pickedTab: StateFlow<PlayerMode?> = _pickedTab
+    /** The tab the user picked in the player, or null for the default ([listenTab]). Picking one plays nothing. */
+    val pickedTab: StateFlow<ListenTab?> = _pickedTab
 
-    fun selectTab(mode: PlayerMode) { _pickedTab.value = mode }
+    fun selectTab(tab: ListenTab) { _pickedTab.value = tab }
 
-    /** The Player opens on the active mode (or the last one used). */
+    /** The player opens on what's live (or the tab last used): every way in calls this first. */
     fun resetTab() { _pickedTab.value = null }
 
     /** The tab shown now. */
-    fun tab(): PlayerMode = playerTab(_pickedTab.value, hub.ui.value.now, hub.saved.value.lastMode)
+    fun tab(): ListenTab = listenTab(_pickedTab.value, hub.ui.value.now, hub.saved.value)
+
+    /** The media tab's mode now: Music or Audiobook. */
+    fun mediaMode(): PlayerMode = mediaMode(hub.ui.value.now, hub.saved.value)
 
     /**
      * A control pressed on the inactive tab: [mode] becomes the active one, loaded from its saved state and playing
@@ -188,8 +207,9 @@ class PlayerViewModel(
     fun nextParagraph() = hub.nextParagraph()
     fun previousParagraph() = hub.previousParagraph()
     fun previousSentence() = hub.previousSentence()
+    fun nextSentence() = hub.nextSentence()
 
-    // Music under the voice and the voice's full view (Plan V2).
+    // Music under the voice and Reader (Plan V2, U2).
     fun setMixLevel(level: Float) = hub.setMixLevel(level)
     fun playPauseMusic() = hub.playPauseMusic()
     fun nextMusic() = hub.nextMusic()

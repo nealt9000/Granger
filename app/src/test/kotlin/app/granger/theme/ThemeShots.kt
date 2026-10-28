@@ -60,13 +60,14 @@ import app.granger.onboarding.OnboardingUi
 import app.granger.onboarding.Step
 import app.granger.pack
 import app.granger.player.FakePlayerHub
+import app.granger.player.ListenPlayerScreen
 import app.granger.player.MiniPlayer
-import app.granger.player.PlayerScreen
 import app.granger.player.PlayerViewModel
 import app.granger.player.audiobook
 import app.granger.player.bookUi
 import app.granger.player.chapter
 import app.granger.player.musicUi
+import app.granger.player.voiceUi
 import app.granger.readiness.Coverage
 import app.granger.readiness.DomainCoverage
 import app.granger.readiness.ReadinessReport
@@ -163,13 +164,25 @@ class ThemeShots {
         }
     }
 
-    @Test fun musicPlayer() = shoot("music") { PlayerScreen(PlayerViewModel(FakePlayerHub(musicUi())), onClose = {}) }
+    @Test fun musicPlayer() = shoot("music") { ListenPlayerScreen(PlayerViewModel(FakePlayerHub(musicUi())), onClose = {}) }
+
+    @Test fun readerPlayer() {
+        val at = app.granger.core.speech.ReadAddress.Text("book:pan", 4, 1)
+        val hub = FakePlayerHub(voiceUi(title = "Peter Pan", section = "Chapter 3")).apply {
+            voiceProgress.value = app.granger.core.player.voice.VoiceProgress(
+                at, app.granger.core.speech.Utterance(at, app.granger.core.speech.UtteranceKind.SENTENCE, "All children, except one, grow up.", 0, 350L), 4,
+                previous = "Chapter 1: Peter Breaks Through.", next = "They soon know that they will grow up.",
+            )
+        }
+        val voices = listOf(app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), "Granger voice (ljspeech)", "en-US"))
+        shoot("reader") { ListenPlayerScreen(PlayerViewModel(hub), onClose = {}, voices = voices) }
+    }
 
     @Test fun audiobookPlayer() {
         val book = audiobook("b", title = "Treasure Island", author = "Robert Louis Stevenson")
         val chapters = listOf(chapter(book, 0, 60_000L), chapter(book, 1, 60_000L))
         shoot("audiobook") {
-            PlayerScreen(PlayerViewModel(FakePlayerHub(bookUi(book, chapters[1], chapterCount = 2, positionMs = 20_000L)), chapters = { MutableStateFlow(chapters) }), onClose = {})
+            ListenPlayerScreen(PlayerViewModel(FakePlayerHub(bookUi(book, chapters[1], chapterCount = 2, positionMs = 20_000L)), chapters = { MutableStateFlow(chapters) }), onClose = {})
         }
     }
 

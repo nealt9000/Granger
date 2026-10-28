@@ -28,7 +28,7 @@ class ListenRoutesTest {
                 composable<LibraryRoute> {}
                 composable<CollectionRoute> {}
                 composable<ListenRoute> {}
-                composable<PlayerRoute> {}
+                composable<ListenPlayerRoute> {}
                 composable<MusicRoute> {}
                 composable<AlbumRoute> {}
                 composable<ArtistRoute> {}
@@ -48,7 +48,7 @@ class ListenRoutesTest {
             return compose.runOnIdle { railToolOf(nav.currentDestination!!, archiveKind = archiveKind) }
         }
         val listen = listOf(
-            ListenRoute, PlayerRoute, MusicRoute(), MusicRoute("c:phone"), AlbumRoute("album:Blue"), ArtistRoute("Miles Davis"),
+            ListenRoute, ListenPlayerRoute, MusicRoute(), MusicRoute("c:phone"), AlbumRoute("album:Blue"), ArtistRoute("Miles Davis"),
             GenreRoute("Jazz"), PlaylistRoute(1L), FolderRoute("Music"), AudiobookShelfRoute(), AudiobookRoute("audiobook:phone:t"), LibriVoxRoute,
         )
         for (route in listen) assertThat(toolAt(route)).isEqualTo(RailTool.LISTEN)

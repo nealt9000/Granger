@@ -397,6 +397,23 @@ class PlayerEngineVoiceTest {
         assertThat(music.index).isEqualTo(1)                                   // saved from under the voice
     }
 
+    @Test fun theLastMediaModeOutlastsTheVoice() {
+        val e = engine()
+        e.saved                                         // read lazily: the first read starts it
+        val book = rig.fakeBook("b", 5_000)
+        e.playAudiobook(book.id)
+        rig.idle()
+        assertThat(e.saved.value.lastMedia).isEqualTo(PlayerMode.AUDIOBOOK)
+
+        // The voice is now the last mode, but the media tab still names the audiobook (Plan U2).
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        val saved = e.saved.value
+        assertThat(saved.lastWasVoice).isTrue()
+        assertThat(saved.lastMode).isNull()
+        assertThat(saved.lastMedia).isEqualTo(PlayerMode.AUDIOBOOK)
+    }
+
     @Test fun aCallPausesBothAndItsEndResumesBoth() {
         val e = mixEngine()
         e.readOverMusic(rig.songs())

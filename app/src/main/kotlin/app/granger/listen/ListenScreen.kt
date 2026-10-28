@@ -45,7 +45,7 @@ import app.granger.sources.GetMoreLink
 
 /** What Listen's home can open; the NavHost wires each to its route. */
 class ListenActions(
-    /** The full player (the voice's sheet while the voice reads). */
+    /** The full player, on what the card shows: Reader for the voice, else Music or Audiobook. */
     val onOpenPlayer: () -> Unit = {},
     /** The card's play/pause: the live item, or what the card says would resume. */
     val onPlayPause: () -> Unit = {},

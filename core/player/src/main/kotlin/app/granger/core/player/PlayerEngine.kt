@@ -1064,7 +1064,7 @@ class PlayerEngine(
         tracks = byId
         mode = Mode.MUSIC
         book = null; map = null
-        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_MUSIC).apply()
+        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_MUSIC).putString(PlayerSettingsKeys.LAST_MEDIA, MODE_MUSIC).apply()
         player.setAudioAttributes(attributes(speech = false), false)
         player.setPlaybackSpeed(1f)
         player.skipSilenceEnabled = false
@@ -1126,7 +1126,8 @@ class PlayerEngine(
         finished = !play && state?.finished == true
         musicQueue = null; tracks = emptyMap()
         mode = Mode.BOOK
-        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_BOOK).putString(PlayerSettingsKeys.LAST_AUDIOBOOK, id).apply()
+        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_BOOK).putString(PlayerSettingsKeys.LAST_MEDIA, MODE_BOOK)
+            .putString(PlayerSettingsKeys.LAST_AUDIOBOOK, id).apply()
 
         player.setAudioAttributes(attributes(speech = true), false)
         player.shuffleModeEnabled = false
