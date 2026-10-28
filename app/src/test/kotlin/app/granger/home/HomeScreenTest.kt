@@ -84,10 +84,10 @@ class HomeScreenTest {
 
     @Test fun theSetupStripShowsProgressAndOpensTheDownloads() {
         compose.setContent {
-            HomeContent(HomeUi(strip = report, setup = SetupProgress(2, 5, 1_000, 4_000, 0)), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenSetup = { calls += "setup" })
+            HomeContent(HomeUi(strip = report, setup = SetupProgress(2, 5, 1_000, 4_000, 0)), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenDownloads = { calls += "downloads" })
         }
         compose.onNodeWithText("Setting up · 2 of 5 · 1.0 KB of 4.0 KB").performClick()
-        assertThat(calls).containsExactly("setup")
+        assertThat(calls).containsExactly("downloads")
     }
 
     @Test fun theStatusLineCountsWhatThePhoneHoldsNotItsOwnMedia() {

@@ -172,22 +172,27 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 1: Downloads
 
-- [ ] Record the baseline: `./gradlew testDebugUnitTest :core:research:test`, with the count in the commit message.
-- [ ] `downloads/DownloadsViewModel` builds `DownloadsUi(now, stopped, doneToday)` from `downloads.records`, catalog titles and the library, as a pure `DownloadsModel.of(records, now, today)`:
+- [x] Record the baseline: `./gradlew testDebugUnitTest :core:research:test`, with the count in the commit message.
+- [x] `downloads/DownloadsViewModel` builds `DownloadsUi(now, stopped, doneToday)` from `downloads.records`, catalog titles and the library, as a pure `DownloadsModel.of(records, now, today)`:
   - groups fold into one row;
   - VECTORS fold into their parent;
   - queue order is by `createdAt`.
-- [ ] `DownloadsScreen`: the three sections, row actions (Cancel, Retry, Open), and the empty state with Get more.
-- [ ] `DownloadsRoute` in the NavHost (rail tool LIBRARY).
+  *(Built: `DownloadsModel.of(records, since, packs, books)`: `since` is midnight, and the library's packs and books give titles and what Open opens. A group with any failed file is under Stopped, even with files still queued. Open is offered for packs and books only; a finished album is a row to look at.)*
+- [x] `DownloadsScreen`: the three sections, row actions (Cancel, Retry, Open), and the empty state with Get more.
+  *(Built: until Task 2 adds `GetMoreRoute`, "Get more →" opens `SourceRoute(KIWIX)`.)*
+- [x] `DownloadsRoute` in the NavHost (rail tool LIBRARY).
   - The Library header icon with a badge.
   - Home's setup bar `onOpenSetup` → Downloads; `setupText` drops "tap to retry".
-- [ ] Notification deep link: `DownloadNotifications` gets the launch intent with `data = granger://downloads`; `MainActivity` / the NavHost's deep-link handling navigates there.
-- [ ] Tests:
+  *(Built: the parameter is now `onOpenDownloads`. The Downloads icon sits between History and Readiness until Task 3's header.)*
+- [x] Notification deep link: `DownloadNotifications` gets the launch intent with `data = granger://downloads`; `MainActivity` / the NavHost's deep-link handling navigates there.
+  *(Built: `downloadsIntent(launch)` in `DownloadWorker.kt` sets `DOWNLOADS_LINK` and SINGLE_TOP | CLEAR_TOP | NEW_TASK, so a running app gets it in `onNewIntent`. `MainActivity.opensDownloads` counts requests the way the Player widget's do. The intent is explicit, so there's no manifest change.)*
+- [x] Tests:
   - `DownloadsModelTest`: sections, group fold, vector fold, done-today cut-off.
   - `DownloadsScreenTest`: actions and empty state.
   - `HomeScreenTest`: the setup tap now goes to Downloads.
   - A notification intent test that the data URI is set.
-- [ ] **Commit.** `Downloads: one screen for what's coming, from Library, Home and the notification`
+  *(Built: `DownloadNotificationsTest` in `:core:downloads`; `DownloadsViewModelTest` too.)*
+- [x] **Commit.** `Downloads: one screen for what's coming, from Library, Home and the notification`
 
 ### Task 2: Get more, and Open on installed packs
 

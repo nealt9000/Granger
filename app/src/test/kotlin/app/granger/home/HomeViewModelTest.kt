@@ -207,7 +207,7 @@ class HomeViewModelTest {
         val vm = viewModel()
         val setup = vm.ui.value.setup!!
         assertThat(setup).isEqualTo(SetupProgress(done = 1, total = 3, bytesDone = 150, bytes = 500, failed = 1))
-        assertThat(setupText(setup)).isEqualTo("Setting up · 1 of 3 · 150 B of 500 B · 1 failed, tap to retry")
+        assertThat(setupText(setup)).isEqualTo("Setting up · 1 of 3 · 150 B of 500 B · 1 failed")
         downloads.list.value = listOf(a, b.copy(state = DownloadState.INSTALLED), c.copy(state = DownloadState.INSTALLED), old)
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.setup).isNull()

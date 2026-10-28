@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,6 +71,9 @@ fun LibraryScreen(
     onSearch: () -> Unit,
     onHistory: () -> Unit,
     onReadiness: () -> Unit,
+    /** What's coming or stopped in Downloads; the icon shows a badge while it isn't 0. */
+    downloadsBadge: Int = 0,
+    onDownloads: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -103,6 +108,11 @@ fun LibraryScreen(
                 actions = {
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
                     IconButton(onClick = onHistory) { Icon(painterResource(R.drawable.ic_history), contentDescription = "History") }
+                    IconButton(onClick = onDownloads) {
+                        BadgedBox(badge = { if (downloadsBadge > 0) Badge { Text("$downloadsBadge") } }) {
+                            Icon(painterResource(R.drawable.ic_download), contentDescription = "Downloads")
+                        }
+                    }
                     IconButton(onClick = onReadiness) { Icon(Icons.Filled.CheckCircle, contentDescription = "Readiness") }
                     if (Features.IMPORT) Box {
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }

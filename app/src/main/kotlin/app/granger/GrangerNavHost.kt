@@ -52,6 +52,9 @@ import app.granger.core.library.BookIds
 import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
+import app.granger.downloads.DownloadsModel
+import app.granger.downloads.DownloadsScreen
+import app.granger.downloads.DownloadsViewModel
 import app.granger.ebook.Dictionary
 import app.granger.ebook.DictionaryChoice
 import app.granger.ebook.EbookReaderScreen
@@ -261,6 +264,8 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 /** [media] opens it at the Music & audiobooks section. */
 @Serializable data class SettingsRoute(val media: Boolean = false)
 @Serializable object ReadinessRoute
+/** What's downloading, what stopped and what landed today (Plan U3b Decision 1). */
+@Serializable object DownloadsRoute
 /** Settings → Voice (Plan V1). */
 @Serializable object VoiceRoute
 
@@ -268,7 +273,8 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 internal fun railToolOf(destination: NavDestination): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
     destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
-        destination.hasRoute<LibriVoxRoute>() || destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
+        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.isMusic() ||
+        destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
     destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() ||
@@ -370,7 +376,7 @@ private class CurrentTab : ViewModel() {
 }
 
 @Composable
-fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0) {
+fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0, openDownloadsRequests: Int = 0) {
     val nav = rememberNavController()
     val shell = rememberShellState()
     // True only for the first resume navigation; read when that navigation's transitions are chosen.
@@ -442,6 +448,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     // The home-screen widget's body: each request (a new count) shows the Player, over whatever the launch opened.
     LaunchedEffect(openPlayerRequests) { if (openPlayerRequests > 0 && Features.PLAYER) nav.showPlayer() }
+    // A download notification's tap: Downloads, over whatever the launch opened.
+    LaunchedEffect(openDownloadsRequests) { if (openDownloadsRequests > 0) nav.navigate(DownloadsRoute) { launchSingleTop = true } }
+    // The Library header's badge: what's coming or stopped.
+    val downloadsBadge by remember { container.downloads.records.map { DownloadsModel.of(it, since = Long.MAX_VALUE).badge } }
+        .collectAsStateWithLifecycle(0)
 
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
     val scope = rememberCoroutineScope()
@@ -659,6 +670,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onSearch = { nav.navigate(SearchRoute()) },
                     onHistory = { nav.navigate(HistoryRoute) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
+                    downloadsBadge = downloadsBadge,
+                    onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -954,7 +967,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
-                    onOpenSetup = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
+                    onOpenDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
                     onOpenCard = { card ->
@@ -985,6 +998,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onDone = { nav.popBackStack() },
                     onSeeDomain = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
+                )
+            }
+            composable<DownloadsRoute> {
+                DownloadsScreen(
+                    viewModel = viewModel {
+                        DownloadsViewModel(container.downloads, container.library, container.bookshelf, container.sessions, container.appScope)
+                    },
+                    onBack = { nav.popBackStack() },
+                    onOpened = ::showTab,
+                    // Get more (Plan U3b Task 2) takes this over; Kiwix is where Readiness sends people today.
+                    onGetMore = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
                 )
             }
             composable<ReadinessRoute> {
