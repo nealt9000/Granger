@@ -102,7 +102,7 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
    The Granger source's search matches author too.
 4. **Listen is the tool: your player and your collection** (Neal, 2026-10-28).
-   - `RailTool.PLAYER` becomes **Listen**. Its icon says "player and collection": Material **library_music** (a stack of records with a note), as a vector `ic_listen.xml`. If it doesn't read well at rail size, a headphones-over-a-device glyph traced from Material parts is the fallback; check it in `ThemeShots`.
+   - `RailTool.PLAYER` becomes **Listen**. Its icon says "player and collection": Material **library_music** (a stack of records with a note), as a vector `ic_listen.xml`. If it doesn't read well at rail size, a headphones-over-a-device glyph traced from Material parts is the fallback; check it in `ThemeShots`. **Picked (Neal, after the render): plain headphones (`ic_headphones`), for now.**
    - **Listen's home** (`ListenRoute`, the tool's landing) has:
      - a **Now playing** card at the top, for the live or last item: voice, music or audiobook, opening the player;
      - the **shelves**: Music and Audiobooks, plus Podcasts once it exists (roadmap). Each appears only when it holds something, with the same rows the Library has today ("All music", collections, folders, playlists; "All audiobooks", collections), the same screens and the same collection features.

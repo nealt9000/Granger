@@ -121,7 +121,7 @@ class RailTest {
     @Test fun listenIsTheToolForThePlayerAndTheCollection() {
         assertThat(RailTool.LISTEN.label).isEqualTo("Listen")
         assertThat(RailTool.entries.map { it.label }).doesNotContain("Player")
-        assertThat(RailTool.LISTEN.drawable()).isEqualTo(app.granger.R.drawable.ic_listen)
+        assertThat(RailTool.LISTEN.drawable()).isEqualTo(app.granger.R.drawable.ic_headphones)
         // Home, Library and Listen each have their own mark.
         assertThat(listOf(RailTool.HOME, RailTool.LIBRARY, RailTool.LISTEN).map { it.drawable() }.toSet()).hasSize(3)
         shell()

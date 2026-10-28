@@ -215,16 +215,14 @@ class ThemeShots {
     }
 
     /**
-     * Listen's icon beside the other rail tools (Plan U2 Task 3), one PNG: Field on the left, Night on the right, and in
-     * each the wired library_music, then the two candidates (headphones over a phone, headphones). Each column is the
-     * narrow rail's tools with Listen selected at the foot, and the full rail's Listen row at 20 dp.
+     * Listen's icon (headphones, picked over library_music and headphones over a phone) beside the other rail tools, one
+     * PNG: Field on the left, Night on the right. Each column is the narrow rail's tools with Listen selected at the
+     * foot, and the full rail's Listen row at 20 dp.
      */
     @Config(qualifiers = "w720dp-h520dp-xxhdpi")
     @Test fun listenIcons() {
         val candidates = listOf(
-            "library_music" to R.drawable.ic_listen,
-            "device" to R.drawable.ic_listen_alt_device,
-            "headphones" to R.drawable.ic_listen_alt_headphones,
+            "headphones" to R.drawable.ic_headphones,
         )
         compose.setContent {
             Row(Modifier.fillMaxSize()) {

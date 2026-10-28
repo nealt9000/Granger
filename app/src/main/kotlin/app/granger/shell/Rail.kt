@@ -102,7 +102,7 @@ internal fun RailTool.drawable(): Int? = when (this) {
     RailTool.HOME -> R.drawable.ic_owl
     RailTool.RESEARCH -> R.drawable.ic_research
     RailTool.LIBRARY -> R.drawable.ic_library_books_open
-    RailTool.LISTEN -> R.drawable.ic_listen
+    RailTool.LISTEN -> R.drawable.ic_headphones
     RailTool.SEARCH, RailTool.SETTINGS -> null
 }
 
