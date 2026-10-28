@@ -151,3 +151,22 @@ From the roadmap row (Neal, 2026-10-27), shaped by what the walk showed:
 | D4 | The model in onboarding | Ticked by default on ASK-tier phones as Ask (Preview). F1's release flag still decides whether friends see it. **Decided (Neal, 2026-10-28).** |
 | D5 | The tool's name | "Ask" in the rail and on its screen. "Research" stays in code. **Decided (Neal, 2026-10-28).** |
 | D6 | Search grouping (carried forward since Plan 5) | By kind (Titles, Articles, Books, Music), not by collection, with the source on each row. **Decided (Neal, 2026-10-28).** |
+
+## 8. Neal's notes from the U3a walkthrough (2026-10-28), triaged
+
+| # | Note | Where it goes |
+|---|---|---|
+| W1 | What's downloading or queued isn't visible once you leave onboarding; the notification shows only the current file. Tapping Home's "Setting up" bar opens Kiwix Browse. | U3b Downloads (D2). The setup bar and the notification open it. |
+| W2 | Offline wikis without pictures are a much poorer read. Ask gains nothing from pictures, but readers do. No-pictures packs should be the space-saving fallback, not the default. | **Decision** on preset sizes (catalog-gen presets, then re-sign the catalog). |
+| W3 | Two Home buttons in the pack reader (the pack's and the app's). Make the app's Home the owl. | U3b, with B8. |
+| W4 | The Library icon reads as messages. | U3b nav map. |
+| W5 | Archive sources still sit below the Library's contents. | U3b Get more (D2), as planned. |
+| W6 | **Bug:** an archive.org graphic novel (V for Vendetta) downloaded as an EPUB with no comic images, not the scans the listing shows. | Investigate: format choice for comics (CBZ/CBR or the scan PDF over the derived EPUB). |
+| W7 | Nothing says whether a pack will be searched by meaning. Checked: 33 of 926 catalog packs have vectors; Efficient leaves out 3 of its 12 (Water Treatment Library, Food for Preppers, Computer by Wikipedia), and Comprehensive 63 of 77. Packs without vectors are still keyword-searched, unless they have no full-text index. | U3b: an Ask line per pack row (meaning + keywords / keywords / not searchable). A vectors build for the Comprehensive packs is its own job (R-track). |
+| W8 | Media with no artwork breaks the theme. | U3c: themed cover tiles for media (`GrangerExtras.coverTile`). |
+| W9 | Granger Classics scrolls slowly; categories load too many books. The preset counts confuse: all 347, starter 351, efficient 359, comprehensive 424, because each counts every Classics book plus the packs and models. "Items are here or on their way" during setup. | U3b (paging, from H4 carried forward); presets counted in packs + "347 books". |
+| W10 | No playing indicator on the album's track list or in the queue. Play on an album should start it and turn into Stop. | U2 (Listen rebuilds the player). |
+| W11 | Granger Classics covers still carry the old brand: `tools/pack-builder/covers.py` bakes `#0E0E0E` / `#E8601C` into each EPUB. | Catalog job: re-render the covers in the field kit and re-release the 347 books (new hashes; installed copies re-download ~95 MB). |
+| W12 | On a fresh install every system voice is listed (long), and no Granger voice was offered or made the default. | U3a addition (proposed): a voice line in Pick a start, default to the Granger voice once installed. System voices fold away in U2. |
+| W13 | Several voice entries in the rail while reading an e-book. | U2 (Reading moves into Listen) and D1. |
+| W14 | No way to clear all recents or chats. | U3b with D1 (History screen: Clear all; Ask landing: Clear chats). |
