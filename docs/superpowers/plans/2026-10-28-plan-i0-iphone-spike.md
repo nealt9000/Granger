@@ -86,11 +86,12 @@
 
 **Files:** `spikes/i0/kmp-core/` (a standalone Gradle build that includes copies of the three cores' sources; the real modules stay untouched). Results §4.
 
-- [ ] Make a standalone KMP build with `jvm()`, `iosArm64()` and `iosSimulatorArm64()` targets over copies of `core/text`, `core/research` and `core/vectors` `src/main` in `commonMain`.
-- [ ] Compile for iOS and record every error, grouped by cause: the Task 1 imports, plus anything else (`String.format`, `synchronized`, reflection, `java.util.regex` differences).
-- [ ] For each cause, write down the replacement and its size, for example `expect`/`actual` `Normalizer` and `BreakIterator` (ICU on iOS through `NSString`), Ksoup for jsoup, and okio or kotlinx-io for `VectorFile`'s memory-mapped reads. Fix enough to get `:core:vectors` compiling for iOS, as a sample of the real work.
-- [ ] Run the existing JVM tests of the converted module under the KMP build's `jvmTest`, and the same tests under `iosSimulatorArm64Test` if they compile. Record pass counts. That shows whether "shared" holds on both sides.
-- [ ] Estimate the work for the rest of the logic that could be shared (Task 1's last step): catalog parsing and the signature check, the library DAOs if Room KMP fits, filing, readiness, the Home feed engine.
+- [x] Make a standalone KMP build with `jvm()`, `iosArm64()` and `iosSimulatorArm64()` targets over copies of `core/text`, `core/research` and `core/vectors` `src/main` in `commonMain`.
+- [x] Compile for iOS and record every error, grouped by cause: the Task 1 imports, plus anything else (`String.format`, `synchronized`, reflection, `java.util.regex` differences).
+- [x] For each cause, write down the replacement and its size, for example `expect`/`actual` `Normalizer` and `BreakIterator` (ICU on iOS through `NSString`), Ksoup for jsoup, and okio or kotlinx-io for `VectorFile`'s memory-mapped reads. Fix enough to get `:core:vectors` compiling for iOS, as a sample of the real work.
+- [x] Run the existing JVM tests of the converted module under the KMP build's `jvmTest`, and the same tests under `iosSimulatorArm64Test` if they compile. Record pass counts. That shows whether "shared" holds on both sides.
+- [x] Estimate the work for the rest of the logic that could be shared (Task 1's last step): catalog parsing and the signature check, the library DAOs if Room KMP fits, filing, readiness, the Home feed engine.
+- *Done 2026-10-28: all three cores compile for iOS; 225 + 7 JVM tests and 2 + 5 Simulator tests pass; one parity difference (sentence breaks at abbreviations). Results §4.*
 
 ### Task 5: The UI route trial (Mac, needs Xcode)
 

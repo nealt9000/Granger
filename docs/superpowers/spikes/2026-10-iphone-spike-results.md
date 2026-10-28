@@ -1076,9 +1076,38 @@ Kotlin's own guide says Compose Multiplatform pulls in `stat`/`fstat` (reason `0
   Neal decides.
 
 
-## 4. The shared core trial
+## 4. The shared core trial (2026-10-28, Xcode 27.1, Kotlin 2.4.21)
 
-*Pending Xcode.*
+**Verdict: the three pure-Kotlin cores share cleanly. All of `:core:text`, `:core:research` and `:core:vectors` compile for `iosArm64` and `iosSimulatorArm64` after about 160 lines of platform code and small edits, every original JVM test still passes, and the iOS Simulator gives the same chunk hashes, parses and folds as the JVM.** Trial code: `spikes/i0/kmp-core/` (a standalone Gradle build over copies of the sources; the real modules are untouched). Run with `./gradlew -p spikes/i0/kmp-core :vectors:iosSimulatorArm64Test :text-research:iosSimulatorArm64Test :vectors:jvmTest :text-research:jvmTest`.
+
+**As copied, before any change:** 210 errors in 13 of 43 files; 30 files compiled for iOS untouched. By cause: `java.nio` / `RandomAccessFile` in `VectorFile` (76), jsoup in `ArticleText`, `HtmlPassages`, `XhtmlChunks` (66), `ExecutorService` / `PriorityQueue` in `VectorSearch` (24), `Normalizer` + `Locale` in five research files (about 30), `BreakIterator` in `CitedQuote`, `MessageDigest` + `String.format` in `Chunkers`, `Map.merge` in `Ranking`, `Character.isHighSurrogate` in `TextCuts`.
+
+**The fixes:**
+
+| Cause | Replacement | Size |
+| --- | --- | --- |
+| `java.nio` mapped reads, `RandomAccessFile`, `File` | `expect class MappedFile` (JVM: `FileChannel.map`; iOS: POSIX `mmap`) with little-endian reads in common code; `writeFileAtomically` (JVM `File`; iOS `fopen` + `rename`); a `LeBytes` builder for the writer; `File` overloads kept in `jvmMain` | `VectorFile` rewritten in place (same layout, same checks); 34 common + 51 JVM + 40 iOS lines |
+| `ExecutorService` + `Callable` | `suspend fun top(..., dispatcher)` with `async`; the blocking `ExecutorService` form kept in `jvmMain` for Android callers | ~20 lines |
+| `PriorityQueue` | a 50-line `TopK` min-heap in common code | 50 lines |
+| jsoup | **Ksoup 0.2.6** (`com.fleeksoft.ksoup`): same API, import swap, `Jsoup.parse(stream, …, xmlParser())` → `Ksoup.parse(html = …, parser = Parser.xmlParser())` | ~12 lines over 3 files |
+| `Normalizer` (NFD / NFKD) | `expect fun decompose(s, compat)` (iOS: `decomposedStringWith{Canonical,Compatibility}Mapping`) | 1 + 1 + 2 lines |
+| `lowercase(Locale.ROOT)` | `lowercase()`: Kotlin's is already locale-invariant | deletions |
+| `BreakIterator` | `expect fun sentenceBreaks` (iOS: `enumerateSubstringsInRange` by sentences, enclosing ranges) | 8 + 10 lines |
+| `MessageDigest` SHA-1, `"%02x".format` | `expect fun sha1` (iOS: CommonCrypto `CC_SHA1`) and a common `hex()` | 3 + 8 lines |
+| `Map.merge`, `Character.isHighSurrogate` | a `bump()` helper; `Char.isHighSurrogate()` | 4 lines |
+
+**Tests:**
+
+| Module | JVM (original tests, now over the common code) | iOS Simulator |
+| --- | --- | --- |
+| text + research | 223 original + 2 parity, all pass (on Ksoup, not jsoup) | 2 parity tests pass |
+| vectors | 7 pass, bench skipped as on main; includes the byte-for-byte match of the writer with `tools/vectors`' Python `tiny.gvec` | 5 pass: the four `VectorFile` tests ported to `kotlin.test` (mmap reads, Python fixture, truncation, byte-identical writer) and a 70,000-row search across two ranges |
+
+**Parity (JVM vs iOS):** `ParityTest` runs one fingerprint through both platforms: chunk hashes of seven tricky strings (empty, accents, the `ﬁ` ligature, mathematical letters, NBSP, CJK), `ArticleText.blocks`, `HtmlPassages.split`, `XhtmlChunks.of`, `cutAtSpaces` with an emoji, accent folding (Greek, `Å`, full-width), `MediaCues`/`Entities` cues, `Entities.runs`, `YearFacts.lifespan`. **Identical on both**, so `.gvec` files built on the Mac match iOS's chunk hashes. **One difference:** sentence breaks. The JVM's `BreakIterator` ends a sentence at "Dr."; iOS doesn't. Only `CitedQuote` (the quote shown under an answer) uses them, and nothing is stored from it. A port can keep the platform splitters or write one in common Kotlin so both phones quote the same sentence (preferred: the Mac's `tools/chunker` runs on the JVM and needs nothing from it).
+
+**Caveats:** the JVM golden comes from the common code on Ksoup. The 223 original jsoup-era tests passing is the evidence that Ksoup parses as jsoup did; a check of the real `.gvec` builds against Ksoup chunks belongs in I1. `Regex` on Kotlin/Native is its own engine; the fingerprint's chunking matched, but `Chunkers.SPACE`-style Unicode classes need a dedicated test in I1. Nothing was timed: the Simulator runs on the M2 Max, not an iPhone.
+
+**The rest of the shared logic (estimate, from §1):** `:core:catalog`'s parser and model (plain kotlinx) plus the signature check through a CryptoKit `@objc` shim, about a day. `:core:library`'s ~1,060 pure lines (filing, passage finders, ranking, `DirectoryVectorSources`) the same way as here, a day or two; its ~2,100 Room-tangled lines and ~1,020 DAO/entity lines move only with Room KMP (§2b), several days including the 11 migrations and `BookIndex`'s raw FTS4 queries. The ~620 lines of download rules and `ReadinessModel` (279), about a day. So a shared core of roughly 6–8k lines is a one-to-two-week plan, not a rewrite.
 
 ## 5. The UI route trial
 

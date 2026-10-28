@@ -1,0 +1,23 @@
+package app.granger.core.text
+
+
+/** What pack-time vectors are tied to: the chunkers' output version and each chunk's text hash. */
+object Chunkers {
+    /**
+     * Bump on any change to the output of [app.granger.core.books.XhtmlChunks] or [app.granger.core.research.HtmlPassages].
+     * PDF page chunks (`PdfText` in `:core:books`, Plan P2) have no pack-time vectors and aren't covered; R2 versions
+     * them when books get vectors on the phone.
+     */
+    const val VERSION = 1
+
+    /**
+     * Android's (ICU's) `\s`, spelled out: `[\t\n\f\r\p{Z}]`. The desktop JVM's `\s` is ASCII-only, so the chunkers use
+     * this class instead, and the Mac's chunks (`tools/chunker`) match the phone's on thin and other Unicode spaces.
+     */
+    const val SPACE = "\\t\\n\\f\\r \\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000"
+
+    /** The first 8 bytes of the SHA-1 of [text]'s UTF-8, big-endian, as 16 lowercase hex digits. */
+    fun hash(text: String): String {
+        return sha1(text.encodeToByteArray()).copyOf(8).hex()
+    }
+}
