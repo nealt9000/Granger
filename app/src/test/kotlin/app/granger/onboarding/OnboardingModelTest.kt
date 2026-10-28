@@ -174,6 +174,7 @@ class OnboardingModelTest {
         val ask = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())
         val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 10_000, ask)
         assertThat(review.groups.map { it.title }).containsExactly("Ask (Preview)")
+        assertThat(review.groups.single().lines.single().title).isEqualTo("The librarian")
         assertThat(review.bytes).isEqualTo(2_160)
     }
 }

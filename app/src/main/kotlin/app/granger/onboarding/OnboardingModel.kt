@@ -132,6 +132,9 @@ object OnboardingModel {
      * Country codes whose map pack the catalog titles differently from the phone's English name for the country (checked
      * against the catalog's 193 maps titles, 2026-10-28), or that share a pack with a neighbour.
      */
+    /** A suggested map larger than this is offered, not preselected: the US map alone is 17 GB. */
+    const val PRESELECT_MAX_BYTES = 2_000_000_000L
+
     val REGION_ALIASES = mapOf(
         "US" to "United States of America", "RU" to "Russian Federation", "CZ" to "Czech Republic", "TR" to "Turkey",
         "CD" to "Dem. Rep. of Congo (Kinshasa)", "CG" to "Rep. of Congo (Brazzaville)", "CI" to "Ivory Coast",
@@ -171,7 +174,8 @@ object OnboardingModel {
                 val whole = s.lines.none { !it.installed && it.id in unticked }
                 s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) s.title else "Your picks", it)) }
             }
-            ask?.let { listOf(it).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
+            // Under its own heading the line is "The librarian", not "Ask (Preview)" twice.
+            ask?.let { listOf(it.copy(title = "The librarian")).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             region?.takeUnless { it.installed }?.let { r ->
                 listOf(Line(r.pack.id, r.title, listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }
                     ?.let { add(ReviewGroup("Your region", it)) }

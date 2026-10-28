@@ -166,6 +166,17 @@ class OnboardingViewModelTest {
         assertThat(vm.finished.value).isTrue()
     }
 
+    @Test fun aBigSuggestedMapIsOfferedNotPreselected() = runTest(main.dispatcher) {
+        val usa = packEntry("maps_en_usa", size = 17_000_000_000).copy(family = "maps", title = "United States of America")
+        catalog.mutable.value = CatalogState(catalog = full.copy(packs = full.packs + usa))
+        val vm = viewModel(country = "US")
+        assertThat(vm.ui.value.region).isNull()
+        assertThat(vm.ui.value.suggestion!!.title).isEqualTo("United States of America")
+        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Your region")
+        vm.chooseRegion("maps_en_usa"); settle()
+        assertThat(vm.ui.value.region!!.title).isEqualTo("United States of America")
+    }
+
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {
         val vm = viewModel()
         vm.next(); settle()

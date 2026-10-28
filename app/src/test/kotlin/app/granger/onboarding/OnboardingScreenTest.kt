@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -110,6 +111,15 @@ class OnboardingScreenTest {
         compose.onNodeWithText("Peru · 500 B").assertIsDisplayed()
         compose.onNodeWithText("No region").performClick()
         assertThat(calls).containsExactly("region:null")
+    }
+
+    @Test fun yourRegionOffersABigSuggestionFirstUnpicked() {
+        val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
+        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions, suggestion = Region(peru, installed = false)))
+        compose.onNodeWithText("Suggested from this phone").assertIsDisplayed()
+        compose.onNodeWithText("Other countries").assertIsDisplayed()
+        compose.onAllNodesWithText("Peru · 500 B")[0].performClick()
+        assertThat(calls).containsExactly("region:maps_en_peru")
     }
 
     @Test fun usesTogglesChipsOnItsOwnScreen() {

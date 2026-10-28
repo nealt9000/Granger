@@ -291,6 +291,12 @@ private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: Onboarding
         }
         item { TextButton(onClick = { actions.onChooseRegion(null) }) { Text("No region") } }
     }
+    val offered = ui.suggestion?.takeIf { ui.region == null && ui.regionQuery.isBlank() }
+    offered?.let { suggestion ->
+        item { Text("Suggested from this phone", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+        item(key = "suggested") { RegionRow(suggestion, ui, actions) }
+        item { Text("Other countries", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+    }
     val shown = if (ui.regionQuery.isBlank() && ui.region != null) Regions(emptyList(), emptyList()) else ui.regions
     items(shown.countries.take(if (ui.regionQuery.isBlank()) 12 else 40), key = { "c-${it.pack.id}" }) { RegionRow(it, ui, actions) }
     if (shown.larger.isNotEmpty()) item { Text("Larger areas", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }

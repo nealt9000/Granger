@@ -58,6 +58,8 @@ data class OnboardingUi(
     val region: Region? = null,
     /** [region] is the one suggested from the phone's country, not one the user picked. */
     val regionSuggested: Boolean = false,
+    /** The phone's country's map, offered first in the list when it was too big to preselect (or was cleared). */
+    val suggestion: Region? = null,
     val additions: List<Addition> = emptyList(),
     val useCaseIds: Set<String> = emptySet(),
     /** Ask's models, offered under the start choices; null where Ask can't run or the catalog has none. */
@@ -158,8 +160,9 @@ class OnboardingViewModel(
         val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed) }.orEmpty()
         val start = starts.firstOrNull { it.id == c.startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
+        val suggestion = OnboardingModel.suggestedRegion(regions, countryCode)
         val suggested = c.regionId == UNCHOSEN
-        val region = if (suggested) OnboardingModel.suggestedRegion(regions, countryCode)
+        val region = if (suggested) suggestion?.takeIf { it.bytes <= OnboardingModel.PRESELECT_MAX_BYTES }
             else (regions.countries + regions.larger).firstOrNull { it.pack.id == c.regionId }
         val chosen = start?.chosen(c.unticked).orEmpty().flatMap { it.items }.mapTo(HashSet()) { it.id }
         region?.let { chosen += it.pack.id }
@@ -187,6 +190,7 @@ class OnboardingViewModel(
             regionQuery = c.regionQuery,
             region = region,
             regionSuggested = suggested && region != null,
+            suggestion = suggestion,
             additions = additions,
             useCaseIds = c.useCaseIds,
             askLine = askLine,
