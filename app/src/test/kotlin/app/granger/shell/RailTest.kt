@@ -129,6 +129,18 @@ class RailTest {
         assertThat(pinned.config.getOrNull(SemanticsProperties.StateDescription)).isEqualTo("Pinned")
     }
 
+    /** Plan U3b, Neal's walkthrough: the tab being read aloud wears a speaker badge and says so, in both rails. */
+    @Test fun aTabReadAloudWearsTheBadgeAndSaysSo() {
+        rail = RailUi(listOf(owls.copy(tab = owls.tab.copy(readingAloud = true)), cats))
+        shell()
+        compose.onAllNodesWithTag(READING_BADGE_TAG, useUnmergedTree = true).assertCountEquals(1)
+        compose.onNodeWithContentDescription("Owls, reading aloud").performClick()
+        assertThat(calls).containsExactly("tab:1")
+        expanded = true
+        compose.waitForIdle()
+        compose.onNodeWithText("Birds of the world · reading aloud").assertExists()
+    }
+
     @Test fun everyTileAndRowHasTalkBackLabels() {
         shell()
         val labelled = SemanticsMatcher("has click and long-click labels") { node ->

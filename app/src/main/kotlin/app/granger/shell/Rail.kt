@@ -125,7 +125,7 @@ private fun RailEntry.painter(): Painter = when (this) {
 /** What TalkBack reads for an item's tile in the narrow rail. */
 private val RailEntry.description: String
     get() = when (this) {
-        is RailEntry.Tab -> if (tab.available) tab.title else "${tab.title}, not available"
+        is RailEntry.Tab -> (if (tab.available) tab.title else "${tab.title}, not available") + if (tab.readingAloud) ", reading aloud" else ""
         is RailEntry.Search -> "Recent search: $query"
         is RailEntry.Chat -> "Ask chat: $title"
         is RailEntry.Play -> "Play again: $title"
@@ -324,25 +324,47 @@ private fun WithPinDot(pinned: Boolean, content: @Composable () -> Unit) {
     }
 }
 
-/** A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out. */
+/**
+ * A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out, and one the voice is
+ * reading wears a speaker badge at its bottom corner (Plan U3b, Neal's walkthrough: one entry per book).
+ */
 @Composable
 private fun LetterTile(tab: RailTabUi, size: Int = 36) {
     val shape = RoundedCornerShape(8.dp)
+    Box {
+        Box(
+            Modifier
+                .size(size.dp)
+                .alpha(if (tab.available) 1f else 0.4f)
+                .clip(shape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
+            contentAlignment = Alignment.Center,
+        ) {
+            val cover = if (tab.coverPath != null) rememberRailCover(tab.coverPath, size.dp) else null
+            if (cover != null) {
+                Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            } else {
+                Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        if (tab.readingAloud) ReadingBadge(Modifier.align(Alignment.BottomEnd))
+    }
+}
+
+/** The small speaker on a tab the voice is reading. */
+@Composable
+private fun ReadingBadge(modifier: Modifier) {
     Box(
-        Modifier
-            .size(size.dp)
-            .alpha(if (tab.available) 1f else 0.4f)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
+        modifier
+            .offset(x = 3.dp, y = 3.dp)
+            .size(16.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .testTag(READING_BADGE_TAG),
         contentAlignment = Alignment.Center,
     ) {
-        val cover = if (tab.coverPath != null) rememberRailCover(tab.coverPath, size.dp) else null
-        if (cover != null) {
-            Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        } else {
-            Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
-        }
+        Icon(painterResource(R.drawable.ic_voice), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(10.dp))
     }
 }
 
@@ -360,6 +382,8 @@ private fun IconTile(entry: RailEntry) {
 private const val UNAVAILABLE_MESSAGE = "This pack or book isn't available. Check that it's still on the phone or SD card."
 
 internal const val PIN_DOT_TAG = "railPinDot"
+
+internal const val READING_BADGE_TAG = "railReadingBadge"
 
 /** Tap calls [onClick]; a long press offers Pin to top (or Unpin), then Remove from rail. Both are labelled for TalkBack. */
 @OptIn(ExperimentalFoundationApi::class)
@@ -441,7 +465,7 @@ private fun TabRowContent(entry: RailEntry.Tab) {
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                if (tab.available) tab.subtitle else "${tab.subtitle} · not available",
+                (if (tab.available) tab.subtitle else "${tab.subtitle} · not available") + if (tab.readingAloud) " · reading aloud" else "",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

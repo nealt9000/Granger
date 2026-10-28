@@ -154,4 +154,12 @@ class DaosTest {
         dao.deleteMark(m)
         assertThat(dao.observeMarks("b").first()).isEmpty()
     }
+
+    @Test fun deleteRecentPlaysForgetsEveryPlay() = runTest {
+        val dao = db.playbackDao()
+        dao.upsertRecentPlay(RecentPlay("album:x", "X", 1L))
+        dao.upsertRecentPlay(RecentPlay("voice:book:b", "B", 2L))
+        dao.deleteRecentPlays()
+        assertThat(dao.observeRecentPlays(10).first()).isEmpty()
+    }
 }

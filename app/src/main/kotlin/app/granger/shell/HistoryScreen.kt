@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Everything opened (History) and the starred articles (Saved). Tapping a row opens it in a rail tab. The overflow's
- * Clear history asks first, then keeps the pinned tabs and [keepTabIds] (the tabs open under this screen).
+ * Clear history asks first, then keeps the pinned tabs and [keepTabIds] (the page you came from).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +60,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onOpenTab: (Long) -> Unit, onBack
         AlertDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text("Clear history?") },
-            text = { Text("This forgets everything you've opened and searched, and closes the tabs on the rail. Pinned items and what's open now stay.") },
+            text = { Text("This forgets what you've opened, searched and played, and empties the rail. Pinned items and the page you came from stay. Ask's chats stay in Ask.") },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clear(keepTabIds())

@@ -18,6 +18,7 @@ import app.granger.core.library.RecentPlay
 import app.granger.core.library.RecentSearch
 import app.granger.core.library.ResearchChats
 import app.granger.core.library.ChatSummary
+import app.granger.core.speech.ReadSourceKey
 import app.granger.media.PlayResumer
 import app.granger.music.MusicSources
 import kotlinx.coroutines.CancellationException
@@ -47,6 +48,8 @@ data class RailTabUi(
     /** An article tab's pack and page, for Home's Continue to leave out main and index pages; empty for a book. */
     val packId: String = "",
     val path: String = "",
+    /** The voice is reading this tab's article or book: the tile wears a speaker badge instead of a Reading row. */
+    val readingAloud: Boolean = false,
 )
 
 /**
@@ -105,7 +108,8 @@ sealed interface RailEntry {
 
 /**
  * [entries]: the pins (newest pin first), then the four recent others in the order they arrived (Plan U3b Decision 6).
- * [recent] is what Home's Continue draws on: the pins, then every unpinned item newest first, not cut to four.
+ * [recent] is what Home's Continue draws on: the pins, then every unpinned item newest first, not cut to four. Neither
+ * holds an unpinned item from before the last Clear history but the tab it kept.
  */
 data class RailUi(val entries: List<RailEntry>, val recent: List<RailEntry> = entries)
 
@@ -132,6 +136,9 @@ class RailViewModel(
     voice: Flow<NowPlaying.Voice?> = flowOf(null),
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
+
+    /** The list, and each tab's read-aloud source key (`pack:<id>/<path>`, `book:<id>`) by tab id. */
+    private class Listed(val ui: RailUi, val tabSources: Map<Long, String>)
 
     private class Opened(
         val tabs: List<ReadingTab>,
@@ -164,8 +171,11 @@ class RailViewModel(
         Opened(tabs, searches, chats, plays)
     }
 
-    private val list: Flow<RailUi> = combine(opened, shelf, currentTabId, pins.pins, combine(hidden.hidden, order.four, ::Pair)) {
-            opened, shelf, current, pinList, (hiddenKeys, saved) ->
+    private val list: Flow<Listed> = combine(opened, shelf, currentTabId, pins.pins, combine(hidden.hidden, hidden.clearedAt, order.four, ::Triple)) {
+            opened, shelf, current, pinList, (hiddenKeys, clearedAt, saved) ->
+        val tabSources = opened.tabs.associate { it.id to sourceKey(it) }
+        // A book read aloud shows once, as its tab, not again as "Play again" (Plan U3b, Neal's walkthrough).
+        val voiceOfTabs = tabSources.values.mapTo(HashSet()) { "$VOICE_PLAY$it" }
         val all = (
             opened.tabs.map { tabEntry(it, shelf, current) } +
                 opened.searches.map { RailEntry.Search(it.query, it.searchedAt) } +
@@ -182,19 +192,44 @@ class RailViewModel(
         }
         if (gone.isNotEmpty()) viewModelScope.launch { pins.dropMissing(gone) }
         val pinnedKeys = pinList.mapTo(HashSet()) { it.key }
+        // Clear history's cut-off (Plan U3b, Neal's walkthrough): nothing from before it backfills a free slot. Tabs
+        // need none, since Clear closed every tab but the one it kept.
         val others = all.values
-            .filter { it.key !in pinnedKeys && !hiddenKeys.hides(it) }
+            .filter { it.key !in pinnedKeys && !hiddenKeys.hides(it) && (it is RailEntry.Tab || it.at > clearedAt) }
+            .filterNot { it is RailEntry.Play && it.playKey in voiceOfTabs }
             .sortedByDescending { it.at }
         // Opening one of the four doesn't move it; a new item enters at the top (Plan U3b Decision 6).
         val four = saved?.next(others) ?: RailFour.seed(others)
         if (four != saved) order.save(four)
         val byKey = others.associateBy { it.key }
-        RailUi(pinned + four.keys.take(UNPINNED).mapNotNull(byKey::get), recent = pinned + others)
+        Listed(RailUi(pinned + four.keys.take(UNPINNED).mapNotNull(byKey::get), recent = pinned + others), tabSources)
     }
 
-    val ui: StateFlow<RailUi> = combine(list, voice) { list, v ->
-        if (v == null) list else list.copy(entries = listOf(RailEntry.Reading(v.sourceKey, v.title)) + list.entries)
+    /**
+     * The live voice: a tab on the list showing what it reads is marked, otherwise a Reading row heads the list (Plan
+     * U3b, Neal's walkthrough: one entry per book). Either way its "Play again" row is left out while it reads.
+     */
+    val ui: StateFlow<RailUi> = combine(list, voice) { listed, v ->
+        val list = listed.ui
+        if (v == null) return@combine list
+        val played = "$VOICE_PLAY${v.sourceKey}"
+        var marked = false
+        val entries = list.entries.mapNotNull { entry ->
+            when {
+                entry is RailEntry.Tab && listed.tabSources[entry.tab.tabId] == v.sourceKey -> {
+                    marked = true
+                    entry.copy(tab = entry.tab.copy(readingAloud = true))
+                }
+                entry is RailEntry.Play && entry.playKey == played -> null
+                else -> entry
+            }
+        }
+        list.copy(entries = if (marked) entries else listOf(RailEntry.Reading(v.sourceKey, v.title)) + entries)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailUi(emptyList()))
+
+    /** What the voice calls [tab]'s page, as the readers key it. */
+    private fun sourceKey(tab: ReadingTab): String =
+        if (BookIds.isBook(tab.packId)) ReadSourceKey.book(tab.packId) else ReadSourceKey.article(tab.packId, tab.path)
 
     private sealed interface Found {
         data class Entry(val entry: RailEntry) : Found
@@ -299,5 +334,8 @@ class RailViewModel(
         const val SCAN = 50
 
         const val PINS_FULL = "$MAX_RAIL_PINS items are pinned already. Unpin one first."
+
+        /** A read-aloud play's key prefix: "voice:" and the source key. */
+        private const val VOICE_PLAY = "voice:"
     }
 }

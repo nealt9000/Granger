@@ -35,4 +35,15 @@ class RailHiddenTest {
         assertThat(kept.keys).doesNotContain("chat:5")
         assertThat(kept.keys).contains("chat:6")
     }
+
+    @Test fun theClearCutOffIsKeptAcrossLaunchesAndForgetsWhatWasHidden() {
+        val store = SharedRailHidden(shared)
+        assertThat(store.clearedAt.value).isEqualTo(0L)
+        store.hide("chat:3", 40L)
+        store.clear(at = 60L)
+        SharedRailHidden(shared).hide("play:songs", 70L)
+        val again = SharedRailHidden(shared)
+        assertThat(again.clearedAt.value).isEqualTo(60L)
+        assertThat(again.hidden.value).containsExactly("play:songs", 70L)
+    }
 }

@@ -450,7 +450,12 @@ class FakeRailPins : RailPins {
 /** [RailHidden] in memory. */
 class FakeRailHidden : RailHidden {
     override val hidden = MutableStateFlow<Map<String, Long>>(emptyMap())
+    override val clearedAt = MutableStateFlow(0L)
     override fun hide(key: String, at: Long) = hidden.update { it + (key to at) }
+    override fun clear(at: Long) {
+        hidden.value = emptyMap()
+        clearedAt.value = at
+    }
 }
 
 /** [RailOrder] in memory; null until the rail seeds it. */

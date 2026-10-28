@@ -178,19 +178,75 @@ class RailViewModelTest {
         assertThat(vm.ui.first { "chat:1" in it.keys }.keys).containsExactly("chat:1", "d", "c", "b").inOrder()
     }
 
-    @Test fun clearingHistoryEmptiesTheFourButWhatsKept() = runTest(main.dispatcher) {
+    /**
+     * Plan U3b, Neal's walkthrough: after Clear history nothing from before it shows, not even to fill a slot a remove
+     * left; chats stay in Ask but leave the rail. Something opened after it does show.
+     */
+    @Test fun afterClearingNothingOlderShowsOrBackfills() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("a"))
         val current = sessions.openTab("a", "Owls", "Owls")
         sessions.openTab("a", "Bats", "Bats")
         searches("a" to 1)
-        chats.chats.value = listOf(ChatSummary(1, "Tides", 1))
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 1), ChatSummary(2, "Rivers", 2))
+        plays.value = listOf(RecentPlay("songs", "", 3))       // as if its delete hadn't landed yet
         val vm = vm()
         vm.ui.first { it.entries.size == 4 }
+        hidden.clear(at = 2_000)
         sessions.clearHistory(keepTabIds = setOf(current))
-        // Chats aren't history; they and the tab on screen stay, and the four close up.
-        val ui = vm.ui.first { it.entries.size == 2 }
-        assertThat(ui.keys).containsExactly("tab:$current", "chat:1").inOrder()
-        assertThat(order.four.value!!.keys).containsExactly("tab:$current", "chat:1").inOrder()
+        // The tab Clear kept stays; the chats and the play are off the rail and out of Continue.
+        val ui = vm.ui.first { it.entries.size == 1 }
+        assertThat(ui.keys).containsExactly("tab:$current")
+        assertThat(ui.recent.map { it.key }).containsExactly("tab:$current")
+        assertThat(chats.chats.value).hasSize(2)
+        vm.remove(ui.entries.single())
+        val empty = vm.ui.first { it.entries.isEmpty() }
+        assertThat(empty.recent).isEmpty()
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 3_000), ChatSummary(2, "Rivers", 2))
+        val after = vm.ui.first { it.entries.isNotEmpty() }
+        assertThat(after.keys).containsExactly("chat:1")
+        assertThat(after.recent.map { it.key }).containsExactly("chat:1")
+    }
+
+    /** Plan U3b, Neal's walkthrough: a book read aloud is one entry, its tab with a badge; no Reading or voice Play row. */
+    @Test fun aBookReadAloudShowsOnceAsItsBadgedTab() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        bookshelf.bookList.value = listOf(book("book:granger:1", "Emma"))
+        sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma", openedAt = 10).copy(path = ""), tab(5, "a", "Owls", openedAt = 20))
+        plays.value = listOf(RecentPlay("voice:book:book:granger:1", "Emma", 50), RecentPlay("voice:pack:a/Owls", "Owls", 40))
+        val vm = vm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        // A past reading of a book whose tab is on the rail isn't listed again.
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5", "tab:4").inOrder()
+        assertThat(vm.ui.value.recent.none { it is RailEntry.Play }).isTrue()
+
+        voice.value = app.granger.core.player.NowPlaying.Voice("book:book:granger:1", "Emma", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.filterIsInstance<RailEntry.Reading>()).isEmpty()
+        assertThat(vm.ui.value.tabs.map { it.tabId to it.readingAloud }).containsExactly(5L to false, 4L to true).inOrder()
+
+        // An article's tab is matched by its pack and page.
+        voice.value = voice.value!!.copy(sourceKey = "pack:a/Owls", title = "Owls")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.tabs.map { it.tabId to it.readingAloud }).containsExactly(5L to true, 4L to false).inOrder()
+        collecting.cancel()
+    }
+
+    @Test fun aVoiceSourceWithoutATabKeepsItsReadingRow() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20))
+        plays.value = listOf(RecentPlay("voice:text:answer:1", "Why tides?", 50))
+        val vm = vm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        voice.value = app.granger.core.player.NowPlaying.Voice("text:answer:1", "Why tides?", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+        testScheduler.advanceUntilIdle()
+        // The Reading row heads the list; its own "Play again" waits until the voice is done.
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1", "tab:5").inOrder()
+        assertThat(vm.ui.value.tabs.single().readingAloud).isFalse()
+        voice.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("play:voice:text:answer:1", "tab:5").inOrder()
+        collecting.cancel()
     }
 
     @Test fun aSavedOrderIsKeptAcrossLaunches() = runTest(main.dispatcher) {
