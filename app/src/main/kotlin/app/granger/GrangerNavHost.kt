@@ -300,11 +300,11 @@ internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? 
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
     destination.hasRoute<SourceRoute>() -> if (sourceScope == CatalogScope.MODELS) RailTool.SETTINGS else RailTool.LIBRARY
     destination.hasRoute<LibraryRoute>() || destination.hasRoute<CollectionRoute>() || destination.hasRoute<ArchiveRoute>() ||
-        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() ||
+        destination.hasRoute<LibriVoxRoute>() || destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() ||
         destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
     destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
     else -> null
 }
