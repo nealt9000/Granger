@@ -132,6 +132,16 @@ class ZimLibrarySearchTest {
         assertThat(hits.drop(3)).containsAtLeast("215 Cassiopeia solar apocalypse computer", "Après l'Apocalypse", "Aspirin")
     }
 
+    @Test fun titlesLoseTheirSiteBeforeTheyAreRanked() = test {
+        install("cooking.zim", FakeZimArchive(
+            "u-cook", "based.cooking LukeSmith",
+            suggestions = listOf(ZimHit("apple-strudel/", "Apple Strudel | Based Cooking"), ZimHit("apple-pie/", "Apple Pie | Based Cooking")),
+        ))
+        library.refresh()
+        val hits = ZimLibrarySearch(library, io = dispatcher).titles("apple pie").hits.filter { it.packId == "u-cook" }
+        assertThat(hits.map { it.title }).containsExactly("Apple Pie", "Apple Strudel").inOrder()
+    }
+
     @Test fun indexPagesAreLeftOutOfTitlesAndText() = test {
         install("se.zim", FakeZimArchive(
             "u-se", "Worldbuilding",

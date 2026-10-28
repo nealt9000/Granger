@@ -107,6 +107,18 @@ class FeedDrawerTest {
         assertThat(drawn.cards.map { it.title }.toSet()).hasSize(FeedDrawer.CARDS)
     }
 
+    @Test fun cardTitlesLoseTheirSite() = runTest {
+        val cooking = FakeZimArchive(
+            uuid = "u4", paths = setOf("index", "aljotta/"), random = "aljotta/",
+            results = listOf(ZimHit("apple-pie/", "Apple Pie | Based Cooking")),
+            contents = mapOf("aljotta/" to "<html><head><title>Aljotta | Based Cooking</title></head><body></body></html>"),
+        )
+        val drawer = FeedDrawer({ cooking }, { emptyList() }, { emptyList() }, librarySearch)
+        val scope = Resolved("Based Cooking", packs = listOf(pack("u4", "based.cooking LukeSmith")))
+        assertThat(drawer.draw(feed(FeedKind.RANDOM), scope, day)!!.cards.map { it.title }).containsExactly("Aljotta")
+        assertThat(drawer.draw(feed(FeedKind.SEARCH, "pie"), scope, day)!!.cards.map { it.title }).containsExactly("Apple Pie")
+    }
+
     @Test fun userAndTagPagesAreNotDrawn() = runTest {
         val se = FakeZimArchive(
             uuid = "u3", paths = setOf("index", "users/7/apocalypse"), random = "users/7/apocalypse",

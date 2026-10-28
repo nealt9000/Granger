@@ -68,7 +68,7 @@ class ZimLibrarySearch(
 
     /**
      * Runs [run] on each OK pack, in library order; a pack that fails is skipped so the others still answer. Index pages
-     * (user and tag lists, [IndexPages]) are left out.
+     * (user and tag lists, [IndexPages]) are left out, and titles lose their site ([PageTitles]) before they're ranked.
      */
     private suspend fun across(query: String, run: (ZimArchive) -> List<ZimHit>): List<PackHits> {
         if (query.isBlank()) return emptyList()
@@ -82,7 +82,7 @@ class ZimLibrarySearch(
                 val found = hits.map { hit -> hit.copy(path = archive.resolvePath(hit.path) ?: hit.path) }
                     .distinctBy { it.path }
                     .filterNot { IndexPages.isIndex(it.path) }
-                    .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, hit.title, hit.snippet) }
+                    .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, PageTitles.clean(hit.title, pack.title), hit.snippet) }
                 PackHits(found, returned = hits.size)
             }
         }

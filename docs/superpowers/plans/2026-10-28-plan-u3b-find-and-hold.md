@@ -253,7 +253,7 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 - [x] `SettingsScreen` in the five sections of Decision 9. `MediaSettingsRoute` hosts `mediaSettingsSection`; `SettingsRoute(media = true)` callers navigate there. The Readiness row goes. Update `SettingsViewModelTest` where it reads keys.
   *(Built: one `LazyColumn` item per section, each under a `SettingsHeader` (titleSmall in the primary colour, as Appearance and Music & audiobooks drew theirs). Storage's own "Storage & downloads" title goes, since Library & storage heads it. `SettingsRoute` is now an object: nothing else needed `media`, so `LEADING_KEYS`, `settingsIndexOf` and `MEDIA_SECTION_KEY` went too, and the section no longer draws its own heading (the screen's title says it). `MediaSettingsScreen` sits in `SettingsScreen.kt`, over its own `SettingsViewModel` with `mediaSettings`; Settings itself no longer builds that model. `MediaSettingsRoute`'s rail tool is SETTINGS. `SettingsViewModelTest` read no keys, so it's unchanged. The scroll tests in `MediaSettingsTest` became `musicAndAudiobooksIsItsOwnScreen`, and the new `SettingsScreenTest` checks the sections' order, their rows, that Readiness is gone, that Reading & listening hides with neither row, and Music & audiobooks' rail tool.)*
-- [ ] Install both builds and check on the Pixel:
+- [x] Install both builds and check on the Pixel:
   - Downloads from all three doors, with a real queued pack and a cancelled one;
   - Get more's sections and Open;
   - the Library's rows and header;
@@ -262,7 +262,8 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
   - Clear history;
   - the Settings sections and Music & audiobooks.
   Note anything off in the commit message.
-- [ ] Full suite green. **Commit.** `Settings in sections; Music & audiobooks its own screen`
+  *(Checked on the Pixel 2026-10-28 by the main session from 7397c75: Downloads from the Library (empty state, then a 28 MB pack under Done today with Open), Get more's sections and rows, Open on installed Kiwix rows with Ask's line, the Library by kind with Downloads / Get more / More, the owl and the open book, the rail's four (new items enter on top, a tile tap opens the e-book without reordering), History opening from the rail with Clear history's confirm (Kept), Settings in sections, Music & audiobooks as its own screen. Found: the 'Main Page' tab title, fixed in Task 8.)*
+- [x] Full suite green. **Commit.** `Settings in sections; Music & audiobooks its own screen`
 - [ ] Neal can merge part 1 here if he wants it on main before part 2.
 
 ## Part 2: finding things
@@ -281,12 +282,14 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 8: Titles without their site
 
-- [ ] `PageTitles.clean(title, packTitle)` and `PageTitlesTest`. Cases:
+- [x] `PageTitles.clean(title, packTitle)` and `PageTitlesTest`. Cases:
   - Wikipedia, Based Cooking, Parenting Stack Exchange, iFixit;
   - a title that is only the site name stays;
   - a pack title as suffix.
-- [ ] Apply it in `ReaderViewModel.onPageShown` / `onPageVisited`, `FeedDrawer.pageTitle` (replacing its regex) and Search's title rows. `ReaderViewModelTest`, `FeedDrawerTest`.
-- [ ] **Commit.** `Titles without their site`
+  *(Built: `CL/PageTitles.kt`. The cases use the packs' real `<title>`s, read with libzim on the Mac: Based Cooking's are "Aljotta | Based Cooking" (its pack title is "based.cooking LukeSmith"), Stack Exchange's "… - Computer Science Stack Exchange", and iFixit's have no site at all ("1997-2001 Jeep Cherokee XJ"), so iFixit's case is that they stay as they are. A dash inside an SE question title stays.)*
+- [x] Apply it in `ReaderViewModel.onPageShown` / `onPageVisited`, `FeedDrawer.pageTitle` (replacing its regex) and Search's title rows. `ReaderViewModelTest`, `FeedDrawerTest`.
+  *(Built: `onPageVisited` stores the path's name, which has no site, so only `onPageShown` cleans, with the pack's title. Search's titles are cleaned in `ZimLibrarySearch` before the ranking, so "Apple Pie | Based Cooking" is an exact match for "apple pie" and the tab it opens stores the clean title; full-text titles are cleaned the same way. Feed cards from a pack's own search are cleaned too. Found on the Pixel: a pack opened from Get more stored the tab title "Main Page" (WikEM). So `clean(title, packTitle, mainPage)` calls the pack's main entry, or a page titled only "Main Page", "Home", "Home page" or "Index", by the pack's title; `onPageShown` passes `mainPage` when the path is the archive's main entry.)*
+- [x] **Commit.** `Titles without their site`
 
 ### Task 9: Continue and Classics
 
