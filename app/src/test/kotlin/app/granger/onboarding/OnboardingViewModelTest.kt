@@ -148,6 +148,24 @@ class OnboardingViewModelTest {
         assertThat(viewModel(country = "IN").ui.value.region).isNull()
     }
 
+    @Test fun startWaitsOnceAndIgnoresASecondTap() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val vm = OnboardingViewModel(
+            catalog, library, downloads, volumes, prefs, DeviceTier.ASK, totalRamBytes = 1, onboardingPrefs,
+            countryCode = "", io = main.dispatcher, now = { 42 },
+            enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); gate.await(); EnqueueResult.Queued },
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        settle()
+        vm.start(); settle()
+        assertThat(vm.ui.value.starting).isTrue()
+        vm.start(); settle()
+        gate.complete(Unit); settle()
+        assertThat(enqueued).hasSize(1)
+        assertThat(vm.finished.value).isTrue()
+    }
+
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {
         val vm = viewModel()
         vm.next(); settle()
@@ -179,7 +197,7 @@ class OnboardingViewModelTest {
         vm.toggleUseCase("medical"); settle()
         val ui = vm.ui.value
         assertThat(ui.additions.single().lines).isEmpty() // WikEM is installed: the chip adds nothing.
-        assertThat(ui.review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region").inOrder()
+        assertThat(ui.review.groups.map { it.title }).containsExactly("Your picks", "Your region").inOrder() // Classics unticked: no longer the preset
         assertThat(ui.review.items.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "maps_en_peru")
         assertThat(ui.review.bytes).isEqualTo(1_500)
         assertThat(ui.review.fits).isTrue()

@@ -52,8 +52,8 @@
    - Region: the field, then **Suggested**: the pack whose title matches the phone's country (`Locale.getDefault().country` → `Locale("", cc).getDisplayCountry(Locale.ENGLISH)`, compared case-insensitively against the title and a small alias table for catalog names that differ, e.g. "United States" ↔ "US"/"USA"; the implementer checks the live catalog's maps titles and fills the table). Below it, the larger area that contains it if `catalog.onboarding` says so, otherwise the larger areas list. Then the alphabetical countries as today.
    - **The suggestion is preselected** (it's a map of where the phone is). "No region" deselects it. *(Built: the alias table maps 27 codes, checked against all 193 maps titles with the JDK's English names; larger areas are never suggested; India has no pack of its own, so nothing is suggested there.)*
    - Uses: the chips as today, on their own screen, with a one-line lead: "Add packs for what you'll use Granger for. You can change this later in Settings."
-5. **Review names what's in it.** The first group is titled with the preset's title only when the picked items equal the preset's items; otherwise **"Your picks"**. The total line uses the same sum as Home's setup bar. Task 4 finds why Review said 318 MB and Home said 244 MB on the same picks, and makes them agree.
-6. **Start leaves at once.** Start disables itself and shows a small progress indicator in the button. `enqueueGroup`'s per-item DAO calls go in one Room transaction (`withTransaction`), and `scheduleGroup` runs on `Dispatchers.Default`. Home's setup bar already shows progress, so navigating the moment the records are written is enough. Target: under 1 s from tap to Home for the Efficient start on the Pixel 6, measured in Task 4.
+5. **Review names what's in it.** The first group is titled with the preset's title only when the picked items equal the preset's items; otherwise **"Your picks"**. *(Built: Review said 318 MB and Home 244 MB because Review counts each pack's `.gvec` (Classics alone 73 MB) and the setup group holds the files only. Review keeps the true total for space and adds "Includes 74 MB of indexes for Ask, fetched after their packs.")*
+6. **Start leaves at once.** Start disables itself and shows a small progress indicator in the button. *(Built: `enqueueGroup` reads the ledger once instead of once per item, writes with one `@Upsert` list call (one transaction), and runs `scheduleGroup` on its IO dispatcher.)* Home's setup bar already shows progress, so navigating the moment the records are written is enough. Target: under 1 s from tap to Home for the Efficient start on the Pixel 6, measured in Task 4.
 7. **"Ask" is the user's word; "Research" stays in code** (D5). Every string a user can see or hear (TalkBack included) says Ask: the rail tool, the screen title, "Ask chat: …", the reader selection action "Ask", Readiness "Library and Ask", onboarding. Routes, classes, prefs keys and log tags keep `Research`.
 8. **Ask's landing explains itself.** With no turns, above Recent chats:
    - the title "Ask" with a **Preview** tag (a small outlined label, `labelSmall`) beside it;
@@ -117,11 +117,11 @@
 
 ### Task 4: Review and Start
 
-- [ ] Review's first heading per Decision 5. Find the 318 MB / 244 MB difference (Review vs Home's setup bar on: based.cooking, Water Treatment, Food for Preppers, Knots, Granger Classics). Fix whichever sum is wrong and test both on that set.
-- [ ] `DownloadManager.enqueueGroup`: per-item reads and upserts in one `withTransaction`; `scheduleGroup` on `Dispatchers.Default`. Keep the mutex. Tests in `core/downloads` stay green; add one for a 360-item group (one transaction, all scheduled).
-- [ ] VM: `starting` state. The button is disabled with a progress indicator. Navigation happens on success as now.
-- [ ] Measure on the Pixel 6 with Granger Fresh (tap → Home, Efficient start, Wi-Fi off so nothing downloads). Note the time in the commit message.
-- [ ] **Commit.** `Onboarding: Review names your picks; Start returns at once`
+- [x] Review's first heading per Decision 5. Find the 318 MB / 244 MB difference (Review vs Home's setup bar on: based.cooking, Water Treatment, Food for Preppers, Knots, Granger Classics). Fix whichever sum is wrong and test both on that set.
+- [x] `DownloadManager.enqueueGroup`: per-item reads and upserts in one `withTransaction`; `scheduleGroup` on `Dispatchers.Default`. Keep the mutex. Tests in `core/downloads` stay green; add one for a 360-item group (one transaction, all scheduled).
+- [x] VM: `starting` state. The button is disabled with a progress indicator. Navigation happens on success as now.
+- [ ] *(Moved to Task 7: queuing the Efficient start on the phone, even with Wi-Fi off, would leave 12 GB queued.)* Measure on the Pixel 6 with Granger Fresh (tap → Home, Efficient start, Wi-Fi off so nothing downloads). Note the time in the commit message.
+- [x] **Commit.** `Onboarding: Review names your picks; Start returns at once`
 
 ### Task 5: Ask
 

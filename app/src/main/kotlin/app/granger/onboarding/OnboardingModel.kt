@@ -8,6 +8,7 @@ import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.UseCase
 import app.granger.core.catalog.downloadBytes
+import app.granger.core.catalog.vectors
 
 /**
  * One row the user can untick: a pack, or a collection's books folded together ([count] > 1). [installed] rows are on
@@ -67,6 +68,8 @@ data class Review(val groups: List<ReviewGroup>, val freeBytes: Long) {
     val lines: List<Line> get() = groups.flatMap { it.lines }
     val items: List<CatalogItem> get() = lines.flatMap { it.items }
     val bytes: Long get() = items.sumOf { it.downloadBytes }
+    /** The part of [bytes] that is Ask's search indexes (`.gvec`), fetched after their packs. */
+    val indexBytes: Long get() = items.sumOf { it.vectors?.sizeBytes ?: 0L }
     val fits: Boolean get() = bytes <= freeBytes
     val isEmpty: Boolean get() = items.isEmpty()
 }
@@ -165,7 +168,11 @@ object OnboardingModel {
             if (items.isEmpty()) null else line.copy(items = items)
         }
         val groups = buildList {
-            start?.let { s -> s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(s.title, it)) } }
+            start?.let { s ->
+                // The preset's name only while it is the preset: trimmed, it's the user's own (Plan U3a Decision 5).
+                val whole = s.lines.none { !it.installed && it.id in unticked }
+                s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) s.title else "Your picks", it)) }
+            }
             ask?.let { listOf(it).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             region?.takeUnless { it.installed }?.let { r ->
                 listOf(Line(r.pack.id, r.title, listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }

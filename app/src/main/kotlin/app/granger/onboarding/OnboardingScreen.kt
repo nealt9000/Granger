@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -114,7 +115,13 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
                 if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text("Back") } else Spacer(Modifier)
                 when (ui.step) {
                     Step.WELCOME -> Button(onClick = actions.onNext) { Text("Get started") }
-                    Step.REVIEW -> Button(onClick = actions.onStart) { Text(if (ui.review.isEmpty) "Finish" else "Start") }
+                    Step.REVIEW -> Button(onClick = actions.onStart, enabled = !ui.starting) {
+                        if (ui.starting) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                        }
+                        Text(if (ui.review.isEmpty) "Finish" else if (ui.starting) "Starting…" else "Start")
+                    }
                     else -> Button(onClick = actions.onNext) { Text("Next") }
                 }
             }
@@ -339,11 +346,20 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
     }
     if (!ui.review.isEmpty) {
         item {
-            Text(
-                "${formatBytes(ui.review.bytes)} of ${formatBytes(ui.review.freeBytes)} free",
-                Modifier.padding(top = 12.dp),
-                color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
-            )
+            Column(Modifier.padding(top = 12.dp)) {
+                Text(
+                    "${formatBytes(ui.review.bytes)} of ${formatBytes(ui.review.freeBytes)} free",
+                    color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
+                )
+                // Home's setup bar counts the files only; say what the difference is (Plan U3a Decision 5).
+                if (ui.review.indexBytes > 0L) {
+                    Text(
+                        "Includes ${formatBytes(ui.review.indexBytes)} of indexes for Ask, fetched after their packs.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
         item {
             Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {

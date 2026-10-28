@@ -165,8 +165,11 @@ class DownloadManager(
         require(specs.all { it.groupId == groupId }) { "Every spec in group $groupId must carry its groupId" }
         val root = volumeRoot.absoluteFile
         var anyActive = false
+        // One read for the whole ledger, not one per spec: an onboarding group can be hundreds of items (Plan U3a).
+        val all = dao.getAll()
+        val byItem = all.groupBy { it.itemId }
         val toFetch = specs.filter { spec ->
-            val versions = dao.forItem(spec.itemId)
+            val versions = byItem[spec.itemId].orEmpty()
             when {
                 versions.any { it.isActive } -> { anyActive = true; false }
                 versions.any { it.hash == spec.hash } -> false
@@ -177,7 +180,7 @@ class DownloadManager(
             return@withLock if (anyActive) EnqueueResult.AlreadyActive else EnqueueResult.AlreadyInstalled
         }
         // Only free space is checked (no cap for media): the group's bytes, other queued bytes on the volume, the reserve.
-        val active = dao.getAll().filter { it.isActive }
+        val active = all.filter { it.isActive }
         val verdict = QueuePolicy.check(
             itemBytes = toFetch.sumOf { it.sizeBytes },
             isPack = false,
@@ -210,8 +213,9 @@ class DownloadManager(
                 updatedAt = t,
             )
         }
-        records.forEach { dao.upsert(it) }
-        scheduler.scheduleGroup(groupId, records)
+        dao.upsertAll(records)
+        // WorkManager's enqueue calls are many and blocking-ish: off the caller's (often the main) thread.
+        withContext(io) { scheduler.scheduleGroup(groupId, records) }
         EnqueueResult.Queued
     }
 

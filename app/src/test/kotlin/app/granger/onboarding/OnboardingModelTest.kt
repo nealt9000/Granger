@@ -117,6 +117,21 @@ class OnboardingModelTest {
     private val embedder = modelEntry("embeddinggemma-2-text-270m", ModelRole.EMBEDDER, size = 160)
     private val withModels = catalog.copy(models = listOf(e4b, e2b, embedder))
 
+    @Test fun theReviewKeepsThePresetsNameOnlyWhileItIsWhole() {
+        val efficient = OnboardingModel.startChoices(catalog, emptySet()).first { it.id == "efficient" }
+        assertThat(OnboardingModel.review(efficient, emptySet(), null, emptyList(), 10_000).groups.single().title).isEqualTo("Efficient start")
+        val trimmed = OnboardingModel.review(efficient, setOf("wikipedia_en_medicine_nopic"), null, emptyList(), 10_000)
+        assertThat(trimmed.groups.single().title).isEqualTo("Your picks")
+    }
+
+    @Test fun theReviewSaysHowMuchIsAsksIndexes() {
+        val vectors = app.granger.core.catalog.VectorsEntry(sizeBytes = 70)
+        val withIndex = med.copy(vectors = vectors)
+        val review = OnboardingModel.review(null, emptySet(), Region(withIndex, installed = false), emptyList(), 10_000)
+        assertThat(review.bytes).isEqualTo(1_070)
+        assertThat(review.indexBytes).isEqualTo(70)
+    }
+
     @Test fun theSuggestedRegionIsThePhonesCountryByNameOrAlias() {
         val us = packEntry("maps_en_usa", size = 9_000).copy(family = "maps", title = "United States of America")
         val gb = packEntry("maps_en_uk", size = 1_000).copy(family = "maps", title = "United Kingdom")

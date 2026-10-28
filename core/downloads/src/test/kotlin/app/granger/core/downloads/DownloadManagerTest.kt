@@ -326,6 +326,13 @@ class DownloadManagerTest {
         )
     }
 
+    @Test fun aLargeGroupIsWrittenAndScheduledInOneGo() = test {
+        val specs = (0 until 360).map { member(it) }
+        assertThat(manager.enqueueGroup("g", specs, internal, wifiOnly = true)).isEqualTo(EnqueueResult.Queued)
+        assertThat(records()).hasSize(360)
+        assertThat(scheduler.groups.single().second.map { it.itemId }).isEqualTo(specs.map { it.itemId })
+    }
+
     @Test fun groupIsQueuedInOrderAsOneChain() = test {
         val specs = listOf(member(0), member(1), member(2))
         assertThat(manager.enqueueGroup("g", specs, internal, wifiOnly = true)).isEqualTo(EnqueueResult.Queued)

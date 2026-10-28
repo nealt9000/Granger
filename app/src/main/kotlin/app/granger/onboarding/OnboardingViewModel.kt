@@ -67,6 +67,8 @@ data class OnboardingUi(
     val wifiOnly: Boolean = true,
     val volumePath: String? = null,
     val notice: String? = null,
+    /** Start was tapped and the downloads are being written; the button waits. */
+    val starting: Boolean = false,
 ) {
     val start: StartChoice? get() = starts.firstOrNull { it.id == startId }
     val chosenVolume: Volume? get() = phone.volumes.firstOrNull { it.root.path == volumePath } ?: phone.volumes.firstOrNull()
@@ -103,6 +105,7 @@ class OnboardingViewModel(
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<String?>(null)
+    private val starting = MutableStateFlow(false)
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
 
     /** Set once Start or Skip has finished; the screen then leaves. */
@@ -111,7 +114,7 @@ class OnboardingViewModel(
 
     private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
     private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean)
-    private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?)
+    private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
         Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
@@ -120,7 +123,7 @@ class OnboardingViewModel(
         @Suppress("UNCHECKED_CAST")
         Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean)
     }
-    private val setup = combine(wifiOnly, volumePath, notice, ::Setup)
+    private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
     val ui: StateFlow<OnboardingUi> = combine(facts, choices, setup) { f, c, s -> build(f, c, s) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnboardingUi())
@@ -192,6 +195,7 @@ class OnboardingViewModel(
             wifiOnly = s.wifiOnly,
             volumePath = volume?.root?.path,
             notice = s.notice,
+            starting = s.starting,
         )
     }
 
@@ -256,6 +260,7 @@ class OnboardingViewModel(
 
     /** Queues the review as one group and finishes; a refusal stays on the review with its notice. */
     fun start() {
+        if (starting.value) return
         viewModelScope.launch {
             val review = ui.value.review
             // The setting flows, not the built UI: a tap on the switch right before Start must count.
@@ -265,12 +270,14 @@ class OnboardingViewModel(
                 return@launch
             }
             val group = "onboarding:${now()}"
+            starting.value = true
             val problem = when (val result = enqueue(group, review.items, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace -> "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)} or untick something."
                 is EnqueueResult.OverCap -> "That would bring your downloads to ${formatBytes(result.wouldUseBytes)}, over the ${formatBytes(result.capBytes)} limit."
             }
             if (problem != null) {
+                starting.value = false
                 notice.value = problem
                 return@launch
             }
