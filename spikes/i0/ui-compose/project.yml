@@ -1,0 +1,20 @@
+name: ComposeShell
+options: { bundleIdPrefix: app.granger.i0, deploymentTarget: { iOS: "26.0" } }
+targets:
+  ComposeShellApp:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_FILE: Info.plist
+        FRAMEWORK_SEARCH_PATHS: ["$(SRCROOT)/../kmp-core/compose-shell/build/bin/iosSimulatorArm64/debugFramework"]
+        OTHER_LDFLAGS: ["-framework", "ComposeShell", "-lc++", "-lsqlite3"]
+        CODE_SIGNING_ALLOWED: NO
+    postCompileScripts:
+      - name: Compose resources
+        script: |
+          mkdir -p "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/compose-resources"
+          cp -R "$SRCROOT/../kmp-core/compose-shell/build/generated/compose/resourceGenerator/assembledResources/${KMP_RES:-iosSimulatorArm64Main}/composeResources" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/compose-resources/"

@@ -2,4 +2,4 @@
 pluginManagement { repositories { gradlePluginPortal(); mavenCentral(); google() } }
 dependencyResolutionManagement { repositories { mavenCentral(); google() } }
 rootProject.name = "kmp-core"
-include(":vectors", ":text-research")
+include(":vectors", ":text-research", ":shared", ":compose-shell")
