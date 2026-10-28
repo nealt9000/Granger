@@ -43,7 +43,7 @@
 
 - [x] **Xcode:** this Mac has only the Command Line Tools (`xcodebuild` fails), and Tasks 4–6 need full Xcode. Neal installs it from the App Store, or OKs `xcodes`. Disk is fine: 126 GB free. *Neal, 2026-10-28: install it (from the App Store).*
 - [x] **Apple Developer Program:** enrol now (needed to install the harness on a real iPhone for more than 7 days, and for TestFlight), or put it off to I1. A free Apple ID can sideload to one's own iPhone with 7-day profiles, which is enough for Task 7. *Neal, 2026-10-28: yes, enrol now (Neal enrols on developer.apple.com; identity checks can take a day or two).*
-- [x] **The iPhone:** which one is used for Task 7. Task 3 says which model is the minimum. Until there's an answer, Task 7 is planned and its harness is built, but it doesn't run. *Neal, 2026-10-28: the first will likely be an iPhone 16 "XL" (the Plus or the Pro Max; to confirm). Every iPhone 16 has 8 GB, like the Pixel 6, so it's a fair stand-in for the ASK tier. Task 3 still names the oldest iPhone that qualifies.*
+- [x] **The iPhone:** which one is used for Task 7. Task 3 says which model is the minimum. Until there's an answer, Task 7 is planned and its harness is built, but it doesn't run. *Neal, 2026-10-28: the first will likely be an **iPhone 16 Plus** (confirmed). Every iPhone 16 has 8 GB, like the Pixel 6, so it's a fair stand-in for the ASK tier. Task 3 still names the oldest iPhone that qualifies.*
 
 ### Task 1: The Android dependency inventory
 
