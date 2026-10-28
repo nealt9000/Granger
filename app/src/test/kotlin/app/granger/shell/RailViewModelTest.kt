@@ -3,6 +3,7 @@ package app.granger.shell
 import app.granger.FakeBookshelf
 import app.granger.FakeLibrary
 import app.granger.FakeRailHidden
+import app.granger.FakeRailOrder
 import app.granger.FakeRailPins
 import app.granger.book
 import app.granger.core.library.BookPosition
@@ -43,12 +44,13 @@ class RailViewModelTest {
     private val hub = FakePlayerHub()
     private val pins = FakeRailPins()
     private val hidden = FakeRailHidden()
+    private val order = FakeRailOrder()
     private val playRows = mutableMapOf<String, RecentPlay>()
 
     private val voice = MutableStateFlow<app.granger.core.player.NowPlaying.Voice?>(null)
 
     private fun vm() = RailViewModel(
-        sessions, library, bookshelf, chats, current, pins, hidden, plays,
+        sessions, library, bookshelf, chats, current, pins, hidden, order, plays,
         recentPlay = { playRows[it] }, resumer = PlayResumer(media, playlists, hub), voice = voice,
     )
 
@@ -97,25 +99,89 @@ class RailViewModelTest {
         assertThat(vm.ui.first { it.tabs.any { t -> t.current && t.tabId == 1L } }.tabs.count { it.current }).isEqualTo(1)
     }
 
-    @Test fun entriesMergeAllKindsNewestFirst() = runTest(main.dispatcher) {
+    @Test fun theFirstRunSeedsTheFourWithTheNewestOfAllKinds() = runTest(main.dispatcher) {
         sessions.tabs.value = listOf(tab(9, "a", "Owls", openedAt = 250))
         sessions.searchRows.value = listOf(RecentSearch("aspirin", 300), RecentSearch("hamlet", 100))
         chats.chats.value = listOf(ChatSummary(1, "Why tides?", 200), ChatSummary(2, "Who was Emma?", 400))
         plays.value = listOf(RecentPlay("album:artist|abbey road|music/", "Abbey Road", 350))
-        val ui = vm().ui.first { it.entries.size == 6 }
+        val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.entries.map { it.key }).containsExactly(
-            "chat:2", "play:album:artist|abbey road|music/", "search:aspirin", "tab:9", "chat:1", "search:hamlet",
+            "chat:2", "play:album:artist|abbey road|music/", "search:aspirin", "tab:9",
         ).inOrder()
         assertThat(ui.entries.none { it.pinned }).isTrue()
         assertThat(ui.entries[1]).isEqualTo(RailEntry.Play("album:artist|abbey road|music/", "Abbey Road", 350))
+        assertThat(order.four.value).isEqualTo(RailFour(ui.entries.map { it.key }, 400))
+        // Home's Continue isn't cut to four.
+        assertThat(ui.recent.map { it.key }).containsExactly(
+            "chat:2", "play:album:artist|abbey road|music/", "search:aspirin", "tab:9", "chat:1", "search:hamlet",
+        ).inOrder()
     }
 
-    @Test fun unpinnedListIsCappedAtTwelve() = runTest(main.dispatcher) {
-        sessions.searchRows.value = (1..10).map { RecentSearch("q$it", it * 10L) }
-        chats.chats.value = (1..10).map { ChatSummary(it.toLong(), "c$it", it * 10L + 5) }
-        val ui = vm().ui.first { it.entries.isNotEmpty() }
-        assertThat(ui.entries).hasSize(RailViewModel.UNPINNED)
-        assertThat(ui.entries.map { it.at }).containsExactly(105L, 100L, 95L, 90L, 85L, 80L, 75L, 70L, 65L, 60L, 55L, 50L).inOrder()
+    private fun searches(vararg queries: Pair<String, Long>) {
+        sessions.searchRows.value = queries.map { (q, at) -> RecentSearch(q, at) }.sortedByDescending { it.searchedAt }
+    }
+
+    private val RailUi.keys get() = entries.map { it.key.removePrefix(RailEntry.SEARCH) }
+
+    @Test fun openingAnItemAlreadyInTheFourDoesntMoveIt() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4)
+        val vm = vm()
+        assertThat(vm.ui.first { it.entries.size == 4 }.keys).containsExactly("d", "c", "b", "a").inOrder()
+        searches("a" to 10, "b" to 2, "c" to 3, "d" to 4)
+        val ui = vm.ui.first { it.recent.first().at == 10L }
+        assertThat(ui.keys).containsExactly("d", "c", "b", "a").inOrder()
+    }
+
+    @Test fun aFifthEntersAtTheTopAndPushesTheOldestOut() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4)
+        val vm = vm()
+        vm.ui.first { it.entries.size == 4 }
+        // b opened again first: it stays put, so a is still the oldest to arrive.
+        searches("a" to 1, "b" to 5, "c" to 3, "d" to 4)
+        vm.ui.first { it.recent.first().at == 5L }
+        searches("a" to 1, "b" to 5, "c" to 3, "d" to 4, "e" to 6)
+        assertThat(vm.ui.first { "e" in it.keys }.keys).containsExactly("e", "d", "c", "b").inOrder()
+        // One pushed out comes back at the top when it's opened again.
+        searches("a" to 7, "b" to 5, "c" to 3, "d" to 4, "e" to 6)
+        assertThat(vm.ui.first { "a" in it.keys }.keys).containsExactly("a", "e", "d", "c").inOrder()
+    }
+
+    @Test fun pinsAreUnaffectedByTheFour() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5)
+        val vm = vm()
+        vm.ui.first { it.entries.size == 4 }
+        assertThat(vm.pin(RailEntry.Search("c", 3))).isNull()
+        // c goes up with the pins; a fills its slot at the bottom, so the rest don't move.
+        assertThat(vm.ui.first { it.entries.any { e -> e.pinned } }.keys).containsExactly("c", "e", "d", "b", "a").inOrder()
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5, "f" to 6, "g" to 7)
+        val ui = vm.ui.first { "g" in it.keys }
+        assertThat(ui.keys).containsExactly("c", "g", "f", "e", "d").inOrder()
+        assertThat(ui.entries.first().pinned).isTrue()
+    }
+
+    @Test fun aRemovedEntryIsReplacedByTheNextNewestAtTheBottom() = runTest(main.dispatcher) {
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4, "e" to 5)
+        val vm = vm()
+        assertThat(vm.ui.first { it.entries.size == 4 }.keys).containsExactly("e", "d", "c", "b").inOrder()
+        vm.remove(RailEntry.Search("d", 4))
+        assertThat(vm.ui.first { "d" !in it.keys }.keys).containsExactly("e", "c", "b", "a").inOrder()
+    }
+
+    @Test fun aHiddenEntryLeavesTheFourAndComesBackAtTheTopWhenUsedAgain() = runTest(main.dispatcher) {
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 10))
+        searches("a" to 1, "b" to 2, "c" to 3, "d" to 4)
+        val vm = vm()
+        assertThat(vm.ui.first { it.entries.size == 4 }.keys).containsExactly("chat:1", "d", "c", "b").inOrder()
+        vm.remove(RailEntry.Chat(1, "Tides", 10))
+        assertThat(vm.ui.first { "chat:1" !in it.keys }.keys).containsExactly("d", "c", "b", "a").inOrder()
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 20))
+        assertThat(vm.ui.first { "chat:1" in it.keys }.keys).containsExactly("chat:1", "d", "c", "b").inOrder()
+    }
+
+    @Test fun aSavedOrderIsKeptAcrossLaunches() = runTest(main.dispatcher) {
+        order.four.value = RailFour(listOf("search:b", "search:a"), seenAt = 10)
+        searches("a" to 1, "b" to 2, "c" to 3)
+        assertThat(vm().ui.first { it.entries.size == 3 }.keys).containsExactly("b", "a", "c").inOrder()
     }
 
     @Test fun pinnedComeFirstInPinOrder() = runTest(main.dispatcher) {
@@ -127,7 +193,7 @@ class RailViewModelTest {
         assertThat(vm.pin(tabEntry)).isNull()
         assertThat(vm.pin(RailEntry.Chat(4, "Tides", 20))).isNull()
         val ui = vm.ui.first { it.entries.count { e -> e.pinned } == 2 }
-        // Newest pin on top, then the rest newest first.
+        // Newest pin on top, then the four.
         assertThat(ui.entries.map { it.key to it.pinned }).containsExactly(
             "chat:4" to true, "tab:1" to true, "search:cats" to false,
         ).inOrder()
@@ -174,8 +240,8 @@ class RailViewModelTest {
         plays.value = listOf(RecentPlay("songs", "", 7))
         playRows["songs"] = plays.value.single()
         val vm = vm()
-        vm.ui.first { it.entries.size == 5 }.entries.forEach { vm.pin(it) }
-        vm.ui.first { it.entries.all { e -> e.pinned } }
+        vm.ui.first { it.recent.size == 5 }.recent.forEach { vm.pin(it) }
+        vm.ui.first { it.entries.size == 5 && it.entries.all { e -> e.pinned } }
 
         sessions.closeTab(1) // closed elsewhere, e.g. its pack was removed
         sessions.forgetSearch("cats")
@@ -205,7 +271,7 @@ class RailViewModelTest {
     @Test fun seventhPinShowsTheLimitNotice() = runTest(main.dispatcher) {
         sessions.searchRows.value = (1..7).map { RecentSearch("q$it", it.toLong()) }
         val vm = vm()
-        vm.ui.first { it.entries.size == 7 }
+        vm.ui.first { it.recent.size == 7 }
         for (i in 1..6) assertThat(vm.pin(RailEntry.Search("q$i", i.toLong()))).isNull()
         assertThat(vm.pin(RailEntry.Search("q7", 7))).isEqualTo(RailViewModel.PINS_FULL)
         assertThat(RailViewModel.PINS_FULL).contains("Unpin one first")

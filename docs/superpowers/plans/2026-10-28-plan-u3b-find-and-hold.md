@@ -223,14 +223,18 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 4: The rail holds what you're in now
 
-- [ ] `RailOrder` (SharedPreferences, `rail_order`): `admit(key)` (prepend if new, cap 4), `keys`, `forget(key)`. `RailViewModel` uses it for the unpinned entries instead of `sortedByDescending { at }.take(12)`. Entries that are gone or hidden drop out, and the next newest fills the slot.
-- [ ] Narrow rail: a tile tap opens its entry (the full rail's open action); History opens `HistoryRoute`; the background tap and the edge swipe still open the full rail.
-- [ ] Rewrite `RailTest.tappingATileOrHistoryInTheNarrowRailOpensTheFullRailInstead` as `tappingATileInTheNarrowRailOpensIt`, and add `historyOpensTheHistoryScreen`.
-- [ ] `RailViewModelTest`:
+- [x] `RailOrder` (SharedPreferences, `rail_order`): `admit(key)` (prepend if new, cap 4), `keys`, `forget(key)`. `RailViewModel` uses it for the unpinned entries instead of `sortedByDescending { at }.take(12)`. Entries that are gone or hidden drop out, and the next newest fills the slot.
+  *(Built: `RailOrder` stores a `RailFour(keys, seenAt)` rather than offering admit/forget. `seenAt` is the newest `at` the rail has seen. `RailFour.next(candidates)` is pure: items no longer candidates (gone, hidden, pinned) leave; items newer than `seenAt` and not in the four enter at the top, oldest first, and the bottom drops past 4; a free slot is filled at the bottom by the newest candidate not in the four, so nothing shown moves. An item pushed out comes back at the top when it's opened again. The first run seeds the four with the newest four by `at`, so an existing rail keeps what it showed. `RailViewModel` saves the four only when it changes. The live voice row still heads the list. `RailUi.recent` (pins, then every unpinned item newest first, not cut to four) feeds Home's Continue, which keeps `CONTINUE = 8`. The full rail lists the same entries as the narrow one.)*
+- [x] Narrow rail: a tile tap opens its entry (the full rail's open action); History opens `HistoryRoute`; the background tap and the edge swipe still open the full rail.
+  *(Built: both rails share one `openAction(entry, …)`, so an unavailable tab says so from either. The tile's click label is now "Open".)*
+- [x] Rewrite `RailTest.tappingATileOrHistoryInTheNarrowRailOpensTheFullRailInstead` as `tappingATileInTheNarrowRailOpensIt`, and add `historyOpensTheHistoryScreen`.
+  *(Built: also `tappingTheNarrowRailsBackgroundOpensTheFullRail`. The edge swipe is already covered in `GrangerShellSideTest`.)*
+- [x] `RailViewModelTest`:
   - opening an item already in the four doesn't reorder;
   - a fifth pushes the oldest out;
   - pins are unaffected;
   - a removed entry is replaced by the next newest.
+  *(Built: plus the first-run seed (and `recent` uncut), a hidden chat leaving and coming back on top, and a saved order kept across launches. `unpinnedListIsCappedAtTwelve` and `entriesMergeAllKindsNewestFirst` became the seed test. `RailOrderTest` covers `SharedRailOrder` across launches and `RailFour.next` with several arriving at once.)*
 - [ ] **Commit.** `Rail: the four things you're in, in a steady order, open on a tap`
 
 ### Task 5: Clear all

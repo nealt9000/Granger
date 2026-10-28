@@ -409,7 +409,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val railViewModel = viewModel {
         RailViewModel(
             container.sessions, container.library, container.bookshelf, container.researchChats, currentTab.id,
-            container.railPins, container.railHidden,
+            container.railPins, container.railHidden, container.railOrder,
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) container.playResumer else null,

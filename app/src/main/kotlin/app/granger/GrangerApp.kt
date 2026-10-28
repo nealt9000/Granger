@@ -86,7 +86,9 @@ import app.granger.home.SharedHomePrefs
 import app.granger.core.library.RoomHomeFeeds
 import app.granger.core.library.RoomRailPins
 import app.granger.shell.RailHidden
+import app.granger.shell.RailOrder
 import app.granger.shell.SharedRailHidden
+import app.granger.shell.SharedRailOrder
 import app.granger.core.library.RoomShelves
 import app.granger.core.library.Shelves
 import app.granger.core.library.ZimLibrarySearch
@@ -508,6 +510,9 @@ class AppContainer(context: Context) {
 
     /** Chats and plays taken off the rail until they're used again. */
     val railHidden: RailHidden = SharedRailHidden(context)
+
+    /** The rail's four recent items, in the order they arrived (Plan U3b Decision 6). */
+    val railOrder: RailOrder = SharedRailOrder(context)
 
     /** Set by the first activity start in this process: turns left PENDING by a dead process are settled once. */
     val chatsSettledThisProcess = AtomicBoolean(false)

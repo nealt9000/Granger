@@ -88,13 +88,16 @@ sealed interface RailEntry {
     }
 }
 
-/** The pins (newest pin first), then the newest [RailViewModel.UNPINNED] others. */
-data class RailUi(val entries: List<RailEntry>)
+/**
+ * [entries]: the pins (newest pin first), then the four recent others in the order they arrived (Plan U3b Decision 6).
+ * [recent] is what Home's Continue draws on: the pins, then every unpinned item newest first, not cut to four.
+ */
+data class RailUi(val entries: List<RailEntry>, val recent: List<RailEntry> = entries)
 
 /**
- * The rail's one list: tabs, searches, Research chats and plays merged newest first, pinned ones on top. A pin whose
- * item is gone (a closed tab, a forgotten search, a deleted chat, a play no longer recorded) is dropped as the list is
- * built. [currentTabId] is the tab on screen, null off the reader.
+ * The rail's one list: tabs, searches, Research chats and plays, pinned ones on top, then the four in [order]. A pin
+ * whose item is gone (a closed tab, a forgotten search, a deleted chat, a play no longer recorded) is dropped as the list
+ * is built. [currentTabId] is the tab on screen, null off the reader.
  */
 class RailViewModel(
     private val sessions: ReadingSessions,
@@ -104,6 +107,7 @@ class RailViewModel(
     currentTabId: StateFlow<Long?>,
     private val pins: RailPins,
     private val hidden: RailHidden,
+    private val order: RailOrder,
     /** Newest first, as `PlaybackDao.observeRecentPlays` gives them; at least [SCAN] of them. */
     plays: Flow<List<RecentPlay>> = flowOf(emptyList()),
     /** A recorded play by its key, for a pinned play older than [plays] holds. */
@@ -145,7 +149,8 @@ class RailViewModel(
         Opened(tabs, searches, chats, plays)
     }
 
-    private val list: Flow<RailUi> = combine(opened, shelf, currentTabId, pins.pins, hidden.hidden) { opened, shelf, current, pinList, hiddenKeys ->
+    private val list: Flow<RailUi> = combine(opened, shelf, currentTabId, pins.pins, combine(hidden.hidden, order.four, ::Pair)) {
+            opened, shelf, current, pinList, (hiddenKeys, saved) ->
         val all = (
             opened.tabs.map { tabEntry(it, shelf, current) } +
                 opened.searches.map { RailEntry.Search(it.query, it.searchedAt) } +
@@ -165,12 +170,15 @@ class RailViewModel(
         val others = all.values
             .filter { it.key !in pinnedKeys && !hiddenKeys.hides(it) }
             .sortedByDescending { it.at }
-            .take(UNPINNED)
-        RailUi(pinned + others)
+        // Opening one of the four doesn't move it; a new item enters at the top (Plan U3b Decision 6).
+        val four = saved?.next(others) ?: RailFour.seed(others)
+        if (four != saved) order.save(four)
+        val byKey = others.associateBy { it.key }
+        RailUi(pinned + four.keys.take(UNPINNED).mapNotNull(byKey::get), recent = pinned + others)
     }
 
     val ui: StateFlow<RailUi> = combine(list, voice) { list, v ->
-        if (v == null) list else RailUi(listOf(RailEntry.Reading(v.sourceKey, v.title)) + list.entries)
+        if (v == null) list else list.copy(entries = listOf(RailEntry.Reading(v.sourceKey, v.title)) + list.entries)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailUi(emptyList()))
 
     private sealed interface Found {
@@ -267,8 +275,8 @@ class RailViewModel(
     private fun initialOf(title: String): Char = title.firstOrNull { it.isLetterOrDigit() }?.uppercaseChar() ?: '#'
 
     companion object {
-        /** Unpinned items on the list. */
-        const val UNPINNED = 12
+        /** Unpinned items on the list (Plan U3b Decision 6). */
+        const val UNPINNED = RailFour.MAX
 
         /** How many of each kind the rail watches; every recent search (50 are kept). */
         const val SCAN = 50

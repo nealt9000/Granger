@@ -47,7 +47,7 @@ data class ScopeChoice(val scope: FeedScope, val label: String)
 /** Home (spec §5): the readiness strip, where you left off, then the feeds. */
 data class HomeUi(
     val strip: ReadinessReport = ReadinessReport.EMPTY,
-    /** The rail's tabs and plays, as the rail orders them (pins first, then newest), at most [HomeViewModel.CONTINUE]. */
+    /** The rail's tabs and plays, pins first, then newest, at most [HomeViewModel.CONTINUE]. */
     val continueCards: List<RailEntry> = emptyList(),
     /** Feeds whose scope names something on the phone, in Home order; the others are hidden (Decision 3). */
     val feeds: List<FeedUi> = emptyList(),
@@ -198,9 +198,12 @@ class HomeViewModel(
 
         const val SETUP_GROUP = "onboarding:"
 
-        /** The rail's tabs and plays in the rail's order; searches, chats and the voice's live row are not "continue". */
+        /**
+         * The rail's tabs and plays, pins first, then newest; searches, chats and the voice's live row are not "continue".
+         * From [RailUi.recent], so Continue isn't cut to the rail's four.
+         */
         fun continueCards(rail: RailUi): List<RailEntry> =
-            rail.entries.filter { it is RailEntry.Tab || it is RailEntry.Play }.take(CONTINUE)
+            rail.recent.filter { it is RailEntry.Tab || it is RailEntry.Play }.take(CONTINUE)
 
         /** What the Add feed dialog offers: the library, each whole pack, each collection, music and audiobooks when there are any. */
         fun scopeChoices(snap: LibrarySnapshot): List<ScopeChoice> {

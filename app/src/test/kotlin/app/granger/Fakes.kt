@@ -37,7 +37,9 @@ import app.granger.settings.AppearancePrefs
 import app.granger.settings.OpenTo
 import app.granger.settings.RailSide
 import app.granger.settings.ThemeChoice
+import app.granger.shell.RailFour
 import app.granger.shell.RailHidden
+import app.granger.shell.RailOrder
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Manifest
@@ -442,6 +444,12 @@ class FakeRailPins : RailPins {
 class FakeRailHidden : RailHidden {
     override val hidden = MutableStateFlow<Map<String, Long>>(emptyMap())
     override fun hide(key: String, at: Long) = hidden.update { it + (key to at) }
+}
+
+/** [RailOrder] in memory; null until the rail seeds it. */
+class FakeRailOrder(four: RailFour? = null) : RailOrder {
+    override val four = MutableStateFlow(four)
+    override fun save(four: RailFour) { this.four.value = four }
 }
 
 /** [AppearancePrefs] in memory. */
