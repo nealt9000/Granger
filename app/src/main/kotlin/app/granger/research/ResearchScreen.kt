@@ -267,7 +267,10 @@ fun ResearchScreen(
                 },
                 title = { AskTitle() },
                 actions = {
-                    IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = "New chat") }
+                    // On the landing you're already in a new chat: + there only looked broken (Neal, U3a walkthrough).
+                    if (state.turns.isNotEmpty() || state.chatId != null) {
+                        IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = "New chat") }
+                    }
                     var menu by remember { mutableStateOf(false) }
                     Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }

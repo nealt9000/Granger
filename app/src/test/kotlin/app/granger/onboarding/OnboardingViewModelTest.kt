@@ -54,10 +54,10 @@ class OnboardingViewModelTest {
         ),
     ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("wikem_en_all_maxi"))), larger = listOf("maps_en_europe")))
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = ""): OnboardingViewModel {
+    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
-            countryCode = country, io = main.dispatcher, now = { 42 },
+            countryCode = country, offerVoice = offerVoice, io = main.dispatcher, now = { 42 },
             enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); enqueueResult },
         )
         backgroundScope.launch { vm.ui.collect {} }
@@ -175,6 +175,21 @@ class OnboardingViewModelTest {
         assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Your region")
         vm.chooseRegion("maps_en_usa"); settle()
         assertThat(vm.ui.value.region!!.title).isEqualTo("United States of America")
+    }
+
+    @Test fun theVoiceIsOfferedTickedAndCanBeLeftOut() = runTest(main.dispatcher) {
+        val maggie = app.granger.core.catalog.VoiceEntry(
+            id = OnboardingModel.VOICE_ID, title = "Granger voice (Maggie & Martin)", engine = "piper", language = "en-US",
+            sizeBytes = 80, sha256 = "d".repeat(64), url = "https://v.test/v.zip", license = "CC BY 4.0",
+        )
+        catalog.mutable.value = CatalogState(catalog = full.copy(voices = listOf(maggie)))
+        val vm = viewModel()
+        assertThat(vm.ui.value.voiceLine!!.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
+        assertThat(vm.ui.value.review.groups.map { it.title }).contains("Read aloud")
+        vm.toggleVoice(); settle()
+        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Read aloud")
+        // Read-aloud off in this build: no line.
+        assertThat(viewModel(offerVoice = false).ui.value.voiceLine).isNull()
     }
 
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {

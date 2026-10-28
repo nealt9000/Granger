@@ -214,7 +214,8 @@ object ReadinessModel {
                 null
             }
         }
-        val unsearchable = packs.filterNot { it.hasFulltextIndex }.sortedBy { it.title.lowercase() }.map { pack ->
+        // A map has nothing to search by text: its missing index isn't a gap (Neal, U3a walkthrough).
+        val unsearchable = packs.filterNot { it.hasFulltextIndex || resolved.entryOf(it)?.family == "maps" }.sortedBy { it.title.lowercase() }.map { pack ->
             Signal.Unsearchable(pack.id, "${pack.title} can't be searched: the pack has no index.")
         }
         return empty + stale + unsearchable

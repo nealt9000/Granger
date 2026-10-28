@@ -139,6 +139,13 @@
 - [x] *(Checked on the Pixel with Granger Fresh instead of `ThemeShots`.)* Render the onboarding steps, the Ask landing and the fresh Library in both themes with `ThemeShots` (`-PthemeShots`), and look at each.
 - [x] **Commit.** `Voices listed at start; no media promo in the Library; no rail in onboarding`
 
+### Task 6b: From Neal's walkthrough (2026-10-28)
+
+- [x] Pick a start offers **Read aloud · 80 MB** (Granger voice, Maggie & Martin) beside Ask, ticked; Review lists it under "Read aloud". Installed, it's the default: `InstalledVoices.CATALOG_VOICES` now ranks Maggie & Martin ahead of ljspeech, and a phone with no voice chosen reads with the first. (W12)
+- [x] Ask's + is hidden on the landing, which is already the new chat: tapping it there only raised the keyboard and looked broken.
+- [x] Readiness no longer flags a map as "can't be searched: the pack has no index" (maps family).
+- [x] **Commit.** `Onboarding offers the Granger voice; Ask's + only in a chat; maps aren't unsearchable`
+
 ### Task 7: Walkthrough (Neal, Pixel 6, Granger Fresh)
 
 - [ ] `adb uninstall app.granger.fresh` then `./gradlew installDebug -Pfresh`. Walk it with Wi-Fi on:

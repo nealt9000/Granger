@@ -65,6 +65,9 @@ data class OnboardingUi(
     /** Ask's models, offered under the start choices; null where Ask can't run or the catalog has none. */
     val askLine: Line? = null,
     val askChosen: Boolean = true,
+    /** A Granger voice for reading aloud, offered beside Ask; null where read-aloud is off or one is installed. */
+    val voiceLine: Line? = null,
+    val voiceChosen: Boolean = true,
     val review: Review = Review(emptyList(), 0),
     val wifiOnly: Boolean = true,
     val volumePath: String? = null,
@@ -91,6 +94,7 @@ class OnboardingViewModel(
     private val onboardingPrefs: OnboardingPrefs,
     private val dense: Boolean = app.granger.DENSE_RETRIEVAL,
     private val countryCode: String = java.util.Locale.getDefault().country,
+    private val offerVoice: Boolean = app.granger.Features.READ_ALOUD && app.granger.Features.PLAYER,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
@@ -104,6 +108,7 @@ class OnboardingViewModel(
     private val regionId = MutableStateFlow<String?>(UNCHOSEN)
     private val useCaseIds = MutableStateFlow<Set<String>>(emptySet())
     private val askChosen = MutableStateFlow(true)
+    private val voiceChosen = MutableStateFlow(true)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<String?>(null)
@@ -115,15 +120,15 @@ class OnboardingViewModel(
     private val done = MutableStateFlow(false)
 
     private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
-    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean)
+    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
         Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
     }
-    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen) { values ->
+    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen) { values ->
         @Suppress("UNCHECKED_CAST")
-        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean)
+        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean)
     }
     private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
@@ -170,7 +175,10 @@ class OnboardingViewModel(
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
         val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: f.volumes.firstOrNull()
         val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
-        val review = OnboardingModel.review(start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen })
+        val voiceLine = catalog?.takeIf { offerVoice }?.let { OnboardingModel.voiceLine(it, f.installed) }
+        val review = OnboardingModel.review(
+            start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
+        )
         return OnboardingUi(
             step = c.step,
             noCatalog = catalog == null,
@@ -195,6 +203,8 @@ class OnboardingViewModel(
             useCaseIds = c.useCaseIds,
             askLine = askLine,
             askChosen = c.askChosen,
+            voiceLine = voiceLine,
+            voiceChosen = c.voiceChosen,
             review = review,
             wifiOnly = s.wifiOnly,
             volumePath = volume?.root?.path,
@@ -241,6 +251,8 @@ class OnboardingViewModel(
     fun chooseRegion(packId: String?) { regionId.value = packId }
 
     fun toggleAsk() = askChosen.update { !it }
+
+    fun toggleVoice() = voiceChosen.update { !it }
 
     fun toggleUseCase(id: String) = useCaseIds.update { if (id in it) it - id else it + id }
 

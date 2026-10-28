@@ -177,4 +177,23 @@ class OnboardingModelTest {
         assertThat(review.groups.single().lines.single().title).isEqualTo("The librarian")
         assertThat(review.bytes).isEqualTo(2_160)
     }
+
+    private fun voice(id: String, title: String, size: Long) = app.granger.core.catalog.VoiceEntry(
+        id = id, title = title, engine = "piper", language = "en-US", sizeBytes = size, sha256 = "d".repeat(64),
+        url = "https://v.test/$id.zip", license = "CC BY 4.0",
+    )
+    private val ljspeech = voice("vits-piper-en_US-ljspeech-medium", "Granger voice (ljspeech)", 67)
+    private val maggie = voice(OnboardingModel.VOICE_ID, "Granger voice (Maggie & Martin)", 80)
+
+    @Test fun theVoiceLineIsMaggieAndMartinUntilAnyCatalogVoiceIsHere() {
+        val withVoices = catalog.copy(voices = listOf(ljspeech, maggie))
+        val line = OnboardingModel.voiceLine(withVoices, emptySet())!!
+        assertThat(line.title).isEqualTo("Read aloud")
+        assertThat(line.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
+        assertThat(OnboardingModel.voiceLine(withVoices, setOf(ljspeech.id))).isNull()
+        assertThat(OnboardingModel.voiceLine(catalog, emptySet())).isNull()
+        val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 1_000, voice = line)
+        assertThat(review.groups.single().title).isEqualTo("Read aloud")
+        assertThat(review.groups.single().lines.single().title).isEqualTo("Granger voice (Maggie & Martin)")
+    }
 }

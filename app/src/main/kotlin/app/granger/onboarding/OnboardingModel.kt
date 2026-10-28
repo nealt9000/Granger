@@ -79,6 +79,8 @@ object OnboardingModel {
     const val EFFICIENT = "efficient"
     const val COMPREHENSIVE = "comprehensive"
     const val ASK = "ask"
+    const val VOICE = "voice"
+    const val VOICE_ID = "vits-piper-en_US-granger_libritts-medium"
 
     /** The two start choices, each from its generated preset; a catalog without them (older) gives an empty list. */
     fun startChoices(catalog: Catalog, installed: Set<String>): List<StartChoice> {
@@ -102,6 +104,16 @@ object OnboardingModel {
         if (tier < DeviceTier.ASK) return null
         val items = Librarian.models(catalog, dense).filter { it.id !in installed }
         return if (items.isEmpty()) null else Line(ASK, "Ask (Preview)", items, installed = false)
+    }
+
+    /**
+     * The voice offered in Pick a start (Plan U3a, Neal's walkthrough): the catalog's Granger voice of [VOICE_ID], else
+     * its first, as one "Read aloud" line. Null with no voices in the catalog or when any catalog voice is installed.
+     */
+    fun voiceLine(catalog: Catalog, installed: Set<String>): Line? {
+        if (catalog.voices.any { it.id in installed }) return null
+        val voice = catalog.voices.firstOrNull { it.id == VOICE_ID } ?: catalog.voices.firstOrNull() ?: return null
+        return Line(VOICE, "Read aloud", listOf(voice), installed = false)
     }
 
     /** The maps family split by [app.granger.core.catalog.Onboarding.larger], each list by title, plus the covered places. */
@@ -162,6 +174,7 @@ object OnboardingModel {
         additions: List<Addition>,
         freeBytes: Long,
         ask: Line? = null,
+        voice: Line? = null,
     ): Review {
         val seen = HashSet<String>()
         fun List<Line>.fresh(): List<Line> = mapNotNull { line ->
@@ -175,6 +188,7 @@ object OnboardingModel {
                 s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) s.title else "Your picks", it)) }
             }
             // Under its own heading the line is "The librarian", not "Ask (Preview)" twice.
+            voice?.let { v -> listOf(v.copy(title = v.items.single().title)).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(v.title, it)) } }
             ask?.let { listOf(it.copy(title = "The librarian")).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             region?.takeUnless { it.installed }?.let { r ->
                 listOf(Line(r.pack.id, r.title, listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }

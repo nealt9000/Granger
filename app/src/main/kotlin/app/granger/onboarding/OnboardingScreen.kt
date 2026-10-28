@@ -57,6 +57,7 @@ class OnboardingActions(
     val onChooseStart: (String?) -> Unit = {},
     val onToggleLine: (String) -> Unit = {},
     val onToggleAsk: () -> Unit = {},
+    val onToggleVoice: () -> Unit = {},
     val onRegionQuery: (String) -> Unit = {},
     val onChooseRegion: (String?) -> Unit = {},
     val onToggleUseCase: (String) -> Unit = {},
@@ -83,6 +84,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
             onNext = viewModel::next, onBack = viewModel::back, onSkip = viewModel::skip, onStart = viewModel::start,
             onRefreshCatalog = viewModel::refreshCatalog, onChooseStart = viewModel::chooseStart, onToggleLine = viewModel::toggleLine,
             onToggleAsk = viewModel::toggleAsk,
+            onToggleVoice = viewModel::toggleVoice,
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
@@ -225,20 +227,12 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
     ui.askLine?.let { ask ->
         // Offered under every choice, Neither included: Granger Classics alone is enough to ask (Plan U3a Decision 2).
         item(key = "ask") {
-            Row(
-                Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ui.askChosen, role = Role.Checkbox) { actions.onToggleAsk() }.padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Checkbox(checked = ui.askChosen, onCheckedChange = null)
-                Column(Modifier.padding(start = 8.dp).weight(1f)) {
-                    Text("${ask.title} · ${formatBytes(ask.bytes)}")
-                    Text(
-                        "The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
+            Extra("${ask.title} · ${formatBytes(ask.bytes)}", "The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.", ui.askChosen, actions.onToggleAsk)
+        }
+    }
+    ui.voiceLine?.let { voice ->
+        item(key = "voice") {
+            Extra("${voice.title} · ${formatBytes(voice.bytes)}", "A Granger voice reads books and articles to you, with no signal.", ui.voiceChosen, actions.onToggleVoice)
         }
     }
     val start = ui.start ?: return
@@ -384,6 +378,21 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
                     Text("${volume.label} · ${formatBytes(volume.freeBytes)} free", Modifier.padding(start = 8.dp))
                 }
             }
+        }
+    }
+}
+
+/** A ticked-by-default extra under the start choices: Ask, the voice. */
+@Composable
+private fun Extra(title: String, blurb: String, ticked: Boolean, onToggle: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ticked, role = Role.Checkbox) { onToggle() }.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(checked = ticked, onCheckedChange = null)
+        Column(Modifier.padding(start = 8.dp).weight(1f)) {
+            Text(title)
+            Text(blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
