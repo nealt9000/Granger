@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.LaunchedEffect
 import app.granger.media.MediaPermissionState
 import app.granger.media.rememberMediaPermission
 import androidx.compose.foundation.selection.selectable
@@ -48,24 +46,22 @@ import app.granger.onboarding.BrandLockup
 import app.granger.formatBytes
 
 /**
- * Models, Readiness, Appearance (the toolbar's side), storage and download choices, Music & audiobooks, and About. [scrollToMedia] opens it at the
- * Music & audiobooks section (the Library's link). [onPermissionChecked] runs after each permission check (resume, or
- * an answer to the prompt), so the app can rescan when the permission changed.
+ * Settings in five sections (Plan U3b Decision 9): Library & storage, Reading & listening, Ask, Appearance and About.
+ * Voice and Music & audiobooks are their own screens; a null [onVoice] or [onMediaSettings] leaves its row out.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     onModels: () -> Unit,
-    onReadiness: () -> Unit,
     /** Runs the onboarding flow again (Plan H3). */
     onSetUpAgain: () -> Unit = {},
     onBack: () -> Unit,
-    scrollToMedia: Boolean = false,
-    onPermissionChecked: () -> Unit = {},
-    /** Settings → Voice (Plan V1); null leaves the row out. */
+    /** Settings → Voice (Plan V1). */
     onVoice: (() -> Unit)? = null,
     voiceSummary: String = "",
+    /** Settings → Music & audiobooks. */
+    onMediaSettings: (() -> Unit)? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -75,15 +71,6 @@ fun SettingsScreen(
     val railSide by viewModel.railSide.collectAsStateWithLifecycle()
     val openTo by viewModel.openTo.collectAsStateWithLifecycle()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
-    val media = viewModel.media
-    val listState = rememberLazyListState()
-    var scrolled by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(scrollToMedia, media) {
-        if (scrollToMedia && media != null && !scrolled) {
-            scrolled = true
-            listState.scrollToItem(settingsIndexOf(MEDIA_SECTION_KEY))
-        }
-    }
     var showWaiver by rememberSaveable { mutableStateOf(false) }
     if (showWaiver) {
         WaiverDialog(
@@ -104,88 +91,88 @@ fun SettingsScreen(
             )
         },
     ) { padding ->
-        val mediaControls = media?.let { rememberMediaControls(it, onPermissionChecked) }
-        LazyColumn(Modifier.padding(padding).fillMaxSize(), state = listState) {
-            // The rows above Music & audiobooks come from LEADING_KEYS, so the media section's index is computed from them.
-            for (key in LEADING_KEYS) item(key = key) {
-                when (key) {
-                    "models" -> {
-                        ListItem(
-                            headlineContent = { Text("Models") },
-                            supportingContent = { Text("AI models for this phone") },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                            modifier = Modifier.selectable(selected = false, onClick = onModels),
+        LazyColumn(Modifier.padding(padding).fillMaxSize()) {
+            item(key = "library") {
+                SettingsHeader("Library & storage")
+                StorageSection(ui, viewModel::selectVolume)
+                ListItem(
+                    headlineContent = { Text("Download on Wi-Fi only") },
+                    supportingContent = { Text("Turn off to use mobile data") },
+                    trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
+                )
+                ListItem(
+                    headlineContent = { Text("Ask before downloads over 100 MB") },
+                    supportingContent = { Text("Turn off to get large scans and comic runs without a prompt") },
+                    trailingContent = { Switch(checked = ui.askBeforeLarge, onCheckedChange = viewModel::setAskBeforeLarge) },
+                )
+                ListItem(
+                    headlineContent = { Text("Archive.org: show everything") },
+                    supportingContent = {
+                        Text(
+                            if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
+                            else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
                         )
-                        HorizontalDivider()
-                    }
-                    "voice" -> if (onVoice != null) {
-                        ListItem(
-                            headlineContent = { Text("Voice") },
-                            supportingContent = { Text(voiceSummary.ifBlank { "Read aloud" }) },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                            modifier = Modifier.selectable(selected = false, onClick = onVoice),
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = ui.archiveEverything,
+                            onCheckedChange = { on -> if (on) showWaiver = true else viewModel.withdrawArchiveWaiver() },
                         )
-                        HorizontalDivider()
-                    }
-                    "readiness" -> {
-                        ListItem(
-                            headlineContent = { Text("Readiness") },
-                            supportingContent = { Text("What you hold offline, and whether it still works") },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                            modifier = Modifier.selectable(selected = false, onClick = onReadiness),
-                        )
-                        ListItem(
-                            headlineContent = { Text("Set up suggestions again") },
-                            supportingContent = { Text("Pick a start, your region and what you'll use Granger for") },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
-                            modifier = Modifier.selectable(selected = false, onClick = onSetUpAgain),
-                        )
-                        HorizontalDivider()
-                    }
-                    "appearance" -> {
-                        AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
-                        HorizontalDivider()
-                    }
-                    "storage" -> StorageSection(ui, viewModel::selectVolume)
-                    "wifi" -> {
-                        ListItem(
-                            headlineContent = { Text("Download on Wi-Fi only") },
-                            supportingContent = { Text("Turn off to use mobile data") },
-                            trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
-                        )
-                        ListItem(
-                            headlineContent = { Text("Ask before downloads over 100 MB") },
-                            supportingContent = { Text("Turn off to get large scans and comic runs without a prompt") },
-                            trailingContent = { Switch(checked = ui.askBeforeLarge, onCheckedChange = viewModel::setAskBeforeLarge) },
-                        )
-                        HorizontalDivider()
-                    }
-                    "archive" -> {
-                        ListItem(
-                            headlineContent = { Text("Archive.org: show everything") },
-                            supportingContent = {
-                                Text(
-                                    if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
-                                    else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
-                                )
-                            },
-                            trailingContent = {
-                                Switch(
-                                    checked = ui.archiveEverything,
-                                    onCheckedChange = { on -> if (on) showWaiver = true else viewModel.withdrawArchiveWaiver() },
-                                )
-                            },
-                        )
-                        HorizontalDivider()
-                    }
-                }
+                    },
+                )
+                LinkRow("Set up suggestions again", "Pick a start, your region and what you'll use Granger for", onSetUpAgain)
+                HorizontalDivider()
             }
-            if (media != null && mediaControls != null) {
+            if (onVoice != null || onMediaSettings != null) item(key = "listening") {
+                SettingsHeader("Reading & listening")
+                if (onVoice != null) LinkRow("Voice", voiceSummary.ifBlank { "Read aloud" }, onVoice)
+                if (onMediaSettings != null) LinkRow("Music & audiobooks", "Folders on this phone, and the player", onMediaSettings)
+                HorizontalDivider()
+            }
+            item(key = "ask") {
+                SettingsHeader("Ask")
+                LinkRow("Models", "AI models for this phone", onModels)
+                HorizontalDivider()
+            }
+            item(key = "appearance") {
+                AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
+                HorizontalDivider()
+            }
+            item(key = "about") {
+                SettingsHeader("About")
+                About()
+            }
+        }
+    }
+}
+
+/**
+ * Settings → Music & audiobooks: [mediaSettingsSection] on its own screen (Plan U3b Decision 9), from Settings and
+ * the empty Music and Audiobooks screens. [onPermissionChecked] runs after each permission check (resume, or an
+ * answer to the prompt), so the app can rescan when the permission changed.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MediaSettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onPermissionChecked: () -> Unit = {}) {
+    val media = viewModel.media
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Music & audiobooks") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                },
+            )
+        },
+    ) { padding ->
+        val controls = media?.let { rememberMediaControls(it, onPermissionChecked) }
+        LazyColumn(Modifier.padding(padding).fillMaxSize()) {
+            if (media != null && controls != null) {
                 mediaSettingsSection(
-                    mediaControls.ui,
-                    onRequestPermission = mediaControls.permission::request,
-                    onOpenAppSettings = mediaControls.permission::openAppSettings,
-                    onAddFolder = mediaControls.addFolder,
+                    controls.ui,
+                    onRequestPermission = controls.permission::request,
+                    onOpenAppSettings = controls.permission::openAppSettings,
+                    onAddFolder = controls.addFolder,
                     onRemoveFolder = media::removeFolder,
                     onRescan = media::rescan,
                     onShowInOtherApps = media::setShowInOtherApps,
@@ -195,16 +182,31 @@ fun SettingsScreen(
                     onHeadsetAutoplay = media::setHeadsetAutoplay,
                 )
             }
-            item(key = "about") { About() }
         }
     }
 }
 
-/** The keys of the rows above Music & audiobooks, in order. Add a row above it here and the scroll follows. */
-private val LEADING_KEYS = listOf("models", "voice", "readiness", "appearance", "storage", "wifi", "archive")
+/** A section's heading, as Appearance and Music & audiobooks have always drawn theirs. */
+@Composable
+internal fun SettingsHeader(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+    )
+}
 
-/** The list index of [key] when the media section is shown: one item per leading key, then [MEDIA_SECTION_KEY]. */
-internal fun settingsIndexOf(key: String): Int = (LEADING_KEYS + MEDIA_SECTION_KEY).indexOf(key)
+/** A row that opens its own screen. */
+@Composable
+private fun LinkRow(title: String, summary: String, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = { Text(summary) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+        modifier = Modifier.selectable(selected = false, onClick = onClick),
+    )
+}
 
 private class MediaControls(val ui: MediaSettingsUi, val permission: MediaPermissionState, val addFolder: (Boolean) -> Unit)
 
@@ -285,8 +287,7 @@ private val OpenTo.label get() = when (this) {
 @Composable
 private fun StorageSection(ui: SettingsUi, onSelect: (String) -> Unit) {
     val choosable = ui.volumes.size > 1
-    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Storage & downloads", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         for (volume in ui.volumes) {
             val selected = volume.path == ui.selectedVolume
             Row(

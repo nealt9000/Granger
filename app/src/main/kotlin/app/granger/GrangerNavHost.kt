@@ -94,6 +94,7 @@ import app.granger.media.PlayResumer
 import app.granger.settings.ComponentOtherAppsSharing
 import app.granger.settings.DaoMediaFolders
 import app.granger.settings.MediaSettings
+import app.granger.settings.MediaSettingsScreen
 import app.granger.settings.ResolverFolderGrants
 import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
@@ -282,7 +283,9 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
     if (kind == ArchiveKind.MUSIC) AudiobookRoute("audiobook:${MediaManifest.ARCHIVE_ORG}:$identifier")
     else AlbumRoute(Albums.itemKey(MediaManifest.ARCHIVE_ORG, identifier))
 /** [media] opens it at the Music & audiobooks section. */
-@Serializable data class SettingsRoute(val media: Boolean = false)
+@Serializable object SettingsRoute
+/** Settings → Music & audiobooks, its own screen (Plan U3b Decision 9). */
+@Serializable object MediaSettingsRoute
 @Serializable object ReadinessRoute
 /** What's downloading, what stopped and what landed today (Plan U3b Decision 1). */
 @Serializable object DownloadsRoute
@@ -301,7 +304,7 @@ internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? 
         destination.isMusic() || destination.isAudiobooks() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.SETTINGS
     destination.hasRoute<PlayerRoute>() -> RailTool.PLAYER
     else -> null
 }
@@ -623,7 +626,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 RailTool.HOME -> if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
-                RailTool.SETTINGS -> nav.navigate(SettingsRoute()) { launchSingleTop = true }
+                RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
                 RailTool.PLAYER -> nav.togglePlayer()
             }
@@ -730,7 +733,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 onFolder = { nav.navigate(FolderRoute(it)) },
                 onBack = { nav.popBackStack() },
                 onOpenSource = nav::openSource,
-                onMediaSettings = { nav.navigate(SettingsRoute(media = true)) },
+                onMediaSettings = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
             )
             val removeDownload: (String) -> Unit = { group -> container.appScope.launch { container.mediaDownloader.remove(group) } }
             // The detail pages aren't scoped to a collection: their routes carry none.
@@ -771,7 +774,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBook = { nav.navigate(AudiobookRoute(it)) },
                     onBack = { nav.popBackStack() },
                     onOpenSource = nav::openSource,
-                    onMediaSettings = { nav.navigate(SettingsRoute(media = true)) },
+                    onMediaSettings = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
                 )
             }
             composable<AudiobookRoute> { backStackEntry ->
@@ -948,25 +951,35 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<SettingsRoute> { backStackEntry ->
+            composable<SettingsRoute> {
                 SettingsScreen(
                     viewModel = viewModel {
                         SettingsViewModel(
                             container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
                             container.appScope,
-                            mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
                             refreshVoices = { if (Features.PLAYER && Features.READ_ALOUD) container.installedVoices.refresh() },
                         )
                     },
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
-                    onReadiness = { nav.navigate(ReadinessRoute) },
                     onBack = { nav.popBackStack() },
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
                         .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
                         ?.title ?: "No offline voice on this phone",
-                    scrollToMedia = backStackEntry.toRoute<SettingsRoute>().media,
+                    onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
+                )
+            }
+            composable<MediaSettingsRoute> {
+                MediaSettingsScreen(
+                    viewModel = viewModel {
+                        SettingsViewModel(
+                            container.downloads, container.volumes, container.downloadPrefs, container.archivePrefs, container.appearancePrefs,
+                            container.appScope,
+                            mediaSettings = if (Features.PLAYER) { vmScope -> mediaSettings(container, appContext, vmScope) } else null,
+                        )
+                    },
+                    onBack = { nav.popBackStack() },
                     onPermissionChecked = { if (Features.PLAYER) container.phoneMediaScans.recheckPermission() },
                 )
             }

@@ -251,7 +251,8 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 6: Settings in sections; part 1 on the phone
 
-- [ ] `SettingsScreen` in the five sections of Decision 9. `MediaSettingsRoute` hosts `mediaSettingsSection`; `SettingsRoute(media = true)` callers navigate there. The Readiness row goes. Update `SettingsViewModelTest` where it reads keys.
+- [x] `SettingsScreen` in the five sections of Decision 9. `MediaSettingsRoute` hosts `mediaSettingsSection`; `SettingsRoute(media = true)` callers navigate there. The Readiness row goes. Update `SettingsViewModelTest` where it reads keys.
+  *(Built: one `LazyColumn` item per section, each under a `SettingsHeader` (titleSmall in the primary colour, as Appearance and Music & audiobooks drew theirs). Storage's own "Storage & downloads" title goes, since Library & storage heads it. `SettingsRoute` is now an object: nothing else needed `media`, so `LEADING_KEYS`, `settingsIndexOf` and `MEDIA_SECTION_KEY` went too, and the section no longer draws its own heading (the screen's title says it). `MediaSettingsScreen` sits in `SettingsScreen.kt`, over its own `SettingsViewModel` with `mediaSettings`; Settings itself no longer builds that model. `MediaSettingsRoute`'s rail tool is SETTINGS. `SettingsViewModelTest` read no keys, so it's unchanged. The scroll tests in `MediaSettingsTest` became `musicAndAudiobooksIsItsOwnScreen`, and the new `SettingsScreenTest` checks the sections' order, their rows, that Readiness is gone, that Reading & listening hides with neither row, and Music & audiobooks' rail tool.)*
 - [ ] Install both builds and check on the Pixel:
   - Downloads from all three doors, with a real queued pack and a cancelled one;
   - Get more's sections and Open;

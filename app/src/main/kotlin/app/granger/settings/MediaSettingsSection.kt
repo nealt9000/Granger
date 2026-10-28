@@ -29,14 +29,11 @@ import androidx.compose.ui.unit.dp
 import app.granger.core.player.ReplayGainMode
 import app.granger.media.MediaPermissionStatus
 
-/** The first item's key: the Library's empty-media link scrolls here. */
-const val MEDIA_SECTION_KEY = "media"
-
 const val SHOW_IN_OTHER_APPS_TAG = "media-other-apps-switch"
 
 /**
  * Settings → Music & audiobooks: phone access, picked folders, "Rescan now", and the player's settings. Stateless:
- * the screen owns the permission prompt and the folder picker.
+ * the screen ([MediaSettingsScreen], which has the title) owns the permission prompt and the folder picker.
  */
 fun LazyListScope.mediaSettingsSection(
     ui: MediaSettingsUi,
@@ -52,14 +49,6 @@ fun LazyListScope.mediaSettingsSection(
     onSkipForward: (Int) -> Unit,
     onHeadsetAutoplay: (Boolean) -> Unit,
 ) {
-    item(key = MEDIA_SECTION_KEY) {
-        Text(
-            "Music & audiobooks",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-        )
-    }
     item(key = "media-permission") {
         ListItem(
             headlineContent = { Text("Find music and audiobooks on this phone") },

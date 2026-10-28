@@ -59,7 +59,7 @@ class SettingsViewModel(
     private val appearancePrefs: AppearancePrefs,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    /** Builds the "Music & audiobooks" section's model on this view model's scope; null hides the section. */
+    /** Builds Music & audiobooks' model on this view model's scope, for [MediaSettingsScreen]; Settings itself passes null. */
     mediaSettings: ((CoroutineScope) -> MediaSettings)? = null,
     /**
      * Lists the voices for the Voice row's summary, which reads the shared list: nothing else fills it until Voice opens,
