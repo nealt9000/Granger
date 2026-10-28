@@ -1,6 +1,10 @@
 package app.granger.library
 
+import androidx.lifecycle.SavedStateHandle
 import app.granger.FakeBookshelf
+import app.granger.FakeCatalogSource
+import app.granger.bookEntry
+import app.granger.catalogOf
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
 import app.granger.book
@@ -188,5 +192,108 @@ class CollectionViewModelTest {
         backgroundScope.launch { vm.superseded.collect {} }
         testScheduler.advanceUntilIdle()
         assertThat(vm.superseded.value).containsExactly("z1")
+    }
+
+    // Plan U2 Task 2: find, sort and browse by kind.
+
+    private val emma = book("emma", "Emma", author = "Jane Austen")
+    private val pan = book("pan", "Peter Pan", author = "J. M. Barrie")
+    private val hamlet = book("hamlet", "Hamlet", author = "William Shakespeare")
+    private val japan = book("japan", "Things Japanese", author = "")
+    private val mine = book("import:x", "Notes", author = "Me").copy(origin = BookOrigin.IMPORT, sourceRef = "x")
+    private val classics = FakeCatalogSource(
+        catalogOf(books = listOf(bookEntry("pan", "Novels & stories"), bookEntry("hamlet", "Drama"), bookEntry("emma", "Novels & stories"))),
+    )
+
+    private fun TestScope.browse(vararg books: Book, saved: SavedStateHandle = SavedStateHandle()): CollectionViewModel {
+        show(collection("c:granger-classics", false, books = books.toList()))
+        val vm = CollectionViewModel(
+            "c:granger-classics", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            catalog = classics, savedState = saved, compute = main.dispatcher,
+        )
+        backgroundScope.launch { vm.books.collect {} }
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    private fun CollectionViewModel.ids(): List<String> = books.value.books.map { it.id }
+
+    @Test fun findMatchesTitleOrAuthorFromTheStartOfAWord() = runTest(main.dispatcher) {
+        val vm = browse(emma, pan, hamlet, japan)
+        vm.setQuery("pan")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ids()).containsExactly("pan")
+        vm.setQuery("AUSTEN")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ids()).containsExactly("emma")
+        assertThat(vm.findText).isEqualTo("AUSTEN")
+        vm.setQuery("")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ids()).hasSize(4)
+    }
+
+    @Test fun nothingMatchingLeavesAnEmptyListButKeepsTheTotal() = runTest(main.dispatcher) {
+        val vm = browse(emma, pan)
+        vm.setQuery("zola")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.books).isEmpty()
+        assertThat(vm.books.value.total).isEqualTo(2)
+    }
+
+    @Test fun sortsByTitleAuthorSurnameOrRecentlyRead() = runTest(main.dispatcher) {
+        bookshelf.positionMap.value = mapOf(
+            "hamlet" to BookPosition("hamlet", "{}", 0.1, "", updatedAt = 100L),
+            "pan" to BookPosition("pan", "{}", 0.5, "", updatedAt = 300L),
+        )
+        val vm = browse(pan, hamlet, japan, emma)
+        assertThat(vm.ids()).containsExactly("emma", "hamlet", "pan", "japan").inOrder()
+        vm.setSort(BookSort.AUTHOR)
+        testScheduler.advanceUntilIdle()
+        // Austen, Barrie, Shakespeare; no author last.
+        assertThat(vm.ids()).containsExactly("emma", "pan", "hamlet", "japan").inOrder()
+        vm.setSort(BookSort.RECENT)
+        testScheduler.advanceUntilIdle()
+        // Read most recently first, then the unread by title.
+        assertThat(vm.ids()).containsExactly("pan", "hamlet", "emma", "japan").inOrder()
+        assertThat(vm.sort.value).isEqualTo(BookSort.RECENT)
+    }
+
+    @Test fun categoriesComeFromTheCatalogInItsOrder() = runTest(main.dispatcher) {
+        val vm = browse(emma, hamlet, pan, mine)
+        assertThat(vm.books.value.categories).containsExactly("Novels & stories", "Drama").inOrder()
+        vm.setCategory("Drama")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ids()).containsExactly("hamlet")
+        assertThat(vm.books.value.category).isEqualTo("Drama")
+        // Find works within the kind.
+        vm.setCategory("Novels & stories")
+        vm.setQuery("peter")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ids()).containsExactly("pan")
+    }
+
+    @Test fun oneKindOrNoCatalogOffersNoChips() = runTest(main.dispatcher) {
+        assertThat(browse(emma, pan).books.value.categories).isEmpty()
+        // A category no longer among the books falls back to All.
+        val vm = browse(emma, pan, saved = SavedStateHandle(mapOf("category" to "Drama")))
+        assertThat(vm.books.value.category).isNull()
+        assertThat(vm.ids()).containsExactly("emma", "pan")
+    }
+
+    @Test fun theChoicesComeBackFromSavedState() = runTest(main.dispatcher) {
+        val vm = browse(emma, hamlet, pan, saved = SavedStateHandle(mapOf("query" to "a", "sort" to "AUTHOR", "category" to "Novels & stories")))
+        assertThat(vm.findText).isEqualTo("a")
+        assertThat(vm.sort.value).isEqualTo(BookSort.AUTHOR)
+        assertThat(vm.ids()).containsExactly("emma")
+    }
+
+    @Test fun authorsFileUnderTheFirstSurname() {
+        assertThat(authorKey("J. M. Barrie")).isEqualTo("barrie")
+        assertThat(authorKey("Jacob and Wilhelm Grimm")).isEqualTo("grimm")
+        assertThat(authorKey("Alfred, Lord Tennyson")).isEqualTo("tennyson")
+        assertThat(authorKey("Alexander Hamilton, James Madison, John Jay")).isEqualTo("hamilton")
+        assertThat(authorKey("Homer")).isEqualTo("homer")
+        assertThat(authorKey("Émile Zola")).isEqualTo("zola")
+        assertThat(authorKey("")).isEmpty()
     }
 }

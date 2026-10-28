@@ -422,6 +422,16 @@ class SourceViewModelTest {
         assertThat(vm.ui.value.sections.first { it.title == "Novels" }.let { it.rows.size to it.foldable }).isEqualTo(12 to false)
     }
 
+    @Test fun grangerSearchMatchesABooksAuthor() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(books = listOf(bookEntry("pan", author = "J. M. Barrie"), bookEntry("emma", author = "Jane Austen"))),
+        )
+        val vm = viewModel()
+        vm.setQuery("barrie")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("pan")
+    }
+
     @Test fun presetsCountByKindAndSayWhatsOnThePhone() = runTest(main.dispatcher) {
         val starter = viewModel().ui.value.presets.single()
         assertThat(listOf(starter.packs, starter.books, starter.others)).containsExactly(3, 0, 1).inOrder()
