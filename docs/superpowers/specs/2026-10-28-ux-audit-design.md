@@ -36,7 +36,7 @@ Rank **A** stops a friend from owning, reading or asking in their first hour. **
 | A2 | **First run shows "Refresh the catalog to see the choices."** before Pick a start. The catalog isn't fetched when onboarding opens. (Logged in H3 as unchecked; now seen on the phone.) | fresh 03 |
 | A3 | **Search results are mostly noise.** Article snippets are page chrome (category and authority-control footers, IEP's menu, Stack Exchange profile stats) with no match shown. User pages rank high ("User apocalypse", "User kviiri"). "215 Cassiopeia solar apocalypse computer" sits above Wikipedia's "Apocalypse". The Titles and article blocks run together with no heading. Book hits repeat title and author per hit (The Idiot ×3). | library 04–05 |
 | A4 | **The rail's recents can't be read.** 12 tiles under the tools: letters (U, H, H, M, C), four identical speech bubbles for chats, a speaker, a note. Each item you open jumps to the top, so the rail reorders under your thumb. With the keyboard up, the rail is cut off mid-tile. | library 01, 22 |
-| A5 | **Bug: tapping the e-book's cover tile in the rail opens the drawer instead of the book.** Happens every time. Letter and icon tiles work. | library 21 |
+| A5 | **Tapping a recent in the narrow rail opens the drawer, not the item.** By design since P1 (`Rail.kt` `EntryTile`, locked in by `RailTest`), and first logged here as a bug, but nothing on the tile says so: it looks like a button for the item. D1 resolves it (open items open directly). | library 21 |
 | A6 | **Installed packs can't be opened from where they're managed.** Sources → Kiwix → Installed gives each pack only **Remove**. To read it you go back out to Library → Media → Kiwix. | library 14 |
 
 ### B. Makes you hunt or doubt
@@ -112,13 +112,13 @@ What moves:
 
 Sized to land as three plans so each can ship to the phone and be walked:
 
-**U3a: first hour (A1, A2, A6, B3, B9, B10, onboarding polish, the two bugs A5, B5)**
+**U3a: first hour (A1, A2, B3, B9, B10, onboarding polish, the B5 bug)** — plan `2026-10-28-plan-u3a-first-hour.md`
 - Onboarding fetches the catalog when Welcome opens and shows a spinner on Pick a start if it hasn't arrived.
 - On ASK-tier phones, Pick a start adds "Ask (Preview): the librarian, 2.x GB" ticked by default, with a "can be wrong" line (D4). This phone's line changes to match. Research's empty state gets one Get button that starts the download in place.
 - Your situation splits into Region (preselected from the locale, larger areas first) and Uses. Review's heading follows the picks. Start shows progress at once.
-- Fix the rail cover tile, the voice summary and the memory figure.
+- Fix the voice summary and the memory figure.
 
-**U3b: find and hold (A3, A4, A6, B1, B2, B4, B8, B11, C items on titles and counts)**
+**U3b: find and hold (A3, A4, A5, A6, B1, B2, B4, B8, B11, C items on titles and counts)**
 - Search: one heading per kind (Titles, Articles, Books, Music), books grouped by book ("The Idiot · 3 passages"), snippets from the matched sentence with chrome stripped, Stack Exchange user, tag and index pages filtered out of Search, Continue and Home, and site suffixes trimmed from titles everywhere. Keyboard drops on submit.
 - The navigation map in §4: Library by kind, Get more, Downloads, Readiness doors, Settings sections, the rail (D1).
 
