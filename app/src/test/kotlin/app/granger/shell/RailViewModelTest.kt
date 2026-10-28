@@ -178,6 +178,21 @@ class RailViewModelTest {
         assertThat(vm.ui.first { "chat:1" in it.keys }.keys).containsExactly("chat:1", "d", "c", "b").inOrder()
     }
 
+    @Test fun clearingHistoryEmptiesTheFourButWhatsKept() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        val current = sessions.openTab("a", "Owls", "Owls")
+        sessions.openTab("a", "Bats", "Bats")
+        searches("a" to 1)
+        chats.chats.value = listOf(ChatSummary(1, "Tides", 1))
+        val vm = vm()
+        vm.ui.first { it.entries.size == 4 }
+        sessions.clearHistory(keepTabIds = setOf(current))
+        // Chats aren't history; they and the tab on screen stay, and the four close up.
+        val ui = vm.ui.first { it.entries.size == 2 }
+        assertThat(ui.keys).containsExactly("tab:$current", "chat:1").inOrder()
+        assertThat(order.four.value!!.keys).containsExactly("tab:$current", "chat:1").inOrder()
+    }
+
     @Test fun aSavedOrderIsKeptAcrossLaunches() = runTest(main.dispatcher) {
         order.four.value = RailFour(listOf("search:b", "search:a"), seenAt = 10)
         searches("a" to 1, "b" to 2, "c" to 3)

@@ -52,6 +52,12 @@ interface ReadingSessions {
 
     /** Deletes the recent search for [query] (trimmed). */
     suspend fun forgetSearch(query: String)
+
+    /**
+     * History's Clear history (Plan U3b Decision 7): deletes every History row and every recent search but
+     * [keepSearches], and takes every tab but [keepTabIds] off the rail.
+     */
+    suspend fun clearHistory(keepTabIds: Set<Long>, keepSearches: Set<String> = emptySet())
 }
 
 class RoomReadingSessions(
@@ -129,6 +135,14 @@ class RoomReadingSessions(
     }
 
     override suspend fun forgetSearch(query: String) = dao.deleteRecentSearch(query.trim())
+
+    override suspend fun clearHistory(keepTabIds: Set<Long>, keepSearches: Set<String>) {
+        db.withTransaction {
+            dao.deleteAllHistory()
+            dao.deleteAllRecentSearches(keepSearches)
+            dao.closeTabsExcept(keepTabIds)
+        }
+    }
 
     private companion object {
         const val MAX_RECENT_SEARCHES = 50

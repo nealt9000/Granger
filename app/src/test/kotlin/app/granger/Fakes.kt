@@ -218,6 +218,13 @@ class FakeReadingSessions : ReadingSessions {
         searches.update { it - trimmed }
         searchRows.update { rows -> rows.filterNot { it.query == trimmed } }
     }
+
+    override suspend fun clearHistory(keepTabIds: Set<Long>, keepSearches: Set<String>) {
+        historyList.value = emptyList()
+        searches.update { list -> list.filter { it in keepSearches } }
+        searchRows.update { rows -> rows.filter { it.query in keepSearches } }
+        tabs.update { list -> list.map { if (it.id in keepTabIds) it else it.copy(onRail = false) } }
+    }
 }
 
 /** In-memory [Shelves] serving whatever [shelfList] holds (a folder's children too); writes are recorded, not applied. */

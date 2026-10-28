@@ -83,6 +83,27 @@ class DaosTest {
         assertThat(all.single().openedAt).isEqualTo(5L)
     }
 
+    @Test fun clearingCallsLeaveWhatTheyAreToldToKeep() = runTest {
+        val dao = db.sessionDao()
+        dao.upsertHistory(HistoryEntry("p", "a", "A", 1L))
+        dao.upsertHistory(HistoryEntry("q", "b", "B", 2L))
+        dao.deleteAllHistory()
+        assertThat(dao.observeHistory().first()).isEmpty()
+
+        for (q in listOf("cats", "dogs", "owls")) dao.upsertRecentSearch(RecentSearch(q, 1L))
+        dao.deleteAllRecentSearches(listOf("owls"))
+        assertThat(dao.observeRecentSearches(10).first().map { it.query }).containsExactly("owls")
+        dao.deleteAllRecentSearches(emptyList())
+        assertThat(dao.observeRecentSearches(10).first()).isEmpty()
+
+        val ids = (1..3).map { dao.insertTab(ReadingTab(0, "p", "page$it", "Page $it", openedAt = it.toLong(), onRail = true)) }
+        dao.closeTabsExcept(listOf(ids[1]))
+        assertThat(dao.observeRailTabs(8).first().map { it.id }).containsExactly(ids[1])
+        assertThat(dao.tab(ids[0])).isNotNull()                 // off the rail, not deleted
+        dao.closeTabsExcept(emptyList())
+        assertThat(dao.observeRailTabs(8).first()).isEmpty()
+    }
+
     private fun book(id: String, title: String = id, status: PackStatus = PackStatus.OK, indexedAt: Long? = null) = Book(
         id = id, origin = BookOrigin.IMPORT, sourceRef = id, filePath = "/books/$id.epub", title = title,
         author = "", translator = "", date = "", language = "eng", subjects = "", description = "",

@@ -239,10 +239,14 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 5: Clear all
 
-- [ ] DAO and API calls (Decision 7), with tests in `DaosTest`, `ReadingSessionsTest` and `ResearchChatsTest`.
-- [ ] History screen overflow: Clear history + confirm. `HistoryViewModel.clear(keepTabIds)` keeps pinned tabs and the one on screen.
-- [ ] Ask's Chats sheet: Delete all chats + confirm. If the open chat is among them, Ask shows a fresh chat.
-- [ ] Tests: `HistoryViewModelTest.clearKeepsPinnedAndCurrent`; `AskLandingTest` for the sheet's Delete all.
+- [x] DAO and API calls (Decision 7), with tests in `DaosTest`, `ReadingSessionsTest` and `ResearchChatsTest`.
+  *(Built: `SessionDao` gains `deleteAllHistory()`, `deleteAllRecentSearches(keep)` and `closeTabsExcept(keep)` (tabs leave the rail, as `closeTab` does; they aren't deleted). `ResearchDao` gains `deleteAllPassages`, `deleteAllTurns` and `deleteAllChats`, which `ResearchChats.deleteAll()` runs in one transaction, as `delete` does. `ReadingSessions.clearHistory(keepTabIds, keepSearches)` runs its three in one transaction.)*
+- [x] History screen overflow: Clear history + confirm. `HistoryViewModel.clear(keepTabIds)` keeps pinned tabs and the one on screen.
+  *(Built: `HistoryViewModel` takes `RailPins` and adds the pinned tabs. Pinned searches stay too, so a pin isn't lost to Clear. On History, `CurrentTab` is null (it follows the top of the stack), so the NavHost passes every reader tab in the back stack: the tabs Back returns to. Chats and plays aren't history and stay on the rail; the rail's four close up around what's left, which `RailViewModelTest.clearingHistoryEmptiesTheFourButWhatsKept` checks.)*
+- [x] Ask's Chats sheet: Delete all chats + confirm. If the open chat is among them, Ask shows a fresh chat.
+  *(Built: Delete all deletes every chat, the open one too, so Ask always shows a fresh chat after it. `ResearchViewModel.deleteAllChats()` shares `leaveChat()` with `deleteChat()`.)*
+- [x] Tests: `HistoryViewModelTest.clearKeepsPinnedAndCurrent`; `AskLandingTest` for the sheet's Delete all.
+  *(Built: also `ResearchViewModelTest.deleteAllChatsLeavesAFreshChat`.)*
 - [ ] **Commit.** `Clear history and Delete all chats`
 
 ### Task 6: Settings in sections; part 1 on the phone

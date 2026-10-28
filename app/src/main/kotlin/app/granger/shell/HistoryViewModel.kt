@@ -8,11 +8,13 @@ import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
+import app.granger.core.library.RailPins
 import app.granger.core.library.ReadingSessions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -21,6 +23,7 @@ class HistoryViewModel(
     private val sessions: ReadingSessions,
     private val library: Library,
     bookshelf: Bookshelf,
+    private val pins: RailPins,
 ) : ViewModel() {
     data class Row(val packId: String, val path: String, val title: String, val packTitle: String, val available: Boolean)
 
@@ -51,6 +54,19 @@ class HistoryViewModel(
     /** Un-stars a saved article. */
     fun unsave(row: Row) {
         viewModelScope.launch { library.setBookmarked(row.packId, row.path, row.title, false) }
+    }
+
+    /**
+     * Clear history (Plan U3b Decision 7): History and recent searches go, and every reading tab leaves the rail but
+     * the pinned ones and [keepTabIds] (what's open under this screen). Pinned searches stay with their pins.
+     */
+    fun clear(keepTabIds: Set<Long>) {
+        viewModelScope.launch {
+            val pinned = pins.pins.first().map { it.key }
+            val tabs = pinned.filter { it.startsWith(RailEntry.TAB) }.mapNotNull { it.removePrefix(RailEntry.TAB).toLongOrNull() }
+            val searches = pinned.filter { it.startsWith(RailEntry.SEARCH) }.map { it.removePrefix(RailEntry.SEARCH) }
+            sessions.clearHistory(keepTabIds + tabs, searches.toSet())
+        }
     }
 
     private fun row(packId: String, path: String, title: String, packs: Map<String, Pack>, books: Map<String, Book>): Row {

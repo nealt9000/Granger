@@ -157,4 +157,15 @@ class ReadingSessionsTest {
         sessions.forgetSearch("never searched")
         assertThat(sessions.recentSearches().first()).containsExactly("dogs")
     }
+
+    @Test fun clearHistoryKeepsOnlyWhatItIsTold() = runTest {
+        val kept = sessions.openTab("p", "Cat", "Cat")
+        sessions.openTab("p", "Dog", "Dog")
+        sessions.recordSearch("cats")
+        sessions.recordSearch("dogs")
+        sessions.clearHistory(keepTabIds = setOf(kept), keepSearches = setOf("dogs"))
+        assertThat(sessions.history.first()).isEmpty()
+        assertThat(sessions.recentSearches().first()).containsExactly("dogs")
+        assertThat(sessions.railTabs().first().map { it.id }).containsExactly(kept)
+    }
 }

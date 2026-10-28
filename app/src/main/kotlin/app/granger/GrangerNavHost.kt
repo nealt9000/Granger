@@ -899,9 +899,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<HistoryRoute> {
                 HistoryScreen(
-                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library, container.bookshelf) },
+                    viewModel = viewModel { HistoryViewModel(container.sessions, container.library, container.bookshelf, container.railPins) },
                     onOpenTab = ::showTab,
                     onBack = { nav.popBackStack() },
+                    // The tabs open under History: Back returns to them, so Clear history keeps them (Plan U3b Decision 7).
+                    keepTabIds = { nav.currentBackStack.value.mapNotNullTo(HashSet()) { it.readingTabId() } },
                 )
             }
             composable<SourceRoute> { backStackEntry ->

@@ -69,6 +69,9 @@ interface ResearchChats {
 
     /** Removes the chat with its turns and passages. */
     suspend fun delete(chatId: Long)
+
+    /** Removes every chat with its turns and passages (Plan U3b Decision 7). */
+    suspend fun deleteAll()
 }
 
 class RoomResearchChats(
@@ -166,6 +169,14 @@ class RoomResearchChats(
             dao.deletePassagesForChat(chatId)
             dao.deleteTurnsForChat(chatId)
             dao.deleteChat(chatId)
+        }
+    }
+
+    override suspend fun deleteAll() {
+        db.withTransaction {
+            dao.deleteAllPassages()
+            dao.deleteAllTurns()
+            dao.deleteAllChats()
         }
     }
 

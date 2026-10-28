@@ -349,11 +349,22 @@ class ResearchViewModel(
     /** Deletes this chat (stopping a running turn) and leaves the view empty. */
     fun deleteChat() {
         val id = chat.value ?: return
+        leaveChat()
+        appScope.launch { logErrors { chats.delete(id) } }
+    }
+
+    /** Deletes every chat (Plan U3b Decision 7), this one too: a running turn stops and Ask shows a fresh chat. */
+    fun deleteAllChats() {
+        leaveChat()
+        appScope.launch { logErrors { chats.deleteAll() } }
+    }
+
+    /** Stops a running turn and empties the view, for a chat about to be deleted. */
+    private fun leaveChat() {
         job?.cancel()
         chat.value = null
         savedState[CHAT_ID] = null
         title.value = ""
-        appScope.launch { logErrors { chats.delete(id) } }
     }
 
     override fun onCleared() {
