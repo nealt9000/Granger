@@ -49,35 +49,38 @@
 
 **Files:** create `docs/superpowers/spikes/2026-10-iphone-spike-results.md` (§1 Inventory).
 
-- [ ] List every module in `settings.gradle.kts` (`:app` plus 14 under `core/` and `:tools:chunker`) with its line count and its role in one line.
-- [ ] List every library in `gradle/libs.versions.toml` and every vendored binary (`core/speech/libs/sherpa-onnx-*.aar`, TagLib under `core/taglib`), with what Granger uses it for. Starting list: LiteRT-LM 0.18.0 (E2B and `LiteRtTextEmbedder`: EmbeddingGemma, both `.litertlm`), libkiwix 2.6.0, Readium 3.4.0 (+ the PDFium adapter), pdfbox-android, Room 2.8.5, WorkManager, OkHttp, BouncyCastle (Ed25519 catalog check), jsoup, commonmark, Media3 (ExoPlayer, session), Glance, sherpa-onnx 1.13.8, TagLib, kotlinx serialization and coroutines, Compose, Navigation.
-- [ ] List every Android platform API a feature depends on: WebView with the page scripts (read-aloud sentence marks, R3 passage highlights, selection actions), MediaStore and picked folders, MediaSession and Android Auto, the foreground download service and notification, `SpeechRecognizer` (A1, not built), file providers ("Show in other apps"), the themed icon, immersive mode, `ACTION_PROCESS_TEXT` and similar intents.
-- [ ] For `:core:text`, `:core:research` and `:core:vectors` (2,173 lines), list the JVM-only imports by file. Found so far: `org.jsoup` (`HtmlPassages`, `ArticleText`, `XhtmlChunks`), `java.text.Normalizer` and `BreakIterator`, `java.util.Locale`, `java.nio` `FileChannel`/`ByteBuffer` and `RandomAccessFile` (`VectorFile`), `MessageDigest`, `ExecutorService`, `PriorityQueue`. These are the KMP work in Task 4.
-- [ ] Then the same check for the Android-library cores that are mostly logic: `:core:catalog` (parsing, signature check), `:core:library` (Room DAOs, filing, `DirectoryVectorSources`), `:core:downloads`. Separate the logic that could be shared from the Android glue around it.
+- [x] List every module in `settings.gradle.kts` (`:app` plus 14 under `core/` and `:tools:chunker`) with its line count and its role in one line.
+- [x] List every library in `gradle/libs.versions.toml` and every vendored binary (`core/speech/libs/sherpa-onnx-*.aar`, TagLib under `core/taglib`), with what Granger uses it for. Starting list: LiteRT-LM 0.18.0 (E2B and `LiteRtTextEmbedder`: EmbeddingGemma, both `.litertlm`), libkiwix 2.6.0, Readium 3.4.0 (+ the PDFium adapter), pdfbox-android, Room 2.8.5, WorkManager, OkHttp, BouncyCastle (Ed25519 catalog check), jsoup, commonmark, Media3 (ExoPlayer, session), Glance, sherpa-onnx 1.13.8, TagLib, kotlinx serialization and coroutines, Compose, Navigation.
+- [x] List every Android platform API a feature depends on: WebView with the page scripts (read-aloud sentence marks, R3 passage highlights, selection actions), MediaStore and picked folders, MediaSession and Android Auto, the foreground download service and notification, `SpeechRecognizer` (A1, not built), file providers ("Show in other apps"), the themed icon, immersive mode, `ACTION_PROCESS_TEXT` and similar intents.
+- [x] For `:core:text`, `:core:research` and `:core:vectors` (2,173 lines), list the JVM-only imports by file. Found so far: `org.jsoup` (`HtmlPassages`, `ArticleText`, `XhtmlChunks`), `java.text.Normalizer` and `BreakIterator`, `java.util.Locale`, `java.nio` `FileChannel`/`ByteBuffer` and `RandomAccessFile` (`VectorFile`), `MessageDigest`, `ExecutorService`, `PriorityQueue`. These are the KMP work in Task 4.
+- [x] Then the same check for the Android-library cores that are mostly logic: `:core:catalog` (parsing, signature check), `:core:library` (Room DAOs, filing, `DirectoryVectorSources`), `:core:downloads`. Separate the logic that could be shared from the Android glue around it.
+- *Done 2026-10-28 (desk research, subagents): results §1.*
 
 ### Task 2: Each dependency's iOS path (desk research)
 
 **Files:** results §2, one row per dependency: the iOS path, its licence, its maturity (release, last commit, an app shipping it), the effort (drop-in / wrap / rewrite) and the risk.
 
-- [ ] **libkiwix / libzim:** how Kiwix's iOS app (`kiwix/kiwix-apple`) builds and links it (CoreKiwix.xcframework or similar), whether a prebuilt framework is published, the licence (GPLv3), and the App Store / GPL question from the Global Constraints.
-- [ ] **Readium:** the Swift toolkit's version against Kotlin 3.4.0, whether EPUB pagination, highlights, the content iterator (for read-aloud sentence marks), decorations and PDF reach parity, and what our Kotlin glue (`:core:books`, the reader screens) maps to.
-- [ ] **E2B and EmbeddingGemma:** whether LiteRT-LM runs on iOS today (a Swift or C++ API, Metal GPU) and reads the same `.litertlm` files. The fallbacks are MediaPipe LLM Inference (`.task`) and llama.cpp (GGUF, Metal). For each one, record the model file format, whether the catalog needs a second file per model (`ModelEntry` gains a platform), and whether the R5 prompt pipeline (rewrite, entities, `YearFacts`, best guess) moves over unchanged. Also the memory ceiling: the iOS per-app limit, the `com.apple.developer.kernel.increased-memory-limit` entitlement, and what E2B plus EmbeddingGemma plus Piper need together (the Pixel 6 numbers are in the R4/R5 results and V0).
-- [ ] **sherpa-onnx and Piper:** the iOS xcframework and its Swift API, whether our Piper voices (`granger_libritts`, `ljspeech`, and V4's `en-gb` ones) load unchanged, and the audio route: `AVAudioEngine` under the music, with `AVAudioSession` categories for the mix and screen-off reading.
-- [ ] **TagLib:** a C++ build for iOS through CMake or SPM, and whether iOS even needs it (no MediaStore: a user's music comes from Files imports or the Music library).
-- [ ] **Storage and data:** Room KMP (2.7+ lists iOS targets) against GRDB or SwiftData; the bundled SQLite and its FTS4 (the e-book index is contentless FTS4); whether the library schema (v13+) can be shared as is.
-- [ ] **Downloads:** URLSession background sessions against WorkManager (multi-GB ZIMs, resume, sha256 after, the app suspended or killed). Also iOS's limits: no persistent foreground service, system-scheduled resumes, and whether cellular-versus-Wi-Fi rules can be enforced.
-- [ ] **Players:** AVFoundation plus MPNowPlayingInfoCenter and MPRemoteCommandCenter against Media3, the voice as a third player mode, the CarPlay audio entitlement against Android Auto, and WidgetKit plus App Intents against the Glance widget.
-- [ ] **Smaller swaps:** OkHttp → Ktor (Darwin engine) or URLSession; BouncyCastle Ed25519 → CryptoKit `Curve25519.Signing` (check it verifies our catalog signature format); jsoup → Ksoup or a SwiftSoup boundary; pdfbox-android page text → PDFKit `PDFPage.string`; commonmark → a KMP Markdown parser or swift-markdown; the WebView → `WKWebView` with the same page scripts (check `evaluateJavaScript` and the message handlers cover what our JS bridge does).
-- [ ] **Speech input (A1):** `SpeechAnalyzer` (iOS 26) and `SFSpeechRecognizer` with `requiresOnDeviceRecognition`: which iPhones and languages work offline, and contextual strings against `EXTRA_BIASING_STRINGS`.
-- [ ] **Phone media and sharing:** what replaces MediaStore (the Files app, `UIDocumentPickerViewController` for folders, MPMediaLibrary for non-DRM Music items) and what replaces "Show in other apps" (`UIFileSharingEnabled` / `LSSupportsOpeningDocumentsInPlace`, so packs show up in Files).
+- [x] **libkiwix / libzim:** how Kiwix's iOS app (`kiwix/kiwix-apple`) builds and links it (CoreKiwix.xcframework or similar), whether a prebuilt framework is published, the licence (GPLv3), and the App Store / GPL question from the Global Constraints.
+- [x] **Readium:** the Swift toolkit's version against Kotlin 3.4.0, whether EPUB pagination, highlights, the content iterator (for read-aloud sentence marks), decorations and PDF reach parity, and what our Kotlin glue (`:core:books`, the reader screens) maps to.
+- [x] **E2B and EmbeddingGemma:** whether LiteRT-LM runs on iOS today (a Swift or C++ API, Metal GPU) and reads the same `.litertlm` files. The fallbacks are MediaPipe LLM Inference (`.task`) and llama.cpp (GGUF, Metal). For each one, record the model file format, whether the catalog needs a second file per model (`ModelEntry` gains a platform), and whether the R5 prompt pipeline (rewrite, entities, `YearFacts`, best guess) moves over unchanged. Also the memory ceiling: the iOS per-app limit, the `com.apple.developer.kernel.increased-memory-limit` entitlement, and what E2B plus EmbeddingGemma plus Piper need together (the Pixel 6 numbers are in the R4/R5 results and V0).
+- [x] **sherpa-onnx and Piper:** the iOS xcframework and its Swift API, whether our Piper voices (`granger_libritts`, `ljspeech`, and V4's `en-gb` ones) load unchanged, and the audio route: `AVAudioEngine` under the music, with `AVAudioSession` categories for the mix and screen-off reading.
+- [x] **TagLib:** a C++ build for iOS through CMake or SPM, and whether iOS even needs it (no MediaStore: a user's music comes from Files imports or the Music library).
+- [x] **Storage and data:** Room KMP (2.7+ lists iOS targets) against GRDB or SwiftData; the bundled SQLite and its FTS4 (the e-book index is contentless FTS4); whether the library schema (v13+) can be shared as is.
+- [x] **Downloads:** URLSession background sessions against WorkManager (multi-GB ZIMs, resume, sha256 after, the app suspended or killed). Also iOS's limits: no persistent foreground service, system-scheduled resumes, and whether cellular-versus-Wi-Fi rules can be enforced.
+- [x] **Players:** AVFoundation plus MPNowPlayingInfoCenter and MPRemoteCommandCenter against Media3, the voice as a third player mode, the CarPlay audio entitlement against Android Auto, and WidgetKit plus App Intents against the Glance widget.
+- [x] **Smaller swaps:** OkHttp → Ktor (Darwin engine) or URLSession; BouncyCastle Ed25519 → CryptoKit `Curve25519.Signing` (check it verifies our catalog signature format); jsoup → Ksoup or a SwiftSoup boundary; pdfbox-android page text → PDFKit `PDFPage.string`; commonmark → a KMP Markdown parser or swift-markdown; the WebView → `WKWebView` with the same page scripts (check `evaluateJavaScript` and the message handlers cover what our JS bridge does).
+- [x] **Speech input (A1):** `SpeechAnalyzer` (iOS 26) and `SFSpeechRecognizer` with `requiresOnDeviceRecognition`: which iPhones and languages work offline, and contextual strings against `EXTRA_BIASING_STRINGS`.
+- [x] **Phone media and sharing:** what replaces MediaStore (the Files app, `UIDocumentPickerViewController` for folders, MPMediaLibrary for non-DRM Music items) and what replaces "Show in other apps" (`UIFileSharingEnabled` / `LSSupportsOpeningDocumentsInPlace`, so packs show up in Files).
+- *Done 2026-10-28 (desk research, subagents): results §2a, 2b.*
 
 ### Task 3: The minimum iPhone
 
 **Files:** results §3.
 
-- [ ] Find the RAM per iPhone model still supported by the current iOS (Apple doesn't publish RAM, so use teardown or benchmark sources and say which). Find the per-app memory ceilings people have measured, with and without the increased-memory-limit entitlement.
-- [ ] Set the Pixel 6's budget against them: E2B resident on the GPU, EmbeddingGemma for the query, a Piper voice, the reader and libkiwix. Use the Pixel 6's peak RSS figures from V0, R4 and R5.
-- [ ] Propose the tiers to mirror `DeviceTier`: an ASK-tier iPhone (runs Ask) and a READ-tier iPhone (everything but Ask), with the oldest model in each. Also propose the minimum iOS version, from what the dependencies in Task 2 require.
+- [x] Find the RAM per iPhone model still supported by the current iOS (Apple doesn't publish RAM, so use teardown or benchmark sources and say which). Find the per-app memory ceilings people have measured, with and without the increased-memory-limit entitlement.
+- [x] Set the Pixel 6's budget against them: E2B resident on the GPU, EmbeddingGemma for the query, a Piper voice, the reader and libkiwix. Use the Pixel 6's peak RSS figures from V0, R4 and R5.
+- [x] Propose the tiers to mirror `DeviceTier`: an ASK-tier iPhone (runs Ask) and a READ-tier iPhone (everything but Ask), with the oldest model in each. Also propose the minimum iOS version, from what the dependencies in Task 2 require.
+- *Done 2026-10-28 (desk research, subagents): results §3.*
 
 ### Task 4: The shared core trial (Mac, needs Xcode)
 
@@ -102,10 +105,11 @@
 
 **Files:** results §6.
 
-- [ ] Apple Developer Program: cost, enrolment as an individual or organisation, and what each shows on the App Store listing (the name a friend sees).
-- [ ] TestFlight: internal testers (on the team, no review) against external testers (up to 10,000, Beta App Review on the first build), build expiry, and how a friend joins with a public link against an email invite.
-- [ ] App Review risks for Granger: downloading large content after install (ZIMs, models, voices: data, not code, guideline 2.5.2), the LLM disclaimer (Ask as a Preview), archive.org and non-commercial packs that Granger links to, the Supporter purchase (in-app purchase rules, Plan 10), and the background download modes.
-- [ ] Privacy: the privacy manifest (`PrivacyInfo.xcprivacy`) and required-reason APIs our dependencies touch, and the App Privacy "Data not collected" label, which fits the no-telemetry brand.
+- [x] Apple Developer Program: cost, enrolment as an individual or organisation, and what each shows on the App Store listing (the name a friend sees).
+- [x] TestFlight: internal testers (on the team, no review) against external testers (up to 10,000, Beta App Review on the first build), build expiry, and how a friend joins with a public link against an email invite.
+- [x] App Review risks for Granger: downloading large content after install (ZIMs, models, voices: data, not code, guideline 2.5.2), the LLM disclaimer (Ask as a Preview), archive.org and non-commercial packs that Granger links to, the Supporter purchase (in-app purchase rules, Plan 10), and the background download modes.
+- [x] Privacy: the privacy manifest (`PrivacyInfo.xcprivacy`) and required-reason APIs our dependencies touch, and the App Privacy "Data not collected" label, which fits the no-telemetry brand.
+- *Done 2026-10-28 (desk research, subagents): results §6.*
 
 ### Task 7: The iPhone harness (built on the Mac; the numbers wait for an iPhone)
 
