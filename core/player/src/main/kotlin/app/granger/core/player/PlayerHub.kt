@@ -6,6 +6,7 @@ import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.Track
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadChapter
 import app.granger.core.speech.ReadSource
 import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +75,9 @@ data class SavedBook(
     val finished: Boolean,
 )
 
+/** The voice's source's chapters (Plan U2, Reader's Chapters sheet) and the one the voice is in (null before the first). */
+data class VoiceChapters(val chapters: List<ReadChapter>, val current: Int?)
+
 /** The last thing the voice read, at the sentence it stopped on. */
 data class SavedVoice(val sourceKey: String, val title: String, val section: String?, val address: ReadAddress, val speed: Float, val voiceId: VoiceId?)
 
@@ -134,6 +138,10 @@ interface PlayerHub {
 
     /** Voice only: by paragraph and by sentence. [jumpTo] moves the voice to an address of its source. */
     fun nextParagraph(); fun previousParagraph(); fun nextSentence(); fun previousSentence(); fun jumpTo(address: ReadAddress)
+
+    /** The voice's chapters, read from its source; null while the voice isn't the mode. [jumpToChapter] goes to one's first sentence. */
+    suspend fun voiceChapters(): VoiceChapters?
+    fun jumpToChapter(index: Int)
 
     /**
      * Music under the voice (Plan V2). Starting the voice while music plays keeps the music at [setMixLevel]'s level

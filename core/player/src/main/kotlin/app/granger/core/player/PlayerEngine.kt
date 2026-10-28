@@ -40,6 +40,7 @@ import app.granger.core.speech.ReadAddress
 import app.granger.core.speech.ReadSource
 import app.granger.core.speech.Speech
 import app.granger.core.speech.SpeechException
+import app.granger.core.speech.Utterance
 import app.granger.core.speech.VoiceId
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
@@ -49,6 +50,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -157,6 +159,8 @@ class PlayerEngine(
         ReadAloudEngine(out, scope).also { engine ->
             scope.launch { engine.progress.collect { if (mode == Mode.VOICE && it != null) onVoiceProgress() } }
             scope.launch { engine.ended.collect { if (mode == Mode.VOICE) onVoiceEnded() } }
+            scope.launch { engine.held.collect { if (mode == Mode.VOICE) onChapterEndReached() } }
+            engine.holdBefore = ::pastSleepChapter
             scope.launch { engine.errors.collect { Log.w(TAG, "Voice: ${it.message}") } }
             // One line per synthesized sentence: the screen-off run (Plan V1 Task 9) reads these from logcat.
             scope.launch {
@@ -174,6 +178,18 @@ class PlayerEngine(
     private var voiceOpen = false                   // the speech engine is loaded and the source is queued
     private var voiceEnded = false
     private var voiceSection: String? = null
+
+    // The voice's End of chapter (Plan U2). [voiceSleepChapter] is the chapter of the source the timer waits for the
+    // end of (-1: before the first chapter; null: no such timer). The voice stops at the real end: the read-aloud
+    // engine is held before the first sentence of a later chapter ([pastSleepChapter]), or the source runs out. The
+    // countdown is only an estimate: [voiceSleepLeft] holds, for each sentence to the chapter's end, how many are
+    // left from it, and each takes [utteranceMs] (measured between sentences, at 1×).
+    private var voiceSleepChapter: Int? = null
+    private var voiceSleepLeft: Map<ReadAddress, Int> = emptyMap()
+    private var voiceSleepCount: Job? = null
+    private var utteranceMs = DEFAULT_UTTERANCE_MS
+    private var lastUtteranceAt = 0L
+    private var lastUtteranceIndex = -1
 
     // Music under the voice (Plan V2). A second ExoPlayer plays the music queue at [mix] while the main player keeps
     // the voice's carrier, so the session, the notification and the headset go on driving the voice. It is made when
@@ -540,7 +556,22 @@ class PlayerEngine(
         if (mode != Mode.VOICE) return@submit
         Log.i(VOICE_TAG, "Voice: jump to ${address.encode().take(80)}")
         if (voiceOpen) readAloud.jumpTo(address) else voiceFrom = address
+        // A place picked moves the End of chapter timer with it, as a chapter picked in an audiobook does.
+        if (voiceSleepChapter != null) aimVoiceSleep(address)
         refresh()
+    }
+
+    override fun jumpToChapter(index: Int) = submit {
+        if (mode != Mode.VOICE) return@submit
+        val address = voiceSource?.let { runCatching { it.chapterStart(index) }.getOrNull() } ?: return@submit
+        jumpTo(address)
+    }
+
+    override suspend fun voiceChapters(): VoiceChapters? {
+        if (mode != Mode.VOICE || !loaded) return null
+        val source = voiceSource ?: return null
+        val at = (if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom
+        return runCatching { VoiceChapters(source.chapters(), at?.let { source.chapterAt(it) }) }.getOrNull()
     }
 
     private suspend fun startBook(id: String, at: AudioBookmark?) {
@@ -916,8 +947,14 @@ class PlayerEngine(
     override fun startSleepTimer(setting: SleepSetting) = submit {
         if (!loaded) return@submit
         fade = 1f
-        retargetSleep(force = true)
-        sleep.start(setting, ::untilSleepTargetEnds)
+        if (mode == Mode.VOICE && setting == SleepSetting.EndOfChapter) {
+            sleepTarget = -1
+            aimVoiceSleep((if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom)
+            sleep.start(setting, estimated = true, chapterEndsInMs = ::untilSleepTargetEnds)
+        } else {
+            retargetSleep(force = true)
+            sleep.start(setting, chapterEndsInMs = ::untilSleepTargetEnds)
+        }
         applyVolume()
         updateTicker()
         refresh()
@@ -1039,6 +1076,8 @@ class PlayerEngine(
         val p = readAloud.progress.value ?: return
         val source = voiceSource ?: return
         Log.i(VOICE_TAG, "Voice: at #${p.index} ¶${p.utterance.paragraph} \"${p.utterance.text.take(40)}\"")
+        measureUtterance(p.index)
+        if (voiceSleepChapter != null && p.address !in voiceSleepLeft) countVoiceSleep(p.address)
         scope.launch {
             val section = runCatching { source.sectionTitle(p.address) }.getOrNull()
             if (section != voiceSection) { voiceSection = section; refresh() }
@@ -1049,6 +1088,12 @@ class PlayerEngine(
 
     private fun onVoiceEnded() {
         voiceEnded = true
+        if (voiceSleepChapter != null) {
+            // The text ended inside the chapter End of chapter waited for: that was its end. Music under it sleeps too.
+            Log.i(VOICE_TAG, "Voice: End of chapter: the text ended")
+            holdMusicUnder()
+            cancelSleep()
+        }
         if (voiceOverMusic) {
             // The music under the voice becomes the mode again (Plan V2); the voice's place is saved on the way.
             submit { if (voiceOverMusic) handToMusic() }
@@ -1418,6 +1463,9 @@ class PlayerEngine(
     private fun cancelSleep() {
         sleep.cancel()
         sleepTarget = -1
+        voiceSleepChapter = null
+        voiceSleepLeft = emptyMap()
+        voiceSleepCount?.cancel(); voiceSleepCount = null
         fade = 1f
         applyVolume()
         updateTicker()
@@ -1434,8 +1482,9 @@ class PlayerEngine(
         }
     }
 
-    /** Wall-clock ms until the pinned chapter (or song) ends: media time ÷ speed; 0 once past it. */
+    /** Wall-clock ms until the pinned chapter (or song) ends: media time ÷ speed; 0 once past it. The voice: [untilVoiceChapterEnds]. */
     private fun untilSleepTargetEnds(): Long? {
+        if (loaded && mode == Mode.VOICE) return untilVoiceChapterEnds()
         if (!loaded || sleepTarget < 0) return null
         val index = player.currentMediaItemIndex
         val position = player.currentPosition
@@ -1456,6 +1505,83 @@ class PlayerEngine(
             Mode.VOICE, Mode.NONE -> return null
         }
         return (mediaLeft / player.playbackParameters.speed).toLong()
+    }
+
+    /**
+     * Pins the voice's End of chapter to the chapter [at] is in (-1 before the first; a source without chapters waits
+     * for its end) and counts the sentences to its end.
+     */
+    private suspend fun aimVoiceSleep(at: ReadAddress?) {
+        val source = voiceSource ?: return
+        voiceSleepChapter = at?.let { runCatching { source.chapterAt(it) }.getOrNull() } ?: -1
+        Log.i(VOICE_TAG, "Voice: End of chapter waits for chapter $voiceSleepChapter")
+        voiceSleepLeft = emptyMap()
+        countVoiceSleep(at)
+    }
+
+    /**
+     * The read-aloud engine asks before each sentence: true (stop here) for the first sentence of a chapter after
+     * the one End of chapter waits for. Stepping back into an earlier chapter waits for that one's end instead.
+     */
+    private suspend fun pastSleepChapter(u: Utterance): Boolean {
+        val target = voiceSleepChapter ?: return false
+        val source = voiceSource ?: return false
+        val chapter = runCatching { source.chapterAt(u.address) }.getOrNull() ?: return false
+        if (chapter < target) { voiceSleepChapter = chapter; countVoiceSleep(u.address) }
+        return chapter > target
+    }
+
+    /** The voice stopped itself at the chapter's end: pause there (the place saved is the next chapter's start) and end the timer. */
+    private fun onChapterEndReached() {
+        Log.i(VOICE_TAG, "Voice: End of chapter: stopped at the chapter's end")
+        if (player.playWhenReady) player.pause()
+        holdMusicUnder()
+        cancelSleep()
+    }
+
+    /** Counts, in the background, the sentences from [from] to the end of the chapter End of chapter waits for. */
+    private fun countVoiceSleep(from: ReadAddress?) {
+        val source = voiceSource ?: return
+        val target = voiceSleepChapter ?: return
+        voiceSleepCount?.cancel()
+        voiceSleepCount = scope.launch {
+            val ahead = ArrayList<ReadAddress>()
+            var at = from
+            counting@ while (ahead.size < MAX_COUNTED) {
+                val batch = runCatching { source.utterances(at, COUNT_BATCH) }.getOrDefault(emptyList())
+                val fresh = if (ahead.isEmpty()) batch else batch.dropWhile { it.address == at }
+                if (fresh.isEmpty()) break
+                for (u in fresh) {
+                    val chapter = runCatching { source.chapterAt(u.address) }.getOrNull()
+                    if (chapter != null && chapter > target) break@counting
+                    ahead += u.address
+                }
+                at = fresh.last().address
+            }
+            if (voiceSleepChapter != target) return@launch
+            voiceSleepLeft = ahead.withIndex().associate { (i, a) -> a to ahead.size - i }
+            refresh()
+        }
+    }
+
+    /** The voice's time to the chapter's end, for the countdown only: sentences left × [utteranceMs] ÷ speed, less the current one's time so far. */
+    private fun untilVoiceChapterEnds(): Long? {
+        if (voiceSleepChapter == null) return null
+        val at = (if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom ?: return null
+        val left = voiceSleepLeft[at] ?: return null
+        val into = if (player.playWhenReady && lastUtteranceAt > 0L) now() - lastUtteranceAt else 0L
+        return (left * utteranceMs / voiceSpeed - into).toLong().coerceAtLeast(0L)
+    }
+
+    /** One more sentence started: the time since the last one, at 1×, goes into [utteranceMs] (a running average). */
+    private fun measureUtterance(index: Int) {
+        val t = now()
+        if (player.playWhenReady && index == lastUtteranceIndex + 1 && lastUtteranceAt > 0L) {
+            val sample = ((t - lastUtteranceAt) * voiceSpeed).toLong()
+            if (sample in MIN_UTTERANCE_MS..MAX_UTTERANCE_MS) utteranceMs = (utteranceMs * 3 + sample) / 4
+        }
+        lastUtteranceAt = t
+        lastUtteranceIndex = index
     }
 
     private fun applyVolume() {
@@ -1543,6 +1669,12 @@ class PlayerEngine(
         const val DUCK_VOLUME = 0.2f
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 3.0f
+        /** End of chapter for the voice: a sentence's time before any is measured, the bounds of a sample, and the counting. */
+        const val DEFAULT_UTTERANCE_MS = 4_000L
+        const val MIN_UTTERANCE_MS = 300L
+        const val MAX_UTTERANCE_MS = 30_000L
+        const val COUNT_BATCH = 200
+        const val MAX_COUNTED = 5_000
 
         fun exoRepeat(repeat: Int) = when (repeat) {
             1 -> Player.REPEAT_MODE_ALL

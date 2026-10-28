@@ -12,8 +12,10 @@ import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
 import app.granger.core.player.SavedVoice
+import app.granger.core.player.VoiceChapters
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadChapter
 import app.granger.core.speech.Utterance
 import app.granger.core.speech.UtteranceKind
 import app.granger.core.speech.Voice
@@ -52,8 +54,8 @@ class ReaderTabTest {
         onStop = { calls += "stop" }, onOpen = { calls += "open:${it.title}" }, onResume = { calls += "resume:${it.sourceKey}" },
     )
 
-    private fun reader(ui: PlayerUi, saved: SavedModes = SavedModes(null, null, null)) = compose.setContent {
-        Reader(ui, progress, saved, voices, mixLevel = 0.3f, controls)
+    private fun reader(ui: PlayerUi, saved: SavedModes = SavedModes(null, null, null), with: ReaderControls = controls) = compose.setContent {
+        Reader(ui, progress, saved, voices, mixLevel = 0.3f, with)
     }
 
     @Test fun showsTheSentencesAndTheControlsReachTheirCallbacks() {
@@ -98,6 +100,23 @@ class ReaderTabTest {
         assertThat(calls).containsExactly("voice:system:com.google.android.tts:en-us-x-iob-local")
     }
 
+    @Test fun chaptersListTheTextsChaptersWithTheCurrentOneAndAPickMovesTheVoice() {
+        val book = VoiceChapters(listOf(ReadChapter("Act I"), ReadChapter("Scene one", depth = 1), ReadChapter("Act II")), current = 1)
+        reader(voiceUi(), with = controls.copy(chapters = { book }, onChapter = { calls += "chapter:$it" }))
+        compose.onNodeWithTag(ReaderTags.CHAPTERS).performScrollTo().assertExists()
+        compose.onNodeWithText("Scene one").assertExists()                      // the row names the current chapter
+        compose.onNodeWithTag(ReaderTags.CHAPTERS).performClick()
+        compose.onNodeWithTag(ReaderTags.chapter(2)).performClick()
+        assertThat(calls).containsExactly("chapter:2")
+        compose.onNodeWithTag(ReaderTags.chapter(2)).assertDoesNotExist()      // the sheet closed
+    }
+
+    @Test fun aTextWithoutChaptersHasNoChaptersRow() {
+        reader(voiceUi(), with = controls.copy(chapters = { VoiceChapters(emptyList(), null) }))
+        compose.onNodeWithTag(ReaderTags.SLEEP).performScrollTo().assertExists()
+        compose.onNodeWithTag(ReaderTags.CHAPTERS).assertDoesNotExist()
+    }
+
     @Test fun nothingLoadedOffersToResumeTheLastRead() {
         reader(PlayerUi.IDLE, SavedModes(null, null, null, voice = last, lastWasVoice = true))
         compose.onNodeWithTag(ReaderTags.SENTENCE).assertDoesNotExist()
@@ -127,7 +146,11 @@ class ReaderTabTest {
         val hub = FakePlayerHub(voiceUi())
         val vm = PlayerViewModel(hub)
         val wired = vm.readerControls(onOpen = {}, onResume = {})
-        wired.onNextSentence(); wired.onBackSentence(); wired.onNextParagraph(); wired.onPreviousParagraph(); wired.onStop()
-        assertThat(hub.calls).containsExactly("nextSentence", "previousSentence", "nextParagraph", "previousParagraph", "stopVoice").inOrder()
+        wired.onNextSentence(); wired.onBackSentence(); wired.onNextParagraph(); wired.onPreviousParagraph(); wired.onChapter(3); wired.onStop()
+        assertThat(hub.calls).containsExactly(
+            "nextSentence", "previousSentence", "nextParagraph", "previousParagraph", "jumpToChapter:3", "stopVoice",
+        ).inOrder()
+        hub.chapters = VoiceChapters(listOf(ReadChapter("One")), 0)
+        assertThat(kotlinx.coroutines.runBlocking { wired.chapters() }).isEqualTo(hub.chapters)
     }
 }

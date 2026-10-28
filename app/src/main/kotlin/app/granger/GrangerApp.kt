@@ -352,6 +352,9 @@ class AppContainer(context: Context) {
     /** The book the voice's restore last opened, kept open for the process (Plan V2: one at most). */
     private var restoredBook: Pair<String, Publication>? = null
 
+    /** A text's saved place (`voice_states`), for a reader's Listen (Plan U2, [listenStart]). */
+    val voicePlace: suspend (sourceKey: String) -> ReadAddress? = { key -> playback.voiceState(key)?.address?.let(ReadAddress::decode) }
+
     /** Resumes a `voice:` play from the rail: the saved place, read again. */
     private val resumeVoice: suspend (String) -> Boolean = { sourceKey ->
         val state = playback.voiceState(sourceKey)

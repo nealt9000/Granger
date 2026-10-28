@@ -85,7 +85,10 @@ class EbookReaderViewModelTest {
 
     // ---- read aloud (Plan V1) ----
 
-    private fun TestScope.readingReader(hub: app.granger.player.FakePlayerHub, now: () -> Long = { clock }): EbookReaderViewModel {
+    private fun TestScope.readingReader(
+        hub: app.granger.player.FakePlayerHub, now: () -> Long = { clock },
+        savedPlace: suspend (String) -> app.granger.core.speech.ReadAddress? = { null },
+    ): EbookReaderViewModel {
         opener.publication = app.granger.testPublicationWithContent(
             title = "The Upanishads",
             chapters = linkedMapOf("c001.xhtml" to "<h1>One</h1><p>First sentence. Second sentence.</p>", "c002.xhtml" to "<p>Chapter two text.</p>"),
@@ -93,7 +96,7 @@ class EbookReaderViewModelTest {
         val file = tmp.root.resolve("b.epub").apply { writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, null, bookshelf, sessions, opener, prefsStore, this, main.dispatcher, FakeBookSearcher(), SavedStateHandle(), player = hub, now = now)
+        return EbookReaderViewModel(1, null, bookshelf, sessions, opener, prefsStore, this, main.dispatcher, FakeBookSearcher(), SavedStateHandle(), player = hub, now = now, savedPlace = savedPlace)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -107,6 +110,25 @@ class EbookReaderViewModelTest {
         val deadline = System.currentTimeMillis() + 5_000
         while (!until() && System.currentTimeMillis() < deadline) { testScheduler.advanceUntilIdle(); Thread.sleep(10) }
         testScheduler.advanceUntilIdle()
+    }
+
+    @Test fun listenGoesOnFromTheBooksSavedPlaceUnlessThePageIsPastIt() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val asked = mutableListOf<String>()
+        var saved: app.granger.core.speech.ReadAddress? = null
+        val vm = readingReader(hub, savedPlace = { key -> asked += key; saved })
+        val sentences = kotlinx.coroutines.runBlocking { BookReadSource(opener.publication!!, "b", "The Upanishads", kotlinx.coroutines.Dispatchers.Unconfined).utterances(null, 10) }
+        saved = sentences.first { it.text == "Second sentence." }.address
+        // The page shows the chapter's start, before the saved place: the voice goes on from where it stopped.
+        vm.readAloud(locator("c001.xhtml", 0.0, 0.0), visibleText = "First sentence.")
+        settle { hub.calls.isNotEmpty() }
+        assertThat(hub.calls.single()).isEqualTo("readAloud:book:b@${saved!!.encode()}")
+        assertThat(asked).containsExactly("book:b")
+        hub.calls.clear()
+        // The page is past it: the first visible sentence wins.
+        vm.readAloud(locator("c002.xhtml", 0.0, 0.5))
+        settle { hub.calls.isNotEmpty() }
+        assertThat(hub.calls.single()).contains("c002.xhtml")
     }
 
     @Test fun readAloudStartsAtTheVisibleElementAndReadFromAtTheSelection() = runTest(main.dispatcher) {

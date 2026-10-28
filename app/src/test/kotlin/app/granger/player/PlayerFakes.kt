@@ -61,6 +61,10 @@ class FakePlayerHub(initial: PlayerUi = PlayerUi.IDLE) : PlayerHub {
     override fun nextSentence() { calls += "nextSentence" }
     override fun previousSentence() { calls += "previousSentence" }
     override fun jumpTo(address: ReadAddress) { calls += "jumpTo:${address.encode()}" }
+    /** What [voiceChapters] answers. */
+    var chapters: app.granger.core.player.VoiceChapters? = null
+    override suspend fun voiceChapters(): app.granger.core.player.VoiceChapters? = chapters
+    override fun jumpToChapter(index: Int) { calls += "jumpToChapter:$index" }
     override fun setMixLevel(level: Float) { calls += "mix:$level" }
     override fun playPauseMusic() { calls += "playPauseMusic" }
     override fun nextMusic() { calls += "nextMusic" }

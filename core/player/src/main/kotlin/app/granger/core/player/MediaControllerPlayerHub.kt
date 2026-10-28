@@ -133,6 +133,8 @@ class MediaControllerPlayerHub(
     override fun nextSentence() = send { it.nextSentence() }
     override fun previousSentence() = send { it.previousSentence() }
     override fun jumpTo(address: ReadAddress) = send { it.jumpTo(address) }
+    override suspend fun voiceChapters(): VoiceChapters? = PlaybackService.engine.value?.voiceChapters()
+    override fun jumpToChapter(index: Int) = send { it.jumpToChapter(index) }
     override fun setMixLevel(level: Float) = send { it.setMixLevel(level) }
     override fun playPauseMusic() = send { it.playPauseMusic() }
     override fun nextMusic() = send { it.nextMusic() }

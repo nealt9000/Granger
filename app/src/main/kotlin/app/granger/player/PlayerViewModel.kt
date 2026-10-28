@@ -13,6 +13,7 @@ import app.granger.core.player.SavedBook
 import app.granger.core.player.SavedModes
 import app.granger.core.player.SavedMusic
 import app.granger.core.player.SleepSetting
+import app.granger.core.player.VoiceChapters
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.CancellationException
@@ -208,6 +209,8 @@ class PlayerViewModel(
     fun previousParagraph() = hub.previousParagraph()
     fun previousSentence() = hub.previousSentence()
     fun nextSentence() = hub.nextSentence()
+    suspend fun voiceChapters(): VoiceChapters? = hub.voiceChapters()
+    fun jumpToChapter(index: Int) = hub.jumpToChapter(index)
 
     // Music under the voice and Reader (Plan V2, U2).
     fun setMixLevel(level: Float) = hub.setMixLevel(level)

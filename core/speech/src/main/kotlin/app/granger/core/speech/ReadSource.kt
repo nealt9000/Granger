@@ -17,7 +17,25 @@ interface ReadSource {
 
     /** Re-finds a saved address after the source was re-opened (articles by block id, then text); null when it is gone. */
     suspend fun locate(address: ReadAddress): ReadAddress? = address
+
+    /**
+     * The source's chapters in reading order (Plan U2): a book's contents, an article's sections. Empty for a source
+     * without any (plain text), where the whole text is one.
+     */
+    suspend fun chapters(): List<ReadChapter> = emptyList()
+
+    /** The first sentence of chapter [index] of [chapters]; null when it can't be found. */
+    suspend fun chapterStart(index: Int): ReadAddress? = null
+
+    /** The index in [chapters] of the chapter [at] falls in; null before the first one, or for a source without chapters. */
+    suspend fun chapterAt(at: ReadAddress): Int? = null
+
+    /** Reading order: below 0 when [a] comes before [b], 0 at the same sentence, above 0 after; null when it can't tell. */
+    suspend fun compare(a: ReadAddress, b: ReadAddress): Int? = null
 }
+
+/** A chapter or a section as the Reader's Chapters sheet lists it; [depth] is its nesting in a book's contents. */
+data class ReadChapter(val title: String, val depth: Int = 0)
 
 /** What a source key names, for whoever has to reopen it (the reader, the player's restore, the rail). */
 sealed interface ReadSourceKey {
@@ -52,5 +70,11 @@ class TextReadSource(override val key: String, override val title: String, text:
     override suspend fun utterances(from: ReadAddress?, limit: Int): List<Utterance> {
         val start = if (from == null) 0 else all.indexOfFirst { it.address == from }.takeIf { it >= 0 } ?: return emptyList()
         return all.subList(start, minOf(all.size, start + limit))
+    }
+
+    override suspend fun compare(a: ReadAddress, b: ReadAddress): Int? {
+        val i = all.indexOfFirst { it.address == a }.takeIf { it >= 0 } ?: return null
+        val j = all.indexOfFirst { it.address == b }.takeIf { it >= 0 } ?: return null
+        return i.compareTo(j)
     }
 }

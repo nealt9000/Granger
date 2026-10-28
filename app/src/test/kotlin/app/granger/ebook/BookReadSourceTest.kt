@@ -73,6 +73,41 @@ class BookReadSourceTest {
         assertThat(source.addressAtHref("c999.xhtml")).isNull()
     }
 
+    @Test fun chaptersAreTheContentsWithTheirStartsAndTheChapterASentenceIsIn() = runTest {
+        val book = testPublicationWithContent(
+            title = "Hamlet",
+            chapters = linkedMapOf(
+                "front.xhtml" to "<p>A play in five acts.</p>",
+                "c001.xhtml" to "<h1>Act I</h1><p>Who's there?</p>",
+                "c001b.xhtml" to "<p>Still Act I, the file split in two.</p>",
+                "c002.xhtml" to "<h1 id=\"s1\">Act II</h1><p>Second act begins.</p><h2 id=\"s2\">Scene two</h2><p>A room in the castle. Enter Polonius.</p>",
+            ),
+            toc = listOf("c001.xhtml" to emptyList(), "c002.xhtml#s1" to listOf("c002.xhtml#s2")),
+        )
+        val s = BookReadSource(book, "book:granger:hamlet", "Hamlet", Dispatchers.Unconfined)
+        assertThat(s.chapters().map { it.title to it.depth }).containsExactly("c001.xhtml" to 0, "c002.xhtml#s1" to 0, "c002.xhtml#s2" to 1).inOrder()
+        // A file's entry starts at its top; an anchored one at the anchored element.
+        assertThat(s.utterances(s.chapterStart(0), 1).single().text).isEqualTo("Act I")
+        assertThat(s.utterances(s.chapterStart(2), 1).single().text).isEqualTo("Scene two")
+        assertThat(s.chapterStart(3)).isNull()
+        val all = s.utterances(null, 50)
+        assertThat(all.map { it.text to s.chapterAt(it.address) }).containsExactly(
+            "A play in five acts." to null,                         // before the first entry
+            "Act I" to 0, "Who's there?" to 0, "Still Act I, the file split in two." to 0,   // an untitled file stays in its chapter
+            "Act II" to 1, "Second act begins." to 1,
+            "Scene two" to 2, "A room in the castle." to 2, "Enter Polonius." to 2,
+        ).inOrder()
+        // The anchored start is the same place the voice reads through, so the boundary is exact.
+        assertThat(s.compare(s.chapterStart(2)!!, all[6].address)).isEqualTo(0)
+        assertThat(s.compare(all[3].address, all[4].address)!!).isLessThan(0)
+        assertThat(s.compare(all[8].address, all[7].address)!!).isGreaterThan(0)
+    }
+
+    @Test fun aBookWithoutContentsHasNoChapters() = runTest {
+        assertThat(source.chapters()).isEmpty()
+        assertThat(source.chapterAt(source.utterances(null, 1).single().address)).isNull()
+    }
+
     @Test fun addressAtAVisibleElementOrASelectionPicksItsSentence() = runTest {
         val chapterTwo = Locator(href = Url("c002.xhtml")!!, mediaType = MediaType.XHTML, locations = Locator.Locations(progression = 0.0))
         val at = source.addressAt(chapterTwo)!!

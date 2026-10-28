@@ -39,4 +39,14 @@ class ReadAloudTest {
         assertThat(failing.start(ReadTarget.Answer(1))).isFalse()
         assertThat(hub.calls).isEmpty()
     }
+
+    @Test fun listenStartsAtTheSavedPlaceWhenThePageIsAtOrBeforeItElseAtThePage() = runTest {
+        val text = TextReadSource("text:t", "T", "One. Two.\n\nThree. Four.")
+        val saved = ReadAddress.Text("text:t", 1, 0)                                           // "Three."
+        assertThat(listenStart(text, ReadAddress.Text("text:t", 0, 0), saved)).isEqualTo(saved)
+        assertThat(listenStart(text, saved, saved)).isEqualTo(saved)
+        assertThat(listenStart(text, ReadAddress.Text("text:t", 1, 1), saved)).isEqualTo(ReadAddress.Text("text:t", 1, 1))
+        assertThat(listenStart(text, ReadAddress.Text("text:t", 0, 1), null)).isEqualTo(ReadAddress.Text("text:t", 0, 1))
+        assertThat(listenStart(text, ReadAddress.Text("text:t", 0, 1), ReadAddress.Text("text:t", 9, 0))).isEqualTo(ReadAddress.Text("text:t", 0, 1))
+    }
 }

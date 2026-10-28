@@ -55,6 +55,8 @@ object ReaderTags {
     const val SLEEP = "reader_sleep"
     const val NOTHING = "reader_nothing"
     const val RESUME = "reader_resume"
+    const val CHAPTERS = "reader_chapters"
+    fun chapter(i: Int) = "reader_chapter_$i"
 }
 
 /** [speed] snapped to the voice's 0.1 steps within 0.7–2.0×. */

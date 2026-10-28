@@ -13,7 +13,9 @@ import app.granger.core.library.ReadingSessions
 import app.granger.core.player.NowPlaying
 import app.granger.player.VoiceButton
 import app.granger.core.player.PlayerHub
+import app.granger.core.speech.ReadAddress
 import app.granger.core.speech.ReadSourceKey
+import app.granger.voice.listenStart
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CancellationException
@@ -137,6 +139,8 @@ class EbookReaderViewModel(
     private val now: () -> Long = System::currentTimeMillis,
     /** Brings back a missing file it can (a pack document, copied out of its pack again; Plan P2); false if not. */
     private val restore: suspend (Book) -> Boolean = { false },
+    /** A text's saved place (Plan U2): Listen goes on from it when the page is at or before it ([listenStart]). */
+    private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -514,7 +518,8 @@ class EbookReaderViewModel(
 
     /**
      * Starts the voice at the sentence holding [visibleText] (the page's first words) in [from]'s chapter; without
-     * the words, at the first element at [from] (a chapter's start), else where the book is open.
+     * the words, at the first element at [from] (a chapter's start), else where the book is open. The book's saved
+     * place wins when the page is at or before it ([listenStart]).
      */
     fun readAloud(from: Locator?, visibleText: String? = null) {
         val hub = player ?: return
@@ -524,8 +529,9 @@ class EbookReaderViewModel(
             val address = visibleText?.let { words -> page?.let { src.addressAtText(it, words) } }
                 ?: src.addressAt(page)
                 ?: return@launch
+            val start = listenStart(src, address, runCatching { savedPlace(src.key) }.getOrNull())
             following = true
-            hub.readAloud(src, address)
+            hub.readAloud(src, start)
         }
     }
 

@@ -1,6 +1,7 @@
 package app.granger.ebook
 
 import app.granger.core.speech.ReadAddress
+import app.granger.core.speech.ReadChapter
 import app.granger.core.speech.ReadSource
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.speech.Sentence
@@ -75,6 +76,95 @@ class BookReadSource(
         }
         walk(publication.tableOfContents)
         out
+    }
+
+    /** A contents entry as a chapter: its title and nesting, its link, and the file it points into ([order] in the reading order, -1 when not in it). */
+    private class TocEntry(val title: String, val depth: Int, val href: Url, val fragment: String?, val order: Int)
+
+    /** Where a sentence is in the book, in reading order: its file, its element's progression in the file, the sentence. */
+    private data class Place(val order: Int, val progression: Double, val sentence: Int) : Comparable<Place> {
+        override fun compareTo(other: Place): Int =
+            compareValuesBy(this, other, Place::order, Place::progression, Place::sentence)
+    }
+
+    private val orderOf: Map<String, Int> by lazy {
+        publication.readingOrder.withIndex().associate { (i, link) -> link.href.toString().substringBefore('#') to i }
+    }
+
+    private val toc: List<TocEntry> by lazy {
+        val out = ArrayList<TocEntry>()
+        fun walk(links: List<Link>, depth: Int) {
+            for (link in links) {
+                val href = link.href.toString()
+                val url = Url(href.substringBefore('#'))
+                if (url != null) {
+                    out += TocEntry(link.title?.trim().orEmpty(), depth, url, href.substringAfter('#', "").ifEmpty { null }, orderOf[url.toString()] ?: -1)
+                }
+                walk(link.children, depth + 1)
+            }
+        }
+        walk(publication.tableOfContents, 0)
+        out
+    }
+
+    // Each entry's first sentence once found; an entry that points at an anchor is found by reading its file.
+    private val starts = ConcurrentHashMap<Int, ReadAddress.Book>()
+
+    override suspend fun chapters(): List<ReadChapter> = toc.map { ReadChapter(it.title, it.depth) }
+
+    /** The entry's first sentence: its file's, or for an entry with an anchor (`c001.xhtml#ch3`), the anchored element's. */
+    override suspend fun chapterStart(index: Int): ReadAddress.Book? {
+        starts[index]?.let { return it }
+        val entry = toc.getOrNull(index) ?: return null
+        val link = publication.linkWithHref(entry.href) ?: return null
+        val locator = publication.locatorFromLink(link) ?: return null
+        val at = if (entry.fragment == null) locator else {
+            // Readium's content iterator starts at a CSS selector's element; an attribute selector takes any id.
+            locator.copy(locations = locator.locations.copy(otherLocations = locator.locations.otherLocations + ("cssSelector" to "[id=\"${entry.fragment}\"]")))
+        }
+        val found = runCatching { addressAt(at) }.getOrNull() ?: if (entry.fragment != null) addressAt(locator) else null
+        return found?.also { starts[index] = it }
+    }
+
+    /**
+     * The entry [at] is in: the last one (in reading order) that starts at or before it. An entry for a whole file
+     * starts at the file's top; one with an anchor where the anchored element is, so a book in one file with
+     * anchored chapters still has chapters. Of entries starting at the same place, the last (the deepest) wins.
+     */
+    override suspend fun chapterAt(at: ReadAddress): Int? {
+        val here = placeOf(at) ?: return null
+        val byFile = toc.indices.filter { toc[it].order in 0..here.order }.groupBy { toc[it].order }
+        for (order in byFile.keys.sortedDescending()) {
+            var best: Int? = null
+            var bestPlace: Place? = null
+            for (i in byFile.getValue(order)) {
+                val p = entryPlace(i) ?: continue
+                if (p <= here && (bestPlace == null || p >= bestPlace)) { best = i; bestPlace = p }
+            }
+            if (best != null) return best
+        }
+        return null
+    }
+
+    override suspend fun compare(a: ReadAddress, b: ReadAddress): Int? {
+        val pa = placeOf(a) ?: return null
+        val pb = placeOf(b) ?: return null
+        return pa.compareTo(pb)
+    }
+
+    private suspend fun entryPlace(index: Int): Place? {
+        val entry = toc[index]
+        if (entry.order < 0) return null
+        if (entry.fragment == null) return Place(entry.order, 0.0, 0)
+        val start = chapterStart(index) ?: return null
+        return placeOf(start)
+    }
+
+    private fun placeOf(at: ReadAddress): Place? {
+        val a = at as? ReadAddress.Book ?: return null
+        val locator = parse(a.locatorJson) ?: return null
+        val order = orderOf[locator.href.toString().substringBefore('#')] ?: return null
+        return Place(order, locator.locations.progression ?: 0.0, a.sentence)
     }
 
     override suspend fun sectionTitle(at: ReadAddress): String? {

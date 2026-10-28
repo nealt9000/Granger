@@ -60,6 +60,39 @@ class ArticleReadSourceTest {
         assertThat(source.locate(ReadAddress.Article("p", "Rosetta_Stone", "nope", 0))).isNull()
     }
 
+    @Test fun sectionsAreTheTopLevelHeadingsWithTheLeadUnderTheTitle() = runTest {
+        val sectioned = """
+            <html><body>
+            <h1 id="firstHeading">Rosetta Stone</h1>
+            <p>The Rosetta Stone is a stele.</p>
+            <h2 id="History">History</h2>
+            <p>Ptolemaic era.</p>
+            <h3 id="Rediscovery">Rediscovery</h3>
+            <p>Found in 1799. By French soldiers.</p>
+            <h2 id="Reading">Reading the stone</h2>
+            <p>Champollion read it.</p>
+            </body></html>
+        """.trimIndent()
+        val s = ArticleReadSource(FakeZimArchive("p", contents = mapOf("Rosetta_Stone" to sectioned)), "p", "Rosetta_Stone", "Rosetta Stone", Dispatchers.Unconfined)
+        // The h3 stays inside its h2; the lead before the first h2 is a section of its own, under the article's title.
+        assertThat(s.chapters().map { it.title }).containsExactly("Rosetta Stone", "History", "Reading the stone").inOrder()
+        assertThat(s.chapterStart(0)).isEqualTo(ReadAddress.Article("p", "Rosetta_Stone", "firstHeading", 0))
+        assertThat(s.chapterStart(1)).isEqualTo(ReadAddress.Article("p", "Rosetta_Stone", "History", 0))
+        assertThat(s.chapterStart(3)).isNull()
+        val all = s.utterances(null, 100)
+        assertThat(all.map { s.chapterAt(it.address) }).containsExactly(0, 0, 1, 1, 1, 1, 1, 2, 2).inOrder()
+        // Reading order, for a reader's saved place.
+        assertThat(s.compare(all[1].address, all[5].address)!!).isLessThan(0)
+        assertThat(s.compare(all[5].address, all[5].address)).isEqualTo(0)
+        assertThat(s.compare(all[5].address, ReadAddress.Article("p", "Rosetta_Stone", "gone", 0))).isNull()
+    }
+
+    @Test fun anArticleWithoutSectionsIsReadAsOne() = runTest {
+        val plain = ArticleReadSource(FakeZimArchive("p", contents = mapOf("Stub" to "<html><body><h1>Stub</h1><p>Short. Text.</p></body></html>")), "p", "Stub", "Stub", Dispatchers.Unconfined)
+        assertThat(plain.chapters()).isEmpty()
+        assertThat(plain.chapterAt(plain.firstAddress()!!)).isNull()
+    }
+
     @Test fun aMissingPageReadsAsNothing() = runTest {
         val empty = ArticleReadSource(FakeZimArchive("p"), "p", "Nothing", "Nothing", Dispatchers.Unconfined)
         assertThat(empty.utterances(null, 10)).isEmpty()

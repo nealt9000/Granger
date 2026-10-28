@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +41,7 @@ import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
 import app.granger.core.player.SavedVoice
 import app.granger.core.player.SleepSetting
+import app.granger.core.player.VoiceChapters
 import app.granger.core.player.voice.VoiceProgress
 import app.granger.core.speech.Voice
 import app.granger.core.speech.VoiceId
@@ -54,6 +58,9 @@ data class ReaderControls(
     val onMix: (Float) -> Unit = {},
     val onPlayPauseMusic: () -> Unit = {},
     val onNextMusic: () -> Unit = {},
+    /** The text's chapters and the current one, read from the voice's source; null when there are none to show. */
+    val chapters: suspend () -> VoiceChapters? = { null },
+    val onChapter: (Int) -> Unit = {},
     val onSleep: (SleepSetting) -> Unit = {},
     val onCancelSleep: () -> Unit = {},
     val onStop: () -> Unit = {},
@@ -68,13 +75,14 @@ fun PlayerViewModel.readerControls(onOpen: (NowPlaying.Voice) -> Unit, onResume:
     onPlayPause = ::playPause, onPreviousParagraph = ::previousParagraph, onBackSentence = ::previousSentence,
     onNextSentence = ::nextSentence, onNextParagraph = ::nextParagraph, onSpeed = ::setSpeed, onVoice = ::setVoice,
     onMix = ::setMixLevel, onPlayPauseMusic = ::playPauseMusic, onNextMusic = ::nextMusic,
+    chapters = ::voiceChapters, onChapter = ::jumpToChapter,
     onSleep = ::startSleepTimer, onCancelSleep = ::cancelSleepTimer, onStop = ::stopVoice, onOpen = onOpen, onResume = onResume,
 )
 
 /**
  * The player's Reader tab (Plan U2 Decision 5), the voice's full player: the title and section; the sentence being
  * read in large type with the ones around it dimmed; previous paragraph, back a sentence, play/pause, next sentence,
- * next paragraph; the speed and the voice; the music under the voice with its level and its own play/pause and next,
+ * next paragraph; the text's chapters (a book's contents, an article's sections); the speed and the voice; the music under the voice with its level and its own play/pause and next,
  * when music plays; the sleep timer; Stop; and Open, to the page being read. With the voice not loaded it offers to
  * resume the last thing read ([SavedModes.voice]) and says how to start one.
  */
@@ -87,6 +95,10 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
         return
     }
     var sleepSheet by remember { mutableStateOf(false) }
+    var chaptersSheet by remember { mutableStateOf(false) }
+    // Re-read as the section changes, so the row and the sheet's mark follow the voice.
+    var chapters by remember(voice.sourceKey) { mutableStateOf<VoiceChapters?>(null) }
+    LaunchedEffect(voice.sourceKey, voice.section) { chapters = controls.chapters() }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).playerInsets().padding(horizontal = 24.dp).padding(bottom = 16.dp)
             .testTag(ReaderTags.ROOT),
@@ -110,6 +122,24 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
                 Icon(painterResource(R.drawable.ic_forward), contentDescription = "Next sentence")
             }
             IconButton(onClick = controls.onNextParagraph) { Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next paragraph") }
+        }
+        chapters?.takeIf { it.chapters.isNotEmpty() }?.let { c ->
+            HorizontalDivider()
+            Row(
+                Modifier.fillMaxWidth().clickable { chaptersSheet = true }.padding(vertical = 8.dp).testTag(ReaderTags.CHAPTERS),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)
+                Spacer(Modifier.size(12.dp))
+                Text("Chapters", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                c.current?.let { i -> c.chapters.getOrNull(i)?.let { i to it } }?.let { (i, here) ->
+                    Text(
+                        here.title.ifBlank { "Chapter ${i + 1}" }, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                }
+            }
         }
         HorizontalDivider()
         SpeedRow(voice.speed, controls.onSpeed)
@@ -136,6 +166,14 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
             OutlinedButton(onClick = controls.onStop, modifier = Modifier.weight(1f).testTag(ReaderTags.STOP)) { Text("Stop") }
             Button(onClick = { controls.onOpen(voice) }, modifier = Modifier.weight(1f).testTag(ReaderTags.OPEN)) { Text("Open") }
         }
+    }
+    val shown = chapters
+    if (chaptersSheet && shown != null) {
+        ReadChaptersSheet(
+            shown.chapters, shown.current,
+            onPick = { controls.onChapter(it); chaptersSheet = false },
+            onDismiss = { chaptersSheet = false },
+        )
     }
     if (sleepSheet) {
         SleepTimerSheet(
