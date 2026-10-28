@@ -70,7 +70,7 @@ class RailTest {
     /** Every item is a tile here, too little to tell apart: a tap opens the full rail, as does History. */
     @Test fun tappingATileOrHistoryInTheNarrowRailOpensTheFullRailInstead() {
         shell()
-        for (description in listOf("Owls", "Gone, not available", "Recent search: cats", "Research chat: About owls", "Play again: Blue", "History")) {
+        for (description in listOf("Owls", "Gone, not available", "Recent search: cats", "Ask chat: About owls", "Play again: Blue", "History")) {
             expanded = false
             compose.waitForIdle()
             compose.onNodeWithContentDescription(description).performClick()
@@ -108,7 +108,7 @@ class RailTest {
             node.config.getOrNull(SemanticsActions.OnClick)?.label != null &&
                 node.config.getOrNull(SemanticsActions.OnLongClick)?.label != null
         }
-        for (description in listOf("Owls", "Gone, not available", "Recent search: cats", "Research chat: About owls", "Play again: Blue")) {
+        for (description in listOf("Owls", "Gone, not available", "Recent search: cats", "Ask chat: About owls", "Play again: Blue")) {
             compose.onNode(hasContentDescription(description) and labelled).assertExists()
         }
         assertThat(compose.onNodeWithContentDescription("Owls").fetchSemanticsNode().config[SemanticsActions.OnLongClick].label)
@@ -163,7 +163,7 @@ class RailTest {
 
     @Test fun longPressInTheNarrowRailOffersTheSameMenu() {
         shell()
-        compose.onNodeWithContentDescription("Research chat: About owls").performTouchInput { longClick() }
+        compose.onNodeWithContentDescription("Ask chat: About owls").performTouchInput { longClick() }
         compose.onNodeWithText("Pin to top").performClick()
         compose.waitForIdle()
         assertThat(calls).containsExactly("pin:chat:7")

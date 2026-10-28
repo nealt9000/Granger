@@ -4,11 +4,11 @@ import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
-import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.UseCase
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.vectors
+import app.granger.research.Librarian
 
 /**
  * One row the user can untick: a pack, or a collection's books folded together ([count] > 1). [installed] rows are on
@@ -100,9 +100,7 @@ object OnboardingModel {
      */
     fun askLine(catalog: Catalog, tier: DeviceTier, dense: Boolean, installed: Set<String>): Line? {
         if (tier < DeviceTier.ASK) return null
-        val answerer = catalog.models.firstOrNull { it.role == ModelRole.SMALL } ?: return null
-        val embedder = if (dense) catalog.models.firstOrNull { it.role == ModelRole.EMBEDDER } else null
-        val items = listOfNotNull(answerer, embedder).filter { it.id !in installed }
+        val items = Librarian.models(catalog, dense).filter { it.id !in installed }
         return if (items.isEmpty()) null else Line(ASK, "Ask (Preview)", items, installed = false)
     }
 

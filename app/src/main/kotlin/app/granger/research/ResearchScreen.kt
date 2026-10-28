@@ -27,12 +27,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -48,30 +50,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.TurnOutcome
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
-import app.granger.research.ResearchViewModel.TurnUi
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import app.granger.R
+import app.granger.formatBytes
 import app.granger.player.VoiceButton
+import app.granger.research.ResearchViewModel.TurnUi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -85,7 +88,9 @@ object ResearchTags {
     const val STOP_READING = "research_stop_reading"
 }
 private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
-private const val MODELS_MISSING = "Research needs the Gemma 4 E2B model. Get it in Settings → Models."
+private const val MODELS_MISSING = "Ask needs the librarian on this phone. Get it in Settings → Models."
+private const val INTRO = "Ask a question; the librarian answers from your library and shows where each part came from. " +
+    "It's a preview: it can be wrong, so check the sources."
 private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
 private const val SEARCH_FAILED = "Couldn't search your library. Try again."
 private const val INTERRUPTED = "Stopped before an answer."
@@ -121,6 +126,10 @@ private sealed interface ThreadRow {
         override val key get() = sourceKey(turnId, n)
     }
 
+    data object Intro : ThreadRow {
+        override val key get() = "intro"
+    }
+
     data object RecentHeader : ThreadRow {
         override val key get() = "recent"
     }
@@ -143,6 +152,8 @@ private fun rows(state: ResearchViewModel.State): List<ThreadRow> = buildList {
             turn.shown.forEachIndexed { i, passage -> add(ThreadRow.Source(turn.id, i + 1, passage)) }
         }
     }
+    // The landing: what Ask is, above the recent chats (Plan U3a Decision 8). Not over a reader's quote.
+    if (state.turns.isEmpty() && state.quote == null) add(ThreadRow.Intro)
     if (state.turns.isEmpty() && state.recentChats.isNotEmpty()) {
         add(ThreadRow.RecentHeader)
         state.recentChats.forEach { add(ThreadRow.Recent(it)) }
@@ -162,6 +173,9 @@ fun ResearchScreen(
     onOpenCitation: (CitationTarget) -> Unit,
     onSearch: (String) -> Unit,
     onGetModels: () -> Unit,
+    /** Ask's models and their download, for the empty state; null when the catalog offers none (Settings → Models then). */
+    librarian: LibrarianUi?,
+    onGetLibrarian: () -> Unit,
     onReadiness: () -> Unit,
     onOpenChat: (Long) -> Unit,
     onNewChat: () -> Unit,
@@ -251,7 +265,7 @@ fun ResearchScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
-                title = { Text("Research") },
+                title = { AskTitle() },
                 actions = {
                     IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = "New chat") }
                     var menu by remember { mutableStateOf(false) }
@@ -275,8 +289,9 @@ fun ResearchScreen(
         bottomBar = {
             Column(Modifier.navigationBarsPadding().imePadding()) {
                 when (state.readiness) {
-                    ResearchReadiness.MODELS_MISSING -> Notice(MODELS_MISSING, "Get models", onGetModels)
-                    ResearchReadiness.UNSUPPORTED -> Notice("Research needs a phone with 6 GB of memory.")
+                    ResearchReadiness.MODELS_MISSING ->
+                        if (librarian != null) LibrarianNotice(librarian, onGetLibrarian) else Notice(MODELS_MISSING, "Get models", onGetModels)
+                    ResearchReadiness.UNSUPPORTED -> Notice("Ask needs a phone with 6 GB of memory.")
                     ResearchReadiness.READY -> Unit
                 }
                 state.quote?.let { QuoteCard(it, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) }
@@ -314,6 +329,12 @@ fun ResearchScreen(
                     is ThreadRow.Source -> SourceCard(
                         row.n, row.passage, flashing == row.key, onOpen = { open(row.turnId, row.n) },
                         onPlay = if (viewModel.canPlay && row.passage.kind == SourceKind.MEDIA) ({ play(row.turnId, row.n) }) else null,
+                    )
+                    ThreadRow.Intro -> Text(
+                        INTRO,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
                     )
                     ThreadRow.RecentHeader -> Text(
                         "Recent chats",
@@ -587,7 +608,56 @@ private fun Banner(text: String) {
     )
 }
 
-/** Why Research can't run here, with the way to fix it when there is one. */
+/** "Ask" with its Preview tag (Plan U3a Decisions 7–8). */
+@Composable
+internal fun AskTitle() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Ask")
+        Text(
+            "Preview",
+            Modifier
+                .padding(start = 10.dp)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                .padding(horizontal = 6.dp, vertical = 1.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** The librarian's download in place of a trip to Settings → Models: Get, its progress, or Try again. */
+@Composable
+internal fun LibrarianNotice(ui: LibrarianUi, onGet: () -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        when {
+            ui.downloading -> {
+                Text(
+                    "Downloading the librarian · ${formatBytes(ui.bytesDone)} of ${formatBytes(ui.bytes)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                LinearProgressIndicator(
+                    progress = { if (ui.bytes > 0) (ui.bytesDone.toFloat() / ui.bytes).coerceIn(0f, 1f) else 0f },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            ui.failed -> {
+                Text("The librarian's download stopped.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedButton(onClick = onGet) { Text("Try again") }
+            }
+            else -> {
+                Text(
+                    "Ask needs the librarian on this phone: ${ui.items.first().title.substringBefore(" (")}, ${formatBytes(ui.bytes)}.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(onClick = onGet) { Text("Get the librarian · ${formatBytes(ui.bytes)}") }
+            }
+        }
+    }
+}
+
+/** Why Ask can't run here, with the way to fix it when there is one. */
 @Composable
 private fun Notice(text: String, action: String? = null, onAction: () -> Unit = {}) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -316,7 +316,13 @@ fun NavController.openShelfFromPlayer(mode: PlayerMode) {
 /** How [route] is opened: [replacesChatOnTop] drops a Research chat on top first (its view model would otherwise stay). */
 internal data class ResearchOpening(val route: ResearchRoute, val replacesChatOnTop: Boolean)
 
-internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean) = ResearchOpening(route, researchOnTop)
+/**
+ * Ask's one rule for + and Back (Plan U3a Decision 9): a kept chat picked on Ask's landing ([fromLanding]) is pushed
+ * over it, so Back returns to the landing and Back again leaves Ask; a new chat (+, the rail's tool) replaces a chat on
+ * top. A reader's "Ask about this" is pushed over the reader by its own route.
+ */
+internal fun researchOpening(route: ResearchRoute, researchOnTop: Boolean, fromLanding: Boolean = false) =
+    ResearchOpening(route, replacesChatOnTop = researchOnTop && !fromLanding)
 
 /**
  * A Research chat: [chatId] opens a kept one, 0 starts a new one. [quote] is a reader's selection, from [quoteSourceId]
@@ -522,9 +528,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
     }
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
-    fun openResearch(route: ResearchRoute) {
+    fun openResearch(route: ResearchRoute, fromLanding: Boolean = false) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
-        val open = researchOpening(route, researchOnTop)
+        val open = researchOpening(route, researchOnTop, fromLanding)
         nav.navigate(open.route) { if (open.replacesChatOnTop) popUpTo<ResearchRoute> { inclusive = true } }
     }
 
@@ -831,8 +837,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onSearch = { keywords -> nav.navigate(SearchRoute(keywords)) },
                     onGetModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
+                    librarian = container.librarian.ui.collectAsStateWithLifecycle(null).value,
+                    onGetLibrarian = {
+                        container.appScope.launch {
+                            container.librarian.get()?.let { problem ->
+                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem, Toast.LENGTH_LONG).show() }
+                            }
+                        }
+                    },
                     onReadiness = { nav.navigate(ReadinessRoute) },
-                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId)) },
+                    onOpenChat = { chatId -> openResearch(ResearchRoute(chatId), fromLanding = true) },
                     onNewChat = { openResearch(ResearchRoute()) },
                     onBack = { nav.popBackStack() },
                 )

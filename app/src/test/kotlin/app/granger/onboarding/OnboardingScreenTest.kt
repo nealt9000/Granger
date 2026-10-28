@@ -42,7 +42,7 @@ class OnboardingScreenTest {
     private val line = Line(med.id, med.title, listOf(med), installed = false)
     private val efficient = StartChoice("efficient", "Efficient start", "The essentials.", listOf(line))
     private val internal = volume("/internal", "Internal storage", free = 10_000, total = 64_000)
-    private val phone = PhoneUi("A library phone, with about 7 GB of memory.", "Research needs 6 GB.", listOf(internal), 1_000, 1_375)
+    private val phone = PhoneUi("A library phone, with about 7 GB of memory.", "Ask needs 6 GB.", listOf(internal), 1_000, 1_375)
 
     private fun show(ui: OnboardingUi) = compose.setContent { OnboardingContent(ui, actions) }
 
@@ -58,7 +58,7 @@ class OnboardingScreenTest {
     @Test fun thisPhoneShowsTheTierStorageAndSizes() {
         show(OnboardingUi(step = Step.PHONE, phone = phone))
         compose.onNodeWithText("A library phone, with about 7 GB of memory.").assertIsDisplayed()
-        compose.onNodeWithText("Research needs 6 GB.").assertIsDisplayed()
+        compose.onNodeWithText("Ask needs 6 GB.").assertIsDisplayed()
         compose.onNodeWithText("Internal storage: 10 KB free of 64 KB").assertIsDisplayed()
         compose.onNodeWithText("Back").performClick()
         assertThat(calls).containsExactly("back")

@@ -529,6 +529,9 @@ class AppContainer(context: Context) {
         appScope, useEmbedder = embedderWanted::get,
     )
 
+    /** Ask's models, fetched from Ask's own empty state (Plan U3a). */
+    val librarian = app.granger.research.Librarian(catalog, downloads, volumes, downloadPrefs, DENSE_RETRIEVAL)
+
     val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex)
 
     /** Search vectors follow their pack or book (Plan R1 Task 10): queued when it installs, removed with it. */

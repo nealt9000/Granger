@@ -324,7 +324,7 @@ class SourceViewModel(
                 is ModelEntry -> when (item.role) {
                     ModelRole.SMALL -> ""
                     ModelRole.LARGE -> "Not used"
-                    ModelRole.EMBEDDER -> if (DENSE_RETRIEVAL) "Used by Research" else "Not used yet"
+                    ModelRole.EMBEDDER -> if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet"
                 }
                 is VoiceEntry -> item.attribution
             }

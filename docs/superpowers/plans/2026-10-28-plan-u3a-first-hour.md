@@ -125,11 +125,11 @@
 
 ### Task 5: Ask
 
-- [ ] Strings (Decision 7). Grep for user-visible "Research" in `app/src/main` (strings, `Text(`, `contentDescription`, `onClickLabel`, enum labels) and change each one. List them in the commit message.
-- [ ] Landing (Decision 8): title + Preview tag, the intro line, and Get the librarian with in-place progress. `ResearchViewModel` gains `getModels()` (enqueue) and `modelDownload: Progress?` from `downloads.records`.
-- [ ] + and Back (Decision 9) in `GrangerNavHost` (`openResearch`, `researchOpening`, the rail tool, `onNewChat`, `onOpenChat`). Update `ResearchOpeningTest`. Add the five paths from Review Focus as tests.
-- [ ] A first `ResearchScreenTest` (Robolectric Compose): the landing shows Ask, Preview and the intro; MODELS_MISSING shows Get the librarian; while downloading the field stays disabled and the progress shows.
-- [ ] **Commit.** `Ask: the name, a landing that explains itself, the librarian in place, + and Back`
+- [x] Strings (Decision 7). Grep for user-visible "Research" in `app/src/main` (strings, `Text(`, `contentDescription`, `onClickLabel`, enum labels) and change each one. List them in the commit message.
+- [x] Landing (Decision 8): title + Preview tag, the intro line, and Get the librarian with in-place progress. `ResearchViewModel` gains `getModels()` (enqueue) and `modelDownload: Progress?` from `downloads.records`.
+- [x] + and Back (Decision 9) in `GrangerNavHost` (`openResearch`, `researchOpening`, the rail tool, `onNewChat`, `onOpenChat`). Update `ResearchOpeningTest`. Add the five paths from Review Focus as tests.
+- [x] *(Built as `AskLandingTest` over the extracted `AskTitle` and `LibrarianNotice`, plus `LibrarianTest`: `ResearchScreen` takes its view model whole.)* A first `ResearchScreenTest` (Robolectric Compose): the landing shows Ask, Preview and the intro; MODELS_MISSING shows Get the librarian; while downloading the field stays disabled and the progress shows.
+- [x] **Commit.** `Ask: the name, a landing that explains itself, the librarian in place, + and Back`
 
 ### Task 6: Small truths
 

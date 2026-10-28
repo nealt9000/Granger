@@ -160,7 +160,7 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
             item(key = "speak-answers") {
                 ListItem(
                     headlineContent = { Text("Speak answers as they arrive") },
-                    supportingContent = { Text("Research reads a new answer aloud while it is written. Any answer can be read from its speaker button.") },
+                    supportingContent = { Text("Ask reads a new answer aloud while it is written. Any answer can be read from its speaker button.") },
                     trailingContent = { Switch(checked = ui.speakAnswers, onCheckedChange = viewModel::setSpeakAnswers, modifier = Modifier.testTag(VoiceSettingsTags.SPEAK_ANSWERS)) },
                 )
             }
