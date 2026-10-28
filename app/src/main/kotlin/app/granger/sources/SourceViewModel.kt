@@ -72,11 +72,61 @@ data class ItemRow(
 
 /**
  * A heading and the rows shown under it. A [foldable] section shows its first [SourceViewModel.FOLDED_ROWS] rows until
- * Show all; [total] counts all of them.
+ * Show all; [total] counts all of them, which are [noun] ("Show all 40 books").
  */
-data class Section(val title: String, val rows: List<ItemRow>, val total: Int = rows.size, val foldable: Boolean = false)
+data class Section(
+    val title: String,
+    val rows: List<ItemRow>,
+    val total: Int = rows.size,
+    val foldable: Boolean = false,
+    val noun: String = "packs",
+)
 
-data class PresetRow(val id: String, val title: String, val itemCount: Int, val remainingCount: Int, val remainingBytes: Long)
+/**
+ * A preset's items counted by kind, with their size: [packs], [books] and [others] (models and voices). [onPhone] are
+ * installed, [downloading] queued or downloading; [remainingCount] of [remainingBytes] are what Get all would queue.
+ */
+data class PresetRow(
+    val id: String,
+    val title: String,
+    val itemCount: Int,
+    val remainingCount: Int,
+    val remainingBytes: Long,
+    val packs: Int = 0,
+    val books: Int = 0,
+    val others: Int = 0,
+    val totalBytes: Long = 0,
+    val onPhone: Int = 0,
+    val downloading: Int = 0,
+)
+
+/** A preset's lines (Plan U3b Decision 13). */
+object PresetText {
+    /** "12 packs and 347 books · 17.7 GB". */
+    fun summary(row: PresetRow): String {
+        val kinds = listOfNotNull(
+            count(row.packs, "pack", "packs"), count(row.books, "book", "books"), count(row.others, "model", "models"),
+        )
+        val joined = if (kinds.size <= 1) kinds.joinToString() else kinds.dropLast(1).joinToString(", ") + " and " + kinds.last()
+        return "$joined · ${formatBytes(row.totalBytes)}"
+    }
+
+    /** "All on this phone"; else "3 downloading", "9 of 12 to get", or both. */
+    fun status(row: PresetRow): String {
+        if (row.onPhone >= row.itemCount) return "All on this phone"
+        val toGet = row.itemCount - row.onPhone - row.downloading
+        return listOfNotNull(
+            if (row.downloading > 0) "${row.downloading} downloading" else null,
+            if (toGet > 0) "$toGet of ${row.itemCount} to get" else null,
+        ).joinToString(" · ")
+    }
+
+    private fun count(n: Int, one: String, many: String) = when (n) {
+        0 -> null
+        1 -> "1 $one"
+        else -> "$n $many"
+    }
+}
 
 enum class SourceTab(val title: String) { BROWSE("Browse"), INSTALLED("Installed"), UPDATES("Updates") }
 
@@ -370,10 +420,12 @@ class SourceViewModel(
         val chosen = s.category?.takeIf { it in categories }
         // The Kiwix screen lists the whole catalog, so its categories fold until Show all, except while searching.
         val folds = kiwix && needle.isEmpty() && chosen == null && !inDomain
-        fun section(title: String, entries: List<CatalogItem>): Section {
-            val open = !folds || title in s.expanded || entries.size <= FOLDED_ROWS
+        // Granger's book categories fold the same way, so Classics' ~350 books don't load as one list (Plan U3b Decision 13).
+        val booksFold = scope == CatalogScope.GRANGER && needle.isEmpty()
+        fun section(title: String, entries: List<CatalogItem>, folding: Boolean = folds, noun: String = "packs"): Section {
+            val open = !folding || title in s.expanded || entries.size <= FOLDED_ROWS
             val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::row)
-            return Section(title, rows, entries.size, foldable = folds && entries.size > FOLDED_ROWS)
+            return Section(title, rows, entries.size, foldable = folding && entries.size > FOLDED_ROWS, noun = noun)
         }
         val sections = if (current == null) emptyList() else buildList {
             val models = current.models.filter(::shown)
@@ -396,12 +448,19 @@ class SourceViewModel(
                 .forEach { (category, entries) -> add(section(category, entries)) }
             // Books come after the packs, grouped by category in catalog order.
             current.books.filter(::shown).groupBy { it.category }
-                .forEach { (category, entries) -> add(Section(category, entries.map(::row))) }
+                .forEach { (category, entries) -> add(section(category, entries, folding = booksFold, noun = "books")) }
         }
         val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
-            val todo = items.filter { wanted(status(it)) }
-            PresetRow(preset.id, preset.title, items.size, todo.size, todo.sumOf { it.downloadBytes })
+            val statuses = items.map(::status)
+            val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
+            PresetRow(
+                preset.id, preset.title, items.size, todo.size, todo.sumOf { it.downloadBytes },
+                packs = items.count { it is PackEntry }, books = items.count { it is BookEntry },
+                others = items.count { it !is PackEntry && it !is BookEntry }, totalBytes = items.sumOf { it.downloadBytes },
+                onPhone = statuses.count { it == ItemStatus.Installed },
+                downloading = statuses.count { it is ItemStatus.Queued || it is ItemStatus.Downloading },
+            )
         }
         return SourceUi(
             tab = s.tab,

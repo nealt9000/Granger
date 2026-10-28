@@ -121,6 +121,26 @@ class HomeViewModelTest {
         assertThat(vm.ui.value.continueCards).hasSize(HomeViewModel.CONTINUE)
     }
 
+    @Test fun continueLeavesOutMainPagesAndIndexPages() = runTest(main.dispatcher) {
+        installWikipedia()
+        fun page(id: Long, packId: String, path: String) =
+            RailEntry.Tab(RailTabUi(id, path, "A pack", 'P', available = true, current = false, packId = packId, path = path), at = id)
+        val cat = page(1, "u1", "Cat")
+        val front = page(2, "u1", "index")
+        val user = page(3, "se", "users/7/apocalypse")
+        val tags = page(4, "se", "tags")
+        val question = page(5, "se", "questions/12/the-end")
+        val book = RailEntry.Tab(RailTabUi(6, "Emma", "Jane Austen", 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
+        rail.value = RailUi(listOf(cat, front, user, tags, question, book))
+        assertThat(viewModel().ui.value.continueCards).containsExactly(cat, question, book).inOrder()
+    }
+
+    @Test fun continueCardsIsPureOverTheMainPaths() {
+        val front = RailEntry.Tab(RailTabUi(1, "WikEM", "WikEM", 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
+        assertThat(HomeViewModel.continueCards(RailUi(listOf(front)))).containsExactly(front)
+        assertThat(HomeViewModel.continueCards(RailUi(listOf(front)), mapOf("w" to "Main_Page"))).isEmpty()
+    }
+
     @Test fun dotsAndTheSentenceFollowTheReport() {
         assertThat(dotAlpha(Coverage.NONE)).isLessThan(dotAlpha(Coverage.BASIC))
         assertThat(dotAlpha(Coverage.BASIC)).isLessThan(dotAlpha(Coverage.COMPREHENSIVE))

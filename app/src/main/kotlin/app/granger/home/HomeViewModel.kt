@@ -13,6 +13,7 @@ import app.granger.core.library.FeedKind
 import app.granger.core.library.HomeDraw
 import app.granger.core.library.HomeFeed
 import app.granger.core.library.HomeFeeds
+import app.granger.core.library.IndexPages
 import app.granger.core.library.Library
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.PackStatus
@@ -119,9 +120,16 @@ class HomeViewModel(
 
     private val setup = downloads.records.map { setupProgress(it) }
 
-    val ui: StateFlow<HomeUi> = combine(strip, rail, feedRows, snapshot, setup) { report, railUi, rows, snap, progress ->
+    /** Each OK pack's main entry, for Continue to leave out (opening an archive reads its file, so on [io]). */
+    private val mainPaths: Flow<Map<String, String>> = library.packs.map { packs ->
+        packs.filter { it.status == PackStatus.OK }.mapNotNull { pack -> library.archive(pack.id)?.mainPath?.let { pack.id to it } }.toMap()
+    }.flowOn(io)
+
+    private val continuing = combine(rail, mainPaths) { railUi, mains -> continueCards(railUi, mains) }
+
+    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, setup) { report, cards, rows, snap, progress ->
         HomeUi(
-            strip = report, continueCards = continueCards(railUi), feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
+            strip = report, continueCards = cards, feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
             scopeChoices = scopeChoices(snap), setup = progress,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
@@ -200,10 +208,18 @@ class HomeViewModel(
 
         /**
          * The rail's tabs and plays, pins first, then newest; searches, chats and the voice's live row are not "continue".
-         * From [RailUi.recent], so Continue isn't cut to the rail's four.
+         * From [RailUi.recent], so Continue isn't cut to the rail's four. A tab on its pack's main page ([mainPaths], by
+         * pack id) or an index page ([IndexPages]) wasn't read, so it isn't continued (Plan U3b Decision 12).
          */
-        fun continueCards(rail: RailUi): List<RailEntry> =
-            rail.recent.filter { it is RailEntry.Tab || it is RailEntry.Play }.take(CONTINUE)
+        fun continueCards(rail: RailUi, mainPaths: Map<String, String> = emptyMap()): List<RailEntry> =
+            rail.recent.filter { entry ->
+                when (entry) {
+                    is RailEntry.Tab -> entry.tab.path.isEmpty() ||
+                        (entry.tab.path != mainPaths[entry.tab.packId] && !IndexPages.isIndex(entry.tab.path))
+                    is RailEntry.Play -> true
+                    else -> false
+                }
+            }.take(CONTINUE)
 
         /** What the Add feed dialog offers: the library, each whole pack, each collection, music and audiobooks when there are any. */
         fun scopeChoices(snap: LibrarySnapshot): List<ScopeChoice> {

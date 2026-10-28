@@ -44,6 +44,9 @@ data class RailTabUi(
     val current: Boolean,
     /** A book's cover image file, drawn instead of the letter tile when it can be decoded. */
     val coverPath: String? = null,
+    /** An article tab's pack and page, for Home's Continue to leave out main and index pages; empty for a book. */
+    val packId: String = "",
+    val path: String = "",
 )
 
 /**
@@ -70,6 +73,18 @@ sealed interface RailEntry {
     /** Music or an audiobook; [playKey] is the `RecentPlay` key ("album:<albumKey>", "audiobook:<id>", "songs", …). */
     data class Play(val playKey: String, val title: String, override val at: Long, override val pinned: Boolean = false) : RailEntry {
         override val key get() = "$PLAY$playKey"
+
+        /** What was played, by its key: "Album", "Audiobook", "Read aloud" (Plan U3b Decision 12). */
+        val kind: String get() = when {
+            playKey.startsWith("audiobook:") -> "Audiobook"
+            playKey.startsWith("voice:") -> "Read aloud"
+            playKey.startsWith("playlist:") -> "Playlist"
+            playKey.startsWith("artist:") -> "Artist"
+            playKey.startsWith("genre:") -> "Genre"
+            playKey.startsWith("folder:") -> "Folder"
+            playKey == "songs" -> "Songs"
+            else -> "Album"
+        }
     }
 
     /** The voice reading [title] now (Plan V2): heads the list while it is loaded; tapping it opens the page. Not pinnable. */
@@ -234,6 +249,8 @@ class RailViewModel(
                 initial = initialOf(tab.title),
                 available = pack?.status == PackStatus.OK,
                 current = tab.id == current,
+                packId = tab.packId,
+                path = tab.path,
             )
         }
         return RailEntry.Tab(ui, tab.openedAt)

@@ -293,10 +293,13 @@ Paths: `A/` = `app/src/main/kotlin/app/granger/`, `CL/` = `core/library/src/main
 
 ### Task 9: Continue and Classics
 
-- [ ] `HomeViewModel.continueCards`: drop tabs on their pack's main page or an `IndexPages` page. A play's subtitle names its kind. `HomeViewModelTest`, `HomeScreenTest`.
-- [ ] Granger source: fold categories past 8 with "Show all N books". Preset lines count by kind with the status words of Decision 13. `SourceViewModelTest`.
+- [x] `HomeViewModel.continueCards`: drop tabs on their pack's main page or an `IndexPages` page. A play's subtitle names its kind. `HomeViewModelTest`, `HomeScreenTest`.
+  *(Built: `RailTabUi` now carries an article tab's `packId` and `path` (empty for a book, which is never dropped). Home reads each OK pack's `mainPath` on `io` and passes them to `continueCards(rail, mainPaths)`. A tab with no path yet is kept. `RailEntry.Play.kind` reads the key: "Album", "Audiobook", "Read aloud", and "Playlist", "Artist", "Genre", "Folder", "Songs" for the other music keys. The rail's TalkBack label still says "Play again: …".)*
+- [x] Granger source: fold categories past 8 with "Show all N books". Preset lines count by kind with the status words of Decision 13. `SourceViewModelTest`.
+  *(Built: `Section.noun` ("packs" or "books") names the foot row. Book categories fold on the Granger screen unless a search is typed; Granger's own pack categories don't fold, as before. `PresetRow` gains the counts by kind (packs, books, others for models and voices), the total size, `onPhone` and `downloading`; `PresetText.summary` reads "12 packs and 347 books · 17.7 GB" (a model counts as "1 model"), and `PresetText.status` "All on this phone", "3 downloading", "9 of 12 to get", or "3 downloading · 9 of 12 to get" when both. The headline stays "<title> set"; the two lines sit under it, and Get all shows while anything is left to get.)*
 - [ ] `CollectionScreen`: profile the Classics grid on the Pixel (frame stats via `adb shell dumpsys gfxinfo app.granger`, before and after). Decode covers off the main thread at cell size if that's the cost.
-- [ ] **Commit.** `Continue is what you read; Classics in pieces; presets counted by kind`
+  *(Needs the phone. Code side checked: `BookCover` already decodes through `rememberRailCover`, which reads bounds first and decodes on `Dispatchers.IO` with a power-of-two `inSampleSize` for the cell's width (so up to twice the cell), into a 4 MB `LruCache` shared with the rail. So nothing changed here. If the Pixel shows jank, the suspects are that cache (only a few cell-sized covers fit, so scrolling back re-decodes) and the power-of-two sample; an exact-size scale or a bigger cache would be the fix.)*
+- [x] **Commit.** `Continue is what you read; Classics in pieces; presets counted by kind`
 
 ### Task 10: Walkthrough (Neal, Pixel 6)
 

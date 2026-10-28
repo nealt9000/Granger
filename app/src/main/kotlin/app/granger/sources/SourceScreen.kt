@@ -235,7 +235,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
                 }
                 if (section.foldable) {
                     item(key = moreKey(index, section)) {
-                        val text = if (section.rows.size < section.total) "Show all ${section.total} packs" else "Show fewer packs"
+                        val text = if (section.rows.size < section.total) "Show all ${section.total} ${section.noun}" else "Show fewer ${section.noun}"
                         ListItem(
                             modifier = Modifier.clickable { toggle(index, section) },
                             headlineContent = { Text(text, color = MaterialTheme.colorScheme.primary) },
@@ -279,10 +279,10 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
     ListItem(
         headlineContent = { Text("${preset.title} set") },
         supportingContent = {
-            Text(
-                if (preset.remainingCount == 0) "All ${preset.itemCount} items are here or on their way."
-                else "${preset.remainingCount} of ${preset.itemCount} items to get · ${formatBytes(preset.remainingBytes)}",
-            )
+            Column {
+                Text(PresetText.summary(preset))
+                Text(PresetText.status(preset))
+            }
         },
         trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text("Get all") } },
     )

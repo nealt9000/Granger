@@ -227,7 +227,7 @@ private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
 
 @Composable
 private fun PlayCard(entry: RailEntry.Play, onClick: () -> Unit) {
-    Card(title = entry.title, subtitle = "Play again", enabled = true, onClick = onClick) {
+    Card(title = entry.title, subtitle = entry.kind, enabled = true, onClick = onClick) {
         IconTile(rememberVectorPainter(Icons.Filled.PlayArrow))
     }
 }

@@ -401,6 +401,52 @@ class SourceViewModelTest {
         assertThat(viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }).isEmpty()
     }
 
+    @Test fun grangerBookCategoriesFoldPastEight() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(books = (1..12).map { bookEntry("n$it", "Novels") } + listOf(bookEntry("hamlet", "Plays"))),
+        )
+        val vm = viewModel()
+        val novels = vm.ui.value.sections.first { it.title == "Novels" }
+        assertThat(novels.rows).hasSize(SourceViewModel.FOLDED_ROWS)
+        assertThat(novels.total).isEqualTo(12)
+        assertThat(novels.foldable).isTrue()
+        assertThat(novels.noun).isEqualTo("books")
+        assertThat(vm.ui.value.sections.first { it.title == "Plays" }.foldable).isFalse()
+        vm.toggleSection("Novels")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.first { it.title == "Novels" }.rows).hasSize(12)
+        // A search shows every match unfolded.
+        vm.toggleSection("Novels")
+        vm.setQuery("Book n")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.first { it.title == "Novels" }.let { it.rows.size to it.foldable }).isEqualTo(12 to false)
+    }
+
+    @Test fun presetsCountByKindAndSayWhatsOnThePhone() = runTest(main.dispatcher) {
+        val starter = viewModel().ui.value.presets.single()
+        assertThat(listOf(starter.packs, starter.books, starter.others)).containsExactly(3, 0, 1).inOrder()
+        assertThat(PresetText.summary(starter)).isEqualTo("3 packs and 1 model · ${app.granger.formatBytes(5_000)}")
+        assertThat(PresetText.status(starter)).isEqualTo("4 of 4 to get")
+
+        library.packList.value = listOf(pack("u-med"))
+        downloads.list.value = listOf(record("top", DownloadState.RUNNING))
+        val partway = viewModel().ui.value.presets.single()
+        assertThat(PresetText.status(partway)).isEqualTo("1 downloading · 2 of 4 to get")
+
+        library.packList.value = listOf(pack("u-med"), pack("u-top"), pack("u-voyage"))
+        downloads.list.value = listOf(record("e2b", DownloadState.INSTALLED, sha256 = e2b.sha256))
+        assertThat(PresetText.status(viewModel().ui.value.presets.single())).isEqualTo("All on this phone")
+    }
+
+    @Test fun presetLinesReadAsPlanned() {
+        val efficient = PresetRow("e", "Efficient start", 359, 0, 0, packs = 12, books = 347, totalBytes = 17_700_000_000)
+        assertThat(PresetText.summary(efficient)).startsWith("12 packs and 347 books · ")
+        assertThat(PresetText.summary(efficient.copy(packs = 1, books = 0))).startsWith("1 pack · ")
+        assertThat(PresetText.summary(efficient.copy(others = 2))).startsWith("12 packs, 347 books and 2 models · ")
+        assertThat(PresetText.status(efficient.copy(downloading = 359))).isEqualTo("359 downloading")
+        assertThat(PresetText.status(efficient.copy(onPhone = 359))).isEqualTo("All on this phone")
+    }
+
     @Test fun classicsPresetComesFirst() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(
             catalog = catalogOf(

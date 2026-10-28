@@ -83,9 +83,9 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(1, "gone", "x-ray"), tab(2, "b", "Aspirin"), tab(3, "a", "Hamlet"))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.tabs).containsExactly(
-            RailTabUi(3, "Hamlet", "Classics", 'H', available = true, current = false, coverPath = null),
-            RailTabUi(2, "Aspirin", "WikiMed", 'A', available = false, current = false, coverPath = null),
-            RailTabUi(1, "x-ray", HistoryViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null),
+            RailTabUi(3, "Hamlet", "Classics", 'H', available = true, current = false, coverPath = null, packId = "a", path = "Hamlet"),
+            RailTabUi(2, "Aspirin", "WikiMed", 'A', available = false, current = false, coverPath = null, packId = "b", path = "Aspirin"),
+            RailTabUi(1, "x-ray", HistoryViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null, packId = "gone", path = "x-ray"),
         ).inOrder()
     }
 
