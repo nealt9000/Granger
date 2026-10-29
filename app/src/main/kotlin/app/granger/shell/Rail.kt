@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -58,6 +59,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.Features
 import app.granger.R
@@ -86,6 +88,19 @@ class RailEntryActions(
 
 internal val NarrowRailWidth = 56.dp
 internal val ExpandedRailWidth = 200.dp
+
+/** A narrow-rail tile's height, and the gap below it: each open item or History takes a 56 dp slot. */
+private val NarrowRailTile = 48.dp
+private val NarrowRailGap = 8.dp
+
+/** How many of the narrow rail's open items fit in [height], and whether History does; History is the first to fit. */
+internal data class NarrowRailFit(val items: Int, val history: Boolean)
+
+internal fun narrowRailItemsThatFit(height: Dp, entries: Int): NarrowRailFit {
+    // n slots need n tiles and n - 1 gaps.
+    val slots = ((height + NarrowRailGap) / (NarrowRailTile + NarrowRailGap)).toInt().coerceAtLeast(0)
+    return NarrowRailFit(items = (slots - 1).coerceIn(0, entries), history = slots >= 1)
+}
 
 /** The tools at the top; Research also needs a phone that can run it ([showResearch]). */
 private fun topTools(showResearch: Boolean) =
@@ -183,16 +198,24 @@ internal fun NarrowRail(
     ) {
         topTools(showResearch).forEach { tool -> ToolIcon(tool, selected == tool) { onTool(tool) } }
         RailDivider(Modifier.width(32.dp))
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            rail.entries.forEach { entry ->
-                EntryTile(entry, openAction(entry, onTab, onSearch, onChat, onPlay, onReading), actions)
-            }
-            IconButton(onClick = onHistory) {
-                Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        // The tools and Settings always show; the open items take whole slots of what's left, History first, and drop
+        // from the end (Plan U3c Decision 3). No scrolling, so a short rail (the keyboard up) never cuts a tile in half.
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            val shown = narrowRailItemsThatFit(maxHeight, rail.entries.size)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(NarrowRailGap),
+            ) {
+                rail.entries.take(shown.items).forEach { entry ->
+                    Box(Modifier.size(NarrowRailTile), contentAlignment = Alignment.Center) {
+                        EntryTile(entry, openAction(entry, onTab, onSearch, onChat, onPlay, onReading), actions)
+                    }
+                }
+                if (shown.history) {
+                    IconButton(onClick = onHistory) {
+                        Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
         }
         ToolIcon(RailTool.SETTINGS, selected == RailTool.SETTINGS) { onTool(RailTool.SETTINGS) }

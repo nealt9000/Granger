@@ -17,6 +17,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -49,8 +50,9 @@ class RailTest {
 
     private var rail by mutableStateOf(RailUi(listOf(owls, gone, cats, chat, blue)))
 
-    private fun shell() = compose.setContent {
+    private fun shell(showResearch: Boolean = false) = compose.setContent {
         GrangerShell(
+            showResearch = showResearch,
             rail = rail,
             expanded = expanded,
             railVisible = true,
@@ -260,5 +262,53 @@ class RailTest {
         compose.onNodeWithText("Gone").performClick()
         compose.waitForIdle()
         assertThat(calls).isEmpty()
+    }
+
+    // Plan U3c Decision 3: the tools and Settings always show; the open items take what's left, dropping from the end.
+    private fun tilesShown() = listOf("Owls", "Gone, not available", "Recent search: cats", "Ask chat: About owls")
+        .count { compose.onAllNodesWithContentDescription(it).fetchSemanticsNodes().isNotEmpty() }
+
+    private fun assertToolsAndSettingsShow() {
+        for (tool in listOf("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings")) {
+            compose.onNodeWithContentDescription(tool).assertExists()
+        }
+    }
+
+    @Config(qualifiers = "w411dp-h866dp") // A Pixel 6 less its status and navigation bars.
+    @Test fun aPixel6RailShowsAllFourAndHistory() {
+        rail = RailUi(listOf(owls, gone, cats, chat))
+        shell(showResearch = true)
+        assertToolsAndSettingsShow()
+        assertThat(tilesShown()).isEqualTo(4)
+        compose.onNodeWithContentDescription("History").assertExists()
+    }
+
+    @Config(qualifiers = "w360dp-h640dp")
+    @Test fun a640dpRailDropsTheLastItem() {
+        rail = RailUi(listOf(owls, gone, cats, chat))
+        shell(showResearch = true)
+        assertToolsAndSettingsShow()
+        assertThat(tilesShown()).isEqualTo(3)
+        compose.onAllNodesWithContentDescription("Ask chat: About owls").assertCountEquals(0)
+        compose.onNodeWithContentDescription("History").assertExists()
+    }
+
+    @Config(qualifiers = "w411dp-h450dp") // The keyboard up.
+    @Test fun withTheKeyboardUpOnlyHistoryKeepsItsPlace() {
+        rail = RailUi(listOf(owls, gone, cats, chat))
+        shell(showResearch = true)
+        assertToolsAndSettingsShow()
+        assertThat(tilesShown()).isEqualTo(0)
+        compose.onNodeWithContentDescription("History").assertExists()
+    }
+
+    @Test fun itemsFitInWholeSlotsWithHistoryFirst() {
+        assertThat(narrowRailItemsThatFit(0.dp, 4)).isEqualTo(NarrowRailFit(0, history = false))
+        assertThat(narrowRailItemsThatFit(47.dp, 4)).isEqualTo(NarrowRailFit(0, history = false))
+        assertThat(narrowRailItemsThatFit(48.dp, 4)).isEqualTo(NarrowRailFit(0, history = true))
+        assertThat(narrowRailItemsThatFit(103.dp, 4)).isEqualTo(NarrowRailFit(0, history = true))
+        assertThat(narrowRailItemsThatFit(104.dp, 4)).isEqualTo(NarrowRailFit(1, history = true))
+        assertThat(narrowRailItemsThatFit(1000.dp, 4)).isEqualTo(NarrowRailFit(4, history = true))
+        assertThat(narrowRailItemsThatFit(1000.dp, 2)).isEqualTo(NarrowRailFit(2, history = true))
     }
 }
