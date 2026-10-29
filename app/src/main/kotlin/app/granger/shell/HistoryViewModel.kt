@@ -89,10 +89,12 @@ class HistoryViewModel(
 
     companion object {
         /**
-         * What Clear history keeps from the back stack under History, given each entry's reading tab (null for other
-         * screens), bottom first: only the nearest, the page you came from (Plan U3b, Neal's walkthrough).
+         * What Clear history keeps from the back stack, given each entry's reading tab (null for other screens), bottom
+         * first and History itself on top: the page you came from, when the screen right under History is a reader
+         * (Plan U3b, Neal's walkthrough). Nothing when you came from Home, Browse or any other screen: a reader buried
+         * under it isn't on screen, so its tab goes with the rest (Plan U3c walkthrough: it stayed on the rail).
          */
-        fun keptTab(backStackTabIds: List<Long?>): Set<Long> = setOfNotNull(backStackTabIds.lastOrNull { it != null })
+        fun keptTab(backStackTabIds: List<Long?>): Set<Long> = setOfNotNull(backStackTabIds.dropLast(1).lastOrNull())
 
         const val REMOVED_PACK = "Removed pack"
         const val REMOVED_BOOK = "Removed book"

@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Everything opened (History) and the starred articles (Saved). Tapping a row opens it in a rail tab. The overflow's
- * Clear history asks first, then keeps the pinned tabs and [keepTabIds] (the page you came from).
+ * Clear history asks first, then keeps the pinned tabs and [keepTabIds] (the page you came from, when that was a reader).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
