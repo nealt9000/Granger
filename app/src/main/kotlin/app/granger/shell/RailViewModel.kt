@@ -106,6 +106,10 @@ sealed interface RailEntry {
     }
 }
 
+/** What the voice calls [tab]'s page (`pack:<id>/<path>`) or book (`book:<id>`), as the readers key it. */
+fun readSourceKeyOf(tab: ReadingTab): String =
+    if (BookIds.isBook(tab.packId)) ReadSourceKey.book(tab.packId) else ReadSourceKey.article(tab.packId, tab.path)
+
 /**
  * [entries]: the pins (newest pin first), then the four recent others in the order they arrived (Plan U3b Decision 6).
  * [recent] is what Home's Continue draws on: the pins, then every unpinned item newest first, not cut to four. Neither
@@ -227,9 +231,7 @@ class RailViewModel(
         list.copy(entries = if (marked) entries else listOf(RailEntry.Reading(v.sourceKey, v.title)) + entries)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailUi(emptyList()))
 
-    /** What the voice calls [tab]'s page, as the readers key it. */
-    private fun sourceKey(tab: ReadingTab): String =
-        if (BookIds.isBook(tab.packId)) ReadSourceKey.book(tab.packId) else ReadSourceKey.article(tab.packId, tab.path)
+    private fun sourceKey(tab: ReadingTab): String = readSourceKeyOf(tab)
 
     private sealed interface Found {
         data class Entry(val entry: RailEntry) : Found

@@ -21,7 +21,12 @@ import androidx.navigation.compose.rememberNavController
 import app.granger.LibraryRoute
 import app.granger.ListenPlayerRoute
 import app.granger.SearchRoute
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookOrigin
+import app.granger.core.library.ReadingTab
 import app.granger.core.player.PlayerUi
+import app.granger.core.speech.ReadSourceKey
+import app.granger.shell.readSourceKeyOf
 import app.granger.togglePlayer
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -178,6 +183,23 @@ class MiniPlayerTest {
         assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
         assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
         assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+    }
+
+    /** Plan U3c walkthrough: Play and Pause showed twice while an article was read aloud. */
+    @Test fun miniPlayerHidesInTheReaderTheVoiceIsReading() {
+        // The reader's own page or book: its bar has the controls.
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, readingHere = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        // Music, or another page read aloud: still over the page.
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, readingHere = false)).isEqualTo(MiniPlayerPlacement.OVERLAY)
+        // Off the reader it stays.
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false, readingHere = true)).isEqualTo(MiniPlayerPlacement.PUSH)
+    }
+
+    @Test fun theReadersSourceIsItsTabsPageOrBook() {
+        val article = ReadingTab(1, "wiki", "Owls", "Owls", 1L, onRail = true)
+        val book = ReadingTab(2, BookIds.of(BookOrigin.IMPORT, "b"), "", "A book", 2L, onRail = true)
+        assertThat(readSourceKeyOf(article)).isEqualTo(ReadSourceKey.article("wiki", "Owls"))
+        assertThat(readSourceKeyOf(book)).isEqualTo(ReadSourceKey.book(book.packId))
     }
 
     @Test fun seekBarSeeksOnReleaseNotWhileDragging() {

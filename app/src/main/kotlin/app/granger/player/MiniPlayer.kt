@@ -52,9 +52,14 @@ enum class MiniPlayerPlacement {
     OVERLAY,
 }
 
-/** Nothing loaded, or the full-screen player showing: hidden. In a reader it goes over the page; elsewhere it pushes the screen down. */
-fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean): MiniPlayerPlacement = when {
+/**
+ * Nothing loaded, or the full-screen player showing: hidden. In a reader it goes over the page; elsewhere it pushes the
+ * screen down. [readingHere]: the voice reads the reader's own page or book, whose bar already has Pause and Stop, so it
+ * is hidden there too (Plan U3c walkthrough); music, or another page read aloud, keeps it.
+ */
+fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean, readingHere: Boolean = false): MiniPlayerPlacement = when {
     !loaded || onPlayer -> MiniPlayerPlacement.HIDDEN
+    reading && readingHere -> MiniPlayerPlacement.HIDDEN
     reading -> MiniPlayerPlacement.OVERLAY
     else -> MiniPlayerPlacement.PUSH
 }
