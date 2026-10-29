@@ -657,7 +657,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         selected = selected,
         onToggleExpanded = { shell.expanded = !shell.expanded },
         onEdgeSwipe = {
-            // Full-screen reader: the swipe brings the chrome (and with it the rail) up; elsewhere it opens the rail.
+            // Full-screen reader: the swipe brings the chrome (and with it the rail, unless it stayed) up; elsewhere it opens the rail.
             if (readerTabId != null && !shell.railVisible) showChromeRequest++ else shell.expanded = !shell.expanded
         },
         onTool = { tool ->
@@ -698,6 +698,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         side = railSide,
         showResearch = showResearch,
         reading = readerTabId != null,
+        // The wiki keeps its rail while the chrome is away (Plan U3c walkthrough); e-books and PDFs read edge to edge.
+        railStays = destination?.hasRoute<ReaderRoute>() == true,
         miniPlayer = if (player == null || miniPlacement == MiniPlayerPlacement.HIDDEN) {
             null
         } else {

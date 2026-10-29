@@ -115,8 +115,10 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * or choosing an item collapses the expanded rail. [miniPlayer] is drawn above [content] in the
  * content column, pushing it down, and takes the status bar's inset for itself. In a reader ([reading]) the page
  * keeps the whole screen: the rail and the mini-player are drawn over it ([LocalShellOverlay]) and slide away with the
- * reader's chrome ([railVisible]); the edge swipe then stays live, as the way back to the chrome. [showResearch] is
- * false on phones below the ASK tier, which hides the Research tool.
+ * reader's chrome ([railVisible]); the edge swipe then stays live, as the way back to the chrome. With [railStays] (the
+ * wiki reader, Plan U3c walkthrough) the rail keeps its place while the chrome is away, and only the mini-player
+ * slides: no empty strip where the rail was, and the page's padding for it stays right. [showResearch] is false on
+ * phones below the ASK tier, which hides the Research tool.
  */
 @Composable
 fun GrangerShell(
@@ -137,10 +139,13 @@ fun GrangerShell(
     side: RailSide = RailSide.LEFT,
     showResearch: Boolean = false,
     reading: Boolean = false,
+    railStays: Boolean = false,
     miniPlayer: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val open = expanded && railVisible
+    // The rail on screen: with the chrome, or in the wiki reader always.
+    val railShown = railVisible || (reading && railStays)
+    val open = expanded && railShown
     // In a reader the swipe stays live while the rail is hidden: it is the way back to the chrome.
     val edgeSwipeActive = (railVisible || reading) && !expanded
     BackHandler(enabled = open, onBack = onToggleExpanded)
@@ -193,7 +198,8 @@ fun GrangerShell(
             }
         }
         if (reading) {
-            // Over the page: they slide off their edges with the reader's bars and back with them (Plan U3c Decision 5).
+            // Over the page: they slide off their edges with the reader's bars and back with them (Plan U3c Decision 5);
+            // the rail stays where [railStays].
             if (miniPlayer != null) {
                 val railDp = with(density) { railWidth.toDp() }
                 AnimatedVisibility(
@@ -213,7 +219,7 @@ fun GrangerShell(
             }
             val offscreenRail = { width: Int -> if (right) width else -width }
             AnimatedVisibility(
-                railVisible,
+                railShown,
                 modifier = Modifier.align(if (right) Alignment.CenterEnd else Alignment.CenterStart),
                 enter = slideInHorizontally(tween(ChromeSlideMs), initialOffsetX = offscreenRail),
                 exit = slideOutHorizontally(tween(ChromeSlideMs), targetOffsetX = offscreenRail),

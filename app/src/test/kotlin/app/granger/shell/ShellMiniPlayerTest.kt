@@ -38,7 +38,7 @@ class ShellMiniPlayerTest {
     @get:Rule val compose = createComposeRule()
 
     @Composable
-    private fun Shell(miniPlayer: Boolean, railVisible: Boolean = true, reading: Boolean = false) {
+    private fun Shell(miniPlayer: Boolean, railVisible: Boolean = true, reading: Boolean = false, railStays: Boolean = false) {
         GrangerShell(
             rail = RailUi(emptyList()),
             expanded = false,
@@ -51,6 +51,7 @@ class ShellMiniPlayerTest {
             onHistory = {},
             onSearch = {},
             reading = reading,
+            railStays = railStays,
             miniPlayer = if (miniPlayer) {
                 { Box(Modifier.fillMaxWidth().height(MiniPlayerHeight).testTag("mini")) }
             } else {
@@ -138,6 +139,20 @@ class ShellMiniPlayerTest {
         compose.waitForIdle()
         compose.onNodeWithTag("mini").assertDoesNotExist()
         compose.onNodeWithContentDescription("Library").assertDoesNotExist()
+        assertThat(compose.onNodeWithTag("content").getBoundsInRoot()).isEqualTo(before)
+    }
+
+    /** The wiki (Plan U3c walkthrough): the chrome going takes the mini-player, but the rail keeps its place. */
+    @Test fun inTheWikiTheRailStaysWhenTheChromeGoes() {
+        var visible by mutableStateOf(true)
+        compose.setContent { Shell(miniPlayer = true, railVisible = visible, reading = true, railStays = true) }
+        val rail = compose.onNodeWithContentDescription("Library").getBoundsInRoot()
+        val before = compose.onNodeWithTag("content").getBoundsInRoot()
+        compose.runOnIdle { visible = false }
+        compose.waitForIdle()
+        compose.onNodeWithTag("mini").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Library").assertIsDisplayed()
+        assertThat(compose.onNodeWithContentDescription("Library").getBoundsInRoot()).isEqualTo(rail)
         assertThat(compose.onNodeWithTag("content").getBoundsInRoot()).isEqualTo(before)
     }
 
