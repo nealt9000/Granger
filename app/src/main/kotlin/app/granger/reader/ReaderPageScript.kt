@@ -31,13 +31,16 @@ object ReaderPageScript {
 /**
  * The padding a page gets for the reader's bars over it (Plan U3c Decision 5): [topDp] and [bottomDp] (CSS px are dp
  * here) on the root, so the first and last lines clear the bars at rest, and as scroll padding, so the Contents' jumps
- * and #anchors land below the top bar. The top is kept for the read-aloud script's first visible block.
+ * and #anchors land below the top bar. [leftDp] and [rightDp] keep the lines' starts clear of the rail on its side,
+ * while the page's background still runs under it. The top is kept for the read-aloud script's first visible block.
  */
-fun chromePaddingScript(topDp: Int, bottomDp: Int): String = """
+fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int = 0): String = """
     (function () {
       var s = document.documentElement.style;
       s.setProperty('padding-top', '${topDp}px', 'important');
       s.setProperty('padding-bottom', '${bottomDp}px', 'important');
+      s.setProperty('padding-left', '${leftDp}px', 'important');
+      s.setProperty('padding-right', '${rightDp}px', 'important');
       s.setProperty('scroll-padding-top', '${topDp}px');
       s.setProperty('scroll-padding-bottom', '${bottomDp}px');
       window.__grangerTop = $topDp;

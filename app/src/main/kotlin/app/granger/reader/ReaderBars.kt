@@ -114,6 +114,13 @@ internal val ReaderBottomBarInsets @Composable get() =
 /** A reader's page: clear of a landscape cutout and the side navigation bar, the same with the chrome up or away. */
 internal val ReaderPageInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Horizontal)
 
+/**
+ * An e-book's or PDF's page: [ReaderPageInsets], and clear of the rail over it ([LocalShellOverlay]) so the lines'
+ * starts aren't under it at rest. Constant: the shell keeps the rail's place while it's away, so Readium never lays the
+ * book out again for it. (The wiki's page pads inside instead, in CSS: [chromePaddingScript].)
+ */
+internal val ReaderBookPageInsets @Composable get() = ReaderPageInsets.union(LocalShellOverlay.current.only(WindowInsetsSides.Horizontal))
+
 /** A reader's panels and sheets over the page: inside what the shell draws over it ([LocalShellOverlay]). */
 @Composable
 fun ClearOfShell(content: @Composable BoxScope.() -> Unit) {

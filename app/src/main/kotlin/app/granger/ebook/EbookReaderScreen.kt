@@ -51,7 +51,7 @@ import app.granger.reader.ChromeBackOnReturn
 import app.granger.reader.ClearOfShell
 import app.granger.reader.ReaderBarActions
 import app.granger.reader.ReaderBottomBar
-import app.granger.reader.ReaderPageInsets
+import app.granger.reader.ReaderBookPageInsets
 import app.granger.reader.ReaderTopBar
 import app.granger.reader.SlidingBar
 import app.granger.reader.SystemBarsHidden
@@ -256,12 +256,12 @@ fun EbookReaderScreen(
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // The navigator has the whole screen whether the chrome shows or not (Plan U3c Decision 5), so Readium never
         // lays the book out again for it: the bars here, and the shell's rail and mini-player, slide over it and away.
-        // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
+        // Readium's own cutout padding is off (readerConfiguration): the page is padded here, for the cutout and the rail.
         Box(
             Modifier
                 .fillMaxSize()
                 .testTag(EbookTags.PAGE)
-                .windowInsetsPadding(ReaderPageInsets)
+                .windowInsetsPadding(ReaderBookPageInsets)
                 .pageTouches(viewModel::onPageTouch),
         ) {
             val error = state.error

@@ -53,7 +53,7 @@ const val BookLink: Int = 0xFFB8662A.toInt()
  * The navigator's configuration. ReadiumCSS night mode paints links #63caff, which beats the theme's text colour;
  * links take [BookLink] instead, in every theme, visited or not. Readium's own inset padding is off: it reads
  * the window's cutout directly, and would add the notch again below the reader's top bar. The reader pads the page
- * itself (ReaderPageInsets), the same way as the web reader's.
+ * itself (ReaderBookPageInsets), for the cutout and the rail over it.
  */
 fun readerConfiguration(): EpubNavigatorFragment.Configuration {
     val accent = CssColor.Int(BookLink)

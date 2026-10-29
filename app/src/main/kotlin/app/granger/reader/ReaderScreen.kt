@@ -64,6 +64,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -89,6 +90,7 @@ import app.granger.player.VoiceButton
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
 import app.granger.shell.ChromeSlideMs
+import app.granger.shell.LocalShellOverlay
 import app.granger.shell.SafeDrawingIgnoringBars
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -232,7 +234,14 @@ fun ReaderScreen(
     var bottomBarPx by remember { mutableIntStateOf(nominalBottom) }
     val padTop = with(density) { topBarPx.toDp().value.roundToInt() }
     val padBottom = with(density) { bottomBarPx.toDp().value.roundToInt() }
-    LaunchedEffect(webView, padTop, padBottom) { webView?.setChromePadding(padTop, padBottom) }
+    // The rail's place over the page, past what the page box already clears (a cutout): constant, as the shell keeps
+    // it while the rail is away, so the lines' starts clear the rail at rest and nothing reflows when it slides.
+    val direction = LocalLayoutDirection.current
+    val overlay = LocalShellOverlay.current
+    val pageInsets = ReaderPageInsets
+    val padLeft = with(density) { (overlay.getLeft(density, direction) - pageInsets.getLeft(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
+    val padRight = with(density) { (overlay.getRight(density, direction) - pageInsets.getRight(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
+    LaunchedEffect(webView, padTop, padBottom, padLeft, padRight) { webView?.setChromePadding(padTop, padBottom, padLeft, padRight) }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // The page has the whole screen whether the chrome shows or not (Plan U3c Decision 5): the bars here, and the
@@ -300,7 +309,7 @@ fun ReaderScreen(
                         ).also {
                             it.setFindListener { active, count, done -> matches = FindMatches(active, count, done) }
                             it.settings.textZoom = zoom
-                            it.setChromePadding(padTop, padBottom)
+                            it.setChromePadding(padTop, padBottom, padLeft, padRight)
                             webView = it
                             val saved = viewModel.webViewState
                             if (saved == null || it.restoreState(saved) == null) it.loadUrl(startUrl)

@@ -74,12 +74,12 @@ class ReaderWebView(
     private var chromePaddingAtStart: ScriptHandler? = null
 
     /**
-     * Pads every page for the reader's bars over it: [topDp] and [bottomDp]. Set before a page loads, it is there from
-     * the page's first paint where the WebView runs scripts at document start; [applyChromePadding] puts it on a page
-     * that has loaded.
+     * Pads every page for the reader's bars over it: [topDp] and [bottomDp], and the rail's [leftDp] or [rightDp]. Set
+     * before a page loads, it is there from the page's first paint where the WebView runs scripts at document start;
+     * [applyChromePadding] puts it on a page that has loaded.
      */
-    fun setChromePadding(topDp: Int, bottomDp: Int) {
-        val script = chromePaddingScript(topDp, bottomDp)
+    fun setChromePadding(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int = 0) {
+        val script = chromePaddingScript(topDp, bottomDp, leftDp, rightDp)
         if (script == chromePadding) return
         chromePadding = script
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {

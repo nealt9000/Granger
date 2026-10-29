@@ -2,6 +2,12 @@ package app.granger.reader
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,7 +24,11 @@ import app.granger.FakeReadingSessions
 import app.granger.FakeZimArchive
 import app.granger.core.library.ReadingTab
 import app.granger.core.zim.ZimResolver
+import app.granger.settings.RailSide
 import app.granger.shell.ChromeSlideMs
+import app.granger.shell.GrangerShell
+import app.granger.shell.NarrowRailWidth
+import app.granger.shell.RailUi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -175,6 +185,80 @@ class ReaderScreenChromeTest {
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
         assertThat(padding()).isEqualTo(chromePaddingScript(64, 56))
+    }
+
+    /** The reader in the shell, as the app shows it: the rail on [side], over the page and sliding with the chrome. */
+    private fun showInShell(side: RailSide) = compose.setContent {
+        root = LocalView.current.rootView
+        var chrome by remember { mutableStateOf(true) }
+        GrangerShell(
+            rail = RailUi(emptyList()), expanded = false, railVisible = chrome, selected = null,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            side = side, reading = true,
+        ) {
+            ReaderScreen(
+                viewModel = viewModel,
+                resolver = ZimResolver({ library.archives[it] }),
+                onChromeVisibleChange = { railVisible += it; chrome = it },
+                onSearchText = {},
+                onBack = {},
+            )
+        }
+    }
+
+    @Test fun theLinesStartClearOfTheRailWithTheChromeUpOrAway() {
+        // The rail is over the page's left edge; the page pads its side for it, once, not per toggle.
+        showInShell(RailSide.LEFT)
+        compose.waitForIdle()
+        val web = compose.runOnIdle { root.findWebView()!! }
+        fun padding(): String? = compose.runOnIdle {
+            web.applyChromePadding()
+            shadowOf(web).lastEvaluatedJavascript
+        }
+        val rail = compose.onNodeWithContentDescription("Home").getBoundsInRoot()
+        val page = pageBounds()
+        val textStart = page.left + NarrowRailWidth
+        assertThat(rail.right).isAtMost(textStart)
+        assertThat(padding()).isEqualTo(chromePaddingScript(64, 56, leftDp = NarrowRailWidth.value.toInt()))
+        compose.runOnIdle { viewModel.toggleChrome() }
+        compose.waitForIdle()
+        assertChromeAway()
+        assertThat(pageBounds()).isEqualTo(page)
+        assertThat(padding()).isEqualTo(chromePaddingScript(64, 56, leftDp = NarrowRailWidth.value.toInt()))
+    }
+
+    @Test fun aRailOnTheRightKeepsTheLinesEndsClear() {
+        showInShell(RailSide.RIGHT)
+        compose.waitForIdle()
+        val web = compose.runOnIdle { root.findWebView()!! }
+        val rail = compose.onNodeWithContentDescription("Home").getBoundsInRoot()
+        assertThat(rail.left).isAtLeast(pageBounds().right - NarrowRailWidth)
+        val padding = compose.runOnIdle {
+            web.applyChromePadding()
+            shadowOf(web).lastEvaluatedJavascript
+        }
+        assertThat(padding).isEqualTo(chromePaddingScript(64, 56, rightDp = NarrowRailWidth.value.toInt()))
+    }
+
+    @Test fun aBooksPageBoxIsClearOfTheRail() {
+        // The e-book and PDF navigator's box (Readium can't run here): padded for the rail's place, chrome up or away.
+        var chrome by mutableStateOf(true)
+        compose.setContent {
+            GrangerShell(
+                rail = RailUi(emptyList()), expanded = false, railVisible = chrome, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                reading = true,
+            ) {
+                Box(Modifier.fillMaxSize().windowInsetsPadding(ReaderBookPageInsets)) { Box(Modifier.fillMaxSize().testTag("book")) }
+            }
+        }
+        compose.waitForIdle()
+        val rail = compose.onNodeWithContentDescription("Home").getBoundsInRoot()
+        val book = compose.onNodeWithTag("book").getBoundsInRoot()
+        assertThat(book.left).isAtLeast(rail.right)
+        compose.runOnIdle { chrome = false }
+        compose.waitForIdle()
+        assertThat(compose.onNodeWithTag("book").getBoundsInRoot()).isEqualTo(book)
     }
 
     private fun View.findWebView(): ReaderWebView? {
