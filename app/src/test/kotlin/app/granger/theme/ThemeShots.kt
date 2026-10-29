@@ -244,7 +244,12 @@ class ThemeShots {
                 previous = "Chapter 1: Peter Breaks Through.", next = "They soon know that they will grow up.",
             )
         }
-        val voices = listOf(app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), "Granger voice (ljspeech)", "en-US"))
+        val voices = listOf(
+            app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), "Granger voice (ljspeech)", "en-US"),
+            app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_GB-granger_professor-medium"), "Granger voice (professor)", "en-GB"),
+        ) + (1..6).map { i ->
+            app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.System("com.google.android.tts", "en-us-x-io$i-local"), "System voice io$i (en-US)", "en-US")
+        }
         shoot("reader") { ListenPlayerScreen(PlayerViewModel(hub), onClose = {}, voices = voices) }
     }
 
