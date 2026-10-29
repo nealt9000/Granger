@@ -64,9 +64,11 @@ class HistoryViewModel(
      * Clear history (Plan U3b Decision 7): History, recent searches and plays go, and every reading tab leaves the rail
      * but the pinned ones and [keepTabIds] (the page you came from). Pinned searches stay with their pins. The rail's
      * cut-off moves to now, so nothing unpinned from before (an Ask chat, a play) shows there or in Continue again
-     * (Plan U3b, Neal's walkthrough). Reading places, bookmarks, Saved and the chats themselves stay.
+     * (Plan U3b, Neal's walkthrough). Reading places, bookmarks, Saved and the chats themselves stay. [onCleared] gets
+     * the tabs left on the rail (kept and pinned) once it's done, for the NavHost to take the closed ones' readers off
+     * the back stack (Plan U3c walkthrough).
      */
-    fun clear(keepTabIds: Set<Long>) {
+    fun clear(keepTabIds: Set<Long>, onCleared: (keptTabIds: Set<Long>) -> Unit = {}) {
         hidden.clear(now())
         viewModelScope.launch {
             forgetPlays()
@@ -74,6 +76,7 @@ class HistoryViewModel(
             val tabs = pinned.filter { it.startsWith(RailEntry.TAB) }.mapNotNull { it.removePrefix(RailEntry.TAB).toLongOrNull() }
             val searches = pinned.filter { it.startsWith(RailEntry.SEARCH) }.map { it.removePrefix(RailEntry.SEARCH) }
             sessions.clearHistory(keepTabIds + tabs, searches.toSet())
+            onCleared(keepTabIds + tabs)
         }
     }
 

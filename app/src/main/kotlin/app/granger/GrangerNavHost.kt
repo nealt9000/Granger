@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -256,6 +257,21 @@ fun NavController.leaveRemovedTab(tabId: Long) {
     val top = currentBackStackEntry ?: return
     if (top.readingTabId() != tabId) return
     if (!popBackStack<HomeRoute>(inclusive = false)) navigate(HomeRoute) { popUpTo(top.destination.id) { inclusive = true } }
+}
+
+/**
+ * After Clear history: takes every reader whose tab isn't in [keptTabIds] off the back stack, so Back never returns to a
+ * page that was cleared, nor writes it into History again (Plan U3c walkthrough). The screens above the lowest such
+ * reader are popped and opened again in order, with their arguments, leaving the others out; the kept reader right
+ * under History and the pinned tabs' readers stay.
+ */
+fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
+    val entries = currentBackStack.value.filter { it.destination !is NavGraph }
+    val first = entries.indexOfFirst { entry -> entry.readingTabId()?.let { it !in keptTabIds } == true }
+    if (first < 0) return
+    val reopen = entries.drop(first + 1).filter { entry -> entry.readingTabId()?.let { it in keptTabIds } != false }
+    repeat(entries.size - first) { popBackStack() }
+    reopen.forEach { navigate(it.destination.id, it.arguments) }
 }
 
 @Serializable data class SearchRoute(val query: String = "")
@@ -1005,6 +1021,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                     // The page you came from: Back returns to it, so Clear history keeps that tab alone (Plan U3b Decision 7).
                     keepTabIds = { HistoryViewModel.keptTab(nav.currentBackStack.value.map { it.readingTabId() }) },
+                    // A buried reader whose tab was closed must not come back on Back (Plan U3c walkthrough).
+                    onCleared = nav::dropClosedReaders,
                 )
             }
             composable<SourceRoute> { backStackEntry ->

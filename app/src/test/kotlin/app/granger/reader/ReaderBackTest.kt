@@ -17,6 +17,7 @@ import app.granger.HomeRoute
 import app.granger.LibraryRoute
 import app.granger.ReaderRoute
 import app.granger.SearchRoute
+import app.granger.dropClosedReaders
 import app.granger.leaveRemovedTab
 import app.granger.openTab
 import app.granger.showTab
@@ -222,6 +223,36 @@ class ReaderBackTest {
         assertThat(nav.readers()).isEmpty()
         compose.runOnIdle { nav.popBackStack() }
         assertThat(compose.runOnIdle { nav.currentDestination!!.hasRoute<LibraryRoute>() }).isTrue()
+    }
+
+    /** Plan U3c walkthrough: a cleared reader came back on Back and wrote History again. */
+    @Test fun clearHistoryTakesTheClosedReadersOffTheBackStack() {
+        val nav = routes()
+        compose.runOnIdle { nav.openTab(article) }
+        compose.runOnIdle { nav.navigate(HomeRoute) }
+        compose.runOnIdle { nav.openTab(book) }
+        compose.runOnIdle { nav.navigate(SearchRoute("leaf")) }
+        compose.runOnIdle { nav.openTab(other) }
+        // History stands in as a Search on top; the article's tab was closed, the book's pinned, the other's kept.
+        compose.runOnIdle { nav.navigate(SearchRoute("history")) }
+        compose.runOnIdle { nav.dropClosedReaders(setOf(book.id, other.id)) }
+        assertThat(nav.readers()).containsExactly(3L, 2L).inOrder()
+        val screens = compose.runOnIdle {
+            nav.currentBackStack.value.mapNotNull { e ->
+                when {
+                    e.destination.hasRoute<LibraryRoute>() -> "library"
+                    e.destination.hasRoute<HomeRoute>() -> "home"
+                    e.destination.hasRoute<SearchRoute>() -> "search:" + e.toRoute<SearchRoute>().query
+                    e.destination.hasRoute<ReaderRoute>() -> "reader:" + e.toRoute<ReaderRoute>().tabId
+                    e.destination.hasRoute<BookRoute>() -> "book:" + e.toRoute<BookRoute>().tabId
+                    else -> null
+                }
+            }
+        }
+        assertThat(screens).containsExactly("library", "home", "book:3", "search:leaf", "reader:2", "search:history").inOrder()
+        // Nothing closed: the stack is left as it is.
+        compose.runOnIdle { nav.dropClosedReaders(setOf(book.id, other.id)) }
+        assertThat(nav.readers()).containsExactly(3L, 2L).inOrder()
     }
 
     @Test fun showTabStillReplacesAReaderOnTop() {

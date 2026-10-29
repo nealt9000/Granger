@@ -46,10 +46,17 @@ import kotlinx.coroutines.launch
 /**
  * Everything opened (History) and the starred articles (Saved). Tapping a row opens it in a rail tab. The overflow's
  * Clear history asks first, then keeps the pinned tabs and [keepTabIds] (the page you came from, when that was a reader).
+ * [onCleared] gets the tabs it left on the rail once it's done.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel, onOpenTab: (Long) -> Unit, onBack: () -> Unit, keepTabIds: () -> Set<Long> = { emptySet() }) {
+fun HistoryScreen(
+    viewModel: HistoryViewModel,
+    onOpenTab: (Long) -> Unit,
+    onBack: () -> Unit,
+    keepTabIds: () -> Set<Long> = { emptySet() },
+    onCleared: (keptTabIds: Set<Long>) -> Unit = {},
+) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var filter by rememberSaveable { mutableStateOf("") }
@@ -63,7 +70,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onOpenTab: (Long) -> Unit, onBack
             text = { Text("This forgets what you've opened, searched and played, and empties the rail. Pinned items and the page you came from stay. Ask's chats stay in Ask.") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.clear(keepTabIds())
+                    viewModel.clear(keepTabIds(), onCleared)
                     confirmClear = false
                 }) { Text("Clear") }
             },

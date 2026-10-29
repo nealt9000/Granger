@@ -110,8 +110,11 @@ class HistoryViewModelTest {
         pins.pin("tab:$pinned")
         pins.pin("search:holst")
         val vm = HistoryViewModel(sessions, library, bookshelf, pins, hidden)
-        vm.clear(keepTabIds = setOf(current))
+        var left: Set<Long>? = null
+        vm.clear(keepTabIds = setOf(current)) { left = it }
         testScheduler.advanceUntilIdle()
+        // The NavHost takes every other tab's reader off the back stack (Plan U3c walkthrough).
+        assertThat(left).containsExactly(pinned, current)
         assertThat(sessions.historyList.value).isEmpty()
         assertThat(sessions.searchRows.value.map { it.query }).containsExactly("holst")
         assertThat(sessions.tabs.value.filter { it.onRail }.map { it.id }).containsExactly(pinned, current)
