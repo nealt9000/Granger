@@ -73,8 +73,8 @@ fun BrowseScreen(viewModel: BrowseViewModel, packsFolder: String, downloadsBadge
 }
 
 /**
- * Browse's home (Plan U3c Decision 1): the packs themselves, Encyclopedias & reference then Maps, each a row opening
- * the pack's main page. With none, [NOTHING_TO_BROWSE], Pick a start's suggestion and Get packs. Null [ui] is still
+ * Browse's home (Plan U3c Decision 1): the packs themselves, by knowledge area, then Other, then Maps, each a row
+ * opening the pack's main page. With none, [NOTHING_TO_BROWSE], Pick a start's suggestion and Get packs. Null [ui] is still
  * loading.
  */
 @OptIn(ExperimentalMaterial3Api::class)

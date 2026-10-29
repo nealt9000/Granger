@@ -7,7 +7,9 @@ import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
 import app.granger.book
 import app.granger.catalogOf
+import app.granger.core.catalog.Domain
 import app.granger.core.catalog.Preset
+import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VectorDownloads
@@ -63,18 +65,19 @@ class BrowseViewModelTest {
             shelf("Music", row("Phone", "music")),
         )
         val ui = BrowseViewModel(shelves, library).ui.filterNotNull().first()
-        assertThat(ui.sections.map { it.title }).containsExactly("Encyclopedias & reference", "Maps").inOrder()
+        // No catalog: every pack that isn't a map is Other.
+        assertThat(ui.sections.map { it.title }).containsExactly("Other", "Maps").inOrder()
         // Not one Kiwix folder: each pack, by title, wherever it's filed (the user's own collection too). No books.
         assertThat(ui.sections[0].packs.map { it.pack.title }).containsExactly("DevDocs: Kotlin", "Medicine", "Wikipedia").inOrder()
         assertThat(ui.sections[1].packs.map { it.pack.title }).containsExactly("Iceland")
-        assertThat(ui.sections.map { it.id }).containsExactly(REFERENCE_SECTION, MAPS_SECTION).inOrder()
+        assertThat(ui.sections.map { it.id }).containsExactly(OTHER_SECTION, MAPS_SECTION).inOrder()
         assertThat(ui.empty).isFalse()
         assertThat(ui.suggestions).isEmpty()
     }
 
     @Test fun eachSectionShowsOnlyWhenItHoldsAPack() {
         assertThat(browseSections(listOf(shelf("Maps", row("OpenStreetMap", "maps", iceland)))).map { it.id }).containsExactly(MAPS_SECTION)
-        assertThat(browseSections(listOf(shelf("Literature", folder))).map { it.id }).containsExactly(REFERENCE_SECTION)
+        assertThat(browseSections(listOf(shelf("Literature", folder))).map { it.id }).containsExactly(OTHER_SECTION)
         assertThat(browseSections(listOf(shelf("Literature", row("Classics", "literature", books = 2))))).isEmpty()
     }
 
@@ -84,6 +87,52 @@ class BrowseViewModelTest {
         assertThat(browseSections(listOf(moved)).single().id).isEqualTo(MAPS_SECTION)
         val intoMaps = shelf("Maps", row("Mine", "maps", devdocs, userCreated = true))
         assertThat(browseSections(listOf(intoMaps)).single().id).isEqualTo(MAPS_SECTION)
+    }
+
+    /**
+     * Packs group by their catalog entry's knowledge area, in the readiness model's order and titles; Wikivoyage's
+     * `maps` domain is its own section, apart from the map files. A pack the catalog doesn't know, or one with no domain,
+     * is Other, just before Maps.
+     */
+    @Test fun packsGroupByKnowledgeArea() = runTest(main.dispatcher) {
+        val wikimed = pack("u-med", "WikiMed")
+        val wikem = pack("u-em", "WikEM")
+        val knots = pack("u-knots", "Knots")
+        val voyage = pack("u-voy", "Wikivoyage").copy(name = "wikivoyage_en_all_nopic")
+        val game = pack("u-game", "Balatro wiki")
+        val sideloaded = pack("u-side", "Sideloaded")
+        shelves.shelfList.value = listOf(
+            shelf("Literature", folder, row("Mine", "literature", wikimed, wikem, knots, voyage, game, sideloaded, userCreated = true)),
+            shelf("Maps", row("OpenStreetMap", "maps", iceland)),
+        )
+        val domains = listOf(
+            Domain("medicine", "Medicine & first aid"), Domain("making", "Making, repair & engineering"),
+            Domain("maps", "Maps, places & travel"), Domain("reference", "General reference"), Domain("thought", "Religion, philosophy & history"),
+        )
+        val catalog = catalogOf(
+            packs = listOf(
+                packEntry("wikipedia").copy(zimUuid = "u-wiki", domain = "reference"),
+                packEntry("wikimed").copy(zimUuid = "u-med", domain = "medicine"),
+                packEntry("wikem").copy(zimUuid = "u-old-snapshot", domain = "medicine"),
+                packEntry("knots").copy(zimUuid = "u-knots", domain = "making"),
+                packEntry("voyage").copy(zimUuid = "u-voy", domain = "maps"),
+                packEntry("balatro").copy(zimUuid = "u-game"),
+            ),
+        ).copy(readiness = Readiness(domains))
+        // WikEM's UUID changed since the catalog was signed: its installed download's file still finds the entry.
+        downloads.list.value = listOf(record("wikem", DownloadState.INSTALLED).copy(filePath = wikem.filePath))
+        val ui = BrowseViewModel(shelves, library, FakeCatalogSource(catalog), downloads.records).ui.filterNotNull()
+            .first { it.sections.size > 2 }
+        assertThat(ui.sections.map { it.id }).containsExactly("medicine", "making", "maps", "reference", OTHER_SECTION, MAPS_SECTION).inOrder()
+        assertThat(ui.sections.map { it.title }).containsExactly(
+            "Medicine & first aid", "Making, repair & engineering", "Maps, places & travel", "General reference", "Other", "Maps",
+        ).inOrder()
+        val titles = ui.sections.associate { it.id to it.packs.map { item -> item.pack.title } }
+        assertThat(titles["medicine"]).containsExactly("WikEM", "WikiMed").inOrder()
+        assertThat(titles["maps"]).containsExactly("Wikivoyage")
+        assertThat(titles["reference"]).containsExactly("Wikipedia")
+        assertThat(titles[OTHER_SECTION]).containsExactly("Balatro wiki", "DevDocs: Kotlin", "Sideloaded").inOrder()
+        assertThat(titles[MAPS_SECTION]).containsExactly("Iceland")
     }
 
     @Test fun eachPackSaysHowAskSearchesItButMapsSayNothing() = runTest(main.dispatcher) {

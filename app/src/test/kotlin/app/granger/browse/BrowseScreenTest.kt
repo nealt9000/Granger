@@ -41,7 +41,7 @@ class BrowseScreenTest {
     private fun SemanticsNodeInteraction.left() = getBoundsInRoot().left
 
     @Test fun eachPackIsARowWithItsSizeAndAskLineAndOpens() {
-        show(BrowseUi(listOf(BrowseSection(REFERENCE_SECTION, "Encyclopedias & reference", listOf(gone, wikipedia)), BrowseSection(MAPS_SECTION, "Maps", listOf(iceland)))))
+        show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(gone, wikipedia)), BrowseSection(MAPS_SECTION, "Maps", listOf(iceland)))))
         compose.onNodeWithText("1.2 GB · Ask: by meaning and keywords").assertExists()
         // Maps say nothing about Ask.
         compose.onNodeWithText("80 MB").assertExists()
@@ -57,7 +57,7 @@ class BrowseScreenTest {
     }
 
     @Test fun aLongPressRemovesThePackAfterAsking() {
-        show(BrowseUi(listOf(BrowseSection(REFERENCE_SECTION, "Encyclopedias & reference", listOf(wikipedia)))))
+        show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(wikipedia)))))
         compose.onNodeWithText("Wikipedia").performTouchInput { longClick() }
         compose.onNodeWithText("Remove from phone").performClick()
         compose.onNodeWithText("Remove Wikipedia?").assertExists()
@@ -66,7 +66,7 @@ class BrowseScreenTest {
     }
 
     @Test fun theHeaderIsGetMoreThenMoreWithDownloadsAndReadiness() {
-        show(BrowseUi(listOf(BrowseSection(REFERENCE_SECTION, "Encyclopedias & reference", listOf(wikipedia)))))
+        show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(wikipedia)))))
         assertThat(compose.onNodeWithContentDescription("Get more").left()).isLessThan(compose.onNodeWithContentDescription("More").left())
         compose.onNodeWithContentDescription("Get more").performClick()
         compose.onNodeWithContentDescription("More").performClick()

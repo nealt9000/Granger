@@ -25,6 +25,8 @@ import app.granger.browse.BrowseActions
 import app.granger.browse.BrowseContent
 import app.granger.browse.BrowseSection
 import app.granger.browse.BrowseUi
+import app.granger.browse.MAPS_SECTION
+import app.granger.browse.OTHER_SECTION
 import app.granger.browse.PackItem
 import app.granger.library.KindRow
 import app.granger.sources.AskReach
@@ -196,15 +198,20 @@ class ThemeShots {
         }
     }
 
-    /** Browse's home (Plan U3c Decision 1): each pack a row, then the maps. */
+    /** Browse's home (Plan U3c Decision 1): each pack a row under its knowledge area, then Other, then the maps. */
     @Test fun browse() = shoot("browse") {
         val gb = 1_000_000_000L
+        val medicine = listOf(
+            PackItem(pack("med", "WikEM emergency medicine").copy(sizeBytes = 45_000_000), AskReach.KEYWORDS),
+            PackItem(pack("wikimed", "WikiMed").copy(sizeBytes = 2 * gb), AskReach.MEANING),
+        )
+        val making = listOf(PackItem(pack("knots", "Knots (Wikipedia)").copy(sizeBytes = 30_000_000), AskReach.MEANING))
         val reference = listOf(
-            PackItem(pack("dev", "DevDocs: Kotlin").copy(sizeBytes = 20_000_000), AskReach.KEYWORDS),
-            PackItem(pack("med", "WikEM").copy(sizeBytes = 45_000_000), AskReach.KEYWORDS),
             PackItem(pack("wiki", "Wikipedia").copy(sizeBytes = 48 * gb), AskReach.MEANING),
             PackItem(pack("wikt", "Wiktionary").copy(sizeBytes = 8 * gb), AskReach.MEANING),
         )
+        val travel = listOf(PackItem(pack("voy", "Wikivoyage travel guide").copy(sizeBytes = 900_000_000), AskReach.MEANING))
+        val other = listOf(PackItem(pack("dev", "DevDocs: Kotlin").copy(sizeBytes = 20_000_000), AskReach.KEYWORDS))
         val maps = listOf(PackItem(pack("uk", "United Kingdom").copy(sizeBytes = 1_400_000_000)))
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.BROWSE,
@@ -212,7 +219,16 @@ class ThemeShots {
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             BrowseContent(
-                BrowseUi(listOf(BrowseSection("reference", "Encyclopedias & reference", reference), BrowseSection("maps", "Maps", maps))),
+                BrowseUi(
+                    listOf(
+                        BrowseSection("medicine", "Medicine & first aid", medicine),
+                        BrowseSection("making", "Making, repair & engineering", making),
+                        BrowseSection("maps", "Maps, places & travel", travel),
+                        BrowseSection("reference", "General reference", reference),
+                        BrowseSection(OTHER_SECTION, "Other", other),
+                        BrowseSection(MAPS_SECTION, "Maps", maps),
+                    ),
+                ),
                 "/packs", downloadsBadge = 0, BrowseActions(),
             )
         }
