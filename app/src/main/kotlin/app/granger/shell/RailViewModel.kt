@@ -25,6 +25,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import app.granger.core.player.NowPlaying
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -140,6 +141,8 @@ class RailViewModel(
     voice: Flow<NowPlaying.Voice?> = flowOf(null),
     /** The clock a removed tab's read-aloud play is hidden by; a play after it brings that back. */
     private val now: () -> Long = System::currentTimeMillis,
+    /** Stops the voice (not music): removing what it reads takes it off with the item. */
+    private val stopVoice: () -> Unit = {},
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
 
@@ -166,6 +169,19 @@ class RailViewModel(
             false
         }
         return if (played) null else "“${item.title}” can't be played: it's no longer in the library, or none of its files are on the phone."
+    }
+
+    /** The voice reading now, held for [remove] to tell whether it reads the item removed. */
+    private val live: StateFlow<NowPlaying.Voice?> = voice.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /**
+     * Sources whose voice [remove] stopped: their Reading row stays off while the stop reaches the player, so the
+     * removed item doesn't come back under its title for a moment. Emptied once the voice is gone.
+     */
+    private val stopping = MutableStateFlow<Set<String>>(emptySet())
+
+    init {
+        viewModelScope.launch { live.collect { if (it == null) stopping.value = emptySet() } }
     }
 
     private val shelf = combine(library.packs, bookshelf.books, bookshelf.positions) { packs, books, positions ->
@@ -215,9 +231,9 @@ class RailViewModel(
      * The live voice: a tab on the list showing what it reads is marked, otherwise a Reading row heads the list (Plan
      * U3b, Neal's walkthrough: one entry per book). Either way its "Play again" row is left out while it reads.
      */
-    val ui: StateFlow<RailUi> = combine(list, voice) { listed, v ->
+    val ui: StateFlow<RailUi> = combine(list, live, stopping) { listed, v, stopped ->
         val list = listed.ui
-        if (v == null) return@combine list
+        if (v == null || v.sourceKey in stopped) return@combine list
         val played = "$VOICE_PLAY${v.sourceKey}"
         var marked = false
         val entries = list.entries.mapNotNull { entry ->
@@ -317,21 +333,43 @@ class RailViewModel(
      * play stays where it lives and is only taken off the rail, until it's used again. A tab's page or book that was
      * read aloud has a "Read aloud" play the tab stood for, which would take its place under the same name (Plan U3c
      * walkthrough: the removed item stayed on the rail); it is hidden with the tab, until it's read aloud again.
+     * An item whose page, book or answer the voice is reading now stops the voice (music under it plays on), or its
+     * Reading row would take the item's place under the same title (Plan U3c walkthrough).
      */
     fun remove(entry: RailEntry) {
+        val reading = live.value?.sourceKey
         viewModelScope.launch {
             pins.unpin(entry.key)
             when (entry) {
                 is RailEntry.Tab -> {
-                    sessions.tab(entry.tab.tabId)?.let { tab -> hidden.hide("${RailEntry.PLAY}$VOICE_PLAY${sourceKey(tab)}", now()) }
+                    sessions.tab(entry.tab.tabId)?.let(::sourceKey)?.let { source ->
+                        if (source == reading) stopReading(source)
+                        hidden.hide(voicePlayKey(source), now())
+                    }
                     sessions.closeTab(entry.tab.tabId)
                 }
                 is RailEntry.Search -> sessions.forgetSearch(entry.query)
-                is RailEntry.Chat, is RailEntry.Play -> hidden.hide(entry.key, entry.at)
-                is RailEntry.Reading -> Unit                // it leaves with the voice; the mini-player stops it
+                is RailEntry.Chat -> hidden.hide(entry.key, entry.at)
+                is RailEntry.Play -> {
+                    if (reading != null && entry.playKey == "$VOICE_PLAY$reading") stopReading(reading)
+                    hidden.hide(entry.key, entry.at)
+                }
+                is RailEntry.Reading -> {
+                    stopReading(entry.sourceKey)
+                    hidden.hide(voicePlayKey(entry.sourceKey), now())
+                }
             }
         }
     }
+
+    /** Stops the voice reading [source], keeping its Reading row off until the stop lands. */
+    private fun stopReading(source: String) {
+        stopping.value = stopping.value + source
+        stopVoice()
+    }
+
+    /** The rail key of [source]'s "Read aloud" play. */
+    private fun voicePlayKey(source: String) = "${RailEntry.PLAY}$VOICE_PLAY$source"
 
     private fun initialOf(title: String): Char = title.firstOrNull { it.isLetterOrDigit() }?.uppercaseChar() ?: '#'
 

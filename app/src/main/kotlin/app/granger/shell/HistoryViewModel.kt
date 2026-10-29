@@ -28,6 +28,10 @@ class HistoryViewModel(
     /** Forgets every recorded play (`PlaybackDao.deleteRecentPlays`). */
     private val forgetPlays: suspend () -> Unit = {},
     private val now: () -> Long = System::currentTimeMillis,
+    /** The source the voice is reading now (`pack:<id>/<path>`, `book:<id>`, …); null when it isn't loaded. */
+    private val readingAloud: () -> String? = { null },
+    /** Stops the voice (not music). */
+    private val stopVoice: () -> Unit = {},
 ) : ViewModel() {
     data class Row(val packId: String, val path: String, val title: String, val packTitle: String, val available: Boolean)
 
@@ -66,7 +70,8 @@ class HistoryViewModel(
      * cut-off moves to now, so nothing unpinned from before (an Ask chat, a play) shows there or in Continue again
      * (Plan U3b, Neal's walkthrough). Reading places, bookmarks, Saved and the chats themselves stay. [onCleared] gets
      * the tabs left on the rail (kept and pinned) once it's done, for the NavHost to take the closed ones' readers off
-     * the back stack (Plan U3c walkthrough).
+     * the back stack (Plan U3c walkthrough). The voice stops unless it reads a tab that stays (the page kept, or a
+     * pinned one): its Reading row would stay on the rail beside the kept page (Plan U3c walkthrough). Music plays on.
      */
     fun clear(keepTabIds: Set<Long>, onCleared: (keptTabIds: Set<Long>) -> Unit = {}) {
         hidden.clear(now())
@@ -75,6 +80,10 @@ class HistoryViewModel(
             val pinned = pins.pins.first().map { it.key }
             val tabs = pinned.filter { it.startsWith(RailEntry.TAB) }.mapNotNull { it.removePrefix(RailEntry.TAB).toLongOrNull() }
             val searches = pinned.filter { it.startsWith(RailEntry.SEARCH) }.map { it.removePrefix(RailEntry.SEARCH) }
+            readingAloud()?.let { reading ->
+                val staying = (keepTabIds + tabs).mapNotNullTo(HashSet()) { id -> sessions.tab(id)?.let(::readSourceKeyOf) }
+                if (reading !in staying) stopVoice()
+            }
             sessions.clearHistory(keepTabIds + tabs, searches.toSet())
             onCleared(keepTabIds + tabs)
         }
