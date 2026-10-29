@@ -14,6 +14,9 @@ import torch
 out = sys.argv[1]
 os.makedirs(out, exist_ok=True)
 for path in sys.argv[2:]:
+    if os.path.exists(path) and os.path.getsize(path) == 0:  # and can list some at 0 bytes (seen on the Nanny's run)
+        print(f"{path}: empty, skipped", flush=True)
+        continue
     try:
         c = torch.load(path, map_location="cpu", weights_only=False)
     except FileNotFoundError:  # RunPod's network volume can still list a checkpoint Lightning deleted hours ago
