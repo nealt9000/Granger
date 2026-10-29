@@ -111,8 +111,17 @@ def good_passage(text):
             and not re.search(r"\b[A-Z]{2,}\b|\.-|\.\.|[a-z]'(?![a-z])|(?<![A-Za-z])'", text))
 
 
-def candidates(sources, extra, passages=False, exclude=()):
+from cut_quotes import speech  # noqa: E402  (the cutter's rule: quotes open speech, not scare quotes)
+
+
+def quoted_share(text):
+    """The share of a passage's characters inside double quotes."""
+    return sum(len(m) for m in re.findall(r'"([^"]*)"', text)) / max(len(text), 1)
+
+
+def candidates(sources, extra, passages=False, exclude=(), dialogue=0.0):
     seen, out = set(exclude), []
+    lines, chars = ((2, 5), (80, 320)) if dialogue else (PASSAGE_LINES, PASSAGE_CHARS)
     for book, path in enumerate(sources):
         if path.endswith(".txt"):
             rows = gutenberg_rows(path, book)
@@ -134,7 +143,7 @@ def candidates(sources, extra, passages=False, exclude=()):
         # Passages: every window of consecutive sentences; overlapping windows share lines, so the picker takes
         # each line once (`(path, index)` keys).
         for i in range(len(rows)):
-            for n in range(PASSAGE_LINES[0], PASSAGE_LINES[1] + 1):
+            for n in range(lines[0], lines[1] + 1):
                 window = rows[i:i + n]
                 if len(window) < n or not all(follows(a[0], b[0]) for a, b in zip(window, window[1:])):
                     break
@@ -144,7 +153,9 @@ def candidates(sources, extra, passages=False, exclude=()):
                 if not good_passage(joined):
                     continue
                 text = clean(joined)
-                if PASSAGE_CHARS[0] <= len(text) <= PASSAGE_CHARS[1] and PLAIN.match(text) and not held_out(text):
+                if dialogue and (quoted_share(text) < dialogue or not speech(text)):
+                    continue
+                if chars[0] <= len(text) <= chars[1] and PLAIN.match(text) and not held_out(text):
                     out.append((text, {(path, k) for k in range(i, i + n)}))
     extras = []
     if extra:
@@ -180,6 +191,8 @@ def main():
     p.add_argument("--espeak-voice", default="en-gb-x-rp")
     p.add_argument("--passages", action="store_true", help="read runs of 2–4 consecutive sentences")
     p.add_argument("--exclude", nargs="*", default=[], help="earlier script directories whose lines to skip")
+    p.add_argument("--dialogue", type=float, default=0.0,
+                   help="passages only, with at least this share of characters inside double quotes (V4b: 0.4)")
     p.add_argument("--tag", default="", help='put in the line ids, e.g. "r2_"')
     args = p.parse_args()
 
@@ -192,7 +205,7 @@ def main():
             if name.endswith(".tsv"):
                 with open(os.path.join(d, name), encoding="utf-8") as f:
                     exclude |= {row.rstrip("\n").split("\t", 1)[1].lower() for row in f if row.strip()}
-    pool, extras = candidates(args.source, args.extra, args.passages, exclude)
+    pool, extras = candidates(args.source, args.extra, args.passages or args.dialogue > 0, exclude, args.dialogue)
     # A passage carries the source lines it uses; a single line is its own.
     keys = [c[1] if isinstance(c, tuple) else {k} for k, c in enumerate(pool)]
     pool = [c[0] if isinstance(c, tuple) else c for c in pool]
