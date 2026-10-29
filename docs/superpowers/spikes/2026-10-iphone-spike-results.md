@@ -1128,6 +1128,8 @@ Two shells with the same content: a Library list in Field colours with Spectral,
 
 **Builder's lean (Neal decides in Task 8):** B, Compose Multiplatform for the screens, with native views for the readers and the player. One developer keeps one UI, and U3 is still reshaping it; the field-kit brand is a custom look anyway, so "not native" costs less here than in a stock-iOS app. Its costs are real: ~9 MB more download, the back-swipe and navigation feel to rebuild (try it on the iPhone 16 Plus), and Compose-on-iOS text selection and accessibility (VoiceOver) to verify before committing. A wins if the iPhone version should feel like an iOS app first, and it costs a second UI kept in step with every Android change.
 
+**Neal's impression (2026-10-29, Simulator):** A feels clearly better. The swipes, taps and screen transitions behave the way someone expects on an iPhone, and the SwiftUI shell keeps the Granger theme (Field colours, Spectral titles) without fighting it. His leaning moves from B to A, from the feel side; the cost side (a second UI) is weighed in Task 8, where the way to keep A cheap is to share the screen logic (state and view models) in the Kotlin core so SwiftUI only draws.
+
 ## 7. iPhone numbers
 
 *Pending the iPhone 16 Plus.*

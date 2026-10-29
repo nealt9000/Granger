@@ -100,7 +100,7 @@
 - [x] **SwiftUI over KMP (A):** an Xcode project that links the `kmp-core` framework from Task 4 and calls one real function, for example `VectorFile` search over a small `.gvec` or `SpokenText` on a sentence. Note how Kotlin types, `suspend` functions and `Flow` look from Swift (SKIE or KMP-NativeCoroutines against the plain export).
 - [x] **Compose Multiplatform (B):** one screen with the Field and Night colours and Spectral, plus a `UIKitView` holding a `WKWebView` that shows a ZIM-like HTML page. Note scrolling, text selection, the keyboard and Back gestures, which are where Compose on iOS has usually felt foreign.
 - [x] Count the Android UI code: `:app` is 25,572 lines. Estimate how much of it B could carry over (Compose screens with Android-only parts swapped out) against A's rewrite. Name the screens that are mostly platform views either way (the readers, the player).
-- [ ] Neal looks at both shells in the Simulator. His impression goes in the results; the decision is in Task 8.
+- [x] Neal looks at both shells in the Simulator. His impression goes in the results; the decision is in Task 8.
 - *Built 2026-10-28: both shells run on the iOS 27.1 Simulator; release sizes 1.8 MB vs 10.5 MB zipped; the builder leans B with native readers and player. Neal's look in the Simulator is next. Results §5.*
 
 ### Task 6: The Apple side
