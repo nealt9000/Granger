@@ -337,6 +337,46 @@ class ThemeShots {
         File(out, "browse-icons.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /**
+     * The readers' shared bars (Plan U3c Decision 4) over a stand-in page, at 360 dp: the wiki idle and reading aloud
+     * (Stop beside Pause), and an EPUB with its place and slider.
+     */
+    private fun wikiBars(voice: app.granger.player.VoiceButton) = app.granger.reader.wikiBarActions(
+        packTitle = "Wikipedia", hasPack = true, hasPage = true, hasHome = true, bookmarked = false, onBack = {}, onListen = {}, voice = voice,
+    )
+
+    private val wikiPage = "Photosynthesis is a system of biological processes by which photosynthetic organisms, such as most plants, " +
+        "algae and cyanobacteria, convert light energy, typically from sunlight, into the chemical energy necessary to fuel their metabolism."
+
+    @Test fun barsWiki() = shoot("bars-wiki") { ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.IDLE), wikiPage) }
+
+    @Test fun barsWikiReading() = shoot("bars-wiki-reading") { ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.READING), wikiPage) }
+
+    @Test fun barsEpub() {
+        val locator = org.readium.r2.shared.publication.Locator(
+            href = org.readium.r2.shared.util.Url("c1.xhtml")!!, mediaType = org.readium.r2.shared.util.mediatype.MediaType.XHTML,
+            title = "Chapter 1", locations = org.readium.r2.shared.publication.Locator.Locations(position = 12, totalProgression = 0.04),
+        )
+        val book = app.granger.ebook.bookBarActions(isPdf = false, bookmarked = true, onBack = {}, onListen = {})
+        shoot("bars-epub") {
+            ReaderShot(
+                "Pride and Prejudice", book,
+                "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+            ) { app.granger.ebook.BookProgress(locator, 410) {} }
+        }
+    }
+
+    @Composable
+    private fun ReaderShot(title: String, actions: app.granger.reader.ReaderBarActions, text: String, progress: (@Composable () -> Unit)? = null) {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            app.granger.reader.ReaderTopBar(title, actions)
+            Box(Modifier.weight(1f).fillMaxWidth().padding(16.dp)) {
+                Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            }
+            app.granger.reader.ReaderBottomBar(actions, progress = progress)
+        }
+    }
+
     /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
     @Composable
     private fun IconColumn(name: String, icon: Int, modifier: Modifier, tool: String = "Listen") {

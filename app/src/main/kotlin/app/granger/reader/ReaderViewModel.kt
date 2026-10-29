@@ -15,6 +15,8 @@ import app.granger.core.speech.ReadSourceKey
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import app.granger.core.zim.ZimUrls
+import app.granger.ebook.ReadingPrefs
+import app.granger.ebook.ReadingPrefsStore
 import app.granger.voice.listenStart
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +58,8 @@ class ReaderViewModel(
     private val quote: String? = null,
     /** A text's saved place (Plan U2): Listen goes on from it when the page is at or before it ([listenStart]). */
     private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
+    /** The text size and reader theme (Plan U3c), shared with the e-books; null keeps them in this reader only (tests). */
+    private val prefsStore: ReadingPrefsStore? = null,
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
@@ -71,6 +75,9 @@ class ReaderViewModel(
         val hits: List<ZimHit> = emptyList(),
         val searched: Boolean = false,
     )
+
+    /** The wiki's panels over the page, from the bottom bar: the article's sections, and Aa. */
+    enum class Panel { CONTENTS, TEXT }
 
     data class State(
         /** The URL a newly created WebView should load: the start page, then the current page. */
@@ -96,6 +103,10 @@ class ReaderViewModel(
         val voice: VoiceButton = VoiceButton.IDLE,
         /** The cited quote on the first page (research spec §7), to mark; null once the reader leaves that page. */
         val cite: CiteRange? = null,
+        /** The panel open over the page, or null. */
+        val panel: Panel? = null,
+        /** The page's sections for Contents: null until read (or when there's no page). */
+        val contents: List<ArticleSection>? = null,
     )
 
     /**
@@ -103,6 +114,11 @@ class ReaderViewModel(
      * rotation) so the next WebView restores it instead of starting a new history.
      */
     var webViewState: Bundle? = null
+
+    private val localPrefs = MutableStateFlow(ReadingPrefs())
+
+    /** The reading preferences: [ReadingPrefs.wikiTextZoom] and [ReadingPrefs.theme] are the wiki's. */
+    val prefs: StateFlow<ReadingPrefs> = prefsStore?.prefs ?: localPrefs.asStateFlow()
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
@@ -254,7 +270,8 @@ class ReaderViewModel(
         val shown = Page(zim.path, title)
         page.value = shown
         if (citedPath != null && citedPath != zim.path) citedPath = null
-        _state.update { it.copy(url = url, page = shown, cite = it.cite.takeIf { citedPath != null }) }
+        // A new page has its own sections; the same page shown again (a jump within it) keeps them.
+        _state.update { it.copy(url = url, page = shown, cite = it.cite.takeIf { citedPath != null }, contents = it.contents.takeIf { _ -> it.page == shown }) }
         writeStack { sessions.pushPath(tabId, zim.path, title) }
         return if (zim.fragment != null) null else library.position(pack, zim.path)
     }
@@ -322,13 +339,13 @@ class ReaderViewModel(
         appScope.launch { library.setBookmarked(pack, current.path, current.title, add) }
     }
 
-    /** A middle tap. Hiding the chrome also closes the find bar. Errors keep the chrome up. */
+    /** A middle tap. Hiding the chrome also closes the find bar and any panel. Errors keep the chrome up. */
     fun toggleChrome() {
         if (_state.value.chromeVisible) searchJob?.cancel()
         _state.update {
             when {
                 it.error != null -> it
-                it.chromeVisible -> it.copy(chromeVisible = false, findQuery = null, packSearch = null)
+                it.chromeVisible -> it.copy(chromeVisible = false, findQuery = null, packSearch = null, panel = null)
                 else -> it.copy(chromeVisible = true)
             }
         }
@@ -345,9 +362,30 @@ class ReaderViewModel(
      */
     fun onScreenLeft() = showChrome()
 
+    fun updatePrefs(p: ReadingPrefs) {
+        if (prefsStore != null) prefsStore.update(p) else localPrefs.value = p.clamped()
+    }
+
+    /**
+     * Opens [panel] over the page (null closes it), closing find and the pack search. Contents reads the page's
+     * sections the first time it opens on a page.
+     */
+    fun open(panel: Panel?) {
+        if (panel != null) searchJob?.cancel()
+        _state.update { if (panel == null) it.copy(panel = null) else it.copy(panel = panel, chromeVisible = true, findQuery = null, packSearch = null) }
+        if (panel != Panel.CONTENTS || _state.value.contents != null) return
+        val pack = packId ?: return
+        val p = page.value ?: return
+        val archive = archive ?: return
+        viewModelScope.launch {
+            val sections = runCatching { sourceFor(pack, p, archive).contents() }.getOrDefault(emptyList())
+            if (page.value == p) _state.update { it.copy(contents = sections) }
+        }
+    }
+
     fun startFind() {
         searchJob?.cancel()
-        _state.update { it.copy(chromeVisible = true, findQuery = it.findQuery ?: "", packSearch = null) }
+        _state.update { it.copy(chromeVisible = true, findQuery = it.findQuery ?: "", packSearch = null, panel = null) }
     }
 
     fun setFindQuery(query: String) {
@@ -376,7 +414,7 @@ class ReaderViewModel(
 
     fun startPackSearch() {
         if (archive == null) return
-        _state.update { it.copy(chromeVisible = true, findQuery = null, packSearch = it.packSearch ?: PackSearch()) }
+        _state.update { it.copy(chromeVisible = true, findQuery = null, panel = null, packSearch = it.packSearch ?: PackSearch()) }
     }
 
     /** Typing: after a short pause, shows title suggestions. A blank query clears the results. */

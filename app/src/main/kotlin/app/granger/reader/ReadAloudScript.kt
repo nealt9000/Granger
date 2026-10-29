@@ -34,6 +34,8 @@ data class BlockRef(val id: String, val prefix: String, val offset: Int? = null)
  * - `clear()`.
  * - `cite(id, prefix, start, end)`: marks a cited quote ([ArticleQuote]) as the e-book marks a search hit, under its
  *   own highlight so the voice's mark doesn't clear it, and scrolls it a third of the way down. `clearCite()`.
+ * - `jump(id, prefix)`: the Contents' jump to a section (Plan U3c): opens the collapsed sections around its heading and
+ *   scrolls the heading to the top. It counts as the user's own scroll, so the page stops following the voice.
  */
 object ReadAloudScript {
     val SOURCE = """
@@ -137,6 +139,13 @@ object ReadAloudScript {
             window.scrollBy(0, rect.top - window.innerHeight / 3);
             return 'ok';
           }
+          function jump(id, prefix) {
+            var el = find(id, prefix);
+            if (!el) return 'missing';
+            for (var d = el.closest('details'); d; d = d.parentElement ? d.parentElement.closest('details') : null) d.open = true;
+            el.scrollIntoView({ block: 'start' });
+            return 'ok';
+          }
           function firstVisible() {
             var list = blocks();
             for (var i = 0; i < list.length; i++) {
@@ -167,7 +176,7 @@ object ReadAloudScript {
             if (Date.now() < ownScrollUntil) return;
             if (window.${ReaderPageScript.BRIDGE_NAME}) ${ReaderPageScript.BRIDGE_NAME}.onUserScroll();
           }, { passive: true });
-          window.__grangerRead = { firstVisible: firstVisible, selectionBlock: selectionBlock, mark: mark, clear: clear, cite: cite, clearCite: clearCite };
+          window.__grangerRead = { firstVisible: firstVisible, selectionBlock: selectionBlock, mark: mark, clear: clear, cite: cite, clearCite: clearCite, jump: jump };
         })();
     """.trimIndent()
 

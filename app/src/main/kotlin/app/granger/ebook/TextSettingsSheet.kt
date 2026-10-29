@@ -21,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
@@ -94,6 +96,40 @@ fun PdfSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDi
             }
             Setting("Theme") {
                 // Sepia reads as Day on a PDF, so it shows as Day here.
+                val shown = if (prefs.theme == ReadingTheme.SEPIA) ReadingTheme.DAY else prefs.theme
+                Chips(listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.NIGHT to "Night"), shown) {
+                    onChange(prefs.copy(theme = it))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The wiki reader's Aa (Plan U3c Decision 4): the text size (the WebView's text zoom, saved) and the reader theme,
+ * Match app, Day or Night, which the e-books share. A wiki page has no sepia of its own, so Sepia shows as Day.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WikiTextSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Setting("Text size") {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(
+                        onClick = { onChange(prefs.copy(wikiTextZoom = prefs.wikiTextZoom - ReadingPrefs.WIKI_ZOOM_STEP)) },
+                        enabled = prefs.wikiTextZoom > ReadingPrefs.MIN_WIKI_ZOOM,
+                        modifier = Modifier.semantics { contentDescription = "Smaller text" },
+                    ) { Text("−") }
+                    Text("${prefs.wikiTextZoom}%", modifier = Modifier.width(56.dp), style = MaterialTheme.typography.titleMedium)
+                    OutlinedButton(
+                        onClick = { onChange(prefs.copy(wikiTextZoom = prefs.wikiTextZoom + ReadingPrefs.WIKI_ZOOM_STEP)) },
+                        enabled = prefs.wikiTextZoom < ReadingPrefs.MAX_WIKI_ZOOM,
+                        modifier = Modifier.semantics { contentDescription = "Larger text" },
+                    ) { Text("+") }
+                }
+            }
+            Setting("Theme") {
                 val shown = if (prefs.theme == ReadingTheme.SEPIA) ReadingTheme.DAY else prefs.theme
                 Chips(listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.NIGHT to "Night"), shown) {
                     onChange(prefs.copy(theme = it))

@@ -49,6 +49,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.testTag
 import app.granger.Features
 import app.granger.reader.ChromeBackOnReturn
+import app.granger.reader.ReaderBarActions
+import app.granger.reader.ReaderBottomBar
+import app.granger.reader.ReaderTopBar
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
 import app.granger.reader.readerPageInsets
@@ -222,18 +225,40 @@ fun EbookReaderScreen(
         }
     }
 
+    val bars = bookBarActions(
+        isPdf = state.isPdf,
+        bookmarked = state.isBookmarkedHere,
+        onBack = onBack,
+        onContents = { viewModel.open(Panel.CONTENTS) },
+        onSearch = { viewModel.open(Panel.SEARCH) },
+        onTextSettings = { viewModel.open(Panel.SETTINGS) },
+        onBookmark = viewModel::toggleBookmark,
+        voice = state.voice,
+        onPauseResume = viewModel::pauseResume,
+        onStop = {
+            viewModel.stopReading()
+            scope.launch { snackbar.showSnackbar("Stopped reading") }
+        },
+        onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
+            val fragment = epub
+            scope.launch {
+                // The page's first words place the voice; Readium's first visible element is the
+                // fallback (it can be the paragraph that ran over from the page before).
+                val words = fragment?.let { runCatching { FirstVisibleText.parse(it.evaluateJavascript(FirstVisibleText.JS)) }.getOrNull() }
+                val page = if (words != null) fragment.currentLocator.value else fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }
+                viewModel.readAloud(page, words)
+            }
+        }),
+    )
+
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // With the chrome up the page is laid out between the top and bottom bars, like any other screen (the shell
         // puts the rail and the mini-player beside and above it); hidden, it fills the screen. Fades only, so the
         // page is laid out again once per tap rather than on every frame of a slide.
         Column(Modifier.fillMaxSize()) {
             AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
-                EbookTopBar(
-                    title = state.title,
-                    onBack = onBack,
-                    onContents = { viewModel.open(Panel.CONTENTS) },
-                    onSearch = if (state.isPdf) null else ({ viewModel.open(Panel.SEARCH) }),
-                )
+                // An error leaves only ←, as the wiki's does.
+                ReaderTopBar(state.title, if (state.error == null) bars else ReaderBarActions(onBack = onBack))
             }
             // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
             Box(Modifier.weight(1f).fillMaxWidth().windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Horizontal))) {
@@ -273,31 +298,9 @@ fun EbookReaderScreen(
             }
             if (state.error == null) {
                 AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
-                    EbookBottomBar(
-                        locator = state.locator ?: state.initial,
-                        positionsCount = state.positionsCount,
-                        bookmarked = state.isBookmarkedHere,
-                        onSeek = viewModel::goToProgression,
-                        onContents = { viewModel.open(Panel.CONTENTS) },
-                        onTextSettings = { viewModel.open(Panel.SETTINGS) },
-                        onBookmark = viewModel::toggleBookmark,
-                        voice = state.voice,
-                        onPauseResume = viewModel::pauseResume,
-                        onStop = {
-                            viewModel.stopReading()
-                            scope.launch { snackbar.showSnackbar("Stopped reading") }
-                        },
-                        onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER || state.isPdf) null else ({
-                            val fragment = epub
-                            scope.launch {
-                                // The page's first words place the voice; Readium's first visible element is the
-                                // fallback (it can be the paragraph that ran over from the page before).
-                                val words = fragment?.let { runCatching { FirstVisibleText.parse(it.evaluateJavascript(FirstVisibleText.JS)) }.getOrNull() }
-                                val page = if (words != null) fragment.currentLocator.value else fragment?.let { runCatching { it.firstVisibleElementLocator() }.getOrNull() }
-                                viewModel.readAloud(page, words)
-                            }
-                        }),
-                    )
+                    ReaderBottomBar(bars) {
+                        BookProgress(state.locator ?: state.initial, state.positionsCount, viewModel::goToProgression)
+                    }
                 }
             }
         }

@@ -18,6 +18,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+/** A section in a wiki page's Contents: its title, and the block ([BlockRef]'s id and prefix) its heading is in. */
+data class ArticleSection(val title: String, val blockId: String, val prefix: String)
+
 /**
  * An article as the voice reads it: the ZIM entry's HTML through [ArticleText]'s rules, split into sentences once and
  * kept. It never touches the WebView, so the player can reopen it after process death and the reader can start the
@@ -90,6 +93,18 @@ class ArticleReadSource(
     override suspend fun locate(address: ReadAddress): ReadAddress? {
         val list = all()
         return indexOf(list, address)?.let { list[it].address }
+    }
+
+    /**
+     * The reader's Contents (Plan U3c Decision 4): the same sections the voice lists as chapters, each with the block
+     * its heading is in (the heading's own id where it has one, else `g<n>`), so the page can jump to it.
+     */
+    suspend fun contents(): List<ArticleSection> {
+        val list = all()
+        return sections.map { s ->
+            val u = list[s.start]
+            ArticleSection(s.title, (u.address as ReadAddress.Article).blockId, u.text.take(40))
+        }
     }
 
     override suspend fun chapters(): List<ReadChapter> { all(); return sections.map { ReadChapter(it.title) } }

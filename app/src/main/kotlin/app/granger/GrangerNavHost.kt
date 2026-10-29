@@ -835,7 +835,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ReaderViewModel(
                             route.tabId, container.library, container.sessions, container.appScope, fragment = route.fragment,
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
-                            quote = route.quote, savedPlace = container.voicePlace,
+                            quote = route.quote, savedPlace = container.voicePlace, prefsStore = container.readingPrefs,
                         )
                     },
                     resolver = container.resolver,

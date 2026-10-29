@@ -7,6 +7,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -14,16 +15,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.imePadding
@@ -38,22 +33,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -62,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,7 +58,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -77,12 +65,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -98,7 +82,7 @@ import app.granger.Features
 import app.granger.theme.GrangerTheme
 import app.granger.R
 import app.granger.core.zim.ZimHit
-import app.granger.player.ListenButtons
+import app.granger.ebook.WikiTextSheet
 import app.granger.player.VoiceButton
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
@@ -112,7 +96,9 @@ private data class FindMatches(val active: Int, val count: Int, val done: Boolea
  * The web-style reader. It opens (and comes back) with its chrome up: the top bar here and the shell's rail (through
  * [onChromeVisibleChange]), with the page fitted below and beside them. A middle tap on the page hides the chrome and
  * the system bars for full-screen reading; another brings them back. Selecting text offers
- * Search ([onSearchText]) and Research ([onResearch], with the article it was selected in); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome; the top bar offers search inside the pack, the bookmark star and a menu with Home, Random article and find in page.
+ * Search ([onSearchText]) and Research ([onResearch], with the article it was selected in); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome.
+ * The bars are the readers' shared ones ([wikiBarActions]): the page's title, Listen and ⋯ above; Contents, the pack's
+ * search, Aa and the bookmark below.
  * Back, the ← arrow or the system's, steps back through the pages read in this tab; at its first page it calls [onBack].
  */
 @Composable
@@ -182,6 +168,7 @@ fun ReaderScreen(
     // Declared later, so it takes Back first while the find bar is open.
     BackHandler(enabled = state.findQuery != null) { viewModel.endFind() }
     BackHandler(enabled = state.packSearch != null) { viewModel.endPackSearch() }
+    BackHandler(enabled = state.panel != null) { viewModel.open(null) }
     // Fires when the app goes to the background and when this screen is left or popped.
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { saveScroll() }
 
@@ -196,9 +183,44 @@ fun ReaderScreen(
         }
     }
 
+    val prefs by viewModel.prefs.collectAsStateWithLifecycle()
+    // The reader theme (Aa): Match app follows the app; Day and Night are the page's own.
+    val pageNight = prefs.wikiNight(night)
+    val zoom = prefs.wikiTextZoom
+    LaunchedEffect(zoom, webView) { webView?.settings?.textZoom = zoom }
+
+    val bars = wikiBarActions(
+        packTitle = state.packTitle,
+        hasPack = state.error == null,
+        hasPage = state.page != null,
+        hasHome = state.hasHome,
+        bookmarked = state.bookmarked,
+        onBack = ::goBack,
+        onHome = { scope.launch { viewModel.homeUrl()?.let(::navigate) } },
+        onRandom = {
+            scope.launch {
+                val url = viewModel.randomUrl()
+                if (url != null) navigate(url) else Toast.makeText(context, NO_RANDOM_ARTICLE, Toast.LENGTH_SHORT).show()
+            }
+        },
+        onFind = viewModel::startFind,
+        onSearchPack = viewModel::startPackSearch,
+        onContents = { viewModel.open(ReaderViewModel.Panel.CONTENTS) },
+        onTextSettings = { viewModel.open(ReaderViewModel.Panel.TEXT) },
+        onToggleBookmark = viewModel::toggleBookmark,
+        voice = state.voice,
+        onPauseResume = viewModel::pauseResume,
+        onStop = viewModel::stopReading,
+        onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
+            val view = webView
+            if (view == null) viewModel.readAloud(null)
+            else view.evaluateJavascript(ReadAloudScript.call("firstVisible")) { json -> viewModel.readAloud(BlockRef.parse(json)) }
+        }),
+    )
+
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // With the chrome up the page is laid out below the top bar and above the navigation bar, like any other
-        // screen (the shell puts the rail and the mini-player beside and above it); hidden, it fills the screen.
+        // With the chrome up the page is laid out between the top and bottom bars, like any other screen (the shell
+        // puts the rail and the mini-player beside and above it); hidden, it fills the screen.
         Column(Modifier.fillMaxSize()) {
             // Fades only, so the page is resized once per tap rather than on every frame of a slide.
             AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
@@ -211,33 +233,7 @@ fun ReaderScreen(
                         onClose = viewModel::endFind,
                     )
                 } else {
-                    ReaderTopBar(
-                        pageTitle = state.page?.title.orEmpty(),
-                        packTitle = state.packTitle,
-                        showPageActions = state.page != null,
-                        bookmarked = state.bookmarked,
-                        showMenu = state.error == null,
-                        hasHome = state.hasHome,
-                        onBack = ::goBack,
-                        onSearchPack = viewModel::startPackSearch,
-                        onHome = { scope.launch { viewModel.homeUrl()?.let(::navigate) } },
-                        onRandom = {
-                            scope.launch {
-                                val url = viewModel.randomUrl()
-                                if (url != null) navigate(url) else Toast.makeText(context, NO_RANDOM_ARTICLE, Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onFind = viewModel::startFind,
-                        onToggleBookmark = viewModel::toggleBookmark,
-                        voice = state.voice,
-                        onPauseResume = viewModel::pauseResume,
-                        onStop = viewModel::stopReading,
-                        onReadAloud = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
-                            val view = webView
-                            if (view == null) viewModel.readAloud(null)
-                            else view.evaluateJavascript(ReadAloudScript.call("firstVisible")) { json -> viewModel.readAloud(BlockRef.parse(json)) }
-                        }),
-                    )
+                    ReaderTopBar(title = state.page?.title ?: state.packTitle.orEmpty(), actions = bars)
                 }
             }
             Box(
@@ -245,7 +241,8 @@ fun ReaderScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .testTag(ReaderTags.PAGE)
-                    .windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
+                    // The bottom bar keeps clear of the navigation bar; an error has none, so its message does.
+                    .windowInsetsPadding(readerPageInsets(state.chromeVisible, if (state.error != null) WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal else WindowInsetsSides.Horizontal)),
             ) {
                 val error = state.error
                 val startUrl = state.url
@@ -253,9 +250,12 @@ fun ReaderScreen(
                     error != null -> Box(Modifier.fillMaxSize().padding(32.dp), Alignment.Center) {
                         Text(error, textAlign = TextAlign.Center)
                     }
-                    startUrl != null -> AndroidView(
+                    // A new reader theme builds the WebView again (its history kept, as for a rotation): a WebView
+                    // darkens pages only when its context's theme is dark.
+                    startUrl != null -> key(pageNight) { AndroidView(
                         modifier = Modifier.fillMaxSize(),
-                        factory = { context ->
+                        factory = { activity ->
+                            val context = ContextThemeWrapper(activity, if (pageNight) R.style.Theme_Granger_Night else R.style.Theme_Granger_Field)
                             val client = ZimWebViewClient(
                                 resolver = resolver,
                                 assets = context.assets,
@@ -281,7 +281,7 @@ fun ReaderScreen(
                             ReaderWebView(
                                 context = context,
                                 client = client,
-                                night = night,
+                                night = pageNight,
                                 onToggleChrome = viewModel::toggleChrome,
                                 onSelectionAction = { action, text ->
                                     when (action) {
@@ -297,16 +297,18 @@ fun ReaderScreen(
                                 onUserScroll = viewModel::onUserScroll,
                             ).also {
                                 it.setFindListener { active, count, done -> matches = FindMatches(active, count, done) }
+                                it.settings.textZoom = zoom
                                 webView = it
                                 val saved = viewModel.webViewState
                                 if (saved == null || it.restoreState(saved) == null) it.loadUrl(startUrl)
                             }
                         },
                         onRelease = {
+                            viewModel.savePosition(it.url, it.scrollFraction())
                             viewModel.webViewState = Bundle().apply { it.saveState(this) }
                             it.destroy()
                         },
-                    )
+                    ) }
                 }
                 // A cited quote is marked once its page has loaded (the page script is in by then).
                 val cite = state.cite
@@ -337,6 +339,11 @@ fun ReaderScreen(
                     )
                 }
             }
+            if (state.error == null) {
+                AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
+                    ReaderBottomBar(bars)
+                }
+            }
         }
         // Over the page and its top bar, so opening the search doesn't resize the page underneath.
         val packSearch = state.packSearch
@@ -353,132 +360,70 @@ fun ReaderScreen(
                 onClose = viewModel::endPackSearch,
             )
         }
+        when (state.panel) {
+            ReaderViewModel.Panel.CONTENTS -> WikiContentsPanel(
+                sections = state.contents,
+                onJump = { section ->
+                    webView?.evaluateJavascript(ReadAloudScript.call("jump", section.blockId, section.prefix), null)
+                    viewModel.open(null)
+                },
+                onDismiss = { viewModel.open(null) },
+            )
+            ReaderViewModel.Panel.TEXT -> WikiTextSheet(prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+            null -> Unit
+        }
     }
 }
 
 /**
- * The reader's top bar, in order: ← (Back within the tab), Home when the pack has a main page, the pack's search box,
- * Listen (with Stop beside it while this page is read), the bookmark star and ⋯ with Random article and Find in page.
- * It shows no page title: [pageTitle] is what TalkBack reads for the bar. With an error ([showMenu] false) only ← is
- * left. Listen, the star and Find wait for a page ([showPageActions]).
+ * The wiki's bars (Plan U3c Decision 4). Top: ←, the page's title, Listen and ⋯ with the pack's main page, Random
+ * article and Find in page. Bottom: Contents, Search (the pack), Aa and the bookmark. With an error ([hasPack] false)
+ * only ← is left; the page's own actions (Listen, Contents, Aa, the star, Find) wait for a page ([hasPage]).
  */
-@Composable
-internal fun ReaderTopBar(
-    pageTitle: String,
+internal fun wikiBarActions(
     packTitle: String?,
-    showPageActions: Boolean,
-    bookmarked: Boolean,
-    showMenu: Boolean,
+    hasPack: Boolean,
+    hasPage: Boolean,
     hasHome: Boolean,
+    bookmarked: Boolean,
     onBack: () -> Unit,
-    onSearchPack: () -> Unit,
-    onHome: () -> Unit,
-    onRandom: () -> Unit,
-    onFind: () -> Unit,
-    onToggleBookmark: () -> Unit,
-    /** Listen, or Pause / Play plus Stop while this page is read (Plan U2 Decision 6). */
-    voice: VoiceButton = VoiceButton.IDLE,
+    onHome: () -> Unit = {},
+    onRandom: () -> Unit = {},
+    onFind: () -> Unit = {},
+    onSearchPack: () -> Unit = {},
+    onContents: () -> Unit = {},
+    onTextSettings: () -> Unit = {},
+    onToggleBookmark: () -> Unit = {},
     /** Starts the voice on this page (Plan V1); null leaves Listen out. */
-    onReadAloud: (() -> Unit)? = null,
+    onListen: (() -> Unit)? = null,
+    voice: VoiceButton = VoiceButton.IDLE,
     onPauseResume: () -> Unit = {},
     onStop: () -> Unit = {},
-) {
-    var menuOpen by remember { mutableStateOf(false) }
-    Surface(color = MaterialTheme.colorScheme.surface) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(ReaderTopBarInsets)
-                .height(64.dp)
-                .padding(horizontal = 4.dp)
-                .semantics { if (pageTitle.isNotEmpty()) contentDescription = pageTitle },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
-            if (showMenu && hasHome) {
-                // The pack's main page: a book, not a house, which is the app's Home (Plan U3b Decision 5).
-                IconButton(onClick = onHome) { Icon(painterResource(R.drawable.ic_menu_book), contentDescription = mainPageLabel(packTitle)) }
-            }
-            if (showMenu) {
-                PackSearchBox(searchLabels(packTitle), onSearchPack, Modifier.weight(1f).padding(horizontal = 4.dp))
-            } else {
-                Spacer(Modifier.weight(1f))
-            }
-            if (showPageActions && onReadAloud != null) ListenButtons(voice, onReadAloud, onPauseResume, onStop)
-            // While this page is read, Stop takes the star's place and the star goes into ⋯, so the bar is never
-            // wider than it is idle and the search box keeps its room at 360 dp.
-            val listening = showPageActions && onReadAloud != null && voice != VoiceButton.IDLE
-            if (showPageActions && !listening) {
-                IconButton(onClick = onToggleBookmark) {
-                    if (bookmarked) {
-                        Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = MaterialTheme.colorScheme.primary)
-                    } else {
-                        Icon(painterResource(R.drawable.ic_star_border), contentDescription = "Add bookmark")
-                    }
-                }
-            }
-            if (showMenu) Box {
-                IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(text = { Text("Random article") }, onClick = { menuOpen = false; onRandom() })
-                    if (showPageActions) {
-                        DropdownMenuItem(text = { Text("Find in page") }, onClick = { menuOpen = false; onFind() })
-                    }
-                    if (listening) {
-                        DropdownMenuItem(
-                            text = { Text(if (bookmarked) "Remove bookmark" else "Add bookmark") },
-                            onClick = { menuOpen = false; onToggleBookmark() },
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
+): ReaderBarActions = ReaderBarActions(
+    onBack = onBack,
+    onListen = onListen?.takeIf { hasPage },
+    voice = voice,
+    onPauseResume = onPauseResume,
+    onStop = onStop,
+    menu = if (!hasPack) emptyList() else listOfNotNull(
+        // The pack's main page: named for the pack, not Home, which is the app's (Plan U3b Decision 5).
+        ReaderMenuItem(mainPageLabel(packTitle), onHome).takeIf { hasHome },
+        ReaderMenuItem("Random article", onRandom),
+        ReaderMenuItem("Find in page", onFind).takeIf { hasPage },
+    ),
+    onContents = onContents.takeIf { hasPage },
+    onSearch = onSearchPack.takeIf { hasPack },
+    searchLabel = searchLabel(packTitle),
+    onTextSettings = onTextSettings.takeIf { hasPage },
+    onBookmark = onToggleBookmark.takeIf { hasPage },
+    bookmarked = bookmarked,
+)
 
-/**
- * "Search <pack>" in a rounded box, or the first of [labels] that fits; read-only, a tap opens the pack search (see
- * [PackSearchPanel]).
- */
-@Composable
-private fun PackSearchBox(labels: List<String>, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier
-            .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .clickable(onClickLabel = "Search", role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Filled.Search, contentDescription = null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.width(8.dp))
-        // The longest of "Search Wikipedia", "Wikipedia" and "Search" that fits, rather than "Search Wi…": with Listen
-        // on the bar a phone has room for about the pack's name, and 360 dp for "Search" (Plan U2 Task 5).
-        BoxWithConstraints(Modifier.weight(1f)) {
-            val style = MaterialTheme.typography.bodyLarge
-            val measurer = rememberTextMeasurer()
-            val shown = labels.firstOrNull { measurer.measure(it, style, maxLines = 1).size.width <= constraints.maxWidth } ?: labels.last()
-            Text(
-                shown,
-                Modifier.semantics { if (shown != labels.first()) contentDescription = labels.first() },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = style,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-/** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
-/** What TalkBack reads for the main-page button: "Wikipedia: main page". */
+/** The main page's entry in ⋯: "Wikipedia: main page". */
 internal fun mainPageLabel(packTitle: String?) = if (packTitle != null) "$packTitle: main page" else "Main page"
 
-private fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"
-
-/** The search box's labels, longest first: "Search Wikipedia", "Wikipedia", "Search". */
-internal fun searchLabels(packTitle: String?) = listOfNotNull(searchLabel(packTitle), packTitle, "Search")
+/** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
+internal fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"
 
 /** The search field in place of the top bar, with the results listed under it. */
 @OptIn(ExperimentalMaterial3Api::class)
