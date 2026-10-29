@@ -539,10 +539,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         scope.launch { container.sessions.tab(tabId)?.let { nav.openTab(it) } }
     }
 
-    /** The one way an installed pack opens: from Browse, a source's Open and Downloads (Plan U3b Decision 3). */
-    fun openPack(packId: String) {
+    /**
+     * The one way an installed pack opens: from Browse, a source's Open and Downloads (Plan U3b Decision 3). [newTab]:
+     * Browse's way, the main page in a tab of its own even when the pack is open on the rail (Plan U3c walkthrough).
+     */
+    fun openPack(packId: String, newTab: Boolean = false) {
         scope.launch {
-            val tabId = app.granger.library.openPack(container.library, container.sessions, packId) ?: return@launch
+            val tabId = app.granger.library.openPack(container.library, container.sessions, packId, newTab) ?: return@launch
             container.sessions.tab(tabId)?.let { nav.showTab(it) }
         }
     }
@@ -790,7 +793,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
-                        onOpenPack = ::openPack,
+                        // Always a new tab at the pack's main page, so a wiki can be open in two places.
+                        onOpenPack = { packId -> openPack(packId, newTab = true) },
                         onGetPacks = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                         onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                         onReadiness = { nav.navigate(ReadinessRoute) },

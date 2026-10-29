@@ -27,6 +27,12 @@ interface ReadingSessions {
     /** Opens an article from Library, Search or History: a new rail tab, or the tab already showing it. Returns the tab id. */
     suspend fun openTab(packId: String, path: String, title: String): Long
 
+    /**
+     * Opens [path] in a new rail tab even when a tab already shows it, so one pack can be open in two places (Browse's
+     * pack, Plan U3c walkthrough). Returns the new tab's id.
+     */
+    suspend fun newTab(packId: String, path: String, title: String): Long
+
     /** Navigation within a tab (following a link): updates that tab instead of adding a rail spot. */
     suspend fun showInTab(tabId: Long, packId: String, path: String, title: String)
 
@@ -85,6 +91,12 @@ class RoomReadingSessions(
         } else {
             dao.insertTab(ReadingTab(0, packId, path, title, time, onRail = true, backStack = stackOf(listOf(path))))
         }
+    }
+
+    override suspend fun newTab(packId: String, path: String, title: String): Long = db.withTransaction {
+        val time = now()
+        dao.upsertHistory(HistoryEntry(packId, path, title, time))
+        dao.insertTab(ReadingTab(0, packId, path, title, time, onRail = true, backStack = stackOf(listOf(path))))
     }
 
     override suspend fun showInTab(tabId: Long, packId: String, path: String, title: String) {

@@ -174,6 +174,16 @@ class FakeReadingSessions : ReadingSessions {
         return id
     }
 
+    override suspend fun newTab(packId: String, path: String, title: String): Long {
+        val time = ++clock
+        historyList.update { list ->
+            listOf(HistoryEntry(packId, path, title, time)) + list.filterNot { it.packId == packId && it.path == path }
+        }
+        val id = (tabs.value.maxOfOrNull { it.id } ?: 0L) + 1
+        tabs.update { it + ReadingTab(id, packId, path, title, time, onRail = true, backStack = path) }
+        return id
+    }
+
     override suspend fun showInTab(tabId: Long, packId: String, path: String, title: String) {
         tabs.update { list -> list.map { if (it.id == tabId) it.copy(packId = packId, path = path, title = title) else it } }
     }
