@@ -56,7 +56,15 @@ def export_onnx(checkpoint, target, keep=None):
     from piper.train.vits.lightning import VitsModel
 
     torch.manual_seed(1234)
-    model_g = VitsModel.load_from_checkpoint(checkpoint, map_location="cpu").model_g
+    # slim_ckpt.py's checkpoints carry the generator only: load those without the discriminators, but check nothing
+    # of the generator is missing.
+    state = torch.load(checkpoint, map_location="cpu", weights_only=False)["state_dict"]
+    slim = not any(k.startswith("model_d.") for k in state)
+    model = VitsModel.load_from_checkpoint(checkpoint, map_location="cpu", strict=not slim)
+    missing = {k for k in model.state_dict() if k.startswith("model_g.")} - set(state)
+    if missing:
+        raise SystemExit(f"{checkpoint}: generator weights missing: {sorted(missing)[:5]}")
+    model_g = model.model_g
     model_g.eval()
     with torch.no_grad():
         model_g.dec.remove_weight_norm()
