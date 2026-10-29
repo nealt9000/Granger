@@ -3,6 +3,7 @@ package app.granger.reader
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
+import app.granger.core.library.PackDocumentTitle
 import app.granger.core.zim.ZimArchive
 import java.io.File
 import java.security.MessageDigest
@@ -27,8 +28,11 @@ class PackDocuments(
         data class Failed(val message: String) : Opened
     }
 
-    /** The pack document for [path] in [packId], copied out first unless it already is. */
-    suspend fun open(packId: String, path: String): Opened = withContext(io) {
+    /**
+     * The pack document for [path] in [packId], copied out first unless it already is. [linkText], the words of the
+     * link tapped in the article, names it when neither the entry nor the PDF has a title ([PackDocumentTitle]).
+     */
+    suspend fun open(packId: String, path: String, linkText: String = ""): Opened = withContext(io) {
         val archive = archiveOf(packId) ?: return@withContext Opened.Failed("Couldn't open this PDF: the pack isn't readable.")
         val entry = archive.entry(path) ?: return@withContext Opened.Failed("Couldn't open this PDF: it isn't in this pack.")
         val file = fileFor(packId, entry.path)
@@ -41,18 +45,21 @@ class PackDocuments(
                 return@withContext Opened.Failed("Couldn't open this PDF: copying it out of the pack failed.")
             }
         }
-        val book = bookshelf.registerPackDocument(packId, entry.path, entry.title, file)
+        val book = bookshelf.registerPackDocument(packId, entry.path, entry.title, file, linkText)
             ?: return@withContext Opened.Failed("Couldn't open this PDF: it is damaged or protected.")
         Opened.Ready(book)
     }
 
-    /** Copies a pack document's file out again when it is gone (storage cleared); false if its pack can't give it. */
+    /**
+     * Copies a pack document's file out again when it is gone (storage cleared); false if its pack can't give it. The
+     * name it has stands in for the link's words, which are gone, so a document named by its link keeps that name.
+     */
     suspend fun restore(book: Book): Boolean {
         if (book.origin != BookOrigin.PACK) return false
         val packId = book.sourceRef.substringBefore('/')
         val path = book.sourceRef.substringAfter('/', "")
         if (path.isEmpty()) return false
-        return open(packId, path) is Opened.Ready
+        return open(packId, path, book.title) is Opened.Ready
     }
 
     private fun fileFor(packId: String, path: String): File =

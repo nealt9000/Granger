@@ -152,6 +152,14 @@ class BookshelfTest {
         assertThat(pdfShelf.registerPackDocument("zim1", "site/docs/scan.pdf", "", untitled)!!.title).isEqualTo("scan")
     }
 
+    @Test fun aPackDocumentsJunkTitleGivesWayToTheLinkThenTheFileName() = test {
+        val junk = PdfFixtures.titled(File(booksDir, "packs/zim1"), "file://C:\\WINDOWS\\Desktop\\water.htm")
+        assertThat(pdfShelf.registerPackDocument("zim1", "site/docs/root_cellar-plans.pdf", "site/docs/root_cellar-plans.pdf", junk, "Root cellar plans (PDF)")!!.title)
+            .isEqualTo("Root cellar plans")
+        assertThat(pdfShelf.registerPackDocument("zim1", "site/docs/root_cellar-plans.pdf", "", junk)!!.title)
+            .isEqualTo("root cellar plans")
+    }
+
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
     private fun sha256(file: File) =

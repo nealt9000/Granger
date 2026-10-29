@@ -25,8 +25,11 @@ class ZimWebViewClient(
     private val onPageShown: (WebView, url: String) -> Unit,
     /** The WebView's history changed to [url]: a new page committed (before it finishes), or a jump within one. */
     private val onVisited: (url: String) -> Unit = {},
-    /** A tapped link to a PDF in the pack (Plan P2): the page stays, and the e-book reader opens the document. */
-    private val onOpenDocument: (packId: String, path: String) -> Unit = { _, _ -> },
+    /**
+     * A tapped link to a PDF in the pack (Plan P2): the page stays, and the e-book reader opens the document.
+     * [linkText] is the link's words, when the page reported them ([ReaderWebView.tappedLinkText]); else empty.
+     */
+    private val onOpenDocument: (packId: String, path: String, linkText: String) -> Unit = { _, _, _ -> },
 ) : WebViewClient() {
     /** File names under `assets/reader/`; nothing else is ever served from the app. */
     private val appFiles: Set<String> by lazy { assets.list(ASSET_DIR).orEmpty().toSet() }
@@ -75,7 +78,8 @@ class ZimWebViewClient(
                 true
             }
             is LinkAction.OpenDocument -> {
-                onOpenDocument(action.packId, action.path)
+                val linkText = (view as? ReaderWebView)?.tappedLinkText(request.url.toString()).orEmpty()
+                onOpenDocument(action.packId, action.path, linkText)
                 true
             }
             LinkAction.Ignore -> true

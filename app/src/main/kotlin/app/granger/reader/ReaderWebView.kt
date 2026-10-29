@@ -42,6 +42,8 @@ class ReaderWebView(
     onUserScroll: (dyDp: Float, byHand: Boolean) -> Unit = { _, _ -> },
     night: Boolean = true,
 ) : WebView(context) {
+    private val bridge = GrangerBridge(onToggleChrome, onUserScroll)
+
     init {
         // Compose's AndroidView adds views with wrap-content params, which puts WebView in "zero layout height" mode:
         // percentage heights then resolve to 0 and pages built on them (Kiwix main pages) render blank.
@@ -66,9 +68,12 @@ class ReaderWebView(
             }
         }
         setBackgroundColor((if (night) NightColors else FieldColors).background.toArgb()) // no wrong-colour flash before the first page paints
-        addJavascriptInterface(GrangerBridge(onToggleChrome, onUserScroll), ReaderPageScript.BRIDGE_NAME)
+        addJavascriptInterface(bridge, ReaderPageScript.BRIDGE_NAME)
         webViewClient = client
     }
+
+    /** The words of the link last tapped on the page, when it went to [url]; empty otherwise ([GrangerBridge.linkTextFor]). */
+    fun tappedLinkText(url: String): String = bridge.linkTextFor(url)
 
     private var chromePadding: String? = null
     private var chromePaddingAtStart: ScriptHandler? = null

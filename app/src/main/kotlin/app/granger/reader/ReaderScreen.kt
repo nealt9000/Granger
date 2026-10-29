@@ -116,8 +116,8 @@ fun ReaderScreen(
     showChromeRequest: Int = 0,
     onSearchText: (String) -> Unit,
     onResearch: (text: String, packId: String, path: String, title: String) -> Unit = { _, _, _, _ -> },
-    /** A tapped PDF in the pack (Plan P2): opened in the e-book reader over this page. */
-    onOpenDocument: (packId: String, path: String) -> Unit = { _, _ -> },
+    /** A tapped PDF in the pack (Plan P2): opened in the e-book reader over this page; [linkText] may name it. */
+    onOpenDocument: (packId: String, path: String, linkText: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -283,10 +283,10 @@ fun ReaderScreen(
                                 }
                             },
                             onVisited = viewModel::onPageVisited,
-                            onOpenDocument = { packId, path ->
+                            onOpenDocument = { packId, path, linkText ->
                                 // Leaving the article for the document: keep the place on the page, as any link does.
                                 webView?.let { viewModel.savePosition(it.url, it.scrollFraction()) }
-                                onOpenDocument(packId, path)
+                                onOpenDocument(packId, path, linkText)
                             },
                         )
                         ReaderWebView(

@@ -1,5 +1,6 @@
 package app.granger.reader
 
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.webkit.JavascriptInterface
@@ -7,7 +8,9 @@ import android.webkit.JavascriptInterface
 /**
  * Script run in every page after it loads (by [ZimWebViewClient]). A tap that lands on plain content in the middle
  * 60 % of the width shows or hides the reader's chrome; taps on links, controls, headings (collapsible sections) and anything the page already handled, and near the edges, don't.
- * The listener runs in the capture phase so a page handler that stops propagation can't hide a tap from it.
+ * The listener runs in the capture phase so a page handler that stops propagation can't hide a tap from it. A tapped
+ * link's address and words go to [GrangerBridge.noteLink] first, before the WebView follows it, so a PDF it opens can
+ * be named by them.
  */
 object ReaderPageScript {
     const val BRIDGE_NAME = "GrangerBridge"
@@ -17,8 +20,13 @@ object ReaderPageScript {
           if (window.__grangerTap) return;
           window.__grangerTap = true;
           document.addEventListener('click', function (e) {
-            if (e.defaultPrevented) return;
             var target = e.target;
+            var link = target && target.closest && target.closest('a[href]');
+            if (link && window.$BRIDGE_NAME) {
+              var img = link.querySelector('img[alt]');
+              $BRIDGE_NAME.noteLink(link.href, link.innerText || link.textContent || link.getAttribute('title') || (img && img.alt) || '');
+            }
+            if (e.defaultPrevented) return;
             if (target && target.closest && target.closest('a, button, input, summary, [onclick], h1, h2, h3, h4, h5, h6, [role=button]')) return;
             var width = window.innerWidth;
             if (e.clientX < width * 0.2 || e.clientX > width * 0.8) return;
@@ -88,6 +96,24 @@ class GrangerBridge(
 ) {
     private val main = Handler(Looper.getMainLooper())
 
+    /** The last link tapped on the page: its address and its words. */
+    @Volatile private var tappedLink: Pair<String, String>? = null
+
+    /**
+     * A link was tapped: [href], its absolute address, and [text], its words. Kept here at once, not posted: the page
+     * waits for this call to return before following the link, so it is in place when [linkTextFor] asks.
+     */
+    @JavascriptInterface
+    fun noteLink(href: String?, text: String?) {
+        tappedLink = href.orEmpty() to text.orEmpty().replace(SPACES, " ").trim()
+    }
+
+    /** The words of the last link tapped, when it went to [url] (its #fragment aside); empty for any other. */
+    fun linkTextFor(url: String): String {
+        val (href, text) = tappedLink ?: return ""
+        return if (sameAddress(href, url)) text else ""
+    }
+
     @JavascriptInterface
     fun toggleChrome() {
         main.post(onToggleChrome)
@@ -101,5 +127,15 @@ class GrangerBridge(
     @JavascriptInterface
     fun onUserScroll(dy: Double, byHand: Boolean) {
         main.post { onUserScroll(dy.toFloat(), byHand) }
+    }
+
+    private companion object {
+        val SPACES = Regex("\\s+")
+
+        /** [a] and [b] are one address: the same once %-escapes are decoded and any #fragment is dropped. */
+        fun sameAddress(a: String, b: String): Boolean {
+            fun bare(url: String) = Uri.decode(url.substringBefore('#'))
+            return a.isNotEmpty() && bare(a) == bare(b)
+        }
     }
 }

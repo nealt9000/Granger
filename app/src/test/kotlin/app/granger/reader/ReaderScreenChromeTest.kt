@@ -325,4 +325,13 @@ class ReaderScreenChromeTest {
         shadowOf(android.os.Looper.getMainLooper()).idle()
         assertThat(scrolls).containsExactly(-30.5f to true, 400f to false).inOrder()
     }
+
+    @Test fun theBridgeKeepsATappedLinksWordsForItsAddress() {
+        val bridge = GrangerBridge(onToggleChrome = {})
+        assertThat(bridge.linkTextFor("https://zim.granger.invalid/z/docs/water.pdf")).isEmpty()
+        bridge.noteLink("https://zim.granger.invalid/z/docs/water%20store.pdf", "  Storing water\n for a year ")
+        // Kept at once, not posted: the WebView asks before the main thread runs anything else.
+        assertThat(bridge.linkTextFor("https://zim.granger.invalid/z/docs/water store.pdf#page=2")).isEqualTo("Storing water for a year")
+        assertThat(bridge.linkTextFor("https://zim.granger.invalid/z/docs/other.pdf")).isEmpty()
+    }
 }

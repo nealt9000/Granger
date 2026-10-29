@@ -72,6 +72,12 @@ object PdfFixtures {
         }
     }
 
+    /** One blank page whose info dictionary's Title is [title], as junk as its maker left it. */
+    fun titled(dir: File, title: String, name: String = "titled.pdf"): File = write(dir, name) { doc ->
+        doc.addPage(PDPage(PDRectangle.LETTER))
+        doc.documentInformation.title = title
+    }
+
     /** [text] with an owner password only: it opens without a password, but it is encrypted. */
     fun encrypted(dir: File, name: String = "locked.pdf"): File {
         val plain = text(dir, "plain-$name")

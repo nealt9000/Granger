@@ -64,15 +64,19 @@ class PackDocumentsTest {
         assertThat(file.parentFile).isEqualTo(File(dir, "zim1"))
         assertThat(file.readBytes()).isEqualTo(PdfPack.BYTES)
         assertThat(bookshelf.packDocuments).containsExactly(Triple("zim1", PdfPack.PATH, "Water treatment"))
+        assertThat(bookshelf.packDocumentLinkTexts).containsExactly("")
 
-        // A second tap reuses the file.
-        docs.open("zim1", PdfPack.PATH)
+        // A second tap reuses the file; the link's words go with it, to name it if nothing better does.
+        docs.open("zim1", PdfPack.PATH, "Treating water")
         assertThat(pack.copies).isEqualTo(1)
+        assertThat(bookshelf.packDocumentLinkTexts.last()).isEqualTo("Treating water")
         // Gone (storage cleared): restore copies it out again.
         file.delete()
         assertThat(docs.restore(opened.book)).isTrue()
         assertThat(file.isFile).isTrue()
         assertThat(pack.copies).isEqualTo(2)
+        // Its name stands in for the link's words, which are gone.
+        assertThat(bookshelf.packDocumentLinkTexts.last()).isEqualTo("Water treatment")
     }
 
     @Test fun aFailedCopySaysWhyAndLeavesNothing() = runTest(UnconfinedTestDispatcher()) {

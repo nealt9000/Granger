@@ -610,9 +610,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             SelectionBridge.dictionaryAvailable = false
         }
     }
-    /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page. */
-    suspend fun openPackDocument(packId: String, path: String) {
-        when (val opened = container.packDocuments.open(packId, path)) {
+    /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page; [linkText] may name it. */
+    suspend fun openPackDocument(packId: String, path: String, linkText: String) {
+        when (val opened = container.packDocuments.open(packId, path, linkText)) {
             is PackDocuments.Opened.Ready -> {
                 val tab = container.sessions.openTab(opened.book.id, "", opened.book.title).let { container.sessions.tab(it) } ?: return
                 nav.showTab(tab, keepCurrent = true)
@@ -910,7 +910,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     showChromeRequest = showChromeRequest,
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onResearch = { text, packId, path, title -> nav.navigate(ResearchRoute.about(text, packId, title, path)) },
-                    onOpenDocument = { packId, path -> scope.launch { openPackDocument(packId, path) } },
+                    onOpenDocument = { packId, path, linkText -> scope.launch { openPackDocument(packId, path, linkText) } },
                     onBack = { nav.popBackStack() },
                 )
             }

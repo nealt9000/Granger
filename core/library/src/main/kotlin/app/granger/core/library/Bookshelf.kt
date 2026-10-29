@@ -83,10 +83,12 @@ interface Bookshelf {
     suspend fun remove(id: String): Boolean
 
     /**
-     * Registers [file], a PDF copied out of pack [zimId] at [path], as a pack document titled [title]: a hidden book
-     * ([BookOrigin.PACK]) so it keeps its place and shows on the rail. Null if the file isn't a readable PDF.
+     * Registers [file], a PDF copied out of pack [zimId] at [path], as a pack document: a hidden book
+     * ([BookOrigin.PACK]) so it keeps its place and shows on the rail. It is called by the entry's [title], the PDF's
+     * own title, the [linkText] tapped in the article or its file name, whichever first reads as a title
+     * ([PackDocumentTitle]). Null if the file isn't a readable PDF.
      */
-    suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book?
+    suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File, linkText: String = ""): Book?
 
     /** Removes every pack document of [zimId], with its file and cover (the pack itself is going). */
     suspend fun removePackDocuments(zimId: String)
@@ -320,15 +322,13 @@ class RoomBookshelf(
         true
     }
 
-    override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book? =
+    override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File, linkText: String): Book? =
         withContext(io) {
-            // The entry's title when it is one: zimit packs title a PDF entry with its path, and then the PDF's own
-            // title ("Emergency Childbirth") or failing that its file name reads better.
-            val entryTitle = title.trim().takeUnless { it.isEmpty() || it == path || '/' in it }
-            val fallback = path.substringAfterLast('/').substringBeforeLast('.')
-            val meta = (PdfInspector.inspect(file, entryTitle ?: fallback) as? Inspection.Ok)?.meta ?: return@withContext null
+            // zimit packs title a PDF entry with its path, and a PDF's own title is often its maker's junk
+            // ("file://C:\WINDOWS\Desktop\…"): the first of them, the link's words and the file name that reads as one.
+            val meta = (PdfInspector.inspect(file, "") as? Inspection.Ok)?.meta ?: return@withContext null
             val ref = "$zimId/$path"
-            val details = BookDetails(entryTitle ?: meta.title, "", "", emptyList(), "", "")
+            val details = BookDetails(PackDocumentTitle.choose(title, meta.title, linkText, path), "", "", emptyList(), "", "")
             register(BookIds.of(BookOrigin.PACK, ref), BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
         }
 
