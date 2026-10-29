@@ -14,7 +14,11 @@ import torch
 out = sys.argv[1]
 os.makedirs(out, exist_ok=True)
 for path in sys.argv[2:]:
-    c = torch.load(path, map_location="cpu", weights_only=False)
+    try:
+        c = torch.load(path, map_location="cpu", weights_only=False)
+    except FileNotFoundError:  # RunPod's network volume can still list a checkpoint Lightning deleted hours ago
+        print(f"{path}: listed but gone, skipped", flush=True)
+        continue
     slim = {k: c[k] for k in ("epoch", "global_step", "pytorch-lightning_version", "hparams_name", "hyper_parameters")
             if k in c}
     slim["state_dict"] = {k: v for k, v in c["state_dict"].items() if k.startswith("model_g.")}
