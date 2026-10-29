@@ -30,6 +30,8 @@ def main():
     p.add_argument("--noise", type=float, default=0.667, help="noise_scale (sherpa's default, as the app)")
     p.add_argument("--noise-w", type=float, default=0.8, help="noise_scale_w: how much durations vary")
     p.add_argument("--length", type=float, default=1.0, help="length_scale: > 1 is slower")
+    p.add_argument("--sentences", type=int, default=1,
+                   help="max_num_sentences: sentences joined into one sequence (the app reads one at a time)")
     p.add_argument("--tag", default="", help="added to the WAV names")
     a = p.parse_args()
 
@@ -51,6 +53,7 @@ def main():
             ),
             num_threads=a.threads,
         ),
+        max_num_sentences=a.sentences,
     )
     tts = sherpa_onnx.OfflineTts(config)
     os.makedirs(a.out, exist_ok=True)
