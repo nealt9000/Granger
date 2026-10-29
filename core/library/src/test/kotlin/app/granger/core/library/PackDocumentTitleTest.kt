@@ -18,6 +18,17 @@ class PackDocumentTitleTest {
         assertThat(PackDocumentTitle.choose("", "", "Click here", "docs/first%20aid_kit.pdf")).isEqualTo("first aid kit")
     }
 
+    @Test fun thePacksOwnListComesBeforeEverything() {
+        // zimgit-food-preparation: the link's words were the file's name, and the PDF's Title junk (2026-10-29).
+        val pdf = "files/Food Preparation (2).pdf"
+        assertThat(PackDocumentTitle.choose(pdf, "file://C:\\WINDOWS\\x.htm", "Food Preparation (2)", pdf, "Camping Recipes"))
+            .isEqualTo("Camping Recipes")
+        assertThat(PackDocumentTitle.choose("Emergency Childbirth", "", "", path, "Childbirth in an emergency"))
+            .isEqualTo("Childbirth in an emergency")
+        // A listed title that isn't one gives way as any other does.
+        assertThat(PackDocumentTitle.choose("Emergency Childbirth", "", "", path, "untitled")).isEqualTo("Emergency Childbirth")
+    }
+
     @Test fun theEntrysTitleThenThePdfsOwnComeFirst() {
         assertThat(PackDocumentTitle.choose("Emergency Childbirth", "Something else", "Link", path)).isEqualTo("Emergency Childbirth")
         assertThat(PackDocumentTitle.choose(path, "Emergency Childbirth", "Read the guide", path)).isEqualTo("Emergency Childbirth")

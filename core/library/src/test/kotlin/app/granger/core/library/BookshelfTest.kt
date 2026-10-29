@@ -160,6 +160,17 @@ class BookshelfTest {
             .isEqualTo("root cellar plans")
     }
 
+    @Test fun aPackDocumentTakesThePacksListedTitleAndIsRenamedWhenRegisteredAgain() = test {
+        val junk = PdfFixtures.titled(File(booksDir, "packs/zim1"), "file://C:\\WINDOWS\\Desktop\\x.htm")
+        val path = "files/Food Preparation (2).pdf"
+        val before = pdfShelf.registerPackDocument("zim1", path, path, junk, "Food Preparation (2)")!!
+        assertThat(before.title).isEqualTo("Food Preparation (2)")
+        // Opened again once the pack's list is read: the same book, under the list's title.
+        val after = pdfShelf.registerPackDocument("zim1", path, path, junk, "Food Preparation (2)", "Camping Recipes")!!
+        assertThat(after.id).isEqualTo(before.id)
+        assertThat(pdfShelf.book(before.id)!!.title).isEqualTo("Camping Recipes")
+    }
+
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
     private fun sha256(file: File) =

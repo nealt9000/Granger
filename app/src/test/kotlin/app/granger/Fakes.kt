@@ -291,9 +291,15 @@ class FakeBookshelf : Bookshelf {
 
     /** The link text each registration in [packDocuments] was given. */
     val packDocumentLinkTexts = mutableListOf<String>()
-    override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File, linkText: String): Book {
+
+    /** The pack's listed title each registration in [packDocuments] was given. */
+    val packDocumentListedTitles = mutableListOf<String>()
+    override suspend fun registerPackDocument(
+        zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
+    ): Book {
         packDocuments += Triple(zimId, path, title)
         packDocumentLinkTexts += linkText
+        packDocumentListedTitles += listedTitle
         val book = book(BookIds.of(BookOrigin.PACK, "$zimId/$path"), title).copy(
             origin = BookOrigin.PACK, sourceRef = "$zimId/$path", filePath = file.absolutePath, format = BookFormat.PDF,
         )

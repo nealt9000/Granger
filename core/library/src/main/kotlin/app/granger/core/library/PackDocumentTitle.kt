@@ -33,12 +33,13 @@ object PackDocumentTitle {
     private val SPACES = Regex("\\s+")
 
     /**
-     * The first of [entryTitle] (the pack entry's own title), [pdfTitle] (the PDF's metadata Title), [linkText] (the
-     * words of the link that was tapped in the article) that [reads as a title][isTitle], tidied; failing them all,
-     * the file name in [path], cleaned ([fromFileName]).
+     * The first of [listedTitle] (the document's title in the pack's own list of them, [NautilusDatabase]),
+     * [entryTitle] (the pack entry's own title), [pdfTitle] (the PDF's metadata Title), [linkText] (the words of the
+     * link that was tapped in the article) that [reads as a title][isTitle], tidied; failing them all, the file name
+     * in [path], cleaned ([fromFileName]).
      */
-    fun choose(entryTitle: String, pdfTitle: String, linkText: String, path: String): String =
-        listOf(entryTitle, pdfTitle, linkText).map(::tidy).firstOrNull { isTitle(it, path) } ?: fromFileName(path)
+    fun choose(entryTitle: String, pdfTitle: String, linkText: String, path: String, listedTitle: String = ""): String =
+        listOf(listedTitle, entryTitle, pdfTitle, linkText).map(::tidy).firstOrNull { isTitle(it, path) } ?: fromFileName(path)
 
     /**
      * False for a blank name, the entry's [path], anything that looks like a path, URL or file name (a scheme, a
