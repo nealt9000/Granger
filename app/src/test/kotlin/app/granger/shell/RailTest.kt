@@ -130,6 +130,25 @@ class RailTest {
         assertThat(calls).containsExactly("tool:LISTEN")
     }
 
+    /** Plan U3c Decision 1: Browse, a globe, between Ask and Library; Settings stays at the foot. */
+    @Test fun browseSitsBetweenAskAndLibrary() {
+        assertThat(RailTool.entries.map { it.label })
+            .containsExactly("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings").inOrder()
+        assertThat(RailTool.BROWSE.shown).isTrue()
+        assertThat(RailTool.BROWSE.drawable()).isEqualTo(app.granger.R.drawable.ic_browse)
+        assertThat(RailTool.entries.mapNotNull { it.drawable() }.toSet()).hasSize(5)
+        shell()
+        val top = { d: String -> compose.onNodeWithContentDescription(d).fetchSemanticsNode().boundsInRoot.top }
+        // Ask shows only on a phone that can run it; Browse still comes after Search and before the Library.
+        assertThat(listOf("Search", "Browse", "Library").map(top)).isInStrictOrder()
+        compose.onNodeWithContentDescription("Browse").performClick()
+        compose.waitForIdle()
+        assertThat(calls).containsExactly("tool:BROWSE")
+        expanded = true
+        compose.waitForIdle()
+        compose.onNodeWithText("Browse").assertExists()
+    }
+
     @Test fun homeIsTheFirstTool() {
         assertThat(RailTool.entries.first()).isEqualTo(RailTool.HOME)
         assertThat(RailTool.HOME.shown).isTrue()

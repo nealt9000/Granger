@@ -36,29 +36,27 @@ data class KindRow(val id: String, val title: String, val mediaTypeId: String, v
     val allCollections: List<CollectionRow> get() = collections.flatMap { it.withChildren }
 }
 
-/** The Library: what the phone holds, by kind. */
+/** The Library: the books the phone holds, by kind. */
 data class LibraryUi(val kinds: List<KindRow>, val emptyLibrary: Boolean)
 
-const val REFERENCE_KIND = "reference"
 const val BOOKS_KIND = "books"
 
 /**
- * The Library's rows, each only when it holds something. Literature splits in two: its packs (the Kiwix folder, and
- * any collection with a pack in it) are Encyclopedias & reference, its book collections are Books. Maps follows; any
- * other media type (Video, one the user made) comes after, in its own order. Music and Audiobooks are Listen's
- * ([listenKinds], Plan U2 Decision 4). No schema change: the media types stay as they are.
+ * The Library's rows (Plan U3c Decision 2: the Library is books), each only when it holds something. Literature's
+ * collections that hold a book are Books (Granger Classics, My books, Archive.org texts, imports, and the user's own);
+ * any other media type with books in it (Video, one the user made) comes after, in its own order. Packs and maps are
+ * Browse's ([app.granger.browse.browseSections]), so the Kiwix folder and a collection holding only packs aren't
+ * here; a collection holding both stays. Music and Audiobooks are Listen's ([listenKinds], Plan U2 Decision 4). No
+ * schema change: the media types stay as they are.
  */
 fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
-    val byId = shelves.associateBy { it.mediaType.id }
-    val literature = byId[LITERATURE]?.collections.orEmpty()
-    val (reference, books) = literature.partition { row -> row.isFolder || row.withChildren.any { it.packs.isNotEmpty() } }
+    fun Shelf.bookCollections() = collections.filter { row -> row.withChildren.any { it.books.isNotEmpty() } }
+    val literature = shelves.firstOrNull { it.mediaType.id == LITERATURE }
     val rest = shelves.filter { it.mediaType.id != LITERATURE && it.mediaType.id !in AUDIO_TYPE_IDS }
-        .sortedBy { FOLLOWING.indexOf(it.mediaType.id).let { i -> if (i < 0) FOLLOWING.size else i } }
-    return listOf(
-        KindRow(REFERENCE_KIND, "Encyclopedias & reference", LITERATURE, reference),
-        KindRow(BOOKS_KIND, "Books", LITERATURE, books),
-    ).filter { it.collections.isNotEmpty() } +
-        rest.map { KindRow(it.mediaType.id, it.mediaType.name, it.mediaType.id, it.collections) }
+    return (
+        listOfNotNull(literature?.let { KindRow(BOOKS_KIND, "Books", LITERATURE, it.bookCollections()) }) +
+            rest.map { KindRow(it.mediaType.id, it.mediaType.name, it.mediaType.id, it.bookCollections()) }
+        ).filter { it.collections.isNotEmpty() }
 }
 
 /**
@@ -76,9 +74,6 @@ fun listenKinds(shelves: List<Shelf>): List<KindRow> {
 }
 
 private const val LITERATURE = "literature"
-
-/** The built-in media types after Literature's two rows, in the Library's order. */
-private val FOLLOWING = listOf("maps")
 
 /** The media types Listen holds rather than the Library, in Listen's order. */
 private val AUDIO_TYPE_IDS = listOf(MUSIC_TYPE_ID, AUDIOBOOKS_TYPE_ID)
@@ -108,7 +103,7 @@ class LibraryViewModel(
 
     /** Null until the first load finishes. */
     val ui: StateFlow<LibraryUi?> = shelves.shelves
-        // Empty means no text or maps: music alone doesn't fill the Library, it fills Listen.
+        // Empty means no books: packs alone fill Browse, and music alone fills Listen.
         .map { shelves -> libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty()) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

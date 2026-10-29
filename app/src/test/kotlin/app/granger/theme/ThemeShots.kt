@@ -20,7 +20,13 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import app.granger.R
+import app.granger.browse.BrowseActions
+import app.granger.browse.BrowseContent
+import app.granger.browse.BrowseSection
+import app.granger.browse.BrowseUi
+import app.granger.browse.PackItem
 import app.granger.library.KindRow
+import app.granger.sources.AskReach
 import app.granger.listen.CardKind
 import app.granger.listen.ListenActions
 import app.granger.listen.ListenContent
@@ -149,17 +155,42 @@ class ThemeShots {
         ) { Box(Modifier.fillMaxSize()) }
     }
 
+    /** The Library is books (Plan U3c Decision 2): the Kiwix folder here is Browse's, and doesn't show. */
     @Test fun library() = shoot("library") {
         val wikipedia = CollectionRow(ShelfCollection("c:kiwix", "Kiwix", "literature", false, defaultKey = "kiwix"), listOf(pack("w")))
-        val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = listOf(book("b")))
+        val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = List(12) { book("b$it") })
+        val mine = CollectionRow(ShelfCollection("c:mine", "My books", "literature", false, defaultKey = "mine"), emptyList(), books = listOf(book("m")))
+        val archive = CollectionRow(ShelfCollection("c:ao", "Archive.org", "literature", false, defaultKey = "ao"), emptyList(), books = List(3) { book("a$it") })
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             LibraryContent(
-                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, wikipedia)))), false),
-                "/packs", SnackbarHostState(), {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
+                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(archive, classics, wikipedia, mine)))), false),
+                SnackbarHostState(), {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
+            )
+        }
+    }
+
+    /** Browse's home (Plan U3c Decision 1): each pack a row, then the maps. */
+    @Test fun browse() = shoot("browse") {
+        val gb = 1_000_000_000L
+        val reference = listOf(
+            PackItem(pack("dev", "DevDocs: Kotlin").copy(sizeBytes = 20_000_000), AskReach.KEYWORDS),
+            PackItem(pack("med", "WikEM").copy(sizeBytes = 45_000_000), AskReach.KEYWORDS),
+            PackItem(pack("wiki", "Wikipedia").copy(sizeBytes = 48 * gb), AskReach.MEANING),
+            PackItem(pack("wikt", "Wiktionary").copy(sizeBytes = 8 * gb), AskReach.MEANING),
+        )
+        val maps = listOf(PackItem(pack("uk", "United Kingdom").copy(sizeBytes = 1_400_000_000)))
+        GrangerShell(
+            rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.BROWSE,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            BrowseContent(
+                BrowseUi(listOf(BrowseSection("reference", "Encyclopedias & reference", reference), BrowseSection("maps", "Maps", maps))),
+                "/packs", downloadsBadge = 0, BrowseActions(),
             )
         }
     }
@@ -239,13 +270,39 @@ class ThemeShots {
         File(out, "listen-icons.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /**
+     * Browse's icon (Plan U3c Decision 1): the globe (Material public, wired) beside the compass (explore), each in the
+     * rail's order with the other tools, Browse selected at the foot and the full rail's Browse row at 20 dp. Field on
+     * the left, Night on the right.
+     */
+    @Config(qualifiers = "w720dp-h560dp-xxhdpi")
+    @Test fun browseIcons() {
+        val candidates = listOf("globe" to R.drawable.ic_browse, "compass" to R.drawable.ic_browse_alt)
+        compose.setContent {
+            Row(Modifier.fillMaxSize()) {
+                for (night in listOf(false, true)) GrangerTheme(night = night) {
+                    Row(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
+                        for ((name, icon) in candidates) IconColumn(name, icon, Modifier.weight(1f), tool = "Browse")
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+        File(out).mkdirs()
+        File(out, "browse-icons.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
     @Composable
-    private fun IconColumn(name: String, listen: Int, modifier: Modifier) {
+    private fun IconColumn(name: String, icon: Int, modifier: Modifier, tool: String = "Listen") {
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
-        val tools = listOf(
+        val listen = if (tool == "Listen") icon else R.drawable.ic_headphones
+        val tools = listOfNotNull(
             "Home" to painterResource(R.drawable.ic_owl),
             "Search" to rememberVectorPainter(Icons.Filled.Search),
             "Ask" to painterResource(R.drawable.ic_research),
+            if (tool == "Browse") "Browse" to painterResource(icon) else null,
             "Library" to painterResource(R.drawable.ic_library_books_open),
             "Listen" to painterResource(listen),
             "Settings" to rememberVectorPainter(Icons.Filled.Settings),
@@ -256,10 +313,10 @@ class ThemeShots {
                 IconButton(onClick = {}) { Icon(painter, contentDescription = label, tint = muted) }
             }
             // Selected, as the rail draws the tool you're in.
-            IconButton(onClick = {}) { Icon(painterResource(listen), contentDescription = "Listen", tint = MaterialTheme.colorScheme.primary) }
+            IconButton(onClick = {}) { Icon(painterResource(icon), contentDescription = tool, tint = MaterialTheme.colorScheme.primary) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(painterResource(listen), contentDescription = null, tint = muted, modifier = Modifier.size(20.dp))
-                Text("Listen", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                Icon(painterResource(icon), contentDescription = null, tint = muted, modifier = Modifier.size(20.dp))
+                Text(tool, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }

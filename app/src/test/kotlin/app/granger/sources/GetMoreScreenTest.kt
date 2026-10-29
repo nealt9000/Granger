@@ -56,7 +56,8 @@ class GetMoreScreenTest {
         assertThat(routeOf(GetMoreLink.MODELS)).isEqualTo(SourceRoute(CatalogScope.MODELS))
     }
 
-    @Test fun theSourcesBelongToTheLibraryButModelsToSettings() {
+    /** Kiwix's packs are Browse's (Plan U3c Decision 1). */
+    @Test fun theSourcesBelongToTheLibraryButKiwixToBrowseAndModelsToSettings() {
         lateinit var nav: NavHostController
         compose.setContent {
             nav = rememberNavController()
@@ -69,7 +70,7 @@ class GetMoreScreenTest {
         compose.runOnIdle { nav.navigate(SourceRoute(CatalogScope.KIWIX)) }
         compose.runOnIdle {
             val source = nav.currentDestination!!
-            assertThat(railToolOf(source, CatalogScope.KIWIX)).isEqualTo(RailTool.LIBRARY)
+            assertThat(railToolOf(source, CatalogScope.KIWIX)).isEqualTo(RailTool.BROWSE)
             assertThat(railToolOf(source, CatalogScope.GRANGER)).isEqualTo(RailTool.LIBRARY)
             assertThat(railToolOf(source, CatalogScope.MODELS)).isEqualTo(RailTool.SETTINGS)
         }

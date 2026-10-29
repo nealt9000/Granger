@@ -69,6 +69,9 @@ import app.granger.library.displayNameOf
 import app.granger.library.LibraryViewModel
 import app.granger.library.SourceLink
 import app.granger.listen.ListenActions
+import app.granger.browse.BrowseActions
+import app.granger.browse.BrowseScreen
+import app.granger.browse.BrowseViewModel
 import app.granger.listen.ListenScreen
 import app.granger.listen.ListenViewModel
 import app.granger.widget.playFromWidget
@@ -298,13 +301,21 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 
 /**
  * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
- * to, except Models ([sourceScope] is a [SourceRoute]'s scope), which stays with Settings (Plan U3b Decision 2). Music,
- * audiobooks, the player and the audio sources (LibriVox, and Archive.org's spoken word and music: [archiveKind] is an
- * [ArchiveRoute]'s kind) are Listen's (Plan U2 Decision 4).
+ * to, except Models ([sourceScope] is a [SourceRoute]'s scope), which stays with Settings (Plan U3b Decision 2), and
+ * Kiwix, whose packs are Browse's. Browse also lights while a pack is read; a book being read lights the Library (Plan
+ * U3c Decision 1). Music, audiobooks, the player and the audio sources (LibriVox, and Archive.org's spoken word and
+ * music: [archiveKind] is an [ArchiveRoute]'s kind) are Listen's (Plan U2 Decision 4). Downloads and Readiness cover
+ * everything, and stay the Library's.
  */
 internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
-    destination.hasRoute<SourceRoute>() -> if (sourceScope == CatalogScope.MODELS) RailTool.SETTINGS else RailTool.LIBRARY
+    destination.hasRoute<SourceRoute>() -> when (sourceScope) {
+        CatalogScope.MODELS -> RailTool.SETTINGS
+        CatalogScope.KIWIX -> RailTool.BROWSE
+        else -> RailTool.LIBRARY
+    }
+    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() -> RailTool.BROWSE
+    destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
     destination.hasRoute<ListenRoute>() || destination.hasRoute<ListenPlayerRoute>() || destination.hasRoute<LibriVoxRoute>() ||
         destination.isMusic() || destination.isAudiobooks() -> RailTool.LISTEN
@@ -315,6 +326,9 @@ internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? 
     destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
     else -> null
 }
+
+/** Browse's home (Plan U3c Decision 1): the packs and the maps, each a row opening its main page. The tool's landing. */
+@Serializable object BrowseRoute
 
 /** Listen's home (Plan U2 Decision 4): the Now playing card and the Music and Audiobooks shelves. The tool's landing. */
 @Serializable object ListenRoute
@@ -506,7 +520,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
     }
 
-    /** The one way an installed pack opens: from the Library, a source's Open and Downloads (Plan U3b Decision 3). */
+    /** The one way an installed pack opens: from Browse, a source's Open and Downloads (Plan U3b Decision 3). */
     fun openPack(packId: String) {
         scope.launch {
             val tabId = app.granger.library.openPack(container.library, container.sessions, packId) ?: return@launch
@@ -641,6 +655,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             when (tool) {
                 RailTool.HOME -> if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
+                RailTool.BROWSE -> if (!nav.popBackStack<BrowseRoute>(inclusive = false)) nav.navigate(BrowseRoute) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
@@ -712,7 +727,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.appScope,
                         )
                     },
-                    packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     notice = backStackEntry.toRoute<LibraryRoute>().notice,
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onSearch = { nav.navigate(SearchRoute()) },
@@ -720,6 +734,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     downloadsBadge = downloadsBadge,
                     onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                     onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                    onOpenSource = nav::openGetMore,
+                )
+            }
+            composable<BrowseRoute> {
+                BrowseScreen(
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records) },
+                    packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
+                    downloadsBadge = downloadsBadge,
+                    actions = BrowseActions(
+                        onOpenPack = ::openPack,
+                        onGetPacks = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
+                        onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
+                        onReadiness = { nav.navigate(ReadinessRoute) },
+                    ),
                 )
             }
             composable<CollectionRoute> { backStackEntry ->

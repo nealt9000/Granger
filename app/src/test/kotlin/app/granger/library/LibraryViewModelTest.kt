@@ -61,7 +61,8 @@ class LibraryViewModelTest {
         assertThat(library.refreshes).isEqualTo(2)
     }
 
-    @Test fun literatureSplitsIntoReferenceAndBooks() = runTest(main.dispatcher) {
+    /** Plan U3c Decision 2: the Library is books; the Kiwix folder, pack collections and Maps are Browse's. */
+    @Test fun theLibraryIsBooksWithNoReferenceOrMaps() = runTest(main.dispatcher) {
         val folder = CollectionRow(
             ShelfCollection("c:kiwix", "Kiwix", "literature", userCreated = false, defaultKey = "kiwix"), emptyList(),
             children = shelf("Literature", "Wikipedia" to 3).collections,
@@ -76,26 +77,43 @@ class LibraryViewModelTest {
             shelf("Audiobooks", "LibriVox" to 1),
         )
         val ui = vm().ui.filterNotNull().first()
-        // Music and Audiobooks are Listen's (Plan U2 Decision 4).
-        assertThat(ui.kinds.map { it.title }).containsExactly("Encyclopedias & reference", "Books", "Maps").inOrder()
-        assertThat(ui.kinds[0].collections.map { it.collection.name }).containsExactly("Granger packs", "Kiwix").inOrder()
-        assertThat(ui.kinds[1].collections.map { it.collection.name }).containsExactly("Granger Classics", "My books").inOrder()
-        // Each keeps its own collapse id; both are filed under Literature.
-        assertThat(ui.kinds.map { it.id }).containsExactly(REFERENCE_KIND, BOOKS_KIND, "maps").inOrder()
-        assertThat(ui.kinds.take(2).map { it.mediaTypeId }).containsExactly("literature", "literature")
+        // Music and Audiobooks are Listen's (Plan U2 Decision 4); packs and maps, Browse's.
+        assertThat(ui.kinds.map { it.title }).containsExactly("Books")
+        assertThat(ui.kinds.single().collections.map { it.collection.name }).containsExactly("Granger Classics", "My books").inOrder()
+        assertThat(ui.kinds.single().id).isEqualTo(BOOKS_KIND)
+        assertThat(ui.kinds.single().mediaTypeId).isEqualTo("literature")
         assertThat(ui.emptyLibrary).isFalse()
     }
 
-    @Test fun aKindWithNothingInItIsLeftOut() = runTest(main.dispatcher) {
-        shelves.shelfList.value = listOf(shelf("Literature", "Wikipedia" to 3, "Medicine" to 1))
+    @Test fun packsAloneLeaveTheLibraryEmpty() = runTest(main.dispatcher) {
+        val folder = CollectionRow(
+            ShelfCollection("c:kiwix", "Kiwix", "literature", userCreated = false, defaultKey = "kiwix"), emptyList(),
+            children = shelf("Literature", "Wikipedia" to 3, "DevDocs" to 2).collections,
+        )
+        shelves.shelfList.value = listOf(shelf("Literature").copy(collections = listOf(folder)), shelf("Maps", "OpenStreetMap" to 1))
         val ui = vm().ui.filterNotNull().first()
-        assertThat(ui.kinds.map { it.title }).containsExactly("Encyclopedias & reference")
-        assertThat(ui.kinds.single().collections.map { it.packs.size }).containsExactly(3, 1).inOrder()
+        assertThat(ui.kinds).isEmpty()
+        assertThat(ui.emptyLibrary).isTrue()
     }
 
-    @Test fun anotherMediaTypeComesAfterTheBuiltInOnes() {
-        val kinds = libraryKinds(listOf(shelf("Video", "Lectures" to 1), shelf("Maps", "OpenStreetMap" to 1)))
-        assertThat(kinds.map { it.title }).containsExactly("Maps", "Video").inOrder()
+    /** A collection the user made with a pack and a book in it stays: its book is the Library's, its pack Browse's too. */
+    @Test fun aCollectionHoldingBooksAndPacksStays() {
+        val both = CollectionRow(
+            ShelfCollection("c:mine", "Field kit", "literature", userCreated = true, defaultKey = null), listOf(pack("w")),
+            books = listOf(book("b")),
+        )
+        val packsOnly = CollectionRow(ShelfCollection("c:ref", "My reference", "literature", userCreated = true, defaultKey = null), listOf(pack("m")))
+        val kinds = libraryKinds(listOf(shelf("Literature").copy(collections = listOf(both, packsOnly))))
+        assertThat(kinds.single().collections.map { it.collection.name }).containsExactly("Field kit")
+        assertThat(rowCountText(kinds.single().collections.single())).isEqualTo("1 pack · 1 book")
+    }
+
+    @Test fun anotherMediaTypeWithBooksComesAfterBooks() {
+        val video = Shelf(MediaType("video", "Video", builtIn = false, sortOrder = 5), listOf(bookRow("Lectures", 1)))
+        val kinds = libraryKinds(listOf(video, shelf("Literature").copy(collections = listOf(bookRow("Classics", 1))), shelf("Maps", "OpenStreetMap" to 1)))
+        assertThat(kinds.map { it.title }).containsExactly("Books", "Video").inOrder()
+        // A type holding only packs (Neal's "Reference") is Browse's.
+        assertThat(libraryKinds(listOf(shelf("Reference", "Medicine" to 2)))).isEmpty()
     }
 
     private fun bookRow(name: String, count: Int) = CollectionRow(
@@ -103,30 +121,23 @@ class LibraryViewModelTest {
         books = List(count) { book("$name-$it") },
     )
 
-    @Test fun theKiwixFolderIsOneRowCountingItsChildren() = runTest(main.dispatcher) {
-        val kiwix = shelf("Literature", "Wikipedia" to 3, "DevDocs" to 2).collections
+    @Test fun theKiwixFolderCountsItsChildren() {
         val folder = CollectionRow(
             ShelfCollection("c:kiwix", "Kiwix", "literature", userCreated = false, defaultKey = "kiwix"), emptyList(),
-            children = kiwix,
+            children = shelf("Literature", "Wikipedia" to 3, "DevDocs" to 2).collections,
         )
-        val classics = shelf("Literature", "Granger Classics" to 1).collections.single()
-        shelves.shelfList.value = listOf(shelf("Literature").copy(collections = listOf(classics, folder)))
-        // Both hold packs: Encyclopedias & reference.
-        val reference = vm().ui.filterNotNull().first().kinds.single()
-        assertThat(reference.collections.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix").inOrder()
-        val row = reference.collections[1]
-        assertThat(row.isFolder).isTrue()
-        assertThat(rowCountText(row)).isEqualTo("5 packs")
-        assertThat(rowCountText(classics)).isEqualTo("1 pack")
+        assertThat(folder.isFolder).isTrue()
+        assertThat(rowCountText(folder)).isEqualTo("5 packs")
+        assertThat(rowCountText(bookRow("Granger Classics", 1))).isEqualTo("1 book")
     }
 
     @Test fun noAudioKindsAndMusicAloneLeavesTheLibraryEmpty() = runTest(main.dispatcher) {
         shelves.shelfList.value = listOf(shelf("Music", "Phone" to 1), shelf("Audiobooks", "LibriVox" to 1))
         val ui = vm().ui.filterNotNull().first()
         assertThat(ui.kinds).isEmpty()
-        // Its empty state stays text-only: get packs and books.
         assertThat(ui.emptyLibrary).isTrue()
-        assertThat(libraryKinds(listOf(shelf("Music", "Phone" to 1), shelf("Video", "Lectures" to 1))).map { it.id }).containsExactly("video")
+        val video = Shelf(MediaType("video", "Video", builtIn = false, sortOrder = 5), listOf(bookRow("Lectures", 1)))
+        assertThat(libraryKinds(listOf(shelf("Music", "Phone" to 1), video)).map { it.id }).containsExactly("video")
     }
 
     /** An audio shelf: each Music collection holds an album, each Audiobooks one an audiobook, with [status]. */

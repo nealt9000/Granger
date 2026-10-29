@@ -68,6 +68,9 @@ enum class RailTool(val label: String, val shown: Boolean) {
     HOME("Home", true),
     SEARCH("Search", true),
     RESEARCH("Ask", Features.RESEARCH),
+    /** The wiki and Kiwix packs and the maps, browsed as linked sites (Plan U3c Decision 1). */
+    BROWSE("Browse", true),
+    /** Books: what you read through (Plan U3c Decision 2). */
     LIBRARY("Library", true),
     /** Your player and your audio collection (Plan U2 Decision 4). */
     LISTEN("Listen", Features.PLAYER),
@@ -94,13 +97,15 @@ private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInse
 
 /**
  * The tool's own drawable; null for Search and Settings, which use Material's vectors. The owl in the G is Home (Plan
- * U3b Decision 5); an open book is the Library, and ic_library stays for articles. Listen is library_music, a stack of
- * records: the player and the collection (Plan U2 Decision 4).
+ * U3b Decision 5); an open book is the Library, and ic_library stays for articles. Listen is headphones: the player and
+ * the collection (Plan U2 Decision 4). Browse is a globe, Material's public (Plan U3c Decision 1; ic_browse_alt, a
+ * compass, is the candidate).
  */
 @DrawableRes
 internal fun RailTool.drawable(): Int? = when (this) {
     RailTool.HOME -> R.drawable.ic_owl
     RailTool.RESEARCH -> R.drawable.ic_research
+    RailTool.BROWSE -> R.drawable.ic_browse
     RailTool.LIBRARY -> R.drawable.ic_library_books_open
     RailTool.LISTEN -> R.drawable.ic_headphones
     RailTool.SEARCH, RailTool.SETTINGS -> null
