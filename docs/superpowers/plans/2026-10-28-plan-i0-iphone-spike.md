@@ -113,13 +113,21 @@
 - [x] Privacy: the privacy manifest (`PrivacyInfo.xcprivacy`) and required-reason APIs our dependencies touch, and the App Privacy "Data not collected" label, which fits the no-telemetry brand.
 - *Done 2026-10-28 (desk research, subagents): results §6.*
 
-### Task 7: The iPhone harness (built on the Mac; the numbers wait for an iPhone)
+### Task 7: The iPhone harness (built and checked on the Mac; run by a remote tester through TestFlight)
 
-**Files:** `spikes/i0/harness/` (a SwiftUI app). Results §7.
+**Changed 2026-10-29:** Neal has no iPhone at hand. The iPhone 16 Plus is with his dad, who runs the tests from a TestFlight link and reports back. So the harness has to run itself, survive being killed, and send its own results; nobody holds a cable or reads Xcode logs.
 
-- [ ] Build an app with four buttons and a log, mirroring the Pixel 6 spikes: **E2B** (load time, first words, tokens per second on one R5 tuning question with its passages, peak memory), **EmbeddingGemma** (one query embed, cold and warm), **Piper** (the Granger voice: RTF on V0's passages, first audio), **libkiwix** (open a small ZIM, title search and full-text search times). Each uses the runtime Task 2 picked. Models and the ZIM are copied in through Finder or the Files app, not bundled.
-- [ ] Check every button in the Simulator for function only, never for numbers.
-- [ ] **When Neal has an iPhone:** sideload it, then run each test from a force-quit app, on power, screen on, one cold and one warm run, decisions on the warm run (Plan 1's rules). Record the model, iOS version and free memory.
+**Files:** `spikes/i0/harness/` (a SwiftUI app, the route Neal picked in Task 5). Results §7.
+
+- [ ] **One button, "Run the tests".** It runs, in order: **libkiwix** (open a small ZIM, title search, full-text search), **EmbeddingGemma** (one query embed, cold and warm), **Piper** (the Granger voice: RTF on V0's passages, first audio), **E2B** (load, first words and tokens per second on one R5 question with its passages), then all three models loaded in turn. Each uses the runtime Task 2 picked. Plain-language progress on screen ("Step 3 of 6: the reading voice").
+- [ ] **Downloads its own test files** (models and the ZIM, about 4 GB) on first open, over Wi-Fi only, with a progress bar and resume. Nothing to copy in through Finder. Hashes checked before use. Hosted where the friend build's files come from.
+- [ ] **Records what a remote run needs:** iPhone model, iOS version, free memory and storage, `os_proc_available_memory` and peak footprint per step, thermal state, on power or not, Low Power Mode.
+- [ ] **Survives a memory kill.** Each step writes "started" before and its numbers after, to a file. If iOS kills the app, the next open says which step it died on and offers to carry on from the next one. A kill is a result, not a failure of the test.
+- [ ] **"Send results"** opens the share sheet with a short text summary and the full JSON attached, so the tester can send it by Messages or email. TestFlight's own crash reports and screenshot feedback are on as a backup.
+- [ ] **A one-page tester note** (what to do: plug in, Wi-Fi, keep the screen on, run twice, send), written for a non-developer.
+- [ ] Check the whole flow in the Simulator: downloads, every step, the kill-and-resume path (kill it mid-step with `simctl terminate`), and sending. Function only, never numbers; the Simulator has no memory limit and a different GPU path.
+- [ ] **Distribute (needs Neal's developer account):** archive, upload to App Store Connect, and add his dad as an **internal tester** (a user on Neal's team), which needs no Beta App Review. Neal OKs the upload.
+- [ ] **The run:** two runs from a freshly opened app, on power, screen on; decisions on the second run (Plan 1's rules). The tester sends both.
 - [ ] **Adopt against these rules** (the Pixel 6's bar from the friend build): E2B first words ≤ 12 s on the R5 question, Piper RTF ≤ 0.5 screen on, and no memory kill with E2B, EmbeddingGemma and Piper loaded in turn. An iPhone that misses the E2B rule is READ-tier.
 
 ### Task 8: Results and decisions
