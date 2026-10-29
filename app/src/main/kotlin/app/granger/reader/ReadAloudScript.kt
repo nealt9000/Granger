@@ -174,20 +174,33 @@ object ReadAloudScript {
           }
           // A scroll is the hand's while a finger is down, and through the fling after it: scroll events that keep
           // coming within 150 ms of each other, from up to 300 ms after the finger lifts. Anything else is the page's own.
+          // Heard in the capture phase, so a page that scrolls in its own full-screen box (Kiwix main pages' #container,
+          // Plan U3c) reports too: an element's scroll doesn't bubble, but it passes the window on the way down. Each
+          // scroller keeps its own last position. A small box (a wide table, a scrolling infobox) isn't the page and is left out.
           var lastY = window.scrollY, touching = false, handUntil = 0;
           function lifted() { touching = false; handUntil = Date.now() + 300; }
           window.addEventListener('touchstart', function () { touching = true; }, { passive: true, capture: true });
           window.addEventListener('touchend', lifted, { passive: true, capture: true });
           window.addEventListener('touchcancel', lifted, { passive: true, capture: true });
-          window.addEventListener('scroll', function () {
-            var y = window.scrollY, dy = y - lastY, now = Date.now();
-            lastY = y;
-            if (now < ownScrollUntil) return;
+          window.addEventListener('scroll', function (e) {
+            var el = e.target, inner = el && el.nodeType === 1 && el !== document.documentElement && el !== document.body;
+            var y, dy, now = Date.now();
+            if (inner) {
+              if (el.clientHeight < window.innerHeight * 0.5) return;
+              y = el.scrollTop;
+              dy = y - (el.__grangerLastY || 0);
+              el.__grangerLastY = y;
+            } else {
+              y = window.scrollY;
+              dy = y - lastY;
+              lastY = y;
+            }
+            if (now < ownScrollUntil || (inner && dy === 0)) return;
             var hand = touching || now < handUntil;
             if (hand && !touching) handUntil = now + 150;
             var scale = window.visualViewport ? window.visualViewport.scale : 1;
             if (window.${ReaderPageScript.BRIDGE_NAME}) ${ReaderPageScript.BRIDGE_NAME}.onUserScroll(dy * scale, hand);
-          }, { passive: true });
+          }, { passive: true, capture: true });
           window.__grangerRead = { firstVisible: firstVisible, selectionBlock: selectionBlock, mark: mark, clear: clear, cite: cite, clearCite: clearCite, jump: jump };
         })();
     """.trimIndent()

@@ -33,17 +33,48 @@ object ReaderPageScript {
  * here) on the root, so the first and last lines clear the bars at rest, and as scroll padding, so the Contents' jumps
  * and #anchors land below the top bar. [leftDp] and [rightDp] keep the lines' starts clear of the rail on its side,
  * while the page's background still runs under it. The top is kept for the read-aloud script's first visible block.
+ *
+ * A page that scrolls inside its own full-screen box instead of the root (Kiwix main pages: mwoffliner's `#container`
+ * is `position:absolute; left:0; top:0; height:100%; overflow:auto`) ignores the root's padding, so that box gets the
+ * same four, border-box: a body child, or its first child, that is absolute or fixed, starts at the viewport's top
+ * left, is at least 90 % of its height and scrolls. Run at document start the body isn't there yet, so the script runs
+ * again when the DOM is loaded; it is idempotent, and [ReaderWebView.applyChromePadding] runs it once more after load.
  */
 fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int = 0): String = """
     (function () {
-      var s = document.documentElement.style;
-      s.setProperty('padding-top', '${topDp}px', 'important');
-      s.setProperty('padding-bottom', '${bottomDp}px', 'important');
-      s.setProperty('padding-left', '${leftDp}px', 'important');
-      s.setProperty('padding-right', '${rightDp}px', 'important');
-      s.setProperty('scroll-padding-top', '${topDp}px');
-      s.setProperty('scroll-padding-bottom', '${bottomDp}px');
-      window.__grangerTop = $topDp;
+      function pad(s) {
+        s.setProperty('padding-top', '${topDp}px', 'important');
+        s.setProperty('padding-bottom', '${bottomDp}px', 'important');
+        s.setProperty('padding-left', '${leftDp}px', 'important');
+        s.setProperty('padding-right', '${rightDp}px', 'important');
+      }
+      function scroller(el) {
+        if (!el) return false;
+        var cs = getComputedStyle(el);
+        if (cs.position !== 'absolute' && cs.position !== 'fixed') return false;
+        if (!/(auto|scroll)/.test(cs.overflowY + ' ' + cs.overflow)) return false;
+        var r = el.getBoundingClientRect();
+        return r.top <= 2 && r.left <= 2 && r.height >= window.innerHeight * 0.9;
+      }
+      function apply() {
+        var s = document.documentElement.style;
+        pad(s);
+        s.setProperty('scroll-padding-top', '${topDp}px');
+        s.setProperty('scroll-padding-bottom', '${bottomDp}px');
+        window.__grangerTop = $topDp;
+        if (!document.body) return;
+        var kids = document.body.children;
+        for (var i = 0; i < kids.length; i++) {
+          var el = scroller(kids[i]) ? kids[i] : scroller(kids[i].firstElementChild) ? kids[i].firstElementChild : null;
+          if (!el) continue;
+          pad(el.style);
+          el.style.setProperty('box-sizing', 'border-box', 'important');
+          el.style.setProperty('scroll-padding-top', '${topDp}px');
+          el.style.setProperty('scroll-padding-bottom', '${bottomDp}px');
+        }
+      }
+      apply();
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });
     })();
 """.trimIndent()
 
