@@ -76,11 +76,12 @@ class EbookReaderViewModelTest {
         searcher: BookSearcher = FakeBookSearcher(),
         savedState: SavedStateHandle = SavedStateHandle(),
         pdfOutline: (java.io.File) -> List<app.granger.core.books.OutlineEntry> = { emptyList() },
+        pdfLinks: (java.io.File) -> List<app.granger.core.books.PdfLink> = { emptyList() },
     ): EbookReaderViewModel {
         val file = tmp.root.resolve("b.epub").apply { if (fileExists) writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState, pdfOutline = pdfOutline)
+        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState, pdfOutline = pdfOutline, pdfLinks = pdfLinks)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -251,6 +252,30 @@ class EbookReaderViewModelTest {
         vm.goTo(vm.state.value.toc[1].href)
         testScheduler.advanceUntilIdle()
         assertThat(jumps.single().locations.fragments).containsExactly("page=3")
+        collecting.cancel()
+    }
+
+    @Test fun aPdfLinkJumpsToItsPageThroughPdfBoxWhenPdfiumGaveNone() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication(pages = 5)
+        var reads = 0
+        val vm = reader(pdfLinks = { reads++; listOf(app.granger.core.books.PdfLink(0, 72f, 600f, 300f, 620f, target = 3)) })
+        val jumps = mutableListOf<Locator>()
+        val collecting = launch { vm.navigation.collect { jumps += it } }
+
+        vm.onPdfLink(PdfLinkTap(page = 1, uri = "", left = 0f, top = 0f, right = 0f, bottom = 0f))
+        testScheduler.advanceUntilIdle()
+        assertThat(jumps.last().locations.fragments).containsExactly("page=2")
+        assertThat(reads).isEqualTo(0)
+
+        // PDFium found the link but not its page: PdfBox's links place it by its box, read once.
+        vm.onPdfLink(PdfLinkTap(page = -1, uri = "", left = 72f, top = 620f, right = 300f, bottom = 600f))
+        testScheduler.advanceUntilIdle()
+        assertThat(jumps.last().locations.fragments).containsExactly("page=4")
+        vm.onPdfLink(PdfLinkTap(page = null, uri = null, left = 72f, top = 620f, right = 300f, bottom = 600f))
+        vm.onPdfLink(PdfLinkTap(page = null, uri = null, left = 1f, top = 2f, right = 3f, bottom = 4f))
+        testScheduler.advanceUntilIdle()
+        assertThat(jumps).hasSize(3)
+        assertThat(reads).isEqualTo(1)
         collecting.cancel()
     }
 

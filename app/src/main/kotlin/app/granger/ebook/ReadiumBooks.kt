@@ -175,11 +175,15 @@ sealed interface BookNavigator {
      * A PDF. [night] and [fitWidth] are read each time PDFium lays the document out, and the reader rebuilds the
      * navigator when either changes. PDFium has no theme, so Night inverts the page there. Readium leaves the
      * viewer's fit at its default, every page scaled by the widest one, so one foldout map shrinks every other page
-     * and pushes a page fitted to the width off to the right: each page is fitted on its own instead.
+     * and pushes a page fitted to the width off to the right: each page is fitted on its own instead. Link taps go to
+     * [links], not the viewer's own handler, so the reader can follow a link PDFium found but couldn't place.
      */
     class Pdf(publication: Publication, initialNight: Boolean, initialFitWidth: Boolean = false) : BookNavigator {
         @Volatile var night: Boolean = initialNight
         @Volatile var fitWidth: Boolean = initialFitWidth
+
+        /** The PDF's link taps, for the reader to follow. */
+        val links = PdfLinkTaps()
         val factory: PdfiumNavigatorFactory = PdfiumNavigatorFactory(
             publication,
             PdfiumEngineProvider(
@@ -188,6 +192,7 @@ sealed interface BookNavigator {
                         configurator.nightMode(night)
                             .fitEachPage(true)
                             .pageFitPolicy(if (fitWidth) FitPolicy.WIDTH else FitPolicy.BOTH)
+                            .linkHandler(links)
                     }
                 },
             ),

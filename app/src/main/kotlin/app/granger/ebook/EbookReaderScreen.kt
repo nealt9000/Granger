@@ -204,6 +204,15 @@ fun EbookReaderScreen(
         epub?.applyDecorations(listOfNotNull(hit), SEARCH_GROUP)
     }
     // One tap listener per navigator instance; a tap on a drawn highlight opens its sheet.
+    // A link on a PDF page: one to the web opens in the browser, one within the PDF jumps to its page.
+    val pdf = viewModel.navigatorFactory as? BookNavigator.Pdf
+    DisposableEffect(pdf, appContext) {
+        pdf?.links?.onLink = { tap ->
+            val uri = tap.uri
+            if (!uri.isNullOrBlank()) openInBrowser(appContext, uri) else viewModel.onPdfLink(tap)
+        }
+        onDispose { pdf?.links?.onLink = null }
+    }
     DisposableEffect(epub) {
         val fragment = epub
         val listener = object : DecorableNavigator.Listener {
@@ -283,15 +292,21 @@ fun EbookReaderScreen(
                     look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
                     isCleared = { viewModel.isCleared },
                     onReady = { fragment ->
-                        fragment.addInputListener(
+                        val taps = listOf(
                             DirectionalNavigationAdapter(
                                 fragment as OverflowableNavigator,
                                 minimumHorizontalEdgeSize = 0.0,
                                 horizontalEdgeThresholdPercent = EDGE_FRACTION,
                                 animatedTransition = true,
                             ),
+                            MiddleTapListener(fragment, viewModel::toggleChrome),
                         )
-                        fragment.addInputListener(MiddleTapListener(fragment, viewModel::toggleChrome))
+                        // A PDF's links are found after the tap is handed over: its turns and chrome wait for that.
+                        if (factory is BookNavigator.Pdf) {
+                            fragment.addInputListener(LinkAwareTaps(taps, factory.links))
+                        } else {
+                            taps.forEach(fragment::addInputListener)
+                        }
                         navigator = fragment
                     },
                     modifier = Modifier.fillMaxSize(),
@@ -427,13 +442,14 @@ private class MiddleTapListener(
 
 /** Links out of the book open in the phone's browser, when it has one. */
 private class ExternalLinkListener(private val appContext: Context) : EpubNavigatorFragment.Listener {
-    override fun onExternalLinkActivated(url: AbsoluteUrl) {
-        try {
-            appContext.startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse(url.toString())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-            )
-        } catch (e: ActivityNotFoundException) {
-            Log.w("Granger", "No app can open $url")
-        }
+    override fun onExternalLinkActivated(url: AbsoluteUrl) = openInBrowser(appContext, url.toString())
+}
+
+/** Opens [url] in the phone's browser, when it has one. */
+private fun openInBrowser(appContext: Context, url: String) {
+    try {
+        appContext.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    } catch (e: ActivityNotFoundException) {
+        Log.w("Granger", "No app can open $url")
     }
 }

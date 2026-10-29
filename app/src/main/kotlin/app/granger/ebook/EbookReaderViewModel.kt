@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
 import app.granger.core.books.OutlineEntry
 import app.granger.core.books.PdfInspector
+import app.granger.core.books.PdfLink
+import app.granger.core.books.PdfLinks
 import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
@@ -145,6 +147,8 @@ class EbookReaderViewModel(
     private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
     /** A PDF's outline as PdfBox reads it, for when PDFium's has nothing to show (called on [io]). */
     private val pdfOutline: (File) -> List<OutlineEntry> = PdfInspector::outline,
+    /** A PDF's links within itself as PdfBox reads them, for a link PDFium found but couldn't place (called on [io]). */
+    private val pdfLinks: (File) -> List<PdfLink> = PdfLinks::read,
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -177,6 +181,12 @@ class EbookReaderViewModel(
     /** The open book's id; set with [navigatorFactory]. */
     var bookId: String? = null
         private set
+
+    /** The open PDF's file, for PdfBox; null for an EPUB. */
+    private var pdfFile: File? = null
+
+    /** The open PDF's links as PdfBox read them, the first time a tapped link needed them. */
+    private var pdfLinkList: List<PdfLink>? = null
     /** The open publication; whoever takes it out closes it. */
     private val publication = AtomicReference<Publication?>(null)
 
@@ -235,6 +245,7 @@ class EbookReaderViewModel(
             val pdf = opened.conformsTo(Profile.PDF)
             val factory = if (pdf) BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight, prefsStore.prefs.value.pdfFitWidth) else BookNavigator.Epub(EpubNavigatorFactory(opened))
             bookId = book.id
+            if (pdf) pdfFile = file
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
             appScope.launch { sessions.showInTab(tabId, book.id, "", book.title) }
@@ -414,6 +425,36 @@ class EbookReaderViewModel(
         val fragment = target.fragment
         val locator = if (fragment == null) base else base.copy(locations = base.locations.copy(fragments = listOf(fragment)))
         jump(locator)
+    }
+
+    /**
+     * A link tapped on a PDF page, to another page of it (a web link is the screen's): the page PDFium gave, or when
+     * it gave none it can use, the page PdfBox finds for the link's box ([PdfLinks.target]), nearest the page shown.
+     * A link neither can place is ignored.
+     */
+    fun onPdfLink(tap: PdfLinkTap) {
+        val pages = _state.value.positionsCount
+        val given = tap.page?.takeIf { it >= 0 && (pages == 0 || it < pages) }
+        if (given != null) return goToPdfPage(given)
+        val file = pdfFile ?: return
+        val shown = (_state.value.locator?.locations?.position ?: 1) - 1
+        viewModelScope.launch {
+            val links = pdfLinkList ?: try {
+                withContext(io) { pdfLinks(file) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Couldn't read the PDF's links", e)
+                emptyList()
+            }.also { pdfLinkList = it }
+            PdfLinks.target(links, tap.left, tap.top, tap.right, tap.bottom, shown)?.let(::goToPdfPage)
+        }
+    }
+
+    /** Opens the PDF at its 0-based page [index], as a Contents row does. */
+    private fun goToPdfPage(index: Int) {
+        val href = _state.value.publication?.readingOrder?.firstOrNull()?.href ?: return
+        goTo("$href#page=${index + 1}")
     }
 
     /** The slider's release: [p] is the share of the whole book. */
