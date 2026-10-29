@@ -56,6 +56,23 @@ class BrowseScreenTest {
         compose.onNodeWithText("Iceland").assertDoesNotExist()
     }
 
+    @Test fun aSectionShowsFourPacksUntilShowAll() {
+        val six = (1..6).map { PackItem(pack("p$it", "Pack $it"), AskReach.KEYWORDS) }
+        show(BrowseUi(listOf(BrowseSection("science", "Science & math", six))))
+        compose.onNodeWithText("Pack 4").assertExists()
+        compose.onNodeWithText("Pack 5").assertDoesNotExist()
+        compose.onNodeWithText("Show all 6").performClick()
+        compose.onNodeWithText("Pack 6").assertExists()
+        compose.onNodeWithText("Show fewer").performClick()
+        compose.onNodeWithText("Pack 5").assertDoesNotExist()
+    }
+
+    @Test fun fourPacksOrFewerHaveNoShowAll() {
+        val four = (1..4).map { PackItem(pack("p$it", "Pack $it"), AskReach.KEYWORDS) }
+        show(BrowseUi(listOf(BrowseSection("science", "Science & math", four))))
+        compose.onNodeWithText("Show all", substring = true).assertDoesNotExist()
+    }
+
     @Test fun aLongPressRemovesThePackAfterAsking() {
         show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(wikipedia)))))
         compose.onNodeWithText("Wikipedia").performTouchInput { longClick() }

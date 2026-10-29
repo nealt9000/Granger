@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -62,6 +63,14 @@ class BrowseActions(
 
 const val NOTHING_TO_BROWSE = "Nothing to browse yet"
 
+/** How many packs a section shows before its Show all. */
+const val SECTION_PREVIEW = 4
+
+object BrowseTags {
+    /** A section's Show all / Show fewer. */
+    fun more(sectionId: String) = "browse_more_$sectionId"
+}
+
 @Composable
 fun BrowseScreen(viewModel: BrowseViewModel, packsFolder: String, downloadsBadge: Int, actions: BrowseActions) {
     LifecycleResumeEffect(Unit) {
@@ -83,6 +92,8 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
     var menuOpen by remember { mutableStateOf(false) }
     // Section ids the user has collapsed; all start expanded, as in the Library.
     var collapsed by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    // Section ids showing every pack rather than the first [SECTION_PREVIEW].
+    var showingAll by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var removing by remember { mutableStateOf<Pack?>(null) }
     Scaffold(
         topBar = {
@@ -156,9 +167,23 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                         },
                     )
                 }
-                if (open) for (item in section.packs) {
-                    item(key = "pack:${item.pack.id}") {
-                        PackItemRow(item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack })
+                if (open) {
+                    val all = section.id in showingAll
+                    val shown = if (all) section.packs else section.packs.take(SECTION_PREVIEW)
+                    for (item in shown) {
+                        item(key = "pack:${item.pack.id}") {
+                            PackItemRow(item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack })
+                        }
+                    }
+                    if (section.packs.size > SECTION_PREVIEW) {
+                        item(key = "more:${section.id}") {
+                            TextButton(
+                                onClick = { showingAll = if (all) showingAll - section.id else showingAll + section.id },
+                                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp).testTag(BrowseTags.more(section.id)),
+                            ) {
+                                Text(if (all) "Show fewer" else "Show all ${section.packs.size}")
+                            }
+                        }
                     }
                 }
                 item(key = "divider:${section.id}") { HorizontalDivider() }
