@@ -127,11 +127,16 @@ internal val ReaderBottomBarInsets @Composable get() =
 internal val ReaderPageInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Horizontal)
 
 /**
- * An e-book's or PDF's page: [ReaderPageInsets], and clear of the rail over it ([LocalShellOverlay]) so the lines'
- * starts aren't under it at rest. Constant: the shell keeps the rail's place while it's away, so Readium never lays the
- * book out again for it. (The wiki's page pads inside instead, in CSS: [chromePaddingScript].)
+ * An e-book's or PDF's page: [ReaderPageInsets], clear of the rail over it ([LocalShellOverlay]) so the lines' starts
+ * aren't under it at rest, and clear of a portrait cutout (the front camera) above and below, so with the bars away the
+ * words don't run under it. Constant: the shell keeps the rail's place while it's away, and the cutout's insets don't
+ * change when the system bars hide, so Readium never lays the book out again. (The wiki's page pads inside instead, in
+ * CSS: [chromePaddingScript]; its top padding is the top bar's height with the status bar's place, which holds the
+ * cutout.)
  */
-internal val ReaderBookPageInsets @Composable get() = ReaderPageInsets.union(LocalShellOverlay.current.only(WindowInsetsSides.Horizontal))
+internal val ReaderBookPageInsets @Composable get() = ReaderPageInsets
+    .union(WindowInsets.displayCutout.only(WindowInsetsSides.Vertical))
+    .union(LocalShellOverlay.current.only(WindowInsetsSides.Horizontal))
 
 /** A reader's panels and sheets over the page: inside what the shell draws over it ([LocalShellOverlay]). */
 @Composable

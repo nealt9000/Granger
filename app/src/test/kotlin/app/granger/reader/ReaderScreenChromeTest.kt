@@ -12,7 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -238,6 +243,37 @@ class ReaderScreenChromeTest {
             shadowOf(web).lastEvaluatedJavascript
         }
         assertThat(padding).isEqualTo(chromePaddingScript(64, 56, rightDp = NarrowRailWidth.value.toInt()))
+    }
+
+    /** A portrait cutout (the front camera) stays clear of the book's words with the bars away; the box doesn't move. */
+    @Test fun aBooksPageBoxIsClearOfTheCameraCutout() {
+        var chrome by mutableStateOf(true)
+        lateinit var view: View
+        var density = Density(1f)
+        compose.setContent {
+            view = LocalView.current
+            density = LocalDensity.current
+            GrangerShell(
+                rail = RailUi(emptyList()), expanded = false, railVisible = chrome, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                reading = true,
+            ) {
+                Box(Modifier.fillMaxSize().windowInsetsPadding(ReaderBookPageInsets)) { Box(Modifier.fillMaxSize().testTag("book")) }
+            }
+        }
+        val cutoutPx = 90
+        compose.runOnIdle {
+            val insets = WindowInsetsCompat.Builder()
+                .setInsets(WindowInsetsCompat.Type.displayCutout(), Insets.of(0, cutoutPx, 0, 0))
+                .build()
+            ViewCompat.dispatchApplyWindowInsets(view, insets)
+        }
+        compose.waitForIdle()
+        val book = compose.onNodeWithTag("book").getBoundsInRoot()
+        assertThat(book.top).isEqualTo(with(density) { cutoutPx.toDp() })
+        compose.runOnIdle { chrome = false }
+        compose.waitForIdle()
+        assertThat(compose.onNodeWithTag("book").getBoundsInRoot()).isEqualTo(book)
     }
 
     @Test fun aBooksPageBoxIsClearOfTheRail() {
