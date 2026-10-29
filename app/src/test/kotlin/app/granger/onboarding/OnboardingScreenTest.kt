@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
@@ -97,11 +99,27 @@ class OnboardingScreenTest {
 
     @Test fun yourRegionSearchesAndPicks() {
         val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
-        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions))
+        // The query is held as the view model holds it, so the field shows what was typed when picking takes its focus.
+        var ui by mutableStateOf(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions))
+        val typing = OnboardingActions(onRegionQuery = { calls += "query:$it"; ui = ui.copy(regionQuery = it) }, onChooseRegion = actions.onChooseRegion)
+        compose.setContent { OnboardingContent(ui, typing) }
         compose.onNodeWithText("Country or area").performTextInput("pe")
         compose.onNodeWithText("Peru · 500 B").performClick()
         compose.onNodeWithText("Medical work").assertDoesNotExist()
         assertThat(calls).containsExactly("query:pe", "region:maps_en_peru").inOrder()
+    }
+
+    /** Plan U3c walkthrough: the keyboard covered the result and Next; picking one puts it away. */
+    @Test fun pickingARegionTakesFocusOffTheSearch() {
+        val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
+        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions, regionQuery = "pe"))
+        val field = compose.onNodeWithText("Country or area")
+        field.performClick()
+        field.assertIsFocused()
+        compose.onNodeWithText("Peru · 500 B").performClick()
+        field.assertIsNotFocused()
+        compose.onNodeWithText("Next").assertIsDisplayed()
+        assertThat(calls).containsExactly("region:maps_en_peru")
     }
 
     @Test fun yourRegionShowsTheSuggestionAndNoRegionClearsIt() {

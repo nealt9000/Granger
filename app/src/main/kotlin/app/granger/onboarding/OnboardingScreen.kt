@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,6 +18,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,8 +42,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -108,6 +114,8 @@ private val Step.title: String
 @Composable
 fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
     Scaffold(
+        // The region search opens the keyboard: the list and Next stay above it (Plan U3c walkthrough).
+        modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
                 title = { Text(ui.step.title) },
@@ -282,11 +290,15 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
 private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: OnboardingUi, actions: OnboardingActions) {
     item { Text("A map of where you are, for finding your way with no signal.", style = MaterialTheme.typography.bodyMedium) }
     item {
+        val keyboard = closeKeyboard()
         OutlinedTextField(
             value = ui.regionQuery,
             onValueChange = actions.onRegionQuery,
             label = { Text("Country or area") },
             singleLine = true,
+            // Done puts the keyboard away, so the results and Next show whole.
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { keyboard() }),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         )
     }
@@ -297,7 +309,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: Onboarding
         item {
             Text("${region.title} · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(top = 8.dp))
         }
-        item { TextButton(onClick = { actions.onChooseRegion(null) }) { Text("No region") } }
+        item {
+            val keyboard = closeKeyboard()
+            TextButton(onClick = { keyboard(); actions.onChooseRegion(null) }) { Text("No region") }
+        }
     }
     val offered = ui.suggestion?.takeIf { ui.region == null && ui.regionQuery.isBlank() }
     offered?.let { suggestion ->
@@ -333,10 +348,29 @@ private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi
     }
 }
 
+/**
+ * Puts the keyboard away and takes focus off the search field. Picking a region calls it, so the choice and Next aren't
+ * left under the keyboard (Plan U3c walkthrough).
+ */
+@Composable
+private fun closeKeyboard(): () -> Unit {
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    return {
+        keyboard?.hide()
+        focus.clearFocus()
+    }
+}
+
+/** One map to pick; picking it closes the keyboard. */
 @Composable
 private fun RegionRow(region: Region, ui: OnboardingUi, actions: OnboardingActions) {
+    val keyboard = closeKeyboard()
     Row(
-        Modifier.fillMaxWidth().selectable(selected = region.pack.id == ui.region?.pack?.id, role = Role.RadioButton) { actions.onChooseRegion(region.pack.id) }.padding(vertical = 4.dp),
+        Modifier.fillMaxWidth().selectable(selected = region.pack.id == ui.region?.pack?.id, role = Role.RadioButton) {
+            keyboard()
+            actions.onChooseRegion(region.pack.id)
+        }.padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = region.pack.id == ui.region?.pack?.id, onClick = null)
