@@ -51,8 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.R
-import app.granger.player.ListenButtons
-import app.granger.player.VoiceButton
+import app.granger.player.ListenTags
 import app.granger.shell.ChromeSlideMs
 import app.granger.shell.LocalShellOverlay
 import app.granger.shell.SafeDrawingIgnoringBars
@@ -77,12 +76,11 @@ data class ReaderBarActions(
      * where it was left. Null leaves it out (e-books, PDFs, a pack with no main page).
      */
     val onMainPage: (() -> Unit)? = null,
-    /** Starts the voice here; null leaves Listen out. */
+    /**
+     * Starts the voice here; null leaves Listen out, as it is while this text is read: then the mini player over the
+     * page is the one place for Pause, Stop and the player (Plan U3c walkthrough).
+     */
     val onListen: (() -> Unit)? = null,
-    /** Listen, or Pause / Play with Stop beside it while this text is read (Plan U2 Decision 6). */
-    val voice: VoiceButton = VoiceButton.IDLE,
-    val onPauseResume: () -> Unit = {},
-    val onStop: () -> Unit = {},
     val menu: List<ReaderMenuItem> = emptyList(),
     val onContents: (() -> Unit)? = null,
     val onSearch: (() -> Unit)? = null,
@@ -163,7 +161,7 @@ fun BoxScope.SlidingBar(visible: Boolean, top: Boolean, onHeight: (Int) -> Unit 
 }
 
 /**
- * A reader's top bar: ←, the title on one line (ellipsized when Listen and Stop need the room), the wiki's Main page,
+ * A reader's top bar: ←, the title on one line (ellipsized when the buttons need the room), the wiki's Main page,
  * Listen and ⋯.
  * Clear of the status bar's place, the mini-player and the rail ([ReaderTopBarInsets]).
  */
@@ -184,7 +182,11 @@ fun ReaderTopBar(title: String, actions: ReaderBarActions, modifier: Modifier = 
                 style = MaterialTheme.typography.titleMedium,
             )
             actions.onMainPage?.let { IconButton(onClick = it) { Icon(Icons.Filled.Home, contentDescription = MAIN_PAGE) } }
-            actions.onListen?.let { ListenButtons(actions.voice, it, actions.onPauseResume, actions.onStop) }
+            actions.onListen?.let {
+                IconButton(onClick = it, modifier = Modifier.testTag(ListenTags.LISTEN)) {
+                    Icon(painterResource(R.drawable.ic_headphones), contentDescription = "Listen")
+                }
+            }
             if (actions.menu.isNotEmpty()) Box {
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {

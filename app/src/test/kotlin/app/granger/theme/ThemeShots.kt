@@ -373,7 +373,7 @@ class ThemeShots {
 
     /**
      * The readers' shared bars (Plan U3c Decision 4) over a stand-in page, at 360 dp: the wiki idle and reading aloud
-     * (Stop beside Pause), and an EPUB with its place and slider.
+     * (no playback buttons in the bar; the mini player above it has them), and an EPUB with its place and slider.
      */
     private fun wikiBars(voice: app.granger.player.VoiceButton) = app.granger.reader.wikiBarActions(
         packTitle = "Wikipedia", hasPack = true, hasPage = true, hasHome = true, bookmarked = false, onBack = {}, onListen = {}, voice = voice,
@@ -384,7 +384,11 @@ class ThemeShots {
 
     @Test fun barsWiki() = shoot("bars-wiki") { ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.IDLE), wikiPage) }
 
-    @Test fun barsWikiReading() = shoot("bars-wiki-reading") { ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.READING), wikiPage) }
+    @Test fun barsWikiReading() = shoot("bars-wiki-reading") {
+        ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.READING), wikiPage) {
+            MiniPlayer(app.granger.player.voiceUi("Photosynthesis", section = "Overview"), onPlayPause = {}, onSecondary = {}, onOpen = {})
+        }
+    }
 
     @Test fun barsEpub() {
         val locator = org.readium.r2.shared.publication.Locator(
@@ -396,13 +400,19 @@ class ThemeShots {
             ReaderShot(
                 "Pride and Prejudice", book,
                 "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
-            ) { app.granger.ebook.BookProgress(locator, 410) {} }
+                progress = { app.granger.ebook.BookProgress(locator, 410) {} },
+            )
         }
     }
 
+    /** A reader's bars over [text]; [mini], the mini player the shell draws over the page, above the top bar. */
     @Composable
-    private fun ReaderShot(title: String, actions: app.granger.reader.ReaderBarActions, text: String, progress: (@Composable () -> Unit)? = null) {
+    private fun ReaderShot(
+        title: String, actions: app.granger.reader.ReaderBarActions, text: String,
+        progress: (@Composable () -> Unit)? = null, mini: (@Composable () -> Unit)? = null,
+    ) {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            mini?.invoke()
             app.granger.reader.ReaderTopBar(title, actions)
             Box(Modifier.weight(1f).fillMaxWidth().padding(16.dp)) {
                 Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)

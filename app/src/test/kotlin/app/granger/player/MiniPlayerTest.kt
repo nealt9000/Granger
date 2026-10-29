@@ -185,14 +185,20 @@ class MiniPlayerTest {
         assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
     }
 
-    /** Plan U3c walkthrough: Play and Pause showed twice while an article was read aloud. */
-    @Test fun miniPlayerHidesInTheReaderTheVoiceIsReading() {
-        // The reader's own page or book: its bar has the controls.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, readingHere = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        // Music, or another page read aloud: still over the page.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, readingHere = false)).isEqualTo(MiniPlayerPlacement.OVERLAY)
-        // Off the reader it stays.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false, readingHere = true)).isEqualTo(MiniPlayerPlacement.PUSH)
+    /**
+     * Plan U3c walkthrough: the mini player is the one place for playback controls, in the reader reading its own page
+     * aloud too: it shows over the page with Pause and Back a sentence, and its tap opens the player (voice, speed, Stop).
+     */
+    @Test fun inTheReaderTheVoiceIsReadingTheMiniPlayerHasTheControls() {
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.OVERLAY)
+        val calls = mutableListOf<String>()
+        compose.setContent {
+            MiniPlayer(voiceUi("Photosynthesis"), onPlayPause = { calls += "pause" }, onSecondary = { calls += "back" }, onOpen = { calls += "open" })
+        }
+        compose.onNodeWithTag(MiniPlayerTags.PLAY_PAUSE).assertContentDescriptionEquals("Pause").performClick()
+        compose.onNodeWithTag(MiniPlayerTags.SECONDARY).assertContentDescriptionEquals("Back a sentence").performClick()
+        compose.onNodeWithTag(MiniPlayerTags.TITLE, useUnmergedTree = true).performClick()
+        assertThat(calls).containsExactly("pause", "back", "open").inOrder()
     }
 
     @Test fun theReadersSourceIsItsTabsPageOrBook() {

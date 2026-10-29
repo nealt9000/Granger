@@ -19,8 +19,9 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * The wiki's bars at a small phone's 360 dp, measured with real fonts (native graphics): Listen and Stop sit together
- * beside the title with nothing moving out, a usual title stays whole, and a long one ends in an ellipsis on one line.
+ * The wiki's bars at a small phone's 360 dp, measured with real fonts (native graphics): Main page, Listen and ⋯ sit
+ * beside the title (while the page is read, Listen leaves for the mini player and nothing else moves), a usual title
+ * stays whole, and a long one ends in an ellipsis on one line.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -66,13 +67,12 @@ class ReaderTopBarFitTest {
         assertThat(title().layout().whole()).isTrue()
     }
 
-    @Test fun readingListenAndStopSitTogetherAndTheTitleKeepsItsRoom() {
+    @Test fun readingMainPageStaysAndTheTitleKeepsItsRoom() {
         bars(VoiceButton.READING)
-        assertBarsFit("Back", "Pause", "Stop", "More")
-        // Main page waits in ⋯ while the voice reads, so the title keeps its room.
-        compose.onNodeWithContentDescription(MAIN_PAGE).assertDoesNotExist()
+        assertBarsFit("Back", MAIN_PAGE, "More")
+        for (n in listOf("Listen", "Pause", "Stop")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
         assertThat(title().layout().whole()).isTrue()
-        // Back, Pause, Stop and ⋯ leave the title well over a third of the bar.
+        // Back, Main page and ⋯ leave the title well over a third of the bar.
         val bounds = title().getBoundsInRoot()
         assertThat(bounds.right - bounds.left).isAtLeast(140.dp)
     }
@@ -82,6 +82,6 @@ class ReaderTopBarFitTest {
         val r = title().layout()
         assertThat(r.lineCount).isEqualTo(1)
         assertThat(r.isLineEllipsized(0)).isTrue()
-        assertBarsFit("Back", "Pause", "Stop", "More")
+        assertBarsFit("Back", MAIN_PAGE, "More")
     }
 }

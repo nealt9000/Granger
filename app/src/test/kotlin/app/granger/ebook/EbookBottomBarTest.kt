@@ -3,13 +3,10 @@ package app.granger.ebook
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
-import app.granger.player.ListenTags
 import app.granger.player.VoiceButton
 import app.granger.reader.ReaderBarTags
 import app.granger.reader.ReaderBottomBar
@@ -45,7 +42,7 @@ class EbookBottomBarTest {
             isPdf = isPdf, bookmarked = false, onBack = { calls += "back" },
             onContents = { calls += "contents" }, onSearch = { calls += "search" }, onTextSettings = { calls += "aa" },
             onBookmark = { calls += "star" },
-            onListen = { calls += "start" }, voice = voice, onPauseResume = { calls += "pauseResume" }, onStop = { calls += "stop" },
+            onListen = { calls += "start" }, voice = voice,
         )
         Column {
             ReaderTopBar("Pride and Prejudice", actions)
@@ -90,25 +87,14 @@ class EbookBottomBarTest {
         assertThat(calls).containsExactly("start")
     }
 
-    @Test fun readingPausesOnATapAndStopIsItsOwnButton() {
-        bars(VoiceButton.READING)
-        compose.onNodeWithContentDescription("Pause").performClick()
-        compose.onNodeWithContentDescription("Stop").performClick()
-        assertThat(calls).containsExactly("pauseResume", "stop").inOrder()
-        assertThat(compose.onNodeWithContentDescription("Pause").getBoundsInRoot().left)
-            .isLessThan(compose.onNodeWithContentDescription("Stop").getBoundsInRoot().left)
-    }
+    /** Plan U3c walkthrough: while the book is read aloud the mini player over the page has Pause, Stop and the player. */
+    @Test fun whileTheBookIsReadTheBarHasNoPlaybackButtons() = assertNoPlaybackButtons(VoiceButton.READING)
 
-    @Test fun aLongPressNoLongerStops() {
-        bars(VoiceButton.READING)
-        compose.onNodeWithTag(ListenTags.LISTEN).performTouchInput { longClick() }
-        assertThat(calls).doesNotContain("stop")
-    }
+    @Test fun whileTheBookIsPausedTheBarHasNoPlaybackButtons() = assertNoPlaybackButtons(VoiceButton.PAUSED)
 
-    @Test fun pausedPlaysOnATap() {
-        bars(VoiceButton.PAUSED)
-        compose.onNodeWithContentDescription("Play").performClick()
-        compose.onNodeWithContentDescription("Stop").assertExists()
-        assertThat(calls).containsExactly("pauseResume")
+    private fun assertNoPlaybackButtons(voice: VoiceButton) {
+        bars(voice)
+        for (n in listOf("Listen", "Pause", "Play", "Stop")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
+        compose.onNodeWithContentDescription("Add bookmark").assertExists()
     }
 }

@@ -216,8 +216,6 @@ fun ReaderScreen(
         onTextSettings = { viewModel.open(ReaderViewModel.Panel.TEXT) },
         onToggleBookmark = viewModel::toggleBookmark,
         voice = state.voice,
-        onPauseResume = viewModel::pauseResume,
-        onStop = viewModel::stopReading,
         onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
             val view = webView
             if (view == null) viewModel.readAloud(null)
@@ -426,21 +424,14 @@ internal fun wikiBarActions(
     onToggleBookmark: () -> Unit = {},
     /** Starts the voice on this page (Plan V1); null leaves Listen out. */
     onListen: (() -> Unit)? = null,
+    /** Whether the voice is on this page: then Listen leaves the bar, for the mini player's controls (Plan U3c walkthrough). */
     voice: VoiceButton = VoiceButton.IDLE,
-    onPauseResume: () -> Unit = {},
-    onStop: () -> Unit = {},
-): ReaderBarActions {
-    // While this page is read, Pause and Stop take Listen's place and Main page waits in ⋯: a usual title stays whole at 360 dp.
-    val voiceHere = onListen != null && hasPage && voice != VoiceButton.IDLE
-    return ReaderBarActions(
+): ReaderBarActions =
+    ReaderBarActions(
         onBack = onBack,
-        onMainPage = onHome.takeIf { hasPack && hasHome && !voiceHere },
-        onListen = onListen?.takeIf { hasPage },
-        voice = voice,
-        onPauseResume = onPauseResume,
-        onStop = onStop,
+        onMainPage = onHome.takeIf { hasPack && hasHome },
+        onListen = onListen?.takeIf { hasPage && voice == VoiceButton.IDLE },
         menu = if (!hasPack) emptyList() else listOfNotNull(
-            ReaderMenuItem(MAIN_PAGE, onHome).takeIf { hasHome && voiceHere },
             ReaderMenuItem("Random article", onRandom),
             ReaderMenuItem("Find in page", onFind).takeIf { hasPage },
         ),
@@ -451,7 +442,6 @@ internal fun wikiBarActions(
         onBookmark = onToggleBookmark.takeIf { hasPage },
         bookmarked = bookmarked,
     )
-}
 
 /** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
 internal fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"

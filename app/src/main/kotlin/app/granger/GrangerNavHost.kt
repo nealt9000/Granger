@@ -127,7 +127,6 @@ import app.granger.shell.RailEntry
 import app.granger.shell.RailEntryActions
 import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
-import app.granger.shell.readSourceKeyOf
 import app.granger.shell.rememberShellState
 import app.granger.sources.CatalogScope
 import app.granger.sources.GetMoreLink
@@ -638,31 +637,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         )
     }
 
-    // The page or book the reader on screen shows, as the voice keys it: the tab follows the reader's links.
-    val readerSource by produceState<String?>(null, readerTabId) {
-        val id = readerTabId
-        if (id == null) {
-            value = null
-            return@produceState
-        }
-        try {
-            container.sessions.railTabs(RailViewModel.SCAN)
-                .map { tabs -> (tabs.firstOrNull { it.id == id } ?: container.sessions.tab(id))?.let(::readSourceKeyOf) }
-                .collect { value = it }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.w("Granger", "Couldn't read the tab on screen", e)
-            value = null
-        }
-    }
     val miniPlacement = miniPlayerPlacement(
         loaded = playerUi.now != NowPlaying.Idle,
         // Listen's home has the Now playing card instead.
         onPlayer = destination?.hasRoute<ListenPlayerRoute>() == true || destination?.hasRoute<ListenRoute>() == true,
         reading = readerTabId != null,
-        // The voice reads this reader's own page or book: its bar has Pause and Stop (Plan U3c walkthrough).
-        readingHere = readerSource != null && (playerUi.now as? NowPlaying.Voice)?.sourceKey == readerSource,
     )
 
     // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.

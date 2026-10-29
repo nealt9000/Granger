@@ -245,11 +245,6 @@ fun EbookReaderScreen(
         onTextSettings = { viewModel.open(Panel.SETTINGS) },
         onBookmark = viewModel::toggleBookmark,
         voice = state.voice,
-        onPauseResume = viewModel::pauseResume,
-        onStop = {
-            viewModel.stopReading()
-            scope.launch { snackbar.showSnackbar("Stopped reading") }
-        },
         onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
             val fragment = epub
             scope.launch {

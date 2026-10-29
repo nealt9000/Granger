@@ -50,7 +50,6 @@ class ReaderTopBarTest {
             onSearchPack = { calls += "search" }, onContents = { calls += "contents" }, onTextSettings = { calls += "aa" },
             onToggleBookmark = { calls += "star" },
             onListen = if (listen) ({ calls += "listen" }) else null, voice = voice,
-            onPauseResume = { calls += "pause" }, onStop = { calls += "stop" },
         )
         Column {
             ReaderTopBar("Photosynthesis", actions)
@@ -74,7 +73,7 @@ class ReaderTopBarTest {
         assertThat(lefts).isInStrictOrder()
         compose.onNodeWithContentDescription("Listen").performClick()
         assertThat(calls).containsExactly("listen")
-        compose.onNodeWithContentDescription("Stop").assertDoesNotExist()   // Stop only while a session is live
+        compose.onNodeWithContentDescription("Stop").assertDoesNotExist()   // the mini player has the controls
     }
 
     @Test fun theBottomBarIsContentsSearchAaBookmark() {
@@ -88,23 +87,17 @@ class ReaderTopBarTest {
         assertThat(calls).containsExactly("contents", "search", "aa", "star").inOrder()
     }
 
-    @Test fun whileThisPageIsReadStopSitsBesidePauseAndTheStarStays() {
-        bars(voice = VoiceButton.READING)
-        compose.onNodeWithContentDescription("Listen").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Pause").performClick()
-        compose.onNodeWithContentDescription("Stop").performClick()
-        assertThat(calls).containsExactly("pause", "stop").inOrder()
-        assertThat(compose.onNodeWithContentDescription("Pause").left()).isLessThan(compose.onNodeWithContentDescription("Stop").left())
-        assertThat(compose.onNodeWithContentDescription("Stop").left()).isLessThan(compose.onNodeWithContentDescription("More").left())
-        // The U2 swap is gone: the star never leaves the bottom bar.
-        compose.onNodeWithContentDescription("Add bookmark").assertExists()
-    }
+    /** Plan U3c walkthrough: the mini player over the page is the one place for Pause, Stop and the player. */
+    @Test fun whileThisPageIsReadTheBarHasNoPlaybackButtons() = assertNoPlaybackButtons(VoiceButton.READING)
 
-    @Test fun pausedShowsPlay() {
-        bars(voice = VoiceButton.PAUSED)
-        compose.onNodeWithContentDescription("Play").performClick()
-        compose.onNodeWithContentDescription("Stop").assertExists()
-        assertThat(calls).containsExactly("pause")
+    @Test fun whileThisPageIsPausedTheBarHasNoPlaybackButtons() = assertNoPlaybackButtons(VoiceButton.PAUSED)
+
+    private fun assertNoPlaybackButtons(voice: VoiceButton) {
+        bars(voice = voice)
+        for (n in listOf("Listen", "Pause", "Play", "Stop")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
+        // Main page stays in the bar, and the star in the bottom one.
+        assertThat(compose.onNodeWithContentDescription(MAIN_PAGE).left()).isLessThan(compose.onNodeWithContentDescription("More").left())
+        compose.onNodeWithContentDescription("Add bookmark").assertExists()
     }
 
     @Test fun withoutTheVoiceThereIsNoListen() {
@@ -127,12 +120,12 @@ class ReaderTopBarTest {
         compose.onNodeWithText("Add bookmark").assertDoesNotExist()
     }
 
-    /** While the page is read, Pause and Stop need the room: Main page moves to the top of ⋯. */
-    @Test fun whileThePageIsReadMainPageIsInMore() {
+    /** While the page is read Main page stays in the bar, one tap, and ⋯ doesn't repeat it. */
+    @Test fun whileThePageIsReadMainPageStaysInTheBar() {
         bars(voice = VoiceButton.READING)
-        compose.onNodeWithContentDescription(MAIN_PAGE).assertDoesNotExist()
+        compose.onNodeWithContentDescription(MAIN_PAGE).performClick()
         compose.onNodeWithContentDescription("More").performClick()
-        compose.onNodeWithText(MAIN_PAGE).performClick()
+        compose.onNodeWithText(MAIN_PAGE).assertDoesNotExist()
         assertThat(calls).containsExactly("home")
     }
 
