@@ -26,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The wiki's bars (Plan U3c Decision 4): ←, the page's title, Listen and ⋯ (main page, Random article, Find in page)
+ * The wiki's bars (Plan U3c Decision 4): ←, the page's title, Main page, Listen and ⋯ (Random article, Find in page)
  * above; Contents, Search, Aa and the bookmark below.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -61,12 +61,13 @@ class ReaderTopBarTest {
     private fun SemanticsNodeInteraction.left() = getBoundsInRoot().left
     private fun SemanticsNodeInteraction.top() = getBoundsInRoot().top
 
-    @Test fun theTopBarIsBackTitleListenMore() {
+    @Test fun theTopBarIsBackTitleMainPageListenMore() {
         bars()
         compose.onNodeWithText("Photosynthesis").assertExists()
         val lefts = listOf(
             compose.onNodeWithContentDescription("Back").left(),
             compose.onNodeWithTag(ReaderBarTags.TITLE).left(),
+            compose.onNodeWithContentDescription(MAIN_PAGE).left(),
             compose.onNodeWithContentDescription("Listen").left(),
             compose.onNodeWithContentDescription("More").left(),
         )
@@ -111,26 +112,34 @@ class ReaderTopBarTest {
         compose.onNodeWithContentDescription("Listen").assertDoesNotExist()
     }
 
-    @Test fun moreHoldsTheMainPageRandomAndFind() {
+    /** The pack's main page is one tap, in the top bar (the walkthrough); ⋯ keeps Random article and Find in page. */
+    @Test fun mainPageIsAButtonAndMoreHoldsRandomAndFind() {
         bars()
-        compose.onNodeWithContentDescription("More").performClick()
-        // The pack's main page, named for the pack: Home is the app's (the rail's owl).
-        compose.onNodeWithText("Wikipedia: main page").performClick()
+        compose.onNodeWithContentDescription(MAIN_PAGE).performClick()
         compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithText("Random article").performClick()
         compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithText("Find in page").performClick()
         assertThat(calls).containsExactly("home", "random", "find").inOrder()
         compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithText("Wikipedia: main page").assertDoesNotExist()
         compose.onNodeWithText("Home").assertDoesNotExist()
         compose.onNodeWithText("Add bookmark").assertDoesNotExist()
-        assertThat(mainPageLabel(null)).isEqualTo("Main page")
+    }
+
+    /** While the page is read, Pause and Stop need the room: Main page moves to the top of ⋯. */
+    @Test fun whileThePageIsReadMainPageIsInMore() {
+        bars(voice = VoiceButton.READING)
+        compose.onNodeWithContentDescription(MAIN_PAGE).assertDoesNotExist()
+        compose.onNodeWithContentDescription("More").performClick()
+        compose.onNodeWithText(MAIN_PAGE).performClick()
+        assertThat(calls).containsExactly("home")
     }
 
     @Test fun theMainPageIsLeftOutWhenThePackHasNone() {
         bars(hasHome = false)
+        compose.onNodeWithContentDescription(MAIN_PAGE).assertDoesNotExist()
         compose.onNodeWithContentDescription("More").performClick()
-        compose.onNodeWithText("Wikipedia: main page").assertDoesNotExist()
         compose.onNodeWithText("Random article").assertExists()
     }
 
@@ -150,7 +159,7 @@ class ReaderTopBarTest {
     @Test fun anErrorLeavesOnlyBack() {
         bars(hasPack = false, hasPage = false)
         compose.onNodeWithContentDescription("Back").assertExists()
-        for (n in listOf("More", "Search Wikipedia", "Contents", "Listen")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
+        for (n in listOf("More", MAIN_PAGE, "Search Wikipedia", "Contents", "Listen")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
     }
 
     @Test fun theBottomBarsSearchOpensThePackSearchWithFocus() {

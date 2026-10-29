@@ -62,13 +62,15 @@ class ReaderTopBarFitTest {
 
     @Test fun idleTheBarsFitAndTheTitleIsWhole() {
         bars(VoiceButton.IDLE)
-        assertBarsFit("Back", "Listen", "More")
+        assertBarsFit("Back", MAIN_PAGE, "Listen", "More")
         assertThat(title().layout().whole()).isTrue()
     }
 
     @Test fun readingListenAndStopSitTogetherAndTheTitleKeepsItsRoom() {
         bars(VoiceButton.READING)
         assertBarsFit("Back", "Pause", "Stop", "More")
+        // Main page waits in ⋯ while the voice reads, so the title keeps its room.
+        compose.onNodeWithContentDescription(MAIN_PAGE).assertDoesNotExist()
         assertThat(title().layout().whole()).isTrue()
         // Back, Pause, Stop and ⋯ leave the title well over a third of the bar.
         val bounds = title().getBoundsInRoot()

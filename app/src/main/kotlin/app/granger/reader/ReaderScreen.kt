@@ -104,8 +104,8 @@ private data class FindMatches(val active: Int, val count: Int, val done: Boolea
  * bars slide away on a scroll down by hand and come back on a scroll up, a middle tap (which also hides them), a
  * system-bar swipe or the shell's edge swipe; the page is never laid out again for them. Selecting text offers
  * Search ([onSearchText]) and Research ([onResearch], with the article it was selected in); a rising [showChromeRequest] (the shell's edge swipe) shows the chrome.
- * The bars are the readers' shared ones ([wikiBarActions]): the page's title, Listen and ⋯ above; Contents, the pack's
- * search, Aa and the bookmark below.
+ * The bars are the readers' shared ones ([wikiBarActions]): the page's title, Main page, Listen and ⋯ above; Contents,
+ * the pack's search, Aa and the bookmark below.
  * Back, the ← arrow or the system's, steps back through the pages read in this tab; at its first page it calls [onBack].
  */
 @Composable
@@ -404,9 +404,11 @@ fun ReaderScreen(
 }
 
 /**
- * The wiki's bars (Plan U3c Decision 4). Top: ←, the page's title, Listen and ⋯ with the pack's main page, Random
- * article and Find in page. Bottom: Contents, Search (the pack), Aa and the bookmark. With an error ([hasPack] false)
- * only ← is left; the page's own actions (Listen, Contents, Aa, the star, Find) wait for a page ([hasPage]).
+ * The wiki's bars (Plan U3c Decision 4). Top: ←, the page's title, the pack's main page (a button since the walkthrough:
+ * one tap home), Listen, and ⋯ with Random article and Find in page. While the page is read aloud, Pause and Stop need
+ * the room, and Main page moves to the top of ⋯. Bottom: Contents, Search (the pack), Aa and the bookmark. With an
+ * error ([hasPack] false) only ← is left; the page's own actions (Listen, Contents, Aa, the star, Find) wait for a page
+ * ([hasPage]).
  */
 internal fun wikiBarActions(
     packTitle: String?,
@@ -427,28 +429,29 @@ internal fun wikiBarActions(
     voice: VoiceButton = VoiceButton.IDLE,
     onPauseResume: () -> Unit = {},
     onStop: () -> Unit = {},
-): ReaderBarActions = ReaderBarActions(
-    onBack = onBack,
-    onListen = onListen?.takeIf { hasPage },
-    voice = voice,
-    onPauseResume = onPauseResume,
-    onStop = onStop,
-    menu = if (!hasPack) emptyList() else listOfNotNull(
-        // The pack's main page: named for the pack, not Home, which is the app's (Plan U3b Decision 5).
-        ReaderMenuItem(mainPageLabel(packTitle), onHome).takeIf { hasHome },
-        ReaderMenuItem("Random article", onRandom),
-        ReaderMenuItem("Find in page", onFind).takeIf { hasPage },
-    ),
-    onContents = onContents.takeIf { hasPage },
-    onSearch = onSearchPack.takeIf { hasPack },
-    searchLabel = searchLabel(packTitle),
-    onTextSettings = onTextSettings.takeIf { hasPage },
-    onBookmark = onToggleBookmark.takeIf { hasPage },
-    bookmarked = bookmarked,
-)
-
-/** The main page's entry in ⋯: "Wikipedia: main page". */
-internal fun mainPageLabel(packTitle: String?) = if (packTitle != null) "$packTitle: main page" else "Main page"
+): ReaderBarActions {
+    // While this page is read, Pause and Stop take Listen's place and Main page waits in ⋯: a usual title stays whole at 360 dp.
+    val voiceHere = onListen != null && hasPage && voice != VoiceButton.IDLE
+    return ReaderBarActions(
+        onBack = onBack,
+        onMainPage = onHome.takeIf { hasPack && hasHome && !voiceHere },
+        onListen = onListen?.takeIf { hasPage },
+        voice = voice,
+        onPauseResume = onPauseResume,
+        onStop = onStop,
+        menu = if (!hasPack) emptyList() else listOfNotNull(
+            ReaderMenuItem(MAIN_PAGE, onHome).takeIf { hasHome && voiceHere },
+            ReaderMenuItem("Random article", onRandom),
+            ReaderMenuItem("Find in page", onFind).takeIf { hasPage },
+        ),
+        onContents = onContents.takeIf { hasPage },
+        onSearch = onSearchPack.takeIf { hasPack },
+        searchLabel = searchLabel(packTitle),
+        onTextSettings = onTextSettings.takeIf { hasPage },
+        onBookmark = onToggleBookmark.takeIf { hasPage },
+        bookmarked = bookmarked,
+    )
+}
 
 /** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
 internal fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"

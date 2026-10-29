@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -56,6 +57,12 @@ import app.granger.shell.ChromeSlideMs
 import app.granger.shell.LocalShellOverlay
 import app.granger.shell.SafeDrawingIgnoringBars
 
+/**
+ * What the wiki's main-page button says (TalkBack): the pack's main page, not Home, which is the app's (Plan U3b
+ * Decision 5), though the icon is a house.
+ */
+const val MAIN_PAGE = "Main page"
+
 /** An entry in a reader's ⋯ menu. */
 data class ReaderMenuItem(val label: String, val onClick: () -> Unit)
 
@@ -65,6 +72,11 @@ data class ReaderMenuItem(val label: String, val onClick: () -> Unit)
  */
 data class ReaderBarActions(
     val onBack: () -> Unit,
+    /**
+     * The wiki's pack's main page, a top-bar button before Listen (Plan U3c walkthrough): one tap home in a wiki reopened
+     * where it was left. Null leaves it out (e-books, PDFs, a pack with no main page).
+     */
+    val onMainPage: (() -> Unit)? = null,
     /** Starts the voice here; null leaves Listen out. */
     val onListen: (() -> Unit)? = null,
     /** Listen, or Pause / Play with Stop beside it while this text is read (Plan U2 Decision 6). */
@@ -146,7 +158,8 @@ fun BoxScope.SlidingBar(visible: Boolean, top: Boolean, onHeight: (Int) -> Unit 
 }
 
 /**
- * A reader's top bar: ←, the title on one line (ellipsized when Listen and Stop need the room), Listen and ⋯.
+ * A reader's top bar: ←, the title on one line (ellipsized when Listen and Stop need the room), the wiki's Main page,
+ * Listen and ⋯.
  * Clear of the status bar's place, the mini-player and the rail ([ReaderTopBarInsets]).
  */
 @Composable
@@ -165,6 +178,7 @@ fun ReaderTopBar(title: String, actions: ReaderBarActions, modifier: Modifier = 
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
             )
+            actions.onMainPage?.let { IconButton(onClick = it) { Icon(Icons.Filled.Home, contentDescription = MAIN_PAGE) } }
             actions.onListen?.let { ListenButtons(actions.voice, it, actions.onPauseResume, actions.onStop) }
             if (actions.menu.isNotEmpty()) Box {
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
