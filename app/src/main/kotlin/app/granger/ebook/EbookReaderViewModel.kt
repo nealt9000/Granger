@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
+import app.granger.core.books.OutlineEntry
+import app.granger.core.books.PdfInspector
 import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
@@ -141,6 +143,8 @@ class EbookReaderViewModel(
     private val restore: suspend (Book) -> Boolean = { false },
     /** A text's saved place (Plan U2): Listen goes on from it when the page is at or before it ([listenStart]). */
     private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
+    /** A PDF's outline as PdfBox reads it, for when PDFium's has nothing to show (called on [io]). */
+    private val pdfOutline: (File) -> List<OutlineEntry> = PdfInspector::outline,
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -243,6 +247,7 @@ class EbookReaderViewModel(
                 ).derived()
             }
             savedState[TARGET_CONSUMED] = true
+            if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
             launch {
@@ -326,6 +331,24 @@ class EbookReaderViewModel(
         if (!ui.isPdf) return ""
         val page = locator.locations.position ?: return ""
         return pdfTocIndex(ui.toc, page)?.let { ui.toc[it].title.ifBlank { null } } ?: "Page $page"
+    }
+
+    /**
+     * PDFium reads some PDFs' outlines as nothing, or as entries with no page (a destination it can't follow), and
+     * Contents would say there is none: PdfBox's reading of [file] is shown instead, when it finds one. When it finds
+     * none either, PDFium's rows that go nowhere are dropped, so Contents says the PDF has no list.
+     */
+    private suspend fun pdfOutlineInstead(opened: Publication, file: File) {
+        val href = opened.readingOrder.firstOrNull()?.href?.toString() ?: return
+        val entries = try {
+            withContext(io) { pdfOutline(file) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Granger", "Couldn't read the PDF's outline", e)
+            emptyList()
+        }
+        _state.update { it.copy(toc = entries.map { e -> TocRow(e.title, "$href#page=${e.page}", e.depth) }).derived() }
     }
 
     private fun flatten(links: List<Link>, depth: Int): List<TocRow> =

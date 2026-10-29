@@ -48,6 +48,9 @@ internal fun highlightColor(name: String): Color = Color(HighlightColors.argb(na
 
 internal const val CANT_FIND = "Can't find this passage in the current edition"
 
+/** What Contents says for a PDF with no outline: its own contents page, if it has one, is among its pages. */
+internal const val NO_PDF_CONTENTS = "This PDF has no contents list of its own. If it has a contents page, it's in the pages."
+
 /** The stored locator's share of the book, as a percent; null when it can't be read. */
 internal fun markPercent(mark: BookAnnotation): Int? = try {
     Locator.fromJSON(JSONObject(mark.locatorJson))?.locations?.totalProgression?.let { (it * 100).toInt().coerceIn(0, 100) }
@@ -86,7 +89,7 @@ fun ContentsPanel(
                     }
                 }
                 when (tab) {
-                    0 -> if (state.toc.isEmpty()) Empty("This book has no contents list.") else LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
+                    0 -> if (state.toc.isEmpty()) Empty(if (state.isPdf) NO_PDF_CONTENTS else "This book has no contents list.") else LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                         itemsIndexed(state.toc) { i, row ->
                             val current = i == state.currentTocIndex
                             Text(

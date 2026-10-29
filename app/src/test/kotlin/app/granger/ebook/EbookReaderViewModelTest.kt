@@ -75,11 +75,12 @@ class EbookReaderViewModelTest {
         appScope: CoroutineScope = this,
         searcher: BookSearcher = FakeBookSearcher(),
         savedState: SavedStateHandle = SavedStateHandle(),
+        pdfOutline: (java.io.File) -> List<app.granger.core.books.OutlineEntry> = { emptyList() },
     ): EbookReaderViewModel {
         val file = tmp.root.resolve("b.epub").apply { if (fileExists) writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState)
+        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState, pdfOutline = pdfOutline)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -231,6 +232,36 @@ class EbookReaderViewModelTest {
         bare.onLocator(page2)
         testScheduler.advanceUntilIdle()
         assertThat(bookshelf.positionMap.value.getValue("b").chapterTitle).isEqualTo("Page 2")
+    }
+
+    @Test fun aPdfWhoseOutlinePdfiumCantReadTakesPdfBoxs() = runTest(main.dispatcher) {
+        // PDFium's outline: one entry whose destination it couldn't follow (page 0).
+        opener.publication = app.granger.testPdfPublication(pages = 5, outline = listOf("Water" to 0))
+        val read = mutableListOf<java.io.File>()
+        val outline = listOf(
+            app.granger.core.books.OutlineEntry("Water", 1, 0),
+            app.granger.core.books.OutlineEntry("Filters", 3, 1),
+        )
+        val vm = reader(pdfOutline = { file -> read += file; outline })
+        assertThat(read).hasSize(1)
+        assertThat(vm.state.value.toc).containsExactly(TocRow("Water", "doc.pdf#page=1", 0), TocRow("Filters", "doc.pdf#page=3", 1)).inOrder()
+
+        val jumps = mutableListOf<Locator>()
+        val collecting = launch { vm.navigation.collect { jumps += it } }
+        vm.goTo(vm.state.value.toc[1].href)
+        testScheduler.advanceUntilIdle()
+        assertThat(jumps.single().locations.fragments).containsExactly("page=3")
+        collecting.cancel()
+    }
+
+    @Test fun aPdfWithNoOutlineHasNoContentsRows() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication(pages = 5, outline = listOf("Water" to 0))
+        assertThat(reader().state.value.toc).isEmpty()
+        // A good outline from PDFium isn't read again.
+        opener.publication = app.granger.testPdfPublication(pages = 5)
+        var asked = false
+        assertThat(reader(pdfOutline = { asked = true; emptyList() }).state.value.toc).hasSize(3)
+        assertThat(asked).isFalse()
     }
 
     @Test fun aPdfBookmarkIsNamedByItsPage() = runTest(main.dispatcher) {

@@ -33,6 +33,14 @@ class PdfInspectorTest {
         assertThat(meta.spine).isEmpty()
     }
 
+    @Test fun theOutlineIsReadByEveryKindOfDestinationWithItsDepth() {
+        assertThat(PdfInspector.outline(PdfFixtures.linked(tmp.root))).containsExactly(
+            OutlineEntry("Water", 1, 0), OutlineEntry("Boiling", 2, 1), OutlineEntry("Filters", 3, 1), OutlineEntry("Storage", 4, 1),
+        ).inOrder()
+        assertThat(PdfInspector.outline(PdfFixtures.imageOnly(tmp.root))).isEmpty()
+        assertThat(PdfInspector.outline(PdfFixtures.truncated(tmp.root))).isEmpty()
+    }
+
     @Test fun noInfoTitleTakesTheFallback() {
         val file = File(tmp.root, "untitled.pdf")
         PDDocument().use { doc ->
