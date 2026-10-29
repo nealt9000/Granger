@@ -247,6 +247,17 @@ fun NavController.showTab(
  */
 fun NavController.openTab(tab: ReadingTab) = showTab(tab, keepCurrent = true)
 
+/**
+ * After [tabId] is removed from the rail: if its reader is on screen, the reader closes and Home shows, popping back to
+ * the Home on the stack or replacing the reader with one (Plan U3c walkthrough: the open item couldn't be removed).
+ * A tab not on screen just leaves the rail.
+ */
+fun NavController.leaveRemovedTab(tabId: Long) {
+    val top = currentBackStackEntry ?: return
+    if (top.readingTabId() != tabId) return
+    if (!popBackStack<HomeRoute>(inclusive = false)) navigate(HomeRoute) { popUpTo(top.destination.id) { inclusive = true } }
+}
+
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 /** [domain] filters the Kiwix list to a readiness domain (Plan H1); null is the whole catalog. */
@@ -713,7 +724,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     }
                 },
                 onUnpin = railViewModel::unpin,
-                onRemove = railViewModel::remove,
+                onRemove = { entry ->
+                    railViewModel.remove(entry)
+                    // The tab on screen: it closes, and Home shows.
+                    if (entry is RailEntry.Tab) nav.leaveRemovedTab(entry.tab.tabId)
+                },
             )
         },
         side = railSide,

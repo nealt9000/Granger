@@ -17,6 +17,7 @@ import app.granger.HomeRoute
 import app.granger.LibraryRoute
 import app.granger.ReaderRoute
 import app.granger.SearchRoute
+import app.granger.leaveRemovedTab
 import app.granger.openTab
 import app.granger.showTab
 import app.granger.FakeLibrary
@@ -197,6 +198,30 @@ class ReaderBackTest {
         compose.runOnIdle { nav.navigate(HomeRoute) }
         compose.runOnIdle { nav.openTab(other) }
         assertThat(nav.readers()).containsExactly(1L, 2L).inOrder()
+    }
+
+    /** Plan U3c walkthrough: removing the open item from the rail closes it and goes Home. */
+    @Test fun removingTheTabOnScreenGoesHome() {
+        val nav = routes()
+        compose.runOnIdle { nav.navigate(HomeRoute) }
+        compose.runOnIdle { nav.openTab(article) }
+        compose.runOnIdle { nav.openTab(other) }
+        // A tab not on screen leaves the reader where it is.
+        compose.runOnIdle { nav.leaveRemovedTab(article.id) }
+        assertThat(nav.readers()).containsExactly(1L, 2L).inOrder()
+        compose.runOnIdle { nav.leaveRemovedTab(other.id) }
+        assertThat(compose.runOnIdle { nav.currentDestination!!.hasRoute<HomeRoute>() }).isTrue()
+        assertThat(nav.readers()).isEmpty()
+    }
+
+    @Test fun removingTheTabOnScreenWithNoHomeUnderneathReplacesItWithHome() {
+        val nav = routes()
+        compose.runOnIdle { nav.openTab(article) }
+        compose.runOnIdle { nav.leaveRemovedTab(article.id) }
+        assertThat(compose.runOnIdle { nav.currentDestination!!.hasRoute<HomeRoute>() }).isTrue()
+        assertThat(nav.readers()).isEmpty()
+        compose.runOnIdle { nav.popBackStack() }
+        assertThat(compose.runOnIdle { nav.currentDestination!!.hasRoute<LibraryRoute>() }).isTrue()
     }
 
     @Test fun showTabStillReplacesAReaderOnTop() {
