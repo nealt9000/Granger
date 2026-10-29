@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Research chats and plays taken off the rail with "Remove from rail". Each stays off until it is used again: a chat
  * answered again, an album played again. (Removing a tab closes it and removing a search forgets it, so those need
- * nothing here.)
+ * nothing here, but for a removed tab's read-aloud play, which the tab stood for.)
  */
 interface RailHidden {
     /** By rail key ([RailEntry.key]): the item's time ([RailEntry.at]) when it was removed. */

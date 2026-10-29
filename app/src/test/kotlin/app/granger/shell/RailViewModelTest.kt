@@ -363,6 +363,33 @@ class RailViewModelTest {
         assertThat(vm.ui.first { it.entries.isEmpty() }.entries).isEmpty()
     }
 
+    /**
+     * Plan U3c walkthrough: removing the tab on screen left it on the rail. Its page had been read aloud, and that
+     * play's "Read aloud" row, kept off while the tab was there, took its place under the same title.
+     */
+    @Test fun removingATabReadAloudTakesItsPlayOffTooUntilReadAgain() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20).copy(path = "Owls"))
+        plays.value = listOf(RecentPlay("voice:pack:a/Owls", "Owls", 40))
+        current.value = 5
+        val vm = RailViewModel(
+            sessions, library, bookshelf, chats, current, pins, hidden, order, plays, voice = voice, now = { 100L },
+        )
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5")
+        vm.remove(vm.ui.value.entries.single())
+        current.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries).isEmpty()
+        assertThat(vm.ui.value.recent).isEmpty()
+        // Read aloud again: the play comes back.
+        plays.value = listOf(RecentPlay("voice:pack:a/Owls", "Owls", 150))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("play:voice:pack:a/Owls")
+        collecting.cancel()
+    }
+
     @Test fun removeSearchDeletesTheRecentSearch() = runTest(main.dispatcher) {
         sessions.searchRows.value = listOf(RecentSearch("cats", 2), RecentSearch("dogs", 1))
         val vm = vm()

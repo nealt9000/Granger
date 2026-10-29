@@ -138,6 +138,8 @@ class RailViewModel(
     private val resumer: PlayResumer? = null,
     /** The voice reading now (Plan V2); it heads the list while it is loaded. */
     voice: Flow<NowPlaying.Voice?> = flowOf(null),
+    /** The clock a removed tab's read-aloud play is hidden by; a play after it brings that back. */
+    private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
 
@@ -312,13 +314,18 @@ class RailViewModel(
 
     /**
      * Long-press "Remove from rail". A tab is closed (History keeps the article) and a search forgotten; a chat or a
-     * play stays where it lives and is only taken off the rail, until it's used again.
+     * play stays where it lives and is only taken off the rail, until it's used again. A tab's page or book that was
+     * read aloud has a "Read aloud" play the tab stood for, which would take its place under the same name (Plan U3c
+     * walkthrough: the removed item stayed on the rail); it is hidden with the tab, until it's read aloud again.
      */
     fun remove(entry: RailEntry) {
         viewModelScope.launch {
             pins.unpin(entry.key)
             when (entry) {
-                is RailEntry.Tab -> sessions.closeTab(entry.tab.tabId)
+                is RailEntry.Tab -> {
+                    sessions.tab(entry.tab.tabId)?.let { tab -> hidden.hide("${RailEntry.PLAY}$VOICE_PLAY${sourceKey(tab)}", now()) }
+                    sessions.closeTab(entry.tab.tabId)
+                }
                 is RailEntry.Search -> sessions.forgetSearch(entry.query)
                 is RailEntry.Chat, is RailEntry.Play -> hidden.hide(entry.key, entry.at)
                 is RailEntry.Reading -> Unit                // it leaves with the voice; the mini-player stops it
