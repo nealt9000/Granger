@@ -355,12 +355,13 @@ class AppContainer(context: Context) {
     /** A text's saved place (`voice_states`), for a reader's Listen (Plan U2, [listenStart]). */
     val voicePlace: suspend (sourceKey: String) -> ReadAddress? = { key -> playback.voiceState(key)?.address?.let(ReadAddress::decode) }
 
-    /** Resumes a `voice:` play from the rail: the saved place, read again. */
+    /** Resumes a `voice:` play from the rail: the saved place, read again in the chosen voice (else the text's own). */
     private val resumeVoice: suspend (String) -> Boolean = { sourceKey ->
         val state = playback.voiceState(sourceKey)
         val source = state?.let { readSources(sourceKey, it.title) }
         if (source == null) false else {
-            playerHub.readAloud(source, state.address.let(ReadAddress::decode), VoiceId.decode(state.voiceId))
+            val voice = installedVoices.forResume(voicePrefs.voiceId.value, VoiceId.decode(state.voiceId))
+            playerHub.readAloud(source, state.address.let(ReadAddress::decode), voice)
             true
         }
     }

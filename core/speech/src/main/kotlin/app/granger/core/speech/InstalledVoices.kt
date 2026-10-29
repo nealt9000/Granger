@@ -37,9 +37,21 @@ class InstalledVoices(
     }
 
     /** The [wanted] voice; else, for a speaker the voice no longer has, the same voice's first speaker; else the first. */
-    fun preferred(wanted: VoiceId?): Voice? = voices.value.firstOrNull { it.id == wanted }
+    fun preferred(wanted: VoiceId?): Voice? = installed(wanted) ?: voices.value.firstOrNull()
+
+    /** The [wanted] voice, or the same voice's first speaker for a speaker it no longer has; null when it isn't installed. */
+    fun installed(wanted: VoiceId?): Voice? = voices.value.firstOrNull { it.id == wanted }
         ?: (wanted as? VoiceId.Granger)?.let { w -> voices.value.firstOrNull { (it.id as? VoiceId.Granger)?.dir == w.dir } }
-        ?: voices.value.firstOrNull()
+
+    /**
+     * The voice to go on reading a text with: the one the user [chosen] while it is installed, so a choice holds for
+     * every read until another is made; else the voice the text was [saved] with. The choice itself is never changed
+     * here, so it comes back once its voice is installed again.
+     */
+    suspend fun forResume(chosen: VoiceId?, saved: VoiceId?): VoiceId? {
+        if (voices.value.isEmpty()) refresh()
+        return installed(chosen)?.id ?: saved
+    }
 
     fun factoryFor(id: VoiceId): SpeechFactory = when (id) {
         is VoiceId.Granger -> granger

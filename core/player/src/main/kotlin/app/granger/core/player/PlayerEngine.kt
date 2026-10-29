@@ -102,6 +102,7 @@ class PlayerEngine(
     private val voices: InstalledVoices? = null,
     /** Reopens a saved source by its key and saved title for a restore; null when nothing can be reopened. */
     private val readSources: (suspend (key: String, title: String) -> ReadSource?)? = null,
+    /** The voice the user chose (Settings, or the player's Reader tab): every read uses it while it is installed. */
     private val preferredVoice: () -> VoiceId? = { null },
     private val defaultVoiceSpeed: () -> Float = { 1f },
     /**
@@ -409,7 +410,11 @@ class PlayerEngine(
             return
         }
         Log.i(VOICE_TAG, "Voice: restoring $key at ${state.address.take(80)}")
-        startVoice(source, ReadAddress.decode(state.address), VoiceId.decode(state.voiceId), state.speed, play = false)
+        // The voice the user chose reads every text (the walkthrough's switch: a restore went back to the voice the
+        // text was last read in); the text's own voice only stands in while the chosen one isn't installed.
+        val saved = VoiceId.decode(state.voiceId)
+        val voice = voices?.forResume(preferredVoice(), saved) ?: saved
+        startVoice(source, ReadAddress.decode(state.address), voice, state.speed, play = false)
     }
 
     /**
@@ -998,17 +1003,17 @@ class PlayerEngine(
     }
 
     /**
-     * Makes the voice the active mode for [source] at [from] with [wanted] (else the preferred, else the first voice):
-     * the carrier item is loaded and the state saved as "voice"; the speech engine itself opens on the first play
-     * ([openVoice]), so a restore after process death costs nothing until the user presses play. False when no voice
-     * can speak.
+     * Makes the voice the active mode for [source] at [from] with [wanted] when it is installed (else the chosen
+     * voice, else the first): the carrier item is loaded and the state saved as "voice"; the speech engine itself
+     * opens on the first play ([openVoice]), so a restore after process death costs nothing until the user presses
+     * play. False when no voice can speak.
      */
     private suspend fun startVoice(
         source: ReadSource, from: ReadAddress?, wanted: VoiceId?, speed: Float, play: Boolean, keepMusicUnder: Boolean = false,
     ): Boolean {
         val list = voices ?: return false
         if (list.voices.value.isEmpty()) list.refresh()
-        val voice = list.preferred(wanted ?: preferredVoice()) ?: run { Log.i(TAG, "Voice: nothing installed can speak"); return false }
+        val voice = list.installed(wanted) ?: list.preferred(preferredVoice()) ?: run { Log.i(TAG, "Voice: nothing installed can speak"); return false }
         voiceSource = source
         voiceId = voice.id
         voiceSpeed = speed.coerceIn(MIN_VOICE_SPEED, MAX_VOICE_SPEED)
@@ -1064,7 +1069,7 @@ class PlayerEngine(
         val source = voiceSource ?: return false
         val list = voices ?: return false
         val id = voiceId ?: return false
-        val voice = list.voices.value.firstOrNull { it.id == id } ?: list.preferred(null)?.also { voiceId = it.id } ?: return false
+        val voice = list.voices.value.firstOrNull { it.id == id } ?: list.preferred(preferredVoice())?.also { voiceId = it.id } ?: return false
         val speech = voiceSpeech ?: try {
             list.open(voice)
         } catch (e: SpeechException) {

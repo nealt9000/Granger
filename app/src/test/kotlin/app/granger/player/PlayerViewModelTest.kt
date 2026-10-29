@@ -1,6 +1,7 @@
 package app.granger.player
 
 import app.granger.MainDispatcherRule
+import app.granger.core.speech.VoiceId
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -35,6 +36,18 @@ class PlayerViewModelTest {
         vm.secondary()
         assertThat(hub.calls).isEmpty()
         assertThat(vm.voiceNow()).isNull()
+    }
+
+    @Test fun aVoicePickedInReaderIsKeptAsTheChoiceForTheNextRead() {
+        // The walkthrough's switch: the professor picked in Reader read only this text; the next one went back to the
+        // Settings voice, because the pick never reached it.
+        val hub = FakePlayerHub(voiceUi())
+        val chosen = mutableListOf<VoiceId>()
+        val vm = PlayerViewModel(hub, chooseVoice = { chosen += it })
+        val professor = VoiceId.Granger("vits-piper-en_GB-granger_professor-medium")
+        vm.setVoice(professor)
+        assertThat(chosen).containsExactly(professor)
+        assertThat(hub.calls).containsExactly("setVoice:${professor.encode()}")
     }
 
     @Test fun bookProgressAddsEarlierChaptersToThePositionInThisOne() = runTest(main.dispatcher) {

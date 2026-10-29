@@ -497,6 +497,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 skipBackSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_BACK_S, PlayerViewModel.DEFAULT_SKIP_S) },
                 skipForwardSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, PlayerViewModel.DEFAULT_SKIP_S) },
                 audiobooks = container.shelves.audioShelves.map { it.audiobooks },
+                chooseVoice = container.voicePrefs::setVoice,
             )
         }
     } else {

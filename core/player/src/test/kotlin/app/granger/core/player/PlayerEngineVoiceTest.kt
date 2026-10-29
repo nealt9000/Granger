@@ -256,6 +256,43 @@ class PlayerEngineVoiceTest {
         assertThat(second.ui.value.playing).isTrue()
     }
 
+    @Test fun aRestoreReadsWithTheChosenVoiceNotTheOneTheTextWasLastReadWith() {
+        // The walkthrough's switch: a text read in one voice, then the professor chosen (in Reader, on another text),
+        // and the first text's restore went back to the voice it was saved with.
+        val professor = Voice(VoiceId.Granger("vits-piper-en_GB-granger_professor-medium"), "Granger voice (professor)", "en-GB")
+        val two = InstalledVoices({ emptyList() }, { listOf(grangerVoice, professor) }, factory, factory)
+        var chosen: VoiceId? = null
+        val first = rig.engine(focus = focus, speechOutput = output, voices = two, readSources = { key, _ -> sources[key] }, preferredVoice = { chosen })
+        first.readAloud(source(), null, null)
+        rig.idle(); first.untilReady(); speak(2)
+        first.release(save = true)
+        assertThat(runBlocking { rig.playback.voiceState("text:article") }!!.voiceId).isEqualTo(grangerVoice.id.encode())
+
+        chosen = professor.id
+        val second = rig.engine(focus = focus, speechOutput = output, voices = two, readSources = { key, _ -> sources[key] }, preferredVoice = { chosen })
+        second.restore()
+        rig.idle()
+        assertThat((second.ui.value.now as NowPlaying.Voice).voiceId).isEqualTo(professor.id)
+    }
+
+    @Test fun aChosenVoiceThatIsGoneFallsBackToTheSavedOneWithoutForgettingTheChoice() {
+        val professor = Voice(VoiceId.Granger("vits-piper-en_GB-granger_professor-medium"), "Granger voice (professor)", "en-GB")
+        val two = InstalledVoices({ emptyList() }, { listOf(grangerVoice, professor) }, factory, factory)
+        var chosen: VoiceId? = professor.id
+        val first = rig.engine(focus = focus, speechOutput = output, voices = two, readSources = { key, _ -> sources[key] }, preferredVoice = { chosen })
+        first.readAloud(source(), null, null)
+        rig.idle(); first.untilReady(); speak(2)
+        first.release(save = true)
+
+        val removed = VoiceId.Granger("vits-piper-en_GB-removed-medium")
+        chosen = removed
+        val second = rig.engine(focus = focus, speechOutput = output, voices = two, readSources = { key, _ -> sources[key] }, preferredVoice = { chosen })
+        second.restore()
+        rig.idle()
+        assertThat((second.ui.value.now as NowPlaying.Voice).voiceId).isEqualTo(professor.id)
+        assertThat(chosen).isEqualTo(removed)
+    }
+
     @Test fun restoreWithAMissingSourceClearsTheStateOnce() {
         val first = engine()
         first.readAloud(source(), null, null)
