@@ -5,12 +5,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import app.granger.TestGrangerApp
@@ -58,23 +68,77 @@ class ShellMiniPlayerTest {
         assertThat(content.top).isEqualTo(mini.bottom)
     }
 
-    @Test fun readerWithItsChromeShowingFitsThePageBesideTheRailAndUnderTheMiniPlayer() {
-        // Like every other screen: the page is laid out in the space the rail and the mini-player leave, not under them.
+    @Test fun readerGetsTheWholeScreenWithTheRailAndTheMiniPlayerOverIt() {
+        // Plan U3c Decision 5: the page isn't laid out around the chrome; the rail and the mini-player are drawn over it.
         compose.setContent { Shell(miniPlayer = true, railVisible = true, reading = true) }
         val mini = compose.onNodeWithTag("mini").getBoundsInRoot()
         val content = compose.onNodeWithTag("content").getBoundsInRoot()
-        assertThat(content.left).isEqualTo(NarrowRailWidth)
-        assertThat(mini.left).isEqualTo(NarrowRailWidth)
-        assertThat(content.top).isEqualTo(mini.bottom)
-    }
-
-    @Test fun fullScreenReaderGetsTheWholeScreen() {
-        // The chrome hidden by a middle tap: no rail, no mini-player, the page from edge to edge.
-        compose.setContent { Shell(miniPlayer = false, railVisible = false, reading = true) }
-        compose.onNodeWithTag("mini").assertDoesNotExist()
-        val content = compose.onNodeWithTag("content").getBoundsInRoot()
         assertThat(content.top).isEqualTo(0.dp)
         assertThat(content.left).isEqualTo(0.dp)
+        // The mini-player sits beside the rail, over the top of the page.
+        assertThat(mini.left).isEqualTo(NarrowRailWidth)
+        assertThat(mini.top).isEqualTo(0.dp)
+        compose.onNodeWithContentDescription("Library").assertIsDisplayed()
+    }
+
+    @Test fun theReaderIsToldWhatIsOverItSoItsBarsKeepClear() {
+        var overlay = WindowInsets(0, 0, 0, 0)
+        var density = Density(1f)
+        compose.setContent {
+            density = LocalDensity.current
+            GrangerShell(
+                rail = RailUi(emptyList()), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                reading = true,
+                miniPlayer = { Box(Modifier.fillMaxWidth().height(MiniPlayerHeight)) },
+            ) { overlay = LocalShellOverlay.current }
+        }
+        compose.waitForIdle()
+        with(density) {
+            assertThat(overlay.getLeft(this, LayoutDirection.Ltr)).isEqualTo(NarrowRailWidth.roundToPx())
+            assertThat(overlay.getTop(this)).isEqualTo(MiniPlayerHeight.roundToPx())
+            assertThat(overlay.getRight(this, LayoutDirection.Ltr)).isEqualTo(0)
+        }
+    }
+
+    @Test fun outsideTheReadersNothingIsOverTheScreen() {
+        var overlay: WindowInsets? = null
+        var density = Density(1f)
+        compose.setContent {
+            density = LocalDensity.current
+            GrangerShell(
+                rail = RailUi(emptyList()), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                miniPlayer = { Box(Modifier.fillMaxWidth().height(MiniPlayerHeight)) },
+            ) { overlay = LocalShellOverlay.current }
+        }
+        compose.waitForIdle()
+        with(density) {
+            assertThat(overlay!!.getLeft(this, LayoutDirection.Ltr)).isEqualTo(0)
+            assertThat(overlay!!.getTop(this)).isEqualTo(0)
+        }
+    }
+
+    @Test fun theReadersChromeGoingSlidesTheRailAndTheMiniPlayerAwayWithoutMovingThePage() {
+        var visible by mutableStateOf(true)
+        compose.setContent { Shell(miniPlayer = true, railVisible = visible, reading = true) }
+        val before = compose.onNodeWithTag("content").getBoundsInRoot()
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle {
+            visible = false
+            Snapshot.sendApplyNotifications()
+        }
+        compose.mainClock.advanceTimeBy(ChromeSlideMs / 2L)
+        // Half way: the mini-player is part way up off the top, and the page hasn't moved.
+        val sliding = compose.onNodeWithTag("mini").getBoundsInRoot()
+        assertThat(sliding.top).isLessThan(0.dp)
+        assertThat(sliding.bottom).isGreaterThan(0.dp)
+        assertThat(compose.onNodeWithTag("content").getBoundsInRoot()).isEqualTo(before)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        compose.onNodeWithTag("mini").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Library").assertDoesNotExist()
+        assertThat(compose.onNodeWithTag("content").getBoundsInRoot()).isEqualTo(before)
     }
 
     @Test fun jvmTestsRunOnTheTestAppWhichSkipsTheEagerPlayerStart() {

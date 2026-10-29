@@ -47,15 +47,15 @@ enum class MiniPlayerPlacement {
 
     /** In the shell's slot at the top of the content column, pushing the screen down. */
     PUSH,
+
+    /** In a reader: over the top of the page, sliding away and back with the reader's chrome (Plan U3c Decision 5). */
+    OVERLAY,
 }
 
-/**
- * Nothing loaded, or the full-screen player showing: hidden. In a reader it follows the reader's chrome (the rail's
- * visibility); whenever it shows it pushes the screen (the reader's page too) down.
- */
-fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean, railVisible: Boolean): MiniPlayerPlacement = when {
+/** Nothing loaded, or the full-screen player showing: hidden. In a reader it goes over the page; elsewhere it pushes the screen down. */
+fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean): MiniPlayerPlacement = when {
     !loaded || onPlayer -> MiniPlayerPlacement.HIDDEN
-    reading -> if (railVisible) MiniPlayerPlacement.PUSH else MiniPlayerPlacement.HIDDEN
+    reading -> MiniPlayerPlacement.OVERLAY
     else -> MiniPlayerPlacement.PUSH
 }
 

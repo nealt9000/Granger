@@ -29,10 +29,29 @@ object ReaderPageScript {
 }
 
 /**
- * The page's only way into the app, added to the WebView as [ReaderPageScript.BRIDGE_NAME]. JavaScript calls arrive
- * on a WebView background thread, so [onToggleChrome] is posted to the main thread.
+ * The padding a page gets for the reader's bars over it (Plan U3c Decision 5): [topDp] and [bottomDp] (CSS px are dp
+ * here) on the root, so the first and last lines clear the bars at rest, and as scroll padding, so the Contents' jumps
+ * and #anchors land below the top bar. The top is kept for the read-aloud script's first visible block.
  */
-class GrangerBridge(private val onToggleChrome: () -> Unit, private val onUserScroll: () -> Unit = {}) {
+fun chromePaddingScript(topDp: Int, bottomDp: Int): String = """
+    (function () {
+      var s = document.documentElement.style;
+      s.setProperty('padding-top', '${topDp}px', 'important');
+      s.setProperty('padding-bottom', '${bottomDp}px', 'important');
+      s.setProperty('scroll-padding-top', '${topDp}px');
+      s.setProperty('scroll-padding-bottom', '${bottomDp}px');
+      window.__grangerTop = $topDp;
+    })();
+""".trimIndent()
+
+/**
+ * The page's only way into the app, added to the WebView as [ReaderPageScript.BRIDGE_NAME]. JavaScript calls arrive
+ * on a WebView background thread, so [onToggleChrome] and [onUserScroll] are posted to the main thread.
+ */
+class GrangerBridge(
+    private val onToggleChrome: () -> Unit,
+    private val onUserScroll: (dyDp: Float, byHand: Boolean) -> Unit = { _, _ -> },
+) {
     private val main = Handler(Looper.getMainLooper())
 
     @JavascriptInterface
@@ -40,9 +59,13 @@ class GrangerBridge(private val onToggleChrome: () -> Unit, private val onUserSc
         main.post(onToggleChrome)
     }
 
-    /** The user scrolled the page themselves (not the read-aloud script): the voice stops following until Follow is tapped. */
+    /**
+     * The page scrolled, not by the read-aloud script: [dy] dp, down when positive. [byHand] when a finger moved it
+     * (a drag, or the fling after one); false for the page's own moves (restoring the place, a Contents jump), which
+     * stop the voice following but leave the chrome alone.
+     */
     @JavascriptInterface
-    fun onUserScroll() {
-        main.post(onUserScroll)
+    fun onUserScroll(dy: Double, byHand: Boolean) {
+        main.post { onUserScroll(dy.toFloat(), byHand) }
     }
 }

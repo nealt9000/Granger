@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -81,6 +82,16 @@ class GrangerShellSideTest {
         val content = compose.onNodeWithTag("content").getBoundsInRoot()
         assertThat(content.left).isEqualTo(0.dp)
         assertThat(content.right).isEqualTo(rootWidth - NarrowRailWidth)
+    }
+
+    @Test fun inAReaderTheRailIsOverThePageOnItsSide() {
+        // Plan U3c Decision 5: the page has the full width; the rail is drawn over its right edge.
+        compose.setContent { Shell(RailSide.RIGHT, reading = true) }
+        val content = compose.onNodeWithTag("content").getBoundsInRoot()
+        assertThat(content.left).isEqualTo(0.dp)
+        assertThat(content.right).isEqualTo(rootWidth)
+        val library = compose.onNodeWithContentDescription("Library").getBoundsInRoot()
+        assertThat(library.left).isAtLeast(rootWidth - NarrowRailWidth)
     }
 
     @Test fun rightRailPadsTheEndInset() {

@@ -57,7 +57,7 @@ data class EbookUi(
     val publication: Publication? = null,
     /** Where the navigator opens. */
     val initial: Locator? = null,
-    /** The top bar and the side rail. Up when the reader opens and when its tab is returned to; a middle tap hides them for full-screen reading. An error keeps them up so the user can leave. */
+    /** The bars, the side rail and the mini-player. Up when the reader opens and when its tab is returned to; a page turn hides them and a middle tap toggles them. An error keeps them up so the user can leave. */
     val chromeVisible: Boolean = true,
     /** The place on screen now; null until the navigator reports one. */
     val locator: Locator? = null,
@@ -185,6 +185,10 @@ class EbookReaderViewModel(
     private var following = true
     private var voiceMovedAt = 0L
 
+    // A finger on the page (Plan U3c Decision 5): a page change while it's down or just after is a turn by hand.
+    private var pageTouched = false
+    private var pageTouchedAt = Long.MIN_VALUE / 2
+
     init {
         SelectionBridge.sink = selectionSink
         player?.let { hub ->
@@ -275,6 +279,8 @@ class EbookReaderViewModel(
      */
     fun onLocator(locator: Locator, onScreen: Boolean = true) {
         if (!onScreen) return
+        val before = _state.value.locator
+        if (before != null && turnedByHand(before, locator)) hideChromeForReading()
         _state.update { it.copy(locator = locator).derived() }
         val id = bookId ?: return
         unsaved = locator
@@ -492,6 +498,30 @@ class EbookReaderViewModel(
 
     fun updatePrefs(prefs: ReadingPrefs) = prefsStore.update(prefs)
 
+    /**
+     * A finger went [down] on the page, or came up. Page changes while it's down, and up to [PAGE_TURN_GRACE_MS] after,
+     * are the reader's own turns (a swipe, an edge tap, a link), which hide the chrome; others (the slider, Contents,
+     * a search hit, the voice, a new text size, the navigator settling as it opens) leave it.
+     */
+    fun onPageTouch(down: Boolean) {
+        pageTouched = down
+        pageTouchedAt = now()
+    }
+
+    private fun turnedByHand(before: Locator, after: Locator): Boolean {
+        val moved = before.href != after.href || before.locations.progression != after.locations.progression ||
+            before.locations.position != after.locations.position
+        if (!moved) return false
+        val t = now()
+        if (t - voiceMovedAt <= VOICE_MOVE_GRACE_MS) return false
+        return pageTouched || t - pageTouchedAt <= PAGE_TURN_GRACE_MS
+    }
+
+    /** A page turn by hand: the chrome slides away, unless a panel or a highlight's sheet is open over the page. */
+    private fun hideChromeForReading() {
+        _state.update { if (!it.chromeVisible || it.panel != null || it.editingHighlight != null) it else it.copy(chromeVisible = false) }
+    }
+
     /** A middle tap. Errors keep the chrome up. */
     fun toggleChrome() {
         _state.update { if (it.error != null) it else it.copy(chromeVisible = !it.chromeVisible) }
@@ -595,6 +625,8 @@ class EbookReaderViewModel(
         const val SAVE_DEBOUNCE_MS = 1_000L
         /** A page change this soon after the voice asked for one is the voice's, not the user's. */
         const val VOICE_MOVE_GRACE_MS = 1_500L
+        /** A page change this soon after a finger left the page is its turn: the turn's animation runs on after it lifts. */
+        const val PAGE_TURN_GRACE_MS = 1_000L
         const val TARGET_CONSUMED = "targetConsumed"
     }
 }

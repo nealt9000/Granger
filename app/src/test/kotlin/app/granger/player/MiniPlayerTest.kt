@@ -169,15 +169,15 @@ class MiniPlayerTest {
         compose.onNodeWithText("Song A").assertExists()
     }
 
-    @Test fun miniPlayerPlacementFollowsTheReaderChrome() {
+    @Test fun miniPlayerPlacementPushesEverywhereButTheReaders() {
         // Non-reading screens: always there when something is loaded, pushing the screen down.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.PUSH)
-        // Reading: only with the reader's chrome (and the rail), and then it pushes the page down like anywhere else.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, railVisible = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, railVisible = true)).isEqualTo(MiniPlayerPlacement.PUSH)
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false)).isEqualTo(MiniPlayerPlacement.PUSH)
+        // Reading: over the page, sliding with the reader's chrome (Plan U3c Decision 5), whether that shows or not.
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.OVERLAY)
         // Nothing loaded, or the full-screen player showing instead.
-        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
     }
 
     @Test fun seekBarSeeksOnReleaseNotWhileDragging() {

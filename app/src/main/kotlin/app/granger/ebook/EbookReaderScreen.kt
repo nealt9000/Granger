@@ -10,15 +10,12 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -37,6 +34,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,12 +48,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.testTag
 import app.granger.Features
 import app.granger.reader.ChromeBackOnReturn
+import app.granger.reader.ClearOfShell
 import app.granger.reader.ReaderBarActions
 import app.granger.reader.ReaderBottomBar
+import app.granger.reader.ReaderPageInsets
 import app.granger.reader.ReaderTopBar
+import app.granger.reader.SlidingBar
 import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
-import app.granger.reader.readerPageInsets
 import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -78,13 +79,14 @@ private const val VOICE_LOG = "GrangerVoice"
 
 object EbookTags {
     const val FOLLOW = "ebook_follow"
+    const val PAGE = "ebook_page"
 }
 
 /**
  * The e-book reader, paginated. It opens (and comes back) with its chrome up: the top and bottom bars here and the
- * shell's rail (through [onChromeVisibleChange]), with the page fitted between them. Edge taps and swipes turn pages;
- * a tap in the middle hides the chrome and the system bars for full-screen reading, and another brings them back.
- * A rising [showChromeRequest] (the shell's edge swipe) shows the chrome.
+ * shell's rail and mini-player (through [onChromeVisibleChange]), over the page. Edge taps and swipes turn pages, and
+ * a turn slides the chrome and the system bars away; a tap in the middle toggles them. A system-bar swipe or a rising
+ * [showChromeRequest] (the shell's edge swipe) shows the chrome. The navigator is never resized for any of it.
  */
 @Composable
 fun EbookReaderScreen(
@@ -123,7 +125,7 @@ fun EbookReaderScreen(
     val requestAtEntry = remember { showChromeRequest }
     LaunchedEffect(showChromeRequest) { if (isNewChromeRequest(requestAtEntry, showChromeRequest)) viewModel.showChrome() }
     LaunchedEffect(state.chromeVisible) { onChromeVisibleChange(state.chromeVisible) }
-    SystemBarsHidden(!state.chromeVisible)
+    SystemBarsHidden(!state.chromeVisible, onSwipedBack = viewModel::showChrome)
     ChromeBackOnReturn(viewModel::onScreenLeft)
     // Backgrounded, or the screen left: write the place now rather than after the debounce.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
@@ -252,55 +254,58 @@ fun EbookReaderScreen(
     )
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // With the chrome up the page is laid out between the top and bottom bars, like any other screen (the shell
-        // puts the rail and the mini-player beside and above it); hidden, it fills the screen. Fades only, so the
-        // page is laid out again once per tap rather than on every frame of a slide.
-        Column(Modifier.fillMaxSize()) {
-            AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
-                // An error leaves only ←, as the wiki's does.
-                ReaderTopBar(state.title, if (state.error == null) bars else ReaderBarActions(onBack = onBack))
-            }
-            // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
-            Box(Modifier.weight(1f).fillMaxWidth().windowInsetsPadding(readerPageInsets(state.chromeVisible, WindowInsetsSides.Horizontal))) {
-                val error = state.error
-                val factory = viewModel.navigatorFactory
-                val bookId = viewModel.bookId
-                when {
-                    error != null -> Box(
-                        Modifier.fillMaxSize().windowInsetsPadding(SafeDrawingIgnoringBars.only(WindowInsetsSides.Bottom)).padding(32.dp),
-                        Alignment.Center,
-                    ) {
-                        Text(error, textAlign = TextAlign.Center)
-                    }
-                    state.publication != null && factory != null && bookId != null -> NavigatorHost(
-                        bookId = bookId,
-                        factory = factory,
-                        // The latest place, so a navigator rebuilt after rotation opens where the reader is.
-                        fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, listener, config),
-                        // PDFium inverts a page only as it lays the document out: Night on a PDF needs a fresh navigator.
-                        look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
-                        isCleared = { viewModel.isCleared },
-                        onReady = { fragment ->
-                            fragment.addInputListener(
-                                DirectionalNavigationAdapter(
-                                    fragment as OverflowableNavigator,
-                                    minimumHorizontalEdgeSize = 0.0,
-                                    horizontalEdgeThresholdPercent = EDGE_FRACTION,
-                                    animatedTransition = true,
-                                ),
-                            )
-                            fragment.addInputListener(MiddleTapListener(fragment, viewModel::toggleChrome))
-                            navigator = fragment
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                    )
+        // The navigator has the whole screen whether the chrome shows or not (Plan U3c Decision 5), so Readium never
+        // lays the book out again for it: the bars here, and the shell's rail and mini-player, slide over it and away.
+        // Readium's own cutout padding is off (readerConfiguration): the page is padded here, as the web reader's is.
+        Box(
+            Modifier
+                .fillMaxSize()
+                .testTag(EbookTags.PAGE)
+                .windowInsetsPadding(ReaderPageInsets)
+                .pageTouches(viewModel::onPageTouch),
+        ) {
+            val error = state.error
+            val factory = viewModel.navigatorFactory
+            val bookId = viewModel.bookId
+            when {
+                error != null -> Box(
+                    Modifier.fillMaxSize().windowInsetsPadding(SafeDrawingIgnoringBars.only(WindowInsetsSides.Bottom)).padding(32.dp),
+                    Alignment.Center,
+                ) {
+                    Text(error, textAlign = TextAlign.Center)
                 }
+                state.publication != null && factory != null && bookId != null -> NavigatorHost(
+                    bookId = bookId,
+                    factory = factory,
+                    // The latest place, so a navigator rebuilt after rotation opens where the reader is.
+                    fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, listener, config),
+                    // PDFium inverts a page only as it lays the document out: Night on a PDF needs a fresh navigator.
+                    look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
+                    isCleared = { viewModel.isCleared },
+                    onReady = { fragment ->
+                        fragment.addInputListener(
+                            DirectionalNavigationAdapter(
+                                fragment as OverflowableNavigator,
+                                minimumHorizontalEdgeSize = 0.0,
+                                horizontalEdgeThresholdPercent = EDGE_FRACTION,
+                                animatedTransition = true,
+                            ),
+                        )
+                        fragment.addInputListener(MiddleTapListener(fragment, viewModel::toggleChrome))
+                        navigator = fragment
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
-            if (state.error == null) {
-                AnimatedVisibility(visible = state.chromeVisible, enter = fadeIn(), exit = fadeOut()) {
-                    ReaderBottomBar(bars) {
-                        BookProgress(state.locator ?: state.initial, state.positionsCount, viewModel::goToProgression)
-                    }
+        }
+        // An error leaves only ←, as the wiki's does.
+        SlidingBar(state.chromeVisible, top = true) {
+            ReaderTopBar(state.title, if (state.error == null) bars else ReaderBarActions(onBack = onBack))
+        }
+        if (state.error == null) {
+            SlidingBar(state.chromeVisible, top = false) {
+                ReaderBottomBar(bars) {
+                    BookProgress(state.locator ?: state.initial, state.positionsCount, viewModel::goToProgression)
                 }
             }
         }
@@ -312,15 +317,18 @@ fun EbookReaderScreen(
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 96.dp).testTag(EbookTags.FOLLOW),
             )
         }
-        when (state.panel) {
-            Panel.CONTENTS -> ContentsPanel(state, viewModel::goTo, viewModel::goToMark, onDismiss = { viewModel.open(null) })
-            Panel.SETTINGS -> if (state.isPdf) {
-                PdfSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
-            } else {
-                TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+        // Clear of the shell's rail and mini-player, which are drawn over the screen.
+        ClearOfShell {
+            when (state.panel) {
+                Panel.CONTENTS -> ContentsPanel(state, viewModel::goTo, viewModel::goToMark, onDismiss = { viewModel.open(null) })
+                Panel.SETTINGS -> if (state.isPdf) {
+                    PdfSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+                } else {
+                    TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+                }
+                Panel.SEARCH -> BookSearchPanel(state.search, viewModel::search, viewModel::goToHit, onDismiss = { viewModel.open(null) })
+                null -> Unit
             }
-            Panel.SEARCH -> BookSearchPanel(state.search, viewModel::search, viewModel::goToHit, onDismiss = { viewModel.open(null) })
-            null -> Unit
         }
         state.editingHighlight?.let { id ->
             state.highlights.firstOrNull { it.id == id }?.let { mark ->
@@ -383,6 +391,22 @@ private fun navigatorFragments(
             configuration = config,
         )
         is BookNavigator.Pdf -> factory.factory.createFragmentFactory(initialLocator = initial, initialPreferences = prefs.toPdfium())
+    }
+}
+
+/**
+ * Tells [onTouch] when a finger goes down on the page (true) and when the last one lifts (false). It only watches:
+ * the navigator underneath still gets every touch.
+ */
+private fun Modifier.pageTouches(onTouch: (down: Boolean) -> Unit): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        // Initial pass: seen before the navigator's view takes the touch.
+        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        onTouch(true)
+        do {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+        } while (event.changes.any { it.pressed })
+        onTouch(false)
     }
 }
 

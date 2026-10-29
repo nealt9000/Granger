@@ -1,8 +1,12 @@
 package app.granger.reader
 
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -14,6 +18,7 @@ import app.granger.FakeReadingSessions
 import app.granger.FakeZimArchive
 import app.granger.core.library.ReadingTab
 import app.granger.core.zim.ZimResolver
+import app.granger.shell.ChromeSlideMs
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,9 +26,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
-/** The Wikipedia reader opens, and comes back, with its toolbar showing; a middle tap goes full screen. */
+/**
+ * The Wikipedia reader opens, and comes back, with its chrome showing over the page; a middle tap or a scroll down by
+ * hand slides it away, a scroll up brings it back, and the page keeps its size throughout (Plan U3c Decision 5).
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class ReaderScreenChromeTest {
@@ -40,7 +49,10 @@ class ReaderScreenChromeTest {
 
     private var shown by mutableStateOf(true)
 
+    private lateinit var root: View
+
     private fun show() = compose.setContent {
+        root = LocalView.current.rootView
         if (shown) {
             ReaderScreen(
                 viewModel = viewModel,
@@ -54,11 +66,23 @@ class ReaderScreenChromeTest {
 
     private fun assertChromeShowing() {
         compose.onNodeWithContentDescription("Back").assertIsDisplayed()
+        compose.onNodeWithTag(ReaderBarTags.BOTTOM).assertIsDisplayed()
         assertThat(railVisible.last()).isTrue()
-        // The page is laid out below the top bar, not drawn under it.
+        // The bars are over the page (Plan U3c Decision 5): it still has the whole screen.
         val bar = compose.onNodeWithContentDescription("Back").getBoundsInRoot()
-        assertThat(compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot().top).isAtLeast(bar.bottom)
+        val page = compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot()
+        assertThat(page.top).isEqualTo(0.dp)
+        assertThat(bar.top).isAtLeast(page.top)
+        assertThat(bar.bottom).isLessThan(page.bottom)
     }
+
+    private fun assertChromeAway() {
+        compose.onNodeWithContentDescription("Back").assertDoesNotExist()
+        compose.onNodeWithTag(ReaderBarTags.BOTTOM).assertDoesNotExist()
+        assertThat(railVisible.last()).isFalse()
+    }
+
+    private fun pageBounds() = compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot()
 
     @Test fun opensWithTheToolbarAndTheRailShowing() {
         show()
@@ -66,17 +90,97 @@ class ReaderScreenChromeTest {
         assertChromeShowing()
     }
 
-    @Test fun aMiddleTapGoesFullScreenAndAnotherBringsTheToolbarBack() {
+    @Test fun aMiddleTapGoesFullScreenAndAnotherBringsTheToolbarBackWithoutResizingThePage() {
         show()
         compose.waitForIdle()
+        val page = pageBounds()
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("Back").assertDoesNotExist()
-        assertThat(railVisible.last()).isFalse()
-        assertThat(compose.onNodeWithTag(ReaderTags.PAGE).getBoundsInRoot().top).isEqualTo(0.dp)
+        assertChromeAway()
+        assertThat(pageBounds()).isEqualTo(page)
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
         assertChromeShowing()
+        assertThat(pageBounds()).isEqualTo(page)
+    }
+
+    @Test fun aScrollDownByHandSlidesTheChromeAwayAndAScrollUpBringsItBack() {
+        show()
+        compose.waitForIdle()
+        val page = pageBounds()
+        // Under 24 dp down: still there.
+        compose.runOnIdle { viewModel.onUserScroll(10f, byHand = true); viewModel.onUserScroll(10f, byHand = true) }
+        compose.waitForIdle()
+        assertChromeShowing()
+        compose.runOnIdle { viewModel.onUserScroll(10f, byHand = true) }
+        compose.waitForIdle()
+        assertChromeAway()
+        assertThat(pageBounds()).isEqualTo(page)
+        // Up, but under 48 dp: still away. Past it: back.
+        compose.runOnIdle { viewModel.onUserScroll(-40f, byHand = true) }
+        compose.waitForIdle()
+        assertChromeAway()
+        compose.runOnIdle { viewModel.onUserScroll(-10f, byHand = true) }
+        compose.waitForIdle()
+        assertChromeShowing()
+        assertThat(pageBounds()).isEqualTo(page)
+    }
+
+    @Test fun thePagesOwnScrollsLeaveTheChromeAlone() {
+        // Restoring the place, a Contents jump: scrolls no finger made.
+        show()
+        compose.waitForIdle()
+        compose.runOnIdle { viewModel.onUserScroll(2_000f, byHand = false) }
+        compose.waitForIdle()
+        assertChromeShowing()
+        compose.runOnIdle { viewModel.toggleChrome() }
+        compose.waitForIdle()
+        compose.runOnIdle { viewModel.onUserScroll(-2_000f, byHand = false) }
+        compose.waitForIdle()
+        assertChromeAway()
+    }
+
+    @Test fun theTopBarSlidesUpAwayRatherThanFading() {
+        show()
+        compose.waitForIdle()
+        val settled = compose.onNodeWithTag(ReaderBarTags.TOP).getBoundsInRoot()
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle {
+            viewModel.toggleChrome()
+            Snapshot.sendApplyNotifications()
+        }
+        compose.mainClock.advanceTimeBy(ChromeSlideMs / 2L)
+        val sliding = compose.onNodeWithTag(ReaderBarTags.TOP).getBoundsInRoot()
+        assertThat(sliding.top).isLessThan(settled.top)
+        val bottom = compose.onNodeWithTag(ReaderBarTags.BOTTOM).getBoundsInRoot()
+        assertThat(bottom.bottom).isGreaterThan(pageBounds().bottom)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        compose.onNodeWithTag(ReaderBarTags.TOP).assertDoesNotExist()
+    }
+
+    @Test fun thePageIsPaddedForTheBarsOnceNotPerToggle() {
+        // The padding is the bars' height (with their insets, none here), the same with the chrome up or away.
+        show()
+        compose.waitForIdle()
+        val web = compose.runOnIdle { root.findWebView()!! }
+        fun padding(): String? = compose.runOnIdle {
+            web.applyChromePadding()
+            shadowOf(web).lastEvaluatedJavascript
+        }
+        assertThat(padding()).isEqualTo(chromePaddingScript(64, 56))
+        compose.runOnIdle { viewModel.toggleChrome() }
+        compose.waitForIdle()
+        assertThat(padding()).isEqualTo(chromePaddingScript(64, 56))
+        compose.runOnIdle { viewModel.toggleChrome() }
+        compose.waitForIdle()
+        assertThat(padding()).isEqualTo(chromePaddingScript(64, 56))
+    }
+
+    private fun View.findWebView(): ReaderWebView? {
+        if (this is ReaderWebView) return this
+        if (this is ViewGroup) for (i in 0 until childCount) getChildAt(i).findWebView()?.let { return it }
+        return null
     }
 
     @Test fun returningToTheTabShowsTheToolbarAgain() {
@@ -84,12 +188,21 @@ class ReaderScreenChromeTest {
         compose.waitForIdle()
         compose.runOnIdle { viewModel.toggleChrome() }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("Back").assertDoesNotExist()
+        assertChromeAway()
         // Another screen on top, then back to the tab (its view model kept on the back stack).
         compose.runOnIdle { shown = false }
         compose.waitForIdle()
         compose.runOnIdle { shown = true }
         compose.waitForIdle()
         assertChromeShowing()
+    }
+
+    @Test fun theBridgeHandsTheScrollOnToTheMainThread() {
+        val scrolls = mutableListOf<Pair<Float, Boolean>>()
+        val bridge = GrangerBridge(onToggleChrome = {}, onUserScroll = { dy, hand -> scrolls += dy to hand })
+        bridge.onUserScroll(-30.5, true)
+        bridge.onUserScroll(400.0, false)
+        shadowOf(android.os.Looper.getMainLooper()).idle()
+        assertThat(scrolls).containsExactly(-30.5f to true, 400f to false).inOrder()
     }
 }

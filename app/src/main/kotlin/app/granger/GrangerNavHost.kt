@@ -602,7 +602,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         // Listen's home has the Now playing card instead.
         onPlayer = destination?.hasRoute<ListenPlayerRoute>() == true || destination?.hasRoute<ListenRoute>() == true,
         reading = readerTabId != null,
-        railVisible = shell.railVisible,
     )
 
     // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.

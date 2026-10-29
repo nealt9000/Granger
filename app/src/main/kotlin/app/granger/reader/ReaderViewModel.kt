@@ -133,6 +133,10 @@ class ReaderViewModel(
     private val stackWrites = Mutex()
     private var source: ArticleReadSource? = null
     private var following = true
+
+    /** The hand's scrolling since it last turned round or moved the chrome, in dp: down positive. */
+    private var scrollRun = 0f
+
     /** The page [State.cite] belongs to; null once it's been left. */
     private var citedPath: String? = null
 
@@ -230,11 +234,32 @@ class ReaderViewModel(
     /** The menu's entry while this page is read: pauses the voice, or resumes it at its sentence. */
     fun pauseResume() { if (_state.value.readingThisPage) player?.playPause() }
 
-    /** The user scrolled: the page stops following the voice until [follow]. */
-    fun onUserScroll() {
-        if (!following || _state.value.reading == null) return
-        following = false
-        _state.update { s -> s.copy(reading = s.reading?.copy(following = false)) }
+    /**
+     * The page scrolled, not by the voice: it stops following the voice until [follow]. A scroll [byHand] of [dy] dp
+     * (down when positive) also moves the chrome (Plan U3c Decision 5): it slides away once the page has gone
+     * [HIDE_AFTER_DP] down in one direction, unless find, the pack search or a panel is open, and comes back after
+     * [SHOW_AFTER_DP] up. The page's own scrolls (its place restored, a Contents jump) leave the chrome where it is.
+     */
+    fun onUserScroll(dy: Float = 0f, byHand: Boolean = false) {
+        if (following && _state.value.reading != null) {
+            following = false
+            _state.update { s -> s.copy(reading = s.reading?.copy(following = false)) }
+        }
+        if (!byHand || dy == 0f) return
+        // The distance gone in the current direction; turning round starts it again.
+        scrollRun = if ((dy > 0) == (scrollRun > 0)) scrollRun + dy else dy
+        val s = _state.value
+        val busy = s.error != null || s.findQuery != null || s.packSearch != null || s.panel != null
+        when {
+            s.chromeVisible && !busy && scrollRun > HIDE_AFTER_DP -> {
+                scrollRun = 0f
+                _state.update { it.copy(chromeVisible = false) }
+            }
+            !s.chromeVisible && scrollRun < -SHOW_AFTER_DP -> {
+                scrollRun = 0f
+                _state.update { it.copy(chromeVisible = true) }
+            }
+        }
     }
 
     fun follow() {
@@ -462,6 +487,10 @@ class ReaderViewModel(
     companion object {
         /** A page's title when it has none of its own: the last part of its path, with spaces for underscores. */
         private fun titleFromPath(path: String) = path.substringAfterLast('/').replace('_', ' ')
+
+        /** How far a scroll down by hand goes before the chrome slides away, and a scroll up before it comes back. */
+        const val HIDE_AFTER_DP = 24f
+        const val SHOW_AFTER_DP = 48f
 
         private const val SUGGEST_DEBOUNCE_MS = 200L
         private const val SUGGESTION_LIMIT = 10
