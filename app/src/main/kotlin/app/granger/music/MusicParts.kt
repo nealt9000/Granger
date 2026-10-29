@@ -51,6 +51,8 @@ import app.granger.library.MovePackDialog
 import app.granger.player.PlayingBars
 import app.granger.player.formatTime
 import app.granger.shell.rememberRailCover
+import app.granger.theme.MediaKind
+import app.granger.theme.MediaTile
 import app.granger.theme.readout
 
 /** Where the music screens lead. */
@@ -185,21 +187,15 @@ fun SongRow(
     }
 }
 
-/** A square cover, or a music note on a plain tile when there's none. */
+/** A square cover, or the themed tile with [title] and [kind]'s glyph when there's none (Plan U3c Decision 6). */
 @Composable
-fun AlbumCover(path: String?, modifier: Modifier = Modifier) {
+fun AlbumCover(path: String?, title: String, modifier: Modifier = Modifier, kind: MediaKind = MediaKind.MUSIC) {
     val cover = rememberRailCover(path, 180.dp)
-    Box(
-        modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Icon(
-                painterResource(R.drawable.ic_music_note), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(40.dp),
-            )
+            MediaTile(title, kind)
         }
     }
 }
@@ -215,7 +211,7 @@ fun AlbumCell(album: AlbumSummary, vm: MusicViewModel, dialogs: MusicDialogs, na
             Modifier.combinedClickable(onClick = { nav.onAlbum(album.key) }, onLongClick = { menu = true }).alpha(if (playable) 1f else 0.4f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            AlbumCover(album.coverPath, Modifier.fillMaxWidth())
+            AlbumCover(album.coverPath, album.title, Modifier.fillMaxWidth())
             Text(album.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
                 albumArtistNames(album).joinToString(", "), style = MaterialTheme.typography.bodySmall,

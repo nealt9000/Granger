@@ -200,7 +200,7 @@ private fun QueueRow(
             Icon(painterResource(R.drawable.ic_drag_handle), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(12.dp))
         }
-        PlayerCover(track.coverPath, book = false, size = 40.dp)
+        PlayerCover(track.coverPath, track.title, book = false, size = 40.dp)
         Spacer(Modifier.width(12.dp))
         if (playing) {
             PlayingBars(heard)

@@ -152,7 +152,7 @@ private fun NowPlayingCardRow(card: NowPlayingCard, actions: ListenActions) {
             Modifier.clickable(onClickLabel = "Open player", onClick = actions.onOpenPlayer).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PlayerCover(card.coverPath, book = card.kind == CardKind.AUDIOBOOK, size = 56.dp, voice = card.kind == CardKind.VOICE)
+            PlayerCover(card.coverPath, card.title, book = card.kind == CardKind.AUDIOBOOK, size = 56.dp, voice = card.kind == CardKind.VOICE)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(card.label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)

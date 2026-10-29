@@ -41,24 +41,20 @@ import app.granger.R
 import app.granger.library.SourceLink
 import app.granger.music.EmptyMedia
 import app.granger.shell.rememberRailCover
+import app.granger.theme.MediaKind
+import app.granger.theme.MediaTile
 
 internal const val UNKNOWN_AUTHOR = "Unknown author"
 
-/** A square cover, or headphones on a plain tile when there's none. */
+/** A square cover, or the themed tile with [title] and headphones when there's none (Plan U3c Decision 6). */
 @Composable
-fun AudiobookCover(path: String?, modifier: Modifier = Modifier) {
+fun AudiobookCover(path: String?, title: String, modifier: Modifier = Modifier) {
     val cover = rememberRailCover(path, 180.dp)
-    Box(
-        modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Icon(
-                painterResource(R.drawable.ic_headphones), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(40.dp),
-            )
+            MediaTile(title, MediaKind.AUDIOBOOK)
         }
     }
 }
@@ -110,7 +106,7 @@ fun AudiobookShelfScreen(
 @Composable
 private fun ShelfCell(item: ShelfBook, onClick: () -> Unit) {
     Column(Modifier.clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        AudiobookCover(item.book.coverPath, Modifier.fillMaxWidth().alpha(if (item.missing) 0.4f else 1f))
+        AudiobookCover(item.book.coverPath, item.book.title, Modifier.fillMaxWidth().alpha(if (item.missing) 0.4f else 1f))
         LinearProgressIndicator(progress = { item.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp))
         Text(item.book.title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text(

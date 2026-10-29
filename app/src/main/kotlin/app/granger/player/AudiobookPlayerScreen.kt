@@ -88,7 +88,7 @@ internal fun AudiobookPlayer(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            PlayerCover(book.book.coverPath, book = true, size = coverSize)
+            PlayerCover(book.book.coverPath, book.book.title, book = true, size = coverSize)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     book.book.title, style = MaterialTheme.typography.titleLarge, maxLines = 2,

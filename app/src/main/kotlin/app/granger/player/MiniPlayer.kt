@@ -87,7 +87,7 @@ fun MiniPlayer(
                 Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = if (voice) "Open the voice" else "Open player", onClick = onOpen).padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PlayerCover(info.coverPath, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
+                PlayerCover(info.coverPath, info.title, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(

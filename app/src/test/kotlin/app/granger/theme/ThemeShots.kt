@@ -33,6 +33,11 @@ import app.granger.listen.ListenContent
 import app.granger.listen.ListenUi
 import app.granger.listen.NowPlayingCard
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.fillMaxWidth
+import app.granger.audiobooks.AudiobookCover
+import app.granger.music.AlbumCover
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -214,6 +219,45 @@ class ThemeShots {
         val chapters = listOf(chapter(book, 0, 60_000L), chapter(book, 1, 60_000L))
         shoot("audiobook") {
             ListenPlayerScreen(PlayerViewModel(FakePlayerHub(bookUi(book, chapters[1], chapterCount = 2, positionMs = 20_000L)), chapters = { MutableStateFlow(chapters) }), onClose = {})
+        }
+    }
+
+    /**
+     * Missing art (Plan U3c Decision 6, W8): an album grid with no covers and an audiobook, the small tiles at the
+     * sizes they're drawn (queue, Browse, mini player, search, Listen), the rail's tab, play, search and chat, and
+     * the mini player, all on the themed tile.
+     */
+    @Config(qualifiers = "w360dp-h720dp-xxhdpi")
+    @Test fun tiles() = shoot("tiles") {
+        val rail = RailUi(
+            listOf(
+                owls.copy(tab = owls.tab.copy(packId = "wiki", path = "A/Owl")), blue,
+                RailEntry.Play("audiobook:t", "Treasure Island", at = 1L), RailEntry.Search("sextant", at = 3L), RailEntry.Chat(7L, "About owls", at = 2L),
+            ),
+        )
+        GrangerShell(
+            rail = rail, expanded = false, railVisible = true, selected = RailTool.LISTEN,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+                Column(Modifier.weight(1f).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    val albums = listOf("Kind of Blue", "A Love Supreme", "The Köln Concert", "Moanin'", "1984", "(What's the Story) Morning Glory?")
+                    for (row in albums.chunked(3)) Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        for (title in row) Column(Modifier.weight(1f)) {
+                            AlbumCover(null, title, Modifier.fillMaxWidth())
+                            Text(title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AudiobookCover(null, "Treasure Island", Modifier.size(72.dp))
+                        for ((size, kind) in listOf(40 to MediaKind.MUSIC, 40 to MediaKind.REFERENCE, 44 to MediaKind.VOICE, 48 to MediaKind.ARTIST, 56 to MediaKind.AUDIOBOOK)) {
+                            Box(Modifier.size(size.dp).clip(RoundedCornerShape(6.dp))) { MediaTile("Moby-Dick", kind) }
+                        }
+                    }
+                }
+                MiniPlayer(musicUi(app.granger.player.track("a", "Blue in Green", artists = "Miles Davis")), onPlayPause = {}, onSecondary = {}, onOpen = {})
+            }
         }
     }
 

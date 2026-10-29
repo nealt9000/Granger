@@ -1,7 +1,6 @@
 package app.granger.browse
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.formatBytes
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
+import app.granger.theme.MediaKind
+import app.granger.theme.MediaTile
 
 /** What Browse's home can open; the NavHost wires each to its route. */
 class BrowseActions(
@@ -158,7 +158,7 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                 }
                 if (open) for (item in section.packs) {
                     item(key = "pack:${item.pack.id}") {
-                        PackItemRow(item, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack })
+                        PackItemRow(item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack })
                     }
                 }
                 item(key = "divider:${section.id}") { HorizontalDivider() }
@@ -182,7 +182,7 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PackItemRow(item: PackItem, onOpen: () -> Unit, onRemove: () -> Unit) {
+private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemove: () -> Unit) {
     val pack = item.pack
     var menu by remember { mutableStateOf(false) }
     val problem = when (pack.status) {
@@ -198,7 +198,7 @@ private fun PackItemRow(item: PackItem, onOpen: () -> Unit, onRemove: () -> Unit
                 onLongClickLabel = "Remove from phone",
                 onLongClick = { menu = true },
             ),
-            leadingContent = { PackTile(pack) },
+            leadingContent = { PackTile(pack, map) },
             headlineContent = { Text(pack.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
             supportingContent = {
                 Column {
@@ -213,17 +213,13 @@ private fun PackItemRow(item: PackItem, onOpen: () -> Unit, onRemove: () -> Unit
     }
 }
 
-/** A pack's tile: its title's initial (Spectral, as every label). The library keeps no pack illustrations yet; themed tiles are W8's. */
+/**
+ * A pack's tile: the themed tile (Plan U3c Decision 6) with its title's initial, and a globe for reference or a pin for
+ * a map. The library keeps no pack illustrations yet.
+ */
 @Composable
-private fun PackTile(pack: Pack) {
-    Box(
-        Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            pack.title.trim().firstOrNull()?.uppercase() ?: "?",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+private fun PackTile(pack: Pack, map: Boolean) {
+    Box(Modifier.size(40.dp).clip(RoundedCornerShape(8.dp))) {
+        MediaTile(pack.title, if (map) MediaKind.MAP else MediaKind.REFERENCE)
     }
 }

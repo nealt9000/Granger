@@ -64,6 +64,8 @@ import androidx.compose.ui.unit.dp
 import app.granger.Features
 import app.granger.R
 import app.granger.settings.RailSide
+import app.granger.theme.MediaKind
+import app.granger.theme.MediaTile
 
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
 enum class RailTool(val label: String, val shown: Boolean) {
@@ -363,8 +365,9 @@ private fun WithPinDot(pinned: Boolean, content: @Composable () -> Unit) {
 }
 
 /**
- * A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out, and one the voice is
- * reading wears a speaker badge at its bottom corner (Plan U3b, Neal's walkthrough: one entry per book).
+ * A tab's tile: its cover, or the themed tile (Plan U3c Decision 6). The current tab is outlined in the accent, an
+ * unavailable one greyed out, and one the voice is reading wears a speaker badge at its bottom corner (Plan U3b,
+ * Neal's walkthrough: one entry per book).
  */
 @Composable
 private fun LetterTile(tab: RailTabUi, size: Int = 36) {
@@ -375,7 +378,6 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
                 .size(size.dp)
                 .alpha(if (tab.available) 1f else 0.4f)
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
             contentAlignment = Alignment.Center,
         ) {
@@ -383,11 +385,24 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
             if (cover != null) {
                 Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             } else {
-                Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                MediaTile(tab.title, tab.mediaKind())
             }
         }
         if (tab.readingAloud) ReadingBadge(Modifier.align(Alignment.BottomEnd))
     }
+}
+
+/** An article tab's glyph is a page; a book's, a book. */
+internal fun RailTabUi.mediaKind(): MediaKind = if (packId.isEmpty()) MediaKind.BOOK else MediaKind.ARTICLE
+
+/** A play's glyph, by what it played. */
+internal fun RailEntry.Play.mediaKind(): MediaKind = when {
+    playKey.startsWith("audiobook:") -> MediaKind.AUDIOBOOK
+    playKey.startsWith("playlist:") -> MediaKind.PLAYLIST
+    playKey.startsWith("artist:") -> MediaKind.ARTIST
+    playKey.startsWith("folder:") -> MediaKind.FOLDER
+    playKey.startsWith("voice:") -> MediaKind.VOICE
+    else -> MediaKind.MUSIC // album:, genre:, songs
 }
 
 /** The small speaker on a tab the voice is reading. */
@@ -406,14 +421,20 @@ private fun ReadingBadge(modifier: Modifier) {
     }
 }
 
-/** A search's, chat's or play's tile in the narrow rail: its icon on the same rounded square as a letter tile. */
+/**
+ * A search's, chat's or play's tile in the narrow rail, on the themed tile (Plan U3c Decision 6): a play shows its
+ * title's initial and what it played; a search, a chat or the voice its glyph alone.
+ */
 @Composable
 private fun IconTile(entry: RailEntry) {
-    Box(
-        Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(entry.painter(), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+    Box(Modifier.size(36.dp).clip(RoundedCornerShape(8.dp))) {
+        when (entry) {
+            is RailEntry.Play -> MediaTile(entry.title, entry.mediaKind())
+            is RailEntry.Search -> MediaTile(null, MediaKind.SEARCH)
+            is RailEntry.Chat -> MediaTile(null, MediaKind.CHAT)
+            is RailEntry.Reading -> MediaTile(null, MediaKind.VOICE)
+            is RailEntry.Tab -> MediaTile(entry.tab.title, entry.tab.mediaKind())
+        }
     }
 }
 
