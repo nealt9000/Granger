@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import app.granger.research.AnswerBody
 import app.granger.R
 import app.granger.browse.BrowseActions
 import app.granger.browse.BrowseContent
@@ -148,6 +149,23 @@ class ThemeShots {
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             HomeContent(HomeUi(strip = report, continueCards = listOf(owls, blue), feeds = listOf(dayFeed)), onReadiness = {}, onOpenTab = {}, onPlay = {})
+        }
+    }
+
+    /** An Ask answer with a heading, lists that wrap, code and citations (Plan U3c Decision 8). */
+    @Test fun answer() = shoot("answer") {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(16.dp)) {
+            AnswerBody(
+                "Owls hunt mostly at night, by **sound** as much as sight [1].\n\n## How they hunt\n\n" +
+                    "1. They perch and listen, turning the head through as much as 270 degrees to place a sound [2].\n" +
+                    "2. They glide down on soft-edged feathers that make almost no noise.\n" +
+                    "  - The *barn owl* can strike in total darkness [3].\n" +
+                    "  - Others need some light.\n" +
+                    "10. They swallow small prey whole.\n\n" +
+                    "The pellets they cough up (search `owl pellet`) show what they ate:\n" +
+                    "- bones\n- fur and feathers, which the stomach can't break down and presses into a neat bundle [1, 2]",
+                onCite = {},
+            )
         }
     }
 

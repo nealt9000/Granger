@@ -239,6 +239,13 @@ fun NavController.showTab(
     }
 }
 
+/**
+ * Opens [tab] from the shell's way in (the rail, Home, Search and the other screens that list tabs), keeping a reader on
+ * top underneath, so Back returns to the page you were on (Plan U3c Decision 7). The rail's tools still clear to their
+ * own landing; only an item opened from them stacks.
+ */
+fun NavController.openTab(tab: ReadingTab) = showTab(tab, keepCurrent = true)
+
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
 /** [domain] filters the Kiwix list to a readiness domain (Plan H1); null is the whole catalog. */
@@ -517,7 +524,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     // A song tapped in Search plays its album from there.
     val songs = container.songs
     fun showTab(tabId: Long) {
-        scope.launch { container.sessions.tab(tabId)?.let { nav.showTab(it) } }
+        scope.launch { container.sessions.tab(tabId)?.let { nav.openTab(it) } }
     }
 
     /** The one way an installed pack opens: from Browse, a source's Open and Downloads (Plan U3b Decision 3). */
@@ -528,7 +535,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         }
     }
 
-    /** Opens the page the voice is reading (an article in its tab, a book in its reader); null when the key names neither. */
+    /**
+     * Opens the page the voice is reading (an article in its tab, a book in its reader), over a reader on top so Back
+     * returns to it; null when the key names neither.
+     */
     suspend fun openVoiceSource(voice: NowPlaying.Voice): Unit? {
         val tabId = when (val key = ReadSourceKey.parse(voice.sourceKey)) {
             is ReadSourceKey.Article -> container.sessions.openTab(key.packId, key.path, voice.title)
@@ -542,7 +552,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             null -> return null
         }
-        container.sessions.tab(tabId)?.let { nav.showTab(it) }
+        container.sessions.tab(tabId)?.let { nav.openTab(it) }
         return Unit
     }
 

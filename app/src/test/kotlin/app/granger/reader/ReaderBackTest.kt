@@ -6,9 +6,24 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import app.granger.BookRoute
+import app.granger.HomeRoute
+import app.granger.LibraryRoute
+import app.granger.ReaderRoute
+import app.granger.SearchRoute
+import app.granger.openTab
+import app.granger.showTab
 import app.granger.FakeLibrary
 import app.granger.FakeReadingSessions
 import app.granger.FakeZimArchive
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookOrigin
 import app.granger.core.library.ReadingTab
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
@@ -22,7 +37,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
-/** ← and system Back step back through the tab's pages, the WebView's own history first, then leave the reader. */
+/**
+ * ← and system Back step back through the tab's pages, the WebView's own history first, then leave the reader; a tab
+ * opened over a reader from the rail, Home or Search leaves it underneath, for Back to return to.
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class ReaderBackTest {
@@ -113,6 +131,80 @@ class ReaderBackTest {
         assertThat(shadowOf(web).lastLoadedUrl).isEqualTo(url("Photosynthesis"))
         assertThat(stack()).containsExactly("C++", "Photosynthesis").inOrder()
         assertThat(left).isEqualTo(0)
+    }
+
+    /** A back stack of the routes alone, starting at the Library, for where Back goes between screens. */
+    private fun routes(): NavHostController {
+        lateinit var nav: NavHostController
+        compose.setContent {
+            nav = rememberNavController()
+            NavHost(nav, startDestination = LibraryRoute()) {
+                composable<LibraryRoute> {}
+                composable<HomeRoute> {}
+                composable<SearchRoute> {}
+                composable<ReaderRoute> {}
+                composable<BookRoute> {}
+            }
+        }
+        compose.waitForIdle()
+        return nav
+    }
+
+    private fun NavHostController.readers(): List<Long> = compose.runOnIdle {
+        currentBackStack.value.mapNotNull {
+            when {
+                it.destination.hasRoute<ReaderRoute>() -> it.toRoute<ReaderRoute>().tabId
+                it.destination.hasRoute<BookRoute>() -> it.toRoute<BookRoute>().tabId
+                else -> null
+            }
+        }
+    }
+
+    private val article = ReadingTab(1, "p", "C++", "C++", 1L, onRail = true)
+    private val other = ReadingTab(2, "p", "Photosynthesis", "Photosynthesis", 2L, onRail = true)
+    private val book = ReadingTab(3, BookIds.of(BookOrigin.IMPORT, "b"), "", "A book", 3L, onRail = true)
+
+    @Test fun aTabOpenedFromTheRailOverAReaderLeavesItUnderneath() {
+        // Plan U3c Decision 7: the rail's open item stacks on the page you're on, so Back returns to it.
+        val nav = routes()
+        compose.runOnIdle { nav.openTab(article) }
+        compose.runOnIdle { nav.openTab(other) }
+        assertThat(nav.readers()).containsExactly(1L, 2L).inOrder()
+        compose.runOnIdle { nav.openTab(book) }
+        assertThat(nav.readers()).containsExactly(1L, 2L, 3L).inOrder()
+        compose.runOnIdle { nav.popBackStack() }
+        assertThat(compose.runOnIdle { nav.currentBackStackEntry!!.toRoute<ReaderRoute>().tabId }).isEqualTo(2L)
+        compose.runOnIdle { nav.popBackStack() }
+        assertThat(compose.runOnIdle { nav.currentBackStackEntry!!.toRoute<ReaderRoute>().tabId }).isEqualTo(1L)
+    }
+
+    @Test fun theTabOnTopAgainIsNoMove() {
+        val nav = routes()
+        compose.runOnIdle { nav.openTab(article) }
+        compose.runOnIdle { nav.openTab(article) }
+        assertThat(nav.readers()).containsExactly(1L)
+    }
+
+    @Test fun fromHomeOrSearchOverAReaderBackStepsThroughThemToIt() {
+        val nav = routes()
+        compose.runOnIdle { nav.openTab(article) }
+        compose.runOnIdle { nav.navigate(SearchRoute("leaf")) }
+        compose.runOnIdle { nav.openTab(other) }
+        compose.runOnIdle { nav.popBackStack() }
+        assertThat(compose.runOnIdle { nav.currentDestination!!.hasRoute<SearchRoute>() }).isTrue()
+        compose.runOnIdle { nav.popBackStack() }
+        assertThat(compose.runOnIdle { nav.currentBackStackEntry!!.toRoute<ReaderRoute>().tabId }).isEqualTo(1L)
+        compose.runOnIdle { nav.navigate(HomeRoute) }
+        compose.runOnIdle { nav.openTab(other) }
+        assertThat(nav.readers()).containsExactly(1L, 2L).inOrder()
+    }
+
+    @Test fun showTabStillReplacesAReaderOnTop() {
+        // The plain open (a citation, a pack's main page) swaps the reader rather than stacking one per tab.
+        val nav = routes()
+        compose.runOnIdle { nav.showTab(article) }
+        compose.runOnIdle { nav.showTab(other) }
+        assertThat(nav.readers()).containsExactly(2L)
     }
 
     private fun View.findWebView(): ReaderWebView? {
