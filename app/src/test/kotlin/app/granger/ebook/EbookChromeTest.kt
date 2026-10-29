@@ -25,7 +25,8 @@ import org.robolectric.annotation.Config
 
 /**
  * The e-book's chrome (Plan U3c Decision 5): a page turned by hand slides it away and a middle tap brings it back;
- * the page moving for any other reason (the slider, Contents, the voice, the navigator settling) leaves it.
+ * the page moving for any other reason (the slider, the voice, the navigator settling) leaves it. A jump from a panel
+ * (Contents, Bookmarks, Search) hides it, so the place it lands is clear.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -120,6 +121,25 @@ class EbookChromeTest {
         vm.open(null)
         vm.turnTo(page(0.3))
         assertThat(vm.state.value.chromeVisible).isFalse()
+    }
+
+    /** A jump from Contents, a bookmark or a search hit lands clear: the panel closes and the chrome slides away. */
+    @Test fun aJumpFromAPanelHidesTheChrome() = runTest(main.dispatcher) {
+        val vm = reader()
+        vm.open(Panel.CONTENTS)
+        vm.goTo("c001.xhtml#s2")
+        assertThat(vm.state.value.panel).isNull()
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        vm.toggleChrome()
+        vm.open(Panel.SEARCH)
+        vm.goToHit(BookSearchRow(page(0.5), "", "", "x", "", null))
+        assertThat(vm.state.value.panel).isNull()
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        // The slider is on the chrome: its move keeps it.
+        vm.toggleChrome()
+        vm.goToProgression(0.5)
+        advanceUntilIdle()
+        assertThat(vm.state.value.chromeVisible).isTrue()
     }
 
     @Test fun aSwipeStillUnderwayCounts() = runTest(main.dispatcher) {

@@ -479,16 +479,20 @@ class EbookReaderViewModel(
         }
     }
 
-    /** A search result: jump there and mark the match on the page. */
+    /** A search result: jump there and mark the match on the page, with the panel and the chrome out of the way ([jump]). */
     fun goToHit(row: BookSearchRow) {
         val locator = row.locator ?: return
         if (row.markId != null && row.markId in _state.value.unplaceable) return
-        _state.update { it.copy(panel = null, searchHit = if (row.markId == null) locator else null) }
+        _state.update { it.copy(panel = null, chromeVisible = false, searchHit = if (row.markId == null) locator else null) }
         _navigation.trySend(locator)
     }
 
+    /**
+     * A jump from the Contents, Bookmarks or Search panel: the panel closes and the chrome slides away (Plan U3c), since
+     * it lies over the page (Decision 5) and would cover the chapter's first lines until a tap. A tap brings it back.
+     */
     private fun jump(locator: Locator) {
-        _state.update { it.copy(panel = null) }
+        _state.update { it.copy(panel = null, chromeVisible = false) }
         _navigation.trySend(locator)
     }
 
