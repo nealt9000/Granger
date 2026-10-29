@@ -30,6 +30,18 @@ class SherpaVoiceTest {
     }
 
     @Test
+    fun piperInferenceComesFromTheConfigWithSherpaDefaultsForWhatIsMissing() {
+        val d = dir("vits-piper-en_GB-granger_nanny-medium", "en_GB-granger_nanny-medium.onnx", "tokens.txt", "espeak-ng-data/")
+        val config = File(d, "en_GB-granger_nanny-medium.onnx.json")
+        val v = SherpaVoice.detect(d)!!
+        assertThat(SherpaVoice.inference(v)).isEqualTo(SherpaVoice.Inference())
+        config.writeText("""{"audio": {"sample_rate": 22050}, "inference": {"noise_scale": 0.75, "length_scale": 1, "noise_w": 1.0}}""")
+        assertThat(SherpaVoice.inference(v)).isEqualTo(SherpaVoice.Inference(noiseScale = 0.75f, noiseScaleW = 1f, lengthScale = 1f))
+        config.writeText("""{"inference": {"noise_w": 0.9}}""")
+        assertThat(SherpaVoice.inference(v)).isEqualTo(SherpaVoice.Inference(noiseScaleW = 0.9f))
+    }
+
+    @Test
     fun kokoroMultiLangVoiceTakesInt8ModelLexiconsAndDict() {
         val d = dir(
             "kokoro-int8-multi-lang-v1_1",

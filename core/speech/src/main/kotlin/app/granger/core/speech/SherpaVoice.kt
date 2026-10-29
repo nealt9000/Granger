@@ -19,6 +19,9 @@ sealed interface SherpaVoice {
     /** A Piper (VITS) voice: one `.onnx` model and `tokens.txt`. */
     data class Piper(override val dir: File, override val model: File, val tokens: File, override val espeakData: File) : SherpaVoice
 
+    /** A VITS voice's sampling: more [noiseScale] is livelier and adds artifacts, more [noiseScaleW] varies timing. */
+    data class Inference(val noiseScale: Float = 0.667f, val noiseScaleW: Float = 0.8f, val lengthScale: Float = 1f)
+
     /**
      * A Kokoro voice: the model, its speaker table `voices.bin`, `tokens.txt`, and for the multi-language builds
      * one or more `lexicon-*.txt` files (joined for the engine) and a `dict/` directory.
@@ -81,6 +84,24 @@ sealed interface SherpaVoice {
             val byId = Regex("\"([^\"]+)\"\\s*:\\s*(\\d+)").findAll(map).associate { it.groupValues[2].toInt() to it.groupValues[1] }
             if (byId.size < 2 || byId.values.any { name -> name.all { it.isDigit() } }) return emptyList()
             return (0 until byId.size).map { byId[it] ?: return emptyList() }
+        }
+
+        /**
+         * How a Piper voice wants to be sampled, from its config's `inference` block (`noise_scale`, `noise_w`,
+         * `length_scale`, Piper's standard keys), so each voice ships its own settings (V4: Neal's pick for the
+         * Granger British voices is 0.75 / 1.0). sherpa-onnx's defaults, which are Piper's, fill in what is missing.
+         */
+        fun inference(voice: SherpaVoice): Inference {
+            if (voice !is Piper) return Inference()
+            val config = File(voice.model.path + ".json").takeIf { it.isFile } ?: return Inference()
+            val block = Regex("\"inference\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return Inference()
+            fun value(key: String) = Regex("\"$key\"\\s*:\\s*([0-9.]+)").find(block)?.groupValues?.get(1)?.toFloatOrNull()
+            val default = Inference()
+            return Inference(
+                noiseScale = value("noise_scale") ?: default.noiseScale,
+                noiseScaleW = value("noise_w") ?: default.noiseScaleW,
+                lengthScale = value("length_scale") ?: default.lengthScale,
+            )
         }
 
         /** Every voice directly under [root], by id. */
