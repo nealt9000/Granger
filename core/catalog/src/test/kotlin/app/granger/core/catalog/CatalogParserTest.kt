@@ -104,6 +104,43 @@ class CatalogParserTest {
         assertThat(maxi.flavour).isEqualTo("maxi")
     }
 
+    /** Plan WF: Wikipedia's slices and subjects. */
+    @Test fun setFieldsDefaultWhenAbsent() {
+        val pack = ok(parse(catalogJson())).packs.single()
+        assertThat(pack.setId).isEmpty()
+        assertThat(pack.setRank).isEqualTo(0)
+        assertThat(pack.isSlice).isFalse()
+        assertThat(pack.isSubject).isFalse()
+        assertThat(pack.adds).isEmpty()
+        assertThat(pack.articles).isEqualTo(0L)
+        assertThat(pack.sample).isFalse()
+    }
+
+    @Test fun aSliceAndASubjectAreRead() {
+        val slice = ok(parse(catalogJson(packExtra = ""","set": "wikipedia_en", "setRank": 2, "setLabel": "Best 50,000 articles", "articles": 50002"""))).packs.single()
+        assertThat(slice.isSlice).isTrue()
+        assertThat(slice.setId).isEqualTo("wikipedia_en")
+        assertThat(slice.setRank).isEqualTo(2)
+        assertThat(slice.setLabel).isEqualTo("Best 50,000 articles")
+        assertThat(slice.articles).isEqualTo(50002L)
+        val subject = ok(parse(catalogJson(packExtra = ""","subjectOf": "wikipedia_en", "articles": 72901, "adds": {"wikipedia_en_top": 0.955, "wikipedia_en_top1m": 0.656}, "sample": true"""))).packs.single()
+        assertThat(subject.isSubject).isTrue()
+        assertThat(subject.adds).containsExactly("wikipedia_en_top", 0.955, "wikipedia_en_top1m", 0.656)
+        assertThat(subject.sample).isTrue()
+    }
+
+    @Test fun inconsistentSetFieldsAreCleared() {
+        val noRank = ok(parse(catalogJson(packExtra = ""","set": "wikipedia_en", "setLabel": "Everything""""))).packs.single()
+        assertThat(noRank.isSlice).isFalse()
+        assertThat(noRank.setLabel).isEmpty()
+        val both = ok(parse(catalogJson(packExtra = ""","set": "wikipedia_en", "setRank": 1, "subjectOf": "wikipedia_en", "adds": {"x": 0.5}"""))).packs.single()
+        assertThat(both.isSlice).isTrue()
+        assertThat(both.isSubject).isFalse()
+        assertThat(both.adds).isEmpty()
+        val share = ok(parse(catalogJson(packExtra = ""","subjectOf": "wikipedia_en", "adds": {"a": 1.5, "b": -0.1, "c": 0.25}"""))).packs.single()
+        assertThat(share.adds).containsExactly("c", 0.25)
+    }
+
     @Test fun aThousandPacksParse() {
         val packs = (1..1000).joinToString(",") { i ->
             """{"id": "p$i", "title": "Pack $i", "category": "Q&A", "language": "eng", "sizeBytes": 1000,

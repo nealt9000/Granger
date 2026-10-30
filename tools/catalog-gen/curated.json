@@ -6,6 +6,7 @@
     "families": "tools/catalog-gen/kiwix_families.json",
     "contents": "tools/catalog-gen/pack_contents.json"
   },
+  "sets": "tools/catalog-gen/pack_sets.json",
   "packs": [
     {
       "name": "wikipedia_en_medicine",

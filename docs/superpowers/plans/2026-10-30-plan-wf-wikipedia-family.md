@@ -196,10 +196,10 @@ The nesting holds. Everything's directory region is 1.02 GB (plus 145 MB of poin
 
 ### Task 2: Sets in the catalog
 
-- [ ] `set`, `setRank`, `setLabel`, `subjectOf` and `adds` through `pin()`, the bulk fields, the curated path and `release_entry`, plus `PackEntry`. Group titles come from the set or base title (Decision 2).
-- [ ] Edit `catalog.json` in place, then `check-links`, re-sign and `verify`. Update `PublishedCatalogTest`.
-- [ ] Tests in `test_catalog_gen.py` and `CatalogParserTest`.
-- [ ] **Commit.** `Catalog: Wikipedia and Wikivoyage as sets, subjects with what they add`
+- [x] `set`, `setRank`, `setLabel`, `subjectOf` and `adds` through `pin()`, the bulk fields, the curated path and `release_entry`, plus `PackEntry`. Group titles come from the set or base title (Decision 2).
+- [x] Edit `catalog.json` in place, then `check-links`, re-sign and `verify`. Update `PublishedCatalogTest`.
+- [x] Tests in `test_catalog_gen.py` and `CatalogParserTest`.
+- [x] **Commit.** `Catalog: Wikipedia and Wikivoyage as sets, subjects with what they add`
 
 ### Task 3: One Wikipedia row
 
