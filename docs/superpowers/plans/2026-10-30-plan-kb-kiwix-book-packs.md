@@ -116,6 +116,11 @@ Neal, GB walkthrough (2026-10-30): "we'll need to review all the kiwix packs for
    - `GutenbergSource` is today's behaviour, and Gutenberg's tests stay green unchanged.
    - `NautilusSource`:
      - `NautilusDatabase.parse` returns records (`_id`, `ti`, `dsc`, `aut` where present, its `fp` list, order). Check the real `database.js` of all 9 packs, fetched with the probe, before fixing the shape.
+     - **The real shapes (Task 1, 2026-10-30):** all 9 `database.js` files, 213 records in all, are `var DATABASE = [{'_id': '00000', 'ti': …, 'dsc': …, 'aut': …, 'fp': [<one path>]}, …];`, every record with all five keys, Python-style quoting (single quotes, double where the text has an apostrophe). Fixtures in `core/library/src/test/resources/nautilus/`.
+       - Every `fp` list has exactly one file today; several files per record is allowed for but not seen.
+       - `fp` may hold a folder and non-ASCII (`Anglais (20 titres)/’Mvoo′ Laa′na the hunter.pdf`). Prunelle interactive-books is 11 EPUBs; the other 8 packs are all PDF.
+       - `aut` is blank (usda) or `-` (prunelle) when there's no author; `Various` is common. `dsc` can be blank, or repeat the pack's own subtitle. `_id` runs `00000`… in page order.
+       - Post Disaster has 108 records, one title used twice.
      - **One row per file,** titled by the record (a record with several files gets "Title (2 of 3)").
      - **Ids:** `BookOrigin.NAUTILUS`, id `book:nautilus:<packName>/<fp>`, `sourceRef = <packName>/files/<fp>`, format by file type.
      - **Covers:** a PDF's first page after copy-out (`PdfCovers`), and a title tile before.

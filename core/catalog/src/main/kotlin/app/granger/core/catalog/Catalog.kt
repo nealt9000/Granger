@@ -38,6 +38,9 @@ sealed interface CatalogItem {
     val license: String
 }
 
+/** [PackEntry.content] of a pack that is a bundle of books (Plan KB). */
+const val CONTENT_BOOKS = "books"
+
 @Serializable
 data class PackEntry(
     override val id: String,
@@ -65,9 +68,19 @@ data class PackEntry(
     val family: String = "",
     /** One of the readiness domain ids (spec §3.1), or blank: the pack counts in storage only. Absent in older catalogs. */
     val domain: String = "",
+    /**
+     * What the pack holds, when it isn't a website (Plan KB Decision 2): [CONTENT_BOOKS] for a bundle of books that
+     * lists its own (gutenberg2zim, nautiluszim), else blank. Absent in older catalogs.
+     */
+    val content: String = "",
+    /** The ZIM's flavour, "maxi", "nopic" or "mini", or blank for an unflavoured ZIM. Absent in older catalogs. */
+    val flavour: String = "",
     /** The pack's search vectors (Plan R1), downloaded with it; null when it has none, and in older catalogs. */
     val vectors: VectorsEntry? = null,
-) : CatalogItem
+) : CatalogItem {
+    /** A bundle of books (Gutenberg, nautilus): listed under Books and opened as a collection (Plan KB). */
+    val isBookPack: Boolean get() = content == CONTENT_BOOKS
+}
 
 /** An e-book (EPUB) the reader opens. */
 @Serializable

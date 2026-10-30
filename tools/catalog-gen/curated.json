@@ -3,7 +3,8 @@
     "languages": [
       "eng"
     ],
-    "families": "tools/catalog-gen/kiwix_families.json"
+    "families": "tools/catalog-gen/kiwix_families.json",
+    "contents": "tools/catalog-gen/pack_contents.json"
   },
   "packs": [
     {

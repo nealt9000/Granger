@@ -88,6 +88,22 @@ class CatalogParserTest {
         assertThat(pack.family).isEqualTo("wikipedia")
     }
 
+    /** Plan KB: which packs are books, and each pack's flavour. */
+    @Test fun contentAndFlavourDefaultWhenAbsent() {
+        val pack = ok(parse(catalogJson())).packs.single()
+        assertThat(pack.content).isEmpty()
+        assertThat(pack.flavour).isEmpty()
+        assertThat(pack.isBookPack).isFalse()
+    }
+
+    @Test fun contentAndFlavourAreRead() {
+        val books = ok(parse(catalogJson(packExtra = ""","content": "books", "flavour": """""))).packs.single()
+        assertThat(books.isBookPack).isTrue()
+        val maxi = ok(parse(catalogJson(packExtra = ""","content": "", "flavour": "maxi""""))).packs.single()
+        assertThat(maxi.isBookPack).isFalse()
+        assertThat(maxi.flavour).isEqualTo("maxi")
+    }
+
     @Test fun aThousandPacksParse() {
         val packs = (1..1000).joinToString(",") { i ->
             """{"id": "p$i", "title": "Pack $i", "category": "Q&A", "language": "eng", "sizeBytes": 1000,

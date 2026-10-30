@@ -82,6 +82,26 @@ class PublishedCatalogTest {
             .isAtLeast(catalog.presets.single { it.id == "efficient" }.items.size)
     }
 
+    /** Plan KB: the 41 Gutenberg packs and the 9 nautilus packs are books; every flavoured pack names its flavour. */
+    @Test fun publishedCatalogMarksTheBookPacksAndFlavours() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+
+        val books = catalog.packs.filter { it.isBookPack }
+        assertThat(books).hasSize(50)
+        assertThat(books.count { it.family == "gutenberg" }).isEqualTo(41)
+        assertThat(catalog.packs.filter { it.family == "gutenberg" }.all { it.isBookPack }).isTrue()
+        assertThat(books.filter { it.family != "gutenberg" }.map { it.zimName }).containsExactly(
+            "zimgit-food-preparation_en", "zimgit-knots_en", "zimgit-medicine_en", "zimgit-post-disaster_en",
+            "zimgit-water_en", "usda-2015_en", "prunelle_en_budding-authors", "prunelle_en_draw-your-african-story",
+            "prunelle_en_interactive-books",
+        )
+        assertThat(catalog.packs.filter { it.flavour.isNotEmpty() }.all { it.id == "${it.zimName}_${it.flavour}" }).isTrue()
+        assertThat(catalog.packs.groupingBy { it.flavour }.eachCount())
+            .containsExactly("", 771, "maxi", 93, "nopic", 50, "mini", 10)
+    }
+
     /** Plan H4: the calibrated tiers and the containment table. */
     @Test fun publishedCatalogCarriesTheCalibration() {
         val bytes = repoFile("catalog/catalog.json").readBytes()
