@@ -71,7 +71,19 @@ object PdfToEpub {
     private fun convert(doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String): Report {
         val origin = PdfOrigin.of(doc)
         if (origin != PdfOrigin.BORN_DIGITAL) return failed("not born-digital: $origin", origin, doc.numberOfPages)
-        val pages = (0 until doc.numberOfPages).map { PdfPages.read(doc, it) }
+        // The pictures wait here until the EPUB is written.
+        val scratch = File(out.absoluteFile.parentFile, ".incoming-${UUID.randomUUID()}").apply { mkdirs() }
+        try {
+            return convert(doc, pdf, out, title, author, language, origin, scratch)
+        } finally {
+            scratch.deleteRecursively()
+        }
+    }
+
+    private fun convert(
+        doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String, origin: PdfOrigin, scratch: File,
+    ): Report {
+        val pages = (0 until doc.numberOfPages).map { PdfPages.read(doc, it, scratch) }
         val layout = PdfLayout.build(pages)
         val outline = try { PdfInspector.outline(doc) } catch (_: IOException) { emptyList() }
         val (chapters, source) = PdfChapters.split(layout.items, outline, pages.size)
@@ -84,7 +96,7 @@ object PdfToEpub {
         val pictureNames = java.util.IdentityHashMap<PagePicture, String>()
         fun nameOf(p: PagePicture): String = pictureNames.getOrPut(p) {
             val ext = if (p.mediaType == "image/png") "png" else "jpg"
-            "images/p${p.page + 1}-${pictureNames.size + 1}.$ext".also { images += EpubImage(it, p.mediaType, p.bytes) }
+            "images/p${p.page + 1}-${pictureNames.size + 1}.$ext".also { images += EpubImage(it, p.mediaType, p.file) }
         }
         val rendered = chapters.map { render(it, ::nameOf) }
         // A picture covering page 1 is the cover.

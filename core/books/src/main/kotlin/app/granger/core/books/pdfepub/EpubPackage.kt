@@ -25,8 +25,8 @@ internal class EpubBook(
 /** A chapter's XHTML [body], and its [sections] (title, element id) for the contents. */
 internal class EpubChapter(val title: String, val body: String, val sections: List<Pair<String, String>>)
 
-/** [path] is inside `OEBPS/`, such as `images/p12-1.jpg`. */
-internal class EpubImage(val path: String, val mediaType: String, val bytes: ByteArray)
+/** [path] is inside `OEBPS/`, such as `images/p12-1.jpg`; [file] holds its bytes. */
+internal class EpubImage(val path: String, val mediaType: String, val file: java.io.File)
 
 internal object EpubPackage {
     fun href(i: Int) = "c%03d.xhtml".format(i + 1)
@@ -79,7 +79,11 @@ internal object EpubPackage {
             put("OEBPS/nav.xhtml", nav)
             put("OEBPS/book.css", book.css)
             book.chapters.forEachIndexed { i, c -> put("OEBPS/${href(i)}", page(c.title, c.body, lang)) }
-            book.images.forEach { put("OEBPS/${it.path}", it.bytes) }
+            book.images.forEach { image ->
+                z.putNextEntry(ZipEntry("OEBPS/${image.path}"))
+                image.file.inputStream().use { it.copyTo(z) }
+                z.closeEntry()
+            }
         }
     }
 

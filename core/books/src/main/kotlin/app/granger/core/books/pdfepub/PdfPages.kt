@@ -13,6 +13,7 @@ import com.tom_roush.pdfbox.pdmodel.graphics.image.PDImageXObject
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import com.tom_roush.pdfbox.text.TextPosition
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import kotlin.math.abs
 
@@ -38,9 +39,9 @@ internal data class TextLine(
     val text: String get() = spans.joinToString("") { it.text }
 }
 
-/** A picture drawn on a page, with its place (top-down) and its bytes ready for the EPUB. */
+/** A picture drawn on a page, with its place (top-down) and its [file], encoded for the EPUB, in the scratch folder. */
 internal class PagePicture(
-    val page: Int, val x: Float, val y: Float, val w: Float, val h: Float, val bytes: ByteArray, val mediaType: String,
+    val page: Int, val x: Float, val y: Float, val w: Float, val h: Float, val file: File, val mediaType: String,
 )
 
 /** A page's lines in reading order, and its pictures; [complex] when its layout has three or more columns. */
@@ -63,14 +64,15 @@ internal object PdfPages {
     /** The longest side a picture keeps; bigger ones are scaled down. */
     private const val MAX_PICTURE_PX = 1600
 
-    fun read(doc: PDDocument, index: Int): PageText {
+    /** Page [index]: its lines, and its pictures written into [scratch] (a book's pictures don't all fit in memory). */
+    fun read(doc: PDDocument, index: Int, scratch: File): PageText {
         val page = doc.getPage(index)
         val box = page.cropBox ?: page.mediaBox
         val width = abs(box.width)
         val height = abs(box.height)
         val glyphs = glyphs(doc, index)
         val (lines, complex) = Lines.of(index, glyphs, width)
-        val pictures = pictures(page, index, width * height)
+        val pictures = pictures(page, index, width * height, scratch)
         return PageText(index, width, height, lines, pictures, complex, glyphs.count { !it.unicode.isNullOrBlank() })
     }
 
@@ -104,8 +106,8 @@ internal object PdfPages {
         }
     }
 
-    private fun pictures(page: PDPage, index: Int, pageArea: Float): List<PagePicture> {
-        val engine = PictureFinder(page, index, pageArea * MIN_PICTURE)
+    private fun pictures(page: PDPage, index: Int, pageArea: Float, scratch: File): List<PagePicture> {
+        val engine = PictureFinder(page, index, pageArea * MIN_PICTURE, scratch)
         try {
             engine.processPage(page)
         } catch (_: IOException) {
@@ -114,7 +116,8 @@ internal object PdfPages {
         return engine.found
     }
 
-    private class PictureFinder(page: PDPage, private val index: Int, private val minArea: Float) : PDFGraphicsStreamEngine(page) {
+    private class PictureFinder(page: PDPage, private val index: Int, private val minArea: Float, private val scratch: File) :
+        PDFGraphicsStreamEngine(page) {
         val found = mutableListOf<PagePicture>()
         private val pageHeight = abs((page.cropBox ?: page.mediaBox).height)
 
@@ -124,7 +127,8 @@ internal object PdfPages {
             val h = abs(m.scaleY)
             if (w * h < minArea) return
             val encoded = encode(pdImage) ?: return
-            found += PagePicture(index, m.translateX, pageHeight - (m.translateY + h), w, h, encoded.first, encoded.second)
+            val file = File(scratch, "p${index + 1}-${found.size + 1}").apply { writeBytes(encoded.first) }
+            found += PagePicture(index, m.translateX, pageHeight - (m.translateY + h), w, h, file, encoded.second)
         }
 
         /** A JPEG as it is; anything else decoded and stored as PNG (with transparency) or JPEG. */
