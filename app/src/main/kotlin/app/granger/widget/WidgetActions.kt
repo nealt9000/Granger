@@ -7,6 +7,7 @@ import androidx.glance.appwidget.action.ActionCallback
 import app.granger.GrangerApp
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
+import app.granger.player.PlayerFocus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -18,7 +19,7 @@ class PlayPauseAction : ActionCallback {
         // Widget actions run in the app's own process: the hub is the container's (made on the main thread).
         val container = (context.applicationContext as GrangerApp).container
         withContext(Dispatchers.Main) {
-            playFromWidget(container.playerHub, resumeVoice = { key, title -> container.playResumer.resume(key, title) })
+            playFromWidget(container.playerHub, container.playerFocus, resumeVoice = { key, title -> container.playResumer.resume(key, title) })
         }
     }
 }
@@ -26,8 +27,8 @@ class PlayPauseAction : ActionCallback {
 /** The widget's second button: next track for music, skip back (the skip setting) for books. */
 class SecondaryAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val hub = (context.applicationContext as GrangerApp).container.playerHub
-        withContext(Dispatchers.Main) { secondaryFromWidget(hub) }
+        val container = (context.applicationContext as GrangerApp).container
+        withContext(Dispatchers.Main) { secondaryFromWidget(container.playerHub, container.playerFocus) }
     }
 }
 
@@ -38,11 +39,12 @@ class SecondaryAction : ActionCallback {
  */
 internal suspend fun playFromWidget(
     hub: PlayerHub,
+    focus: PlayerFocus = PlayerFocus(),
     waitMs: Long = 3_000L,
     resumeVoice: suspend (key: String, title: String) -> Boolean = { _, _ -> false },
 ) {
     if (hub.ui.value.now != NowPlaying.Idle) {
-        hub.playPause()
+        focus.playPause(hub)
         return
     }
     val saved = withTimeoutOrNull(waitMs) { hub.saved.first { it.loaded } } ?: return
@@ -51,7 +53,8 @@ internal suspend fun playFromWidget(
     saved.resumeMode()?.let(hub::activate)
 }
 
-internal fun secondaryFromWidget(hub: PlayerHub) {
+internal fun secondaryFromWidget(hub: PlayerHub, focus: PlayerFocus = PlayerFocus()) {
+    if (focus.drivesMusic(hub.ui.value)) return hub.nextMusic()
     when (hub.ui.value.now) {
         is NowPlaying.Music -> hub.next()
         is NowPlaying.Book -> hub.skipBack()

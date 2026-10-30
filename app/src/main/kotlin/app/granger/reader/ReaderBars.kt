@@ -136,6 +136,14 @@ internal val ReaderBookPageInsets @Composable get() = ReaderPageInsets
     .union(WindowInsets.displayCutout.only(WindowInsetsSides.Vertical))
     .union(LocalShellOverlay.current.only(WindowInsetsSides.Horizontal))
 
+/**
+ * A PDF's page: [ReaderBookPageInsets] without the rail's place. A PDF is a picture to zoom and pan, not lines to start
+ * clear of the rail: it has the whole width, and the rail and the mini-player cover its edge until they slide away
+ * (Neal, 2026-10-30: a comic left a blank strip where they had been).
+ */
+internal val ReaderPdfPageInsets @Composable get() = ReaderPageInsets
+    .union(WindowInsets.displayCutout.only(WindowInsetsSides.Vertical))
+
 /** A reader's panels and sheets over the page: inside what the shell draws over it ([LocalShellOverlay]). */
 @Composable
 fun ClearOfShell(content: @Composable BoxScope.() -> Unit) {

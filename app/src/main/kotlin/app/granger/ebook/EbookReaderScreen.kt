@@ -52,6 +52,7 @@ import app.granger.reader.ClearOfShell
 import app.granger.reader.ReaderBarActions
 import app.granger.reader.ReaderBottomBar
 import app.granger.reader.ReaderBookPageInsets
+import app.granger.reader.ReaderPdfPageInsets
 import app.granger.reader.ReaderTopBar
 import app.granger.reader.SlidingBar
 import app.granger.reader.SystemBarsHidden
@@ -265,7 +266,7 @@ fun EbookReaderScreen(
             Modifier
                 .fillMaxSize()
                 .testTag(EbookTags.PAGE)
-                .windowInsetsPadding(ReaderBookPageInsets)
+                .windowInsetsPadding(if (state.isPdf) ReaderPdfPageInsets else ReaderBookPageInsets)
                 .pageTouches(viewModel::onPageTouch),
         ) {
             val error = state.error

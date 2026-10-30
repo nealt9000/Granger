@@ -49,14 +49,78 @@ class ArchiveOfferTest {
         assertThat(offer).isEqualTo(Offer.LendOnly)
     }
 
-    @Test fun scanOnlyItemOffersOcrTextAndThePdf() {
+    @Test fun anUploadedPdfIsTheBookNotTheOcrTextMadeFromIt() {
+        // A magazine scan uploaded as a Text PDF: its pages, not archive.org's OCR text of them.
         val offer = ArchiveOffers.choose(fixtureItem("scientific-american-1881-10-15", "item-scan-only.json"))
         assertThat(offer).isInstanceOf(Offer.Download::class.java)
         offer as Offer.Download
+        assertThat(offer.kind).isEqualTo(TextKind.PDF)
+        assertThat(offer.file.format).isEqualTo("Text PDF")
+        assertThat(offer.file.source).isEqualTo("original")
+    }
+
+    @Test fun ocrTextOfAScanStillComesWithItsPdf() {
+        val offer = ArchiveOffers.choose(
+            item(
+                file("a_jp2.zip", "Single Page Processed JP2 ZIP", "derivative"),
+                file("a_djvu.txt", "DjVuTXT", "derivative"),
+                file("a.pdf", "Text PDF", "derivative"),
+            ),
+        ) as Offer.Download
         assertThat(offer.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(offer.file.name).endsWith("_djvu.txt")
-        assertThat(offer.pdf!!.format).isEqualTo("Text PDF")
-        assertThat(offer.pdf!!.name).endsWith(".pdf")
+        assertThat(offer.pdf!!.name).isEqualTo("a.pdf")
+    }
+
+    // ---- what the uploader made beats archive.org's EPUB of it (Pixel 6 walkthrough, 2026-10-30) ----
+
+    @Test fun aComicIsItsFirstPartNotTheEpubMadeFromIt() {
+        // Batman The Dark Knight Returns: four CBRs, each with an EPUB and a Text PDF archive.org derived.
+        val offer = ArchiveOffers.choose(
+            item(
+                file("Batman/02 (of 04).cbr", "Comic Book RAR", size = 53_000_000),
+                file("Batman/01 (of 04).cbr", "Comic Book RAR", size = 60_000_000),
+                file("Batman/01 (of 04).epub", "EPUB", "derivative", size = 38_000_000),
+                file("Batman/01 (of 04)_text.pdf", "Text PDF", "derivative", size = 9_000_000),
+            ),
+        ) as Offer.Download
+        assertThat(offer.kind).isEqualTo(TextKind.COMIC)
+        assertThat(offer.file.name).isEqualTo("Batman/01 (of 04).cbr")
+        assertThat(offer.pdf).isNull()
+    }
+
+    @Test fun anUploadedImagePdfBeatsTheEpubMadeFromIt() {
+        // V for Vendetta: an image-only PDF, whose derived EPUB has none of the pictures.
+        val offer = ArchiveOffers.choose(
+            item(
+                file("V.pdf", "Image Container PDF", size = 58_000_000),
+                file("V.epub", "EPUB", "derivative", size = 237_000),
+                file("V_text.pdf", "Additional Text PDF", "derivative", size = 67_000_000),
+                file("V_djvu.txt", "DjVuTXT", "derivative"),
+            ),
+        ) as Offer.Download
+        assertThat(offer.kind).isEqualTo(TextKind.PDF)
+        assertThat(offer.file.name).isEqualTo("V.pdf")
+    }
+
+    @Test fun anUploadedEpubOrTextIsStillTheBook() {
+        val epub = ArchiveOffers.choose(item(file("b.epub", "EPUB"), file("b.pdf", "Text PDF"))) as Offer.Download
+        assertThat(epub.kind).isEqualTo(TextKind.EPUB)
+        val text = ArchiveOffers.choose(item(file("c.txt", "Text"), file("c.pdf", "Text PDF"))) as Offer.Download
+        assertThat(text.kind).isEqualTo(TextKind.TEXT)
+        assertThat(text.pdf!!.name).isEqualTo("c.pdf")
+    }
+
+    @Test fun anEpubMadeFromAScanComesWithTheScansPdf() {
+        // A book scanned page by page: no uploaded PDF, so archive.org's EPUB (for reading and Listen) and its PDF.
+        val offer = ArchiveOffers.choose(
+            item(
+                file("d_jp2.zip", "Single Page Processed JP2 ZIP"),
+                file("d.epub", "EPUB", "derivative"),
+                file("d.pdf", "Text PDF", "derivative"),
+            ),
+        ) as Offer.Download
+        assertThat(offer.kind).isEqualTo(TextKind.EPUB)
+        assertThat(offer.pdf!!.name).isEqualTo("d.pdf")
     }
 
     @Test fun pdfFormatPreference() {
@@ -198,6 +262,11 @@ class ArchiveOfferTest {
 
     @Test fun previewFromSearchFormats() {
         assertThat((ArchiveOffers.preview(doc(listOf("EPUB"))) as Offer.Download).kind).isEqualTo(TextKind.EPUB)
+        // An Image Container PDF means an uploaded PDF, and a Comic Book format an uploaded comic: either beats the EPUB.
+        assertThat((ArchiveOffers.preview(doc(listOf("EPUB", "Image Container PDF", "Text PDF"))) as Offer.Download).kind)
+            .isEqualTo(TextKind.PDF)
+        assertThat((ArchiveOffers.preview(doc(listOf("Comic Book RAR", "EPUB", "Text PDF"))) as Offer.Download).kind)
+            .isEqualTo(TextKind.COMIC)
         val ocr = ArchiveOffers.preview(doc(listOf("DjVuTXT", "Text PDF"))) as Offer.Download
         assertThat(ocr.kind).isEqualTo(TextKind.OCR_TEXT)
         assertThat(ocr.pdf).isNotNull()

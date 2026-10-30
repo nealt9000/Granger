@@ -31,10 +31,11 @@ import app.granger.sources.ItemStatusText
 /** The label for what an item offers; null when the guess is unknown. */
 internal fun offerLabel(offer: Offer?): String? = when (offer) {
     is Offer.Download -> when (offer.kind) {
-        app.granger.core.archive.TextKind.EPUB -> "EPUB"
+        app.granger.core.archive.TextKind.EPUB -> if (offer.pdf != null) "EPUB made from a scan · PDF" else "EPUB"
         app.granger.core.archive.TextKind.TEXT -> "Plain text"
         app.granger.core.archive.TextKind.OCR_TEXT -> if (offer.pdf != null) "OCR text: may have errors · PDF" else "OCR text: may have errors"
         app.granger.core.archive.TextKind.PDF -> "PDF"
+        app.granger.core.archive.TextKind.COMIC -> "Comic: its pages, to zoom"
     }
     Offer.LendOnly -> "Borrow on archive.org"
     Offer.Nothing -> "No downloadable text"

@@ -31,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -75,6 +76,8 @@ fun ListenPlayerScreen(
     val picked by viewModel.pickedTab.collectAsStateWithLifecycle()
     val audiobooks by viewModel.hasAudiobooks.collectAsStateWithLifecycle()
     val tab = listenTab(picked, ui.now, saved)
+    // The mini-player shows this side once the player closes (PlayerFocus).
+    LaunchedEffect(tab) { viewModel.shownTab(tab) }
     val media = mediaMode(ui.now, saved, audiobooks)
     val live = modeOf(ui.now) == media
     // A Surface, like the Scaffold every other screen sits in: it provides onBackground as LocalContentColor, without
