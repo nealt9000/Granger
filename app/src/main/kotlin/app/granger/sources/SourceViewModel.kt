@@ -354,6 +354,7 @@ class SourceViewModel(
 
     private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): SourceUi {
         val current = state.catalog
+        val gutenberg = scope == CatalogScope.GUTENBERG
         val volumeRows = volumeRows(s.volumes, records)
         // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
         val recordsById = records.groupBy { it.itemId }
@@ -387,7 +388,9 @@ class SourceViewModel(
                 is VoiceEntry -> item.attribution
             }
             val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
-            return ItemRow(item.id, item.title, details, description, item.downloadBytes, status(item), packId, ask)
+            // On Project Gutenberg's own screen, each pack is its subject alone.
+            val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else item.title
+            return ItemRow(item.id, title, details, description, item.downloadBytes, status(item), packId, ask)
         }
         val needle = s.query.trim()
         val kiwix = scope == CatalogScope.KIWIX
@@ -440,6 +443,13 @@ class SourceViewModel(
                 tier to packs.filterNot { it.id in tierIds }
             } else {
                 packs.partition { kiwix && chosen == null && it.featured }
+            }
+            if (gutenberg) {
+                // Project Gutenberg (Plan GB Decision 7): the subject packs A–Z, then the two everything-packs, each with its size.
+                val (everything, subjects) = packs.partition { it.zimName.endsWith("_all") }
+                if (subjects.isNotEmpty()) add(Section(SUBJECTS, subjects.sortedBy { it.title.lowercase() }.map(::row)))
+                if (everything.isNotEmpty()) add(Section(EVERYTHING, everything.sortedBy { it.sizeBytes }.map(::row)))
+                return@buildList
             }
             if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
             rest.groupBy { it.category }
@@ -497,6 +507,9 @@ class SourceViewModel(
         /** Rows a folded section shows before Show all. */
         const val FOLDED_ROWS = 8
         const val RECOMMENDED = "Recommended"
+        const val SUBJECTS = "Subjects"
+        const val EVERYTHING = "Everything"
+        private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
         private const val CLASSICS_PRESET = "granger-classics"
 
         /** The family table's categories (tools/catalog-gen/kiwix_families.json); any other sorts after, by name. */

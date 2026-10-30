@@ -156,6 +156,18 @@ class ReadinessModelTest {
         assertThat(domain(r, "medicine").installedBytes).isEqualTo(2_800)
     }
 
+    @Test fun aGutenbergPackStillCountsTowardLiteratureAndAsKiwixStorage() {
+        // Offered under Books now (Plan GB Decision 7), but it's still a Kiwix pack of the literature domain.
+        val music = packEntry("gutenberg_en_lcc-m", "gutenberg_en_lcc-m", "literature", 3_994, family = "gutenberg")
+        val literature = Domain("literature", "Literature", essential = listOf("family:gutenberg"), comprehensive = listOf("family:gutenberg"))
+        val cat = catalog.copy(packs = catalog.packs + music, readiness = Readiness(readiness.domains + literature))
+        val r = report(packs = listOf(installed(music)), cat = cat)
+        assertThat(domain(r, "literature").coverage).isEqualTo(Coverage.COMPREHENSIVE)
+        assertThat(domain(r, "literature").installedBytes).isEqualTo(3_994)
+        assertThat(r.storage.single { it.source == Source.KIWIX }.bytes).isEqualTo(3_994)
+        assertThat(ReadinessModel.sourceOf(installed(music), cat)).isEqualTo(Source.KIWIX)
+    }
+
     @Test fun aPackUnknownToTheCatalogIsStorageOnly() {
         val stranger = pack("u-stranger", "Stranger").copy(name = "stranger_en_all", sizeBytes = 777, filePath = "/internal/packs/stranger.zim")
         val r = report(packs = listOf(stranger))

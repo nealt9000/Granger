@@ -138,6 +138,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import app.granger.core.books.TextQuote
@@ -291,6 +292,7 @@ fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = t
 internal fun routeOf(link: GetMoreLink): Any = when (link) {
     GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
     GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
+    GetMoreLink.GUTENBERG -> SourceRoute(CatalogScope.GUTENBERG)
     GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
     GetMoreLink.LIBRIVOX -> LibriVoxRoute
     GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
@@ -630,6 +632,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 nav.showTab(tab, keepCurrent = true)
             }
             is PackDocuments.Opened.Failed -> android.widget.Toast.makeText(appContext, opened.message, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** Opens the Library collection of an installed Gutenberg pack's books (Plan GB Decision 4). */
+    fun openGutenbergCollection(packId: String) {
+        scope.launch {
+            val pack = container.library.packs.first().firstOrNull { it.id == packId } ?: return@launch
+            nav.navigate(CollectionRoute("c:${app.granger.core.library.Filing.defaultKey(pack)}"))
         }
     }
 
@@ -1032,7 +1042,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
-                    onOpenPack = ::openPack,
+                    // An installed Gutenberg pack opens as its books, in the Library (Plan GB).
+                    onOpenPack = { packId -> if (source == CatalogScope.GUTENBERG) openGutenbergCollection(packId) else openPack(packId) },
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->

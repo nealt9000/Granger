@@ -18,6 +18,14 @@ class CatalogScopeTest {
         assertThat(scopeOf(packEntry("lookalike", urls = listOf("https://notkiwix.org.evil.test/a.zim")))).isEqualTo(CatalogScope.GRANGER)
     }
 
+    @Test fun gutenbergPacksAreGutenbergsNotKiwixs() {
+        val kiwix = listOf("https://download.kiwix.org/zim/gutenberg/gutenberg_en_lcc-m_2026-03.zim")
+        // By family, and failing that by ZIM name (Plan GB Decision 1).
+        assertThat(scopeOf(packEntry("gutenberg_en_lcc-m", urls = kiwix).copy(family = "gutenberg"))).isEqualTo(CatalogScope.GUTENBERG)
+        assertThat(scopeOf(packEntry("m", urls = kiwix, zimName = "gutenberg_en_lcc-m"))).isEqualTo(CatalogScope.GUTENBERG)
+        assertThat(scopeOf(packEntry("w", urls = kiwix, zimName = "wikisource_en_all"))).isEqualTo(CatalogScope.KIWIX)
+    }
+
     @Test fun modelsAreModels() {
         assertThat(scopeOf(modelEntry("e2b"))).isEqualTo(CatalogScope.MODELS)
     }

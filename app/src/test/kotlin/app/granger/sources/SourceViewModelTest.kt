@@ -135,6 +135,41 @@ class SourceViewModelTest {
         assertThat(ids(CatalogScope.MODELS)).containsExactly("e2b")
     }
 
+    private fun gutenberg(lcc: String, subject: String, size: Long, featured: Boolean = false) = packEntry(
+        "gutenberg_en_$lcc", category = "Literature & Drama", size = size,
+        urls = listOf("https://download.kiwix.org/zim/gutenberg/gutenberg_en_${lcc}_2026-03.zim"), featured = featured,
+        zimName = "gutenberg_en_$lcc",
+    ).copy(title = "$subject · Project Gutenberg", family = "gutenberg")
+
+    @Test fun projectGutenbergListsTheSubjectsAToZThenEverythingAndKiwixDoesnt() = runTest(main.dispatcher) {
+        val music = gutenberg("lcc-m", "Music and books on music", 3_994_272_104)
+        val philosophy = gutenberg("lcc-b", "Philosophy, psychology, religion", 6_365_165_314, featured = true)
+        val fineArts = gutenberg("lcc-n", "Fine arts", 22_752_881_356)
+        val english = gutenberg("all", "Every English book", 221_251_590_584)
+        val every = packEntry(
+            "gutenberg_mul_all", size = 253_055_616_960, urls = listOf("https://download.kiwix.org/zim/gutenberg/gutenberg_mul_all_2026-03.zim"),
+            zimName = "gutenberg_mul_all",
+        ).copy(title = "Every book, all languages · Project Gutenberg", family = "gutenberg")
+        val wiki = kiwix("wiki", "Reference")
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(every, wiki, music, english, philosophy, fineArts)))
+        library.packList.value = listOf(pack("u-gutenberg_en_lcc-m").copy(name = "gutenberg_en_lcc-m"))
+
+        val ui = viewModel(CatalogScope.GUTENBERG).ui.value
+        assertThat(ui.sections.map { it.title }).containsExactly("Subjects", "Everything").inOrder()
+        assertThat(ui.categories).isEmpty()
+        assertThat(ui.presets).isEmpty()
+        // A–Z by subject, each its subject alone on this screen, with its size and whether it's on the phone.
+        val subjects = ui.sections[0].rows
+        assertThat(subjects.map { it.title }).containsExactly("Fine arts", "Music and books on music", "Philosophy, psychology, religion").inOrder()
+        assertThat(subjects.map { it.sizeBytes }).containsExactly(22_752_881_356, 3_994_272_104, 6_365_165_314).inOrder()
+        assertThat(subjects[1].status).isEqualTo(ItemStatus.Installed)
+        assertThat(subjects[1].packId).isEqualTo("u-gutenberg_en_lcc-m")
+        assertThat(ui.sections[1].rows.map { it.title }).containsExactly("Every English book", "Every book, all languages").inOrder()
+
+        // Kiwix's list no longer shows them, featured or not.
+        assertThat(viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("wiki")
+    }
+
     private fun kiwix(id: String, category: String = "Q&A", featured: Boolean = false, zimName: String = "n-$id") =
         packEntry(id, category = category, urls = listOf("https://download.kiwix.org/zim/$id.zim"), featured = featured, zimName = zimName)
 
