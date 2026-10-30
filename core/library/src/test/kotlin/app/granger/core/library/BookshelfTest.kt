@@ -60,8 +60,13 @@ class BookshelfTest {
         assertThat(importFiles().filter { it.startsWith(".incoming-") }).isEmpty()
     }
 
-    @Test fun refusesAnEncryptedPdf() = test {
+    @Test fun importsAnOwnerPasswordPdf() = test {
         val source = PdfFixtures.encrypted(src)
+        assertThat(pdfShelf.import("flags.pdf") { source.inputStream() }).isInstanceOf(ImportResult.Imported::class.java)
+    }
+
+    @Test fun refusesAPasswordLockedPdf() = test {
+        val source = PdfFixtures.passwordLocked(src)
         val result = pdfShelf.import("locked.pdf") { source.inputStream() }
         assertThat(result).isEqualTo(ImportResult.Protected(DrmKind.PDF_ENCRYPTED))
         assertThat(result.message("locked.pdf")).isEqualTo(
