@@ -208,12 +208,14 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
     - `titleOverrides` replace contents (and page `<title>`) titles; a key naming a page the book doesn't have fails the build, so an override that drifts out of date is caught. Rows added: Faerie Queene (all 31 pages: Introduction, Letter to Raleigh, "Dedication; Cantos I–IV", "Cantos IV–VII", "Cantos VII–X", "Cantos X–XII", then "Notes: Canto N"/"Questions: Canto N", Glossary; the poem's cantos are `p.i16` text, not headings, so its pages are size splits) and Beowulf ("Prelude; I–XXXIV", "XXXV–XLIII", "Footnotes"). Metamorphoses is left to Task 8.
     - **Word exports** (`verse.flatten_word_export`, verse works only, and only on a page with `xhtml_` classes): unwraps spans whose classes are all `xhtml_font*` (not `xhtml_big`, which carries real sizing, e.g. Medea's headings), turns single-column `table.xhtml_*` into a `div` per non-empty cell (keeping its `style`), and unwraps every `blockquote` whose only child is an attribute-less `div` (Word's indent levels). Real quotations stay.
     - **Keats Poems 1817 passes:** 0 flush wraps at all three settings (was 96%), so the edition stays. Lines wrapping (hanging) at 390 px: 460 of 1,819 (1,274 with one blockquote level left).
-- [ ] **Task 6: the verse check**
+- [x] **Task 6: the verse check**
   - Move the audit's `render.py` and `compare.py` into `tools/pack-builder/verse_check/`, with a README covering Chrome, Readium CSS taken from the app's AAR, and Noto Serif.
   - Rebuild the 135 verse-section books plus Hamlet and run the check at 390 px and 360 px at 100%, and at 390 px at 125%.
   - **Pass:** no book wraps flush on more than 2% of lines, apart from Keats under Decision 3, and lost alignment is 0.
   - Take screenshot pairs of Paradise Lost, Faerie Queene, G&S, Leaves of Grass, Canterbury Tales, Hamlet, Divine Comedy, the Sonnets, Faust Part One and Hansel and Gretel for Neal's review.
   - Work through the per-book notes in audit §6.
+  - **Done 2026-10-30.** `tools/pack-builder/verse_check/`: `harness.py setup` copies Readium CSS out of the readium-navigator 3.4.0 AAR in the Gradle cache and fetches Noto Serif into `~/.cache/granger/verse-check/`; `render.py BOOKS W SCALE` serves the pages itself on a free port and measures every book whose row reads as verse (eBible rows too); `compare.py` applies the pass rule and exits 1 on a failure; `shot.py` takes a phone screenshot of one page. The README covers setup. The line marking and the pass rule have unit tests (`tests/test_verse_check.py`); rendering needs Chrome and stays out of pytest. The audit's own scripts stay in the spike folder as the record.
+  - **Measured on the Task 10 build** (147 books: every verse-section row, the three eBibles, the Douay-Rheims and the Consolation; 110 with ≥ 100 lines; 474,835 verse lines): flush continuation rows **17** at 390/100% (101,623 lines wrap, all others hang), **38** at 360/100%, **102** at 390/125%. Worst book: Ash-Wednesday 0.45% (1 of 222) at 360 and 125%; G&S 0.36% and Martha 0.27% at 125%. No book over 2%; Keats needs no exception. Lost alignment **0** at every setting. **PASS.** The screenshot pairs for Neal and the audit §6 per-book notes were not redone this round; Task 4/5's shots are in the session scratchpad.
 
 ### Part 2: the brand
 
@@ -271,11 +273,26 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
 
 ### Part 4: release
 
-- [ ] **Task 10: full build and checks**
+- [x] **Task 10: full build and checks**
   - Run `build-epubs` for all works into `~/granger-build/classics-<date>/`.
   - epubcheck must report 0 errors for every file, as the 2026-10-17 release did.
   - Run the Task 6 verse check over the whole set.
   - Record the total size against the old 95.2 MB.
+  - **Fixups first (2026-10-30)**, from Tasks 2, 5 and 8, each a commit with tests:
+    - **Ramayan's split `dl`:** a size split moves a `dt` at a page's foot over with its `dd`, and every `dl` on a page gets an empty `dt`/`dd` if it still starts with a `dd` or ends with a `dt`.
+    - **Faded Page notices** (Cakes and Ale): `gutenberg.clean` drops the widest block of ≤ 600 characters around four exact phrases in the first 12,000 characters. None of the other nine 1930 works has them; "these faded pages" in Gawain is untouched. Its "later edition?" warning stays: the Triangle Books 1941 reprint's copyright page, of the 1930 text.
+    - **`cutAfter`** (new optional manifest field): the work's last words, which must appear exactly once; everything after goes. The Guermantes Way uses it to drop the Modern Library catalogue and the transcriber's corrections list. No generic rule: a publisher's list can't be told safely from a work's own.
+    - **`packSections`** (new optional manifest field): a page over the budget packs its next-level sections into as few even pages as fit (usfm's `even_runs`, now in `chapters`), named "Genesis 1–27", "Psalms 98–150"; a book that fits is named for its chapters ("Genesis", "Lamentations" past its preface). Douay-Rheims: 776 → 93 pages. Left as is: its last two pages are "Additional Books (part 1/2)", and "The New Testament…" heading sits at the foot of 2 Machabees inside a wrapper copy.
+    - **Title check:** dashes part words, so both Metamorphoses rows have `titleCheck` back on.
+    - **Start of text** landmark: the first page whose title (an override wins) or heading isn't Title page, Contents, Table of contents, Front matter, Dedication or "…'s Dedication".
+    - **Title case:** a small word after initials stays small ("The U.S.A. and Its States").
+    - **Consolation of Philosophy:** `"verse": true`.
+    - **The Woman of Andros** is left as one page: 131 KB, under the 150 KB budget, with seven scene breaks (`hr.tb`) and no headings. Splitting it would need a new rule for one book.
+  - **Done 2026-10-30.** `build-epubs` into `~/granger-build/classics-2026-10-30/`: **372 EPUBs, 114.8 MB** (old release 95.2 MB for 350; +19.6 MB, mostly the three eBibles, the Douay-Rheims, Proust and Genji). Largest: the Douay-Rheims, 2.10 MB (93 pages, largest page 146 KB); then WEB 1.91 MB and Ramayan 1.73 MB. 36 minutes, mostly fetching new Gutenberg files. Five "later edition?" warnings, all known (Art of War's 1963 mention, Origin's edition list, Peter Pan's 1991 Fulcrum line, Cakes and Ale's 1941 reprint, Decameron's accent note).
+  - **epubcheck 5.2.1: 372 of 372 with 0 fatals, 0 errors, 0 warnings, 0 infos.** `min()` in `book.css` passes.
+  - **Verse check:** as Task 6, PASS at all three settings. The Douay-Rheims has 99 verse lines (its text is prose verses), 0 flush; WEB 23,338 lines and BSB 24,335, 0 flush; JPS has none (its poetry is set as prose).
+  - **Looked at** (390 × 844 screenshots under Readium CSS and Noto Serif): Douay-Rheims Genesis 1 (book intro, "Genesis Chapter 1", argument, verses, Challoner's notes indented); Cakes and Ale's opening (now the title page, no Faded Page notices); Guermantes's last page (ends "You'll live to bury us all!""); Meditations (Long) Book I; Metamorphoses VIII–XV "Book the Eighth, Fable I"; Maltese Falcon chapter 1; Consolation Song I (lines hang). Mahabharata's contents read "Book I: Astra Darsana (The Tournament)" … "Glossary of Sanskrit Words".
+  - **Seen, not fixed:** Long's Meditations heads its first book "The Thoughts / Of / Marcus Aurelius Antoninus" (a `<br>` in a heading starts a new sentence, so "Of" is capitalised) and its contents read "I." with the stop while II–XII don't. Footnote links show in the browser's link blue in these shots; the reader's theme sets link colour.
 - [ ] **Task 11: vectors**
   - Rebuild every Classics `.gvec` with `tools/vectors/build.py --only granger-classics` on the Mac, timing it.
   - Upload the vectors under a new `vectors-<date>` tag.
