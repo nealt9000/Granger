@@ -587,6 +587,14 @@ class AppContainer(context: Context) {
             if (record.kind == ItemKind.PACK) {
                 library.fileReplaced(record.filePath)
                 library.refresh()
+                // A Switch: the pack's other flavour gives way to this one, keeping what was saved in it (Plan KB).
+                try {
+                    app.granger.sources.FlavourSwitch.settle(record.itemId, catalog.state.value.catalog, downloads, library)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w("Granger", "Couldn't remove the other flavour of ${record.itemId}", e)
+                }
             } else if (record.kind == ItemKind.BOOK) {
                 fileBookRecord(bookshelf, archiveSidecarDir, record) { appScope.launch { bookIndex.indexPending() } }
             } else if (record.kind == ItemKind.AUDIO) {

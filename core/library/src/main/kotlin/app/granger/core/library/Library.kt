@@ -43,4 +43,12 @@ interface Library {
      * exists and can't be deleted; an unknown id is already gone, so it returns true.
      */
     suspend fun remove(packId: String): Boolean
+
+    /**
+     * [newPackId] takes [oldPackId]'s place (another flavour of the same pack, Plan KB walkthrough): the old file and
+     * entry go as [remove] takes them, but its bookmarks, reading places, tabs and history move to the new pack, as a
+     * new snapshot inherits them. False, with nothing changed, when the new pack isn't readable, the two aren't the same
+     * ZIM name, or the old file can't be deleted.
+     */
+    suspend fun supersede(oldPackId: String, newPackId: String): Boolean = false
 }

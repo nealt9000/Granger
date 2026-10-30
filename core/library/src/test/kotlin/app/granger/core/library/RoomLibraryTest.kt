@@ -427,4 +427,47 @@ class RoomLibraryTest {
         assertThat(packs()).isEmpty()
         assertThat(library.remove("nope")).isTrue()
     }
+
+    /** Plan KB walkthrough: Switch's new flavour takes the old one's place, keeping what was saved in it. */
+    @Test fun anotherFlavourSupersedesTheOldOneAndKeepsItsMarks() = test {
+        val gone = mutableListOf<String>()
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val old = zim(internal, "wikipedia_en_medicine_nopic_2026-10.zim", "u-nopic", name = "wikipedia_en_medicine")
+        hooked.refresh()
+        hooked.setBookmarked("u-nopic", "index", "Home", true)
+        hooked.savePosition("u-nopic", "index", 0.4f)
+        val sessions = RoomReadingSessions(db) { clock }
+        val tabId = sessions.openTab("u-nopic", "index", "Home")
+        clock = 9_000L
+        zim(internal, "wikipedia_en_medicine_maxi_2026-10.zim", "u-maxi", name = "wikipedia_en_medicine")
+        hooked.refresh()
+        // Both flavours on the phone stay apart until the switch settles.
+        assertThat(hooked.packs.first().map { it.id }).containsExactly("u-nopic", "u-maxi")
+
+        assertThat(hooked.supersede("u-nopic", "u-maxi")).isTrue()
+
+        assertThat(old.exists()).isFalse()
+        assertThat(hooked.packs.first().map { it.id }).containsExactly("u-maxi")
+        assertThat(hooked.packs.first().single().addedAt).isEqualTo(1_000L)
+        assertThat(hooked.bookmarks.first().map { it.packId to it.path }).containsExactly("u-maxi" to "index")
+        assertThat(hooked.position("u-maxi", "index")).isEqualTo(0.4f)
+        assertThat(sessions.tab(tabId)?.packId).isEqualTo("u-maxi")
+        assertThat(sessions.history.first().map { it.packId }).containsExactly("u-maxi")
+        assertThat(gone).containsExactly("u-nopic")
+        hooked.refresh()
+        assertThat(hooked.packs.first().map { it.id }).containsExactly("u-maxi")
+    }
+
+    @Test fun supersedeLeavesTheOldPackWhenTheNewOneIsntThere() = test {
+        val old = zim(internal, "a.zim", "u-a", name = "n")
+        zim(internal, "other.zim", "u-other", name = "other")
+        library.refresh()
+        library.setBookmarked("u-a", "index", "Home", true)
+        // No new pack (the download failed or was cancelled), or a different pack altogether.
+        assertThat(library.supersede("u-a", "u-missing")).isFalse()
+        assertThat(library.supersede("u-a", "u-other")).isFalse()
+        assertThat(old.exists()).isTrue()
+        assertThat(packs().map { it.id }).containsExactly("u-a", "u-other")
+        assertThat(library.bookmarks.first().map { it.packId }).containsExactly("u-a")
+    }
 }
