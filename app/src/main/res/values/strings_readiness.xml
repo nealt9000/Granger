@@ -80,4 +80,8 @@
     <!-- Verify a file against the catalog. -->
     <string name="readiness_check">Check</string>
     <string name="readiness_download_again">Download again</string>
+    <!-- A bigger pack on the phone holds one this domain lists (Plan WF). %1$s is the set, such as Wikipedia; %2$s the bigger slice, such as Top 1 million; %3$s the smaller, such as Best 50,000. -->
+    <string name="readiness_covers_slice">%1$s %2$s covers %3$s</string>
+    <!-- %1$s is the bigger pack's title; %2$s the one it holds. -->
+    <string name="readiness_covers">%1$s covers %2$s</string>
 </resources>

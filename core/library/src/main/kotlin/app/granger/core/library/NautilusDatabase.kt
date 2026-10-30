@@ -1,10 +1,25 @@
 package app.granger.core.library
 
 /**
- * The document list of a Kiwix "nautilus" pack (the zimgit-* packs). The pack lists its documents from JavaScript, in
- * an entry `database.js`: `var DATABASE = [{'_id': '00001', 'ti': 'Camping Recipes', 'fp': ['Food Preparation (2).pdf']}, …]`,
- * Python-style dicts with single- or double-quoted strings. Each document's file is at `files/<fp>` in the pack, and
- * its `ti` is the title the pack's own page shows, which beats the PDF's metadata and the link's words.
+ * One record of a nautilus pack's `database.js`: a document, its title (`ti`), description (`dsc`), author (`aut`) and
+ * files (`fp`, each at `files/<fp>` in the pack), [order] its place in the list. The 9 packs in Kiwix's catalog
+ * (2026-10-30) give every record all five keys and one file; a blank or `-` author means none.
+ */
+data class NautilusRecord(
+    val id: String,
+    val title: String,
+    val description: String,
+    val author: String,
+    val files: List<String>,
+    val order: Int,
+)
+
+/**
+ * The document list of a Kiwix "nautilus" pack (the zimgit-* and prunelle packs). The pack lists its documents from
+ * JavaScript, in an entry `database.js`: `var DATABASE = [{'_id': '00001', 'ti': 'Camping Recipes', 'dsc': '…',
+ * 'aut': 'Various', 'fp': ['Food Preparation (2).pdf']}, …]`, Python-style dicts with single- or double-quoted strings.
+ * Each document's file is at `files/<fp>` in the pack, and its `ti` is the title the pack's own page shows, which beats
+ * the PDF's metadata and the link's words.
  */
 object NautilusDatabase {
     /** The entry the list is in. */
@@ -19,9 +34,19 @@ object NautilusDatabase {
      */
     fun parse(text: String): Map<String, String> {
         val titles = HashMap<String, String>()
+        for (record in records(text)) record.files.forEach { titles.putIfAbsent(it, record.title) }
+        return titles
+    }
+
+    /**
+     * The records of [text], in order, each with a title and at least one file; strings trimmed, an author of `-`
+     * blank. Read leniently, like [parse].
+     */
+    fun records(text: String): List<NautilusRecord> {
+        val out = ArrayList<NautilusRecord>()
         val scanner = Scanner(text)
         var depth = 0
-        var title: String? = null
+        val fields = HashMap<String, String>()
         val files = mutableListOf<String>()
         // The last string read at the record's own level, a key once a ':' follows it.
         var key: String? = null
@@ -35,7 +60,7 @@ object NautilusDatabase {
                     when {
                         inFiles -> files += s
                         depth == 1 && expectingValue -> {
-                            if (key == "ti") title = s
+                            key?.let { fields.putIfAbsent(it, s) }
                             expectingValue = false
                             key = null
                         }
@@ -45,7 +70,7 @@ object NautilusDatabase {
                 '{' -> {
                     depth++
                     if (depth == 1) {
-                        title = null
+                        fields.clear()
                         files.clear()
                         key = null
                         expectingValue = false
@@ -53,8 +78,18 @@ object NautilusDatabase {
                 }
                 '}' -> {
                     if (depth == 1) {
-                        val name = title?.trim().orEmpty()
-                        if (name.isNotEmpty()) files.forEach { titles.putIfAbsent(it, name) }
+                        val title = fields["ti"]?.trim().orEmpty()
+                        val kept = files.filter { it.isNotBlank() }
+                        if (title.isNotEmpty() && kept.isNotEmpty()) {
+                            out += NautilusRecord(
+                                id = fields["_id"]?.trim().orEmpty(),
+                                title = title,
+                                description = fields["dsc"]?.trim().orEmpty(),
+                                author = fields["aut"]?.trim()?.takeUnless { it == "-" }.orEmpty(),
+                                files = kept,
+                                order = out.size,
+                            )
+                        }
                     }
                     if (depth > 0) depth--
                     inFiles = false
@@ -74,7 +109,7 @@ object NautilusDatabase {
                 }
             }
         }
-        return titles
+        return out
     }
 
     /** Reads [text] a character at a time, and a quoted string with its escapes. */

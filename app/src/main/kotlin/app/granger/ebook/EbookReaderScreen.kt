@@ -4,6 +4,7 @@ package app.granger.ebook
 
 import androidx.compose.ui.res.stringResource
 import app.granger.R
+import app.granger.UiText
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -21,10 +22,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +58,7 @@ import app.granger.reader.ClearOfShell
 import app.granger.reader.ReaderBarActions
 import app.granger.reader.ReaderBottomBar
 import app.granger.reader.ReaderBookPageInsets
+import app.granger.reader.ReaderMenuItem
 import app.granger.reader.ReaderPdfPageInsets
 import app.granger.reader.ReaderTopBar
 import app.granger.reader.SlidingBar
@@ -104,6 +109,10 @@ fun EbookReaderScreen(
     /** Opens the word's Wiktionary entry in [packId]; false when it has none. */
     onLookUp: suspend (packId: String, word: String) -> Boolean = { _, _ -> false },
     onBack: () -> Unit,
+    /** Shows the rail tab [tabId] (an ebook's original pages, Plan IA). */
+    onOpenTab: (tabId: Long) -> Unit = {},
+    /** Opens this book again: it has just become an ebook (Read as ebook). */
+    onReopen: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var navigator by remember { mutableStateOf<VisualNavigator?>(null) }
@@ -232,12 +241,47 @@ fun EbookReaderScreen(
     BackHandler(enabled = state.panel != null) { viewModel.open(null) }
     LaunchedEffect(navigator, state.prefs) {
         when (val shown = navigator) {
-            is EpubNavigatorFragment -> shown.submitPreferences(state.prefs.toEpub())
+            is EpubNavigatorFragment -> shown.submitPreferences(state.prefs.toEpub(state.fixedLayout))
             // The only PDF navigator the reader builds is PDFium's (BookNavigator.Pdf).
             is PdfNavigatorFragment<*, *> -> @Suppress("UNCHECKED_CAST") (shown as PdfiumNavigatorFragment).submitPreferences(state.prefs.toPdfium())
             else -> Unit
         }
     }
+
+    var confirmRemovePages by remember { mutableStateOf(false) }
+    // Making an ebook takes a while on a long book (about 20 s for 600 pages): the message stays until it's done.
+    val making = stringResource(R.string.ebook_making_ebook)
+    val context = LocalContext.current
+    LaunchedEffect(state.makingEbook) {
+        if (state.makingEbook) snackbar.showSnackbar(making, duration = SnackbarDuration.Indefinite)
+    }
+    LaunchedEffect(state.notice) {
+        state.notice?.let {
+            snackbar.showSnackbar(it.resolve(context))
+            viewModel.noticeShown()
+        }
+    }
+    if (confirmRemovePages) {
+        AlertDialog(
+            onDismissRequest = { confirmRemovePages = false },
+            title = { Text(stringResource(R.string.ebook_remove_original_title)) },
+            text = { Text(stringResource(R.string.ebook_remove_original_body)) },
+            confirmButton = {
+                TextButton(onClick = { confirmRemovePages = false; viewModel.removeOriginalPages() }) { Text(stringResource(R.string.common_remove)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmRemovePages = false }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+    // ⋯: an ebook made from a PDF opens or removes its original pages; a PDF can be made an ebook (Plan IA).
+    val menu = listOfNotNull(
+        state.originalPagesBytes?.let {
+            ReaderMenuItem(R.string.ebook_original_pages) { scope.launch { viewModel.openOriginalPages()?.let(onOpenTab) } }
+        },
+        state.originalPagesBytes?.let {
+            ReaderMenuItem(UiText.Res(R.string.ebook_remove_original_pages, app.granger.formatBytes(it))) { confirmRemovePages = true }
+        },
+        ReaderMenuItem(R.string.ebook_read_as_ebook) { viewModel.readAsEbook(onReopen) }.takeIf { state.canReadAsEbook && !state.makingEbook },
+    )
 
     val bars = bookBarActions(
         isPdf = state.isPdf,
@@ -246,6 +290,8 @@ fun EbookReaderScreen(
         onContents = { viewModel.open(Panel.CONTENTS) },
         onSearch = { viewModel.open(Panel.SEARCH) },
         onTextSettings = { viewModel.open(Panel.SETTINGS) },
+        fixedLayout = state.fixedLayout,
+        hasText = state.hasText,
         onBookmark = viewModel::toggleBookmark,
         voice = state.voice,
         onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
@@ -258,7 +304,7 @@ fun EbookReaderScreen(
                 viewModel.readAloud(page, words)
             }
         }),
-    )
+    ).copy(menu = menu)
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // The navigator has the whole screen whether the chrome shows or not (Plan U3c Decision 5), so Readium never
@@ -268,7 +314,7 @@ fun EbookReaderScreen(
             Modifier
                 .fillMaxSize()
                 .testTag(EbookTags.PAGE)
-                .windowInsetsPadding(if (state.isPdf) ReaderPdfPageInsets else ReaderBookPageInsets)
+                .windowInsetsPadding(if (state.isPdf || state.fixedLayout) ReaderPdfPageInsets else ReaderBookPageInsets)
                 .pageTouches(viewModel::onPageTouch),
         ) {
             val error = state.error
@@ -285,7 +331,7 @@ fun EbookReaderScreen(
                     bookId = bookId,
                     factory = factory,
                     // The latest place, so a navigator rebuilt after rotation opens where the reader is.
-                    fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, listener, config),
+                    fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, state.fixedLayout, listener, config),
                     // PDFium inverts a page only as it lays the document out: Night on a PDF needs a fresh navigator.
                     look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
                     isCleared = { viewModel.isCleared },
@@ -393,13 +439,14 @@ private fun navigatorFragments(
     factory: BookNavigator,
     initial: org.readium.r2.shared.publication.Locator?,
     prefs: ReadingPrefs,
+    fixedLayout: Boolean,
     listener: EpubNavigatorFragment.Listener,
     config: EpubNavigatorFragment.Configuration,
-): androidx.fragment.app.FragmentFactory = remember(factory, initial, prefs, listener, config) {
+): androidx.fragment.app.FragmentFactory = remember(factory, initial, prefs, fixedLayout, listener, config) {
     when (factory) {
         is BookNavigator.Epub -> factory.factory.createFragmentFactory(
             initialLocator = initial,
-            initialPreferences = prefs.toEpub(),
+            initialPreferences = prefs.toEpub(fixedLayout),
             listener = listener,
             configuration = config,
         )

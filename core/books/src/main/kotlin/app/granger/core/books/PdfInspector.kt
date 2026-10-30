@@ -85,7 +85,7 @@ object PdfInspector {
      * Depth-first, each entry with its depth (0 at the top). Entries whose destination isn't a page in this document
      * are skipped; PdfBox follows a destination given directly, by name, or through a GoTo action.
      */
-    private fun outline(doc: PDDocument): List<OutlineEntry> {
+    internal fun outline(doc: PDDocument): List<OutlineEntry> {
         val root = doc.documentCatalog.documentOutline ?: return emptyList()
         val out = ArrayList<OutlineEntry>()
         fun walk(node: PDOutlineNode, depth: Int) {

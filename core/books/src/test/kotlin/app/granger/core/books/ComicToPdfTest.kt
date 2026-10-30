@@ -75,9 +75,4 @@ class ComicToPdfTest {
         assertThat(File(tmp.root, "junk.pdf").exists()).isFalse()
         assertThat(tmp.root.listFiles()!!.filter { it.name.startsWith(".incoming-") }).isEmpty()
     }
-
-    @Test fun pagesSortByTheirNumbers() {
-        val names = listOf("p10.jpg", "P2.jpg", "p1.jpg", "cover.jpg", "p02a.jpg")
-        assertThat(names.sortedWith(ComicToPdf.PAGE_ORDER)).containsExactly("cover.jpg", "p1.jpg", "P2.jpg", "p02a.jpg", "p10.jpg").inOrder()
-    }
 }

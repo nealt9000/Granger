@@ -1,5 +1,6 @@
 package app.granger
 
+import app.granger.core.books.PdfToEpub
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Audiobook
 import app.granger.core.library.Filing
@@ -114,6 +115,20 @@ class FakeLibrary : Library {
     }
 
     override suspend fun refresh() { refreshes++ }
+
+    /** Each [supersede] as old to new; [supersedes] says whether it works. */
+    val superseded = mutableListOf<Pair<String, String>>()
+    var supersedes = true
+    /** The [supersede]s made across a set (Plan WF), as old to new. */
+    val supersededAcross = mutableListOf<Pair<String, String>>()
+    override suspend fun supersede(oldPackId: String, newPackId: String, acrossNames: Boolean): Boolean {
+        if (!supersedes || packList.value.none { it.id == newPackId }) return false
+        superseded += oldPackId to newPackId
+        if (acrossNames) supersededAcross += oldPackId to newPackId
+        packList.update { list -> list.filterNot { it.id == oldPackId } }
+        bookmarkList.update { list -> list.map { if (it.packId == oldPackId) it.copy(packId = newPackId) else it } }
+        return true
+    }
 
     val replacedFiles = mutableListOf<String>()
     override suspend fun fileReplaced(path: String) { replacedFiles += path }
@@ -284,6 +299,20 @@ class FakeBookshelf : Bookshelf {
         removed += id
         bookList.update { list -> list.filterNot { it.id == id } }
         return true
+    }
+
+    /** Original pages by ebook id (Plan IA): the hidden PDF book and its size. */
+    val originalPages = mutableMapOf<String, Pair<Book, Long>>()
+
+    /** What Read as ebook gives, by book id; a passing report also turns the book into an EPUB. */
+    val ebookReports = mutableMapOf<String, PdfToEpub.Report>()
+    override suspend fun originalPages(bookId: String): Book? = originalPages[bookId]?.first
+    override suspend fun originalPagesBytes(bookId: String): Long? = originalPages[bookId]?.second
+    override suspend fun removeOriginalPages(bookId: String): Boolean = originalPages.remove(bookId) != null
+    override suspend fun readAsEbook(bookId: String): PdfToEpub.Report? {
+        val report = ebookReports[bookId] ?: return null
+        if (report.passes) bookList.update { list -> list.map { if (it.id == bookId) it.copy(format = BookFormat.EPUB) else it } }
+        return report
     }
 
     /** Pack documents registered, as (zimId, path, title); each becomes a PDF book whose file is the one given. */

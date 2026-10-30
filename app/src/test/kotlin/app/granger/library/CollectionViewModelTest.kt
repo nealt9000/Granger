@@ -351,4 +351,114 @@ class CollectionViewModelTest {
         assertThat(authorKey("Émile Zola")).isEqualTo("zola")
         assertThat(authorKey("")).isEmpty()
     }
+
+    // --- Plan GB: a Gutenberg collection ---
+
+    private val music = pack("u-m", "Music and books on music · Project Gutenberg")
+        .copy(name = "gutenberg_en_lcc-m", description = "Music and books on music")
+
+    private fun gutenbergBook(id: Int, title: String, indexed: Boolean = false, copied: Boolean = false): Book {
+        val file = java.io.File(tmp.root, "gutenberg/$id.epub")
+        if (copied) file.apply { parentFile!!.mkdirs(); writeText("epub") }
+        return book("book:gutenberg:$id", title).copy(
+            origin = BookOrigin.GUTENBERG, sourceRef = "gutenberg_en_lcc-m/$title.$id.epub", filePath = file.absolutePath,
+            sizeBytes = 1_000_000L * id, indexedAt = if (indexed) 5L else null,
+        )
+    }
+
+    private val gutenbergRow get() = CollectionRow(
+        ShelfCollection("c:gutenberg-m", "Music and books on music", "lit", false, defaultKey = "gutenberg-m"), emptyList(),
+        listOf(gutenbergBook(1, "Bach", indexed = true, copied = true), gutenbergBook(2, "Beethoven"), gutenbergBook(3, "Chopin")),
+    )
+
+    @Test fun aGutenbergCollectionsHeaderCountsItsBooksAndTheSearchableOnes() = runTest(main.dispatcher) {
+        library.packList.value = listOf(music)
+        show(gutenbergRow)
+        val vm = vm("c:gutenberg-m")
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.pack).isEqualTo(music)
+        assertThat(header.books).isEqualTo(3)
+        assertThat(header.searchable).isEqualTo(1)
+        assertThat(header.text).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        // The Library's row says the same (Plan GB walkthrough).
+        assertThat(rowCountText(gutenbergRow)).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+    }
+
+    @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {
+        show(collection("c:granger-classics", false, books = listOf(book("hamlet"))))
+        val vm = vm("c:granger-classics")
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.gutenbergHeader.value).isNull()
+    }
+
+    @Test fun makeAllSearchableGivesTheSizeThenCopiesOutAndIndexesWhatIsLeft() = runTest(main.dispatcher) {
+        library.packList.value = listOf(music)
+        show(gutenbergRow)
+        val copied = mutableListOf<String>()
+        var indexed = 0
+        val shelf = GutenbergShelf(
+            restore = { copied += it.id; true }, indexPending = { indexed++ },
+            dir = { java.io.File(tmp.root, "gutenberg") }, scope = this, io = main.dispatcher, batch = 1,
+        )
+        val vm = CollectionViewModel(
+            "c:gutenberg-m", shelves, library, sessions, bookshelf, downloads, appScope = this, gutenberg = shelf,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+
+        val cost = vm.searchableCost()!!
+        assertThat(cost.books).isEqualTo(2)
+        assertThat(cost.bytes).isEqualTo(5_000_000L)
+        assertThat(cost.freeBytes).isGreaterThan(0L)
+
+        vm.makeAllSearchable()
+        assertThat(vm.gutenbergHeader.value).isNotNull()
+        assertThat(shelf.progress.value["gutenberg_en_lcc-m"]).isEqualTo(SearchableProgress(0, 3))
+        testScheduler.advanceUntilIdle()
+        assertThat(copied).containsExactly("book:gutenberg:2", "book:gutenberg:3").inOrder()
+        assertThat(indexed).isAtLeast(1)
+        assertThat(shelf.progress.value).isEmpty()
+    }
+
+    // --- Plan KB: a nautilus pack's collection ---
+
+    private val food = pack("u-food", "Food for Preppers").copy(name = "zimgit-food-preparation_en", scraper = "nautiluszim 1.1.1")
+
+    private fun document(fp: String, title: String, indexed: Boolean = false, searchable: Boolean = true) =
+        book("book:nautilus:zimgit-food-preparation_en/$fp", title).copy(
+            origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-food-preparation_en/files/$fp",
+            format = app.granger.core.library.BookFormat.PDF, indexedAt = if (indexed) 5L else null, searchable = searchable,
+        )
+
+    private val foodRow get() = CollectionRow(
+        ShelfCollection("c:kiwixbooks-zimgit-food-preparation_en", "Food for Preppers", "lit", false,
+            defaultKey = "kiwixbooks-zimgit-food-preparation_en"),
+        emptyList(),
+        listOf(
+            document("Food Preparation (1).pdf", "Philmont Trail Cookbook", indexed = true),
+            // Opened and indexed, but a scan: no text to search.
+            document("Food Preparation (2).pdf", "Camping Recipes", indexed = true, searchable = false),
+            document("Food Preparation (3).pdf", "Dutch Oven"),
+        ),
+    )
+
+    @Test fun aNautilusCollectionsHeaderSaysKiwixLibraryAndLeavesOutScans() = runTest(main.dispatcher) {
+        library.packList.value = listOf(food)
+        show(foodRow)
+        val vm = vm("c:kiwixbooks-zimgit-food-preparation_en")
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.pack).isEqualTo(food)
+        assertThat(header.books).isEqualTo(3)
+        assertThat(header.searchable).isEqualTo(1)
+        assertThat(header.text).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(rowCountText(foodRow)).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })))
+            .isEqualTo("Kiwix library · 1 document")
+    }
 }

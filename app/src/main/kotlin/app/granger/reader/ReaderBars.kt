@@ -60,7 +60,9 @@ import app.granger.shell.LocalShellOverlay
 import app.granger.shell.SafeDrawingIgnoringBars
 
 /** An entry in a reader's ⋯ menu. */
-data class ReaderMenuItem(@StringRes val label: Int, val onClick: () -> Unit)
+data class ReaderMenuItem(val label: UiText, val onClick: () -> Unit) {
+    constructor(@StringRes label: Int, onClick: () -> Unit) : this(UiText.Res(label), onClick)
+}
 
 /**
  * What the reader bars offer (Plan U3c Decision 4), the same for the wiki, e-books and PDFs: a null hides its
@@ -199,7 +201,7 @@ fun ReaderTopBar(title: String, actions: ReaderBarActions, modifier: Modifier = 
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     actions.menu.forEach { item ->
-                        DropdownMenuItem(text = { Text(stringResource(item.label)) }, onClick = { menuOpen = false; item.onClick() })
+                        DropdownMenuItem(text = { Text(item.label.resolve()) }, onClick = { menuOpen = false; item.onClick() })
                     }
                 }
             }

@@ -68,7 +68,10 @@ class BookIndex(
     /** A book's indexed chunks, in reading order; empty until the book is indexed. */
     suspend fun chunks(bookId: String): List<BookChunk> = dao.chunksOf(bookId)
 
-    /** Indexes every OK book not yet indexed. A book that fails stays pending for the next call. */
+    /**
+     * Indexes every OK book not yet indexed whose file is on the phone (a Gutenberg book once opened). A book that
+     * fails stays pending for the next call.
+     */
     suspend fun indexPending() = mutex.withLock {
         withContext(io) {
             indexAll()
@@ -243,6 +246,8 @@ class BookIndex(
 
     private suspend fun indexAll() {
         for (book in dao.notIndexed()) {
+            // A Gutenberg book is a row long before it's a file (Plan GB): its text joins once it's been opened.
+            if (!File(book.filePath).isFile) continue
             try {
                 index(book)
             } catch (e: CancellationException) {

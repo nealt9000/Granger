@@ -1,6 +1,7 @@
 package app.granger.core.books
 
 import android.graphics.BitmapFactory
+import app.granger.core.text.NaturalOrder
 import com.github.junrar.Archive
 import com.github.junrar.exception.RarException
 import com.tom_roush.pdfbox.io.MemoryUsageSetting
@@ -78,7 +79,7 @@ object ComicToPdf {
             }
             else -> return null
         }
-        return named.sortedWith { a, b -> PAGE_ORDER.compare(a.first, b.first) }.map { it.second }
+        return named.sortedWith { a, b -> NaturalOrder.compare(a.first, b.first) }.map { it.second }
     }
 
     /** One page per picture that reads; false when none does. */
@@ -117,23 +118,4 @@ object ComicToPdf {
 
     private val PICTURES = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
     private const val JPEG_QUALITY = 0.9f
-
-    /** "page 2" before "page 10": runs of digits compare as numbers, the rest ignoring case. */
-    internal val PAGE_ORDER = Comparator<String> { a, b ->
-        val x = CHUNK.findAll(a.replace('\\', '/').lowercase()).map { it.value }.toList()
-        val y = CHUNK.findAll(b.replace('\\', '/').lowercase()).map { it.value }.toList()
-        for (i in 0 until minOf(x.size, y.size)) {
-            val p = x[i]
-            val q = y[i]
-            val c = if (p[0].isDigit() && q[0].isDigit()) {
-                p.trimStart('0').length.compareTo(q.trimStart('0').length).takeIf { it != 0 } ?: p.trimStart('0').compareTo(q.trimStart('0'))
-            } else {
-                p.compareTo(q)
-            }
-            if (c != 0) return@Comparator c
-        }
-        x.size.compareTo(y.size)
-    }
-
-    private val CHUNK = Regex("\\d+|\\D+")
 }

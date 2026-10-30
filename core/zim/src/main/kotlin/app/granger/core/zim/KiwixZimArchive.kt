@@ -30,6 +30,7 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         language = meta("Language"),
         date = meta("Date"),
         name = meta("Name"),
+        scraper = meta("Scraper"),
     )
     override val mainPath: String? =
         if (archive.hasMainEntry()) archive.mainEntry.getItem(true).path else null

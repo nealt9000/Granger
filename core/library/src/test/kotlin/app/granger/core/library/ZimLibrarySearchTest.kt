@@ -217,4 +217,40 @@ class ZimLibrarySearchTest {
         assertThat(hits).isEqualTo(index.search("whale"))
         assertThat(search.books("whale")).isEmpty()
     }
+
+    /** Plan WF Decision 6: with Best 50,000 and Top 1 million both on the phone, an article is found once, in the bigger. */
+    @Test fun aSmallerSlicesHitsForArticlesTheBiggerHasAreLeftOut() = test {
+        val top = FakeZimArchive(
+            "u-top", "Best 50,000", paths = setOf("index", "Lion", "Lost_in_Translation"), name = "wikipedia_en_top",
+            suggestions = listOf(ZimHit("Lion", "Lion"), ZimHit("Lost_in_Translation", "Lost in Translation")),
+            results = listOf(ZimHit("Lion", "Lion", "the <b>lion</b>", 80), ZimHit("Lost_in_Translation", "Lost in Translation", "s", 60)),
+        )
+        val top1m = FakeZimArchive(
+            "u-top1m", "Top 1 million", paths = setOf("index", "Lion", "Liger"), name = "wikipedia_en_top1m",
+            suggestions = listOf(ZimHit("Lion", "Lion"), ZimHit("Liger", "Liger")),
+            results = listOf(ZimHit("Lion", "Lion", "the <b>lion</b>", 85), ZimHit("Liger", "Liger", "s", 50)),
+        )
+        install("top.zim", top)
+        install("top1m.zim", top1m)
+        library.refresh()
+        val slices = PackSlices { pack ->
+            when (pack.name) {
+                "wikipedia_en_top" -> SliceKey("wikipedia_en", 2)
+                "wikipedia_en_top1m" -> SliceKey("wikipedia_en", 3)
+                else -> null
+            }
+        }
+        val deduped = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 5, fullTextLimit = 10, slices = slices)
+        val text = deduped.fullText("li").filter { it.packId in setOf("u-top", "u-top1m") }
+        assertThat(text.map { it.packId to it.path }).containsExactly(
+            "u-top1m" to "Lion", "u-top" to "Lost_in_Translation", "u-top1m" to "Liger",
+        )
+        val titles = deduped.titles("l").hits.filter { it.packId in setOf("u-top", "u-top1m") }
+        assertThat(titles.map { it.packId to it.path }).containsExactly(
+            "u-top1m" to "Lion", "u-top" to "Lost_in_Translation", "u-top1m" to "Liger",
+        )
+        // Without the catalog's sets, both packs answer as before.
+        val plain = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 5, fullTextLimit = 10)
+        assertThat(plain.fullText("li").count { it.path == "Lion" }).isEqualTo(2)
+    }
 }

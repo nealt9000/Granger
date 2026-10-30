@@ -429,6 +429,9 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
                     stringResource(R.string.onboarding_of_free, formatBytes(ui.review.bytes), formatBytes(ui.review.freeBytes)),
                     color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
                 )
+                for (note in ui.review.notes) {
+                    Text(note.resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 OnboardingModel.quickFirstText(ui.review)?.let {
                     Text(it.resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

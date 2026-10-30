@@ -70,13 +70,18 @@ class SherpaTts(val voice: SherpaVoice, val threads: Int = 2) : AutoCloseable {
 
         fun config(voice: SherpaVoice, threads: Int): OfflineTtsConfig {
             val model = when (voice) {
-                is SherpaVoice.Piper -> OfflineTtsModelConfig(
-                    vits = OfflineTtsVitsModelConfig(
-                        model = voice.model.path,
-                        tokens = voice.tokens.path,
-                        dataDir = voice.espeakData.path,
-                    ),
-                )
+                is SherpaVoice.Piper -> SherpaVoice.inference(voice).let { inference ->
+                    OfflineTtsModelConfig(
+                        vits = OfflineTtsVitsModelConfig(
+                            model = voice.model.path,
+                            tokens = voice.tokens.path,
+                            dataDir = voice.espeakData.path,
+                            noiseScale = inference.noiseScale,
+                            noiseScaleW = inference.noiseScaleW,
+                            lengthScale = inference.lengthScale,
+                        ),
+                    )
+                }
                 is SherpaVoice.Kokoro -> OfflineTtsModelConfig(
                     kokoro = OfflineTtsKokoroModelConfig(
                         model = voice.model.path,

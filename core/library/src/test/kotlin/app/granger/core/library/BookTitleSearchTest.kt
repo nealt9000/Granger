@@ -55,4 +55,11 @@ class BookTitleSearchTest {
         assertThat(ranked("  ")).isEmpty()
         assertThat(ranked("-")).isEmpty()
     }
+
+    @Test fun aGutenbergBookIsFoundByTitleBeforeItsFirstOpen() {
+        // Listed from its pack, its EPUB not yet copied out (Plan GB Decision 6).
+        val beethoven = book("1000", BookOrigin.GUTENBERG, "Beethoven").copy(author = "Ludwig Nohl", filePath = "/nowhere/1000.epub")
+        assertThat(ranked("beethoven", shelf + beethoven)).containsExactly(Rank.EXACT to "Beethoven")
+        assertThat(ranked("nohl", shelf + beethoven)).containsExactly(Rank.AUTHOR to "Beethoven")
+    }
 }

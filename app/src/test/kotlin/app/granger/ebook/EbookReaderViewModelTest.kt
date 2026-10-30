@@ -12,6 +12,8 @@ import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.TrackingContainer
 import app.granger.book
+import app.granger.core.books.PdfOrigin
+import app.granger.core.books.PdfToEpub
 import app.granger.core.books.TextQuote
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.BookPosition
@@ -299,6 +301,42 @@ class EbookReaderViewModelTest {
         vm.toggleBookmark()
         advanceUntilIdle()
         assertThat(bookshelf.markList.value.single().text).isEqualTo("Filters · p. 3")
+    }
+
+    // ---- ebooks made from PDFs (Plan IA) ----
+
+    @Test fun anEbookMadeFromAPdfOpensAndRemovesItsOriginalPages() = runTest(main.dispatcher) {
+        val pages = book("pages", title = "The Upanishads")
+        bookshelf.originalPages["b"] = pages to 2_500_000L
+        val vm = reader()
+        assertThat(vm.state.value.originalPagesBytes).isEqualTo(2_500_000L)
+        assertThat(vm.state.value.canReadAsEbook).isFalse()
+        val tab = vm.openOriginalPages()!!
+        assertThat(sessions.tabs.value.single { it.id == tab }.title).isEqualTo("The Upanishads (original pages)")
+        vm.removeOriginalPages()
+        advanceUntilIdle()
+        assertThat(vm.state.value.originalPagesBytes).isNull()
+        assertThat(vm.state.value.notice?.resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Original pages removed")
+        assertThat(bookshelf.originalPages).isEmpty()
+    }
+
+    @Test fun aPdfReadAsAnEbookOpensAgainOrSaysWhyNot() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication()
+        val vm = reader()
+        assertThat(vm.state.value.canReadAsEbook).isTrue()
+        val passing = PdfToEpub.Report(PdfOrigin.BORN_DIGITAL, 10, 1000, 1000, 0, 10, 100, 0, 1, 0, 0, 2, null, 0, true, "passes")
+        bookshelf.ebookReports["b"] = passing.copy(passes = false, why = "kept only 80% of the text")
+        var reopened = 0
+        vm.readAsEbook { reopened++ }
+        advanceUntilIdle()
+        assertThat(reopened).isEqualTo(0)
+        assertThat(vm.state.value.notice?.resolve(ApplicationProvider.getApplicationContext())).contains("kept only 80% of the text")
+        assertThat(vm.state.value.makingEbook).isFalse()
+
+        bookshelf.ebookReports["b"] = passing
+        vm.readAsEbook { reopened++ }
+        advanceUntilIdle()
+        assertThat(reopened).isEqualTo(1)
     }
 
     @Test fun aColourPdfKeepsItsColoursInNight() = runTest(main.dispatcher) {
@@ -666,13 +704,40 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.isBookmarkedHere).isTrue()
     }
 
-    @Test fun lastMatchingTocRowInTheFileIsCurrent() = runTest(main.dispatcher) {
+    @Test fun withNoAnchorsFoundTheFilesFirstRowIsCurrent() = runTest(main.dispatcher) {
+        // The files can't be read, so where #a and #b are isn't known: the file's first row, not a middle one.
         opener.publication = testPublication(
             toc = listOf("c001.xhtml" to listOf("c002.xhtml", "c002.xhtml#a", "c002.xhtml#b"), "c003.xhtml" to emptyList()),
         )
         val vm = reader()
         vm.onLocator(locator("c002.xhtml", 0.5, 0.4))
-        assertThat(vm.state.value.currentTocIndex).isEqualTo(3)
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(1)
+    }
+
+    @Test fun inAGutenbergFileOfManyChaptersTheChapterReachedIsCurrent() = runTest(main.dispatcher) {
+        // As gutenberg2zim's EPUBs: a header file and one big text file, every contents row an anchor (Plan GB walkthrough).
+        val text = "x".repeat(1000)
+        val big = "h-1.htm.xhtml"
+        opener.publication = app.granger.testPublicationWithContent(
+            chapters = linkedMapOf(
+                "h-0.htm.xhtml" to "<h1 id=\"pg-header\">The Oera Linda Book</h1><p>$text</p><h2 id=\"contents\">Contents</h2><p>$text</p>",
+                big to "<h2 id=\"entext\">Introduction</h2><p>$text</p><h2 id=\"ch1\">One</h2><p>$text</p>" +
+                    "<h2 id=\"ch2\">Two</h2><p>$text</p><h2 id=\"ch3\">Three</h2><p>$text</p>",
+            ),
+            toc = listOf(
+                "h-0.htm.xhtml#pg-header" to emptyList(), "h-0.htm.xhtml#contents" to emptyList(),
+                "$big#entext" to listOf("$big#ch1", "$big#ch2", "$big#ch3"),
+            ),
+        )
+        val vm = reader()
+        vm.onLocator(locator("h-0.htm.xhtml", 0.0, 0.0))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(0)
+        vm.onLocator(locator(big, 0.0, 0.1))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(2)
+        vm.onLocator(locator(big, 0.30, 0.4))
+        assertThat(vm.state.value.toc[vm.state.value.currentTocIndex!!].href).isEqualTo("$big#ch1")
+        vm.onLocator(locator(big, 0.99, 0.9))
+        assertThat(vm.state.value.toc[vm.state.value.currentTocIndex!!].href).isEqualTo("$big#ch3")
     }
 
     @Test fun backToBackJumpsAreAllDelivered() = runTest(main.dispatcher) {

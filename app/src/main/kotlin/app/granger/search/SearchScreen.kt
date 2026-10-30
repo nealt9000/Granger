@@ -44,6 +44,7 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.BookTarget
 import app.granger.R
@@ -79,6 +80,11 @@ fun SearchScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Back from a book opened since (and so indexed) searches again, so the book is found (Plan GB walkthrough).
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onShown()
+        onPauseOrDispose {}
+    }
     val scope = rememberCoroutineScope()
     fun open(hit: SearchHit) { scope.launch { onOpenTab(viewModel.open(hit)) } }
     fun open(hit: BookHit) { scope.launch { viewModel.openBook(hit).let { (tab, at) -> onOpenBook(tab, at) } } }
@@ -120,7 +126,7 @@ fun SearchScreen(
                         placeholder = { Text(stringResource(R.string.search_placeholder)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = { dropKeyboard() }),
+                        keyboardActions = KeyboardActions(onSearch = { dropKeyboard(); viewModel.refresh() }),
                         modifier = Modifier.fillMaxWidth().focusRequester(focus),
                     )
                 },

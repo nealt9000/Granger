@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import app.granger.core.downloads.DOWNLOADS_LINK
 import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.ebook.ReadiumFragmentFactory
+import app.granger.library.LocalPackCovers
 import app.granger.ebook.dropNavigatorStandIns
 import app.granger.launch.LaunchDecider
 import app.granger.launch.LaunchFacts
@@ -115,9 +117,11 @@ class MainActivity : FragmentActivity() {
                 if (decided == null) {
                     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
                 } else {
-                    GrangerNavHost(
-                        container, decided, openPlayerRequests = openPlayer.intValue, openDownloadsRequests = openDownloads.intValue,
-                    )
+                    CompositionLocalProvider(LocalPackCovers provides container.gutenbergCovers::thumbnail) {
+                        GrangerNavHost(
+                            container, decided, openPlayerRequests = openPlayer.intValue, openDownloadsRequests = openDownloads.intValue,
+                        )
+                    }
                 }
             }
         }

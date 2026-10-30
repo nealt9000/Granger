@@ -9,6 +9,8 @@ data class ZimMetadata(
     val language: String,
     val date: String,
     val name: String,
+    /** The tool that made the ZIM, its `Scraper` metadata ("gutenberg2zim-3.0.1", "nautiluszim 1.1.1"); blank if unsaid. */
+    val scraper: String = "",
 )
 
 /** One entry's content after following redirects; [path] is the final entry's path. */

@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -14,6 +17,14 @@ import app.granger.core.library.Book
 import app.granger.core.library.BookFormat
 import app.granger.shell.rememberRailCover
 import app.granger.theme.MediaTile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * A cover for a book that has no cover file of its own yet (a Gutenberg book not yet opened: [GutenbergCovers]); null
+ * when there is none. Called off the main thread.
+ */
+val LocalPackCovers = staticCompositionLocalOf<suspend (Book) -> String?> { { null } }
 
 /**
  * A 2:3 book cover. The cover file is decoded off the main thread, bounds-checked and sized for the cell; with no
@@ -22,7 +33,11 @@ import app.granger.theme.MediaTile
 @Composable
 fun BookCover(book: Book, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.aspectRatio(2f / 3f).clip(RoundedCornerShape(6.dp))) {
-        val cover = rememberRailCover(book.coverPath, maxWidth)
+        val packCovers = LocalPackCovers.current
+        val path by produceState(book.coverPath, book.id, book.coverPath) {
+            if (value == null) value = withContext(Dispatchers.IO) { packCovers(book) }
+        }
+        val cover = rememberRailCover(path, maxWidth)
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {

@@ -11,6 +11,8 @@
 # speaker; all but the new speaker embedding and conditioning layers for several), with a fresh optimizer. Run it
 # again with the same run name to resume from last.ckpt; piper1-gpl skips the warm-start on a resume.
 # GRANGER_WARMSTART names another checkpoint to warm-start from (round 2: widen_speakers.py's output).
+# GRANGER_ESPEAK (default en-us, V3's American readers) and GRANGER_VOICE_NAME (default granger_libritts) set the
+# phonemes and the config's voice name; V4's British teacher voices use en-gb-x-rp.
 #
 # Extra args go to LightningCLI, e.g. --trainer.max_epochs 1200 --trainer.accelerator mps --data.batch_size 16.
 set -euo pipefail
@@ -35,10 +37,10 @@ else
 fi
 
 exec "$python" "$(dirname "$0")/fit.py" fit \
-    --data.voice_name granger_libritts \
+    --data.voice_name "${GRANGER_VOICE_NAME:-granger_libritts}" \
     --data.csv_path "$data/metadata.csv" \
     --data.audio_dir "$data/wav" \
-    --data.espeak_voice en-us \
+    --data.espeak_voice "${GRANGER_ESPEAK:-en-us}" \
     --data.cache_dir "$work/cache/$dataset" \
     --data.config_path "$data/config.json" \
     --data.batch_size 32 \

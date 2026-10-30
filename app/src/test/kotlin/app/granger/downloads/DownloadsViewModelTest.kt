@@ -103,4 +103,29 @@ class DownloadsViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.doneToday.map { it.key }).containsExactly("item:m")
     }
+
+    /** Plan WF Decision 5: Downloads offers the same tidy-up as Home's card. */
+    @Test fun downloadsOffersToRemoveTheSmallerSlice() = runTest(main.dispatcher) {
+        val top = app.granger.packEntry("wikipedia_en_100", zimName = "wikipedia_en_100", size = 333_000_000)
+            .copy(setId = "wikipedia_en", setRank = 1, setLabel = "100 essential articles")
+        val best = app.granger.packEntry("wikipedia_en_top_mini", zimName = "wikipedia_en_top", size = 300_000_000)
+            .copy(setId = "wikipedia_en", setRank = 2, setLabel = "Best 50,000 articles")
+        val catalog = app.granger.FakeCatalogSource(app.granger.catalogOf(listOf(top, best)))
+        library.packList.value = listOf(
+            app.granger.pack(top.zimUuid).copy(name = top.zimName, sizeBytes = 333_000_000),
+            app.granger.pack(best.zimUuid).copy(name = best.zimName),
+        )
+        val vm = DownloadsViewModel(
+            downloads, library, bookshelf, sessions, appScope = this, catalog = catalog, today = { 0L }, clock = { 5L },
+            tick = flowOf(Unit), work = main.dispatcher,
+        )
+        backgroundScope.launch { vm.tidy.collect {} }
+        testScheduler.advanceUntilIdle()
+        val offer = vm.tidy.value.single()
+        assertThat(offer.text).isEqualTo("Best 50,000 is in. Remove 100 essential (333 MB)? Your places and bookmarks move across.")
+        vm.removeSmaller(offer)
+        testScheduler.advanceUntilIdle()
+        assertThat(library.supersededAcross).containsExactly(top.zimUuid to best.zimUuid)
+        assertThat(downloads.calls).contains("remove:wikipedia_en_100")
+    }
 }

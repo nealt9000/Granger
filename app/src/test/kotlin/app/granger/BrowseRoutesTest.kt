@@ -53,7 +53,7 @@ class BrowseRoutesTest {
         assertThat(toolAt(CollectionRoute("c:gc"))).isEqualTo(RailTool.LIBRARY)
         assertThat(toolAt(DownloadsRoute)).isEqualTo(RailTool.LIBRARY)
         assertThat(toolAt(ReadinessRoute)).isEqualTo(RailTool.LIBRARY)
-        assertThat(toolAt(GetMoreRoute)).isEqualTo(RailTool.LIBRARY)
+        assertThat(toolAt(GetMoreRoute())).isEqualTo(RailTool.LIBRARY)
         assertThat(toolAt(LibraryRoute())).isEqualTo(RailTool.LIBRARY)
         // Models stay with Settings.
         assertThat(toolAt(SourceRoute(CatalogScope.MODELS), CatalogScope.MODELS)).isEqualTo(RailTool.SETTINGS)

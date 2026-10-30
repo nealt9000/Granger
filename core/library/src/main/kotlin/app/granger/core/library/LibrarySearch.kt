@@ -41,6 +41,8 @@ class ZimLibrarySearch(
     private val titleLimit: Int = TITLE_LIMIT,
     /** The books Titles lists by title or author; none when null. */
     private val bookshelf: Bookshelf? = null,
+    /** The sets the packs are slices of, so a smaller slice's hits don't double a bigger one's (Plan WF Decision 6). */
+    private val slices: PackSlices? = null,
 ) : LibrarySearch {
     // The packs take turns, each in its own order, so a big pack can't push the others below the first few or past the limit.
     // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10). Books on the
@@ -104,7 +106,7 @@ class ZimLibrarySearch(
                     .distinctBy { it.path }
                     .filterNot { IndexPages.isIndex(it.path) }
                     .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, PageTitles.clean(hit.title, pack.title), hit.snippet) }
-                PackHits(found, returned = hits.size)
+                PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size)
             }
         }
     }

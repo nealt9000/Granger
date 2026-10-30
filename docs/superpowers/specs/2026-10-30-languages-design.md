@@ -88,7 +88,7 @@ Ask answers in the question's language, whatever the app's language is (§6.2).
 ### 5.2 Kiwix
 
 - `curated.json` languages become `["eng", "spa"]`, and the family regexes already match any language.
-- Excluded for licence: `ifixit_es`, `khanacademy_es` and TED, which are non-commercial. `ecured_es` and `marxists.org_es` stay out until their licences are checked.
+- `ifixit_es` is treated as `ifixit_en_all` is (non-commercial flag, in Making; F1's policy check decides both). Excluded: `khanacademy_es` and TED (Neal, 2026-10-30; L3 research §7). `ecured_es` and `marxists.org_es` stay out until their licences are checked.
 - The Spanish tiers are calibrated the way H4 calibrated English. There's no Spanish Top 1M, so:
   - **Efficient** is built around `wikipedia_es_top` (pictures by default, 4.07 GB) or nopic (1.21 GB) with Save space.
   - **Comprehensive** is built around `wikipedia_es_all` maxi (36.5 GB) or nopic (13.3 GB).
