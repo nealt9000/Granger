@@ -122,7 +122,8 @@ class DownloadsViewModelTest {
         backgroundScope.launch { vm.tidy.collect {} }
         testScheduler.advanceUntilIdle()
         val offer = vm.tidy.value.single()
-        assertThat(offer.text).isEqualTo("Best 50,000 is in. Remove 100 essential (333 MB)? Your places and bookmarks move across.")
+        assertThat(offer.text)
+            .isEqualTo(app.granger.UiText.Res(app.granger.R.string.sources_tidy_text, "Best 50,000", "100 essential", app.granger.formatBytes(333_000_000)))
         vm.removeSmaller(offer)
         testScheduler.advanceUntilIdle()
         assertThat(library.supersededAcross).containsExactly(top.zimUuid to best.zimUuid)

@@ -588,8 +588,7 @@ class ArchiveViewModel(
 
     /** The other audio view's media root and shelf name: where an item got from there lives. */
     private val otherRoot = if (kind == ArchiveKind.MUSIC) "audiobooks" else "music"
-    // ItemStatus.InLibrary takes the shelf name as text (the sources package, L1 Task 8).
-    private val otherShelf = if (kind == ArchiveKind.MUSIC) "Audiobooks" else "Music"
+    private val otherShelf = if (kind == ArchiveKind.MUSIC) app.granger.sources.LibraryShelf.AUDIOBOOKS else app.granger.sources.LibraryShelf.MUSIC
     private val otherFolder = "/$otherRoot/${MediaManifest.ARCHIVE_ORG}/"
 
     private fun buildAudioUi(s: State, records: List<DownloadRecord>): ArchiveUi {
@@ -781,7 +780,7 @@ class ArchiveViewModel(
                 DownloadState.QUEUED -> ItemStatus.Queued(active.wifiOnly, active.error)
                 DownloadState.RUNNING ->
                     ItemStatus.Downloading(if (active.sizeBytes > 0) active.bytesDone.toFloat() / active.sizeBytes else 0f)
-                else -> ItemStatus.Failed(active.error ?: "Download failed")
+                else -> ItemStatus.Failed(active.error)
             }
         }
         return if (versions.any { it.state == DownloadState.INSTALLED }) ItemStatus.Installed else ItemStatus.NotInstalled

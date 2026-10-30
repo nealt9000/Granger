@@ -116,8 +116,8 @@ fun ListenContent(ui: ListenUi?, actions: ListenActions) {
                     item(key = "source:$source") {
                         ListItem(
                             modifier = Modifier.clickable { actions.onOpenSource(source) },
-                            headlineContent = { Text(source.title) },
-                            supportingContent = { Text(source.subtitle) },
+                            headlineContent = { Text(stringResource(source.title)) },
+                            supportingContent = { Text(stringResource(source.subtitle)) },
                         )
                     }
                 }

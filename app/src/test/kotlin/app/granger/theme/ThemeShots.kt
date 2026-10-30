@@ -708,28 +708,28 @@ class ThemeShots {
      */
     @Test fun kiwixRows() = shoot("kiwix-rows") {
         val flavours = listOf(
-            app.granger.sources.FlavourChoice("top_maxi", "With pictures", 6_990_000_000, chosen = true),
-            app.granger.sources.FlavourChoice("top_nopic", "No pictures", 2_750_000_000, chosen = false),
-            app.granger.sources.FlavourChoice("top_mini", "Mini (intro paragraphs only)", 300_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_maxi", app.granger.UiText.Raw("With pictures"), 6_990_000_000, chosen = true),
+            app.granger.sources.FlavourChoice("top_nopic", app.granger.UiText.Raw("No pictures"), 2_750_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_mini", app.granger.UiText.Raw("Mini (intro paragraphs only)"), 300_000_000, chosen = false),
         )
         val rows = listOf(
             app.granger.sources.ItemRow(
-                "top_maxi", "Wikipedia: best articles", "English · Updated October 2026 · CC BY-SA",
-                "The 50,000 best Wikipedia articles", 6_990_000_000, app.granger.sources.ItemStatus.NotInstalled, null,
+                "top_maxi", "Wikipedia: best articles", app.granger.UiText.Raw("English · Updated October 2026 · CC BY-SA"),
+                app.granger.UiText.Raw("The 50,000 best Wikipedia articles"), 6_990_000_000, app.granger.sources.ItemStatus.NotInstalled, null,
                 flavours = flavours, license = "CC BY-SA 4.0",
             ),
             app.granger.sources.ItemRow(
-                "med_maxi", "WikiMed", "English · Updated October 2026 · CC BY-SA", "The largest medical encyclopedia, from Wikipedia",
+                "med_maxi", "WikiMed", app.granger.UiText.Raw("English · Updated October 2026 · CC BY-SA"), app.granger.UiText.Raw("The largest medical encyclopedia, from Wikipedia"),
                 1_860_000_000, app.granger.sources.ItemStatus.NotInstalled, "u-med",
                 flavours = listOf(
-                    app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
-                    app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
+                    app.granger.sources.FlavourChoice("med_maxi", app.granger.UiText.Raw("With pictures"), 1_860_000_000, chosen = true),
+                    app.granger.sources.FlavourChoice("med_nopic", app.granger.UiText.Raw("No pictures"), 1_050_000_000, chosen = false, installed = true),
                 ),
-                installedFlavour = "no pictures", switches = true, license = "CC BY-SA 4.0",
+                switches = true, license = "CC BY-SA 4.0",
             ),
             app.granger.sources.ItemRow(
-                "survivor", "Survivor Library", "English · Updated September 2026 · Licence not stated",
-                "Books and manuals on how things were done before electricity", 220_350_000_000,
+                "survivor", "Survivor Library", app.granger.UiText.Raw("English · Updated September 2026 · Licence not stated"),
+                app.granger.UiText.Raw("Books and manuals on how things were done before electricity"), 220_350_000_000,
                 app.granger.sources.ItemStatus.NotInstalled, null, license = "Not stated by the source",
             ),
         )
@@ -747,8 +747,8 @@ class ThemeShots {
     @Test fun switchFlavour() = shootDialog("switch-flavour") {
         app.granger.sources.SwitchDialog(
             "WikiMed",
-            app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
-            app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
+            app.granger.sources.FlavourChoice("med_nopic", app.granger.UiText.Raw("No pictures"), 1_050_000_000, chosen = false, installed = true),
+            app.granger.sources.FlavourChoice("med_maxi", app.granger.UiText.Raw("With pictures"), 1_860_000_000, chosen = true),
             onSwitch = {}, onDismiss = {},
         )
     }
@@ -758,7 +758,7 @@ class ThemeShots {
         app.granger.sources.SizeCheckDialog(
             app.granger.sources.SizeCheck(
                 "wikipedia_en_all_maxi", "Wikipedia", 115_000_000_000, 41_000_000_000, "Phone",
-                smaller = app.granger.sources.FlavourChoice("wikipedia_en_all_nopic", "No pictures", 48_000_000_000, chosen = false),
+                smaller = app.granger.sources.FlavourChoice("wikipedia_en_all_nopic", app.granger.UiText.Raw("No pictures"), 48_000_000_000, chosen = false),
             ),
             onGet = {}, onDismiss = {},
         )
@@ -865,7 +865,8 @@ class ThemeShots {
             app.granger.sources.TidyOfferCard(
                 app.granger.sources.TidyOffer(
                     "a>b", "wikipedia_en_top1m_nopic", "wikipedia_en_top_nopic", "u-1m", "u-top", 2_700_000_000,
-                    "Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.", "Best 50,000",
+                    app.granger.UiText.Res(app.granger.R.string.sources_tidy_text, "Top 1 million", "Best 50,000", "2.7 GB"),
+                    "Best 50,000",
                 ),
                 onRemove = {}, onKeep = {},
             )

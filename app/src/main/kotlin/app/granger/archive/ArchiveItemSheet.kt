@@ -253,7 +253,7 @@ internal fun partStatusText(part: PartRow): UiText {
     return when (val status = part.status) {
         is ItemStatus.Queued -> UiText.Res(R.string.archive_part_queued, size)
         is ItemStatus.Downloading -> UiText.Res(R.string.archive_part_downloading, size, (status.fraction * 100).toInt())
-        is ItemStatus.Failed -> UiText.Res(R.string.archive_part_stopped, size, status.reason)
+        is ItemStatus.Failed -> UiText.Res(R.string.archive_part_stopped, size, app.granger.sources.failedText(status))
         ItemStatus.Installed, ItemStatus.UpdateAvailable -> UiText.Res(R.string.archive_part_in_library, size)
         else -> UiText.Raw(size)
     }

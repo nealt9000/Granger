@@ -1,5 +1,7 @@
 package app.granger.sources
 
+import androidx.annotation.StringRes
+import app.granger.R
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ModelEntry
@@ -9,12 +11,12 @@ import app.granger.core.library.GutenbergNames
 import java.net.URI
 
 /** Where packs can be fetched from; each has its own source screen. */
-enum class CatalogScope(val title: String) {
-    GRANGER("Granger"), KIWIX("Kiwix"), MODELS("Models"),
+enum class CatalogScope(@StringRes val title: Int) {
+    GRANGER(R.string.sources_scope_granger), KIWIX(R.string.sources_scope_kiwix), MODELS(R.string.sources_scope_models),
     /** Kiwix's Project Gutenberg packs, offered as books (Plan GB Decision 7). */
-    GUTENBERG("Project Gutenberg"),
+    GUTENBERG(R.string.sources_scope_gutenberg),
     /** Kiwix's other book packs, the nautilus libraries (Food for Preppers, Water, Prunelle), offered as books (Plan KB). */
-    KIWIX_BOOKS("Kiwix libraries"),
+    KIWIX_BOOKS(R.string.sources_scope_kiwix_books),
 }
 
 /** The scopes a pack can be in: where Readiness's domain views and the other cross-scope lists look (Plan KB Decision 6). */

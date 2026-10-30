@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -1093,7 +1094,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             family = route.family,
                         )
                     },
-                    title = source.title,
+                    title = stringResource(source.title),
                     onBack = { nav.popBackStack() },
                     // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
                     onOpenPack = ::openPackOrCollection,

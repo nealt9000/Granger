@@ -963,10 +963,10 @@ class ArchiveViewModelTest {
         downloads.list.value = holstRecords("music")
         val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
         settle { vm.ui.value.rows.isNotEmpty() }
-        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary("Music"))
+        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary(app.granger.sources.LibraryShelf.MUSIC))
         vm.openItem(HOLST)
         settle { vm.ui.value.sheet?.loading == false }
-        assertThat(vm.ui.value.sheet!!.status).isEqualTo(ItemStatus.InLibrary("Music"))
+        assertThat(vm.ui.value.sheet!!.status).isEqualTo(ItemStatus.InLibrary(app.granger.sources.LibraryShelf.MUSIC))
 
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
@@ -991,7 +991,7 @@ class ArchiveViewModelTest {
         downloads.list.value = holstRecords("audiobooks", DownloadState.QUEUED)
         val vm = audioViewModel(ArchiveKind.MUSIC)
         settle { vm.ui.value.rows.isNotEmpty() }
-        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary("Audiobooks"))
+        assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary(app.granger.sources.LibraryShelf.AUDIOBOOKS))
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
         assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_already_in_audiobooks))

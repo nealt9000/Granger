@@ -159,7 +159,7 @@ object MediaDownloads {
             if (!stalled && started) return ItemStatus.Downloading(fractionOf(group))
             return ItemStatus.Queued(queued.wifiOnly, queued.error)
         }
-        group.firstOrNull { it.state == DownloadState.FAILED }?.let { return ItemStatus.Failed(it.error ?: "Download failed") }
+        group.firstOrNull { it.state == DownloadState.FAILED }?.let { return ItemStatus.Failed(it.error) }
         val installed = group.filter { it.state == DownloadState.INSTALLED && !isCover(it) }.map { it.itemId }.distinct().size
         return when {
             installed >= fileCount -> ItemStatus.Installed

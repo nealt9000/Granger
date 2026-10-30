@@ -41,7 +41,7 @@ class ListenScreenTest {
     @Test fun withNoAudioItOffersTheSourcesAndThePhone() {
         compose.setContent { ListenContent(ListenUi(nowPlaying = null, shelves = emptyList()), actions) }
         compose.onNodeWithText("Nothing to listen to yet").assertExists()
-        for (link in AUDIO_SOURCES) compose.onNodeWithText(link.title).performClick()
+        for (link in AUDIO_SOURCES) compose.onNodeWithText(androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>().getString(link.title)).performClick()
         compose.onNodeWithText("Find music on this phone").performClick()
         assertThat(calls).containsExactly(
             "source:${GetMoreLink.LIBRIVOX}", "source:${GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS}", "source:${GetMoreLink.ARCHIVE_ORG_MUSIC}", "phone",

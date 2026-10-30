@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Get more: where sources live. Kiwix, Granger Classics, Project Gutenberg and LibriVox are names. -->
+    <string name="sources_get_more">Get more</string>
+    <!-- Get more opened from the Library's +: book sources only. -->
+    <string name="sources_get_books">Get books</string>
+    <!-- Get more opened from Listen's +: audio sources only. -->
+    <string name="sources_get_audio">Get audiobooks &amp; music</string>
+    <string name="sources_group_knowledge">Knowledge packs</string>
+    <string name="sources_group_books">Books</string>
+    <string name="sources_group_audio">Audiobooks &amp; music</string>
+    <string name="sources_group_models">Models &amp; voices</string>
+    <string name="sources_link_kiwix">Kiwix</string>
+    <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicine, how-to and more, offline</string>
+    <string name="sources_link_classics">Granger Classics</string>
+    <string name="sources_link_classics_sub">Public-domain e-books, ready to read</string>
+    <string name="sources_link_gutenberg">Project Gutenberg</string>
+    <string name="sources_link_gutenberg_sub">Public-domain books by subject, in packs from Kiwix</string>
+    <!-- Kiwix's book packs (nautilus libraries): Food for Preppers, Water, Prunelle. -->
+    <string name="sources_link_kiwix_books">Kiwix libraries</string>
+    <string name="sources_link_kiwix_books_sub">Guides and handbooks: food, water, medicine, knots and more</string>
+    <string name="sources_link_archive_books">Archive.org books</string>
+    <string name="sources_link_archive_books_sub">Out-of-copyright books from the Internet Archive</string>
+    <string name="sources_link_librivox">LibriVox</string>
+    <string name="sources_link_librivox_sub">Public-domain audiobooks, read by volunteers</string>
+    <string name="sources_link_archive_audiobooks">Archive.org audiobooks</string>
+    <string name="sources_link_archive_audiobooks_sub">Spoken word from the Internet Archive</string>
+    <string name="sources_link_archive_music">Archive.org music</string>
+    <string name="sources_link_archive_music_sub">Recordings from the Internet Archive</string>
+    <string name="sources_link_models">Models and voices</string>
+    <string name="sources_link_models_sub">What Ask and Read aloud run on</string>
+    <!-- Imports the user's own books from files on the phone. -->
+    <string name="sources_import_own">Import your own</string>
+    <string name="sources_import_own_sub">EPUB, PDF, TXT or Markdown books from this phone</string>
+
+    <!-- A source screen's title. -->
+    <string name="sources_scope_granger">Granger</string>
+    <string name="sources_scope_kiwix">Kiwix</string>
+    <string name="sources_scope_models">Models</string>
+    <string name="sources_scope_gutenberg">Project Gutenberg</string>
+    <string name="sources_scope_kiwix_books">Kiwix libraries</string>
+
+    <!-- A source screen. -->
+    <string name="sources_check_updates">Check for updates</string>
+    <!-- The search box; %1$s is the screen's name, such as Kiwix. -->
+    <string name="sources_search">Search %1$s</string>
+    <!-- Closes the readiness domain's filter chip. -->
+    <string name="sources_show_all_kiwix">Show all of Kiwix</string>
+    <!-- The category chip that shows every category. -->
+    <string name="sources_all">All</string>
+    <string name="sources_tab_browse">Browse</string>
+    <string name="sources_tab_installed">Installed</string>
+    <string name="sources_tab_updates">Updates</string>
+    <!-- %1$s is the free space, %2$s the storage (such as Internal storage), %3$s what Granger uses there. -->
+    <string name="sources_storage_summary">%1$s free on %2$s · Granger uses %3$s</string>
+    <string name="sources_no_match">Nothing matches that search.</string>
+    <string name="sources_nothing_yet">Nothing here yet.</string>
+    <!-- Section headings the app names itself (the rest are catalog categories). -->
+    <string name="sources_section_recommended">Recommended</string>
+    <string name="sources_section_subjects">Subjects</string>
+    <!-- Project Gutenberg's two everything-packs. -->
+    <string name="sources_section_everything">Everything</string>
+    <string name="sources_section_libraries">Libraries</string>
+    <string name="sources_section_models">AI models</string>
+    <!-- Unfolds a long section: "Show all 40 packs". -->
+    <plurals name="sources_show_all_packs">
+        <item quantity="one">Show all %d pack</item>
+        <item quantity="other">Show all %d packs</item>
+    </plurals>
+    <plurals name="sources_show_all_books">
+        <item quantity="one">Show all %d book</item>
+        <item quantity="other">Show all %d books</item>
+    </plurals>
+    <string name="sources_show_fewer_packs">Show fewer packs</string>
+    <string name="sources_show_fewer_books">Show fewer books</string>
+    <!-- %1$s is the item's title. -->
+    <string name="sources_remove_title">Remove %1$s?</string>
+    <!-- One slice of a set: %1$s is the set (Wikipedia), %2$s the slice (Best 50,000 articles). -->
+    <string name="sources_remove_slice_title">Remove %1$s: %2$s?</string>
+    <string name="sources_remove_pack_body">This deletes the file, and the bookmarks and reading places you saved in it.</string>
+    <string name="sources_remove_body">This deletes the file.</string>
+    <!-- A preset (a ready-made set of downloads); %1$s is its name, such as Granger Classics. -->
+    <string name="sources_preset_title">%1$s set</string>
+    <string name="sources_get_all">Get all</string>
+    <!-- Counts in a preset's line: "12 packs and 347 books · 17.7 GB". -->
+    <plurals name="sources_packs">
+        <item quantity="one">%d pack</item>
+        <item quantity="other">%d packs</item>
+    </plurals>
+    <plurals name="sources_models">
+        <item quantity="one">%d model</item>
+        <item quantity="other">%d models</item>
+    </plurals>
+    <!-- Map regions: "Maps · 3 regions". -->
+    <plurals name="sources_regions">
+        <item quantity="one">%d region</item>
+        <item quantity="other">%d regions</item>
+    </plurals>
+    <!-- Two counted kinds, such as "12 packs and 347 books". -->
+    <string name="sources_two_kinds">%1$s and %2$s</string>
+    <string name="sources_three_kinds">%1$s, %2$s and %3$s</string>
+    <string name="sources_preset_all_here">All on this phone</string>
+    <!-- %1$d of a preset's items are downloading. -->
+    <string name="sources_preset_downloading">%1$d downloading</string>
+    <!-- %1$d of the preset's %2$d items are still to get. -->
+    <string name="sources_preset_to_get">%1$d of %2$d to get</string>
+    <!-- Two parts of a line with a dot between, such as "No pictures · March 2026" or "220 GB · English". -->
+    <string name="sources_dotted">%1$s · %2$s</string>
+    <!-- %1$s is the full licence text. -->
+    <string name="sources_licence">Licence: %1$s</string>
+
+    <!-- The question before a very big download. %1$s is the pack, %2$s its size. -->
+    <string name="sources_size_check_title">%1$s is %2$s</string>
+    <!-- %1$s is the free space, %2$s the storage. -->
+    <string name="sources_size_check_free">You have %1$s free on %2$s.</string>
+    <string name="sources_size_check_free_phone">You have %1$s free on this phone.</string>
+    <string name="sources_size_check_no_room">That isn\'t enough room for it.</string>
+    <!-- Gets the pack's smaller flavour instead: %1$s is the flavour (lower case, such as "no pictures"), %2$s its size. -->
+    <string name="sources_get_smaller">Get %1$s, %2$s</string>
+    <!-- Gets it anyway; %1$s is its size. -->
+    <string name="sources_get_size">Get %1$s</string>
+
+    <!-- A pack's flavours. -->
+    <string name="sources_flavour_with_pictures">With pictures</string>
+    <string name="sources_flavour_no_pictures">No pictures</string>
+    <string name="sources_flavour_mini">Mini (intro paragraphs only)</string>
+    <!-- A pack that comes in one flavour only. -->
+    <string name="sources_flavour_standard">Standard</string>
+    <!-- A set's row (Wikipedia): how many articles, and pictures. -->
+    <string name="sources_how_much">How much</string>
+    <string name="sources_pictures">Pictures</string>
+    <string name="sources_add_subject">Add a subject</string>
+    <!-- Lower case, read out after a choice by a screen reader: "With pictures, 7.0 GB, installed". -->
+    <string name="sources_installed_lower">installed</string>
+    <string name="sources_installed">Installed</string>
+    <!-- %1$s is the bigger slice on the phone, such as Top 1 million. -->
+    <string name="sources_inside_your">Inside your %1$s</string>
+    <!-- A slice and its pictures: "Best 50,000 articles, No pictures". -->
+    <string name="sources_slice_and_pictures">%1$s, %2$s</string>
+    <!-- A slice that comes in one pictures choice only: "With pictures only". -->
+    <string name="sources_pictures_only">%1$s only</string>
+    <!-- A pictures choice the chosen slice doesn't come in; %1$s is the slice. -->
+    <string name="sources_not_offered_for">Not offered for %1$s</string>
+    <!-- %1$s is the flavour switched to, such as With pictures. -->
+    <string name="sources_switch_to">Switch to %1$s</string>
+    <string name="sources_switch_to_this">Switch to this</string>
+    <string name="sources_switch">Switch</string>
+    <!-- %1$s is the pack; %2$s and %3$s the flavour on the phone and its size; %4$s and %5$s the new one and its size. -->
+    <string name="sources_switch_text">Switch %1$s from %2$s (%3$s) to %4$s (%5$s)? The %2$s version is removed once the new one has downloaded. Your places and bookmarks carry over.</string>
+    <string name="sources_update">Update</string>
+    <!-- The overflow menu of a row; %1$s is its title. -->
+    <string name="sources_more_for">More for %1$s</string>
+
+    <!-- A download's status. %1$s is why the last try stopped. -->
+    <string name="sources_retrying">Retrying: %1$s</string>
+    <string name="sources_waiting_wifi">Waiting for Wi-Fi</string>
+    <string name="sources_queued_status">Queued</string>
+    <string name="sources_percent">%1$d%%</string>
+    <string name="sources_download_failed">Download failed</string>
+    <string name="sources_update_available">A newer version is available</string>
+    <string name="sources_needs_memory">Needs a phone with more memory</string>
+    <!-- %1$d of %2$d files are in. -->
+    <string name="sources_partly_downloaded">Partly downloaded: %1$d of %2$d</string>
+    <!-- An archive.org item already got from the other audio view. -->
+    <string name="sources_in_your_music">In your Music</string>
+    <string name="sources_in_your_audiobooks">In your Audiobooks</string>
+
+    <!-- Notices. -->
+    <!-- %1$s is a preset's name. -->
+    <string name="sources_preset_already">Everything in %1$s is already here or on its way.</string>
+    <string name="sources_couldnt_delete">Couldn\'t delete %1$s.</string>
+    <string name="sources_no_storage">No storage is available right now.</string>
+    <!-- %1$s is the storage, %2$s the item, %3$s the space needed. -->
+    <string name="sources_no_space">Not enough space on %1$s for %2$s: free up %3$s.</string>
+    <!-- %1$s is the item, %2$s the total it would make, %3$s the downloads limit. -->
+    <string name="sources_over_cap">%1$s would bring your downloads to %2$s, over the %3$s limit.</string>
+    <!-- After a problem part-way through a set: %1$s is the problem, %2$d how many were queued first. -->
+    <plurals name="sources_queued_before">
+        <item quantity="one">%1$s Queued %2$d before that.</item>
+        <item quantity="other">%1$s Queued %2$d before that.</item>
+    </plurals>
+    <plurals name="sources_queued">
+        <item quantity="one">Queued %d download.</item>
+        <item quantity="other">Queued %d downloads.</item>
+    </plurals>
+    <string name="sources_catalog_unloaded">Couldn\'t load the catalog. Connect to the internet and try again.</string>
+    <string name="sources_catalog_offline">Offline: showing the catalog from your last connection.</string>
+    <string name="sources_catalog_bad_signature">The latest catalog failed its security check. Showing the last good copy.</string>
+    <string name="sources_catalog_unsupported">A newer catalog needs an app update. Showing the last copy that works.</string>
+    <string name="sources_catalog_malformed">Couldn\'t read the latest catalog. Showing the last good copy.</string>
+
+    <!-- How Ask can search a pack. -->
+    <string name="sources_ask_meaning">Ask: by meaning and keywords</string>
+    <string name="sources_ask_keywords">Ask: keywords only</string>
+    <string name="sources_ask_none">Ask can\'t search this</string>
+    <!-- What a model is for. -->
+    <string name="sources_model_not_used">Not used</string>
+    <string name="sources_model_used_by_ask">Used by Ask</string>
+    <string name="sources_model_not_used_yet">Not used yet</string>
+    <string name="sources_voice">Read-aloud voice</string>
+
+    <!-- A pack row's details. %1$s is the month and year, such as March 2026. -->
+    <string name="sources_updated">Updated %1$s</string>
+    <!-- More than three languages: %1$s names three, %2$d is how many more. -->
+    <plurals name="sources_languages_more">
+        <item quantity="one">%1$s and %2$d more</item>
+        <item quantity="other">%1$s and %2$d more</item>
+    </plurals>
+    <string name="sources_licence_not_stated">Licence not stated</string>
+    <string name="sources_licence_public_domain">Public domain</string>
+    <!-- Several open licences, per project. -->
+    <string name="sources_licence_open">Open licences</string>
+    <string name="sources_licence_cc">CC licences</string>
+    <string name="sources_licence_see">See licence</string>
+    <!-- A licence that asks for credit to Kiwix: "CC BY-NC-SA · provided by Kiwix". -->
+    <string name="sources_licence_kiwix">%1$s · provided by Kiwix</string>
+    <!-- A set's line. -->
+    <string name="sources_set_wikipedia">The free encyclopedia, from 100 essential articles to all of it.</string>
+    <string name="sources_set_wikivoyage">The free travel guide, from Europe to the whole world.</string>
+    <!-- A set's subjects list; %1$s is the set, such as Wikipedia. -->
+    <string name="sources_set_subjects">%1$s subjects</string>
+    <!-- Families shown as one row, opening their own list. -->
+    <string name="sources_family_devdocs">Developer docs</string>
+    <string name="sources_family_stack_exchange">Q&amp;A sites</string>
+    <string name="sources_family_maps">Maps</string>
+    <!-- What a subject adds to a Wikipedia slice. %1$s is the slice, %2$d the share of its articles that are new. -->
+    <string name="sources_adds_to">Adds to %1$s (%2$d%% new)</string>
+    <string name="sources_adds_to_your">Adds to your %1$s (%2$d%% new)</string>
+    <!-- %1$s is about how many articles, %2$s the slice, %3$d the percent new. -->
+    <plurals name="sources_adds_about">
+        <item quantity="one">Adds about %1$s article to %2$s (%3$d%% new)</item>
+        <item quantity="other">Adds about %1$s articles to %2$s (%3$d%% new)</item>
+    </plurals>
+    <plurals name="sources_adds_about_your">
+        <item quantity="one">Adds about %1$s article to your %2$s (%3$d%% new)</item>
+        <item quantity="other">Adds about %1$s articles to your %2$s (%3$d%% new)</item>
+    </plurals>
+    <!-- %1$s is the set, such as Wikipedia. -->
+    <string name="sources_adds_inside_your">Already inside your %1$s</string>
+    <!-- %1$s is the slice, such as Top 1 million. -->
+    <string name="sources_adds_inside">Already inside %1$s</string>
+
+    <!-- Tidy up after a bigger slice is in. %1$s is the bigger slice, %2$s the smaller, %3$s its size. -->
+    <string name="sources_tidy_text">%1$s is in. Remove %2$s (%3$s)? Your places and bookmarks move across.</string>
+    <string name="sources_tidy_keep_both">Keep both</string>
+    <!-- %1$s is the smaller slice, such as Best 50,000. -->
+    <string name="sources_tidy_remove">Remove %1$s</string>
+</resources>

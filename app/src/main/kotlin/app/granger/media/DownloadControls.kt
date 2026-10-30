@@ -18,6 +18,7 @@ import app.granger.R
 import app.granger.UiText
 import app.granger.library.ConfirmDialog
 import app.granger.sources.ItemStatus
+import app.granger.sources.failedText
 
 /** What a downloaded item's files are: an album's tracks or an audiobook's chapters. */
 enum class DownloadUnit { TRACKS, CHAPTERS }
@@ -41,8 +42,8 @@ internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: Downl
         is ItemStatus.Downloading ->
             if (total > 0) count(R.plurals.media_downloading_tracks, R.plurals.media_downloading_chapters) else UiText.Res(R.string.common_downloading)
         is ItemStatus.Partial -> count(R.plurals.media_partial_tracks, R.plurals.media_partial_chapters, status.done, status.total)
-        // The downloader's own reason (sources/ and the ledger hold it as text).
-        is ItemStatus.Failed -> UiText.Raw(status.reason)
+        // The downloader's own reason (the ledger holds it as English text, L2), else Download failed.
+        is ItemStatus.Failed -> failedText(status)
         else -> null
     }
 }

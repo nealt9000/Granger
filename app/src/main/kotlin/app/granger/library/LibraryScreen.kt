@@ -42,6 +42,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -183,8 +184,8 @@ fun LibraryContent(
                     item(key = "source:$source") {
                         ListItem(
                             modifier = Modifier.clickable { onOpenSource(source) },
-                            headlineContent = { Text(source.title) },
-                            supportingContent = { Text(source.subtitle) },
+                            headlineContent = { Text(stringResource(source.title)) },
+                            supportingContent = { Text(stringResource(source.subtitle)) },
                         )
                     }
                 }

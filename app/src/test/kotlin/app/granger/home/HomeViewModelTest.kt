@@ -334,7 +334,7 @@ class HomeViewModelTest {
     @Test fun homeOffersToRemoveTheSmallerSliceAndRemovesItOnlyOnAYes() = runTest(main.dispatcher) {
         val vm = tidyViewModel(app.granger.sources.TidyDismissals())
         val offer = vm.ui.value.tidy.single()
-        assertThat(offer.text).isEqualTo("Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.")
+        assertThat(offer.text.text()).isEqualTo("Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.")
         // Nothing has been removed by just showing it.
         assertThat(library.superseded).isEmpty()
         assertThat(downloads.calls).isEmpty()
