@@ -272,6 +272,17 @@ class HomeViewModelTest {
         assertThat((vm.ui.value.downloads as DownloadsCard.Stopped).count).isEqualTo(3)
     }
 
+    @Test fun aStoppedFileTheCatalogDroppedIsNotOfferedRetry() {
+        val dropped = record("wikem", DownloadState.FAILED, error = "lb.download.kiwix.org answered 404")
+        val listed = record("knots", DownloadState.FAILED, error = "timeout")
+        val summary = QueueSummary(stopped = listOf(dropped, listed))
+        val card = HomeViewModel.downloadsCard(summary, emptySet(), catalogIds = setOf("knots")) as DownloadsCard.Stopped
+        assertThat(card.count).isEqualTo(2)
+        assertThat(card.retriable).containsExactly("knots")
+        // Before the catalog has loaded, nothing is judged dropped.
+        assertThat((HomeViewModel.downloadsCard(summary, emptySet()) as DownloadsCard.Stopped).retriable).containsExactly("wikem", "knots")
+    }
+
     @Test fun theCardIsGoneWhenThereIsNothingToShow() = runTest(main.dispatcher) {
         prefs.seeded = true
         downloads.list.value = listOf(record("done", DownloadState.INSTALLED))

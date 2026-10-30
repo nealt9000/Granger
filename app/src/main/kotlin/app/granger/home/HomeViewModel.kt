@@ -6,6 +6,7 @@ import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.DownloadQueueSummary
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.QueueSummary
+import app.granger.core.downloads.isFromCatalog
 import app.granger.core.downloads.isGone
 import app.granger.core.library.onShelf
 import app.granger.core.library.Albums
@@ -140,8 +141,10 @@ class HomeViewModel(
 
     private val dismissed = MutableStateFlow(prefs.dismissedFailures)
 
-    private val downloadsCard = combine(downloads.records, downloads.live, dismissed) { records, live, closed ->
-        downloadsCard(DownloadQueueSummary.of(records, live, clock()), closed)
+    private val catalogIds = catalog.state.map { s -> s.catalog?.let { c -> (c.packs + c.models + c.books + c.voices).mapTo(HashSet()) { it.id } } }
+
+    private val downloadsCard = combine(downloads.records, downloads.live, dismissed, catalogIds) { records, live, closed, ids ->
+        downloadsCard(DownloadQueueSummary.of(records, live, clock()), closed, ids)
     }.flowOn(io)
 
     /** Each OK pack's main entry, for Continue to leave out (opening an archive reads its file, so on [io]). */
@@ -234,9 +237,10 @@ class HomeViewModel(
 
         /**
          * The round while anything waits or runs, for every download, not just setup. With nothing to come, the stopped
-         * files, unless that card was closed on exactly these ([closed]); null when there's nothing to show.
+         * files, unless that card was closed on exactly these ([closed]); null when there's nothing to show. A withdrawn
+         * file, or one the catalog ([catalogIds], null while there is none) no longer lists, isn't offered Retry.
          */
-        fun downloadsCard(summary: QueueSummary, closed: Set<String>): DownloadsCard? {
+        fun downloadsCard(summary: QueueSummary, closed: Set<String>, catalogIds: Set<String>? = null): DownloadsCard? {
             if (summary.isActive) {
                 return DownloadsCard.Active(
                     title = summary.current?.title, paused = summary.paused, filesDone = summary.filesDone, files = summary.files,
@@ -246,7 +250,9 @@ class HomeViewModel(
             }
             val keys = summary.stopped.mapTo(HashSet()) { "${it.itemId}@${it.hash}" }
             if (keys.isEmpty() || closed.containsAll(keys)) return null
-            val retriable = summary.stopped.filterNot { it.isGone }.map { it.itemId }.distinct()
+            val retriable = summary.stopped
+                .filterNot { it.isGone || (catalogIds != null && it.isFromCatalog && it.itemId !in catalogIds) }
+                .map { it.itemId }.distinct()
             return DownloadsCard.Stopped(summary.stopped.map { it.itemId }.distinct().size, retriable, keys)
         }
 
