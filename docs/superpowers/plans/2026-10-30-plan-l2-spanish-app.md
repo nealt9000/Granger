@@ -84,13 +84,13 @@ Use these words everywhere. If a string needs a different word, keep the glossar
 
 ## Task 2: Completeness test
 
-- [ ] **Step 1:** Add `SpanishStringsTest`, a JVM test that parses each `values/` strings file and its `values-es/` twin. It fails when:
+- [x] **Step 1:** Add `SpanishStringsTest`, a JVM test that parses each `values/` strings file and its `values-es/` twin. It fails when:
   - a translatable name has no Spanish
   - a Spanish name has no English
   - the placeholders differ (same set of `%n$x`)
   - a plurals entry lacks `one` or `other`
-- [ ] **Step 2:** Add a Robolectric test that resolves every string under `qualifiers = "es"` with sample args, so a bad format string fails here rather than on the phone.
-- [ ] **Step 3:** Commit.
+- [x] **Step 2:** Add a Robolectric test that resolves every string under `qualifiers = "es"` with sample args, so a bad format string fails here rather than on the phone.
+- [x] **Step 3:** Commit.
 
 ## Task 3: The language setting
 
