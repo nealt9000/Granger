@@ -131,6 +131,7 @@ import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
 import app.granger.sources.CatalogScope
+import app.granger.sources.GetMoreFor
 import app.granger.sources.GetMoreLink
 import app.granger.sources.GetMoreScreen
 import app.granger.sources.SourceScreen
@@ -290,8 +291,21 @@ fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
 
 fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = true }
 
-/** Where sources live: Kiwix, books, audiobooks and music, models (Plan U3b Decision 2). */
-@Serializable object GetMoreRoute
+/**
+ * Where sources live: Kiwix, books, audiobooks and music, models (Plan U3b Decision 2). [only] is one tool's sources:
+ * the Library's books, Listen's audio (Plan KB walkthrough 2); null is all of them.
+ */
+@Serializable data class GetMoreRoute(val only: GetMoreFor? = null)
+
+/** The Library entry's saved-state key: Get books' Import your own asked for the file picker. */
+internal const val IMPORT_ASKED = "importAsked"
+
+/** Get books' Import your own: back to the Library, which opens the picker (its import shows its notice there). */
+fun NavController.importIntoLibrary() {
+    val library = runCatching { getBackStackEntry<LibraryRoute>() }.getOrNull() ?: return
+    library.savedStateHandle[IMPORT_ASKED] = true
+    popBackStack<LibraryRoute>(inclusive = false)
+}
 
 /** Where each Get more row goes: today's source screens. */
 internal fun routeOf(link: GetMoreLink): Any = when (link) {
@@ -349,7 +363,9 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
  * music: [archiveKind] is an [ArchiveRoute]'s kind) are Listen's (Plan U2 Decision 4). Downloads and Readiness cover
  * everything, and stay the Library's.
  */
-internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null): RailTool? = when {
+internal fun railToolOf(
+    destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null, getMoreFor: GetMoreFor? = null,
+): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
     destination.hasRoute<SourceRoute>() -> when (sourceScope) {
         CatalogScope.MODELS -> RailTool.SETTINGS
@@ -358,6 +374,7 @@ internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? 
     }
     destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
+    destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
     destination.hasRoute<ListenRoute>() || destination.hasRoute<ListenPlayerRoute>() || destination.hasRoute<LibriVoxRoute>() ||
         destination.isMusic() || destination.isAudiobooks() -> RailTool.LISTEN
@@ -678,6 +695,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             e.destination,
             sourceScope = if (e.destination.hasRoute<SourceRoute>()) e.toRoute<SourceRoute>().scope else null,
             archiveKind = if (e.destination.hasRoute<ArchiveRoute>()) e.toRoute<ArchiveRoute>().kind else null,
+            getMoreFor = if (e.destination.hasRoute<GetMoreRoute>()) e.toRoute<GetMoreRoute>().only else null,
         )
     }
 
@@ -802,6 +820,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             popExitTransition = { fadeOut(tween(700)) },
         ) {
             composable<LibraryRoute> { backStackEntry ->
+                val importAsked by backStackEntry.savedStateHandle.getStateFlow(IMPORT_ASKED, false).collectAsStateWithLifecycle()
                 LibraryScreen(
                     viewModel = viewModel {
                         val context = appContext
@@ -822,8 +841,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     downloadsBadge = downloadsBadge,
                     onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
-                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                    onGetMore = { nav.navigate(GetMoreRoute(GetMoreFor.BOOKS)) { launchSingleTop = true } },
                     onOpenSource = nav::openGetMore,
+                    importAsked = importAsked,
+                    onImportAsked = { backStackEntry.savedStateHandle[IMPORT_ASKED] = false },
                 )
             }
             composable<BrowseRoute> {
@@ -1173,7 +1194,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                         onOpenSource = nav::openGetMore,
                         onFindOnPhone = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
-                        onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                        onGetMore = { nav.navigate(GetMoreRoute(GetMoreFor.LISTEN)) { launchSingleTop = true } },
                     ),
                 )
             }
@@ -1249,11 +1270,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,
                     onOpenPack = ::openPack,
-                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                    onGetMore = { nav.navigate(GetMoreRoute()) { launchSingleTop = true } },
                 )
             }
-            composable<GetMoreRoute> {
-                GetMoreScreen(onOpen = nav::openGetMore, onBack = { nav.popBackStack() })
+            composable<GetMoreRoute> { backStackEntry ->
+                val only = backStackEntry.toRoute<GetMoreRoute>().only
+                GetMoreScreen(
+                    onOpen = nav::openGetMore,
+                    onBack = { nav.popBackStack() },
+                    only = only,
+                    onImport = if (only == GetMoreFor.BOOKS && Features.IMPORT) nav::importIntoLibrary else null,
+                )
             }
             composable<ReadinessRoute> {
                 ReadinessScreen(

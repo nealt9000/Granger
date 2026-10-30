@@ -28,6 +28,7 @@ import app.granger.packEntry
 import app.granger.record
 import app.granger.volume
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -1014,5 +1015,20 @@ class SourceViewModelTest {
 
         val kiwix = viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }.map { it.id }
         assertThat(kiwix).containsNoneIn(nautilus + gutenberg.map { it.id })
+    }
+
+    /**
+     * Plan KB walkthrough 2: every book source the Library's + offers that lists the catalog (Granger Classics, Project
+     * Gutenberg, Kiwix libraries) lists something from the published catalog; archive.org books searches the network.
+     */
+    @Test fun everyBookSourceOfTheLibrarysGetMoreListsThePublishedCatalog() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        val scopes = getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }
+            .mapNotNull { (app.granger.routeOf(it) as? app.granger.SourceRoute)?.scope }
+        assertThat(scopes).containsExactly(CatalogScope.GRANGER, CatalogScope.GUTENBERG, CatalogScope.KIWIX_BOOKS).inOrder()
+        for (scope in scopes) {
+            val ui = viewModel(scope).ui.value
+            assertWithMessage(scope.title).that(ui.sections.flatMap { it.rows }).isNotEmpty()
+        }
     }
 }

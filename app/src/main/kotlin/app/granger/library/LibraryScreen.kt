@@ -76,6 +76,9 @@ fun LibraryScreen(
     onGetMore: () -> Unit = {},
     /** A book source the empty Library links to. */
     onOpenSource: (GetMoreLink) -> Unit = {},
+    /** Get books' Import your own asked for the file picker; [onImportAsked] says it has opened. */
+    importAsked: Boolean = false,
+    onImportAsked: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -98,6 +101,11 @@ fun LibraryScreen(
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         viewModel.import(uris)
+    }
+    LaunchedEffect(importAsked) {
+        if (!importAsked) return@LaunchedEffect
+        onImportAsked()
+        picker.launch(IMPORT_TYPES)
     }
     LibraryContent(
         ui, snackbar, onOpenCollection, onSearch, onReadiness,
