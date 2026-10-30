@@ -11,7 +11,8 @@ Writes `<out>/vits-piper-<name>/` with what `SherpaVoice.detect` and `pack_voice
   path Piper's own voices came from; plus the metadata sherpa-onnx reads (`model_type=vits`, `comment=piper`,
   `language`, `voice`, `has_espeak`, `n_speakers`, `sample_rate`), as on sherpa's `en_US-ljspeech-medium.onnx`.
 - `<name>.onnx.json`: the training config (`--config`), with speaker names if given, and `--noise`/`--noise-w` in
-  its `inference` block, which the app reads as the voice's sampling settings.
+  its `inference` block, which the app reads as the voice's sampling settings, and with `--dialogue-speaker` a
+  `granger` block naming the speaker id the app reads quoted speech with.
 - `tokens.txt`: `<phoneme> <id>` from the config's `phoneme_id_map`, as sherpa-onnx's Piper conversion writes it,
   single-codepoint phonemes only (sherpa-onnx rejects the file otherwise).
 - `espeak-ng-data/`: copied from sherpa's ljspeech voice (`<base>/sherpa/…`).
@@ -138,6 +139,7 @@ def main():
     p.add_argument("--epochs", default="", help="for the model card, e.g. '1000 epochs from the base'")
     p.add_argument("--speakers", nargs="*", default=[], help="reader=Name, renaming speaker_id_map keys")
     p.add_argument("--keep", type=int, help="export only speakers 0..keep-1")
+    p.add_argument("--dialogue-speaker", help="the speaker_id_map name that reads quoted speech (V4b: dialogue)")
     p.add_argument("--noise", type=float, help="the voice's noise_scale (V4 British voices: 0.75)")
     p.add_argument("--noise-w", type=float, help="the voice's noise_w (V4 British voices: 1.0)")
     a = p.parse_args()
@@ -159,6 +161,10 @@ def main():
     if renames:
         config["speaker_id_map"] = {renames.get(k, k): v for k, v in config["speaker_id_map"].items()}
     config["dataset"] = "granger_libritts"
+    if a.dialogue_speaker:
+        if a.dialogue_speaker not in config["speaker_id_map"]:
+            raise SystemExit(f"no speaker {a.dialogue_speaker!r} in {sorted(config['speaker_id_map'])}")
+        config["granger"] = {"dialogue_speaker": config["speaker_id_map"][a.dialogue_speaker]}
     inference = config.setdefault("inference", {"noise_scale": 0.667, "length_scale": 1.0, "noise_w": 0.8})
     if a.noise is not None:
         inference["noise_scale"] = a.noise
