@@ -21,3 +21,6 @@ __pycache__/
 tools/catalog-gen/.pytest_cache/
 # check-links stamps (Plan DL)
 *.links-ok
+# Plan A0: Neal's recordings stay off GitHub
+tools/asr/audio/
+tools/asr/out/

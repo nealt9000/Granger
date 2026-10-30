@@ -1,0 +1,394 @@
+{
+ "version": 1,
+ "note": "Plan A0 phrases. Questions from tools/eval/dataset (eval id where it matched); names from the Pixel 6 library on 2026-10-30, said as 'Open <name>'; 'accept' lists other forms that count as a hit.",
+ "phrases": [
+  {
+   "id": "q01",
+   "kind": "question",
+   "text": "What's a normal blood pressure?",
+   "eval": "medical-003"
+  },
+  {
+   "id": "q02",
+   "kind": "question",
+   "text": "What does half life mean?",
+   "eval": "physics-003"
+  },
+  {
+   "id": "q03",
+   "kind": "question",
+   "text": "Did Jesus say we should pay taxes?",
+   "eval": "vocab-gap-003"
+  },
+  {
+   "id": "q04",
+   "kind": "question",
+   "text": "What did John Stuart Mill think about peer pressure and having to conform?",
+   "eval": "vocab-gap-009"
+  },
+  {
+   "id": "q05",
+   "kind": "question",
+   "text": "Who wrote The Yellow Wallpaper?",
+   "eval": "who-wrote-005"
+  },
+  {
+   "id": "q06",
+   "kind": "question",
+   "text": "What should you do right after you burn yourself?",
+   "eval": "medical-014"
+  },
+  {
+   "id": "q07",
+   "kind": "question",
+   "text": "What's Adam Smith's example of how specialization makes workers more productive?",
+   "eval": "vocab-gap-005"
+  },
+  {
+   "id": "q08",
+   "kind": "question",
+   "text": "How does Pride and Prejudice start?",
+   "eval": "literature-001"
+  },
+  {
+   "id": "q09",
+   "kind": "question",
+   "text": "What does the Bhagavad Gita say about doing your work without worrying about the outcome?",
+   "eval": "bible-010"
+  },
+  {
+   "id": "q10",
+   "kind": "question",
+   "text": "Who wrote The Tale of Genji?",
+   "eval": "who-wrote-003"
+  },
+  {
+   "id": "q11",
+   "kind": "question",
+   "text": "What did the Stoics say about only worrying about what you can control?",
+   "eval": "vocab-gap-008"
+  },
+  {
+   "id": "q12",
+   "kind": "question",
+   "text": "How tall is Mount Everest?",
+   "eval": "geography-general-001"
+  },
+  {
+   "id": "q13",
+   "kind": "question",
+   "text": "Who wrote the book with Big Brother in it?",
+   "eval": "who-wrote-004"
+  },
+  {
+   "id": "q14",
+   "kind": "question",
+   "text": "What did Thoreau say about minimalism?",
+   "eval": "vocab-gap-006"
+  },
+  {
+   "id": "q15",
+   "kind": "question",
+   "text": "Who was Scrooge's business partner?",
+   "eval": "literature-004"
+  },
+  {
+   "id": "q16",
+   "kind": "question",
+   "text": "What's the deepest lake in the world?",
+   "eval": "geography-001"
+  },
+  {
+   "id": "q17",
+   "kind": "question",
+   "text": "Is it true salary comes from Roman soldiers getting paid in salt?",
+   "eval": "words-004"
+  },
+  {
+   "id": "q18",
+   "kind": "question",
+   "text": "In old novels people die of dropsy. What is that?",
+   "eval": "medical-032"
+  },
+  {
+   "id": "q19",
+   "kind": "question",
+   "text": "What's wrong with a granny knot?",
+   "eval": "knots-002"
+  },
+  {
+   "id": "q20",
+   "kind": "question",
+   "text": "What was the ship called in Treasure Island?",
+   "eval": "literature-003"
+  },
+  {
+   "id": "q21",
+   "kind": "question",
+   "text": "Who lived longer in the Bible, Methuselah or Noah, and by how much?",
+   "eval": "multi-step-010"
+  },
+  {
+   "id": "q22",
+   "kind": "question",
+   "text": "Who wrote Don Quixote?",
+   "eval": "who-wrote-011"
+  },
+  {
+   "id": "q23",
+   "kind": "question",
+   "text": "How many years after the Magna Carta did the Black Death reach Europe?",
+   "eval": "multi-step-014"
+  },
+  {
+   "id": "q24",
+   "kind": "question",
+   "text": "Where in the Bible does it talk about alcohol?",
+   "eval": "bible-001"
+  },
+  {
+   "id": "q25",
+   "kind": "question",
+   "text": "What did Thucydides say about the plague in Athens?"
+  },
+  {
+   "id": "n01",
+   "kind": "name",
+   "text": "Open Wikivoyage",
+   "name": "Wikivoyage",
+   "accept": []
+  },
+  {
+   "id": "n02",
+   "kind": "name",
+   "text": "Open Appropedia",
+   "name": "Appropedia",
+   "accept": []
+  },
+  {
+   "id": "n03",
+   "kind": "name",
+   "text": "Open iFixit",
+   "name": "iFixit",
+   "accept": []
+  },
+  {
+   "id": "n04",
+   "kind": "name",
+   "text": "Open Mi Yodeya",
+   "name": "Mi Yodeya",
+   "accept": []
+  },
+  {
+   "id": "n05",
+   "kind": "name",
+   "text": "Open WikiMed",
+   "name": "WikiMed",
+   "accept": [
+    "wiki med"
+   ]
+  },
+  {
+   "id": "n06",
+   "kind": "name",
+   "text": "Open Ready.gov",
+   "name": "Ready.gov",
+   "accept": [
+    "ready gov"
+   ]
+  },
+  {
+   "id": "n07",
+   "kind": "name",
+   "text": "Open Toned Ear",
+   "name": "Toned Ear",
+   "accept": []
+  },
+  {
+   "id": "n08",
+   "kind": "name",
+   "text": "Open The Dhammapada",
+   "name": "The Dhammapada",
+   "accept": [
+    "dhammapada"
+   ]
+  },
+  {
+   "id": "n09",
+   "kind": "name",
+   "text": "Open Crito",
+   "name": "Crito",
+   "accept": []
+  },
+  {
+   "id": "n10",
+   "kind": "name",
+   "text": "Open the Metaphysic of Morals",
+   "name": "the Metaphysic of Morals",
+   "accept": [
+    "metaphysic of morals"
+   ]
+  },
+  {
+   "id": "n11",
+   "kind": "name",
+   "text": "Open The Mayor of Casterbridge",
+   "name": "The Mayor of Casterbridge",
+   "accept": [
+    "mayor of casterbridge"
+   ]
+  },
+  {
+   "id": "n12",
+   "kind": "name",
+   "text": "Open Riders to the Sea",
+   "name": "Riders to the Sea",
+   "accept": []
+  },
+  {
+   "id": "n13",
+   "kind": "name",
+   "text": "Open Hector Berlioz",
+   "name": "Hector Berlioz",
+   "accept": [
+    "berlioz"
+   ]
+  },
+  {
+   "id": "n14",
+   "kind": "name",
+   "text": "Open Giacomo Puccini",
+   "name": "Giacomo Puccini",
+   "accept": [
+    "puccini"
+   ]
+  },
+  {
+   "id": "n15",
+   "kind": "name",
+   "text": "Open How to Study Fiorillo",
+   "name": "How to Study Fiorillo",
+   "accept": [
+    "fiorillo"
+   ]
+  },
+  {
+   "id": "n16",
+   "kind": "name",
+   "text": "Open Harpsichords and Clavichords",
+   "name": "Harpsichords and Clavichords",
+   "accept": []
+  },
+  {
+   "id": "n17",
+   "kind": "name",
+   "text": "Open The Castle of Andalusia",
+   "name": "The Castle of Andalusia",
+   "accept": [
+    "castle of andalusia"
+   ]
+  },
+  {
+   "id": "n18",
+   "kind": "name",
+   "text": "Open Meditations by Marcus Aurelius",
+   "name": "Meditations by Marcus Aurelius",
+   "accept": [
+    "marcus aurelius"
+   ]
+  },
+  {
+   "id": "n19",
+   "kind": "name",
+   "text": "Open Discourses of Epictetus",
+   "name": "Discourses of Epictetus",
+   "accept": [
+    "epictetus"
+   ]
+  },
+  {
+   "id": "n20",
+   "kind": "name",
+   "text": "Open The Tale of Genji",
+   "name": "The Tale of Genji",
+   "accept": [
+    "genji"
+   ]
+  },
+  {
+   "id": "c01",
+   "kind": "command",
+   "text": "Read aloud"
+  },
+  {
+   "id": "c02",
+   "kind": "command",
+   "text": "Stop reading"
+  },
+  {
+   "id": "c03",
+   "kind": "command",
+   "text": "Next chapter"
+  },
+  {
+   "id": "c04",
+   "kind": "command",
+   "text": "Go back a chapter"
+  },
+  {
+   "id": "c05",
+   "kind": "command",
+   "text": "Pause the music"
+  },
+  {
+   "id": "c06",
+   "kind": "command",
+   "text": "Play The Dark Side of the Moon"
+  },
+  {
+   "id": "c07",
+   "kind": "command",
+   "text": "Play Holst's The Planets"
+  },
+  {
+   "id": "c08",
+   "kind": "command",
+   "text": "Search Roman roads"
+  },
+  {
+   "id": "c09",
+   "kind": "command",
+   "text": "Search knots that hold under load"
+  },
+  {
+   "id": "c10",
+   "kind": "command",
+   "text": "Find books by Thomas Hardy"
+  },
+  {
+   "id": "c11",
+   "kind": "command",
+   "text": "Search Wikivoyage for Lisbon"
+  },
+  {
+   "id": "c12",
+   "kind": "command",
+   "text": "Open the Medical Library"
+  },
+  {
+   "id": "c13",
+   "kind": "command",
+   "text": "Go to Home"
+  },
+  {
+   "id": "c14",
+   "kind": "command",
+   "text": "Read from where I left off"
+  },
+  {
+   "id": "c15",
+   "kind": "command",
+   "text": "Bookmark this page"
+  }
+ ]
+}
