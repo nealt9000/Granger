@@ -890,3 +890,53 @@ def test_sign_needs_a_passing_check_of_the_same_file(tmp_path, link_server, caps
     with pytest.raises(SystemExit, match="1 of 1 links dead"):
         cg.main(["check-links", str(path)])
     assert "DEAD" in capsys.readouterr().out
+
+
+# --- Plan GB: Gutenberg packs are named for their subject ---
+
+GUTENBERG_FAMILIES = [
+    {"family": "gutenberg", "match": "^gutenberg_", "category": "Literature & Drama", "license": "Public domain (US)",
+     "domain": "literature"},
+]
+
+
+def gutenberg_entry(name, summary):
+    return feed_entry(name).replace(f"<summary>About {name}</summary>", f"<summary>{summary}</summary>")
+
+
+def test_gutenberg_packs_are_titled_by_their_subject():
+    xml = feed(gutenberg_entry("gutenberg_en_lcc-m", "Music and books on music"),
+               gutenberg_entry("gutenberg_en_lcc-pf", "west Germanic languages"),
+               gutenberg_entry("gutenberg_en_all", "All books in English from the first producer of free Ebooks"),
+               gutenberg_entry("gutenberg_mul_all", "All books in all languages from the first producer of free Ebooks"))
+    packs = cg.kiwix_entries({"languages": ["eng"]}, GUTENBERG_FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                             feed_fetch(xml), workers=2, sleep=lambda s: None)[0]
+    by_id = {p["id"]: p for p in packs}
+    assert by_id["gutenberg_en_lcc-m"]["title"] == "Music and books on music · Project Gutenberg"
+    # The first letter is capitalised; the summary stays the description.
+    assert by_id["gutenberg_en_lcc-pf"]["title"] == "West Germanic languages · Project Gutenberg"
+    assert by_id["gutenberg_en_lcc-pf"]["description"] == "west Germanic languages"
+    assert by_id["gutenberg_en_all"]["title"] == "Every English book · Project Gutenberg"
+    assert by_id["gutenberg_mul_all"]["title"] == "Every book, all languages · Project Gutenberg"
+
+
+def test_a_curated_gutenberg_pack_follows_the_same_rule(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": GUTENBERG_FAMILIES}))
+    xml = feed(gutenberg_entry("gutenberg_en_lcc-b", "Philosophy, psychology, religion"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"},
+               "packs": [{"name": "gutenberg_en_lcc-b", "category": "Religion & Philosophy",
+                          "license": "Public domain (US)", "title": "Project Gutenberg: Philosophy & Religion"}],
+               "models": [], "presets": []}
+    (pack,) = cg.build(curated, feed_fetch(xml), root=tmp_path)["packs"]
+    assert pack["title"] == "Philosophy, psychology, religion · Project Gutenberg"
+    assert pack["category"] == "Religion & Philosophy" and pack["featured"]
+
+
+def test_gutenberg_title_without_a_summary():
+    assert cg.gutenberg_title("gutenberg_en_lcc-x", "  ") == "Project Gutenberg"
+
+
+def test_real_curated_gutenberg_rows_carry_no_title_of_their_own():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text(encoding="utf-8"))
+    rows = [p for p in curated["packs"] if p.get("name", "").startswith("gutenberg_")]
+    assert rows and all("title" not in p for p in rows)

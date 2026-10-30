@@ -354,6 +354,7 @@ class SourceViewModel(
 
     private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): SourceUi {
         val current = state.catalog
+        val gutenberg = scope == CatalogScope.GUTENBERG
         val volumeRows = volumeRows(s.volumes, records)
         // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
         val recordsById = records.groupBy { it.itemId }
@@ -387,7 +388,9 @@ class SourceViewModel(
                 is VoiceEntry -> item.attribution
             }
             val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
-            return ItemRow(item.id, item.title, details, description, item.downloadBytes, status(item), packId, ask)
+            // On Project Gutenberg's own screen, each pack is its subject alone.
+            val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else item.title
+            return ItemRow(item.id, title, details, description, item.downloadBytes, status(item), packId, ask)
         }
         val needle = s.query.trim()
         val kiwix = scope == CatalogScope.KIWIX
@@ -441,6 +444,13 @@ class SourceViewModel(
             } else {
                 packs.partition { kiwix && chosen == null && it.featured }
             }
+            if (gutenberg) {
+                // Project Gutenberg (Plan GB Decision 7): the subject packs A–Z, then the two everything-packs, each with its size.
+                val (everything, subjects) = packs.partition { it.zimName.endsWith("_all") }
+                if (subjects.isNotEmpty()) add(Section(SUBJECTS, subjects.sortedBy { it.title.lowercase() }.map(::row)))
+                if (everything.isNotEmpty()) add(Section(EVERYTHING, everything.sortedBy { it.sizeBytes }.map(::row)))
+                return@buildList
+            }
             if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
             rest.groupBy { it.category }
                 .toList()
@@ -450,7 +460,11 @@ class SourceViewModel(
             current.books.filter(::shown).groupBy { it.category }
                 .forEach { (category, entries) -> add(section(category, entries, folding = booksFold, noun = "books")) }
         }
-        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
+        // Granger's screen is Get more's Granger Classics, under Books: only a set of books is offered there. Starter,
+        // Efficient and Comprehensive bring Kiwix's wikis and the models, which aren't books (Plan GB walkthrough).
+        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { preset ->
+            preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry }
+        }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
@@ -497,6 +511,9 @@ class SourceViewModel(
         /** Rows a folded section shows before Show all. */
         const val FOLDED_ROWS = 8
         const val RECOMMENDED = "Recommended"
+        const val SUBJECTS = "Subjects"
+        const val EVERYTHING = "Everything"
+        private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
         private const val CLASSICS_PRESET = "granger-classics"
 
         /** The family table's categories (tools/catalog-gen/kiwix_families.json); any other sorts after, by name. */

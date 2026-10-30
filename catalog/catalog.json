@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-30T11:06:19Z",
+  "generatedAt": "2026-10-30T12:57:36Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -178,7 +178,7 @@
     },
     {
       "id": "gutenberg_en_lcc-b",
-      "title": "Project Gutenberg: Philosophy & Religion",
+      "title": "Philosophy, psychology, religion · Project Gutenberg",
       "description": "Philosophy, psychology, religion",
       "category": "Religion & Philosophy",
       "language": "eng",
@@ -222,7 +222,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pr",
-      "title": "Project Gutenberg: English literature",
+      "title": "English literature · Project Gutenberg",
       "description": "English literature",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2014,7 +2014,7 @@
     },
     {
       "id": "gutenberg_en_all",
-      "title": "Project Gutenberg Library",
+      "title": "Every English book · Project Gutenberg",
       "description": "All books in English from the first producer of free Ebooks",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2035,7 +2035,7 @@
     },
     {
       "id": "gutenberg_en_lcc-a",
-      "title": "Project Gutenberg Library",
+      "title": "General works · Project Gutenberg",
       "description": "General works",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2056,7 +2056,7 @@
     },
     {
       "id": "gutenberg_en_lcc-c",
-      "title": "Project Gutenberg Library",
+      "title": "Auxiliary sciences of history · Project Gutenberg",
       "description": "Auxiliary sciences of history",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2077,7 +2077,7 @@
     },
     {
       "id": "gutenberg_en_lcc-d",
-      "title": "Project Gutenberg Library",
+      "title": "World history (Europe, Asia, Africa, Australia) · Project Gutenberg",
       "description": "World history (Europe, Asia, Africa, Australia)",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2098,7 +2098,7 @@
     },
     {
       "id": "gutenberg_en_lcc-e",
-      "title": "Project Gutenberg Library",
+      "title": "History of the Americas · Project Gutenberg",
       "description": "History of the Americas",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2119,7 +2119,7 @@
     },
     {
       "id": "gutenberg_en_lcc-f",
-      "title": "Project Gutenberg Library",
+      "title": "History of the Americas · Project Gutenberg",
       "description": "History of the Americas",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2140,7 +2140,7 @@
     },
     {
       "id": "gutenberg_en_lcc-g",
-      "title": "Project Gutenberg Library",
+      "title": "Geography, anthropology, recreation · Project Gutenberg",
       "description": "Geography, anthropology, recreation",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2161,7 +2161,7 @@
     },
     {
       "id": "gutenberg_en_lcc-h",
-      "title": "Project Gutenberg Library",
+      "title": "Social sciences · Project Gutenberg",
       "description": "Social sciences",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2182,7 +2182,7 @@
     },
     {
       "id": "gutenberg_en_lcc-j",
-      "title": "Project Gutenberg Library",
+      "title": "Political science · Project Gutenberg",
       "description": "Political science",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2203,7 +2203,7 @@
     },
     {
       "id": "gutenberg_en_lcc-k",
-      "title": "Project Gutenberg Library",
+      "title": "Law · Project Gutenberg",
       "description": "Law",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2224,7 +2224,7 @@
     },
     {
       "id": "gutenberg_en_lcc-l",
-      "title": "Project Gutenberg Library",
+      "title": "Education · Project Gutenberg",
       "description": "Education",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2245,7 +2245,7 @@
     },
     {
       "id": "gutenberg_en_lcc-m",
-      "title": "Project Gutenberg Library",
+      "title": "Music and books on music · Project Gutenberg",
       "description": "Music and books on music",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2266,7 +2266,7 @@
     },
     {
       "id": "gutenberg_en_lcc-n",
-      "title": "Project Gutenberg Library",
+      "title": "Fine arts · Project Gutenberg",
       "description": "Fine arts",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2287,7 +2287,7 @@
     },
     {
       "id": "gutenberg_en_lcc-p",
-      "title": "Project Gutenberg Library",
+      "title": "Language and literature · Project Gutenberg",
       "description": "Language and literature",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2308,7 +2308,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pa",
-      "title": "Project Gutenberg Library",
+      "title": "Greek and Latin language and literature · Project Gutenberg",
       "description": "Greek and Latin language and literature",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2329,7 +2329,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pb",
-      "title": "Project Gutenberg Library",
+      "title": "Modern and Celtic languages · Project Gutenberg",
       "description": "Modern and Celtic languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2350,7 +2350,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pc",
-      "title": "Project Gutenberg Library",
+      "title": "Romance languages · Project Gutenberg",
       "description": "Romance languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2371,7 +2371,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pd",
-      "title": "Project Gutenberg Library",
+      "title": "Germanic and Scandinavian languages · Project Gutenberg",
       "description": "Germanic and Scandinavian languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2392,7 +2392,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pe",
-      "title": "Project Gutenberg Library",
+      "title": "English language · Project Gutenberg",
       "description": "English language",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2413,7 +2413,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pf",
-      "title": "Project Gutenberg Library",
+      "title": "West Germanic languages · Project Gutenberg",
       "description": "West Germanic languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2434,7 +2434,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pg",
-      "title": "Project Gutenberg Library",
+      "title": "Slavic, Baltic and Albanian languages · Project Gutenberg",
       "description": "Slavic, Baltic and Albanian languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2455,7 +2455,7 @@
     },
     {
       "id": "gutenberg_en_lcc-ph",
-      "title": "Project Gutenberg Library",
+      "title": "Uralic and Basque languages · Project Gutenberg",
       "description": "Uralic and Basque languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2476,7 +2476,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pj",
-      "title": "Project Gutenberg Library",
+      "title": "Oriental languages and literatures · Project Gutenberg",
       "description": "Oriental languages and literatures",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2497,7 +2497,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pk",
-      "title": "Project Gutenberg Library",
+      "title": "Indo-Iranian languages and literatures · Project Gutenberg",
       "description": "Indo-Iranian languages and literatures",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2518,7 +2518,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pl",
-      "title": "Project Gutenberg Library",
+      "title": "Eastern Asia, Africa, Oceania languages · Project Gutenberg",
       "description": "Eastern Asia, Africa, Oceania languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2539,7 +2539,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pm",
-      "title": "Project Gutenberg Library",
+      "title": "Hyperborean, Indian, and artificial languages · Project Gutenberg",
       "description": "Hyperborean, Indian, and artificial languages",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2560,7 +2560,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pn",
-      "title": "Project Gutenberg Library",
+      "title": "Literature (General) · Project Gutenberg",
       "description": "Literature (General)",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2581,7 +2581,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pq",
-      "title": "Project Gutenberg Library",
+      "title": "French, Italian, Spanish, Portuguese literature · Project Gutenberg",
       "description": "French, Italian, Spanish, Portuguese literature",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2602,7 +2602,7 @@
     },
     {
       "id": "gutenberg_en_lcc-ps",
-      "title": "Project Gutenberg Library",
+      "title": "American literature · Project Gutenberg",
       "description": "American literature",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2623,7 +2623,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pt",
-      "title": "Project Gutenberg Library",
+      "title": "Germanic and Scandinavian literature · Project Gutenberg",
       "description": "Germanic and Scandinavian literature",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2644,7 +2644,7 @@
     },
     {
       "id": "gutenberg_en_lcc-pz",
-      "title": "Project Gutenberg Library",
+      "title": "Fiction and juvenile belles lettres · Project Gutenberg",
       "description": "Fiction and juvenile belles lettres",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2665,7 +2665,7 @@
     },
     {
       "id": "gutenberg_en_lcc-q",
-      "title": "Project Gutenberg Library",
+      "title": "Science · Project Gutenberg",
       "description": "Science",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2686,7 +2686,7 @@
     },
     {
       "id": "gutenberg_en_lcc-r",
-      "title": "Project Gutenberg Library",
+      "title": "Medicine · Project Gutenberg",
       "description": "Medicine",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2707,7 +2707,7 @@
     },
     {
       "id": "gutenberg_en_lcc-s",
-      "title": "Project Gutenberg Library",
+      "title": "Agriculture · Project Gutenberg",
       "description": "Agriculture",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2728,7 +2728,7 @@
     },
     {
       "id": "gutenberg_en_lcc-t",
-      "title": "Project Gutenberg Library",
+      "title": "Technology · Project Gutenberg",
       "description": "Technology",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2749,7 +2749,7 @@
     },
     {
       "id": "gutenberg_en_lcc-u",
-      "title": "Project Gutenberg Library",
+      "title": "Military science · Project Gutenberg",
       "description": "Military science",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2770,7 +2770,7 @@
     },
     {
       "id": "gutenberg_en_lcc-v",
-      "title": "Project Gutenberg Library",
+      "title": "Naval science · Project Gutenberg",
       "description": "Naval science",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2791,7 +2791,7 @@
     },
     {
       "id": "gutenberg_en_lcc-z",
-      "title": "Project Gutenberg Library",
+      "title": "Bibliography, library science, info resources · Project Gutenberg",
       "description": "Bibliography, library science, info resources",
       "category": "Literature & Drama",
       "language": "eng",
@@ -2812,7 +2812,7 @@
     },
     {
       "id": "gutenberg_mul_all",
-      "title": "Project Gutenberg Library",
+      "title": "Every book, all languages · Project Gutenberg",
       "description": "All books in all languages from the first producer of free Ebooks",
       "category": "Literature & Drama",
       "language": "eng,fra,fin,deu,ita,nld,spa,por,hun,zho,swe,ell,lat,epo,dan,cat,tgl,pol,nor,jpn,fry,afr,cym,ces,rus,isl,heb,bul,tel,ron,srp,slv,glg,nhe,gle,mri,oci,lit,kor,bre,bod,iku,ara,yid,san,fas,ina,est",

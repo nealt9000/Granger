@@ -66,6 +66,45 @@ class ShelvesTest {
         assertThat(db.shelfDao().getCollections()).containsExactlyElementsIn(collections)
     }
 
+    private fun gutenbergBook(id: String, title: String, packName: String = "gutenberg_en_lcc-m") =
+        book(id, BookOrigin.GUTENBERG, title).copy(sourceRef = "$packName/$title.$id.epub")
+
+    @Test fun aGutenbergPacksBooksAreACollectionBesideTheClassicsAndThePackIsntShelved() = runTest {
+        val music = named("g1", "gutenberg_en_lcc-m").copy(description = "Music and books on music")
+        bookshelf.state.value = listOf(
+            book("hamlet", title = "Hamlet"),
+            gutenbergBook("1000", "Beethoven"), gutenbergBook("1001", "Bach"),
+        )
+        val (s, _) = shelves(top, music)
+        val literature = s.shelves.first().single()
+        val top = literature.collections.filter { it.collection.parentId == null }
+        assertThat(top.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix", "Music and books on music").inOrder()
+        val gutenberg = top.first { it.collection.name == "Music and books on music" }
+        assertThat(gutenberg.collection.id).isEqualTo("c:gutenberg-m")
+        assertThat(gutenberg.collection.defaultKey).isEqualTo("gutenberg-m")
+        assertThat(gutenberg.books.map { it.title }).containsExactly("Bach", "Beethoven")
+        // The pack is the file and the download; its books are the way in, so it's on no shelf (nor in Browse).
+        assertThat(literature.allCollections.flatMap { it.packs }.map { it.id }).containsExactly(this@ShelvesTest.top.id)
+        assertThat(db.shelfDao().getPlacements().map { it.packKey }).doesNotContain("gutenberg_en_lcc-m")
+    }
+
+    @Test fun gutenbergCollectionKeysAndNames() {
+        assertThat(Filing.gutenbergKey("gutenberg_en_lcc-m")).isEqualTo("gutenberg-m")
+        assertThat(Filing.gutenbergKey("gutenberg_en_lcc-pf")).isEqualTo("gutenberg-pf")
+        assertThat(Filing.gutenbergKey("gutenberg_en_all")).isEqualTo("gutenberg-en_all")
+        val music = named("g1", "gutenberg_en_lcc-m").copy(description = "music and books on music")
+        assertThat(Filing.defaultKey(music)).isEqualTo("gutenberg-m")
+        assertThat(Filing.folderKey(music)).isNull()
+        assertThat(Filing.defaultName("gutenberg-m", music)).isEqualTo("Music and books on music")
+        val bach = gutenbergBook("1001", "Bach")
+        assertThat(Filing.defaultKey(bach)).isEqualTo("gutenberg-m")
+        assertThat(Filing.defaultName("gutenberg-m", bach, listOf(music))).isEqualTo("Music and books on music")
+        // Its pack gone, the collection is still somebody's.
+        assertThat(Filing.defaultName("gutenberg-m", bach)).isEqualTo("Project Gutenberg")
+        assertThat(Filing.isGutenbergCollection("gutenberg-m")).isTrue()
+        assertThat(Filing.isGutenbergCollection("granger-classics")).isFalse()
+    }
+
     @Test fun blankNameFilesUnderOther() = runTest {
         val (s, _) = shelves(pack("x1"))
         val row = s.shelves.first().single().collections.single()

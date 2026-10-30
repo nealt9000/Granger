@@ -227,6 +227,12 @@ interface BookDao {
     @Upsert
     suspend fun upsert(book: Book)
 
+    @Upsert
+    suspend fun upsertAll(books: List<Book>)
+
+    @Query("SELECT * FROM books WHERE origin = :origin")
+    suspend fun byOrigin(origin: BookOrigin): List<Book>
+
     @Query("DELETE FROM books WHERE id = :id")
     suspend fun delete(id: String)
 

@@ -51,6 +51,8 @@ import app.granger.R
 import app.granger.audiobooks.ALL_AUDIOBOOKS
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
+import app.granger.core.library.Filing
+import app.granger.core.library.GutenbergNames
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 import app.granger.sources.GetMoreLink
@@ -262,7 +264,7 @@ internal fun LazyListScope.kindRows(
 const val NO_BOOKS = "No books yet"
 
 /** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2). */
-internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.ARCHIVE_ORG_BOOKS)
+internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.ARCHIVE_ORG_BOOKS)
 
 private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
@@ -271,7 +273,14 @@ private val IMPORT_TYPES = arrayOf(
 /** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */
 internal fun rowCountText(row: CollectionRow): String {
     val rows = row.withChildren
-    return countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
+    val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
+    // A Gutenberg collection is called by its subject; the line under it says whose (Plan GB Decision 2), and, as the
+    // collection's header does, how many of its books are searchable in full once any are.
+    if (!Filing.isGutenbergCollection(row.collection.defaultKey)) return counts
+    val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
+    val header = GutenbergHeader(pack = null, books = rows.sumOf { it.books.size }, searchable = searchable)
+    return listOfNotNull(GutenbergNames.PROVIDER, counts.ifEmpty { null }, header.searchableText.takeIf { searchable > 0 })
+        .joinToString(" · ")
 }
 
 private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): String = listOfNotNull(

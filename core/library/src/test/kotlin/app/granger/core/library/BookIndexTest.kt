@@ -38,6 +38,52 @@ class BookIndexTest {
     private suspend fun addPdf(ref: String, file: File): Book =
         shelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, ref)!!
 
+    @Test fun aGutenbergBookIsIndexedOnlyOnceItsBeenCopiedOut() = test {
+        val archive = GutenbergFixtures.archive(tmp.newFolder("src"))
+        val pack = GutenbergFixtures.pack(archive).also { db.packDao().upsert(it) }
+        val gutenberg = GutenbergBooks(db, { archive.takeIf { _ -> it == pack.id } }, { File(booksDir, "gutenberg") }, File(tmp.root, "covers"), dispatcher)
+        gutenberg.sync(listOf(pack))
+        index.indexPending()
+        assertThat(index.search("Gutenberg number")).isEmpty()
+        assertThat(db.bookDao().byOrigin(BookOrigin.GUTENBERG).map { it.indexedAt }.distinct()).containsExactly(null)
+
+        val irish = db.bookDao().get(BookIds.of(BookOrigin.GUTENBERG, "43349"))!!
+        assertThat(gutenberg.restore(irish)).isTrue()
+        index.indexPending()
+        val hit = index.search("Gutenberg number 43349").single()
+        assertThat(hit.bookId).isEqualTo(irish.id)
+        assertThat(hit.bookTitle).isEqualTo("An Irishman's Difficulties with the Dutch Language")
+        assertThat(db.bookDao().get(irish.id)!!.indexedAt).isEqualTo(5L)
+        // The rest are still waiting for their first open.
+        assertThat(db.bookDao().byOrigin(BookOrigin.GUTENBERG).count { it.indexedAt == null }).isEqualTo(3)
+    }
+
+    @Test fun anOpenedGutenbergBookIsFoundAmongTheClassics() = test {
+        // Plan GB walkthrough: "beginning of French opera" is in A Complete History of Music, in one of the few big
+        // files gutenberg2zim splits a book into; Classics that mention opera, French and beginnings are the noise.
+        add("faust", "<p>The French opera of Faust had its beginning in Paris.</p>", title = "Faust")
+        add("war", "<p>From the beginning the French were at the opera.</p>", title = "War and Peace")
+        add("enquiry", "<p>The beginning of our operations, as the French say.</p>", title = "Enquiry")
+        val epub = TestEpubs.build(
+            File(booksDir, "gutenberg").apply { mkdirs() }, "54392.epub", title = "A Complete History of Music",
+            chapters = listOf(
+                "<p>Music among the ancients.</p>",
+                "<h2 id=\"chap10\">Chapter X</h2><p>The beginning of French opera came with Lully.</p>",
+            ),
+        )
+        db.bookDao().upsert(
+            book("54392", BookOrigin.GUTENBERG, "A Complete History of Music")
+                .copy(sourceRef = "gutenberg_en_lcc-m/54392.epub", filePath = epub.path),
+        )
+        index.indexPending()
+
+        val hits = index.search("beginning of French opera")
+        assertThat(hits.first().bookId).isEqualTo(BookIds.of(BookOrigin.GUTENBERG, "54392"))
+        assertThat(hits.first().snippet).contains("<b>")
+        assertThat(index.passages(listOf("beginning french opera")).map { it.book.id })
+            .contains(BookIds.of(BookOrigin.GUTENBERG, "54392"))
+    }
+
     @Test fun aPdfIsIndexedByPage() = test {
         val water = addPdf("water", PdfFixtures.text(File(booksDir, "archive-org"), "water.pdf"))
         index.indexPending()

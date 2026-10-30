@@ -27,6 +27,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.Book
+import app.granger.core.library.BookOrigin
+import app.granger.core.library.isGutenberg
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -89,6 +95,7 @@ fun CollectionScreen(
     val shown by viewModel.books.collectAsStateWithLifecycle()
     val sort by viewModel.sort.collectAsStateWithLifecycle()
     val view by viewModel.view.collectAsStateWithLifecycle()
+    val gutenberg by viewModel.gutenbergHeader.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     // The collection disappears when its last pack moves out or it is deleted; leave once it has been seen.
     var seen by remember { mutableStateOf(false) }
@@ -102,7 +109,19 @@ fun CollectionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(loaded?.collection?.name.orEmpty()) },
+                title = {
+                    // A Gutenberg collection is called by its subject (Plan GB Decision 2), often long: two lines, smaller.
+                    if (gutenberg != null) {
+                        Text(
+                            loaded?.collection?.name.orEmpty(),
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    } else {
+                        Text(loaded?.collection?.name.orEmpty())
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
@@ -110,6 +129,24 @@ fun CollectionScreen(
                     if (loaded != null && !loaded.isFolder) Box {
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
+                            gutenberg?.let { g ->
+                                if (g.progress == null && g.searchable < g.books) DropdownMenuItem(
+                                    text = { Text("Make all searchable…") },
+                                    onClick = {
+                                        menuOpen = false
+                                        scope.launch { viewModel.searchableCost()?.let { dialog = CollectionDialog.MakeSearchable(it) } }
+                                    },
+                                )
+                                val pack = g.pack
+                                if (pack != null && pack.status == PackStatus.OK) DropdownMenuItem(
+                                    text = { Text("Open the pack's own pages") },
+                                    onClick = { menuOpen = false; onOpenPack(pack.id) },
+                                )
+                                if (pack != null) DropdownMenuItem(
+                                    text = { Text("Remove pack") },
+                                    onClick = { menuOpen = false; dialog = CollectionDialog.RemovePack(pack) },
+                                )
+                            }
                             DropdownMenuItem(
                                 text = { Text("Move collection to…") },
                                 onClick = { menuOpen = false; dialog = CollectionDialog.MoveCollection },
@@ -166,6 +203,9 @@ fun CollectionScreen(
                         HorizontalDivider()
                     }
                 })
+                gutenberg?.let { g ->
+                    add(HeadItem("gutenberg", "gutenberg") { GutenbergHead(g) })
+                }
                 if (shown.total > 0) {
                     add(HeadItem("find", "find") {
                         OutlinedTextField(
@@ -230,7 +270,7 @@ fun CollectionScreen(
                 Box {
                     var bookMenu by remember { mutableStateOf(false) }
                     BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
-                    BookMenu(bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                    BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
                 }
             } else ShelfGrid(
                 shown.sections,
@@ -244,7 +284,7 @@ fun CollectionScreen(
                 Box(Modifier.padding(horizontal = 8.dp)) {
                     var bookMenu by remember { mutableStateOf(false) }
                     BookCell(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
-                    BookMenu(bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                    BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
                 }
             }
         }
@@ -276,9 +316,11 @@ fun CollectionScreen(
             onConfirm = { viewModel.removeBook(d.book) },
             onDismiss = { dialog = null },
         )
+        is CollectionDialog.MakeSearchable -> MakeSearchableDialog(d.cost, onConfirm = viewModel::makeAllSearchable, onDismiss = { dialog = null })
         is CollectionDialog.RemovePack -> ConfirmDialog(
             title = "Remove from phone?",
-            message = "${d.pack.title} will be deleted from this phone. You can download it again later.",
+            message = "${d.pack.title} will be deleted from this phone. You can download it again later." +
+                if (d.pack.isGutenberg) " Its books go with it; your places, bookmarks and highlights are kept." else "",
             confirm = "Remove",
             onConfirm = { viewModel.remove(d.pack) },
             onDismiss = { dialog = null },
@@ -311,11 +353,72 @@ fun CollectionScreen(
 /** A row above the books, in either view: a pack, the Find field, the chips. */
 private class HeadItem(val key: String, val contentType: String, val content: @Composable () -> Unit)
 
+/**
+ * A book's long-press menu. A Gutenberg book says whether its full text is searchable yet (Plan GB Decision 6), and has
+ * no Remove: it's its pack's, and goes with the pack.
+ */
 @Composable
-private fun BookMenu(open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
+private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
     DropdownMenu(open, onClose) {
+        if (book.origin == BookOrigin.GUTENBERG) DropdownMenuItem(
+            text = { Text(if (book.searchableInFull) "Searchable in full" else "Titles only until you open it") },
+            onClick = {},
+            enabled = false,
+        )
         DropdownMenuItem(text = { Text("Move to collection…") }, onClick = { onClose(); onMove() })
-        DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { onClose(); onRemove() })
+        if (book.origin != BookOrigin.GUTENBERG) DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { onClose(); onRemove() })
+    }
+}
+
+/**
+ * The lines under a Gutenberg collection's name: whose it is and what it holds, how much is searchable in full, and a
+ * run's progress. Two lines rather than one that wraps mid-phrase at 360 dp; TalkBack reads them as one.
+ */
+@Composable
+private fun GutenbergHead(header: GutenbergHeader) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(Modifier.clearAndSetSemantics { contentDescription = header.text }) {
+            Text(header.provenance, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(header.searchableText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        header.progress?.let { p ->
+            val number = java.text.NumberFormat.getIntegerInstance()
+            Text(
+                "Making searchable: ${number.format(p.done)} of ${number.format(p.total)} copied",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            LinearProgressIndicator(
+                progress = { if (p.total == 0) 0f else p.done.toFloat() / p.total },
+                modifier = Modifier.fillMaxWidth().height(3.dp),
+            )
+        }
+    }
+}
+
+/** Gives the size first (Plan GB Decision 5); with too little space, says so and offers nothing to run. */
+@Composable
+private fun MakeSearchableDialog(cost: SearchableCost, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val size = Formatter.formatShortFileSize(context, cost.bytes)
+    val free = Formatter.formatShortFileSize(context, cost.freeBytes)
+    val count = java.text.NumberFormat.getIntegerInstance().format(cost.books)
+    if (!cost.fits) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Not enough space") },
+            text = { Text("Making all $count books searchable needs about $size more, and this phone has $free free.") },
+            confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("OK") } },
+        )
+    } else {
+        ConfirmDialog(
+            title = "Make all searchable?",
+            message = "Copies the $count books not yet opened out of the pack, so Search and Ask can read them in full. " +
+                "That takes about $size more ($free free). It runs in the background; you can leave this screen.",
+            confirm = "Make searchable",
+            onConfirm = onConfirm,
+            onDismiss = onDismiss,
+        )
     }
 }
 
@@ -324,6 +427,7 @@ private sealed interface CollectionDialog {
     data class RemovePack(val pack: Pack) : CollectionDialog
     data class MoveBook(val book: Book) : CollectionDialog
     data class RemoveBook(val book: Book) : CollectionDialog
+    data class MakeSearchable(val cost: SearchableCost) : CollectionDialog
     data object MoveCollection : CollectionDialog
     data object Rename : CollectionDialog
     data object Delete : CollectionDialog
@@ -376,6 +480,7 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
         PackStatus.CORRUPT -> "Damaged"
     }
     val label = formatLabel(book)
+    val fullText = book.searchableInFull
     ShelfRow(
         title = book.title,
         subtitle = book.author,
@@ -383,8 +488,9 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
         onClick = { if (readable) onClick() },
         onLongClick = onLongClick,
         dimmed = !readable,
-        detail = if (label == null && problem == null) null else {
+        detail = if (label == null && problem == null && !fullText) null else {
             {
+                if (fullText) FullTextMark()
                 if (label != null) Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (problem != null) Text(problem, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
             }
@@ -425,6 +531,7 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
         formatLabel(book)?.let {
             Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        if (book.searchableInFull) FullTextMark()
         when (book.status) {
             PackStatus.OK -> LinearProgressIndicator(
                 progress = { (progress ?: 0.0).toFloat().coerceIn(0f, 1f) },
@@ -434,4 +541,23 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
             PackStatus.CORRUPT -> Text("Damaged", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
         }
     }
+}
+
+/**
+ * The mark on a Gutenberg book whose full text is in Search and Ask (Plan GB Decision 6): a small outlined label,
+ * read by TalkBack as "Searchable in full".
+ */
+@Composable
+internal fun FullTextMark() {
+    Text(
+        "Full text",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.primary,
+        maxLines = 1,
+        modifier = Modifier
+            .padding(vertical = 2.dp)
+            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
+            .padding(horizontal = 5.dp, vertical = 1.dp)
+            .clearAndSetSemantics { contentDescription = "Searchable in full" },
+    )
 }

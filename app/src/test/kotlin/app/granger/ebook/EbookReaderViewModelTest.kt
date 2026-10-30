@@ -665,13 +665,40 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.isBookmarkedHere).isTrue()
     }
 
-    @Test fun lastMatchingTocRowInTheFileIsCurrent() = runTest(main.dispatcher) {
+    @Test fun withNoAnchorsFoundTheFilesFirstRowIsCurrent() = runTest(main.dispatcher) {
+        // The files can't be read, so where #a and #b are isn't known: the file's first row, not a middle one.
         opener.publication = testPublication(
             toc = listOf("c001.xhtml" to listOf("c002.xhtml", "c002.xhtml#a", "c002.xhtml#b"), "c003.xhtml" to emptyList()),
         )
         val vm = reader()
         vm.onLocator(locator("c002.xhtml", 0.5, 0.4))
-        assertThat(vm.state.value.currentTocIndex).isEqualTo(3)
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(1)
+    }
+
+    @Test fun inAGutenbergFileOfManyChaptersTheChapterReachedIsCurrent() = runTest(main.dispatcher) {
+        // As gutenberg2zim's EPUBs: a header file and one big text file, every contents row an anchor (Plan GB walkthrough).
+        val text = "x".repeat(1000)
+        val big = "h-1.htm.xhtml"
+        opener.publication = app.granger.testPublicationWithContent(
+            chapters = linkedMapOf(
+                "h-0.htm.xhtml" to "<h1 id=\"pg-header\">The Oera Linda Book</h1><p>$text</p><h2 id=\"contents\">Contents</h2><p>$text</p>",
+                big to "<h2 id=\"entext\">Introduction</h2><p>$text</p><h2 id=\"ch1\">One</h2><p>$text</p>" +
+                    "<h2 id=\"ch2\">Two</h2><p>$text</p><h2 id=\"ch3\">Three</h2><p>$text</p>",
+            ),
+            toc = listOf(
+                "h-0.htm.xhtml#pg-header" to emptyList(), "h-0.htm.xhtml#contents" to emptyList(),
+                "$big#entext" to listOf("$big#ch1", "$big#ch2", "$big#ch3"),
+            ),
+        )
+        val vm = reader()
+        vm.onLocator(locator("h-0.htm.xhtml", 0.0, 0.0))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(0)
+        vm.onLocator(locator(big, 0.0, 0.1))
+        assertThat(vm.state.value.currentTocIndex).isEqualTo(2)
+        vm.onLocator(locator(big, 0.30, 0.4))
+        assertThat(vm.state.value.toc[vm.state.value.currentTocIndex!!].href).isEqualTo("$big#ch1")
+        vm.onLocator(locator(big, 0.99, 0.9))
+        assertThat(vm.state.value.toc[vm.state.value.currentTocIndex!!].href).isEqualTo("$big#ch3")
     }
 
     @Test fun backToBackJumpsAreAllDelivered() = runTest(main.dispatcher) {
