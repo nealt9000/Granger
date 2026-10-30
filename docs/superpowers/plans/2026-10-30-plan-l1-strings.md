@@ -110,7 +110,7 @@ Steps for each package:
 Things the package tasks left for after the merge, because they cross task boundaries:
 
 - [ ] `LaunchDecider.MISSING_NOTICE` goes through `LibraryRoute(notice: String?)` in `GrangerNavHost.kt`. Make the route carry a string id (Task 3, with Task 8's files).
-- [ ] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
+- [x] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
 - [ ] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
 - [ ] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays.
 - [ ] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).

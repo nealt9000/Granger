@@ -35,11 +35,13 @@ import app.granger.sources.ItemStatusText
 @Composable
 internal fun offerLabel(offer: Offer?): String? = when (offer) {
     is Offer.Download -> when (offer.kind) {
-        app.granger.core.archive.TextKind.EPUB -> "EPUB"
+        app.granger.core.archive.TextKind.EPUB ->
+            if (offer.pdf != null) stringResource(R.string.archive_offer_epub_scan_pdf) else "EPUB"
         app.granger.core.archive.TextKind.TEXT -> stringResource(R.string.archive_offer_plain_text)
         app.granger.core.archive.TextKind.OCR_TEXT ->
             stringResource(if (offer.pdf != null) R.string.archive_offer_ocr_pdf else R.string.archive_offer_ocr)
         app.granger.core.archive.TextKind.PDF -> "PDF"
+        app.granger.core.archive.TextKind.COMIC -> stringResource(R.string.archive_offer_comic)
     }
     Offer.LendOnly -> stringResource(R.string.archive_borrow)
     Offer.Nothing -> stringResource(R.string.archive_no_text)

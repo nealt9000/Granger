@@ -157,9 +157,9 @@ interface PlayerHub {
     /**
      * Music under the voice (Plan V2). Starting the voice while music plays keeps the music at [setMixLevel]'s level
      * (0–1, remembered), and starting music while the voice reads puts it underneath; the transport drives the
-     * voice, and the music has these two of its own. No-ops without music under the voice.
+     * voice, and the music has these of its own. No-ops without music under the voice.
      */
-    fun setMixLevel(level: Float); fun playPauseMusic(); fun nextMusic()
+    fun setMixLevel(level: Float); fun playPauseMusic(); fun nextMusic(); fun seekMusic(positionMs: Long)
 
     /** Switches the reading voice to [voice] (an installed one) at the current sentence; no-op when the voice isn't the mode. */
     fun setVoice(voice: VoiceId)

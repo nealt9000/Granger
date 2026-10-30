@@ -16,6 +16,8 @@ private class FakeArchive : Interceptor {
     val bodies = mutableMapOf<String, String>()
     val status = mutableMapOf<String, Int>()
     var failWith: IOException? = null
+    /** Fails only the next this many requests with [failWith]. */
+    var failTimes = Int.MAX_VALUE
     val requests = mutableListOf<Request>()
 
     fun fixture(path: String, resource: String) {
@@ -25,7 +27,7 @@ private class FakeArchive : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         requests += request
-        failWith?.let { throw it }
+        failWith?.takeIf { failTimes > 0 }?.let { failTimes--; throw it }
         val path = request.url.encodedPath
         val code = status[path] ?: if (path in bodies) 200 else 404
         return Response.Builder().request(request).protocol(Protocol.HTTP_1_1).message("")
@@ -134,6 +136,19 @@ class ArchiveOrgClientTest {
         server.bodies["/metadata/dark"] = """{"is_dark":true,"metadata":{"identifier":"dark"},"files":[]}"""
         val e = assertThrows(ArchiveError::class.java) { kotlinx.coroutines.runBlocking { client.item("dark") } }
         assertThat(e).hasMessageThat().isEqualTo("Not found on archive.org")
+    }
+
+    @Test fun aDroppedConnectionIsTriedOnceMoreBeforeArchiveOrgIsUnreachable() = runTest {
+        server.fixture("/advancedsearch.php", "search-steam-engine.json")
+        server.failWith = IOException("stale connection")
+        server.failTimes = 1
+        assertThat(client.search("x", 1).docs).isNotEmpty()
+        assertThat(server.requests).hasSize(2)
+
+        server.requests.clear()
+        server.failTimes = Int.MAX_VALUE
+        assertThrows(ArchiveError::class.java) { kotlinx.coroutines.runBlocking { client.search("x", 1) } }
+        assertThat(server.requests).hasSize(2)                          // once more, not forever
     }
 
     @Test fun serverErrorIsAnArchiveError() = runTest {

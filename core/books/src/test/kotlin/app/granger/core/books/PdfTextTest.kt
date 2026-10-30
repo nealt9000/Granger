@@ -77,7 +77,8 @@ class PdfTextTest {
         val file = PdfFixtures.text(tmp.root)
         assertThat(PdfText.chunks(file, "page/9")).isEmpty()
         assertThat(PdfText.chunks(file, "OEBPS/c001.xhtml")).isEmpty()
-        assertThat(PdfText.chunks(PdfFixtures.encrypted(tmp.root), "page/1")).isEmpty()
+        assertThat(PdfText.chunks(PdfFixtures.passwordLocked(tmp.root), "page/1")).isEmpty()
+        assertThat(PdfText.chunks(PdfFixtures.encrypted(tmp.root), "page/1")).isNotEmpty()   // owner password only
         assertThat(PdfText.chunks(PdfFixtures.truncated(tmp.root), "page/1")).isEmpty()
     }
 

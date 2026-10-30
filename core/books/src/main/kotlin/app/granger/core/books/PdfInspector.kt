@@ -41,8 +41,9 @@ object PdfInspector {
     }
 
     private fun inspect(doc: PDDocument, fallbackTitle: String): Inspection {
-        // Checked first: an owner-password PDF opens without a password, but it is still encrypted.
-        if (doc.isEncrypted) return Inspection.Protected(DrmKind.PDF_ENCRYPTED)
+        // A PDF that needs a password never gets here (InvalidPasswordException above). One that opened is at most
+        // owner-password encrypted: print and copy flags, readable by anyone, so it's read like any other PDF (Neal,
+        // 2026-10-30: V for Vendetta on archive.org; this reverses the P2 spec's refusal of them).
         if (doc.numberOfPages == 0) return Inspection.Invalid("no pages")
         val info = doc.documentInformation
         fun String?.clean() = this?.trim().orEmpty()

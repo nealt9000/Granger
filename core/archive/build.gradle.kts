@@ -11,6 +11,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    // android.util.Log (the HTTP retry's line) is a no-op in the plain JVM tests.
+    testOptions { unitTests.isReturnDefaultValues = true }
 }
 
 dependencies {

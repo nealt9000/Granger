@@ -352,9 +352,9 @@ class LibriVoxViewModel(
         return MediaDownloads.statusOf(group, count, records)
     }
 
-    // LibriVoxError's and ArchiveError's messages are core/archive's English (L1 Task 7).
     private fun messageOf(e: Exception): UiText = when (e) {
-        is LibriVoxError, is ArchiveError -> e.message?.let(UiText::Raw) ?: OFFLINE
+        is LibriVoxError -> UiText.Res(e.problem.text, *e.textArgs.toTypedArray())
+        is ArchiveError -> UiText.Res(e.problem.text, *e.textArgs.toTypedArray())
         else -> OFFLINE
     }
 

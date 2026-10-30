@@ -52,8 +52,10 @@ class PdfInspectorTest {
         assertThat(meta.authors).isEmpty()
     }
 
-    @Test fun encryptedIsProtected() {
-        assertThat(PdfInspector.inspect(PdfFixtures.encrypted(tmp.root)))
+    @Test fun anOwnerPasswordPdfOpensAndAPasswordLockedOneIsProtected() {
+        val owner = PdfInspector.inspect(PdfFixtures.encrypted(tmp.root)) as Inspection.Ok
+        assertThat(owner.meta.pageCount).isEqualTo(3)
+        assertThat(PdfInspector.inspect(PdfFixtures.passwordLocked(tmp.root)))
             .isEqualTo(Inspection.Protected(DrmKind.PDF_ENCRYPTED))
     }
 

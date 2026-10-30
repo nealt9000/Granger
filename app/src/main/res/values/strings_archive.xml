@@ -83,4 +83,8 @@
     <string name="archive_not_public_domain">This item wasn\'t published in 1930 or earlier. Show everything to download it.</string>
     <string name="archive_spoken_word_get">Show everything to download archive.org spoken word.</string>
     <string name="archive_offline">Couldn\'t reach archive.org. Check your connection and try again.</string>
+    <!-- An archive.org item whose EPUB was made from a scan, with the scan's PDF too. -->
+    <string name="archive_offer_epub_scan_pdf">EPUB made from a scan · PDF</string>
+    <!-- An archive.org comic: its page images, opened to zoom. -->
+    <string name="archive_offer_comic">Comic: its pages, to zoom</string>
 </resources>

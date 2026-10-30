@@ -14,7 +14,7 @@ import java.io.IOException
  * heads), so the index can re-extract one chunk's text at query time without reading the whole book.
  */
 object PdfText {
-    /** Empty for a missing, encrypted or corrupt file, or an href that names no page. */
+    /** Empty for a missing, password-locked or corrupt file, or an href that names no page. */
     fun chunks(file: File, href: String): List<TextChunk> = open(file)?.use { it.chunks(href) }.orEmpty()
 
     /** Every page's chunks, in order. */
@@ -26,14 +26,9 @@ object PdfText {
     /** True when the first 20 pages hold 200 or more characters of text; false for a scan with no text layer. */
     fun hasTextLayer(file: File): Boolean = open(file)?.use { it.hasTextLayer() } ?: false
 
+    /** An owner-password PDF opens like any other (see [PdfInspector]); one that needs a password to open doesn't. */
     fun open(file: File): Reader? = try {
-        val doc = loadPdf(file)
-        if (doc.isEncrypted) {
-            doc.close()
-            null
-        } else {
-            Reader(doc)
-        }
+        Reader(loadPdf(file))
     } catch (_: IOException) {
         null
     } catch (_: RuntimeException) {

@@ -196,8 +196,7 @@ class LibriVoxViewModelTest {
     @Test fun busyShowsTheMessageWithRetry() = runTest(main.dispatcher) {
         librivoxStatus = 429
         val vm = viewModel()
-        // core/archive's LibriVoxError message, passed through as raw text until L1 Task 7.
-        assertThat(vm.ui.value.error).isEqualTo(UiText.Raw("LibriVox is busy right now. Try again in a minute."))
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(app.granger.core.archive.LibriVoxProblem.BUSY.text))
         assertThat(vm.ui.value.rows).isEmpty()
         assertThat(vm.ui.value.loading).isFalse()
         librivoxStatus = null
@@ -305,7 +304,7 @@ class LibriVoxViewModelTest {
         offline = true
         downloads.list.value = installed(13) + record("med", DownloadState.INSTALLED)
         val vm = viewModel()
-        assertThat((vm.ui.value.error as UiText.Raw).text).contains("Couldn't reach LibriVox")
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(R.string.librivox_offline))
         vm.setTab(LibriVoxTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         val row = vm.ui.value.rows.single()

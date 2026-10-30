@@ -154,10 +154,9 @@ class ArchiveViewModelTest {
         assertThat(ui.tab).isEqualTo(ArchiveTab.BROWSE)
         assertThat(ui.total).isEqualTo(1341)
         assertThat(ui.rows.first().identifier).isEqualTo("HistoryOfTheFrickCompany")
-        // The search-time guess: OCR text, with a PDF alongside.
+        // The search-time guess: an Image Container PDF means the uploader's PDF, which beats the OCR text.
         val preview = ui.rows.first().preview as Offer.Download
-        assertThat(preview.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(preview.pdf).isNotNull()
+        assertThat(preview.kind).isEqualTo(TextKind.PDF)
         assertThat(ui.canLoadMore).isTrue()
         assertThat(ui.error).isNull()
     }
@@ -539,8 +538,7 @@ class ArchiveViewModelTest {
             record("med", DownloadState.INSTALLED),
         )
         val vm = viewModel()
-        // core/archive's ArchiveError message, passed through as raw text until L1 Task 7.
-        assertThat((vm.ui.value.error as UiText.Raw).text).contains("Couldn't reach archive.org")
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(R.string.archive_offline))
         assertThat(vm.ui.value.rows).isEmpty()
         assertThat(vm.ui.value.loading).isFalse()
         vm.setTab(ArchiveTab.INSTALLED)
@@ -581,7 +579,7 @@ class ArchiveViewModelTest {
         offline = true
         vm.openItem(epubId)
         settle { vm.ui.value.sheet?.loading == false }
-        assertThat((vm.ui.value.sheet!!.error as UiText.Raw).text).contains("Couldn't reach archive.org")
+        assertThat(vm.ui.value.sheet!!.error).isEqualTo(UiText.Res(R.string.archive_offline))
         assertThat(vm.ui.value.sheet!!.item).isNull()
     }
 

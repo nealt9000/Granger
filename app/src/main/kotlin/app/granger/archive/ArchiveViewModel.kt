@@ -648,13 +648,15 @@ class ArchiveViewModel(
             "epub" -> TextKind.EPUB
             "txt" -> TextKind.TEXT
             "pdf" -> TextKind.PDF
+            "cbz", "cbr" -> TextKind.COMIC
             else -> return null
         }
         return Offer.Download(PLACEHOLDER, kind)
     }
 
     // ArchiveError's message is core/archive's English (L1 Task 7).
-    private fun messageOf(e: Exception): UiText = (e as? ArchiveError)?.message?.let(UiText::Raw) ?: OFFLINE
+    private fun messageOf(e: Exception): UiText =
+        (e as? ArchiveError)?.let { UiText.Res(it.problem.text, *it.textArgs.toTypedArray()) } ?: OFFLINE
 
     private companion object {
         const val DEBOUNCE_MS = 400L

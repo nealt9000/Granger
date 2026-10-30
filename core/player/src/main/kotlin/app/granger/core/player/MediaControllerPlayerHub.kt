@@ -140,6 +140,7 @@ class MediaControllerPlayerHub(
     override fun setMixLevel(level: Float) = send { it.setMixLevel(level) }
     override fun playPauseMusic() = send { it.playPauseMusic() }
     override fun nextMusic() = send { it.nextMusic() }
+    override fun seekMusic(positionMs: Long) = send { it.seekMusic(positionMs) }
     override fun setVoice(voice: VoiceId) = send { it.setVoice(voice) }
     override fun activate(mode: PlayerMode) = send { it.activate(mode) }
     override fun setFinished(audiobookId: String, finished: Boolean) = send { it.setFinished(audiobookId, finished) }
