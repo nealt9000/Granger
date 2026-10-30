@@ -47,6 +47,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
+import org.readium.r2.shared.publication.Layout
 import org.readium.r2.shared.publication.Publication.Profile
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
@@ -101,6 +102,12 @@ data class EbookUi(
      * PDF ones.
      */
     val isPdf: Boolean = false,
+    /**
+     * A fixed-layout EPUB (a picture book, FixedPages): pages as drawn, one at a time, so the text settings are off.
+     */
+    val fixedLayout: Boolean = false,
+    /** Whether the book has words to read aloud or search; a picture book's pages may hold only pictures. */
+    val hasText: Boolean = true,
     /** An ebook made from a PDF (Plan IA): the size of its original pages, which ⋯ opens or removes; null without them. */
     val originalPagesBytes: Long? = null,
     /** A PDF on the shelves, which ⋯ Read as ebook can make an ebook (Plan IA Decisions 6 and 9). */
@@ -263,6 +270,8 @@ class EbookReaderViewModel(
             val pdf = opened.conformsTo(Profile.PDF)
             // A comic or a magazine keeps its colours in Night; only black-and-white pages are inverted.
             colour = pdf && withContext(io) { pdfColour(file) }
+            val fixed = !pdf && opened.metadata.layout == Layout.FIXED
+            val text = !fixed || withContext(io) { FixedPages.scan(opened, stopAtUnsized = false).hasText }
             val factory = if (pdf) {
                 BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight && !colour, prefsStore.prefs.value.pdfFitWidth)
             } else {
@@ -278,7 +287,7 @@ class EbookReaderViewModel(
             _state.update {
                 it.copy(
                     loading = false, publication = opened, initial = initial, searchHit = hit,
-                    toc = flatten(opened.tableOfContents, 0), isPdf = pdf,
+                    toc = flatten(opened.tableOfContents, 0), isPdf = pdf, fixedLayout = fixed, hasText = text,
                 ).derived()
             }
             savedState[TARGET_CONSUMED] = true

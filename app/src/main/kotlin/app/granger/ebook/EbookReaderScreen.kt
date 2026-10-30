@@ -238,7 +238,7 @@ fun EbookReaderScreen(
     BackHandler(enabled = state.panel != null) { viewModel.open(null) }
     LaunchedEffect(navigator, state.prefs) {
         when (val shown = navigator) {
-            is EpubNavigatorFragment -> shown.submitPreferences(state.prefs.toEpub())
+            is EpubNavigatorFragment -> shown.submitPreferences(state.prefs.toEpub(state.fixedLayout))
             // The only PDF navigator the reader builds is PDFium's (BookNavigator.Pdf).
             is PdfNavigatorFragment<*, *> -> @Suppress("UNCHECKED_CAST") (shown as PdfiumNavigatorFragment).submitPreferences(state.prefs.toPdfium())
             else -> Unit
@@ -285,6 +285,8 @@ fun EbookReaderScreen(
         onContents = { viewModel.open(Panel.CONTENTS) },
         onSearch = { viewModel.open(Panel.SEARCH) },
         onTextSettings = { viewModel.open(Panel.SETTINGS) },
+        fixedLayout = state.fixedLayout,
+        hasText = state.hasText,
         onBookmark = viewModel::toggleBookmark,
         voice = state.voice,
         onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
@@ -307,7 +309,7 @@ fun EbookReaderScreen(
             Modifier
                 .fillMaxSize()
                 .testTag(EbookTags.PAGE)
-                .windowInsetsPadding(if (state.isPdf) ReaderPdfPageInsets else ReaderBookPageInsets)
+                .windowInsetsPadding(if (state.isPdf || state.fixedLayout) ReaderPdfPageInsets else ReaderBookPageInsets)
                 .pageTouches(viewModel::onPageTouch),
         ) {
             val error = state.error
@@ -324,7 +326,7 @@ fun EbookReaderScreen(
                     bookId = bookId,
                     factory = factory,
                     // The latest place, so a navigator rebuilt after rotation opens where the reader is.
-                    fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, listener, config),
+                    fragments = navigatorFragments(factory, state.locator ?: state.initial, state.prefs, state.fixedLayout, listener, config),
                     // PDFium inverts a page only as it lays the document out: Night on a PDF needs a fresh navigator.
                     look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
                     isCleared = { viewModel.isCleared },
@@ -432,13 +434,14 @@ private fun navigatorFragments(
     factory: BookNavigator,
     initial: org.readium.r2.shared.publication.Locator?,
     prefs: ReadingPrefs,
+    fixedLayout: Boolean,
     listener: EpubNavigatorFragment.Listener,
     config: EpubNavigatorFragment.Configuration,
-): androidx.fragment.app.FragmentFactory = remember(factory, initial, prefs, listener, config) {
+): androidx.fragment.app.FragmentFactory = remember(factory, initial, prefs, fixedLayout, listener, config) {
     when (factory) {
         is BookNavigator.Epub -> factory.factory.createFragmentFactory(
             initialLocator = initial,
-            initialPreferences = prefs.toEpub(),
+            initialPreferences = prefs.toEpub(fixedLayout),
             listener = listener,
             configuration = config,
         )
