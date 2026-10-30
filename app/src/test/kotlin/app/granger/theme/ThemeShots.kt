@@ -52,6 +52,18 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.foundation.layout.aspectRatio
+import app.granger.core.library.ShelfKey
+import app.granger.library.shelf.ShelfGrid
+import app.granger.library.shelf.ShelfHeader
+import app.granger.library.shelf.ShelfList
+import app.granger.library.shelf.ShelfRow
+import app.granger.library.shelf.ShelfSections
+import app.granger.library.shelf.ShelfView
+import app.granger.library.shelf.ViewToggle
+import app.granger.library.shelf.sortedByShelfKey
+import app.granger.settings.RailSide
+import androidx.compose.ui.test.performTouchInput
 import app.granger.book
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.FeedKind
@@ -423,6 +435,101 @@ class ThemeShots {
                 Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
             }
             app.granger.reader.ReaderBottomBar(actions, progress = progress)
+        }
+    }
+
+    /** Sixty classics, for the shared shelf's shots (Plan LV Task 2). */
+    private val classics = listOf(
+        "The Adventures of Tom Sawyer" to "Mark Twain", "Aesop's Fables" to "Aesop", "Anna Karenina" to "Leo Tolstoy",
+        "Around the World in Eighty Days" to "Jules Verne", "The Awakening" to "Kate Chopin", "Beowulf" to "",
+        "Bleak House" to "Charles Dickens", "The Brothers Karamazov" to "Fyodor Dostoevsky", "Candide" to "Voltaire",
+        "The Call of the Wild" to "Jack London", "A Christmas Carol" to "Charles Dickens", "Crime and Punishment" to "Fyodor Dostoevsky",
+        "David Copperfield" to "Charles Dickens", "Don Quixote" to "Miguel de Cervantes", "Dracula" to "Bram Stoker",
+        "Emma" to "Jane Austen", "Émile" to "Jean-Jacques Rousseau", "Frankenstein" to "Mary Shelley",
+        "Great Expectations" to "Charles Dickens", "Gulliver's Travels" to "Jonathan Swift", "Hamlet" to "William Shakespeare",
+        "Heart of Darkness" to "Joseph Conrad", "The Iliad" to "Homer", "The Importance of Being Earnest" to "Oscar Wilde",
+        "Ivanhoe" to "Walter Scott", "Jane Eyre" to "Charlotte Brontë", "The Jungle Book" to "Rudyard Kipling",
+        "Kidnapped" to "Robert Louis Stevenson", "King Lear" to "William Shakespeare", "Leviathan" to "Thomas Hobbes",
+        "Little Women" to "Louisa May Alcott", "Madame Bovary" to "Gustave Flaubert", "Middlemarch" to "George Eliot",
+        "Moby-Dick" to "Herman Melville", "Narrative of the Life of Frederick Douglass" to "Frederick Douglass",
+        "North and South" to "Elizabeth Gaskell", "The Odyssey" to "Homer", "Oliver Twist" to "Charles Dickens",
+        "Paradise Lost" to "John Milton", "Persuasion" to "Jane Austen", "The Picture of Dorian Gray" to "Oscar Wilde",
+        "Pride and Prejudice" to "Jane Austen", "The Prince" to "Niccolò Machiavelli", "Robinson Crusoe" to "Daniel Defoe",
+        "The Scarlet Letter" to "Nathaniel Hawthorne", "Sense and Sensibility" to "Jane Austen", "Siddhartha" to "Hermann Hesse",
+        "A Tale of Two Cities" to "Charles Dickens", "The Time Machine" to "H. G. Wells", "Treasure Island" to "Robert Louis Stevenson",
+        "Ulysses" to "James Joyce", "Utopia" to "Thomas More", "Vanity Fair" to "William Makepeace Thackeray",
+        "The War of the Worlds" to "H. G. Wells", "Walden" to "Henry David Thoreau", "Wuthering Heights" to "Emily Brontë",
+        "The Yellow Wallpaper" to "Charlotte Perkins Gilman", "Zadig" to "Voltaire", "1984" to "George Orwell",
+        "20,000 Leagues Under the Sea" to "Jules Verne",
+    )
+
+    private fun classicsShelf() = ShelfSections.of(
+        classics.sortedByShelfKey({ ShelfKey.of(it.first) }), byName = true, key = { it.first },
+        letter = { ShelfKey.letter(ShelfKey.of(it.first)) },
+    )
+
+    /** The shared shelf in a collection's frame: the rail on [side], a top bar with the view toggle, a find field. */
+    @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ShelfShot(view: ShelfView, side: RailSide = RailSide.LEFT) {
+        GrangerShell(
+            rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, side = side,
+        ) {
+            androidx.compose.material3.Scaffold(
+                topBar = {
+                    androidx.compose.material3.TopAppBar(
+                        title = { Text("Granger Classics") },
+                        actions = { ViewToggle(view) {} },
+                    )
+                },
+            ) { padding ->
+                val shelf = classicsShelf()
+                val find: () -> Unit = {}
+                if (view == ShelfView.LIST) {
+                    ShelfList(shelf, Modifier.padding(padding).fillMaxSize(), header = {
+                        item { ShelfHeader("Title", listOf("Title", "Author", "Recently read"), { it }, {}) }
+                    }) { (title, author) ->
+                        ShelfRow(
+                            title, author, cover = { Box(Modifier.size(32.dp, 48.dp).clip(RoundedCornerShape(4.dp))) { MediaTile(title, MediaKind.BOOK) } },
+                            onClick = find,
+                            detail = { Text("EPUB", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        )
+                    }
+                } else {
+                    ShelfGrid(
+                        shelf, cellMin = 104.dp, modifier = Modifier.padding(padding).fillMaxSize(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    ) { (title, author) ->
+                        Column {
+                            Box(Modifier.fillMaxWidth().aspectRatio(2f / 3f).clip(RoundedCornerShape(4.dp))) { MediaTile(title, MediaKind.BOOK) }
+                            Text(title, style = MaterialTheme.typography.bodySmall, maxLines = 2, minLines = 2, color = MaterialTheme.colorScheme.onSurface)
+                            Text(author, style = MaterialTheme.typography.labelSmall, maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun shelfList() = shoot("shelf-list") { ShelfShot(ShelfView.LIST) }
+
+    @Test fun shelfGrid() = shoot("shelf-grid") { ShelfShot(ShelfView.GRID) }
+
+    @Test fun shelfListRailRight() = shoot("shelf-list-rail-right") { ShelfShot(ShelfView.LIST, RailSide.RIGHT) }
+
+    /** Mid-drag: the bubble beside the thumb, the list at M. */
+    @Test fun shelfDrag() {
+        var night by mutableStateOf(true)
+        compose.setContent { GrangerTheme(night = night) { ShelfShot(ShelfView.LIST) } }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { down(center) }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { moveBy(androidx.compose.ui.geometry.Offset(0f, height * 11.5f)) }
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "shelf-drag-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
     }
 
