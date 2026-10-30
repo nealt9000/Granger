@@ -45,9 +45,9 @@ class SherpaSpeech internal constructor(
             return if (locale >= 0 && locale + 1 < parts.size) parts[locale + 1] else dir
         }
 
-        fun title(dir: String): String = "Granger voice (${shortName(dir)})"
+        fun title(dir: String, titles: VoiceTitles): String = titles.granger(shortName(dir))
 
         /** A named speaker's title: "Granger voice (Maggie)". */
-        fun speakerTitle(name: String): String = "Granger voice ($name)"
+        fun speakerTitle(name: String, titles: VoiceTitles): String = titles.granger(name)
     }
 }

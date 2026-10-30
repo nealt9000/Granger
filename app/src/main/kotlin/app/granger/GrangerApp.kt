@@ -325,7 +325,7 @@ class AppContainer(context: Context) {
     val installedVoices: InstalledVoices by lazy {
         val dirs = { context.getExternalFilesDirs(null).filterNotNull().map { File(it, "voices") } }
         val system = SystemSpeech.Factory(context)
-        InstalledVoices(dirs, { system.voices() }, SherpaSpeech.Factory(dirs), system)
+        InstalledVoices(dirs, { system.voices() }, SherpaSpeech.Factory(dirs), system, titles = app.granger.core.speech.VoiceTitles.of(context))
     }
 
     /**

@@ -24,7 +24,7 @@ class InstalledVoicesTest {
         val volumeA = tmp.newFolder("a"); val volumeB = tmp.newFolder("b")
         voiceDir(File(volumeA, "voices"), "vits-piper-en_US-ljspeech-medium")
         voiceDir(File(volumeB, "voices"), "vits-piper-en_US-ljspeech-medium")   // the same voice on two volumes counts once
-        val voices = InstalledVoices({ listOf(File(volumeA, "voices"), File(volumeB, "voices"), File(tmp.root, "missing")) }, { listOf(systemVoice) }, noFactory, noFactory)
+        val voices = InstalledVoices({ listOf(File(volumeA, "voices"), File(volumeB, "voices"), File(tmp.root, "missing")) }, { listOf(systemVoice) }, noFactory, noFactory, titles = ENGLISH)
         assertThat(voices.voices.value).isEmpty()
         val list = voices.refresh()
         assertThat(list.map { it.id }).containsExactly(VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), systemVoice.id).inOrder()
@@ -85,7 +85,7 @@ class InstalledVoicesTest {
         val volume = tmp.newFolder("v")
         val dir = "vits-piper-en_US-granger_libritts-medium"
         voiceDir(File(volume, "voices"), dir, """{"num_speakers": 2, "speaker_id_map": {"Martin": 1, "Maggie": 0}, "audio": {}}""")
-        val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { emptyList() }, noFactory, noFactory)
+        val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { emptyList() }, noFactory, noFactory, titles = ENGLISH)
         val list = voices.refresh()
         assertThat(list.map { it.id }).containsExactly(VoiceId.Granger(dir, 0), VoiceId.Granger(dir, 1)).inOrder()
         assertThat(list.map { it.title }).containsExactly("Granger voice (Maggie)", "Granger voice (Martin)").inOrder()
