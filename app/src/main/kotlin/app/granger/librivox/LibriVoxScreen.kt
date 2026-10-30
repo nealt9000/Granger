@@ -132,7 +132,7 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
                             FilterChip(
                                 selected = ui.shelf == shelf,
                                 onClick = { viewModel.selectShelf(shelf) },
-                                label = { Text(shelf.title) },
+                                label = { Text(androidx.compose.ui.res.stringResource(shelf.title)) },
                             )
                         }
                     }

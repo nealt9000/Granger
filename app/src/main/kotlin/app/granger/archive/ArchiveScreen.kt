@@ -294,7 +294,7 @@ internal fun ArchiveContent(
                             FilterChip(
                                 selected = ui.shelf == shelf,
                                 onClick = { onShelf(shelf) },
-                                label = { Text(shelf.title) },
+                                label = { Text(androidx.compose.ui.res.stringResource(shelf.title)) },
                             )
                         }
                     }

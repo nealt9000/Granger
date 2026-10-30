@@ -35,11 +35,11 @@ class ArchiveOrgClient(
     }
 
     suspend fun item(identifier: String): ArchiveItem {
-        if (!ArchiveQuery.isValidIdentifier(identifier)) throw ArchiveError("Not found on archive.org")
+        if (!ArchiveQuery.isValidIdentifier(identifier)) throw ArchiveError(ArchiveProblem.NOT_FOUND, "Not found on archive.org")
         val root = fetch("$baseUrl/metadata/$identifier".toHttpUrl())
-        if (root.isEmpty() || root["is_dark"]?.asBool() == true) throw ArchiveError("Not found on archive.org")
+        if (root.isEmpty() || root["is_dark"]?.asBool() == true) throw ArchiveError(ArchiveProblem.NOT_FOUND, "Not found on archive.org")
         return parse {
-            val meta = root["metadata"]?.jsonObject ?: throw ArchiveError("Not found on archive.org")
+            val meta = root["metadata"]?.jsonObject ?: throw ArchiveError(ArchiveProblem.NOT_FOUND, "Not found on archive.org")
             val date = meta["date"]?.firstString().orEmpty()
             ArchiveItem(
                 identifier = meta["identifier"]?.firstString() ?: identifier,
@@ -65,8 +65,8 @@ class ArchiveOrgClient(
     fun detailsUrl(identifier: String): String = "$baseUrl/details/$identifier"
 
     private suspend fun fetch(url: HttpUrl): JsonObject {
-        val reply = client.getText(url, userAgent) { ArchiveError("Couldn't reach archive.org") }
-        if (!reply.isSuccessful) throw ArchiveError("archive.org answered ${reply.code}")
+        val reply = client.getText(url, userAgent) { ArchiveError(ArchiveProblem.UNREACHABLE, "Couldn't reach archive.org") }
+        if (!reply.isSuccessful) throw ArchiveError(ArchiveProblem.ANSWERED, "archive.org answered ${reply.code}", reply.code)
         return parse { json.parseToJsonElement(reply.body).jsonObject }
     }
 
@@ -75,7 +75,7 @@ class ArchiveOrgClient(
     } catch (e: ArchiveError) {
         throw e
     } catch (e: Exception) {
-        throw ArchiveError("archive.org sent something Granger couldn't read")
+        throw ArchiveError(ArchiveProblem.UNREADABLE, "archive.org sent something Granger couldn't read")
     }
 
     private fun JsonObject.toDoc() = ArchiveDoc(
