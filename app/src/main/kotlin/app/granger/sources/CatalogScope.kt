@@ -13,11 +13,17 @@ enum class CatalogScope(val title: String) {
     GRANGER("Granger"), KIWIX("Kiwix"), MODELS("Models"),
     /** Kiwix's Project Gutenberg packs, offered as books (Plan GB Decision 7). */
     GUTENBERG("Project Gutenberg"),
+    /** Kiwix's other book packs, the nautilus libraries (Food for Preppers, Water, Prunelle), offered as books (Plan KB). */
+    KIWIX_BOOKS("Kiwix libraries"),
 }
+
+/** The scopes a pack can be in: where Readiness's domain views and the other cross-scope lists look (Plan KB Decision 6). */
+val PACK_SCOPES = setOf(CatalogScope.KIWIX, CatalogScope.KIWIX_BOOKS, CatalogScope.GUTENBERG)
 
 /**
  * Models (and voices) are Models; a Project Gutenberg pack is Gutenberg's (Plan GB: its books are the way in, so it's
- * offered under Books, not among Kiwix's knowledge packs); any other pack with a mirror on kiwix.org is Kiwix's; every
+ * offered under Books, not among Kiwix's knowledge packs); any other book pack (`content: "books"`, the nautilus
+ * libraries) is Kiwix libraries' (Plan KB Decision 6); any other pack with a mirror on kiwix.org is Kiwix's; every
  * other pack is Granger's own.
  */
 fun scopeOf(item: CatalogItem): CatalogScope = when (item) {
@@ -26,6 +32,7 @@ fun scopeOf(item: CatalogItem): CatalogScope = when (item) {
     is BookEntry -> CatalogScope.GRANGER
     is PackEntry -> when {
         isGutenberg(item) -> CatalogScope.GUTENBERG
+        item.isBookPack -> CatalogScope.KIWIX_BOOKS
         item.urls.any(::isKiwixUrl) -> CatalogScope.KIWIX
         else -> CatalogScope.GRANGER
     }

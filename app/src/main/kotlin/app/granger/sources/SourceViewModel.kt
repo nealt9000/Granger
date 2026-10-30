@@ -355,6 +355,7 @@ class SourceViewModel(
     private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): SourceUi {
         val current = state.catalog
         val gutenberg = scope == CatalogScope.GUTENBERG
+        val kiwixBooks = scope == CatalogScope.KIWIX_BOOKS
         val volumeRows = volumeRows(s.volumes, records)
         // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
         val recordsById = records.groupBy { it.itemId }
@@ -399,7 +400,9 @@ class SourceViewModel(
         val domainTitle = domainId?.let { id -> current?.readiness?.domains?.firstOrNull { it.id == id }?.title }
         val inDomain = domainTitle != null
         fun shown(item: CatalogItem): Boolean {
-            if (scopeOf(item) != scope) return false
+            // A readiness domain lists its packs whichever scope they're offered in: Food keeps Water and Food for
+            // Preppers, which are offered under Books (Plan KB Decision 6).
+            if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES)) return false
             if (inDomain && (item !is PackEntry || item.domain != domainId)) return false
             val status = status(item)
             val inTab = when (s.tab) {
@@ -449,6 +452,11 @@ class SourceViewModel(
                 val (everything, subjects) = packs.partition { it.zimName.endsWith("_all") }
                 if (subjects.isNotEmpty()) add(Section(SUBJECTS, subjects.sortedBy { it.title.lowercase() }.map(::row)))
                 if (everything.isNotEmpty()) add(Section(EVERYTHING, everything.sortedBy { it.sizeBytes }.map(::row)))
+                return@buildList
+            }
+            if (kiwixBooks) {
+                // Kiwix libraries (Plan KB Decision 7): the nautilus packs A–Z, each with its size.
+                if (packs.isNotEmpty()) add(Section(LIBRARIES, packs.sortedBy { it.title.lowercase() }.map(::row)))
                 return@buildList
             }
             if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
@@ -513,6 +521,7 @@ class SourceViewModel(
         const val RECOMMENDED = "Recommended"
         const val SUBJECTS = "Subjects"
         const val EVERYTHING = "Everything"
+        const val LIBRARIES = "Libraries"
         private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
         private const val CLASSICS_PRESET = "granger-classics"
 

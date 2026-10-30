@@ -51,6 +51,7 @@ import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.Albums
 import app.granger.core.library.AudioShelves
 import app.granger.core.library.BookIds
+import app.granger.core.library.isBookPack
 import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
@@ -294,6 +295,7 @@ internal fun routeOf(link: GetMoreLink): Any = when (link) {
     GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
     GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
     GetMoreLink.GUTENBERG -> SourceRoute(CatalogScope.GUTENBERG)
+    GetMoreLink.KIWIX_BOOKS -> SourceRoute(CatalogScope.KIWIX_BOOKS)
     GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
     GetMoreLink.LIBRIVOX -> LibriVoxRoute
     GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
@@ -644,10 +646,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         }
     }
 
-    /** Opens the Library collection of an installed Gutenberg pack's books (Plan GB Decision 4). */
-    fun openGutenbergCollection(packId: String) {
+    /**
+     * Opens an installed pack: a book pack's Library collection of its books (Plan GB Decision 4, Plan KB Decision 6),
+     * any other pack in the reader.
+     */
+    fun openPackOrCollection(packId: String) {
         scope.launch {
-            val pack = container.library.packs.first().firstOrNull { it.id == packId } ?: return@launch
+            val pack = container.library.packs.first().firstOrNull { it.id == packId }
+            if (pack == null || !pack.isBookPack) {
+                openPack(packId)
+                return@launch
+            }
             nav.navigate(CollectionRoute("c:${app.granger.core.library.Filing.defaultKey(pack)}"))
         }
     }
@@ -1052,8 +1061,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
-                    // An installed Gutenberg pack opens as its books, in the Library (Plan GB).
-                    onOpenPack = { packId -> if (source == CatalogScope.GUTENBERG) openGutenbergCollection(packId) else openPack(packId) },
+                    // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
+                    onOpenPack = ::openPackOrCollection,
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->

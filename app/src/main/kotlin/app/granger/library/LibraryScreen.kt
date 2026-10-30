@@ -264,7 +264,7 @@ internal fun LazyListScope.kindRows(
 const val NO_BOOKS = "No books yet"
 
 /** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2). */
-internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.ARCHIVE_ORG_BOOKS)
+internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS)
 
 private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",

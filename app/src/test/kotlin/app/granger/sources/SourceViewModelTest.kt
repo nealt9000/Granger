@@ -710,6 +710,50 @@ class SourceViewModelTest {
         assertThat(ui.categories).isNotEmpty()
     }
 
+    // --- Plan KB: Kiwix libraries under Books; essentials still counted ---
+
+    private fun library(id: String, title: String, size: Long) =
+        kiwix(id, "Other", zimName = id).copy(title = title, sizeBytes = size, content = "books", family = id.substringBefore('_'))
+
+    private val water = library("zimgit-water_en", "Water", 20_000_000)
+    private val prep = library("zimgit-food-preparation_en", "Food for Preppers", 90_000_000)
+    private val knots = library("zimgit-knots_en", "Knots", 60_000_000)
+
+    @Test fun theKiwixListHasNoBookPacksAndKiwixLibrariesListsThemAToZ() = runTest(main.dispatcher) {
+        val cooking = kiwix("based.cooking_en_all", "How-to", zimName = "based.cooking_en_all")
+        val music = gutenberg("lcc-m", "Music and books on music", 3_994_272_104).copy(content = "books")
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(cooking, water, prep, knots, music)))
+        library.packList.value = listOf(pack("u-water").copy(name = "zimgit-water_en"))
+
+        val kiwixUi = viewModel(CatalogScope.KIWIX).ui.value
+        assertThat(kiwixUi.sections.flatMap { it.rows }.map { it.id }).containsExactly(cooking.id)
+        assertThat(kiwixUi.categories).containsExactly("How-to")
+
+        val libraries = viewModel(CatalogScope.KIWIX_BOOKS).ui.value
+        assertThat(libraries.sections.map { it.title }).containsExactly(SourceViewModel.LIBRARIES)
+        val rows = libraries.sections.single().rows
+        assertThat(rows.map { it.title }).containsExactly("Food for Preppers", "Knots", "Water").inOrder()
+        assertThat(rows.map { it.sizeBytes }).containsExactly(90_000_000L, 60_000_000L, 20_000_000L).inOrder()
+        assertThat(libraries.presets).isEmpty()
+        assertThat(libraries.categories).isEmpty()
+        // Gutenberg keeps its own screen.
+        assertThat(viewModel(CatalogScope.GUTENBERG).ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly(music.id)
+    }
+
+    @Test fun foodsDomainViewStillListsWaterAndFoodForPreppers() = runTest(main.dispatcher) {
+        val cooking = kiwix("based.cooking_en_all", "How-to", zimName = "based.cooking_en_all").copy(domain = "food")
+        val cat = catalogOf(listOf(cooking, water.copy(domain = "food"), prep.copy(domain = "food"), knots.copy(domain = "making"))).copy(
+            readiness = Readiness(
+                listOf(Domain("food", "Food, water & survival", essential = listOf(cooking.id, water.id, prep.id), comprehensive = listOf(cooking.id, water.id, prep.id))),
+            ),
+        )
+        catalog.mutable.value = CatalogState(catalog = cat)
+        val ui = domainViewModel("food").ui.value
+        assertThat(ui.domainTitle).isEqualTo("Food, water & survival")
+        assertThat(ui.sections.first().title).isEqualTo(SourceViewModel.RECOMMENDED)
+        assertThat(ui.sections.flatMap { it.rows }.map { it.id }).containsExactly(cooking.id, water.id, prep.id)
+    }
+
     @Test fun aQueryInADomainSearchesTheDomainOnly() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = domainCatalog)
         val vm = domainViewModel("medicine")

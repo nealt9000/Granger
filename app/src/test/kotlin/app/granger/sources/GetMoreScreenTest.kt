@@ -33,9 +33,10 @@ class GetMoreScreenTest {
         assertThat(GET_MORE_SECTIONS.map { it.first })
             .containsExactly("Knowledge packs", "Books", "Audiobooks & music", "Models & voices").inOrder()
         assertThat(GET_MORE_SECTIONS.flatMap { it.second }).containsExactlyElementsIn(GetMoreLink.entries)
-        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7).
+        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7); Kiwix libraries after it (Plan KB).
         assertThat(GET_MORE_SECTIONS.single { it.first == "Books" }.second)
-            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+        assertThat(GetMoreLink.KIWIX_BOOKS.title).isEqualTo("Kiwix libraries")
         // Archive.org once per kind, its kind in the name.
         assertThat(GetMoreLink.entries.map { it.title }.filter { it.startsWith("Archive.org") })
             .containsExactly("Archive.org books", "Archive.org audiobooks", "Archive.org music")
@@ -53,6 +54,7 @@ class GetMoreScreenTest {
         assertThat(routeOf(GetMoreLink.KIWIX)).isEqualTo(SourceRoute(CatalogScope.KIWIX))
         assertThat(routeOf(GetMoreLink.GRANGER_CLASSICS)).isEqualTo(SourceRoute(CatalogScope.GRANGER))
         assertThat(routeOf(GetMoreLink.GUTENBERG)).isEqualTo(SourceRoute(CatalogScope.GUTENBERG))
+        assertThat(routeOf(GetMoreLink.KIWIX_BOOKS)).isEqualTo(SourceRoute(CatalogScope.KIWIX_BOOKS))
         assertThat(routeOf(GetMoreLink.ARCHIVE_ORG_BOOKS)).isEqualTo(ArchiveRoute(ArchiveKind.TEXTS))
         assertThat(routeOf(GetMoreLink.LIBRIVOX)).isEqualTo(LibriVoxRoute)
         assertThat(routeOf(GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS)).isEqualTo(ArchiveRoute(ArchiveKind.SPOKEN_WORD))
@@ -77,6 +79,7 @@ class GetMoreScreenTest {
             assertThat(railToolOf(source, CatalogScope.KIWIX)).isEqualTo(RailTool.BROWSE)
             assertThat(railToolOf(source, CatalogScope.GRANGER)).isEqualTo(RailTool.LIBRARY)
             assertThat(railToolOf(source, CatalogScope.GUTENBERG)).isEqualTo(RailTool.LIBRARY)
+            assertThat(railToolOf(source, CatalogScope.KIWIX_BOOKS)).isEqualTo(RailTool.LIBRARY)
             assertThat(railToolOf(source, CatalogScope.MODELS)).isEqualTo(RailTool.SETTINGS)
         }
     }
