@@ -85,10 +85,20 @@ data class ItemSheet(
     /** The PDF beside a text download (Plan P2): its size, and where its own download stands. */
     val pdfSizeBytes: Long? = null,
     val pdfStatus: ItemStatus = ItemStatus.NotInstalled,
+    /** A set's parts in order, each with where its download stands (Plan IA); empty for an item of one file. */
+    val parts: List<PartRow> = emptyList(),
 )
 
-/** A Get over 100 MB waiting for the user's yes (Plan P2): [pdf] when it's the PDF beside the item's text. */
-data class ConfirmLarge(val identifier: String, val pdf: Boolean, val bytes: Long, val title: String)
+/** One part of a set on the sheet: its [number], [title], size and where its download stands. */
+data class PartRow(val number: Int, val title: String, val sizeBytes: Long, val status: ItemStatus)
+
+/**
+ * A Get over 100 MB waiting for the user's yes (Plan P2): [pdf] when it's the PDF beside the item's text; [part] when
+ * it's one part of a set, [set] when it's every part still missing (Plan IA).
+ */
+data class ConfirmLarge(
+    val identifier: String, val pdf: Boolean, val bytes: Long, val title: String, val part: Int? = null, val set: Boolean = false,
+)
 
 data class ArchiveUi(
     val tab: ArchiveTab = ArchiveTab.BROWSE,
@@ -186,6 +196,9 @@ class ArchiveViewModel(
     /** Installed items' [TextKind]s read from their sidecars on [io]; a missing sidecar isn't cached, so a later one is seen. */
     private val sidecarKinds = ConcurrentHashMap<String, TextKind>()
 
+    /** Offers read from items' metadata this session: a search row shows a set's parts once its sheet has been opened. */
+    private val knownOffers = ConcurrentHashMap<String, Offer>()
+
     /** Audio groups' file counts, read once from their manifests on [io]: the ledger drops a cancelled file's record. */
     private val fileCounts = ConcurrentHashMap<String, Int>()
 
@@ -247,7 +260,7 @@ class ArchiveViewModel(
             val sheet = try {
                 val item = client.item(identifier)
                 if (audio) Sheet(identifier, loading = false, item = item, offer = null, error = null, audio = ArchiveAudioOffers.choose(item))
-                else Sheet(identifier, loading = false, item = item, offer = ArchiveOffers.choose(item), error = null)
+                else Sheet(identifier, loading = false, item = item, offer = ArchiveOffers.choose(item).also { knownOffers[identifier] = it }, error = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -262,25 +275,31 @@ class ArchiveViewModel(
         state.update { it.copy(sheet = null) }
     }
 
-    /** Gets the item's download, or with [pdf] the PDF beside its text; one over 100 MB asks first ([confirm]). */
+    /**
+     * Gets the item's download, or with [pdf] the PDF beside its text; one over 100 MB asks first ([confirm]). A set's
+     * Get is every part not yet got or on its way (Plan IA).
+     */
     fun get(identifier: String, pdf: Boolean = false) = get(identifier, pdf, confirmed = false)
+
+    /** Gets part [number] of a set (Plan IA). */
+    fun getPart(identifier: String, number: Int) = get(identifier, pdf = false, confirmed = false, part = number)
 
     /** Yes to [ArchiveUi.confirm]; [dontAskAgain] turns the prompt off (Settings turns it back on). */
     fun confirmLarge(dontAskAgain: Boolean) {
         val confirm = state.value.confirm ?: return
         state.update { it.copy(confirm = null) }
         if (dontAskAgain) downloadPrefs.askBeforeLarge = false
-        get(confirm.identifier, confirm.pdf, confirmed = true)
+        get(confirm.identifier, confirm.pdf, confirmed = true, part = confirm.part)
     }
 
     fun dismissLarge() {
         state.update { it.copy(confirm = null) }
     }
 
-    private fun get(identifier: String, pdf: Boolean, confirmed: Boolean) {
+    private fun get(identifier: String, pdf: Boolean, confirmed: Boolean, part: Int? = null) {
         appScope.launch {
             val notice = try {
-                if (audio) fetchAndGetAudio(identifier) else fetchAndEnqueue(identifier, pdf, confirmed)
+                if (audio) fetchAndGetAudio(identifier) else fetchAndEnqueue(identifier, pdf, confirmed, part)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -296,11 +315,18 @@ class ArchiveViewModel(
             return
         }
         appScope.launch {
-            // The sheet acts on the item: its text and the PDF beside it go together.
+            // The sheet acts on the item: its text and the PDF beside it go together, and a set's parts.
             downloads.cancel(ArchiveDownloads.itemId(identifier))
             downloads.cancel(ArchiveDownloads.pdfItemId(identifier))
-            val kept = downloads.records.first().any {
-                ArchiveDownloads.identifierOf(it.itemId) == identifier && it.state == DownloadState.INSTALLED
+            val records = downloads.records.first()
+            for (key in partKeys(identifier, records)) {
+                downloads.cancel(ArchiveDownloads.itemId(key))
+                val partKept = records.any { it.itemId == ArchiveDownloads.itemId(key) && it.state == DownloadState.INSTALLED }
+                if (!partKept) withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), key) }
+            }
+            val kept = records.any {
+                ArchiveDownloads.identifierOf(it.itemId) == identifier && ArchiveDownloads.partNumberOf(it.itemId) == null &&
+                    it.state == DownloadState.INSTALLED
             }
             // An installed download keeps the sidecar it is filed (and repaired) with.
             if (!kept) withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
@@ -314,6 +340,12 @@ class ArchiveViewModel(
         }
         appScope.launch {
             downloads.retry(ArchiveDownloads.itemId(identifier))
+            val records = downloads.records.first()
+            // A set's parts that stopped.
+            for (key in partKeys(identifier, records)) {
+                val itemId = ArchiveDownloads.itemId(key)
+                if (recordStatus(itemId, records) is ItemStatus.Failed) downloads.retry(itemId)
+            }
             // The PDF beside the text only when it is the one that failed.
             val pdf = ArchiveDownloads.pdfItemId(identifier)
             if (downloads.records.first().any { it.itemId == pdf && statusOf(identifier, listOf(it), pdf = true) is ItemStatus.Failed }) {
@@ -340,9 +372,28 @@ class ArchiveViewModel(
             downloads.remove(ArchiveDownloads.pdfItemId(identifier))
             bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier))
             bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier + ArchiveDownloads.PDF_SUFFIX))
+            for (key in partKeys(identifier, downloads.records.first())) removeKey(key)
             withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
         }
     }
+
+    /** Removes part [number] of a set: its download, its book and its sidecar (Plan IA). */
+    fun removePart(identifier: String, number: Int) {
+        val count = (state.value.sheet?.offer as? Offer.Download)?.parts?.size ?: return
+        appScope.launch { removeKey(ArchiveDownloads.partKey(identifier, number, count)) }
+    }
+
+    private suspend fun removeKey(key: String) {
+        downloads.remove(ArchiveDownloads.itemId(key))
+        bookshelf.remove(BookIds.of(BookOrigin.ARCHIVE_ORG, key))
+        withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), key) }
+    }
+
+    /** The keys of [identifier]'s parts with a download record. */
+    private fun partKeys(identifier: String, records: List<DownloadRecord>): List<String> = records
+        .filter { ArchiveDownloads.identifierOf(it.itemId) == identifier && ArchiveDownloads.partNumberOf(it.itemId) != null }
+        .mapNotNull { ArchiveDownloads.bookRefOf(it.itemId) }
+        .distinct()
 
     /** The waiver flow reruns the search unfiltered. */
     fun acceptWaiver() {
@@ -391,7 +442,7 @@ class ArchiveViewModel(
      * Returns the notice to show, or null when the download is on its way or waits on [ArchiveUi.confirm]. With
      * [pdf], the download is the PDF beside the item's text, a second book; without, the item's own download.
      */
-    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean): String? {
+    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean, part: Int? = null): String? {
         // Only fetched metadata is downloaded from: a preview's file is a placeholder.
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier || !ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
@@ -402,6 +453,7 @@ class ArchiveViewModel(
         val all = withContext(io) { volumes.list() }
         val volume = all.firstOrNull { it.root.path == downloadPrefs.volumePath } ?: all.firstOrNull()
             ?: return "No storage is available right now."
+        if (offer.isSet && !pdf) return enqueueParts(item, offer, part, confirmed, volume.root, volume.label)
         val spec = ArchiveDownloads.spec(item, offer, client, pdfCopy = pdf)
         if (!confirmed && downloadPrefs.askBeforeLarge && spec.sizeBytes > DownloadPrefs.LARGE_DOWNLOAD_BYTES) {
             val isPdf = pdf || offer.kind == TextKind.PDF
@@ -431,6 +483,53 @@ class ArchiveViewModel(
                 "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
                     "over the ${formatBytes(result.capBytes)} limit."
         }
+    }
+
+    /**
+     * Queues part [part] of a set, or with none every part not yet got or on its way, in order, as one download group
+     * (Plan IA). Each part has its own sidecar, titled for it. Over 100 MB in all asks first.
+     */
+    private suspend fun enqueueParts(
+        item: ArchiveItem, offer: Offer.Download, part: Int?, confirmed: Boolean, root: File, label: String,
+    ): String? {
+        val records = downloads.records.first()
+        val count = offer.parts.size
+        val wanted = offer.parts.filter { p ->
+            if (part != null) return@filter p.number == part
+            val status = recordStatus(ArchiveDownloads.itemId(ArchiveDownloads.partKey(item.identifier, p.number, count)), records)
+            status == ItemStatus.NotInstalled
+        }
+        if (wanted.isEmpty()) return null
+        val specs = wanted.map { it to ArchiveDownloads.spec(item, offer, client, part = it) }
+        val bytes = specs.sumOf { it.second.sizeBytes }
+        if (!confirmed && downloadPrefs.askBeforeLarge && bytes > DownloadPrefs.LARGE_DOWNLOAD_BYTES) {
+            val title = if (part != null) "part" else if (wanted.size == count) "set" else "${wanted.size} parts"
+            state.update { it.copy(confirm = ConfirmLarge(item.identifier, false, bytes, title, part = part, set = part == null)) }
+            return null
+        }
+        for ((p, spec) in specs) {
+            // Written first: the download may finish before enqueue returns.
+            val sidecar = withContext(io) { ArchiveDownloads.writeSidecar(sidecarDir(), item, offer.kind, p, count) }
+            val result = try {
+                downloads.enqueue(spec, root, downloadPrefs.wifiOnly)
+            } catch (e: Throwable) {
+                withContext(NonCancellable + io) { sidecar.delete() }
+                throw e
+            }
+            when (result) {
+                EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> Unit
+                is EnqueueResult.NoSpace -> {
+                    withContext(io) { sidecar.delete() }
+                    return "Not enough space on $label for ${spec.title}: free up ${formatBytes(result.neededBytes)}."
+                }
+                is EnqueueResult.OverCap -> {
+                    withContext(io) { sidecar.delete() }
+                    return "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
+                        "over the ${formatBytes(result.capBytes)} limit."
+                }
+            }
+        }
+        return null
     }
 
     /**
@@ -566,13 +665,22 @@ class ArchiveViewModel(
                     identifier = doc.identifier,
                     title = doc.title.ifBlank { doc.identifier },
                     details = listOfNotNull(doc.creator.ifBlank { null }, doc.year?.toString()).joinToString(" · "),
-                    preview = ArchiveOffers.preview(doc),
+                    preview = knownOffers[doc.identifier] ?: ArchiveOffers.preview(doc),
                     status = statusOf(doc.identifier, ours),
                 )
             }
             // Built from the ledger alone, so it works offline. An item's text and the PDF beside it are one row.
             ArchiveTab.INSTALLED -> ours.groupBy { ArchiveDownloads.identifierOf(it.itemId) }.mapNotNull { (identifier, all) ->
                 identifier ?: return@mapNotNull null
+                // A set is one row: its name, its parts and their size (Plan IA).
+                val parts = all.filter { ArchiveDownloads.partNumberOf(it.itemId) != null }.groupBy { it.itemId }.map { it.value.last() }
+                if (parts.isNotEmpty()) return@mapNotNull ArchiveRow(
+                    identifier = identifier,
+                    title = parts.first().title.substringBeforeLast(ArchiveDownloads.PART_TITLE_SEPARATOR).ifBlank { identifier },
+                    details = "${parts.size} ${if (parts.size == 1) "part" else "parts"} · ${formatBytes(parts.sumOf { it.sizeBytes })}",
+                    preview = previewOf(identifier, parts.first().filePath),
+                    status = statusOf(identifier, ours),
+                )
                 val versions = all.filterNot { ArchiveDownloads.isPdfCopy(it.itemId) }.ifEmpty { all }
                 val latest = versions.last()
                 // The PDF beside a text is counted too: "561 KB + PDF 109 MB".
@@ -603,11 +711,17 @@ class ArchiveViewModel(
                     loading = sheet.loading,
                     item = sheet.item,
                     offer = sheet.offer,
-                    sizeBytes = (sheet.offer as? Offer.Download)?.file?.sizeBytes,
+                    sizeBytes = (sheet.offer as? Offer.Download)?.totalBytes,
                     error = sheet.error,
                     status = statusOf(sheet.identifier, ours),
                     pdfSizeBytes = (sheet.offer as? Offer.Download)?.pdf?.sizeBytes,
                     pdfStatus = statusOf(sheet.identifier, ours, pdf = true),
+                    parts = (sheet.offer as? Offer.Download)?.takeIf { it.isSet }?.let { offer ->
+                        offer.parts.map { p ->
+                            val itemId = ArchiveDownloads.itemId(ArchiveDownloads.partKey(sheet.identifier, p.number, offer.parts.size))
+                            PartRow(p.number, p.title, p.sizeBytes, recordStatus(itemId, ours))
+                        }
+                    }.orEmpty(),
                 )
             },
             notice = s.notice,
@@ -615,9 +729,37 @@ class ArchiveViewModel(
         )
     }
 
-    /** Where the item's own download stands, or with [pdf] the PDF's beside its text. */
+    /**
+     * Where the item's own download stands, or with [pdf] the PDF's beside its text. A set's is its parts' together
+     * (Plan IA): downloading while any is, Partial with some in and none on its way ("Get the rest").
+     */
     private fun statusOf(identifier: String, records: List<DownloadRecord>, pdf: Boolean = false): ItemStatus {
-        val itemId = if (pdf) ArchiveDownloads.pdfItemId(identifier) else ArchiveDownloads.itemId(identifier)
+        if (pdf) return recordStatus(ArchiveDownloads.pdfItemId(identifier), records)
+        val partIds = records.map { it.itemId }.filter {
+            ArchiveDownloads.identifierOf(it) == identifier && ArchiveDownloads.partNumberOf(it) != null
+        }.distinct()
+        if (partIds.isEmpty()) return recordStatus(ArchiveDownloads.itemId(identifier), records)
+        val total = maxOf(partIds.size, partCount(identifier))
+        val per = partIds.map { recordStatus(it, records) }
+        val done = per.count { it == ItemStatus.Installed }
+        if (per.any { it is ItemStatus.Downloading }) {
+            return ItemStatus.Downloading((done + per.sumOf { (it as? ItemStatus.Downloading)?.fraction?.toDouble() ?: 0.0 }.toFloat()) / total)
+        }
+        per.firstOrNull { it is ItemStatus.Queued }?.let { return it }
+        per.firstOrNull { it is ItemStatus.Failed }?.let { return it }
+        return when (done) {
+            total -> ItemStatus.Installed
+            0 -> ItemStatus.NotInstalled
+            else -> ItemStatus.Partial(done, total)
+        }
+    }
+
+    /** A set's part count from the open sheet's offer; 0 when it isn't open (the records then count). */
+    private fun partCount(identifier: String): Int =
+        (state.value.sheet?.takeIf { it.identifier == identifier }?.offer as? Offer.Download)?.parts?.size ?: 0
+
+    /** Where one download ([itemId]) stands. */
+    private fun recordStatus(itemId: String, records: List<DownloadRecord>): ItemStatus {
         val versions = records.filter { it.itemId == itemId }
         versions.firstOrNull { it.isActive }?.let { active ->
             return when (active.state) {

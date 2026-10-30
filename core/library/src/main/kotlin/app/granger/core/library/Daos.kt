@@ -240,7 +240,7 @@ interface BookDao {
     suspend fun setStatus(id: String, status: PackStatus)
 
     /** Pack documents are never indexed (Plan P2): their packs' own search covers the pack. */
-    @Query("SELECT * FROM books WHERE status = 'OK' AND indexedAt IS NULL AND origin != 'PACK'")
+    @Query("SELECT * FROM books WHERE status = 'OK' AND indexedAt IS NULL AND origin NOT IN ('PACK', 'PAGES')")
     suspend fun notIndexed(): List<Book>
 
     @Query("UPDATE books SET indexedAt = :at WHERE id = :id")
@@ -266,6 +266,14 @@ interface BookDao {
 
     @Query("DELETE FROM book_marks WHERE bookId = :bookId")
     suspend fun deleteMarks(bookId: String)
+
+    /** Gives a book's place to another book id (a PDF's, to its original pages once it's an ebook; Plan IA). */
+    @Query("UPDATE OR REPLACE book_positions SET bookId = :to WHERE bookId = :from")
+    suspend fun movePosition(from: String, to: String)
+
+    /** Gives a book's bookmarks and highlights to another book id (as [movePosition]). */
+    @Query("UPDATE book_marks SET bookId = :to WHERE bookId = :from")
+    suspend fun moveMarks(from: String, to: String)
 
     @Query("DELETE FROM book_positions WHERE bookId LIKE :prefix || '%' AND bookId NOT IN (SELECT id FROM books)")
     suspend fun deleteOrphanPositions(prefix: String)

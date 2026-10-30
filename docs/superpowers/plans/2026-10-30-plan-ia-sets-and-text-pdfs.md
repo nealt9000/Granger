@@ -78,7 +78,7 @@ All settled with Neal, 2026-10-30 (D6, D7 and D9 were his calls on the draft).
    - `~` is not in archive.org's identifier alphabet, so no part id can collide with an item id.
    - `ArchiveDownloads.identifierOf` takes everything before `~` or `#`.
    - Each part has its own sidecar, `<id>~<nn>.json`, so its title is "Item title · part title".
-   - **Legacy:** a book already filed as `<id>` (Batman's first part from the bug pass) counts as part 1 when the item's parts are listed, and is never downloaded again.
+   - **Legacy (changed while building, 2026-10-30):** a book already filed as `<id>` (Batman's first part from the bug pass) is left as it is, an ordinary Archive.org book; it isn't counted as part 1. Only Neal's phone has one, and Remove plus Get all is simpler than special-casing it in filing and status.
 4. **A set in the Library (recommended).** Parts file into a collection named for the item ("Batman The Dark Knight Returns (1986)"), made on the first part and kept while any part is there.
    - The collection's `defaultKey` is `archive-org:<id>`, so filing is idempotent and a user's move (`userSet`) wins, as for every collection.
    - Within it, parts list in part order: the shelf's sort is by title, and the zero-padded numbers keep that right.
@@ -167,42 +167,42 @@ Two parts, in order: sets first, since they are smaller and shippable alone, the
 
 ### Task 0: Corpus and fixtures
 
-- [ ] Save the metadata JSON of `BatmanTheDarkKnightReturns03of041986` and `national-geographic-magazine-complete-pdf` as `core/archive` test fixtures (trim NatGeo to 40 files, keeping the specials and a year boundary).
-- [ ] Find and list in `tools/pdf-eval/corpus.tsv` about 25 archive.org items, with kinds and sizes and nothing downloaded into the repo:
+- [x] Save the metadata JSON of `BatmanTheDarkKnightReturns03of041986` and `national-geographic-magazine-complete-pdf` as `core/archive` test fixtures (trim NatGeo to 40 files, keeping the specials and a year boundary).
+- [ ] (Moved to the start of part 2, 2026-10-30.) Find and list in `tools/pdf-eval/corpus.tsv` about 25 archive.org items, with kinds and sizes and nothing downloaded into the repo:
   - comic runs (CBR and CBZ, one with a RAR5 part);
   - magazine runs;
   - a book in volumes;
   - one item whose "parts" are chapters;
   - born-digital PDFs: a novel, verse (the Odyssey), a textbook with figures, a two-column paper, a footnoted history, a cookbook with tables, a children's picture book;
   - two scans' Text PDFs, as controls.
-- [ ] Commit: "Plan IA Task 0: archive.org sets and text PDFs to test against".
+- [x] Commit: "Plan IA Task 0: archive.org sets and text PDFs to test against".
 
 ### Task 1: Parts and natural order (`core`)
 
-- [ ] Move `PAGE_ORDER` to `core/text` `NaturalOrder` and point `ComicToPdf` at it, with no change in behaviour (its test moves too).
-- [ ] `ArchiveParts.of(item, kind)` (Decisions 1 and 2), with cleaned titles. `choose()` fills `Offer.Download.parts`, with its file still the first part.
-- [ ] Tests: Batman gives 4 parts in order with titles "01 (of 04) (1986)"…; NatGeo (fixture) gives 40 parts in date order, specials last; a 3-page errata PDF beside a 300-page book is not a part; a single-file item has one part; derived EPUBs are never parts.
-- [ ] Commit.
+- [x] Move `PAGE_ORDER` to `core/text` `NaturalOrder` and point `ComicToPdf` at it, with no change in behaviour (its test moves too).
+- [x] `ArchiveParts.of(item, kind)` (Decisions 1 and 2), with cleaned titles. `choose()` fills `Offer.Download.parts`, with its file still the first part.
+- [x] Tests: Batman gives 4 parts in order with titles "01 (of 04) (1986)"…; NatGeo (fixture) gives 40 parts in date order, specials last; a 3-page errata PDF beside a 300-page book is not a part; a single-file item has one part; derived EPUBs are never parts.
+- [x] Commit.
 
 ### Task 2: Getting and filing parts
 
-- [ ] `ArchiveDownloads.spec(item, part)`, part item ids, files and sidecars (Decision 3), and `identifierOf` for `~` and `#`.
-- [ ] Get all queues the missing parts as group `archive-org:<id>`. Get part n queues one.
-- [ ] Filing: a part is placed in its set's collection (Decision 4), created on the first part. A legacy `<id>` book is part 1.
-- [ ] `refresh()` files stray parts (`<id>~nn.*`) with their sidecars. `remove()` and Remove all take parts and their sources.
-- [ ] Tests (Robolectric, `BookshelfTest`, `ArchiveViewModelTest`):
+- [x] `ArchiveDownloads.spec(item, part)`, part item ids, files and sidecars (Decision 3), and `identifierOf` for `~` and `#`.
+- [x] Get all queues the missing parts as group `archive-org:<id>`. Get part n queues one.
+- [x] Filing: a part is placed in its set's collection (Decision 4), created on the first part. (A legacy `<id>` book stays as it is: Decision 3.)
+- [x] `refresh()` files stray parts (`<id>~nn.*`) with their sidecars. `remove()` and Remove all take parts and their sources.
+- [x] Tests (Robolectric, `BookshelfTest`, `ArchiveViewModelTest`):
   - two of four parts get, land in the set's collection, titled and ordered;
   - Get all skips the installed ones;
   - the legacy book counts as part 1;
   - removing the last part removes the empty set collection;
   - a user's move of the set survives a new part arriving.
-- [ ] Commit.
+- [x] Commit.
 
 ### Task 3: The sheet for a set
 
-- [ ] The set line, Get all · total (with the large prompt on the total), and Choose parts (Decision 5): a filter over 20 parts, and each row's status and action, from the downloads ledger and the shelf.
-- [ ] The search row shows "n parts" once known.
-- [ ] Tests: `ArchiveItemSheetTest` for the line, buttons and row states; the large prompt for NatGeo's total.
+- [x] The set line, Get all · total (with the large prompt on the total), and Choose parts (Decision 5): a filter over 20 parts, and each row's status and action, from the downloads ledger and the shelf.
+- [x] The search row shows "n parts" once known.
+- [x] Tests: `ArchiveItemSheetTest` for the line, buttons and row states; the large prompt for NatGeo's total.
 - [ ] Phone check (say on the channel first):
   - get Batman's parts 2 and 3 one at a time, then Get all (only part 4 is fetched);
   - the set in the Library, in order;
@@ -214,43 +214,61 @@ Two parts, in order: sets first, since they are smaller and shippable alone, the
 
 ### Task 4: Born-digital or scanned (`PdfOrigin`)
 
-- [ ] `PdfOrigin.of(file)`: BORN_DIGITAL, SCAN or IMAGES (Decision 6), from the fonts, text render modes and image coverage of up to 12 pages spread through the file.
-- [ ] Tests on fixtures: an embedded-font page is BORN_DIGITAL; a `GlyphLessFont` invisible text over an image is SCAN; a picture-only page is IMAGES. On the corpus (eval): every born-digital item is BORN_DIGITAL and both scan controls are SCAN.
-- [ ] Commit.
+- [x] `PdfOrigin.of(file)`: BORN_DIGITAL, SCAN or IMAGES (Decision 6), from the fonts, text render modes and image coverage of up to 12 pages spread through the file.
+- [x] Tests on fixtures: an embedded-font page is BORN_DIGITAL; a `GlyphLessFont` invisible text over an image is SCAN; a picture-only page is IMAGES. On the corpus (eval): every born-digital item is BORN_DIGITAL and both scan controls are SCAN.
+- [x] Commit.
 
 ### Task 5: Lines, heads and feet, blocks, verse and prose (converter stages 1–5)
 
-- [ ] The `PDFTextStripper` subclass keeping positions; lines; body style; running heads, feet and page numbers dropped; blocks; verse kept; prose joined with hyphenation; paragraphs across pages; two columns read in order.
-- [ ] One test per rule on `TextPdfFixtures`, including a verse page from the Odyssey's layout (short lines, a centred book heading) and a prose page with a running head, an alternating page head and a folio.
-- [ ] Commit.
+- [x] The `PDFTextStripper` subclass keeping positions; lines; body style; running heads, feet and page numbers dropped; blocks; verse kept; prose joined with hyphenation; paragraphs across pages; two columns read in order.
+- [x] One test per rule on `TextPdfFixtures`, including a verse page from the Odyssey's layout (short lines, a centred book heading) and a prose page with a running head, an alternating page head and a folio.
+- [x] Commit.
 
 ### Task 6: Chapters, pictures, notes, writing the EPUB (stages 6–9)
 
-- [ ] Chapters from the outline with mid-page splits, the heading fallback, the pages fallback; figures with captions; the cover; notes at chapter ends; XHTML and nav; metadata from the sidecar.
-- [ ] Tests:
+- [x] Chapters from the outline with mid-page splits, the heading fallback, the pages fallback; figures with captions; the cover; notes at chapter ends; XHTML and nav; metadata from the sidecar.
+- [x] Tests:
   - outline chapters split at the right line;
   - nested contents;
   - a figure lands between the right paragraphs;
   - footnotes gather under Notes;
   - the EPUB passes `EpubInspector` and opens in Readium in the reader test;
   - Listen's `BookReadSource` reads it.
-- [ ] Commit.
+- [x] Commit.
 
 ### Task 7: The quality gate and the eval
 
-- [ ] Gate thresholds from the stage metrics (Decision 8), tuned on the corpus: a book passes when its text kept, paragraph lengths and chapters look like a book. A complex layout passes only with good numbers everywhere else.
+- [x] Gate thresholds from the stage metrics (Decision 8), tuned on the corpus: a book passes when its text kept, paragraph lengths and chapters look like a book. A complex layout passes only with good numbers everywhere else.
 - [ ] `tools/pdf-eval` writes the report. Neal reads it for a dozen books before anything ships: the Odyssey, the novel, the textbook, the two-column paper and the picture book at least.
-- [ ] Target: at least 80% of the born-digital corpus passes and reads well in the report; every failure fails the gate (it is filed as a PDF), never a bad ebook.
-- [ ] Commit with the report's numbers in the message.
+- [x] Target: at least 80% of the born-digital corpus passes and reads well in the report; every failure fails the gate (it is filed as a PDF), never a bad ebook.
+- [x] Commit with the report's numbers in the message.
 
 ### Task 8: Wiring it in
 
-- [ ] `choose()` offers `PDF_TEXT` for an uploaded born-digital PDF. This can only be confirmed after the download, so the offer says "PDF, read as an ebook when it can be"; `PdfOrigin` decides at filing time.
-- [ ] `addDownloaded` converts and files the EPUB (or the PDF on a gate failure). `refresh()` converts strays. `remove()` takes both.
-- [ ] Original pages in the reader's ⋯ (Decision 7), opening the PDF at the chapter's first page; Remove original pages · size there and in the book's details, which deletes the PDF and keeps the ebook (the source no longer counts as unconverted on `refresh()`).
-- [ ] Read as ebook on text PDFs already in the Library, archive.org's and imports alike (Decisions 6 and 9), with the gate deciding as on arrival.
-- [ ] Tests: `BookshelfTest` (a born-digital PDF becomes an EPUB with the PDF beside it; a scan stays a PDF; a gate failure stays a PDF; Remove original pages deletes the PDF and a refresh doesn't convert again; Read as ebook on an import); `EbookReaderViewModelTest` (Original pages opens the PDF at the chapter's page).
-- [ ] Commit.
+- [x] `choose()` offers `PDF_TEXT` for an uploaded born-digital PDF. This can only be confirmed after the download, so the offer says "PDF, read as an ebook when it can be"; `PdfOrigin` decides at filing time.
+- [x] `addDownloaded` converts and files the EPUB (or the PDF on a gate failure). `refresh()` converts strays. `remove()` takes both.
+- [x] Original pages in the reader's ⋯ (Decision 7), opening the PDF at the chapter's first page; Remove original pages · size there and in the book's details, which deletes the PDF and keeps the ebook (the source no longer counts as unconverted on `refresh()`).
+- [x] Read as ebook on text PDFs already in the Library, archive.org's and imports alike (Decisions 6 and 9), with the gate deciding as on arrival.
+- [x] Tests: `BookshelfTest` (a born-digital PDF becomes an EPUB with the PDF beside it; a scan stays a PDF; a gate failure stays a PDF; Remove original pages deletes the PDF and a refresh doesn't convert again; Read as ebook on an import); `EbookReaderViewModelTest` (Original pages opens the PDF at the chapter's page).
+- [x] Commit.
+
+**Eval, 2026-10-30** (`tools/pdf-eval/corpus.tsv`, 25 archive.org PDFs; `PdfToEpubEval`):
+- 18 of 20 born-digital PDFs pass the gate and read as books on inspection. The two refusals are right: Eastern Standard Tribe's text layer is garbled (63% of words run together), and Euclid's Elements is mostly diagrams and formulas (median paragraph 27 characters).
+- All 5 controls stay pages: 2 scans, 1 image-only PDF, 2 picture books.
+- 4.2 s at most per book on the Mac.
+- Fixed along the way:
+  - verse told by early line breaks, with neighbours deciding borderline blocks;
+  - margin line numbers;
+  - gutters as empty vertical strips (narrow gutters, columns whose baselines differ);
+  - landscape spreads and booklet impositions split into their printed pages and put in order by page number (Pride and Prejudice is imposed 14/3, 16/1…);
+  - quarter-turned pages;
+  - footnotes only under body text (not a book's endnotes);
+  - the outline level with no over-long chapter;
+  - outlines whose entries all point at one page placed by title;
+  - heading lines merged into one title;
+  - the run-together gate;
+  - ligatures.
+- Left as they are: cookbook and journal layouts pass but read rougher; some tables come out as lines; IPCC's missing "fi" glyphs are the PDF's own.
 
 ### Task 9: Walkthrough on the Pixel (say on the channel first)
 

@@ -72,6 +72,7 @@ class ArchiveViewModelTest {
             TAGGED -> TAGGED_JSON
             HOLST -> resource("item-holst-planets.json")
             AUDIO_LENDING -> resource("item-audio-lending.json")
+            COMIC_RUN -> resource("item-comic-run.json")
             else -> "{}"
         }
     }
@@ -269,6 +270,105 @@ class ArchiveViewModelTest {
         vm.acceptWaiver()
         settleNow { searches().size == 2 }
         assertThat(searches()[1].queryParameter("q")).isEqualTo(ArchiveQuery.build("", ArchiveShelf.MOST_DOWNLOADED, false))
+    }
+
+    // ---- sets (Plan IA) ----
+
+    private fun part(n: Int) = "archive-org:$COMIC_RUN~0$n"
+
+    @Test fun aSetsGetQueuesEveryPartInOrderAsOneGroupEachWithItsSidecar() = runTest(main.dispatcher) {
+        prefs.accept()
+        downloadPrefs.askBeforeLarge = false
+        val vm = viewModel()
+        vm.openItem(COMIC_RUN)
+        settle { vm.ui.value.sheet?.loading == false }
+        val sheet = vm.ui.value.sheet!!
+        assertThat(sheet.parts.map { it.title }).containsExactly(
+            "01 (of 04) (1986)", "02 (of 04) (1986)", "03 (of 04) (1986)", "04 (of 04) (1986)",
+        ).inOrder()
+        assertThat(sheet.sizeBytes).isEqualTo(sheet.parts.sumOf { it.sizeBytes })
+        vm.get(COMIC_RUN)
+        settle { downloads.enqueuedSpecs.size == 4 }
+        assertThat(downloads.enqueuedSpecs.map { it.itemId }).containsExactly(part(1), part(2), part(3), part(4)).inOrder()
+        assertThat(downloads.enqueuedSpecs.map { it.groupId }.toSet()).containsExactly("archive-org:$COMIC_RUN")
+        val second = downloads.enqueuedSpecs[1]
+        assertThat(second.relativePath).isEqualTo("books/archive-org/$COMIC_RUN~02.cbr")
+        assertThat(second.title).isEqualTo("Batman The Dark Knight Returns (1986) · 02 (of 04) (1986)")
+        val sidecar = ArchiveDownloads.readSidecar(File(sidecars, "$COMIC_RUN~02.json"))!!
+        assertThat(sidecar.first.title).isEqualTo("Batman The Dark Knight Returns (1986) · 02 (of 04) (1986)")
+        assertThat(sidecar.second).isEqualTo(TextKind.COMIC)
+    }
+
+    @Test fun onePartAloneThenTheRest() = runTest(main.dispatcher) {
+        prefs.accept()
+        downloadPrefs.askBeforeLarge = false
+        val vm = viewModel()
+        vm.openItem(COMIC_RUN)
+        settle { vm.ui.value.sheet?.loading == false }
+        vm.getPart(COMIC_RUN, 3)
+        settle { downloads.enqueuedSpecs.isNotEmpty() }
+        assertThat(downloads.enqueuedSpecs.single().itemId).isEqualTo(part(3))
+
+        // Part 3 in, part 1 on its way: the sheet says so, and Get the rest is parts 2 and 4.
+        downloads.list.value = listOf(
+            record(part(3), DownloadState.INSTALLED, kind = ItemKind.BOOK),
+            record(part(1), DownloadState.RUNNING, kind = ItemKind.BOOK, sizeBytes = 100, bytesDone = 50),
+        )
+        settle { vm.ui.value.sheet?.parts?.get(2)?.status == ItemStatus.Installed }
+        val sheet = vm.ui.value.sheet!!
+        assertThat(sheet.parts[0].status).isEqualTo(ItemStatus.Downloading(0.5f))
+        assertThat(sheet.status).isInstanceOf(ItemStatus.Downloading::class.java)
+        downloads.list.value = listOf(record(part(3), DownloadState.INSTALLED, kind = ItemKind.BOOK))
+        settle { vm.ui.value.sheet?.status is ItemStatus.Partial }
+        assertThat(vm.ui.value.sheet!!.status).isEqualTo(ItemStatus.Partial(1, 4))
+        downloads.enqueuedSpecs.clear()
+        vm.get(COMIC_RUN)
+        settle { downloads.enqueuedSpecs.size == 3 }
+        assertThat(downloads.enqueuedSpecs.map { it.itemId }).containsExactly(part(1), part(2), part(4)).inOrder()
+    }
+
+    @Test fun aLargeSetAsksOnceForTheWhole() = runTest(main.dispatcher) {
+        prefs.accept()
+        val vm = viewModel()
+        vm.openItem(COMIC_RUN)
+        settle { vm.ui.value.sheet?.loading == false }
+        vm.get(COMIC_RUN)
+        settle { vm.ui.value.confirm != null }
+        val confirm = vm.ui.value.confirm!!
+        assertThat(confirm.title).isEqualTo("set")
+        assertThat(confirm.bytes).isEqualTo(vm.ui.value.sheet!!.sizeBytes)
+        assertThat(downloads.enqueuedSpecs).isEmpty()
+        vm.confirmLarge(dontAskAgain = false)
+        settle { downloads.enqueuedSpecs.size == 4 }
+    }
+
+    @Test fun removingASetRemovesEveryPart() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(
+            record(part(1), DownloadState.INSTALLED, kind = ItemKind.BOOK),
+            record(part(2), DownloadState.INSTALLED, kind = ItemKind.BOOK),
+        )
+        File(sidecars, "$COMIC_RUN~01.json").writeText("{}")
+        val vm = viewModel()
+        vm.remove(COMIC_RUN)
+        settle { "remove:${part(2)}" in downloads.calls }
+        assertThat(downloads.calls).containsAtLeast("remove:${part(1)}", "remove:${part(2)}")
+        assertThat(bookshelf.removed).containsAtLeast("book:archive-org:$COMIC_RUN~01", "book:archive-org:$COMIC_RUN~02")
+        assertThat(File(sidecars, "$COMIC_RUN~01.json").exists()).isFalse()
+    }
+
+    @Test fun anInstalledSetIsOneRow() = runTest(main.dispatcher) {
+        downloads.list.value = listOf(
+            record(part(1), DownloadState.INSTALLED, kind = ItemKind.BOOK, sizeBytes = 60, title = "Batman (1986) · 01",
+                filePath = "/internal/books/archive-org/$COMIC_RUN~01.cbr"),
+            record(part(2), DownloadState.INSTALLED, kind = ItemKind.BOOK, sizeBytes = 50, title = "Batman (1986) · 02",
+                filePath = "/internal/books/archive-org/$COMIC_RUN~02.cbr"),
+        )
+        val vm = viewModel()
+        vm.setTab(ArchiveTab.INSTALLED)
+        settle { vm.ui.value.rows.isNotEmpty() }
+        val row = vm.ui.value.rows.single()
+        assertThat(row.title).isEqualTo("Batman (1986)")
+        assertThat(row.details).isEqualTo("2 parts · ${app.granger.formatBytes(110)}")
     }
 
     @Test fun aThrowingEnqueueLeavesNoSidecar() = runTest(main.dispatcher) {
@@ -946,6 +1046,7 @@ class ArchiveViewModelTest {
                 "]}}"
 
         const val MODERN = "modern1950"
+        const val COMIC_RUN = "BatmanTheDarkKnightReturns03of041986"
         val MODERN_JSON = """
             {"metadata":{"identifier":"$MODERN","title":"A Modern Book","creator":"Someone","date":"1950","mediatype":"texts"},
              "files":[{"name":"$MODERN.epub","format":"EPUB","size":"1000","sha1":"${"c".repeat(40)}","source":"derivative"}]}

@@ -90,15 +90,32 @@ object Filing {
     /** Identity of a book across re-downloads: its id, which is derived from origin and source. */
     fun bookKey(book: Book): String = book.id
 
-    /** A Gutenberg book goes in its pack's collection ([gutenbergKey]); every other book by its origin. */
-    fun defaultKey(book: Book): String =
-        if (book.origin == BookOrigin.GUTENBERG) gutenbergKey(GutenbergBooks.packNameOf(book)) else BOOK_COLLECTIONS.getValue(book.origin).first
+    /**
+     * A Gutenberg book goes in its pack's collection ([gutenbergKey]); a part of an archive.org set (its ref
+     * `<identifier>~03`, Plan IA) in its set's own collection, `archive-org:<identifier>`, so the parts sit together and
+     * in order; every other book by its origin.
+     */
+    fun defaultKey(book: Book): String = when {
+        book.origin == BookOrigin.GUTENBERG -> gutenbergKey(GutenbergBooks.packNameOf(book))
+        book.origin == BookOrigin.ARCHIVE_ORG && SET_PART in book.sourceRef ->
+            BOOK_COLLECTIONS.getValue(BookOrigin.ARCHIVE_ORG).first + ":" + book.sourceRef.substringBefore(SET_PART)
+        else -> BOOK_COLLECTIONS.getValue(book.origin).first
+    }
 
-    /** [packs] name a Gutenberg book's collection: its pack's subject. */
+    /**
+     * [packs] name a Gutenberg book's collection: its pack's subject. A set's collection is named for its item: the
+     * part's title before " · " ("Batman (1986) · 02 (of 04)").
+     */
     fun defaultName(key: String, book: Book, packs: List<Pack> = emptyList()): String = when {
         book.origin == BookOrigin.GUTENBERG -> gutenbergName(packs.firstOrNull { it.name == GutenbergBooks.packNameOf(book) })
-        else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second ?: book.title
+        else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second
+            ?: book.title.substringBeforeLast(SET_TITLE).takeIf { key.startsWith("archive-org:") && SET_TITLE in book.title }
+            ?: book.title
     }
+
+    /** How an archive.org part's ref and title mark it (ArchiveDownloads.PART_SEPARATOR and PART_TITLE_SEPARATOR in the app). */
+    private const val SET_PART = '~'
+    private const val SET_TITLE = " · "
 
     /** Every book is reading material. */
     @Suppress("UNUSED_PARAMETER")
