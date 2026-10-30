@@ -1,5 +1,7 @@
 package app.granger.downloads
 
+import app.granger.R
+import app.granger.UiText
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
@@ -39,15 +41,15 @@ class DownloadsScreenTest {
         bytesPerSecond = 2_100_000, timeLeftMillis = 25 * 60_000L, bytesToGo = 8_600_000_000, freeBytes = 41_000_000_000, volumeLabel = "Phone",
     )
     private val running = DownloadRow(
-        "item:wiki", "Wikipedia Top", RowState.RUNNING, 312_000_000, 980_000_000, groupId = "onboarding:1", groupLabel = "Setting up",
+        "item:wiki", UiText.Raw("Wikipedia Top"), RowState.RUNNING, 312_000_000, 980_000_000, groupId = "onboarding:1", groupLabel = UiText.Res(R.string.downloads_setting_up),
         itemIds = listOf("wiki"),
     )
     private fun waiting(id: String, place: Int) =
-        DownloadRow("item:$id", "Pack $id", RowState.QUEUED, 0, 1_000_000, itemIds = listOf(id), reason = WaitReason.InLine(place))
-    private val failed = DownloadRow("item:emma", "Emma", RowState.FAILED, 0, 1_000, itemIds = listOf("emma"), error = "No connection.")
-    private val failed2 = failed.copy(key = "item:owl", title = "Owl", itemIds = listOf("owl"), error = "Timed out.")
-    private val gone = DownloadRow("item:wikem", "WikEM", RowState.FAILED, 0, 1_000, itemIds = listOf("wikem"), error = "Kiwix no longer offers this file", gone = true)
-    private val done = DownloadRow("item:owls", "Owls", RowState.DONE, 1_000, 1_000, itemIds = listOf("owls"), open = OpenTarget.Pack("owls"))
+        DownloadRow("item:$id", UiText.Raw("Pack $id"), RowState.QUEUED, 0, 1_000_000, itemIds = listOf(id), reason = WaitReason.InLine(place))
+    private val failed = DownloadRow("item:emma", UiText.Raw("Emma"), RowState.FAILED, 0, 1_000, itemIds = listOf("emma"), error = "No connection.")
+    private val failed2 = failed.copy(key = "item:owl", title = UiText.Raw("Owl"), itemIds = listOf("owl"), error = "Timed out.")
+    private val gone = DownloadRow("item:wikem", UiText.Raw("WikEM"), RowState.FAILED, 0, 1_000, itemIds = listOf("wikem"), error = "Kiwix no longer offers this file", gone = true)
+    private val done = DownloadRow("item:owls", UiText.Raw("Owls"), RowState.DONE, 1_000, 1_000, itemIds = listOf("owls"), open = OpenTarget.Pack("owls"))
 
     private fun show(ui: DownloadsUi) = compose.setContent {
         DownloadsContent(

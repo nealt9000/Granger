@@ -68,7 +68,7 @@ class DownloadsViewModelTest {
 
     @Test fun cancelRetryAndRemoveActOnTheItemAndItsIndex() = runTest(main.dispatcher) {
         val vm = vm()
-        val row = DownloadRow("item:b", "B", RowState.FAILED, 0, 10, groupId = "g", itemIds = listOf("b", "b.vectors"))
+        val row = DownloadRow("item:b", app.granger.UiText.Raw("B"), RowState.FAILED, 0, 10, groupId = "g", itemIds = listOf("b", "b.vectors"))
         vm.retry(row)
         vm.cancel(row)
         vm.cancelGroup(row)
