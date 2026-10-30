@@ -2,6 +2,8 @@ package app.granger.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.VoiceEntry
 import app.granger.core.downloads.DownloadState
@@ -42,7 +44,7 @@ data class VoiceSettingsUi(
     val speed: Float = 1f,
     val markSentence: Boolean = true,
     val catalog: List<CatalogVoiceRow> = emptyList(),
-    val notice: String? = null,
+    val notice: UiText? = null,
     /** Research reads a new answer aloud as it is written (Plan V2). */
     val speakAnswers: Boolean = false,
 )
@@ -62,7 +64,7 @@ class VoiceSettingsViewModel(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
-    private val notice = MutableStateFlow<String?>(null)
+    private val notice = MutableStateFlow<UiText?>(null)
 
     val ui: StateFlow<VoiceSettingsUi> = combine(
         installed.voices, prefs.voiceId, prefs.speed, combine(prefs.markSentence, prefs.speakAnswers) { mark, speak -> mark to speak },
@@ -95,11 +97,11 @@ class VoiceSettingsViewModel(
     fun get(entry: VoiceEntry) {
         appScope.launch {
             val root = volumeFor()
-            if (root == null) { notice.value = "No storage to download to."; return@launch }
+            if (root == null) { notice.value = UiText.Res(R.string.settings_voice_no_storage); return@launch }
             notice.value = when (downloads.enqueue(entry, root, downloadPrefs.wifiOnly)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
-                is EnqueueResult.NoSpace -> "Not enough free space for ${entry.title}."
-                is EnqueueResult.OverCap -> "Over the storage cap."
+                is EnqueueResult.NoSpace -> UiText.Res(R.string.settings_voice_no_space, entry.title)
+                is EnqueueResult.OverCap -> UiText.Res(R.string.settings_voice_over_cap)
             }
         }
     }
