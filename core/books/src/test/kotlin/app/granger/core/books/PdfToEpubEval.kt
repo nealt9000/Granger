@@ -35,6 +35,21 @@ class PdfToEpubEval {
             .filter { only.isEmpty() || only.any { o -> it.name.contains(o) } }
         for (pdf in pdfs) {
             val epub = File(out, pdf.nameWithoutExtension + ".epub").apply { delete() }
+            if (System.getenv("PDF_EVAL_HEADINGS") != null) {
+                loadPdf(pdf).use { doc ->
+                    val scratch = kotlin.io.path.createTempDirectory().toFile()
+                    val pages = app.granger.core.books.pdfepub.PdfPages.readAll(doc, scratch)
+                    val layout = app.granger.core.books.pdfepub.PdfLayout.build(pages)
+                    println("BODY ${pdf.name}: ${layout.bodySize}")
+                    layout.items.filterIsInstance<app.granger.core.books.pdfepub.Heading>().take(40)
+                        .forEach { println("HEADING p${it.page} ${it.size} y=${it.y} ${it.text.take(50)}") }
+                    scratch.deleteRecursively()
+                }
+            }
+            if (System.getenv("PDF_EVAL_OUTLINE") != null) {
+                val outline = PdfInspector.outline(pdf)
+                println("OUTLINE ${pdf.name}: ${outline.groupingBy { it.depth }.eachCount()} " + outline.take(30).joinToString(" | ") { "${it.depth}:${it.page}:${it.title.take(30)}" })
+            }
             val start = System.currentTimeMillis()
             val r = try {
                 PdfToEpub.convert(pdf, epub)

@@ -31,15 +31,22 @@ internal object PdfChapters {
         if (items.isEmpty()) return null
         val usable = outline.filter { it.page >= 1 && it.title.isNotBlank() }
         if (usable.size < 2) return null
-        val level = level(usable, items)
-        val tops = usable.filter { it.depth <= level }.sortedBy { it.page }
+        // An outline whose entries mostly point at one page (a broken export) is placed by its titles alone, in order.
+        val byTitle = usable.map { it.page }.distinct().size * 2 < usable.size
+        val level = if (byTitle) {
+            usable.map { it.depth }.distinct().sorted().let { ds -> ds.firstOrNull { d -> usable.count { it.depth <= d } >= 3 } ?: ds.first() }
+        } else {
+            level(usable, items)
+        }
+        val tops = usable.filter { it.depth <= level }.let { if (byTitle) it else it.sortedBy { e -> e.page } }
         val starts = mutableListOf<Pair<OutlineEntry, Pair<Int, Boolean>>>()
         var from = 0
         for (entry in tops) {
-            val at = place(items, entry, from) ?: continue
+            val at = (if (byTitle) findTitle(items, entry.title, from)?.let { it to true } else place(items, entry, from)) ?: continue
             starts += entry to at
-            from = at.first
+            from = at.first + if (byTitle) 1 else 0
         }
+        if (byTitle && starts.size * 5 < tops.size * 3) return null
         if (starts.size < 2) return null
         val sectionEntries = usable.filter { it.depth == level + 1 }
         val chapters = mutableListOf<Chapter>()
@@ -80,6 +87,10 @@ internal object PdfChapters {
 
     private const val MAX_CHAPTER_PAGES = 50
     private const val MAX_CHAPTER_SHARE = 0.2f
+    private const val MAX_OVERLONG_SHARE = 0.4f
+
+    /** A heading that only labels the one below it: "Section 1", "Chapter IV", "3.". */
+    private val LABEL = Regex("^(section|chapter|part|book)?\\s*[0-9ivxlc]+\\.?$", RegexOption.IGNORE_CASE)
 
     /** The item [entry] starts at (from [from] on), and whether it reads as the entry's title. */
     private fun place(items: List<Item>, entry: OutlineEntry, from: Int): Pair<Int, Boolean>? {
@@ -101,28 +112,53 @@ internal object PdfChapters {
         return first to false
     }
 
+    /** The first heading (else paragraph) from [from] on that starts with [title]'s words (its first 40 letters). */
+    private fun findTitle(items: List<Item>, title: String, from: Int): Int? {
+        val want = normal(title).take(40)
+        if (want.length < 3) return null
+        fun text(item: Item) = when (item) {
+            is Heading -> item.text
+            is Paragraph -> item.text.take(200)
+            else -> null
+        }
+        return (from until items.size).firstOrNull { i -> items[i] is Heading && normal(text(items[i])!!).startsWith(want) }
+            ?: (from until items.size).firstOrNull { i -> text(items[i])?.let { normal(it).startsWith(want) } == true }
+    }
+
     private fun normal(text: String): String = text.lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), "")
 
     /**
-     * Chapters at the biggest headings that come at least twice and no more than once a page: a title page's one big
-     * line doesn't count, a run of section heads in every page is too many. Null without two.
+     * Chapters at the biggest headings that come at least twice and no more than once a page, and leave no chapter over
+     * [MAX_CHAPTER_SHARE] of the book or [MAX_CHAPTER_PAGES] pages: a title page's one big line doesn't count, a run of
+     * section heads on every page is too many, and a report's two title lines don't make two 300-page chapters. Null
+     * when no level does.
      */
     private fun fromHeadings(items: List<Item>): List<Chapter>? {
         val headings = items.withIndex().filter { it.value is Heading }
         if (headings.size < 2) return null
-        val pages = (items.maxOf { it.page } - items.minOf { it.page } + 1).coerceAtLeast(1)
-        val bySize = headings.groupBy { (it.value as Heading).size.let { s -> Math.round(s * 2f) / 2f } }
-        val level = bySize.keys.sortedDescending().firstOrNull { size ->
-            val n = bySize.getValue(size).size
-            n >= 2 && n <= pages
+        val first = items.first().page
+        val last = items.last().page
+        val pages = (last - first + 1).coerceAtLeast(1)
+        val limit = maxOf(MAX_CHAPTER_PAGES, (pages * MAX_CHAPTER_SHARE).toInt())
+        val levels = headings.map { Math.round((it.value as Heading).size * 2f) / 2f }.distinct().sortedDescending()
+        val found = levels.asSequence().map { level ->
+            headings.filter { (it.value as Heading).size >= level - 0.25f }.map { it.index }
+        }.firstOrNull { starts ->
+            if (starts.size < 2 || starts.size > pages) return@firstOrNull false
+            val bounds = listOf(first) + starts.map { items[it].page } + (last + 1)
+            // One long stretch is allowed (a report's notes): no more than [MAX_OVERLONG_SHARE] of the book over the limit.
+            val spans = bounds.zipWithNext { a, b -> b - a }
+            spans.filter { it > limit }.sum() <= pages * MAX_OVERLONG_SHARE && spans.count { it > limit } <= 1
         } ?: return null
-        val starts = headings.filter { (it.value as Heading).size >= level - 0.25f }.map { it.index }
+        // Heading lines one after another are one title: "Section 1" over "Introduction", a journal's name over three lines.
+        val runs = mutableListOf<MutableList<Int>>()
+        for (i in found) if (runs.lastOrNull()?.last() == i - 1) runs.last() += i else runs += mutableListOf(i)
         val chapters = mutableListOf<Chapter>()
-        opening(items, starts.first())?.let { chapters += it }
-        for ((k, start) in starts.withIndex()) {
-            val end = starts.getOrNull(k + 1) ?: items.size
-            val heading = items[start] as Heading
-            chapters += Chapter(heading.text.trim(), items.subList(start, end), 0, emptyList())
+        opening(items, runs.first().first())?.let { chapters += it }
+        for ((k, run) in runs.withIndex()) {
+            val end = runs.getOrNull(k + 1)?.first() ?: items.size
+            val title = run.map { (items[it] as Heading).text.trim() }.reduce { a, b -> if (LABEL.matches(a)) "$a: $b" else "$a $b" }
+            chapters += Chapter(title, items.subList(run.first(), end), 0, emptyList())
         }
         return chapters
     }

@@ -214,43 +214,61 @@ Two parts, in order: sets first, since they are smaller and shippable alone, the
 
 ### Task 4: Born-digital or scanned (`PdfOrigin`)
 
-- [ ] `PdfOrigin.of(file)`: BORN_DIGITAL, SCAN or IMAGES (Decision 6), from the fonts, text render modes and image coverage of up to 12 pages spread through the file.
-- [ ] Tests on fixtures: an embedded-font page is BORN_DIGITAL; a `GlyphLessFont` invisible text over an image is SCAN; a picture-only page is IMAGES. On the corpus (eval): every born-digital item is BORN_DIGITAL and both scan controls are SCAN.
-- [ ] Commit.
+- [x] `PdfOrigin.of(file)`: BORN_DIGITAL, SCAN or IMAGES (Decision 6), from the fonts, text render modes and image coverage of up to 12 pages spread through the file.
+- [x] Tests on fixtures: an embedded-font page is BORN_DIGITAL; a `GlyphLessFont` invisible text over an image is SCAN; a picture-only page is IMAGES. On the corpus (eval): every born-digital item is BORN_DIGITAL and both scan controls are SCAN.
+- [x] Commit.
 
 ### Task 5: Lines, heads and feet, blocks, verse and prose (converter stages 1–5)
 
-- [ ] The `PDFTextStripper` subclass keeping positions; lines; body style; running heads, feet and page numbers dropped; blocks; verse kept; prose joined with hyphenation; paragraphs across pages; two columns read in order.
-- [ ] One test per rule on `TextPdfFixtures`, including a verse page from the Odyssey's layout (short lines, a centred book heading) and a prose page with a running head, an alternating page head and a folio.
-- [ ] Commit.
+- [x] The `PDFTextStripper` subclass keeping positions; lines; body style; running heads, feet and page numbers dropped; blocks; verse kept; prose joined with hyphenation; paragraphs across pages; two columns read in order.
+- [x] One test per rule on `TextPdfFixtures`, including a verse page from the Odyssey's layout (short lines, a centred book heading) and a prose page with a running head, an alternating page head and a folio.
+- [x] Commit.
 
 ### Task 6: Chapters, pictures, notes, writing the EPUB (stages 6–9)
 
-- [ ] Chapters from the outline with mid-page splits, the heading fallback, the pages fallback; figures with captions; the cover; notes at chapter ends; XHTML and nav; metadata from the sidecar.
-- [ ] Tests:
+- [x] Chapters from the outline with mid-page splits, the heading fallback, the pages fallback; figures with captions; the cover; notes at chapter ends; XHTML and nav; metadata from the sidecar.
+- [x] Tests:
   - outline chapters split at the right line;
   - nested contents;
   - a figure lands between the right paragraphs;
   - footnotes gather under Notes;
   - the EPUB passes `EpubInspector` and opens in Readium in the reader test;
   - Listen's `BookReadSource` reads it.
-- [ ] Commit.
+- [x] Commit.
 
 ### Task 7: The quality gate and the eval
 
-- [ ] Gate thresholds from the stage metrics (Decision 8), tuned on the corpus: a book passes when its text kept, paragraph lengths and chapters look like a book. A complex layout passes only with good numbers everywhere else.
+- [x] Gate thresholds from the stage metrics (Decision 8), tuned on the corpus: a book passes when its text kept, paragraph lengths and chapters look like a book. A complex layout passes only with good numbers everywhere else.
 - [ ] `tools/pdf-eval` writes the report. Neal reads it for a dozen books before anything ships: the Odyssey, the novel, the textbook, the two-column paper and the picture book at least.
-- [ ] Target: at least 80% of the born-digital corpus passes and reads well in the report; every failure fails the gate (it is filed as a PDF), never a bad ebook.
-- [ ] Commit with the report's numbers in the message.
+- [x] Target: at least 80% of the born-digital corpus passes and reads well in the report; every failure fails the gate (it is filed as a PDF), never a bad ebook.
+- [x] Commit with the report's numbers in the message.
 
 ### Task 8: Wiring it in
 
-- [ ] `choose()` offers `PDF_TEXT` for an uploaded born-digital PDF. This can only be confirmed after the download, so the offer says "PDF, read as an ebook when it can be"; `PdfOrigin` decides at filing time.
-- [ ] `addDownloaded` converts and files the EPUB (or the PDF on a gate failure). `refresh()` converts strays. `remove()` takes both.
-- [ ] Original pages in the reader's ⋯ (Decision 7), opening the PDF at the chapter's first page; Remove original pages · size there and in the book's details, which deletes the PDF and keeps the ebook (the source no longer counts as unconverted on `refresh()`).
-- [ ] Read as ebook on text PDFs already in the Library, archive.org's and imports alike (Decisions 6 and 9), with the gate deciding as on arrival.
-- [ ] Tests: `BookshelfTest` (a born-digital PDF becomes an EPUB with the PDF beside it; a scan stays a PDF; a gate failure stays a PDF; Remove original pages deletes the PDF and a refresh doesn't convert again; Read as ebook on an import); `EbookReaderViewModelTest` (Original pages opens the PDF at the chapter's page).
-- [ ] Commit.
+- [x] `choose()` offers `PDF_TEXT` for an uploaded born-digital PDF. This can only be confirmed after the download, so the offer says "PDF, read as an ebook when it can be"; `PdfOrigin` decides at filing time.
+- [x] `addDownloaded` converts and files the EPUB (or the PDF on a gate failure). `refresh()` converts strays. `remove()` takes both.
+- [x] Original pages in the reader's ⋯ (Decision 7), opening the PDF at the chapter's first page; Remove original pages · size there and in the book's details, which deletes the PDF and keeps the ebook (the source no longer counts as unconverted on `refresh()`).
+- [x] Read as ebook on text PDFs already in the Library, archive.org's and imports alike (Decisions 6 and 9), with the gate deciding as on arrival.
+- [x] Tests: `BookshelfTest` (a born-digital PDF becomes an EPUB with the PDF beside it; a scan stays a PDF; a gate failure stays a PDF; Remove original pages deletes the PDF and a refresh doesn't convert again; Read as ebook on an import); `EbookReaderViewModelTest` (Original pages opens the PDF at the chapter's page).
+- [x] Commit.
+
+**Eval, 2026-10-30** (`tools/pdf-eval/corpus.tsv`, 25 archive.org PDFs; `PdfToEpubEval`):
+- 18 of 20 born-digital PDFs pass the gate and read as books on inspection. The two refusals are right: Eastern Standard Tribe's text layer is garbled (63% of words run together), and Euclid's Elements is mostly diagrams and formulas (median paragraph 27 characters).
+- All 5 controls stay pages: 2 scans, 1 image-only PDF, 2 picture books.
+- 4.2 s at most per book on the Mac.
+- Fixed along the way:
+  - verse told by early line breaks, with neighbours deciding borderline blocks;
+  - margin line numbers;
+  - gutters as empty vertical strips (narrow gutters, columns whose baselines differ);
+  - landscape spreads and booklet impositions split into their printed pages and put in order by page number (Pride and Prejudice is imposed 14/3, 16/1…);
+  - quarter-turned pages;
+  - footnotes only under body text (not a book's endnotes);
+  - the outline level with no over-long chapter;
+  - outlines whose entries all point at one page placed by title;
+  - heading lines merged into one title;
+  - the run-together gate;
+  - ligatures.
+- Left as they are: cookbook and journal layouts pass but read rougher; some tables come out as lines; IPCC's missing "fi" glyphs are the PDF's own.
 
 ### Task 9: Walkthrough on the Pixel (say on the channel first)
 

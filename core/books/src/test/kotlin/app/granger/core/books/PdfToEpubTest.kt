@@ -213,5 +213,8 @@ class PdfToEpubTest {
         assertThat(PdfToEpub.gate(ok.copy(complexPages = 30))).contains("tables or three columns")
         assertThat(PdfToEpub.gate(ok.copy(medianParagraphChars = 20))).contains("too short")
         assertThat(PdfToEpub.gate(ok.copy(keptChars = 300, sourceChars = 300))).contains("too little text")
+        assertThat(PdfToEpub.gate(ok.copy(runTogether = 0.3f))).contains("run together")
+        assertThat(PdfToEpub.runTogether("Alarwtyseertafnoladleadrmupthhaitsw and some words https://example.com/averyveryverylongaddress"))
+            .isWithin(0.001f).of(1f / 5f)
     }
 }

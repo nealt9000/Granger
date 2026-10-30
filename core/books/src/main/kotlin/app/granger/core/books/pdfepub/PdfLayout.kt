@@ -231,8 +231,11 @@ internal object PdfLayout {
                 Kind.HEADING -> {
                     flush()
                     val run = mutableListOf(line)
+                    // Lines of one heading: the same size, close below (a chapter's number on a line of its own
+                    // above its title, "1" over "“WE HAVE SOME PLANES”", is further).
                     while (i + 1 < classed.size && classed[i + 1].kind == Kind.HEADING &&
-                        abs(classed[i + 1].line.size - line.size) < 0.6f && classed[i + 1].line.y - run.last().y < leading * 2.2f
+                        abs(classed[i + 1].line.size - line.size) < 0.6f &&
+                        classed[i + 1].line.y - run.last().y < leading * (if (run.size == 1 && isNumber(run[0].text)) 4.5f else 2.2f)
                     ) run += classed[++i].line
                     place(Placed(Heading(page.index, joinLines(run), line.size, startsPage = line === first, y = line.y)))
                 }
@@ -258,6 +261,8 @@ internal object PdfLayout {
         pictures.forEach { place(Placed(Picture(page.index, it))) }
     }
 
+    private fun isNumber(text: String) = text.trim().let { it.isNotEmpty() && it.length <= 6 && PAGE_NUMBER.matches(it) }
+
     /** Where a column's lines start and end: the commonest start, and the right edge most lines reach. */
     private class Margin(val left: Float, val right: Float) {
         val width: Float get() = (right - left).coerceAtLeast(1f)
@@ -266,7 +271,9 @@ internal object PdfLayout {
     private fun margin(lines: List<TextLine>): Margin {
         if (lines.isEmpty()) return Margin(0f, 1f)
         val left = lines.groupingBy { it.x.roundToInt() }.eachCount().maxByOrNull { it.value }!!.key.toFloat()
-        return Margin(left, lines.maxOf { it.right })
+        // The right edge most lines reach: the odd overlong line (a long web address) doesn't move it.
+        val rights = lines.map { it.right }.sorted()
+        return Margin(left, rights[minOf(rights.size - 1, (rights.size * 19) / 20)])
     }
 
     /**
@@ -278,7 +285,7 @@ internal object PdfLayout {
             var k = i + step
             while (k in slots.indices) {
                 val b = slots[k].block
-                if (b != null && kotlin.math.abs(b.page - page) > 2) return null
+                if (b != null && kotlin.math.abs(b.page - page) > 1) return null
                 if (b != null && b.shape != Shape.MAYBE) return b.shape
                 k += step
             }
@@ -325,12 +332,13 @@ internal object PdfLayout {
     private fun shape(lines: List<TextLine>, left: Float, right: Float): Shape {
         val edge = maxOf(right, lines.maxOf { it.right })
         val width = (edge - left).coerceAtLeast(1f)
-        var early = 0
-        for (i in 0 until lines.size - 1) {
+        // Lines that end a sentence say nothing: a paragraph's last line stops short in prose too.
+        val open = (0 until lines.size - 1).filter { !TERMINAL.containsMatchIn(lines[it].text.trimEnd()) }
+        val early = open.count { i ->
             val line = lines[i]
             val advance = (line.right - line.x) / line.text.length.coerceAtLeast(1)
             val nextWord = lines[i + 1].text.trimStart().takeWhile { !it.isWhitespace() }.length * advance
-            if (edge - line.right > nextWord + advance) early++
+            edge - line.right > nextWord + advance * 2f
         }
         val atMargin = lines.count { it.right >= edge - width * 0.015f }
         val hyphens = lines.count { it.text.trimEnd().endsWith("-") }
@@ -338,7 +346,7 @@ internal object PdfLayout {
         val verseLike = lines.size >= 2 && atMargin * 10 < lines.size * 4 && hyphens * 10 < lines.size && commonStart * 10 >= lines.size * 6
         return when {
             !verseLike -> Shape.PROSE
-            lines.size >= 3 && early * 2 >= lines.size - 1 -> Shape.VERSE
+            lines.size >= 5 && open.size >= 3 && early * 10 >= open.size * 7 && atMargin * 10 < lines.size * 3 -> Shape.VERSE
             else -> Shape.MAYBE
         }
     }

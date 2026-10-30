@@ -48,6 +48,8 @@ object PdfToEpub {
         val complexPages: Int,
         val passes: Boolean,
         val why: String,
+        /** The share of words of 20 or more letters (web addresses aside): words run together, text that came out garbled. */
+        val runTogether: Float = 0f,
     ) {
         val keptShare: Float get() = if (sourceChars == 0) 0f else keptChars.toFloat() / sourceChars
     }
@@ -83,9 +85,12 @@ object PdfToEpub {
     private fun convert(
         doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String, origin: PdfOrigin, scratch: File,
     ): Report {
-        val pages = (0 until doc.numberOfPages).map { PdfPages.read(doc, it, scratch) }
+        val pages = PdfPages.readAll(doc, scratch)
         val layout = PdfLayout.build(pages)
-        val outline = try { PdfInspector.outline(doc) } catch (_: IOException) { emptyList() }
+        // The outline counts PDF pages; a spread is two of the book's, so its entries go to the first of them.
+        val firstOf = pages.groupBy { it.pdfPage }.mapValues { (_, ps) -> ps.minOf { it.index } }
+        val outline = (try { PdfInspector.outline(doc) } catch (_: IOException) { emptyList() })
+            .mapNotNull { e -> firstOf[e.page - 1]?.let { e.copy(page = it + 1) } }
         val (chapters, source) = PdfChapters.split(layout.items, outline, pages.size)
         val info = doc.documentInformation
         val bookTitle = title.ifBlank { info.title?.trim().orEmpty() }.ifBlank { pdf.nameWithoutExtension }
@@ -122,6 +127,7 @@ object PdfToEpub {
             complexPages = layout.complexPages,
             passes = false,
             why = "",
+            runTogether = runTogether(items.joinToString(" ") { textOf(it) }),
         )
         val verdict = gate(report)
         val final = report.copy(passes = verdict == null, why = verdict ?: "passes")
@@ -150,11 +156,27 @@ object PdfToEpub {
         r.keptChars < 500 -> "too little text (${r.keptChars} characters)"
         r.keptShare < 0.92f -> "kept only ${(r.keptShare * 100).toInt()}% of the text"
         r.keptShare > 1.08f -> "text came out ${(r.keptShare * 100).toInt()}% of the source"
+        r.runTogether > 0.02f -> "${(r.runTogether * 100).toInt()}% of the words run together"
         r.complexPages * 5 > r.pages -> "${r.complexPages} of ${r.pages} pages have tables or three columns"
         r.paragraphs >= 20 && r.medianParagraphChars < 40 -> "paragraphs too short (median ${r.medianParagraphChars} characters)"
         r.paragraphs >= 5 && r.medianParagraphChars > 6000 -> "paragraphs too long (median ${r.medianParagraphChars} characters)"
         r.chapters == 0 -> "no chapters"
         else -> null
+    }
+
+    private val WORD = Regex("\\S+")
+    private val ADDRESS = Regex("https?:|www\\.|[/@_]|\\.(com|org|net)\\b")
+
+    /** The share of [text]'s words with 20 or more letters, web addresses aside. */
+    internal fun runTogether(text: String): Float {
+        var words = 0
+        var long = 0
+        for (m in WORD.findAll(text)) {
+            words++
+            val w = m.value
+            if (w.count { it.isLetterOrDigit() } >= 20 && !ADDRESS.containsMatchIn(w)) long++
+        }
+        return if (words == 0) 0f else long.toFloat() / words
     }
 
     private fun failed(why: String, origin: PdfOrigin = PdfOrigin.UNKNOWN, pages: Int = 0) =
