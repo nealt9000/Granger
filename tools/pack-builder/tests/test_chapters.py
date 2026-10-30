@@ -135,4 +135,5 @@ def test_spanish_clean_title_translates_the_titles_split_makes_up():
     assert clean_title("Front matter", "X", "", 0, "es") == "Preliminares"
     assert clean_title("Part 2", "X", "", 1, "es") == "Parte 2"
     assert clean_title("Capítulo I (part 3)", "X", "", 1, "es") == "Capítulo I (parte 3)"
+    assert clean_title("Front matter (part 2)", "X", "", 1, "es") == "Preliminares (parte 2)"
     assert clean_title("Front matter", "X", "", 0) == "Front matter"

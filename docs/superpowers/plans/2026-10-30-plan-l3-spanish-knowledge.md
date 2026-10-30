@@ -157,7 +157,7 @@ A domain with no list for a language is empty in that language.
 
 **Files:** `tools/pack-builder/classics/manifest_es.json`, plus `manifest.py`, `pack_builder.py`, `epubpack.py`, `zimpack.py`, `chapters.py` and their tests. Research §5.5 lists every place.
 
-- [ ] **Step 1: Builder changes** (research §5.5 table):
+- [x] **Step 1: Builder changes** (research §5.5 table):
   - The language check reads `m.language`, so `en,es` readers pass.
   - Spanish stop words.
   - The manifest reads `collection`, `bookIdPrefix`, section `domain` and `learner`.
@@ -167,12 +167,12 @@ A domain with no list for a language is empty in that language.
   - `clean_title` handles "por …", "Índice" and "Capítulo" on real PG HTML.
   - `catalog_gen.BOOK_DOMAINS` is keyed by section id plus the manifest's `domain`, so Spanish *thought* gets its books.
   - English output must be byte-identical. Rebuild three English books and compare their sha256.
-- [ ] **Step 2: The rights rule** (Neal's call 4):
+- [x] **Step 2: The rights rule** (Neal's call 4):
   - Each work records `died` for every named author, translator and editor, with a `diedSource` (Wikipedia or a national library page).
   - `validate()` fails on any death after 1945 (`PD_DEATH_LINE`, the year Spain's life + 80 leaves free in 2026), on an unknown death year for a named person, and on a `published` (the translation's own first year for translations) after 1930.
   - Anonymous and pre-1800 works pass with `"died": null` and a note.
   - The research's §5.2 eight authors are out. So is anyone else the check finds (for example the translator Ramón D. Perés, d. 1956, and any school-edition editor who died after 1945). List them in the commit.
-- [ ] **Step 3: The manifest.** Write `manifest_es.json` from research §5.3 and the appendix:
+- [x] **Step 3: The manifest.** Write `manifest_es.json` from research §5.3 and the appendix:
   - ten sections with their domains;
   - the twenty learner picks marked;
   - `$b` dropped from titles;
@@ -180,9 +180,105 @@ A domain with no list for a language is empty in that language.
   - the translators' years checked (research §5.2).
 
   Expect about 220–230 works once the rule is applied.
-- [ ] **Step 4: Build** the EPUBs and the release descriptor, `releases/clasicos_granger_es_books.json` (collection `clasicos-granger`, about 65 MB). Open five EPUBs in the reader's test harness (or `epubcheck` if it's installed) and check: one learner reader, one verse, one play, one multi-volume, one translation.
+- [x] **Step 4: Build** the EPUBs and the release descriptor, `releases/clasicos_granger_es_books.json` (collection `clasicos-granger`, about 65 MB). Open five EPUBs in the reader's test harness (or `epubcheck` if it's installed) and check: one learner reader, one verse, one play, one multi-volume, one translation.
 - [ ] **Step 5: Upload (waits for Neal).** Create the GitHub release `clasicos-es-YYYY-MM-DD` and add a `curated.json` `books` row with `"license": "Public domain (US)"`. Then restore `@clasicos-granger` in Task 3's lists.
-- [ ] **Step 6:** Commit "L3: Clásicos Granger".
+- [x] **Step 6:** Commit "L3: Clásicos Granger".
+
+### Task 4 results (2026-10-30, branch `l3-clasicos`)
+
+Steps 1–4 and 6 are done; Step 5 (the release upload) waits for Neal. The manifest is `tools/pack-builder/classics/manifest_es.json` and the descriptor is `tools/pack-builder/releases/clasicos_granger_es_books.json`: **185 books, 46.3 MB**, release date 2026-10-30. Its URLs point at the `clasicos-es-2026-10-30` release, which doesn't exist yet.
+
+**The rights rule as applied.** Every named author, translator and editor has a `died` year and a `diedSource` (Wikidata, Wikipedia or a Library of Congress authority record). An editor here is anyone whose words are in the book: editors, prologue and introduction writers, annotators, commentators, compilers, and vocabulary makers. That includes people named only on the book's title page, not in Gutenberg's metadata. Illustrators don't count, because the EPUBs carry no images. 185 of the 244 proposed works pass. The plan's estimate of 220–230 was too high: the research checked authors and translators but not the editors and prologue writers on the title pages. Many American school editions also fail because their editors' death years can't be found.
+
+**Works kept per section:** lecturas 5, infantil 8, cuentos 26, poesía 17, teatro 14, novelas 43, universales 34, ensayo 15, historia 21, escritura 2. That makes 147 books in *literature* and 38 in *thought*.
+
+**Learner picks kept (11 of 20):** #15353 *A First Spanish Reader*, #11047 *Libro segundo de lectura*, #10814 Bécquer *Legends, Tales and Poems*, #14235 *Más vale maña que fuerza*, #55206 Samaniego *Fábulas*, #29497 Iriarte *Fábulas literarias*, #19898 *La Edad de Oro*, #36558 *Ratón Pérez*, #73486 *Corazón*, #55514 *Cuentos de amor*, #17340 *Marianela*. Lost: #36805, #22065, #24250, #39647, #33406, #15532, #29731, #16109 and #9980 (reasons below).
+
+**Judgment calls for Neal to check:**
+- #66337–66340 Ovid *Metamorfóseos* (Crivell, Imprenta Real 1805–1819). Wikidata gives Crivell's death only to the century: the 19th. The manifest records 1900 as an upper bound. Strictly, "unknown year = out" would drop these four.
+- #64775 *Los Lusíadas*: the translator Gómez de Tapia's death year is unknown, but the work dates from 1580, so the pre-1800 rule applies.
+- #15353 *A First Spanish Reader* prints the Guatemalan anthem's words under the composer's name, Rafael Álvarez (d. 1946). The words are by José Joaquín Palma (d. 1911), and the music isn't reproduced. The book is kept.
+- #73486 *Corazón*, #24823 *Silas Marner*, #24801 *El prisionero de Zenda*, #74029 Dumas and #67961 *El arte de amar* are anonymous translations. Each is dated by its own edition (1925, 1919, 1909, 1912 and 1821), so `published` is that edition's year.
+- #5881 holds only the Epistle to the Romans, although Gutenberg catalogues it as the 1909 Reina-Valera New Testament. It's listed as *Epístola de San Pablo a los romanos*. Its opening note is by an anonymous modern web transcriber.
+- Some editions are later printings of earlier editions: #29506 (Bourland's 1907 edition, printed in 1934) and #16625 (Cejador's 1913 edition, printed in 1931). Gutenberg marks both public domain in the USA, and the editor of each died before the reprint.
+
+**Excluded (59):**
+- #36805 *Spanish Tales for Beginners* (`lecturas`, learner): contributor Louise Reinhardt (b. 1866): death year not found (LoC no97020669 gives none).
+- #22065 *An Elementary Spanish Reader* (`lecturas`, learner): author Earl Stanley Harrison (b. 1871): death year not found.
+- #39647 *The Spanish American Reader* (`lecturas`, learner): author Ernesto Nelson: death year not found (LoC nr94034672 gives none).
+- #24250 *Lecturas fáciles con ejercicios* (`lecturas`, learner): author Max A. Luria died 1966 (LoC no2013030201); co-author Lawrence A. Wilkins's death year not found.
+- #33406 *Spanish short stories* (`lecturas`, learner): co-editor Louise Reinhardt: death year not found.
+- #63464 *Nuestra Pampa; libro de lectura* (`lecturas`): author W. Jaime Molins died 1965.
+- #16059 *Modern Spanish Lyrics* (`lecturas`): co-editor S. Griswold Morley died 1970.
+- #15532 *Novelas Cortas* (`lecturas`, learner): editor William F. Giese (b. 1864): death year not found (LoC no91028075 gives none).
+- #29731 *El Capitán Veneno* (`lecturas`, learner): editor Percy Bentley Burnet: death year not found on Wikipedia, Wikidata or LoC.
+- #15725 *Doña Perfecta* (`lecturas`): vocabulary by Steven T. Byington, died 1957.
+- #24917 *Mariucha* (`lecturas`): editor S. Griswold Morley died 1970.
+- #28106 *Tres Comedias* (`lecturas`): author Jacinto Benavente died 1954; editor John Van Horne died 1959.
+- #16109 *Doña Clarines y Mañana de Sol* (`lecturas`, learner): editor S. Griswold Morley died 1970.
+- #15781 *El Estudiante de Salamanca and Other Selections* (`lecturas`): editor George Tyler Northup died 1964.
+- #38124 *Spanish Composition* (`lecturas`): author Edith J. Broomhall: death year not found on Wikipedia, Wikidata or LoC.
+- #64058 *Fábulas y cuentos en verso* (`infantil`): compiler María Goyri died 1954; series director Ramón Menéndez Pidal died 1968.
+- #9980 *Platero y yo* (`infantil`, learner): author Juan Ramón Jiménez died 1958; Federico de Onís (introduction) died 1966.
+- #55215 *Cuando la tierra era niña* (`infantil`): translator Gregorio Martínez Sierra died 1947.
+- #69552 *El libro de las tierras vírgenes* (`infantil`): translator Ramón D. Perés died 1956.
+- #65738 *El conde Lucanor* (`cuentos`): prologue and notes by F. J. Sánchez Cantón, died 1971.
+- #40827 *La voz de la conseja, t.1* (`cuentos`): includes Pío Baroja (d. 1956), Jacinto Benavente (d. 1954), Pedro Mata (d. 1946) and Pedro de Répide (d. 1948); compiler Emilio Carrere died 1947.
+- #30053 *Los Puritanos, y otros cuentos* (`cuentos`): editor W. T. Faulkner: death year not found.
+- #10825 *La Navidad en las Montañas* (`cuentos`): editors Edith A. Hill and Mary Joy Lombard: death years not found.
+- #58103 *20 poemas para ser leídos en el tranvía* (`poesia`): author Oliverio Girondo died 1967.
+- #68131 *Obras* (`poesia`): editor Tomás Navarro Tomás died 1979.
+- #60198 *Fuente Ovejuna* (`teatro`): edition revised by Américo Castro, died 1972.
+- #23206 *La moza de cántaro* (`teatro`): editor Madison Stathers (b. 1877): death year not found.
+- #28408 *Comedias* (`teatro`): editor and commentator Justo Gómez Ocerín died 1968.
+- #28002 *Electra* (`teatro`): editor Otis Gridley Bunnell: death year not found on Wikipedia, Wikidata or LoC.
+- #29677 *El trovador* (`teatro`): editor Herbert Hunter Vaughan died 1948.
+- #10909 *Los Amantes de Teruel* (`teatro`): editor George Wallace Umphrey died 1950 (LoC no98084301).
+- #57590 *La verdad sospechosa* (`teatro`): preliminary notes by Julio Jiménez Rueda, died 1960.
+- #18580 *Los favores del mundo* (`teatro`): edition by Pedro Henríquez Ureña, died 1946.
+- #58194 *Tirso de Molina* (`teatro`): selection by Samuel Gili Gaya (d. 1976); series director Ramón Menéndez Pidal (d. 1968).
+- #76410 *La Malquerida* (`teatro`): author Jacinto Benavente died 1954.
+- #16484 *Juanita La Larga* (`novelas`): modern edition with a prologue by Paulino Garagorri (d. 2007), printed 1982–83.
+- #27738 *José* (`novelas`): editor F. J. A. Davidson died 1946 (LoC no2017053727); vocabulary by Alice P. F. Hubbard, death year not found.
+- #60464 *El árbol de la ciencia* (`novelas`): author Pío Baroja died 1956.
+- #13264 *Zalacaín El Aventurero* (`novelas`): author Pío Baroja died 1956.
+- #12848 *Las inquietudes de Shanti Andia* (`novelas`): author Pío Baroja died 1956.
+- #43432 *La busca* (`novelas`): author Pío Baroja died 1956.
+- #43017 *Mala Hierba* (`novelas`): author Pío Baroja died 1956.
+- #40544 *Aurora roja* (`novelas`): author Pío Baroja died 1956.
+- #75126 *Sab (novela original)* (`novelas`): introduction by Hugo D. Barbagelata (Paris, 1920), died 1971.
+- #29920 *La gloria de don Ramiro* (`novelas`): author Enrique Larreta died 1961.
+- #18166 *Amistad funesta* (`novelas`): includes essays on Martí by Miguel Tedín and Román Vélez, whose death years were not found.
+- #16082 *Angelina* (`novelas`): preliminary study by Ventura García Calderón, died 1959.
+- #26545 *Antonio Azorín* (`novelas`): author Azorín died 1967.
+- #63509 *Edipo rey; Edipo en Colona; Antígona* (`universales`): translator José Pérez Bojart: death year not found.
+- #66023 *Tragedias* (`universales`): editor Julio Torri died 1970.
+- #61851 *El crimen y el castigo* (`universales`): translator Pedro Pedraza y Páez (b. 1877): death year not found (Wikidata gives only the 20th century); translation year unknown.
+- #75739 *Los miserables, tomo 1* (`universales`): translator "J. A. R." unidentified, so no death year.
+- #78068 *Los miserables, tomo 2* (`universales`): translator "J. A. R." unidentified, so no death year.
+- #61887 *Una historia de dos ciudades* (`universales`): translator Gregorio Lafuerza: death year not found; translation year unknown.
+- #7109 *Candido, o El Optimismo* (`universales`): anonymous translation whose year can't be established.
+- #25807 *Poemas* (`universales`): translator Alberto Lasplaces died 1950.
+- #57448 *Meditaciones del Quijote* (`ensayo`): author José Ortega y Gasset died 1955.
+- #43861 *Granos de oro* (`ensayo`): editor Rafael G. Argilagos died 1967.
+- #33267 *Facundo* (`ensayo`): preliminary notice by Ricardo Rojas, died 1957.
+
+**Corrections to the research:**
+- The 244-work proposal checked only Gutenberg's author and translator fields. Ten books' title pages name editors or prologue writers who fail the rule: Sánchez Cantón, Américo Castro, Jiménez Rueda, Henríquez Ureña, Garagorri, Barbagelata, Ricardo Rojas, García Calderón, Tedín and Román Vélez, and Hill and Lombard. Gutenberg's own editor fields name more: Gómez Ocerín, Gili Gaya, Navarro Tomás, Torri, Morley, Northup, Van Horne, Umphrey, Vaughan, Davidson, Byington and Goyri.
+- The §5.2 list was incomplete. Besides its eight authors and Perés, the following also fail: Molins (d. 1965), Argilagos (d. 1967), Lasplaces (d. 1950, Poe *Poemas*), Carrere, Mata and Répide (*La voz de la conseja*), and Luria (d. 1966).
+- Of the §5.2 translator years: Pedraza y Páez has no death year (out); Lasplaces died 1950 (out); Martínez Sierra died 1947 (out); Azaña's *La Biblia en España* is 1921 (kept).
+- #5881 isn't a New Testament; see above.
+- #61887 Dickens and #61851 Dostoyevsky are undated Sopena editions with translators whose death years can't be found.
+- `language` is `spa` (ISO 639-3, like English's `eng`), not `es`. The builder maps it to `es` for EPUBs, descriptors and the Gutenberg check.
+
+**Five EPUBs checked** (all 185 pass `epubcheck` 5 with no errors or warnings):
+- *Marianela*, the learner reader: Spanish metadata, "Índice" nav, 23 pages from "Preliminares" to "-XXII- Adiós".
+- *El gaucho Martín Fierro*, the verse: line breaks are kept stanza by stanza. The source has no headings, so the book is one 76 KB page.
+- *El sí de las niñas*, the play: pages for Personas and Actos I–III.
+- *Historia de las Indias*, tomo 1 de 5, a multi-volume set: 87 pages by chapter.
+- *La Odisea* (Segalá), a translation: the translator is listed as an OPF contributor, with a page per canto.
+
+None of the five mentions Gutenberg.
 
 ## Task 5: The app reads languages (`core/catalog`)
 

@@ -75,8 +75,7 @@ def _translate_made_up(segment: str, words: dict) -> str:
     """The titles `split` invents ("Front matter", "Part 2", "… (part 2)") in the book's language."""
     if words is TITLE_WORDS["en"]:
         return segment
-    if segment == "Front matter":
-        return words["front"]
+    segment = re.sub(r"^Front matter\b", words["front"], segment)
     segment = re.sub(r"^Part (\d+)$", rf"{words['part']} \1", segment)
     return re.sub(r" \(part (\d+)\)$", rf" ({words['part'].lower()} \1)", segment)
 
