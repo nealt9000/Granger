@@ -38,6 +38,26 @@ class BookIndexTest {
     private suspend fun addPdf(ref: String, file: File): Book =
         shelf.addDownloaded(file, BookOrigin.ARCHIVE_ORG, ref)!!
 
+    @Test fun aGutenbergBookIsIndexedOnlyOnceItsBeenCopiedOut() = test {
+        val archive = GutenbergFixtures.archive(tmp.newFolder("src"))
+        val pack = GutenbergFixtures.pack(archive).also { db.packDao().upsert(it) }
+        val gutenberg = GutenbergBooks(db, { archive.takeIf { _ -> it == pack.id } }, { File(booksDir, "gutenberg") }, File(tmp.root, "covers"), dispatcher)
+        gutenberg.sync(listOf(pack))
+        index.indexPending()
+        assertThat(index.search("Gutenberg number")).isEmpty()
+        assertThat(db.bookDao().byOrigin(BookOrigin.GUTENBERG).map { it.indexedAt }.distinct()).containsExactly(null)
+
+        val irish = db.bookDao().get(BookIds.of(BookOrigin.GUTENBERG, "43349"))!!
+        assertThat(gutenberg.restore(irish)).isTrue()
+        index.indexPending()
+        val hit = index.search("Gutenberg number 43349").single()
+        assertThat(hit.bookId).isEqualTo(irish.id)
+        assertThat(hit.bookTitle).isEqualTo("An Irishman's Difficulties with the Dutch Language")
+        assertThat(db.bookDao().get(irish.id)!!.indexedAt).isEqualTo(5L)
+        // The rest are still waiting for their first open.
+        assertThat(db.bookDao().byOrigin(BookOrigin.GUTENBERG).count { it.indexedAt == null }).isEqualTo(3)
+    }
+
     @Test fun aPdfIsIndexedByPage() = test {
         val water = addPdf("water", PdfFixtures.text(File(booksDir, "archive-org"), "water.pdf"))
         index.indexPending()
