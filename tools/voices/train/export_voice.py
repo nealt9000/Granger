@@ -16,7 +16,8 @@ Writes `<out>/vits-piper-<name>/` with what `SherpaVoice.detect` and `pack_voice
 - `tokens.txt`: `<phoneme> <id>` from the config's `phoneme_id_map`, as sherpa-onnx's Piper conversion writes it,
   single-codepoint phonemes only (sherpa-onnx rejects the file otherwise).
 - `espeak-ng-data/`: copied from sherpa's ljspeech voice (`<base>/sherpa/…`).
-- `MODEL_CARD`: what it was trained from and under which licences (Decision 3).
+- `MODEL_CARD`: what it was trained from and under which licences (Decision 3); `--teacher <voice>` writes V4's card
+  (synthetic speech from Granger's Qwen3-TTS voice, the texts' sources) instead of V3's LibriTTS-R readers one.
 
 `--keep N` exports only speakers 0..N-1 (round 2 trains 42 readers to ship 2): the speaker embedding is cut to its
 first N rows and the config's `speaker_id_map` to those ids. Nothing else in the network depends on the count.
@@ -120,6 +121,33 @@ def add_metadata(target, config):
     return meta
 
 
+TEACHER_CARD = """# Model card for {name}
+
+* Language: en_GB (English, British; espeak-ng `{espeak}`)
+* Speakers: {speakers}
+* Quality: medium
+* Samplerate: 22,050Hz
+
+## Dataset
+
+Synthetic speech: Granger's own voice `{teacher_voice}`, designed for Granger with Qwen3-TTS
+(https://huggingface.co/Qwen, Apache-2.0) in audio.cpp and read by its 12Hz-1.7B clone model. No real person's voice
+was cloned. The lines it read:
+
+* LibriTTS-R's normalized sentences (https://www.openslr.org/141/; public-domain books), text only, CC BY 4.0
+  (https://creativecommons.org/licenses/by/4.0/): Koizumi et al., 2023
+* Public-domain books from Project Gutenberg (https://www.gutenberg.org)
+* Lines written for Granger
+
+## Training
+
+Fine-tuned for Granger from Piper's `en_US-ljspeech-medium` checkpoint (`lj-med_1000.ckpt`, trained from scratch on
+the LJ Speech dataset, public domain) with piper1-gpl's trainer (GPL-3.0), {epochs}. No `lessac` or `libritts_r`
+voice data or weights and no non-commercial model or output were used. The voice is distributed under CC BY 4.0's
+terms, with attribution to LibriTTS-R (Koizumi et al., 2023) for the text.
+"""
+
+
 def write_tokens(config, target):
     """sherpa-onnx refuses a token longer than one codepoint (piper1-gpl's map has diphthongs such as `aɪ` for
     vowel-cluster voices); without vowel clusters training never produces them, so they are left out."""
@@ -142,11 +170,12 @@ def main():
     p.add_argument("--dialogue-speaker", help="the speaker_id_map name that reads quoted speech (V4b: dialogue)")
     p.add_argument("--noise", type=float, help="the voice's noise_scale (V4 British voices: 0.75)")
     p.add_argument("--noise-w", type=float, help="the voice's noise_w (V4 British voices: 1.0)")
+    p.add_argument("--teacher", help="V4: the audio.cpp voice the data was generated with; writes the teacher card")
     a = p.parse_args()
 
     with open(a.config, encoding="utf-8") as f:
         config = json.load(f)
-    if config["espeak"]["voice"] != "en-us":
+    if config["espeak"]["voice"] != "en-us" and not a.teacher:
         print(f"warning: espeak voice is {config['espeak']['voice']!r}, not 'en-us'", file=sys.stderr)
     if any(len(k) > 1 for k in config["phoneme_id_map"]) and config.get("vowel_clusters"):
         raise SystemExit("trained with vowel clusters: sherpa-onnx tokenises per codepoint, so this won't work")
@@ -160,7 +189,7 @@ def main():
         config["num_speakers"] = a.keep
     if renames:
         config["speaker_id_map"] = {renames.get(k, k): v for k, v in config["speaker_id_map"].items()}
-    config["dataset"] = "granger_libritts"
+    config["dataset"] = "granger_" + a.teacher if a.teacher else "granger_libritts"
     if a.dialogue_speaker:
         if a.dialogue_speaker not in config["speaker_id_map"]:
             raise SystemExit(f"no speaker {a.dialogue_speaker!r} in {sorted(config['speaker_id_map'])}")
@@ -189,14 +218,12 @@ def main():
     if others:
         named[-1] += f"; trained alongside {len(others)} more for timing and stress ({', '.join(others)})"
     with open(os.path.join(voice, "MODEL_CARD"), "w", encoding="utf-8") as f:
-        f.write(
-            MODEL_CARD.format(
-                name=a.name,
-                speakers=n_speakers,
-                readers=", ".join(named),
-                epochs=a.epochs or "see tools/voices/train/README.md for the epochs",
-            )
-        )
+        epochs = a.epochs or "see tools/voices/train/README.md for the epochs"
+        if a.teacher:
+            f.write(TEACHER_CARD.format(name=a.name, espeak=config["espeak"]["voice"], speakers=n_speakers,
+                                        teacher_voice=a.teacher, epochs=epochs))
+        else:
+            f.write(MODEL_CARD.format(name=a.name, speakers=n_speakers, readers=", ".join(named), epochs=epochs))
     print(json.dumps(meta), file=sys.stderr)
     print(voice)
 
