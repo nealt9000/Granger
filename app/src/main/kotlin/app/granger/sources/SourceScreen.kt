@@ -440,10 +440,31 @@ private fun FlavouredRow(
         if (row.status != ItemStatus.Installed && !row.switches) {
             CompositionLocalProvider(LocalContentColor provides variant) { ItemStatusText(row.status) }
         }
+        var confirmSwitch by remember(row.id) { mutableStateOf(false) }
         Row(Modifier.fillMaxWidth().testTag(SourceTags.ACTIONS), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-            RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen)
+            RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen, onSwitch = { confirmSwitch = true })
+        }
+        val from = row.flavours.firstOrNull { it.installed }
+        val to = row.flavours.firstOrNull { it.chosen }
+        if (confirmSwitch && from != null && to != null) {
+            SwitchDialog(row.title, from, to, onSwitch = { confirmSwitch = false; onGet() }, onDismiss = { confirmSwitch = false })
         }
     }
+}
+
+/** What Switch says it trades (Plan KB walkthrough 2): "Switch WikiMed from No pictures (1.1 GB) to With pictures (1.9 GB)?…" */
+internal fun switchText(title: String, from: FlavourChoice, to: FlavourChoice): String =
+    "Switch $title from ${from.label} (${formatBytes(from.sizeBytes)}) to ${to.label} (${formatBytes(to.sizeBytes)})? " +
+        "The ${from.label} version is removed once the new one has downloaded. Your places and bookmarks carry over."
+
+@Composable
+internal fun SwitchDialog(title: String, from: FlavourChoice, to: FlavourChoice, onSwitch: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = { Text(switchText(title, from, to)) },
+        confirmButton = { TextButton(onClick = onSwitch) { Text("Switch") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 /** One flavour: a radio row read as "With pictures, 7.0 GB, installed". */
@@ -472,14 +493,30 @@ private fun FlavourOption(flavour: FlavourChoice, onChoose: () -> Unit) {
     }
 }
 
-/** What a row's buttons are for its status: Get, Open, Switch, Update, Cancel, Retry, Remove. */
+/**
+ * What a row's buttons are for its status: Get, Open, Switch, Update, Cancel, Retry, Remove. A pack with a flavour on
+ * the phone offers Switch, enabled once another flavour is chosen and naming it ("Switch to With pictures"); [onSwitch]
+ * asks first.
+ */
 @Composable
-private fun RowActions(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit) {
+private fun RowActions(
+    row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit,
+    onSwitch: () -> Unit = onGet,
+) {
     val opens = row.packId != null
     if (row.switches) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (opens) TextButton(onClick = onOpen) { Text("Open") }
-            TextButton(onClick = onGet) { Text("Switch") }
+            TextButton(onClick = onSwitch) { Text(row.flavours.firstOrNull { it.chosen }?.let { "Switch to ${it.label}" } ?: "Switch") }
+        }
+        return
+    }
+    if (row.status == ItemStatus.Installed && opens && row.flavours.size > 1 && row.flavours.any { it.installed }) {
+        // The flavour on the phone is the one chosen: nothing to switch to yet.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onOpen) { Text("Open") }
+            TextButton(onClick = {}, enabled = false) { Text("Switch") }
+            RemoveMenu(row.title, onRemove)
         }
         return
     }

@@ -742,6 +742,16 @@ class ThemeShots {
         }
     }
 
+    /** Switch says what it trades (Plan KB walkthrough 2). */
+    @Test fun switchFlavour() = shootDialog("switch-flavour") {
+        app.granger.sources.SwitchDialog(
+            "WikiMed",
+            app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
+            app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
+            onSwitch = {}, onDismiss = {},
+        )
+    }
+
     /** "Survivor Library is 220 GB" and Wikipedia's offer of its smaller flavour (Plan KB Decision 9). */
     @Test fun sizeCheck() = shootDialog("size-check") {
         app.granger.sources.SizeCheckDialog(

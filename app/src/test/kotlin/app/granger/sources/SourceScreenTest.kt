@@ -5,6 +5,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.getBoundsInRoot
@@ -70,8 +71,46 @@ class SourceScreenTest {
         compose.onNodeWithContentDescription("No pictures, 2.8 GB, installed").assertIsDisplayed()
         compose.onNodeWithContentDescription("With pictures, 7.0 GB").assertIsSelected()
         compose.onNodeWithText("Open").performClick()
+        // Switch names what it trades, and asks first (Plan KB walkthrough 2).
+        compose.onNodeWithText("Switch to With pictures").performClick()
+        compose.onNodeWithText(
+            "Switch Wikipedia: best articles from No pictures (2.8 GB) to With pictures (7.0 GB)? The No pictures version " +
+                "is removed once the new one has downloaded. Your places and bookmarks carry over.",
+        ).assertIsDisplayed()
+        compose.onNodeWithText("Cancel").performClick()
+        assertThat(calls).containsExactly("open").inOrder()
+        compose.onNodeWithText("Switch to With pictures").performClick()
         compose.onNodeWithText("Switch").performClick()
         assertThat(calls).containsExactly("open", "switch").inOrder()
+        compose.onNodeWithText("Cancel").assertDoesNotExist()
+    }
+
+    /** With the flavour on the phone chosen (where the radio starts), Switch is there but there's nothing to switch to. */
+    @Test fun switchWaitsForAnotherFlavour() {
+        val calls = mutableListOf<String>()
+        compose.setContent {
+            CatalogItemRow(
+                top.copy(
+                    id = "wikipedia_en_top_nopic", status = ItemStatus.Installed,
+                    flavours = flavours.map { it.copy(installed = it.label == "No pictures", chosen = it.label == "No pictures") },
+                    installedFlavour = "no pictures", packId = "u-top",
+                ),
+                onGet = { calls += "get" }, onCancel = {}, onRetry = {}, onRemove = {}, onOpen = { calls += "open" },
+            )
+        }
+        compose.onNodeWithContentDescription("No pictures, 2.8 GB, installed").assertIsSelected()
+        compose.onNodeWithText("Switch").assertIsNotEnabled().performClick()
+        compose.onNodeWithText("Open").performClick()
+        assertThat(calls).containsExactly("open")
+    }
+
+    @Test fun switchTextNamesBothFlavoursAndTheirSizes() {
+        val from = FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true)
+        val to = FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true)
+        assertThat(switchText("WikiMed", from, to)).isEqualTo(
+            "Switch WikiMed from No pictures (1.1 GB) to With pictures (1.9 GB)? The No pictures version is removed once " +
+                "the new one has downloaded. Your places and bookmarks carry over.",
+        )
     }
 
     /** Plan KB walkthrough: at 360 dp the title has its own line, the choices a line each, the actions their own line. */
@@ -96,7 +135,7 @@ class SourceScreenTest {
         // The actions come last, on their own line, and nothing sits beside the title.
         val actions = compose.onNodeWithTag(SourceTags.ACTIONS).getBoundsInRoot()
         assertThat(actions.top).isAtLeast(choices[2].getBoundsInRoot().bottom)
-        assertThat(compose.onNodeWithText("Switch").getBoundsInRoot().top).isAtLeast(actions.top)
+        assertThat(compose.onNodeWithText("Switch to With pictures").getBoundsInRoot().top).isAtLeast(actions.top)
         assertThat(compose.onNodeWithText("Open").getBoundsInRoot().top).isAtLeast(titleBounds.bottom)
         compose.onNodeWithContentDescription("No pictures, 2.8 GB, installed").assertIsDisplayed()
     }

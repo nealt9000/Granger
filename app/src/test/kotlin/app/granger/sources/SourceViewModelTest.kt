@@ -812,6 +812,8 @@ class SourceViewModelTest {
         assertThat(installed.installedFlavour).isEqualTo("no pictures")
         assertThat(installed.switches).isFalse()
         assertThat(installed.status).isEqualTo(ItemStatus.Installed)
+        // The radio starts on the flavour on the phone (Plan KB walkthrough 2), though With pictures is the default.
+        assertThat(installed.flavours.single { it.chosen }.id).isEqualTo("wikipedia_en_medicine_nopic")
         vm.chooseFlavour("wikipedia_en_medicine_maxi")
         testScheduler.advanceUntilIdle()
         val other = vm.ui.value.sections.flatMap { it.rows }.single()
