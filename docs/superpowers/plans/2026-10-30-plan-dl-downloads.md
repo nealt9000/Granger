@@ -14,6 +14,8 @@ Neal, U3c fresh-install walkthrough (2026-10-29): "Homescreen should show ongoin
 - **Control:** Pause all, and "Download next" on any waiting item (Decision 3).
 - **Home:** one live card for every download, not just setup; it turns into "n stopped · Retry" if anything failed (Decision 7).
 
+Neal, 2026-10-30: a fresh install got stuck in "Setting up" at 375 of 376, with one file failing on every Retry. On the phone's `downloads.db` that file is `wikem_en_all_maxi` (WikEM emergency medicine, onboarding group), error "lb.download.kiwix.org answered 404". Kiwix has withdrawn WikEM: neither `_maxi_2026-07` nor `_nopic_2026-07` is on download.kiwix.org or in library.kiwix.org's catalog any more. A check of all 926 Kiwix URLs in the catalog found only those two dead. Decision 10 and Task 0.
+
 **Out of this plan:**
 - Kiwix catalog friendliness and PDF contents-from-text, which get their own session.
 - Per-item progress on Source rows, Voice settings and Ask. They keep working off the same records and get "n ahead of it" only if it falls out cheaply.
@@ -128,10 +130,21 @@ All under `core/downloads/src/main/kotlin/app/granger/core/downloads/` unless no
    - Tapping it opens Downloads (`granger://downloads`, as today).
    - Paused or idle, it's gone.
 
+10. **A file that's gone stops cleanly, and the catalog is checked before it's signed.**
+   - **Catalog:**
+     - `catalog_gen.py check-links` HEADs every download URL, mirrors included, and fails listing the dead ones;
+     - `sign` refuses to run until `check-links` has passed on the same file;
+     - drop both WikEM entries and their preset and domain references, then re-sign. Medicine keeps WikiMed.
+   - **App:**
+     - a 404 or 410 from every mirror is permanent: the record is FAILED at once, with no backoff;
+     - its text reads "Kiwix no longer offers this file", and its action is Remove instead of Retry;
+     - when a newly signed catalog no longer lists an item that's still queued or failed, the item says "No longer in the catalog" and offers Remove;
+     - Home's card counts a round as finished when nothing is waiting or running, so a stopped file shows "1 stopped" instead of "Setting up 375 of 376".
+
 ## Global Constraints
 
 - `./gradlew testDebugUnitTest :core:research:test` stays green after every task, and the count only grows. The baseline is 2464 (30 skipped).
-- One migration (`downloads.db` 3 → 4), with a `DownloadMigrationTest` case. No catalog change.
+- One migration (`downloads.db` 3 → 4), with a `DownloadMigrationTest` case. One catalog change, in Task 0: WikEM removed and the catalog re-signed after `check-links` passes.
 - A `.part` file is never thrown away by pause, Download next, a Wi-Fi switch or a restart. Only Cancel and Remove delete it.
 - Commit after every task with the message given, ending with the Co-Authored-By line.
 - One app on the phone. A true first run (Task 6) needs Neal's OK to uninstall.
@@ -145,8 +158,20 @@ All under `core/downloads/src/main/kotlin/app/granger/core/downloads/` unless no
 - Does a flaky mirror let the queue move on and come back to it, with the attempt count showing?
 - Does a fresh Efficient start land the voice and the Classics first, with Wikipedia Top and the models last?
 - Is the time left steady, rather than jumping about?
+- Does a 404 on every mirror stop at once with Remove offered, and does the round still finish?
 
 ---
+
+### Task 0: Gone files (Decision 10)
+
+- [ ] `catalog_gen.py check-links`, with a test using a fake HTTP server. `sign` requires a passing check.
+- [ ] Remove `wikem_en_all_maxi` and `wikem_en_all_nopic` and every reference to them. Run `check-links`, then re-sign with `~/.config/granger/catalog-signing.key`. Update the tests that name WikEM so they use another pack.
+- [ ] App:
+  - in `FileDownloader`/`DownloadRunner`, treat a 404 or 410 from every mirror as gone: FAILED at once, with the error code `GONE`;
+  - the Downloads row shows "Kiwix no longer offers this file", with Remove;
+  - an item missing from a new catalog says "No longer in the catalog".
+  - Tests in `FileDownloaderTest`, `DownloadRunnerTest` and `DownloadsModelTest`.
+- [ ] **Commit.** `Downloads: a file Kiwix withdrew stops cleanly; catalog: WikEM removed, links checked before signing`
 
 ### Task 1: One queue
 
@@ -228,7 +253,8 @@ All under `core/downloads/src/main/kotlin/app/granger/core/downloads/` unless no
   - Download next on a waiting item;
   - the notification and its Pause;
   - toggling Wi-Fi only;
-  - a stopped item's Retry, and closing Home's stopped card.
+  - a stopped item's Retry, and closing Home's stopped card;
+  - the stuck WikEM record on today's install shows "No longer in the catalog" with Remove, and removing it clears the round.
 - [ ] **With Neal's OK,** a true first run: uninstall, install, and onboard with Efficient.
   - The voice and the Classics should land within minutes.
   - Read-aloud and the Classics should work while the big packs are still coming.
