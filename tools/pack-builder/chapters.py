@@ -93,6 +93,8 @@ def title_case(text: str, first: bool = True) -> tuple[str, bool]:
 
     if not any(c.isalpha() for c in text):
         return text, first
+    if text.strip().lower() in _SMALL_WORDS:  # a heading split over lines: "THE THOUGHTS / OF / MARCUS AURELIUS"
+        return text.lower(), first
     return _WORD.sub(word, text), first
 
 
@@ -234,7 +236,31 @@ def _groups(nodes: list[PageElement], level: int) -> tuple[list[PageElement], li
             groups[-1].nodes.append(node)
         else:
             front.append(node)
+    for before, after in zip(groups, groups[1:]):
+        moved = _trailing_section_heading(before.nodes, level)
+        if moved:
+            del before.nodes[-len(moved):]
+            after.nodes[:0] = moved
     return front, groups
+
+
+def _trailing_section_heading(nodes: list[PageElement], level: int) -> list[PageElement]:
+    """The nodes ending a part that only head what comes next: a higher heading ("The New Testament" between
+    2 Machabees and Matthew) with nothing under it, and the rules and space around it."""
+    higher = [f"h{n}" for n in range(1, level)]
+    tail: list[PageElement] = []
+    for node in reversed(nodes[1:]):
+        if isinstance(node, NavigableString):
+            if node.strip():
+                break
+        elif not _heading_only(_Part("", [node])):
+            break
+        tail.insert(0, node)
+    if not any(isinstance(n, Tag) and (n.name in higher or n.find(higher)) for n in tail):
+        return []
+    while tail and not (isinstance(tail[0], Tag) and (tail[0].name in higher or tail[0].find(higher))):
+        tail.pop(0)  # what stays: the rule or space that closes the part before
+    return tail
 
 
 def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_bytes: int,

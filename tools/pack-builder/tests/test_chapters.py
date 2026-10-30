@@ -256,3 +256,24 @@ def test_title_case_after_initials_keeps_small_words_small():
     from chapters import clean_title
     assert clean_title("THE U.S.A. AND ITS STATES", "X", "", 0) == "The U.S.A. and Its States"
     assert clean_title("BOOK IV. THE ARGUMENT.", "X", "", 0) == "Book IV. The Argument"
+
+
+def test_a_heading_that_is_only_a_small_word_stays_small():
+    from chapters import title_case
+    assert title_case("OF")[0] == "of"                      # "THE THOUGHTS / OF / MARCUS AURELIUS", one h2 each
+    assert title_case(" AND ")[0] == " and "
+    assert title_case("OF MICE")[0] == "Of Mice"
+
+
+def test_a_section_heading_between_two_parts_starts_the_next_one():
+    html = ('<h3>2 MACHABEES</h3><p>the end</p><hr/><div class="chapter"><h2>THE NEW TESTAMENT</h2></div><hr/>'
+            '<h3>MATTHEW</h3><p>the beginning</p><h3>MARK</h3><p>more</p>')
+    first, second, _ = split(body(html), split_at="h3")
+    assert "NEW TESTAMENT" not in first.html and "<hr/>" in first.html
+    assert second.html.lstrip().startswith('<div class="chapter"><h2>THE NEW TESTAMENT')
+
+
+def test_a_heading_at_the_split_level_is_not_carried():
+    html = '<h3>ONE</h3><p>a</p><h4>An aside heading</h4><h3>TWO</h3><p>b</p>'
+    first, second = split(body(html), split_at="h3")
+    assert "An aside heading" in first.html
