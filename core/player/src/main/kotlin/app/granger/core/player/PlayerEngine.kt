@@ -1253,7 +1253,9 @@ class PlayerEngine(
             // First play (or play again after the end): open the engine in turn, then come back here.
             submit {
                 if (voiceEnded && voiceOpen) { voiceFrom = null; voiceOpen = false }
-                if (openVoice()) resume()
+                // A second play queued while the first was opening (Listen tapped twice as the voice loaded) finds it
+                // open: opening again would restart the voice paused under a carrier already playing, and silent.
+                if (voiceOpen || openVoice()) resume()
             }
             return
         }
@@ -1281,6 +1283,8 @@ class PlayerEngine(
             }
         }
         player.play()
+        // The carrier may already have been playing (so no play-when-ready change reaches the listener): the voice plays too.
+        if (mode == Mode.VOICE && voiceOpen) readAloud.play()
         if (musicUnderHeld) musicUnderPlay()                 // paused with the voice: plays again with it
     }
 
