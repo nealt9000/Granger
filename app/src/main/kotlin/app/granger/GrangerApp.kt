@@ -44,6 +44,7 @@ import app.granger.core.speech.SystemSpeech
 import app.granger.core.speech.TextReadSource
 import app.granger.core.speech.VoiceId
 import app.granger.ebook.BookReadSource
+import app.granger.player.PlayerFocus
 import app.granger.reader.ArticleReadSource
 import app.granger.reader.PackDocuments
 import app.granger.settings.SharedVoicePrefs
@@ -190,7 +191,7 @@ open class GrangerApp : Application(), DownloadsHost {
         container.playerHub
         container.phoneMediaScans.start()
         // The home-screen widget follows the player: re-rendered on changes, never on a clock.
-        WidgetUpdater(container.playerHub, container.appScope) { model ->
+        WidgetUpdater(container.playerHub, container.appScope, container.playerFocus) { model ->
             container.widgetModel.value = model
             container.widgetStore.save(model)
             PlayerWidget().updateAll(this)
@@ -373,6 +374,9 @@ class AppContainer(context: Context) {
             true
         }
     }
+
+    /** Which side the mini-player, Listen's card and the widget show while the voice has music under it. */
+    val playerFocus = PlayerFocus()
 
     /** The one way to the players (spec §8); made in [GrangerApp.onCreate], on the main thread. */
     val playerHub: PlayerHub by lazy {

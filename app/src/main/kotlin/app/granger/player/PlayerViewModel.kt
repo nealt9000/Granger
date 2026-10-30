@@ -142,8 +142,14 @@ class PlayerViewModel(
     audiobooks: Flow<Boolean> = flowOf(true),
     /** Keeps the voice picked in Reader as the user's choice (Settings' voice), so the next read uses it too. */
     private val chooseVoice: (VoiceId) -> Unit = {},
+    /** Which side the one-item views show while the voice has music under it; the app's one. */
+    private val focus: PlayerFocus = PlayerFocus(),
 ) : ViewModel() {
     val ui: StateFlow<PlayerUi> = hub.ui
+
+    /** What the mini-player shows: the voice, or the music under it ([PlayerFocus]). */
+    val mini: StateFlow<PlayerUi> = combine(hub.ui, focus.prefersMusic, PlayerUi::oneSide)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, hub.ui.value.oneSide(focus.prefersMusic.value))
     val queue: StateFlow<List<Track>> = hub.queue
 
     /** The phone holds an audiobook; true until the shelves first load, so a saved Audiobook tab doesn't flicker. */
@@ -159,8 +165,21 @@ class PlayerViewModel(
 
     fun selectTab(tab: ListenTab) { _pickedTab.value = tab }
 
-    /** The player opens on what's live (or the tab last used): every way in calls this first. */
-    fun resetTab() { _pickedTab.value = null }
+    /**
+     * The player opens on what's live (or the tab last used): every way in calls this first. With music under the voice
+     * it opens on the side the mini-player shows, and stays there while the two play and pause.
+     */
+    fun resetTab() {
+        val now = hub.ui.value
+        _pickedTab.value = when {
+            now.musicUnder() == null -> null
+            now.showsMusicUnder(focus.prefersMusic.value) -> ListenTab.MEDIA
+            else -> ListenTab.READER
+        }
+    }
+
+    /** The full player is showing [tab]: the mini-player shows that side when the player closes ([PlayerFocus]). */
+    fun shownTab(tab: ListenTab) = focus.shown(tab, hub.ui.value)
 
     /** The tab shown now. */
     fun tab(): ListenTab = listenTab(_pickedTab.value, hub.ui.value.now, hub.saved.value)
@@ -201,8 +220,11 @@ class PlayerViewModel(
 
     fun playPause() = hub.playPause()
 
+    /** The mini-player's play/pause: the side it shows ([mini]). */
+    fun miniPlayPause() = focus.playPause(hub)
+
     /** The mini-player's one secondary button: next track for music, skip back for audiobooks, back a sentence for the voice. */
-    fun secondary() = when (hub.ui.value.now) {
+    fun secondary() = if (focus.drivesMusic(hub.ui.value)) hub.nextMusic() else when (hub.ui.value.now) {
         is NowPlaying.Music -> hub.next()
         is NowPlaying.Book -> hub.skipBack()
         is NowPlaying.Voice -> hub.previousSentence()
