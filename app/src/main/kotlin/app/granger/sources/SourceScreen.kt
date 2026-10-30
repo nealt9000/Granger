@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -230,6 +231,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
                         onRetry = { viewModel.retry(row.id) },
                         onRemove = { confirmRemove = row },
                         onOpen = { row.packId?.let(onOpenPack) },
+                        onChooseFlavour = viewModel::chooseFlavour,
                     )
                     HorizontalDivider()
                 }
@@ -245,6 +247,17 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
                 }
             }
         }
+    }
+
+    ui.sizeCheck?.let { check ->
+        SizeCheckDialog(
+            check,
+            onGet = { id ->
+                beforeDownload()
+                viewModel.confirmGet(id)
+            },
+            onDismiss = viewModel::dismissSizeCheck,
+        )
     }
 
     confirmRemove?.let { row ->
@@ -289,28 +302,91 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
 }
 
 /**
+ * "Survivor Library is 220 GB. You have 41 GB free on Phone." (Plan KB Decision 9): Get, the pack's smaller flavour
+ * where there is one, or Cancel.
+ */
+@Composable
+internal fun SizeCheckDialog(check: SizeCheck, onGet: (itemId: String) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("${check.title} is ${formatBytes(check.sizeBytes)}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("You have ${formatBytes(check.freeBytes)} free on ${check.volumeLabel}.")
+                if (check.sizeBytes > check.freeBytes) Text("That isn't enough room for it.", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        confirmButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                check.smaller?.let { smaller ->
+                    TextButton(onClick = { onGet(smaller.id) }) { Text("Get ${smaller.label.lowercase()}, ${formatBytes(smaller.sizeBytes)}") }
+                }
+                TextButton(onClick = { onGet(check.itemId) }) { Text("Get ${formatBytes(check.sizeBytes)}") }
+                TextButton(onClick = onDismiss) { Text("Cancel") }
+            }
+        },
+    )
+}
+
+/**
  * An installed pack opens here, where it's managed (Plan U3b Decision 3): Open is the row's action and Remove is in its
- * overflow. An installed item the library doesn't hold as a pack (a book, a model) keeps Remove as its action.
+ * overflow. An installed item the library doesn't hold as a pack (a book, a model) keeps Remove as its action. A pack
+ * with flavours offers them as chips, and says which is on the phone (Plan KB Decision 8); a tap on the row shows its
+ * full licence.
  */
 @Composable
 internal fun CatalogItemRow(
     row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit = {},
+    onChooseFlavour: (String) -> Unit = {},
 ) {
     val status = row.status
     val opens = row.packId != null
+    var licenceShown by rememberSaveable(row.id) { mutableStateOf(false) }
     ListItem(
+        modifier = if (row.license.isNotBlank()) Modifier.clickable { licenceShown = !licenceShown } else Modifier,
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
                 if (row.description.isNotBlank()) {
                     Text(row.description, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
+                if (row.flavours.isNotEmpty()) {
+                    FlowRow(Modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        for (flavour in row.flavours) {
+                            FilterChip(
+                                selected = flavour.chosen,
+                                onClick = { onChooseFlavour(flavour.id) },
+                                label = {
+                                    Column {
+                                        Text(flavour.label, style = MaterialTheme.typography.labelMedium)
+                                        Text(formatBytes(flavour.sizeBytes), style = MaterialTheme.typography.labelSmall)
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    Text(row.details, style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
+                }
+                if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall)
                 row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall) }
-                ItemStatusText(status)
+                when {
+                    row.installedFlavour != null && (row.switches || status == ItemStatus.Installed || status == ItemStatus.UpdateAvailable) ->
+                        Text("Installed: ${row.installedFlavour}", color = MaterialTheme.colorScheme.primary)
+                    else -> ItemStatusText(status)
+                }
+                if (row.installedFlavour != null && status == ItemStatus.UpdateAvailable) Text("A newer version is available")
             }
         },
         trailingContent = {
+            if (row.switches) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (opens) TextButton(onClick = onOpen) { Text("Open") }
+                    TextButton(onClick = onGet) { Text("Switch") }
+                }
+                return@ListItem
+            }
             when (status) {
                 ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text("Get") }
                 ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {

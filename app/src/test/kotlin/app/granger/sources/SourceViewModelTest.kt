@@ -75,7 +75,7 @@ class SourceViewModelTest {
         val ui = viewModel().ui.value
         assertThat(ui.sections.map { it.title }).containsExactly("Medical", "Reference", "Regional").inOrder()
         assertThat(ui.loading).isFalse()
-        assertThat(ui.sections[0].rows.single().details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
+        assertThat(ui.sections[0].rows.single().details).isEqualTo("English · Updated October 2026 · CC BY-SA")
     }
 
     @Test fun aPackRowCarriesItsCatalogDescription() = runTest(main.dispatcher) {
@@ -92,8 +92,8 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("ifixit").details).isEqualTo("eng · Updated 2026-10-10 · CC BY-NC-SA 3.0 · provided by Kiwix")
-        assertThat(rows.getValue("med").details).isEqualTo("eng · Updated 2026-10-10 · CC BY-SA 4.0")
+        assertThat(rows.getValue("ifixit").details).isEqualTo("English · Updated October 2026 · CC BY-NC-SA · provided by Kiwix")
+        assertThat(rows.getValue("med").details).isEqualTo("English · Updated October 2026 · CC BY-SA")
     }
 
     @Test fun modelsScopeListsTheModelsSection() = runTest(main.dispatcher) {
@@ -760,5 +760,109 @@ class SourceViewModelTest {
         vm.setQuery("Pack")
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "medline", "cdc")
+    }
+
+    // --- Plan KB: one row per pack, in plain words, with a size check ---
+
+    private fun wiki(flavour: String, size: Long, featured: Boolean = false, title: String = "WikiMed") =
+        kiwix("wikipedia_en_medicine_$flavour", "Medical", featured = featured, zimName = "wikipedia_en_medicine")
+            .copy(title = title, sizeBytes = size, flavour = flavour, snapshotDate = "2026-03-05")
+
+    private val medFlavours = listOf(
+        wiki("nopic", 1_050_000_000, featured = true, title = "WikiMed (no pictures)"),
+        wiki("maxi", 1_860_000_000, featured = true),
+        wiki("mini", 170_000_000, title = "WikiMed Medical Encyclopedia"),
+    )
+
+    @Test fun threeWikipediaFlavoursAreOneRowWithAChoice() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(medFlavours + kiwix("other", "Medical")))
+        val vm = viewModel(CatalogScope.KIWIX)
+        val rows = vm.ui.value.sections.flatMap { it.rows }
+        val med = rows.single { it.title == "WikiMed" }
+        assertThat(rows).hasSize(2)
+        assertThat(med.flavours.map { it.label }).containsExactly("With pictures", "No pictures", "Mini").inOrder()
+        assertThat(med.flavours.map { it.sizeBytes }).containsExactly(1_860_000_000L, 1_050_000_000L, 170_000_000L).inOrder()
+        // Both featured flavours fit, so the larger is chosen.
+        assertThat(med.id).isEqualTo("wikipedia_en_medicine_maxi")
+        assertThat(med.flavours.single { it.chosen }.label).isEqualTo("With pictures")
+        assertThat(med.details).isEqualTo("English · Updated March 2026 · CC BY-SA")
+        assertThat(med.license).isEqualTo("CC BY-SA 4.0")
+    }
+
+    @Test fun getTakesTheChosenFlavour() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(medFlavours))
+        val vm = viewModel(CatalogScope.KIWIX)
+        vm.chooseFlavour("wikipedia_en_medicine_mini")
+        testScheduler.advanceUntilIdle()
+        val med = vm.ui.value.sections.flatMap { it.rows }.single()
+        assertThat(med.id).isEqualTo("wikipedia_en_medicine_mini")
+        assertThat(med.sizeBytes).isEqualTo(170_000_000L)
+        vm.get(med.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly("wikipedia_en_medicine_mini")
+    }
+
+    @Test fun anInstalledFlavourSaysSoAndAnotherOneIsASwitch() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(medFlavours))
+        library.packList.value = listOf(pack("u-wikipedia_en_medicine_nopic").copy(name = "wikipedia_en_medicine"))
+        val vm = viewModel(CatalogScope.KIWIX)
+        val installed = vm.ui.value.sections.flatMap { it.rows }.single()
+        assertThat(installed.id).isEqualTo("wikipedia_en_medicine_nopic")
+        assertThat(installed.installedFlavour).isEqualTo("no pictures")
+        assertThat(installed.switches).isFalse()
+        assertThat(installed.status).isEqualTo(ItemStatus.Installed)
+        vm.chooseFlavour("wikipedia_en_medicine_maxi")
+        testScheduler.advanceUntilIdle()
+        val other = vm.ui.value.sections.flatMap { it.rows }.single()
+        assertThat(other.id).isEqualTo("wikipedia_en_medicine_maxi")
+        assertThat(other.installedFlavour).isEqualTo("no pictures")
+        assertThat(other.switches).isTrue()
+        assertThat(other.packId).isEqualTo("u-wikipedia_en_medicine_nopic")
+    }
+
+    @Test fun languagesDatesAndLicencesAreInPlainWords() {
+        assertThat(KiwixList.languages("eng")).isEqualTo("English")
+        assertThat(KiwixList.languages("eng,rus")).isEqualTo("English, Russian")
+        assertThat(KiwixList.languages("eng,zho")).isEqualTo("English, Chinese")
+        assertThat(KiwixList.languages("eng,fra,deu,nld,spa")).isEqualTo("English, French, German and 2 more")
+        assertThat(KiwixList.updated("2026-03-05")).isEqualTo("Updated March 2026")
+        assertThat(KiwixList.updated("")).isEmpty()
+        assertThat(KiwixList.licence("CC BY-SA 4.0")).isEqualTo("CC BY-SA")
+        assertThat(KiwixList.licence("CC BY-NC-SA 2.5")).isEqualTo("CC BY-NC-SA")
+        assertThat(KiwixList.licence("Open licenses, per project (MIT, Apache, BSD, CC)")).isEqualTo("Open licences")
+        assertThat(KiwixList.licence("Mixed open licenses (mostly CC BY-NC-SA 4.0)")).isEqualTo("Open licences")
+        assertThat(KiwixList.licence("Not stated by the source")).isEqualTo("Licence not stated")
+        assertThat(KiwixList.licence("Public domain (US) / Project Gutenberg License")).isEqualTo("Public domain")
+        assertThat(KiwixList.licence("ODbL 1.0")).isEqualTo("ODbL")
+    }
+
+    @Test fun aGetOverTenGbAsksWithTheFreeSpaceAndASmallerFlavour() = runTest(main.dispatcher) {
+        val maxi = wiki("maxi", 110_000_000_000).copy(id = "wikipedia_en_all_maxi", zimName = "wikipedia_en_all", title = "Wikipedia")
+        val nopic = wiki("nopic", 48_000_000_000).copy(id = "wikipedia_en_all_nopic", zimName = "wikipedia_en_all", title = "Wikipedia (no pictures)")
+        val survivor = kiwix("survivorlibrary.com_en_all", "How-to", zimName = "survivorlibrary.com_en_all")
+            .copy(title = "Survivor Library", sizeBytes = 220_000_000_000)
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(maxi, nopic, survivor)))
+        val vm = viewModel(CatalogScope.KIWIX)
+        vm.get(survivor.id)
+        testScheduler.advanceUntilIdle()
+        val check = vm.ui.value.sizeCheck!!
+        assertThat(check.title).isEqualTo("Survivor Library")
+        assertThat(check.sizeBytes).isEqualTo(220_000_000_000L)
+        assertThat(check.volumeLabel).isEqualTo("Internal storage")
+        assertThat(check.freeBytes).isEqualTo(volumes.list().first().freeBytes)
+        assertThat(check.smaller).isNull()
+        assertThat(downloads.enqueued).isEmpty()
+        vm.dismissSizeCheck()
+
+        vm.get(maxi.id)
+        testScheduler.advanceUntilIdle()
+        val wikipedia = vm.ui.value.sizeCheck!!
+        assertThat(wikipedia.title).isEqualTo("Wikipedia")
+        assertThat(wikipedia.smaller!!.id).isEqualTo(nopic.id)
+        assertThat(wikipedia.smaller!!.label).isEqualTo("No pictures")
+        vm.confirmGet(wikipedia.smaller!!.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sizeCheck).isNull()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly(nopic.id)
     }
 }

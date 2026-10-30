@@ -688,6 +688,68 @@ class ThemeShots {
         }
     }
 
+    /** A dialog alone, as its window draws it, in Night then Field. */
+    private fun shootDialog(name: String, content: @Composable () -> Unit) {
+        var night by mutableStateOf(true)
+        compose.setContent { GrangerTheme(night = night) { content() } }
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onNode(androidx.compose.ui.test.isDialog()).captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    /** The Kiwix list's rows in plain words (Plan KB Decisions 8 and 9): a pack with flavours, one installed, a plain one. */
+    @Test fun kiwixRows() = shoot("kiwix-rows") {
+        val flavours = listOf(
+            app.granger.sources.FlavourChoice("top_maxi", "With pictures", 6_990_000_000, chosen = true),
+            app.granger.sources.FlavourChoice("top_nopic", "No pictures", 2_750_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_mini", "Mini", 300_000_000, chosen = false),
+        )
+        val rows = listOf(
+            app.granger.sources.ItemRow(
+                "top_maxi", "Wikipedia: best articles", "English · Updated October 2026 · CC BY-SA",
+                "The 50,000 best Wikipedia articles", 6_990_000_000, app.granger.sources.ItemStatus.NotInstalled, null,
+                flavours = flavours, license = "CC BY-SA 4.0",
+            ),
+            app.granger.sources.ItemRow(
+                "med_maxi", "WikiMed", "English · Updated October 2026 · CC BY-SA", "The largest medical encyclopedia, from Wikipedia",
+                1_860_000_000, app.granger.sources.ItemStatus.NotInstalled, "u-med",
+                flavours = listOf(
+                    app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
+                    app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false),
+                ),
+                installedFlavour = "no pictures", switches = true, license = "CC BY-SA 4.0",
+            ),
+            app.granger.sources.ItemRow(
+                "survivor", "Survivor Library", "English · Updated September 2026 · Licence not stated",
+                "Books and manuals on how things were done before electricity", 220_350_000_000,
+                app.granger.sources.ItemStatus.NotInstalled, null, license = "Not stated by the source",
+            ),
+        )
+        androidx.compose.material3.Surface {
+            androidx.compose.foundation.layout.Column {
+                for (row in rows) {
+                    app.granger.sources.CatalogItemRow(row, onGet = {}, onCancel = {}, onRetry = {}, onRemove = {})
+                    androidx.compose.material3.HorizontalDivider()
+                }
+            }
+        }
+    }
+
+    /** "Survivor Library is 220 GB" and Wikipedia's offer of its smaller flavour (Plan KB Decision 9). */
+    @Test fun sizeCheck() = shootDialog("size-check") {
+        app.granger.sources.SizeCheckDialog(
+            app.granger.sources.SizeCheck(
+                "wikipedia_en_all_maxi", "Wikipedia", 115_000_000_000, 41_000_000_000, "Phone",
+                smaller = app.granger.sources.FlavourChoice("wikipedia_en_all_nopic", "No pictures", 48_000_000_000, chosen = false),
+            ),
+            onGet = {}, onDismiss = {},
+        )
+    }
+
     @Test fun kiwixBooksList() = kiwixBooksShot("kiwixbooks-list", ShelfView.LIST)
 
     @Test fun kiwixBooksGrid() = kiwixBooksShot("kiwixbooks-grid", ShelfView.GRID)

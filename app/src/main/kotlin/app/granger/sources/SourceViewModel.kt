@@ -68,6 +68,30 @@ data class ItemRow(
     val packId: String?,
     /** How Ask can search this pack; null for anything else, and for maps. */
     val ask: AskReach? = null,
+    /** The pack's flavours, when it has more than one (Plan KB Decision 8); the [id] is the chosen one's. */
+    val flavours: List<FlavourChoice> = emptyList(),
+    /** The flavour on the phone, as a row says it ("no pictures"), when the pack has flavours and one is installed. */
+    val installedFlavour: String? = null,
+    /** Get fetches another flavour than the one on the phone: the action reads Switch. */
+    val switches: Boolean = false,
+    /** The full licence, for the row's details (its short name is in [details]); blank for anything but a pack. */
+    val license: String = "",
+)
+
+/** One flavour of a pack's row: "With pictures 6.9 GB". */
+data class FlavourChoice(val id: String, val label: String, val sizeBytes: Long, val chosen: Boolean)
+
+/**
+ * A Get that asks first (Plan KB Decision 9): [title] is [sizeBytes], [freeBytes] free on [volumeLabel]; [smaller] is
+ * the pack's next smaller flavour, offered instead, when it has one.
+ */
+data class SizeCheck(
+    val itemId: String,
+    val title: String,
+    val sizeBytes: Long,
+    val freeBytes: Long,
+    val volumeLabel: String,
+    val smaller: FlavourChoice? = null,
 )
 
 /**
@@ -148,6 +172,8 @@ data class SourceUi(
     val category: String? = null,
     /** The readiness domain the Kiwix list is filtered to (Plan H1, spec §4.1); null when it isn't. */
     val domainTitle: String? = null,
+    /** A big Get waiting on its question (Plan KB Decision 9). */
+    val sizeCheck: SizeCheck? = null,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -194,6 +220,8 @@ class SourceViewModel(
         val expanded: Set<String>,
         val category: String?,
         val domain: String?,
+        val flavours: Map<String, String> = emptyMap(),
+        val sizeCheck: SizeCheck? = null,
     )
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
@@ -206,6 +234,9 @@ class SourceViewModel(
     private val expanded = MutableStateFlow<Set<String>>(emptySet())
     private val category = MutableStateFlow<String?>(null)
     private val domainCleared = MutableStateFlow(false)
+    /** Each pack's chosen flavour, by ZIM name (Plan KB Decision 8). */
+    private val flavourChoice = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val sizeCheck = MutableStateFlow<SizeCheck?>(null)
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -215,14 +246,18 @@ class SourceViewModel(
     var searchText by mutableStateOf("")
         private set
     private val settings = combine(
-        combine(volumeList, selectedPath, wifiOnly, notice, domainCleared, ::Choices),
-        tab,
-        query,
-        expanded,
-        category,
-    ) { c, tab, query, expanded, category ->
-        Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded, category, if (c.domainCleared) null else domain)
-    }
+        combine(
+            combine(volumeList, selectedPath, wifiOnly, notice, domainCleared, ::Choices),
+            tab,
+            query,
+            expanded,
+            category,
+        ) { c, tab, query, expanded, category ->
+            Settings(c.volumes, c.selectedPath, c.wifiOnly, c.notice, tab, query, expanded, category, if (c.domainCleared) null else domain)
+        },
+        flavourChoice,
+        sizeCheck,
+    ) { settings, flavours, check -> settings.copy(flavours = flavours, sizeCheck = check) }
 
     val ui: StateFlow<SourceUi> =
         combine(catalog.state, downloads.records, library.packs, settings, ::buildUi)
@@ -247,8 +282,46 @@ class SourceViewModel(
         viewModelScope.launch { catalog.refresh() }
     }
 
+    /** Gets [itemId]; a pack over [KiwixList.SIZE_CHECK_BYTES] asks first ([SourceUi.sizeCheck]). */
     fun get(itemId: String) {
+        val current = catalog.state.value.catalog ?: return
+        val item = current.item(itemId) ?: return
+        if (item is PackEntry && item.downloadBytes > KiwixList.SIZE_CHECK_BYTES) {
+            viewModelScope.launch {
+                val all = volumeList.value.ifEmpty { withContext(io) { volumes.list() } }
+                val volume = all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
+                val group = KiwixList.group(current.packs.filter { it.zimName == item.zimName }).firstOrNull()
+                val smaller = KiwixList.smallerThan(group, item)?.let {
+                    FlavourChoice(it.id, KiwixList.flavourLabel(it.flavour), it.downloadBytes, chosen = false)
+                }
+                sizeCheck.value = SizeCheck(
+                    item.id, group?.title ?: item.title, item.downloadBytes, volume?.freeBytes ?: 0L, volume?.label ?: "this phone", smaller,
+                )
+            }
+            return
+        }
+        enqueueOne(item)
+    }
+
+    /** Yes to the size check: gets [itemId] (the big one, or the smaller flavour it offered). */
+    fun confirmGet(itemId: String) {
+        sizeCheck.value = null
         val item = catalog.state.value.catalog?.item(itemId) ?: return
+        (item as? PackEntry)?.let { flavourChoice.value = flavourChoice.value + (it.zimName to it.id) }
+        enqueueOne(item)
+    }
+
+    fun dismissSizeCheck() {
+        sizeCheck.value = null
+    }
+
+    /** The flavour [itemId] is now its pack's choice: the row shows its size, and Get fetches it. */
+    fun chooseFlavour(itemId: String) {
+        val item = catalog.state.value.catalog?.item(itemId) as? PackEntry ?: return
+        flavourChoice.value = flavourChoice.value + (item.zimName to item.id)
+    }
+
+    private fun enqueueOne(item: CatalogItem) {
         appScope.launch {
             notice.value = enqueue(listOf(item))
             refreshVolumes()
@@ -367,10 +440,8 @@ class SourceViewModel(
             statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
-                is PackEntry -> listOf(
-                    item.language, "Updated ${item.snapshotDate}",
-                    if (item.nonCommercial) "${item.license} · provided by Kiwix" else item.license,
-                )
+                // Plain words (Plan KB Decision 9): "English · Updated March 2026 · CC BY-SA".
+                is PackEntry -> listOf(KiwixList.details(item))
                 is BookEntry -> listOf(item.author, item.license)
                 is ModelEntry -> listOf(item.license)
                 is VoiceEntry -> listOf("Read-aloud voice", item.language, item.license)
@@ -391,7 +462,27 @@ class SourceViewModel(
             val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
             // On Project Gutenberg's own screen, each pack is its subject alone.
             val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else item.title
-            return ItemRow(item.id, title, details, description, item.downloadBytes, status(item), packId, ask)
+            return ItemRow(
+                item.id, title, details, description, item.downloadBytes, status(item), packId, ask,
+                license = (item as? PackEntry)?.license.orEmpty(),
+            )
+        }
+        val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        /** One row for a pack and its flavours (Plan KB Decision 8): the chosen flavour, else the installed, else the default. */
+        fun groupRow(group: PackGroup): ItemRow {
+            if (group.flavours.size == 1) return row(group.default)
+            val installed = group.flavours.firstOrNull { status(it) in installedStates }
+            val chosenId = s.flavours[group.zimName]?.takeIf { group.flavour(it) != null } ?: installed?.id ?: group.default.id
+            val entry = group.flavour(chosenId)!!
+            val base = row(entry)
+            val switches = installed != null && installed.id != entry.id && status(entry) == ItemStatus.NotInstalled
+            return base.copy(
+                title = group.title,
+                flavours = group.flavours.map { FlavourChoice(it.id, KiwixList.flavourLabel(it.flavour), it.downloadBytes, it.id == entry.id) },
+                installedFlavour = installed?.let { KiwixList.flavourLabel(it.flavour).lowercase() },
+                switches = switches,
+                packId = base.packId ?: if (switches) installedPackId(installed!!, recordsById[installed.id].orEmpty(), packs) else null,
+            )
         }
         val needle = s.query.trim()
         val kiwix = scope == CatalogScope.KIWIX
@@ -399,11 +490,15 @@ class SourceViewModel(
         val domainId = s.domain?.takeIf { kiwix }
         val domainTitle = domainId?.let { id -> current?.readiness?.domains?.firstOrNull { it.id == id }?.title }
         val inDomain = domainTitle != null
-        fun shown(item: CatalogItem): Boolean {
+        /** Whether [item] belongs on this list at all, before the tab and the search. */
+        fun inList(item: CatalogItem): Boolean {
             // A readiness domain lists its packs whichever scope they're offered in: Food keeps Water and Food for
             // Preppers, which are offered under Books (Plan KB Decision 6).
             if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES)) return false
-            if (inDomain && (item !is PackEntry || item.domain != domainId)) return false
+            return !(inDomain && (item !is PackEntry || item.domain != domainId))
+        }
+        fun shown(item: CatalogItem): Boolean {
+            if (!inList(item)) return false
             val status = status(item)
             val inTab = when (s.tab) {
                 SourceTab.BROWSE -> true
@@ -436,6 +531,33 @@ class SourceViewModel(
         val sections = if (current == null) emptyList() else buildList {
             val models = current.models.filter(::shown)
             if (models.isNotEmpty()) add(Section("AI models", models.map(::row)))
+            if (kiwix) {
+                // One row per pack, whatever its flavours (Plan KB Decision 8): chips, search and Recommended work on them.
+                val free = volumeRows.firstOrNull { it.path == s.selectedPath }?.freeBytes ?: volumeRows.firstOrNull()?.freeBytes
+                val groups = KiwixList.group(
+                    current.packs.filter { inList(it) && (chosen == null || it.category == chosen) }, free,
+                ).filter { group -> group.flavours.any(::shown) }
+                val (featured, rest) = if (inDomain) {
+                    val domain = current.readiness!!.domains.first { it.id == domainId }
+                    val tierIds = (domain.essential + domain.comprehensive).distinct()
+                    val byFlavour = groups.flatMap { g -> g.flavours.map { it.id to g } }.toMap()
+                    val tier = tierIds.mapNotNull { byFlavour[it] }.distinct()
+                        .sortedBy { g -> g.flavours.any { status(it) == ItemStatus.Installed } }
+                    tier to groups.filterNot { it in tier }
+                } else {
+                    groups.partition { chosen == null && it.featured }
+                }
+                if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::groupRow)))
+                rest.groupBy { it.default.category }
+                    .toList()
+                    .sortedWith(compareBy({ categoryRank(it.first) }, { it.first }))
+                    .forEach { (category, entries) ->
+                        val open = !folds || category in s.expanded || entries.size <= FOLDED_ROWS
+                        val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::groupRow)
+                        add(Section(category, rows, entries.size, foldable = folds && entries.size > FOLDED_ROWS))
+                    }
+                return@buildList
+            }
             val packs = current.packs.filter { shown(it) && (chosen == null || it.category == chosen) }
             val (featured, rest) = if (inDomain) {
                 // Recommended in a domain: its tier items (essential first), the uninstalled before the installed.
@@ -499,6 +621,7 @@ class SourceViewModel(
             categories = categories,
             category = chosen,
             domainTitle = domainTitle,
+            sizeCheck = s.sizeCheck,
         )
     }
 
