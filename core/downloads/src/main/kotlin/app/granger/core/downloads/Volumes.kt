@@ -43,7 +43,7 @@ class AndroidVolumes(private val context: Context) : VolumeSource {
         return Volume(
             root = root,
             label = storage.getStorageVolume(root)?.getDescription(context)
-                ?: if (removable) "SD card" else "Internal storage",
+                ?: context.getString(if (removable) R.string.downloads_volume_sd_card else R.string.downloads_volume_internal),
             removable = removable,
             freeBytes = root.usableSpace,
             totalBytes = root.totalSpace,
