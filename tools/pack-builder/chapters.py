@@ -83,7 +83,8 @@ def title_case(text: str, first: bool = True) -> tuple[str, bool]:
         nonlocal first
         token = m.group(0)
         bare = token.rstrip(".,;:!?’'\")»”")
-        starts, first = first, token.endswith((".", ":", "!", "?"))
+        # a full stop ends a sentence, but not the last stop of initials ("U.S.A. and Its States")
+        starts, first = first, token.endswith((".", ":", "!", "?")) and "." not in bare
         if "." in bare or (bare and _ROMAN.fullmatch(bare)):  # initials ("U.S.A.") or a numeral
             return token
         if not starts and bare.lower() in _SMALL_WORDS:

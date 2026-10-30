@@ -250,3 +250,9 @@ def test_packed_sections_name_a_book_by_its_chapters_past_a_preface():
             + '<h3>THE GOSPEL OF ST. MARK</h3><h4>Mark Chapter 1</h4><p>v</p>')
     chapters = split(body(html), split_at="h3", pack=True)
     assert [c.title for c in chapters] == ["Lamentations", "Ruth", "Mark"]
+
+
+def test_title_case_after_initials_keeps_small_words_small():
+    from chapters import clean_title
+    assert clean_title("THE U.S.A. AND ITS STATES", "X", "", 0) == "The U.S.A. and Its States"
+    assert clean_title("BOOK IV. THE ARGUMENT.", "X", "", 0) == "Book IV. The Argument"
