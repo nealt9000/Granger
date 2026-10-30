@@ -805,7 +805,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             backStackEntry.toRoute<CollectionRoute>().collectionId,
                             container.shelves, container.library, container.sessions,
                             container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
-                            container.catalog, createSavedStateHandle(),
+                            container.catalog, createSavedStateHandle(), container.libraryViews,
                         )
                     },
                     onOpened = ::showTab,

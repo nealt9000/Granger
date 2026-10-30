@@ -533,6 +533,37 @@ class ThemeShots {
         }
     }
 
+    /** Classics as the collection screen shows it, at 360 dp: the find field, chips and toggle with the list or grid. */
+    private fun booksShot(name: String, view: ShelfView) {
+        val shelves = app.granger.FakeShelves()
+        val books = classics.mapIndexed { i, (title, author) -> app.granger.book("c$i", title, author = author) }
+        shelves.shelfList.value = listOf(
+            app.granger.core.library.Shelf(
+                MediaType("lit", "Literature", true, 0),
+                listOf(CollectionRow(ShelfCollection("c:gc", "Granger Classics", "lit", false, defaultKey = "gc"), emptyList(), books)),
+            ),
+        )
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.BOOKS, view) }
+        val catalog = app.granger.FakeCatalogSource(
+            app.granger.catalogOf(books = books.mapIndexed { i, b -> app.granger.bookEntry(b.sourceRef, listOf("Novels & stories", "Drama", "Philosophy")[i % 3]) }),
+        )
+        val vm = app.granger.library.CollectionViewModel(
+            "c:gc", shelves, app.granger.FakeLibrary(), app.granger.FakeReadingSessions(), app.granger.FakeBookshelf(), app.granger.FakeDownloads(),
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main), catalog = catalog, viewPrefs = prefs,
+            compute = kotlinx.coroutines.Dispatchers.Main,
+        )
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.library.CollectionScreen(vm, onOpened = {}, onOpenPack = {}, onGetBooks = {}, onOpenCollection = {}, onBack = {}) }
+        }
+    }
+
+    @Test fun booksList() = booksShot("books-list", ShelfView.LIST)
+
+    @Test fun booksGrid() = booksShot("books-grid", ShelfView.GRID)
+
     /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
     @Composable
     private fun IconColumn(name: String, icon: Int, modifier: Modifier, tool: String = "Listen") {

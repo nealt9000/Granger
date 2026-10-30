@@ -20,6 +20,9 @@ import app.granger.core.library.MediaType
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Shelf
 import app.granger.core.library.ShelfCollection
+import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfKind
+import app.granger.library.shelf.ShelfView
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -205,11 +208,13 @@ class CollectionViewModelTest {
         catalogOf(books = listOf(bookEntry("pan", "Novels & stories"), bookEntry("hamlet", "Drama"), bookEntry("emma", "Novels & stories"))),
     )
 
-    private fun TestScope.browse(vararg books: Book, saved: SavedStateHandle = SavedStateHandle()): CollectionViewModel {
-        show(collection("c:granger-classics", false, books = books.toList()))
+    private val viewPrefs = LibraryViewPrefs()
+
+    private fun TestScope.browse(vararg books: Book, saved: SavedStateHandle = SavedStateHandle(), id: String = "c:granger-classics"): CollectionViewModel {
+        show(collection(id, false, books = books.toList()))
         val vm = CollectionViewModel(
-            "c:granger-classics", shelves, library, sessions, bookshelf, downloads, appScope = this,
-            catalog = classics, savedState = saved, compute = main.dispatcher,
+            id, shelves, library, sessions, bookshelf, downloads, appScope = this,
+            catalog = classics, savedState = saved, viewPrefs = viewPrefs, compute = main.dispatcher,
         )
         backgroundScope.launch { vm.books.collect {} }
         testScheduler.advanceUntilIdle()
@@ -280,11 +285,61 @@ class CollectionViewModelTest {
         assertThat(vm.ids()).containsExactly("emma", "pan")
     }
 
-    @Test fun theChoicesComeBackFromSavedState() = runTest(main.dispatcher) {
-        val vm = browse(emma, hamlet, pan, saved = SavedStateHandle(mapOf("query" to "a", "sort" to "AUTHOR", "category" to "Novels & stories")))
+    @Test fun theFindTextAndKindComeBackFromSavedState() = runTest(main.dispatcher) {
+        val vm = browse(emma, hamlet, pan, saved = SavedStateHandle(mapOf("query" to "a", "category" to "Novels & stories")))
         assertThat(vm.findText).isEqualTo("a")
-        assertThat(vm.sort.value).isEqualTo(BookSort.AUTHOR)
         assertThat(vm.ids()).containsExactly("emma")
+    }
+
+    // Plan LV Task 3: the sort and view are remembered for every book collection; titles skip The, A and An.
+
+    @Test fun theSortAndViewAreRememberedAcrossCollections() = runTest(main.dispatcher) {
+        val classicsVm = browse(emma, hamlet, pan)
+        assertThat(classicsVm.sort.value).isEqualTo(BookSort.TITLE)
+        assertThat(classicsVm.view.value).isEqualTo(ShelfView.LIST)
+        classicsVm.setSort(BookSort.AUTHOR)
+        classicsVm.toggleView()
+        testScheduler.advanceUntilIdle()
+        // My books opens the same way.
+        val mineVm = browse(mine, emma, id = "c:my-books")
+        assertThat(mineVm.sort.value).isEqualTo(BookSort.AUTHOR)
+        assertThat(mineVm.view.value).isEqualTo(ShelfView.GRID)
+        assertThat(viewPrefs.sort(ShelfKind.BOOKS).value).isEqualTo("AUTHOR")
+        mineVm.toggleView()
+        assertThat(classicsVm.view.value).isEqualTo(ShelfView.LIST)
+    }
+
+    @Test fun titlesFileUnderTheirFirstWordAfterAnArticle() = runTest(main.dispatcher) {
+        val odyssey = book("odyssey", "The Odyssey", author = "Homer")
+        val nineteen = book("1984", "1984", author = "George Orwell")
+        val emile = book("emile", "Émile", author = "Jean-Jacques Rousseau")
+        val tale = book("tale", "A Tale of Two Cities", author = "Charles Dickens")
+        val filler = (1..30).map { book("b$it", "Book $it", author = "Author $it") }
+        val vm = browse(odyssey, nineteen, emile, tale, emma, pan, *filler.toTypedArray())
+        val sections = vm.books.value.sections
+        assertThat(sections.lettered).isTrue()
+        fun letterOf(id: String) = sections.items.first { it.value.id == id }.letter
+        assertThat(letterOf("odyssey")).isEqualTo("O")
+        assertThat(letterOf("1984")).isEqualTo("#")
+        assertThat(letterOf("emile")).isEqualTo("E")
+        assertThat(letterOf("tale")).isEqualTo("T")
+        // In the order shown: Émile with Emma under E, The Odyssey before Peter Pan, 1984 last.
+        assertThat(vm.ids().filter { it in setOf("odyssey", "1984", "emile", "emma", "pan", "tale") })
+            .containsExactly("emile", "emma", "odyssey", "pan", "tale", "1984").inOrder()
+        assertThat(sections.letters.last()).isEqualTo("#")
+    }
+
+    @Test fun authorSortFilesUnderTheSurnameAndRecentHasNoLetters() = runTest(main.dispatcher) {
+        val filler = (1..30).map { book("b$it", "Book $it", author = "Ann Zed") }
+        val vm = browse(emma, pan, hamlet, japan, *filler.toTypedArray())
+        vm.setSort(BookSort.AUTHOR)
+        testScheduler.advanceUntilIdle()
+        val byAuthor = vm.books.value.sections
+        assertThat(byAuthor.letters).containsExactly("A", "B", "S", "Z", "#").inOrder()
+        assertThat(byAuthor.sections.last().items.map { it.value.id }).containsExactly("japan")
+        vm.setSort(BookSort.RECENT)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.sections.lettered).isFalse()
     }
 
     @Test fun authorsFileUnderTheFirstSurname() {

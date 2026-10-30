@@ -107,7 +107,7 @@ fun <T> ShelfList(
         LazyColumn(Modifier.fillMaxSize(), state = state, contentPadding = contentPadding.withStrip(sections.lettered, stripSide)) {
             header()
             for (section in sections.sections) {
-                if (sections.lettered) stickyHeader(key = "letter:${section.letter}", contentType = "letter") { LetterHeader(section.letter) }
+                if (sections.lettered) stickyHeader(key = "letter:${section.letter}", contentType = "letter") { LetterHeader(section.letter, start = 16.dp) }
                 items(section.items.size, key = { section.items[it].key }, contentType = { contentType }) { i -> row(section.items[i].value) }
             }
         }
@@ -138,6 +138,8 @@ fun <T> ShelfGrid(
     contentPadding: PaddingValues = PaddingValues(16.dp),
     horizontalSpacing: Dp = 12.dp,
     verticalSpacing: Dp = 16.dp,
+    /** How far in the letter headers start, to line up with cells that pad themselves. */
+    headerIndent: Dp = 0.dp,
     contentType: String = "item",
     header: LazyGridScope.() -> Unit = {},
     cell: @Composable LazyGridItemScope.(T) -> Unit,
@@ -156,7 +158,7 @@ fun <T> ShelfGrid(
             header()
             for (section in sections.sections) {
                 if (sections.lettered) item(key = "letter:${section.letter}", span = { GridItemSpan(maxLineSpan) }, contentType = "letter") {
-                    LetterHeader(section.letter, inGrid = true)
+                    LetterHeader(section.letter, start = headerIndent)
                 }
                 items(section.items.size, key = { section.items[it].key }, contentType = { contentType }) { i -> cell(section.items[i].value) }
             }
@@ -194,7 +196,7 @@ private fun PaddingValues.withStrip(strip: Boolean, side: RailSide): PaddingValu
 
 /** A letter's header: the accent colour on the page's own background, so a sticky one covers the rows it passes. */
 @Composable
-private fun LetterHeader(letter: String, inGrid: Boolean = false) {
+private fun LetterHeader(letter: String, start: Dp) {
     Text(
         letter,
         style = MaterialTheme.typography.titleMedium,
@@ -202,7 +204,7 @@ private fun LetterHeader(letter: String, inGrid: Boolean = false) {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .padding(start = if (inGrid) 0.dp else 16.dp, top = 8.dp, bottom = 4.dp)
+            .padding(start = start, top = 8.dp, bottom = 4.dp)
             .semantics { heading() },
     )
 }

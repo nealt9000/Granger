@@ -7,6 +7,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.archive.ArchiveDownloads
+import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfKind
+import app.granger.library.shelf.ShelfView
+import app.granger.library.shelf.sortNamed
+import app.granger.library.shelf.toggled
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.BookPosition
@@ -52,6 +57,8 @@ class CollectionViewModel(
     /** Where a Granger book's category comes from; null offers no category chips. */
     private val catalog: CatalogSource? = null,
     private val savedState: SavedStateHandle = SavedStateHandle(),
+    /** The books shelf's remembered sort and view. */
+    private val viewPrefs: LibraryViewPrefs = LibraryViewPrefs(),
     /** Where the books are filtered and sorted, off the main thread. */
     private val compute: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
@@ -68,9 +75,12 @@ class CollectionViewModel(
         private set
     /** The Find text: a title or author, matched from the start of a word. */
     val query: StateFlow<String> = savedState.getStateFlow(QUERY, "")
-    val sort: StateFlow<BookSort> = savedState.getStateFlow(SORT, BookSort.TITLE.name)
-        .map { name -> BookSort.entries.firstOrNull { it.name == name } ?: BookSort.TITLE }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, BookSort.TITLE)
+    val sort: StateFlow<BookSort> = viewPrefs.sort(ShelfKind.BOOKS)
+        .map { sortNamed(it, BookSort.TITLE) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, sortNamed(viewPrefs.sort(ShelfKind.BOOKS).value, BookSort.TITLE))
+
+    /** List (the default) or the cover grid. */
+    val view: StateFlow<ShelfView> = viewPrefs.view(ShelfKind.BOOKS)
     private val category: StateFlow<String?> = savedState.getStateFlow(CATEGORY, null)
 
     /** Each catalog book's category by id, in catalog order. */
@@ -95,7 +105,9 @@ class CollectionViewModel(
         savedState[QUERY] = text
     }
 
-    fun setSort(sort: BookSort) { savedState[SORT] = sort.name }
+    fun setSort(sort: BookSort) = viewPrefs.setSort(ShelfKind.BOOKS, sort.name)
+
+    fun toggleView() = viewPrefs.setView(ShelfKind.BOOKS, view.value.toggled())
 
     /** Null shows every category. */
     fun setCategory(category: String?) { savedState[CATEGORY] = category }
@@ -184,7 +196,6 @@ class CollectionViewModel(
 
     private companion object {
         const val QUERY = "query"
-        const val SORT = "sort"
         const val CATEGORY = "category"
     }
 }
