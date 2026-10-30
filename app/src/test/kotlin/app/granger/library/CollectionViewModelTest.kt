@@ -31,8 +31,16 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import androidx.test.core.app.ApplicationProvider
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class CollectionViewModelTest {
+    private fun app.granger.UiText?.en(): String? = this?.resolve(ApplicationProvider.getApplicationContext())
+
     @get:Rule val main = MainDispatcherRule()
     private val library = FakeLibrary()
     private val shelves = FakeShelves()
@@ -62,7 +70,7 @@ class CollectionViewModelTest {
         val folder = vm("c:kiwix").ui.filterNotNull().first()
         assertThat(folder.isFolder).isTrue()
         assertThat(folder.children.map { it.collection.id }).containsExactly("c:devdocs", "c:wikipedia").inOrder()
-        assertThat(folder.children.map(::rowCountText)).containsExactly("1 pack", "1 pack")
+        assertThat(folder.children.map { rowCountText(it).en() }).containsExactly("1 pack", "1 pack")
         // A child opens as an ordinary collection.
         val child = vm("c:wikipedia").ui.filterNotNull().first()
         assertThat(child.isFolder).isFalse()
@@ -381,9 +389,9 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(music)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        assertThat(header.text.en()).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
         // The Library's row says the same (Plan GB walkthrough).
-        assertThat(rowCountText(gutenbergRow)).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
     }
 
     @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {
@@ -456,9 +464,9 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(food)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
-        assertThat(rowCountText(foodRow)).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
-        assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })))
+        assertThat(header.text.en()).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(rowCountText(foodRow).en()).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })).en())
             .isEqualTo("Kiwix library · 1 document")
     }
 }

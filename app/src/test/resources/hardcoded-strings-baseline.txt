@@ -1,5 +1,1 @@
 app/src/main/kotlin/app/granger/GrangerNavHost.kt	1
-app/src/main/kotlin/app/granger/library/CollectionScreen.kt	36
-app/src/main/kotlin/app/granger/library/LibraryScreen.kt	8
-app/src/main/kotlin/app/granger/library/OrganizeDialogs.kt	16
-app/src/main/kotlin/app/granger/library/shelf/ShelfView.kt	4

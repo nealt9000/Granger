@@ -49,12 +49,11 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.Features
 import app.granger.R
-import app.granger.audiobooks.ALL_AUDIOBOOKS
+import app.granger.UiText
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Filing
 import app.granger.core.library.GutenbergNames
-import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 import app.granger.sources.GetMoreLink
 
@@ -95,9 +94,10 @@ fun LibraryScreen(
         }
     }
     val importNotice by viewModel.notice.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(importNotice) {
         val text = importNotice ?: return@LaunchedEffect
-        snackbar.showSnackbar(text)
+        snackbar.showSnackbar(text.resolve(context))
         viewModel.dismissNotice()
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -116,7 +116,7 @@ fun LibraryScreen(
 
 /**
  * The header (Search, Downloads with its badge, Get more, and Readiness and Import books… in the overflow) and one row
- * per kind, each opening to its collections. With no books, [NO_BOOKS] and the [BOOK_SOURCES]. Null [ui] is still
+ * per kind, each opening to its collections. With no books, "No books yet" and the [BOOK_SOURCES]. Null [ui] is still
  * loading.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,26 +141,26 @@ fun LibraryContent(
         topBar = {
             TopAppBar(
                 // One line: on a narrow phone the actions leave it short, and a word broken in two reads worse.
-                title = { Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(stringResource(R.string.library_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
-                    IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "Search") }
+                    IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.common_search)) }
                     IconButton(onClick = onDownloads) {
                         BadgedBox(badge = { if (downloadsBadge > 0) Badge { Text("$downloadsBadge") } }) {
-                            Icon(painterResource(R.drawable.ic_download), contentDescription = "Downloads")
+                            Icon(painterResource(R.drawable.ic_download), contentDescription = stringResource(R.string.library_downloads))
                         }
                     }
-                    IconButton(onClick = onGetMore) { Icon(Icons.Filled.Add, contentDescription = "Get more") }
+                    IconButton(onClick = onGetMore) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.sources_get_more)) }
                     // Readiness is in the overflow so the title fits at 360 dp (Plan U3b Decision 4).
                     Box {
-                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             DropdownMenuItem(
-                                text = { Text("Readiness") },
+                                text = { Text(stringResource(R.string.library_readiness)) },
                                 onClick = { menuOpen = false; onReadiness() },
                             )
                             if (Features.IMPORT) {
                                 DropdownMenuItem(
-                                    text = { Text("Import books…") },
+                                    text = { Text(stringResource(R.string.library_import_books)) },
                                     onClick = { menuOpen = false; onImport() },
                                 )
                             }
@@ -175,7 +175,7 @@ fun LibraryContent(
             if (loaded.emptyLibrary) {
                 item(key = "empty") {
                     Text(
-                        NO_BOOKS,
+                        stringResource(R.string.library_no_books),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                     )
@@ -192,7 +192,7 @@ fun LibraryContent(
                 if (Features.IMPORT) {
                     item(key = "import") {
                         TextButton(onClick = onImport, modifier = Modifier.padding(horizontal = 8.dp)) {
-                            Text("Import your own EPUB, PDF, TXT or Markdown books")
+                            Text(stringResource(R.string.library_import_own))
                         }
                     }
                 }
@@ -226,11 +226,11 @@ internal fun LazyListScope.kindRows(
     item(key = "kind:$id") {
         ListItem(
             modifier = Modifier.clickable { onToggle(open) },
-            headlineContent = { Text(kind.title, style = MaterialTheme.typography.titleMedium) },
+            headlineContent = { Text(kind.title.resolve(), style = MaterialTheme.typography.titleMedium) },
             trailingContent = {
                 Icon(
                     if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = if (open) "Collapse" else "Expand",
+                    contentDescription = stringResource(if (open) R.string.library_collapse else R.string.library_expand),
                 )
             },
         )
@@ -241,9 +241,9 @@ internal fun LazyListScope.kindRows(
         item(key = if (music) "all-music" else "all-audiobooks") {
             ListItem(
                 modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
-                headlineContent = { Text(if (music) ALL_MUSIC else ALL_AUDIOBOOKS) },
+                headlineContent = { Text(stringResource(if (music) R.string.library_all_music else R.string.library_all_audiobooks)) },
                 supportingContent = {
-                    Text(countText(0, 0, kind.allCollections.sumOf { it.albums.size }, kind.allCollections.sumOf { it.audiobooks.size }))
+                    Text(countText(0, 0, kind.allCollections.sumOf { it.albums.size }, kind.allCollections.sumOf { it.audiobooks.size }).resolve())
                 },
             )
         }
@@ -263,14 +263,13 @@ internal fun LazyListScope.kindRows(
                     }
                     .padding(start = 16.dp),
                 headlineContent = { Text(row.collection.name) },
-                supportingContent = { Text(rowCountText(row)) },
+                supportingContent = { Text(rowCountText(row).resolve()) },
             )
         }
     }
     item(key = "divider:$id") { HorizontalDivider() }
 }
 
-const val NO_BOOKS = "No books yet"
 
 /** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2). */
 internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS)
@@ -280,7 +279,7 @@ private val IMPORT_TYPES = arrayOf(
 )
 
 /** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */
-internal fun rowCountText(row: CollectionRow): String {
+internal fun rowCountText(row: CollectionRow): UiText {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
     // A book pack's collection is called by its subject or pack; the line under it says whose (Plan GB Decision 2, Plan
@@ -292,20 +291,26 @@ internal fun rowCountText(row: CollectionRow): String {
     val header = GutenbergHeader(pack = null, books = books, searchable = searchable)
     if (Filing.isKiwixBooksCollection(key)) {
         // "Kiwix library · 17 documents · 3 searchable in full" (Plan KB Decision 7).
-        val kiwix = header.copy(provider = KIWIX_LIBRARY, noun = "document")
-        return listOfNotNull(if (books > 0) kiwix.provenance else KIWIX_LIBRARY, kiwix.searchableText.takeIf { searchable > 0 })
-            .joinToString(" · ")
+        val kiwix = header.copy(kind = HeaderKind.KIWIX_LIBRARY)
+        return dotted(listOfNotNull(if (books > 0) kiwix.provenance else kiwix.provider, kiwix.searchableText.takeIf { searchable > 0 }))
     }
-    return listOfNotNull(GutenbergNames.PROVIDER, counts.ifEmpty { null }, header.searchableText.takeIf { searchable > 0 })
-        .joinToString(" · ")
+    return dotted(listOfNotNull(header.provider, counts.takeIf { it != EMPTY }, header.searchableText.takeIf { searchable > 0 }))
 }
 
-private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): String = listOfNotNull(
-    if (packs > 0) (if (packs == 1) "1 pack" else "$packs packs") else null,
-    if (books > 0) (if (books == 1) "1 book" else "$books books") else null,
-    if (albums > 0) (if (albums == 1) "1 album" else "$albums albums") else null,
-    if (audiobooks > 0) (if (audiobooks == 1) "1 audiobook" else "$audiobooks audiobooks") else null,
-).joinToString(" · ")
+private val EMPTY = UiText.Raw("")
+
+/** [parts] in a line, a dot between each. */
+private fun dotted(parts: List<UiText>): UiText =
+    parts.drop(1).fold(parts.firstOrNull() ?: EMPTY) { line, part -> UiText.Res(R.string.library_dotted, line, part) }
+
+private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): UiText = dotted(
+    listOfNotNull(
+        if (packs > 0) UiText.Plural(R.plurals.sources_packs, packs, packs) else null,
+        if (books > 0) UiText.Plural(R.plurals.common_books, books, books) else null,
+        if (albums > 0) UiText.Plural(R.plurals.common_albums, albums, albums) else null,
+        if (audiobooks > 0) UiText.Plural(R.plurals.library_audiobooks, audiobooks, audiobooks) else null,
+    ),
+)
 
 /** The file's display name from the document provider, falling back to the last part of its URI. */
 fun displayNameOf(context: Context, uri: Uri): String {

@@ -348,7 +348,7 @@ class ThemeShots {
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             ListenContent(
-                ListenUi(card, listOf(KindRow("music", "Music", "music", listOf(phone)), KindRow("audiobooks", "Audiobooks", "audiobooks", listOf(librivox)))),
+                ListenUi(card, listOf(KindRow("music", app.granger.UiText.Raw("Music"), "music", listOf(phone)), KindRow("audiobooks", app.granger.UiText.Raw("Audiobooks"), "audiobooks", listOf(librivox)))),
                 ListenActions(),
             )
         }

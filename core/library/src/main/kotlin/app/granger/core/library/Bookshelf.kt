@@ -33,18 +33,7 @@ sealed interface ImportResult {
     data class Protected(val kind: DrmKind) : ImportResult
     data object Unsupported : ImportResult
     data class Damaged(val reason: String) : ImportResult
-
-    /** The message to show the user about the file called [name]; null when nothing went wrong. */
-    fun message(name: String): String? = when (this) {
-        is Imported, is AlreadyThere -> null
-        is Protected -> if (kind == DrmKind.PDF_ENCRYPTED) {
-            "$name is password-protected or encrypted. Granger can't open it and won't remove the protection."
-        } else {
-            "$name is copy-protected (DRM). Granger can't open it and won't remove the protection."
-        }
-        Unsupported -> "$name isn't an EPUB, PDF, TXT or Markdown file."
-        is Damaged -> "$name is damaged or isn't a complete e-book."
-    }
+    // The app says what each means (app.granger.library.importProblem), in the phone's language.
 }
 
 /** What a source knows about a book; its non-blank fields win over the EPUB's own metadata. */

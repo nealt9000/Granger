@@ -59,7 +59,7 @@ class LibraryScreenTest {
     }
 
     @Test fun eachKindOpensToItsCollections() {
-        show(LibraryUi(listOf(KindRow(BOOKS_KIND, "Books", "literature", listOf(classics))), emptyLibrary = false))
+        show(LibraryUi(listOf(KindRow(BOOKS_KIND, app.granger.UiText.Raw("Books"), "literature", listOf(classics))), emptyLibrary = false))
         compose.onNodeWithText("Granger Classics").performClick()
         compose.onNodeWithText("Books").performClick()
         compose.onNodeWithText("Granger Classics").assertDoesNotExist()
@@ -69,7 +69,7 @@ class LibraryScreenTest {
     /** Plan U3c Decision 2: the Library is books, so an empty one offers the book sources (and Import), not packs. */
     @Test fun anEmptyLibraryOffersTheBookSources() {
         show(LibraryUi(emptyList(), emptyLibrary = true))
-        compose.onNodeWithText(NO_BOOKS).assertIsDisplayed()
+        compose.onNodeWithText("No books yet").assertIsDisplayed()
         compose.onNodeWithText("Granger Classics").performClick()
         compose.onNodeWithText("Archive.org books").performClick()
         compose.onNodeWithText("Import your own EPUB, PDF, TXT or Markdown books").performClick()

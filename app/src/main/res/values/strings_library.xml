@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Library: the books on the phone. -->
+    <string name="library_title">Library</string>
+    <string name="library_downloads">Downloads</string>
+    <!-- The overflow menu: how ready the phone is, by subject. -->
+    <string name="library_readiness">Readiness</string>
+    <string name="library_import_books">Import books…</string>
+    <string name="library_no_books">No books yet</string>
+    <string name="library_import_own">Import your own EPUB, PDF, TXT or Markdown books</string>
+    <!-- The kind of thing a row holds. -->
+    <string name="library_books">Books</string>
+    <string name="library_collapse">Collapse</string>
+    <string name="library_expand">Expand</string>
+    <string name="library_all_music">All music</string>
+    <string name="library_all_audiobooks">All audiobooks</string>
+    <plurals name="library_audiobooks">
+        <item quantity="one">%d audiobook</item>
+        <item quantity="other">%d audiobooks</item>
+    </plurals>
+    <!-- Two parts of a line with a dot between, such as "Project Gutenberg · 1,284 books". -->
+    <string name="library_dotted">%1$s · %2$s</string>
+    <!-- A Kiwix book pack's collection, whose books are documents (Plan KB). -->
+    <string name="library_kiwix_library">Kiwix library</string>
+    <!-- %1$s is the count, formatted, such as 1,284. -->
+    <plurals name="library_books_counted">
+        <item quantity="one">%1$s book</item>
+        <item quantity="other">%1$s books</item>
+    </plurals>
+    <plurals name="library_documents">
+        <item quantity="one">%1$s document</item>
+        <item quantity="other">%1$s documents</item>
+    </plurals>
+    <!-- How many of a pack's books Search and Ask can read in full; %1$s is the count, formatted. -->
+    <plurals name="library_searchable_in_full">
+        <item quantity="one">%1$s searchable in full</item>
+        <item quantity="other">%1$s searchable in full</item>
+    </plurals>
+
+    <!-- The source names an empty Music or Audiobooks screen links to. -->
+    <string name="library_link_granger">Granger</string>
+    <string name="library_link_kiwix">Kiwix</string>
+    <string name="library_link_archive">Archive.org</string>
+    <string name="library_link_librivox">LibriVox</string>
+
+    <!-- A collection. -->
+    <!-- Copies a book pack's books out so Search and Ask can read them in full. -->
+    <string name="library_make_searchable_menu">Make all searchable…</string>
+    <string name="library_open_pack_pages">Open the pack\'s own pages</string>
+    <string name="library_remove_pack">Remove pack</string>
+    <string name="library_move_collection">Move collection to…</string>
+    <string name="library_rename">Rename</string>
+    <string name="library_move_to_collection">Move to collection…</string>
+    <string name="library_remove_from_phone">Remove from phone</string>
+    <string name="library_find_title_author">Find a title or author</string>
+    <string name="library_clear">Clear</string>
+    <string name="library_no_books_match">No books match.</string>
+    <!-- How a collection's books are ordered. -->
+    <string name="library_sort_title">Title</string>
+    <string name="library_sort_author">Author</string>
+    <string name="library_sort_recent">Recently read</string>
+    <string name="library_remove_from_phone_title">Remove from phone?</string>
+    <!-- %1$s is the book's title. -->
+    <string name="library_remove_book_body">%1$s will be deleted from this phone. Your place, bookmarks and highlights are kept.</string>
+    <!-- %1$s is the pack's title. -->
+    <string name="library_remove_pack_body">%1$s will be deleted from this phone. You can download it again later.</string>
+    <string name="library_remove_book_pack_body">%1$s will be deleted from this phone. You can download it again later. Its books go with it; your places, bookmarks and highlights are kept.</string>
+    <string name="library_rename_collection">Rename collection</string>
+    <string name="library_collection_name">Collection name</string>
+    <string name="library_delete_collection_title">Delete collection?</string>
+    <string name="library_delete_collection_body">Its packs go back to their usual collections. Nothing is removed from the phone.</string>
+    <!-- A pack's book: whether Search and Ask can read it in full yet. -->
+    <string name="library_searchable_full">Searchable in full</string>
+    <string name="library_title_only_scan">Title only: it\'s a scan</string>
+    <string name="library_titles_only">Titles only until you open it</string>
+    <!-- %1$s of %2$s books copied out, both formatted. -->
+    <string name="library_making_searchable">Making searchable: %1$s of %2$s copied</string>
+    <string name="library_not_enough_space">Not enough space</string>
+    <!-- %1$s is how many books (formatted), %2$s the space needed, %3$s the space free. -->
+    <plurals name="library_searchable_no_room">
+        <item quantity="one">Making %1$s book searchable needs about %2$s more, and this phone has %3$s free.</item>
+        <item quantity="other">Making all %1$s books searchable needs about %2$s more, and this phone has %3$s free.</item>
+    </plurals>
+    <string name="library_make_searchable_title">Make all searchable?</string>
+    <plurals name="library_make_searchable_body">
+        <item quantity="one">Copies the %1$s book not yet opened out of the pack, so Search and Ask can read it in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
+        <item quantity="other">Copies the %1$s books not yet opened out of the pack, so Search and Ask can read them in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
+    </plurals>
+    <string name="library_make_searchable">Make searchable</string>
+    <string name="library_pack_missing">File not found. Reinsert the SD card or download the pack again.</string>
+    <string name="library_pack_corrupt">This file is damaged and can\'t be opened.</string>
+    <string name="library_replaced_by_classics">Replaced by the Granger Classics e-books</string>
+    <string name="library_get_ebooks">Get the e-books</string>
+    <string name="library_file_not_found">File not found</string>
+    <string name="library_damaged">Damaged</string>
+    <!-- How far through a book the reader is. -->
+    <string name="library_percent">%1$d%%</string>
+    <!-- The small mark on a book Search and Ask can read in full. -->
+    <string name="library_full_text">Full text</string>
+    <!-- A PDF scan's text can't be searched. -->
+    <string name="library_pdf_not_searchable">PDF · Not searchable</string>
+
+    <!-- Moving packs and collections. -->
+    <string name="library_new_collection">New collection</string>
+    <string name="library_move">Move</string>
+    <!-- A media type is a top-level group, such as Books or Music. -->
+    <string name="library_new_media_type">New media type</string>
+    <string name="library_media_type_name">Media type name</string>
+    <string name="library_new_collection_choice">New collection…</string>
+    <string name="library_new_media_type_choice">New media type…</string>
+
+    <!-- The shelf. %1$s is a letter on the A–Z strip. -->
+    <string name="library_jump_to">Jump to %1$s</string>
+    <!-- %1$s is the order, such as Title. -->
+    <string name="library_sort">Sort: %1$s</string>
+    <string name="library_show_grid">Show as grid</string>
+    <string name="library_show_list">Show as list</string>
+
+    <!-- Importing books. -->
+    <plurals name="library_imported">
+        <item quantity="one">Imported %d book.</item>
+        <item quantity="other">Imported %d books.</item>
+    </plurals>
+    <plurals name="library_already_there">
+        <item quantity="one">%d was already in My books.</item>
+        <item quantity="other">%d were already in My books.</item>
+    </plurals>
+    <string name="library_nothing_imported">Nothing was imported.</string>
+    <!-- Two sentences one after the other. -->
+    <string name="library_sentences">%1$s %2$s</string>
+    <!-- A file the phone gives no name for, in the messages below. -->
+    <string name="library_a_file">A file</string>
+    <!-- %1$s is the file's name. -->
+    <string name="library_import_encrypted">%1$s is password-protected or encrypted. Granger can\'t open it and won\'t remove the protection.</string>
+    <string name="library_import_drm">%1$s is copy-protected (DRM). Granger can\'t open it and won\'t remove the protection.</string>
+    <string name="library_import_unsupported">%1$s isn\'t an EPUB, PDF, TXT or Markdown file.</string>
+    <string name="library_import_damaged">%1$s is damaged or isn\'t a complete e-book.</string>
+</resources>

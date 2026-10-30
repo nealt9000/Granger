@@ -143,7 +143,7 @@ fun EmptyMedia(text: String, links: List<SourceLink>, onOpenSource: ((SourceLink
     Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (onOpenSource != null) for (link in links) OutlinedButton(onClick = { onOpenSource(link) }) { Text(link.title) }
+            if (onOpenSource != null) for (link in links) OutlinedButton(onClick = { onOpenSource(link) }) { Text(stringResource(link.title)) }
             if (onMediaSettings != null) TextButton(onClick = onMediaSettings) { Text(stringResource(R.string.music_media_settings)) }
         }
     }
