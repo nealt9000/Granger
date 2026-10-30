@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
@@ -69,7 +70,7 @@ fun QueueSheet(
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding()) {
-            Text("Queue", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+            Text(stringResource(R.string.player_queue), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
             if (editable) ReorderableQueue(queue, current, heard, onMove, onRemove, onPlay) else ReadOnlyQueue(queue, current)
         }
     }
@@ -181,16 +182,19 @@ private fun QueueRow(
     modifier: Modifier = Modifier,
     onPlay: (() -> Unit)? = null,
 ) {
+    val playLabel = stringResource(R.string.common_play)
+    val moveUp = stringResource(R.string.player_move_up)
+    val moveDown = stringResource(R.string.player_move_down)
     Row(
         modifier
             .fillMaxWidth()
-            .then(if (onPlay != null) Modifier.clickable(onClickLabel = "Play", onClick = onPlay) else Modifier)
+            .then(if (onPlay != null) Modifier.clickable(onClickLabel = playLabel, onClick = onPlay) else Modifier)
             .testTag(PlayerTags.QUEUE_ROW)
             .semantics {
                 // Dragging has no screen-reader equivalent; these do the same one step at a time.
                 customActions = buildList {
-                    if (canMoveUp) add(CustomAccessibilityAction("Move up") { onMoveBy(-1); true })
-                    if (canMoveDown) add(CustomAccessibilityAction("Move down") { onMoveBy(1); true })
+                    if (canMoveUp) add(CustomAccessibilityAction(moveUp) { onMoveBy(-1); true })
+                    if (canMoveDown) add(CustomAccessibilityAction(moveDown) { onMoveBy(1); true })
                 }
             }
             .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
@@ -218,7 +222,7 @@ private fun QueueRow(
         }
         if (editable) {
             IconButton(onClick = onRemove, enabled = canRemove) {
-                Icon(Icons.Filled.Close, contentDescription = "Remove ${track.title} from queue")
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.player_remove_from_queue, track.title))
             }
         }
     }

@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,12 @@ import app.granger.shell.rememberRailCover
 import app.granger.theme.MediaKind
 import app.granger.theme.MediaTile
 
+/** Search's English copy until search/ moves to resources (Plan L1 Task 2); the shelf shows [R.string.audiobooks_unknown_author]. */
 internal const val UNKNOWN_AUTHOR = "Unknown author"
+
+/** A book's author as shown: "Unknown author" when it has none. */
+@Composable
+internal fun authorOf(author: String): String = author.ifBlank { stringResource(R.string.audiobooks_unknown_author) }
 
 /** A square cover, or the themed tile with [title] and headphones when there's none (Plan U3c Decision 6). */
 @Composable
@@ -93,8 +99,8 @@ fun AudiobookShelfScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(loaded?.title.orEmpty()) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(loaded?.title?.resolve().orEmpty()) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
             )
         },
     ) { padding ->
@@ -102,7 +108,7 @@ fun AudiobookShelfScreen(
         if (ui.sections.isEmpty) {
             Box(Modifier.padding(padding)) {
                 EmptyMedia(
-                    "No audiobooks yet",
+                    stringResource(R.string.audiobooks_none_yet),
                     links = listOf(SourceLink.LIBRIVOX, SourceLink.ARCHIVE_ORG_SPOKEN),
                     onOpenSource = onOpenSource,
                     onMediaSettings = onMediaSettings,
@@ -113,7 +119,8 @@ fun AudiobookShelfScreen(
         // The grid already pads its edges by 12 dp; the row lines up with the list's 16 either way.
         val continueRow: @Composable (inset: Dp) -> Unit = { inset -> ContinueRow(ui.continueRow, inset, onBook) }
         val header: @Composable () -> Unit = {
-            ShelfHeader(ui.sort, AudiobookSort.entries, { it.label }, vm::setSort, view = view, onToggleView = vm::toggleView)
+            val sorts = AudiobookSort.entries.associateWith { stringResource(it.label) }
+            ShelfHeader(ui.sort, AudiobookSort.entries, { sorts.getValue(it) }, vm::setSort, view = view, onToggleView = vm::toggleView)
         }
         if (view == ShelfView.LIST) {
             ShelfList(
@@ -149,7 +156,7 @@ fun AudiobookShelfScreen(
 private fun ContinueRow(books: List<ShelfBook>, inset: Dp, onBook: (String) -> Unit) {
     Column(Modifier.padding(top = 8.dp, bottom = 8.dp)) {
         Text(
-            "Continue",
+            stringResource(R.string.audiobooks_continue),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(start = inset, bottom = 8.dp),
         )
@@ -164,12 +171,12 @@ private fun ContinueRow(books: List<ShelfBook>, inset: Dp, onBook: (String) -> U
 private fun AudiobookRow(item: ShelfBook, onClick: () -> Unit) {
     ShelfRow(
         title = item.book.title,
-        subtitle = item.book.author.ifBlank { UNKNOWN_AUTHOR },
+        subtitle = authorOf(item.book.author),
         cover = { AudiobookCover(item.book.coverPath, item.book.title, Modifier.size(ShelfCoverSize)) },
         onClick = onClick,
         dimmed = item.missing,
         detail = if (item.missing) {
-            { Text("Missing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
+            { Text(stringResource(R.string.audiobooks_missing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
         } else {
             null
         },
@@ -179,14 +186,14 @@ private fun AudiobookRow(item: ShelfBook, onClick: () -> Unit) {
                 {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
-                        Text("Finished", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.audiobooks_finished), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
             item.listening == Listening.IN_PROGRESS -> {
                 {
                     Text(
-                        "${(item.fraction * 100).roundToInt().coerceIn(1, 99)}%",
+                        stringResource(R.string.audiobooks_percent, (item.fraction * 100).roundToInt().coerceIn(1, 99)),
                         style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -203,12 +210,12 @@ private fun ShelfCell(item: ShelfBook, modifier: Modifier = Modifier, onClick: (
         LinearProgressIndicator(progress = { item.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp))
         Text(item.book.title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text(
-            item.book.author.ifBlank { UNKNOWN_AUTHOR }, style = MaterialTheme.typography.bodySmall,
+            authorOf(item.book.author), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
         val status = when {
-            item.missing -> "Missing"
-            item.listening == Listening.FINISHED -> "Finished"
+            item.missing -> stringResource(R.string.audiobooks_missing)
+            item.listening == Listening.FINISHED -> stringResource(R.string.audiobooks_finished)
             else -> null
         }
         if (status != null) {

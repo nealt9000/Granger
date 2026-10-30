@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import android.provider.DocumentsContract.Root
+import androidx.test.core.app.ApplicationProvider
 import app.granger.core.media.MediaManifest
 import app.granger.core.media.MediaManifests
 import app.granger.volume
@@ -72,6 +73,7 @@ class MediaDocumentsProviderTest {
             volumes = { listOf(volume(internal.path, "Internal storage")) },
             volumeKey = { "primary" },
             titleOf = { dir -> MediaManifests.read(dir)?.let(MediaManifests::displayTitle) },
+            shelfName = MediaSharing.shelfName(ApplicationProvider.getApplicationContext()),
         )
     }
 

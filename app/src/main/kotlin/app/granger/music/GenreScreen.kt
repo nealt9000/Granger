@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 
 /** One genre: the albums with songs in it, then those songs. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,8 +27,8 @@ fun GenreScreen(vm: MusicViewModel, name: String, nav: MusicNav) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(name) },
-                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(shownName(name)) },
+                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
             )
         },
     ) { padding ->
@@ -34,7 +36,7 @@ fun GenreScreen(vm: MusicViewModel, name: String, nav: MusicNav) {
         val source = MusicSources.genre(loaded.name)
         AlbumsAndSongs(
             Modifier.padding(padding),
-            sections = listOfNotNull(loaded.albums.takeIf { it.isNotEmpty() }?.let { "Albums" to it }),
+            sections = listOfNotNull(loaded.albums.takeIf { it.isNotEmpty() }?.let { stringResource(R.string.music_albums) to it }),
             songs = loaded.songs,
             vm = vm, dialogs = dialogs, nav = nav,
             onPlay = { i, shuffle -> vm.play(loaded.songs, i, source, shuffle) },

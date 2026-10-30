@@ -1,6 +1,8 @@
 package app.granger.audiobooks
 
 import app.granger.FakeShelves
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
@@ -110,7 +112,7 @@ class AudiobooksViewModelTest {
         )
 
         val shelf = vm().shelf.filterNotNull().filter { it.books.size == 6 }.first()
-        assertThat(shelf.title).isEqualTo(ALL_AUDIOBOOKS)
+        assertThat(shelf.title).isEqualTo(UiText.Res(R.string.audiobooks_all))
         assertThat(shelf.sort).isEqualTo(AudiobookSort.TITLE)
         // Every book A–Z, finished ones in their place and The Yak under Y (Plan LV Decision 7).
         assertThat(shelf.books.map { it.book.sourceRef })
@@ -126,7 +128,7 @@ class AudiobooksViewModelTest {
         )
         shelves.shelfList.value = listOf(Shelf(type, listOf(row)))
         val scoped = vm("c-mine").shelf.filterNotNull().filter { it.books.isNotEmpty() }.first()
-        assertThat(scoped.title).isEqualTo("Mine")
+        assertThat(scoped.title).isEqualTo(UiText.Raw("Mine"))
         assertThat(scoped.books.map { it.book.sourceRef }).containsExactly("alpha", "older").inOrder()
     }
 
@@ -190,7 +192,7 @@ class AudiobooksViewModelTest {
         val page = vm.book(b.id).filterNotNull().first()
         assertThat(page.progress.positionMs).isEqualTo(110_000L)
         assertThat(page.currentChapter).isEqualTo(2)
-        assertThat(page.playLabel).isEqualTo("Resume")
+        assertThat(page.playLabel).isEqualTo(R.string.audiobooks_resume)
     }
 
     @Test fun theBookInThePlayerPausesAndCarriesOnInPlace() = runTest(main.dispatcher) {
@@ -202,14 +204,14 @@ class AudiobooksViewModelTest {
         hub.ui.value = playingBook
         val vm = vm()
 
-        assertThat(vm.book(b.id).filterNotNull().first().playLabel).isEqualTo("Pause")
+        assertThat(vm.book(b.id).filterNotNull().first().playLabel).isEqualTo(R.string.common_pause)
         vm.play(b.id)
         advanceUntilIdle()
         // No reload from the saved position (20 s, behind the player's 30 s): only a pause.
         assertThat(hub.calls).containsExactly("playPause")
 
         hub.ui.value = playingBook.copy(playing = false)
-        assertThat(vm.book(b.id).filterNotNull().first { !it.playing }.playLabel).isEqualTo("Resume")
+        assertThat(vm.book(b.id).filterNotNull().first { !it.playing }.playLabel).isEqualTo(R.string.audiobooks_resume)
         vm.play(b.id)
         advanceUntilIdle()
         assertThat(hub.calls).containsExactly("playPause", "playPause")
@@ -242,7 +244,7 @@ class AudiobooksViewModelTest {
 
         val page = vm.book(b.id).filterNotNull().first { it.listening == Listening.FINISHED }
         assertThat(page.fraction).isEqualTo(1f)
-        assertThat(page.playLabel).isEqualTo("Play from start")
+        assertThat(page.playLabel).isEqualTo(R.string.audiobooks_play_from_start)
 
         vm.play(b.id)
         advanceUntilIdle()
@@ -319,7 +321,7 @@ class AudiobooksViewModelTest {
         val page = vm.book(b.id).filterNotNull().first { it.bookmarks.isNotEmpty() }
         assertThat(page.missing).isTrue()
         assertThat(page.playable).isFalse()
-        assertThat(page.playLabel).isEqualTo("Missing")
+        assertThat(page.playLabel).isEqualTo(R.string.audiobooks_missing)
         assertThat(page.bookmarks).containsExactly(mark)
         assertThat(page.progress.positionMs).isEqualTo(125_000L)
 

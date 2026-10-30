@@ -23,7 +23,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.library.PackStatus
 import app.granger.core.library.PlaylistItem
 
@@ -48,13 +50,13 @@ fun PlaylistScreen(vm: MusicViewModel, playlistId: Long, nav: MusicNav) {
         topBar = {
             TopAppBar(
                 title = { Text(loaded?.playlist?.name.orEmpty()) },
-                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
                 actions = {
                     if (loaded != null) Box {
-                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(menu, { menu = false }) {
-                            DropdownMenuItem(text = { Text("Rename") }, onClick = { menu = false; renaming = true })
-                            DropdownMenuItem(text = { Text("Delete") }, onClick = { menu = false; deleting = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.music_rename)) }, onClick = { menu = false; renaming = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.common_delete)) }, onClick = { menu = false; deleting = true })
                         }
                     }
                 },
@@ -72,14 +74,14 @@ fun PlaylistScreen(vm: MusicViewModel, playlistId: Long, nav: MusicNav) {
                     onShuffle = { vm.play(tracks, null, source, shuffle = true) },
                 )
             }
-            if (tracks.isEmpty()) item { Empty("No songs yet. Long-press a song or album to add it.") }
+            if (tracks.isEmpty()) item { Empty(stringResource(R.string.music_playlist_empty)) }
             // A song can be in a playlist twice, so rows are keyed by entry ordinal.
             val items = loaded.items
             itemsIndexed(items, key = { _, item -> "${item.ordinal}:${item.track.id}" }) { i, item ->
                 SongRow(item.track, vm, dialogs, nav, onPlay = { vm.play(tracks, i, source) }) { close ->
-                    if (i > 0) DropdownMenuItem(text = { Text("Move up") }, onClick = { close(); vm.moveInPlaylist(playlistId, item.ordinal, items[i - 1].ordinal) })
-                    if (i < items.lastIndex) DropdownMenuItem(text = { Text("Move down") }, onClick = { close(); vm.moveInPlaylist(playlistId, item.ordinal, items[i + 1].ordinal) })
-                    DropdownMenuItem(text = { Text("Remove from playlist") }, onClick = { close(); vm.removeFromPlaylist(playlistId, item.ordinal) })
+                    if (i > 0) DropdownMenuItem(text = { Text(stringResource(R.string.music_move_up)) }, onClick = { close(); vm.moveInPlaylist(playlistId, item.ordinal, items[i - 1].ordinal) })
+                    if (i < items.lastIndex) DropdownMenuItem(text = { Text(stringResource(R.string.music_move_down)) }, onClick = { close(); vm.moveInPlaylist(playlistId, item.ordinal, items[i + 1].ordinal) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.music_remove_from_playlist)) }, onClick = { close(); vm.removeFromPlaylist(playlistId, item.ordinal) })
                 }
             }
         }

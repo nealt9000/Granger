@@ -21,7 +21,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.granger.R
 import app.granger.core.library.Playlist
 import app.granger.library.NameDialog
 
@@ -32,9 +34,9 @@ fun AddToPlaylistSheet(playlists: List<Playlist>, onPick: (playlistId: Long) -> 
     var naming by rememberSaveable { mutableStateOf(false) }
     if (naming) {
         NameDialog(
-            title = "New playlist",
-            label = "Playlist name",
-            confirm = "Create",
+            title = stringResource(R.string.music_new_playlist),
+            label = stringResource(R.string.music_playlist_name),
+            confirm = stringResource(R.string.music_create),
             onConfirm = { onNew(it) },
             onDismiss = { naming = false },
         )
@@ -42,13 +44,13 @@ fun AddToPlaylistSheet(playlists: List<Playlist>, onPick: (playlistId: Long) -> 
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding()) {
-            Text("Add to playlist", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+            Text(stringResource(R.string.music_add_to_playlist), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
             LazyColumn {
                 item {
                     ListItem(
                         modifier = Modifier.clickable { naming = true },
                         leadingContent = { Icon(Icons.Filled.Add, contentDescription = null) },
-                        headlineContent = { Text("New playlist") },
+                        headlineContent = { Text(stringResource(R.string.music_new_playlist)) },
                     )
                 }
                 items(playlists, key = { it.id }) { playlist ->

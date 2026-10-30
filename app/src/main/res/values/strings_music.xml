@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Music shelf: its tabs, album, artist, genre, folder and playlist pages (Plan L1). -->
+
+    <!-- The unscoped Music view's title (a collection's name otherwise). -->
+    <string name="music_all">All music</string>
+
+    <!-- Tabs. -->
+    <string name="music_tab_albums">Albums</string>
+    <string name="music_tab_artists">Artists</string>
+    <string name="music_tab_songs">Songs</string>
+    <string name="music_tab_genres">Genres</string>
+    <string name="music_tab_playlists">Playlists</string>
+    <string name="music_tab_folders">Folders</string>
+
+    <!-- Sort orders for songs and albums. -->
+    <string name="music_sort_title">Title</string>
+    <string name="music_sort_artist">Artist</string>
+    <string name="music_sort_album">Album</string>
+    <string name="music_sort_year">Year</string>
+    <string name="music_sort_date_added">Date added</string>
+
+    <!-- An artist page's album groups, by release type. -->
+    <string name="music_release_albums">Albums</string>
+    <string name="music_release_eps">EPs</string>
+    <string name="music_release_singles">Singles</string>
+    <string name="music_release_compilations">Compilations</string>
+    <string name="music_release_live">Live</string>
+    <string name="music_release_soundtracks">Soundtracks</string>
+    <string name="music_release_others">Other releases</string>
+    <!-- An artist page's albums by others the artist is on. -->
+    <string name="music_appears_on">Appears on</string>
+    <!-- A heading over an artist's or genre's songs, and the Songs list's name in the player. -->
+    <string name="music_songs">Songs</string>
+    <!-- A heading over a genre's albums. -->
+    <string name="music_albums">Albums</string>
+
+    <!-- Placeholders for music with no tag. -->
+    <string name="music_unknown_artist">Unknown artist</string>
+    <string name="music_unknown_album">Unknown album</string>
+    <string name="music_unknown_genre">Unknown genre</string>
+
+    <!-- Empty lists. -->
+    <string name="music_none_yet">No music yet</string>
+    <string name="music_no_artists">No artists</string>
+    <string name="music_no_genres">No genres</string>
+    <string name="music_no_folders">No folders</string>
+    <string name="music_no_songs">No songs</string>
+    <string name="music_no_albums">No albums</string>
+    <string name="music_playlist_empty">No songs yet. Long-press a song or album to add it.</string>
+    <!-- Opens Settings → Music & audiobooks. -->
+    <string name="music_media_settings">Music &amp; audiobooks settings</string>
+
+    <plurals name="music_songs_count">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+    <!-- An artist's line: %1$s is a count of albums (3 albums), %2$s of songs (12 songs). -->
+    <string name="music_albums_and_songs">%1$s · %2$s</string>
+
+    <!-- Buttons and menus. -->
+    <string name="music_shuffle">Shuffle</string>
+    <string name="music_shuffle_all">Shuffle all</string>
+    <string name="music_play_next">Play next</string>
+    <string name="music_add_to_queue">Add to queue</string>
+    <string name="music_add_to_playlist_menu">Add to playlist…</string>
+    <string name="music_go_to_album">Go to album</string>
+    <!-- %1$s is an artist's name. -->
+    <string name="music_go_to">Go to %1$s</string>
+    <string name="music_move_to_collection">Move to collection…</string>
+    <!-- A song whose file is gone from the phone. -->
+    <string name="music_file_not_found">File not found</string>
+    <!-- A heading in an album with more than one disc. %1$d is the disc's number. -->
+    <string name="music_disc">Disc %1$d</string>
+
+    <!-- Playlists. -->
+    <string name="music_add_to_playlist">Add to playlist</string>
+    <string name="music_new_playlist">New playlist</string>
+    <string name="music_playlist_name">Playlist name</string>
+    <string name="music_create">Create</string>
+    <string name="music_rename">Rename</string>
+    <string name="music_rename_playlist">Rename playlist</string>
+    <string name="music_delete_playlist">Delete playlist?</string>
+    <!-- %1$s is the playlist's name. -->
+    <string name="music_delete_playlist_message">%1$s will be deleted. The songs stay on the phone.</string>
+    <string name="music_move_up">Move up</string>
+    <string name="music_move_down">Move down</string>
+    <string name="music_remove_from_playlist">Remove from playlist</string>
+</resources>

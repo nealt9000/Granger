@@ -1,6 +1,8 @@
 package app.granger.player
 
 import app.granger.MainDispatcherRule
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.speech.VoiceId
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -116,12 +118,14 @@ class PlayerViewModelTest {
 
         // A bookmark only with a book loaded, titled with the chapter and the time in it.
         hub.calls.clear()
-        vm.addBookmark()
+        var named: UiText? = null
+        vm.addBookmark { named = it; "named" }
         val book = audiobook("b")
         hub.ui.value = bookUi(book, chapter(book, 2, 600_000L, title = "The Storm"), chapterCount = 5, positionMs = 125_000L)
-        vm.addBookmark()
+        vm.addBookmark { named = it; "named" }
         testScheduler.advanceUntilIdle()
-        assertThat(hub.calls).containsExactly("bookmark:The Storm · 2:05")
+        assertThat(hub.calls).containsExactly("bookmark:named")
+        assertThat(named).isEqualTo(UiText.Res(R.string.player_bookmark_title, UiText.Raw("The Storm"), "2:05"))
     }
 
     @Test fun speedsAndSleepChoicesMatchTheSpec() {
