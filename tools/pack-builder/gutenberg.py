@@ -31,6 +31,11 @@ NO_PHRASING_CHILDREN = {"ul", "ol", "dl", "table", "thead", "tbody", "tfoot", "t
 NOTE_HEADING = re.compile(r"^\W*transcriber[’'`]?s?\s+notes?\W*$", re.I)
 COVER_ART = re.compile(r"\bcover[\s-]+(art|image|picture|illustration|design)|\bpublic domain\b", re.I)
 NOTE_CHARS = 400
+# Faded Page (Distributed Proofreaders Canada) opens its books with terms of use, a Canadian copyright warning
+# and a box of posting dates; Gutenberg copies them in. Only these exact phrases, near the start, count.
+FADED_PAGE = re.compile(r"made available at no cost and with very few\s+restrictions|in the Canadian public domain"
+                        r"|Faded Page eBook #|IF THE BOOK IS UNDER COPYRIGHT\s+IN YOUR COUNTRY")
+FADED_PAGE_BLOCK_CHARS = 600
 
 
 class CleaningError(ValueError):
@@ -163,6 +168,7 @@ def _drop_leftovers(root: Tag) -> None:
         if not shell.get_text().strip():
             shell.decompose()
     _drop_cover_notes(root)
+    _drop_faded_page_notices(root)
     for block in reversed(root.find_all(["div", "p"])):  # innermost first, so emptied wrappers go too
         if block.parent is None or block.parent.name in NO_PHRASING_CHILDREN or block.get_text().strip():
             continue
@@ -173,6 +179,27 @@ def _drop_leftovers(root: Tag) -> None:
                 block.insert_before(BeautifulSoup("", "lxml").new_tag("span", attrs={"id": block["id"]}))
             for span in children:
                 block.insert_before(span.extract())
+            block.decompose()
+
+
+def _drop_faded_page_notices(root: Tag) -> None:
+    """Removes Faded Page's notices near the start: each phrase's widest enclosing block of at most 600 characters."""
+    seen, found = 0, []
+    for string in root.find_all(string=True):
+        if seen > FRONT_MATTER_CHARS:
+            break
+        seen += len(string.strip())
+        if FADED_PAGE.search(" ".join(string.split())):
+            found.append(string)
+    for string in found:
+        if string.parent is None:
+            continue
+        block = None
+        for parent in string.parents:
+            if parent is root or len(parent.get_text().strip()) > FADED_PAGE_BLOCK_CHARS:
+                break
+            block = parent
+        if block is not None and not block.decomposed and FADED_PAGE.search(" ".join(block.get_text(" ").split())):
             block.decompose()
 
 

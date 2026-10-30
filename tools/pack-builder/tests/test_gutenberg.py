@@ -168,3 +168,28 @@ def test_transcribers_note_with_real_content_is_kept():
     assert "Obvious printer" in modern_body(**{"<h2>Chapter 5</h2>": note + "<h2>Chapter 5</h2>"}).get_text()
     inline = "<div><p>Transcriber's Note:</p><p>The cover of the first edition reads 'Tales'.</p></div>"
     assert "first edition" in modern_body(**{"<h2>Chapter 5</h2>": inline + "<h2>Chapter 5</h2>"}).get_text()
+
+
+FADED_PAGE = ('<p class="pindent">This ebook is made available at no cost and with very few\nrestrictions. These '
+              'restrictions apply only if (1) you make a change in the ebook, or (2) you are making commercial use of '
+              'the ebook. If either of these conditions applies, please contact a FP administrator before proceeding.</p>'
+              '<p class="pindent">This work is in the Canadian public domain, but may be under copyright in some '
+              "countries. If you live outside Canada, check your country's copyright laws. IF THE BOOK IS UNDER "
+              'COPYRIGHT IN YOUR COUNTRY, DO NOT DOWNLOAD OR REDISTRIBUTE THIS FILE.</p>'
+              '<div class="lgl"><p class="line0"><span class="it">Title:</span> Cakes and Ale</p>'
+              '<p class="line0"><span class="it">Date of first publication:</span> 1930</p>'
+              '<p class="line0"><span class="it">Date first posted:</span> July 31, 2017</p>'
+              '<p class="line0">Faded Page eBook #20170731</p></div>')
+
+
+def test_faded_page_notices_at_the_start_are_dropped():
+    body = modern_body(**{"<h2>Chapter 1</h2>": FADED_PAGE + "<h2>Chapter 1</h2>"})
+    text = body.get_text()
+    for words in ("made available", "Canadian", "DO NOT DOWNLOAD", "Date first posted", "Faded Page"):
+        assert words not in text
+    assert "Chapter 1" in text
+
+
+def test_faded_pages_in_the_text_are_kept():
+    line = "<p>Then we turn back to these faded pages, and read the quaintly earnest words.</p>"
+    assert "faded pages" in modern_body(**{"<h2>Chapter 1</h2>": line + "<h2>Chapter 1</h2>"}).get_text()
