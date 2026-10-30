@@ -106,6 +106,7 @@ def parse_rdf(data: bytes) -> Rdf:
 
 
 def _words(text: str) -> set[str]:
+    text = re.sub(r"[\u2010-\u2015\u2212]", " ", text)  # dashes part words, as a hyphen does ("I–VII")
     plain = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
     return set(re.sub(r"[^a-z0-9]+", " ", plain).split()) - STOP_WORDS
 

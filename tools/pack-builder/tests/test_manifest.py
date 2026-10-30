@@ -168,3 +168,11 @@ def test_pack_sections_is_read_and_must_be_true_or_false(tmp_path):
     assert manifest(tmp_path).works[0].pack_sections is False
     assert manifest(tmp_path, packSections=True).works[0].pack_sections is True
     assert any("packSections" in e for e in validate(manifest(tmp_path, packSections="yes"), rdf_ok))
+
+
+def test_title_check_treats_dashes_as_word_breaks(tmp_path):
+    def rdf(_):
+        return Rdf("The Metamorphoses of Ovid, Books VIII-XV", ["en"], PD)
+    assert validate(manifest(tmp_path, title="Metamorphoses, Books VIII–XV"), rdf) == []
+    assert validate(manifest(tmp_path, title="Metamorphoses, Books VIII—XV"), rdf) == []
+    assert validate(manifest(tmp_path, title="Metamorphoses, Books VIII–XVI"), rdf)
