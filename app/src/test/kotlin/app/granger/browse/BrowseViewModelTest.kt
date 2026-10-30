@@ -75,6 +75,13 @@ class BrowseViewModelTest {
         assertThat(ui.suggestions).isEmpty()
     }
 
+    @Test fun aGutenbergPackIsNotListed() {
+        // Its books are the way in, in the Library (Plan GB); a pack the user filed in a collection of their own stays out too.
+        val music = pack("u-m", "Music and books on music · Project Gutenberg").copy(name = "gutenberg_en_lcc-m")
+        val sections = browseSections(listOf(shelf("Literature", folder, row("Mine", "literature", music, userCreated = true))))
+        assertThat(sections.flatMap { it.packs }.map { it.pack.id }).containsExactly("u-wiki", "u-dev")
+    }
+
     @Test fun eachSectionShowsOnlyWhenItHoldsAPack() {
         assertThat(browseSections(listOf(shelf("Maps", row("OpenStreetMap", "maps", iceland)))).map { it.id }).containsExactly(MAPS_SECTION)
         assertThat(browseSections(listOf(shelf("Literature", folder))).map { it.id }).containsExactly(OTHER_SECTION)

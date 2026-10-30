@@ -18,6 +18,8 @@ import app.granger.core.library.BookPosition
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Filing
+import app.granger.core.library.GutenbergBooks
+import app.granger.core.library.isGutenberg
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -61,6 +63,8 @@ class CollectionViewModel(
     private val viewPrefs: LibraryViewPrefs = LibraryViewPrefs(),
     /** Where the books are filtered and sorted, off the main thread. */
     private val compute: CoroutineDispatcher = Dispatchers.Default,
+    /** "Make all searchable…" for a Gutenberg collection (Plan GB); null offers it nowhere. */
+    private val gutenberg: GutenbergShelf? = null,
 ) : ViewModel() {
     /** Null until loaded, and again if the collection goes away (emptied or deleted). */
     val ui: StateFlow<CollectionRow?> =
@@ -116,6 +120,34 @@ class CollectionViewModel(
     val superseded: StateFlow<Set<String>> = ui
         .map { row -> row?.packs.orEmpty().filter(Filing::isSuperseded).map { it.id }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /**
+     * A Gutenberg collection's header (Plan GB Decision 5): its pack, when installed, for the overflow; how many books it
+     * lists and how many are searchable in full; and the "Make all searchable…" run, if one is going. Null for any
+     * other collection.
+     */
+    val gutenbergHeader: StateFlow<GutenbergHeader?> = combine(
+        ui, library.packs, gutenberg?.progress ?: flowOf(emptyMap()),
+    ) { row, packs, runs ->
+        val key = row?.collection?.defaultKey?.takeIf(Filing::isGutenbergCollection) ?: return@combine null
+        val pack = packs.firstOrNull { it.isGutenberg && Filing.defaultKey(it) == key }
+        val packName = pack?.name ?: row.books.firstOrNull()?.let(GutenbergBooks::packNameOf)
+        GutenbergHeader(pack, row.books.size, row.books.count { it.searchableInFull }, packName?.let(runs::get))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** What "Make all searchable…" would take here; null when it isn't offered. */
+    suspend fun searchableCost(): SearchableCost? {
+        val shelf = gutenberg ?: return null
+        val books = ui.value?.books ?: return null
+        return shelf.cost(books)
+    }
+
+    /** Copies out and indexes every book here not yet on the phone, in the app's scope; leaving doesn't stop it. */
+    fun makeAllSearchable() {
+        val books = ui.value?.books.orEmpty()
+        val packName = gutenbergHeader.value?.pack?.name ?: books.firstOrNull()?.let(GutenbergBooks::packNameOf) ?: return
+        gutenberg?.makeSearchable(packName, books)
+    }
 
     /** Every media type and collection a pack or collection can move to. */
     val targets: StateFlow<List<Shelf>> =
@@ -198,4 +230,19 @@ class CollectionViewModel(
         const val QUERY = "query"
         const val CATEGORY = "category"
     }
+}
+
+/** A Gutenberg collection's [pack] (null once it's gone), its [books], how many are [searchable] in full, and a run's [progress]. */
+data class GutenbergHeader(val pack: Pack?, val books: Int, val searchable: Int, val progress: SearchableProgress? = null) {
+    /** "Project Gutenberg · 1,284 books". */
+    val provenance: String get() =
+        "${app.granger.core.library.GutenbergNames.PROVIDER} · ${number(books)} ${if (books == 1) "book" else "books"}"
+
+    /** "37 searchable in full". */
+    val searchableText: String get() = "${number(searchable)} searchable in full"
+
+    /** "Project Gutenberg · 1,284 books · 37 searchable in full". */
+    val text: String get() = "$provenance · $searchableText"
+
+    private fun number(n: Int) = java.text.NumberFormat.getIntegerInstance().format(n)
 }

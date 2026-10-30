@@ -147,7 +147,7 @@ def pin(entry, row, fetch=http_get):
               if u.startswith("https://") and urllib.parse.urlparse(u).hostname in STABLE_MIRRORS]
     result = {
         "id": f"{name}_{flavour}" if flavour else name,
-        "title": row.get("title", entry["title"]),
+        "title": gutenberg_title(name, entry["summary"]) if row.get("family") == "gutenberg" else row.get("title", entry["title"]),
         "description": row.get("description", entry["summary"]),
         "category": row["category"],
         "language": entry["language"],
@@ -168,6 +168,24 @@ def pin(entry, row, fetch=http_get):
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
     return result
+
+
+# Plan GB: the two everything-packs, whose summaries describe the producer rather than a subject.
+GUTENBERG_EVERYTHING = {
+    "gutenberg_en_all": "Every English book",
+    "gutenberg_mul_all": "Every book, all languages",
+}
+
+
+def gutenberg_title(name, summary):
+    """
+    A Project Gutenberg pack's title (Plan GB Decision 2): "{Subject} · Project Gutenberg", its subject the OPDS
+    summary with its first letter capitalised. Every pack is titled "Project Gutenberg Library" in Kiwix's catalog.
+    The app's `GutenbergNames` follows the same rule for an installed pack.
+    """
+    subject = GUTENBERG_EVERYTHING.get(name) or summary.strip()
+    subject = subject[:1].upper() + subject[1:]
+    return f"{subject} · Project Gutenberg" if subject else "Project Gutenberg"
 
 
 def family_of(entry, families):

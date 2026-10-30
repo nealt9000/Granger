@@ -7,12 +7,17 @@ enum class BookOrigin(val key: String) {
     ARCHIVE_ORG("archive-org"),
     /** A PDF inside a Kiwix pack, opened from an article: a hidden row, so places and the rail work; not in My books. */
     PACK("pack"),
-
     /**
      * The PDF an ebook was made from (Plan IA), opened from the ebook's Original pages: a hidden row like [PACK]. Its ref
      * is the ebook's id without `book:`.
      */
     PAGES("pages"),
+
+    /**
+     * A book in a Project Gutenberg pack (Plan GB), ref its Gutenberg id: one row whichever pack or snapshot holds it.
+     * Listed from the pack's own list; its EPUB is copied out of the pack the first time it's opened.
+     */
+    GUTENBERG("gutenberg"),
 }
 
 object BookIds {

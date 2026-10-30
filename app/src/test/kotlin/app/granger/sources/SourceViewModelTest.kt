@@ -135,6 +135,41 @@ class SourceViewModelTest {
         assertThat(ids(CatalogScope.MODELS)).containsExactly("e2b")
     }
 
+    private fun gutenberg(lcc: String, subject: String, size: Long, featured: Boolean = false) = packEntry(
+        "gutenberg_en_$lcc", category = "Literature & Drama", size = size,
+        urls = listOf("https://download.kiwix.org/zim/gutenberg/gutenberg_en_${lcc}_2026-03.zim"), featured = featured,
+        zimName = "gutenberg_en_$lcc",
+    ).copy(title = "$subject · Project Gutenberg", family = "gutenberg")
+
+    @Test fun projectGutenbergListsTheSubjectsAToZThenEverythingAndKiwixDoesnt() = runTest(main.dispatcher) {
+        val music = gutenberg("lcc-m", "Music and books on music", 3_994_272_104)
+        val philosophy = gutenberg("lcc-b", "Philosophy, psychology, religion", 6_365_165_314, featured = true)
+        val fineArts = gutenberg("lcc-n", "Fine arts", 22_752_881_356)
+        val english = gutenberg("all", "Every English book", 221_251_590_584)
+        val every = packEntry(
+            "gutenberg_mul_all", size = 253_055_616_960, urls = listOf("https://download.kiwix.org/zim/gutenberg/gutenberg_mul_all_2026-03.zim"),
+            zimName = "gutenberg_mul_all",
+        ).copy(title = "Every book, all languages · Project Gutenberg", family = "gutenberg")
+        val wiki = kiwix("wiki", "Reference")
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(every, wiki, music, english, philosophy, fineArts)))
+        library.packList.value = listOf(pack("u-gutenberg_en_lcc-m").copy(name = "gutenberg_en_lcc-m"))
+
+        val ui = viewModel(CatalogScope.GUTENBERG).ui.value
+        assertThat(ui.sections.map { it.title }).containsExactly("Subjects", "Everything").inOrder()
+        assertThat(ui.categories).isEmpty()
+        assertThat(ui.presets).isEmpty()
+        // A–Z by subject, each its subject alone on this screen, with its size and whether it's on the phone.
+        val subjects = ui.sections[0].rows
+        assertThat(subjects.map { it.title }).containsExactly("Fine arts", "Music and books on music", "Philosophy, psychology, religion").inOrder()
+        assertThat(subjects.map { it.sizeBytes }).containsExactly(22_752_881_356, 3_994_272_104, 6_365_165_314).inOrder()
+        assertThat(subjects[1].status).isEqualTo(ItemStatus.Installed)
+        assertThat(subjects[1].packId).isEqualTo("u-gutenberg_en_lcc-m")
+        assertThat(ui.sections[1].rows.map { it.title }).containsExactly("Every English book", "Every book, all languages").inOrder()
+
+        // Kiwix's list no longer shows them, featured or not.
+        assertThat(viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("wiki")
+    }
+
     private fun kiwix(id: String, category: String = "Q&A", featured: Boolean = false, zimName: String = "n-$id") =
         packEntry(id, category = category, urls = listOf("https://download.kiwix.org/zim/$id.zim"), featured = featured, zimName = zimName)
 
@@ -248,6 +283,9 @@ class SourceViewModelTest {
     }
 
     @Test fun presetsOnlyOnGranger() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(books = listOf(bookEntry("emma")), presets = listOf(Preset("granger-classics", "Granger Classics", listOf("emma")))),
+        )
         assertThat(viewModel(CatalogScope.GRANGER).ui.value.presets).hasSize(1)
         assertThat(viewModel(CatalogScope.KIWIX).ui.value.presets).isEmpty()
         assertThat(viewModel(CatalogScope.MODELS).ui.value.presets).isEmpty()
@@ -433,18 +471,22 @@ class SourceViewModelTest {
     }
 
     @Test fun presetsCountByKindAndSayWhatsOnThePhone() = runTest(main.dispatcher) {
-        val starter = viewModel().ui.value.presets.single()
-        assertThat(listOf(starter.packs, starter.books, starter.others)).containsExactly(3, 0, 1).inOrder()
-        assertThat(PresetText.summary(starter)).isEqualTo("3 packs and 1 model · ${app.granger.formatBytes(5_000)}")
-        assertThat(PresetText.status(starter)).isEqualTo("4 of 4 to get")
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                books = listOf(bookEntry("emma"), bookEntry("hamlet"), bookEntry("pan")),
+                presets = listOf(Preset("granger-classics", "Granger Classics", listOf("emma", "hamlet", "pan"))),
+            ),
+        )
+        val classics = viewModel().ui.value.presets.single()
+        assertThat(listOf(classics.packs, classics.books, classics.others)).containsExactly(0, 3, 0).inOrder()
+        assertThat(PresetText.summary(classics)).isEqualTo("3 books · ${app.granger.formatBytes(1_500)}")
+        assertThat(PresetText.status(classics)).isEqualTo("3 of 3 to get")
 
-        library.packList.value = listOf(pack("u-med"))
-        downloads.list.value = listOf(record("top", DownloadState.RUNNING))
-        val partway = viewModel().ui.value.presets.single()
-        assertThat(PresetText.status(partway)).isEqualTo("1 downloading · 2 of 4 to get")
+        val book = app.granger.core.downloads.ItemKind.BOOK
+        downloads.list.value = listOf(record("emma", DownloadState.INSTALLED, kind = book), record("hamlet", DownloadState.RUNNING, kind = book))
+        assertThat(PresetText.status(viewModel().ui.value.presets.single())).isEqualTo("1 downloading · 1 of 3 to get")
 
-        library.packList.value = listOf(pack("u-med"), pack("u-top"), pack("u-voyage"))
-        downloads.list.value = listOf(record("e2b", DownloadState.INSTALLED, sha256 = e2b.sha256))
+        downloads.list.value = listOf("emma", "hamlet", "pan").map { record(it, DownloadState.INSTALLED, kind = book) }
         assertThat(PresetText.status(viewModel().ui.value.presets.single())).isEqualTo("All on this phone")
     }
 
@@ -460,15 +502,44 @@ class SourceViewModelTest {
     @Test fun classicsPresetComesFirst() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(
             catalog = catalogOf(
-                packs = listOf(med),
-                books = listOf(bookEntry("emma")),
+                books = listOf(bookEntry("emma"), bookEntry("hamlet")),
                 presets = listOf(
-                    Preset("starter", "Starter", listOf("med")),
-                    Preset("granger-classics", "Granger Classics", listOf("emma")),
+                    Preset("tragedies", "Tragedies", listOf("hamlet")),
+                    Preset("granger-classics", "Granger Classics", listOf("emma", "hamlet")),
                 ),
             ),
         )
-        assertThat(viewModel().ui.value.presets.map { it.id }).containsExactly("granger-classics", "starter").inOrder()
+        assertThat(viewModel().ui.value.presets.map { it.id }).containsExactly("granger-classics", "tragedies").inOrder()
+    }
+
+    /**
+     * Neal (Plan GB walkthrough): "Kiwix wikis are still showing in get more books". Under Books, Granger Classics lists
+     * Granger's books and only sets of books (Starter, Efficient and Comprehensive bring the wikis), and Project
+     * Gutenberg lists only Gutenberg packs.
+     */
+    @Test fun underBooksOnlyGrangerBooksAndGutenbergPacksAreOffered() = runTest(main.dispatcher) {
+        val wiki = kiwix("wikipedia_en_medicine_nopic", "Medical", featured = true, zimName = "wikipedia_en_medicine")
+        val cooking = kiwix("based.cooking_en_all", "How-to", zimName = "based.cooking_en_all")
+        val music = gutenberg("lcc-m", "Music and books on music", 3_994_272_104)
+        val byName = packEntry("gutenberg_fr_all", urls = listOf("https://download.kiwix.org/zim/gutenberg/gutenberg_fr_all.zim"), zimName = "gutenberg_fr_all")
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                packs = listOf(wiki, cooking, music, byName),
+                models = listOf(e2b),
+                books = listOf(bookEntry("emma"), bookEntry("hamlet")),
+                presets = listOf(
+                    Preset("starter", "Starter", listOf("e2b", wiki.id, "emma")),
+                    Preset("efficient", "Efficient start", listOf(wiki.id, cooking.id, "emma", "hamlet")),
+                    Preset("granger-classics", "Granger Classics: all books", listOf("emma", "hamlet")),
+                ),
+            ),
+        )
+        val classics = viewModel(CatalogScope.GRANGER).ui.value
+        assertThat(classics.sections.flatMap { it.rows }.map { it.id }).containsExactly("emma", "hamlet")
+        assertThat(classics.presets.map { it.id }).containsExactly("granger-classics")
+        val gutenberg = viewModel(CatalogScope.GUTENBERG).ui.value
+        assertThat(gutenberg.sections.flatMap { it.rows }.map { it.id }).containsExactly(music.id, byName.id)
+        assertThat(gutenberg.presets).isEmpty()
     }
 
     @Test fun installedTabIncludesBooks() = runTest(main.dispatcher) {
@@ -492,8 +563,6 @@ class SourceViewModelTest {
         library.packList.value = listOf(pack("u-med"))
         downloads.list.value = listOf(record("top", DownloadState.RUNNING))
         val vm = viewModel()
-        assertThat(vm.ui.value.presets.single().remainingCount).isEqualTo(2)
-        assertThat(vm.ui.value.presets.single().remainingBytes).isEqualTo(3_000)
         vm.getPreset("starter")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued.map { it.first }).containsExactly("e2b", "voyage").inOrder()
@@ -569,8 +638,6 @@ class SourceViewModelTest {
     @Test fun weakPhonesCannotGetModels() = runTest(main.dispatcher) {
         val models = viewModel(CatalogScope.MODELS, DeviceTier.LIBRARY_ONLY).ui.value
         assertThat(models.sections.single().rows.single().status).isEqualTo(ItemStatus.NeedsMoreMemory)
-        val granger = viewModel(tier = DeviceTier.LIBRARY_ONLY).ui.value
-        assertThat(granger.presets.single().remainingCount).isEqualTo(3)
     }
 
     // --- Plan H1: the Kiwix list filtered to a readiness domain ---

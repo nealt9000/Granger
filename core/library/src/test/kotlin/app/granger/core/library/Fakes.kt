@@ -25,13 +25,22 @@ class FakeZimArchive(
     name: String = uuid,
     private val html: Map<String, String> = emptyMap(),
     var random: String? = null,
+    description: String = "About $title",
+    /** Entries of any type: path to (MIME type, content), beside [paths]' HTML ones. */
+    private val files: Map<String, Pair<String, ByteArray>> = emptyMap(),
 ) : ZimArchive {
-    override val metadata = ZimMetadata(title, "About $title", "eng", "2026-10-15", name)
+    override val metadata = ZimMetadata(title, description, "eng", "2026-10-15", name)
     var closed = false
     var searches = 0
 
-    override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths }
-    override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html", html[it].orEmpty().toByteArray()) }
+    /** Every path [read] was asked for, in order. */
+    val reads = mutableListOf<String>()
+
+    override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths || it in files }
+    override fun read(path: String) = resolvePath(path)?.let {
+        reads += it
+        files[it]?.let { (mime, bytes) -> ZimItem(it, mime, bytes) } ?: ZimItem(it, "text/html", html[it].orEmpty().toByteArray())
+    }
 
     override fun randomPath(): String? = random
 

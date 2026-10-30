@@ -139,6 +139,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import app.granger.core.books.TextQuote
@@ -292,6 +293,7 @@ fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = t
 internal fun routeOf(link: GetMoreLink): Any = when (link) {
     GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
     GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
+    GetMoreLink.GUTENBERG -> SourceRoute(CatalogScope.GUTENBERG)
     GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
     GetMoreLink.LIBRIVOX -> LibriVoxRoute
     GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
@@ -616,12 +618,31 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
     /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page; [linkText] may name it. */
     suspend fun openPackDocument(packId: String, path: String, linkText: String) {
+        // A Gutenberg pack's EPUB opens as its book row (Plan GB), copied out by the reader on its first open.
+        if (path.endsWith(".epub", ignoreCase = true)) {
+            val book = container.gutenbergBooks.bookFor(packId, path)
+            if (book == null) {
+                android.widget.Toast.makeText(appContext, "Couldn't open this book: it isn't in this pack's list.", android.widget.Toast.LENGTH_LONG).show()
+                return
+            }
+            val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
+            nav.showTab(tab, keepCurrent = true)
+            return
+        }
         when (val opened = container.packDocuments.open(packId, path, linkText)) {
             is PackDocuments.Opened.Ready -> {
                 val tab = container.sessions.openTab(opened.book.id, "", opened.book.title).let { container.sessions.tab(it) } ?: return
                 nav.showTab(tab, keepCurrent = true)
             }
             is PackDocuments.Opened.Failed -> android.widget.Toast.makeText(appContext, opened.message, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** Opens the Library collection of an installed Gutenberg pack's books (Plan GB Decision 4). */
+    fun openGutenbergCollection(packId: String) {
+        scope.launch {
+            val pack = container.library.packs.first().firstOrNull { it.id == packId } ?: return@launch
+            nav.navigate(CollectionRoute("c:${app.granger.core.library.Filing.defaultKey(pack)}"))
         }
     }
 
@@ -809,6 +830,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.shelves, container.library, container.sessions,
                             container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
                             container.catalog, createSavedStateHandle(), container.libraryViews,
+                            gutenberg = container.gutenbergShelf,
                         )
                     },
                     onOpened = ::showTab,
@@ -908,7 +930,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.readingPrefs, container.appScope,
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
-                            restore = container.packDocuments::restore, savedPlace = container.voicePlace,
+                            restore = container::restoreBook, savedPlace = container.voicePlace,
                             pdfColour = PdfColour::isColour,
                         )
                     },
@@ -1030,7 +1052,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
-                    onOpenPack = ::openPack,
+                    // An installed Gutenberg pack opens as its books, in the Library (Plan GB).
+                    onOpenPack = { packId -> if (source == CatalogScope.GUTENBERG) openGutenbergCollection(packId) else openPack(packId) },
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->

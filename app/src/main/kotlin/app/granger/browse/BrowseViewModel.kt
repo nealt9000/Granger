@@ -11,6 +11,7 @@ import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VectorDownloads
 import app.granger.core.library.Filing
+import app.granger.core.library.isGutenberg
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.Shelf
@@ -70,6 +71,8 @@ fun browseSections(
     val byDomain = LinkedHashMap<String, LinkedHashMap<String, Pack>>()
     val maps = LinkedHashMap<String, Pack>()
     for (shelf in shelves) for (row in shelf.allCollections) for (pack in row.packs) {
+        // A Gutenberg pack's way in is its books, in the Library (Plan GB Decision 1).
+        if (pack.isGutenberg) continue
         val isMap = shelf.mediaType.id == MAPS_TYPE_ID || Filing.defaultKey(pack) == MAPS_TYPE_ID
         if (isMap) { maps.putIfAbsent(pack.id, pack); continue }
         val domain = domainOf(pack)?.takeIf { it.isNotBlank() && it in known } ?: OTHER_SECTION

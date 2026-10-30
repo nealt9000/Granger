@@ -50,6 +50,7 @@ import app.granger.reader.PackDocuments
 import app.granger.settings.SharedVoicePrefs
 import app.granger.settings.VoicePrefs
 import android.util.Log
+import app.granger.core.library.Book
 import app.granger.core.library.BookIndex
 import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
@@ -153,6 +154,10 @@ import java.io.File
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 import app.granger.core.library.BookIds
+import app.granger.core.library.GutenbergBooks
+import app.granger.core.library.isGutenberg
+import app.granger.library.GutenbergCovers
+import app.granger.library.GutenbergShelf
 import app.granger.core.library.DensePassageFinder
 import app.granger.core.library.CombinedVectorSources
 import app.granger.core.library.DirectoryVectorSources
@@ -173,8 +178,12 @@ open class GrangerApp : Application(), DownloadsHost {
         PdfSupport.init(this)
         if (Features.PLAYER) startMedia()
         startVectorDownloads()
+        startGutenbergSync()
         resumeDownloads()
     }
+
+    /** Gutenberg packs' books follow their packs (Plan GB). JVM tests swap this out (`TestGrangerApp`). */
+    protected open fun startGutenbergSync() = container.followGutenberg()
 
     /** Search vectors follow their pack or book (Plan R1 Task 10). JVM tests swap this out (`TestGrangerApp`). */
     protected open fun startVectorDownloads() = container.followVectors()
@@ -290,6 +299,51 @@ class AppContainer(context: Context) {
 
     /** PDFs inside Kiwix packs, copied out to the internal volume's `books/packs` when tapped (Plan P2). */
     val packDocuments = PackDocuments(bookshelf, library::archive, dir = { File(bookDirs().first(), "packs") })
+
+    /** The books of the installed Project Gutenberg packs (Plan GB), copied out to the internal volume's `books/gutenberg` when opened. */
+    val gutenbergBooks = GutenbergBooks(
+        libraryDb, library::archive, dir = { File(bookDirs().first(), "gutenberg") }, coversDir = File(context.filesDir, "covers"),
+    )
+
+    /** "Make all searchable…" for Gutenberg collections (Plan GB): runs on the app scope, so leaving the screen doesn't stop it. */
+    val gutenbergShelf by lazy {
+        GutenbergShelf(gutenbergBooks::restore, bookIndex::indexPending, dir = { File(bookDirs().first(), "gutenberg") }, appScope)
+    }
+
+    /** Gutenberg covers read from their packs before a book's first open, kept in the cache. */
+    val gutenbergCovers = GutenbergCovers({ library.packs.first() }, library::archive, File(context.cacheDir, "gutenberg-covers"))
+
+    /**
+     * Brings back a book's missing file for the reader: a pack document copied out again, or a Gutenberg book copied out
+     * of its pack, which is then indexed (Plan GB Decision 6: its full text joins Search and Ask after the first open).
+     */
+    suspend fun restoreBook(book: Book): Boolean =
+        packDocuments.restore(book) || gutenbergBooks.restore(book).also { if (it) appScope.launch { bookIndex.indexPending() } }
+
+    /**
+     * Keeps the Gutenberg books' rows following the installed Gutenberg packs (Plan GB Decision 3): synced on start, on
+     * an install, a new snapshot, a pack going missing and a removal, off the main thread.
+     */
+    fun followGutenberg() {
+        appScope.launch {
+            library.packs
+                .map { packs -> packs.filter { it.isGutenberg } }
+                .distinctUntilChanged { old, new -> old.map { it.id to it.status } == new.map { it.id to it.status } }
+                .collectLatest { packs ->
+                    try {
+                        val started = SystemClock.elapsedRealtime()
+                        gutenbergBooks.sync(packs)
+                        if (packs.isNotEmpty()) {
+                            Log.i("Granger", "Gutenberg sync: ${packs.size} packs in ${SystemClock.elapsedRealtime() - started} ms")
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w("Granger", "Couldn't list the Gutenberg packs' books", e)
+                    }
+                }
+        }
+    }
 
     /** Set by the first activity start in this process: the book scan and index pass run once per process. */
     val booksScannedThisProcess = AtomicBoolean(false)
