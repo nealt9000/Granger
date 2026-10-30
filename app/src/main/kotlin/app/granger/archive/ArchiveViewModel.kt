@@ -196,6 +196,9 @@ class ArchiveViewModel(
     /** Installed items' [TextKind]s read from their sidecars on [io]; a missing sidecar isn't cached, so a later one is seen. */
     private val sidecarKinds = ConcurrentHashMap<String, TextKind>()
 
+    /** Offers read from items' metadata this session: a search row shows a set's parts once its sheet has been opened. */
+    private val knownOffers = ConcurrentHashMap<String, Offer>()
+
     /** Audio groups' file counts, read once from their manifests on [io]: the ledger drops a cancelled file's record. */
     private val fileCounts = ConcurrentHashMap<String, Int>()
 
@@ -257,7 +260,7 @@ class ArchiveViewModel(
             val sheet = try {
                 val item = client.item(identifier)
                 if (audio) Sheet(identifier, loading = false, item = item, offer = null, error = null, audio = ArchiveAudioOffers.choose(item))
-                else Sheet(identifier, loading = false, item = item, offer = ArchiveOffers.choose(item), error = null)
+                else Sheet(identifier, loading = false, item = item, offer = ArchiveOffers.choose(item).also { knownOffers[identifier] = it }, error = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -662,7 +665,7 @@ class ArchiveViewModel(
                     identifier = doc.identifier,
                     title = doc.title.ifBlank { doc.identifier },
                     details = listOfNotNull(doc.creator.ifBlank { null }, doc.year?.toString()).joinToString(" · "),
-                    preview = ArchiveOffers.preview(doc),
+                    preview = knownOffers[doc.identifier] ?: ArchiveOffers.preview(doc),
                     status = statusOf(doc.identifier, ours),
                 )
             }
