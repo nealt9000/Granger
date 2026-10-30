@@ -154,8 +154,11 @@ import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.ResearchViewModel
 
-/** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
-@Serializable data class LibraryRoute(val notice: String? = null)
+/** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading; [noticeTitle] is the item it names. */
+@Serializable data class LibraryRoute(val notice: app.granger.launch.LibraryNotice? = null, val noticeTitle: String? = null)
+
+/** The Library route's notice in words. */
+internal fun LibraryRoute.noticeText(): UiText? = notice?.let { UiText.Res(it.text, *listOfNotNull(noticeTitle).toTypedArray()) }
 
 /** Home (Plan H2): the readiness strip, Continue and the feeds. A rail tool, pushed over the Library. */
 @Serializable object HomeRoute
@@ -736,7 +739,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     fun resumePlay(item: RailEntry.Play) {
         scope.launch {
             val notice = railViewModel.resume(item) ?: return@launch
-            nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
+            nav.navigate(LibraryRoute(notice, item.title)) { popUpTo<LibraryRoute> { inclusive = true } }
         }
     }
 
@@ -779,7 +782,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     scope.launch {
                         // All six are taken: say to unpin one first.
                         val notice = railViewModel.pin(entry) ?: return@launch
-                        Toast.makeText(appContext, notice, Toast.LENGTH_LONG).show()
+                        Toast.makeText(appContext, notice.resolve(appContext), Toast.LENGTH_LONG).show()
                     }
                 },
                 onUnpin = railViewModel::unpin,
@@ -834,7 +837,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.appScope,
                         )
                     },
-                    notice = backStackEntry.toRoute<LibraryRoute>().notice,
+                    notice = backStackEntry.toRoute<LibraryRoute>().noticeText(),
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
@@ -1053,7 +1056,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onGetLibrarian = {
                         container.appScope.launch {
                             container.librarian.get()?.let { problem ->
-                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem, Toast.LENGTH_LONG).show() }
+                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem.resolve(appContext), Toast.LENGTH_LONG).show() }
                             }
                         }
                     },

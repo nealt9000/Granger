@@ -65,7 +65,7 @@ import app.granger.sources.GetMoreLink
 fun LibraryScreen(
     viewModel: LibraryViewModel,
     /** Shown once as a snackbar, e.g. why the app didn't resume reading. */
-    notice: String?,
+    notice: UiText?,
     onOpenCollection: (collectionId: String) -> Unit,
     onSearch: () -> Unit,
     onReadiness: () -> Unit,
@@ -86,15 +86,15 @@ fun LibraryScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
     var noticeShown by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(notice) {
         if (notice != null && !noticeShown) {
             noticeShown = true
-            snackbar.showSnackbar(notice)
+            snackbar.showSnackbar(notice.resolve(context))
         }
     }
     val importNotice by viewModel.notice.collectAsStateWithLifecycle()
-    val context = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(importNotice) {
         val text = importNotice ?: return@LaunchedEffect
         snackbar.showSnackbar(text.resolve(context))

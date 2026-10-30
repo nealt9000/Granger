@@ -345,7 +345,7 @@ class RailViewModelTest {
         vm.ui.first { it.recent.size == 7 }
         for (i in 1..6) assertThat(vm.pin(RailEntry.Search("q$i", i.toLong()))).isNull()
         assertThat(vm.pin(RailEntry.Search("q7", 7))).isEqualTo(RailViewModel.PINS_FULL)
-        assertThat(RailViewModel.PINS_FULL).contains("Unpin one first")
+        assertThat(RailViewModel.PINS_FULL).isEqualTo(app.granger.UiText.Plural(app.granger.R.plurals.shell_pins_full, app.granger.core.library.MAX_RAIL_PINS, app.granger.core.library.MAX_RAIL_PINS))
         assertThat(vm.ui.first { it.entries.count { e -> e.pinned } == 6 }.entries.last()).isEqualTo(RailEntry.Search("q7", 7))
     }
 
@@ -530,8 +530,7 @@ class RailViewModelTest {
         media.trackList.value = listOf(song("a", folder = "Old/", status = PackStatus.MISSING))
         for (key in listOf("album:nobody|gone|music/", "playlist:42", "folder:Old/", "artist:Nobody", "audiobook:phone:gone", "nonsense")) {
             val notice = vm.resume(RailEntry.Play(key, "Gone thing", 1))
-            assertThat(notice).isNotNull()
-            assertThat(notice).contains("Gone thing")
+            assertThat(notice).isEqualTo(app.granger.launch.LibraryNotice.CANT_PLAY)
         }
         assertThat(hub.calls).isEmpty()
     }
