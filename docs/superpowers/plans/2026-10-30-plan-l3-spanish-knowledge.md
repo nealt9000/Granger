@@ -212,22 +212,24 @@ A domain with no list for a language is empty in that language.
 
 **Files:** `Catalog.kt`, `CatalogParser.kt`, a new `Languages.kt`, and tests.
 
-- [ ] **Step 1: `Languages`.** Add `normalise(code)` (ISO 639-2/3 → 639-1, from `Locale.getISOLanguages()` and `isO3Language`; comma lists kept in order), `codes(entryLanguage): List<String>`, and `has(entryLanguage, code)`. These are pure JVM functions.
-- [ ] **Step 2: Model.**
+- [x] **Step 1: `Languages`.** Add `normalise(code)` (ISO 639-2/3 → 639-1, from `Locale.getISOLanguages()` and `isO3Language`; comma lists kept in order), `codes(entryLanguage): List<String>`, and `has(entryLanguage, code)`. These are pure JVM functions.
+- [x] **Step 2: Model.**
   - `PackEntry.language` and `BookEntry.language` are normalised in the parser.
   - `Domain`, `Preset` and `UseCase` gain `i18n: Map<String, Copy>` and `languages: Map<String, Tiers>` (or `Items`).
   - `Preset` gains `language = "en"`.
   - The parser checks each language's tokens as it checks English ones, and drops a language whose lists are empty after checking.
-- [ ] **Step 3: Helpers.** Add:
+- [x] **Step 3: Helpers.** Add:
   - `Domain.essential(lang)`, `Domain.comprehensive(lang)` (English lists for `en`)
   - `Copy`-picking `title(appLang)`
   - `Catalog.tierPresets(lang)`
   - `Catalog.languages`: the codes that have tiers
-- [ ] **Step 4: Tests.**
+- [x] **Step 4: Tests.**
   - An old catalog (no `languages`, no `i18n`, `eng` codes) parses to the same English model as today.
   - A Spanish domain with an unknown token drops only that token.
   - `i18n` falls back to English.
-- [ ] **Step 5:** Commit.
+  - Also: `PackEntry` gains `i18n`, `setTitle` and `setDescription` (the generator writes them on curated packs and set slices), and `localised()` picks a field of the app language's copy, else the entry's own text. A Spanish pack's own title is Spanish with its English in `i18n.en`, so English isn't short-circuited.
+  - `./gradlew testDebugUnitTest`: 2563 (was 2553; 53 skipped, 0 failed). `:app` unchanged at 1406.
+- [x] **Step 5:** Commit.
 
 ## Task 6: Knowledge languages (app)
 

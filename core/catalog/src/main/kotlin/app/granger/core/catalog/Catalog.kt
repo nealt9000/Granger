@@ -26,7 +26,69 @@ data class Catalog(
     /** Release builds list only models that passed the eval (spec §3 "Catalog"). */
     fun forBuild(includeUnevaluatedModels: Boolean): Catalog =
         if (includeUnevaluatedModels) this else copy(models = models.filter { it.evalPassed })
+
+    /**
+     * The knowledge languages the readiness model has tiers for (Plan L3): English first when its lists name anything,
+     * then each other language in the order the domains name them. Empty without a readiness model.
+     */
+    val languages: List<String>
+        get() {
+            val domains = readiness?.domains.orEmpty()
+            val out = LinkedHashSet<String>()
+            if (domains.any { it.comprehensive.isNotEmpty() }) out += ENGLISH
+            domains.forEach { d -> d.languages.forEach { (code, tiers) -> if (tiers.comprehensive.isNotEmpty()) out += code } }
+            return out.toList()
+        }
+
+    /**
+     * The start choices' presets for knowledge language [lang] (Plan L3), Efficient then Comprehensive: `efficient` and
+     * `comprehensive` for English, `efficient-<lang>` and `comprehensive-<lang>` otherwise. A missing one is left out.
+     */
+    fun tierPresets(lang: String): List<Preset> {
+        val code = Languages.normalise(lang)
+        return TIER_PRESETS.mapNotNull { id ->
+            val wanted = if (code == ENGLISH) id else "$id-$code"
+            presets.firstOrNull { it.id == wanted && it.language == code }
+        }
+    }
+
+    companion object {
+        /** The generated tier presets' English ids (Plan H1); another language's carry "-<code>". */
+        val TIER_PRESETS = listOf("efficient", "comprehensive")
+    }
 }
+
+/** English, the catalog's own language: its lists and copy are the plain fields (Plan L3). */
+const val ENGLISH = "en"
+
+/**
+ * Catalog copy in another language (Plan L3): the fields a domain, preset, use case, set or curated pack writes, blank
+ * where that language has none. The app shows the app language's copy, else the catalog's own ([localised]).
+ */
+@Serializable
+data class Copy(
+    val title: String = "",
+    val blurb: String = "",
+    /** A set's slice: its label, and the set's name and line (Plan WF's sets, in this language). */
+    val setLabel: String = "",
+    val setTitle: String = "",
+    val setDescription: String = "",
+)
+
+/**
+ * The field [pick] of [i18n]'s copy for app language [appLang] when it has one, else [own], the catalog's own text.
+ * That is English for generator copy; a Spanish pack's own title is Spanish, with its English in `i18n.en`.
+ */
+fun localised(i18n: Map<String, Copy>, appLang: String, own: String, pick: (Copy) -> String = Copy::title): String =
+    i18n[Languages.normalise(appLang)]?.let(pick)?.ifBlank { null } ?: own
+
+/** A readiness domain's lists in one language (Plan L3). */
+@Serializable
+data class Tiers(val essential: List<String> = emptyList(), val comprehensive: List<String> = emptyList())
+
+/** A use case's items in one language (Plan L3). */
+@Serializable
+data class Items(val items: List<String> = emptyList())
 
 /** Anything the downloader can fetch and verify. */
 sealed interface CatalogItem {
@@ -94,7 +156,15 @@ data class PackEntry(
     val articles: Long = 0,
     /** A test pack (the 2 MB Ray Charles sample): kept in the catalog, left off the lists. */
     val sample: Boolean = false,
+    /** A slice's set name and line (Plan L3), blank in older catalogs. */
+    val setTitle: String = "",
+    val setDescription: String = "",
+    /** The curated title and the set's copy in other languages, by language code (Plan L3); empty in older catalogs. */
+    val i18n: Map<String, Copy> = emptyMap(),
 ) : CatalogItem {
+    /** The title in app language [appLang], else the catalog's own (Kiwix's, or the curated one). */
+    fun title(appLang: String): String = localised(i18n, appLang, title)
+
     /** A bundle of books (Gutenberg, nautilus): listed under Books and opened as a collection (Plan KB). */
     val isBookPack: Boolean get() = content == CONTENT_BOOKS
 
@@ -204,7 +274,17 @@ data class VoiceEntry(
 }
 
 @Serializable
-data class Preset(val id: String, val title: String, val items: List<String>)
+data class Preset(
+    val id: String,
+    val title: String,
+    val items: List<String>,
+    /** The knowledge language of a tier or collection preset (Plan L3); English in older catalogs. */
+    val language: String = ENGLISH,
+    val i18n: Map<String, Copy> = emptyMap(),
+) {
+    /** The title in app language [appLang], else English. */
+    fun title(appLang: String): String = localised(i18n, appLang, title)
+}
 
 /** The readiness model (Plan H1, spec §3): the knowledge domains in screen order, each with its tier items. */
 @Serializable
@@ -231,7 +311,22 @@ data class Domain(
     val essential: List<String> = emptyList(),
     /** All installed → Comprehensive. Includes [essential]. */
     val comprehensive: List<String> = emptyList(),
-)
+    /** The title in other languages (Plan L3); empty in older catalogs. */
+    val i18n: Map<String, Copy> = emptyMap(),
+    /** The lists in other languages, by code (Plan L3); English stays in [essential] and [comprehensive]. */
+    val languages: Map<String, Tiers> = emptyMap(),
+) {
+    /** The essential tier in knowledge language [lang]; empty for a language with none. */
+    fun essential(lang: String): List<String> =
+        Languages.normalise(lang).let { if (it == ENGLISH) essential else languages[it]?.essential.orEmpty() }
+
+    /** The comprehensive tier in knowledge language [lang]; empty for a language with none. */
+    fun comprehensive(lang: String): List<String> =
+        Languages.normalise(lang).let { if (it == ENGLISH) comprehensive else languages[it]?.comprehensive.orEmpty() }
+
+    /** The title in app language [appLang], else English. */
+    fun title(appLang: String): String = localised(i18n, appLang, title)
+}
 
 /** Onboarding's tables (Plan H3, spec §6). */
 @Serializable
@@ -245,7 +340,24 @@ data class Onboarding(
 
 /** A use-case chip: what it adds, as readiness-style tokens the parser has resolved. */
 @Serializable
-data class UseCase(val id: String, val title: String, val blurb: String = "", val items: List<String> = emptyList())
+data class UseCase(
+    val id: String,
+    val title: String,
+    val blurb: String = "",
+    val items: List<String> = emptyList(),
+    /** The title and blurb in other languages (Plan L3); empty in older catalogs. */
+    val i18n: Map<String, Copy> = emptyMap(),
+    /** The items in other languages, by code (Plan L3); English stays in [items]. */
+    val languages: Map<String, Items> = emptyMap(),
+) {
+    /** The items in knowledge language [lang]; empty when the use case isn't offered in it. */
+    fun items(lang: String): List<String> =
+        Languages.normalise(lang).let { if (it == ENGLISH) items else languages[it]?.items.orEmpty() }
+
+    fun title(appLang: String): String = localised(i18n, appLang, title)
+
+    fun blurb(appLang: String): String = localised(i18n, appLang, blurb, Copy::blurb)
+}
 
 /** A subject under this share new to a slice of its set is inside it (Plan WF Decision 5). */
 const val COVERED_SHARE = 0.05

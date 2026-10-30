@@ -391,4 +391,125 @@ class CatalogParserTest {
         assertThat(wrongType.books.map { it.id }).containsExactly("gc-hamlet")
         assertThat(wrongType.packs.single().vectors).isNull()
     }
+
+    // --- Plan L3: languages ---
+
+    private fun esPack(id: String, domain: String) = pack(id, "wikipedia", domain).replace("\"language\": \"eng\"", "\"language\": \"spa\"")
+
+    private fun spanishCatalog(domains: String, useCases: String = "", presets: String = "") = """
+        {"formatVersion": 1, "generatedAt": "2026-10-30T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine")}, ${esPack("wikipedia_es_medicine_maxi", "medicine")},
+                   ${pack("so", "stack_exchange", "technology").replace("\"language\": \"eng\"", "\"language\": \"eng,spa\"")}],
+         "books": [${book("gc-bible", "thought")}],
+         "presets": [$presets],
+         "readiness": {"domains": [$domains]}${if (useCases.isEmpty()) "" else ", \"onboarding\": {\"useCases\": [$useCases]}"}}
+    """.trimIndent().toByteArray()
+
+    private val spanishDomains = """
+        {"id": "medicine", "title": "Medicine & first aid", "essential": ["med"], "comprehensive": [],
+         "i18n": {"spa": {"title": "Medicina y primeros auxilios"}},
+         "languages": {"es": {"essential": ["wikipedia_es_medicine_maxi", "wikipedia_es_atlantis"], "comprehensive": ["so"]}}},
+        {"id": "thought", "title": "Thought", "essential": ["@granger-classics"], "comprehensive": [],
+         "languages": {"es": {"essential": ["nope"], "comprehensive": []}, "en": {"essential": ["med"]}}}
+    """
+
+    @Test fun anOldCatalogParsesToTheSameEnglishModel() {
+        val old = ok(parse(readinessCatalog(domains)))
+        assertThat(old.packs.map { it.language }).containsExactly("en", "en").inOrder()
+        assertThat(old.books.map { it.language }).containsExactly("en", "en")
+        val medicine = old.readiness!!.domains.first()
+        assertThat(medicine.i18n).isEmpty()
+        assertThat(medicine.languages).isEmpty()
+        assertThat(medicine.essential("en")).isEqualTo(medicine.essential)
+        assertThat(medicine.comprehensive("eng")).isEqualTo(medicine.comprehensive)
+        assertThat(medicine.essential("es")).isEmpty()
+        assertThat(old.languages).containsExactly("en")
+        val preset = ok(parse(catalogJson())).presets.single()
+        assertThat(preset.language).isEqualTo("en")
+        assertThat(preset.i18n).isEmpty()
+        assertThat(preset.title("es")).isEqualTo("Starter")
+        val pack = ok(parse(catalogJson())).packs.single()
+        assertThat(pack.language).isEqualTo("en")
+        assertThat(pack.i18n).isEmpty()
+        assertThat(pack.setTitle).isEmpty()
+    }
+
+    @Test fun aSpanishDomainDropsOnlyItsUnknownTokens() {
+        val catalog = ok(parse(spanishCatalog(spanishDomains)))
+        val medicine = catalog.readiness!!.domains.single { it.id == "medicine" }
+        assertThat(medicine.essential("es")).containsExactly("wikipedia_es_medicine_maxi")
+        assertThat(medicine.comprehensive("es")).containsExactly("wikipedia_es_medicine_maxi", "so").inOrder()
+        assertThat(medicine.essential).containsExactly("med")
+        // A language whose lists are empty after checking is dropped, and English never comes from `languages`.
+        assertThat(catalog.readiness!!.domains.single { it.id == "thought" }.languages).isEmpty()
+        assertThat(catalog.languages).containsExactly("en", "es").inOrder()
+    }
+
+    @Test fun packAndBookLanguagesAreNormalised() {
+        val catalog = ok(parse(spanishCatalog(spanishDomains)))
+        assertThat(catalog.packs.map { it.language }).containsExactly("en", "es", "en,es").inOrder()
+        assertThat(Languages.has(catalog.packs.last().language, "es")).isTrue()
+    }
+
+    @Test fun i18nFallsBackToEnglish() {
+        val catalog = ok(parse(spanishCatalog(spanishDomains)))
+        val medicine = catalog.readiness!!.domains.single { it.id == "medicine" }
+        // The code is normalised ("spa" → "es").
+        assertThat(medicine.title("es")).isEqualTo("Medicina y primeros auxilios")
+        assertThat(medicine.title("es-MX")).isEqualTo("Medicina y primeros auxilios")
+        assertThat(medicine.title("en")).isEqualTo("Medicine & first aid")
+        assertThat(medicine.title("fr")).isEqualTo("Medicine & first aid")
+        assertThat(catalog.readiness!!.domains.single { it.id == "thought" }.title("es")).isEqualTo("Thought")
+    }
+
+    @Test fun tierPresetsArePickedByLanguage() {
+        val presets = """
+            {"id": "efficient", "title": "Efficient start", "items": ["med"], "i18n": {"es": {"title": "Comienzo eficiente"}}},
+            {"id": "comprehensive", "title": "Comprehensive library", "items": ["med", "so"]},
+            {"id": "efficient-es", "title": "Efficient start", "items": ["wikipedia_es_medicine_maxi"], "language": "es"},
+            {"id": "comprehensive-es", "title": "Comprehensive library", "items": ["wikipedia_es_medicine_maxi", "so"], "language": "spa"},
+            {"id": "efficient-fr", "title": "Efficient start", "items": ["med"]}
+        """
+        val catalog = ok(parse(spanishCatalog(spanishDomains, presets = presets)))
+        assertThat(catalog.tierPresets("en").map { it.id }).containsExactly("efficient", "comprehensive").inOrder()
+        assertThat(catalog.tierPresets("es").map { it.id }).containsExactly("efficient-es", "comprehensive-es").inOrder()
+        assertThat(catalog.tierPresets("es")[1].language).isEqualTo("es")
+        // A preset whose language doesn't match its id isn't a tier preset.
+        assertThat(catalog.tierPresets("fr")).isEmpty()
+        assertThat(catalog.tierPresets("en").first().title("es")).isEqualTo("Comienzo eficiente")
+        assertThat(catalog.tierPresets("en")[1].title("es")).isEqualTo("Comprehensive library")
+    }
+
+    @Test fun useCasesCarryTheirItemsAndCopyPerLanguage() {
+        val useCases = """
+            {"id": "medical", "title": "Medical work", "blurb": "Clinical.", "items": ["med"],
+             "i18n": {"es": {"title": "Trabajo sanitario"}},
+             "languages": {"es": {"items": ["wikipedia_es_medicine_maxi", "nope", "wikipedia_es_medicine_maxi"]}}},
+            {"id": "faith", "title": "Faith", "items": ["@granger-classics"], "languages": {"es": {"items": ["nope"]}}}
+        """
+        val onboarding = ok(parse(spanishCatalog(spanishDomains, useCases))).onboarding!!
+        val (medical, faith) = onboarding.useCases
+        assertThat(medical.items("es")).containsExactly("wikipedia_es_medicine_maxi")
+        assertThat(medical.items("en")).containsExactly("med")
+        assertThat(medical.title("es")).isEqualTo("Trabajo sanitario")
+        assertThat(medical.blurb("es")).isEqualTo("Clinical.")
+        // Nothing Spanish resolves: not offered in Spanish.
+        assertThat(faith.languages).isEmpty()
+        assertThat(faith.items("es")).isEmpty()
+    }
+
+    @Test fun aSliceCarriesItsSetCopy() {
+        val extra = ""","set": "wikipedia_es", "setRank": 1, "setLabel": "Todo", "setTitle": "Wikipedia en español",
+            "setDescription": "La enciclopedia libre.", "i18n": {"en": {"title": "Wikipedia in Spanish: Everything",
+            "setLabel": "Everything", "setTitle": "Wikipedia in Spanish"}}"""
+        val pack = ok(parse(catalogJson(packTitle = "Wikipedia en español: Todo", packExtra = extra))).packs.single()
+        assertThat(pack.setTitle).isEqualTo("Wikipedia en español")
+        assertThat(pack.setDescription).isEqualTo("La enciclopedia libre.")
+        // A Spanish pack's own title is Spanish; its English is in i18n.en.
+        assertThat(pack.title("en")).isEqualTo("Wikipedia in Spanish: Everything")
+        assertThat(pack.title("es")).isEqualTo("Wikipedia en español: Todo")
+        assertThat(localised(pack.i18n, "en", pack.setLabel, Copy::setLabel)).isEqualTo("Everything")
+        assertThat(localised(pack.i18n, "es", pack.setLabel, Copy::setLabel)).isEqualTo("Todo")
+        assertThat(localised(pack.i18n, "en", pack.setDescription, Copy::setDescription)).isEqualTo("La enciclopedia libre.")
+    }
 }
