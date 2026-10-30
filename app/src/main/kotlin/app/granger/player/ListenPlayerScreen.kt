@@ -1,5 +1,6 @@
 package app.granger.player
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -37,9 +38,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
@@ -85,7 +89,7 @@ fun ListenPlayerScreen(
         contentColor = MaterialTheme.colorScheme.onBackground,
     ) {
         Column(Modifier.fillMaxSize()) {
-            PlayerTopBar(topLabel(tab, media, live, ui.now, saved), onClose)
+            PlayerTopBar(topLabel(tab, media, live, ui.now, saved).resolve(), onClose)
             ListenTabs(tab, media, viewModel::selectTab)
             Box(Modifier.fillMaxWidth().weight(1f)) {
                 when (tab) {
@@ -138,21 +142,21 @@ private fun MediaTab(mode: PlayerMode, live: Boolean, ui: PlayerUi, queue: List<
 internal fun NowPlaying.Voice.musicUi(ui: PlayerUi): PlayerUi =
     PlayerUi(music!!, playing = musicPlaying, positionMs = musicPositionMs, durationMs = musicDurationMs, sleepRemainingMs = ui.sleepRemainingMs)
 
-private fun topLabel(tab: ListenTab, media: PlayerMode, live: Boolean, now: NowPlaying, saved: SavedModes): String = when {
+private fun topLabel(tab: ListenTab, media: PlayerMode, live: Boolean, now: NowPlaying, saved: SavedModes): UiText = when {
     tab == ListenTab.READER -> when {
-        now is NowPlaying.Voice -> if (now.ended) "Read aloud · finished" else "Reading aloud"
-        else -> "Read aloud"
+        now is NowPlaying.Voice -> UiText.Res(if (now.ended) R.string.player_top_read_aloud_finished else R.string.player_top_reading_aloud)
+        else -> UiText.Res(R.string.player_top_read_aloud)
     }
     media == PlayerMode.MUSIC -> when {
-        live && now is NowPlaying.Music -> "Now playing · ${now.index + 1} of ${now.queueSize}"
-        now is NowPlaying.Voice && now.music != null -> now.music.let { m -> "Under the voice · ${m!!.index + 1} of ${m.queueSize}" }
-        saved.music != null -> saved.music!!.let { "Paused · ${it.index + 1} of ${it.queue.size}" }
-        else -> "Music"
+        live && now is NowPlaying.Music -> UiText.Res(R.string.player_top_now_playing, now.index + 1, now.queueSize)
+        now is NowPlaying.Voice && now.music != null -> now.music.let { m -> UiText.Res(R.string.player_top_under_voice, m!!.index + 1, m.queueSize) }
+        saved.music != null -> saved.music!!.let { UiText.Res(R.string.player_top_paused, it.index + 1, it.queue.size) }
+        else -> UiText.Res(R.string.player_music)
     }
     else -> when {
-        live -> "Audiobook"
-        saved.book != null -> "Audiobook · paused"
-        else -> "Audiobooks"
+        live -> UiText.Res(R.string.player_audiobook)
+        saved.book != null -> UiText.Res(R.string.player_top_audiobook_paused)
+        else -> UiText.Res(R.string.player_audiobooks)
     }
 }
 
@@ -167,18 +171,19 @@ private fun ListenTabs(tab: ListenTab, media: PlayerMode, onSelect: (ListenTab) 
     PrimaryTabRow(selectedTabIndex = tab.ordinal, containerColor = MaterialTheme.colorScheme.background) {
         for (t in ListenTab.entries) {
             Tab(
-                selected = tab == t, onClick = { onSelect(t) }, text = { Text(tabTitle(t, media)) },
+                selected = tab == t, onClick = { onSelect(t) }, text = { Text(stringResource(tabTitle(t, media))) },
                 modifier = Modifier.testTag(if (t == ListenTab.READER) ListenTabTags.READER else ListenTabTags.MEDIA),
             )
         }
     }
 }
 
-internal fun tabTitle(tab: ListenTab, media: PlayerMode): String = when (tab) {
-    ListenTab.READER -> "Reader"
+@StringRes
+internal fun tabTitle(tab: ListenTab, media: PlayerMode): Int = when (tab) {
+    ListenTab.READER -> R.string.player_tab_reader
     ListenTab.MEDIA -> when (media) {
-        PlayerMode.MUSIC -> "Music"
-        PlayerMode.AUDIOBOOK -> "Audiobook"
+        PlayerMode.MUSIC -> R.string.player_music
+        PlayerMode.AUDIOBOOK -> R.string.player_audiobook
     }
 }
 
@@ -190,7 +195,7 @@ private fun NothingPlayed(mode: PlayerMode, onShelf: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("Nothing played yet", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.player_nothing_played), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         ShelfLink(mode, onShelf)
     }
 }
@@ -199,15 +204,16 @@ private fun NothingPlayed(mode: PlayerMode, onShelf: () -> Unit) {
 @Composable
 internal fun ShelfLink(mode: PlayerMode, onClick: () -> Unit) {
     TextButton(onClick = onClick) {
-        Text(shelfLabel(mode))
+        Text(stringResource(shelfLabel(mode)))
         Spacer(Modifier.size(4.dp))
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
     }
 }
 
-internal fun shelfLabel(mode: PlayerMode): String = when (mode) {
-    PlayerMode.MUSIC -> "Music shelf"
-    PlayerMode.AUDIOBOOK -> "Audiobooks shelf"
+@StringRes
+internal fun shelfLabel(mode: PlayerMode): Int = when (mode) {
+    PlayerMode.MUSIC -> R.string.player_music_shelf
+    PlayerMode.AUDIOBOOK -> R.string.player_audiobooks_shelf
 }
 
 /** The player's bar: close (back to the mini-player) and a small label. */
@@ -217,7 +223,7 @@ internal fun PlayerTopBar(label: String, onClose: () -> Unit) {
     TopAppBar(
         title = { Text(label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
         navigationIcon = {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Close player") }
+            IconButton(onClick = onClose) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.player_close)) }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
     )

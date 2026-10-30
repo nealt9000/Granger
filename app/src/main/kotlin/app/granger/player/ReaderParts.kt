@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -84,7 +85,7 @@ internal fun Sentences(voice: NowPlaying.Voice, progress: VoiceProgress?) {
             maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth().testTag(ReaderTags.PREVIOUS),
         )
         Text(
-            if (voice.ended) "Finished reading" else current, style = MaterialTheme.typography.titleLarge,
+            if (voice.ended) stringResource(R.string.player_finished_reading) else current, style = MaterialTheme.typography.titleLarge,
             maxLines = 6, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth().testTag(ReaderTags.SENTENCE),
         )
         Text(
@@ -100,9 +101,10 @@ internal fun Sentences(voice: NowPlaying.Voice, progress: VoiceProgress?) {
 internal fun SpeedRow(speed: Float, onSpeed: (Float) -> Unit) {
     var value by remember(speed) { mutableFloatStateOf(snapVoiceSpeed(speed)) }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Speed", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Text(stringResource(R.string.player_speed), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Text(speedLabel(value), style = MaterialTheme.typography.titleMedium)
     }
+    val speedName = stringResource(R.string.player_reading_speed)
     Slider(
         value = value,
         onValueChange = { value = snapVoiceSpeed(it) },
@@ -110,7 +112,7 @@ internal fun SpeedRow(speed: Float, onSpeed: (Float) -> Unit) {
         valueRange = PlayerViewModel.VOICE_SPEEDS.first()..PlayerViewModel.VOICE_SPEEDS.last(),
         steps = PlayerViewModel.VOICE_SPEEDS.size - 2,
         colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
-        modifier = Modifier.fillMaxWidth().testTag(ReaderTags.SPEED).semantics { contentDescription = "Reading speed" },
+        modifier = Modifier.fillMaxWidth().testTag(ReaderTags.SPEED).semantics { contentDescription = speedName },
     )
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         PlayerViewModel.VOICE_PRESETS.forEach { preset ->
@@ -136,7 +138,7 @@ internal fun VoiceRow(voices: List<Voice>, chosen: VoiceId, onVoice: (VoiceId) -
             onValueChange = {},
             readOnly = true,
             singleLine = true,
-            label = { Text("Voice") },
+            label = { Text(stringResource(R.string.player_voice)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = open) },
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).testTag(ReaderTags.VOICE),
         )
@@ -144,7 +146,7 @@ internal fun VoiceRow(voices: List<Voice>, chosen: VoiceId, onVoice: (VoiceId) -
             first.forEach { v -> VoiceOption(v, v.id == chosen) { open = false; if (v.id != chosen) onVoice(v.id) } }
             if (system.isNotEmpty()) {
                 Text(
-                    "System voices", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+                    stringResource(R.string.player_system_voices), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag(ReaderTags.SYSTEM_VOICES),
                 )
                 system.forEach { v -> VoiceOption(v, v.id == chosen) { open = false; if (v.id != chosen) onVoice(v.id) } }
@@ -159,7 +161,7 @@ private fun VoiceOption(voice: Voice, reading: Boolean, onClick: () -> Unit) {
     DropdownMenuItem(
         text = { Text(voice.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         onClick = onClick,
-        trailingIcon = if (reading) ({ Icon(Icons.Filled.Check, contentDescription = "Reading") }) else null,
+        trailingIcon = if (reading) ({ Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.player_reading)) }) else null,
         modifier = Modifier.testTag(ReaderTags.VOICE_OPTION),
     )
 }
@@ -168,13 +170,14 @@ private fun VoiceOption(voice: Voice, reading: Boolean, onClick: () -> Unit) {
 @Composable
 internal fun MusicRow(music: NowPlaying.Music, playing: Boolean, mixLevel: Float, onMix: (Float) -> Unit, onPlayPause: () -> Unit, onNext: () -> Unit) {
     var level by remember(mixLevel) { mutableFloatStateOf(mixLevel.coerceIn(0f, 1f)) }
-    Text("Music under the voice", style = MaterialTheme.typography.bodyLarge)
+    val mixName = stringResource(R.string.player_music_under_voice)
+    Text(mixName, style = MaterialTheme.typography.bodyLarge)
     Slider(
         value = level,
         onValueChange = { level = it; onMix(it) },
         valueRange = 0f..1f,
         colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
-        modifier = Modifier.fillMaxWidth().testTag(ReaderTags.MIX).semantics { contentDescription = "Music under the voice" },
+        modifier = Modifier.fillMaxWidth().testTag(ReaderTags.MIX).semantics { contentDescription = mixName },
     )
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Icon(painterResource(R.drawable.ic_music_note), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -187,10 +190,10 @@ internal fun MusicRow(music: NowPlaying.Music, playing: Boolean, mixLevel: Float
             )
         }
         IconButton(onClick = onPlayPause, modifier = Modifier.testTag(ReaderTags.MUSIC_PLAY_PAUSE)) {
-            Icon(painterResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play), contentDescription = if (playing) "Pause music" else "Play music")
+            Icon(painterResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play), contentDescription = stringResource(if (playing) R.string.player_pause_music else R.string.player_play_music))
         }
         IconButton(onClick = onNext, modifier = Modifier.testTag(ReaderTags.MUSIC_NEXT)) {
-            Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next track")
+            Icon(painterResource(R.drawable.ic_skip_next), contentDescription = stringResource(R.string.player_next_track))
         }
     }
     Spacer(Modifier.height(0.dp))

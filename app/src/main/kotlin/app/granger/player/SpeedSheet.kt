@@ -23,10 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.granger.R
 import kotlin.math.roundToInt
 
 /** [speed] snapped to the sheet's 0.1 steps within 0.5–3.0×. */
@@ -44,14 +46,17 @@ fun SpeedSheet(speed: Float, onSpeed: (Float) -> Unit, onDismiss: () -> Unit) {
             Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Playback speed", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.player_playback_speed), style = MaterialTheme.typography.titleMedium)
+            val slower = stringResource(R.string.player_slower)
+            val faster = stringResource(R.string.player_faster)
+            val speedName = stringResource(R.string.player_playback_speed)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = { onSpeed(snapSpeed(value - 0.1f)) }, enabled = value > PlayerViewModel.SPEEDS.first()) {
-                    Text("−", modifier = Modifier.semantics { contentDescription = "Slower" })
+                    Text("−", modifier = Modifier.semantics { contentDescription = slower })
                 }
                 Text(speedLabel(value), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.width(80.dp))
                 OutlinedButton(onClick = { onSpeed(snapSpeed(value + 0.1f)) }, enabled = value < PlayerViewModel.SPEEDS.last()) {
-                    Text("+", modifier = Modifier.semantics { contentDescription = "Faster" })
+                    Text("+", modifier = Modifier.semantics { contentDescription = faster })
                 }
             }
             Slider(
@@ -61,7 +66,7 @@ fun SpeedSheet(speed: Float, onSpeed: (Float) -> Unit, onDismiss: () -> Unit) {
                 valueRange = PlayerViewModel.SPEEDS.first()..PlayerViewModel.SPEEDS.last(),
                 steps = PlayerViewModel.SPEEDS.size - 2,
                 colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Playback speed" },
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = speedName },
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PRESETS.forEach { preset ->

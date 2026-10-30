@@ -26,8 +26,8 @@ class VoiceButtonTest {
 
     @Test fun oneSetOfGlyphsEverywhere() {
         // Plan U2 Decision 6: headphones to start, then pause or play; Stop is its own button.
-        assertThat(VoiceButton.IDLE.iconAndLabel()).isEqualTo(app.granger.R.drawable.ic_headphones to "Listen")
-        assertThat(VoiceButton.READING.iconAndLabel()).isEqualTo(app.granger.R.drawable.ic_pause to "Pause")
-        assertThat(VoiceButton.PAUSED.iconAndLabel()).isEqualTo(app.granger.R.drawable.ic_play to "Play")
+        assertThat(VoiceButton.IDLE.iconAndLabel()).isEqualTo(app.granger.R.drawable.ic_headphones to app.granger.R.string.player_listen)
+        assertThat(VoiceButton.READING.iconAndLabel()).isEqualTo(app.granger.R.drawable.ic_pause to app.granger.R.string.common_pause)
+        assertThat(VoiceButton.PAUSED.iconAndLabel()).isEqualTo(app.granger.R.drawable.ic_play to app.granger.R.string.common_play)
     }
 }

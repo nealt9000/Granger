@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The players: Listen's Reader and Music/Audiobook tabs, the mini-player and their sheets (Plan L1). -->
+
+    <!-- A chapter with no title of its own. %1$d is its number. -->
+    <string name="player_chapter_number">Chapter %1$d</string>
+    <!-- The audiobook player's chapter line: %1$s the chapter's name, %2$d its number, %3$d how many the book has. -->
+    <string name="player_chapter_of">%1$s · %2$d of %3$d</string>
+    <!-- How far through the whole book: %1$s and %2$s are times (1:23:45), %3$d a percentage. -->
+    <string name="player_book_progress">Book: %1$s of %2$s · %3$d%%</string>
+    <!-- A bookmark's title: %1$s the chapter's name, %2$s the time in it. -->
+    <string name="player_bookmark_title">%1$s · %2$s</string>
+
+    <!-- The voice's state under the title in the mini-player. -->
+    <string name="player_reading">Reading</string>
+    <string name="player_finished_reading">Finished reading</string>
+    <!-- %1$s is the section being read, such as a chapter or an article's heading. -->
+    <string name="player_reading_section">Reading · %1$s</string>
+    <string name="player_finished_reading_section">Finished reading · %1$s</string>
+
+    <!-- The player's top bar label. -->
+    <string name="player_top_read_aloud">Read aloud</string>
+    <string name="player_top_read_aloud_finished">Read aloud · finished</string>
+    <string name="player_top_reading_aloud">Reading aloud</string>
+    <!-- %1$d is the song's place in the queue, %2$d the queue's length. -->
+    <string name="player_top_now_playing">Now playing · %1$d of %2$d</string>
+    <!-- Music playing under the voice. %1$d is the song's place in the queue, %2$d the queue's length. -->
+    <string name="player_top_under_voice">Under the voice · %1$d of %2$d</string>
+    <string name="player_top_paused">Paused · %1$d of %2$d</string>
+    <string name="player_top_audiobook_paused">Audiobook · paused</string>
+    <string name="player_music">Music</string>
+    <string name="player_audiobook">Audiobook</string>
+    <string name="player_audiobooks">Audiobooks</string>
+    <!-- The Listen tab showing the voice reading a text. -->
+    <string name="player_tab_reader">Reader</string>
+    <string name="player_nothing_played">Nothing played yet</string>
+    <!-- Links from a player to its shelf. -->
+    <string name="player_music_shelf">Music shelf</string>
+    <string name="player_audiobooks_shelf">Audiobooks shelf</string>
+    <string name="player_close">Close player</string>
+
+    <!-- Transport buttons, read by TalkBack. -->
+    <string name="player_seek">Seek</string>
+    <string name="player_seek_chapter">Seek in chapter</string>
+    <string name="player_seek_track">Seek in track</string>
+    <string name="player_previous_chapter">Previous chapter</string>
+    <string name="player_next_chapter">Next chapter</string>
+    <string name="player_previous_track">Previous track</string>
+    <string name="player_next_track">Next track</string>
+    <plurals name="player_back_seconds">
+        <item quantity="one">Back %d second</item>
+        <item quantity="other">Back %d seconds</item>
+    </plurals>
+    <plurals name="player_forward_seconds">
+        <item quantity="one">Forward %d second</item>
+        <item quantity="other">Forward %d seconds</item>
+    </plurals>
+    <string name="player_back_sentence">Back a sentence</string>
+    <string name="player_next_sentence">Next sentence</string>
+    <string name="player_previous_paragraph">Previous paragraph</string>
+    <string name="player_next_paragraph">Next paragraph</string>
+    <string name="player_shuffle_on">Shuffle on</string>
+    <string name="player_shuffle_off">Shuffle off</string>
+    <string name="player_repeat_all">Repeat all</string>
+    <string name="player_repeat_one">Repeat one</string>
+    <string name="player_repeat_off">Repeat off</string>
+    <!-- The equalizer bars beside the current song. -->
+    <string name="player_playing">Playing</string>
+    <string name="player_paused">Paused</string>
+    <!-- Tapping the mini-player opens the full player (or the voice's Reader tab). -->
+    <string name="player_open_voice">Open the voice</string>
+    <string name="player_open_player">Open player</string>
+
+    <!-- The audiobook player's actions: a short label under the icon, and what TalkBack reads. -->
+    <string name="player_chapters">Chapters</string>
+    <!-- %1$s is the speed, such as 1.5×. -->
+    <string name="player_playback_speed_value">Playback speed %1$s</string>
+    <!-- Short label under the sleep timer button. -->
+    <string name="player_sleep">Sleep</string>
+    <string name="player_sleep_timer">Sleep timer</string>
+    <!-- %1$s is the time left, such as 12:30. -->
+    <string name="player_sleep_timer_left">Sleep timer, %1$s left</string>
+    <!-- Short label under the add-bookmark button. -->
+    <string name="player_bookmark">Bookmark</string>
+    <string name="player_add_bookmark">Add bookmark</string>
+    <string name="player_bookmarks">Bookmarks</string>
+    <string name="player_skip_silence">Skip silence</string>
+    <string name="player_volume_boost">Volume boost</string>
+    <string name="player_queue">Queue</string>
+
+    <!-- Sheets. -->
+    <string name="player_no_chapters">No chapters yet</string>
+    <!-- Adds a bookmark at the current position. -->
+    <string name="player_add_here">Add here</string>
+    <string name="player_no_bookmarks">No bookmarks in this book yet</string>
+    <!-- %1$s is the bookmark's title. -->
+    <string name="player_delete_bookmark">Delete bookmark %1$s</string>
+    <string name="player_playback_speed">Playback speed</string>
+    <string name="player_slower">Slower</string>
+    <string name="player_faster">Faster</string>
+    <!-- %1$s is the time left, such as 12:30. -->
+    <string name="player_stops_in">Stops in %1$s</string>
+    <string name="player_cancel_timer">Cancel timer</string>
+    <plurals name="player_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <string name="player_end_of_chapter">End of chapter</string>
+    <!-- Queue rows: accessibility actions and the remove button. -->
+    <string name="player_move_up">Move up</string>
+    <string name="player_move_down">Move down</string>
+    <!-- %1$s is the song's title. -->
+    <string name="player_remove_from_queue">Remove %1$s from queue</string>
+
+    <!-- The Reader tab (the voice). -->
+    <string name="player_speed">Speed</string>
+    <string name="player_reading_speed">Reading speed</string>
+    <string name="player_voice">Voice</string>
+    <!-- A heading in the voice menu, over the phone's own voices. -->
+    <string name="player_system_voices">System voices</string>
+    <string name="player_music_under_voice">Music under the voice</string>
+    <string name="player_pause_music">Pause music</string>
+    <string name="player_play_music">Play music</string>
+    <!-- The sleep timer isn't running. -->
+    <string name="player_off">Off</string>
+    <string name="player_open_hint">Open a book or article and tap Listen</string>
+    <!-- Resumes the voice. %1$s is what was read, such as a book's title. -->
+    <string name="player_resume">Resume %1$s</string>
+    <!-- %1$s is what was read, %2$s its section, such as a chapter. -->
+    <string name="player_resume_section">Resume %1$s · %2$s</string>
+    <!-- The Listen button, before the voice is reading. -->
+    <string name="player_listen">Listen</string>
+</resources>

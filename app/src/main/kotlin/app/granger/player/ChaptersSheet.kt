@@ -19,8 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.granger.R
 import app.granger.core.library.AudiobookChapter
 import app.granger.core.speech.ReadChapter
 import app.granger.theme.readout
@@ -34,7 +36,7 @@ fun ChaptersSheet(chapters: List<AudiobookChapter>, currentOrdinal: Int, onPick:
     ) { i, current ->
         val chapter = chapters[i]
         ChapterLine(
-            "${chapter.ordinal + 1}", chapter.title.ifBlank { "Chapter ${chapter.ordinal + 1}" }, depth = 0, current = current,
+            "${chapter.ordinal + 1}", chapterName(chapter.title, chapter.ordinal).resolve(), depth = 0, current = current,
             trailing = formatTime(chapter.durationMs), onClick = { onPick(chapter.ordinal) },
         )
     }
@@ -49,7 +51,7 @@ fun ReadChaptersSheet(chapters: List<ReadChapter>, current: Int?, onPick: (Int) 
     ChapterList(count = chapters.size, current = current, key = { it }, onDismiss = onDismiss) { i, isCurrent ->
         val chapter = chapters[i]
         ChapterLine(
-            "${i + 1}", chapter.title.ifBlank { "Chapter ${i + 1}" }, depth = chapter.depth, current = isCurrent,
+            "${i + 1}", chapterName(chapter.title, i).resolve(), depth = chapter.depth, current = isCurrent,
             trailing = null, onClick = { onPick(i) }, modifier = Modifier.testTag(ReaderTags.chapter(i)),
         )
     }
@@ -60,10 +62,10 @@ fun ReadChaptersSheet(chapters: List<ReadChapter>, current: Int?, onPick: (Int) 
 private fun ChapterList(count: Int, current: Int?, key: (Int) -> Any, onDismiss: () -> Unit, row: @Composable (Int, Boolean) -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding()) {
-            Text("Chapters", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+            Text(stringResource(R.string.player_chapters), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
             if (count == 0) {
                 Text(
-                    "No chapters yet", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(R.string.player_no_chapters), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(24.dp),
                 )
             }
