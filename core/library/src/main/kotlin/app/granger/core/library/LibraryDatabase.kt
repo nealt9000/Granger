@@ -190,7 +190,9 @@ abstract class LibraryDatabase : RoomDatabase() {
         /**
          * Plan GB: Gutenberg packs are named for their subject ([GutenbergNames.packTitle]), so a pack already
          * installed reads "Music and books on music · Project Gutenberg" without a download. A pack with no description
-         * keeps its title. No table changes.
+         * keeps its title. The packs leave the old `c:gutenberg` collection in the Kiwix folder (their books have a
+         * collection each, made when they're filed), unless the user moved one there; the collection goes once empty.
+         * No table changes.
          */
         val MIGRATION_13_14 = object : Migration(13, 14) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -202,6 +204,11 @@ abstract class LibraryDatabase : RoomDatabase() {
                         "ELSE upper(substr(trim(description), 1, 1)) || substr(trim(description), 2) || ' · $provider' END " +
                         "WHERE name LIKE 'gutenberg\\_%' ESCAPE '\\' " +
                         "AND (trim(description) != '' OR name IN ('gutenberg_en_all', 'gutenberg_mul_all'))",
+                )
+                db.execSQL("DELETE FROM placements WHERE collectionId = 'c:gutenberg' AND userSet = 0")
+                db.execSQL(
+                    "DELETE FROM collections WHERE id = 'c:gutenberg' AND userCreated = 0 " +
+                        "AND NOT EXISTS (SELECT 1 FROM placements WHERE collectionId = 'c:gutenberg')",
                 )
             }
         }

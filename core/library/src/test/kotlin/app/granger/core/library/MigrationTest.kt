@@ -44,6 +44,42 @@ class MigrationTest {
         )
     }
 
+    @Test fun migration13To14TakesGutenbergPacksOutOfTheKiwixFolderUnlessTheUserPutThemThere() {
+        helper.createDatabase("migrate14b.db", 13).apply {
+            insertPack("u-m", "gutenberg_en_lcc-m", "Project Gutenberg Library", "Music and books on music")
+            execSQL("INSERT INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) VALUES ('c:kiwix', 'Kiwix', 'literature', 0, 'kiwix', NULL)")
+            execSQL("INSERT INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) VALUES ('c:gutenberg', 'Gutenberg', 'literature', 0, 'gutenberg', 'c:kiwix')")
+            execSQL("INSERT INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) VALUES ('c:wikipedia', 'Wikipedia', 'literature', 0, 'wikipedia', 'c:kiwix')")
+            execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES ('gutenberg_en_lcc-m', 'c:gutenberg', 0)")
+            execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES ('wikipedia_en_top', 'c:wikipedia', 0)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate14b.db", 14, true, LibraryDatabase.MIGRATION_13_14)
+        db.query("SELECT packKey FROM placements").use {
+            val keys = buildList { while (it.moveToNext()) add(it.getString(0)) }
+            assertThat(keys).containsExactly("wikipedia_en_top")
+        }
+        db.query("SELECT id FROM collections ORDER BY id").use {
+            val ids = buildList { while (it.moveToNext()) add(it.getString(0)) }
+            assertThat(ids).containsExactly("c:kiwix", "c:wikipedia").inOrder()
+        }
+    }
+
+    @Test fun migration13To14KeepsAGutenbergPackTheUserMoved() {
+        helper.createDatabase("migrate14c.db", 13).apply {
+            execSQL("INSERT INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) VALUES ('c:gutenberg', 'Gutenberg', 'literature', 0, 'gutenberg', 'c:kiwix')")
+            execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES ('gutenberg_en_lcc-m', 'c:gutenberg', 1)")
+            execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES ('gutenberg_en_lcc-pf', 'c:gutenberg', 0)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate14c.db", 14, true, LibraryDatabase.MIGRATION_13_14)
+        db.query("SELECT packKey FROM placements").use {
+            val keys = buildList { while (it.moveToNext()) add(it.getString(0)) }
+            assertThat(keys).containsExactly("gutenberg_en_lcc-m")
+        }
+        db.query("SELECT COUNT(*) FROM collections WHERE id = 'c:gutenberg'").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+    }
+
     @Test fun migration12To13GivesEveryBookEpubAndSearchable() {
         helper.createDatabase("migrate13.db", 12).apply {
             execSQL(

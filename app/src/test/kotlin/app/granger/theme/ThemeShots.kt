@@ -581,6 +581,84 @@ class ThemeShots {
         }
     }
 
+    /** Real titles from the Music pack, the first four searchable in full. */
+    private val musicBooks = listOf(
+        "Beethoven" to "Ludwig Nohl", "The Art of the Fugue" to "Johann Sebastian Bach", "Chopin and Other Musical Essays" to "Henry T. Finck",
+        "Great Pianists on Piano Playing" to "James Francis Cooke", "The Music of the Wild" to "Gene Stratton-Porter",
+        "A History of Music" to "Waldo Selden Pratt", "How to Listen to Music" to "Henry Edward Krehbiel",
+        "Music: An Art and a Language" to "Walter Raymond Spalding", "Mozart: The Man and His Works" to "W. J. Turner",
+        "The Orchestra and Orchestral Music" to "W. J. Henderson", "Piano Playing, with Piano Questions Answered" to "Josef Hofmann",
+        "The Standard Operaglass" to "Charles Annesley", "Wagner's Tristan and Isolde" to "Richard Wagner", "Bach" to "C. F. Abdy Williams",
+    )
+
+    /** A Gutenberg pack's books as their collection (Plan GB), at 360 dp: header, marks, pack covers for some. */
+    private fun gutenbergShot(name: String, view: ShelfView) {
+        val coverDir = File(System.getProperty("java.io.tmpdir"), "gb-covers").apply { mkdirs() }
+        val books = musicBooks.mapIndexed { i, (title, author) ->
+            app.granger.book("book:gutenberg:${1000 + i}", title, author = author).copy(
+                origin = app.granger.core.library.BookOrigin.GUTENBERG,
+                sourceRef = "gutenberg_en_lcc-m/$title.${1000 + i}.epub", indexedAt = if (i in setOf(0, 1, 5, 9)) 5L else null,
+            )
+        }
+        val covers = books.filterIndexed { i, _ -> i % 3 != 2 }.associate { book ->
+            val file = File(coverDir, "${book.id.substringAfterLast(':')}.png")
+            val bmp = Bitmap.createBitmap(200, 300, Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(bmp)
+            canvas.drawColor(android.graphics.Color.rgb(90 + (book.title.length * 7) % 120, 70, 60))
+            canvas.drawRect(20f, 40f, 180f, 120f, android.graphics.Paint().apply { color = android.graphics.Color.rgb(230, 220, 190) })
+            file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            book.id to file.path
+        }
+        val shelves = app.granger.FakeShelves()
+        shelves.shelfList.value = listOf(
+            app.granger.core.library.Shelf(
+                MediaType("literature", "Literature", true, 0),
+                listOf(CollectionRow(ShelfCollection("c:gutenberg-m", "Music and books on music", "literature", false, defaultKey = "gutenberg-m"), emptyList(), books)),
+            ),
+        )
+        val library = app.granger.FakeLibrary().apply {
+            packList.value = listOf(pack("u-m", "Music and books on music · Project Gutenberg").copy(name = "gutenberg_en_lcc-m"))
+        }
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.BOOKS, view) }
+        val vm = app.granger.library.CollectionViewModel(
+            "c:gutenberg-m", shelves, library, app.granger.FakeReadingSessions(), app.granger.FakeBookshelf().apply { positionMap.value = mapOf(books[1].id to app.granger.core.library.BookPosition(books[1].id, "{}", 0.4, "", 1L)) }, app.granger.FakeDownloads(),
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main), viewPrefs = prefs,
+            compute = kotlinx.coroutines.Dispatchers.Main,
+        )
+        shoot(name) {
+            androidx.compose.runtime.CompositionLocalProvider(app.granger.library.LocalPackCovers provides { book -> covers[book.id] }) {
+                GrangerShell(
+                    rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                    onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                ) { app.granger.library.CollectionScreen(vm, onOpened = {}, onOpenPack = {}, onGetBooks = {}, onOpenCollection = {}, onBack = {}) }
+            }
+        }
+    }
+
+    @Test fun gutenbergList() = gutenbergShot("gutenberg-list", ShelfView.LIST)
+
+    @Test fun gutenbergGrid() = gutenbergShot("gutenberg-grid", ShelfView.GRID)
+
+    /** The Library with a Gutenberg collection beside the Classics (Plan GB Decision 4). */
+    @Test fun libraryWithGutenberg() = shoot("library-gutenberg") {
+        val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = List(12) { book("b$it") })
+        val mine = CollectionRow(ShelfCollection("c:mine", "My books", "literature", false, defaultKey = "mine"), emptyList(), books = listOf(book("m")))
+        val music = CollectionRow(
+            ShelfCollection("c:gutenberg-m", "Music and books on music", "literature", false, defaultKey = "gutenberg-m"), emptyList(),
+            books = List(412) { book("g$it") },
+        )
+        GrangerShell(
+            rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            LibraryContent(
+                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, music, mine)))), false),
+                SnackbarHostState(), {}, {}, {}, downloadsBadge = 0, onDownloads = {}, onGetMore = {}, onImport = {},
+            )
+        }
+    }
+
     @Test fun booksList() = booksShot("books-list", ShelfView.LIST)
 
     @Test fun booksGrid() = booksShot("books-grid", ShelfView.GRID)

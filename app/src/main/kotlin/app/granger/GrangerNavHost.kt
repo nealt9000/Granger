@@ -613,6 +613,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
     /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page; [linkText] may name it. */
     suspend fun openPackDocument(packId: String, path: String, linkText: String) {
+        // A Gutenberg pack's EPUB opens as its book row (Plan GB), copied out by the reader on its first open.
+        if (path.endsWith(".epub", ignoreCase = true)) {
+            val book = container.gutenbergBooks.bookFor(packId, path)
+            if (book == null) {
+                android.widget.Toast.makeText(appContext, "Couldn't open this book: it isn't in this pack's list.", android.widget.Toast.LENGTH_LONG).show()
+                return
+            }
+            val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
+            nav.showTab(tab, keepCurrent = true)
+            return
+        }
         when (val opened = container.packDocuments.open(packId, path, linkText)) {
             is PackDocuments.Opened.Ready -> {
                 val tab = container.sessions.openTab(opened.book.id, "", opened.book.title).let { container.sessions.tab(it) } ?: return
@@ -806,6 +817,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.shelves, container.library, container.sessions,
                             container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
                             container.catalog, createSavedStateHandle(), container.libraryViews,
+                            gutenberg = container.gutenbergShelf,
                         )
                     },
                     onOpened = ::showTab,

@@ -512,7 +512,12 @@ class RoomBookshelf(
 
 /**
  * Drops an emission that differs from the last only in `indexedAt`: indexing a book touches its row, and nothing that
- * watches the list needs to redraw for that. A list emitted for any other change carries the current values.
+ * watches the list needs to redraw for that. A list emitted for any other change carries the current values. A
+ * Gutenberg book becoming indexed, or no longer, is a change: its shelf marks the books searchable in full (Plan GB).
  */
 internal fun Flow<List<Book>>.ignoringIndexedAt(): Flow<List<Book>> =
-    distinctUntilChanged { old, new -> old.size == new.size && old.indices.all { old[it].copy(indexedAt = null) == new[it].copy(indexedAt = null) } }
+    distinctUntilChanged { old, new -> old.size == new.size && old.indices.all { sameButIndexedAt(old[it], new[it]) } }
+
+private fun sameButIndexedAt(old: Book, new: Book): Boolean =
+    old.copy(indexedAt = null) == new.copy(indexedAt = null) &&
+        (old.origin != BookOrigin.GUTENBERG || (old.indexedAt == null) == (new.indexedAt == null))

@@ -51,6 +51,8 @@ import app.granger.R
 import app.granger.audiobooks.ALL_AUDIOBOOKS
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
+import app.granger.core.library.Filing
+import app.granger.core.library.GutenbergNames
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
 import app.granger.sources.GetMoreLink
@@ -271,7 +273,9 @@ private val IMPORT_TYPES = arrayOf(
 /** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */
 internal fun rowCountText(row: CollectionRow): String {
     val rows = row.withChildren
-    return countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
+    val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
+    // A Gutenberg collection is called by its subject; the line under it says whose (Plan GB Decision 2).
+    return if (Filing.isGutenbergCollection(row.collection.defaultKey)) "${GutenbergNames.PROVIDER} · $counts" else counts
 }
 
 private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): String = listOfNotNull(

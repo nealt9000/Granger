@@ -108,6 +108,16 @@ class LibraryViewModelTest {
         assertThat(rowCountText(kinds.single().collections.single())).isEqualTo("1 pack · 1 book")
     }
 
+    @Test fun aGutenbergCollectionSitsBesideTheClassics() {
+        val gutenberg = CollectionRow(
+            ShelfCollection("c:gutenberg-m", "Music and books on music", "literature", userCreated = false, defaultKey = "gutenberg-m"),
+            emptyList(), books = List(3) { book("g$it") },
+        )
+        val kinds = libraryKinds(listOf(shelf("Literature").copy(collections = listOf(bookRow("Granger Classics", 2), gutenberg))))
+        assertThat(kinds.single().collections.map { it.collection.name }).containsExactly("Granger Classics", "Music and books on music").inOrder()
+        assertThat(rowCountText(kinds.single().collections[1])).isEqualTo("Project Gutenberg · 3 books")
+    }
+
     @Test fun anotherMediaTypeWithBooksComesAfterBooks() {
         val video = Shelf(MediaType("video", "Video", builtIn = false, sortOrder = 5), listOf(bookRow("Lectures", 1)))
         val kinds = libraryKinds(listOf(video, shelf("Literature").copy(collections = listOf(bookRow("Classics", 1))), shelf("Maps", "OpenStreetMap" to 1)))

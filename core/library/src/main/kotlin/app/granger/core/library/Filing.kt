@@ -10,7 +10,6 @@ object Filing {
         Rule({ it.startsWith("wiktionary_") }, "wiktionary", "Wiktionary"),
         Rule({ it.startsWith("wikisource_") }, "wikisource", "Wikisource"),
         Rule({ it.startsWith("wikem_") }, "wikem", "WikEM"),
-        Rule({ it.startsWith("gutenberg_") }, "gutenberg", "Gutenberg"),
         Rule({ it.startsWith("granger_classics") }, "granger-classics", "Granger Classics"),
         Rule({ it.startsWith("ifixit_") }, "ifixit", "iFixit"),
         Rule({ it.startsWith("wikivoyage_") }, "wikivoyage", "Wikivoyage"),
@@ -32,12 +31,14 @@ object Filing {
 
     fun defaultKey(pack: Pack): String {
         if (pack.name.isBlank()) return "other"
+        if (pack.isGutenberg) return gutenbergKey(pack.name)
         return RULES.firstOrNull { it.matches(pack.name) }?.key ?: "pack:${pack.name}"
     }
 
     /** The name of the collection with [key]; [pack] supplies the title for one-off `pack:` collections. */
     fun defaultName(key: String, pack: Pack): String = when {
         key == "other" -> "Other"
+        pack.isGutenberg && key == gutenbergKey(pack.name) -> gutenbergName(pack)
         key.startsWith("pack:") -> pack.title
         else -> RULES.firstOrNull { it.key == key }?.name ?: pack.title
     }
@@ -57,7 +58,27 @@ object Filing {
     fun isKiwix(pack: Pack): Boolean = pack.name.isNotBlank() && !pack.name.startsWith("granger_classics")
 
     /** The folder a new app-made collection for [pack] goes in: [FOLDER_KEY] for Kiwix's reading packs, none for maps. */
-    fun folderKey(pack: Pack): String? = FOLDER_KEY.takeIf { isKiwix(pack) && defaultMediaType(pack) == "literature" }
+    fun folderKey(pack: Pack): String? =
+        FOLDER_KEY.takeIf { isKiwix(pack) && !pack.isGutenberg && defaultMediaType(pack) == "literature" }
+
+    /**
+     * The collection of a Gutenberg pack's books (Plan GB Decision 4), `gutenberg-<lcc>` from the ZIM name
+     * (`gutenberg_en_lcc-m` → `gutenberg-m`; `gutenberg_en_all` → `gutenberg-en_all`). It sits at the top of
+     * Literature, beside Granger Classics, not in the Kiwix folder; the pack itself isn't shelved ([RoomShelves]).
+     */
+    fun gutenbergKey(packName: String): String {
+        val rest = packName.removePrefix("gutenberg_")
+        return "$GUTENBERG_PREFIX${rest.substringAfter("lcc-", "").ifEmpty { rest }}"
+    }
+
+    /** Whether the collection with [defaultKey] holds a Gutenberg pack's books. */
+    fun isGutenbergCollection(defaultKey: String?): Boolean = defaultKey?.startsWith(GUTENBERG_PREFIX) == true
+
+    /** A Gutenberg collection's name: the pack's subject alone ("Music and books on music"), else "Project Gutenberg". */
+    fun gutenbergName(pack: Pack?): String =
+        pack?.let { GutenbergNames.subject(it.name, it.description) }?.ifEmpty { null } ?: GutenbergNames.PROVIDER
+
+    private const val GUTENBERG_PREFIX = "gutenberg-"
 
     /** Books are filed by origin; these are their collections' keys and names. */
     private val BOOK_COLLECTIONS = mapOf(
@@ -69,10 +90,15 @@ object Filing {
     /** Identity of a book across re-downloads: its id, which is derived from origin and source. */
     fun bookKey(book: Book): String = book.id
 
-    fun defaultKey(book: Book): String = BOOK_COLLECTIONS.getValue(book.origin).first
+    /** A Gutenberg book goes in its pack's collection ([gutenbergKey]); every other book by its origin. */
+    fun defaultKey(book: Book): String =
+        if (book.origin == BookOrigin.GUTENBERG) gutenbergKey(GutenbergBooks.packNameOf(book)) else BOOK_COLLECTIONS.getValue(book.origin).first
 
-    fun defaultName(key: String, book: Book): String =
-        BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second ?: book.title
+    /** [packs] name a Gutenberg book's collection: its pack's subject. */
+    fun defaultName(key: String, book: Book, packs: List<Pack> = emptyList()): String = when {
+        book.origin == BookOrigin.GUTENBERG -> gutenbergName(packs.firstOrNull { it.name == GutenbergBooks.packNameOf(book) })
+        else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second ?: book.title
+    }
 
     /** Every book is reading material. */
     @Suppress("UNUSED_PARAMETER")

@@ -156,6 +156,7 @@ import app.granger.core.library.BookIds
 import app.granger.core.library.GutenbergBooks
 import app.granger.core.library.isGutenberg
 import app.granger.library.GutenbergCovers
+import app.granger.library.GutenbergShelf
 import app.granger.core.library.DensePassageFinder
 import app.granger.core.library.CombinedVectorSources
 import app.granger.core.library.DirectoryVectorSources
@@ -300,6 +301,11 @@ class AppContainer(context: Context) {
     val gutenbergBooks = GutenbergBooks(
         libraryDb, library::archive, dir = { File(bookDirs().first(), "gutenberg") }, coversDir = File(context.filesDir, "covers"),
     )
+
+    /** "Make all searchable…" for Gutenberg collections (Plan GB): runs on the app scope, so leaving the screen doesn't stop it. */
+    val gutenbergShelf by lazy {
+        GutenbergShelf(gutenbergBooks::restore, bookIndex::indexPending, dir = { File(bookDirs().first(), "gutenberg") }, appScope)
+    }
 
     /** Gutenberg covers read from their packs before a book's first open, kept in the cache. */
     val gutenbergCovers = GutenbergCovers({ library.packs.first() }, library::archive, File(context.cacheDir, "gutenberg-covers"))

@@ -450,6 +450,17 @@ class BookshelfTest {
         assertThat(emitted.map { it.single().title }).containsExactly("a", "Renamed").inOrder()
     }
 
+    @Test fun aGutenbergBookBecomingIndexedIsAChange() = test {
+        val g = book("1", BookOrigin.GUTENBERG)
+        val emitted = kotlinx.coroutines.flow.flowOf(
+            listOf(g),
+            listOf(g.copy(indexedAt = 5L)),
+            // Indexed again: still searchable in full, nothing to redraw.
+            listOf(g.copy(indexedAt = 9L)),
+        ).ignoringIndexedAt().toList()
+        assertThat(emitted.map { it.single().indexedAt }).containsExactly(null, 5L).inOrder()
+    }
+
     @Test fun textNameStartingWithPkIsConverted() = test {
         val source = File(src, "notes.txt").apply { writeText("PK wrote these notes.\n\nSecond paragraph.") }
         val result = shelf.import("notes.txt") { source.inputStream() }
