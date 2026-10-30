@@ -975,4 +975,41 @@ class SourceViewModelTest {
             assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Encyclopédie de Diderot")
         }
     }
+
+    /** The catalog in catalog/, as the phone gets it once it is published. */
+    private fun publishedCatalog(): app.granger.core.catalog.Catalog {
+        var dir: File? = File("").absoluteFile
+        while (dir != null && !File(dir, "catalog/catalog.json").isFile) dir = dir.parentFile
+        val root = dir ?: error("catalog/catalog.json not found")
+        val key = java.util.Base64.getDecoder().decode(File(root, "catalog/public-key.txt").readText().trim())
+        val parsed = app.granger.core.catalog.CatalogParser.parse(
+            File(root, "catalog/catalog.json").readBytes(), File(root, "catalog/catalog.json.sig").readBytes(), key,
+        )
+        return (parsed as app.granger.core.catalog.ParseResult.Ok).catalog
+    }
+
+    /**
+     * Plan KB walkthrough: Kiwix libraries is the nine nautilus packs and nothing else, no Recommended and no folded
+     * family, and Project Gutenberg only Gutenberg, over the whole published catalog; Kiwix keeps neither.
+     */
+    @Test fun eachBookScreenListsOnlyItsOwnPacksFromThePublishedCatalog() = runTest(main.dispatcher) {
+        val published = publishedCatalog()
+        catalog.mutable.value = CatalogState(catalog = published)
+        val nautilus = published.packs.filter { it.isBookPack && !isGutenberg(it) }.map { it.id }
+        assertThat(nautilus).hasSize(9)
+        assertThat(nautilus.filter { it.startsWith("prunelle_") }).hasSize(3)
+
+        val libraries = viewModel(CatalogScope.KIWIX_BOOKS).ui.value
+        assertThat(libraries.sections.map { it.title }).containsExactly(SourceViewModel.LIBRARIES)
+        val rows = libraries.sections.flatMap { it.rows }
+        assertThat(rows.map { it.id }).containsExactlyElementsIn(nautilus)
+        assertThat(rows.none { it.opensFamily != null }).isTrue()
+        assertThat(libraries.categories).isEmpty()
+
+        val gutenberg = viewModel(CatalogScope.GUTENBERG).ui.value.sections.flatMap { it.rows }
+        assertThat(gutenberg.map { it.id }).containsExactlyElementsIn(published.packs.filter(::isGutenberg).map { it.id })
+
+        val kiwix = viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }.map { it.id }
+        assertThat(kiwix).containsNoneIn(nautilus + gutenberg.map { it.id })
+    }
 }
