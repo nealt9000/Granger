@@ -1,0 +1,39 @@
+# Round 2 hand-written lines (make_script.py --extra), read by every speaker. The pilot voices swallowed a
+# sentence-initial "b" ("Boil" heard as "Oil") and blurred the t in "water", so these open on plosives and lean on
+# words with a t between vowels. Spoken form, no digits, British spelling, not the held-out listening lines.
+Boil it for one full minute, then let it cool.
+Bring the water to a gentle simmer.
+Bread, butter and a pot of tea were waiting on the table.
+Before the bridge was built, the only way across was the ferry.
+Back in the village, the bells had already started.
+Better to wait until morning than to cross the river in the dark.
+Bottled water is safer when the pipes have been damaged.
+Please put the kettle on.
+Put a little salt in the water before the pasta goes in.
+Pour the water slowly over the coffee and let it stand.
+Perhaps the letter was never sent at all.
+Pressure on the wound will slow the bleeding.
+Take the tablets with a glass of water, after food.
+Tea, toast and marmalade, as it always was on Sundays.
+Today the city is quieter than it has been for years.
+Doctors once believed that bad air carried the disease.
+Drink plenty of water, little and often.
+Do you know the way to the station?
+Keep the bottle sealed until you need it.
+Carry a map, a torch and a bottle of water.
+Cold water will soothe a burn better than butter.
+Go back to the beginning of the letter and read it again.
+Gather dry kindling before the weather turns.
+Get the children inside before the storm breaks.
+Water covers most of the surface of the Earth.
+The water in the bottle was cold and tasted of metal.
+A little later, the butter had melted into the bread.
+She wrote a letter to her daughter every Saturday.
+The matter was settled long before anyone thought to ask.
+His better judgement told him to turn back.
+It is a pity the city never rebuilt the theatre.
+Waterloo was a village before it was a battle.
+Butterflies gathered on the buddleia by the garden wall.
+Patience, he said, is mostly a matter of practice.
+Beyond the water meadows, the path climbed towards the beacon.
+Bats came out at dusk, darting over the water.

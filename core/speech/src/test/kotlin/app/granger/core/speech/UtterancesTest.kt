@@ -28,6 +28,17 @@ class UtterancesTest {
     }
 
     @Test
+    fun aSentenceInsideAQuoteTheParagraphOpenedSaysSo() {
+        val blocks = listOf(
+            Block("p1", BlockKind.PARAGRAPH, "\"I'll go. You stay.\" He left."),
+            Block("p2", BlockKind.PARAGRAPH, "Nobody spoke. Then the door shut."),
+        )
+        val u = Utterances.fromBlocks(blocks, ::article)
+        assertThat(u.map { it.text }).containsExactly("\"I'll go.", "You stay.\"", "He left.", "Nobody spoke.", "Then the door shut.").inOrder()
+        assertThat(u.map { it.quoteOpen }).containsExactly(false, true, false, false, false).inOrder()
+    }
+
+    @Test
     fun blocksBecomeHeadingAndSentenceUtterancesWithPauses() {
         val blocks = listOf(
             Block("h1", BlockKind.HEADING, "Rosetta  Stone"),
