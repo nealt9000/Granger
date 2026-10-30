@@ -693,3 +693,15 @@ Flags: `transl.` = translation; `lang en,es` = bilingual or school edition (pass
 |---|---|---|---|---|---|---|
 | 5881 | Reina Valera New Testament of the Bible 1909 |  | Reina, Casiodoro de; Valera, C | 788 | transl. |  |
 | 65165 | Vida de Jesús | Renan, Ernest | Vega, Federico de la | 856 | transl. |  |
+
+## 7. Neal's calls (2026-10-30)
+
+1. **Comprehensive Wikipedia:** `wikipedia_es_all_maxi` (36.5 GB), pictures throughout. Save space swaps it to nopic.
+2. **Ready.gov en español:** in Comprehensive only. Efficient is about 5.8 GB with pictures, 1.8 GB with Save space.
+3. **iFixit en español:** treated the same as `ifixit_en_all`: in the Making essentials under the same non-commercial flag. F1's Play policy check decides for both languages together. This replaces the spec's "excluded".
+4. **Clásicos Granger:** only works public domain both in the US and where the readers live (Spain, Argentina, the life+70/80 countries). The ~8 authors in §5.2 and the 13 non-PD Gutenberg books are out.
+
+Defaults taken without asking, matching the English calls:
+- Stack Overflow en español stays out of the tiers, as English Stack Overflow left them in H4. It can still be had from Get more.
+- MedlinePlus en español has the same standing as the English pack.
+- English Wiktionary is the learner's Define, per spec §10.3.
