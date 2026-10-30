@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 import verse
 
@@ -7,6 +7,10 @@ def marked(html):
     soup = BeautifulSoup(f"<div id='page'>{html}</div>", "lxml")
     verse.mark(soup)
     return soup.find(id="page")
+
+
+def kinds(block):
+    return [c["class"] for c in block.children if isinstance(c, Tag)]
 
 
 def lines(block):
@@ -18,7 +22,8 @@ def test_br_lines_become_hanging_lines_and_a_blank_line_a_stanza_gap():
                   "Brought Death into the World<br/>\n</p>")
     p = page.p
     assert p["class"] == ["poem", "gv"] and p.find("br") is None
-    assert [c["class"] for c in p.children] == [["gv-l"], ["gv-l"], ["gv-gap"], ["gv-l"]]
+    assert kinds(p) == [["gv-l"], ["gv-l"], ["gv-gap"], ["gv-l"]]
+    assert p.get_text() == "Of Mans First Disobedience, and the Fruit\nOf that Forbidden Tree\n\nBrought Death into the World"
     assert lines(p)[0] == ("Of Mans First Disobedience, and the Fruit", None)
 
 
@@ -44,7 +49,7 @@ def test_trailing_line_numbers_and_glosses_go_to_the_margin():
     spans = page.p.find_all("span", class_="gv-l")
     assert [n.get_text() for n in page.find_all("span", class_="gv-n")] == ["*sweet", "20"]
     assert spans[0].contents[0]["class"] == ["gv-n"]  # first, so it floats beside its own line
-    assert spans[0].get_text() == "*sweetWhan that Aprille with his shoures soote*,"
+    assert spans[0].get_text() == "*sweet Whan that Aprille with his shoures soote*,"
     assert spans[3].get_text() == "1"  # a line that is only a number stays a line
 
 
@@ -53,7 +58,7 @@ def test_a_pre_becomes_a_verse_div_keeping_its_indents_and_inline_tags():
                   '   And what I assume\n</pre>')
     div = page.find("div", class_="gv-pre")
     assert div["class"] == ["verse", "gv", "gv-pre"] and div["id"] == "p1" and page.find("pre") is None
-    assert [c["class"] for c in div.children] == [["gv-l"], ["gv-l"], ["gv-gap"], ["gv-l"]]
+    assert kinds(div) == [["gv-l"], ["gv-l"], ["gv-gap"], ["gv-l"]]
     assert lines(div)[1] == ("and sing myself,", "margin-left: min(3.00em, 35%)")
     assert div.find("i").get_text() == "myself"
 

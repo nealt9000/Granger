@@ -368,7 +368,7 @@ def test_a_verse_work_gets_verse_lines_and_the_verse_rules_after_its_own(tmp_pat
     w.verse = True
     z = build(tmp_path, w)
     page = z.read("OEBPS/c001.xhtml").decode()
-    assert '<p class="poem gv"><span class="gv-l">Of Mans First Disobedience</span>' in page
+    assert '<p class="poem gv"><span class="gv-l">Of Mans First Disobedience</span>\n<span class="gv-l">' in page
     css = z.read("OEBPS/book.css").decode()
     assert css.index("p.poem {") < css.index(".gv {") < css.index("div.stanza > p")
 

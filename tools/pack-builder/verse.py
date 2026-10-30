@@ -106,7 +106,9 @@ def _lines(soup: BeautifulSoup, block: Tag) -> None:
 
 
 def _fill(soup: BeautifulSoup, block: Tag, groups: list[list[PageElement]], base: int, em_per_space: float) -> None:
-    """Appends a line per group, a gap per run of empty ones; an anchor on an empty line joins the next line."""
+    """Appends a line per group, a gap per run of empty ones; an anchor on an empty line joins the next line.
+
+    A newline goes between lines, so the block's plain text (search, read aloud) keeps its lines apart."""
     anchors: list[Tag] = []
     gap = False
     for group in groups:
@@ -115,8 +117,10 @@ def _fill(soup: BeautifulSoup, block: Tag, groups: list[list[PageElement]], base
             gap = gap or bool(block.contents)
             continue
         if gap:
-            block.append(soup.new_tag("span", attrs={"class": "gv-gap"}))
+            block.extend(["\n", soup.new_tag("span", attrs={"class": "gv-gap"})])
             gap = False
+        if block.contents:
+            block.append("\n")
         block.append(_line(soup, anchors + group, base, em_per_space))
         anchors = []
     if anchors:
@@ -179,7 +183,7 @@ def _line(soup: BeautifulSoup, nodes: list[PageElement], base: int, em_per_space
     if note:
         number = soup.new_tag("span", attrs={"class": "gv-n"})
         number.string = note
-        line.append(number)
+        line.extend([number, " "])
     for node in nodes:
         if not (isinstance(node, NavigableString) and not str(node)):
             line.append(node)
