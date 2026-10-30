@@ -65,7 +65,8 @@ def _work(spec, source) -> zimpack.Work:
                            page_href=epubpack.chapter_href)
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
-                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles)
+                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
+                        line_numbers=spec.line_numbers)
 
 
 def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str) -> list[Path]:

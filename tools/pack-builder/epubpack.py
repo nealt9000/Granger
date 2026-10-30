@@ -37,9 +37,30 @@ img { max-width: 100%; }
 .cover img { max-height: 100vh; }
 """.strip()
 
+LINE_NUMBER = {"linenum", "linenumber", "lineno", "line-number", "linenr"}
+
 _RULE = re.compile(r"([^{}]+)\{([^{}]*)\}")
 _DROPPED_PROPERTY = re.compile(r"^(color|background(-.*)?|font-family)$", re.I)
-_PAGE_NUMBER_SELECTOR = re.compile(r"\.(" + "|".join(map(re.escape, sorted(PAGE_NUMBER))) + r")(?![\w-])", re.I)
+
+
+def _class_selector(classes: set[str]) -> re.Pattern:
+    return re.compile(r"\.(" + "|".join(map(re.escape, sorted(classes))) + r")(?![\w-])", re.I)
+
+
+_PAGE_NUMBER_SELECTOR = _class_selector(PAGE_NUMBER)
+_LINE_NUMBER_SELECTOR = _class_selector(LINE_NUMBER)
+_SIDES = {"margin-left", "margin-right", "padding-left", "padding-right"}
+_PERCENT = re.compile(r"(\d*\.?\d+)%")
+_EM = re.compile(r"(\d*\.?\d+)em")
+_IMPORTANT = re.compile(r"\s*!\s*important\s*$", re.I)
+# Where an absolutely placed mark (a line number at `left: 60%`) goes instead of on top of the words.
+_MARGIN_NOTE = "float: right; font-size: .75em; opacity: .65; margin-left: .75em"
+_PLACEMENT = {"position", "left", "right", "top", "bottom"} | {d.split(":")[0].strip() for d in _MARGIN_NOTE.split(";")}
+# Readium sets every <p> to the reader's alignment with `text-align: inherit !important` at specificity
+# (0,3,3); four :root pseudo-classes outrank it, so a work's centred or right-aligned paragraphs stay so.
+_BOOST = ":root:root:root:root"
+_PARAGRAPH = re.compile(r"(^|[\s>+~])p([.#:\[]|$)")
+_BARE_CLASS = re.compile(r"\.[\w-]+")
 
 
 @dataclass
@@ -69,19 +90,55 @@ def display_title(work: Work) -> str:
     return work.title
 
 
-def scrub_css(css: str) -> str:
-    """The work's own rules without colours, backgrounds, font families or page-number styling."""
+def scrub_css(css: str, line_numbers: str = "margin") -> str:
+    """The work's own rules without colours, backgrounds, font families or page-number styling, fitted to a phone.
+
+    Wide side margins are clamped, absolutely placed marks move to the right margin (or, with line numbers
+    dropped, their rules go), and centred or right-aligned paragraphs are restated so the reader keeps them.
+    """
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
-    rules = []
+    rules, boosts = [], []
     for selector, body in _RULE.findall(css):
         selector = selector.strip()
-        if selector.startswith("@") or _PAGE_NUMBER_SELECTOR.search(selector):
+        if (selector.startswith("@") or _PAGE_NUMBER_SELECTOR.search(selector)
+                or (line_numbers == "drop" and _LINE_NUMBER_SELECTOR.search(selector))):
             continue
-        declarations = [d.strip() for d in body.split(";") if d.strip()]
-        kept = [d for d in declarations if not _DROPPED_PROPERTY.match(d.split(":", 1)[0].strip())]
+        declarations = [d.strip().partition(":") for d in body.split(";") if d.strip()]
+        declarations = [(k.strip().lower(), v.strip()) for k, colon, v in declarations
+                        if colon and not _DROPPED_PROPERTY.match(k.strip())]
+        placed = any(k == "position" and re.match(r"(absolute|fixed)\b", v, re.I) for k, v in declarations)
+        kept = [f"{k}: {_fit_sides(k, v)}" for k, v in declarations if not (placed and k in _PLACEMENT)]
+        if placed:
+            kept.append(_MARGIN_NOTE)
+        for k, v in declarations:
+            align = _IMPORTANT.sub("", v).lower()
+            if k == "text-align" and align in ("center", "right", "end"):
+                paragraphs = [s for s in map(str.strip, selector.split(","))
+                              if _PARAGRAPH.search(s) or _BARE_CLASS.fullmatch(s)]
+                boosts += [f"{_BOOST} {s} {{ text-align: {align} !important }}" for s in paragraphs]
         if kept:
             rules.append(f"{selector} {{ {'; '.join(kept)} }}")
-    return "\n".join(rules)
+    return "\n".join(rules + boosts)
+
+
+def _fit_sides(prop: str, value: str) -> str:
+    """Side margins and paddings that won't squeeze a phone's column: over 5% to at most 2em, over 6em to 30%."""
+    important = _IMPORTANT.search(value)
+    plain = value[:important.start()] if important else value
+    if prop in _SIDES:
+        plain = _clamp(plain)
+    elif prop in ("margin", "padding"):
+        parts = plain.split()
+        plain = " ".join(_clamp(p) if len(parts) == 1 or i % 2 == 1 else p for i, p in enumerate(parts))
+    return plain + (" !important" if important else "")
+
+
+def _clamp(length: str) -> str:
+    if (m := _PERCENT.fullmatch(length)) and float(m.group(1)) > 5:
+        return f"min({length}, 2em)"
+    if (m := _EM.fullmatch(length)) and float(m.group(1)) > 6:
+        return f"min({length}, 30%)"
+    return length
 
 
 def to_xhtml(html: str) -> str:
@@ -103,13 +160,9 @@ _MEDIA = {"img", "svg", "canvas", "video", "iframe", "object", "embed", "input",
 _SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 
 
-def _is_page_number(tag) -> bool:
-    return bool(PAGE_NUMBER.intersection(tag.get("class") or ()))
-
-
-def _drop_page_numbers(soup: BeautifulSoup) -> None:
-    """Removes page-number marks but keeps the ids on them, so links to a page still land."""
-    for tag in soup.find_all(_is_page_number):
+def _drop_page_numbers(soup: BeautifulSoup, classes: set[str] = PAGE_NUMBER) -> None:
+    """Removes page-number (or line-number) marks but keeps the ids on them, so links to a page still land."""
+    for tag in soup.find_all(lambda t: bool(classes.intersection(t.get("class") or ()))):
         if tag.decomposed:
             continue
         ids = [t["id"] for t in [tag, *tag.find_all(id=True)] if t.get("id")]
@@ -144,6 +197,9 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
             # A fixed width (an emptied figure's `width: 500px`) would only narrow the column on a phone.
             declarations = [d for d in tag["style"].split(";") if d.strip() and d.count("'") % 2 == 0
                             and d.count('"') % 2 == 0 and (media or d.split(":", 1)[0].strip().lower() != "width")]
+            if tag.name == "p":  # like a centred class, inline centring must outrank the reader's alignment
+                declarations = [d + " !important" if re.match(r"\s*text-align\s*:\s*(center|right|end)\s*$", d, re.I)
+                                else d for d in declarations]
             if declarations:
                 tag["style"] = "; ".join(d.strip() for d in declarations)
             else:
@@ -172,9 +228,11 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
             wrapper.append(soup.new_tag("dd"))
 
 
-def _prepare(html: str) -> BeautifulSoup:
+def _prepare(html: str, line_numbers: str = "margin") -> BeautifulSoup:
     soup = BeautifulSoup(html, "lxml")
     _drop_page_numbers(soup)
+    if line_numbers == "drop":
+        _drop_page_numbers(soup, LINE_NUMBER)
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
@@ -275,12 +333,12 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
         ("OEBPS/content.opf", _opf(work, meta, len(work.chapters))),
         ("OEBPS/nav.xhtml", _nav(work, meta, titles)),
         ("OEBPS/toc.ncx", _ncx(work, meta, titles)),
-        ("OEBPS/book.css", BOOK_CSS + "\n" + scrub_css(work.styles) + "\n"),
+        ("OEBPS/book.css", BOOK_CSS + "\n" + scrub_css(work.styles, work.line_numbers) + "\n"),
         ("OEBPS/cover.jpg", cover_jpeg),
         ("OEBPS/cover.xhtml", _page(title, meta.language,
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
     ]
-    soups = [_prepare(chapter.html) for chapter in work.chapters]
+    soups = [_prepare(chapter.html, work.line_numbers) for chapter in work.chapters]
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))

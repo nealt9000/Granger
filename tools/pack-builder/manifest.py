@@ -123,7 +123,8 @@ def validate(m: Manifest, rdf_for: Callable[[int], Rdf]) -> list[str]:
             errors.append(f"{where}: unknown source {w.source!r}")
             continue
         if w.source != "gutenberg":
-            if not (w.licence and re.search(r"public domain", w.licence, re.I) and re.search(r"https://\S+", w.licence)):
+            licence = w.licence or ""
+            if not (re.search(r"public domain", licence, re.I) and re.search(r"https://\S+", licence)):
                 errors.append(f"{where}: licence must name its public-domain dedication and source URL, "
                               f"not {w.licence!r}")
             continue

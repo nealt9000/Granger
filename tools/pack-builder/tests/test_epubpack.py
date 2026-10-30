@@ -210,3 +210,114 @@ def test_fixed_widths_in_inline_styles_are_dropped_except_on_media(tmp_path):
     assert 'class="figcenter">a' in page and 'style="margin-left: 2em"' in page
     assert "<table>" in page and "width: 10em" in page
     assert "500px" not in page and "45%" not in page and "80%" not in page
+
+
+# The rules the verse audit found, as Gutenberg's HTML has them (Paradise Lost #20, Hamlet #1524,
+# Faerie Queene #15272).
+PARADISE_LOST_CSS = """
+body { margin-left: 10%; margin-right: 10% }
+p { margin-top: 0.2em; text-align: justify; margin-bottom: 0.2em; text-indent: 4% }
+p.poem { text-indent: 3%; margin-left: 30% }
+p.center { text-align: center; text-indent: 0; margin-top: 1em; margin-bottom: 1em }
+"""
+HAMLET_CSS = """
+h1, h2, h3, h4, h5 { text-align: center; font-style: normal }
+p.right { text-align: right }
+p.scenedesc { font-style: italic; text-align: center; margin-left: 1em; margin-right: 1em }
+div.fig { display: block; margin: 0 auto; text-align: center }
+"""
+FAERIE_QUEENE_CSS = """
+.poem { margin-left: 10%; margin-right: 10%; margin-bottom: 1em; text-align: left }
+.poem .stanza { margin: 1em 0 1em 0 }
+.poem p { margin: 0; padding-left: 3em; text-indent: -3em }
+.poem p.i12 { margin-left: 6em }
+.poem p.i20 { margin-left: 10em }
+.author { text-align: right; margin-top: -1em; margin-right: 5% }
+.center { text-align: center }
+.linenum { position: absolute; top: auto; left: 60% }
+.sidenote { position: absolute; left: 92%; font-size: smaller; text-align: left }
+"""
+BOOST = ":root:root:root:root"
+
+
+def rules(css):
+    return [line for line in css.splitlines() if line]
+
+
+def test_wide_percentage_side_margins_are_clamped():
+    css = rules(epubpack.scrub_css(PARADISE_LOST_CSS))
+    assert "body { margin-left: min(10%, 2em); margin-right: min(10%, 2em) }" in css
+    assert "p.poem { text-indent: 3%; margin-left: min(30%, 2em) }" in css
+    assert "p { margin-top: 0.2em; text-align: justify; margin-bottom: 0.2em; text-indent: 4% }" in css
+    fq = rules(epubpack.scrub_css(FAERIE_QUEENE_CSS))
+    assert (".poem { margin-left: min(10%, 2em); margin-right: min(10%, 2em); margin-bottom: 1em; text-align: left }"
+            in fq)
+    assert ".author { text-align: right; margin-top: -1em; margin-right: 5% }" in fq       # 5% is narrow enough
+
+
+def test_shorthand_side_margins_and_paddings_are_clamped():
+    css = rules(epubpack.scrub_css("blockquote { margin: 0 20% } .a { padding: 1em 8% 2em 3% } .b { margin: 15% }"
+                                   " .c { margin: 1em auto !important } .d { margin-left: 25% !important }"))
+    assert css == ["blockquote { margin: 0 min(20%, 2em) }", ".a { padding: 1em min(8%, 2em) 2em 3% }",
+                   ".b { margin: min(15%, 2em) }", ".c { margin: 1em auto !important }",
+                   ".d { margin-left: min(25%, 2em) !important }"]
+
+
+def test_deep_em_indents_are_capped():
+    css = rules(epubpack.scrub_css(FAERIE_QUEENE_CSS))
+    assert ".poem p.i20 { margin-left: min(10em, 30%) }" in css
+    assert ".poem p.i12 { margin-left: 6em }" in css
+    assert ".poem p { margin: 0; padding-left: 3em; text-indent: -3em }" in css
+    assert ".poem .stanza { margin: 1em 0 1em 0 }" in css
+
+
+def test_centred_and_right_aligned_paragraphs_win_over_the_readers_alignment():
+    css = rules(epubpack.scrub_css(HAMLET_CSS))
+    assert f"{BOOST} p.right {{ text-align: right !important }}" in css
+    assert f"{BOOST} p.scenedesc {{ text-align: center !important }}" in css
+    assert not any(BOOST in line and ("h1" in line or "div.fig" in line) for line in css)
+    assert "p.right { text-align: right }" in css                       # the rule itself stays
+    fq = rules(epubpack.scrub_css(FAERIE_QUEENE_CSS))
+    assert f"{BOOST} .center {{ text-align: center !important }}" in fq
+    assert f"{BOOST} .author {{ text-align: right !important }}" in fq
+    assert not any(BOOST in line and ".poem" in line for line in fq)   # left isn't boosted
+    pl = rules(epubpack.scrub_css(PARADISE_LOST_CSS + ".x p, td.c, p:first-child { text-align: end }"))
+    assert f"{BOOST} p.center {{ text-align: center !important }}" in pl
+    assert f"{BOOST} .x p {{ text-align: end !important }}" in pl
+    assert f"{BOOST} p:first-child {{ text-align: end !important }}" in pl
+    assert not any(BOOST in line and "td.c" in line for line in pl)
+    assert pl.index(f"{BOOST} p.center {{ text-align: center !important }}") > pl.index("p.poem { text-indent: 3%; "
+                                                                                     "margin-left: min(30%, 2em) }")
+
+
+def test_absolutely_positioned_marks_move_to_the_right_margin():
+    css = rules(epubpack.scrub_css(FAERIE_QUEENE_CSS))
+    note = "float: right; font-size: .75em; opacity: .65; margin-left: .75em"
+    assert f".linenum {{ {note} }}" in css
+    assert f".sidenote {{ text-align: left; {note} }}" in css
+    assert not any("position" in line or "left: 60%" in line or "92%" in line for line in css)
+    assert ".x { position: relative; left: 1em }" in epubpack.scrub_css(".x { position: relative; left: 1em }")
+
+
+def test_dropped_line_numbers_lose_their_rules():
+    css = epubpack.scrub_css(FAERIE_QUEENE_CSS + "span.linenum.mckay:before { content: '[' }", line_numbers="drop")
+    assert "linenum" not in css and ".sidenote { text-align: left; float: right" in css
+
+
+def test_inline_centring_on_a_paragraph_wins_over_the_readers_alignment(tmp_path):
+    page = chapter1(tmp_path, '<p style="text-align:center">a</p><p style="text-align: right !important">b</p>'
+                              '<p style="text-align: left">c</p><div style="text-align: center">d</div>')
+    assert 'style="text-align:center !important"' in page and 'style="text-align: right !important"' in page
+    assert 'style="text-align: left"' in page and '<div style="text-align: center">' in page
+
+
+def test_line_numbers_stay_in_the_margin_or_are_dropped(tmp_path):
+    html = ('<h2>Canto I</h2><div class="stanza"><a id="l4"></a><p class="i2">fourth line</p>'
+            '<span class="linenum" id="n5">5</span><p class="i2">fifth line</p></div>')
+    kept = chapter1(tmp_path, html)
+    assert '<span class="linenum" id="n5">5</span>' in kept
+    w = work(html=html)
+    w.line_numbers = "drop"
+    dropped = build(tmp_path, w).read("OEBPS/c001.xhtml").decode()
+    assert ">5<" not in dropped and "linenum" not in dropped and 'id="n5"' in dropped
+    assert "fifth line" in dropped

@@ -42,6 +42,7 @@ class Work:
     section: str
     chapters: list[Chapter]
     styles: str = ""
+    line_numbers: str = "margin"  # "margin" or "drop", for EPUBs
 
 
 @dataclass

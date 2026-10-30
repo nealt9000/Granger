@@ -162,11 +162,22 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
     - The copy keeps all the wrapper's attributes (class, `lang`, `style`), not only the class. The first copy also keeps the id, so links to the wrapper still land; later copies have none.
     - `_flatten` starts a new run at each child holding a split heading, so the heading stays inside its wrapper copy. `_by_size` tracks the chain of wrappers open on the current page and counts the copies' tags against the page limit.
     - Checked on real books with the audit's dead-rule test. Faerie Queene (#15272): `.poem p` was live on 35 of 8,249 lines, `.poem p.i2` on 9 of 4,343, `.poem .stanza` on 9 of 641 and `.poem p.i20` on 0 of 619. All are now live everywhere. The rules still "dead" (`.poem p.i16` 13/37, `.poem p.i4` 0/19, `.noflo p.i2` 8/4,343) match exactly what they match in the source HTML. Same 31 pages, largest page 142 KB, no duplicate ids. Paradise Lost and Hamlet are unchanged apart from Task 1's leftovers.
-- [ ] **Task 3: CSS fixes** (R3, R4, R5)
+- [x] **Task 3: CSS fixes** (R3, R4, R5)
   - `scrub_css` clamps percentage side margins and paddings above 5% to `min(X%, 2em)`, and em indents above 6em to `min(Xem, 30%)`.
   - It writes `:root:root:root:root <sel> { text-align: X !important }` for each centre, right or end rule that targets a `p` or a bare class, and adds `!important` to inline `text-align` on a `p`.
   - It replaces absolute or fixed positioning with a right float in small, faint type. With `lineNumbers: "drop"`, the line-number spans are removed instead.
   - Unit tests run against the exact rules from Paradise Lost, Hamlet and Faerie Queene that the audit found.
+  - **Done 2026-10-30. As built:**
+    - The em cap applies to side margins and paddings (longhand and the side positions of `margin`/`padding` shorthands), not to `text-indent`. `!important` on a clamped value is kept.
+    - The boost rules go after all the work's rules. The `!important` on inline `text-align` is added in `_fix_attributes`.
+    - A positioned rule loses `position`, its offsets and any `float`/`font-size`/`opacity`/`margin-left` of its own, then gets the margin-note declarations, so nothing is stated twice.
+    - Line-number classes are `linenum`, `linenumber`, `lineno`, `line-number` and `linenr` (`epubpack.LINE_NUMBER`). With `"drop"`, their rules go from the CSS and the spans go from the pages, keeping their ids as page numbers do. `zimpack.Work` gains `line_numbers` (EPUB only), set from the manifest in `pack_builder._work`.
+    - Checked on real books (Readium CSS 3.4.0 from the AAR, Chrome, 390 px iframe, Georgia):
+      - Hamlet: 0 → 70 centred `p.scenedesc` and 0 → 115 right-aligned `p.right` (`[Exit.]`).
+      - Paradise Lost: `p.poem` is 428 px wide instead of 322 at a 500 px window. The flush wraps and the drop cap remain, which is Task 4's job.
+      - Faerie Queene: the 1,108 `.linenum` go from `position: absolute` over the words to small right-floated numbers. With `"drop"` they're gone, 0 left. The `.poem` hanging indent and `i2` indents show.
+    - epubcheck isn't installed on this Mac, so `min()` in `book.css` hasn't been through epubcheck yet; Task 10 runs it.
+    - **For Task 4/6:** in Faerie Queene, `.poem`'s clamped 2em on both sides plus the 3em hang leaves about 270 px for verse at 390 px, so many lines still wrap (they hang). Task 4's `p.gv` margin reset doesn't cover this, because these lines aren't `<br>` blocks. Consider clamping `.poem`'s right margin to 0 or the 2em cap lower if Task 6 measures it as a problem.
 - [ ] **Task 4: verse blocks** (R1, R2, Decision 2, and R9 if it passes)
   - Port `fixproto.py` into `epubpack._prepare`, gated on the work's `verse` setting, and append the audit's verse CSS (§5) to `BOOK_CSS`.
   - Tests cover:
