@@ -1222,7 +1222,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 librarySearch = container.search,
                                 thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
                             ),
-                            container.shelves, container.media, container.homePrefs,
+                            container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
@@ -1264,7 +1264,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         DownloadsViewModel(
                             container.downloads, container.library, container.bookshelf, container.sessions, container.appScope,
-                            container.catalog, container.volumes,
+                            container.catalog, container.volumes, tidyDismissals = container.tidyDismissals,
                         )
                     },
                     onBack = { nav.popBackStack() },

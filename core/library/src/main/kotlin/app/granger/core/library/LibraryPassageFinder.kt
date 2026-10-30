@@ -55,6 +55,8 @@ class LibraryPassageFinder(
     private val mediaCards: Int = 2,
     private val searchParallelism: Int = 4,
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
+    /** The sets the packs are slices of, so a smaller slice's articles don't double a bigger one's (Plan WF Decision 6). */
+    private val slices: PackSlices? = null,
 ) : PassageFinder {
     /** The last [find]'s timings (Plan R5 Task 1); null before the first, or when it had no keywords. */
     @Volatile var lastTimings: KeywordTimings? = null
@@ -72,7 +74,12 @@ class LibraryPassageFinder(
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
         // The four searches don't depend on each other: books, cards and media run alongside the packs' full-text search.
         return coroutineScope {
-            val articles = async { timed { withoutClassicsTwins(articles(words, packs, collections), packs) } }
+            val articles = async {
+                timed {
+                    val found = withoutClassicsTwins(articles(words, packs, collections), packs)
+                    SliceDedupe.apply(found, packs, slices, library::archive, { p -> p.sourceId.takeIf { p.kind == SourceKind.ARTICLE } }, { it.location })
+                }
+            }
             val books = async { timed { books(words, collections) } }
             val cards = async { timed { cards(words, packs, collections) } }
             val media = async { timed { mediaCards(words) } }

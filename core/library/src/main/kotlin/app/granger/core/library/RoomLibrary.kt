@@ -133,15 +133,37 @@ class RoomLibrary(
         }
     }
 
-    override suspend fun supersede(oldPackId: String, newPackId: String): Boolean = refreshMutex.withLock {
+    override suspend fun supersede(oldPackId: String, newPackId: String, acrossNames: Boolean): Boolean = refreshMutex.withLock {
         withContext(io) {
             if (oldPackId == newPackId) return@withContext false
             val old = packDao.get(oldPackId) ?: return@withContext false
             val new = packDao.get(newPackId)?.takeIf { it.status == PackStatus.OK } ?: return@withContext false
-            if (old.name.isBlank() || old.name != new.name) return@withContext false
+            if (!acrossNames && (old.name.isBlank() || old.name != new.name)) return@withContext false
+            // Across a set, the marks whose article the new pack lacks become history before anything is deleted.
+            val missing = if (acrossNames) {
+                val archive = archive(newPackId) ?: return@withContext false
+                val bookmarks = bookmarkDao.forPack(oldPackId).filter { archive.resolvePath(it.path) == null }
+                val places = positionDao.forPack(oldPackId).filter { archive.resolvePath(it.path) == null }
+                bookmarks to places
+            } else null
             closeArchive(oldPackId)
             val file = File(old.filePath)
             if (file.exists() && !file.delete()) return@withContext false
+            if (missing != null) {
+                val (bookmarks, places) = missing
+                db.withTransaction {
+                    for (b in bookmarks) {
+                        if (!sessionDao.hasHistory(oldPackId, b.path)) sessionDao.upsertHistory(HistoryEntry(oldPackId, b.path, b.title, b.createdAt))
+                        bookmarkDao.delete(oldPackId, b.path)
+                    }
+                    for (p in places) {
+                        if (!sessionDao.hasHistory(oldPackId, p.path)) {
+                            sessionDao.upsertHistory(HistoryEntry(oldPackId, p.path, p.path.substringAfterLast('/').replace('_', ' '), p.updatedAt))
+                        }
+                        positionDao.delete(oldPackId, p.path)
+                    }
+                }
+            }
             inherit(old, new)
             onRemoved(oldPackId)
             true

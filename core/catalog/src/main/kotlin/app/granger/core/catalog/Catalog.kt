@@ -246,3 +246,34 @@ data class Onboarding(
 /** A use-case chip: what it adds, as readiness-style tokens the parser has resolved. */
 @Serializable
 data class UseCase(val id: String, val title: String, val blurb: String = "", val items: List<String> = emptyList())
+
+/** A subject under this share new to a slice of its set is inside it (Plan WF Decision 5). */
+const val COVERED_SHARE = 0.05
+
+/**
+ * Which ZIMs hold which (Plan H4 Decision 5, Plan WF Decision 5): the readiness `contains` table; every bigger slice of
+ * a set holds the smaller; a subject is held by its set's top slice (the whole of it) and by any slice it adds under
+ * [COVERED_SHARE] to. Built once per catalog; [containers] is memoised.
+ */
+class Containment(private val catalog: Catalog?) {
+    private val byZim = catalog?.packs.orEmpty().filter { it.zimName.isNotBlank() }.groupBy { it.zimName }
+    private val slicesBySet = catalog?.packs.orEmpty().filter { it.isSlice }.groupBy { it.setId }
+    private val memo = HashMap<String, Set<String>>()
+
+    /** The ZIM names that hold [zimName]'s articles; never [zimName] itself. */
+    fun containers(zimName: String): Set<String> = memo.getOrPut(zimName) {
+        val out = LinkedHashSet<String>()
+        catalog?.readiness?.containers(zimName)?.let(out::addAll)
+        val entry = byZim[zimName]?.firstOrNull()
+        if (entry != null && entry.isSlice) {
+            slicesBySet[entry.setId].orEmpty().filter { it.setRank > entry.setRank }.mapTo(out) { it.zimName }
+        }
+        if (entry != null && entry.isSubject) {
+            val slices = slicesBySet[entry.subjectOf].orEmpty()
+            val top = slices.maxOfOrNull { it.setRank }
+            slices.filter { it.setRank == top || (entry.adds[it.zimName] ?: 1.0) < COVERED_SHARE }.mapTo(out) { it.zimName }
+        }
+        out.remove(zimName)
+        out
+    }
+}

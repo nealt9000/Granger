@@ -147,12 +147,9 @@ object KiwixList {
     /** A slice's name in a sentence: "Best 50,000", "Top 1 million", "Everything". */
     fun shortLabel(label: String): String = label.removeSuffix(" articles")
 
-    /** Subjects of a set at under this share new to a slice are inside it (Plan WF Decision 5). */
-    const val COVERED_SHARE = 0.05
-
     /** Whether [slice] (of rank [slice].setRank, the set's top rank [topRank]) holds [subject]'s articles. */
     fun covers(slice: PackEntry, subject: PackEntry, topRank: Int): Boolean =
-        slice.setRank >= topRank || (subject.adds[slice.zimName]?.let { it < COVERED_SHARE } ?: false)
+        slice.setRank >= topRank || (subject.adds[slice.zimName]?.let { it < app.granger.core.catalog.COVERED_SHARE } ?: false)
 
     /** What a subject's row says about [slice] (Plan WF Decision 4): its [text], and whether it is [covered] already. */
     data class Adds(val text: String, val covered: Boolean)

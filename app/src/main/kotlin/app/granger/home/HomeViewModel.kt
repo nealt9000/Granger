@@ -57,6 +57,8 @@ data class HomeUi(
     val scopeChoices: List<ScopeChoice> = emptyList(),
     /** The live downloads card (Plan DL Decision 7); null when there's nothing to show. */
     val downloads: DownloadsCard? = null,
+    /** A bigger slice is in: the offers to remove the smaller (Plan WF Decision 5). */
+    val tidy: List<app.granger.sources.TidyOffer> = emptyList(),
 )
 
 /** Home's one card for downloads: the round while anything waits or runs, else what stopped. */
@@ -96,7 +98,7 @@ interface HomePrefs {
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     catalog: CatalogSource,
-    library: Library,
+    private val library: Library,
     bookshelf: Bookshelf,
     private val downloads: Downloads,
     rail: StateFlow<RailUi>,
@@ -108,6 +110,7 @@ class HomeViewModel(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val today: () -> LocalDate = LocalDate::now,
     private val clock: () -> Long = System::currentTimeMillis,
+    private val tidyDismissals: app.granger.sources.TidyDismissals = app.granger.sources.TidyDismissals(),
 ) : ViewModel() {
     private val day = MutableStateFlow(today())
 
@@ -154,10 +157,14 @@ class HomeViewModel(
 
     private val continuing = combine(rail, mainPaths) { railUi, mains -> continueCards(railUi, mains) }
 
-    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, downloadsCard) { report, cards, rows, snap, card ->
+    private val tidyOffers = combine(catalog.state, downloads.records, library.packs, tidyDismissals.keys) { c, records, packs, keys ->
+        app.granger.sources.SetTidy.offers(c.catalog, records, packs, keys)
+    }.flowOn(io)
+
+    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, combine(downloadsCard, tidyOffers, ::Pair)) { report, cards, rows, snap, (card, tidy) ->
         HomeUi(
             strip = report, continueCards = cards, feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
-            scopeChoices = scopeChoices(snap), downloads = card,
+            scopeChoices = scopeChoices(snap), downloads = card, tidy = tidy,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
 
@@ -193,6 +200,16 @@ class HomeViewModel(
     fun retryStopped(card: DownloadsCard.Stopped) {
         viewModelScope.launch { card.retriable.forEach { downloads.retry(it) } }
     }
+
+    /** Yes to a tidy offer: the smaller slice goes, its places and bookmarks moving to the bigger (Plan WF Decision 5). */
+    fun removeSmaller(offer: app.granger.sources.TidyOffer) {
+        viewModelScope.launch {
+            if (!app.granger.sources.SetTidy.remove(offer, library, downloads)) tidyDismissals.dismiss(offer.key)
+        }
+    }
+
+    /** Keep both: the offer doesn't come back. */
+    fun keepBoth(offer: app.granger.sources.TidyOffer) = tidyDismissals.dismiss(offer.key)
 
     /** Closes the stopped card until something else fails. */
     fun dismissStopped(card: DownloadsCard.Stopped) {

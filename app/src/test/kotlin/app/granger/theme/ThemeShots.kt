@@ -859,6 +859,19 @@ class ThemeShots {
         }
     }
 
+    /** Plan WF Decision 5: the offer to tidy up once Top 1 million is in. */
+    @Test fun wfTidy() = shoot("wf-tidy") {
+        androidx.compose.material3.Surface {
+            app.granger.sources.TidyOfferCard(
+                app.granger.sources.TidyOffer(
+                    "a>b", "wikipedia_en_top1m_nopic", "wikipedia_en_top_nopic", "u-1m", "u-top", 2_700_000_000,
+                    "Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.", "Best 50,000",
+                ),
+                onRemove = {}, onKeep = {},
+            )
+        }
+    }
+
     @Test fun wfKiwixList() = wfScreen("wf-kiwix-list", null)
 
     @Test fun wfSubjects() = wfScreen("wf-subjects", "subjects:wikipedia_en:wikipedia_en_top")

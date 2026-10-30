@@ -1271,4 +1271,19 @@ class SourceViewModelTest {
         assertThat(recommended.rows.map { it.title }).contains("Wikipedia")
         assertThat(vm.rows().count { it.title == "Wikipedia" }).isEqualTo(1)
     }
+
+    /** Plan WF Decision 5: a preset holding two slices of one set queues only the bigger; one already inside isn't queued. */
+    @Test fun aPresetQueuesOnlyTheBiggestSliceOfASet() = runTest(main.dispatcher) {
+        val best = kiwix("wikipedia_en_top_maxi", "Reference", zimName = "wikipedia_en_top")
+            .copy(setId = "wikipedia_en", setRank = 2, setLabel = "Best 50,000 articles")
+        val million = kiwix("wikipedia_en_top1m_nopic", "Reference", zimName = "wikipedia_en_top1m")
+            .copy(setId = "wikipedia_en", setRank = 3, setLabel = "Top 1 million articles")
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(listOf(best, million), presets = listOf(Preset("comprehensive", "Comprehensive", listOf(best.id, million.id)))),
+        )
+        val vm = viewModel(CatalogScope.KIWIX)
+        vm.getPreset("comprehensive")
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly(million.id)
+    }
 }

@@ -67,7 +67,12 @@ data class Addition(val useCase: UseCase, val lines: List<Line>) {
 data class ReviewGroup(val title: String, val lines: List<Line>)
 
 /** The review step: every item once, the total against the chosen volume's free space. */
-data class Review(val groups: List<ReviewGroup>, val freeBytes: Long) {
+data class Review(
+    val groups: List<ReviewGroup>,
+    val freeBytes: Long,
+    /** What was left out because a bigger pack in the review holds it (Plan WF Decision 5). */
+    val notes: List<String> = emptyList(),
+) {
     val lines: List<Line> get() = groups.flatMap { it.lines }
     val items: List<CatalogItem> get() = lines.flatMap { it.items }
     val bytes: Long get() = items.sumOf { it.downloadBytes }
@@ -188,6 +193,7 @@ object OnboardingModel {
         freeBytes: Long,
         ask: Line? = null,
         voice: Line? = null,
+        containment: app.granger.core.catalog.Containment? = null,
     ): Review {
         val seen = HashSet<String>()
         fun List<Line>.fresh(): List<Line> = mapNotNull { line ->
@@ -210,8 +216,42 @@ object OnboardingModel {
             val useCaseLines = additions.flatMap { it.lines }.fresh()
             if (useCaseLines.isNotEmpty()) add(ReviewGroup("What you'll use it for", useCaseLines))
         }
-        return Review(groups, freeBytes)
+        return if (containment == null) Review(groups, freeBytes) else held(groups, freeBytes, containment)
     }
+
+    /**
+     * [groups] less every pack another pack in them holds (Plan WF Decision 5): of two slices of one set only the
+     * biggest is queued, and the review says so.
+     */
+    private fun held(groups: List<ReviewGroup>, freeBytes: Long, containment: app.granger.core.catalog.Containment): Review {
+        val packs = groups.flatMap { g -> g.lines.flatMap { it.items } }.filterIsInstance<PackEntry>().filter { it.zimName.isNotBlank() }
+        val byZim = packs.associateBy { it.zimName }
+        val dropped = LinkedHashMap<String, PackEntry>() // held ZIM name -> the review's pack that holds it
+        for (pack in packs) {
+            val holder = containment.containers(pack.zimName).mapNotNull { byZim[it] }.maxByOrNull { it.setRank } ?: continue
+            dropped.putIfAbsent(pack.zimName, holder)
+        }
+        if (dropped.isEmpty()) return Review(groups, freeBytes)
+        val kept = groups.mapNotNull { g ->
+            val lines = g.lines.mapNotNull { line ->
+                val items = line.items.filterNot { it is PackEntry && it.zimName in dropped }
+                if (items.isEmpty()) null else line.copy(items = items)
+            }
+            if (lines.isEmpty()) null else g.copy(lines = lines)
+        }
+        val notes = dropped.map { (zim, holder) -> heldText(holder, packs.first { it.zimName == zim }) }.distinct()
+        return Review(kept, freeBytes, notes)
+    }
+
+    /** "Wikipedia Top 1 million covers Best 50,000, so only Top 1 million is queued." */
+    fun heldText(holder: PackEntry, held: PackEntry): String =
+        if (holder.isSlice && held.isSlice && holder.setId == held.setId) {
+            val big = app.granger.sources.KiwixList.shortLabel(holder.setLabel)
+            val set = app.granger.sources.KiwixList.setTitle(holder.setId, listOf(holder))
+            "$set $big covers ${app.granger.sources.KiwixList.shortLabel(held.setLabel)}, so only $big is queued."
+        } else {
+            "${holder.title} covers ${held.title}, so it isn't queued."
+        }
 
     /** The Granger Classics' collection id. */
     const val CLASSICS = "granger-classics"

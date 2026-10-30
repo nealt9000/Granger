@@ -470,4 +470,37 @@ class RoomLibraryTest {
         assertThat(packs().map { it.id }).containsExactly("u-a", "u-other")
         assertThat(library.bookmarks.first().map { it.packId }).containsExactly("u-a")
     }
+
+    /** Plan WF Decision 5: Top 1 million takes Best 50,000's place; a mark on an article it lacks becomes history. */
+    @Test fun aBiggerSliceSupersedesAcrossZimNamesKeepingPlacesAndTurningMissingArticlesIntoHistory() = test {
+        val gone = mutableListOf<String>()
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val old = zim(internal, "wikipedia_en_top_maxi_2026-09.zim", "u-top", name = "wikipedia_en_top", paths = setOf("index", "Lion", "Lost_in_Translation"))
+        hooked.refresh()
+        hooked.setBookmarked("u-top", "Lion", "Lion", true)
+        hooked.setBookmarked("u-top", "Lost_in_Translation", "Lost in Translation", true)
+        hooked.savePosition("u-top", "Lion", 0.3f)
+        hooked.savePosition("u-top", "Lost_in_Translation", 0.7f)
+        val sessions = RoomReadingSessions(db) { clock }
+        val tabId = sessions.openTab("u-top", "Lion", "Lion")
+        clock = 9_000L
+        zim(internal, "wikipedia_en_top1m_nopic_2026-04.zim", "u-top1m", name = "wikipedia_en_top1m", paths = setOf("index", "Lion"))
+        hooked.refresh()
+
+        // Without the set's say-so, two ZIM names never supersede.
+        assertThat(hooked.supersede("u-top", "u-top1m")).isFalse()
+        assertThat(old.exists()).isTrue()
+
+        assertThat(hooked.supersede("u-top", "u-top1m", acrossNames = true)).isTrue()
+        assertThat(old.exists()).isFalse()
+        assertThat(hooked.packs.first().map { it.id }).containsExactly("u-top1m")
+        assertThat(hooked.bookmarks.first().map { it.packId to it.path }).containsExactly("u-top1m" to "Lion")
+        assertThat(hooked.position("u-top1m", "Lion")).isEqualTo(0.3f)
+        assertThat(hooked.position("u-top1m", "Lost_in_Translation")).isNull()
+        assertThat(sessions.tab(tabId)?.packId).isEqualTo("u-top1m")
+        // The article Top 1 million lacks is kept as a history row, under its bookmark's title.
+        val history = sessions.history.first().filter { it.path == "Lost_in_Translation" }
+        assertThat(history.map { it.packId to it.title }).containsExactly("u-top1m" to "Lost in Translation")
+        assertThat(gone).containsExactly("u-top")
+    }
 }

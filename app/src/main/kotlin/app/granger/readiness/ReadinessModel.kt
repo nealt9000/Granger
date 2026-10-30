@@ -35,6 +35,8 @@ data class DomainCoverage(
     val comprehensiveBytes: Long,
     /** Essential items not installed, smallest first; `family:` items are left out (onboarding picks the region). */
     val missingEssential: List<CatalogItem>,
+    /** Tier items a bigger pack on the phone holds (Plan WF Decision 5): "Wikipedia Top 1 million covers Best 50,000". */
+    val covers: List<String> = emptyList(),
 )
 
 /** One sentence about a gap, with what the screen can do about it (spec §4). */
@@ -115,9 +117,27 @@ object ReadinessModel {
         private val installedNames = packEntries.values.filterNotNull().mapTo(HashSet()) { it.zimName }
         private val installedFamilies = packEntries.values.filterNotNull().mapNotNullTo(HashSet()) { it.family.ifBlank { null } }
 
-        /** A ZIM is held when it, or a ZIM that holds its articles, is installed (Plan H4, Decision 7). */
+        private val containment = app.granger.core.catalog.Containment(catalog)
+
+        /**
+         * A ZIM is held when it, or a ZIM that holds its articles, is installed (Plan H4, Decision 7): a bigger slice of
+         * its set, or for a subject the whole set (Plan WF Decision 5).
+         */
         private fun held(zimName: String): Boolean =
-            zimName in installedNames || catalog?.readiness?.containers(zimName).orEmpty().any { it in installedNames }
+            zimName in installedNames || containment.containers(zimName).any { it in installedNames }
+
+        /** The installed ZIM that holds [zimName] when [zimName] itself isn't installed, else null. */
+        private fun heldBy(zimName: String): String? =
+            if (zimName in installedNames) null else containment.containers(zimName).firstOrNull { it in installedNames }
+
+        /** "Wikipedia Top 1 million covers Best 50,000": within a set by its labels, else by the packs' titles. */
+        private fun coversText(container: PackEntry, item: PackEntry): String =
+            if (container.isSlice && item.isSlice && container.setId == item.setId) {
+                val set = app.granger.sources.KiwixList.setTitle(container.setId, listOf(container))
+                "$set ${app.granger.sources.KiwixList.shortLabel(container.setLabel)} covers ${app.granger.sources.KiwixList.shortLabel(item.setLabel)}"
+            } else {
+                "${container.title} covers ${item.title}"
+            }
 
         /** Granger books that are whole, with their entries. */
         val granger: Map<Book, BookEntry> = books.filter { it.origin == BookOrigin.GRANGER }
@@ -144,6 +164,12 @@ object ReadinessModel {
                 essentialBytes = tierBytes(essential),
                 comprehensiveBytes = tierBytes(comprehensive),
                 missingEssential = essential.filterNot { it.started }.mapNotNull { it.missing }.sortedBy { it.sizeBytes },
+                covers = (domain.essential + domain.comprehensive).distinct().mapNotNull { id ->
+                    val item = catalog?.packs?.firstOrNull { it.id == id } ?: return@mapNotNull null
+                    val by = heldBy(item.zimName) ?: return@mapNotNull null
+                    val container = packEntries.values.filterNotNull().firstOrNull { it.zimName == by } ?: byName[by]?.firstOrNull() ?: return@mapNotNull null
+                    coversText(container, item)
+                }.distinct(),
             )
         }
 
@@ -153,8 +179,7 @@ object ReadinessModel {
         /** A tier's catalog size: one entry per ZIM (its largest listed flavour), nothing for a ZIM another in the tier holds. */
         private fun tierBytes(tokens: List<Token>): Long {
             val byZim = tokens.filter { !it.zimName.isNullOrBlank() }.groupBy { it.zimName!! }.mapValues { (_, t) -> t.maxOf { it.bytes } }
-            val containers = catalog?.readiness
-            val counted = byZim.filterKeys { zim -> containers?.containers(zim).orEmpty().none { it in byZim } }
+            val counted = byZim.filterKeys { zim -> containment.containers(zim).none { it in byZim } }
             return counted.values.sum() + tokens.filter { it.zimName.isNullOrBlank() }.sumOf { it.bytes }
         }
 

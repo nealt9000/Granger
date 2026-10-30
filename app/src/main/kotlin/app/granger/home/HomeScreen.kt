@@ -69,6 +69,9 @@ class DownloadsCardActions(
     val onResume: () -> Unit = {},
     val onRetry: (DownloadsCard.Stopped) -> Unit = {},
     val onDismiss: (DownloadsCard.Stopped) -> Unit = {},
+    /** A tidy offer's Remove and Keep both (Plan WF Decision 5). */
+    val onTidyRemove: (app.granger.sources.TidyOffer) -> Unit = {},
+    val onTidyKeep: (app.granger.sources.TidyOffer) -> Unit = {},
 )
 
 /** What the screen can do for a feed. */
@@ -96,7 +99,10 @@ fun HomeScreen(
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val actions = remember(viewModel) { FeedActions(viewModel::addFeed, viewModel::removeFeed, viewModel::moveFeed) }
     val cardActions = remember(viewModel) {
-        DownloadsCardActions(viewModel::pauseDownloads, viewModel::resumeDownloads, viewModel::retryStopped, viewModel::dismissStopped)
+        DownloadsCardActions(
+            viewModel::pauseDownloads, viewModel::resumeDownloads, viewModel::retryStopped, viewModel::dismissStopped,
+            viewModel::removeSmaller, viewModel::keepBoth,
+        )
     }
     HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions)
 }
@@ -126,6 +132,11 @@ fun HomeContent(
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list")) {
             item(key = "strip") { ReadinessStrip(ui.strip, onReadiness) }
             ui.downloads?.let { card -> item(key = "downloads") { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
+            for (offer in ui.tidy) {
+                item(key = "tidy-${offer.key}") {
+                    app.granger.sources.TidyOfferCard(offer, { downloadsActions.onTidyRemove(offer) }, { downloadsActions.onTidyKeep(offer) })
+                }
+            }
             if (adding) {
                 item(key = "add-feed") {
                     AddFeedPanel(

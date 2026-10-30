@@ -215,16 +215,16 @@ The nesting holds. Everything's directory region is 1.02 GB (plus 145 MB of poin
 
 ### Task 4: Bigger covers smaller
 
-- [ ] Covering rules. Readiness counts covered items; onboarding and presets queue only the biggest slice; rows read "Inside your …" (Decision 5).
-- [ ] The offer-to-remove prompt and `supersede` across a set. Search and Ask dedupe (Decision 6).
-- [ ] Tests:
+- [x] Covering rules. Readiness counts covered items; onboarding and presets queue only the biggest slice; rows read "Inside your …" (Decision 5).
+- [x] The offer-to-remove prompt and `supersede` across a set. Search and Ask dedupe (Decision 6).
+- [x] Tests:
   - `ReadinessModelTest`: Reference with Top 1 million installed;
   - `OnboardingModelTest`: Best 50,000 and Top 1 million both chosen → one queued;
   - `RoomLibraryTest`: supersede across `zimName` in a set, keeping places and turning missing articles into history;
   - Home/Downloads prompt tests;
   - a `ZimLibrarySearch` dedupe test.
-- [ ] Full suite, then build.
-- [ ] **Commit.** `Wikipedia family: a bigger slice covers the smaller, with an offer to tidy up`
+- [x] Full suite, then build.
+- [x] **Commit.** `Wikipedia family: a bigger slice covers the smaller, with an offer to tidy up`
 
 ### Task 5: Walkthrough (Neal, Pixel 6)
 

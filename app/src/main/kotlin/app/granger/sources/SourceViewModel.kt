@@ -391,7 +391,12 @@ class SourceViewModel(
         appScope.launch {
             val records = downloads.records.first()
             val packs = library.packs.first()
+            // A pack a bigger one on the phone, or in the preset, holds isn't queued (Plan WF Decision 5).
+            val containment = app.granger.core.catalog.Containment(current)
+            val names = packs.filter { it.status == app.granger.core.library.PackStatus.OK }.mapTo(HashSet()) { it.name }
+            val presetZims = preset.items.mapNotNullTo(HashSet()) { (current.item(it) as? PackEntry)?.zimName?.ifBlank { null } }
             val todo = preset.items.mapNotNull { current.item(it) }.filter { wanted(statusOf(it, records, packs, tier)) }
+                .filter { item -> item !is PackEntry || containment.containers(item.zimName).none { it in names || it in presetZims } }
             notice.value = if (todo.isEmpty()) {
                 "Everything in ${preset.title} is already here or on its way."
             } else {
