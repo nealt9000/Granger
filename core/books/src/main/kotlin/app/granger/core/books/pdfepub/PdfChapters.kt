@@ -125,7 +125,12 @@ internal object PdfChapters {
             ?: (from until items.size).firstOrNull { i -> text(items[i])?.let { normal(it).startsWith(want) } == true }
     }
 
-    private fun normal(text: String): String = text.lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), "")
+    private val NOT_WORD = Regex("[^\\p{L}\\p{N}]+")
+
+    /** [text] lower-cased with only its letters and digits; cached for a heading or paragraph, which are matched many times. */
+    private val normals = java.util.Collections.synchronizedMap(java.util.WeakHashMap<String, String>())
+
+    private fun normal(text: String): String = normals.getOrPut(text) { text.lowercase().replace(NOT_WORD, "") }
 
     /**
      * Chapters at the biggest headings that come at least twice and no more than once a page, and leave no chapter over

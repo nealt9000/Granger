@@ -68,6 +68,12 @@ internal class PageText(
     )
 }
 
+/** Time spent reading text and finding pictures, for the phone bench (nanoseconds). */
+class PdfTimings {
+    @Volatile var textNs = 0L
+    @Volatile var picturesNs = 0L
+}
+
 /** Reads a PDF page by page into lines and pictures (Plan IA converter stage 1). */
 internal object PdfPages {
     /** Pictures smaller than this share of the page (icons, rules, ornaments) are left out. */
@@ -80,18 +86,22 @@ internal object PdfPages {
      * Page [index]: its lines, and its pictures written into [scratch] (a book's pictures don't all fit in memory). Two
      * pages when it is a spread of two printed pages.
      */
-    fun read(doc: PDDocument, index: Int, scratch: File, spreadGutter: Float? = null): List<PageText> {
+    fun read(doc: PDDocument, index: Int, scratch: File, spreadGutter: Float? = null, timings: PdfTimings? = null): List<PageText> {
         val page = doc.getPage(index)
         val box = page.cropBox ?: page.mediaBox
         // A page stored portrait and turned a quarter for display is read turned (the glyphs' positions already are).
         val turned = page.rotation % 180 != 0
         val width = abs(if (turned) box.height else box.width)
         val height = abs(if (turned) box.width else box.height)
+        val t0 = System.nanoTime()
         val glyphs = glyphs(doc, index)
+        timings?.let { it.textNs += System.nanoTime() - t0 }
         // A book of spreads splits every landscape page at its gutter, a nearly empty half (a chapter's end) too.
         val forced = spreadGutter?.takeIf { width > height * 1.1f }
         val laid = Lines.of(index, glyphs, width, forced)
+        val t1 = System.nanoTime()
         val pictures = pictures(page, index, width * height, scratch)
+        timings?.let { it.picturesNs += System.nanoTime() - t1 }
         val chars = glyphs.count { !it.unicode.isNullOrBlank() }
         val gutter = laid.gutter
         // A landscape page with a gutter down its middle is two printed pages side by side (a spread, or a booklet's
@@ -111,8 +121,8 @@ internal object PdfPages {
      * Every page, in reading order: when most landscape pages are spreads, those that weren't found to be (a half nearly
      * empty) are read again split at the spreads' usual gutter.
      */
-    fun readAll(doc: PDDocument, scratch: File): List<PageText> {
-        val pages = (0 until doc.numberOfPages).map { read(doc, it, scratch) }
+    fun readAll(doc: PDDocument, scratch: File, timings: PdfTimings? = null): List<PageText> {
+        val pages = (0 until doc.numberOfPages).map { read(doc, it, scratch, timings = timings) }
         val spreads = pages.filter { it.size == 2 }
         val wholeLandscape = pages.withIndex().filter { (_, p) -> p.size == 1 && p[0].width > p[0].height * 1.1f }
         val gutter = spreads.mapNotNull { it[0].gutter }.sorted().let { it.getOrNull(it.size / 2) }
@@ -271,13 +281,22 @@ internal object PdfPages {
         .filter { it.y < page.height * 0.09f || it.y > page.height * 0.91f }
         .firstNotNullOfOrNull { it.text.trim().takeIf { t -> t.length <= 4 && t.all(Char::isDigit) }?.toIntOrNull() }
 
+    /** Each font's [style], worked out once: asked for every glyph, it is the hottest call in reading a page. */
+    private val styles = java.util.Collections.synchronizedMap(java.util.WeakHashMap<PDFont, Pair<Boolean, Boolean>>())
+
+    fun styleOf(font: PDFont?): Pair<Boolean, Boolean> = if (font == null) NO_STYLE else styles.getOrPut(font) { style(font) }
+
+    private val NO_STYLE = false to false
+    private val BOLD_NAME = Regex("bold|black|heavy|semibold|demi|-bd|bd$")
+    private val ITALIC_NAME = Regex("italic|oblique|-it$|-it[^a-z]|it$|slanted")
+
     /** Bold and italic from the font's name and descriptor ("Minion-BoldIt", weight 700, the italic flag). */
     fun style(font: PDFont?): Pair<Boolean, Boolean> {
         val name = font?.name.orEmpty().substringAfter('+').lowercase()
         val descriptor = try { font?.fontDescriptor } catch (_: RuntimeException) { null }
-        val bold = Regex("bold|black|heavy|semibold|demi|-bd|bd$").containsMatchIn(name) ||
+        val bold = BOLD_NAME.containsMatchIn(name) ||
             (descriptor?.fontWeight ?: 0f) >= 600f || descriptor?.isForceBold == true
-        val italic = Regex("italic|oblique|-it$|-it[^a-z]|it$|slanted").containsMatchIn(name) || descriptor?.isItalic == true
+        val italic = ITALIC_NAME.containsMatchIn(name) || descriptor?.isItalic == true
         return bold to italic
     }
 }
@@ -423,7 +442,7 @@ internal object Lines {
             text.setLength(0)
         }
         for (g in glyphs) {
-            val s = PdfPages.style(g.font)
+            val s = PdfPages.styleOf(g.font)
             val size = g.fontSizeInPt.takeIf { it > 0f } ?: 10f
             val gap = if (right.isNaN()) 0f else g.xDirAdj - right
             // Ligatures as their letters ("ﬁ" → "fi"), so search and the voice find the words.

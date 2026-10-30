@@ -15,6 +15,7 @@ import app.granger.core.books.pdfepub.Paragraph
 import app.granger.core.books.pdfepub.PdfChapters
 import app.granger.core.books.pdfepub.PdfLayout
 import app.granger.core.books.pdfepub.PdfPages
+import app.granger.core.books.pdfepub.PdfTimings
 import app.granger.core.books.pdfepub.Picture
 import app.granger.core.books.pdfepub.Span
 import app.granger.core.books.pdfepub.Verse
@@ -59,7 +60,11 @@ object PdfToEpub {
      * when given (an archive.org sidecar's), else as the PDF's own information says. [out] is written only when the
      * report [Report.passes].
      */
-    fun convert(pdf: File, out: File, title: String = "", author: String = "", language: String = ""): Report {
+    fun convert(
+        pdf: File, out: File, title: String = "", author: String = "", language: String = "",
+        /** Told each stage's name and milliseconds (the phone bench). */
+        trace: ((String, Long) -> Unit)? = null,
+    ): Report {
         val doc = try {
             loadPdf(pdf)
         } catch (e: IOException) {
@@ -67,16 +72,23 @@ object PdfToEpub {
         } catch (e: RuntimeException) {
             return failed("unreadable: ${e.message}")
         }
-        return doc.use { convert(it, pdf, out, title, author, language) }
+        return doc.use { convert(it, pdf, out, title, author, language, trace) }
     }
 
-    private fun convert(doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String): Report {
+    private fun convert(doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String, trace: ((String, Long) -> Unit)?): Report {
+        var mark = System.nanoTime()
+        fun stage(name: String) {
+            val now = System.nanoTime()
+            trace?.invoke(name, (now - mark) / 1_000_000)
+            mark = now
+        }
         val origin = PdfOrigin.of(doc)
+        stage("origin")
         if (origin != PdfOrigin.BORN_DIGITAL) return failed("not born-digital: $origin", origin, doc.numberOfPages)
         // The pictures wait here until the EPUB is written.
         val scratch = File(out.absoluteFile.parentFile, ".incoming-${UUID.randomUUID()}").apply { mkdirs() }
         try {
-            return convert(doc, pdf, out, title, author, language, origin, scratch)
+            return convert(doc, pdf, out, title, author, language, origin, scratch, ::stage, trace)
         } finally {
             scratch.deleteRecursively()
         }
@@ -84,14 +96,20 @@ object PdfToEpub {
 
     private fun convert(
         doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String, origin: PdfOrigin, scratch: File,
+        stage: (String) -> Unit, trace: ((String, Long) -> Unit)?,
     ): Report {
-        val pages = PdfPages.readAll(doc, scratch)
+        val timings = if (trace != null) PdfTimings() else null
+        val pages = PdfPages.readAll(doc, scratch, timings)
+        timings?.let { trace?.invoke("pages: text", it.textNs / 1_000_000); trace?.invoke("pages: pictures", it.picturesNs / 1_000_000) }
+        stage("pages")
         val layout = PdfLayout.build(pages)
+        stage("layout")
         // The outline counts PDF pages; a spread is two of the book's, so its entries go to the first of them.
         val firstOf = pages.groupBy { it.pdfPage }.mapValues { (_, ps) -> ps.minOf { it.index } }
         val outline = (try { PdfInspector.outline(doc) } catch (_: IOException) { emptyList() })
             .mapNotNull { e -> firstOf[e.page - 1]?.let { e.copy(page = it + 1) } }
         val (chapters, source) = PdfChapters.split(layout.items, outline, pages.size)
+        stage("chapters")
         val info = doc.documentInformation
         val bookTitle = title.ifBlank { info.title?.trim().orEmpty() }.ifBlank { pdf.nameWithoutExtension }
         val bookAuthor = author.ifBlank { info.author?.trim().orEmpty() }
@@ -139,6 +157,7 @@ object PdfToEpub {
                 EpubPackage.write(EpubBook(bookTitle, bookAuthor, bookLanguage, pdf.name + ":" + pdf.length(), rendered, images, CSS, cover), it)
             }
             if (!partial.renameTo(out)) partial.copyTo(out, overwrite = true)
+            stage("write")
         } catch (e: IOException) {
             return final.copy(passes = false, why = "couldn't write: ${e.message}")
         } finally {
@@ -164,20 +183,37 @@ object PdfToEpub {
         else -> null
     }
 
-    private val WORD = Regex("\\S+")
-    private val ADDRESS = Regex("https?:|www\\.|[/@_]|\\.(com|org|net)\\b")
-
-    /** The share of [text]'s words with 20 or more letters, web addresses aside. */
+    /**
+     * The share of [text]'s words with 20 or more letters, web addresses aside. Counted by hand, not with a Regex: on
+     * Android each match of findAll copies the whole input into a new native matcher, and over a book that took minutes.
+     */
     internal fun runTogether(text: String): Float {
         var words = 0
         var long = 0
-        for (m in WORD.findAll(text)) {
+        var start = -1
+        var letters = 0
+        fun end(i: Int) {
             words++
-            val w = m.value
-            if (w.count { it.isLetterOrDigit() } >= 20 && !ADDRESS.containsMatchIn(w)) long++
+            if (letters >= 20 && !isAddress(text.substring(start, i))) long++
+            start = -1
+            letters = 0
         }
+        for (i in text.indices) {
+            val c = text[i]
+            if (c.isWhitespace()) {
+                if (start >= 0) end(i)
+            } else {
+                if (start < 0) start = i
+                if (c.isLetterOrDigit()) letters++
+            }
+        }
+        if (start >= 0) end(text.length)
         return if (words == 0) 0f else long.toFloat() / words
     }
+
+    private fun isAddress(word: String): Boolean =
+        "http:" in word || "https:" in word || "www." in word || '/' in word || '@' in word || '_' in word ||
+            ".com" in word || ".org" in word || ".net" in word
 
     private fun failed(why: String, origin: PdfOrigin = PdfOrigin.UNKNOWN, pages: Int = 0) =
         Report(origin, pages, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0, passes = false, why = why)

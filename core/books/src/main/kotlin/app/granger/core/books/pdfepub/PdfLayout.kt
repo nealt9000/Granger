@@ -51,6 +51,9 @@ internal object PdfLayout {
     /** A gap between baselines over this many leadings ends a block. */
     private const val BLOCK_GAP = 1.55f
 
+    private val ROMAN = Regex("\\b[ivxlcdm]+\\b")
+    private val NOT_LETTERS = Regex("[^\\p{L}]+")
+    private val NOTE_MARK = Regex("^[\\d*†‡§]+[.)]?\\s")
     private val TERMINAL = Regex("[.!?:…]['\"”’)\\]]*$")
     private val PAGE_NUMBER = Regex("^[\\[(]?(\\d{1,4}|[ivxlcdm]{1,7})[\\])]?$", RegexOption.IGNORE_CASE)
 
@@ -130,8 +133,8 @@ internal object PdfLayout {
 
     /** A running head's words: no digits, no roman numerals, no punctuation, lower case. */
     private fun key(text: String): String = text.lowercase()
-        .replace(Regex("\\b[ivxlcdm]+\\b"), " ")
-        .replace(Regex("[^\\p{L}]+"), " ")
+        .replace(ROMAN, " ")
+        .replace(NOT_LETTERS, " ")
         .trim()
 
     /**
@@ -358,7 +361,7 @@ internal object PdfLayout {
         val out = mutableListOf<MutableList<TextLine>>()
         val left = lines.minOf { it.x }
         for (line in lines) {
-            val starts = out.isEmpty() || line.x - left > line.size * 0.6f || Regex("^[\\d*†‡§]+[.)]?\\s").containsMatchIn(line.text)
+            val starts = out.isEmpty() || line.x - left > line.size * 0.6f || NOTE_MARK.containsMatchIn(line.text)
             if (starts) out += mutableListOf(line) else out.last() += line
         }
         return out.map { Note(page, joinLines(it)) }

@@ -944,10 +944,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
                     onOpenTab = ::showTab,
-                    // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook.
+                    // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook. Only if it is
+                    // still on screen: the reader may have been left while the conversion ran.
                     onReopen = {
-                        nav.popBackStack()
-                        showTab(route.tabId)
+                        if (nav.currentBackStackEntry?.readingTabId() == route.tabId) {
+                            nav.popBackStack()
+                            showTab(route.tabId)
+                        }
                     },
                 )
             }

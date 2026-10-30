@@ -339,7 +339,7 @@ class EbookReaderViewModel(
     fun readAsEbook(onDone: () -> Unit) {
         val id = bookId ?: return
         if (_state.value.makingEbook) return
-        _state.update { it.copy(makingEbook = true, notice = "Making an ebook of this PDF…") }
+        _state.update { it.copy(makingEbook = true) }
         appScope.launch {
             val report = try {
                 bookshelf.readAsEbook(id)

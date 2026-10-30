@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -245,6 +246,10 @@ fun EbookReaderScreen(
     }
 
     var confirmRemovePages by remember { mutableStateOf(false) }
+    // Making an ebook takes a while on a long book (about 20 s for 600 pages): the message stays until it's done.
+    LaunchedEffect(state.makingEbook) {
+        if (state.makingEbook) snackbar.showSnackbar("Making an ebook of this PDF…", duration = SnackbarDuration.Indefinite)
+    }
     LaunchedEffect(state.notice) {
         state.notice?.let {
             snackbar.showSnackbar(it)
