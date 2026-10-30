@@ -277,3 +277,17 @@ def test_a_heading_at_the_split_level_is_not_carried():
     html = '<h3>ONE</h3><p>a</p><h4>An aside heading</h4><h3>TWO</h3><p>b</p>'
     first, second = split(body(html), split_at="h3")
     assert "An aside heading" in first.html
+
+
+def test_a_section_heading_inside_the_wrapper_that_closes_a_part_starts_the_next_one():
+    html = ('<div class="section"><h3>2 MACHABEES</h3><p>the end</p><hr/>'
+            '<div class="chapter"><h2>THE NEW TESTAMENT</h2></div><h3>MATTHEW</h3><p>the beginning</p></div>')
+    first, second = split(body(html), split_at="h3")
+    assert "NEW TESTAMENT" not in first.html and "the end" in first.html
+    assert second.html.index("NEW TESTAMENT") < second.html.index("MATTHEW")
+
+
+def test_a_title_opening_word_on_its_own_line_keeps_its_capital():
+    from chapters import title_case
+    assert title_case("THE")[0] == "The"                    # "THE / TALE OF GENJI"
+    assert title_case("A")[0] == "A"

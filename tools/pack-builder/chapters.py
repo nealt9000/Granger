@@ -68,6 +68,7 @@ _PART_SUFFIX = re.compile(r"\s*\(part \d+\)$")
 _ROMAN = re.compile(r"M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
 _SMALL_WORDS = {"a", "an", "and", "as", "at", "but", "by", "for", "from", "in", "into", "nor", "of", "on", "or",
                 "the", "to", "upon", "with"}
+_JOINING_WORDS = {"and", "by", "of", "or"}  # small words that can't open a title ("THE / TALE OF GENJI")
 _WORD = re.compile(r"[^\W\d_][^\s\-–—/]*")
 
 
@@ -93,7 +94,7 @@ def title_case(text: str, first: bool = True) -> tuple[str, bool]:
 
     if not any(c.isalpha() for c in text):
         return text, first
-    if text.strip().lower() in _SMALL_WORDS:  # a heading split over lines: "THE THOUGHTS / OF / MARCUS AURELIUS"
+    if text.strip().lower() in _JOINING_WORDS:  # a heading split over lines: "THE THOUGHTS / OF / MARCUS AURELIUS"
         return text.lower(), first
     return _WORD.sub(word, text), first
 
@@ -237,17 +238,18 @@ def _groups(nodes: list[PageElement], level: int) -> tuple[list[PageElement], li
         else:
             front.append(node)
     for before, after in zip(groups, groups[1:]):
-        moved = _trailing_section_heading(before.nodes, level)
-        if moved:
-            del before.nodes[-len(moved):]
-            after.nodes[:0] = moved
+        after.nodes[:0] = _take_trailing_section_heading(before.nodes, level)
     return front, groups
 
 
-def _trailing_section_heading(nodes: list[PageElement], level: int) -> list[PageElement]:
-    """The nodes ending a part that only head what comes next: a higher heading ("The New Testament" between
-    2 Machabees and Matthew) with nothing under it, and the rules and space around it."""
+def _take_trailing_section_heading(nodes: list[PageElement], level: int) -> list[PageElement]:
+    """Removes and returns what ends a part only to head the next one: a higher heading ("The New Testament"
+    between 2 Machabees and Matthew) with nothing under it, looking inside a wrapper that closes the part."""
     higher = [f"h{n}" for n in range(1, level)]
+
+    def heads(node: PageElement) -> bool:
+        return isinstance(node, Tag) and (node.name in higher or node.find(higher) is not None)
+
     tail: list[PageElement] = []
     for node in reversed(nodes[1:]):
         if isinstance(node, NavigableString):
@@ -256,11 +258,18 @@ def _trailing_section_heading(nodes: list[PageElement], level: int) -> list[Page
         elif not _heading_only(_Part("", [node])):
             break
         tail.insert(0, node)
-    if not any(isinstance(n, Tag) and (n.name in higher or n.find(higher)) for n in tail):
-        return []
-    while tail and not (isinstance(tail[0], Tag) and (tail[0].name in higher or tail[0].find(higher))):
-        tail.pop(0)  # what stays: the rule or space that closes the part before
-    return tail
+    while tail and not heads(tail[0]):
+        tail.pop(0)  # the rule or space that closes the part stays with it
+    if tail:
+        del nodes[-len(tail):]
+        return tail
+    last = next((n for n in reversed(nodes) if not (isinstance(n, NavigableString) and not n.strip())), None)
+    if isinstance(last, Tag) and last.name not in HEADINGS:
+        moved = _take_trailing_section_heading(list(last.contents), level)
+        for node in moved:
+            node.extract()
+        return moved
+    return []
 
 
 def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_bytes: int,
