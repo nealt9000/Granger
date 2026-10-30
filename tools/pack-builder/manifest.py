@@ -10,6 +10,7 @@ eBible details page must still say "Public Domain".
 
 Reading settings: `verse` turns verse layout on or off (the default follows the section), `lineNumbers` puts
 line numbers in the margin or drops them, and `titleOverrides` replaces contents titles by page number.
+`packSections` packs a too-big page's sections into even pages rather than one page each (a Bible's chapters).
 `cutAfter` gives a Gutenberg work's last words, so whatever follows them (a publisher's catalogue) is cut.
 """
 import json
@@ -52,6 +53,7 @@ class WorkSpec:
     ebible: str | None = None
     licence: str | None = None
     cut_after: str | None = None
+    pack_sections: bool = False
 
     @property
     def reads_as_verse(self) -> bool:
@@ -89,7 +91,7 @@ def load(path: Path) -> Manifest:
                       title_check=w.get("titleCheck", True), verse=w.get("verse"),
                       line_numbers=w.get("lineNumbers", "margin"), title_overrides=w.get("titleOverrides", {}),
                       source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"),
-                      cut_after=w.get("cutAfter"))
+                      cut_after=w.get("cutAfter"), pack_sections=w.get("packSections", False))
              for w in data["works"]]
     return Manifest(name=data["name"], title=data["title"], description=data["description"],
                     language=data["language"], sections=[(s["id"], s["title"]) for s in data["sections"]],
@@ -154,6 +156,8 @@ def _reading_errors(w: WorkSpec) -> list[str]:
         errors.append(f"verse must be true, false or left out, not {w.verse!r}")
     if w.line_numbers not in LINE_NUMBERS:
         errors.append(f"lineNumbers must be one of {LINE_NUMBERS}, not {w.line_numbers!r}")
+    if not isinstance(w.pack_sections, bool):
+        errors.append(f"packSections must be true or false, not {w.pack_sections!r}")
     if w.cut_after is not None and not (isinstance(w.cut_after, str) and w.cut_after.strip()):
         errors.append(f"cutAfter must be the work's last words, not {w.cut_after!r}")
     overrides = w.title_overrides

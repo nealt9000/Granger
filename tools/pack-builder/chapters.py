@@ -5,10 +5,15 @@ limit splits again at the next heading level found inside it, then between block
 served as siblings (`<slug>/001`, `<slug>/002`, ...), so links to anchors are rewritten to point at the
 page that now holds the anchor.
 
+With `pack` (a Bible: books at the split level, chapters below), a page over the limit isn't split one page
+per section: its sections are packed into as few pages as fit, as even as the boundaries allow, and named
+for the sections they hold ("Psalms 1–40"); a book that fits is named for its chapters ("Genesis").
+
 A wrapper element opened to split inside it (a `div.poem` holding many cantos, or one too big for a page)
 isn't thrown away: each run of its children goes back into a copy of it, so the work's rules scoped to the
 wrapper (`.poem p.i2`) still match on every page. Only the first copy keeps the wrapper's id.
 """
+import math
 import re
 from dataclasses import dataclass
 from typing import Callable
@@ -99,10 +104,10 @@ def drop_full_stop(text: str) -> str:
 
 
 def split(body: Tag, split_at: str | None = None, max_bytes: int = 150_000,
-          page_href: Callable[[int], str] = page_name) -> list[Chapter]:
+          page_href: Callable[[int], str] = page_name, pack: bool = False) -> list[Chapter]:
     nodes = list(body.contents)
     level = int(split_at[1]) if split_at else _pick_level(body)
-    parts = _split_level(nodes, level, None, max_bytes) if level else None
+    parts = _split_level(nodes, level, None, max_bytes, pack) if level else None
     if not parts:
         parts = _fit(_Part("", nodes), max_bytes, 1)
     return _finish(parts, page_href)
@@ -215,7 +220,8 @@ def _merge_heading_only(groups: list[_Part]) -> list[_Part]:
     return out
 
 
-def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_bytes: int) -> list[_Part] | None:
+def _groups(nodes: list[PageElement], level: int) -> tuple[list[PageElement], list[_Part]]:
+    """The nodes before the first h{level} heading, and a part per heading holding what follows it."""
     nodes = _flatten(nodes, level)
     front: list[PageElement] = []
     groups: list[_Part] = []
@@ -227,6 +233,12 @@ def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_b
             groups[-1].nodes.append(node)
         else:
             front.append(node)
+    return front, groups
+
+
+def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_bytes: int,
+                 pack: bool = False) -> list[_Part] | None:
+    front, groups = _groups(nodes, level)
     if not groups:
         return None
     groups = _merge_heading_only(groups)
@@ -236,19 +248,83 @@ def _split_level(nodes: list[PageElement], level: int, parent: str | None, max_b
         groups.insert(0, _Part(parent or "Front matter", front))
     else:
         groups[0].nodes[:0] = front
-    return [piece for part in groups for piece in _fit(part, max_bytes, level + 1)]
+    return [piece for part in groups for piece in _fit(part, max_bytes, level + 1, pack)]
 
 
-def _fit(part: _Part, max_bytes: int, next_level: int) -> list[_Part]:
+def _fit(part: _Part, max_bytes: int, next_level: int, pack: bool = False) -> list[_Part]:
     """The part itself if it's small enough, else its pieces at the next heading level or by size."""
     if _size(part.nodes) <= max_bytes:
+        if pack:
+            name = _section_name([g.title for g in _section_titles(part.nodes, next_level)])
+            return [_Part(name[0], part.nodes) if name else part]
         return [part]
     for level in range(next_level, 7):
         if any(_has(n, level) for n in part.nodes):
-            pieces = _split_level(part.nodes, level, part.title or None, max_bytes)
+            if pack:
+                pieces = _pack(part, level, max_bytes)
+            else:
+                pieces = _split_level(part.nodes, level, part.title or None, max_bytes)
             if pieces and len(pieces) > 1:
                 return pieces
     return _by_size(part, max_bytes)
+
+
+# A Bible's chapter heading: "Genesis Chapter 1", "Psalm 23".
+_SECTION = re.compile(r"^(.*\S)\s+(?:Chapter|Psalm|Chap\.?)\s+([0-9IVXLC]+)\.?$", re.I)
+
+
+def _section_titles(nodes: list[PageElement], level: int) -> list[_Part]:
+    """A title-only part per h{level} heading in the nodes, without moving anything."""
+    headings = [h for n in nodes if isinstance(n, Tag)
+                for h in ([n] if n.name == f"h{level}" else n.find_all(f"h{level}"))]
+    return [_Part(_heading_title(h), []) for h in headings]
+
+
+def _section_name(titles: list[str]) -> tuple[str, str, str] | None:
+    """("Psalms", "1", "40") when the numbered titles are all chapters of one book (a preface doesn't count)."""
+    matches = [m for m in map(_SECTION.match, titles) if m]
+    if not matches or len({m.group(1) for m in matches}) != 1:
+        return None
+    return matches[0].group(1), matches[0].group(2), matches[-1].group(2)
+
+
+def _pack(part: _Part, level: int, max_bytes: int) -> list[_Part] | None:
+    """The part's h{level} sections in as few even pages as fit, each named for its first and last section."""
+    front, groups = _groups(part.nodes, level)
+    if len(groups) < 2:
+        return None
+    groups[0].nodes[:0] = front
+    sizes = [_size(g.nodes) for g in groups]
+    for count in range(min(math.ceil(sum(sizes) / max_bytes), len(groups)), len(groups) + 1):
+        runs = even_runs(groups, sizes, count)
+        if all(sum(_size(g.nodes) for g in run) <= max_bytes for run in runs):
+            break
+    pieces = []
+    for k, run in enumerate(runs, 1):
+        name = _section_name([g.title for g in run])
+        if name:
+            title = f"{name[0]} {name[1]}–{name[2]}" if len(run) > 1 else f"{name[0]} {name[1]}"
+        elif len(run) == 1:
+            title = f"{part.title} — {run[0].title}" if part.title else run[0].title
+        else:
+            title = f"{part.title} (part {k})" if part.title else f"Part {k}"
+        piece = _Part(title, [n for g in run for n in g.nodes])
+        pieces.extend(_by_size(piece, max_bytes) if _size(piece.nodes) > max_bytes else [piece])
+    return pieces
+
+
+def even_runs(items: list, sizes: list[int], count: int) -> list[list]:
+    """`items` cut into `count` consecutive runs whose sizes are as even as the boundaries allow."""
+    total, runs, start, done = sum(sizes), [], 0, 0
+    for k in range(1, count):
+        goal, end, reach = total * k / count, start + 1, done + sizes[start]
+        while end < len(items) - (count - k) and abs(reach + sizes[end] - goal) < abs(reach - goal):
+            reach += sizes[end]
+            end += 1
+        runs.append(items[start:end])
+        start, done = end, reach
+    runs.append(items[start:])
+    return runs
 
 
 def _by_size(part: _Part, max_bytes: int) -> list[_Part]:

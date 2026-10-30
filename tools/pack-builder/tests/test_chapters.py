@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup
 
 from chapters import page_name, split
@@ -202,3 +204,49 @@ def test_a_definition_list_split_by_size_keeps_each_term_with_its_definition():
         for dl in BeautifulSoup(c.html, "lxml").find_all("dl"):
             items = dl.find_all(["dt", "dd"], recursive=False)
             assert items[0].name == "dt" and items[-1].name == "dd", c.title
+
+
+def bible(books):
+    """Douay-shaped: each book an h3, each chapter an h4 '<Name> Chapter N' in a wrapper div."""
+    html = '<div class="chapter"><h2>THE OLD TESTAMENT</h2></div>'
+    for title, name, count, words in books:
+        html += f'<div class="chapter"><h3>{title}</h3></div><p>About {name}.</p>'
+        html += "".join(f'<div class="section"><h4>{name} Chapter {n}</h4></div><p>{n}:1. {"verse " * words}</p>'
+                        for n in range(1, count + 1))
+    return body(html)
+
+
+def test_packed_sections_make_one_page_per_book_named_for_its_chapters():
+    chapters = split(bible([("THE BOOK OF RUTH", "Ruth", 4, 50), ("THE BOOK OF JOB", "Job", 42, 50),
+                            ("THE EPISTLE OF ST. PAUL TO PHILEMON", "Philemon", 1, 50)]),
+                     split_at="h3", max_bytes=150_000, pack=True)
+    assert [c.title for c in chapters] == ["Ruth", "Job", "Philemon"]
+    assert "About Ruth." in chapters[0].html and "Ruth Chapter 4" in chapters[0].html
+
+
+def test_packed_sections_split_a_big_book_evenly_at_chapter_boundaries():
+    chapters = split(bible([("THE BOOK OF PSALMS", "Psalms", 150, 200), ("THE BOOK OF RUTH", "Ruth", 4, 50)]),
+                     split_at="h3", max_bytes=60_000, pack=True)
+    titles = [c.title for c in chapters]
+    assert titles[-1] == "Ruth" and titles[0].startswith("Psalms 1–")
+    assert all(re.fullmatch(r"Psalms \d+–\d+", t) for t in titles[:-1]), titles
+    sizes = [len(c.html.encode()) for c in chapters[:-1]]
+    assert max(sizes) <= 60_000 and min(sizes) > 0.7 * max(sizes)
+    numbers = [int(n) for t in titles[:-1] for n in t.split()[1].split("–")]
+    assert numbers[0] == 1 and numbers[-1] == 150
+    assert all(b == a + 1 for a, b in zip(numbers[1::2], numbers[2::2]))  # no chapter lost or repeated
+    assert "About Psalms." in chapters[0].html
+
+
+def test_without_pack_a_big_book_still_splits_one_page_per_chapter():
+    chapters = split(bible([("THE BOOK OF PSALMS", "Psalms", 20, 600)]), split_at="h3", max_bytes=60_000)
+    assert len(chapters) == 20
+
+
+def test_packed_sections_name_a_book_by_its_chapters_past_a_preface():
+    html = ('<h3>THE LAMENTATIONS OF JEREMIAS</h3><h4>PREFACE</h4><p>pre</p>'
+            + "".join(f"<h4>Lamentations Chapter {n}</h4><p>v</p>" for n in range(1, 6))
+            + '<h3>THE BOOK OF RUTH</h3><h4>Ruth Chapter 1</h4><p>v</p>'
+            + '<h3>THE GOSPEL OF ST. MARK</h3><h4>Mark Chapter 1</h4><p>v</p>')
+    chapters = split(body(html), split_at="h3", pack=True)
+    assert [c.title for c in chapters] == ["Lamentations", "Ruth", "Mark"]

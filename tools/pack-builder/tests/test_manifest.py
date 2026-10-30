@@ -162,3 +162,9 @@ def test_cut_after_is_read_and_must_be_text(tmp_path):
     assert validate(manifest(tmp_path, cutAfter="bury us all!”"), rdf_ok) == []
     assert any("cutAfter" in e for e in validate(manifest(tmp_path, cutAfter=""), rdf_ok))
     assert any("cutAfter" in e for e in validate(manifest(tmp_path, cutAfter=3), rdf_ok))
+
+
+def test_pack_sections_is_read_and_must_be_true_or_false(tmp_path):
+    assert manifest(tmp_path).works[0].pack_sections is False
+    assert manifest(tmp_path, packSections=True).works[0].pack_sections is True
+    assert any("packSections" in e for e in validate(manifest(tmp_path, packSections="yes"), rdf_ok))

@@ -59,7 +59,8 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EB
             raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
-        pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles))
+        pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),
+                               pack=spec.pack_sections)
         print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
         works.append(zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                                   published=spec.published, section=spec.section, chapters=pages,
@@ -83,7 +84,7 @@ def _work(spec, source, ebible) -> zimpack.Work:
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
     pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),
-                           page_href=epubpack.chapter_href)
+                           page_href=epubpack.chapter_href, pack=spec.pack_sections)
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                         published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,

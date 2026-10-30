@@ -17,7 +17,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from html import escape
 
-from chapters import Chapter
+from chapters import Chapter, even_runs
 
 # Books that aren't scripture text: front and back matter, introductions, concordance and indexes.
 SKIPPED_BOOKS = {"FRT", "INT", "BAK", "OTH", "CNC", "TDX", "NDX"}
@@ -279,7 +279,7 @@ def book_pages(book: Book, max_bytes: int) -> list[Chapter]:
     sizes = [size(html) for _, _, html in book.chapters]
     sizes[0] += size(head(book.title, True))
     for count in range(math.ceil(total / max_bytes), len(sizes) + 1):
-        runs = _even_runs(list(zip(book.chapters, sizes)), sizes, count)
+        runs = even_runs(list(zip(book.chapters, sizes)), sizes, count)
         groups = [[chapter for chapter, _ in run] for run in runs]
         heads = [size(head(f"{book.title} {g[0][0]}–{g[-1][0]}", False)) if i else 0 for i, g in enumerate(groups)]
         if all(sum(s for _, s in run) + extra <= max_bytes for run, extra in zip(runs, heads)):
@@ -289,20 +289,6 @@ def book_pages(book: Book, max_bytes: int) -> list[Chapter]:
         title = f"{book.title} {group[0][0]}–{group[-1][0]}" if len(group) > 1 else f"{book.title} {group[0][0]}"
         pages.append(Chapter(title, head(title, i == 0) + "".join(html for _, _, html in group)))
     return pages
-
-
-def _even_runs(items: list, sizes: list[int], count: int) -> list[list]:
-    """`items` cut into `count` consecutive runs whose sizes are as even as the boundaries allow."""
-    total, runs, start, done = sum(sizes), [], 0, 0
-    for k in range(1, count):
-        goal, end, reach = total * k / count, start + 1, done + sizes[start]
-        while end < len(items) - (count - k) and abs(reach + sizes[end] - goal) < abs(reach - goal):
-            reach += sizes[end]
-            end += 1
-        runs.append(items[start:end])
-        start, done = end, reach
-    runs.append(items[start:])
-    return runs
 
 
 def convert(books: list[tuple[str, str]], max_bytes: int) -> tuple[list[Chapter], list[str], Counter]:
