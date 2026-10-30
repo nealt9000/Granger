@@ -62,7 +62,11 @@ class SherpaSpeech internal constructor(
             return if (locale >= 0 && locale + 1 < parts.size) parts[locale + 1] else dir
         }
 
-        fun title(dir: String): String = "Granger voice (${shortName(dir)})"
+        /** "Granger voice (ljspeech)"; Granger's own voices drop the prefix: `…-granger_nanny-medium` → "Granger voice (Nanny)". */
+        fun title(dir: String): String {
+            val name = shortName(dir)
+            return "Granger voice (${if (name.startsWith("granger_")) name.removePrefix("granger_").replaceFirstChar { it.uppercase() } else name})"
+        }
 
         /** A named speaker's title: "Granger voice (Maggie)". */
         fun speakerTitle(name: String): String = "Granger voice ($name)"
