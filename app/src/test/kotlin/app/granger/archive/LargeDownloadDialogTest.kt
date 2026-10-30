@@ -19,7 +19,7 @@ class LargeDownloadDialogTest {
     @Test fun tappingTheLabelTicksDontAskAgain() {
         var answer: Boolean? = null
         compose.setContent {
-            LargeDownloadDialog(ConfirmLarge("id", pdf = true, bytes = 109_000_000, title = "PDF"), onDownload = { answer = it }, onDismiss = {})
+            LargeDownloadDialog(ConfirmLarge("id", pdf = true, bytes = 109_000_000, isPdf = true), onDownload = { answer = it }, onDismiss = {})
         }
         compose.onNodeWithText("Don't ask again").performClick()
         compose.onNodeWithText("Download").performClick()
@@ -29,7 +29,7 @@ class LargeDownloadDialogTest {
     @Test fun leftAloneItAsksAgain() {
         var answer: Boolean? = null
         compose.setContent {
-            LargeDownloadDialog(ConfirmLarge("id", pdf = true, bytes = 109_000_000, title = "PDF"), onDownload = { answer = it }, onDismiss = {})
+            LargeDownloadDialog(ConfirmLarge("id", pdf = true, bytes = 109_000_000, isPdf = true), onDownload = { answer = it }, onDismiss = {})
         }
         compose.onNodeWithText("Download").performClick()
         assertThat(answer).isFalse()

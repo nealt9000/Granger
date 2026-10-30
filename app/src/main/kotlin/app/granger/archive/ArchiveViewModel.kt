@@ -1,10 +1,13 @@
 package app.granger.archive
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.archive.ArchiveDoc
 import app.granger.core.archive.ArchiveError
 import app.granger.core.archive.ArchiveFile
@@ -57,7 +60,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Archive.org has no versions, so there's no Updates tab (spec §5). */
-enum class ArchiveTab(val title: String) { BROWSE("Browse"), INSTALLED("Installed") }
+enum class ArchiveTab(@StringRes val title: Int) { BROWSE(R.string.archive_tab_browse), INSTALLED(R.string.archive_tab_installed) }
 
 data class ArchiveRow(
     val identifier: String,
@@ -77,7 +80,7 @@ data class ItemSheet(
     val item: ArchiveItem?,
     val offer: Offer?,
     val sizeBytes: Long?,
-    val error: String?,
+    val error: UiText?,
     val status: ItemStatus,
     /** An audio item's files in and in all ("Downloading: 3 of 7"); 0 and 0 for texts or before the item is known. */
     val filesDone: Int = 0,
@@ -87,8 +90,11 @@ data class ItemSheet(
     val pdfStatus: ItemStatus = ItemStatus.NotInstalled,
 )
 
-/** A Get over 100 MB waiting for the user's yes (Plan P2): [pdf] when it's the PDF beside the item's text. */
-data class ConfirmLarge(val identifier: String, val pdf: Boolean, val bytes: Long, val title: String)
+/**
+ * A Get over 100 MB waiting for the user's yes (Plan P2): [pdf] when it's the PDF beside the item's text; [isPdf] when
+ * the file asked about is a PDF (that one, or a scan-only item's own), which the prompt names.
+ */
+data class ConfirmLarge(val identifier: String, val pdf: Boolean, val bytes: Long, val isPdf: Boolean)
 
 data class ArchiveUi(
     val tab: ArchiveTab = ArchiveTab.BROWSE,
@@ -99,9 +105,9 @@ data class ArchiveUi(
     val total: Int = 0,
     val loading: Boolean = true,
     val canLoadMore: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val sheet: ItemSheet? = null,
-    val notice: String? = null,
+    val notice: UiText? = null,
     val kind: ArchiveKind = ArchiveKind.TEXTS,
     /** The first year the audio filter leaves out: 1926 in 2026. */
     val filterYear: Int = PublicDomain.lastRecordingYear(LocalDate.now()) + 1,
@@ -146,7 +152,7 @@ class ArchiveViewModel(
         val loading: Boolean,
         val item: ArchiveItem?,
         val offer: Offer?,
-        val error: String?,
+        val error: UiText?,
         val audio: AudioOffer? = null,
     )
 
@@ -162,9 +168,9 @@ class ArchiveViewModel(
         val total: Int = 0,
         val page: Int = 0,
         val loading: Boolean = true,
-        val error: String? = null,
+        val error: UiText? = null,
         val sheet: Sheet? = null,
-        val notice: String? = null,
+        val notice: UiText? = null,
         val confirm: ConfirmLarge? = null,
     )
 
@@ -391,7 +397,7 @@ class ArchiveViewModel(
      * Returns the notice to show, or null when the download is on its way or waits on [ArchiveUi.confirm]. With
      * [pdf], the download is the PDF beside the item's text, a second book; without, the item's own download.
      */
-    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean): String? {
+    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean): UiText? {
         // Only fetched metadata is downloaded from: a preview's file is a placeholder.
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier || !ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
@@ -401,11 +407,11 @@ class ArchiveViewModel(
         if (!prefs.waiverAccepted.value && !ArchiveOffers.isPublicDomain(item)) return NOT_PUBLIC_DOMAIN
         val all = withContext(io) { volumes.list() }
         val volume = all.firstOrNull { it.root.path == downloadPrefs.volumePath } ?: all.firstOrNull()
-            ?: return "No storage is available right now."
+            ?: return UiText.Res(R.string.archive_no_storage)
         val spec = ArchiveDownloads.spec(item, offer, client, pdfCopy = pdf)
         if (!confirmed && downloadPrefs.askBeforeLarge && spec.sizeBytes > DownloadPrefs.LARGE_DOWNLOAD_BYTES) {
             val isPdf = pdf || offer.kind == TextKind.PDF
-            state.update { it.copy(confirm = ConfirmLarge(identifier, pdf, spec.sizeBytes, if (isPdf) "PDF" else "download")) }
+            state.update { it.copy(confirm = ConfirmLarge(identifier, pdf, spec.sizeBytes, isPdf)) }
             return null
         }
         // Written first: the download may finish before enqueue returns. The PDF beside a text shares the item's
@@ -426,10 +432,9 @@ class ArchiveViewModel(
         return when (result) {
             EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
             is EnqueueResult.NoSpace ->
-                "Not enough space on ${volume.label} for ${spec.title}: free up ${formatBytes(result.neededBytes)}."
+                UiText.Res(R.string.archive_no_space, volume.label, spec.title, formatBytes(result.neededBytes))
             is EnqueueResult.OverCap ->
-                "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                    "over the ${formatBytes(result.capBytes)} limit."
+                UiText.Res(R.string.archive_over_cap, spec.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
         }
     }
 
@@ -437,21 +442,24 @@ class ArchiveViewModel(
      * Gets an audio item as one group, an album (Music) or an audiobook (Audiobooks). Every check reads the live
      * preference, not the screen's: the waiver may have been withdrawn since this item was reached.
      */
-    private suspend fun fetchAndGetAudio(identifier: String): String? {
+    private suspend fun fetchAndGetAudio(identifier: String): UiText? {
         if (!prefs.waiverAccepted.value && !kind.datedRecordings) return SPOKEN_WORD_GET
         if (!ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
         // Got from the other view: it lives on that shelf, and getting it here would make a second copy of one group.
-        if (media!!.mediaRootOf(groupOf(identifier)) == otherRoot) return "This is already in your $otherShelf."
+        if (media!!.mediaRootOf(groupOf(identifier)) == otherRoot) {
+            return UiText.Res(if (kind == ArchiveKind.MUSIC) R.string.archive_already_in_audiobooks else R.string.archive_already_in_music)
+        }
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier) return NOTHING_TO_DOWNLOAD
         val offer = ArchiveAudioOffers.choose(item) as? AudioOffer.Tracks ?: return NOTHING_TO_DOWNLOAD
         if (offer.files.isEmpty()) return NOTHING_TO_DOWNLOAD
         if (!prefs.waiverAccepted.value && !ArchiveOffers.isPublicDomainRecording(item, today())) {
-            return "This recording wasn't published before ${filterYear()}. Show everything to download it."
+            return UiText.Res(R.string.archive_recording_too_new, filterYear())
         }
         val manifest = MediaDownloads.albumManifest(item, offer, kind, client, now())
         fileCounts[groupOf(identifier)] = manifest.files.size
-        return media!!.get(manifest)
+        // MediaDownloader (the media package) still hands back English; L1 Task 4 converts it.
+        return media!!.get(manifest)?.let(UiText::Raw)
     }
 
     private fun waiverNeeded(filtered: Boolean) = audio && filtered && !kind.datedRecordings
@@ -476,6 +484,7 @@ class ArchiveViewModel(
 
     /** The other audio view's media root and shelf name: where an item got from there lives. */
     private val otherRoot = if (kind == ArchiveKind.MUSIC) "audiobooks" else "music"
+    // ItemStatus.InLibrary takes the shelf name as text (the sources package, L1 Task 8).
     private val otherShelf = if (kind == ArchiveKind.MUSIC) "Audiobooks" else "Music"
     private val otherFolder = "/$otherRoot/${MediaManifest.ARCHIVE_ORG}/"
 
@@ -644,14 +653,15 @@ class ArchiveViewModel(
         return Offer.Download(PLACEHOLDER, kind)
     }
 
-    private fun messageOf(e: Exception): String = (e as? ArchiveError)?.message ?: OFFLINE
+    // ArchiveError's message is core/archive's English (L1 Task 7).
+    private fun messageOf(e: Exception): UiText = (e as? ArchiveError)?.message?.let(UiText::Raw) ?: OFFLINE
 
     private companion object {
         const val DEBOUNCE_MS = 400L
-        const val NOTHING_TO_DOWNLOAD = "Nothing on this item can be downloaded."
-        const val NOT_PUBLIC_DOMAIN = "This item wasn't published in 1930 or earlier. Show everything to download it."
-        const val SPOKEN_WORD_GET = "Show everything to download archive.org spoken word."
-        const val OFFLINE = "Couldn't reach archive.org. Check your connection and try again."
+        val NOTHING_TO_DOWNLOAD = UiText.Res(R.string.archive_nothing_to_download)
+        val NOT_PUBLIC_DOMAIN = UiText.Res(R.string.archive_not_public_domain)
+        val SPOKEN_WORD_GET = UiText.Res(R.string.archive_spoken_word_get)
+        val OFFLINE = UiText.Res(R.string.archive_offline)
         val PLACEHOLDER = ArchiveFile(name = "", format = "", sizeBytes = null, sha1 = null, md5 = null, source = "", isPrivate = false)
     }
 }
