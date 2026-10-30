@@ -709,7 +709,7 @@ class ThemeShots {
         val flavours = listOf(
             app.granger.sources.FlavourChoice("top_maxi", "With pictures", 6_990_000_000, chosen = true),
             app.granger.sources.FlavourChoice("top_nopic", "No pictures", 2_750_000_000, chosen = false),
-            app.granger.sources.FlavourChoice("top_mini", "Mini", 300_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_mini", "Mini (intro paragraphs only)", 300_000_000, chosen = false),
         )
         val rows = listOf(
             app.granger.sources.ItemRow(

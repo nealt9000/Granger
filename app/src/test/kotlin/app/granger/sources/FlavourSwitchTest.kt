@@ -15,9 +15,9 @@ import org.junit.Test
 
 /** Plan KB walkthrough: Switch removes the old flavour once the new one has installed, keeping its marks. */
 class FlavourSwitchTest {
-    private val nopic = packEntry("med_nopic", zimName = "wikipedia_en_medicine")
-    private val maxi = packEntry("med_maxi", zimName = "wikipedia_en_medicine")
-    private val other = packEntry("top_maxi", zimName = "wikipedia_en_top")
+    private val nopic = packEntry("med_nopic", zimName = "wikipedia_en_medicine").copy(flavour = "nopic")
+    private val maxi = packEntry("med_maxi", zimName = "wikipedia_en_medicine").copy(flavour = "maxi")
+    private val other = packEntry("top_maxi", zimName = "wikipedia_en_top").copy(flavour = "maxi")
     private val catalog = catalogOf(listOf(nopic, maxi, other))
     private val downloads = FakeDownloads()
     private val library = FakeLibrary()
@@ -64,5 +64,16 @@ class FlavourSwitchTest {
         assertThat(FlavourSwitch.settle(other.id, catalog, downloads, library)).isEmpty()
         assertThat(FlavourSwitch.settle("unknown", catalog, downloads, library)).isEmpty()
         assertThat(FlavourSwitch.settle(other.id, null, downloads, library)).isEmpty()
+    }
+
+    /** MDWiki's unflavoured ZIM shares its name with its flavour with pictures but is a pack of its own: both stay. */
+    @Test fun anUnflavouredZimOfTheSameNameIsLeftAlone() = runTest {
+        val plain = packEntry("mdwiki_en_all", zimName = "mdwiki_en_all")
+        val pictures = packEntry("mdwiki_en_all_maxi", zimName = "mdwiki_en_all").copy(flavour = "maxi")
+        val both = catalogOf(listOf(plain, pictures))
+        onPhone(plain.id to DownloadState.INSTALLED, pictures.id to DownloadState.INSTALLED)
+        assertThat(FlavourSwitch.settle(pictures.id, both, downloads, library)).isEmpty()
+        assertThat(FlavourSwitch.settle(plain.id, both, downloads, library)).isEmpty()
+        assertThat(library.superseded).isEmpty()
     }
 }

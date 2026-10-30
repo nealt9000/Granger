@@ -297,9 +297,9 @@ class SourceViewModel(
             viewModelScope.launch {
                 val all = volumeList.value.ifEmpty { withContext(io) { volumes.list() } }
                 val volume = all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
-                val group = KiwixList.group(current.packs.filter { it.zimName == item.zimName }).firstOrNull()
+                val group = KiwixList.group(current.packs.filter { it.zimName == item.zimName }).firstOrNull { it.flavour(item.id) != null }
                 val smaller = KiwixList.smallerThan(group, item)?.let {
-                    FlavourChoice(it.id, KiwixList.flavourLabel(it.flavour), it.downloadBytes, chosen = false)
+                    FlavourChoice(it.id, group?.let(KiwixList::flavourLabels)?.get(it.id) ?: KiwixList.flavourLabel(it), it.downloadBytes, chosen = false)
                 }
                 sizeCheck.value = SizeCheck(
                     item.id, group?.title ?: item.title, item.downloadBytes, volume?.freeBytes ?: 0L, volume?.label ?: "this phone", smaller,
@@ -488,12 +488,13 @@ class SourceViewModel(
             val entry = group.flavour(chosenId)!!
             val base = row(entry)
             val switches = installed != null && installed.id != entry.id && status(entry) == ItemStatus.NotInstalled
+            val labels = KiwixList.flavourLabels(group)
             return base.copy(
                 title = group.title,
                 flavours = group.flavours.map {
-                    FlavourChoice(it.id, KiwixList.flavourLabel(it.flavour), it.downloadBytes, it.id == entry.id, installed = it.id == installed?.id)
+                    FlavourChoice(it.id, labels.getValue(it.id), it.downloadBytes, it.id == entry.id, installed = it.id == installed?.id)
                 },
-                installedFlavour = installed?.let { KiwixList.flavourLabel(it.flavour).lowercase() },
+                installedFlavour = installed?.let { labels.getValue(it.id).lowercase() },
                 switches = switches,
                 packId = base.packId ?: if (switches) installedPackId(installed!!, recordsById[installed.id].orEmpty(), packs) else null,
             )

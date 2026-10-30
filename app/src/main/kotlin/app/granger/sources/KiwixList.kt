@@ -28,23 +28,65 @@ object KiwixList {
     /** A Get over this asks first, with the free space and a smaller flavour (Plan KB Decision 9): 10 GB. */
     const val SIZE_CHECK_BYTES = 10L * 1000 * 1000 * 1000
 
-    /** What a flavour is called on a row: "With pictures", "No pictures", "Mini"; "Standard" for an unflavoured ZIM. */
+    /** The true flavours, the only entries of one ZIM name that group (Plan KB walkthrough 2). */
+    private val FLAVOURS = setOf("maxi", "nopic", "mini")
+
+    /**
+     * [entry]'s flavour: the catalog's, or for a catalog without the field (main's, before Plan KB) the one its id ends
+     * in, `wikipedia_en_top_nopic` → "nopic"; blank for an unflavoured ZIM.
+     */
+    fun flavourOf(entry: PackEntry): String {
+        if (entry.flavour.isNotBlank()) return entry.flavour
+        val suffix = entry.id.removePrefix("${entry.zimName}_").takeIf { entry.zimName.isNotBlank() && it != entry.id }
+        return suffix?.takeIf { it in FLAVOURS }.orEmpty()
+    }
+
+    const val WITH_PICTURES = "With pictures"
+    const val NO_PICTURES = "No pictures"
+    const val MINI = "Mini (intro paragraphs only)"
+
+    /** What a flavour is called on a row: [WITH_PICTURES], [NO_PICTURES], [MINI]; "Standard" for an unflavoured ZIM. */
     fun flavourLabel(flavour: String): String = when (flavour) {
-        "maxi" -> "With pictures"
-        "nopic" -> "No pictures"
-        "mini" -> "Mini"
+        "maxi" -> WITH_PICTURES
+        "nopic" -> NO_PICTURES
+        "mini" -> MINI
         else -> "Standard"
     }
 
+    /** [entry]'s flavour as a row says it. */
+    fun flavourLabel(entry: PackEntry): String = flavourLabel(flavourOf(entry))
+
     /**
-     * [packs] grouped by ZIM name, in the order each name first appears. A group's default is its featured flavour
-     * (the largest featured that fits in [freeBytes], else the smallest featured), else the largest flavour that fits,
-     * else the smallest; with [freeBytes] null every flavour fits.
+     * Each of [group]'s flavours as its choice says it, by id, no two the same (Plan KB walkthrough 2): the flavour, and
+     * where two share one, what else differs: the month updated, the language, the title, else the id.
+     */
+    fun flavourLabels(group: PackGroup): Map<String, String> {
+        val labels = group.flavours.associate { it.id to flavourLabel(it) }.toMutableMap()
+        val distinctions = listOf<(PackEntry) -> String>(
+            { updated(it.snapshotDate) },
+            { e -> e.language.split(',').joinToString(", ") { languageName(it) } },
+            { it.title },
+            { it.id },
+        )
+        for ((label, same) in group.flavours.groupBy { labels.getValue(it.id) }) {
+            if (same.size < 2) continue
+            val by = distinctions.firstOrNull { d -> same.map(d).distinct().size == same.size } ?: distinctions.last()
+            for (entry in same) labels[entry.id] = "$label · ${by(entry)}"
+        }
+        return labels
+    }
+
+    /**
+     * [packs] grouped by ZIM name, in the order each name first appears; only true flavours group, so an unflavoured ZIM
+     * that shares its name with flavoured ones is a pack of its own. A group's default is its featured flavour (the
+     * largest featured that fits in [freeBytes], else the smallest featured), else the largest flavour that fits, else
+     * the smallest; with [freeBytes] null every flavour fits.
      */
     fun group(packs: List<PackEntry>, freeBytes: Long? = null): List<PackGroup> =
-        packs.groupBy { it.zimName.ifBlank { it.id } }.map { (name, entries) ->
-            val flavours = entries.sortedBy { FLAVOUR_ORDER.indexOf(it.flavour).let { i -> if (i < 0) FLAVOUR_ORDER.size else i } }
-            PackGroup(name, flavours, defaultOf(flavours, freeBytes))
+        // Keyed by ZIM name for a flavour, by id (apart from any ZIM name) for anything else.
+        packs.groupBy { if (it.zimName.isNotBlank() && flavourOf(it).isNotBlank()) "zim:${it.zimName}" else "id:${it.id}" }.values.map { entries ->
+            val flavours = entries.sortedBy { FLAVOUR_ORDER.indexOf(flavourOf(it)).let { i -> if (i < 0) FLAVOUR_ORDER.size else i } }
+            PackGroup(flavours.first().zimName.ifBlank { flavours.first().id }, flavours, defaultOf(flavours, freeBytes))
         }
 
     private fun defaultOf(flavours: List<PackEntry>, freeBytes: Long?): PackEntry {
@@ -55,7 +97,7 @@ object KiwixList {
 
     /** The flavour with pictures names the pack, less "(no pictures)" or "(with pictures)" if a title carries it. */
     fun groupTitle(group: PackGroup): String {
-        val named = group.flavours.firstOrNull { it.flavour == "maxi" } ?: group.default
+        val named = group.flavours.firstOrNull { flavourOf(it) == "maxi" } ?: group.default
         return named.title.replace(FLAVOUR_WORDS, "").trim()
     }
 

@@ -30,7 +30,7 @@ class SourceScreenTest {
     private val flavours = listOf(
         FlavourChoice("wikipedia_en_top_maxi", "With pictures", 6_990_000_000, chosen = true),
         FlavourChoice("wikipedia_en_top_nopic", "No pictures", 2_750_000_000, chosen = false),
-        FlavourChoice("wikipedia_en_top_mini", "Mini", 300_000_000, chosen = false),
+        FlavourChoice("wikipedia_en_top_mini", "Mini (intro paragraphs only)", 300_000_000, chosen = false),
     )
     private val top = ItemRow(
         "wikipedia_en_top_maxi", "Wikipedia: best articles", "English, Russian · Updated March 2026 · CC BY-SA", "",

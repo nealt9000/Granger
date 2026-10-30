@@ -781,7 +781,7 @@ class SourceViewModelTest {
         val rows = vm.ui.value.sections.flatMap { it.rows }
         val med = rows.single { it.title == "WikiMed" }
         assertThat(rows).hasSize(2)
-        assertThat(med.flavours.map { it.label }).containsExactly("With pictures", "No pictures", "Mini").inOrder()
+        assertThat(med.flavours.map { it.label }).containsExactly("With pictures", "No pictures", KiwixList.MINI).inOrder()
         assertThat(med.flavours.map { it.sizeBytes }).containsExactly(1_860_000_000L, 1_050_000_000L, 170_000_000L).inOrder()
         // Both featured flavours fit, so the larger is chosen.
         assertThat(med.id).isEqualTo("wikipedia_en_medicine_maxi")
@@ -1030,5 +1030,46 @@ class SourceViewModelTest {
             val ui = viewModel(scope).ui.value
             assertWithMessage(scope.title).that(ui.sections.flatMap { it.rows }).isNotEmpty()
         }
+    }
+
+    /**
+     * Plan KB walkthrough 2 (every choice read "Standard"): over the published catalog, and over it without the
+     * `flavour` field (main's catalog), each grouped pack's choices are told apart, each by what it is.
+     */
+    @Test fun everyGroupedPacksChoicesSayWhatDiffersInThePublishedCatalog() {
+        val published = publishedCatalog()
+        val meaningful = setOf(KiwixList.WITH_PICTURES, KiwixList.NO_PICTURES, KiwixList.MINI)
+        for (packs in listOf(published.packs, published.packs.map { it.copy(flavour = "") })) {
+            val groups = KiwixList.group(packs).filter { it.flavours.size > 1 }
+            assertThat(groups.size).isAtLeast(40)
+            for (group in groups) {
+                val labels = KiwixList.flavourLabels(group)
+                assertWithMessage(group.zimName).that(labels.values.toSet()).hasSize(group.flavours.size)
+                assertWithMessage(group.zimName).that(meaningful).containsAtLeastElementsIn(labels.values)
+                assertWithMessage(group.zimName).that(group.flavours.map { it.zimName }.distinct()).containsExactly(group.zimName)
+            }
+            // Wikipedia: best articles is its three flavours, and only them (not the top 1m).
+            val top = groups.single { it.zimName == "wikipedia_en_top" }
+            assertThat(top.flavours.map { KiwixList.flavourLabels(top).getValue(it.id) })
+                .containsExactly(KiwixList.WITH_PICTURES, KiwixList.NO_PICTURES, KiwixList.MINI).inOrder()
+        }
+        // MDWiki's unflavoured ZIM is a pack of its own beside its flavour with pictures.
+        val mdwiki = KiwixList.group(published.packs).filter { g -> g.flavours.any { it.zimName == "mdwiki_en_all" } }
+        assertThat(mdwiki.map { g -> g.flavours.map { it.id } }).containsExactly(listOf("mdwiki_en_all"), listOf("mdwiki_en_all_maxi"))
+        for (group in KiwixList.group(published.packs).filter { it.flavours.size > 1 }) {
+            println("flavour group ${group.zimName}: " + group.flavours.joinToString { "${it.id}=${KiwixList.flavourLabels(group).getValue(it.id)}" })
+        }
+    }
+
+    /** Two flavours alike but for their date are told apart by it; alike but for language, by that. */
+    @Test fun flavoursAlikeAreToldApartByWhatDiffers() {
+        fun entry(id: String, flavour: String, date: String, language: String = "eng") =
+            app.granger.packEntry(id, zimName = "x_en_all").copy(flavour = flavour, snapshotDate = date, language = language)
+        val byDate = KiwixList.group(listOf(entry("a", "maxi", "2026-03-05"), entry("b", "maxi", "2025-11-01"), entry("c", "nopic", "2026-03-05"))).single()
+        assertThat(KiwixList.flavourLabels(byDate)).containsExactly(
+            "a", "With pictures · Updated March 2026", "b", "With pictures · Updated November 2025", "c", "No pictures",
+        )
+        val byLanguage = KiwixList.group(listOf(entry("a", "mini", "2026-03-05"), entry("b", "mini", "2026-03-05", "fra"))).single()
+        assertThat(KiwixList.flavourLabels(byLanguage).values).containsExactly("${KiwixList.MINI} · English", "${KiwixList.MINI} · French")
     }
 }
