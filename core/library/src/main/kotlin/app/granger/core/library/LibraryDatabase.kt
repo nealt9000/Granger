@@ -21,7 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AlbumNote::class, RailPin::class,
         HomeFeed::class, HomeDraw::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -188,6 +188,25 @@ abstract class LibraryDatabase : RoomDatabase() {
         }
 
         /**
+         * Plan GB: Gutenberg packs are named for their subject ([GutenbergNames.packTitle]), so a pack already
+         * installed reads "Music and books on music · Project Gutenberg" without a download. A pack with no description
+         * keeps its title. No table changes.
+         */
+        val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                val provider = GutenbergNames.PROVIDER
+                db.execSQL(
+                    "UPDATE packs SET title = CASE name " +
+                        "WHEN 'gutenberg_en_all' THEN 'Every English book · $provider' " +
+                        "WHEN 'gutenberg_mul_all' THEN 'Every book, all languages · $provider' " +
+                        "ELSE upper(substr(trim(description), 1, 1)) || substr(trim(description), 2) || ' · $provider' END " +
+                        "WHERE name LIKE 'gutenberg\\_%' ESCAPE '\\' " +
+                        "AND (trim(description) != '' OR name IN ('gutenberg_en_all', 'gutenberg_mul_all'))",
+                )
+            }
+        }
+
+        /**
          * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
          * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
          * and the like, should the user have moved one here); of the keys with a `:`, only `pack:` ones are packs'.
@@ -232,7 +251,7 @@ abstract class LibraryDatabase : RoomDatabase() {
             Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
                 .addMigrations(
                     MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-                    MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
+                    MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
                 )
                 .addCallback(SeedCallback)
                 .build()

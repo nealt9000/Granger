@@ -36,7 +36,12 @@ data class Pack(
         fun from(archive: ZimArchive, file: File, addedAt: Long) = Pack(
             id = archive.uuid,
             filePath = file.absolutePath,
-            title = archive.metadata.title,
+            // A Gutenberg pack is named for its subject, not "Project Gutenberg Library" (Plan GB).
+            title = if (GutenbergNames.isGutenberg(archive.metadata.name)) {
+                GutenbergNames.packTitle(archive.metadata.name, archive.metadata.description)
+            } else {
+                archive.metadata.title
+            },
             description = archive.metadata.description,
             language = archive.metadata.language,
             date = archive.metadata.date,

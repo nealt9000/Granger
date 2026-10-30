@@ -250,6 +250,25 @@ class RoomLibraryTest {
         assertThat(packs().single().name).isEqualTo("wikipedia_en_top")
     }
 
+    @Test fun aGutenbergPackIsNamedForItsSubject() = test {
+        opener.archives["m.zim"] = {
+            FakeZimArchive("u-m", "Project Gutenberg Library", name = "gutenberg_en_lcc-m", description = "music and books on music")
+        }
+        File(internal, "m.zim").writeText("zim u-m")
+        opener.archives["all.zim"] = {
+            FakeZimArchive("u-all", "Project Gutenberg Library", name = "gutenberg_en_all", description = "All books in English")
+        }
+        File(internal, "all.zim").writeText("zim u-all")
+        zim(internal, "other.zim", "u-o", "Project Gutenberg Library", name = "wikipedia_en_top")
+        library.refresh()
+        assertThat(packs().associate { it.name to it.title }).containsExactly(
+            "gutenberg_en_lcc-m", "Music and books on music · Project Gutenberg",
+            "gutenberg_en_all", "Every English book · Project Gutenberg",
+            // Only a Gutenberg ZIM name is renamed.
+            "wikipedia_en_top", "Project Gutenberg Library",
+        )
+    }
+
     @Test fun updatedSnapshotKeepsBookmarksPositionsAndAddedAt() = test {
         val old = zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top", paths = setOf("index", "C++"))
         library.refresh()
