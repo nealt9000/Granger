@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.DocumentsContract
+import app.granger.R
+import app.granger.UiText
 import app.granger.archive.ArchivePrefs
 import app.granger.core.library.MediaFolder
 import app.granger.core.library.MediaLibrary
@@ -183,7 +185,7 @@ sealed interface RescanState {
 }
 
 /** A picked folder; [name] is its path within its storage volume ("Music/Rock"). */
-data class FolderRow(val uri: String, val name: String, val audiobooks: Boolean)
+data class FolderRow(val uri: String, val name: UiText, val audiobooks: Boolean)
 
 data class MediaSettingsUi(
     val permission: MediaPermissionStatus = MediaPermissionStatus.DENIED,
@@ -336,14 +338,18 @@ class MediaSettings(
         val SKIP_CHOICES = listOf(10, 15, 30, 60)
 
         /** "primary:Music/Rock" → "Music/Rock"; a volume's root is named by its volume. */
-        fun folderName(uri: String): String {
+        fun folderName(uri: String): UiText {
             val id = try {
                 DocumentsContract.getTreeDocumentId(Uri.parse(uri))
             } catch (e: IllegalArgumentException) {
-                return Uri.parse(uri).lastPathSegment ?: uri
+                return UiText.Raw(Uri.parse(uri).lastPathSegment ?: uri)
             }
             val path = id.substringAfter(':', id)
-            return path.ifBlank { if (id.startsWith("primary")) "Internal storage" else id.substringBefore(':') }
+            return when {
+                path.isNotBlank() -> UiText.Raw(path)
+                id.startsWith("primary") -> UiText.Res(R.string.settings_internal_storage)
+                else -> UiText.Raw(id.substringBefore(':'))
+            }
         }
     }
 }

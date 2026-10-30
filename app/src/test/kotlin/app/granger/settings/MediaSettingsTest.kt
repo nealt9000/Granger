@@ -111,7 +111,7 @@ class MediaSettingsTest {
         assertThat(grants.taken).containsExactly(musicTree)
         assertThat(folders.list.value).containsExactly(MediaFolder(musicTree, audiobooks = false, addedAt = 77L))
         assertThat(scans).isEqualTo(1)
-        assertThat(s.ui.value.folders.single().name).isEqualTo("Music/Rock")
+        assertThat(s.ui.value.folders.single().name).isEqualTo(app.granger.UiText.Raw("Music/Rock"))
         assertThat(s.ui.value.scan).isEqualTo(RescanState.Done(ScanSummary(12, 2)))
     }
 

@@ -22,6 +22,7 @@ import app.granger.packEntry
 import app.granger.volume
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
+import app.granger.UiText
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -42,10 +43,10 @@ class OnboardingScreenTest {
 
     private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000).copy(title = "WikiMed (no pictures)")
     private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
-    private val line = Line(med.id, med.title, listOf(med), installed = false)
-    private val efficient = StartChoice("efficient", "Efficient start", "The essentials.", listOf(line))
+    private val line = Line(med.id, UiText.Raw(med.title), listOf(med), installed = false)
+    private val efficient = StartChoice("efficient", "Efficient start", UiText.Raw("The essentials."), listOf(line))
     private val internal = volume("/internal", "Internal storage", free = 10_000, total = 64_000)
-    private val phone = PhoneUi("A library phone, with about 7 GB of memory.", "Ask needs 6 GB.", listOf(internal), 1_000, 1_375)
+    private val phone = PhoneUi(UiText.Raw("A library phone, with about 7 GB of memory."), UiText.Raw("Ask needs 6 GB."), listOf(internal), 1_000, 1_375)
 
     private fun show(ui: OnboardingUi) = compose.setContent { OnboardingContent(ui, actions) }
 
@@ -68,7 +69,7 @@ class OnboardingScreenTest {
     }
 
     @Test fun pickAStartOffersAskUnderTheChoices() {
-        val ask = Line(OnboardingModel.ASK, "Ask (Preview)", listOf(app.granger.modelEntry("e2b", size = 2_200_000_000)), installed = false)
+        val ask = Line(OnboardingModel.ASK, UiText.Res(app.granger.R.string.onboarding_ask_line), listOf(app.granger.modelEntry("e2b", size = 2_200_000_000)), installed = false)
         show(OnboardingUi(step = Step.START, noCatalog = false, startId = null, askLine = ask, askChosen = true))
         compose.onNodeWithText("Ask (Preview) · 2.2 GB").assertIsDisplayed().assertIsOn().performClick()
         compose.onNodeWithText("The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.").assertIsDisplayed()
@@ -163,7 +164,7 @@ class OnboardingScreenTest {
     }
 
     @Test fun reviewListsGroupsTheTotalWifiAndStart() {
-        val review = Review(listOf(ReviewGroup("Efficient start", listOf(line)), ReviewGroup("Your region", listOf(Line(peru.id, "Peru", listOf(peru), false)))), freeBytes = 10_000)
+        val review = Review(listOf(ReviewGroup(UiText.Raw("Efficient start"), listOf(line)), ReviewGroup(UiText.Res(app.granger.R.string.onboarding_your_region), listOf(Line(peru.id, UiText.Raw("Peru"), listOf(peru), false)))), freeBytes = 10_000)
         show(OnboardingUi(step = Step.REVIEW, noCatalog = false, phone = phone, review = review, wifiOnly = true))
         compose.onNodeWithText("Your region").assertIsDisplayed()
         compose.onNodeWithText("Peru").assertIsDisplayed()
@@ -174,7 +175,7 @@ class OnboardingScreenTest {
     }
 
     @Test fun anEmptyReviewFinishesAndANoticeShows() {
-        show(OnboardingUi(step = Step.REVIEW, noCatalog = false, phone = phone, notice = "Not enough space on Internal storage: free up 5 KB or untick something."))
+        show(OnboardingUi(step = Step.REVIEW, noCatalog = false, phone = phone, notice = UiText.Res(app.granger.R.string.onboarding_no_space, "Internal storage", "5 KB")))
         compose.onNodeWithText("Nothing to download yet. Home and the Library are ready; the Kiwix screen has everything else.").assertIsDisplayed()
         compose.onNodeWithText("Not enough space on Internal storage: free up 5 KB or untick something.").assertIsDisplayed()
         compose.onNodeWithText("Finish").performClick()

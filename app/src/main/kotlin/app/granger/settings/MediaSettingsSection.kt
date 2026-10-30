@@ -25,6 +25,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.ui.unit.dp
 import app.granger.core.player.ReplayGainMode
 import app.granger.media.MediaPermissionStatus
@@ -51,46 +54,48 @@ fun LazyListScope.mediaSettingsSection(
 ) {
     item(key = "media-permission") {
         ListItem(
-            headlineContent = { Text("Find music and audiobooks on this phone") },
+            headlineContent = { Text(stringResource(R.string.settings_media_permission)) },
             supportingContent = {
                 Text(
-                    when (ui.permission) {
-                        MediaPermissionStatus.GRANTED -> "Granger reads them where they are and never changes them."
-                        MediaPermissionStatus.DENIED -> "Not allowed. Granger works without it; folders you add below still need it."
-                        MediaPermissionStatus.PERMANENTLY_DENIED -> "Not allowed. Android won't ask again: allow Music and audio in Granger's app settings."
-                    },
+                    stringResource(
+                        when (ui.permission) {
+                            MediaPermissionStatus.GRANTED -> R.string.settings_media_permission_granted
+                            MediaPermissionStatus.DENIED -> R.string.settings_media_permission_denied
+                            MediaPermissionStatus.PERMANENTLY_DENIED -> R.string.settings_media_permission_permanently_denied
+                        },
+                    ),
                 )
             },
             trailingContent = {
                 when (ui.permission) {
-                    MediaPermissionStatus.GRANTED -> Text("Allowed", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    MediaPermissionStatus.DENIED -> Button(onClick = onRequestPermission) { Text("Allow access") }
-                    MediaPermissionStatus.PERMANENTLY_DENIED -> TextButton(onClick = onOpenAppSettings) { Text("Open app settings") }
+                    MediaPermissionStatus.GRANTED -> Text(stringResource(R.string.settings_media_allowed), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    MediaPermissionStatus.DENIED -> Button(onClick = onRequestPermission) { Text(stringResource(R.string.settings_media_allow_access)) }
+                    MediaPermissionStatus.PERMANENTLY_DENIED -> TextButton(onClick = onOpenAppSettings) { Text(stringResource(R.string.settings_media_open_app_settings)) }
                 }
             },
         )
     }
     item(key = "media-add-folder") {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Add a folder", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_media_add_folder), style = MaterialTheme.typography.bodyLarge)
             Text(
-                "For files the phone's media list misses. Granger only reads them.",
+                stringResource(R.string.settings_media_add_folder_summary),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { onAddFolder(false) }) { Text("Music folder") }
-                OutlinedButton(onClick = { onAddFolder(true) }) { Text("Audiobooks folder") }
+                OutlinedButton(onClick = { onAddFolder(false) }) { Text(stringResource(R.string.settings_media_music_folder)) }
+                OutlinedButton(onClick = { onAddFolder(true) }) { Text(stringResource(R.string.settings_media_audiobooks_folder)) }
             }
         }
     }
     items(ui.folders, key = { "media-folder:${it.uri}" }) { folder ->
         ListItem(
-            headlineContent = { Text(folder.name) },
-            supportingContent = { Text(if (folder.audiobooks) "Audiobooks folder" else "Music folder") },
+            headlineContent = { Text(folder.name.resolve()) },
+            supportingContent = { Text(stringResource(if (folder.audiobooks) R.string.settings_media_audiobooks_folder else R.string.settings_media_music_folder)) },
             trailingContent = {
                 IconButton(onClick = { onRemoveFolder(folder.uri) }) {
-                    Icon(Icons.Filled.Close, contentDescription = "Remove ${folder.name}")
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.settings_media_remove_folder, folder.name.resolve()))
                 }
             },
             modifier = Modifier.padding(start = 16.dp),
@@ -99,14 +104,18 @@ fun LazyListScope.mediaSettingsSection(
     item(key = "media-rescan") {
         val running = ui.scan == RescanState.Running
         ListItem(
-            headlineContent = { Text("Rescan now") },
+            headlineContent = { Text(stringResource(R.string.settings_media_rescan)) },
             supportingContent = {
                 Text(
                     when (val s = ui.scan) {
-                        RescanState.Idle -> "Granger rescans on start and when the phone's media changes."
-                        RescanState.Running -> "Scanning…"
-                        is RescanState.Done -> "Found ${count(s.summary.songs, "song")} and ${count(s.summary.audiobooks, "audiobook")}."
-                        RescanState.Failed -> "The scan didn't finish. Try again."
+                        RescanState.Idle -> stringResource(R.string.settings_media_rescan_idle)
+                        RescanState.Running -> stringResource(R.string.settings_media_scanning)
+                        is RescanState.Done -> stringResource(
+                            R.string.settings_media_found,
+                            pluralStringResource(R.plurals.settings_songs, s.summary.songs, s.summary.songs),
+                            pluralStringResource(R.plurals.settings_audiobooks, s.summary.audiobooks, s.summary.audiobooks),
+                        )
+                        RescanState.Failed -> stringResource(R.string.settings_media_scan_failed)
                     },
                 )
             },
@@ -116,12 +125,9 @@ fun LazyListScope.mediaSettingsSection(
     }
     item(key = "media-other-apps") {
         ListItem(
-            headlineContent = { Text("Show in other apps") },
+            headlineContent = { Text(stringResource(R.string.settings_media_other_apps)) },
             supportingContent = {
-                Text(
-                    "Granger's downloaded music and audiobooks appear in the Files app and in other apps' file pickers, " +
-                        "read-only. Music players that only read the phone's media list won't list them.",
-                )
+                Text(stringResource(R.string.settings_media_other_apps_summary))
             },
             trailingContent = {
                 Switch(
@@ -134,37 +140,50 @@ fun LazyListScope.mediaSettingsSection(
     }
     item(key = "media-replaygain") {
         ChoiceRow(
-            title = "ReplayGain",
-            description = "Evens out loudness. Auto uses album gain when an album plays in order, else track gain.",
+            title = stringResource(R.string.settings_replaygain),
+            description = stringResource(R.string.settings_replaygain_summary),
             choices = ReplayGainMode.entries,
             selected = ui.replayGain,
-            label = { it.name.lowercase().replaceFirstChar(Char::uppercase) },
+            label = { it.label },
             onSelect = onReplayGain,
         )
     }
     // Audiobook-only: hidden until there's an audiobook (Plan U2 Decision 7).
     if (ui.audiobooks) {
         item(key = "media-skip-back") {
-            ChoiceRow("Skip back", "Audiobooks", MediaSettings.SKIP_CHOICES, ui.skipBackS, { "$it s" }, onSkipBack)
+            ChoiceRow(
+                stringResource(R.string.settings_skip_back), stringResource(R.string.settings_skip_audiobooks), MediaSettings.SKIP_CHOICES,
+                ui.skipBackS, { stringResource(R.string.settings_seconds_short, it) }, onSkipBack,
+            )
         }
         item(key = "media-skip-forward") {
-            ChoiceRow("Skip forward", "Audiobooks", MediaSettings.SKIP_CHOICES, ui.skipForwardS, { "$it s" }, onSkipForward)
+            ChoiceRow(
+                stringResource(R.string.settings_skip_forward), stringResource(R.string.settings_skip_audiobooks), MediaSettings.SKIP_CHOICES,
+                ui.skipForwardS, { stringResource(R.string.settings_seconds_short, it) }, onSkipForward,
+            )
         }
     }
     item(key = "media-headset") {
         ListItem(
-            headlineContent = { Text("Play when headphones connect") },
-            supportingContent = { Text("Resumes where you left off") },
+            headlineContent = { Text(stringResource(R.string.settings_headset_autoplay)) },
+            supportingContent = { Text(stringResource(R.string.settings_headset_autoplay_summary)) },
             trailingContent = { Switch(checked = ui.headsetAutoplay, onCheckedChange = onHeadsetAutoplay) },
         )
         HorizontalDivider()
     }
 }
 
-private fun count(n: Int, noun: String) = if (n == 1) "1 $noun" else "$n ${noun}s"
+private val ReplayGainMode.label @Composable get() = stringResource(
+    when (this) {
+        ReplayGainMode.OFF -> R.string.settings_replaygain_off
+        ReplayGainMode.TRACK -> R.string.settings_replaygain_track
+        ReplayGainMode.ALBUM -> R.string.settings_replaygain_album
+        ReplayGainMode.AUTO -> R.string.settings_replaygain_auto
+    },
+)
 
 @Composable
-private fun <T> ChoiceRow(title: String, description: String, choices: List<T>, selected: T, label: (T) -> String, onSelect: (T) -> Unit) {
+private fun <T> ChoiceRow(title: String, description: String, choices: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(title, style = MaterialTheme.typography.bodyLarge)
         Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

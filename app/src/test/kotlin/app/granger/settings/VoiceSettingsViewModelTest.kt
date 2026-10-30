@@ -115,6 +115,6 @@ class VoiceSettingsViewModelTest {
         vm.get(entry)
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued).isEmpty()
-        assertThat(vm.ui.value.notice).isEqualTo("No storage to download to.")
+        assertThat(vm.ui.value.notice).isEqualTo(app.granger.UiText.Res(app.granger.R.string.settings_voice_no_storage))
     }
 }
