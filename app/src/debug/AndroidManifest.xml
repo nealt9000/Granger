@@ -5,7 +5,13 @@
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
+        <!-- Lets the voice input spike list the phone's speech recognizers (Plan A0). -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
     </queries>
+    <!-- Plan A0 only: the main manifest gets RECORD_AUDIO in A1, if voice input is adopted. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application>
         <activity
             android:name="app.granger.spike.SpikeActivity"
@@ -28,6 +34,10 @@
             android:name="app.granger.ebook.PdfBenchActivity"
             android:exported="true"
             android:label="PDF bench" />
+        <activity
+            android:name="app.granger.voiceinput.VoiceInputSpikeActivity"
+            android:exported="true"
+            android:label="Voice input spike" />
         <activity
             android:name="app.granger.eval.EvalActivity"
             android:exported="true"
