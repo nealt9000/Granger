@@ -58,6 +58,32 @@ class BookIndexTest {
         assertThat(db.bookDao().byOrigin(BookOrigin.GUTENBERG).count { it.indexedAt == null }).isEqualTo(3)
     }
 
+    @Test fun anOpenedGutenbergBookIsFoundAmongTheClassics() = test {
+        // Plan GB walkthrough: "beginning of French opera" is in A Complete History of Music, in one of the few big
+        // files gutenberg2zim splits a book into; Classics that mention opera, French and beginnings are the noise.
+        add("faust", "<p>The French opera of Faust had its beginning in Paris.</p>", title = "Faust")
+        add("war", "<p>From the beginning the French were at the opera.</p>", title = "War and Peace")
+        add("enquiry", "<p>The beginning of our operations, as the French say.</p>", title = "Enquiry")
+        val epub = TestEpubs.build(
+            File(booksDir, "gutenberg").apply { mkdirs() }, "54392.epub", title = "A Complete History of Music",
+            chapters = listOf(
+                "<p>Music among the ancients.</p>",
+                "<h2 id=\"chap10\">Chapter X</h2><p>The beginning of French opera came with Lully.</p>",
+            ),
+        )
+        db.bookDao().upsert(
+            book("54392", BookOrigin.GUTENBERG, "A Complete History of Music")
+                .copy(sourceRef = "gutenberg_en_lcc-m/54392.epub", filePath = epub.path),
+        )
+        index.indexPending()
+
+        val hits = index.search("beginning of French opera")
+        assertThat(hits.first().bookId).isEqualTo(BookIds.of(BookOrigin.GUTENBERG, "54392"))
+        assertThat(hits.first().snippet).contains("<b>")
+        assertThat(index.passages(listOf("beginning french opera")).map { it.book.id })
+            .contains(BookIds.of(BookOrigin.GUTENBERG, "54392"))
+    }
+
     @Test fun aPdfIsIndexedByPage() = test {
         val water = addPdf("water", PdfFixtures.text(File(booksDir, "archive-org"), "water.pdf"))
         index.indexPending()

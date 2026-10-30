@@ -98,6 +98,38 @@ class SearchViewModelTest {
         assertThat(vm.state.value.query).isEqualTo("photo ")
     }
 
+    @Test fun comingBackToSearchSearchesAgainSoANewlyIndexedBookShows() = runTest(main.dispatcher) {
+        // Plan GB walkthrough: searched, opened the Gutenberg book (which indexes it), came Back to the same query.
+        search.bookHits = emptyList()
+        val vm = SearchViewModel(search, sessions, "beginning of French opera")
+        vm.onShown()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.books).isEmpty()
+        vm.toggle(SearchGroup.TITLES)
+
+        val history = BookHit("book:gutenberg:54392", "A Complete History of Music", "", "OEBPS/x-h-2.htm.xhtml", 0.4, "")
+        search.bookHits = listOf(history)
+        vm.onShown()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.books).containsExactly(history)
+        assertThat(search.titleQueries).hasSize(2)
+        // Show all stays open on a refresh of the same words.
+        assertThat(vm.state.value.expanded).containsExactly(SearchGroup.TITLES)
+    }
+
+    @Test fun submittingTheSameQuerySearchesAgain() = runTest(main.dispatcher) {
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        vm.refresh()
+        testScheduler.advanceUntilIdle()
+        assertThat(search.titleQueries).containsExactly("photo", "photo")
+        vm.onQueryChange("")
+        vm.refresh()
+        testScheduler.advanceUntilIdle()
+        assertThat(search.titleQueries).hasSize(2)
+    }
+
     @Test fun initialQueryIsSearchedImmediately() = runTest(main.dispatcher) {
         val vm = SearchViewModel(search, sessions, "photo")
         testScheduler.runCurrent()
