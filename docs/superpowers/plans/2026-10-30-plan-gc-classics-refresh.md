@@ -155,6 +155,7 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
     - `titleOverrides` maps a page number as a string (`"3"` is `c003.xhtml`) to its contents title. Task 1 only loads and checks it; Task 5 applies it.
     - `gutenberg` is optional on a row whose `source` isn't `gutenberg`. Such a row skips the RDF checks and must carry a `licence` that says "public domain" and holds an `https://` URL. `WorkSpec.reads_as_verse` gives the verse default (poetry, drama, libretti, scripture).
     - The rights check is now exact ("Public domain in the USA.", whitespace-normalised) rather than a prefix match.
+    - `validate` on the current 347-work manifest, with every RDF fetched into the cache, gives 0 errors under the exact check.
 - [x] **Task 2: splitting keeps wrappers** (R6)
   - When `_flatten`/`_by_size` open a wrapper, each run of its children is re-wrapped in a shallow copy with the same tag and class and no id.
   - Test with a Faerie Queene-shaped fixture (`div.poem > div.stanza > p.i2`) split across two pages: `deadrules.py` must report the indent rules as live.
