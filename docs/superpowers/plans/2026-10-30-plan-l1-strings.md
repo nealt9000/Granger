@@ -105,6 +105,18 @@ Steps for each package:
 - [ ] **Step 4:** Fix the tests: assertions keep their English text where Robolectric supplies it, and JVM tests move to Robolectric or assert `UiText`.
 - [ ] **Step 5:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.<package>.*' --tests '*HardcodedStrings*'` passes. Commit "L1: <package> strings to resources".
 
+## Task 8b: Follow-ups found while merging
+
+Things the package tasks left for after the merge, because they cross task boundaries:
+
+- [ ] `LaunchDecider.MISSING_NOTICE` goes through `LibraryRoute(notice: String?)` in `GrangerNavHost.kt`. Make the route carry a string id (Task 3, with Task 8's files).
+- [ ] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
+- [ ] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
+- [ ] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays.
+- [ ] **Not in L1, noted for L2:**
+  - Download error messages are stored in `downloads.db`, and `isGone` matches them as text. Translating them needs a stored error code (a schema change).
+  - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3).
+
 ## Task 9: Zero and lock
 
 - [ ] **Step 1:** The baseline is empty. Delete the file, and make the guard fail on any hit outside `// l10n-ignore`.
