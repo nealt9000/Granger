@@ -167,6 +167,26 @@ class ThemeShots {
         }
     }
 
+    /** Plan DL Task 4: Home with the live downloads card, running and stopped. */
+    private fun homeWith(card: app.granger.home.DownloadsCard) = shoot(if (card is app.granger.home.DownloadsCard.Stopped) "home-downloads-stopped" else "home-downloads") {
+        GrangerShell(
+            rail = RailUi(listOf(owls, RailEntry.Search("sextant", at = 3L), blue)), expanded = false, railVisible = true, selected = null,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            HomeContent(
+                HomeUi(strip = report, continueCards = listOf(owls, blue), feeds = listOf(dayFeed), downloads = card),
+                onReadiness = {}, onOpenTab = {}, onPlay = {},
+            )
+        }
+    }
+
+    @Test fun homeDownloads() = homeWith(
+        app.granger.home.DownloadsCard.Active("Wikipedia: best articles", false, 3, 14, 1_200_000_000, 9_800_000_000, 10, 25 * 60_000L),
+    )
+
+    @Test fun homeDownloadsStopped() = homeWith(app.granger.home.DownloadsCard.Stopped(2, listOf("a"), setOf("a@x", "b@x")))
+
     /** An Ask answer with a heading, lists that wrap, code and citations (Plan U3c Decision 8). */
     @Test fun answer() = shoot("answer") {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(16.dp)) {

@@ -28,6 +28,11 @@ import app.granger.record
 import app.granger.shell.RailEntry
 import app.granger.shell.RailTabUi
 import app.granger.shell.RailUi
+import app.granger.core.downloads.DownloadLive
+import app.granger.core.downloads.QueueProgress
+import app.granger.core.downloads.QueueSummary
+import app.granger.core.downloads.GoneFile
+import app.granger.SHA_A
 import com.google.common.truth.Truth.assertThat
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -217,21 +222,61 @@ class HomeViewModelTest {
         assertThat(vm.ui.value.feeds.map { it.feed.scope }).containsExactly("pack:wikipedia_en_all")
     }
 
-    @Test fun theSetupStripFollowsTheNewestOnboardingGroupUntilItLands() = runTest(main.dispatcher) {
+    @Test fun theDownloadsCardFollowsAnyDownloadNotJustSetup() = runTest(main.dispatcher) {
         prefs.seeded = true
-        val a = record("a", DownloadState.INSTALLED).copy(groupId = "onboarding:1", sizeBytes = 100)
-        val b = record("b", DownloadState.RUNNING).copy(groupId = "onboarding:1", sizeBytes = 300, bytesDone = 50)
-        val c = record("c", DownloadState.FAILED).copy(groupId = "onboarding:1", sizeBytes = 100)
-        val old = record("z", DownloadState.QUEUED).copy(groupId = "onboarding:0", sizeBytes = 999)
-        downloads.list.value = listOf(a, b, c, old)
+        // A pack got from its source page: no group at all.
+        downloads.list.value = listOf(
+            record("a", DownloadState.INSTALLED).copy(sizeBytes = 100, updatedAt = 10),
+            record("b", DownloadState.RUNNING, title = "Wikivoyage").copy(sizeBytes = 300, bytesDone = 50),
+        )
+        downloads.liveFlow.value = DownloadLive(QueueProgress("b", SHA_A, 150, null), batchStartedAt = 5)
         val vm = viewModel()
-        val setup = vm.ui.value.setup!!
-        assertThat(setup).isEqualTo(SetupProgress(done = 1, total = 3, bytesDone = 150, bytes = 500, failed = 1))
-        assertThat(setupText(setup)).isEqualTo("Setting up · 1 of 3 · 150 B of 500 B · 1 failed")
-        downloads.list.value = listOf(a, b.copy(state = DownloadState.INSTALLED), c.copy(state = DownloadState.INSTALLED), old)
+        val card = vm.ui.value.downloads as DownloadsCard.Active
+        assertThat(homeDownloadsTitle(card)).isEqualTo("Downloading Wikivoyage")
+        assertThat(homeDownloadsText(card)).isEqualTo("1 of 2 · 250 B of 400 B")
+        assertThat(card.fraction).isEqualTo(250f / 400f)
+    }
+
+    @Test fun pausedTheCardSaysHowManyWaitAndResumes() = runTest(main.dispatcher) {
+        prefs.seeded = true
+        downloads.list.value = listOf(record("a", DownloadState.QUEUED), record("b", DownloadState.QUEUED))
+        downloads.liveFlow.value = DownloadLive(paused = true)
+        val vm = viewModel()
+        val card = vm.ui.value.downloads as DownloadsCard.Active
+        assertThat(homeDownloadsTitle(card)).isEqualTo("Downloads paused")
+        assertThat(homeDownloadsText(card)).isEqualTo("Paused · 2 waiting")
+        vm.resumeDownloads()
+        vm.pauseDownloads()
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.setup).isNull()
-        assertThat(HomeViewModel.setupProgress(emptyList())).isNull()
+        assertThat(downloads.calls).containsExactly("resume", "pause").inOrder()
+    }
+
+    @Test fun withNothingToComeItShowsWhatStoppedUntilClosedAndANewFailureBringsItBack() = runTest(main.dispatcher) {
+        prefs.seeded = true
+        val failed = record("a", DownloadState.FAILED, error = "x answered 503")
+        val gone = record("wikem", DownloadState.FAILED, error = GoneFile.KIWIX)
+        downloads.list.value = listOf(record("done", DownloadState.INSTALLED), failed, gone)
+        val vm = viewModel()
+        val card = vm.ui.value.downloads as DownloadsCard.Stopped
+        assertThat(card.count).isEqualTo(2)
+        // The withdrawn file isn't retried: Downloads offers Remove for it.
+        vm.retryStopped(card)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("retry:a")
+        vm.dismissStopped(card)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.downloads).isNull()
+        assertThat(prefs.dismissedFailures).containsExactly("a@$SHA_A", "wikem@$SHA_A")
+        downloads.list.value = listOf(failed, gone, record("c", DownloadState.FAILED))
+        testScheduler.advanceUntilIdle()
+        assertThat((vm.ui.value.downloads as DownloadsCard.Stopped).count).isEqualTo(3)
+    }
+
+    @Test fun theCardIsGoneWhenThereIsNothingToShow() = runTest(main.dispatcher) {
+        prefs.seeded = true
+        downloads.list.value = listOf(record("done", DownloadState.INSTALLED))
+        assertThat(viewModel().ui.value.downloads).isNull()
+        assertThat(HomeViewModel.downloadsCard(QueueSummary(), emptySet())).isNull()
     }
 
     @Test fun scopeChoicesOfferWhatIsOnThePhone() = runTest(main.dispatcher) {

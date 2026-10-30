@@ -92,11 +92,43 @@ class HomeScreenTest {
         compose.onNodeWithText("Play again").assertDoesNotExist()
     }
 
-    @Test fun theSetupStripShowsProgressAndOpensTheDownloads() {
-        compose.setContent {
-            HomeContent(HomeUi(strip = report, setup = SetupProgress(2, 5, 1_000, 4_000, 0)), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenDownloads = { calls += "downloads" })
-        }
-        compose.onNodeWithText("Setting up · 2 of 5 · 1.0 KB of 4.0 KB").performClick()
+    private fun showCard(card: DownloadsCard) = compose.setContent {
+        HomeContent(
+            HomeUi(strip = report, downloads = card), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenDownloads = { calls += "downloads" },
+            downloadsActions = DownloadsCardActions(
+                onPause = { calls += "pause" }, onResume = { calls += "resume" },
+                onRetry = { calls += "retry:${it.count}" }, onDismiss = { calls += "close:${it.count}" },
+            ),
+        )
+    }
+
+    @Test fun theDownloadsCardShowsTheRoundPausesAndOpensDownloads() {
+        showCard(DownloadsCard.Active("Wikipedia Top", false, 3, 14, 1_200_000_000, 9_800_000_000, 10, 25 * 60_000L))
+        compose.onNodeWithText("Downloading Wikipedia Top").assertExists()
+        compose.onNodeWithText("3 of 14 · 1.2 GB of 9.8 GB · about 25 min left").performClick()
+        compose.onNodeWithContentDescription("Pause downloads").performClick()
+        assertThat(calls).containsExactly("downloads", "pause").inOrder()
+    }
+
+    @Test fun pausedTheCardResumes() {
+        showCard(DownloadsCard.Active(null, true, 3, 14, 1, 2, 11))
+        compose.onNodeWithText("Paused · 11 waiting").assertExists()
+        compose.onNodeWithContentDescription("Resume downloads").performClick()
+        assertThat(calls).containsExactly("resume")
+    }
+
+    @Test fun theStoppedCardRetriesOrCloses() {
+        showCard(DownloadsCard.Stopped(2, listOf("a"), setOf("a@x", "b@x")))
+        compose.onNodeWithText("2 stopped").assertExists()
+        compose.onNodeWithText("Retry").performClick()
+        compose.onNodeWithContentDescription("Close").performClick()
+        assertThat(calls).containsExactly("retry:2", "close:2").inOrder()
+    }
+
+    @Test fun aStoppedCardWithNothingToRetryHasNoRetry() {
+        showCard(DownloadsCard.Stopped(1, emptyList(), setOf("wikem@x")))
+        compose.onNodeWithText("1 stopped").performClick()
+        compose.onNodeWithText("Retry").assertDoesNotExist()
         assertThat(calls).containsExactly("downloads")
     }
 
