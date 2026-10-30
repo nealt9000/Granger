@@ -31,6 +31,7 @@
     <string name="downloads_index_for_ask">Index for Ask</string>
     <!-- After a row's line when the pack's Ask index downloads with it. %1$s is the line. -->
     <string name="downloads_with_index">%1$s + index for Ask</string>
+    <!-- A download row's state, a word or two. -->
     <string name="downloads_queued">Queued</string>
     <string name="downloads_failed">Failed</string>
     <!-- Said of an item a newer catalog dropped. -->

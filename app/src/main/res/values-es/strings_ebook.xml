@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ebook_your_highlight">Tu resaltado</string>
+    <string name="ebook_your_note">Tu nota</string>
+    <string name="ebook_your_highlight_in">Tu resaltado · %1$s</string>
+    <string name="ebook_your_note_in">Tu nota · %1$s</string>
+    <string name="ebook_search_in_this_book">Buscar en este libro</string>
+    <string name="ebook_nothing_found">No se encontró nada para “%1$s”.</string>
+    <string name="ebook_search_in_book">Buscar en el libro</string>
+
+    <string name="ebook_page_of">pág. %1$d de %2$d</string>
+    <string name="ebook_percent">%1$d%%</string>
+    <string name="ebook_chapter_and_place">%1$s · %2$s</string>
+
+    <string name="ebook_tab_contents">Índice</string>
+    <string name="ebook_tab_bookmarks">Marcadores</string>
+    <string name="ebook_tab_highlights">Resaltados</string>
+    <string name="ebook_no_contents">Este libro no tiene índice.</string>
+    <string name="ebook_no_pdf_contents">Este PDF no tiene un índice propio. Si tiene una página de índice, está entre sus páginas.</string>
+    <string name="ebook_untitled">Sin título</string>
+    <string name="ebook_bookmark">Marcador</string>
+    <string name="ebook_no_bookmarks">Aún no hay marcadores. Toca la estrella en la página que quieras guardar.</string>
+    <string name="ebook_no_highlights">Aún no hay resaltados. Selecciona texto del libro para resaltarlo.</string>
+    <string name="ebook_cant_find">No se encuentra este pasaje en la edición actual</string>
+
+    <string name="ebook_follow">Seguir</string>
+
+    <string name="ebook_no_wiktionary_entry">No hay una entrada para “%1$s” en Wikcionario</string>
+    <string name="ebook_no_dictionary_app">No hay una app de diccionario instalada</string>
+    <string name="ebook_lookup_failed">No se pudo buscar “%1$s”</string>
+
+    <string name="ebook_select_copy">Copiar</string>
+    <string name="ebook_select_highlight">Resaltar</string>
+    <string name="ebook_select_note">Nota</string>
+    <string name="ebook_select_define">Definir</string>
+    <string name="ebook_select_ask">Preguntar</string>
+    <string name="ebook_select_read_from_here">Leer desde aquí</string>
+
+    <string name="ebook_highlight_yellow">resaltado amarillo</string>
+    <string name="ebook_highlight_green">resaltado verde</string>
+    <string name="ebook_highlight_blue">resaltado azul</string>
+    <string name="ebook_highlight_pink">resaltado rosa</string>
+    <string name="ebook_note">Nota</string>
+
+    <string name="ebook_typeface">Tipo de letra</string>
+    <string name="ebook_typeface_serif">Con serifa</string>
+    <string name="ebook_typeface_sans">Sin serifa</string>
+    <string name="ebook_size">Tamaño</string>
+    <string name="ebook_line_spacing">Interlineado</string>
+    <string name="ebook_margins">Márgenes</string>
+    <string name="ebook_alignment">Alineación</string>
+    <string name="ebook_align_left">Izquierda</string>
+    <string name="ebook_align_justified">Justificado</string>
+    <string name="ebook_theme">Tema</string>
+    <string name="ebook_theme_match_app">Como la app</string>
+    <string name="ebook_theme_day">Día</string>
+    <string name="ebook_theme_sepia">Sepia</string>
+    <string name="ebook_theme_night">Noche</string>
+    <string name="ebook_pdf_pages">Páginas</string>
+    <string name="ebook_pdf_page_by_page">Página por página</string>
+    <string name="ebook_pdf_scroll">Desplazamiento</string>
+    <string name="ebook_pdf_fit">Ajuste</string>
+    <string name="ebook_pdf_whole_page">Página entera</string>
+    <string name="ebook_pdf_width">Ancho</string>
+    <string name="ebook_text_size">Tamaño del texto</string>
+    <string name="ebook_smaller_text">Texto más pequeño</string>
+    <string name="ebook_larger_text">Texto más grande</string>
+
+    <string name="ebook_tab_gone">Este marcador se quitó.</string>
+    <string name="ebook_book_gone">Este libro ya no está en el teléfono. Revisa la tarjeta SD o vuelve a descargarlo desde Granger.</string>
+    <string name="ebook_book_damaged">No se pudo abrir este libro. Intenta quitarlo y luego descargarlo o importarlo de nuevo.</string>
+</resources>

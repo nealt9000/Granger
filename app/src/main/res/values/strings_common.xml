@@ -8,6 +8,7 @@
     <string name="common_remove">Remove</string>
     <string name="common_delete">Delete</string>
     <string name="common_close">Close</string>
+    <!-- The dismiss button of a Remove, Clear or Delete dialog: keep the thing as it is. -->
     <string name="common_keep">Keep</string>
     <!-- The overflow menu button's description. -->
     <string name="common_more">More</string>
@@ -17,6 +18,7 @@
     <string name="common_stop">Stop</string>
     <string name="common_search">Search</string>
     <string name="common_settings">Settings</string>
+    <!-- A button that closes a sheet or ends an edit. -->
     <string name="common_done">Done</string>
     <!-- Download something: Get the rest, Get the Granger voice. -->
     <string name="common_get">Get</string>

@@ -69,18 +69,18 @@ Use these words everywhere. If a string needs a different word, keep the glossar
 - `app/src/main/res/values-es/strings_<package>.xml` for each `strings_*.xml`
 - `core/{downloads,player,speech,archive}/src/main/res/values-es/strings.xml`
 
-- [ ] **Step 1:** Translate every `<string>` and `<plurals>`. Skip `translatable="false"`.
+- [x] **Step 1:** Translate every `<string>` and `<plurals>`. Skip `translatable="false"`.
   - Keep each name and every placeholder (`%1$s`, `%2$d`), in whatever order the Spanish needs.
   - Plurals give `one` and `other`. Android's Spanish rules also use `many` for large numbers: copy `other` into `many`.
   - Keep typographic marks: "…" and "·"; ¿? and ¡! where Spanish needs them.
   - Escape apostrophes and quotes as in the English files.
-- [ ] **Step 2:** Every string a reviewer might misread gets a short comment in the English source file (not the Spanish one), so the friend review has its context: what it labels, and how much room it has.
-- [ ] **Step 3:** Write `docs/superpowers/l2-review.md` for the friend review:
+- [x] **Step 2:** Every string a reviewer might misread gets a short comment in the English source file (not the Spanish one), so the friend review has its context: what it labels, and how much room it has.
+- [x] **Step 3:** Write `docs/superpowers/l2-review.md` for the friend review:
   - the glossary
   - how to see the app in Spanish
   - the strings Claude was least sure of, with the reason
   - the places where length forced a shorter wording
-- [ ] **Step 4:** Commit "L2: Spanish strings (draft for review)".
+- [x] **Step 4:** Commit "L2: Spanish strings (draft for review)".
 
 ## Task 2: Completeness test
 

@@ -47,6 +47,7 @@
     <!-- Why a pack couldn't be shown. -->
     <string name="reader_pack_unavailable">This pack is missing or damaged. Check that its file is still on the phone or SD card.</string>
     <string name="reader_no_main_page">This pack has no main page. Use Search to open an article.</string>
+    <!-- Shown in place of the page when the rail item that opened it no longer exists. -->
     <string name="reader_tab_gone">This bookmark was removed.</string>
     <!-- Shown in place of a page a link points to that the pack doesn't have. -->
     <string name="reader_page_not_in_pack">This page isn\'t in this pack.</string>

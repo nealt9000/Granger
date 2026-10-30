@@ -9,6 +9,7 @@
 
     <string name="settings_wifi_only">Download on Wi-Fi only</string>
     <string name="settings_wifi_only_summary">Turn off to use mobile data</string>
+    <!-- A switch: confirm before any download over 100 MB. -->
     <string name="settings_ask_large">Ask before downloads over 100 MB</string>
     <string name="settings_ask_large_summary">Turn off to get large scans and comic runs without a prompt</string>
     <string name="settings_archive_everything">Archive.org: show everything</string>
@@ -72,6 +73,7 @@
     <string name="settings_media_audiobooks_folder">Audiobooks folder</string>
     <!-- %1$s is the folder's name. -->
     <string name="settings_media_remove_folder">Remove %1$s</string>
+    <!-- Look through the phone for music and audiobooks again. -->
     <string name="settings_media_rescan">Rescan now</string>
     <string name="settings_media_rescan_idle">Granger rescans on start and when the phone\'s media changes.</string>
     <string name="settings_media_scanning">Scanning…</string>
@@ -95,6 +97,7 @@
     <string name="settings_replaygain_track">Track</string>
     <string name="settings_replaygain_album">Album</string>
     <string name="settings_replaygain_auto">Auto</string>
+    <!-- How far the skip buttons jump, chosen from chips of seconds. -->
     <string name="settings_skip_back">Skip back</string>
     <string name="settings_skip_forward">Skip forward</string>
     <!-- Which media the skip settings apply to. -->

@@ -59,6 +59,7 @@
     <!-- %1$d is the percent done. -->
     <string name="archive_pdf_downloading">PDF: downloading, %1$d%%</string>
     <string name="archive_pdf_failed">PDF: failed</string>
+    <!-- The PDF line's lead when it has no other status; the trailing space is kept. -->
     <string name="archive_pdf_other">"PDF: "</string>
     <string name="archive_view_on_site">View on archive.org</string>
     <!-- Get, with the download's size. -->

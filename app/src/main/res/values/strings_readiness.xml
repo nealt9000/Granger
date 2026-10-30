@@ -18,10 +18,11 @@
     <!-- A knowledge area's status line. %1$s and %2$s are sizes, such as 1.2 GB. -->
     <string name="readiness_coverage_nothing">Nothing yet</string>
     <string name="readiness_coverage_nothing_essentials">Nothing yet · the essentials are %1$s</string>
-    <!-- The area holds packs (%1$s of them) but none of its essentials. -->
+    <!-- The area holds packs (%1$s is their size, such as 1.2 GB) but none of its essentials. -->
     <string name="readiness_coverage_held">No essentials yet · %1$s held</string>
     <string name="readiness_coverage_held_essentials">No essentials yet · %1$s held · the essentials are %2$s</string>
     <!-- %1$s is how much is held, %2$s the size of the full set. -->
+    <!-- Basic and Comprehensive are how well an area is covered. -->
     <string name="readiness_coverage_basic">Basic · %1$s of %2$s</string>
     <string name="readiness_coverage_comprehensive">Comprehensive · %1$s</string>
 

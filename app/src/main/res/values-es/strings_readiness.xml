@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="readiness_title">Preparación</string>
+    <string name="readiness_this_phone">Este teléfono</string>
+    <string name="readiness_what_you_hold">Lo que tienes sin conexión</string>
+    <string name="readiness_storage">Almacenamiento</string>
+    <string name="readiness_by_source">Por fuente</string>
+
+    <string name="readiness_memory">%1$s de memoria</string>
+    <string name="readiness_tier_library_only">Solo biblioteca: Preguntar necesita un teléfono con 6 GB de memoria</string>
+    <string name="readiness_tier_ask">Biblioteca y Preguntar</string>
+    <string name="readiness_refresh_catalog">Actualiza el catálogo para ver tu cobertura.</string>
+    <string name="readiness_ready">Todo listo.</string>
+
+    <!-- The implied noun is "cobertura" (feminine): Básica, Completa. -->
+    <string name="readiness_coverage_nothing">Aún nada</string>
+    <string name="readiness_coverage_nothing_essentials">Aún nada · lo esencial ocupa %1$s</string>
+    <string name="readiness_coverage_held">Aún sin lo esencial · %1$s guardados</string>
+    <string name="readiness_coverage_held_essentials">Aún sin lo esencial · %1$s guardados · lo esencial ocupa %2$s</string>
+    <string name="readiness_coverage_basic">Básica · %1$s de %2$s</string>
+    <string name="readiness_coverage_comprehensive">Completa · %1$s</string>
+
+    <string name="readiness_signal_nothing_for">Aún no hay nada de %1$s. Descarga %2$s, %3$s.</string>
+    <string name="readiness_signal_no_essentials_for">Aún no tienes lo esencial de %1$s. Descarga %2$s, %3$s.</string>
+    <string name="readiness_signal_stale">%1$s es del %2$s; hay una versión más nueva en el catálogo.</string>
+    <string name="readiness_signal_unsearchable">No se puede buscar en %1$s: el paquete no tiene índice.</string>
+    <string name="readiness_see">Ver</string>
+    <string name="readiness_show_all">Mostrar todo (%1$d)</string>
+
+    <string name="readiness_volume">%1$s libres de %2$s · Granger usa %3$s</string>
+
+    <string name="readiness_source_my_books">Mis libros</string>
+    <string name="readiness_source_models">Modelos de IA</string>
+    <string name="readiness_source_voices">Voces</string>
+    <string name="readiness_source_phone_media">Música y audiolibros del teléfono</string>
+    <string name="readiness_not_stored">Granger no guarda una copia</string>
+    <plurals name="readiness_source_items">
+        <item quantity="one">%1$s · %2$d elemento</item>
+        <item quantity="many">%1$s · %2$d elementos</item>
+        <item quantity="other">%1$s · %2$d elementos</item>
+    </plurals>
+    <plurals name="readiness_source_trouble">
+        <item quantity="one">%1$s · %2$d necesita atención</item>
+        <item quantity="many">%1$s · %2$d necesitan atención</item>
+        <item quantity="other">%1$s · %2$d necesitan atención</item>
+    </plurals>
+    <string name="readiness_show_source">Mostrar %1$s</string>
+    <string name="readiness_hide_source">Ocultar %1$s</string>
+
+    <string name="readiness_verified">Verificado</string>
+    <string name="readiness_verified_on">Verificado el %1$s</string>
+    <string name="readiness_size_ok">El tamaño es correcto; aún no se revisó por completo</string>
+    <string name="readiness_incomplete">Incompleto: el archivo no tiene el tamaño correcto</string>
+    <string name="readiness_corrupted">Corrupto: el contenido no coincide</string>
+    <string name="readiness_missing">No encontrado: el archivo no está</string>
+    <string name="readiness_damaged">Dañado: no se puede abrir</string>
+    <string name="readiness_not_from_catalog">Agregado a mano; no se puede verificar</string>
+    <string name="readiness_checking">Revisando… %1$d%%</string>
+    <string name="readiness_check">Revisar</string>
+    <string name="readiness_download_again">Volver a descargar</string>
+</resources>

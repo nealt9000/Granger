@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browse_title">Explorar</string>
+    <string name="browse_get_more">Conseguir más</string>
+    <string name="browse_downloads">Descargas</string>
+    <string name="browse_downloads_count">Descargas (%1$d)</string>
+    <string name="browse_readiness">Preparación</string>
+    <string name="browse_nothing_yet">Aún no hay nada para explorar</string>
+    <string name="browse_suggest_map">Un mapa de tu región · %1$s</string>
+    <string name="browse_suggest_encyclopedia">Una enciclopedia · %1$s</string>
+    <string name="browse_get_packs">Conseguir paquetes</string>
+    <string name="browse_copy_zims">O copia archivos .zim en %1$s</string>
+    <string name="browse_collapse">Contraer</string>
+    <string name="browse_expand">Expandir</string>
+    <string name="browse_show_fewer">Mostrar menos</string>
+    <string name="browse_show_all">Mostrar los %1$d</string>
+    <string name="browse_section_other">Otros</string>
+    <string name="browse_section_maps">Mapas</string>
+    <string name="browse_remove_title">¿Quitar %1$s?</string>
+    <string name="browse_remove_body">%1$s se eliminará de este teléfono. Puedes volver a descargarlo más tarde.</string>
+    <string name="browse_pack_missing">No se encontró el archivo. Vuelve a insertar la tarjeta SD o descarga el paquete de nuevo.</string>
+    <string name="browse_pack_corrupt">Este archivo está dañado y no se puede abrir.</string>
+    <string name="browse_remove_from_phone">Quitar del teléfono</string>
+</resources>

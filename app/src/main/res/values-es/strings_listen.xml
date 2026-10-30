@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="listen_title">Escuchar</string>
+    <string name="listen_get_more">Conseguir más</string>
+    <string name="listen_find_on_phone">Buscar música en este teléfono</string>
+    <string name="listen_nothing_yet">Aún no hay nada para escuchar</string>
+    <string name="listen_open_player">Abrir el reproductor</string>
+    <string name="listen_last_read">Última lectura</string>
+    <string name="listen_last_played">Última reproducción</string>
+    <string name="listen_paused">En pausa</string>
+    <string name="listen_reading_aloud">Leyendo en voz alta</string>
+    <string name="listen_now_playing">Reproduciendo</string>
+</resources>

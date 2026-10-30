@@ -59,8 +59,10 @@
     <string name="music_albums_and_songs">%1$s · %2$s</string>
 
     <!-- Buttons and menus. -->
+    <!-- A button: play these in shuffled order. -->
     <string name="music_shuffle">Shuffle</string>
     <string name="music_shuffle_all">Shuffle all</string>
+    <!-- A menu item: play this right after the current song. -->
     <string name="music_play_next">Play next</string>
     <string name="music_add_to_queue">Add to queue</string>
     <string name="music_add_to_playlist_menu">Add to playlist…</string>

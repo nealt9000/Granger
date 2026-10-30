@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="music_all">Toda la música</string>
+
+    <string name="music_tab_albums">Álbumes</string>
+    <string name="music_tab_artists">Artistas</string>
+    <string name="music_tab_songs">Canciones</string>
+    <string name="music_tab_genres">Géneros</string>
+    <string name="music_tab_playlists">Listas</string>
+    <string name="music_tab_folders">Carpetas</string>
+
+    <string name="music_sort_title">Título</string>
+    <string name="music_sort_artist">Artista</string>
+    <string name="music_sort_album">Álbum</string>
+    <string name="music_sort_year">Año</string>
+    <string name="music_sort_date_added">Fecha en que se agregó</string>
+
+    <string name="music_release_albums">Álbumes</string>
+    <string name="music_release_eps">EP</string>
+    <string name="music_release_singles">Sencillos</string>
+    <string name="music_release_compilations">Recopilaciones</string>
+    <string name="music_release_live">En vivo</string>
+    <string name="music_release_soundtracks">Bandas sonoras</string>
+    <string name="music_release_others">Otros lanzamientos</string>
+    <string name="music_appears_on">Aparece en</string>
+    <string name="music_songs">Canciones</string>
+    <string name="music_albums">Álbumes</string>
+
+    <string name="music_unknown_artist">Artista desconocido</string>
+    <string name="music_unknown_album">Álbum desconocido</string>
+    <string name="music_unknown_genre">Género desconocido</string>
+
+    <string name="music_none_yet">Aún no hay música</string>
+    <string name="music_no_artists">No hay artistas</string>
+    <string name="music_no_genres">No hay géneros</string>
+    <string name="music_no_folders">No hay carpetas</string>
+    <string name="music_no_songs">No hay canciones</string>
+    <string name="music_no_albums">No hay álbumes</string>
+    <string name="music_playlist_empty">Aún no hay canciones. Mantén presionada una canción o un álbum para agregarlo.</string>
+    <string name="music_media_settings">Ajustes de música y audiolibros</string>
+
+    <plurals name="music_songs_count">
+        <item quantity="one">%d canción</item>
+        <item quantity="many">%d canciones</item>
+        <item quantity="other">%d canciones</item>
+    </plurals>
+    <string name="music_albums_and_songs">%1$s · %2$s</string>
+
+    <string name="music_shuffle">Aleatorio</string>
+    <string name="music_shuffle_all">Reproducir todo al azar</string>
+    <string name="music_play_next">Reproducir a continuación</string>
+    <string name="music_add_to_queue">Agregar a la cola</string>
+    <string name="music_add_to_playlist_menu">Agregar a una lista…</string>
+    <string name="music_go_to_album">Ir al álbum</string>
+    <string name="music_go_to">Ir a %1$s</string>
+    <string name="music_move_to_collection">Mover a una colección…</string>
+    <string name="music_file_not_found">No se encontró el archivo</string>
+    <string name="music_disc">Disco %1$d</string>
+
+    <string name="music_add_to_playlist">Agregar a una lista</string>
+    <string name="music_new_playlist">Nueva lista</string>
+    <string name="music_playlist_name">Nombre de la lista</string>
+    <string name="music_create">Crear</string>
+    <string name="music_rename">Cambiar nombre</string>
+    <string name="music_rename_playlist">Cambiar el nombre de la lista</string>
+    <string name="music_delete_playlist">¿Eliminar la lista?</string>
+    <string name="music_delete_playlist_message">Se eliminará %1$s. Las canciones se quedan en el teléfono.</string>
+    <string name="music_move_up">Subir</string>
+    <string name="music_move_down">Bajar</string>
+    <string name="music_remove_from_playlist">Quitar de la lista</string>
+</resources>

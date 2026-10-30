@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shell_tool_home">Inicio</string>
+    <string name="shell_tool_search">Buscar</string>
+    <string name="shell_tool_ask">Preguntar</string>
+    <string name="shell_tool_browse">Explorar</string>
+    <string name="shell_tool_library">Biblioteca</string>
+    <string name="shell_tool_listen">Escuchar</string>
+    <string name="shell_tool_settings">Ajustes</string>
+
+    <string name="shell_tab_not_available">%1$s, no disponible</string>
+    <string name="shell_tab_reading_aloud">%1$s, leyendo en voz alta</string>
+    <string name="shell_tab_not_available_reading_aloud">%1$s, no disponible, leyendo en voz alta</string>
+    <string name="shell_recent_search">Búsqueda reciente: %1$s</string>
+    <string name="shell_ask_chat">Chat de Preguntar: %1$s</string>
+    <string name="shell_play_again">Volver a reproducir: %1$s</string>
+    <string name="shell_reading_aloud">Leyendo en voz alta: %1$s</string>
+    <string name="shell_subtitle_not_available">%1$s · no disponible</string>
+    <string name="shell_subtitle_reading_aloud">%1$s · leyendo en voz alta</string>
+    <string name="shell_subtitle_not_available_reading_aloud">%1$s · no disponible · leyendo en voz alta</string>
+    <string name="shell_pinned">Fijados</string>
+    <string name="shell_history">Historial</string>
+    <string name="shell_unavailable">Este paquete o libro no está disponible. Revisa que siga en el teléfono o en la tarjeta SD.</string>
+    <string name="shell_unpin_or_remove">Dejar de fijar o quitar de la barra</string>
+    <string name="shell_pin_or_remove">Fijar arriba o quitar de la barra</string>
+    <string name="shell_unpin">Dejar de fijar</string>
+    <string name="shell_pin_to_top">Fijar arriba</string>
+    <string name="shell_remove_from_rail">Quitar de la barra</string>
+
+    <string name="shell_kind_audiobook">Audiolibro</string>
+    <string name="shell_kind_read_aloud">Lectura en voz alta</string>
+    <string name="shell_kind_playlist">Lista de reproducción</string>
+    <string name="shell_kind_artist">Artista</string>
+    <string name="shell_kind_genre">Género</string>
+    <string name="shell_kind_folder">Carpeta</string>
+    <string name="shell_kind_songs">Canciones</string>
+    <string name="shell_kind_album">Álbum</string>
+
+    <string name="shell_clear_history_title">¿Borrar el historial?</string>
+    <string name="shell_clear_history_body">Se olvidará lo que abriste, buscaste y reprodujiste, y se vaciará la barra. Los elementos fijados y la página de la que vienes se quedan. Los chats de Preguntar se quedan en Preguntar.</string>
+    <string name="shell_clear">Borrar</string>
+    <string name="shell_clear_history">Borrar el historial</string>
+    <string name="shell_saved">Guardados</string>
+    <string name="shell_filter_history">Filtrar el historial</string>
+    <string name="shell_no_saved">Aún no hay artículos guardados. Toca la estrella mientras lees para guardar uno.</string>
+    <string name="shell_nothing_opened">Aún no has abierto nada.</string>
+    <string name="shell_no_history_match">Nada del historial coincide.</string>
+    <string name="shell_remove_from_saved">Quitar de guardados</string>
+    <string name="shell_removed_pack">Paquete quitado</string>
+    <string name="shell_removed_book">Libro quitado</string>
+
+    <plurals name="shell_pins_full">
+        <item quantity="one">Ya hay %1$d elemento fijado. Primero deja de fijarlo.</item>
+        <item quantity="many">Ya hay %1$d elementos fijados. Primero deja de fijar uno.</item>
+        <item quantity="other">Ya hay %1$d elementos fijados. Primero deja de fijar uno.</item>
+    </plurals>
+    <string name="shell_cant_play">No se puede reproducir “%1$s”: ya no está en la biblioteca o ninguno de sus archivos está en el teléfono.</string>
+</resources>

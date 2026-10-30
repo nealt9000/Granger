@@ -55,6 +55,7 @@
         <item quantity="one">Forward %d second</item>
         <item quantity="other">Forward %d seconds</item>
     </plurals>
+    <!-- The voice's transport buttons. -->
     <string name="player_back_sentence">Back a sentence</string>
     <string name="player_next_sentence">Next sentence</string>
     <string name="player_previous_paragraph">Previous paragraph</string>
@@ -62,6 +63,7 @@
     <string name="player_shuffle_on">Shuffle on</string>
     <string name="player_shuffle_off">Shuffle off</string>
     <string name="player_repeat_all">Repeat all</string>
+    <!-- Repeats the current song. -->
     <string name="player_repeat_one">Repeat one</string>
     <string name="player_repeat_off">Repeat off</string>
     <!-- The equalizer bars beside the current song. -->

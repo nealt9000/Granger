@@ -9,7 +9,7 @@
     <string name="search_books">Books</string>
     <string name="search_music">Music</string>
     <string name="search_audiobooks">Audiobooks</string>
-    <!-- A page number under a PDF result. %1$s is the page. -->
+    <!-- A page number under a PDF result. %1$d is the page. -->
     <string name="search_page">p. %1$d</string>
 
     <!-- The line under an artist result. -->

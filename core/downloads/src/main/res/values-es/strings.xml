@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="downloads_channel">Descargas</string>
+    <string name="downloads_pause">Pausar</string>
+    <string name="downloads_notification_title">Descargando %1$s</string>
+    <string name="downloads_notification_title_plain">Descargando</string>
+    <string name="downloads_notification_files">%1$d de %2$d</string>
+    <!-- %1$s is "unos 25 min": "faltan unos 25 min". -->
+    <string name="downloads_notification_time_left">faltan %1$s</string>
+    <string name="downloads_notification_starting">Empezando…</string>
+
+    <string name="downloads_volume_sd_card">Tarjeta SD</string>
+    <string name="downloads_volume_internal">Almacenamiento interno</string>
+
+    <!-- Follows "faltan" in Spanish: "faltan unos 25 min". -->
+    <string name="downloads_time_left_under_minute">menos de un minuto</string>
+    <plurals name="downloads_time_left_minutes">
+        <item quantity="one">aprox. %d min</item>
+        <item quantity="many">unos %d min</item>
+        <item quantity="other">unos %d min</item>
+    </plurals>
+    <plurals name="downloads_time_left_hours">
+        <item quantity="one">aprox. %d h</item>
+        <item quantity="many">unas %d h</item>
+        <item quantity="other">unas %d h</item>
+    </plurals>
+    <plurals name="downloads_time_left_days">
+        <item quantity="one">aprox. %d día</item>
+        <item quantity="many">unos %d días</item>
+        <item quantity="other">unos %d días</item>
+    </plurals>
+
+    <plurals name="downloads_in_seconds">
+        <item quantity="one">en %d s</item>
+        <item quantity="many">en %d s</item>
+        <item quantity="other">en %d s</item>
+    </plurals>
+    <plurals name="downloads_in_minutes">
+        <item quantity="one">en %d min</item>
+        <item quantity="many">en %d min</item>
+        <item quantity="other">en %d min</item>
+    </plurals>
+    <plurals name="downloads_in_hours">
+        <item quantity="one">en %d h</item>
+        <item quantity="many">en %d h</item>
+        <item quantity="other">en %d h</item>
+    </plurals>
+
+    <string name="downloads_place_next">Siguiente</string>
+    <!-- %1$s is the phone's own ordinal, such as "2.º". -->
+    <string name="downloads_place_in_line">%1$s en la cola</string>
+</resources>

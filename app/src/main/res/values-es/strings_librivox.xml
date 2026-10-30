@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="librivox_title">LibriVox</string>
+    <string name="librivox_footer">Las grabaciones de LibriVox son de dominio público. Los archivos los sirve Internet Archive.</string>
+    <string name="librivox_search_placeholder">Buscar en LibriVox por título o autor</string>
+    <string name="librivox_tab_browse">Explorar</string>
+    <string name="librivox_tab_installed">Descargado</string>
+    <string name="librivox_empty_installed">Aún no has descargado nada de LibriVox.</string>
+    <string name="librivox_empty_search">Nada coincide con esa búsqueda.</string>
+    <string name="librivox_load_more">Cargar más</string>
+    <string name="librivox_get_the_rest">Descargar el resto</string>
+    <string name="librivox_remove_title">¿Quitar %1$s?</string>
+    <string name="librivox_remove_this_book">¿Quitar este libro?</string>
+    <string name="librivox_remove_body">Se eliminarán sus archivos. Se conservan tu lugar y tus marcadores.</string>
+
+    <string name="librivox_book_fallback">Libro de LibriVox</string>
+    <string name="librivox_read_by">Narrado por %1$s</string>
+    <plurals name="librivox_read_by_more">
+        <item quantity="one">Narrado por %1$s y %2$d más</item>
+        <item quantity="many">Narrado por %1$s y %2$d más</item>
+        <item quantity="other">Narrado por %1$s y %2$d más</item>
+    </plurals>
+    <string name="librivox_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="librivox_duration_hours">%1$d h</string>
+    <string name="librivox_duration_minutes">%1$d min</string>
+    <string name="librivox_row_details">%1$s · %2$s</string>
+    <plurals name="librivox_chapters">
+        <item quantity="one">%1$d capítulo</item>
+        <item quantity="many">%1$d capítulos</item>
+        <item quantity="other">%1$d capítulos</item>
+    </plurals>
+    <plurals name="librivox_chapters_size">
+        <item quantity="one">%1$d capítulo · %2$s</item>
+        <item quantity="many">%1$d capítulos · %2$s</item>
+        <item quantity="other">%1$d capítulos · %2$s</item>
+    </plurals>
+    <plurals name="librivox_downloading_chapters">
+        <item quantity="one">Descargando: %1$d de %2$d capítulo</item>
+        <item quantity="many">Descargando: %1$d de %2$d capítulos</item>
+        <item quantity="other">Descargando: %1$d de %2$d capítulos</item>
+    </plurals>
+    <string name="librivox_view_on_site">Ver en LibriVox</string>
+
+    <string name="librivox_incomplete">No todos los archivos de este libro están en archive.org.</string>
+    <string name="librivox_not_on_archive">Este libro aún no está en archive.org.</string>
+    <string name="librivox_not_found">No se encontró en LibriVox</string>
+    <string name="librivox_offline">No se pudo conectar con LibriVox. Revisa tu conexión e inténtalo de nuevo.</string>
+</resources>

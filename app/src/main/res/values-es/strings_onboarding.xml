@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_step_welcome">Te damos la bienvenida</string>
+    <string name="onboarding_step_phone">Este teléfono</string>
+    <string name="onboarding_step_start">Elige un comienzo</string>
+    <string name="onboarding_your_region">Tu región</string>
+    <string name="onboarding_uses">Para qué lo usarás</string>
+    <string name="onboarding_step_review">Revisar y empezar</string>
+
+    <string name="onboarding_skip">Omitir</string>
+    <string name="onboarding_get_started">Comenzar</string>
+    <string name="onboarding_finish">Terminar</string>
+    <string name="onboarding_starting">Empezando…</string>
+    <string name="onboarding_start">Empezar</string>
+    <string name="onboarding_next">Siguiente</string>
+
+    <string name="onboarding_tagline">El conocimiento del mundo.\nTuyo para siempre.</string>
+    <string name="onboarding_intro">Enciclopedias, mapas, manuales, libros y tu propia música, con un lector y un bibliotecario al que puedes preguntar: todo en tu teléfono y sin necesidad de señal.</string>
+
+    <string name="onboarding_tier_library">Un teléfono biblioteca, con %1$s de memoria.</string>
+    <string name="onboarding_tier_ask">Un teléfono biblioteca que puede usar Preguntar, con %1$s de memoria.</string>
+    <string name="onboarding_research_needs_memory">Preguntar, el bibliotecario con IA, necesita un teléfono con 6 GB de memoria; por eso, en este, Granger es la biblioteca.</string>
+    <string name="onboarding_research_offered">Preguntar, el bibliotecario, funciona en este teléfono. Puedes conseguirlo en la siguiente pantalla.</string>
+    <string name="onboarding_research_runs">Preguntar, el bibliotecario, funciona en este teléfono.</string>
+    <string name="onboarding_storage">Almacenamiento</string>
+    <string name="onboarding_volume_free_of">%1$s: %2$s libres de %3$s</string>
+    <string name="onboarding_start_sizes">El comienzo Eficiente ocupa %1$s; la biblioteca Completa, %2$s. Solo una Wikipedia completa ocupa unos 100 GB.</string>
+
+    <string name="onboarding_catalog_failed">No se pudo conectar con el catálogo. Revisa la conexión e inténtalo de nuevo.</string>
+    <string name="onboarding_try_again">Intentar de nuevo</string>
+    <string name="onboarding_catalog_failed_next">O toca Siguiente: Inicio y la Biblioteca son tuyos de todos modos.</string>
+    <string name="onboarding_catalog_loading">Obteniendo la lista de paquetes…</string>
+    <string name="onboarding_blurb_efficient">Lo esencial de cada área: suficiente para responder a la mayoría de las preguntas, en el menor espacio.</string>
+    <string name="onboarding_blurb_comprehensive">Todo lo que cuenta el modelo de preparación, para un teléfono que pueda guardarlo.</string>
+    <string name="onboarding_neither">Ninguno, elegiré después</string>
+    <string name="onboarding_neither_blurb">Inicio y la Biblioteca son tuyos de todos modos.</string>
+    <string name="onboarding_ask_line">Preguntar (versión preliminar)</string>
+    <string name="onboarding_ask_blurb">El bibliotecario responde preguntas a partir de tu biblioteca, en este teléfono. Es una versión preliminar: puede equivocarse.</string>
+    <string name="onboarding_the_librarian">El bibliotecario</string>
+    <string name="onboarding_voice_line">Leer en voz alta</string>
+    <string name="onboarding_voice_blurb">Una voz de Granger te lee libros y artículos, sin señal.</string>
+    <string name="onboarding_save_space">Ahorrar espacio</string>
+    <string name="onboarding_save_space_blurb">Enciclopedias sin sus imágenes: los mismos artículos, una lectura más pobre.</string>
+    <string name="onboarding_granger_classics">Clásicos Granger</string>
+    <string name="onboarding_title_size">%1$s · %2$s</string>
+    <string name="onboarding_on_the_phone">%1$s · en el teléfono</string>
+    <string name="onboarding_of_free">%1$s de %2$s libres</string>
+    <string name="onboarding_your_picks">Lo que elegiste</string>
+
+    <string name="onboarding_region_intro">Un mapa de donde estás, para orientarte sin señal.</string>
+    <string name="onboarding_region_search">País o zona</string>
+    <string name="onboarding_region_suggested">Sugerido según este teléfono</string>
+    <string name="onboarding_no_region">Ninguna región</string>
+    <string name="onboarding_other_countries">Otros países</string>
+    <string name="onboarding_larger_areas">Zonas más grandes</string>
+    <string name="onboarding_region_in">%1$s · en %2$s · %3$s</string>
+
+    <string name="onboarding_uses_intro">Agrega paquetes según para qué usarás Granger. Puedes cambiarlo después en Ajustes.</string>
+    <string name="onboarding_see">Ver</string>
+    <string name="onboarding_use_covered">%1$s Ya está cubierto con lo que elegiste.</string>
+    <string name="onboarding_use_adds">%1$s Agrega %2$s · %3$s.</string>
+    <plurals name="onboarding_items">
+        <item quantity="one">%d elemento</item>
+        <item quantity="many">%d elementos</item>
+        <item quantity="other">%d elementos</item>
+    </plurals>
+
+    <string name="onboarding_review_empty">Aún no hay nada que descargar. Inicio y la Biblioteca están listos; la pantalla de Kiwix tiene todo lo demás.</string>
+    <string name="onboarding_quick_voice_classics">Primero lo rápido: la voz y los Clásicos llegan en unos minutos.</string>
+    <string name="onboarding_quick_voice">Primero lo rápido: la voz llega en unos minutos.</string>
+    <string name="onboarding_quick_classics">Primero lo rápido: los Clásicos llegan en unos minutos.</string>
+    <string name="onboarding_indexes">Incluye %1$s de índices para Preguntar, que se descargan después de sus paquetes.</string>
+    <string name="onboarding_wifi_only">Descargar solo con Wi-Fi</string>
+    <string name="onboarding_store_on">Guardar en</string>
+    <string name="onboarding_volume_free">%1$s · %2$s libres</string>
+    <string name="onboarding_no_space">No hay espacio suficiente en %1$s: libera %2$s o desmarca algo.</string>
+    <string name="onboarding_over_cap">Con eso tus descargas llegarían a %1$s, por encima del límite de %2$s.</string>
+</resources>

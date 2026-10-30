@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="archive_shelf_most_downloaded">Más descargados</string>
+    <string name="archive_shelf_manuals">Manuales técnicos</string>
+    <string name="archive_shelf_science">Ciencia e ingeniería</string>
+    <string name="archive_shelf_literature">Literatura</string>
+    <string name="archive_shelf_poetry">Poesía</string>
+    <string name="archive_shelf_drama">Teatro</string>
+    <string name="archive_shelf_78">Discos de 78 rpm</string>
+    <string name="archive_shelf_classical">Clásica</string>
+    <string name="archive_shelf_folk">Folk y grabaciones de campo</string>
+
+    <string name="archive_librivox_shelf_recent">Agregados recientemente</string>
+    <string name="archive_librivox_shelf_fiction">Ficción</string>
+    <string name="archive_librivox_shelf_poetry">Poesía</string>
+    <string name="archive_librivox_shelf_children">Infantiles</string>
+    <string name="archive_librivox_shelf_science_fiction">Ciencia ficción</string>
+    <string name="archive_librivox_shelf_detective">Misterio y policiales</string>
+    <string name="archive_librivox_shelf_philosophy">Filosofía</string>
+
+    <string name="archive_error_not_found">No se encontró en archive.org</string>
+    <string name="archive_error_unreachable">No se pudo conectar con archive.org</string>
+    <string name="archive_error_answered">archive.org respondió %1$d</string>
+    <string name="archive_error_unreadable">archive.org envió algo que Granger no pudo leer</string>
+
+    <string name="archive_librivox_error_not_found">No se encontró en LibriVox</string>
+    <string name="archive_librivox_error_unreachable">No se pudo conectar con LibriVox</string>
+    <string name="archive_librivox_error_busy">LibriVox está ocupado en este momento. Inténtalo de nuevo en un minuto.</string>
+    <string name="archive_librivox_error_answered">LibriVox respondió %1$d</string>
+    <string name="archive_librivox_error_unreadable">LibriVox envió algo que Granger no pudo leer</string>
+</resources>

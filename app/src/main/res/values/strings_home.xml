@@ -21,6 +21,7 @@
 
     <!-- Kinds of feed. -->
     <string name="home_kind_random">Random</string>
+    <!-- A feed of what happened on today's date in past years. -->
     <string name="home_kind_on_this_day">On this day</string>
     <string name="home_kind_search">Search</string>
 

@@ -7,6 +7,7 @@
     <!-- Step titles. -->
     <string name="onboarding_step_welcome">Welcome</string>
     <string name="onboarding_step_phone">This phone</string>
+    <!-- A step title: pick a starter library, Efficient or Comprehensive. -->
     <string name="onboarding_step_start">Pick a start</string>
     <!-- A step title, and the heading of the region's map in the review. -->
     <string name="onboarding_your_region">Your region</string>
@@ -45,6 +46,7 @@
     <string name="onboarding_catalog_loading">Getting the list of packs…</string>
     <string name="onboarding_blurb_efficient">The essentials of every domain: enough to answer most questions, in the least space.</string>
     <string name="onboarding_blurb_comprehensive">Everything the readiness model counts, for a phone that can hold it.</string>
+    <!-- The third choice, beside the Efficient and Comprehensive starts. -->
     <string name="onboarding_neither">Neither, I\'ll choose later</string>
     <string name="onboarding_neither_blurb">Home and the Library are yours either way.</string>
     <!-- The line that gets Ask's AI models. -->

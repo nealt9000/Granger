@@ -49,6 +49,7 @@
     <!-- The text-selection menu. -->
     <string name="ebook_select_copy">Copy</string>
     <string name="ebook_select_highlight">Highlight</string>
+    <!-- Add a note to the selected text. -->
     <string name="ebook_select_note">Note</string>
     <string name="ebook_select_define">Define</string>
     <!-- Ask Research about the selected text. -->
@@ -67,6 +68,7 @@
     <!-- The text settings sheet (Aa). -->
     <string name="ebook_typeface">Typeface</string>
     <string name="ebook_typeface_serif">Serif</string>
+    <!-- A typeface without serifs. -->
     <string name="ebook_typeface_sans">Sans</string>
     <!-- Text size. -->
     <string name="ebook_size">Size</string>
@@ -84,6 +86,7 @@
     <!-- A PDF's settings: how pages follow each other. -->
     <string name="ebook_pdf_pages">Pages</string>
     <string name="ebook_pdf_page_by_page">Page by page</string>
+    <!-- Pages run on in one continuous scroll. -->
     <string name="ebook_pdf_scroll">Scroll</string>
     <!-- A PDF's settings: how a page fits the screen. -->
     <string name="ebook_pdf_fit">Fit</string>
@@ -95,6 +98,7 @@
     <string name="ebook_larger_text">Larger text</string>
 
     <!-- Why a book couldn't be shown. -->
+    <!-- Shown in place of the book when the rail item that opened it no longer exists. -->
     <string name="ebook_tab_gone">This bookmark was removed.</string>
     <string name="ebook_book_gone">This book isn\'t on the phone any more. Check the SD card, or download it again from Granger.</string>
     <string name="ebook_book_damaged">This book couldn\'t be opened. Try removing it, then download or import it again.</string>

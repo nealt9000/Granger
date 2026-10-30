@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Atrás</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_ok">Aceptar</string>
+    <string name="common_retry">Reintentar</string>
+    <string name="common_remove">Quitar</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="common_close">Cerrar</string>
+    <string name="common_keep">Conservar</string>
+    <string name="common_more">Más</string>
+    <string name="common_open">Abrir</string>
+    <string name="common_play">Reproducir</string>
+    <string name="common_pause">Pausar</string>
+    <string name="common_stop">Detener</string>
+    <string name="common_search">Buscar</string>
+    <string name="common_settings">Ajustes</string>
+    <string name="common_done">Listo</string>
+    <string name="common_get">Descargar</string>
+    <string name="common_downloading">Descargando</string>
+    <string name="common_downloading_named">Descargando %1$s</string>
+
+    <plurals name="common_books">
+        <item quantity="one">%d libro</item>
+        <item quantity="many">%d libros</item>
+        <item quantity="other">%d libros</item>
+    </plurals>
+    <plurals name="common_albums">
+        <item quantity="one">%d álbum</item>
+        <item quantity="many">%d álbumes</item>
+        <item quantity="other">%d álbumes</item>
+    </plurals>
+</resources>
