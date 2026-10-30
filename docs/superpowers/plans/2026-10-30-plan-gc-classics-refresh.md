@@ -236,10 +236,23 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
 
 ### Part 3: the collection
 
-- [ ] **Task 8: manifest changes** (Decision 6)
+- [x] **Task 8: manifest changes** (Decision 6)
   - Apply the replacement, additions, splits into volumes, metadata fixes and the new description.
   - Run `validate`, which runs the rights guard.
   - Build the new works and look at each one's first chapter and contents.
+  - **Done 2026-10-30 (gc-manifest).** 372 works (was 350): 22 added, 56 rows changed. `validate` reports 0 errors and the 144 tests pass. The description already read "...to 1930", and `PD_LINE` is 1930.
+  - **Added:** Mackail's Aeneid (#22456); Norton's prose Hell, Purgatory and Paradise (#1995–1997); Riley's Metamorphoses VIII–XV (#26073); Dutt's Mahabharata (#19630); Waley's Genji volumes 2–4 (#67111, #75852, #77408); Within a Budding Grove (#63532) and The Guermantes Way (#73425); the Douay-Rheims (#1581); and all ten 1930 works. Each 1930 work's RDF says "Public domain in the USA.", English, and its 1930 year comes from the title page (MARC 260 agrees).
+  - **Changed:** Meditations is #15877 (Long, 1862) under the same slug. Metamorphoses #21765 is now "Books I–VII" and Genji #66057 "Volume 1", both under their old slugs. Chase is credited for the Ethics; Rogers for the Frogs, at 1902; Burnet for Utopia, at 1684. The Candide note says the translation is anonymous. The Canterbury Tales note credits Purves as editor; there's no editor field, and the translator field would be wrong. 47 titles get their leading "The"/"A" from the RDF: 46 novels and *A Midsummer Night's Dream*. Robinson Crusoe, Moll Flanders, Tristram Shandy and Strange Case keep their short or original titles. The Scarlet Pimpernel's author is "Baroness Orczy".
+  - **Deviations:**
+    - **Douay-Rheims is #1581, not #8300.** #8300's own front matter says #1581 is the "improved and more complete edition". #1581 has all 73 books at h3 with Challoner's annotations, so it uses `splitAt: "h3"`, with published set to 1752.
+    - **Distinct titles for second versions,** because the app shows only title and author: "The Aeneid (prose, tr. Mackail)" and "The Divine Comedy: Hell/Purgatory/Paradise (prose, tr. Norton)". Dryden's and Longfellow's rows are unchanged. Genji is "The Tale of Genji, Volume N: <part title>". The Mahabharata has no author, so it reads "(tr. Romesh Chunder Dutt)".
+    - **`titleCheck` is off** where our title differs from Gutenberg's: Meditations, Mackail, Norton, Dutt, the Genji volumes, and both Metamorphoses halves. `_words` drops the en dash in "I–VII" (it joins the words into "ivii"), so those rows can't match Gutenberg's hyphen. Each row's note gives the Gutenberg title.
+    - **`titleOverrides` were added for 17 works** whose contents showed title-page names, "Part N" pages, or a repeated prefix (all 16 Mahabharata pages read "THE EPIC OF ANCIENT INDIA — ..."). The page numbers come from this build's split. Recheck them once the verse rules change splitting, since this branch's builder doesn't apply overrides yet.
+  - **Seen in the builds, needing builder work (not done here):**
+    - *Cakes and Ale* opens with Faded Page's Canadian boilerplate ("IF THE BOOK IS UNDER COPYRIGHT IN YOUR COUNTRY, DO NOT DOWNLOAD..."), and `later_edition_notices` flags it. `gutenberg.clean` should drop that block.
+    - *The Guermantes Way*'s last page ends with about 9 KB of the Modern Library's title catalogue, which should be trimmed.
+    - The Douay-Rheims splits into 776 pages, one per chapter, with nav entries like "THE BOOK OF GENESIS — Genesis Chapter 1". eBible packs a book's chapters into even pages instead.
+    - *The Woman of Andros* has no headings, so it is a single 121k-character page.
 - [x] **Task 9: eBible Bibles** (Decision 8)
   - Add `EBibleSource` (cached) and `usfm.py` with tests on a small USFM fixture: chapters, verse numbers, `\q1`/`\q2` lines, `\s` headings, and footnotes dropped.
   - `build-epubs` and `describe-epubs` send `source: ebible` rows through it.
