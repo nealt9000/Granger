@@ -31,15 +31,15 @@
 
 ### Task 1: Prove the cut on a handful (Mac only, about an hour)
 
-- [ ] `make_script.py --dialogue`: passages with at least 40% of their characters inside double quotes, 2–5 sentences, quotes balanced inside the passage; excludes lines already used (`--exclude script script2`).
-- [ ] 20 passages per voice through `generate.py` (no tail, takes 0–2).
-- [ ] `cut_quotes.py <raw dir> <script> <out>`: Whisper words with timings, aligned to the script's words, so each quote span gets start and end times; cut in the silence nearest each boundary (search ±150 ms for the lowest-energy 20 ms), 30 ms fades; each piece gets its slot and its own text, quotes stripped.
-- [ ] QC every piece with `qc.py`'s checks (WER on the piece's own text, length, clipping, clean ending).
-- [ ] **Neal listens** to a dozen cut dialogue pieces per voice next to their source passages. The questions: does the voicing survive the cut, and are the edges clean? Stop here if not.
+- [x] `make_script.py --dialogue`: passages with at least 40% of their characters inside double quotes, 2–5 sentences, quotes balanced inside the passage; excludes lines already used (`--exclude script script2`).
+- [x] 20 passages per voice through `generate.py` (no tail, takes 0–2).
+- [x] `cut_quotes.py <raw dir> <script> <out>`: Whisper words with timings, aligned to the script's words, so each quote span gets start and end times; cut in the silence nearest each boundary (search ±150 ms for the lowest-energy 20 ms), 30 ms fades; each piece gets its slot and its own text, quotes stripped.
+- [x] QC every piece with `qc.py`'s checks (WER on the piece's own text, length, clipping, clean ending).
+- [x] **Neal listens** to a dozen cut dialogue pieces per voice next to their source passages. The questions: does the voicing survive the cut, and are the edges clean? Stop here if not. *Done 2026-10-29: 104 dialogue / 102 narration pieces from 37 passages × 3 takes; Neal: the pieces hold up alone and together, edges clean. Teacher's dialogue vs narration: Nanny +1.4 semitones and a 40% wider range; Professor about the same pitch, range +10%.*
 
 ### Task 2: Generate the dialogue set
 
-- [ ] About 400 dialogue passages per voice (aim: 25–30 min of quoted speech after QC), on the Mac overnight, with retakes for failures as in round 2.
+- [ ] About 320 dialogue passages per voice (`script3`, ~31 min quoted each; 15 Gutenberg books incl. Treasure Island, Peter Pan, The Railway Children, Five Children and It, Alice; Neal's Mary Poppins is in copyright), `v4/round3.sh`. Was: about 400 dialogue passages per voice (aim: 25–30 min of quoted speech after QC), on the Mac overnight, with retakes for failures as in round 2.
 - [ ] Cut, QC, and fold in round 2's 140 quoted lines, cut the same way.
 - [ ] Build `dataset/<voice>-2slot/`: all round-2 narration plus the new narration pieces as `narration`, all dialogue pieces as `dialogue`. Record the minutes per slot.
 
@@ -50,9 +50,9 @@
 
 ### Task 4: The app reads quotes in the dialogue slot (`v4-voice-settings`)
 
-- [ ] `QuoteSpans`: splits one sentence into `(text, inQuote)` pieces, carrying whether a quote is open from one sentence to the next within a paragraph (`"I'll go. You stay." He left.`). Unit tests: quote at the start, in the middle, at the end, across sentences, unbalanced quotes (treated as narration from the stray mark on), curly and straight quotes.
-- [ ] `SherpaVoice.dialogueSpeaker(voice)` from the `granger` block; `speakerNames` leaves that slot out of the picker.
-- [ ] `SherpaSpeech`: when the voice has a dialogue slot, synthesize each piece with its slot and join the audio with no added pause (the cut's own silence is the gap). Highlighting and resume still go by sentence; nothing changes for other voices.
+- [x] `QuoteSpans`: splits one sentence into `(text, inQuote)` pieces, carrying whether a quote is open from one sentence to the next within a paragraph (`"I'll go. You stay." He left.`). Unit tests: quote at the start, in the middle, at the end, across sentences, unbalanced quotes (treated as narration from the stray mark on), curly and straight quotes.
+- [x] `SherpaVoice.dialogueSpeaker(voice)` from the `granger` block; `speakerNames` leaves that slot out of the picker.
+- [x] `SherpaSpeech`: when the voice has a dialogue slot, synthesize each piece with its slot and join the audio with no added pause (the cut's own silence is the gap). Highlighting and resume still go by sentence; nothing changes for other voices. *`v4-voice-settings` 6ba0b60 (rebased on main 9479962).*
 - [ ] Tests green; build on top of whatever is on the phone (see "The phone"); Neal listens through the reader on a novel.
 
 ### Task 5: Numbers and decision
