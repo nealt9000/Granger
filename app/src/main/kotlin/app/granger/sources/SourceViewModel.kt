@@ -79,7 +79,41 @@ data class ItemRow(
     val license: String = "",
     /** A folded family's row (Plan KB Decision 10): the family it opens, its packs A–Z. */
     val opensFamily: String? = null,
+    /** The set a set's row is of (Plan WF Decision 3); null for any other row. */
+    val setId: String? = null,
+    /** A set's row: How much, smallest first; the [id] is the chosen slice's chosen pictures. */
+    val slices: List<SliceChoice> = emptyList(),
+    /** A set's row: the pictures choices for the chosen slice. */
+    val pictures: List<PictureChoice> = emptyList(),
+    /** A set's chosen slice is inside a bigger one on the phone: "Inside your Top 1 million", with no Get. */
+    val insideOf: String? = null,
+    /** A set's Switch, between flavours of one slice: what goes and what comes. */
+    val switchFrom: FlavourChoice? = null,
+    val switchTo: FlavourChoice? = null,
+    /** A set's row: the subjects list it opens with Add a subject ("subjects:wikipedia_en:wikipedia_en_top"). */
+    val subjects: String? = null,
+    /** A subject's line (Plan WF Decision 4): "Adds about 69,600 articles to your Best 50,000 (95% new)". */
+    val adds: String? = null,
+    /** The subject is inside the Wikipedia on the phone: Get is quiet. */
+    val covered: Boolean = false,
 )
+
+/**
+ * One slice of a set's row: "Best 50,000 articles · 7.0 GB" for the chosen pictures; [note] when it doesn't offer them
+ * ("With pictures only"); [inside] when a bigger slice on the phone holds it.
+ */
+data class SliceChoice(
+    val zimName: String,
+    val label: String,
+    val sizeBytes: Long,
+    val chosen: Boolean,
+    val installed: Boolean = false,
+    val inside: String? = null,
+    val note: String? = null,
+)
+
+/** One pictures choice of a set's row; one the chosen slice doesn't offer is not [enabled], with its [reason]. */
+data class PictureChoice(val flavour: String, val label: String, val chosen: Boolean, val enabled: Boolean = true, val reason: String? = null)
 
 /** One flavour of a pack's row: "With pictures · 6.9 GB"; [installed] when it is the one on the phone. */
 data class FlavourChoice(val id: String, val label: String, val sizeBytes: Long, val chosen: Boolean, val installed: Boolean = false)
@@ -229,7 +263,11 @@ class SourceViewModel(
         val domain: String?,
         val flavours: Map<String, String> = emptyMap(),
         val sizeCheck: SizeCheck? = null,
+        val sets: SetChoice = SetChoice(),
     )
+
+    /** Each set's chosen slice (ZIM name) and pictures (flavour), by set id (Plan WF Decision 3). */
+    private data class SetChoice(val slices: Map<String, String> = emptyMap(), val pictures: Map<String, String> = emptyMap())
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
     private val selectedPath = MutableStateFlow(prefs.volumePath)
@@ -244,6 +282,7 @@ class SourceViewModel(
     /** Each pack's chosen flavour, by ZIM name (Plan KB Decision 8). */
     private val flavourChoice = MutableStateFlow<Map<String, String>>(emptyMap())
     private val sizeCheck = MutableStateFlow<SizeCheck?>(null)
+    private val setChoice = MutableStateFlow(SetChoice())
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -264,7 +303,8 @@ class SourceViewModel(
         },
         flavourChoice,
         sizeCheck,
-    ) { settings, flavours, check -> settings.copy(flavours = flavours, sizeCheck = check) }
+        setChoice,
+    ) { settings, flavours, check, sets -> settings.copy(flavours = flavours, sizeCheck = check, sets = sets) }
 
     val ui: StateFlow<SourceUi> =
         combine(catalog.state, downloads.records, library.packs, settings, ::buildUi)
@@ -326,6 +366,16 @@ class SourceViewModel(
     fun chooseFlavour(itemId: String) {
         val item = catalog.state.value.catalog?.item(itemId) as? PackEntry ?: return
         flavourChoice.value = flavourChoice.value + (item.zimName to item.id)
+    }
+
+    /** How much of set [setId]: the slice [zimName] is now its row's choice. */
+    fun chooseSlice(setId: String, zimName: String) {
+        setChoice.value = setChoice.value.let { it.copy(slices = it.slices + (setId to zimName)) }
+    }
+
+    /** With pictures, No pictures or Mini ([flavour]) for set [setId]'s row. */
+    fun choosePictures(setId: String, flavour: String) {
+        setChoice.value = setChoice.value.let { it.copy(pictures = it.pictures + (setId to flavour)) }
     }
 
     private fun enqueueOne(item: CatalogItem) {
@@ -445,6 +495,31 @@ class SourceViewModel(
             .mapNotNullTo(HashSet()) { VectorDownloads.parentOf(it.itemId) }
         fun status(item: CatalogItem): ItemStatus =
             statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
+        val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        // Plan WF: the subjects list's own set and slice, from its token "subjects:<set>:<slice ZIM name>".
+        val subjectsToken = family?.takeIf { scope == CatalogScope.KIWIX && it.startsWith(SUBJECTS_PREFIX) }
+            ?.removePrefix(SUBJECTS_PREFIX)?.split(':')
+        val subjectsSet = subjectsToken?.getOrNull(0)
+        val subjectsSlice = subjectsToken?.getOrNull(1)
+        val freeBytes = volumeRows.firstOrNull { it.path == s.selectedPath }?.freeBytes ?: volumeRows.firstOrNull()?.freeBytes
+        val setGroups = HashMap<String, PackGroup?>()
+        fun setGroup(setId: String): PackGroup? = setGroups.getOrPut(setId) {
+            current?.packs?.filter { it.setId == setId && it.isSlice }
+                ?.let { KiwixList.group(it, freeBytes, sets = true).firstOrNull { g -> g.setId == setId } }
+        }
+        /** The slice a subject's line is about: the biggest on the phone, else the one chosen, else the set's default. */
+        fun referenceSlice(setId: String): Pair<PackEntry, Boolean>? {
+            val group = setGroup(setId) ?: return null
+            group.flavours.filter { status(it) in installedStates }.maxByOrNull { it.setRank }?.let { return it to true }
+            val zim = s.sets.slices[setId] ?: subjectsSlice?.takeIf { setId == subjectsSet } ?: group.default.zimName
+            return (group.flavours.firstOrNull { it.zimName == zim } ?: group.default) to false
+        }
+        fun addsOf(subject: PackEntry): KiwixList.Adds? {
+            if (!subject.isSubject) return null
+            val (slice, installed) = referenceSlice(subject.subjectOf) ?: return null
+            val group = setGroup(subject.subjectOf) ?: return null
+            return KiwixList.adds(subject, slice, group.flavours.maxOf { it.setRank }, group.title, installed)
+        }
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
                 // Plain words (Plan KB Decision 9): "English · Updated March 2026 · CC BY-SA".
@@ -469,9 +544,12 @@ class SourceViewModel(
             val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
             // On Project Gutenberg's own screen, each pack is its subject alone.
             val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else item.title
+            val adds = (item as? PackEntry)?.let(::addsOf)
             return ItemRow(
                 item.id, title, details, description, item.downloadBytes, status(item), packId, ask,
                 license = (item as? PackEntry)?.license.orEmpty(),
+                adds = adds?.text,
+                covered = adds?.covered ?: false,
             )
         }
         /** A folded family's row: "Developer docs", "243 packs". */
@@ -479,9 +557,64 @@ class SourceViewModel(
             "family:${folded.family}", folded.label, "$count ${folded.noun}", "", 0L, ItemStatus.NotInstalled, null,
             opensFamily = folded.family,
         )
-        val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        /**
+         * A set's one row (Plan WF Decision 3): How much (the slices) × Pictures. The chosen slice is the one chosen, else
+         * the biggest on the phone, else the default; its pictures the ones chosen, else those on the phone, else the
+         * default's. A slice a bigger one on the phone holds reads "Inside your Top 1 million" (Decision 5).
+         */
+        fun setRow(group: PackGroup): ItemRow {
+            val setId = group.setId!!
+            val slices = KiwixList.slices(group)
+            val installed = group.flavours.filter { status(it) in installedStates }
+            val top = installed.maxByOrNull { it.setRank }
+            val chosenSlice = slices.firstOrNull { it.zimName == s.sets.slices[setId] }
+                ?: slices.firstOrNull { it.zimName == top?.zimName }
+                ?: slices.first { it.zimName == group.default.zimName }
+            val onPhone = chosenSlice.entries.firstOrNull { it in installed }
+            val pictures = s.sets.pictures[setId] ?: onPhone?.let(KiwixList::picturesOf)
+                ?: top?.let(KiwixList::picturesOf) ?: KiwixList.picturesOf(group.default)
+            val entry = KiwixList.entryFor(chosenSlice, pictures)
+            val base = row(entry)
+            fun bigger(slice: KiwixList.Slice): PackEntry? =
+                installed.filter { it.setRank > slice.rank }.maxByOrNull { it.setRank }?.takeIf { slice.entries.none { e -> e in installed } }
+            fun insideText(e: PackEntry) = "Inside your ${KiwixList.shortLabel(e.setLabel)}"
+            fun choiceLabel(e: PackEntry) = "${e.setLabel}, ${KiwixList.flavourLabel(KiwixList.picturesOf(e))}"
+            val covering = bigger(chosenSlice)
+            val switches = onPhone != null && onPhone.id != entry.id && status(entry) == ItemStatus.NotInstalled
+            val offered = group.flavours.mapTo(HashSet(), KiwixList::picturesOf)
+            val chosenOffers = chosenSlice.entries.mapTo(HashSet(), KiwixList::picturesOf)
+            return base.copy(
+                title = group.title,
+                setId = setId,
+                description = KiwixList.setDescription(setId, group.flavours),
+                slices = slices.map { slice ->
+                    val e = KiwixList.entryFor(slice, pictures)
+                    SliceChoice(
+                        slice.zimName, slice.label, e.downloadBytes, chosen = slice === chosenSlice,
+                        installed = slice.entries.any { it in installed },
+                        inside = bigger(slice)?.let(::insideText),
+                        note = if (KiwixList.picturesOf(e) != pictures) "${KiwixList.flavourLabel(KiwixList.picturesOf(e))} only" else null,
+                    )
+                },
+                pictures = PICTURES.filter { it in offered }.map { f ->
+                    PictureChoice(
+                        f, KiwixList.flavourLabel(f), chosen = KiwixList.picturesOf(entry) == f, enabled = f in chosenOffers,
+                        reason = if (f in chosenOffers) null else "Not offered for ${chosenSlice.label}",
+                    )
+                },
+                insideOf = covering?.let(::insideText),
+                switches = switches,
+                switchFrom = onPhone?.takeIf { switches }?.let { FlavourChoice(it.id, choiceLabel(it), it.downloadBytes, chosen = false, installed = true) },
+                switchTo = entry.takeIf { switches }?.let { FlavourChoice(it.id, choiceLabel(it), it.downloadBytes, chosen = true) },
+                packId = base.packId ?: (if (switches) onPhone else covering)?.let { installedPackId(it, recordsById[it.id].orEmpty(), packs) },
+                subjects = if (current?.packs?.any { it.subjectOf == setId && !it.sample } == true) {
+                    "$SUBJECTS_PREFIX$setId:${chosenSlice.zimName}"
+                } else null,
+            )
+        }
         /** One row for a pack and its flavours (Plan KB Decision 8): the chosen flavour, else the installed, else the default. */
         fun groupRow(group: PackGroup): ItemRow {
+            if (group.isSet) return setRow(group)
             if (group.flavours.size == 1) return row(group.default)
             val installed = group.flavours.firstOrNull { status(it) in installedStates }
             val chosenId = s.flavours[group.zimName]?.takeIf { group.flavour(it) != null } ?: installed?.id ?: group.default.id
@@ -509,6 +642,10 @@ class SourceViewModel(
         val words = app.granger.core.library.SearchText.words(needle)
         /** Whether [item] belongs on this list at all, before the tab and the search. */
         fun inList(item: CatalogItem): Boolean {
+            // The 2 MB Ray Charles sample is a test pack (Plan WF Decision 4).
+            if (item is PackEntry && item.sample) return false
+            // The subjects list (Plan WF Decision 4): its set's subject packs.
+            if (subjectsSet != null) return item is PackEntry && item.subjectOf == subjectsSet
             // A readiness domain lists its packs whichever scope they're offered in: Food keeps Water and Food for
             // Preppers, which are offered under Books (Plan KB Decision 6).
             if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES)) return false
@@ -535,7 +672,7 @@ class SourceViewModel(
             }
             return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
         }
-        val categories = if (!kiwix || current == null || inDomain || familyView != null) emptyList() else
+        val categories = if (!kiwix || current == null || inDomain || familyView != null || subjectsSet != null) emptyList() else
             current.packs.filter { scopeOf(it) == scope }.map { it.category }.distinct()
                 .sortedWith(compareBy({ categoryRank(it) }, { it }))
         // A chip shows one category whole; a category that has left the catalog falls back to All.
@@ -556,10 +693,23 @@ class SourceViewModel(
                 // One row per pack, whatever its flavours (Plan KB Decision 8): chips, search and Recommended work on them.
                 val free = volumeRows.firstOrNull { it.path == s.selectedPath }?.freeBytes ?: volumeRows.firstOrNull()?.freeBytes
                 // Search: every word, in any order, anywhere in a pack's words; title hits first (Plan KB Decision 11).
+                // Plan WF: a set (Wikipedia, Wikivoyage) is one row; its subjects leave the list for Add a subject until a
+                // search or a domain looks for them, but for WikiMed, Medicine's essential.
+                val subjectsAway = needle.isEmpty() && !inDomain && familyView == null && subjectsSet == null
                 val groups = KiwixList.group(
-                    current.packs.filter { inList(it) && (chosen == null || it.category == chosen) }, free,
+                    current.packs.filter { inList(it) && (chosen == null || it.category == chosen) }, free, sets = true,
                 ).filter { group -> group.flavours.any(::inTab) && KiwixList.matches(group, words) }
+                    .filterNot { subjectsAway && it.default.isSubject && it.default.zimName !in OWN_ROW_SUBJECTS }
                     .sortedByDescending { KiwixList.titleMatches(it, words) }
+                if (subjectsSet != null) {
+                    // Add a subject's list: A–Z, for the letter strip, each saying what it adds, named without "by Wikipedia".
+                    val setTitle = setGroup(subjectsSet)?.title ?: "Wikipedia"
+                    fun subjectTitle(title: String) = title.removeSuffix(" by $setTitle").removeSuffix(" ($setTitle)").trim()
+                    val rows = groups.map { g -> groupRow(g).let { it.copy(title = subjectTitle(it.title)) } }
+                        .sortedByShelfKey({ app.granger.core.library.ShelfKey.of(it.title) })
+                    if (rows.isNotEmpty()) add(Section(SUBJECTS, rows))
+                    return@buildList
+                }
                 if (familyView != null) {
                     // A folded family's own list: its packs A–Z, for the letter strip.
                     val rows = groups.sortedByShelfKey({ app.granger.core.library.ShelfKey.of(it.title) }).map(::groupRow)
@@ -658,7 +808,7 @@ class SourceViewModel(
             category = chosen,
             domainTitle = domainTitle,
             sizeCheck = s.sizeCheck,
-            familyTitle = familyView?.label,
+            familyTitle = familyView?.label ?: subjectsSet?.let { set -> "${setGroup(set)?.title ?: "Wikipedia"} subjects" },
         )
     }
 
@@ -682,6 +832,11 @@ class SourceViewModel(
         const val SUBJECTS = "Subjects"
         const val EVERYTHING = "Everything"
         const val LIBRARIES = "Libraries"
+        /** A subjects list's family token: "subjects:<set id>:<slice ZIM name>" (Plan WF Decision 4). */
+        const val SUBJECTS_PREFIX = "subjects:"
+        /** Subjects that keep their own row in the Kiwix list (Plan WF Decision 4): WikiMed, Medicine's essential. */
+        val OWN_ROW_SUBJECTS = setOf("wikipedia_en_medicine")
+        private val PICTURES = listOf("maxi", "nopic", "mini")
         private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
         private const val CLASSICS_PRESET = "granger-classics"
 

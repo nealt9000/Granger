@@ -44,6 +44,7 @@ import app.granger.music.AlbumCover
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -797,6 +798,70 @@ class ThemeShots {
             ) { app.granger.sources.SourceScreen(vm, title = "Kiwix", onBack = {}) }
         }
     }
+
+    // --- Plan WF: Wikipedia as one family, over the published catalog ---
+
+    private fun publishedCatalog(): app.granger.core.catalog.Catalog {
+        var dir: File? = File("").absoluteFile
+        while (dir != null && !File(dir, "catalog/catalog.json").isFile) dir = dir.parentFile
+        val root = dir ?: error("catalog/catalog.json not found")
+        val key = java.util.Base64.getDecoder().decode(File(root, "catalog/public-key.txt").readText().trim())
+        val parsed = app.granger.core.catalog.CatalogParser.parse(
+            File(root, "catalog/catalog.json").readBytes(), File(root, "catalog/catalog.json.sig").readBytes(), key,
+        )
+        return (parsed as app.granger.core.catalog.ParseResult.Ok).catalog
+    }
+
+    private fun wfViewModel(family: String? = null, installed: List<String> = emptyList()): app.granger.sources.SourceViewModel {
+        val catalog = publishedCatalog()
+        val library = app.granger.FakeLibrary()
+        library.packList.value = installed.map { id -> catalog.packs.single { it.id == id }.let { app.granger.pack(it.zimUuid).copy(name = it.zimName) } }
+        return app.granger.sources.SourceViewModel(
+            app.granger.sources.CatalogScope.KIWIX, app.granger.FakeCatalogSource(catalog), app.granger.FakeDownloads(),
+            library, app.granger.FakeBookshelf(),
+            app.granger.FakeVolumes(listOf(app.granger.volume("/internal", "Phone", free = 41_000_000_000))), app.granger.FakePrefs(),
+            app.granger.core.ai.DeviceTier.ASK, kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main),
+            io = kotlinx.coroutines.Dispatchers.Main, family = family,
+        )
+    }
+
+    /** The Wikipedia row alone: How much × Pictures and Add a subject, then WikiMed's row with its line. */
+    private fun wfRows(name: String, installed: List<String> = emptyList(), slice: String? = null) {
+        val vm = wfViewModel(installed = installed)
+        if (slice != null) vm.chooseSlice("wikipedia_en", slice)
+        shoot(name) {
+            val ui by vm.ui.collectAsState()
+            val rows = ui.sections.flatMap { it.rows }
+            androidx.compose.material3.Surface {
+                androidx.compose.foundation.layout.Column {
+                    for (row in listOfNotNull(rows.firstOrNull { it.title == "Wikipedia" }, rows.firstOrNull { it.title == "WikiMed" })) {
+                        app.granger.sources.CatalogItemRow(row, onGet = {}, onCancel = {}, onRetry = {}, onRemove = {})
+                        androidx.compose.material3.HorizontalDivider()
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun wfWikipediaRow() = wfRows("wf-wikipedia-row")
+
+    @Test fun wfWikipediaInside() = wfRows("wf-wikipedia-inside", installed = listOf("wikipedia_en_top1m_nopic"), slice = "wikipedia_en_top")
+
+    @Test fun wfWikipediaHundred() = wfRows("wf-wikipedia-hundred", slice = "wikipedia_en_100")
+
+    private fun wfScreen(name: String, family: String?) {
+        val vm = wfViewModel(family = family)
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.BROWSE,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.sources.SourceScreen(vm, title = "Kiwix", onBack = {}) }
+        }
+    }
+
+    @Test fun wfKiwixList() = wfScreen("wf-kiwix-list", null)
+
+    @Test fun wfSubjects() = wfScreen("wf-subjects", "subjects:wikipedia_en:wikipedia_en_top")
 
     @Test fun kiwixList() = kiwixListShot("kiwix-list", null)
 

@@ -246,6 +246,9 @@ fun SourceScreen(
                     onRemove = { confirmRemove = row },
                     onOpen = { row.packId?.let(onOpenPack) },
                     onChooseFlavour = viewModel::chooseFlavour,
+                    onChooseSlice = { zim -> row.setId?.let { viewModel.chooseSlice(it, zim) } },
+                    onChoosePictures = { f -> row.setId?.let { viewModel.choosePictures(it, f) } },
+                    onAddSubject = { row.subjects?.let(onOpenFamily) },
                 )
             }
             HorizontalDivider()
@@ -298,7 +301,7 @@ fun SourceScreen(
     confirmRemove?.let { row ->
         AlertDialog(
             onDismissRequest = { confirmRemove = null },
-            title = { Text("Remove ${row.title}?") },
+            title = { Text("Remove ${row.slices.firstOrNull { it.chosen }?.let { "${row.title}: ${it.label}" } ?: row.title}?") },
             text = {
                 Text(
                     if (row.packId != null) "This deletes the file, and the bookmarks and reading places you saved in it."
@@ -384,9 +387,16 @@ internal fun SizeCheckDialog(check: SizeCheck, onGet: (itemId: String) -> Unit, 
 internal fun CatalogItemRow(
     row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit = {},
     onChooseFlavour: (String) -> Unit = {},
+    onChooseSlice: (zimName: String) -> Unit = {},
+    onChoosePictures: (flavour: String) -> Unit = {},
+    onAddSubject: () -> Unit = {},
 ) {
     var licenceShown by rememberSaveable(row.id) { mutableStateOf(false) }
     val toggleLicence = if (row.license.isNotBlank()) Modifier.clickable { licenceShown = !licenceShown } else Modifier
+    if (row.slices.isNotEmpty()) {
+        SetRow(row, licenceShown, toggleLicence, onGet, onCancel, onRetry, onRemove, onOpen, onChooseSlice, onChoosePictures, onAddSubject)
+        return
+    }
     if (row.flavours.isNotEmpty()) {
         FlavouredRow(row, licenceShown, toggleLicence, onGet, onCancel, onRetry, onRemove, onOpen, onChooseFlavour)
         return
@@ -402,6 +412,7 @@ internal fun CatalogItemRow(
                 }
                 Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
                 if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall)
+                row.adds?.let { AddsText(it) }
                 row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(status)
             }
@@ -435,6 +446,7 @@ private fun FlavouredRow(
         }
         Text(row.details, style = MaterialTheme.typography.bodySmall, color = variant)
         if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall, color = variant)
+        row.adds?.let { AddsText(it) }
         row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall, color = variant) }
         // Installed is on its choice; what's left is a download's progress or trouble, or an update.
         if (row.status != ItemStatus.Installed && !row.switches) {
@@ -448,6 +460,121 @@ private fun FlavouredRow(
         val to = row.flavours.firstOrNull { it.chosen }
         if (confirmSwitch && from != null && to != null) {
             SwitchDialog(row.title, from, to, onSwitch = { confirmSwitch = false; onGet() }, onDismiss = { confirmSwitch = false })
+        }
+    }
+}
+
+/** A subject's "Adds about 69,600 articles to your Best 50,000 (95% new)" (Plan WF Decision 4). */
+@Composable
+private fun AddsText(text: String) {
+    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+}
+
+/**
+ * A set's one row (Plan WF Decision 3, 360 dp): the title and line; How much as radio rows, "Best 50,000 articles ·
+ * 7.0 GB", a slice a bigger one on the phone holds reading "Inside your Top 1 million"; Pictures as radio rows, one the
+ * chosen slice doesn't offer greyed with its reason; Add a subject; the details; then the actions on their own line.
+ */
+@Composable
+private fun SetRow(
+    row: ItemRow, licenceShown: Boolean, toggleLicence: Modifier,
+    onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit,
+    onChooseSlice: (String) -> Unit, onChoosePictures: (String) -> Unit, onAddSubject: () -> Unit,
+) {
+    val variant = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)) {
+        Column(Modifier.fillMaxWidth().then(toggleLicence)) {
+            Text(row.title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            if (row.description.isNotBlank()) {
+                Text(row.description, style = MaterialTheme.typography.bodyMedium, color = variant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        Text("How much", style = MaterialTheme.typography.labelMedium, color = variant, modifier = Modifier.padding(top = 8.dp))
+        Column(Modifier.selectableGroup().testTag(SourceTags.SLICES)) {
+            for (slice in row.slices) SliceOption(slice) { onChooseSlice(slice.zimName) }
+        }
+        if (row.pictures.size > 1) {
+            Text("Pictures", style = MaterialTheme.typography.labelMedium, color = variant, modifier = Modifier.padding(top = 4.dp))
+            Column(Modifier.selectableGroup().testTag(SourceTags.PICTURES)) {
+                for (choice in row.pictures) PictureOption(choice) { onChoosePictures(choice.flavour) }
+            }
+        }
+        if (row.subjects != null) {
+            TextButton(onClick = onAddSubject, modifier = Modifier.testTag(SourceTags.ADD_SUBJECT)) { Text("Add a subject") }
+        }
+        Text(row.details, style = MaterialTheme.typography.bodySmall, color = variant)
+        if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall, color = variant)
+        row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall, color = variant) }
+        if (row.status != ItemStatus.Installed && !row.switches && row.insideOf == null) {
+            CompositionLocalProvider(LocalContentColor provides variant) { ItemStatusText(row.status) }
+        }
+        var confirmSwitch by remember(row.id) { mutableStateOf(false) }
+        Row(Modifier.fillMaxWidth().testTag(SourceTags.ACTIONS), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+            val inside = row.insideOf
+            when {
+                row.switches -> {
+                    if (row.packId != null) TextButton(onClick = onOpen) { Text("Open") }
+                    TextButton(onClick = { confirmSwitch = true }) { Text("Switch to ${row.switchTo?.label ?: "this"}") }
+                }
+                inside != null && row.status == ItemStatus.NotInstalled -> {
+                    Text(inside, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    if (row.packId != null) TextButton(onClick = onOpen) { Text("Open") }
+                }
+                else -> RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen)
+            }
+        }
+        val from = row.switchFrom
+        val to = row.switchTo
+        if (confirmSwitch && from != null && to != null) {
+            SwitchDialog(row.title, from, to, onSwitch = { confirmSwitch = false; onGet() }, onDismiss = { confirmSwitch = false })
+        }
+    }
+}
+
+/** One slice: "Best 50,000 articles · 7.0 GB", or "· Inside your Top 1 million"; Installed when it is on the phone. */
+@Composable
+private fun SliceOption(slice: SliceChoice, onChoose: () -> Unit) {
+    val size = formatBytes(slice.sizeBytes)
+    val extra = slice.inside ?: slice.note
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = slice.chosen, role = Role.RadioButton, onClick = onChoose)
+            .clearAndSetSemantics {
+                contentDescription = listOfNotNull(slice.label, size, extra, "installed".takeIf { slice.installed }).joinToString(", ")
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = slice.chosen, onClick = null)
+        Column(Modifier.padding(start = 12.dp).weight(1f)) {
+            Text("${slice.label} · $size", style = MaterialTheme.typography.bodyMedium)
+            if (extra != null) Text(extra, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (slice.installed) {
+            Text("Installed", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+/** One pictures choice; one the chosen slice doesn't offer is greyed, with why. */
+@Composable
+private fun PictureOption(choice: PictureChoice, onChoose: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = choice.chosen, enabled = choice.enabled, role = Role.RadioButton, onClick = onChoose)
+            .clearAndSetSemantics {
+                contentDescription = listOfNotNull(choice.label, choice.reason).joinToString(", ")
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = choice.chosen, onClick = null, enabled = choice.enabled)
+        Column(Modifier.padding(start = 12.dp).weight(1f)) {
+            val color = if (choice.enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            Text(choice.label, style = MaterialTheme.typography.bodyMedium, color = color)
+            choice.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
 }
@@ -521,7 +648,12 @@ private fun RowActions(
         return
     }
     when (val status = row.status) {
-        ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text("Get") }
+        // A subject already inside the Wikipedia on the phone (Plan WF Decision 4): Get stays, quietly.
+        ItemStatus.NotInstalled -> if (row.covered) {
+            TextButton(onClick = onGet) { Text("Get", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        } else {
+            TextButton(onClick = onGet) { Text("Get") }
+        }
         ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
             if (opens) TextButton(onClick = onOpen) { Text("Open") } else TextButton(onClick = onRemove) { Text("Remove") }
             TextButton(onClick = onGet) { Text("Update") }
@@ -552,6 +684,9 @@ private fun RowActions(
 internal object SourceTags {
     const val FLAVOURS = "source-flavours"
     const val ACTIONS = "source-actions"
+    const val SLICES = "source-slices"
+    const val PICTURES = "source-pictures"
+    const val ADD_SUBJECT = "source-add-subject"
 }
 
 /** A row's overflow, holding Remove (which still asks first). */

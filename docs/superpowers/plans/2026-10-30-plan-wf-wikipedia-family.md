@@ -203,15 +203,15 @@ The nesting holds. Everything's directory region is 1.02 GB (plus 145 MB of poin
 
 ### Task 3: One Wikipedia row
 
-- [ ] The set row (How much × Pictures), the title fix, Wikivoyage, "Add a subject" with its A–Z list and "adds" lines, WikiMed's line, and the sample hidden (Decisions 3 and 4).
-- [ ] Tests in `SourceViewModelTest` and `SourceScreenTest`, against the published catalog:
+- [x] The set row (How much × Pictures), the title fix, Wikivoyage, "Add a subject" with its A–Z list and "adds" lines, WikiMed's line, and the sample hidden (Decisions 3 and 4).
+- [x] Tests in `SourceViewModelTest` and `SourceScreenTest`, against the published catalog:
   - one Wikipedia row with 4 slices;
   - sizes follow the pictures choice;
   - default Best 50,000 with pictures;
   - "Adds about …" against installed and against chosen;
   - "Already inside your Wikipedia" with Everything installed.
-- [ ] ThemeShots: the Wikipedia row, the subject list, 360 dp, Field and Night. Review them.
-- [ ] **Commit.** `Kiwix list: Wikipedia as one row, subjects as add-ons`
+- [x] ThemeShots: the Wikipedia row, the subject list, 360 dp, Field and Night. Review them.
+- [x] **Commit.** `Kiwix list: Wikipedia as one row, subjects as add-ons`
 
 ### Task 4: Bigger covers smaller
 

@@ -1074,4 +1074,201 @@ class SourceViewModelTest {
         val byLanguage = KiwixList.group(listOf(entry("a", "mini", "2026-03-05"), entry("b", "mini", "2026-03-05", "fra"))).single()
         assertThat(KiwixList.flavourLabels(byLanguage).values).containsExactly("${KiwixList.MINI} · English", "${KiwixList.MINI} · French")
     }
+
+    // --- Plan WF: Wikipedia as one family ---
+
+    private fun TestScope.kiwixViewModel(family: String? = null): SourceViewModel {
+        val vm = SourceViewModel(
+            CatalogScope.KIWIX, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this,
+            io = main.dispatcher, family = family,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    private fun installed(vararg ids: String): List<app.granger.core.library.Pack> {
+        val packs = publishedCatalog().packs.associateBy { it.id }
+        return ids.map { id -> packs.getValue(id).let { pack(it.zimUuid).copy(name = it.zimName) } }
+    }
+
+    private fun SourceViewModel.rows() = ui.value.sections.flatMap { it.rows }
+    private fun SourceViewModel.wikipedia() = rows().single { it.title == "Wikipedia" }
+    private fun SourceViewModel.wikiMed() = rows().first { it.title == "WikiMed" }
+
+    @Test fun theKiwixListShowsOneWikipediaRowWithFourSlicesAndOneWikivoyageRow() = runTest(main.dispatcher) {
+        val published = publishedCatalog()
+        catalog.mutable.value = CatalogState(catalog = published)
+        val vm = kiwixViewModel()
+        val rows = vm.rows()
+        val wikipedia = vm.wikipedia()
+        assertThat(wikipedia.description).isEqualTo("The free encyclopedia, from 100 essential articles to all of it.")
+        assertThat(wikipedia.slices.map { it.label }).containsExactly(
+            "100 essential articles", "Best 50,000 articles", "Top 1 million articles", "Everything",
+        ).inOrder()
+        assertThat(wikipedia.pictures.map { it.label }).containsExactly(KiwixList.WITH_PICTURES, KiwixList.NO_PICTURES, KiwixList.MINI).inOrder()
+        assertThat(vm.ui.value.sections.first { wikipedia in it.rows }.title).isEqualTo(SourceViewModel.RECOMMENDED)
+        val voyage = rows.single { it.title == "Wikivoyage" }
+        assertThat(voyage.slices.map { it.label }).containsExactly("Europe", "The whole world").inOrder()
+        // No slice has a row of its own, nor the sample; of the subjects only WikiMed keeps one.
+        val slices = published.packs.filter { it.isSlice }.mapTo(HashSet()) { it.id }
+        assertThat(rows.filter { it.id in slices }.map { it.title }).containsExactly("Wikipedia", "Wikivoyage")
+        assertThat(rows.map { it.title }).doesNotContain("Wikipedia sample: Ray Charles (2 MB)")
+        val subjects = published.packs.filter { it.isSubject }.mapTo(HashSet()) { it.id }
+        assertThat(rows.filter { it.id in subjects }.map { it.title }.distinct()).containsExactly("WikiMed")
+        assertThat(wikipedia.subjects).isEqualTo("subjects:wikipedia_en:wikipedia_en_top")
+        // A search still finds a subject, with what it adds.
+        vm.setQuery("chemistry")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.rows().first { it.title == "Chemistry (Wikipedia)" }.adds).startsWith("Adds about")
+    }
+
+    @Test fun theDefaultIsBest50000WithPictures() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        val wikipedia = kiwixViewModel().wikipedia()
+        assertThat(wikipedia.id).isEqualTo("wikipedia_en_top_maxi")
+        assertThat(wikipedia.slices.single { it.chosen }.label).isEqualTo("Best 50,000 articles")
+        assertThat(wikipedia.pictures.single { it.chosen }.label).isEqualTo(KiwixList.WITH_PICTURES)
+        assertThat(wikipedia.status).isEqualTo(ItemStatus.NotInstalled)
+    }
+
+    @Test fun sizesFollowThePicturesChoice() = runTest(main.dispatcher) {
+        val published = publishedCatalog()
+        catalog.mutable.value = CatalogState(catalog = published)
+        val vm = kiwixViewModel()
+        fun size(id: String) = published.packs.single { it.id == id }.let { it.sizeBytes + (it.vectors?.sizeBytes ?: 0L) }
+        assertThat(vm.wikipedia().slices.map { it.sizeBytes }).containsExactly(
+            size("wikipedia_en_100"), size("wikipedia_en_top_maxi"), size("wikipedia_en_top1m_maxi"), size("wikipedia_en_all_maxi"),
+        ).inOrder()
+        vm.choosePictures("wikipedia_en", "nopic")
+        testScheduler.advanceUntilIdle()
+        val nopic = vm.wikipedia()
+        assertThat(nopic.id).isEqualTo("wikipedia_en_top_nopic")
+        assertThat(nopic.slices.map { it.sizeBytes }).containsExactly(
+            size("wikipedia_en_100"), size("wikipedia_en_top_nopic"), size("wikipedia_en_top1m_nopic"), size("wikipedia_en_all_nopic"),
+        ).inOrder()
+        // The 100 comes one way only, and says so.
+        assertThat(nopic.slices.first().note).isEqualTo("With pictures only")
+        vm.chooseSlice("wikipedia_en", "wikipedia_en_100")
+        testScheduler.advanceUntilIdle()
+        val hundred = vm.wikipedia()
+        assertThat(hundred.id).isEqualTo("wikipedia_en_100")
+        assertThat(hundred.pictures.filter { it.enabled }.map { it.flavour }).containsExactly("maxi")
+        assertThat(hundred.pictures.single { it.flavour == "mini" }.reason).isEqualTo("Not offered for 100 essential articles")
+        vm.chooseSlice("wikipedia_en", "wikipedia_en_top1m")
+        vm.choosePictures("wikipedia_en", "mini")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.wikipedia().id).isEqualTo("wikipedia_en_top1m_mini")
+        assertThat(vm.wikipedia().sizeBytes).isEqualTo(size("wikipedia_en_top1m_mini"))
+        assertThat(KiwixList.adds(published.packs.first { it.isSubject }, published.packs.single { it.id == "wikipedia_en_100" }, 4, "Wikipedia", false))
+            .isNotNull()
+    }
+
+    @Test fun getFetchesTheChosenSliceAndPictures() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        val vm = kiwixViewModel()
+        vm.chooseSlice("wikipedia_en", "wikipedia_en_100")
+        testScheduler.advanceUntilIdle()
+        vm.get(vm.wikipedia().id)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly("wikipedia_en_100")
+    }
+
+    @Test fun aSubjectSaysWhatItAddsToTheChosenSliceThenTheInstalledOne() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        val vm = kiwixViewModel()
+        assertThat(vm.wikiMed().adds).isEqualTo("Adds about 69,600 articles to Best 50,000 (95% new)")
+        vm.chooseSlice("wikipedia_en", "wikipedia_en_top1m")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.wikiMed().adds).isEqualTo("Adds about 47,800 articles to Top 1 million (66% new)")
+        // Once a slice is on the phone, that is the one compared against, whatever is chosen.
+        library.packList.value = installed("wikipedia_en_top_nopic")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.wikiMed().adds).isEqualTo("Adds about 69,600 articles to your Best 50,000 (95% new)")
+        assertThat(vm.wikiMed().covered).isFalse()
+    }
+
+    @Test fun withEverythingInstalledASubjectIsAlreadyInside() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        library.packList.value = installed("wikipedia_en_all_nopic")
+        val vm = kiwixViewModel()
+        assertThat(vm.wikiMed().adds).isEqualTo("Already inside your Wikipedia")
+        assertThat(vm.wikiMed().covered).isTrue()
+        val wikipedia = vm.wikipedia()
+        assertThat(wikipedia.slices.single { it.chosen }.label).isEqualTo("Everything")
+        assertThat(wikipedia.status).isEqualTo(ItemStatus.Installed)
+    }
+
+    @Test fun addASubjectListsTheSubjectsAToZWithWhatEachAdds() = runTest(main.dispatcher) {
+        val published = publishedCatalog()
+        catalog.mutable.value = CatalogState(catalog = published)
+        val vm = kiwixViewModel(family = "subjects:wikipedia_en:wikipedia_en_top1m")
+        val ui = vm.ui.value
+        assertThat(ui.familyTitle).isEqualTo("Wikipedia subjects")
+        val rows = ui.sections.single().rows
+        val expected = published.packs.filter { it.isSubject && !it.sample }.map { it.zimName }.distinct()
+        assertThat(rows).hasSize(expected.size)
+        assertThat(rows.map { it.title }).isInOrder(compareBy<String> { app.granger.core.library.ShelfKey.of(it) })
+        assertThat(rows.all { it.adds?.contains("to Top 1 million") == true }).isTrue()
+        assertThat(rows.map { it.title }).containsAtLeast("Astronomy", "Chemistry", "WikiMed")
+        assertThat(rows.none { it.title.contains("Wikipedia") }).isTrue()
+        assertThat(rows.single { it.title == "WikiMed" }.adds).isEqualTo("Adds about 47,800 articles to Top 1 million (66% new)")
+    }
+
+    @Test fun addsCountsAreRoundedSensibly() {
+        assertThat(KiwixList.roundCount(69_619)).isEqualTo(69_600L)
+        assertThat(KiwixList.roundCount(306_432)).isEqualTo(306_000L)
+        assertThat(KiwixList.roundCount(1_911)).isEqualTo(1_900L)
+        assertThat(KiwixList.roundCount(592)).isEqualTo(590L)
+        assertThat(KiwixList.roundCount(7)).isEqualTo(7L)
+    }
+
+    @Test fun aSliceInsideABiggerOneOnThePhoneSaysSo() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        library.packList.value = installed("wikipedia_en_top1m_nopic")
+        val vm = kiwixViewModel()
+        val wikipedia = vm.wikipedia()
+        assertThat(wikipedia.slices.single { it.chosen }.label).isEqualTo("Top 1 million articles")
+        assertThat(wikipedia.slices.map { it.inside }).containsExactly(
+            "Inside your Top 1 million", "Inside your Top 1 million", null, null,
+        ).inOrder()
+        vm.chooseSlice("wikipedia_en", "wikipedia_en_top")
+        testScheduler.advanceUntilIdle()
+        val top = vm.wikipedia()
+        assertThat(top.insideOf).isEqualTo("Inside your Top 1 million")
+        assertThat(top.packId).isEqualTo(publishedCatalog().packs.single { it.id == "wikipedia_en_top1m_nopic" }.zimUuid)
+    }
+
+    @Test fun anotherPicturesChoiceOfTheSliceOnThePhoneIsASwitch() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        library.packList.value = installed("wikipedia_en_top_nopic")
+        val vm = kiwixViewModel()
+        assertThat(vm.wikipedia().id).isEqualTo("wikipedia_en_top_nopic")
+        assertThat(vm.wikipedia().switches).isFalse()
+        vm.choosePictures("wikipedia_en", "maxi")
+        testScheduler.advanceUntilIdle()
+        val switch = vm.wikipedia()
+        assertThat(switch.switches).isTrue()
+        assertThat(switch.switchFrom!!.label).isEqualTo("Best 50,000 articles, No pictures")
+        assertThat(switch.switchTo!!.label).isEqualTo("Best 50,000 articles, With pictures")
+        // A bigger slice is a Get, not a Switch: the smaller one is offered for removal once it's in (Decision 5).
+        vm.chooseSlice("wikipedia_en", "wikipedia_en_top1m")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.wikipedia().switches).isFalse()
+        assertThat(vm.wikipedia().status).isEqualTo(ItemStatus.NotInstalled)
+    }
+
+    @Test fun theReferenceDomainShowsTheWikipediaRow() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
+        val vm = SourceViewModel(
+            CatalogScope.KIWIX, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this,
+            io = main.dispatcher, domain = "reference",
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val recommended = vm.ui.value.sections.first()
+        assertThat(recommended.title).isEqualTo(SourceViewModel.RECOMMENDED)
+        assertThat(recommended.rows.map { it.title }).contains("Wikipedia")
+        assertThat(vm.rows().count { it.title == "Wikipedia" }).isEqualTo(1)
+    }
 }
