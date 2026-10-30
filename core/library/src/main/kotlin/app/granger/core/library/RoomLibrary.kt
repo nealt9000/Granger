@@ -133,6 +133,21 @@ class RoomLibrary(
         }
     }
 
+    override suspend fun supersede(oldPackId: String, newPackId: String): Boolean = refreshMutex.withLock {
+        withContext(io) {
+            if (oldPackId == newPackId) return@withContext false
+            val old = packDao.get(oldPackId) ?: return@withContext false
+            val new = packDao.get(newPackId)?.takeIf { it.status == PackStatus.OK } ?: return@withContext false
+            if (old.name.isBlank() || old.name != new.name) return@withContext false
+            closeArchive(oldPackId)
+            val file = File(old.filePath)
+            if (file.exists() && !file.delete()) return@withContext false
+            inherit(old, new)
+            onRemoved(oldPackId)
+            true
+        }
+    }
+
     override fun archive(packId: String): ZimArchive? {
         synchronized(openArchives) { openArchives[packId]?.let { return it } }
         val pack = packDao.get(packId)?.takeIf { it.status == PackStatus.OK } ?: return null

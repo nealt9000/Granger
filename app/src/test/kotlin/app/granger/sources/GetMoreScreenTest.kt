@@ -33,9 +33,10 @@ class GetMoreScreenTest {
         assertThat(GET_MORE_SECTIONS.map { it.first })
             .containsExactly("Knowledge packs", "Books", "Audiobooks & music", "Models & voices").inOrder()
         assertThat(GET_MORE_SECTIONS.flatMap { it.second }).containsExactlyElementsIn(GetMoreLink.entries)
-        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7).
+        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7); Kiwix libraries after it (Plan KB).
         assertThat(GET_MORE_SECTIONS.single { it.first == "Books" }.second)
-            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+        assertThat(GetMoreLink.KIWIX_BOOKS.title).isEqualTo("Kiwix libraries")
         // Archive.org once per kind, its kind in the name.
         assertThat(GetMoreLink.entries.map { it.title }.filter { it.startsWith("Archive.org") })
             .containsExactly("Archive.org books", "Archive.org audiobooks", "Archive.org music")
@@ -49,10 +50,44 @@ class GetMoreScreenTest {
         assertThat(opened).containsExactlyElementsIn(GetMoreLink.entries).inOrder()
     }
 
+    /** Plan KB walkthrough 2: the Library's + is books alone, with Import your own; Listen's, audio alone. */
+    @Test fun theLibrarysGetMoreOffersOnlyBooksAndListensOnlyAudio() {
+        assertThat(getMoreSections(GetMoreFor.BOOKS).flatMap { it.second })
+            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+        assertThat(getMoreSections(GetMoreFor.LISTEN).flatMap { it.second })
+            .containsExactly(GetMoreLink.LIBRIVOX, GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS, GetMoreLink.ARCHIVE_ORG_MUSIC).inOrder()
+        assertThat(getMoreSections(null)).isEqualTo(GET_MORE_SECTIONS)
+
+        val opened = mutableListOf<GetMoreLink>()
+        var imports = 0
+        compose.setContent { GetMoreScreen(onOpen = { opened += it }, onBack = {}, only = GetMoreFor.BOOKS, onImport = { imports++ }) }
+        compose.onNodeWithText("Get books").assertIsDisplayed()
+        for (link in GetMoreLink.entries - getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }.toSet()) {
+            compose.onNodeWithText(link.title).assertDoesNotExist()
+        }
+        compose.onNodeWithText("Knowledge packs").assertDoesNotExist()
+        compose.onNodeWithText("Audiobooks & music").assertDoesNotExist()
+        for (link in getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }) compose.onNodeWithText(link.title).performClick()
+        compose.onNodeWithText(IMPORT_YOUR_OWN).performClick()
+        assertThat(opened).containsExactlyElementsIn(getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }).inOrder()
+        assertThat(imports).isEqualTo(1)
+    }
+
+    @Test fun listensGetMoreHasNoBooksNorImport() {
+        compose.setContent { GetMoreScreen(onOpen = {}, onBack = {}, only = GetMoreFor.LISTEN) }
+        compose.onNodeWithText("Get audiobooks & music").assertIsDisplayed()
+        for (link in getMoreSections(GetMoreFor.LISTEN).flatMap { it.second }) compose.onNodeWithText(link.title).assertIsDisplayed()
+        for (link in listOf(GetMoreLink.KIWIX, GetMoreLink.KIWIX_BOOKS, GetMoreLink.GUTENBERG, GetMoreLink.MODELS)) {
+            compose.onNodeWithText(link.title).assertDoesNotExist()
+        }
+        compose.onNodeWithText(IMPORT_YOUR_OWN).assertDoesNotExist()
+    }
+
     @Test fun eachRowsRouteIsTodaysSourceScreen() {
         assertThat(routeOf(GetMoreLink.KIWIX)).isEqualTo(SourceRoute(CatalogScope.KIWIX))
         assertThat(routeOf(GetMoreLink.GRANGER_CLASSICS)).isEqualTo(SourceRoute(CatalogScope.GRANGER))
         assertThat(routeOf(GetMoreLink.GUTENBERG)).isEqualTo(SourceRoute(CatalogScope.GUTENBERG))
+        assertThat(routeOf(GetMoreLink.KIWIX_BOOKS)).isEqualTo(SourceRoute(CatalogScope.KIWIX_BOOKS))
         assertThat(routeOf(GetMoreLink.ARCHIVE_ORG_BOOKS)).isEqualTo(ArchiveRoute(ArchiveKind.TEXTS))
         assertThat(routeOf(GetMoreLink.LIBRIVOX)).isEqualTo(LibriVoxRoute)
         assertThat(routeOf(GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS)).isEqualTo(ArchiveRoute(ArchiveKind.SPOKEN_WORD))
@@ -65,18 +100,22 @@ class GetMoreScreenTest {
         lateinit var nav: NavHostController
         compose.setContent {
             nav = rememberNavController()
-            NavHost(nav, startDestination = GetMoreRoute) {
+            NavHost(nav, startDestination = GetMoreRoute()) {
                 composable<GetMoreRoute> {}
                 composable<SourceRoute> {}
             }
         }
         compose.runOnIdle { assertThat(railToolOf(nav.currentDestination!!)).isEqualTo(RailTool.LIBRARY) }
+        // Listen's Get more is Listen's; the Library's (books) and Downloads' stay the Library's.
+        compose.runOnIdle { assertThat(railToolOf(nav.currentDestination!!, getMoreFor = GetMoreFor.LISTEN)).isEqualTo(RailTool.LISTEN) }
+        compose.runOnIdle { assertThat(railToolOf(nav.currentDestination!!, getMoreFor = GetMoreFor.BOOKS)).isEqualTo(RailTool.LIBRARY) }
         compose.runOnIdle { nav.navigate(SourceRoute(CatalogScope.KIWIX)) }
         compose.runOnIdle {
             val source = nav.currentDestination!!
             assertThat(railToolOf(source, CatalogScope.KIWIX)).isEqualTo(RailTool.BROWSE)
             assertThat(railToolOf(source, CatalogScope.GRANGER)).isEqualTo(RailTool.LIBRARY)
             assertThat(railToolOf(source, CatalogScope.GUTENBERG)).isEqualTo(RailTool.LIBRARY)
+            assertThat(railToolOf(source, CatalogScope.KIWIX_BOOKS)).isEqualTo(RailTool.LIBRARY)
             assertThat(railToolOf(source, CatalogScope.MODELS)).isEqualTo(RailTool.SETTINGS)
         }
     }

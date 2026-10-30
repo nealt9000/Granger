@@ -940,3 +940,89 @@ def test_real_curated_gutenberg_rows_carry_no_title_of_their_own():
     curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text(encoding="utf-8"))
     rows = [p for p in curated["packs"] if p.get("name", "").startswith("gutenberg_")]
     assert rows and all("title" not in p for p in rows)
+
+
+# --- Plan KB: which packs are books, and each pack's flavour ---
+
+BOOK_FAMILIES = GUTENBERG_FAMILIES + [
+    {"family": "zimgit-water", "match": "^zimgit-water_", "category": "Survival", "license": "Not stated",
+     "domain": "food"},
+    {"family": "wikipedia", "match": "^wikipedia_", "category": "Reference", "license": "CC BY-SA 4.0"},
+]
+CONTENTS = {"gutenberg_en_lcc-pf": "gutenberg2zim-3.0.1", "zimgit-water_en": "nautiluszim 1.1.1",
+            "wikipedia_en_medicine": "mwoffliner 2.1.1"}
+
+
+def test_book_scrapers_mark_a_pack_as_books():
+    assert cg.content_of("gutenberg_en_lcc-pf", CONTENTS) == "books"
+    assert cg.content_of("zimgit-water_en", CONTENTS) == "books"
+    assert cg.content_of("wikipedia_en_medicine", CONTENTS) == ""
+    assert cg.content_of("unknown_en_all", CONTENTS) == ""
+    assert cg.content_of("zimgit-water_en", None) == ""
+
+
+def test_bulk_packs_carry_content_and_flavour():
+    xml = feed(gutenberg_entry("gutenberg_en_lcc-pf", "West Germanic languages"), feed_entry("zimgit-water_en"),
+               feed_entry("wikipedia_en_medicine", "maxi"), feed_entry("wikipedia_en_medicine", "nopic"),
+               feed_entry("wikipedia_en_medicine", "mini"), feed_entry("wikipedia_en_medicine", "odd"))
+    packs = cg.kiwix_entries({"languages": ["eng"]}, BOOK_FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                             feed_fetch(xml), workers=2, sleep=lambda s: None, contents=CONTENTS)[0]
+    by_id = {p["id"]: p for p in packs}
+    assert by_id["gutenberg_en_lcc-pf"]["content"] == "books"
+    assert by_id["zimgit-water_en"]["content"] == "books"
+    assert by_id["zimgit-water_en"]["flavour"] == ""
+    assert by_id["wikipedia_en_medicine_maxi"]["content"] == ""
+    assert [by_id[f"wikipedia_en_medicine_{f}"]["flavour"] for f in ("maxi", "nopic", "mini", "odd")] == \
+        ["maxi", "nopic", "mini", ""]
+
+
+def test_the_report_lists_the_book_packs():
+    xml = feed(feed_entry("zimgit-water_en"), feed_entry("wikipedia_en_medicine", "maxi"))
+    _, report = cg.kiwix_entries({"languages": ["eng"]}, BOOK_FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                                 feed_fetch(xml), workers=2, sleep=lambda s: None, contents=CONTENTS)
+    at = report.index("Book packs (Plan KB): 1")
+    assert report[at + 1] == "  zimgit-water_en"
+
+
+def test_a_curated_pack_takes_its_content_from_the_contents_file(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": BOOK_FAMILIES}))
+    (tmp_path / "contents.json").write_text(json.dumps({"packs": CONTENTS}))
+    xml = feed(feed_entry("zimgit-water_en"), feed_entry("wikipedia_en_medicine", "nopic"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json", "contents": "contents.json"},
+               "packs": [{"name": "zimgit-water_en", "category": "Survival", "license": "Not stated"},
+                         {"name": "wikipedia_en_medicine", "flavour": "nopic", "category": "Medical",
+                          "license": "CC BY-SA 4.0"}],
+               "models": [], "presets": []}
+    water, med = cg.build(curated, feed_fetch(xml), root=tmp_path)["packs"]
+    assert (water["content"], water["flavour"], water["featured"]) == ("books", "", True)
+    assert (med["content"], med["flavour"]) == ("", "nopic")
+
+
+def test_without_a_contents_file_nothing_is_books(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": BOOK_FAMILIES}))
+    xml = feed(feed_entry("zimgit-water_en"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [], "presets": []}
+    (water,) = cg.build(curated, feed_fetch(xml), root=tmp_path)["packs"]
+    assert water["content"] == ""
+
+
+def test_a_release_pack_has_no_content_or_flavour(tmp_path):
+    write_descriptor(tmp_path / "rel.json")
+    pack = cg.release_entry(RELEASE_ROW, head=lambda url: 123, root=tmp_path)
+    assert (pack["content"], pack["flavour"]) == ("", "")
+
+
+def test_real_pack_contents_name_fifty_book_packs():
+    contents = cg.load_contents()
+    books = sorted(name for name in contents if cg.content_of(name, contents) == "books")
+    assert len(books) == 50
+    assert sum(1 for b in books if b.startswith("gutenberg_")) == 41
+    assert sorted(b for b in books if not b.startswith("gutenberg_")) == [
+        "prunelle_en_budding-authors", "prunelle_en_draw-your-african-story", "prunelle_en_interactive-books",
+        "usda-2015_en", "zimgit-food-preparation_en", "zimgit-knots_en", "zimgit-medicine_en",
+        "zimgit-post-disaster_en", "zimgit-water_en"]
+
+
+def test_real_curated_names_the_contents_file():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text(encoding="utf-8"))
+    assert curated["kiwix"]["contents"] == cg.CONTENTS

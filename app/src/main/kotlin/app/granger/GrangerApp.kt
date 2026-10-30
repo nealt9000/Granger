@@ -155,7 +155,10 @@ import java.util.Base64
 import java.util.concurrent.TimeUnit
 import app.granger.core.library.BookIds
 import app.granger.core.library.GutenbergBooks
-import app.granger.core.library.isGutenberg
+import app.granger.core.library.NautilusBooks
+import app.granger.core.library.PackBookLinks
+import app.granger.core.library.PackBooks
+import app.granger.core.library.bookSource
 import app.granger.library.GutenbergCovers
 import app.granger.library.GutenbergShelf
 import app.granger.core.library.DensePassageFinder
@@ -305,9 +308,26 @@ class AppContainer(context: Context) {
         libraryDb, library::archive, dir = { File(bookDirs().first(), "gutenberg") }, coversDir = File(context.filesDir, "covers"),
     )
 
-    /** "Make all searchable…" for Gutenberg collections (Plan GB): runs on the app scope, so leaving the screen doesn't stop it. */
+    /**
+     * The documents of the installed nautilus packs (Plan KB: Food for Preppers, Water, Prunelle's books), copied out to
+     * the internal volume's `books/nautilus` when opened; earlier pack documents of the same files are adopted.
+     */
+    val nautilusBooks = NautilusBooks(
+        libraryDb, library::archive, dir = { File(bookDirs().first(), "nautilus") }, coversDir = File(context.filesDir, "covers"),
+    )
+
+    /** A link on a book pack's own page opens the pack's row for it (Plan KB Decision 4). */
+    val packBookLinks = PackBookLinks({ library.packs.first() }, listOf(gutenbergBooks, nautilusBooks))
+
+    /**
+     * "Make all searchable…" for book pack collections (Plan GB, Plan KB): runs on the app scope, so leaving the screen
+     * doesn't stop it. The copies go to the internal volume, where both sources keep theirs.
+     */
     val gutenbergShelf by lazy {
-        GutenbergShelf(gutenbergBooks::restore, bookIndex::indexPending, dir = { File(bookDirs().first(), "gutenberg") }, appScope)
+        GutenbergShelf(
+            { book -> gutenbergBooks.restore(book) || nautilusBooks.restore(book) }, bookIndex::indexPending,
+            dir = { File(bookDirs().first(), "gutenberg") }, appScope,
+        )
     }
 
     /** Gutenberg covers read from their packs before a book's first open, kept in the cache. */
@@ -318,28 +338,36 @@ class AppContainer(context: Context) {
      * of its pack, which is then indexed (Plan GB Decision 6: its full text joins Search and Ask after the first open).
      */
     suspend fun restoreBook(book: Book): Boolean =
-        packDocuments.restore(book) || gutenbergBooks.restore(book).also { if (it) appScope.launch { bookIndex.indexPending() } }
+        packDocuments.restore(book) ||
+            (gutenbergBooks.restore(book) || nautilusBooks.restore(book)).also { if (it) appScope.launch { bookIndex.indexPending() } }
 
     /**
      * Keeps the Gutenberg books' rows following the installed Gutenberg packs (Plan GB Decision 3): synced on start, on
      * an install, a new snapshot, a pack going missing and a removal, off the main thread.
      */
     fun followGutenberg() {
+        follow(gutenbergBooks, "Gutenberg")
+        // Plan KB: the nautilus packs' documents, the same way; a pack's earlier PDFs are adopted, and indexed once moved.
+        follow(nautilusBooks, "Nautilus") { if (nautilusBooks.adopted > 0) bookIndex.indexPending() }
+    }
+
+    private fun follow(books: PackBooks, label: String, after: suspend () -> Unit = {}) {
         appScope.launch {
             library.packs
-                .map { packs -> packs.filter { it.isGutenberg } }
+                .map { packs -> packs.filter { it.bookSource == books.source.origin } }
                 .distinctUntilChanged { old, new -> old.map { it.id to it.status } == new.map { it.id to it.status } }
                 .collectLatest { packs ->
                     try {
                         val started = SystemClock.elapsedRealtime()
-                        gutenbergBooks.sync(packs)
+                        books.sync(packs)
                         if (packs.isNotEmpty()) {
-                            Log.i("Granger", "Gutenberg sync: ${packs.size} packs in ${SystemClock.elapsedRealtime() - started} ms")
+                            Log.i("Granger", "$label sync: ${packs.size} packs in ${SystemClock.elapsedRealtime() - started} ms")
                         }
+                        after()
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
-                        Log.w("Granger", "Couldn't list the Gutenberg packs' books", e)
+                        Log.w("Granger", "Couldn't list the $label packs' books", e)
                     }
                 }
         }
@@ -559,6 +587,14 @@ class AppContainer(context: Context) {
             if (record.kind == ItemKind.PACK) {
                 library.fileReplaced(record.filePath)
                 library.refresh()
+                // A Switch: the pack's other flavour gives way to this one, keeping what was saved in it (Plan KB).
+                try {
+                    app.granger.sources.FlavourSwitch.settle(record.itemId, catalog.state.value.catalog, downloads, library)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w("Granger", "Couldn't remove the other flavour of ${record.itemId}", e)
+                }
             } else if (record.kind == ItemKind.BOOK) {
                 fileBookRecord(bookshelf, archiveSidecarDir, record) { appScope.launch { bookIndex.indexPending() } }
             } else if (record.kind == ItemKind.AUDIO) {

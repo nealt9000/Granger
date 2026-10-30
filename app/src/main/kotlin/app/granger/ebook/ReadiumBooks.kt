@@ -26,6 +26,7 @@ import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.epub.css.Color as CssColor
 import org.readium.r2.navigator.epub.css.RsProperties
 import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.publication.Layout
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.publication.Publication
@@ -129,27 +130,40 @@ class ReadiumBookOpener(context: Context) : BookOpener {
 
     override suspend fun open(file: File): Publication? {
         return try {
-            val asset = assetRetriever.retrieve(file).getOrElse {
-                Log.w(TAG, "Can't read ${file.name}: ${it.message}")
-                return null
-            }
-            // Passed to open(), not the constructor: in Readium 3.4 open() calls its own parameter twice (both
-            // `this.onCreatePublication()` and `onCreatePublication()` resolve to it) and the constructor's never,
-            // so withBookCss wraps only once.
-            publicationOpener.open(
-                asset,
-                allowUserInteraction = false,
-                onCreatePublication = { container = withBookCss(manifest, container) },
-            ).getOrElse {
-                Log.w(TAG, "Can't open ${file.name}: ${it.message}")
-                asset.close()
-                return null
-            }
+            val publication = open(file, fixed = false) ?: return null
+            // A picture book whose pages are fixed in all but its metadata (FixedPages) opens again, laid out fixed.
+            val reopen = publication.conformsTo(Publication.Profile.EPUB) && publication.metadata.layout != Layout.FIXED &&
+                withContext(Dispatchers.IO) { FixedPages.scan(publication, stopAtUnsized = true).allSized }
+            if (!reopen) return publication
+            publication.close()
+            open(file, fixed = true)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Log.w(TAG, "Opening ${file.name} failed", e)
             null
+        }
+    }
+
+    private suspend fun open(file: File, fixed: Boolean): Publication? {
+        val asset = assetRetriever.retrieve(file).getOrElse {
+            Log.w(TAG, "Can't read ${file.name}: ${it.message}")
+            return null
+        }
+        // Passed to open(), not the constructor: in Readium 3.4 open() calls its own parameter twice (both
+        // `this.onCreatePublication()` and `onCreatePublication()` resolve to it) and the constructor's never,
+        // so withBookCss wraps only once.
+        return publicationOpener.open(
+            asset,
+            allowUserInteraction = false,
+            onCreatePublication = {
+                container = withBookCss(manifest, container)
+                if (fixed) manifest = manifest.copy(metadata = manifest.metadata.copy(layout = Layout.FIXED))
+            },
+        ).getOrElse {
+            Log.w(TAG, "Can't open ${file.name}: ${it.message}")
+            asset.close()
+            return null
         }
     }
 

@@ -423,4 +423,42 @@ class CollectionViewModelTest {
         assertThat(indexed).isAtLeast(1)
         assertThat(shelf.progress.value).isEmpty()
     }
+
+    // --- Plan KB: a nautilus pack's collection ---
+
+    private val food = pack("u-food", "Food for Preppers").copy(name = "zimgit-food-preparation_en", scraper = "nautiluszim 1.1.1")
+
+    private fun document(fp: String, title: String, indexed: Boolean = false, searchable: Boolean = true) =
+        book("book:nautilus:zimgit-food-preparation_en/$fp", title).copy(
+            origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-food-preparation_en/files/$fp",
+            format = app.granger.core.library.BookFormat.PDF, indexedAt = if (indexed) 5L else null, searchable = searchable,
+        )
+
+    private val foodRow get() = CollectionRow(
+        ShelfCollection("c:kiwixbooks-zimgit-food-preparation_en", "Food for Preppers", "lit", false,
+            defaultKey = "kiwixbooks-zimgit-food-preparation_en"),
+        emptyList(),
+        listOf(
+            document("Food Preparation (1).pdf", "Philmont Trail Cookbook", indexed = true),
+            // Opened and indexed, but a scan: no text to search.
+            document("Food Preparation (2).pdf", "Camping Recipes", indexed = true, searchable = false),
+            document("Food Preparation (3).pdf", "Dutch Oven"),
+        ),
+    )
+
+    @Test fun aNautilusCollectionsHeaderSaysKiwixLibraryAndLeavesOutScans() = runTest(main.dispatcher) {
+        library.packList.value = listOf(food)
+        show(foodRow)
+        val vm = vm("c:kiwixbooks-zimgit-food-preparation_en")
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.pack).isEqualTo(food)
+        assertThat(header.books).isEqualTo(3)
+        assertThat(header.searchable).isEqualTo(1)
+        assertThat(header.text).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(rowCountText(foodRow)).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })))
+            .isEqualTo("Kiwix library · 1 document")
+    }
 }

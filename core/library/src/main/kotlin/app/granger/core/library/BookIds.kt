@@ -18,7 +18,15 @@ enum class BookOrigin(val key: String) {
      * Listed from the pack's own list; its EPUB is copied out of the pack the first time it's opened.
      */
     GUTENBERG("gutenberg"),
+    /**
+     * A document in a Kiwix "nautilus" pack (Plan KB: Food for Preppers, Water, Prunelle's books), ref
+     * `<pack name>/<file>`: listed from the pack's own `database.js`, PDF or EPUB, copied out when first opened.
+     */
+    NAUTILUS("nautilus"),
 }
+
+/** A book listed from a book pack's own list ([PackBooks]): its row follows the pack, its file is copied out on open. */
+val BookOrigin.isPackBook: Boolean get() = this == BookOrigin.GUTENBERG || this == BookOrigin.NAUTILUS
 
 object BookIds {
     private const val PREFIX = "book:"

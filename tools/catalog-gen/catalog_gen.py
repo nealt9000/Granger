@@ -29,6 +29,10 @@ Dead links (Plan DL): `check-links` asks every download URL, mirrors included, w
 listing the dead ones. It leaves `<file>.links-ok` holding the checked file's sha256; `sign` refuses a file without a
 matching one, so a catalog is never signed with a link Kiwix has withdrawn (WikEM, 2026-10).
 
+Book packs (Plan KB): a pack whose ZIM name pack_contents.json gives a book scraper (gutenberg2zim, nautiluszim) is marked
+`content: "books"`; every pack carries its `flavour` ("maxi", "nopic", "mini" or blank). `zim_probe.py probe` refreshes
+pack_contents.json from the packs themselves.
+
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
 import argparse
@@ -164,10 +168,31 @@ def pin(entry, row, fetch=http_get):
         "family": row.get("family", ""),
         # The readiness domain (spec §3.2); blank means storage only.
         "domain": row.get("domain") or "",
+        # Plan KB: "books" for a bundle of books (gutenberg2zim, nautiluszim), and the flavour of a flavoured ZIM.
+        "content": row.get("content") or "",
+        "flavour": flavour if flavour in FLAVOURS else "",
     }
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
     return result
+
+
+# Plan KB Decision 2: the scrapers whose packs are bundles of books, each listing its own books; and the flavours.
+BOOK_SCRAPERS = ("gutenberg2zim", "nautiluszim")
+FLAVOURS = ("maxi", "nopic", "mini")
+CONTENTS = "tools/catalog-gen/pack_contents.json"
+
+
+def content_of(name, contents):
+    """ "books" when the pack named [name] was made by a book scraper, by its Scraper in [contents], else blank."""
+    scraper = (contents or {}).get(name, "")
+    return "books" if scraper.startswith(BOOK_SCRAPERS) else ""
+
+
+def load_contents(root=None, path=CONTENTS):
+    """pack_contents.json's {ZIM name: scraper}; empty when there's no such file."""
+    file = pathlib.Path(root or REPO_ROOT) / path
+    return json.loads(file.read_text(encoding="utf-8"))["packs"] if file.exists() else {}
 
 
 # Plan GB: the two everything-packs, whose summaries describe the producer rather than a subject.
@@ -200,7 +225,8 @@ def family_of(entry, families):
     return None
 
 
-def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep):
+def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep,
+                  contents=None):
     """
     Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
     the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
@@ -233,7 +259,8 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     def pin_with_retries(item):
         e, row = item
         fields = {"family": row["family"], "category": row["category"], "license": row["license"],
-                  "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain")}
+                  "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain"),
+                  "content": content_of(e["name"], contents)}
         for attempt in range(tries):
             try:
                 return pin(e, fields, fetch), None
@@ -258,6 +285,8 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     by_domain = {}
     for p in packs:
         by_domain[p["domain"] or "(storage only)"] = by_domain.get(p["domain"] or "(storage only)", 0) + 1
+    books = sorted(p["id"] for p in packs if p["content"] == "books")
+    report += ["", f"Book packs (Plan KB): {len(books)}"] + [f"  {b}" for b in books]
     report += ["", "Listed, by readiness domain:"] + [f"  {d}: {n}" for d, n in sorted(by_domain.items())]
     for hold, counts in sorted(held.items()):
         report += ["", f"Held back ({hold}): {sum(counts.values())}"] + [f"  {f}: {n}" for f, n in sorted(counts.items())]
@@ -299,6 +328,8 @@ def release_entry(curated, head=http_head, root=None):
         "featured": False,
         "family": "",
         "domain": curated.get("domain", ""),
+        "content": curated.get("content", ""),
+        "flavour": "",
     }
 
 
@@ -344,6 +375,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     else:
         families = json.loads((pathlib.Path(root or REPO_ROOT) / kiwix["families"]).read_text(encoding="utf-8"))["families"]
         feed = kiwix_feed(fetch)
+        contents = load_contents(root, kiwix.get("contents", CONTENTS))
         by_key = {(e["name"], e["flavour"]): e for e in feed}
         packs = []
         for c in curated["packs"]:
@@ -353,9 +385,10 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             sample = by_key.get((c["name"], c.get("flavour", "")))
             row = family_of(sample, families) if sample else None
             packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else "",
-                                     "domain": c.get("domain", row.get("domain") if row else "")}, fetch, feed))
+                                     "domain": c.get("domain", row.get("domain") if row else ""),
+                                     "content": content_of(c["name"], contents)}, fetch, feed))
         curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
-        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch)
+        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents)
         packs += bulk
         if report is not None:
             report += lines

@@ -27,8 +27,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.Book
-import app.granger.core.library.BookOrigin
-import app.granger.core.library.isGutenberg
+import app.granger.core.library.isBookPack
+import app.granger.core.library.isPackBook
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -320,7 +320,7 @@ fun CollectionScreen(
         is CollectionDialog.RemovePack -> ConfirmDialog(
             title = "Remove from phone?",
             message = "${d.pack.title} will be deleted from this phone. You can download it again later." +
-                if (d.pack.isGutenberg) " Its books go with it; your places, bookmarks and highlights are kept." else "",
+                if (d.pack.isBookPack) " Its books go with it; your places, bookmarks and highlights are kept." else "",
             confirm = "Remove",
             onConfirm = { viewModel.remove(d.pack) },
             onDismiss = { dialog = null },
@@ -354,19 +354,27 @@ fun CollectionScreen(
 private class HeadItem(val key: String, val contentType: String, val content: @Composable () -> Unit)
 
 /**
- * A book's long-press menu. A Gutenberg book says whether its full text is searchable yet (Plan GB Decision 6), and has
- * no Remove: it's its pack's, and goes with the pack.
+ * A book's long-press menu. A pack's book (Gutenberg, nautilus) says whether its full text is searchable yet (Plan GB
+ * Decision 6), and has no Remove: it's its pack's, and goes with the pack.
  */
 @Composable
 private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
     DropdownMenu(open, onClose) {
-        if (book.origin == BookOrigin.GUTENBERG) DropdownMenuItem(
-            text = { Text(if (book.searchableInFull) "Searchable in full" else "Titles only until you open it") },
+        if (book.origin.isPackBook) DropdownMenuItem(
+            text = {
+                Text(
+                    when {
+                        book.searchableInFull -> "Searchable in full"
+                        book.indexedAt != null && !book.searchable -> "Title only: it's a scan"
+                        else -> "Titles only until you open it"
+                    },
+                )
+            },
             onClick = {},
             enabled = false,
         )
         DropdownMenuItem(text = { Text("Move to collection…") }, onClick = { onClose(); onMove() })
-        if (book.origin != BookOrigin.GUTENBERG) DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { onClose(); onRemove() })
+        if (!book.origin.isPackBook) DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { onClose(); onRemove() })
     }
 }
 

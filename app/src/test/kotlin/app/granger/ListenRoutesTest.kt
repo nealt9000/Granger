@@ -56,7 +56,7 @@ class ListenRoutesTest {
         assertThat(toolAt(ArchiveRoute(ArchiveKind.MUSIC), ArchiveKind.MUSIC)).isEqualTo(RailTool.LISTEN)
         // Archive.org's books, Get more, collections and the Library stay the Library's; the phone's music settings, Settings'.
         assertThat(toolAt(ArchiveRoute(ArchiveKind.TEXTS), ArchiveKind.TEXTS)).isEqualTo(RailTool.LIBRARY)
-        assertThat(toolAt(GetMoreRoute)).isEqualTo(RailTool.LIBRARY)
+        assertThat(toolAt(GetMoreRoute())).isEqualTo(RailTool.LIBRARY)
         assertThat(toolAt(CollectionRoute("c:gc"))).isEqualTo(RailTool.LIBRARY)
         assertThat(toolAt(LibraryRoute())).isEqualTo(RailTool.LIBRARY)
         assertThat(toolAt(MediaSettingsRoute)).isEqualTo(RailTool.SETTINGS)

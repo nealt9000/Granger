@@ -37,9 +37,14 @@ class EbookBottomBarTest {
         locations = Locator.Locations(totalProgression = 0.25),
     )
 
-    private fun bars(voice: VoiceButton = VoiceButton.IDLE, isPdf: Boolean = false) = compose.setContent {
+    private fun bars(
+        voice: VoiceButton = VoiceButton.IDLE,
+        isPdf: Boolean = false,
+        fixedLayout: Boolean = false,
+        hasText: Boolean = true,
+    ) = compose.setContent {
         val actions = bookBarActions(
-            isPdf = isPdf, bookmarked = false, onBack = { calls += "back" },
+            isPdf = isPdf, bookmarked = false, onBack = { calls += "back" }, fixedLayout = fixedLayout, hasText = hasText,
             onContents = { calls += "contents" }, onSearch = { calls += "search" }, onTextSettings = { calls += "aa" },
             onBookmark = { calls += "star" },
             onListen = { calls += "start" }, voice = voice,
@@ -71,6 +76,18 @@ class EbookBottomBarTest {
         // Contents appears once, in the bottom bar.
         assertThat(compose.onNodeWithContentDescription("Contents").getBoundsInRoot().top)
             .isAtLeast(compose.onNodeWithTag(ReaderBarTags.TOP).getBoundsInRoot().bottom)
+    }
+
+    @Test fun aPictureBookHasNoTextSettingsAndWithoutWordsNoListenOrSearch() {
+        bars(fixedLayout = true, hasText = false)
+        for (n in listOf("Text settings", "Listen", "Search in book")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
+        for (n in listOf("Contents", "Add bookmark")) compose.onNodeWithContentDescription(n).assertExists()
+    }
+
+    @Test fun aFixedLayoutBookWithWordsKeepsListenAndSearch() {
+        bars(fixedLayout = true, hasText = true)
+        compose.onNodeWithContentDescription("Text settings").assertDoesNotExist()
+        for (n in listOf("Listen", "Search in book")) compose.onNodeWithContentDescription(n).assertExists()
     }
 
     @Test fun aPdfHasNoSearchInBookAndNoListen() {

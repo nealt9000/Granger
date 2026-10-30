@@ -635,6 +635,179 @@ class ThemeShots {
         }
     }
 
+    /** Food for Preppers as its collection (Plan KB Decision 7), at 360 dp: PDFs, one opened with a first-page cover, a scan. */
+    private fun kiwixBooksShot(name: String, view: ShelfView) {
+        val coverDir = File(System.getProperty("java.io.tmpdir"), "kb-covers").apply { mkdirs() }
+        val docs = listOf(
+            "Philmont Trail Cookbook" to "Various", "Camping Recipes" to "Various", "Dutch Oven Cooking" to "Various",
+            "Food Storage in the Home" to "Utah State University", "Home Canning Guide" to "USDA",
+            "Drying Foods" to "University of Georgia", "Making Jerky at Home Safely" to "USDA",
+            "Bread Baking Basics" to "Various", "Root Cellaring" to "Various", "Emergency Food Storage" to "FEMA",
+        )
+        val books = docs.mapIndexed { i, (title, author) ->
+            app.granger.book("book:nautilus:zimgit-food-preparation_en/Food Preparation (${i + 1}).pdf", title, author = author).copy(
+                origin = app.granger.core.library.BookOrigin.NAUTILUS,
+                sourceRef = "zimgit-food-preparation_en/files/Food Preparation (${i + 1}).pdf",
+                format = app.granger.core.library.BookFormat.PDF,
+                indexedAt = if (i in setOf(0, 1, 3)) 5L else null, searchable = i != 3,
+            )
+        }.mapIndexed { i, book ->
+            if (i !in setOf(0, 1, 3)) return@mapIndexed book
+            val file = File(coverDir, "$i.png")
+            val bmp = Bitmap.createBitmap(200, 260, Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(bmp)
+            canvas.drawColor(android.graphics.Color.WHITE)
+            val ink = android.graphics.Paint().apply { color = android.graphics.Color.rgb(40, 60, 40) }
+            canvas.drawRect(16f, 20f, 184f, 60f, ink)
+            for (line in 0 until 9) canvas.drawRect(16f, 80f + line * 18f, 120f + (line * 23) % 60, 88f + line * 18f, ink)
+            file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            book.copy(coverPath = file.path)
+        }
+        val key = "kiwixbooks-zimgit-food-preparation_en"
+        val shelves = app.granger.FakeShelves()
+        shelves.shelfList.value = listOf(
+            app.granger.core.library.Shelf(
+                MediaType("literature", "Literature", true, 0),
+                listOf(CollectionRow(ShelfCollection("c:$key", "Food for Preppers", "literature", false, defaultKey = key), emptyList(), books)),
+            ),
+        )
+        val library = app.granger.FakeLibrary().apply {
+            packList.value = listOf(pack("u-food", "Food for Preppers").copy(name = "zimgit-food-preparation_en", scraper = "nautiluszim 1.1.1"))
+        }
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.BOOKS, view) }
+        val vm = app.granger.library.CollectionViewModel(
+            "c:$key", shelves, library, app.granger.FakeReadingSessions(), app.granger.FakeBookshelf().apply { positionMap.value = mapOf(books[1].id to app.granger.core.library.BookPosition(books[1].id, "{}", 0.4, "", 1L)) }, app.granger.FakeDownloads(),
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main), viewPrefs = prefs,
+            compute = kotlinx.coroutines.Dispatchers.Main,
+        )
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.library.CollectionScreen(vm, onOpened = {}, onOpenPack = {}, onGetBooks = {}, onOpenCollection = {}, onBack = {}) }
+        }
+    }
+
+    /** A dialog alone, as its window draws it, in Night then Field. */
+    private fun shootDialog(name: String, content: @Composable () -> Unit) {
+        var night by mutableStateOf(true)
+        compose.setContent { GrangerTheme(night = night) { content() } }
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onNode(androidx.compose.ui.test.isDialog()).captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    /**
+     * The Kiwix list's rows in plain words (Plan KB Decisions 8 and 9, walkthrough layout): a pack with flavours as radio
+     * rows, one with a flavour installed and another chosen (Switch), a plain one kept compact.
+     */
+    @Test fun kiwixRows() = shoot("kiwix-rows") {
+        val flavours = listOf(
+            app.granger.sources.FlavourChoice("top_maxi", "With pictures", 6_990_000_000, chosen = true),
+            app.granger.sources.FlavourChoice("top_nopic", "No pictures", 2_750_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_mini", "Mini (intro paragraphs only)", 300_000_000, chosen = false),
+        )
+        val rows = listOf(
+            app.granger.sources.ItemRow(
+                "top_maxi", "Wikipedia: best articles", "English · Updated October 2026 · CC BY-SA",
+                "The 50,000 best Wikipedia articles", 6_990_000_000, app.granger.sources.ItemStatus.NotInstalled, null,
+                flavours = flavours, license = "CC BY-SA 4.0",
+            ),
+            app.granger.sources.ItemRow(
+                "med_maxi", "WikiMed", "English · Updated October 2026 · CC BY-SA", "The largest medical encyclopedia, from Wikipedia",
+                1_860_000_000, app.granger.sources.ItemStatus.NotInstalled, "u-med",
+                flavours = listOf(
+                    app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
+                    app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
+                ),
+                installedFlavour = "no pictures", switches = true, license = "CC BY-SA 4.0",
+            ),
+            app.granger.sources.ItemRow(
+                "survivor", "Survivor Library", "English · Updated September 2026 · Licence not stated",
+                "Books and manuals on how things were done before electricity", 220_350_000_000,
+                app.granger.sources.ItemStatus.NotInstalled, null, license = "Not stated by the source",
+            ),
+        )
+        androidx.compose.material3.Surface {
+            androidx.compose.foundation.layout.Column {
+                for (row in rows) {
+                    app.granger.sources.CatalogItemRow(row, onGet = {}, onCancel = {}, onRetry = {}, onRemove = {})
+                    androidx.compose.material3.HorizontalDivider()
+                }
+            }
+        }
+    }
+
+    /** Switch says what it trades (Plan KB walkthrough 2). */
+    @Test fun switchFlavour() = shootDialog("switch-flavour") {
+        app.granger.sources.SwitchDialog(
+            "WikiMed",
+            app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
+            app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
+            onSwitch = {}, onDismiss = {},
+        )
+    }
+
+    /** "Survivor Library is 220 GB" and Wikipedia's offer of its smaller flavour (Plan KB Decision 9). */
+    @Test fun sizeCheck() = shootDialog("size-check") {
+        app.granger.sources.SizeCheckDialog(
+            app.granger.sources.SizeCheck(
+                "wikipedia_en_all_maxi", "Wikipedia", 115_000_000_000, 41_000_000_000, "Phone",
+                smaller = app.granger.sources.FlavourChoice("wikipedia_en_all_nopic", "No pictures", 48_000_000_000, chosen = false),
+            ),
+            onGet = {}, onDismiss = {},
+        )
+    }
+
+    /** The Kiwix list (Plan KB Decisions 8 and 10), or one folded [family]'s A–Z list, from a catalog in the shape of Kiwix's. */
+    private fun kiwixListShot(name: String, family: String?, query: String = "") {
+        fun entry(id: String, title: String, category: String, family: String, size: Long, flavour: String = "", zim: String = id, featured: Boolean = false) =
+            app.granger.packEntry(id, category = category, size = size, urls = listOf("https://download.kiwix.org/zim/$id.zim"), zimName = zim, featured = featured)
+                .copy(title = title, family = family, flavour = flavour, snapshotDate = "2026-10-10")
+        val docs = listOf("Angular", "Bash", "C", "C++", "CSS", "Django", "Docker", "Git", "Go", "HTML", "JavaScript", "Kotlin", "Node.js",
+            "PostgreSQL", "Python", "React", "Rust", "Sass", "SQLite", "Vue")
+            .flatMap { lang -> (0 until 3).map { i -> lang + listOf("", " 2", " 3")[i] } }
+        val packs = listOf(
+            entry("wikipedia_en_medicine_maxi", "WikiMed", "Medical", "wikipedia", 1_860_000_000, "maxi", "wikipedia_en_medicine", featured = true),
+            entry("wikipedia_en_medicine_nopic", "WikiMed (no pictures)", "Medical", "wikipedia", 1_050_000_000, "nopic", "wikipedia_en_medicine", featured = true),
+            entry("wikipedia_en_medicine_mini", "WikiMed Medical Encyclopedia", "Medical", "wikipedia", 170_000_000, "mini", "wikipedia_en_medicine"),
+            entry("mdwiki_en_all", "MDWiki", "Medical", "mdwiki", 2_300_000_000),
+            entry("freecodecamp_en_javascript", "freeCodeCamp JavaScript", "Programming", "freecodecamp", 9_000_000),
+            entry("cooking.stackexchange.com_en_all", "Cooking Stack Exchange", "Q&A", "stack_exchange", 230_000_000),
+            entry("diy.stackexchange.com_en_all", "DIY Stack Exchange", "Q&A", "stack_exchange", 900_000_000),
+            entry("maps_en_france", "France", "Maps", "maps", 3_000_000_000),
+            entry("maps_en_spain", "Spain", "Maps", "maps", 1_200_000_000),
+        ) + docs.map { entry("devdocs_en_${it.lowercase().replace(" ", "-")}", "$it Docs", "Programming", "devdocs", 3_000_000) }
+        val vm = app.granger.sources.SourceViewModel(
+            app.granger.sources.CatalogScope.KIWIX, app.granger.FakeCatalogSource(app.granger.catalogOf(packs)), app.granger.FakeDownloads(),
+            app.granger.FakeLibrary(), app.granger.FakeBookshelf(),
+            app.granger.FakeVolumes(listOf(app.granger.volume("/internal", "Phone", free = 41_000_000_000))), app.granger.FakePrefs(),
+            app.granger.core.ai.DeviceTier.ASK, kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main),
+            io = kotlinx.coroutines.Dispatchers.Main, family = family,
+        )
+        if (query.isNotEmpty()) vm.setQuery(query)
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.BROWSE,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.sources.SourceScreen(vm, title = "Kiwix", onBack = {}) }
+        }
+    }
+
+    @Test fun kiwixList() = kiwixListShot("kiwix-list", null)
+
+    @Test fun kiwixFamily() = kiwixListShot("kiwix-family", "devdocs")
+
+    @Test fun kiwixSearch() = kiwixListShot("kiwix-search", null, query = "wiki medicine")
+
+    @Test fun kiwixBooksList() = kiwixBooksShot("kiwixbooks-list", ShelfView.LIST)
+
+    @Test fun kiwixBooksGrid() = kiwixBooksShot("kiwixbooks-grid", ShelfView.GRID)
+
     @Test fun gutenbergList() = gutenbergShot("gutenberg-list", ShelfView.LIST)
 
     @Test fun gutenbergGrid() = gutenbergShot("gutenberg-grid", ShelfView.GRID)

@@ -168,6 +168,27 @@ class ReadinessModelTest {
         assertThat(ReadinessModel.sourceOf(installed(music), cat)).isEqualTo(Source.KIWIX)
     }
 
+    /** Plan KB Decision 6: Water and Food for Preppers are offered under Books, but Food's essentials still list them. */
+    @Test fun foodsEssentialsStillListWaterAndFoodForPreppers() {
+        val water = packEntry("zimgit-water_en", "zimgit-water_en", "food", 20, family = "zimgit-water").copy(content = "books")
+        val prep = packEntry("zimgit-food-preparation_en", "zimgit-food-preparation_en", "food", 90, family = "zimgit-food-preparation")
+            .copy(content = "books")
+        val cooking = packEntry("based.cooking_en_all", "based.cooking_en_all", "food", 30, family = "based.cooking")
+        val food = Domain("food", "Food, water & survival", essential = listOf(cooking.id, water.id, prep.id),
+            comprehensive = listOf(cooking.id, water.id, prep.id))
+        val cat = catalog.copy(packs = catalog.packs + listOf(water, prep, cooking), readiness = Readiness(readiness.domains + food))
+        assertThat(app.granger.sources.scopeOf(water)).isEqualTo(app.granger.sources.CatalogScope.KIWIX_BOOKS)
+
+        val none = domain(report(cat = cat), "food")
+        assertThat(none.coverage).isEqualTo(Coverage.NONE)
+        // Installed as book packs, they still count toward Food, and as Kiwix's storage.
+        val r = report(packs = listOf(installed(water), installed(prep)), cat = cat)
+        assertThat(domain(r, "food").coverage).isEqualTo(Coverage.BASIC)
+        assertThat(domain(r, "food").installedBytes).isEqualTo(110)
+        assertThat(r.storage.single { it.source == Source.KIWIX }.bytes).isEqualTo(110)
+        assertThat(ReadinessModel.sourceOf(installed(water), cat)).isEqualTo(Source.KIWIX)
+    }
+
     @Test fun aPackUnknownToTheCatalogIsStorageOnly() {
         val stranger = pack("u-stranger", "Stranger").copy(name = "stranger_en_all", sizeBytes = 777, filePath = "/internal/packs/stranger.zim")
         val r = report(packs = listOf(stranger))
