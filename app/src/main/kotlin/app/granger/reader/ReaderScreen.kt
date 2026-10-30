@@ -1,5 +1,6 @@
 package app.granger.reader
 
+import app.granger.UiText
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -437,7 +438,7 @@ internal fun wikiBarActions(
         ),
         onContents = onContents.takeIf { hasPage },
         onSearch = onSearchPack.takeIf { hasPack },
-        searchLabel = searchLabel(packTitle),
+        searchLabel = UiText.Raw(searchLabel(packTitle)),
         onTextSettings = onTextSettings.takeIf { hasPage },
         onBookmark = onToggleBookmark.takeIf { hasPage },
         bookmarked = bookmarked,

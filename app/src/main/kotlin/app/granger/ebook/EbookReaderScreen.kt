@@ -2,6 +2,8 @@
 
 package app.granger.ebook
 
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -276,7 +278,7 @@ fun EbookReaderScreen(
                     Modifier.fillMaxSize().windowInsetsPadding(SafeDrawingIgnoringBars.only(WindowInsetsSides.Bottom)).padding(32.dp),
                     Alignment.Center,
                 ) {
-                    Text(error, textAlign = TextAlign.Center)
+                    Text(error.resolve(), textAlign = TextAlign.Center)
                 }
                 state.publication != null && factory != null && bookId != null -> NavigatorHost(
                     bookId = bookId,
@@ -323,7 +325,7 @@ fun EbookReaderScreen(
         if (reading != null && !reading.following) {
             AssistChip(
                 onClick = viewModel::follow,
-                label = { Text("Follow") },
+                label = { Text(stringResource(R.string.ebook_follow)) },
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 96.dp).testTag(EbookTags.FOLLOW),
             )
         }
@@ -369,15 +371,15 @@ private suspend fun define(
     if (word.isEmpty()) return null
     return try {
         when (choice) {
-            is DictionaryChoice.Wiktionary -> if (lookUp(choice.packId, word)) null else "No entry for “$word” in Wiktionary"
-            DictionaryChoice.ProcessText -> if (Dictionary.startProcessText(context, selection)) null else "No dictionary app is installed"
+            is DictionaryChoice.Wiktionary -> if (lookUp(choice.packId, word)) null else context.getString(R.string.ebook_no_wiktionary_entry, word)
+            DictionaryChoice.ProcessText -> if (Dictionary.startProcessText(context, selection)) null else context.getString(R.string.ebook_no_dictionary_app)
             DictionaryChoice.None -> null
         }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         Log.w("Granger", "Looking up “$word” failed", e)
-        "Couldn’t look up “$word”"
+        context.getString(R.string.ebook_lookup_failed, word)
     }
 }
 

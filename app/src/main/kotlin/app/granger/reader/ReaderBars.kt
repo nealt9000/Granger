@@ -1,5 +1,6 @@
 package app.granger.reader
 
+import app.granger.UiText
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -85,7 +86,7 @@ data class ReaderBarActions(
     val onContents: (() -> Unit)? = null,
     val onSearch: (() -> Unit)? = null,
     /** What TalkBack reads for Search: "Search Wikipedia", "Search in book". */
-    val searchLabel: String = "Search",
+    val searchLabel: UiText = UiText.Res(R.string.common_search),
     /** Aa: the text sheet. */
     val onTextSettings: (() -> Unit)? = null,
     val onBookmark: (() -> Unit)? = null,
@@ -210,7 +211,7 @@ fun ReaderBottomBar(actions: ReaderBarActions, modifier: Modifier = Modifier, pr
             if (progress != null) Box(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) { progress() }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
                 actions.onContents?.let { IconButton(onClick = it) { Icon(Icons.Filled.Menu, contentDescription = "Contents") } }
-                actions.onSearch?.let { IconButton(onClick = it) { Icon(Icons.Filled.Search, contentDescription = actions.searchLabel) } }
+                actions.onSearch?.let { IconButton(onClick = it) { Icon(Icons.Filled.Search, contentDescription = actions.searchLabel.resolve()) } }
                 actions.onTextSettings?.let {
                     IconButton(onClick = it, Modifier.semantics { contentDescription = "Text settings" }) {
                         Text("Aa", style = MaterialTheme.typography.titleMedium)

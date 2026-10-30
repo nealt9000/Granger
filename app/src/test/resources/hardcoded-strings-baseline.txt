@@ -5,11 +5,6 @@ app/src/main/kotlin/app/granger/audiobooks/AudiobookScreen.kt	11
 app/src/main/kotlin/app/granger/audiobooks/AudiobookShelfScreen.kt	3
 app/src/main/kotlin/app/granger/browse/BrowseScreen.kt	12
 app/src/main/kotlin/app/granger/downloads/DownloadsScreen.kt	14
-app/src/main/kotlin/app/granger/ebook/BookSearchPanel.kt	2
-app/src/main/kotlin/app/granger/ebook/EbookReaderScreen.kt	1
-app/src/main/kotlin/app/granger/ebook/HighlightSheet.kt	4
-app/src/main/kotlin/app/granger/ebook/ReaderControls.kt	1
-app/src/main/kotlin/app/granger/ebook/TextSettingsSheet.kt	2
 app/src/main/kotlin/app/granger/home/AddFeedPanel.kt	6
 app/src/main/kotlin/app/granger/home/HomeScreen.kt	9
 app/src/main/kotlin/app/granger/home/ReadinessStrip.kt	1

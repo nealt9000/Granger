@@ -1,5 +1,7 @@
 package app.granger.ebook
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.BookAnnotation
 import org.json.JSONObject
 import org.readium.r2.navigator.Decoration
@@ -57,7 +59,8 @@ internal fun place(publication: Publication?, highlights: List<BookAnnotation>):
 /** One line in the search panel: a hit in context, or one of the reader's own marks. */
 data class BookSearchRow(
     val locator: Locator?,
-    val chapter: String,
+    /** The chapter, or for the reader's own mark "Your highlight · chapter". */
+    val chapter: UiText,
     val before: String,
     val match: String,
     val after: String,
@@ -78,11 +81,13 @@ internal object SearchRows {
             val inText = mark.text.contains(query, ignoreCase = true)
             if (!inNote && !inText) return@mapNotNull null
             val locator = parseLocator(mark.locatorJson)
-            val label = if (inText) "Your highlight" else "Your note"
             val where = locator?.title?.trim().orEmpty()
             BookSearchRow(
                 locator = locator,
-                chapter = if (where.isEmpty()) label else "$label · $where",
+                chapter = when {
+                    where.isEmpty() -> UiText.Res(if (inText) R.string.ebook_your_highlight else R.string.ebook_your_note)
+                    else -> UiText.Res(if (inText) R.string.ebook_your_highlight_in else R.string.ebook_your_note_in, where)
+                },
                 before = "",
                 match = if (inText) mark.text else mark.note,
                 after = "",
@@ -92,7 +97,7 @@ internal object SearchRows {
         val text = hits.map { hit ->
             BookSearchRow(
                 locator = hit,
-                chapter = hit.title?.trim().orEmpty().ifEmpty { chapterTitle(hit.href, toc) },
+                chapter = UiText.Raw(hit.title?.trim().orEmpty().ifEmpty { chapterTitle(hit.href, toc) }),
                 before = hit.text.before.orEmpty(),
                 match = hit.text.highlight.orEmpty(),
                 after = hit.text.after.orEmpty(),
