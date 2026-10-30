@@ -697,7 +697,11 @@ Flags: `transl.` = translation; `lang en,es` = bilingual or school edition (pass
 ## 7. Neal's calls (2026-10-30)
 
 1. **Comprehensive Wikipedia:** `wikipedia_es_all_maxi` (36.5 GB), pictures throughout. Save space swaps it to nopic.
-2. **Ready.gov en español:** in Comprehensive only. Efficient is about 5.8 GB with pictures, 1.8 GB with Save space.
+2. **Ready.gov en español:** in Comprehensive only.
+   - **Totals with calls 1–3 together** (corrected 2026-10-30: the first figures here left out iFixit's 3.68 GB):
+     - Efficient: about 9.5 GB with pictures, 5.5 GB with Save space.
+     - Comprehensive: about 48.2 GB with pictures, 24.4 GB with Save space.
+   - These are packs only, before L4's search vectors.
 3. **iFixit en español:** treated the same as `ifixit_en_all`: in the Making essentials under the same non-commercial flag. F1's Play policy check decides for both languages together. This replaces the spec's "excluded".
 4. **Clásicos Granger:** only works public domain both in the US and where the readers live (Spain, Argentina, the life+70/80 countries). The ~8 authors in §5.2 and the 13 non-PD Gutenberg books are out.
 
