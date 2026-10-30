@@ -7,6 +7,7 @@ import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
 import androidx.glance.testing.unit.hasTestTag
 import androidx.glance.testing.unit.hasText
 import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,7 +17,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class PlayerWidgetTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val music = WidgetModel("Mars", "Holst", null, playing = true, secondary = Secondary.NEXT, progress = 0.5f, empty = false)
+    private val music = WidgetModel(UiText.Raw("Mars"), UiText.Raw("Holst"), null, playing = true, secondary = Secondary.NEXT, progress = 0.5f, empty = false)
 
     @Test fun smallSizeShowsCoverAndPlay() = runGlanceAppWidgetUnitTest {
         setContext(context)

@@ -64,11 +64,13 @@ internal fun nowInfo(now: NowPlaying): NowInfo? = when (now) {
 }
 
 /** "Reading", with the section when the source has one; "Finished reading" once the voice ran out. */
-internal fun voiceState(voice: NowPlaying.Voice): UiText {
-    val section = voice.section?.takeIf { it.isNotBlank() }
+internal fun voiceState(voice: NowPlaying.Voice): UiText = voiceState(voice.section, voice.ended)
+
+internal fun voiceState(section: String?, ended: Boolean): UiText {
+    val named = section?.takeIf { it.isNotBlank() }
     return when {
-        section == null -> UiText.Res(if (voice.ended) R.string.player_finished_reading else R.string.player_reading)
-        else -> UiText.Res(if (voice.ended) R.string.player_finished_reading_section else R.string.player_reading_section, section)
+        named == null -> UiText.Res(if (ended) R.string.player_finished_reading else R.string.player_reading)
+        else -> UiText.Res(if (ended) R.string.player_finished_reading_section else R.string.player_reading_section, named)
     }
 }
 
@@ -77,12 +79,6 @@ internal fun chapterName(title: String, ordinal: Int): UiText =
     if (title.isBlank()) UiText.Res(R.string.player_chapter_number, ordinal + 1) else UiText.Raw(title)
 
 internal fun chapterName(book: NowPlaying.Book): UiText = chapterName(book.chapter.title, book.chapter.ordinal)
-
-// The widget's English copies of [voiceState] and [chapterName]; widget/ moves to resources in Plan L1 Task 8.
-internal fun voiceSubtitle(voice: NowPlaying.Voice): String =
-    listOfNotNull(if (voice.ended) "Finished reading" else "Reading", voice.section?.takeIf { it.isNotBlank() }).joinToString(" · ")
-
-internal fun chapterTitle(book: NowPlaying.Book): String = book.chapter.title.ifBlank { "Chapter ${book.chapter.ordinal + 1}" }
 
 internal fun fraction(positionMs: Long, durationMs: Long): Float =
     if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)

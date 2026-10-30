@@ -14,6 +14,7 @@ import app.granger.library.KindRow
 import app.granger.library.listenKinds
 import app.granger.player.PlayerFocus
 import app.granger.player.oneSide
+import app.granger.UiText
 import app.granger.widget.WidgetModel
 import app.granger.widget.resumeMode
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +34,8 @@ enum class CardKind { MUSIC, AUDIOBOOK, VOICE }
  */
 data class NowPlayingCard(
     @StringRes val label: Int,
-    val title: String,
-    val subtitle: String,
+    val title: UiText,
+    val subtitle: UiText,
     val coverPath: String?,
     val kind: CardKind,
     val live: Boolean,

@@ -340,7 +340,7 @@ class ThemeShots {
     @Test fun listen() = shoot("listen") {
         val phone = CollectionRow(ShelfCollection("c:phone", "Phone", "music", false, defaultKey = "phone"), emptyList(), albums = emptyList())
         val librivox = CollectionRow(ShelfCollection("c:lv", "LibriVox", "audiobooks", false, defaultKey = "lv"), emptyList(), audiobooks = listOf(audiobook("t")))
-        val card = NowPlayingCard(app.granger.R.string.listen_now_playing, "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true)
+        val card = NowPlayingCard(app.granger.R.string.listen_now_playing, app.granger.UiText.Raw("Blue in Green"), app.granger.UiText.Raw("Miles Davis"), null, CardKind.MUSIC, live = true, playing = true)
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},

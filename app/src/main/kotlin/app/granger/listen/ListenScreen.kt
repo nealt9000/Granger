@@ -153,13 +153,14 @@ private fun NowPlayingCardRow(card: NowPlayingCard, actions: ListenActions) {
             Modifier.clickable(onClickLabel = stringResource(R.string.listen_open_player), onClick = actions.onOpenPlayer).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PlayerCover(card.coverPath, card.title, book = card.kind == CardKind.AUDIOBOOK, size = 56.dp, voice = card.kind == CardKind.VOICE)
+            val title = card.title.resolve()
+            PlayerCover(card.coverPath, title, book = card.kind == CardKind.AUDIOBOOK, size = 56.dp, voice = card.kind == CardKind.VOICE)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(card.label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                Text(card.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    card.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    card.subtitle.resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
+import app.granger.UiText
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.AudioShelves
 import app.granger.core.library.CollectionRow
@@ -95,14 +96,14 @@ class ListenViewModelTest {
         val vm = vm()
         hub.ui.value = musicUi(track("a", "Blue in Green", artists = "Miles Davis"))
         val music = vm.ui.filterNotNull().first { it.nowPlaying != null }.nowPlaying!!
-        assertThat(music).isEqualTo(NowPlayingCard(app.granger.R.string.listen_now_playing, "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true))
+        assertThat(music).isEqualTo(NowPlayingCard(app.granger.R.string.listen_now_playing, UiText.Raw("Blue in Green"), UiText.Raw("Miles Davis"), null, CardKind.MUSIC, live = true, playing = true))
         // Only the position changing doesn't make a new card.
         hub.ui.value = musicUi(track("a", "Blue in Green", artists = "Miles Davis"), positionMs = 90_000L)
         assertThat(vm.ui.value!!.nowPlaying).isSameInstanceAs(music)
         hub.ui.value = voiceUi("Peter Pan", section = "Chapter 3", playing = false)
         val voice = vm.ui.filterNotNull().first { it.nowPlaying?.kind == CardKind.VOICE }.nowPlaying!!
         assertThat(context.getString(voice.label)).isEqualTo("Paused")
-        assertThat(voice.subtitle).isEqualTo("Reading · Chapter 3")
+        assertThat(voice.subtitle.resolve(context)).isEqualTo("Reading · Chapter 3")
     }
 
     @Test fun theCardSaysWhatEachKindIs() {
@@ -112,8 +113,8 @@ class ListenViewModelTest {
         assertThat(context.getString(reading.label)).isEqualTo("Reading aloud")
         val listening = nowPlayingCard(bookUi(book, chapter(book, 2, 60_000L), chapterCount = 5).copy(playing = true), idle)!!
         assertThat(listening.kind).isEqualTo(CardKind.AUDIOBOOK)
-        assertThat(listening.title).isEqualTo("Chapter 3")
-        assertThat(listening.subtitle).isEqualTo("Treasure Island")
+        assertThat(listening.title.resolve(context)).isEqualTo("Chapter 3")
+        assertThat(listening.subtitle.resolve(context)).isEqualTo("Treasure Island")
         assertThat(context.getString(listening.label)).isEqualTo("Now playing")
     }
 
@@ -122,13 +123,13 @@ class ListenViewModelTest {
         val saved = SavedModes(SavedMusic(listOf(track("a", "So What")), 0, 10_000L, false, 0), null, PlayerMode.MUSIC)
         val last = nowPlayingCard(app.granger.core.player.PlayerUi.IDLE, saved)!!
         assertThat(context.getString(last.label)).isEqualTo("Last played")
-        assertThat(last.title).isEqualTo("So What")
+        assertThat(last.title.resolve(context)).isEqualTo("So What")
         assertThat(last.live).isFalse()
         assertThat(last.playing).isFalse()
         val voice = SavedVoice("book:pp", "Peter Pan", "Chapter 3", ReadAddress.Text("k", 0, 0), 1f, null)
         val read = nowPlayingCard(app.granger.core.player.PlayerUi.IDLE, saved.copy(voice = voice, lastWasVoice = true, lastMode = null))!!
         assertThat(read.kind).isEqualTo(CardKind.VOICE)
         assertThat(context.getString(read.label)).isEqualTo("Last read")
-        assertThat(read.title).isEqualTo("Peter Pan")
+        assertThat(read.title.resolve(context)).isEqualTo("Peter Pan")
     }
 }

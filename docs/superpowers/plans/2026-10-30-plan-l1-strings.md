@@ -96,7 +96,7 @@ Each task converts its packages under the conventions, lowers or removes those f
 | 5 | ebook, reader, research | The medical banner in `research/AnswerText.kt` becomes a string. Prompts stay (L4). `ReaderBars`/`ReaderViewModel` constants become ids |
 | 6 | archive, librivox, shell | `shell` holds the rail labels; keep them short |
 | 7 | `core/` modules: downloads, media, player, speech, taglib, books, zim, ai, archive | Android library modules get their own `res/values/strings.xml` (`<module>_` names). Pure-Kotlin messages become types mapped in `app/`. `ArchiveQuery` shelf titles become an enum mapped in `app/archive` |
-| 8 (last) | sources, library, widget, top-level files (`Bytes.kt`, `GrangerNavHost.kt`, `MainActivity.kt`, `GrangerApp.kt`) | The open `gb-gutenberg` branch touches `sources/`, `library/` and `MainActivity.kt`, and `bugs-2026-10-30` touches `widget/WidgetUpdater.kt`, so convert these after those branches merge. `Bytes.kt` uses the locale's decimal separator; its tests pin `Locale.US` |
+| 8 (last) | sources, library, widget, top-level files (`Bytes.kt`, `GrangerNavHost.kt`, `MainActivity.kt`, `GrangerApp.kt`) | The open `gb-gutenberg` branch touches `sources/`, `library/` and `MainActivity.kt`, and `bugs-2026-10-30` touches `widget/WidgetUpdater.kt`, so convert these after those branches merge. `Bytes.kt` uses the locale's decimal separator; its tests pin `Locale.US`. **widget done** (2026-10-30): `WidgetModel` holds `UiText`; `WidgetModelStore` keeps it as JSON with stable resource names |
 
 Steps for each package:
 - [ ] **Step 1:** List the package's literals with the guard's patterns plus `grep -nE '"[A-Z][^"]{2,}"'`. Sort each into translate or keep (convention 6).
@@ -131,7 +131,7 @@ Things the package tasks left for after the merge, because they cross task bound
 - [ ] **Saved in book data:** archive.org's OCR note and the "(PDF)" suffix, matched with `removePrefix`. Decide in L2 with the other saved strings (Task 6).
 - [ ] **Android Auto:** `media/AutoBrowseTree` folder names ("Recent", "Music", "Nothing here yet"…). Take a `(Int) -> String` from `GrangerApp.kt` (Task 4).
 - [ ] **English constants kept for other packages:**
-  - `chapterTitle` and `voiceSubtitle` (widget)
+  - ~~`chapterTitle` and `voiceSubtitle` (widget)~~ done: deleted, the widget uses `chapterName`/`voiceState`
   - `ALL_MUSIC` and `ALL_AUDIOBOOKS` (library)
   - `UNKNOWN_AUTHOR`
   - `MediaDownloader`'s "Download failed"
@@ -144,7 +144,7 @@ Things the package tasks left for after the merge, because they cross task bound
   - `AskReach.text`
   - `GetMoreLink`
   - `formatBytes`
-  - `WidgetModel`
+  - ~~`WidgetModel`~~ done with the widget (Listen's card now takes `UiText`)
   - the volume label
 - [ ] **Changes to the English the walkthrough should confirm:**
   - Readiness's "is from" date is now localised ("Jan 10, 2025", not "2025-01-10"). Task 2; a one-line revert if Neal prefers ISO.

@@ -70,7 +70,7 @@ class ListenScreenTest {
     }
 
     @Test fun theNowPlayingCardOpensThePlayerAndPlays() {
-        val card = NowPlayingCard(app.granger.R.string.listen_now_playing, "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true)
+        val card = NowPlayingCard(app.granger.R.string.listen_now_playing, app.granger.UiText.Raw("Blue in Green"), app.granger.UiText.Raw("Miles Davis"), null, CardKind.MUSIC, live = true, playing = true)
         val music = KindRow("music", "Music", "music", listOf(row("music", "Phone")))
         compose.setContent { ListenContent(ListenUi(card, shelves = listOf(music)), actions) }
         compose.onNodeWithText("Now playing").assertExists()
