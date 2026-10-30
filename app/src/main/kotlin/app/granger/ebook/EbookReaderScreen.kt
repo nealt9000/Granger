@@ -19,10 +19,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +55,7 @@ import app.granger.reader.ClearOfShell
 import app.granger.reader.ReaderBarActions
 import app.granger.reader.ReaderBottomBar
 import app.granger.reader.ReaderBookPageInsets
+import app.granger.reader.ReaderMenuItem
 import app.granger.reader.ReaderPdfPageInsets
 import app.granger.reader.ReaderTopBar
 import app.granger.reader.SlidingBar
@@ -102,6 +106,10 @@ fun EbookReaderScreen(
     /** Opens the word's Wiktionary entry in [packId]; false when it has none. */
     onLookUp: suspend (packId: String, word: String) -> Boolean = { _, _ -> false },
     onBack: () -> Unit,
+    /** Shows the rail tab [tabId] (an ebook's original pages, Plan IA). */
+    onOpenTab: (tabId: Long) -> Unit = {},
+    /** Opens this book again: it has just become an ebook (Read as ebook). */
+    onReopen: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var navigator by remember { mutableStateOf<VisualNavigator?>(null) }
@@ -237,6 +245,39 @@ fun EbookReaderScreen(
         }
     }
 
+    var confirmRemovePages by remember { mutableStateOf(false) }
+    // Making an ebook takes a while on a long book (about 20 s for 600 pages): the message stays until it's done.
+    LaunchedEffect(state.makingEbook) {
+        if (state.makingEbook) snackbar.showSnackbar("Making an ebook of this PDF…", duration = SnackbarDuration.Indefinite)
+    }
+    LaunchedEffect(state.notice) {
+        state.notice?.let {
+            snackbar.showSnackbar(it)
+            viewModel.noticeShown()
+        }
+    }
+    if (confirmRemovePages) {
+        AlertDialog(
+            onDismissRequest = { confirmRemovePages = false },
+            title = { Text("Remove the original pages?") },
+            text = { Text("The PDF this ebook was made from goes, and with it the book as printed. The ebook stays.") },
+            confirmButton = {
+                TextButton(onClick = { confirmRemovePages = false; viewModel.removeOriginalPages() }) { Text("Remove") }
+            },
+            dismissButton = { TextButton(onClick = { confirmRemovePages = false }) { Text("Cancel") } },
+        )
+    }
+    // ⋯: an ebook made from a PDF opens or removes its original pages; a PDF can be made an ebook (Plan IA).
+    val menu = listOfNotNull(
+        state.originalPagesBytes?.let {
+            ReaderMenuItem("Original pages") { scope.launch { viewModel.openOriginalPages()?.let(onOpenTab) } }
+        },
+        state.originalPagesBytes?.let {
+            ReaderMenuItem("Remove original pages · ${app.granger.formatBytes(it)}") { confirmRemovePages = true }
+        },
+        ReaderMenuItem("Read as ebook") { viewModel.readAsEbook(onReopen) }.takeIf { state.canReadAsEbook && !state.makingEbook },
+    )
+
     val bars = bookBarActions(
         isPdf = state.isPdf,
         bookmarked = state.isBookmarkedHere,
@@ -256,7 +297,7 @@ fun EbookReaderScreen(
                 viewModel.readAloud(page, words)
             }
         }),
-    )
+    ).copy(menu = menu)
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // The navigator has the whole screen whether the chrome shows or not (Plan U3c Decision 5), so Readium never

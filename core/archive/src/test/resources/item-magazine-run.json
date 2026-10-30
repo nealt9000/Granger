@@ -1,0 +1,726 @@
+{
+ "metadata": {
+  "identifier": "national-geographic-magazine-complete-pdf",
+  "mediatype": "texts",
+  "collection": [
+   "magazine_packs",
+   "magazine_rack"
+  ],
+  "date": "1888",
+  "description": "National Geographic Magazine 1888 - current",
+  "language": "eng",
+  "subject": [
+   "natgeo",
+   "magazine",
+   "mag",
+   "world",
+   "pdf"
+  ],
+  "title": "National Geographic Magazine complete pdf"
+ },
+ "files": [
+  {
+   "name": "National Geographic - Special Issue - The Civil War.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic - Special Issue - The Civil War_hocr.html",
+   "size": "161780128",
+   "md5": "2f9b92d4bf637a3aeae4a315de29df53",
+   "sha1": "a669562936f2e1eb54c60f5398c34bd8f29dc569"
+  },
+  {
+   "name": "National Geographic - Special Issue - The Civil War.pdf",
+   "source": "original",
+   "size": "106543400",
+   "md5": "a827497b9b1e8439370ba702a88c2fe3",
+   "sha1": "b748c988d2826ce4498ffd2469575b16c5ebc834",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1888-01 Oct 001-1.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1888-01 Oct 001-1_hocr.html",
+   "size": "7826842",
+   "md5": "7b1c0e4b18cfd2ddf549b077fdb0bb11",
+   "sha1": "785f5407f53ccd99357da266599e19889216d99b"
+  },
+  {
+   "name": "National Geographic 1888-01 Oct 001-1.pdf",
+   "source": "original",
+   "size": "5196132",
+   "md5": "0829f23043563f6ec1db8a25cf48c951",
+   "sha1": "7cabc499048539e59d9b9e986ec248bb9331e967",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1889-01 001-2.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1889-01 001-2_hocr.html",
+   "size": "2564645",
+   "md5": "66a2d0a2b673bc843aedc02f4baa4f68",
+   "sha1": "073186e807fef5dee3148f08be90b702157e67ba"
+  },
+  {
+   "name": "National Geographic 1889-01 001-2.pdf",
+   "source": "original",
+   "size": "3997086",
+   "md5": "f42ae4a9e79df368c70352290266d41f",
+   "sha1": "6fd21485ef838dee7d0e58ba60282409d961ae81",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1889-02 001-3.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1889-02 001-3_hocr.html",
+   "size": "8228589",
+   "md5": "e4af13d402823cee1b47948713cf63bc",
+   "sha1": "7d35471aacf6233a94218045eca070d946e27735"
+  },
+  {
+   "name": "National Geographic 1889-02 001-3.pdf",
+   "source": "original",
+   "size": "4861899",
+   "md5": "5ecb73430781754ba63093730a778c72",
+   "sha1": "18126a566f2e8028a26080d34dca947047a238de",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1889-03 001-4.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1889-03 001-4_hocr.html",
+   "size": "9607248",
+   "md5": "e78b6d71bfe25c91d2a6a09d000918e8",
+   "sha1": "ec34f0f4f9276ea882c9b0cbae34f0c44fd65ed0"
+  },
+  {
+   "name": "National Geographic 1889-03 001-4.pdf",
+   "source": "original",
+   "size": "3380354",
+   "md5": "2f0f35c5699acec52306c6eda8e36392",
+   "sha1": "05da1a411fbe31d84a58ae2313fbe7a97df4d41b",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1890-01 002-1.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1890-01 002-1_hocr.html",
+   "size": "2315657",
+   "md5": "f1d243b169a63158789894a66cd4c63a",
+   "sha1": "bc9b005e9c1a6b389eae0dd8cbdbde29a31cd940"
+  },
+  {
+   "name": "National Geographic 1890-01 002-1.pdf",
+   "source": "original",
+   "size": "3668807",
+   "md5": "9a33388333e73f3733224a82f9a823bb",
+   "sha1": "d2fa576febaa9b21871f8304854d6cb6dcbd4f1e",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1890-02 002-2.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1890-02 002-2_hocr.html",
+   "size": "4908540",
+   "md5": "db0adabd2cb01583bccdd0f1c5531ade",
+   "sha1": "25ea2410edcf4344d411105789695c37416110fc"
+  },
+  {
+   "name": "National Geographic 1890-02 002-2.pdf",
+   "source": "original",
+   "size": "4338887",
+   "md5": "3bd9477b8af864d02797b66c1dc8ea65",
+   "sha1": "a81e6f2f51cbf850bac817fa3d766683d7686936",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1890-03 002-3.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1890-03 002-3_hocr.html",
+   "size": "10554024",
+   "md5": "40cbc7aa90712cb35106461c26428ff2",
+   "sha1": "623446c8336f492310ee64e0af33b9276d87425a"
+  },
+  {
+   "name": "National Geographic 1890-03 002-3.pdf",
+   "source": "original",
+   "size": "3587369",
+   "md5": "3d60dcac0fc74c66f7891a0bb14a6671",
+   "sha1": "7bf770bcbcda455bd2a9006183fb22dd1ce7c502",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1890-04 002-4.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1890-04 002-4_hocr.html",
+   "size": "3706134",
+   "md5": "dc165c42ee2f3214bbc10bcbc9e1d1c2",
+   "sha1": "f3b7cd9457e57e70ceaa2be2e95cc1430263674b"
+  },
+  {
+   "name": "National Geographic 1890-04 002-4.pdf",
+   "source": "original",
+   "size": "2861271",
+   "md5": "6a0bb89c65fc12d66feb3b13eb20ccd6",
+   "sha1": "7d7e08a25e263f6697758bd192c47df5c24c27d7",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1890-05 002-5.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1890-05 002-5_hocr.html",
+   "size": "2069794",
+   "md5": "e1b787e6dd6793a0039ec028ebd3af1c",
+   "sha1": "22ef7e044a1dfe5c5845491758e716b744aaa0ef"
+  },
+  {
+   "name": "National Geographic 1890-05 002-5.pdf",
+   "source": "original",
+   "size": "2037402",
+   "md5": "5ab0aae7069d74075505d7fc118d464c",
+   "sha1": "a2f04265ba544f258c63cfd6c983ccbed86a2e54",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1891-01 003-1 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1891-01 003-1 Mar_hocr.html",
+   "size": "3926012",
+   "md5": "3b3de3fcea78bb1deb9f781879cacd56",
+   "sha1": "4adeae3617dc893ef1c4bfcfc0a3ff884d573bf8"
+  },
+  {
+   "name": "National Geographic 1891-01 003-1 Mar.pdf",
+   "source": "original",
+   "size": "1431943",
+   "md5": "f19003bd536e20e5a7b18de7e1238fa4",
+   "sha1": "cf3401d853377bb4f1f5dfaf428cba2074ca700a",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1891-02 003-2 Apr.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1891-02 003-2 Apr_hocr.html",
+   "size": "2314460",
+   "md5": "3e83c4c4abd865d86b7d7f4d4d93ea81",
+   "sha1": "b7a5f8c50146d08907e5e7c38179529d54f200c1"
+  },
+  {
+   "name": "National Geographic 1891-02 003-2 Apr.pdf",
+   "source": "original",
+   "size": "526959",
+   "md5": "1597db8779e5fccf6b259869fbe985a8",
+   "sha1": "6fa3cb26939bb68fa24c44212f757c819dc981bc",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1891-03 003-3 May.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1891-03 003-3 May_hocr.html",
+   "size": "1060537",
+   "md5": "d152fcc1e20db6275559bc39ee24a889",
+   "sha1": "0fbd3c9bc72d5352af054fdae03258315759206e"
+  },
+  {
+   "name": "National Geographic 1891-03 003-3 May.pdf",
+   "source": "original",
+   "size": "588733",
+   "md5": "100f8178fda2503a2c455b3dc05dc506",
+   "sha1": "2542b23f0f0854d17bca4bf4ea9fe97113b254f3",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1891-04 003-4 May.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1891-04 003-4 May_hocr.html",
+   "size": "14475053",
+   "md5": "a9a2fd14e34ae2a51615e980eb8d4341",
+   "sha1": "50a5d74cca77e6630ed7092dfdf46075ae09e411"
+  },
+  {
+   "name": "National Geographic 1891-04 003-4 May.pdf",
+   "source": "original",
+   "size": "6952361",
+   "md5": "e7f19543c6e17256eb0e88a205c4a74b",
+   "sha1": "bd94c927722d0478edf430010380e15058162d29",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1892-01 003-5 Feb.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1892-01 003-5 Feb_hocr.html",
+   "size": "7091466",
+   "md5": "f821fe576ae62a4e7a5fb78c45275705",
+   "sha1": "cc7b17be3efcd50fef4466a0a9de08ee48b8f667"
+  },
+  {
+   "name": "National Geographic 1892-01 003-5 Feb.pdf",
+   "source": "original",
+   "size": "3180259",
+   "md5": "051f21e7c9ca8ddaf459eaa423ffd121",
+   "sha1": "13889bd583969b666c60255e806d300a86cee843",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1892-02 004-1 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1892-02 004-1 Mar_hocr.html",
+   "size": "2916785",
+   "md5": "90f3451643407badd6a4116cf72e7573",
+   "sha1": "fae11890b4dd9733a698b7c2954a3ba50e262b18"
+  },
+  {
+   "name": "National Geographic 1892-02 004-1 Mar.pdf",
+   "source": "original",
+   "size": "922910",
+   "md5": "080b820ce553792ec742cc7f8ef85b47",
+   "sha1": "ac1ba992002cea90a96eaa34b01b4e2847028b2b",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1892-03 004-2 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1892-03 004-2 Mar_hocr.html",
+   "size": "10689633",
+   "md5": "9c7f4bbe57fd61f019aa9376717dbd3b",
+   "sha1": "e3c1a386ef071152426e66ab152ec5ef14183977"
+  },
+  {
+   "name": "National Geographic 1892-03 004-2 Mar.pdf",
+   "source": "original",
+   "size": "3230829",
+   "md5": "54de947146f07d7c6b100ba95a831201",
+   "sha1": "2532b9f5c8ed59de4f743315e6da6518ba87a28d",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1892-04 004-3 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1892-04 004-3 Mar_hocr.html",
+   "size": "2410625",
+   "md5": "d91cb15b12eed95884ea691e7dfa244e",
+   "sha1": "f227f2e8925429a63f20a6dedec55a98d037684d"
+  },
+  {
+   "name": "National Geographic 1892-04 004-3 Mar.pdf",
+   "source": "original",
+   "size": "836355",
+   "md5": "cb99285b2db4bf7ee25e7f09a4f0cac0",
+   "sha1": "392d42d4e654e16852dfa2c22f2b64a2943128eb",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1892-05 004-4 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1892-05 004-4 Mar_hocr.html",
+   "size": "2351783",
+   "md5": "1d166acf09fae5d8d75416aadcba7e26",
+   "sha1": "70a52f8e13457bae506afcaebdfb357f0e22ded2"
+  },
+  {
+   "name": "National Geographic 1892-05 004-4 Mar.pdf",
+   "source": "original",
+   "size": "789833",
+   "md5": "92340c1d51874b4809ab3abdfcb55b9d",
+   "sha1": "a2c6184968bf7de819ac3e9194d6273a957cc319",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1892-06 004-5 May.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1892-06 004-5 May_hocr.html",
+   "size": "4822822",
+   "md5": "a3f7535d286ad52477ec4c48530dfd00",
+   "sha1": "2437d823a90a8a9829525a0f021fb1c5c691ba79"
+  },
+  {
+   "name": "National Geographic 1892-06 004-5 May.pdf",
+   "source": "original",
+   "size": "2468044",
+   "md5": "3bf8cc2095f2f31803fb34c4e7019dec",
+   "sha1": "f3d7c3f5c5a845b82d17a0e77b768d96451c97da",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-01 004-6 Feb.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-01 004-6 Feb_hocr.html",
+   "size": "2747140",
+   "md5": "88175c4b60b12eefb2788ea0bc52d405",
+   "sha1": "42dd6bd589b5ea8fcecfb970f7af9994307afaeb"
+  },
+  {
+   "name": "National Geographic 1893-01 004-6 Feb.pdf",
+   "source": "original",
+   "size": "2191853",
+   "md5": "d9ee8811d1e42abea678b53cbd7ea865",
+   "sha1": "3cc04957153b813fa9210a200dcb4d86b48ce3ca",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-02 004-7 Feb.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-02 004-7 Feb_hocr.html",
+   "size": "2672374",
+   "md5": "2f9144e6243f1d6c3e5cf875f59f31ef",
+   "sha1": "8c43632b89489c37f27528236f22c998b40b9a50"
+  },
+  {
+   "name": "National Geographic 1893-02 004-7 Feb.pdf",
+   "source": "original",
+   "size": "1355730",
+   "md5": "cc834783d59b6958dc5862d4cfe06066",
+   "sha1": "1336d8078c4b72faf6f07b3fd800ca35aeeacb01",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-03 005-2 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-03 005-2 Mar_hocr.html",
+   "size": "7421299",
+   "md5": "c995cf6a17faaf8fd5b554823b8edab2",
+   "sha1": "3fe967fab0b955fff4b379b34f9862eb5f6f319c"
+  },
+  {
+   "name": "National Geographic 1893-03 005-2 Mar.pdf",
+   "source": "original",
+   "size": "1636350",
+   "md5": "2498ec8db1d08a7ca815eff91b6ac667",
+   "sha1": "977c291417318c6e358dc77708a5e0b4b78b376c",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-04 005-1 Apr.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-04 005-1 Apr_hocr.html",
+   "size": "11951108",
+   "md5": "457cee38afd0970fd3df25d1e1a63792",
+   "sha1": "02b418d2dc0b7fef3082a12153f26f2125f0c514"
+  },
+  {
+   "name": "National Geographic 1893-04 005-1 Apr.pdf",
+   "source": "original",
+   "size": "1235357",
+   "md5": "93b31420b959fa39d928299f300f78a4",
+   "sha1": "d4963210ac913e3e51c7cab64d694cf328957dac",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-05 005-3 Apr.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-05 005-3 Apr_hocr.html",
+   "size": "2376765",
+   "md5": "003d2e65bca356918cf71884e316c57f",
+   "sha1": "78d86878dfc402ef5eee422c1f8e628c7a57a7ea"
+  },
+  {
+   "name": "National Geographic 1893-05 005-3 Apr.pdf",
+   "source": "original",
+   "size": "648856",
+   "md5": "21ed56162c457471f7f3a3f720d5ba09",
+   "sha1": "cb9ade99ca75e46265b8fe80adfd7db497b77a15",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-06 005-6 May.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-06 005-6 May_hocr.html",
+   "size": "2007547",
+   "md5": "ac5c8972e8d85842e859e7330424561c",
+   "sha1": "db6929e3f10b9cbf03e20945668666af213b37b4"
+  },
+  {
+   "name": "National Geographic 1893-06 005-6 May.pdf",
+   "source": "original",
+   "size": "2158791",
+   "md5": "f754b17735436ceec5e196c4c490207c",
+   "sha1": "92ff4a4d4f871d867957bbf6e84be57f1f43388d",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1893-07 005-4 Jul.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1893-07 005-4 Jul_hocr.html",
+   "size": "4250412",
+   "md5": "90d163972a61478e55cb7018491c2b1f",
+   "sha1": "8ef30dcd05846414e9c0da5e86c6e6c57957337b"
+  },
+  {
+   "name": "National Geographic 1893-07 005-4 Jul.pdf",
+   "source": "original",
+   "size": "1516866",
+   "md5": "4f0d157050d9a3c655aad0113474a2b4",
+   "sha1": "125e0996681d89e8dd4f23be3c5a799b99297158",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1894-01 005-5 Jan.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1894-01 005-5 Jan_hocr.html",
+   "size": "1777168",
+   "md5": "ea3c79869492aa40def87838443c6f68",
+   "sha1": "9c996d9611868b5b3a5a82e2cca84bee02998528"
+  },
+  {
+   "name": "National Geographic 1894-01 005-5 Jan.pdf",
+   "source": "original",
+   "size": "6123981",
+   "md5": "240e28ceee0da534e421804190a4ecf5",
+   "sha1": "c239ecf4c71ba24ea0cbde47b250887fd9ddfaa0",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1894-02 006-1 Feb.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1894-02 006-1 Feb_hocr.html",
+   "size": "946885",
+   "md5": "ebe57db9fe30d89ba5d1f8ca660ca428",
+   "sha1": "781959a5eb52f2fa5d6ec1141f037eed5e8b842b"
+  },
+  {
+   "name": "National Geographic 1894-02 006-1 Feb.pdf",
+   "source": "original",
+   "size": "969238",
+   "md5": "0d9b642617cb272e0972fe1e177a9605",
+   "sha1": "91dc170b16aeb0eb25117e8baea94fc4b2127222",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1894-03 006-2 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1894-03 006-2 Mar_hocr.html",
+   "size": "1908140",
+   "md5": "7ef8642cc1aeb7de04feaf946c381929",
+   "sha1": "c31ebae86eee6cb4590d19dc35760a55c15f1493"
+  },
+  {
+   "name": "National Geographic 1894-03 006-2 Mar.pdf",
+   "source": "original",
+   "size": "716426",
+   "md5": "7f8da8383f779cb74f33437dcea89826",
+   "sha1": "ef5073f2df46fdb76ccfe9533afce6830fca8ba1",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1909-09 020-09 Sep.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1909-09 020-09 Sep_hocr.html",
+   "size": "58956258",
+   "md5": "8ee816ba7a1e20261ee1d2b77e687ef5",
+   "sha1": "2f53dcf2bf96106605fa1632d8f0c6d614e29783"
+  },
+  {
+   "name": "National Geographic 1909-09 020-09 Sep.pdf",
+   "source": "original",
+   "size": "4758947",
+   "md5": "b5c8c788f3c258e79718a292355bcd9b",
+   "sha1": "cd995eadb67c4262bf0b6704bdd693515a3258c1",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1909-10 020-10 Oct.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1909-10 020-10 Oct_hocr.html",
+   "size": "57945988",
+   "md5": "583397ad4bb0de659166524a7a86e178",
+   "sha1": "327150f4bfa2902633c9bee4734793d585a70aa6"
+  },
+  {
+   "name": "National Geographic 1909-10 020-10 Oct.pdf",
+   "source": "original",
+   "size": "4955305",
+   "md5": "504ef29c544fcc708a32ea4e85bc6c17",
+   "sha1": "b7647452945a048a426a2414e23c63c7b0f34092",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1909-11 020-11 Nov.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1909-11 020-11 Nov_hocr.html",
+   "size": "73206585",
+   "md5": "5452755d4e115a8c31ca1432edcd0143",
+   "sha1": "cf72aa649f50548de39633926ee12c0d0f423a52"
+  },
+  {
+   "name": "National Geographic 1909-11 020-11 Nov.pdf",
+   "source": "original",
+   "size": "5591684",
+   "md5": "f86eaae9fab7bb285729e54d44cbc479",
+   "sha1": "1d21e9f1ab7de30462efe9430507526e4a955cf6",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1909-12 020-12 Dec.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1909-12 020-12 Dec_hocr.html",
+   "size": "75851331",
+   "md5": "3b71d53042035bfb55b671fccfab5c57",
+   "sha1": "088d6e4af9c450aaa7c53564ddbc2e73f21f9026"
+  },
+  {
+   "name": "National Geographic 1909-12 020-12 Dec.pdf",
+   "source": "original",
+   "size": "6012655",
+   "md5": "6ba19816f7bd7b3bd4da92543684ab50",
+   "sha1": "6af5e698eb861ebfb71b708fdd37b5ee5637af1f",
+   "format": "Image Container PDF"
+  },
+  {
+   "name": "National Geographic 1910-01 021-01 Jan.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1910-01 021-01 Jan_hocr.html",
+   "size": "51445216",
+   "md5": "a790ea14a5de590e16dbd8a71904fab6",
+   "sha1": "7bb13a062bd238ec9689c2ef7f85e6e36cac9075"
+  },
+  {
+   "name": "National Geographic 1910-01 021-01 Jan.pdf",
+   "source": "original",
+   "size": "6151065",
+   "format": "Image Container PDF",
+   "md5": "ab41bbac427cee82924c7d903f7286a4",
+   "sha1": "f6f4ec518adb805dc8f46af916cb6f195d1b2dce"
+  },
+  {
+   "name": "National Geographic 1910-02 021-02 Feb.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1910-02 021-02 Feb_hocr.html",
+   "size": "67569882",
+   "md5": "bb1673cb2c64ecc8c7cb8969da5d60e6",
+   "sha1": "90362eb087245b1c0751b427f180726cbd62072b"
+  },
+  {
+   "name": "National Geographic 1910-02 021-02 Feb.pdf",
+   "source": "original",
+   "size": "6238122",
+   "format": "Image Container PDF",
+   "md5": "562a5bd0bbdcdfc162473e41d6cccb9c",
+   "sha1": "e17e81f66b67e9de936bc72f62e4a29e7fa6b760"
+  },
+  {
+   "name": "National Geographic 1910-03 021-03 Mar.epub",
+   "source": "derivative",
+   "hocr_epub_module_version": "0.0.1",
+   "hocr_epub_hocr_version": "1.1.66",
+   "format": "EPUB",
+   "original": "National Geographic 1910-03 021-03 Mar_hocr.html",
+   "size": "69578785",
+   "md5": "7d529445ed78533fb829ef636886c700",
+   "sha1": "f3ee02e04a60d8d64df4783ac13ee75cbc17427f"
+  },
+  {
+   "name": "National Geographic 1910-03 021-03 Mar.pdf",
+   "source": "original",
+   "size": "5717948",
+   "format": "Image Container PDF",
+   "md5": "25fc906cd4f5771c474a0a9cfcbb9970",
+   "sha1": "813490670dd51da11f3b4cc374bdefd0cb5f77f1"
+  }
+ ]
+}

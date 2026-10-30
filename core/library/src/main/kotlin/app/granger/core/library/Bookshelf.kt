@@ -7,6 +7,7 @@ import app.granger.core.books.DrmKind
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfInspector
+import app.granger.core.books.PdfToEpub
 import app.granger.core.books.TextDecoding
 import app.granger.core.books.TextToEpub
 import java.io.File
@@ -87,6 +88,25 @@ interface Bookshelf {
     suspend fun remove(id: String): Boolean
 
     /**
+     * The PDF the ebook [bookId] was made from (Plan IA), as a hidden book to open ([BookOrigin.PAGES]); null when it
+     * has none (it wasn't made from one, or its original pages were removed).
+     */
+    suspend fun originalPages(bookId: String): Book? = null
+
+    /** The size of [bookId]'s original pages, or null when it has none. */
+    suspend fun originalPagesBytes(bookId: String): Long? = null
+
+    /** Deletes the PDF the ebook [bookId] was made from, keeping the ebook. False if it can't be deleted. */
+    suspend fun removeOriginalPages(bookId: String): Boolean = false
+
+    /**
+     * Makes the PDF book [bookId] an ebook (Plan IA Decisions 6 and 9): the same book, now the EPUB, its PDF kept as its
+     * original pages, which keep the PDF's place, bookmarks and highlights. Null when it isn't a PDF here; else the
+     * conversion's report, the book unchanged unless it passes.
+     */
+    suspend fun readAsEbook(bookId: String): PdfToEpub.Report? = null
+
+    /**
      * Registers [file], a PDF copied out of pack [zimId] at [path], as a pack document: a hidden book
      * ([BookOrigin.PACK]) so it keeps its place and shows on the rail. It is called by its [listedTitle] in the pack's
      * own list of documents ([NautilusDatabase]), the entry's [title], the PDF's own title, the [linkText] tapped in the
@@ -134,9 +154,17 @@ class RoomBookshelf(
 
     override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? =
         withContext(io) {
-            val pdf = if (ComicToPdf.isComicName(file.name)) convertComic(file) ?: return@withContext null else file
+            val comic = ComicToPdf.isComicName(file.name)
+            val pdf = if (comic) convertComic(file) ?: return@withContext null else file
             if (isPdfName(pdf.name)) {
                 val meta = (PdfInspector.inspect(pdf) as? Inspection.Ok)?.meta ?: return@withContext null
+                // An archive.org upload made on a computer is read as an ebook, its PDF kept as its pages (Plan IA); not a
+                // comic's pages, and not the PDF got beside a text ("#pdf"), which was asked for as a PDF.
+                if (origin == BookOrigin.ARCHIVE_ORG && !comic && '#' !in ref) {
+                    ebookFrom(pdf, details?.title.orEmpty(), details?.author.orEmpty(), details?.language.orEmpty())?.let { (epub, epubMeta) ->
+                        return@withContext register(BookIds.of(origin, ref), origin, ref, epub, epubMeta, details)
+                    }
+                }
                 return@withContext register(BookIds.of(origin, ref), origin, ref, pdf, meta, details, BookFormat.PDF)
             }
             val epub = if (file.extension.equals("txt", ignoreCase = true)) {
@@ -170,6 +198,87 @@ class RoomBookshelf(
         } finally {
             partial.delete()
         }
+    }
+
+    /**
+     * Converts [pdf] to `<name>.pdf.epub` beside it when it passes [PdfToEpub]'s gate; null (with the reason logged) when
+     * it doesn't, or isn't born-digital. The PDF stays: it is the book's original pages.
+     */
+    private fun ebookFrom(pdf: File, title: String, author: String, language: String): Pair<File, BookMeta>? {
+        val target = File(pdf.parentFile, pdf.name + ".epub")
+        val report = try {
+            PdfToEpub.convert(pdf, target, title, author, language)
+        } catch (e: OutOfMemoryError) {
+            android.util.Log.w("Granger", "Making ${pdf.name} an ebook ran out of memory")
+            target.delete()
+            return null
+        }
+        android.util.Log.i("Granger", "Ebook from ${pdf.name}: ${report.why} (${report.origin}, ${report.pages} pages, " +
+            "${report.chapters} chapters from ${report.chapterSource}, kept ${(report.keptShare * 100).toInt()}%)")
+        if (!report.passes) return null
+        val meta = (EpubInspector.inspect(target) as? Inspection.Ok)?.meta
+        if (meta == null) target.delete()
+        return meta?.let { target to it }
+    }
+
+    /** The PDF [ebook] was made from: `x.pdf` for `x.pdf.epub`; null for an ebook that wasn't. */
+    private fun pagesFile(ebook: File): File? =
+        ebook.takeIf { it.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true) }?.let { File(it.parentFile, it.name.dropLast(".epub".length)) }
+
+    override suspend fun originalPages(bookId: String): Book? = withContext(io) {
+        val book = dao.get(bookId) ?: return@withContext null
+        val pdf = pagesFile(File(book.filePath))?.takeIf { it.isFile } ?: return@withContext null
+        val id = BookIds.pagesOf(bookId)
+        dao.get(id)?.takeIf { File(it.filePath) == pdf && it.status == PackStatus.OK }?.let { return@withContext it }
+        val meta = (PdfInspector.inspect(pdf) as? Inspection.Ok)?.meta ?: return@withContext null
+        register(id, BookOrigin.PAGES, bookId.removePrefix("book:"), pdf, meta,
+            BookDetails(book.title, book.author, book.date, emptyList(), "", book.language), BookFormat.PDF)
+    }
+
+    override suspend fun originalPagesBytes(bookId: String): Long? = withContext(io) {
+        val book = dao.get(bookId) ?: return@withContext null
+        pagesFile(File(book.filePath))?.takeIf { it.isFile }?.length()
+    }
+
+    override suspend fun removeOriginalPages(bookId: String): Boolean = withContext(io) {
+        val book = dao.get(bookId) ?: return@withContext false
+        val pdf = pagesFile(File(book.filePath)) ?: return@withContext false
+        if (pdf.exists() && !pdf.delete()) return@withContext false
+        dropPages(bookId)
+        true
+    }
+
+    /** Forgets [bookId]'s original pages' row, cover, place and marks. */
+    private suspend fun dropPages(bookId: String) {
+        val id = BookIds.pagesOf(bookId)
+        dao.get(id)?.coverPath?.let { File(it).delete() }
+        db.withTransaction {
+            dao.delete(id)
+            dao.deletePosition(id)
+            dao.deleteMarks(id)
+        }
+    }
+
+    override suspend fun readAsEbook(bookId: String): PdfToEpub.Report? = withContext(io) {
+        val book = dao.get(bookId) ?: return@withContext null
+        if (book.format != BookFormat.PDF || !book.onShelf) return@withContext null
+        val pdf = File(book.filePath).takeIf { it.isFile } ?: return@withContext null
+        val target = File(pdf.parentFile, pdf.name + ".epub")
+        val report = PdfToEpub.convert(pdf, target, book.title, book.author, book.language)
+        if (!report.passes) return@withContext report
+        val meta = (EpubInspector.inspect(target) as? Inspection.Ok)?.meta
+            ?: return@withContext report.copy(passes = false, why = "the ebook didn't open").also { target.delete() }
+        // The PDF's place, bookmarks and highlights are on its pages: they go with them.
+        val pages = BookIds.pagesOf(bookId)
+        db.withTransaction {
+            dao.movePosition(bookId, pages)
+            dao.moveMarks(bookId, pages)
+            dao.deleteChunks(bookId)
+        }
+        register(bookId, book.origin, book.sourceRef, target, meta,
+            BookDetails(book.title, book.author, book.date, book.subjects.split("; ").filter { it.isNotBlank() }, book.description, book.language))
+        originalPages(bookId)
+        report
     }
 
     /** Converts the comic [archive] to `<name>.pdf` beside it; null if it can't be read. Leaves the archive in place. */
@@ -302,7 +411,7 @@ class RoomBookshelf(
         val archiveFiles = archiveDirs.flatMap { strays(it, knownPaths) }
         val candidates =
             grangerFiles.map { Triple(BookOrigin.GRANGER, it.nameWithoutExtension.substringBeforeLast('_'), it) } +
-                archiveFiles.map { Triple(BookOrigin.ARCHIVE_ORG, it.nameWithoutExtension, it) } +
+                archiveFiles.map { Triple(BookOrigin.ARCHIVE_ORG, it.name.removeSuffix(EBOOK_FROM_PDF).let { n -> if (n == it.name) it.nameWithoutExtension else n }, it) } +
                 importFiles.map { file -> Triple(BookOrigin.IMPORT, file.inputStream().use { sha256(it) }, file) }
 
         for ((key, group) in candidates.groupBy { (origin, ref, _) -> origin to ref }) {
@@ -311,7 +420,8 @@ class RoomBookshelf(
             val existing = dao.get(id)
             // Older snapshots of a download can be left behind: keep a row whose file is still there, else take the newest.
             if (existing != null && File(existing.filePath).exists()) continue
-            val file = group.maxBy { it.third.name }.third
+            // An ebook made from a PDF wins over the PDF beside it (its original pages).
+            val file = (group.filter { it.third.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true) }.ifEmpty { group }).maxBy { it.third.name }.third
             when (val inspection = inspect(file)) {
                 is Inspection.Ok -> register(id, origin, ref, file, inspection.meta, format = formatOf(file))
                 else -> dao.upsert(
@@ -327,8 +437,13 @@ class RoomBookshelf(
         val book = dao.get(id) ?: return@withContext true
         val file = File(book.filePath)
         if (file.exists() && !file.delete()) return@withContext false
+        // An ebook made from a PDF takes its original pages with it.
+        pagesFile(file)?.let { pdf ->
+            if (pdf.exists() && !pdf.delete()) return@withContext false
+            dropPages(id)
+        }
         // A converted text or comic book's source stays beside it; left alone, the next refresh() would convert it again.
-        if (book.origin == BookOrigin.ARCHIVE_ORG) {
+        if (book.origin == BookOrigin.ARCHIVE_ORG && !file.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true)) {
             val sources = if (book.format == BookFormat.EPUB) listOf("txt") else listOf("cbz", "cbr")
             for (extension in sources) {
                 val source = File(file.parentFile, file.nameWithoutExtension + ".$extension")
@@ -487,6 +602,9 @@ class RoomBookshelf(
         const val COVER_HEIGHT_PX = 600
 
         fun isPdfName(name: String) = name.endsWith(".pdf", ignoreCase = true)
+
+        /** An ebook made from a PDF is named for it: `x.pdf.epub` beside `x.pdf` (Plan IA). */
+        const val EBOOK_FROM_PDF = ".pdf.epub"
 
         fun String?.orElse(fallback: String) = this?.takeIf { it.isNotBlank() } ?: fallback
 
