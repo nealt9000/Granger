@@ -10,5 +10,9 @@
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
+        <!-- The download notification's Pause (Plan DL Decision 9). -->
+        <receiver
+            android:name="app.granger.core.downloads.DownloadActionReceiver"
+            android:exported="false" />
     </application>
 </manifest>

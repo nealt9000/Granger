@@ -25,10 +25,13 @@ interface RecordRunner {
 interface QueuePrefs {
     /** Pause all (Plan DL Decision 3): nothing downloads until Resume. */
     var paused: Boolean
+
+    /** When something was queued into an empty queue: where this round of downloads began (Decision 6). */
+    var batchStartedAt: Long
 }
 
-/** Pause all kept in memory only: for tests and previews. */
-class MemoryQueuePrefs(override var paused: Boolean = false) : QueuePrefs
+/** The queue's settings kept in memory only: for tests and previews. */
+class MemoryQueuePrefs(override var paused: Boolean = false, override var batchStartedAt: Long = 0) : QueuePrefs
 
 /** Why the queue stopped working through records, and when it should look again. */
 sealed interface QueueRest {
@@ -59,7 +62,18 @@ class DownloadQueue(
     private val now: () -> Long = System::currentTimeMillis,
     /** How often a run checks it may still use this network. */
     private val networkCheckMillis: Long = 5_000,
+    /** How often [progress] is brought up to date while a file downloads. */
+    private val progressEveryMillis: Long = 1_000,
+    /** The clock [TransferRate] reads: monotonic in the app. */
+    private val elapsed: () -> Long = now,
 ) {
+    private val rate = TransferRate()
+    private val _progress = MutableStateFlow(QueueProgress())
+    @Volatile private var bytesNow = 0L
+
+    /** The file downloading now, how far and how fast (Plan DL Decision 6); empty when nothing runs in this process. */
+    val progress: StateFlow<QueueProgress> = _progress.asStateFlow()
+
     private val lock = Any()
     private var draining = false
     private var dirty = false
@@ -90,6 +104,10 @@ class DownloadQueue(
         job.cancel()
         job.join()
     }
+
+    /** The queue as the notification shows it. */
+    suspend fun summary(): QueueSummary =
+        DownloadQueueSummary.of(dao.getAll(), DownloadLive(progress.value, prefs.paused, prefs.batchStartedAt, unmetered()), now())
 
     /** Works through the runnable records until none is left, then says why it stopped. */
     suspend fun drain(onProgress: (DownloadRecord, done: Long, total: Long) -> Unit = { _, _, _ -> }): QueueRest {
@@ -124,6 +142,8 @@ class DownloadQueue(
         } finally {
             synchronized(lock) { draining = false }
             _current.value = null
+            _progress.value = QueueProgress()
+            rate.reset()
         }
     }
 
@@ -148,9 +168,26 @@ class DownloadQueue(
             record
         }
         _current.value = running
+        bytesNow = record.bytesDone
+        _progress.value = QueueProgress(record.itemId, record.hash, record.bytesDone, rate.bytesPerSecond(elapsed()))
+        // The first report is what the part file already held: only bytes after it are counted as speed.
+        var last = -1L
         val outcome = try {
             coroutineScope {
-                val job = async { runner.run(record.itemId, record.hash) { done, total -> onProgress(running, done, total) } }
+                val job = async {
+                    runner.run(record.itemId, record.hash) { done, total ->
+                        if (last >= 0 && done > last) rate.add(done - last, elapsed())
+                        last = done
+                        bytesNow = done
+                        onProgress(running, done, total)
+                    }
+                }
+                val ticker = launch {
+                    while (job.isActive) {
+                        _progress.value = QueueProgress(record.itemId, record.hash, bytesNow, rate.bytesPerSecond(elapsed()))
+                        delay(progressEveryMillis)
+                    }
+                }
                 synchronized(lock) { run = job }
                 // Wi-Fi lost, or Wi-Fi only turned on, while on mobile data: the file goes back to waiting.
                 val watch = launch {
@@ -167,6 +204,7 @@ class DownloadQueue(
                     null
                 } finally {
                     watch.cancel()
+                    ticker.cancel()
                 }
             }
         } finally {

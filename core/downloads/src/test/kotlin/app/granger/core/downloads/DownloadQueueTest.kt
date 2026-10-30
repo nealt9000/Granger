@@ -88,7 +88,10 @@ class DownloadQueueTest {
     )
 
     private fun queueOf(recordRunner: RecordRunner, networkCheckMillis: Long = Long.MAX_VALUE) =
-        DownloadQueue(dao, recordRunner, prefs, unmetered = { unmetered }, now = { clock }, networkCheckMillis = networkCheckMillis)
+        DownloadQueue(
+            dao, recordRunner, prefs, unmetered = { unmetered }, now = { clock }, networkCheckMillis = networkCheckMillis,
+            progressEveryMillis = Long.MAX_VALUE,
+        )
 
     init {
         queue = queueOf(runner)
@@ -308,5 +311,44 @@ class DownloadQueueTest {
         runner.holds.getValue("a").complete(Unit)
         drain.join()
         assertThat(queue.wake()).isTrue()
+    }
+
+    @Test fun aNewRoundStartsWhenSomethingIsQueuedIntoAnEmptyQueue() = runTest {
+        clock = 5_000
+        group("onboarding:1", "a")
+        assertThat(prefs.batchStartedAt).isEqualTo(5_000)
+        clock = 6_000
+        manager.enqueue(spec("b"), root, true)
+        assertThat(prefs.batchStartedAt).isEqualTo(5_000)
+        queue.drain()
+        clock = 9_000
+        manager.enqueue(spec("c"), root, true)
+        assertThat(prefs.batchStartedAt).isEqualTo(9_000)
+    }
+
+    @Test fun theSpeedCountsOnlyBytesFetchedNow() = runTest {
+        val reported = CompletableDeferred<Unit>()
+        val hold = CompletableDeferred<Unit>()
+        val reporting = object : RecordRunner by runner {
+            override suspend fun run(itemId: String, hash: String, onProgress: (Long, Long) -> Unit): RunOutcome {
+                // What the part file held, then 1 000 bytes a second for 21 s.
+                onProgress(5_000, 100_000)
+                repeat(21) { clock += 1_000; onProgress(5_000L + (it + 1) * 1_000, 100_000) }
+                reported.complete(Unit)
+                hold.await()
+                return runner.run(itemId, hash, onProgress)
+            }
+        }
+        queue = DownloadQueue(
+            dao, reporting, prefs, unmetered = { true }, now = { clock }, networkCheckMillis = Long.MAX_VALUE, progressEveryMillis = 1_000,
+        )
+        group("onboarding:1", "a")
+        val drain = launch { queue.drain() }
+        reported.await()
+        advanceTimeBy(1_001)
+        assertThat(queue.progress.value).isEqualTo(QueueProgress("a", SHA_1, bytesDone = 26_000, bytesPerSecond = 1_000))
+        hold.complete(Unit)
+        drain.join()
+        assertThat(queue.progress.value).isEqualTo(QueueProgress())
     }
 }

@@ -34,6 +34,7 @@ import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.file
 import app.granger.core.downloads.WorkManagerScheduler
 import app.granger.core.downloads.isUnmetered
+import app.granger.core.downloads.unmeteredFlow
 import app.granger.core.speech.InstalledVoices
 import app.granger.core.speech.ReadAddress
 import app.granger.core.speech.ReadSource
@@ -130,6 +131,9 @@ import app.granger.research.ModelsAdapter
 import app.granger.research.installedModelsOf
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import android.os.SystemClock
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -196,6 +200,7 @@ open class GrangerApp : Application(), DownloadsHost {
     }
 
     override val downloadQueue: DownloadQueue get() = container.downloadQueue
+    override val downloads: Downloads get() = container.downloads
 }
 
 /**
@@ -463,13 +468,18 @@ class AppContainer(context: Context) {
 
     /** The one download queue (Plan DL Decision 1), drained by the `download-queue` worker. */
     val downloadQueue: DownloadQueue by lazy {
-        DownloadQueue(downloadDao, downloadRunner, downloadPrefs, unmetered = { isUnmetered(context) })
+        DownloadQueue(
+            downloadDao, downloadRunner, downloadPrefs, unmetered = { isUnmetered(context) }, elapsed = SystemClock::elapsedRealtime,
+        )
     }
 
     val downloads: Downloads = DownloadManager(
         dao = downloadDao,
         scheduler = WorkManagerScheduler(context) { downloadQueue },
         prefs = downloadPrefs,
+        // Deferred: the queue needs the runner, made below.
+        progress = flow { emitAll(downloadQueue.progress) },
+        unmetered = unmeteredFlow(context),
         // Every installed pack and book counts towards the cap, SD card included (spec "Storage cap").
         // Books are not in the library yet, so they come from the downloads ledger.
         installedPackBytes = {

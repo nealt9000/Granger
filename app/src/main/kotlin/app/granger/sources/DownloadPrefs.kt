@@ -38,4 +38,8 @@ class SharedDownloadPrefs(context: Context) : DownloadPrefs {
     override var paused: Boolean
         get() = prefs.getBoolean("paused", false)
         set(value) = prefs.edit().putBoolean("paused", value).apply()
+
+    override var batchStartedAt: Long
+        get() = prefs.getLong("batchStartedAt", 0)
+        set(value) = prefs.edit().putLong("batchStartedAt", value).apply()
 }

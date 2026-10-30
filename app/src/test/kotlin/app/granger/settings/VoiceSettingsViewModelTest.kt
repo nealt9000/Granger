@@ -56,6 +56,7 @@ class VoiceSettingsViewModelTest {
         override var volumePath: String? = null
         override var askBeforeLarge = true
         override var paused = false
+        override var batchStartedAt = 0L
     }
 
     private fun voiceDir(root: File, id: String) {

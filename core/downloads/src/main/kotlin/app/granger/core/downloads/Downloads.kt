@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -42,6 +44,9 @@ interface Downloads {
 
     /** Pause all is on: nothing downloads until [resume]. */
     val paused: StateFlow<Boolean>
+
+    /** What the queue is doing this moment (Plan DL Decision 6): with [records], all a [DownloadQueueSummary] needs. */
+    val live: Flow<DownloadLive>
 
     /** Checks the cap and free space on [volumeRoot], then queues [item]. */
     suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
@@ -127,6 +132,8 @@ class DownloadManager(
     private val dao: DownloadDao,
     private val scheduler: DownloadScheduler,
     private val prefs: QueuePrefs = MemoryQueuePrefs(),
+    progress: Flow<QueueProgress> = flowOf(QueueProgress()),
+    unmetered: Flow<Boolean> = flowOf(true),
     private val installedPackBytes: suspend () -> Long,
     private val capBytes: () -> Long = { Long.MAX_VALUE },
     private val freeBytes: (File) -> Long = { it.usableSpace },
@@ -139,6 +146,19 @@ class DownloadManager(
 
     private val _paused = MutableStateFlow(prefs.paused)
     override val paused: StateFlow<Boolean> = _paused.asStateFlow()
+    private val batch = MutableStateFlow(prefs.batchStartedAt)
+
+    override val live: Flow<DownloadLive> = combine(progress, _paused, batch, unmetered) { p, paused, since, wifi ->
+        DownloadLive(p, paused, since, wifi)
+    }
+
+    /** Something is queued into an empty queue: a new round of downloads begins (Decision 6). */
+    private suspend fun startRoundIfIdle() {
+        if (dao.waiting().isNotEmpty()) return
+        val t = now()
+        prefs.batchStartedAt = t
+        batch.value = t
+    }
 
     /** Starts the queue if anything waits; Pause all keeps it stopped. */
     private suspend fun wake() {
@@ -204,6 +224,7 @@ class DownloadManager(
             // Something you start yourself goes next; a pack's vectors, queued as it installs, follow right after it.
             queueOrder = nextOrder(),
         )
+        startRoundIfIdle()
         dao.upsert(record)
         wake()
         EnqueueResult.Queued
@@ -265,6 +286,7 @@ class DownloadManager(
                 queueOrder = base + i,
             )
         }
+        startRoundIfIdle()
         dao.upsertAll(records)
         wake()
         EnqueueResult.Queued
@@ -283,6 +305,7 @@ class DownloadManager(
         val t = now()
         val queued = dao.forGroup(groupId).filter { it.state == DownloadState.FAILED }.map { it.requeued(t) }
         if (queued.isEmpty()) return@withLock
+        startRoundIfIdle()
         dao.upsertAll(queued)
         wake()
     }
@@ -295,6 +318,7 @@ class DownloadManager(
 
     override suspend fun retry(itemId: String) = mutex.withLock {
         val failed = dao.forItem(itemId).firstOrNull { it.state == DownloadState.FAILED } ?: return@withLock
+        startRoundIfIdle()
         dao.upsert(failed.requeued(now()))
         wake()
     }
@@ -355,6 +379,7 @@ class DownloadManager(
         if (versions.any { it.isActive }) return@withLock
         val installed = versions.firstOrNull { it.state == DownloadState.INSTALLED } ?: return@withLock
         val queued = installed.requeued(now()).copy(bytesDone = 0, verifiedAt = null, queueOrder = nextOrder())
+        startRoundIfIdle()
         dao.upsert(queued)
         wake()
     }

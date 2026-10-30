@@ -9,6 +9,7 @@ import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.Preset
+import app.granger.core.downloads.DownloadLive
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadSpec
 import app.granger.core.downloads.DownloadState
@@ -141,6 +142,8 @@ class FakeDownloads : Downloads {
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
     val pausedFlow = MutableStateFlow(false)
     override val paused: StateFlow<Boolean> = pausedFlow
+    val liveFlow = MutableStateFlow(DownloadLive())
+    override val live: kotlinx.coroutines.flow.Flow<DownloadLive> = liveFlow
     override suspend fun recover() { calls += "recover" }
     override suspend fun pause() { calls += "pause"; pausedFlow.value = true }
     override suspend fun resume() { calls += "resume"; pausedFlow.value = false }
@@ -197,4 +200,5 @@ class FakePrefs(
     override var volumePath: String? = null,
     override var askBeforeLarge: Boolean = true,
     override var paused: Boolean = false,
+    override var batchStartedAt: Long = 0,
 ) : DownloadPrefs
