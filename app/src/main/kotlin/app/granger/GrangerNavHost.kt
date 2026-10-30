@@ -33,6 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.archive.ArchiveScreen
+import app.granger.core.library.PdfColour
 import app.granger.core.player.NowPlaying
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.player.PlayerMode
@@ -908,6 +909,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             restore = container.packDocuments::restore, savedPlace = container.voicePlace,
+                            pdfColour = PdfColour::isColour,
                         )
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },

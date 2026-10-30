@@ -77,11 +77,12 @@ class EbookReaderViewModelTest {
         savedState: SavedStateHandle = SavedStateHandle(),
         pdfOutline: (java.io.File) -> List<app.granger.core.books.OutlineEntry> = { emptyList() },
         pdfLinks: (java.io.File) -> List<app.granger.core.books.PdfLink> = { emptyList() },
+        pdfColour: (java.io.File) -> Boolean = { false },
     ): EbookReaderViewModel {
         val file = tmp.root.resolve("b.epub").apply { if (fileExists) writeText("epub") }
         bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
-        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState, pdfOutline = pdfOutline, pdfLinks = pdfLinks)
+        return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState, pdfOutline = pdfOutline, pdfLinks = pdfLinks, pdfColour = pdfColour)
             .also { testScheduler.advanceUntilIdle() }
     }
 
@@ -297,6 +298,13 @@ class EbookReaderViewModelTest {
         vm.toggleBookmark()
         advanceUntilIdle()
         assertThat(bookshelf.markList.value.single().text).isEqualTo("Filters · p. 3")
+    }
+
+    @Test fun aColourPdfKeepsItsColoursInNight() = runTest(main.dispatcher) {
+        prefsStore.update(ReadingPrefs(theme = ReadingTheme.NIGHT))
+        opener.publication = app.granger.testPdfPublication()
+        val pdf = reader(pdfColour = { true }).navigatorFactory as BookNavigator.Pdf
+        assertThat(pdf.night).isFalse()
     }
 
     @Test fun aPdfsNightFollowsTheTheme() = runTest(main.dispatcher) {
