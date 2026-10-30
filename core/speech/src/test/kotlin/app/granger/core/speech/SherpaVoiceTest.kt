@@ -42,6 +42,21 @@ class SherpaVoiceTest {
     }
 
     @Test
+    fun aDialogueSlotIsReadFromTheConfigAndLeftOutOfTheSpeakers() {
+        val d = dir("vits-piper-en_GB-granger_nanny-medium", "en_GB-granger_nanny-medium.onnx", "tokens.txt", "espeak-ng-data/")
+        val config = File(d, "en_GB-granger_nanny-medium.onnx.json")
+        val v = SherpaVoice.detect(d)!!
+        config.writeText("""{"speaker_id_map": {"narration": 0, "dialogue": 1}, "granger": {"dialogue_speaker": 1}}""")
+        assertThat(SherpaVoice.dialogueSpeaker(v)).isEqualTo(1)
+        assertThat(SherpaVoice.speakerNames(v)).isEmpty()
+        config.writeText("""{"speaker_id_map": {"Maggie": 0, "Martin": 1, "dialogue": 2}, "granger": {"dialogue_speaker": 2}}""")
+        assertThat(SherpaVoice.speakerNames(v)).containsExactly("Maggie", "Martin").inOrder()
+        config.writeText("""{"speaker_id_map": {"Maggie": 0, "Martin": 1}}""")
+        assertThat(SherpaVoice.dialogueSpeaker(v)).isNull()
+        assertThat(SherpaVoice.speakerNames(v)).containsExactly("Maggie", "Martin").inOrder()
+    }
+
+    @Test
     fun kokoroMultiLangVoiceTakesInt8ModelLexiconsAndDict() {
         val d = dir(
             "kokoro-int8-multi-lang-v1_1",

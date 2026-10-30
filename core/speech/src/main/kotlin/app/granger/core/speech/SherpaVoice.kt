@@ -83,7 +83,21 @@ sealed interface SherpaVoice {
             val map = Regex("\"speaker_id_map\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return emptyList()
             val byId = Regex("\"([^\"]+)\"\\s*:\\s*(\\d+)").findAll(map).associate { it.groupValues[2].toInt() to it.groupValues[1] }
             if (byId.size < 2 || byId.values.any { name -> name.all { it.isDigit() } }) return emptyList()
-            return (0 until byId.size).map { byId[it] ?: return emptyList() }
+            val names = (0 until byId.size).map { byId[it] ?: return emptyList() }
+            // A dialogue slot is the same reader, not a speaker to pick; it comes last, so the others keep their ids.
+            val dialogue = dialogueSpeaker(voice) ?: return names
+            return if (dialogue == names.lastIndex && names.size > 2) names.dropLast(1) else emptyList()
+        }
+
+        /**
+         * The speaker id a voice reads quoted speech with, from its config's `granger` block (`"dialogue_speaker": 1`,
+         * V4b), or null when it reads everything with one speaker.
+         */
+        fun dialogueSpeaker(voice: SherpaVoice): Int? {
+            if (voice !is Piper) return null
+            val config = File(voice.model.path + ".json").takeIf { it.isFile } ?: return null
+            val block = Regex("\"granger\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return null
+            return Regex("\"dialogue_speaker\"\\s*:\\s*(\\d+)").find(block)?.groupValues?.get(1)?.toIntOrNull()
         }
 
         /**
