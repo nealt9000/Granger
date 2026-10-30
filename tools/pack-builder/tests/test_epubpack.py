@@ -407,3 +407,19 @@ def test_a_split_definition_list_copy_is_made_valid(tmp_path):
     assert "<dt>2.</dt><dd/></dl>" in ends_with_term
     starts_with_definition = chapter1(tmp_path, '<dl class="n"><dd>two</dd><dt>3.</dt><dd>three</dd></dl>')
     assert '<dl class="n"><dt/><dd>two</dd>' in starts_with_definition
+
+
+def landmark(z):
+    nav = etree.fromstring(z.read("OEBPS/nav.xhtml"))
+    return next(a.get("href") for a in nav.iter(XHTML + "a") if a.get("{http://www.idpf.org/2007/ops}type") == "bodymatter")
+
+
+def test_start_of_text_skips_front_matter_pages(tmp_path):
+    html = ("<h2>CONTENTS</h2><p>a</p><h2>Translator’s Dedication</h2><p>b</p><h2>Chapter 1</h2><p>c</p>"
+            "<h2>Chapter 2</h2><p>d</p>")
+    w = work(html=html)
+    assert landmark(build(tmp_path, w)) == "c003.xhtml"
+    w.title_overrides = {"1": "Title page", "3": "Front matter"}
+    assert landmark(build(tmp_path, w)) == "c004.xhtml"
+    w = work(html="<h2>Contents</h2><p>a</p><h2>Dedication</h2><p>b</p><h2>Contents</h2><p>c</p>")
+    assert landmark(build(tmp_path, w)) == "c001.xhtml"  # nothing but front matter: the first page

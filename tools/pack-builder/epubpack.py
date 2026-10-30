@@ -314,9 +314,22 @@ def _titles(work: Work) -> list[str]:
             for i, c in enumerate(work.chapters)]
 
 
+_FRONT_MATTER = {"title page", "contents", "table of contents", "front matter", "dedication"}
+
+
+def _start_of_text(titles: list[str], headings: list[str]) -> int:
+    """The first page that isn't a title page, contents, dedication or the splitter's "Front matter", going by
+    its contents title or its heading (a "CONTENTS" heading's contents title is only "Part N")."""
+    def front(title: str) -> bool:
+        plain = " ".join(title.split()).rstrip(".").lower()
+        return plain in _FRONT_MATTER or plain.endswith(("’s dedication", "'s dedication"))
+    return next((i for i, (t, h) in enumerate(zip(titles, headings)) if not (front(t) or front(h))), 0)
+
+
 def _nav(work: Work, meta: BookMeta, titles: list[str]) -> str:
     items = "".join(f'<li><a href="{chapter_href(i)}">{escape(t, quote=False)}</a></li>' for i, t in enumerate(titles))
-    first = chapter_href(0) if titles else "cover.xhtml"
+    headings = ["" if str(i + 1) in work.title_overrides else c.title for i, c in enumerate(work.chapters)]
+    first = chapter_href(_start_of_text(titles, headings)) if titles else "cover.xhtml"
     body = (f'<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>{items}</ol></nav>'
             '<nav epub:type="landmarks" hidden="hidden"><h1>Landmarks</h1><ol>'
             '<li><a epub:type="cover" href="cover.xhtml">Cover</a></li>'
