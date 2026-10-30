@@ -201,3 +201,42 @@ def test_definition_list_cut_between_term_and_definition_stays_valid(tmp_path):
     assert ends_with_term.startswith("<dl><dt>1.</dt><dd>one</dd><dt>2.</dt><dd/></dl>")
     starts_with_definition = chapter1(tmp_path, "<dd>two</dd><dt>3.</dt><dd>three</dd>").split("<body>")[1]
     assert starts_with_definition.startswith("<dl><dt/><dd>two</dd><dt>3.</dt><dd>three</dd></dl>")
+
+
+def test_colophon_is_last_in_the_spine_a_backmatter_landmark_and_not_in_the_contents(tmp_path):
+    w = work(translator="T. Ranslator")
+    z = build(tmp_path, w, source_line="From Project Gutenberg ebook #1342")
+    opf = etree.fromstring(z.read("OEBPS/content.opf"))
+    items = {i.get("id"): i for i in opf.iter(OPF + "item")}
+    assert items["colophon"].get("href") == "colophon.xhtml" and items["colophon"].get("properties") == "svg"
+    spine = [r.get("idref") for r in opf.iter(OPF + "itemref")]
+    assert spine[0] == "cover" and spine[1] == "c001" and spine[-1] == "colophon"
+
+    nav = etree.fromstring(z.read("OEBPS/nav.xhtml"))
+    navs = {n.get("{http://www.idpf.org/2007/ops}type"): n for n in nav.iter(XHTML + "nav")}
+    toc_links = [a.get("href") for a in navs["toc"].iter(XHTML + "a")]
+    landmarks = {a.get("{http://www.idpf.org/2007/ops}type"): a.get("href") for a in navs["landmarks"].iter(XHTML + "a")}
+    assert "colophon.xhtml" not in toc_links
+    assert landmarks["backmatter"] == "colophon.xhtml" and landmarks["bodymatter"] == "c001.xhtml"
+    assert "colophon.xhtml" not in z.read("OEBPS/toc.ncx").decode()
+
+
+def test_colophon_names_the_book_and_its_source(tmp_path):
+    w = work(translator="T. Ranslator")
+    z = build(tmp_path, w, source_line="From Project Gutenberg ebook #1342")
+    page = etree.fromstring(z.read("OEBPS/colophon.xhtml"))
+    text = " ".join(" ".join(page.itertext()).split())
+    for expected in ("Granger Classics", "The Modern Book", "A. Writer", "Translated by T. Ranslator",
+                     "This translation first published 1920", "From Project Gutenberg ebook #1342",
+                     "Public domain in the USA.", "The world’s knowledge. Yours to keep."):
+        assert expected in text, expected
+    svg = page.find(".//{http://www.w3.org/2000/svg}svg")
+    assert svg is not None and len(svg.findall("{http://www.w3.org/2000/svg}path")) == 3
+
+
+def test_colophon_source_line_comes_from_the_caller(tmp_path):
+    w = work(author="", title="The World English Bible")
+    z = build(tmp_path, w, source_line="From the World English Bible at eBible.org")
+    text = z.read("OEBPS/colophon.xhtml").decode()
+    assert "From the World English Bible at eBible.org" in text and "Gutenberg" not in text
+    assert "This edition first published 1920" in text and 'class="author"' not in text
