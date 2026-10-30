@@ -60,6 +60,16 @@
 - [ ] RTF on the Pixel 6 screen off through the real player (two calls per quoted sentence cost a little), and first-audio time.
 - [ ] Neal's verdict against the round-2 voices and the references. If yes: model card (both slots, the Qwen3 teacher, Gutenberg/LibriTTS sources), new voice ids, catalog entry later with V2's Task 3.
 
+## Result (2026-10-30)
+
+**The dialogue slot doesn't buy delivery; the round-2 voices ship as they are.** The slot learned a pitch level for quoted speech (Nanny +1.1 semitones against the teacher's +1.4; Professor +1.3 where the teacher went −0.3) but not the pace, range or inflection that make a storyteller, and Neal heard the e400 voices as deadpan straight through. The cause is the model, not the data: Piper's VITS medium learns one average reading for a text, and the teacher's many readings average to flat; the slot only gives quotes a second average. KittenTTS (the StyleTTS2 family, which predicts a style per sentence) reads just as flat to Neal and slightly behind our round-2 voices, so a small StyleTTS2 student isn't the way out either. On-device delivery waits for a model that predicts it from the text and still runs at RTF ≤ 0.5 on the Pixel; the Qwen3 teacher pipeline is ready to retry when one appears.
+
+**What ships:** `vits-piper-en_GB-granger_nanny-medium` (e735, val_mel 0.3003) and `…_professor-medium` (e789, 0.3172), round 2, single speaker, setting e (noise 0.75, noise_w 1.0) in their `inference` block, which the app reads (`v4-voice-settings`). Re-exported with V4's model card (`export_voice --teacher`, aac394f3); the ONNX models are byte-identical to the ones Neal used on the phone. Zips (67 MB each) in `v4/ship-zips/`; `curated.json` entries on `v4-voice-settings`.
+
+**What stays, dormant:** the app's dialogue-slot code (a voice without a `granger.dialogue_speaker` reads as before), `cut_quotes.py`, `build_slots.py`, `say.py --dialogue`, and the two-slot runs' checkpoints in `runs-pod/<voice>-2slot/`.
+
+**Lessons for the next pod run:** one network volume for two runs fills with full 25-epoch snapshots (0.9 GB each): slim them on the pod as they land (`/root/vt/slimmer.sh`). After the first few epochs a 4090 does ~17–19 s an epoch on ~200 min, not 35–39. The pod's own `RUNPOD_API_KEY` can't remove pods; Neal's key (`runpodctl config --apiKey`) can.
+
 ## The phone
 
 Shared with the U3c walkthrough. On 2026-10-29 the installed build was `v4-phone-test` (u3c-reading 54c03a7 + the voice settings change), with the app's data backed up to `backups/phone-2026-10-29-v4/`. Before installing, check what is on it (`dumpsys package app.granger` install time against the worktrees' APKs), build on top of that branch, and back up first. One app only, `app.granger`. Pushing a voice folder needs no install.
