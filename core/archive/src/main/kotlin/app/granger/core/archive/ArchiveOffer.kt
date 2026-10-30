@@ -2,12 +2,13 @@ package app.granger.core.archive
 
 import java.time.LocalDate
 
-enum class TextKind { EPUB, TEXT, OCR_TEXT, PDF }
+/** [COMIC]: a comic book archive (CBZ or CBR), made into a PDF of its pages on the phone. */
+enum class TextKind { EPUB, TEXT, OCR_TEXT, PDF, COMIC }
 
 sealed interface Offer {
     /**
-     * [file] of [kind] to download. [pdf] is the item's best PDF beside a text download (TEXT or OCR_TEXT), which
-     * can be got as a second book (Plan P2); null otherwise, and for an EPUB (its text is already the book's).
+     * [file] of [kind] to download. [pdf] is the item's best PDF beside a text download (TEXT, OCR_TEXT, or an EPUB
+     * archive.org made from a scan), which can be got as a second book (Plan P2); null otherwise.
      */
     data class Download(val file: ArchiveFile, val kind: TextKind, val pdf: ArchiveFile? = null) : Offer
     data object LendOnly : Offer
@@ -28,11 +29,23 @@ object ArchiveOffers {
         val pdf = bestPdf(usable)
         // The size cap is for text Granger converts in memory; a PDF is opened in place, at any size.
         val convertible = usable.filter { (it.sizeBytes ?: 0) <= maxTextBytes }
+        val epubs = usable.filter { it.format == "EPUB" }
 
-        usable.filter { it.format == "EPUB" }.maxByOrNull { it.sizeBytes ?: 0 }
+        // An EPUB or a text its uploader made is the book.
+        epubs.filter { it.source == "original" }.maxByOrNull { it.sizeBytes ?: 0 }
             ?.let { return Offer.Download(it, TextKind.EPUB) }
         convertible.firstOrNull { it.source == "original" && it.format == "Text" }
             ?.let { return Offer.Download(it, TextKind.TEXT, pdf) }
+        // What the uploader made otherwise, a comic or a PDF (a magazine, a scan, a born-digital book), reads better as
+        // itself than as the EPUB archive.org makes from it: OCR text a page per file, with no chapters, and pictures
+        // cut out of the page (Pixel 6 walkthrough, 2026-10-30). A multi-part item offers its first part.
+        usable.filter { it.source == "original" && isComic(it) }.minByOrNull { it.name }
+            ?.let { return Offer.Download(it, TextKind.COMIC) }
+        bestPdf(usable.filter { it.source == "original" })
+            ?.let { return Offer.Download(it, TextKind.PDF) }
+        // archive.org's EPUB from a scan: its text for reading and Listen, with the scan's PDF beside it.
+        epubs.maxByOrNull { it.sizeBytes ?: 0 }
+            ?.let { return Offer.Download(it, TextKind.EPUB, pdf) }
         convertible.firstOrNull { it.format == "DjVuTXT" }
             ?.let { return Offer.Download(it, TextKind.OCR_TEXT, pdf) }
 
@@ -45,7 +58,11 @@ object ArchiveOffers {
     fun preview(doc: ArchiveDoc): Offer? {
         val placeholder = ArchiveFile(name = "", format = "", sizeBytes = null, sha1 = null, md5 = null, source = "", isPrivate = false)
         val pdf = doc.formats.any { it.contains("PDF") && !it.startsWith("LCP Encrypted") }
+        // archive.org makes an Image Container PDF only from an uploaded PDF, which choose() prefers to the EPUB.
+        val uploadedPdf = "Image Container PDF" in doc.formats
         return when {
+            doc.formats.any { it.startsWith("Comic Book") } && !doc.restricted -> Offer.Download(placeholder, TextKind.COMIC)
+            uploadedPdf && !doc.restricted -> Offer.Download(placeholder, TextKind.PDF)
             "EPUB" in doc.formats && !doc.restricted -> Offer.Download(placeholder, TextKind.EPUB)
             "DjVuTXT" in doc.formats && !doc.restricted ->
                 Offer.Download(placeholder, TextKind.OCR_TEXT, pdf = if (pdf) placeholder else null)
@@ -75,6 +92,10 @@ object ArchiveOffers {
      */
     fun isPublicDomainRecording(item: ArchiveItem, today: LocalDate): Boolean =
         item.year != null && item.year in PublicDomain.EARLIEST_RECORDING_YEAR..PublicDomain.lastRecordingYear(today)
+
+    /** A comic book archive: archive.org's "Comic Book RAR"/"Comic Book ZIP", or a `.cbz`/`.cbr` it didn't name. */
+    fun isComic(file: ArchiveFile): Boolean =
+        file.format.startsWith("Comic Book") || file.name.lowercase().let { it.endsWith(".cbz") || it.endsWith(".cbr") }
 
     private fun isTextOrPdf(file: ArchiveFile): Boolean = file.format != "Metadata" && (
         file.format in setOf("EPUB", "Text", "DjVuTXT") || file.format.contains("PDF") || file.name.endsWith(".epub") || file.name.endsWith(".txt"))

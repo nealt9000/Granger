@@ -227,6 +227,41 @@ class BookshelfTest {
         assertThat(book.id).isEqualTo("book:archive-org:x")
     }
 
+    private fun comic(name: String): File {
+        val bitmap = android.graphics.Bitmap.createBitmap(20, 30, android.graphics.Bitmap.Config.ARGB_8888)
+        val jpeg = java.io.ByteArrayOutputStream().also { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, it) }.toByteArray()
+        return File(archiveDir, name).also { file ->
+            java.util.zip.ZipOutputStream(file.outputStream()).use { zip ->
+                for (page in listOf("01.jpg", "02.jpg")) {
+                    zip.putNextEntry(java.util.zip.ZipEntry(page)); zip.write(jpeg); zip.closeEntry()
+                }
+            }
+        }
+    }
+
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Test fun anArchiveComicIsFiledAsAPdfOfItsPages() = test {
+        val book = pdfShelf.addDownloaded(comic("dkr.cbr"), BookOrigin.ARCHIVE_ORG, "dkr",
+            BookDetails("The Dark Knight Returns", "", "", emptyList(), "", ""))!!
+        assertThat(book.format).isEqualTo(BookFormat.PDF)
+        assertThat(book.filePath).endsWith("dkr.pdf")
+        assertThat(book.title).isEqualTo("The Dark Knight Returns")
+
+        // Removed, it takes its comic with it, so the next refresh doesn't file it again.
+        assertThat(pdfShelf.remove(book.id)).isTrue()
+        pdfShelf.refresh()
+        assertThat(pdfShelf.book(book.id)).isNull()
+        assertThat(File(archiveDir, "dkr.cbr").exists()).isFalse()
+    }
+
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Test fun refreshConvertsAStrayArchiveComic() = test {
+        comic("strip.cbz")
+        pdfShelf.refresh()
+        assertThat(File(archiveDir, "strip.pdf").exists()).isTrue()
+        assertThat(pdfShelf.book("book:archive-org:strip")!!.format).isEqualTo(BookFormat.PDF)
+    }
+
     @Test fun archiveTextOverTheLimitIsRefused() = test {
         val small = RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, maxTextBytes = 10)
         val txt = File(archiveDir, "big.txt").apply { writeText("x".repeat(100)) }

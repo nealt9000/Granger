@@ -23,6 +23,8 @@ bouncycastle = "1.86"
 webkit = "1.14.0"
 jsoup = "1.21.2"
 commonmark = "0.30.0"
+# CBR comics (RAR 4); pure Java.
+junrar = "7.5.5"
 readium = "3.4.0"
 pdfboxAndroid = "2.0.27.0"
 # The one readium-adapter-pdfium 3.4.0 depends on; named only to compile against PDFView.Configurator.
@@ -67,6 +69,7 @@ androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+junrar = { module = "com.github.junrar:junrar", version.ref = "junrar" }
 readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version.ref = "readium" }
 readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version.ref = "readium" }
 readium-navigator = { module = "org.readium.kotlin-toolkit:readium-navigator", version.ref = "readium" }
