@@ -197,11 +197,11 @@ class OnboardingViewModelTest {
     }
 
     @Test fun theVoiceIsOfferedTickedAndCanBeLeftOut() = runTest(main.dispatcher) {
-        val maggie = app.granger.core.catalog.VoiceEntry(
-            id = OnboardingModel.VOICE_ID, title = "Granger voice (Maggie & Martin)", engine = "piper", language = "en-US",
+        val nanny = app.granger.core.catalog.VoiceEntry(
+            id = OnboardingModel.VOICE_ID, title = "Granger voice (Nanny)", engine = "piper", language = "en-US",
             sizeBytes = 80, sha256 = "d".repeat(64), url = "https://v.test/v.zip", license = "CC BY 4.0",
         )
-        catalog.mutable.value = CatalogState(catalog = full.copy(voices = listOf(maggie)))
+        catalog.mutable.value = CatalogState(catalog = full.copy(voices = listOf(nanny)))
         val vm = viewModel()
         assertThat(vm.ui.value.voiceLine!!.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
         assertThat(vm.ui.value.review.groups.map { it.title }).contains("Read aloud")

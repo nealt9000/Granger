@@ -83,7 +83,7 @@ object OnboardingModel {
     const val COMPREHENSIVE = "comprehensive"
     const val ASK = "ask"
     const val VOICE = "voice"
-    const val VOICE_ID = "vits-piper-en_US-granger_libritts-medium"
+    const val VOICE_ID = "vits-piper-en_GB-granger_nanny-medium"
 
     /**
      * The two start choices, each from its generated preset; a catalog without them (older) gives an empty list.
