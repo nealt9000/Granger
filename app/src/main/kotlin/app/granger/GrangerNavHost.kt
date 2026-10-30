@@ -921,6 +921,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
+                    onOpenTab = ::showTab,
+                    // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook.
+                    onReopen = {
+                        nav.popBackStack()
+                        showTab(route.tabId)
+                    },
                 )
             }
             composable<SearchRoute> { backStackEntry ->

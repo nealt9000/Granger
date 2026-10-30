@@ -11,6 +11,8 @@ import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.TrackingContainer
 import app.granger.book
+import app.granger.core.books.PdfOrigin
+import app.granger.core.books.PdfToEpub
 import app.granger.core.books.TextQuote
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.BookPosition
@@ -298,6 +300,42 @@ class EbookReaderViewModelTest {
         vm.toggleBookmark()
         advanceUntilIdle()
         assertThat(bookshelf.markList.value.single().text).isEqualTo("Filters · p. 3")
+    }
+
+    // ---- ebooks made from PDFs (Plan IA) ----
+
+    @Test fun anEbookMadeFromAPdfOpensAndRemovesItsOriginalPages() = runTest(main.dispatcher) {
+        val pages = book("pages", title = "The Upanishads")
+        bookshelf.originalPages["b"] = pages to 2_500_000L
+        val vm = reader()
+        assertThat(vm.state.value.originalPagesBytes).isEqualTo(2_500_000L)
+        assertThat(vm.state.value.canReadAsEbook).isFalse()
+        val tab = vm.openOriginalPages()!!
+        assertThat(sessions.tabs.value.single { it.id == tab }.title).isEqualTo("The Upanishads (original pages)")
+        vm.removeOriginalPages()
+        advanceUntilIdle()
+        assertThat(vm.state.value.originalPagesBytes).isNull()
+        assertThat(vm.state.value.notice).isEqualTo("Original pages removed")
+        assertThat(bookshelf.originalPages).isEmpty()
+    }
+
+    @Test fun aPdfReadAsAnEbookOpensAgainOrSaysWhyNot() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication()
+        val vm = reader()
+        assertThat(vm.state.value.canReadAsEbook).isTrue()
+        val passing = PdfToEpub.Report(PdfOrigin.BORN_DIGITAL, 10, 1000, 1000, 0, 10, 100, 0, 1, 0, 0, 2, null, 0, true, "passes")
+        bookshelf.ebookReports["b"] = passing.copy(passes = false, why = "kept only 80% of the text")
+        var reopened = 0
+        vm.readAsEbook { reopened++ }
+        advanceUntilIdle()
+        assertThat(reopened).isEqualTo(0)
+        assertThat(vm.state.value.notice).contains("kept only 80% of the text")
+        assertThat(vm.state.value.makingEbook).isFalse()
+
+        bookshelf.ebookReports["b"] = passing
+        vm.readAsEbook { reopened++ }
+        advanceUntilIdle()
+        assertThat(reopened).isEqualTo(1)
     }
 
     @Test fun aColourPdfKeepsItsColoursInNight() = runTest(main.dispatcher) {

@@ -14,6 +14,7 @@ import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
+import app.granger.core.library.onShelf
 import app.granger.core.player.NowPlaying
 import app.granger.player.VoiceButton
 import app.granger.core.player.PlayerHub
@@ -99,6 +100,14 @@ data class EbookUi(
      * PDF ones.
      */
     val isPdf: Boolean = false,
+    /** An ebook made from a PDF (Plan IA): the size of its original pages, which ⋯ opens or removes; null without them. */
+    val originalPagesBytes: Long? = null,
+    /** A PDF on the shelves, which ⋯ Read as ebook can make an ebook (Plan IA Decisions 6 and 9). */
+    val canReadAsEbook: Boolean = false,
+    /** Read as ebook is working. */
+    val makingEbook: Boolean = false,
+    /** Something the reader says once (Read as ebook's outcome), then [noticeShown] clears. */
+    val notice: String? = null,
 )
 
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
@@ -269,6 +278,10 @@ class EbookReaderViewModel(
                 ).derived()
             }
             savedState[TARGET_CONSUMED] = true
+            launch {
+                val pages = bookshelf.originalPagesBytes(book.id)
+                _state.update { it.copy(originalPagesBytes = pages, canReadAsEbook = pdf && book.onShelf) }
+            }
             if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
@@ -293,6 +306,60 @@ class EbookReaderViewModel(
                 _state.update { it.copy(prefs = prefs) }
             }
         }
+    }
+
+    /** Opens the PDF this ebook was made from in its own tab (Plan IA); the tab's id, or null when it has none. */
+    suspend fun openOriginalPages(): Long? {
+        val id = bookId ?: return null
+        val pages = bookshelf.originalPages(id) ?: return null
+        return sessions.openTab(pages.id, "", pages.title + ORIGINAL_PAGES_TITLE)
+    }
+
+    /** Deletes the PDF this ebook was made from; the ebook stays (Plan IA Decision 7). */
+    fun removeOriginalPages() {
+        val id = bookId ?: return
+        appScope.launch {
+            val removed = bookshelf.removeOriginalPages(id)
+            _state.update {
+                if (removed) it.copy(originalPagesBytes = null, notice = "Original pages removed")
+                else it.copy(notice = "Couldn't remove the original pages")
+            }
+        }
+    }
+
+    /**
+     * Makes this PDF an ebook (Plan IA). On success [onDone] runs, to open the book again as the ebook; else the notice
+     * says why not.
+     */
+    fun readAsEbook(onDone: () -> Unit) {
+        val id = bookId ?: return
+        if (_state.value.makingEbook) return
+        _state.update { it.copy(makingEbook = true, notice = "Making an ebook of this PDF…") }
+        appScope.launch {
+            val report = try {
+                bookshelf.readAsEbook(id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Read as ebook failed", e)
+                null
+            }
+            _state.update {
+                it.copy(
+                    makingEbook = false,
+                    notice = when {
+                        report == null -> "Couldn't make an ebook of this PDF"
+                        report.passes -> null
+                        else -> "This PDF doesn't read well as an ebook (${report.why}), so it stays as pages."
+                    },
+                )
+            }
+            if (report?.passes == true) withContext(Dispatchers.Main) { onDone() }
+        }
+    }
+
+    fun noticeShown() {
+        _state.update { it.copy(notice = null) }
     }
 
     private fun fail(message: String) {
@@ -707,6 +774,9 @@ class EbookReaderViewModel(
         /** A page change this soon after a finger left the page is its turn: the turn's animation runs on after it lifts. */
         const val PAGE_TURN_GRACE_MS = 1_000L
         const val TARGET_CONSUMED = "targetConsumed"
+
+        /** After the title of an ebook's original pages, on their tab. */
+        const val ORIGINAL_PAGES_TITLE = " (original pages)"
     }
 }
 
