@@ -400,3 +400,10 @@ def test_title_overrides_name_pages_in_the_contents(tmp_path):
     w.title_overrides = {"4": "Canto IV"}  # the book has three pages: the manifest is out of date
     with pytest.raises(ValueError, match=r"pages \['4'\], but the book has 3"):
         build(tmp_path, w)
+
+
+def test_a_split_definition_list_copy_is_made_valid(tmp_path):
+    ends_with_term = chapter1(tmp_path, '<dl class="n"><dt>1.</dt><dd>one</dd><dt>2.</dt></dl>')
+    assert "<dt>2.</dt><dd/></dl>" in ends_with_term
+    starts_with_definition = chapter1(tmp_path, '<dl class="n"><dd>two</dd><dt>3.</dt><dd>three</dd></dl>')
+    assert '<dl class="n"><dt/><dd>two</dd>' in starts_with_definition

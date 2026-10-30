@@ -272,6 +272,13 @@ def _by_size(part: _Part, max_bytes: int) -> list[_Part]:
             same += 1
         shells = sum(_bytes(_shell(w, True)) for w in wrappers[same:])
         if size + n + shells > max_bytes and runs[-1]:
+            term = _trailing_term(opened, wrappers)
+            if term is not None and term is not node:  # a dt goes over with its dd
+                pending[:0] = [(term.extract(), wrappers), (node, wrappers)]
+                runs.append([])
+                size = 0
+                del opened[:]
+                continue
             runs.append([])
             size, same = 0, 0
             shells = sum(_bytes(_shell(w, True)) for w in wrappers)
@@ -288,6 +295,15 @@ def _by_size(part: _Part, max_bytes: int) -> list[_Part]:
         size += n + shells
     name = part.title
     return [_Part(f"{name} (part {k})" if name else f"Part {k}", run) for k, run in enumerate(runs, 1)]
+
+
+def _trailing_term(opened: list[tuple[Tag, Tag]], wrappers: tuple[Tag, ...]) -> Tag | None:
+    """The dt ending the current page's copy of the definition list the next node also goes into, if any."""
+    if not opened or not wrappers or opened[-1][0] is not wrappers[-1] or wrappers[-1].name != "dl":
+        return None
+    last = next((c for c in reversed(opened[-1][1].contents) if not (isinstance(c, NavigableString) and not c.strip())),
+                None)
+    return last if isinstance(last, Tag) and last.name == "dt" and len(opened[-1][1].contents) > 1 else None
 
 
 def _split_text(node: PageElement, max_bytes: int) -> list[PageElement]:

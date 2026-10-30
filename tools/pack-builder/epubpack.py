@@ -228,8 +228,9 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
 
 
 def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
-    """A definition list split across chapters leaves dt/dd runs without their dl."""
-    wrapper, created = None, []
+    """A definition list split across chapters leaves dt/dd runs without their dl, or a dl that ends in a dt or
+    starts with a dd; an empty dt or dd makes each valid."""
+    wrapper = None
     for item in soup.find_all(["dt", "dd"]):
         if item.parent is None or item.parent.name == "dl":
             continue
@@ -239,14 +240,13 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
         if wrapper is None or previous is not wrapper:
             wrapper = soup.new_tag("dl")
             item.insert_before(wrapper)
-            created.append(wrapper)
         wrapper.append(item.extract())
-    for wrapper in created:
-        items = wrapper.find_all(["dt", "dd"], recursive=False)
-        if items[0].name == "dd":  # its dt ended the previous chapter
-            wrapper.insert(0, soup.new_tag("dt"))
-        if items[-1].name == "dt":  # its dd starts the next one
-            wrapper.append(soup.new_tag("dd"))
+    for dl in soup.find_all("dl"):  # the new lists, and a list's copies on either side of a page break
+        items = dl.find_all(["dt", "dd"], recursive=False)
+        if items and items[0].name == "dd":  # its dt ended the previous chapter
+            items[0].insert_before(soup.new_tag("dt"))
+        if items and items[-1].name == "dt":  # its dd starts the next one
+            items[-1].insert_after(soup.new_tag("dd"))
 
 
 def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False) -> BeautifulSoup:

@@ -192,3 +192,13 @@ def test_clean_title_quietens_titles_in_capitals():
     assert t("QUESTIONS AND TOPICS (part 2)") == "Questions and Topics (part 2)"
     assert t("SCENE I. A room in the castle.") == "SCENE I. A room in the castle."  # not all capitals
     assert t("THE END...") == "The End..."
+
+
+def test_a_definition_list_split_by_size_keeps_each_term_with_its_definition():
+    notes = "".join(f'<dt>{i}.</dt><dd>{"note text " * 30}</dd>' for i in range(80))
+    chapters = split(body(f'<h2>Footnotes</h2><dl class="notes">{notes}</dl>'), max_bytes=6_000)
+    assert len(chapters) >= 3
+    for c in chapters:
+        for dl in BeautifulSoup(c.html, "lxml").find_all("dl"):
+            items = dl.find_all(["dt", "dd"], recursive=False)
+            assert items[0].name == "dt" and items[-1].name == "dd", c.title
