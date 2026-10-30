@@ -830,7 +830,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             fun musicViewModel(collectionId: String?) =
                 MusicViewModel(
                     collectionId, container.media, container.shelves, container.playlists, container.playerHub,
-                    downloads = container.downloads.records, remover = removeDownload,
+                    downloads = container.downloads.records, remover = removeDownload, viewPrefs = container.libraryViews,
                 )
             composable<MusicRoute> { backStackEntry ->
                 val id = backStackEntry.toRoute<MusicRoute>().collectionId

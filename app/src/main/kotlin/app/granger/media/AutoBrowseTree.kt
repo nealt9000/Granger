@@ -23,7 +23,6 @@ import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
 import app.granger.music.MusicCatalog
 import app.granger.music.MusicSources
-import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -73,7 +72,7 @@ class AutoBrowseTree(
         parentId == MUSIC -> listOf(albumsFolder(), artistsFolder(), playlistsFolder())
         parentId == RECENT -> recents().map { (play, item) -> item.takeIf { play != null } }.filterNotNull()
         parentId == ALBUMS -> withContext(compute) {
-            albums(present()).sortedWith(compareBy({ it.title.lowercase(Locale.ROOT) }, { it.key })).map(::albumItem)
+            present().let { tracks -> MusicCatalog.albumsByTitle(albums(tracks), tracks) }.map(::albumItem)
         }
         parentId == ARTISTS -> withContext(compute) { MusicCatalog.artists(present()).map { artistItem(it.name) } }
         parentId == PLAYLISTS -> playlists.all.first().map(::playlistItem)

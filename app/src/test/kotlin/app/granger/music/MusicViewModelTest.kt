@@ -14,6 +14,9 @@ import app.granger.core.library.ShelfCollection
 import app.granger.core.library.Track
 import app.granger.core.player.PlaySource
 import app.granger.player.FakePlayerHub
+import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfKind
+import app.granger.library.shelf.ShelfView
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -33,8 +36,10 @@ class MusicViewModelTest {
 
     private val removed = mutableListOf<String>()
 
+    private val viewPrefs = LibraryViewPrefs()
+
     private fun TestScope.vm(collectionId: String? = null): MusicViewModel {
-        val vm = MusicViewModel(collectionId, media, shelves, playlists, hub, downloads = flowOf(emptyList()), remover = { removed += it })
+        val vm = MusicViewModel(collectionId, media, shelves, playlists, hub, downloads = flowOf(emptyList()), remover = { removed += it }, viewPrefs = viewPrefs)
         backgroundScope.launch { vm.ui.collect {} }
         return vm
     }
@@ -192,6 +197,31 @@ class MusicViewModelTest {
         vm.setSort(SongSort.DATE_ADDED)
         assertThat(vm.ui.filterNotNull().first { it.sort == SongSort.DATE_ADDED }.songs.map { it.title })
             .containsExactly("The Zebra", "Mango", "Apple").inOrder()
+    }
+
+    @Test fun theSongAndAlbumSortsAndTheAlbumViewAreRemembered() = runTest(main.dispatcher) {
+        media.trackList.value = listOf(
+            song("1", title = "Zulu", album = "The Wall", albumArtists = "Pink Floyd", date = "1979"),
+            song("2", title = "Alpha", album = "Abbey Road", albumArtists = "Beatles", date = "1969"),
+        )
+        val first = vm()
+        val ui = first.ui.filterNotNull().first()
+        assertThat(ui.sort).isEqualTo(SongSort.TITLE)
+        assertThat(ui.albumSort).isEqualTo(AlbumSort.TITLE)
+        assertThat(ui.albums.map { it.title }).containsExactly("Abbey Road", "The Wall").inOrder()
+        assertThat(first.albumView.value).isEqualTo(ShelfView.LIST)
+        first.setSort(SongSort.YEAR)
+        first.setAlbumSort(AlbumSort.YEAR)
+        first.toggleAlbumView()
+        // Leaving and coming back, or another collection's Music page: the same choices.
+        val again = vm("c-any").ui.filterNotNull().first()
+        assertThat(again.sort).isEqualTo(SongSort.YEAR)
+        assertThat(again.albumSort).isEqualTo(AlbumSort.YEAR)
+        assertThat(vm().albumView.value).isEqualTo(ShelfView.GRID)
+        assertThat(viewPrefs.sort(ShelfKind.SONGS).value).isEqualTo("YEAR")
+        val byYear = vm().ui.filterNotNull().first()
+        assertThat(byYear.songs.map { it.title }).containsExactly("Alpha", "Zulu").inOrder()
+        assertThat(byYear.albumSections.lettered).isFalse()
     }
 
     @Test fun moveTargetsAreMusicCollectionsOnly() = runTest(main.dispatcher) {

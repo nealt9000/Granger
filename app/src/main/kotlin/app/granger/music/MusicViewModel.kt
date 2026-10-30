@@ -18,6 +18,14 @@ import app.granger.core.player.PlaySource
 import app.granger.core.player.PlayerHub
 import app.granger.core.player.PlayerUi
 import app.granger.core.downloads.DownloadRecord
+import app.granger.core.library.ShelfKey
+import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfKind
+import app.granger.library.shelf.ShelfSections
+import app.granger.library.shelf.ShelfView
+import app.granger.library.shelf.sortNamed
+import app.granger.library.shelf.sortedByShelfKey
+import app.granger.library.shelf.toggled
 import app.granger.media.MediaDownloads
 import app.granger.sources.ItemStatus
 import java.util.Locale
@@ -25,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -45,8 +52,13 @@ const val ALL_MUSIC = "All music"
 
 const val UNKNOWN_GENRE = MediaNames.UNKNOWN_GENRE
 
-/** How the Songs tab is ordered. */
-enum class SongSort(val label: String) { TITLE("Title"), ARTIST("Artist"), ALBUM("Album"), YEAR("Year"), DATE_ADDED("Date added") }
+/** How the Songs tab is ordered; [byName] sorts file under letters (Plan LV Decision 4). */
+enum class SongSort(val label: String, val byName: Boolean) {
+    TITLE("Title", true), ARTIST("Artist", true), ALBUM("Album", true), YEAR("Year", false), DATE_ADDED("Date added", false),
+}
+
+/** How the Albums tab is ordered (Plan LV Decision 5): by title, by artist then year then title, or by year. */
+enum class AlbumSort(val label: String, val byName: Boolean) { TITLE("Title", true), ARTIST("Artist", true), YEAR("Year", false) }
 
 /** How an artist page groups albums, in display order (Auxio). Untyped albums are [ALBUMS]. */
 enum class ReleaseGroup(val label: String) {
@@ -54,7 +66,8 @@ enum class ReleaseGroup(val label: String) {
     SOUNDTRACKS("Soundtracks"), OTHERS("Other releases"),
 }
 
-data class ArtistSummary(val name: String, val albumCount: Int, val songCount: Int)
+/** [shelfKey] is the [ShelfKey] the Artists tab sorts and files [name] by (its sort tag when tagged). */
+data class ArtistSummary(val name: String, val albumCount: Int, val songCount: Int, val shelfKey: String = ShelfKey.of(name))
 data class GenreSummary(val name: String, val songCount: Int)
 
 /** [path] is the track's stored folder (e.g. "Music/Rock/"); [name] is it without the trailing slash. */
@@ -84,17 +97,27 @@ data class PlaylistPage(val playlist: Playlist, val items: List<PlaylistItem>) {
     val tracks: List<Track> get() = items.map { it.track }
 }
 
+/**
+ * One Music page's tabs. Songs, Albums and Artists come as shelves ([songSections], [albumSections],
+ * [artistSections]): A–Z under letters when long and sorted by name (Plan LV); [songs], [albums] and [artists] are
+ * them in the order shown.
+ */
 data class MusicUi(
     val title: String,
     val sort: SongSort,
-    val songs: List<Track>,
-    val albums: List<AlbumSummary>,
-    val artists: List<ArtistSummary>,
+    val songSections: ShelfSections<Track>,
+    val albumSort: AlbumSort,
+    val albumSections: ShelfSections<AlbumSummary>,
+    val artistSections: ShelfSections<ArtistSummary>,
     val genres: List<GenreSummary>,
     val folders: List<FolderSummary>,
     /** Always every playlist: playlists aren't scoped to a collection. */
     val playlists: List<Playlist>,
-)
+) {
+    val songs: List<Track> get() = songSections.items.map { it.value }
+    val albums: List<AlbumSummary> get() = albumSections.items.map { it.value }
+    val artists: List<ArtistSummary> get() = artistSections.items.map { it.value }
+}
 
 /**
  * The music the player holds, as the album page marks it (Plan U2 Decision 8): [trackId] is the current track, [source]
@@ -164,19 +187,76 @@ object MusicCatalog {
     /** Albums as [Albums.summaries] builds them, with the track artists named where no album artist is tagged. */
     fun albums(tracks: List<Track>): List<AlbumSummary> = MediaNames.albums(tracks)
 
+    /** A song's [ShelfKey] by title: its sort tag, else its title (or file name when untitled). */
+    fun titleKey(t: Track): String = ShelfKey.of(trackTitle(t), t.sortTitle)
+    private fun artistKey(t: Track): String = ShelfKey.of(trackArtistsOf(t).joinToString(JOIN), t.sortArtist)
+    private fun albumTitleKey(t: Track): String = ShelfKey.of(Albums.title(t), t.sortAlbum)
+
+    /**
+     * [tracks] in [sort]'s order. Title, Artist and Album go A–Z by [ShelfKey] (articles skipped, "#" last), an
+     * artist's or an album's songs in album order; Year oldest first, Date added newest first.
+     */
     fun sortSongs(tracks: List<Track>, sort: SongSort): List<Track> {
         val byTitle = compareBy<Track>({ sortName(it.sortTitle, it.title) }, { it.id })
         val inAlbum = compareBy<Track>({ it.disc ?: 1 }, { it.trackNo ?: Int.MAX_VALUE }).then(byTitle)
-        val comparator = when (sort) {
-            SongSort.TITLE -> byTitle
-            SongSort.ARTIST -> compareBy<Track>({ sortName(it.sortArtist, trackArtistsOf(it).joinToString(JOIN)) },
-                { sortName(it.sortAlbum, Albums.title(it)) }, { it.albumKey }).then(inAlbum)
-            SongSort.ALBUM -> compareBy<Track>({ sortName(it.sortAlbum, Albums.title(it)) }, { it.albumKey }).then(inAlbum)
-            SongSort.YEAR -> compareBy<Track>({ it.date.trim().ifEmpty { "￿" } }, { sortName(it.sortAlbum, Albums.title(it)) },
-                { it.albumKey }).then(inAlbum)
-            SongSort.DATE_ADDED -> compareByDescending<Track> { it.addedAt }.then(byTitle)
+        return when (sort) {
+            SongSort.TITLE -> tracks.sortedByShelfKey(::titleKey, byTitle)
+            SongSort.ARTIST -> {
+                val album = tracks.associate { it.id to albumTitleKey(it) }
+                tracks.sortedByShelfKey(::artistKey, compareBy<Track>({ album[it.id] }, { it.albumKey }).then(inAlbum))
+            }
+            SongSort.ALBUM -> tracks.sortedByShelfKey(::albumTitleKey, compareBy<Track> { it.albumKey }.then(inAlbum))
+            SongSort.YEAR -> {
+                val album = tracks.associate { it.id to albumTitleKey(it) }
+                tracks.sortedWith(compareBy<Track>({ it.date.trim().ifEmpty { "\uFFFF" } }, { album[it.id] }, { it.albumKey }).then(inAlbum))
+            }
+            SongSort.DATE_ADDED -> tracks.sortedWith(compareByDescending<Track> { it.addedAt }.then(byTitle))
         }
-        return tracks.sortedWith(comparator)
+    }
+
+    /** The Songs tab: [tracks] sorted by [sort], under the letters of the sort's key when it has them. */
+    fun songSections(tracks: List<Track>, sort: SongSort): ShelfSections<Track> {
+        val letterKey: (Track) -> String = when (sort) {
+            SongSort.ARTIST -> ::artistKey
+            SongSort.ALBUM -> ::albumTitleKey
+            else -> ::titleKey
+        }
+        return ShelfSections.of(sortSongs(tracks, sort), sort.byName, key = { it.id }) { ShelfKey.letter(letterKey(it)) }
+    }
+
+    /** [albums] (built from [tracks]) A–Z by title, the album's sort tag where it has one. Android Auto lists them so too. */
+    fun albumsByTitle(albums: List<AlbumSummary>, tracks: List<Track>): List<AlbumSummary> {
+        val keys = albumTitleKeys(albums, tracks)
+        return albums.sortedByShelfKey({ keys.getValue(it.key) }, compareBy { it.key })
+    }
+
+    private fun albumTitleKeys(albums: List<AlbumSummary>, tracks: List<Track>): Map<String, String> {
+        val tags = HashMap<String, String>()
+        for (t in tracks) if (t.sortAlbum.isNotBlank()) tags.putIfAbsent(t.albumKey, t.sortAlbum)
+        return albums.associate { it.key to ShelfKey.of(it.title, tags[it.key]) }
+    }
+
+    /**
+     * The Albums tab: [tracks]' albums by [sort]. Title A–Z; Artist A–Z by album artist (its sort tag where tagged),
+     * then year, then title; Year oldest first (undated last), then title. Title and Artist file under letters.
+     */
+    fun albumSections(tracks: List<Track>, sort: AlbumSort): ShelfSections<AlbumSummary> {
+        val albums = albums(tracks)
+        val titleKeys = albumTitleKeys(albums, tracks)
+        val title = compareBy<AlbumSummary>({ titleKeys[it.key] }, { it.key })
+        return when (sort) {
+            AlbumSort.TITLE -> ShelfSections.of(albums.sortedByShelfKey({ titleKeys.getValue(it.key) }, compareBy { it.key }), true, key = { it.key }) {
+                ShelfKey.letter(titleKeys.getValue(it.key))
+            }
+            AlbumSort.ARTIST -> {
+                val tags = HashMap<String, String>()
+                for (t in tracks) if (t.sortAlbumArtist.isNotBlank()) tags.putIfAbsent(t.albumKey, t.sortAlbumArtist)
+                val artistKeys = albums.associate { it.key to ShelfKey.of(it.albumArtist, tags[it.key]) }
+                val sorted = albums.sortedByShelfKey({ artistKeys.getValue(it.key) }, compareBy<AlbumSummary> { it.year.ifEmpty { "\uFFFF" } }.then(title))
+                ShelfSections.of(sorted, true, key = { it.key }) { ShelfKey.letter(artistKeys.getValue(it.key)) }
+            }
+            AlbumSort.YEAR -> ShelfSections.of(albums.sortedWith(compareBy<AlbumSummary> { it.year.ifEmpty { "\uFFFF" } }.then(title)), false, key = { it.key }) { "" }
+        }
     }
 
     /** Every album artist and track artist, merged by name. */
@@ -192,9 +272,13 @@ object MusicCatalog {
             trackArtists.forEach { acc(it).songs++ }
             if (trackArtists.size == 1 && t.sortArtist.isNotBlank()) acc(trackArtists[0]).apply { sort = sort ?: t.sortArtist }
         }
-        return all.values.sortedWith(compareBy({ sortName(it.sort.orEmpty(), it.name) }, { it.name }))
-            .map { ArtistSummary(it.name, it.albums.size, it.songs) }
+        return all.values.map { ArtistSummary(it.name, it.albums.size, it.songs, ShelfKey.of(it.name, it.sort)) }
+            .sortedByShelfKey({ it.shelfKey }, compareBy { it.name })
     }
+
+    /** The Artists tab: A–Z by name (its sort tag where tagged). */
+    fun artistSections(tracks: List<Track>): ShelfSections<ArtistSummary> =
+        ShelfSections.of(artists(tracks), byName = true, key = { it.name }) { ShelfKey.letter(it.shelfKey) }
 
     fun releaseGroup(releaseType: String): ReleaseGroup {
         val tokens = releaseType.lowercase(Locale.ROOT).split(';', '/', ',', '+').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
@@ -242,7 +326,7 @@ object MusicCatalog {
             val k = nameKey(g)
             counts[k] = (counts[k]?.first ?: g) to ((counts[k]?.second ?: 0) + 1)
         }
-        return counts.values.sortedBy { it.first.lowercase(Locale.ROOT) }.map { GenreSummary(it.first, it.second) }
+        return counts.values.map { GenreSummary(it.first, it.second) }.sortedByShelfKey({ ShelfKey.of(it.name) }, compareBy { it.name })
     }
 
     fun genrePage(name: String, tracks: List<Track>): GenrePage {
@@ -255,7 +339,7 @@ object MusicCatalog {
 
     fun folders(tracks: List<Track>): List<FolderSummary> =
         tracks.groupBy { it.folder }.map { (path, group) -> FolderSummary(path, folderName(path), group.size) }
-            .sortedBy { it.name.lowercase(Locale.ROOT) }
+            .sortedByShelfKey({ ShelfKey.of(it.name) }, compareBy { it.path })
 
     fun folderPage(path: String, tracks: List<Track>): FolderPage {
         val inFolder = tracks.filter { it.folder == path }
@@ -312,6 +396,8 @@ class MusicViewModel(
     downloads: Flow<List<DownloadRecord>> = flowOf(emptyList()),
     /** Removes a downloaded album's files by its group (`MediaDownloader.remove`, run in the app scope). */
     private val remover: (groupId: String) -> Unit = {},
+    /** The Songs, Albums and Artists shelves' remembered sorts and the Albums view (Plan LV). */
+    private val viewPrefs: LibraryViewPrefs = LibraryViewPrefs(),
 ) : ViewModel() {
     /** Groups' file counts from their manifests, read once (on [compute]). */
     private val fileCounts = ConcurrentHashMap<String, Int>()
@@ -319,7 +405,11 @@ class MusicViewModel(
     private val mediaRecords: Flow<List<DownloadRecord>> =
         downloads.map { all -> all.filter { it.groupId?.startsWith(MediaDownloads.PREFIX) == true } }.distinctUntilChanged()
 
-    private val sort = MutableStateFlow(SongSort.TITLE)
+    private val sort = viewPrefs.sort(ShelfKind.SONGS).map { sortNamed(it, SongSort.TITLE) }
+    private val albumSort = viewPrefs.sort(ShelfKind.ALBUMS).map { sortNamed(it, AlbumSort.TITLE) }
+
+    /** The Albums tab's view: List (the default) or the cover grid. */
+    val albumView: StateFlow<ShelfView> = viewPrefs.view(ShelfKind.ALBUMS)
 
     private data class Scope(val title: String, val tracks: List<Track>)
 
@@ -338,13 +428,14 @@ class MusicViewModel(
     private val tracks: Flow<List<Track>> = scope.map { it.tracks }.distinctUntilChanged()
 
     /** Null until loaded. */
-    val ui: StateFlow<MusicUi?> = combine(scope, playlists.all, sort) { s, lists, order ->
+    val ui: StateFlow<MusicUi?> = combine(scope, playlists.all, sort, albumSort) { s, lists, order, albumOrder ->
         MusicUi(
             title = s.title,
             sort = order,
-            songs = MusicCatalog.sortSongs(s.tracks, order),
-            albums = MusicCatalog.albums(s.tracks),
-            artists = MusicCatalog.artists(s.tracks),
+            songSections = MusicCatalog.songSections(s.tracks, order),
+            albumSort = albumOrder,
+            albumSections = MusicCatalog.albumSections(s.tracks, albumOrder),
+            artistSections = MusicCatalog.artistSections(s.tracks),
             genres = MusicCatalog.genres(s.tracks),
             folders = MusicCatalog.folders(s.tracks),
             playlists = lists,
@@ -364,7 +455,11 @@ class MusicViewModel(
     val allPlaylists: StateFlow<List<Playlist>> =
         playlists.all.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun setSort(order: SongSort) { sort.value = order }
+    fun setSort(order: SongSort) = viewPrefs.setSort(ShelfKind.SONGS, order.name)
+
+    fun setAlbumSort(order: AlbumSort) = viewPrefs.setSort(ShelfKind.ALBUMS, order.name)
+
+    fun toggleAlbumView() = viewPrefs.setView(ShelfKind.ALBUMS, albumView.value.toggled())
 
     fun album(key: String): Flow<AlbumPage?> = combine(tracks, mediaRecords) { all, records ->
         val tracksOf = MusicCatalog.albumTracks(key, all)

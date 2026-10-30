@@ -64,6 +64,7 @@ import app.granger.library.shelf.ViewToggle
 import app.granger.library.shelf.sortedByShelfKey
 import app.granger.settings.RailSide
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.performClick
 import app.granger.book
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.FeedKind
@@ -563,6 +564,48 @@ class ThemeShots {
     @Test fun booksList() = booksShot("books-list", ShelfView.LIST)
 
     @Test fun booksGrid() = booksShot("books-grid", ShelfView.GRID)
+
+    /** All music, forty albums of two songs, at 360 dp; [tab] is clicked before the shot. */
+    private fun musicShot(name: String, tab: String, albumView: ShelfView = ShelfView.LIST) {
+        val tracks = classics.take(40).flatMapIndexed { i, (title, author) ->
+            (1..2).map { n ->
+                app.granger.music.song("s$i-$n", title = if (n == 1) title else "$title, part two", album = title, albumArtists = author.ifEmpty { "Anonymous" },
+                    trackNo = n, date = "${1900 + i}")
+            }
+        }
+        val media = app.granger.music.FakeMediaLibrary(tracks)
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.ALBUMS, albumView) }
+        val vm = app.granger.music.MusicViewModel(
+            null, media, app.granger.FakeShelves(), app.granger.music.FakePlaylists(media), FakePlayerHub(),
+            compute = kotlinx.coroutines.Dispatchers.Main, viewPrefs = prefs,
+        )
+        val nav = app.granger.music.MusicNav({}, {}, {}, {}, {}, {})
+        var night by mutableStateOf(true)
+        compose.setContent {
+            GrangerTheme(night = night) {
+                GrangerShell(
+                    rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
+                    onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                ) { app.granger.music.MusicScreen(vm, nav) }
+            }
+        }
+        compose.onNode(androidx.compose.ui.test.hasText(tab) and androidx.compose.ui.test.hasClickAction()).performClick()
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    @Test fun musicSongs() = musicShot("music-songs", "Songs")
+
+    @Test fun musicAlbumsList() = musicShot("music-albums-list", "Albums")
+
+    @Test fun musicAlbumsGrid() = musicShot("music-albums-grid", "Albums", ShelfView.GRID)
+
+    @Test fun musicArtists() = musicShot("music-artists", "Artists")
 
     /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
     @Composable
