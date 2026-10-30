@@ -2,7 +2,7 @@
 
 2026-10-30 · Neal Thompson (decisions) · written up by Claude
 
-Status: draft for Neal's review. Research: `docs/superpowers/spikes/2026-10-30-language-research.md`. Roadmap row L0. Decisions so far (Neal, 2026-10-30): the app in Spanish and Spanish knowledge are built together and both are done before Spanish ships; the base is neutral Latin American Spanish; work proceeds now until it needs the phone; Spanish voice training is planned but not started.
+Status: decided 2026-10-30 (§10). Research: `docs/superpowers/spikes/2026-10-30-language-research.md`. Roadmap row L0. Decisions so far (Neal, 2026-10-30): the app in Spanish and Spanish knowledge are built together and both are done before Spanish ships; the base is neutral Latin American Spanish; work proceeds now until it needs the phone; Spanish voice training is planned but not started.
 
 ## 1. Why
 
@@ -97,7 +97,7 @@ Ask answers in the question's language, whatever the app's language is (§6.2).
 
 ### 5.3 Books and audio
 
-- **Clásicos Granger:** the pack builder takes a Spanish manifest (`manifest.py` stops rejecting non-English works; `language` is read from the manifest, not hardcoded). The Spanish Gutenberg works are curated the way the 347 English ones were, published as `gc-es-*` books in their own release, and filed under Granger Classics with a language section.
+- **Clásicos Granger:** the pack builder takes a Spanish manifest (`manifest.py` stops rejecting non-English works; `language` is read from the manifest, not hardcoded). The Spanish Gutenberg works are curated the way the 347 English ones were, published as `gc-es-*` books in their own release, and filed as their own collection, Clásicos Granger (§10).
 - **archive.org:** a `language:(spa OR Spanish)` clause when the user's knowledge languages include Spanish, with Spanish subject words on the shelves. The 1930 rule is unchanged.
 - **LibriVox:** filtered on each item's `language` field client-side, because the API ignores a language parameter. Leading articles (*el, la, los, las, un, una*) are stripped for sorting.
 - `TextToEpub` writes the book's detected or declared language, not `en`.
@@ -178,9 +178,12 @@ Desk and Mac work runs now: all of L1's code, L2's translation, L3's catalog and
 
 **Shipping:** Spanish ships when L1–L4 pass, with the phone's own voice. L5 follows when it's ready.
 
-## 10. Open questions for Neal
+## 10. Decisions (Neal, 2026-10-30)
 
-1. **Translation review:** who reviews the Spanish before friends see it? A native-speaker friend, or a paid reviewer?
-2. **Glossary:** approve the names in §4.2, especially Preparación, Colaborador and the tagline.
-3. **Clásicos:** one Granger Classics collection with English and Spanish sections, or a separate Clásicos Granger collection?
-4. **Bilingual onboarding:** ask "Also English?" only when the phone lists both languages (proposed), or always?
+1. **Translation review:** Claude drafts the Spanish. A small group of Spanish-speaking friends reviews it before anyone else sees it. Until then, no one outside Neal and Claude sees the Spanish.
+2. **Glossary:** the names in §4.2 stand for now (Preparación, Colaborador, "El conocimiento del mundo. Tuyo para siempre."). The friend review may change them.
+3. **Spanish Classics are their own collection,** Clásicos Granger, beside Granger Classics, not a section of it. Neal is learning Spanish and wants to learn with them, so §5.3 changes:
+   - Clásicos Granger is a collection of its own in the Library and Get more.
+   - Define in a Spanish book uses the reader's own Wiktionary first: for an English-speaking learner that's English Wiktionary, which glosses Spanish words in English. Spanish Wiktionary is second. The L3 plan checks how well the English Wiktionary ZIM covers Spanish headwords.
+   - Learner tools beyond Define (parallel texts, graded shelves) are later ideas, not this round.
+4. **Bilingual setup:** do what's typical. Onboarding offers a second knowledge language only when the phone's language list has more than one (§3, as proposed). Settings → Language is where anyone else adds one.
