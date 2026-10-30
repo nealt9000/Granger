@@ -168,12 +168,12 @@ Things the package tasks left for after the merge, because they cross task bound
 
 ## Task 9: Zero and lock
 
-- [ ] **Step 1:** The baseline is empty. Delete the file, and make the guard fail on any hit outside `// l10n-ignore`.
-- [ ] **Step 2: Pseudo-locale check.**
+- [x] **Step 1:** The baseline is empty. Delete the file, and make the guard fail on any hit outside `// l10n-ignore`. *(2026-10-30: deleted with `-PwriteBaseline`; `HardcodedStringsTest.noFileHasHardcodedUiText` fails on any hit.)*
+- [x] **Step 2: Pseudo-locale check.** *(2026-10-30: `isPseudoLocalesEnabled` on the debug build; `PseudoLocaleTest` works under Robolectric (`qualifiers = "en-rXA"` reads "[Çåñçéļ one two]") and checks Home, the Library, Search, Settings and the player. Each screen's own data (titles, names) is listed as allowed, with sizes and times; names kept `translatable="false"` (Granger, Kiwix, LibriVox, Project Gutenberg, Archive.org) stay plain under en-XA, so the test allows "Granger".)*
   - Add `pseudoLocalesEnabled = true` to the debug build type.
   - A Robolectric test renders five screens (Home, Library, Search, Settings, the player) under `qualifiers = "en-rXA"` and checks that no visible text node is in plain ASCII. A plain-ASCII node means a literal was missed.
-- [ ] **Step 3:** The full `./gradlew testDebugUnitTest` passes with the test count at or above the baseline from Task 0.
-- [ ] **Step 4:** `git grep -c '<string name=' app/src/main/res core/*/src/main/res` gives the real string count. Write it in the roadmap row.
+- [x] **Step 3:** The full `./gradlew testDebugUnitTest` passes with the test count at or above the baseline from Task 0. *(2026-10-30: 2574 tests, 53 skipped, 0 failures, against 2315 at Task 0. `core/player`'s `PlayerEngineTest.audiobookPositionSavedOnPauseAndEveryFiveSeconds` failed once in four runs on timing, 6990 ms against 7000; not a strings change.)*
+- [x] **Step 4:** `git grep -c '<string name=' app/src/main/res core/*/src/main/res` gives the real string count. Write it in the roadmap row. *(2026-10-30: 1,042 strings and 74 plurals in 28 files (24 in app, 4 in core modules), 15 of the strings `translatable="false"`: about 1,100 to translate for L2.)*
 
 ## Task 10: Walkthrough (needs the phone)
 
