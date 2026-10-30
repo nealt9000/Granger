@@ -21,13 +21,6 @@
       "title": "WikiMed"
     },
     {
-      "name": "wikem_en_all",
-      "flavour": "maxi",
-      "category": "Medical",
-      "license": "CC BY-SA 4.0",
-      "title": "WikEM emergency medicine"
-    },
-    {
       "name": "wikipedia_en_top",
       "flavour": "nopic",
       "category": "Reference",
@@ -229,7 +222,6 @@
         ],
         "comprehensive": [
           "wikipedia_en_medicine_maxi",
-          "wikem_en_all_maxi",
           "medlineplus.gov_en_all",
           "zimgit-medicine_en",
           "wwwnc.cdc.gov_en_all"
@@ -405,8 +397,7 @@
           "appropedia_en_all_maxi",
           "zimgit-water_en",
           "zimgit-food-preparation_en",
-          "zimgit-medicine_en",
-          "wikem_en_all_maxi"
+          "zimgit-medicine_en"
         ]
       },
       {
@@ -452,7 +443,6 @@
         "blurb": "Clinical references beyond first aid.",
         "items": [
           "wikipedia_en_medicine_maxi",
-          "wikem_en_all_maxi",
           "medlineplus.gov_en_all",
           "zimgit-medicine_en",
           "wwwnc.cdc.gov_en_all",

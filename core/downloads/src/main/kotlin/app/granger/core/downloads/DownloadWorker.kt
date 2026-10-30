@@ -4,149 +4,133 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.SystemClock
-import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
-import androidx.work.ListenableWorker
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
-/** Implemented by the Application so the worker can reach the one [DownloadRunner] of the process. */
+/** Implemented by the Application so the queue worker and the notification reach the one queue of the process. */
 interface DownloadsHost {
-    val downloadRunner: DownloadRunner
+    val downloadQueue: DownloadQueue
+    val downloads: Downloads
 }
 
-class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+/**
+ * The one download worker (Plan DL Decision 1): unique work [WorkManagerScheduler.QUEUE_WORK], which drains the
+ * [DownloadQueue] one file at a time. When only retrying or Wi-Fi-only records are left it books its own next run.
+ */
+class DownloadQueueWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     private val notifications = DownloadNotifications(context)
-    private val title: String get() = inputData.getString(KEY_TITLE).orEmpty()
 
-    override suspend fun getForegroundInfo(): ForegroundInfo =
-        notifications.foregroundInfo(inputData.getString(KEY_ITEM_ID).orEmpty(), title, 0, 0)
+    override suspend fun getForegroundInfo(): ForegroundInfo = notifications.foregroundInfo(QueueSummary())
 
     override suspend fun doWork(): Result {
-        val itemId = inputData.getString(KEY_ITEM_ID) ?: return Result.failure()
-        val hash = (inputData.getString(KEY_HASH) ?: inputData.getString(LEGACY_KEY_SHA256)) ?: return Result.failure()
-        val grouped = inputData.getString(KEY_GROUP) != null
-        val runner = (applicationContext as DownloadsHost).downloadRunner
+        val queue = (applicationContext as DownloadsHost).downloadQueue
         try {
-            setForeground(notifications.foregroundInfo(itemId, title, 0, 0))
+            setForeground(notifications.foregroundInfo(queue.summary()))
         } catch (e: IllegalStateException) {
             // Android 12+ refuses a foreground service started from the background; download anyway.
         }
-        var shownAt = 0L
         try {
-            val outcome = runner.run(itemId, hash) { done, total ->
-                val t = SystemClock.elapsedRealtime()
-                if (t - shownAt >= NOTIFY_EVERY_MS) {
-                    shownAt = t
-                    notifications.update(itemId, title, done, total)
+            val rest = coroutineScope {
+                val shown = launch {
+                    while (true) {
+                        delay(NOTIFY_EVERY_MS)
+                        notifications.update(queue.summary())
+                    }
                 }
+                queue.drain().also { shown.cancel() }
             }
-            if (outcome == RunOutcome.RETRY && isLastAttempt(runAttemptCount)) {
-                // WorkManager retries forever; stop and show the last error with a Retry button.
-                runner.giveUp(itemId, hash)
-                return RunOutcome.FAILED.toWorkResult(grouped)
-            }
-            return outcome.toWorkResult(grouped)
+            if (rest is QueueRest.Later) WorkManagerScheduler.later(WorkManager.getInstance(applicationContext), rest.delayMillis, rest.unmeteredOnly)
+            return Result.success()
         } finally {
-            // Also removes a progress notification posted when setForeground was refused.
-            notifications.cancel(itemId)
+            // Paused or idle, it's gone; this also removes one posted when setForeground was refused.
+            notifications.cancel()
         }
     }
 
-    companion object {
-        const val KEY_ITEM_ID = "itemId"
-        const val KEY_HASH = "hash"
-
-        /** Set on work that belongs to a download group's chain. */
-        const val KEY_GROUP = "group"
-
-        /** Work queued by the version before Plan 7 carries the checksum under this key. */
-        private const val LEGACY_KEY_SHA256 = "sha256"
-        const val KEY_TITLE = "title"
-        private const val NOTIFY_EVERY_MS = 2_000L
-
-        /** Attempts per download before giving up (WorkManager has no limit of its own). */
-        const val MAX_ATTEMPTS = 10
-
-        /** [runAttemptCount] counts from 0, so attempt [MAX_ATTEMPTS] is the last. */
-        fun isLastAttempt(runAttemptCount: Int) = runAttemptCount >= MAX_ATTEMPTS - 1
+    private companion object {
+        const val NOTIFY_EVERY_MS = 2_000L
     }
 }
 
 /**
- * A [grouped] file's failure still reports success, so the rest of its group's chain runs; its record holds the
- * failure and offers Retry. [RunOutcome.RETRY] stays a retry, so the chain waits and keeps one file at a time.
+ * Work queued before Plan DL (one per item, or a group's chain) may still be in WorkManager after an update. It only
+ * wakes the queue, which runs the records in their stored order.
  */
-fun RunOutcome.toWorkResult(grouped: Boolean = false): ListenableWorker.Result = when (this) {
-    RunOutcome.INSTALLED, RunOutcome.GONE -> ListenableWorker.Result.success()
-    RunOutcome.RETRY -> ListenableWorker.Result.retry()
-    RunOutcome.FAILED -> if (grouped) ListenableWorker.Result.success() else ListenableWorker.Result.failure()
+class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result = Result.success()
 }
 
-class WorkManagerScheduler(context: Context) : DownloadScheduler {
+/**
+ * Starts, stops and books [DownloadQueueWorker], and reaches the [queue] running in this process. [ensure] replaces a
+ * waiting (delayed or Wi-Fi-bound) run with one that starts now; while the queue is draining it only tells it to look
+ * again, so the running file is never cut off.
+ */
+class WorkManagerScheduler(context: Context, private val queueOf: () -> DownloadQueue) : DownloadScheduler {
     private val work = WorkManager.getInstance(context)
+    private val queue: DownloadQueue get() = queueOf()
 
-    override fun schedule(record: DownloadRecord, replace: Boolean) {
-        val policy = if (replace) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP
-        work.enqueueUniqueWork(name(record.itemId), policy, request(record, groupId = null))
+    override fun ensure(unmeteredOnly: Boolean) {
+        if (queue.wake()) work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.REPLACE, request(0, unmeteredOnly))
     }
 
-    override fun cancel(itemId: String) {
-        work.cancelUniqueWork(name(itemId))
+    override suspend fun stopRun(itemId: String) = queue.stopRun(itemId)
+
+    override suspend fun stopQueue() {
+        work.cancelUniqueWork(QUEUE_WORK)
+        queue.stopRun(null)
     }
 
-    /**
-     * Each record is appended to the group's one unique chain, so its files run one at a time, in order.
-     * APPEND_OR_REPLACE starts a fresh chain when the old one was cancelled; [replace] starts afresh regardless.
-     */
-    override fun scheduleGroup(groupId: String, records: List<DownloadRecord>, replace: Boolean) {
-        records.forEachIndexed { i, record ->
-            val policy = when {
-                replace && i == 0 -> ExistingWorkPolicy.REPLACE
-                replace -> ExistingWorkPolicy.APPEND
-                else -> ExistingWorkPolicy.APPEND_OR_REPLACE
-            }
-            work.enqueueUniqueWork(groupName(groupId), policy, request(record, groupId))
+    override fun isRunning(itemId: String): Boolean = queue.isRunning(itemId)
+
+    /** Work from before Plan DL would only wake the queue; it is cancelled at startup instead. */
+    override fun forgetLegacyWork() {
+        work.cancelAllWorkByTag(DownloadWorker::class.java.name)
+    }
+
+    companion object {
+        const val QUEUE_WORK = "download-queue"
+
+        /** The queue's next run, after the one finishing now: [delayMillis] on, once the network allows. */
+        fun later(work: WorkManager, delayMillis: Long, unmeteredOnly: Boolean) {
+            work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, request(delayMillis, unmeteredOnly))
+        }
+
+        private fun request(delayMillis: Long, unmeteredOnly: Boolean): OneTimeWorkRequest {
+            val network = if (unmeteredOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
+            return OneTimeWorkRequestBuilder<DownloadQueueWorker>()
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
+                .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+                .build()
         }
     }
-
-    override fun cancelGroup(groupId: String) {
-        work.cancelUniqueWork(groupName(groupId))
-    }
-
-    private fun request(record: DownloadRecord, groupId: String?): OneTimeWorkRequest {
-        val network = if (record.wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
-        val data = listOfNotNull(
-            DownloadWorker.KEY_ITEM_ID to record.itemId,
-            DownloadWorker.KEY_HASH to record.hash,
-            DownloadWorker.KEY_TITLE to record.title,
-            groupId?.let { DownloadWorker.KEY_GROUP to it },
-        )
-        return OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setInputData(workDataOf(*data.toTypedArray()))
-            .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
-            .build()
-    }
-
-    private fun name(itemId: String) = "download-$itemId"
-
-    private fun groupName(groupId: String) = "download-group-$groupId"
 }
 
+/** The queue's one notification (Plan DL Decision 9): the file downloading, the round, the time left and Pause. */
 internal class DownloadNotifications(private val context: Context) {
     private val manager = context.getSystemService(NotificationManager::class.java)
 
@@ -154,37 +138,101 @@ internal class DownloadNotifications(private val context: Context) {
         manager.createNotificationChannel(NotificationChannel(CHANNEL, "Downloads", NotificationManager.IMPORTANCE_LOW))
     }
 
-    fun foregroundInfo(itemId: String, title: String, done: Long, total: Long) =
-        ForegroundInfo(itemId.hashCode(), build(title, done, total), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+    fun foregroundInfo(summary: QueueSummary) =
+        ForegroundInfo(NOTIFICATION_ID, build(summary), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
 
     /** Silently dropped when the user declined notifications. */
-    fun update(itemId: String, title: String, done: Long, total: Long) {
-        manager.notify(itemId.hashCode(), build(title, done, total))
+    fun update(summary: QueueSummary) {
+        manager.notify(NOTIFICATION_ID, build(summary))
     }
 
-    fun cancel(itemId: String) {
-        manager.cancel(itemId.hashCode())
+    fun cancel() {
+        manager.cancel(NOTIFICATION_ID)
     }
 
-    private fun build(title: String, done: Long, total: Long): Notification {
-        val percent = if (total > 0) (done * 100 / total).toInt() else 0
+    fun build(summary: QueueSummary): Notification {
         val open = context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
             PendingIntent.getActivity(context, 0, downloadsIntent(it), PendingIntent.FLAG_IMMUTABLE)
         }
+        val pause = PendingIntent.getBroadcast(context, 0, pauseIntent(context), PendingIntent.FLAG_IMMUTABLE)
+        val (title, text) = notificationText(summary)
+        val permille = (summary.fraction * 1000).toInt()
         return Notification.Builder(context, CHANNEL)
             .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setContentTitle(title.ifBlank { "Downloading" })
-            .setContentText(if (total > 0) "$percent%" else "Starting…")
-            .setProgress(100, percent, total <= 0)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setProgress(1000, permille, summary.bytes <= 0)
             .setContentIntent(open)
+            .addAction(Notification.Action.Builder(null, PAUSE, pause).build())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .build()
     }
 
-    private companion object {
-        const val CHANNEL = "downloads"
+    companion object {
+        private const val CHANNEL = "downloads"
+
+        /** The queue's one notification. */
+        const val NOTIFICATION_ID = 0x6772616e
+
+        const val PAUSE = "Pause"
     }
+}
+
+/** "Downloading Wikipedia Top" over "3 of 14 · about 25 min left". */
+fun notificationText(summary: QueueSummary): Pair<String, String> {
+    val title = summary.current?.title?.let { "Downloading $it" } ?: "Downloading"
+    val parts = mutableListOf<String>()
+    if (summary.files > 0) parts += "${summary.filesDone} of ${summary.files}"
+    summary.timeLeftMillis?.let { parts += "${QueueText.timeLeft(it)} left" }
+    return title to parts.joinToString(" · ").ifEmpty { "Starting…" }
+}
+
+/** What the notification's Pause sends: [DownloadActionReceiver], inside the app only. */
+fun pauseIntent(context: Context): Intent =
+    Intent(context, DownloadActionReceiver::class.java).setAction(DownloadActionReceiver.ACTION_PAUSE)
+
+/** Pause all from the notification, through the app's [Downloads] (so the setting is kept and Home shows it). */
+class DownloadActionReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != ACTION_PAUSE) return
+        val host = context.applicationContext as? DownloadsHost ?: return
+        val pending = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                host.downloads.pause()
+            } finally {
+                pending.finish()
+            }
+        }
+    }
+
+    companion object {
+        const val ACTION_PAUSE = "app.granger.downloads.PAUSE"
+    }
+}
+
+/** [isUnmetered] as it changes, for "Waiting for Wi-Fi". */
+fun unmeteredFlow(context: Context): Flow<Boolean> = callbackFlow {
+    val cm = context.getSystemService(ConnectivityManager::class.java)
+    val callback = object : ConnectivityManager.NetworkCallback() {
+        override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+            trySend(caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED))
+        }
+
+        override fun onLost(network: Network) {
+            trySend(isUnmetered(context))
+        }
+    }
+    trySend(isUnmetered(context))
+    cm?.registerDefaultNetworkCallback(callback)
+    awaitClose { cm?.unregisterNetworkCallback(callback) }
+}.distinctUntilChanged()
+
+/** Whether the network now is unmetered (Wi-Fi, Ethernet): what a Wi-Fi-only download may use. */
+fun isUnmetered(context: Context): Boolean {
+    val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
+    return cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) == true
 }
 
 /** The link a download notification opens: the app's Downloads screen (Plan U3b Decision 1). */

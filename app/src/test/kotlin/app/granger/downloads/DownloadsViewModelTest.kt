@@ -7,9 +7,11 @@ import app.granger.FakeReadingSessions
 import app.granger.MainDispatcherRule
 import app.granger.book
 import app.granger.core.downloads.DownloadState
+import app.granger.core.downloads.GoneFile
 import app.granger.core.downloads.ItemKind
 import app.granger.record
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -23,24 +25,68 @@ class DownloadsViewModelTest {
     private val bookshelf = FakeBookshelf()
     private val sessions = FakeReadingSessions()
 
-    private fun TestScope.vm() = DownloadsViewModel(downloads, library, bookshelf, sessions, appScope = this, today = { 0L })
+    private fun TestScope.vm() = DownloadsViewModel(
+        downloads, library, bookshelf, sessions, appScope = this, today = { 0L }, clock = { 5L }, tick = flowOf(Unit), work = main.dispatcher,
+    )
 
-    @Test fun cancelAndRetryActOnTheGroupAndItsIndexes() = runTest(main.dispatcher) {
+    private fun TestScope.watching(vm: DownloadsViewModel) = backgroundScope.launch { vm.ui.collect {} }
+
+    @Test fun pauseAllAndResume() = runTest(main.dispatcher) {
         val vm = vm()
-        val row = DownloadRow("group:g", "Setting up", RowState.FAILED, 0, 10, groupId = "g", itemIds = listOf("b.vectors"))
+        vm.pause()
+        vm.resume()
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("pause", "resume").inOrder()
+    }
+
+    @Test fun downloadNextMovesARowToTheTopOfUpNext() = runTest(main.dispatcher) {
+        val vm = vm()
+        watching(vm)
+        downloads.list.value = listOf("a", "b", "c", "d").map { record(it, if (it == "a") DownloadState.RUNNING else DownloadState.QUEUED) }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.upNext.map { it.key }).containsExactly("item:b", "item:c", "item:d").inOrder()
+        vm.downloadNext(vm.ui.value.upNext.last())
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("next:d")
+        assertThat(vm.ui.value.now!!.key).isEqualTo("item:a")
+        assertThat(vm.ui.value.upNext.map { it.key }).containsExactly("item:d", "item:b", "item:c").inOrder()
+    }
+
+    @Test fun retryAllQueuesWhatCanBeFetchedAgain() = runTest(main.dispatcher) {
+        val vm = vm()
+        watching(vm)
+        downloads.list.value = listOf(
+            record("a", DownloadState.FAILED, error = "x answered 503"),
+            record("gone", DownloadState.FAILED, error = GoneFile.KIWIX),
+            record("b", DownloadState.FAILED, error = "x answered 503"),
+        )
+        testScheduler.advanceUntilIdle()
+        vm.retryAll(vm.ui.value.stopped)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).containsExactly("retry:a", "retry:b").inOrder()
+    }
+
+    @Test fun cancelRetryAndRemoveActOnTheItemAndItsIndex() = runTest(main.dispatcher) {
+        val vm = vm()
+        val row = DownloadRow("item:b", "B", RowState.FAILED, 0, 10, groupId = "g", itemIds = listOf("b", "b.vectors"))
         vm.retry(row)
         vm.cancel(row)
+        vm.cancelGroup(row)
+        vm.remove(row)
         testScheduler.advanceUntilIdle()
-        assertThat(downloads.calls).containsExactly("retryGroup:g", "retry:b.vectors", "cancelGroup:g", "cancel:b.vectors").inOrder()
+        assertThat(downloads.calls).containsExactly(
+            "retry:b", "retry:b.vectors", "cancel:b", "cancel:b.vectors", "cancelGroup:g", "remove:b", "remove:b.vectors",
+        ).inOrder()
     }
 
     @Test fun theSectionsFollowTheRecords() = runTest(main.dispatcher) {
         val vm = vm()
-        backgroundScope.launch { vm.ui.collect {} }
+        watching(vm)
         downloads.list.value = listOf(record("a", DownloadState.QUEUED), record("b", DownloadState.FAILED))
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.now.map { it.key }).containsExactly("item:a")
+        assertThat(vm.ui.value.upNext.map { it.key }).containsExactly("item:a")
         assertThat(vm.ui.value.stopped.map { it.key }).containsExactly("item:b")
+        assertThat(vm.ui.value.header!!.files).isEqualTo(2)
     }
 
     @Test fun openBookShowsItInItsTab() = runTest(main.dispatcher) {
@@ -52,7 +98,7 @@ class DownloadsViewModelTest {
 
     @Test fun aRecordFinishedTodayIsDoneToday() = runTest(main.dispatcher) {
         val vm = vm()
-        backgroundScope.launch { vm.ui.collect {} }
+        watching(vm)
         downloads.list.value = listOf(record("m", DownloadState.INSTALLED, kind = ItemKind.MODEL))
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.doneToday.map { it.key }).containsExactly("item:m")

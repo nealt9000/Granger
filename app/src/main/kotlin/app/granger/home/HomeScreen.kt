@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,6 +34,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,6 +63,14 @@ import app.granger.shell.mediaKind
 import app.granger.shell.rememberRailCover
 import app.granger.theme.MediaTile
 
+/** What Home's downloads card can do (Plan DL Decision 7); a tap on it opens Downloads. */
+class DownloadsCardActions(
+    val onPause: () -> Unit = {},
+    val onResume: () -> Unit = {},
+    val onRetry: (DownloadsCard.Stopped) -> Unit = {},
+    val onDismiss: (DownloadsCard.Stopped) -> Unit = {},
+)
+
 /** What the screen can do for a feed. */
 class FeedActions(
     val onAdd: (FeedScope, FeedKind, String) -> Unit = { _, _, _ -> },
@@ -74,7 +86,7 @@ fun HomeScreen(
     onOpenTab: (Long) -> Unit,
     onPlay: (RailEntry.Play) -> Unit,
     onOpenCard: (Card) -> Unit,
-    /** The setup bar opens Downloads, where a failed file is retried (Plan U3b Decision 1). */
+    /** The downloads card opens Downloads, where the whole queue is (Plan DL Decision 7). */
     onOpenDownloads: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
@@ -83,7 +95,10 @@ fun HomeScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val actions = remember(viewModel) { FeedActions(viewModel::addFeed, viewModel::removeFeed, viewModel::moveFeed) }
-    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads)
+    val cardActions = remember(viewModel) {
+        DownloadsCardActions(viewModel::pauseDownloads, viewModel::resumeDownloads, viewModel::retryStopped, viewModel::dismissStopped)
+    }
+    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,8 +110,9 @@ fun HomeContent(
     onPlay: (RailEntry.Play) -> Unit,
     onOpenCard: (Card) -> Unit = {},
     actions: FeedActions = FeedActions(),
-    /** The setup bar opens Downloads, where a failed file is retried (Plan U3b Decision 1). */
+    /** The downloads card opens Downloads, where the whole queue is (Plan DL Decision 7). */
     onOpenDownloads: () -> Unit = {},
+    downloadsActions: DownloadsCardActions = DownloadsCardActions(),
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -109,14 +125,7 @@ fun HomeContent(
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list")) {
             item(key = "strip") { ReadinessStrip(ui.strip, onReadiness) }
-            ui.setup?.let { setup ->
-                item(key = "setup") {
-                    Column(Modifier.fillMaxWidth().clickable(onClick = onOpenDownloads).padding(horizontal = 16.dp, vertical = 8.dp).testTag("setup-strip")) {
-                        LinearProgressIndicator(progress = { setup.fraction }, modifier = Modifier.fillMaxWidth())
-                        Text(setupText(setup), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 6.dp))
-                    }
-                }
-            }
+            ui.downloads?.let { card -> item(key = "downloads") { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
             if (adding) {
                 item(key = "add-feed") {
                     AddFeedPanel(
@@ -309,8 +318,65 @@ internal fun Card(title: String, subtitle: String, enabled: Boolean, onClick: ()
     }
 }
 
-/** "Setting up · 3 of 14 · 1.2 GB of 9.8 GB", with the failures when there are any; Retry is in Downloads. */
-fun setupText(setup: SetupProgress): String {
-    val base = "Setting up · ${setup.done} of ${setup.total} · ${app.granger.formatBytes(setup.bytesDone)} of ${app.granger.formatBytes(setup.bytes)}"
-    return if (setup.failed > 0) "$base · ${setup.failed} failed" else base
+/**
+ * Home's one card for downloads, where the setup strip was: the file downloading, the round's bar and figures, and
+ * Pause or Resume; or "2 stopped · Retry" with a close. A tap opens Downloads.
+ */
+@Composable
+private fun DownloadsCardView(card: DownloadsCard, onOpen: () -> Unit, actions: DownloadsCardActions) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onOpen).padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+            .testTag("downloads-card"),
+    ) {
+        when (card) {
+            is DownloadsCard.Active -> {
+                Column(Modifier.weight(1f).padding(vertical = 4.dp)) {
+                    Text(
+                        homeDownloadsTitle(card),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    LinearProgressIndicator(progress = { card.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp))
+                    Text(
+                        homeDownloadsText(card),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (card.paused) {
+                    IconButton(onClick = actions.onResume) { Icon(Icons.Filled.PlayArrow, contentDescription = "Resume downloads") }
+                } else {
+                    IconButton(onClick = actions.onPause) { Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause downloads") }
+                }
+            }
+            is DownloadsCard.Stopped -> {
+                Text(
+                    "${card.count} stopped",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.weight(1f),
+                )
+                if (card.retriable.isNotEmpty()) TextButton(onClick = { actions.onRetry(card) }) { Text("Retry") }
+                IconButton(onClick = { actions.onDismiss(card) }) { Icon(Icons.Filled.Close, contentDescription = "Close") }
+            }
+        }
+    }
+}
+
+/** The file downloading now; "Downloads paused" while paused. */
+fun homeDownloadsTitle(card: DownloadsCard.Active): String = when {
+    card.paused -> "Downloads paused"
+    else -> card.title?.let { "Downloading $it" } ?: "Downloading"
+}
+
+/** "3 of 14 · 1.2 GB of 9.8 GB · about 25 min left", or "Paused · 11 waiting". */
+fun homeDownloadsText(card: DownloadsCard.Active): String {
+    if (card.paused) return "Paused · ${card.waiting} waiting"
+    val parts = mutableListOf(
+        "${card.filesDone} of ${card.files}", "${app.granger.formatBytes(card.bytesDone)} of ${app.granger.formatBytes(card.bytes)}",
+    )
+    card.timeLeftMillis?.let { parts += "${app.granger.core.downloads.QueueText.timeLeft(it)} left" }
+    return parts.joinToString(" · ")
 }

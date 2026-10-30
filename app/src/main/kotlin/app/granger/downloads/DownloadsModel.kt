@@ -3,8 +3,14 @@ package app.granger.downloads
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.MAX_ATTEMPTS
+import app.granger.core.downloads.QueueSummary
+import app.granger.core.downloads.QueueText
 import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.WaitReason
 import app.granger.core.downloads.isActive
+import app.granger.core.downloads.isFromCatalog
+import app.granger.core.downloads.isGone
 import app.granger.core.library.Book
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -12,7 +18,7 @@ import app.granger.formatBytes
 import app.granger.home.HomeViewModel
 import java.io.File
 
-/** Where a row stands: the worst of its files decides (a failure, then one running, then one waiting). */
+/** Where a row stands. */
 enum class RowState { RUNNING, QUEUED, FAILED, DONE }
 
 /** What a finished row opens: an installed pack or book. */
@@ -21,13 +27,10 @@ sealed interface OpenTarget {
     data class Book(val bookId: String) : OpenTarget
 }
 
-/** One file of a group row, shown when the row is opened. */
-data class DownloadFile(val name: String, val state: DownloadState)
-
 /**
- * One row of Downloads: one item, or one group (onboarding's setup, an album) folded into a row (Plan U3b Decision 1).
- * An item's search vectors are part of its row ([withIndex]); when the item itself isn't shown, the row is its index
- * alone ([indexOnly]), still under the item's title.
+ * One row of Downloads (Plan DL Decision 8): one file, with its search vectors folded in ([withIndex]); when the item
+ * itself isn't shown, the row is its index alone ([indexOnly]), still under the item's title. A group's files are rows
+ * of their own, labelled by the group ([groupLabel]); only Done today folds a group into one row ([groupFiles]).
  */
 data class DownloadRow(
     val key: String,
@@ -35,132 +38,189 @@ data class DownloadRow(
     val state: RowState,
     val bytesDone: Long,
     val bytes: Long,
-    /** The group Cancel and Retry act on, for a group row. */
+    /** The group the file belongs to, for Cancel all; null outside a group. */
     val groupId: String? = null,
-    /** A group's files, in queue order; empty for an item. */
-    val files: List<DownloadFile> = emptyList(),
-    val failed: Int = 0,
-    /** The items outside a group that Cancel and Retry act on: the item and its vectors. */
+    /** "Setting up", or the album's title. */
+    val groupLabel: String? = null,
+    /** What Download next, Cancel, Retry and Remove act on: the item and its vectors. */
     val itemIds: List<String> = emptyList(),
     val withIndex: Boolean = false,
     val indexOnly: Boolean = false,
+    /** Why a waiting row waits (Plan DL Decision 4). */
+    val reason: WaitReason? = null,
     val error: String? = null,
-    val wifiOnly: Boolean = false,
     val open: OpenTarget? = null,
-    /** When it joined the queue: its oldest unfinished file. */
-    val queuedAt: Long = 0,
+    /** Every address answered 404 or 410: Retry won't help, so the row offers Remove (Plan DL Decision 10). */
+    val gone: Boolean = false,
+    /** A catalog item that a newer catalog no longer lists, still waiting or stopped: it offers Remove. */
+    val notInCatalog: Boolean = false,
+    /** Done today, a group folded into one row: how many of its files landed. */
+    val groupFiles: Int = 0,
     /** When its last file changed; for a finished row, when it finished. */
     val finishedAt: Long = 0,
 ) {
-    val isGroup: Boolean get() = groupId != null
+    val isGroup: Boolean get() = groupFiles > 0
+
+    /** Remove instead of Retry: the file can't be fetched again. */
+    val removeOnly: Boolean get() = gone || notInCatalog
+
     val fraction: Float get() = if (bytes > 0) (bytesDone.toFloat() / bytes).coerceIn(0f, 1f) else 0f
 }
 
-/** Downloads' three sections. */
+/** The summary header: the round's bar and figures, the speed, Pause all or Resume, and the storage line. */
+data class DownloadsHeader(
+    val paused: Boolean,
+    val files: Int,
+    val filesDone: Int,
+    val bytes: Long,
+    val bytesDone: Long,
+    val waiting: Int,
+    val bytesPerSecond: Long? = null,
+    val timeLeftMillis: Long? = null,
+    val bytesToGo: Long = 0,
+    val freeBytes: Long? = null,
+    val volumeLabel: String? = null,
+) {
+    val fraction: Float get() = if (bytes > 0) (bytesDone.toFloat() / bytes).coerceIn(0f, 1f) else 0f
+}
+
+/** Downloads' sections (Plan DL Decision 8). */
 data class DownloadsUi(
-    val now: List<DownloadRow> = emptyList(),
+    val header: DownloadsHeader? = null,
+    val now: DownloadRow? = null,
+    val upNext: List<DownloadRow> = emptyList(),
     val stopped: List<DownloadRow> = emptyList(),
     val doneToday: List<DownloadRow> = emptyList(),
 ) {
-    val isEmpty: Boolean get() = now.isEmpty() && stopped.isEmpty() && doneToday.isEmpty()
+    val isEmpty: Boolean get() = header == null && now == null && upNext.isEmpty() && stopped.isEmpty() && doneToday.isEmpty()
 
-    /** The Library header's badge: what's still coming or needs a tap. */
-    val badge: Int get() = now.size + stopped.size
+    /** Stopped rows Retry all queues again: not the ones that can only be removed. */
+    val retriable: List<DownloadRow> get() = stopped.filterNot { it.removeOnly }
 }
+
+/** Where a waiting row's free space is counted: a volume's root, its label and its free bytes. */
+data class VolumeSpace(val root: String, val label: String, val freeBytes: Long)
 
 object DownloadsModel {
     /** What a group from onboarding is called (its ids are `onboarding:<epoch>`). */
     const val SETUP_TITLE = "Setting up"
 
+    /** Up next shows this many rows before "Show all n". */
+    const val UP_NEXT_SHOWN = 20
+
     /**
-     * Builds the sections from every download record. A record counts while it's unfinished, or once it was installed
-     * at or after [since] (midnight today). [packs] and [books] give an installed item its library title and what Open
-     * opens.
+     * Builds the page from every download record (in queue order) and the queue's [summary]. A record installed at or
+     * after [since] (midnight today) is Done today. [packs] and [books] give an installed item its library title and
+     * what Open opens; [catalogIds] is every item the current catalog lists, null while there is none.
      */
-    fun of(records: List<DownloadRecord>, since: Long, packs: List<Pack> = emptyList(), books: List<Book> = emptyList()): DownloadsUi {
-        fun shown(r: DownloadRecord) = r.isActive || r.updatedAt >= since
+    fun of(
+        records: List<DownloadRecord>,
+        summary: QueueSummary,
+        since: Long,
+        packs: List<Pack> = emptyList(),
+        books: List<Book> = emptyList(),
+        catalogIds: Set<String>? = null,
+        volumes: List<VolumeSpace> = emptyList(),
+    ): DownloadsUi {
         val packByPath = packs.associateBy { it.filePath }
         val bookByPath = books.associateBy { it.filePath }
-        fun titleOf(r: DownloadRecord) = packByPath[r.filePath]?.title ?: bookByPath[r.filePath]?.title ?: r.title
-
-        val (vectors, own) = records.partition { it.kind == ItemKind.VECTORS }
-        // Each item's or group's records, in the order they came (the ledger's, oldest first).
-        val units = LinkedHashMap<String, MutableList<DownloadRecord>>()
-        for (r in own) {
-            val group = r.groupId
-            if (group != null) units.getOrPut(groupKey(group)) { mutableListOf() } += r
-            else if (shown(r)) units.getOrPut(itemKey(r.itemId)) { mutableListOf() } += r
+        val byItem = records.filter { it.kind != ItemKind.VECTORS }.associateBy { it.itemId }
+        fun titleOf(r: DownloadRecord): String {
+            if (r.kind == ItemKind.VECTORS) return VectorDownloads.parentOf(r.itemId)?.let(byItem::get)?.let(::titleOf) ?: r.title
+            return packByPath[r.filePath]?.title ?: bookByPath[r.filePath]?.title ?: fileName(r)
         }
-        val unitOfItem = own.associate { it.itemId to (it.groupId?.let(::groupKey) ?: itemKey(it.itemId)) }
-        val shownUnits = units.filterValues { list -> list.any(::shown) }.keys
+        fun notInCatalog(r: DownloadRecord) = catalogIds != null && r.isActive && r.isFromCatalog && r.itemId !in catalogIds
 
-        val folded = HashMap<String, MutableList<DownloadRecord>>()
-        val indexOnly = LinkedHashMap<String, MutableList<DownloadRecord>>()
-        for (v in vectors.filter(::shown)) {
-            val parentUnit = VectorDownloads.parentOf(v.itemId)?.let(unitOfItem::get)
-            if (parentUnit != null && parentUnit in shownUnits) folded.getOrPut(parentUnit) { mutableListOf() } += v
-            else indexOnly.getOrPut(v.itemId) { mutableListOf() } += v
-        }
-
-        val rows = shownUnits.map { key ->
-            val main = units.getValue(key)
-            val group = main.first().groupId
-            val title = when {
-                group == null -> titleOf(main.first())
-                group.startsWith(HomeViewModel.SETUP_GROUP) -> SETUP_TITLE
-                else -> main.first().title
+        // A vectors record folds into its parent's row when that row is in the same section.
+        fun rows(list: List<DownloadRecord>, state: RowState, reasons: Map<DownloadRecord, WaitReason> = emptyMap()): List<DownloadRow> {
+            val shown = list.filter { it.kind != ItemKind.VECTORS }.mapTo(HashSet()) { it.itemId }
+            val folded = list.filter { r -> r.kind == ItemKind.VECTORS && VectorDownloads.parentOf(r.itemId) in shown }
+                .groupBy { VectorDownloads.parentOf(it.itemId)!! }
+            val foldedAway = folded.values.flatten().toHashSet()
+            return list.filter { it !in foldedAway }.map { r ->
+                val vecs = if (r.kind == ItemKind.VECTORS) emptyList() else folded[r.itemId].orEmpty()
+                val all = listOf(r) + vecs
+                DownloadRow(
+                    key = (if (r.kind == ItemKind.VECTORS) "index:" else "item:") + r.itemId,
+                    title = titleOf(r),
+                    state = state,
+                    bytesDone = all.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
+                    bytes = all.sumOf { it.sizeBytes },
+                    groupId = r.groupId,
+                    groupLabel = r.groupId?.let { groupLabel(it, r) },
+                    itemIds = all.map { it.itemId },
+                    withIndex = vecs.isNotEmpty(),
+                    indexOnly = r.kind == ItemKind.VECTORS,
+                    reason = reasons[r],
+                    error = all.firstOrNull { it.state == DownloadState.FAILED }?.error,
+                    open = if (state == RowState.DONE) openOf(r, packByPath, bookByPath) else null,
+                    gone = r.isGone,
+                    notInCatalog = notInCatalog(r),
+                    finishedAt = all.maxOf { it.updatedAt },
+                )
             }
-            val vecs = folded[key].orEmpty()
-            row(key, title, main, vecs, group, open = if (group == null) openOf(main.first(), packByPath, bookByPath) else null)
-        } + indexOnly.map { (itemId, vecs) ->
-            val parent = VectorDownloads.parentOf(itemId)?.let { p -> own.firstOrNull { it.itemId == p } }
-            row(
-                indexKey(itemId), parent?.let(::titleOf) ?: vecs.first().title, emptyList(), vecs, group = null,
-                open = parent?.let { openOf(it, packByPath, bookByPath) },
+        }
+
+        val current = summary.current
+        val now = current?.let { c ->
+            rows(listOf(c), RowState.RUNNING).single().copy(bytesDone = summary.currentBytesDone)
+        }
+        val reasons = summary.waiting.associate { it.record to it.reason }
+        val upNext = rows(summary.waiting.map { it.record }, RowState.QUEUED, reasons)
+        val stopped = rows(summary.stopped, RowState.FAILED)
+
+        // Done today: an item's row, or a group folded into one, with its files' vectors.
+        val done = records.filter { it.state == DownloadState.INSTALLED && it.updatedAt >= since }
+        val groupOf = done.filter { it.groupId != null }.associate { it.itemId to it.groupId!! }
+        val (groupVectors, singles) = done.filter { it.groupId == null }
+            .partition { it.kind == ItemKind.VECTORS && VectorDownloads.parentOf(it.itemId) in groupOf }
+        val vectorsOfGroup = groupVectors.groupBy { groupOf.getValue(VectorDownloads.parentOf(it.itemId)!!) }
+        val doneToday = rows(singles, RowState.DONE) +
+            done.filter { it.groupId != null }.groupBy { it.groupId!! }.map { (group, files) ->
+                val all = files + vectorsOfGroup[group].orEmpty()
+                DownloadRow(
+                    key = "group:$group", title = groupLabel(group, files.first()), state = RowState.DONE,
+                    bytesDone = all.sumOf { it.sizeBytes }, bytes = all.sumOf { it.sizeBytes }, groupId = group,
+                    itemIds = files.map { it.itemId }, withIndex = all.size > files.size, groupFiles = files.size,
+                    finishedAt = all.maxOf { it.updatedAt },
+                )
+            }
+
+        val header = if (!summary.isActive) null else {
+            val first = current ?: summary.waiting.firstOrNull()?.record
+            val volume = first?.let { r -> volumes.firstOrNull { r.filePath.startsWith(it.root.trimEnd(File.separatorChar) + File.separator) } }
+            DownloadsHeader(
+                paused = summary.paused,
+                files = summary.files,
+                filesDone = summary.filesDone,
+                bytes = summary.bytes,
+                bytesDone = summary.bytesDone,
+                waiting = summary.waiting.size,
+                bytesPerSecond = summary.bytesPerSecond,
+                timeLeftMillis = summary.timeLeftMillis,
+                bytesToGo = summary.bytesToGo,
+                freeBytes = volume?.freeBytes,
+                volumeLabel = volume?.label,
             )
         }
-        val byQueue = compareBy<DownloadRow> { it.queuedAt }
         return DownloadsUi(
-            now = rows.filter { it.state == RowState.RUNNING }.sortedWith(byQueue) +
-                rows.filter { it.state == RowState.QUEUED }.sortedWith(byQueue),
-            stopped = rows.filter { it.state == RowState.FAILED }.sortedWith(byQueue),
-            doneToday = rows.filter { it.state == RowState.DONE }.sortedByDescending { it.finishedAt },
+            header = header,
+            now = now,
+            upNext = upNext,
+            stopped = stopped,
+            doneToday = doneToday.sortedByDescending { it.finishedAt },
         )
     }
 
-    private fun groupKey(groupId: String) = "group:$groupId"
-    private fun itemKey(itemId: String) = "item:$itemId"
-    private fun indexKey(itemId: String) = "index:$itemId"
+    /**
+     * The Library header's badge: what's still coming or stopped, a group counted once (an onboarding round is one
+     * thing coming, not 376).
+     */
+    fun badge(records: List<DownloadRecord>): Int =
+        records.filter { it.isActive && it.kind != ItemKind.VECTORS }.distinctBy { it.groupId ?: it.itemId }.size
 
-    private fun row(
-        key: String, title: String, main: List<DownloadRecord>, vecs: List<DownloadRecord>, group: String?, open: OpenTarget?,
-    ): DownloadRow {
-        val all = main + vecs
-        val state = when {
-            all.any { it.state == DownloadState.FAILED } -> RowState.FAILED
-            all.any { it.state == DownloadState.RUNNING } -> RowState.RUNNING
-            all.any { it.state == DownloadState.QUEUED } -> RowState.QUEUED
-            else -> RowState.DONE
-        }
-        return DownloadRow(
-            key = key,
-            title = title,
-            state = state,
-            bytesDone = all.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
-            bytes = all.sumOf { it.sizeBytes },
-            groupId = group,
-            files = if (group == null) emptyList() else main.map { DownloadFile(fileName(it), it.state) },
-            failed = all.count { it.state == DownloadState.FAILED },
-            itemIds = ((if (group == null) main else emptyList()) + vecs).map { it.itemId }.distinct(),
-            withIndex = main.isNotEmpty() && vecs.isNotEmpty(),
-            indexOnly = main.isEmpty(),
-            error = all.firstOrNull { it.state == DownloadState.FAILED }?.error,
-            wifiOnly = all.any { it.isActive && it.wifiOnly },
-            open = if (state == RowState.DONE) open else null,
-            queuedAt = all.filter { it.isActive }.minOfOrNull { it.createdAt } ?: Long.MAX_VALUE,
-            finishedAt = all.maxOf { it.updatedAt },
-        )
-    }
+    fun groupLabel(groupId: String, r: DownloadRecord): String =
+        if (groupId.startsWith(HomeViewModel.SETUP_GROUP)) SETUP_TITLE else r.title
 
     /** An album's files all carry the album's title: they are told apart by name. */
     private fun fileName(r: DownloadRecord) = if (r.kind == ItemKind.AUDIO) File(r.filePath).name else r.title
@@ -172,20 +232,59 @@ object DownloadsModel {
     }
 }
 
-/** The line under a row's title: how far it is, or why it stopped. */
-fun downloadsText(row: DownloadRow): String {
+/** Said of an item a newer catalog dropped (Plan DL Decision 10). */
+const val NOT_IN_CATALOG = "No longer in the catalog"
+
+/** A waiting row's reason, as it reads (Plan DL Decision 4). [now] is for "Trying again in 2 min". */
+fun reasonText(reason: WaitReason, now: Long): String = when (reason) {
+    WaitReason.Paused -> "Paused"
+    WaitReason.WaitingForWifi -> "Waiting for Wi-Fi"
+    is WaitReason.Retrying -> "Trying again ${QueueText.inTime(reason.at - now)} (attempt ${reason.attempt} of $MAX_ATTEMPTS)"
+    is WaitReason.NeedsSpace -> "Needs ${formatBytes(reason.bytes)} more space"
+    is WaitReason.InLine -> QueueText.place(reason.place)
+}
+
+/** "312 of 980 MB" once a file has begun, its size before. */
+private fun sizeText(row: DownloadRow) =
+    if (row.bytesDone > 0 && row.bytesDone < row.bytes) "${formatBytes(row.bytesDone)} of ${formatBytes(row.bytes)}" else formatBytes(row.bytes)
+
+/** The line under a row's title: how far it is, why it waits, or why it stopped. [speed] is the running file's. */
+fun downloadsText(row: DownloadRow, now: Long = System.currentTimeMillis(), speed: Long? = null): String {
     val parts = mutableListOf<String>()
     if (row.indexOnly) parts += "Index for Ask"
-    if (row.isGroup) parts += "${row.files.count { it.state == DownloadState.INSTALLED }} of ${row.files.size}"
-    parts += when (row.state) {
-        RowState.RUNNING -> "${formatBytes(row.bytesDone)} of ${formatBytes(row.bytes)}"
-        RowState.QUEUED -> if (row.wifiOnly) "Waiting for Wi-Fi" else "Queued"
-        RowState.FAILED -> when {
-            row.isGroup -> "${row.failed} failed"
+    when (row.state) {
+        RowState.RUNNING -> {
+            parts += "${formatBytes(row.bytesDone)} of ${formatBytes(row.bytes)}"
+            speed?.let { parts += "${formatBytes(it)}/s" }
+        }
+        RowState.QUEUED -> {
+            parts += sizeText(row)
+            parts += if (row.notInCatalog) NOT_IN_CATALOG else row.reason?.let { reasonText(it, now) } ?: "Queued"
+        }
+        RowState.FAILED -> parts += when {
+            row.notInCatalog && !row.gone -> NOT_IN_CATALOG
             else -> row.error ?: "Failed"
         }
-        RowState.DONE -> formatBytes(row.bytes)
+        RowState.DONE -> {
+            if (row.isGroup) parts += "${row.groupFiles} ${if (row.groupFiles == 1) "file" else "files"}"
+            parts += formatBytes(row.bytes)
+        }
     }
     val line = parts.joinToString(" · ")
     return if (row.withIndex) "$line + index for Ask" else line
+}
+
+/** The header's first line: "3 of 14 · 1.2 of 9.8 GB · about 25 min left", or "Paused · 11 waiting". */
+fun headerText(h: DownloadsHeader): String {
+    if (h.paused) return "Paused · ${h.waiting} waiting"
+    val parts = mutableListOf("${h.filesDone} of ${h.files}", "${formatBytes(h.bytesDone)} of ${formatBytes(h.bytes)}")
+    h.timeLeftMillis?.let { parts += "${QueueText.timeLeft(it)} left" }
+    return parts.joinToString(" · ")
+}
+
+/** The storage line: "9.8 GB to go · 41 GB free on Phone". */
+fun storageText(h: DownloadsHeader): String {
+    val togo = "${formatBytes(h.bytesToGo)} to go"
+    val free = h.freeBytes ?: return togo
+    return "$togo · ${formatBytes(free)} free on ${h.volumeLabel ?: "this phone"}"
 }

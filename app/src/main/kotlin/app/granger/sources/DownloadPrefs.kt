@@ -1,8 +1,10 @@
 package app.granger.sources
 
 import android.content.Context
+import app.granger.core.downloads.QueuePrefs
 
-interface DownloadPrefs {
+/** Also the queue's own settings ([QueuePrefs]): Pause all survives a restart (Plan DL Decision 3). */
+interface DownloadPrefs : QueuePrefs {
     /** Spec: Wi-Fi only by default; the user can turn it off. */
     var wifiOnly: Boolean
 
@@ -32,4 +34,12 @@ class SharedDownloadPrefs(context: Context) : DownloadPrefs {
     override var askBeforeLarge: Boolean
         get() = prefs.getBoolean("askBeforeLarge", true)
         set(value) = prefs.edit().putBoolean("askBeforeLarge", value).apply()
+
+    override var paused: Boolean
+        get() = prefs.getBoolean("paused", false)
+        set(value) = prefs.edit().putBoolean("paused", value).apply()
+
+    override var batchStartedAt: Long
+        get() = prefs.getLong("batchStartedAt", 0)
+        set(value) = prefs.edit().putLong("batchStartedAt", value).apply()
 }

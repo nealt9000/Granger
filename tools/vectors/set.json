@@ -7,27 +7,6 @@
    "maxChunksPerArticle": 12
   },
   {
-   "id": "wikem_en_all_maxi",
-   "domain": "medicine",
-   "skipPathSuffixes": [
-    "/es",
-    "/ko",
-    "/vi",
-    "/it",
-    "/ja",
-    "/pt",
-    "/id",
-    "/fr",
-    "/ru",
-    "/tr",
-    "/de",
-    "/pl",
-    "/zh",
-    "/ar",
-    "/hi"
-   ]
-  },
-  {
    "id": "appropedia_en_all_maxi",
    "domain": "food"
   },

@@ -545,7 +545,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     // A download notification's tap: Downloads, over whatever the launch opened.
     LaunchedEffect(openDownloadsRequests) { if (openDownloadsRequests > 0) nav.navigate(DownloadsRoute) { launchSingleTop = true } }
     // The Library header's badge: what's coming or stopped.
-    val downloadsBadge by remember { container.downloads.records.map { DownloadsModel.of(it, since = Long.MAX_VALUE).badge } }
+    val downloadsBadge by remember { container.downloads.records.map(DownloadsModel::badge) }
         .collectAsStateWithLifecycle(0)
 
     // Every screen that opens a tab hands over its id; the tab decides which reader shows it.
@@ -1180,7 +1180,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             composable<DownloadsRoute> {
                 DownloadsScreen(
                     viewModel = viewModel {
-                        DownloadsViewModel(container.downloads, container.library, container.bookshelf, container.sessions, container.appScope)
+                        DownloadsViewModel(
+                            container.downloads, container.library, container.bookshelf, container.sessions, container.appScope,
+                            container.catalog, container.volumes,
+                        )
                     },
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,

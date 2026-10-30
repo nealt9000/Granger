@@ -15,7 +15,7 @@ import org.junit.Test
 class OnboardingModelTest {
     private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
     private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
-    private val wikem = packEntry("wikem_en_all_maxi", size = 375).copy(family = "wikem")
+    private val medline = packEntry("medlineplus.gov_en_all", size = 375).copy(family = "medlineplus.gov")
     private val voyage = packEntry("wikivoyage_en_all_maxi", size = 1_070).copy(family = "wikivoyage")
     private val france = packEntry("maps_en_france", size = 4_000).copy(family = "maps", title = "France")
     private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
@@ -26,16 +26,16 @@ class OnboardingModelTest {
     private val hamlet = bookEntry("gc-hamlet", category = "Drama").copy(sizeBytes = 20, collection = "granger-classics")
 
     private val catalog = catalogOf(
-        packs = listOf(med, medMaxi, wikem, voyage, france, peru, europe, mdwikiNopic, mdwikiMaxi),
+        packs = listOf(med, medMaxi, medline, voyage, france, peru, europe, mdwikiNopic, mdwikiMaxi),
         books = listOf(bible, hamlet),
         presets = listOf(
             Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_nopic", "gc-bible", "gc-hamlet")),
-            Preset("comprehensive", "Comprehensive library", listOf("wikipedia_en_medicine_nopic", "gc-bible", "wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "gc-hamlet")),
+            Preset("comprehensive", "Comprehensive library", listOf("wikipedia_en_medicine_nopic", "gc-bible", "wikipedia_en_medicine_maxi", "medlineplus.gov_en_all", "gc-hamlet")),
         ),
     ).copy(
         onboarding = Onboarding(
             useCases = listOf(
-                UseCase("medical", "Medical work", "Clinical.", listOf("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "family:mdwiki")),
+                UseCase("medical", "Medical work", "Clinical.", listOf("wikipedia_en_medicine_maxi", "medlineplus.gov_en_all", "family:mdwiki")),
                 UseCase("faith", "Faith & philosophy", "", listOf("@granger-classics")),
                 UseCase("travel", "Travel", "", listOf("wikivoyage_en_all_maxi")),
             ),
@@ -45,7 +45,7 @@ class OnboardingModelTest {
     )
 
     @Test fun startChoicesFoldBooksIntoOneLineAndSkipInstalledOnes() {
-        val choices = OnboardingModel.startChoices(catalog, installed = setOf("wikem_en_all_maxi"))
+        val choices = OnboardingModel.startChoices(catalog, installed = setOf("medlineplus.gov_en_all"))
         assertThat(choices.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()
         val efficient = choices[0]
         assertThat(efficient.lines.map { it.title }).containsExactly("Pack wikipedia_en_medicine_nopic", "Granger Classics").inOrder()
@@ -53,9 +53,9 @@ class OnboardingModelTest {
         assertThat(efficient.bytes()).isEqualTo(1_030)
         assertThat(efficient.bytes(unticked = setOf("collection:granger-classics"))).isEqualTo(1_000)
         val comprehensive = choices[1]
-        assertThat(comprehensive.lines.single { it.id == "wikem_en_all_maxi" }.installed).isTrue()
+        assertThat(comprehensive.lines.single { it.id == "medlineplus.gov_en_all" }.installed).isTrue()
         // WikiMed with and without pictures are one ZIM: only the larger is listed (Neal, 2026-10-22).
-        assertThat(comprehensive.lines.map { it.id }).containsExactly("collection:granger-classics", "wikipedia_en_medicine_maxi", "wikem_en_all_maxi").inOrder()
+        assertThat(comprehensive.lines.map { it.id }).containsExactly("collection:granger-classics", "wikipedia_en_medicine_maxi", "medlineplus.gov_en_all").inOrder()
         assertThat(comprehensive.bytes()).isEqualTo(30 + 1_900)
         assertThat(OnboardingModel.startChoices(catalogOf(), emptySet())).isEmpty()
     }
@@ -77,7 +77,7 @@ class OnboardingModelTest {
     }
 
     @Test fun additionsLeaveOutWhatIsChosenOrInstalledAndTakeAFamilysSmallestPack() {
-        val additions = OnboardingModel.additions(catalog, installed = setOf("wikem_en_all_maxi"), chosen = setOf("wikipedia_en_medicine_maxi"))
+        val additions = OnboardingModel.additions(catalog, installed = setOf("medlineplus.gov_en_all"), chosen = setOf("wikipedia_en_medicine_maxi"))
         val medical = additions.first { it.useCase.id == "medical" }
         assertThat(medical.lines.map { it.id }).containsExactly("mdwiki_en_all_nopic")
         assertThat(medical.bytes).isEqualTo(800)
@@ -88,7 +88,7 @@ class OnboardingModelTest {
     }
 
     @Test fun theReviewCountsEveryItemOnceAndNothingInstalled() {
-        val installed = setOf("wikem_en_all_maxi")
+        val installed = setOf("medlineplus.gov_en_all")
         val start = OnboardingModel.startChoices(catalog, installed)[1] // comprehensive
         val region = OnboardingModel.regions(catalog, installed).countries.first { it.title == "Peru" }
         val additions = OnboardingModel.additions(catalog, installed, chosen = start.chosen().flatMap { it.items }.map { it.id }.toSet())
@@ -106,7 +106,7 @@ class OnboardingModelTest {
         // A use case chosen alongside a start that already holds its items adds nothing twice.
         val twice = OnboardingModel.review(start, emptySet(), null, OnboardingModel.additions(catalog, installed, emptySet()), 1)
         assertThat(twice.items.map { it.id }).containsNoDuplicates()
-        assertThat(twice.items.map { it.id }).doesNotContain("wikem_en_all_maxi")
+        assertThat(twice.items.map { it.id }).doesNotContain("medlineplus.gov_en_all")
 
         // Nothing chosen at all.
         assertThat(OnboardingModel.review(null, emptySet(), null, emptyList(), 1).isEmpty).isTrue()
@@ -198,12 +198,73 @@ class OnboardingModelTest {
     }
 
     @Test fun saveSpaceSwapsEachPackForItsNoPicturesFlavour() {
-        val pictures = catalog.copy(presets = listOf(Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "gc-bible"))))
+        val pictures = catalog.copy(presets = listOf(Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_maxi", "medlineplus.gov_en_all", "gc-bible"))))
         val withPictures = OnboardingModel.startChoices(pictures, emptySet()).single()
-        assertThat(withPictures.lines.map { it.id }).containsExactly("wikipedia_en_medicine_maxi", "wikem_en_all_maxi", "collection:granger-classics").inOrder()
+        assertThat(withPictures.lines.map { it.id }).containsExactly("wikipedia_en_medicine_maxi", "medlineplus.gov_en_all", "collection:granger-classics").inOrder()
         val saving = OnboardingModel.startChoices(pictures, emptySet(), saveSpace = true).single()
-        // WikEM has no no-pictures flavour: it stays.
-        assertThat(saving.lines.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "wikem_en_all_maxi", "collection:granger-classics").inOrder()
+        // MedlinePlus has no no-pictures flavour: it stays.
+        assertThat(saving.lines.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "medlineplus.gov_en_all", "collection:granger-classics").inOrder()
         assertThat(saving.bytes()).isLessThan(withPictures.bytes())
+    }
+
+    // Plan DL Decision 5: quick wins first.
+    private val domains = listOf("medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought")
+    private val voice = app.granger.core.catalog.VoiceEntry(
+        id = "granger-voice", title = "Granger voice", engine = "piper", language = "en-GB", sizeBytes = 80_000_000, sha256 = "b".repeat(64),
+        url = "https://a.test/voice.zip", license = "CC0",
+    )
+    private fun mb(id: String, mb: Long, domain: String) = packEntry(id, size = mb * 1_000_000).copy(domain = domain)
+    private val wikimed = mb("wikipedia_en_medicine_maxi", 1_860, "medicine")
+    private val foodPrep = mb("zimgit-food-preparation_en", 50, "food")
+    private val water = mb("zimgit-water_en", 30, "food")
+    private val knots = mb("zimgit-knots_en", 31, "making")
+    private val ifixit = mb("ifixit_en_all", 3_570, "technology")
+    private val sciences = mb("libretexts.org_en_chem", 150, "science")
+    private val wikivoyage = mb("wikivoyage_en_all_maxi", 1_020, "reference")
+    private val top = mb("wikipedia_en_top_maxi", 6_990, "reference")
+    private val peruMap = mb("maps_en_peru", 500, "maps")
+    private val franceMap = mb("maps_en_france", 4_000, "maps")
+    private val gemma = modelEntry("gemma-4-e2b", size = 2_000_000_000)
+    private val embedderGemma = modelEntry("embeddinggemma", role = ModelRole.EMBEDDER, size = 300_000_000)
+
+    private fun order(vararg items: app.granger.core.catalog.CatalogItem, region: String? = null) =
+        OnboardingModel.downloadOrder(items.toList(), domains, region).map { it.id }
+
+    @Test fun anEfficientStartLandsTheVoiceAndTheClassicsFirstAndTheModelsLast() {
+        // As the review lists them: the preset's lines (Classics last), the voice, Ask's models, the region.
+        val ids = order(
+            wikimed, foodPrep, water, knots, ifixit, sciences, wikivoyage, top, bible, hamlet, voice, gemma, embedderGemma, peruMap,
+            region = "maps_en_peru",
+        )
+        assertThat(ids).containsExactly(
+            "granger-voice", "gc-bible", "gc-hamlet",
+            // Small packs in readiness-domain order.
+            "zimgit-food-preparation_en", "zimgit-water_en", "zimgit-knots_en", "libretexts.org_en_chem",
+            "maps_en_peru",
+            // The rest smallest first: Wikipedia Top last among the packs.
+            "wikivoyage_en_all_maxi", "wikipedia_en_medicine_maxi", "ifixit_en_all", "wikipedia_en_top_maxi",
+            "gemma-4-e2b", "embeddinggemma",
+        ).inOrder()
+    }
+
+    @Test fun aComprehensiveStartPutsAMapOver2GbWithTheRest() {
+        val ids = order(top, embedderGemma, gemma, franceMap, wikimed, hamlet, knots, voice, region = "maps_en_france")
+        assertThat(ids).containsExactly(
+            "granger-voice", "gc-hamlet", "zimgit-knots_en", "wikipedia_en_medicine_maxi", "maps_en_france", "wikipedia_en_top_maxi",
+            "gemma-4-e2b", "embeddinggemma",
+        ).inOrder()
+    }
+
+    @Test fun aStarterWithoutTheVoiceOrModelsStillPutsTheQuickOnesFirst() {
+        // A release-shaped catalog offers no models: none are queued.
+        val ids = order(top, knots, hamlet, bible)
+        assertThat(ids).containsExactly("gc-hamlet", "gc-bible", "zimgit-knots_en", "wikipedia_en_top_maxi").inOrder()
+    }
+
+    @Test fun theReviewSaysQuickOnesComeFirst() {
+        val line = Line("x", "x", listOf(voice, hamlet), installed = false)
+        assertThat(OnboardingModel.quickFirstText(Review(listOf(ReviewGroup("Start", listOf(line))), 0)))
+            .isEqualTo("Quick ones first: the voice and the Classics land in a few minutes.")
+        assertThat(OnboardingModel.quickFirstText(Review(emptyList(), 0))).isNull()
     }
 }

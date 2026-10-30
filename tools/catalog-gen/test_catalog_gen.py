@@ -811,3 +811,82 @@ def test_the_vectors_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, ca
     assert out["generatedAt"] > "2026-10-22T00:00:00Z"
     assert out["books"][0]["vectors"]["url"].endswith("/v/gc-aeneid_x.gvec")
     assert "vectors on 1 entries from 1 files" in capsys.readouterr().out
+
+
+# --- Plan DL: dead links ---
+
+import http.server
+import threading
+
+
+@pytest.fixture
+def link_server():
+    """Serves HEAD: /ok and /ok2 answer 200, /moved redirects to /ok, /gone 404s, /withdrawn 410s, /busy 503s."""
+    asked = []
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_HEAD(self):
+            asked.append(self.path)
+            if self.path == "/moved":
+                self.send_response(302)
+                self.send_header("Location", "/ok")
+            else:
+                self.send_response({"/ok": 200, "/ok2": 200, "/gone": 404, "/withdrawn": 410}.get(self.path, 503))
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    yield f"http://127.0.0.1:{server.server_address[1]}", asked
+    server.shutdown()
+
+
+def _link_catalog(base):
+    return {
+        "packs": [{"id": "a", "urls": [f"{base}/ok", f"{base}/gone"], "vectors": {"url": f"{base}/moved"}},
+                  {"id": "b", "urls": [f"{base}/ok"]}],
+        "models": [{"id": "m", "url": f"{base}/withdrawn"}],
+        "books": [{"id": "c", "urls": [f"{base}/ok2"]}],
+        "voices": [{"id": "v", "url": f"{base}/busy"}],
+    }
+
+
+def test_catalog_urls_lists_every_url_once_mirrors_and_vectors_included():
+    assert cg.catalog_urls(_link_catalog("h")) == ["h/ok", "h/gone", "h/moved", "h/withdrawn", "h/ok2", "h/busy"]
+
+
+def test_check_links_lists_the_dead_and_asks_a_busy_server_again(tmp_path, link_server):
+    base, asked = link_server
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps(_link_catalog(base)))
+    count, dead = cg.check_links(path, sleep=lambda s: None)
+    assert count == 6
+    assert sorted(dead) == [(f"{base}/busy", "HTTP 503"), (f"{base}/gone", "HTTP 404"), (f"{base}/withdrawn", "HTTP 410")]
+    # 404 and 410 are dead at once; a 503 is asked three times.
+    assert asked.count("/gone") == 1 and asked.count("/withdrawn") == 1 and asked.count("/busy") == 3
+    assert not cg.links_checked(path)
+
+
+def test_sign_needs_a_passing_check_of_the_same_file(tmp_path, link_server, capsys):
+    base, _ = link_server
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps({"packs": [{"id": "a", "urls": [f"{base}/ok"], "vectors": {"url": f"{base}/moved"}}]}))
+    with pytest.raises(SystemExit):
+        cg.main(["sign", "--key-hex", RFC_SEED.hex(), str(path)])
+    assert not (tmp_path / "catalog.json.sig").exists()
+
+    cg.main(["check-links", str(path)])
+    assert "all 2 links answer" in capsys.readouterr().out
+    cg.main(["sign", "--key-hex", RFC_SEED.hex(), str(path)])
+    assert cg.verify_file(RFC_PUBLIC, path)
+
+    # Changed after the check: sign refuses again.
+    path.write_text(json.dumps({"packs": [{"id": "a", "urls": [f"{base}/gone"]}]}))
+    with pytest.raises(SystemExit):
+        cg.main(["sign", "--key-hex", RFC_SEED.hex(), str(path)])
+    with pytest.raises(SystemExit, match="1 of 1 links dead"):
+        cg.main(["check-links", str(path)])
+    assert "DEAD" in capsys.readouterr().out

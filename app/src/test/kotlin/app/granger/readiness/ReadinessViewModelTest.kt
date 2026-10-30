@@ -77,7 +77,7 @@ class ReadinessViewModelTest {
 
     @Test fun everyRowKnowsTheSourceItIsListedUnder() = runTest(main.dispatcher) {
         val voice = record("vits-piper-en_US-ljspeech-medium", DownloadState.INSTALLED, kind = ItemKind.VOICE, filePath = "/internal/voices/v.zip")
-        val kiwix = record("wikem", DownloadState.INSTALLED).copy(urls = listOf("https://download.kiwix.org/zim/wikem.zim"))
+        val kiwix = record("medline", DownloadState.INSTALLED).copy(urls = listOf("https://download.kiwix.org/zim/medline.zim"))
         downloads.list.value = listOf(med, kiwix, e2b, voice) + chapters
         library.packList.value = listOf(pack("u-hand", title = "Pushed"))
         val ui = viewModel().ui.value
@@ -85,7 +85,7 @@ class ReadinessViewModelTest {
         assertThat(ui.voices.single().source).isEqualTo(Source.VOICES)
         assertThat(ui.media.single().source).isEqualTo(Source.LIBRIVOX)
         assertThat(ui.packs.associate { it.title to it.source }).containsExactly(
-            "Title med", Source.GRANGER, "Title wikem", Source.KIWIX, "Pushed", Source.KIWIX,
+            "Title med", Source.GRANGER, "Title medline", Source.KIWIX, "Pushed", Source.KIWIX,
         )
     }
 
@@ -268,17 +268,17 @@ class ReadinessViewModelTest {
     // --- Plan H1: coverage, signals and storage on the UI ---
 
     private val medEntry = packEntry("med", category = "Medical").copy(domain = "medicine", family = "wikipedia")
-    private val wikemEntry = packEntry("wikem", category = "Medical").copy(domain = "medicine", family = "wikem")
+    private val medlineEntry = packEntry("medline", category = "Medical").copy(domain = "medicine", family = "medlineplus.gov")
     private val mapEntry = packEntry("m1", category = "Maps").copy(domain = "maps", family = "maps")
     private val model = Readiness(
         listOf(
-            Domain("medicine", "Medicine & first aid", listOf("med"), listOf("med", "wikem")),
+            Domain("medicine", "Medicine & first aid", listOf("med"), listOf("med", "medline")),
             Domain("maps", "Maps, places & travel", listOf("family:maps"), listOf("family:maps")),
         ),
     )
 
     @Test fun coverageRowsComeFromTheCatalogAndTheLibrary() = runTest(main.dispatcher) {
-        catalog.mutable.value = CatalogState(catalog = catalogOf(packs = listOf(medEntry, wikemEntry, mapEntry)).copy(readiness = model))
+        catalog.mutable.value = CatalogState(catalog = catalogOf(packs = listOf(medEntry, medlineEntry, mapEntry)).copy(readiness = model))
         library.packList.value = listOf(pack("u-med", "WikiMed").copy(name = "n-med", sizeBytes = 900))
         val report = viewModel().ui.value.report
         assertThat(report.needsCatalogRefresh).isFalse()

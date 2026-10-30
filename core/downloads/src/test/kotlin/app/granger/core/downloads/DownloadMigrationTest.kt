@@ -89,6 +89,36 @@ class DownloadMigrationTest {
         }
     }
 
+    @Test fun version3RecordsGetTheirQueuePlaceFromWhenTheyCameThenTheirId() {
+        fun insert(db: androidx.sqlite.db.SupportSQLiteDatabase, id: String, state: String, created: Long, group: String?) = db.execSQL(
+            "INSERT INTO downloads (itemId, hash, hashAlgorithm, kind, title, urls, sizeBytes, filePath, snapshotDate, groupId, " +
+                "wifiOnly, state, bytesDone, error, hashFailures, verifiedAt, createdAt, updatedAt) " +
+                "VALUES ('$id', '${"ab".repeat(32)}', 'SHA256', 'PACK', '$id', 'https://a.test/$id.zim', 10, '/p/packs/$id.zim', " +
+                "'2026-10-10', ${group?.let { "'$it'" } ?: "NULL"}, 1, '$state', 0, " +
+                "${if (state == "FAILED") "'lb.download.kiwix.org answered 404'" else "NULL"}, 0, NULL, $created, $created)",
+        )
+        helper.createDatabase("migrate4.db", 3).apply {
+            // An onboarding group shares one createdAt; a pack got later; one got before.
+            insert(this, "wikem", "FAILED", 20, "onboarding:20")
+            insert(this, "knots", "INSTALLED", 20, "onboarding:20")
+            insert(this, "later", "QUEUED", 30, null)
+            insert(this, "early", "INSTALLED", 10, null)
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate4.db", 4, true, DownloadDatabase.MIGRATION_3_4)
+        db.query("SELECT itemId, queueOrder, attempts, retryAt, state, error, groupId FROM downloads ORDER BY queueOrder").use {
+            val rows = generateSequence { if (it.moveToNext()) Triple(it.getString(0), it.getLong(1), it.getInt(2)) else null }.toList()
+            assertThat(rows).containsExactly(
+                Triple("early", 0L, 0), Triple("knots", 1L, 0), Triple("wikem", 2L, 0), Triple("later", 3L, 0),
+            ).inOrder()
+            it.moveToPosition(2)
+            assertThat(it.isNull(3)).isTrue()
+            assertThat(it.getString(4)).isEqualTo("FAILED")
+            assertThat(it.getString(5)).isEqualTo("lb.download.kiwix.org answered 404")
+            assertThat(it.getString(6)).isEqualTo("onboarding:20")
+        }
+    }
+
     @Test fun migratedRecordsReadBackThroughRoom() = kotlinx.coroutines.test.runTest {
         val hash = "ab".repeat(32)
         helper.createDatabase("migrate3.db", 2).apply {
@@ -102,13 +132,16 @@ class DownloadMigrationTest {
         }
         val db = androidx.room.Room.databaseBuilder(
             androidx.test.core.app.ApplicationProvider.getApplicationContext(), DownloadDatabase::class.java, "migrate3.db",
-        ).allowMainThreadQueries().build()
+        ).addMigrations(DownloadDatabase.MIGRATION_3_4).allowMainThreadQueries().build()
         try {
             val record = db.downloadDao().getAll().single()
             assertThat(record.itemId).isEqualTo("med")
             assertThat(record.state).isEqualTo(DownloadState.INSTALLED)
             assertThat(record.urls).containsExactly("https://a.test/med.zim")
             assertThat(record.groupId).isNull()
+            assertThat(record.queueOrder).isEqualTo(0)
+            assertThat(record.attempts).isEqualTo(0)
+            assertThat(record.retryAt).isNull()
         } finally {
             db.close()
         }

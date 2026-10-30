@@ -21,17 +21,17 @@ class DownloadRunner(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val progressEveryMillis: Long = 1_000,
-) {
+) : RecordRunner {
     private val locks = mutableMapOf<String, Mutex>()
 
     /** One run per record at a time: a replacing run waits until the old one has fully exited. */
-    suspend fun run(itemId: String, hash: String, onProgress: (done: Long, total: Long) -> Unit = { _, _ -> }): RunOutcome {
+    override suspend fun run(itemId: String, hash: String, onProgress: (done: Long, total: Long) -> Unit): RunOutcome {
         val lock = synchronized(locks) { locks.getOrPut("$itemId@$hash") { Mutex() } }
         return lock.withLock { runLocked(itemId, hash, onProgress) }
     }
 
     /** Called after too many retries: a queued or running record becomes failed, keeping its last error. */
-    suspend fun giveUp(itemId: String, hash: String) {
+    override suspend fun giveUp(itemId: String, hash: String) {
         val lock = synchronized(locks) { locks.getOrPut("$itemId@$hash") { Mutex() } }
         lock.withLock {
             val record = dao.get(itemId, hash) ?: return
@@ -74,6 +74,7 @@ class DownloadRunner(
                         return fail(record, "Not enough free space: about $mb MB more is needed.", hashFailures)
                     }
                     is DownloadResult.Failed -> {
+                        if (result.gone) return fail(record, GoneFile.message(record.urls), hashFailures)
                         if (result.permanent) return fail(record, result.reason, hashFailures)
                         val queued = dao.setActiveState(itemId, hash, DownloadState.QUEUED, result.reason, part.length(), hashFailures, now())
                         return if (queued == 0) RunOutcome.GONE else RunOutcome.RETRY
@@ -81,7 +82,7 @@ class DownloadRunner(
                 }
             }
         } catch (e: CancellationException) {
-            // Stopped by WorkManager (Wi-Fi lost, cancelled, time limit): the part file stays for a resume.
+            // Stopped (Pause all, Cancel, Wi-Fi lost, a time limit): the part file stays for a resume.
             withContext(NonCancellable) { dao.requeueIfRunning(itemId, hash, now()) }
             throw e
         } catch (e: Exception) {

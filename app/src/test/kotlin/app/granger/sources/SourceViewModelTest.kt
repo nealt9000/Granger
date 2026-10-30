@@ -578,7 +578,7 @@ class SourceViewModelTest {
     private val domainCatalog = catalogOf(
         listOf(
             kiwix("med", "Medical", featured = true).copy(domain = "medicine", family = "wikipedia"),
-            kiwix("wikem", "Medical").copy(domain = "medicine", family = "wikem"),
+            kiwix("medline", "Medical").copy(domain = "medicine", family = "medlineplus.gov"),
             kiwix("cdc", "Medical").copy(domain = "medicine", family = "cdc"),
             kiwix("top", "Reference", featured = true).copy(domain = "reference", family = "wikipedia"),
             kiwix("se1").copy(domain = "technology", family = "stack_exchange"),
@@ -586,7 +586,7 @@ class SourceViewModelTest {
     ).copy(
         readiness = Readiness(
             listOf(
-                Domain("medicine", "Medicine & first aid", essential = listOf("med"), comprehensive = listOf("med", "wikem")),
+                Domain("medicine", "Medicine & first aid", essential = listOf("med"), comprehensive = listOf("med", "medline")),
                 Domain("reference", "General reference", essential = listOf("top"), comprehensive = listOf("top")),
             ),
         ),
@@ -607,7 +607,7 @@ class SourceViewModelTest {
         val ui = domainViewModel("medicine").ui.value
         assertThat(ui.domainTitle).isEqualTo("Medicine & first aid")
         assertThat(ui.categories).isEmpty()
-        assertThat(ui.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "wikem", "cdc")
+        assertThat(ui.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "medline", "cdc")
         // Short list: nothing folds.
         assertThat(ui.sections.none { it.foldable }).isTrue()
     }
@@ -617,8 +617,8 @@ class SourceViewModelTest {
         library.packList.value = listOf(pack("u-med"))
         val sections = domainViewModel("medicine").ui.value.sections
         assertThat(sections.map { it.title }).containsExactly("Recommended", "Medical").inOrder()
-        // wikem (not installed) before med (installed); the non-tier pack is in its category.
-        assertThat(sections[0].rows.map { it.id }).containsExactly("wikem", "med").inOrder()
+        // medline (not installed) before med (installed); the non-tier pack is in its category.
+        assertThat(sections[0].rows.map { it.id }).containsExactly("medline", "med").inOrder()
         assertThat(sections[1].rows.map { it.id }).containsExactly("cdc")
     }
 
@@ -648,6 +648,6 @@ class SourceViewModelTest {
         val vm = domainViewModel("medicine")
         vm.setQuery("Pack")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "wikem", "cdc")
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("med", "medline", "cdc")
     }
 }

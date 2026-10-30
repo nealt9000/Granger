@@ -6,6 +6,7 @@ one snapshot by its sha256 from Kiwix's metalink file. Models are listed in cura
 
   catalog_gen.py keygen --out ~/.config/granger/catalog-signing.key   # once; prints the public key
   catalog_gen.py build  --curated tools/catalog-gen/curated.json --out catalog/catalog.json
+  catalog_gen.py check-links catalog/catalog.json                       # HEADs every download URL (Plan DL)
   catalog_gen.py sign   --key ~/.config/granger/catalog-signing.key catalog/catalog.json
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
   catalog_gen.py vectors --releases tools/vectors/releases --release-url URL catalog/catalog.json
@@ -24,18 +25,24 @@ Search vectors (Plan R1): a "vectors" setting in curated.json names the folder o
 descriptors and the release URL their files are uploaded under; each descriptor's vectors go on the entries built from
 its exact source file. `vectors` does the same to a catalog that's already built, with a fresh generatedAt.
 
+Dead links (Plan DL): `check-links` asks every download URL, mirrors included, whether it is still there, and fails
+listing the dead ones. It leaves `<file>.links-ok` holding the checked file's sha256; `sign` refuses a file without a
+matching one, so a catalog is never signed with a link Kiwix has withdrawn (WikEM, 2026-10).
+
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
 import argparse
 import base64
 import concurrent.futures
 import datetime
+import hashlib
 import json
 import os
 import pathlib
 import re
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -607,6 +614,78 @@ def tier_sizes(catalog):
     return sizes
 
 
+def catalog_urls(catalog):
+    """Every URL the app may download from: each entry's URLs (mirrors included), models' and voices' URL, vectors."""
+    urls = []
+    for kind in ("packs", "models", "books", "voices"):
+        for entry in catalog.get(kind, []):
+            urls += entry.get("urls", [])
+            if entry.get("url"):
+                urls.append(entry["url"])
+            if entry.get("vectors", {}).get("url"):
+                urls.append(entry["vectors"]["url"])
+    return list(dict.fromkeys(urls))
+
+
+def http_status(url):
+    """The status a HEAD finally gets, after redirects (Kiwix sends you to a mirror, GitHub to its CDN)."""
+    request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "granger-catalog-gen"})
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return response.status
+    except urllib.error.HTTPError as e:
+        return e.code
+
+
+def dead_links(urls, status=http_status, workers=16, tries=3, sleep=time.sleep):
+    """[(url, why)] for every URL that isn't there. A 404 or 410 is dead at once; anything else but 2xx is asked again."""
+    def check(url):
+        why = None
+        for attempt in range(tries):
+            try:
+                code = status(url)
+            except Exception as e:  # a timeout, a reset, DNS: ask again
+                why = f"{type(e).__name__}: {e}"
+            else:
+                if 200 <= code < 300:
+                    return None
+                why = f"HTTP {code}"
+                if code in (404, 410):
+                    break
+            if attempt < tries - 1:
+                sleep(2 ** attempt)
+        return url, why
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+        return [r for r in pool.map(check, urls) if r]
+
+
+def links_ok_path(path):
+    return pathlib.Path(f"{path}.links-ok")
+
+
+def file_sha256(path):
+    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+def check_links(path, status=http_status, workers=16, sleep=time.sleep):
+    """Checks [path]'s URLs; on success writes `<path>.links-ok`, otherwise removes it. Returns (count, dead)."""
+    urls = catalog_urls(json.loads(pathlib.Path(path).read_text(encoding="utf-8")))
+    dead = dead_links(urls, status, workers, sleep=sleep)
+    stamp = links_ok_path(path)
+    if dead:
+        stamp.unlink(missing_ok=True)
+    else:
+        stamp.write_text(file_sha256(path) + "\n")
+    return len(urls), dead
+
+
+def links_checked(path):
+    """Whether `check-links` passed on [path] as it is now."""
+    stamp = links_ok_path(path)
+    return stamp.is_file() and stamp.read_text().strip() == file_sha256(path)
+
+
 def public_key(seed):
     return Ed25519PrivateKey.from_private_bytes(seed).public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
 
@@ -648,6 +727,7 @@ def main(argv):
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("keygen"); p.add_argument("--out", required=True)
     p = sub.add_parser("build"); p.add_argument("--curated", required=True); p.add_argument("--out", required=True)
+    p = sub.add_parser("check-links"); p.add_argument("file")
     p = sub.add_parser("sign"); p.add_argument("file")
     group = p.add_mutually_exclusive_group(required=True)
     group.add_argument("--key"); group.add_argument("--key-hex")
@@ -670,7 +750,16 @@ def main(argv):
             (out.parent / "kiwix-report.txt").write_text("\n".join(report) + "\n", encoding="utf-8")
         print(f"{args.out}: {len(catalog['packs'])} packs, {len(catalog['models'])} models, "
               f"{out.stat().st_size / 1e6:.2f} MB")
+    elif args.command == "check-links":
+        count, dead = check_links(args.file)
+        if dead:
+            for url, why in dead:
+                print(f"  DEAD {url}: {why}")
+            raise SystemExit(f"{args.file}: {len(dead)} of {count} links dead")
+        print(f"{args.file}: all {count} links answer")
     elif args.command == "sign":
+        if not links_checked(args.file):
+            raise SystemExit(f"{args.file}: run check-links on this file first (it changed since, or never passed)")
         hex_seed = args.key_hex or pathlib.Path(args.key).expanduser().read_text().strip()
         sign_file(bytes.fromhex(hex_seed), args.file)
         print(f"wrote {args.file}.sig")

@@ -29,8 +29,9 @@ sealed interface DownloadResult {
     /**
      * Every URL failed; [reason] is the last error. The bytes so far are kept for a resume.
      * [permanent] means every URL failed in a way retrying won't fix (gone, a different file, a bad address).
+     * [gone] means every URL answered 404 or 410: the file has been withdrawn (Plan DL Decision 10).
      */
-    data class Failed(val reason: String, val permanent: Boolean = false) : DownloadResult
+    data class Failed(val reason: String, val permanent: Boolean = false, val gone: Boolean = false) : DownloadResult
 }
 
 /**
@@ -60,6 +61,7 @@ class FileDownloader(
             onProgress(offset)
             var lastError = "No download address"
             var permanent = true
+            var gone = request.urls.isNotEmpty()
             for (url in request.urls) {
                 if (offset >= request.sizeBytes) break
                 val attempt = fetch(url, request, part, dir, digest, offset, onProgress)
@@ -76,8 +78,9 @@ class FileDownloader(
                 if (attempt.noSpace) return@withContext DownloadResult.NoSpace(request.sizeBytes - offset)
                 attempt.error?.let { lastError = it }
                 if (!attempt.permanent) permanent = false
+                if (!attempt.gone) gone = false
             }
-            if (offset < request.sizeBytes) return@withContext DownloadResult.Failed(lastError, permanent)
+            if (offset < request.sizeBytes) return@withContext DownloadResult.Failed(lastError, permanent, gone && permanent)
             if (digest.digest().toHex() != request.hash.lowercase()) {
                 part.delete()
                 return@withContext DownloadResult.HashMismatch
@@ -85,7 +88,9 @@ class FileDownloader(
             DownloadResult.Done
         }
 
-    private class Attempt(val offset: Long, val error: String? = null, val noSpace: Boolean = false, val permanent: Boolean = false)
+    private class Attempt(
+        val offset: Long, val error: String? = null, val noSpace: Boolean = false, val permanent: Boolean = false, val gone: Boolean = false,
+    )
 
     @OptIn(InternalCoroutinesApi::class)
     private suspend fun fetch(
@@ -118,7 +123,10 @@ class FileDownloader(
                         false
                     }
                     200 -> true // no range support: start the file again
-                    else -> return Attempt(offset, "$host answered ${response.code}", permanent = response.code.isPermanentStatus())
+                    else -> return Attempt(
+                        offset, "$host answered ${response.code}", permanent = response.code.isPermanentStatus(),
+                        gone = response.code == 404 || response.code == 410,
+                    )
                 }
                 val body = response.body
                 val expected = if (restart) request.sizeBytes else request.sizeBytes - start

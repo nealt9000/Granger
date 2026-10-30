@@ -197,7 +197,7 @@ class CatalogParserTest {
     """.trimIndent().toByteArray()
 
     private val domains = """
-        {"id": "medicine", "title": "Medicine & first aid", "essential": ["med"], "comprehensive": ["med", "wikem", "@lost"]},
+        {"id": "medicine", "title": "Medicine & first aid", "essential": ["med"], "comprehensive": ["med", "medline", "@lost"]},
         {"id": "maps", "title": "Maps", "essential": ["family:maps", "family:atlas"], "comprehensive": []},
         {"id": "thought", "title": "Thought", "essential": ["@granger-classics"], "comprehensive": ["med"]},
         {"id": "", "title": "Blank", "essential": [], "comprehensive": []},

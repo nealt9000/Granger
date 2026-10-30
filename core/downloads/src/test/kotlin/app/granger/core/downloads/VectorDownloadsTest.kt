@@ -69,7 +69,16 @@ class VectorDownloadsTest {
         assertThat(record.urls).containsExactly("https://github.test/vectors-1/med.gvec")
         assertThat(record.filePath).isEqualTo(File(sd, "vectors/med_333333333333.gvec").path)
         assertThat(record.wifiOnly).isTrue()
-        assertThat(scheduler.scheduled.map { it.first.itemId }).containsExactly("med.vectors")
+        assertThat(scheduler.ensured).hasSize(1)
+    }
+
+    @Test fun vectorsGoRightAfterTheirParentAheadOfTheRestOfTheQueue() = test {
+        manager.enqueueGroup(
+            "onboarding:1", listOf("atlas", "knots").map { downloadSpecOf(packEntry(id = it), "onboarding:1") }, sd, wifiOnly = true,
+        )
+        install(med)
+        reconcile(catalog(med))
+        assertThat(dao.waiting().map { it.itemId }).containsExactly("med.vectors", "atlas", "knots").inOrder()
     }
 
     @Test fun aBookGetsItsVectorsToo() = test {
@@ -83,7 +92,7 @@ class VectorDownloadsTest {
         reconcile(catalog(med))
         reconcile(catalog(med))
         assertThat(vectorRecords()).hasSize(1)
-        assertThat(scheduler.scheduled).hasSize(1)
+        assertThat(scheduler.ensured).hasSize(1)
     }
 
     @Test fun anItemStillDownloadingOrAtAnotherSnapshotGetsNone() = test {

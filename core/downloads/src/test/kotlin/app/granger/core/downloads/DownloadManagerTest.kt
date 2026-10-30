@@ -63,7 +63,8 @@ class DownloadManagerTest {
         assertThat(record.urls).containsExactly("https://a.test/med.zim")
         assertThat(record.wifiOnly).isTrue()
         assertThat(record.createdAt).isEqualTo(7L)
-        assertThat(scheduler.scheduled.single()).isEqualTo(record to false)
+        // Wi-Fi only: the queue is asked to run on an unmetered network.
+        assertThat(scheduler.ensured).containsExactly(true)
     }
 
     @Test fun modelsGoToTheModelsFolder() = test {
@@ -101,13 +102,13 @@ class DownloadManagerTest {
         manager.enqueue(packEntry(), internal, true)
         assertThat(manager.enqueue(packEntry(), internal, true)).isEqualTo(EnqueueResult.AlreadyActive)
         assertThat(records()).hasSize(1)
-        assertThat(scheduler.scheduled).hasSize(1)
+        assertThat(scheduler.ensured).hasSize(1)
     }
 
     @Test fun anInstalledVersionIsNotDownloadedAgain() = test {
         installed(packEntry(), "/x/med.zim")
         assertThat(manager.enqueue(packEntry(), internal, true)).isEqualTo(EnqueueResult.AlreadyInstalled)
-        assertThat(scheduler.scheduled).isEmpty()
+        assertThat(scheduler.ensured).isEmpty()
     }
 
     @Test fun aNewerVersionQueuesNextToTheInstalledOne() = test {
@@ -154,7 +155,7 @@ class DownloadManagerTest {
         assertThat(record.hash).isEqualTo("a".repeat(40))
         assertThat(record.kind).isEqualTo(ItemKind.BOOK)
         assertThat(record.snapshotDate).isEqualTo("2026-10-17")
-        assertThat(scheduler.scheduled.single()).isEqualTo(record to false)
+        assertThat(scheduler.ensured).hasSize(1)
     }
 
     @Test fun cappedSpecCountsAgainstTheCap() = test {
@@ -178,7 +179,7 @@ class DownloadManagerTest {
             ),
         )
         assertThat(manager.enqueue(spec(), internal, true)).isEqualTo(EnqueueResult.AlreadyInstalled)
-        assertThat(scheduler.scheduled).isEmpty()
+        assertThat(scheduler.ensured).isEmpty()
     }
 
     @Test fun cancelDeletesPartAndRecord() = test {
@@ -189,7 +190,7 @@ class DownloadManagerTest {
         manager.cancel("med")
         assertThat(records()).isEmpty()
         assertThat(record.partFile.exists()).isFalse()
-        assertThat(scheduler.cancelled).containsExactly("med")
+        assertThat(scheduler.stopped).containsExactly("med")
     }
 
     @Test fun cancelKeepsTheInstalledVersion() = test {
@@ -207,7 +208,7 @@ class DownloadManagerTest {
         assertThat(record.state).isEqualTo(DownloadState.QUEUED)
         assertThat(record.error).isNull()
         assertThat(record.hashFailures).isEqualTo(0)
-        assertThat(scheduler.scheduled.last().second).isTrue()
+        assertThat(scheduler.ensured).hasSize(2)
     }
 
     @Test fun removeDeletesEveryVersionAndFile() = test {
@@ -219,7 +220,7 @@ class DownloadManagerTest {
         assertThat(records()).isEmpty()
         assertThat(old.exists()).isFalse()
         assertThat(part.exists()).isFalse()
-        assertThat(scheduler.cancelled).contains("med")
+        assertThat(scheduler.stopped).contains("med")
     }
 
     @Test fun repairRequeuesAnInstalledItem() = test {
@@ -230,7 +231,7 @@ class DownloadManagerTest {
         assertThat(record.state).isEqualTo(DownloadState.QUEUED)
         assertThat(record.bytesDone).isEqualTo(0)
         assertThat(record.verifiedAt).isNull()
-        assertThat(scheduler.scheduled.single().second).isTrue()
+        assertThat(scheduler.ensured).hasSize(1)
     }
 
     @Test fun cancellingARepairKeepsTheInstalledRecord() = test {
@@ -263,13 +264,13 @@ class DownloadManagerTest {
         installed(packEntry(sha256 = SHA_1), File(internal, "packs/med_2026-09-01.zim").path)
         manager.enqueue(packEntry(sha256 = SHA_2), internal, true)
         val before = records()
-        val scheduledBefore = scheduler.scheduled.size
+        val ensuredBefore = scheduler.ensured.size
         manager.repair("med")
         assertThat(records()).isEqualTo(before)
-        assertThat(scheduler.scheduled).hasSize(scheduledBefore)
+        assertThat(scheduler.ensured).hasSize(ensuredBefore)
     }
 
-    @Test fun setWifiOnlyReschedulesActiveDownloads() = test {
+    @Test fun setWifiOnlyAppliesToActiveDownloadsAndWakesTheQueue() = test {
         installed(packEntry(id = "old"), "/x/old.zim")
         manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
         manager.enqueue(packEntry(id = "f"), internal, wifiOnly = true)
@@ -277,24 +278,31 @@ class DownloadManagerTest {
         manager.setWifiOnly(false)
         assertThat(records().first { it.itemId == "a" }.wifiOnly).isFalse()
         assertThat(records().first { it.itemId == "old" }.wifiOnly).isTrue()
-        assertThat(scheduler.scheduled.last().let { it.first.itemId to it.second }).isEqualTo("a" to true)
-        assertThat(scheduler.scheduled.last().first.wifiOnly).isFalse()
         assertThat(records().first { it.itemId == "f" }.wifiOnly).isFalse()
         assertThat(records().first { it.itemId == "f" }.state).isEqualTo(DownloadState.FAILED)
-        assertThat(scheduler.scheduled.filter { it.second }.map { it.first.itemId }).containsExactly("a")
+        // Any network will do now.
+        assertThat(scheduler.ensured.last()).isFalse()
     }
 
-    @Test fun resumeSchedulesUnfinishedDownloadsWithoutReplacingThem() = test {
+    @Test fun recoverStartsTheQueueAndRequeuesAStaleRunningRecord() = test {
         installed(packEntry(id = "old"), "/x/old.zim")
         manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
-        manager.enqueue(packEntry(id = "f"), internal, wifiOnly = true)
-        dao.setState("f", SHA_1, DownloadState.FAILED, "boom", 0, 0, 9)
-        manager.enqueueGroup("g", listOf(spec().copy(groupId = "g")), internal, wifiOnly = true)
-        val before = scheduler.scheduled.size
-        val groupsBefore = scheduler.groups.size
-        manager.resume()
-        assertThat(scheduler.scheduled.drop(before).map { it.first.itemId to it.second }).containsExactly("a" to false)
-        assertThat(scheduler.groups).hasSize(groupsBefore)
+        manager.enqueueGroup("g", listOf(spec().copy(itemId = "x", groupId = "g")), internal, wifiOnly = true)
+        dao.setState("x", spec().hash, DownloadState.RUNNING, null, 3, 0, 9)
+        val before = scheduler.ensured.size
+        manager.recover()
+        assertThat(scheduler.ensured).hasSize(before + 1)
+        assertThat(scheduler.legacyForgotten).isEqualTo(1)
+        assertThat(records().first { it.itemId == "x" }.state).isEqualTo(DownloadState.QUEUED)
+        assertThat(records().first { it.itemId == "x" }.bytesDone).isEqualTo(3)
+    }
+
+    @Test fun recoverLeavesTheFileRunningNowAlone() = test {
+        manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
+        dao.setState("a", SHA_1, DownloadState.RUNNING, null, 3, 0, 9)
+        scheduler.running = "a"
+        manager.recover()
+        assertThat(records().single().state).isEqualTo(DownloadState.RUNNING)
     }
 
     @Test fun recordCheckSetsAndClearsVerifiedAt() = test {
@@ -330,21 +338,19 @@ class DownloadManagerTest {
         val specs = (0 until 360).map { member(it) }
         assertThat(manager.enqueueGroup("g", specs, internal, wifiOnly = true)).isEqualTo(EnqueueResult.Queued)
         assertThat(records()).hasSize(360)
-        assertThat(scheduler.groups.single().second.map { it.itemId }).isEqualTo(specs.map { it.itemId })
+        assertThat(dao.waiting().map { it.itemId }).isEqualTo(specs.map { it.itemId })
+        assertThat(scheduler.ensured).hasSize(1)
     }
 
-    @Test fun groupIsQueuedInOrderAsOneChain() = test {
+    @Test fun groupIsQueuedInOrderAtTheBack() = test {
+        manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
         val specs = listOf(member(0), member(1), member(2))
         assertThat(manager.enqueueGroup("g", specs, internal, wifiOnly = true)).isEqualTo(EnqueueResult.Queued)
-        val (group, records, replace) = scheduler.groups.single()
-        assertThat(group).isEqualTo("g")
-        assertThat(records.map { it.itemId }).containsExactly("g/000", "g/001", "g/002").inOrder()
-        assertThat(replace).isFalse()
-        assertThat(records().map { it.groupId }.distinct()).containsExactly("g")
-        assertThat(records().map { it.kind }.distinct()).containsExactly(ItemKind.AUDIO)
+        assertThat(dao.waiting().map { it.itemId }).containsExactly("a", "g/000", "g/001", "g/002").inOrder()
+        val group = dao.forGroup("g")
+        assertThat(group.map { it.kind }.distinct()).containsExactly(ItemKind.AUDIO)
         assertThat(records().map { it.state }.distinct()).containsExactly(DownloadState.QUEUED)
         assertThat(records().first { it.itemId == "g/001" }.filePath).isEqualTo(fileOf(specs[1]).path)
-        assertThat(scheduler.scheduled).isEmpty()
         assertThat(dao.forGroup("g").map { it.itemId }).containsExactly("g/000", "g/001", "g/002").inOrder()
     }
 
@@ -353,8 +359,7 @@ class DownloadManagerTest {
         val specs = listOf(member(0), member(1), member(2))
         assertThat(manager.enqueueGroup("g", specs, internal, true)).isEqualTo(EnqueueResult.NoSpace(50))
         assertThat(records()).isEmpty()
-        assertThat(scheduler.groups).isEmpty()
-        assertThat(scheduler.scheduled).isEmpty()
+        assertThat(scheduler.ensured).isEmpty()
     }
 
     @Test fun groupSpaceCheckCountsOtherQueuedDownloadsOnTheVolume() = test {
@@ -375,7 +380,7 @@ class DownloadManagerTest {
         installedMember(specs[1])
         free[internal.path] = QueuePolicy.RESERVE_BYTES + 200
         assertThat(manager.enqueueGroup("g", specs, internal, true)).isEqualTo(EnqueueResult.Queued)
-        assertThat(scheduler.groups.single().second.map { it.itemId }).containsExactly("g/000", "g/002").inOrder()
+        assertThat(dao.waiting().map { it.itemId }).containsExactly("g/000", "g/002").inOrder()
         assertThat(records().first { it.itemId == "g/001" }.state).isEqualTo(DownloadState.INSTALLED)
     }
 
@@ -383,7 +388,7 @@ class DownloadManagerTest {
         manager.enqueueGroup("g", listOf(member(0), member(1)), internal, true)
         dao.setState("g/001", member(1).hash, DownloadState.FAILED, "boom", 0, 0, 9)
         assertThat(manager.enqueueGroup("g", listOf(member(0), member(1), member(2)), internal, true)).isEqualTo(EnqueueResult.Queued)
-        assertThat(scheduler.groups.last().second.map { it.itemId }).containsExactly("g/002")
+        assertThat(dao.waiting().map { it.itemId }).containsExactly("g/000", "g/002").inOrder()
         assertThat(records().first { it.itemId == "g/001" }.state).isEqualTo(DownloadState.FAILED)
     }
 
@@ -394,7 +399,7 @@ class DownloadManagerTest {
         assertThat(manager.enqueueGroup("g", specs, internal, true)).isEqualTo(EnqueueResult.AlreadyInstalled)
         manager.enqueueGroup("h", listOf(member(0, group = "h")), internal, true)
         assertThat(manager.enqueueGroup("h", listOf(member(0, group = "h")), internal, true)).isEqualTo(EnqueueResult.AlreadyActive)
-        assertThat(scheduler.groups.map { it.first }).containsExactly("h")
+        assertThat(scheduler.ensured).hasSize(1)
     }
 
     @Test fun cancelGroupKeepsInstalledFiles() = test {
@@ -408,7 +413,7 @@ class DownloadManagerTest {
         assertThat(records().map { it.itemId to it.state }).containsExactly(a.itemId to DownloadState.INSTALLED)
         assertThat(fileOf(a).exists()).isTrue()
         assertThat(part.exists()).isFalse()
-        assertThat(scheduler.cancelledGroups).containsExactly("g")
+        assertThat(scheduler.stopped).containsExactly(b.itemId)
     }
 
     @Test fun removeGroupDeletesEveryFile() = test {
@@ -424,7 +429,7 @@ class DownloadManagerTest {
         assertThat(fileOf(a).exists()).isFalse()
         assertThat(part.exists()).isFalse()
         assertThat(fileOf(other).exists()).isTrue()
-        assertThat(scheduler.cancelledGroups).containsExactly("g")
+        assertThat(scheduler.stopped).containsExactly(a.itemId, b.itemId)
     }
 
     @Test fun retryGroupRequeuesFailedInOrder() = test {
@@ -434,38 +439,18 @@ class DownloadManagerTest {
         dao.setState("g/002", specs[2].hash, DownloadState.FAILED, "boom", 0, 2, 9)
         dao.setState("g/001", specs[1].hash, DownloadState.FAILED, "boom", 0, 1, 9)
         manager.retryGroup("g")
-        val (group, records, replace) = scheduler.groups.last()
-        assertThat(group).isEqualTo("g")
-        assertThat(records.map { it.itemId }).containsExactly("g/001", "g/002").inOrder()
-        assertThat(replace).isFalse()
+        assertThat(dao.waiting().map { it.itemId }).containsExactly("g/001", "g/002").inOrder()
         val after = records().filter { it.itemId != "g/000" }
         assertThat(after.map { it.state }.distinct()).containsExactly(DownloadState.QUEUED)
         assertThat(after.map { it.error }.distinct()).containsExactly(null)
         assertThat(after.map { it.hashFailures }.distinct()).containsExactly(0)
     }
 
-    @Test fun wifiOnlyChangeReschedulesGroupsAsChains() = test {
-        val specs = listOf(member(0), member(1), member(2))
-        manager.enqueueGroup("g", specs, internal, wifiOnly = true)
-        dao.setState("g/000", specs[0].hash, DownloadState.RUNNING, null, 0, 0, 9)
-        dao.setState("g/001", specs[1].hash, DownloadState.FAILED, "boom", 0, 0, 9)
-        manager.enqueue(packEntry(id = "a"), internal, wifiOnly = true)
-        manager.setWifiOnly(false)
-        val (group, records, replace) = scheduler.groups.last()
-        assertThat(group).isEqualTo("g")
-        assertThat(records.map { it.itemId }).containsExactly("g/000", "g/002").inOrder()
-        assertThat(records.map { it.wifiOnly }.distinct()).containsExactly(false)
-        assertThat(replace).isTrue()
-        assertThat(scheduler.groups).hasSize(2)
-        assertThat(scheduler.scheduled.filter { it.second }.map { it.first.itemId }).containsExactly("a")
-    }
-
-    @Test fun retryOfOneGroupedFileJoinsItsChain() = test {
+    @Test fun retryOfOneGroupedFileKeepsItsPlace() = test {
         val specs = listOf(member(0), member(1))
         manager.enqueueGroup("g", specs, internal, true)
-        dao.setState("g/001", specs[1].hash, DownloadState.FAILED, "boom", 0, 0, 9)
-        manager.retry("g/001")
-        assertThat(scheduler.groups.last().let { it.first to it.second.map { r -> r.itemId } }).isEqualTo("g" to listOf("g/001"))
-        assertThat(scheduler.scheduled).isEmpty()
+        dao.setState("g/000", specs[0].hash, DownloadState.FAILED, "boom", 0, 0, 9)
+        manager.retry("g/000")
+        assertThat(dao.waiting().map { it.itemId }).containsExactly("g/000", "g/001").inOrder()
     }
 }

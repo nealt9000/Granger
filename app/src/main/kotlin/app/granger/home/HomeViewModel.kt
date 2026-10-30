@@ -3,9 +3,11 @@ package app.granger.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.catalog.CatalogSource
-import app.granger.core.downloads.DownloadRecord
-import app.granger.core.downloads.DownloadState
+import app.granger.core.downloads.DownloadQueueSummary
 import app.granger.core.downloads.Downloads
+import app.granger.core.downloads.QueueSummary
+import app.granger.core.downloads.isFromCatalog
+import app.granger.core.downloads.isGone
 import app.granger.core.library.onShelf
 import app.granger.core.library.Albums
 import app.granger.core.library.Bookshelf
@@ -53,19 +55,37 @@ data class HomeUi(
     /** Feeds whose scope names something on the phone, in Home order; the others are hidden (Decision 3). */
     val feeds: List<FeedUi> = emptyList(),
     val scopeChoices: List<ScopeChoice> = emptyList(),
-    /** Onboarding's downloads while they run (Plan H3); null once they have all landed or were cancelled. */
-    val setup: SetupProgress? = null,
+    /** The live downloads card (Plan DL Decision 7); null when there's nothing to show. */
+    val downloads: DownloadsCard? = null,
 )
 
-/** The latest onboarding group's progress: files landed of files asked for, and bytes. */
-data class SetupProgress(val done: Int, val total: Int, val bytesDone: Long, val bytes: Long, val failed: Int) {
-    val fraction: Float get() = if (bytes <= 0L) 0f else (bytesDone.toFloat() / bytes).coerceIn(0f, 1f)
+/** Home's one card for downloads: the round while anything waits or runs, else what stopped. */
+sealed interface DownloadsCard {
+    /** [title] is the file downloading now; null between files and while paused. */
+    data class Active(
+        val title: String?,
+        val paused: Boolean,
+        val filesDone: Int,
+        val files: Int,
+        val bytesDone: Long,
+        val bytes: Long,
+        val waiting: Int,
+        val timeLeftMillis: Long? = null,
+    ) : DownloadsCard {
+        val fraction: Float get() = if (bytes <= 0L) 0f else (bytesDone.toFloat() / bytes).coerceIn(0f, 1f)
+    }
+
+    /** The queue is empty but [count] files stopped; [retriable] can be fetched again (not a withdrawn one). */
+    data class Stopped(val count: Int, val retriable: List<String>, val keys: Set<String>) : DownloadsCard
 }
 
 /** The one-time marks Home keeps (SharedPreferences `"home"`). */
 interface HomePrefs {
     /** The first-run feeds were inserted (Decision 4); set even when the user removes them all. */
     var seeded: Boolean
+
+    /** The stopped files whose card was closed (`itemId@hash`); a new failure brings the card back (Plan DL Decision 7). */
+    var dismissedFailures: Set<String>
 }
 
 /**
@@ -78,7 +98,7 @@ class HomeViewModel(
     catalog: CatalogSource,
     library: Library,
     bookshelf: Bookshelf,
-    downloads: Downloads,
+    private val downloads: Downloads,
     rail: StateFlow<RailUi>,
     private val homeFeeds: HomeFeeds,
     private val drawer: FeedDrawer,
@@ -87,6 +107,7 @@ class HomeViewModel(
     private val prefs: HomePrefs,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val today: () -> LocalDate = LocalDate::now,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     private val day = MutableStateFlow(today())
 
@@ -118,7 +139,13 @@ class HomeViewModel(
         }
     }
 
-    private val setup = downloads.records.map { setupProgress(it) }
+    private val dismissed = MutableStateFlow(prefs.dismissedFailures)
+
+    private val catalogIds = catalog.state.map { s -> s.catalog?.let { c -> (c.packs + c.models + c.books + c.voices).mapTo(HashSet()) { it.id } } }
+
+    private val downloadsCard = combine(downloads.records, downloads.live, dismissed, catalogIds) { records, live, closed, ids ->
+        downloadsCard(DownloadQueueSummary.of(records, live, clock()), closed, ids)
+    }.flowOn(io)
 
     /** Each OK pack's main entry, for Continue to leave out (opening an archive reads its file, so on [io]). */
     private val mainPaths: Flow<Map<String, String>> = library.packs.map { packs ->
@@ -127,10 +154,10 @@ class HomeViewModel(
 
     private val continuing = combine(rail, mainPaths) { railUi, mains -> continueCards(railUi, mains) }
 
-    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, setup) { report, cards, rows, snap, progress ->
+    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, downloadsCard) { report, cards, rows, snap, card ->
         HomeUi(
             strip = report, continueCards = cards, feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
-            scopeChoices = scopeChoices(snap), setup = progress,
+            scopeChoices = scopeChoices(snap), downloads = card,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
 
@@ -154,6 +181,25 @@ class HomeViewModel(
     }
 
     /** A new look at Home (resume): the date may have turned. */
+    fun pauseDownloads() {
+        viewModelScope.launch { downloads.pause() }
+    }
+
+    fun resumeDownloads() {
+        viewModelScope.launch { downloads.resume() }
+    }
+
+    /** Queues the stopped files again (a withdrawn one stays for Downloads' Remove). */
+    fun retryStopped(card: DownloadsCard.Stopped) {
+        viewModelScope.launch { card.retriable.forEach { downloads.retry(it) } }
+    }
+
+    /** Closes the stopped card until something else fails. */
+    fun dismissStopped(card: DownloadsCard.Stopped) {
+        prefs.dismissedFailures = card.keys
+        dismissed.value = card.keys
+    }
+
     fun refresh() {
         day.value = today()
     }
@@ -189,19 +235,25 @@ class HomeViewModel(
             FeedScope.Family("wikiquote") to FeedKind.RANDOM,
         )
 
-        /** The newest onboarding group (`onboarding:<epoch>`) that still has files to land, else null. */
-        fun setupProgress(records: List<DownloadRecord>): SetupProgress? {
-            val group = records.mapNotNull { it.groupId?.takeIf { g -> g.startsWith(SETUP_GROUP) } }.maxOrNull() ?: return null
-            val rows = records.filter { it.groupId == group }
-            val done = rows.count { it.state == DownloadState.INSTALLED }
-            if (done == rows.size) return null
-            return SetupProgress(
-                done = done,
-                total = rows.size,
-                bytesDone = rows.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
-                bytes = rows.sumOf { it.sizeBytes },
-                failed = rows.count { it.state == DownloadState.FAILED },
-            )
+        /**
+         * The round while anything waits or runs, for every download, not just setup. With nothing to come, the stopped
+         * files, unless that card was closed on exactly these ([closed]); null when there's nothing to show. A withdrawn
+         * file, or one the catalog ([catalogIds], null while there is none) no longer lists, isn't offered Retry.
+         */
+        fun downloadsCard(summary: QueueSummary, closed: Set<String>, catalogIds: Set<String>? = null): DownloadsCard? {
+            if (summary.isActive) {
+                return DownloadsCard.Active(
+                    title = summary.current?.title, paused = summary.paused, filesDone = summary.filesDone, files = summary.files,
+                    bytesDone = summary.bytesDone, bytes = summary.bytes, waiting = summary.waiting.size,
+                    timeLeftMillis = summary.timeLeftMillis,
+                )
+            }
+            val keys = summary.stopped.mapTo(HashSet()) { "${it.itemId}@${it.hash}" }
+            if (keys.isEmpty() || closed.containsAll(keys)) return null
+            val retriable = summary.stopped
+                .filterNot { it.isGone || (catalogIds != null && it.isFromCatalog && it.itemId !in catalogIds) }
+                .map { it.itemId }.distinct()
+            return DownloadsCard.Stopped(summary.stopped.map { it.itemId }.distinct().size, retriable, keys)
         }
 
         const val SETUP_GROUP = "onboarding:"
@@ -251,5 +303,12 @@ class SharedHomePrefs(private val prefs: android.content.SharedPreferences) : Ho
         get() = prefs.getBoolean(KEY_SEEDED, false)
         set(value) = prefs.edit().putBoolean(KEY_SEEDED, value).apply()
 
-    private companion object { const val KEY_SEEDED = "seeded" }
+    override var dismissedFailures: Set<String>
+        get() = prefs.getStringSet(KEY_DISMISSED, null).orEmpty().toSet()
+        set(value) = prefs.edit().putStringSet(KEY_DISMISSED, value).apply()
+
+    private companion object {
+        const val KEY_SEEDED = "seeded"
+        const val KEY_DISMISSED = "dismissedFailures"
+    }
 }

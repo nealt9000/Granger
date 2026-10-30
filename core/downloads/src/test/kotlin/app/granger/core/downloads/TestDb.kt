@@ -40,17 +40,20 @@ fun modelEntry(id: String = "e2b", sha256: String = SHA_2, size: Long = 2_000, u
         minRamGb = 6, sha256 = sha256, url = url, license = "Apache-2.0", evalPassed = true,
     )
 
-class FakeScheduler : DownloadScheduler {
-    val scheduled = mutableListOf<Pair<DownloadRecord, Boolean>>()
-    val cancelled = mutableListOf<String>()
-    override fun schedule(record: DownloadRecord, replace: Boolean) { scheduled += record to replace }
-    override fun cancel(itemId: String) { cancelled += itemId }
-
-    /** Each scheduleGroup call: the group, its records in order, and whether it replaced the chain. */
-    val groups = mutableListOf<Triple<String, List<DownloadRecord>, Boolean>>()
-    val cancelledGroups = mutableListOf<String>()
-    override fun scheduleGroup(groupId: String, records: List<DownloadRecord>, replace: Boolean) {
-        groups += Triple(groupId, records, replace)
-    }
-    override fun cancelGroup(groupId: String) { cancelledGroups += groupId }
+/**
+ * Records what the manager asks of the queue. With [queueOf], stops reach that [DownloadQueue], as in the app;
+ * [running] stands in for a file downloading now.
+ */
+class FakeScheduler(private val queueOf: () -> DownloadQueue? = { null }) : DownloadScheduler {
+    /** Each ensure call: whether it asked for an unmetered network. */
+    val ensured = mutableListOf<Boolean>()
+    val stopped = mutableListOf<String>()
+    var queueStops = 0
+    var legacyForgotten = 0
+    var running: String? = null
+    override fun ensure(unmeteredOnly: Boolean) { ensured += unmeteredOnly }
+    override suspend fun stopRun(itemId: String) { stopped += itemId; queueOf()?.stopRun(itemId) }
+    override suspend fun stopQueue() { queueStops++; queueOf()?.stopRun(null) }
+    override fun isRunning(itemId: String) = running == itemId || queueOf()?.isRunning(itemId) == true
+    override fun forgetLegacyWork() { legacyForgotten++ }
 }
