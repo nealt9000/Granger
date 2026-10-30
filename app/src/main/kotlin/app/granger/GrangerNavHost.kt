@@ -855,7 +855,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             // The book page isn't scoped to a collection: its route carries none.
             fun audiobooksViewModel(collectionId: String?) = AudiobooksViewModel(
                 collectionId, container.media, container.shelves, DaoListening(container.playback), container.playerHub,
-                downloads = container.downloads.records, remover = removeDownload,
+                downloads = container.downloads.records, remover = removeDownload, viewPrefs = container.libraryViews,
             )
             composable<AudiobookShelfRoute> { backStackEntry ->
                 val id = backStackEntry.toRoute<AudiobookShelfRoute>().collectionId

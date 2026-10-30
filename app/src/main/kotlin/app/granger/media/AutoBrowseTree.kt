@@ -252,7 +252,7 @@ class AutoBrowseTree(
         return media.track(id.substring(at + ENTRY.length))?.takeIf { it.albumKey == key && it.status != PackStatus.MISSING }
     }
 
-    /** Present audiobooks as the shelf orders them: part-way by last played, unplayed by title, finished last. */
+    /** Present audiobooks for a car: part-way by last played, unplayed by title, finished last ([AudiobookShelf.order]). */
     private suspend fun shelf(): List<Audiobook> {
         val books = media.audiobooks.first().filter { it.status == PackStatus.OK }
         val chapters = media.allChapters.first().groupBy { it.audiobookId }

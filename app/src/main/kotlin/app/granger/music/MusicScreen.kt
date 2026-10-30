@@ -196,6 +196,7 @@ private fun AlbumsTab(ui: MusicUi, vm: MusicViewModel, dialogs: MusicDialogs, na
             modifier = Modifier.fillMaxSize(),
             // 12 dp edges, so two 150 dp columns still fit beside the rail and the letter strip on a 411 dp phone.
             contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 16.dp),
+            headerIndent = 4.dp,
             contentType = "album",
             header = { item(key = "header", span = { GridItemSpan(maxLineSpan) }, contentType = "header") { header() } },
         ) { album -> AlbumCell(album, vm, dialogs, nav) }

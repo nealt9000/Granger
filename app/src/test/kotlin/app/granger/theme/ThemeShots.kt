@@ -607,6 +607,34 @@ class ThemeShots {
 
     @Test fun musicArtists() = musicShot("music-artists", "Artists")
 
+    /** Forty audiobooks, three part-way, two finished, one missing, at 360 dp. */
+    private fun audiobooksShot(name: String, view: ShelfView) {
+        val media = app.granger.music.FakeMediaLibrary()
+        val books = classics.take(40).mapIndexed { i, (title, author) ->
+            audiobook("a$i", title, author, durationMs = 100_000L).let { if (i == 5) it.copy(status = app.granger.core.library.PackStatus.MISSING) else it }
+        }
+        media.bookList.value = books
+        media.chapterList.value = books.map { chapter(it, 0, 100_000L) }
+        val listening = app.granger.audiobooks.FakeListening()
+        listening.stateList.value = listOf(2 to 40L, 9 to 30L, 17 to 20L).map { (i, at) ->
+            app.granger.core.library.AudiobookState(books[i].id, "track:phone:a$i-f", 35_000L, 1f, true, 0, false, at)
+        } + listOf(0, 3).map { i -> app.granger.core.library.AudiobookState(books[i].id, "track:phone:a$i-f", 100_000L, 1f, true, 0, true, 5L) }
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.AUDIOBOOKS, view) }
+        val vm = app.granger.audiobooks.AudiobooksViewModel(
+            null, media, app.granger.FakeShelves(), listening, FakePlayerHub(), compute = kotlinx.coroutines.Dispatchers.Main, viewPrefs = prefs,
+        )
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.audiobooks.AudiobookShelfScreen(vm, onBook = {}, onBack = {}) }
+        }
+    }
+
+    @Test fun audiobooksList() = audiobooksShot("audiobooks-list", ShelfView.LIST)
+
+    @Test fun audiobooksGrid() = audiobooksShot("audiobooks-grid", ShelfView.GRID)
+
     /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
     @Composable
     private fun IconColumn(name: String, icon: Int, modifier: Modifier, tool: String = "Listen") {
