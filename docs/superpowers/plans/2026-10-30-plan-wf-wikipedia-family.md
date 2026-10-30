@@ -131,13 +131,68 @@ Neal, KB walkthrough (2026-10-30): "wikipedia's 1m Top Articles and 100 essentia
 
 ### Task 1: Measure the overlap
 
-- [ ] `zim_probe.py titles` (article paths over ranges), with tests against the fixture ZIM.
-- [ ] Run it over the slices and subject packs (Decision 1). Write `pack_sets.json` (sets, ranks, labels, `subjectOf`, `adds`) and a findings section in this plan:
+- [x] `zim_probe.py titles` (article paths over ranges), with tests against the fixture ZIM.
+- [x] Run it over the slices and subject packs (Decision 1). Write `pack_sets.json` (sets, ranks, labels, `subjectOf`, `adds`) and a findings section in this plan:
   - counts;
   - nesting holds or not;
   - each subject's share new to Best 50,000 and to Top 1 million;
   - bytes fetched.
-- [ ] **Commit.** `Wikipedia family: measure what each slice and subject holds`
+- [x] **Commit.** `Wikipedia family: measure what each slice and subject holds`
+
+#### Task 1 findings (2026-10-30)
+
+Measured with `zim_probe.py titles` on each pack's smallest flavour; numbers in `tools/catalog-gen/pack_sets.json`.
+
+- **What counts as an article.** A namespace C text/html entry that isn't a redirect, *less* section-redirect pages. Older mwoffliner (1.17.5: Top 1 million, the 100, some subject nopics) writes a redirect to a section ("Abyssinian lion" → Lion#Subspecies) as a ~220-byte HTML page with a meta refresh, packed thousands to a cluster at the end. `titles` tells them apart by cluster (64+ blobs averaging under 120 stored bytes) and lists them with the redirects. Without this the 100 read as 1,323 articles and Top 1 million as 1,774,450.
+- **A path is "in" a slice** when the slice has it as an article or as a redirect. Paths are URL-decoded, NFC, spaces as underscores.
+- **Flavours:** chemistry mini 9,314 articles, nopic 9,313 (the one is an article sharing the boundary cluster with the section pages). Same paths otherwise.
+
+**Slices**
+
+| Slice | Probed | Articles | Inside the next one up |
+|---|---|---|---|
+| 100 essential articles | `wikipedia_en_100` (2026-08) | 100 | 100 % in Best 50,000 |
+| Best 50,000 | `top_mini` (2026-09) | 50,002 | 99.97 % in Top 1 million: 15 missing, renames between snapshots (Top 1 million is 2026-04) |
+| Top 1 million | `top1m_mini` (2026-04) | 999,593 | Everything not read |
+| Everything | `all_mini` (2026-09) | 7,331,817 (Kiwix's Counter) | — |
+| Wikivoyage Europe | `europe_nopic` | 10,376 | 99.99 % in the whole world (1 missing: its own home page) |
+| Wikivoyage, the whole world | `all_nopic` | 34,600 | — |
+
+The nesting holds. Everything's directory region is 1.02 GB (plus 145 MB of pointers), over the 500 MB budget, so it was not read; it is taken to contain every slice and subject (the full dump).
+
+**Subjects: share of articles new to each slice** (`adds`)
+
+| Subject | Articles | New to Best 50,000 | New to Top 1 million |
+|---|---|---|---|
+| astronomy | 28,272 | 97.8 % | 74.0 % |
+| baseball | 50,622 | 99.1 % | 82.5 % |
+| basketball | 37,018 | 99.4 % | 85.3 % |
+| chemistry | 9,314 | 93.7 % | 55.9 % |
+| climate-change | 3,701 | 92.3 % | 57.2 % |
+| comics | 21,515 | 98.3 % | 69.3 % |
+| computer | 43,489 | 95.7 % | 62.0 % |
+| cricket | 46,252 | 99.7 % | 92.1 % |
+| football | 308,031 | 99.5 % | 85.0 % |
+| geography | 91,985 | 99.1 % | 92.5 % |
+| golf | 12,140 | 99.6 % | 89.8 % |
+| history | 48,733 | 96.8 % | 67.7 % |
+| ice-hockey | 41,982 | 99.7 % | 86.7 % |
+| indian-cinema | 28,391 | 99.6 % | 83.0 % |
+| knots | 599 | 98.8 % | 69.3 % |
+| mathematics | 23,326 | 96.0 % | 66.9 % |
+| medicine (WikiMed) | 72,901 | 95.5 % | 65.6 % |
+| molcell | 28,369 | 97.6 % | 80.8 % |
+| movies | 309,311 | 98.9 % | 83.6 % |
+| nollywood | 1,916 | 99.7 % | 93.5 % |
+| physics | 21,783 | 95.4 % | 62.7 % |
+| sociology | 10,654 | 92.6 % | 52.4 % |
+| tennis | 45,704 | 99.6 % | 86.6 % |
+| ray-charles (sample) | 152 | 95.4 % | 70.4 % |
+
+- Every subject is about 100 % new to the 100, and taken as 0 % new to Everything.
+- So subjects really do add: nearly all of each is new to Best 50,000, and half to nine-tenths is new to Top 1 million. No subject falls under Decision 5's 5 % line for any slice short of Everything.
+- Spot check (medicine, new to Top 1 million): Amylmetacresol, Bartonella chomelii, Contraceptive security; shared: Renal corpuscle, Propafenone. Astronomy new: 208 Lacrimosa, HD 114533; shared: NGC 3242.
+- **Cost:** 30 packs plus a chemistry nopic check, 8 at once; 573 MB and 145 s a pass (Top 1 million alone 318 MB, 120 s). Run twice (once before the section-page fix, once after), so about 1.15 GB in all, plus a few MB of spot checks.
 
 ### Task 2: Sets in the catalog
 
