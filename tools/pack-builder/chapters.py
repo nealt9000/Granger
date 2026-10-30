@@ -4,6 +4,10 @@ A book splits at the first heading level (h1-h4) it uses at least three times. A
 limit splits again at the next heading level found inside it, then between block elements. Pages are
 served as siblings (`<slug>/001`, `<slug>/002`, ...), so links to anchors are rewritten to point at the
 page that now holds the anchor.
+
+A wrapper element opened to split inside it (a `div.poem` holding many cantos, or one too big for a page)
+isn't thrown away: each run of its children goes back into a copy of it, so the work's rules scoped to the
+wrapper (`.poem p.i2`) still match on every page. Only the first copy keeps the wrapper's id.
 """
 import re
 from dataclasses import dataclass
@@ -71,9 +75,39 @@ def _flatten(nodes: list[PageElement], level: int) -> list[PageElement]:
     out = []
     for node in nodes:
         if isinstance(node, Tag) and node.name != f"h{level}" and _has(node, level) >= 2:
-            out.extend(_flatten(list(node.contents), level))
+            out.extend(_rewrap(node, _flatten(list(node.contents), level), level))
         else:
             out.append(node)
+    return out
+
+
+_HOLDER = BeautifulSoup("", "lxml")
+
+
+def _shell(wrapper: Tag, keep_id: bool) -> Tag:
+    """An empty copy of a wrapper, with all its attributes but the id unless asked to keep it."""
+    attrs = {k: list(v) if isinstance(v, list) else v for k, v in wrapper.attrs.items() if keep_id or k != "id"}
+    return _HOLDER.new_tag(wrapper.name, attrs=attrs)
+
+
+def _rewrap(wrapper: Tag, children: list[PageElement], level: int) -> list[PageElement]:
+    """The opened wrapper's children in runs, each new run starting at a split heading, each in a copy of it."""
+    runs: list[list[PageElement]] = [[]]
+    for child in children:
+        if _has(child, level) and runs[-1]:
+            runs.append([])
+        runs[-1].append(child)
+    out: list[PageElement] = []
+    first = True
+    for run in runs:
+        if all(isinstance(n, NavigableString) and not n.strip() for n in run):
+            out.extend(run)
+            continue
+        copy = _shell(wrapper, keep_id=first)
+        first = False
+        for node in run:
+            copy.append(node.extract() if node.parent is not None else node)
+        out.append(copy)
     return out
 
 
@@ -169,23 +203,40 @@ def _fit(part: _Part, max_bytes: int, next_level: int) -> list[_Part]:
 
 
 def _by_size(part: _Part, max_bytes: int) -> list[_Part]:
+    """Packs the part's nodes into pages, opening any node too big for one; its pieces go back into copies of it."""
     runs: list[list[PageElement]] = [[]]
     size = 0
-    pending = list(part.nodes)
+    opened: list[tuple[Tag, Tag]] = []  # the wrappers open on the current page and their copies, outermost first
+    first_copy: set[int] = set()
+    pending: list[tuple[PageElement, tuple[Tag, ...]]] = [(node, ()) for node in part.nodes]
     while pending:
-        node = pending.pop(0)
+        node, wrappers = pending.pop(0)
         n = _bytes(node)
-        if n > max_bytes:
+        if n + sum(_bytes(_shell(w, True)) for w in wrappers) > max_bytes:
             if isinstance(node, Tag) and node.contents:
-                pending[:0] = list(node.contents)
+                pending[:0] = [(child, (*wrappers, node)) for child in node.contents]
                 continue
-            pending[:0] = _split_text(node, max_bytes)
+            pending[:0] = [(piece, wrappers) for piece in _split_text(node, max_bytes)]
             continue
-        if size + n > max_bytes and runs[-1]:
+        same = 0
+        while same < min(len(opened), len(wrappers)) and opened[same][0] is wrappers[same]:
+            same += 1
+        shells = sum(_bytes(_shell(w, True)) for w in wrappers[same:])
+        if size + n + shells > max_bytes and runs[-1]:
             runs.append([])
-            size = 0
-        runs[-1].append(node)
-        size += n
+            size, same = 0, 0
+            shells = sum(_bytes(_shell(w, True)) for w in wrappers)
+        del opened[same:]
+        for wrapper in wrappers[same:]:
+            copy = _shell(wrapper, keep_id=id(wrapper) not in first_copy)
+            first_copy.add(id(wrapper))
+            (opened[-1][1] if opened else runs[-1]).append(copy)
+            opened.append((wrapper, copy))
+        if opened:
+            opened[-1][1].append(node.extract() if node.parent is not None else node)
+        else:
+            runs[-1].append(node)
+        size += n + shells
     name = part.title
     return [_Part(f"{name} (part {k})" if name else f"Part {k}", run) for k, run in enumerate(runs, 1)]
 

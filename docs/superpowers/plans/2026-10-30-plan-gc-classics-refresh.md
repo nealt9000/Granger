@@ -155,9 +155,13 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
     - `titleOverrides` maps a page number as a string (`"3"` is `c003.xhtml`) to its contents title. Task 1 only loads and checks it; Task 5 applies it.
     - `gutenberg` is optional on a row whose `source` isn't `gutenberg`. Such a row skips the RDF checks and must carry a `licence` that says "public domain" and holds an `https://` URL. `WorkSpec.reads_as_verse` gives the verse default (poetry, drama, libretti, scripture).
     - The rights check is now exact ("Public domain in the USA.", whitespace-normalised) rather than a prefix match.
-- [ ] **Task 2: splitting keeps wrappers** (R6)
+- [x] **Task 2: splitting keeps wrappers** (R6)
   - When `_flatten`/`_by_size` open a wrapper, each run of its children is re-wrapped in a shallow copy with the same tag and class and no id.
   - Test with a Faerie Queene-shaped fixture (`div.poem > div.stanza > p.i2`) split across two pages: `deadrules.py` must report the indent rules as live.
+  - **Done 2026-10-30. As built:**
+    - The copy keeps all the wrapper's attributes (class, `lang`, `style`), not only the class. The first copy also keeps the id, so links to the wrapper still land; later copies have none.
+    - `_flatten` starts a new run at each child holding a split heading, so the heading stays inside its wrapper copy. `_by_size` tracks the chain of wrappers open on the current page and counts the copies' tags against the page limit.
+    - Checked on real books with the audit's dead-rule test. Faerie Queene (#15272): `.poem p` was live on 35 of 8,249 lines, `.poem p.i2` on 9 of 4,343, `.poem .stanza` on 9 of 641 and `.poem p.i20` on 0 of 619. All are now live everywhere. The rules still "dead" (`.poem p.i16` 13/37, `.poem p.i4` 0/19, `.noflo p.i2` 8/4,343) match exactly what they match in the source HTML. Same 31 pages, largest page 142 KB, no duplicate ids. Paradise Lost and Hamlet are unchanged apart from Task 1's leftovers.
 - [ ] **Task 3: CSS fixes** (R3, R4, R5)
   - `scrub_css` clamps percentage side margins and paddings above 5% to `min(X%, 2em)`, and em indents above 6em to `min(Xem, 30%)`.
   - It writes `:root:root:root:root <sel> { text-align: X !important }` for each centre, right or end rule that targets a `p` or a bare class, and adds `!important` to inline `text-align` on a `p`.

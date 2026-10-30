@@ -117,3 +117,62 @@ def test_page_href_names_cross_page_targets():
     html = '<h2>A</h2><p><a href="#z">to Z</a></p><h2>B</h2><p>b</p><h2 id="z">C</h2><p>x</p>'
     chapters = split(body(html), page_href=lambda i: f"c{i + 1:03d}.xhtml")
     assert 'href="c003.xhtml#z"' in chapters[0].html
+
+
+# The Faerie Queene's indent rules, which match only while each line sits in its stanza and poem.
+POEM_RULES = [".poem p", ".poem p.i2", ".poem p.i20", ".poem .stanza", "div.poem > div.stanza > p.i2"]
+
+
+def dead_rules(html, rules=POEM_RULES):
+    """Like the audit's deadrules.py: a rule is dead on a page when its last part matches more than the whole."""
+    page = BeautifulSoup(html, "lxml")
+    return [r for r in rules if len(page.select(r)) < len(page.select(r.replace(">", " ").split()[-1]))]
+
+
+def stanza(n):
+    lines = "".join(f'<p class="i2">Line {n}.{i}, {"faire and gentle " * 4}</p>' for i in range(8))
+    return f'<div class="stanza"><p class="i20">{n}</p><p>First {n}</p>{lines}</div>'
+
+
+def test_a_poem_split_by_size_keeps_its_wrapper_on_every_page():
+    html = '<h2>Canto I</h2><div class="poem" id="canto-1">' + "".join(stanza(n) for n in range(60)) + "</div>"
+    chapters = split(body(html), max_bytes=20_000)
+    assert len(chapters) >= 3
+    for c in chapters:
+        assert dead_rules(c.html) == [], c.title
+        assert len(c.html.encode()) <= 20_000
+    assert "".join(c.html for c in chapters).count('id="canto-1"') == 1
+    assert 'id="canto-1"' in chapters[0].html
+    assert all(BeautifulSoup(c.html, "lxml").select("div.stanza") for c in chapters)
+
+
+def test_a_stanza_too_big_for_a_page_keeps_both_wrappers():
+    html = '<h2>Canto I</h2><div class="poem"><div class="stanza">' + "".join(
+        f'<p class="i2">Line {i} {"word " * 40}</p>' for i in range(200)) + "</div></div>"
+    chapters = split(body(html), max_bytes=10_000)
+    assert len(chapters) >= 3
+    for c in chapters:
+        assert dead_rules(c.html) == [] and len(c.html.encode()) <= 10_000
+
+
+def test_a_wrapper_opened_at_headings_keeps_its_rules():
+    html = ('<div class="book" id="b" lang="la">' + "".join(
+        f'<h2>Canto {i}</h2><div class="poem"><div class="stanza"><p class="i2">l{i}</p></div></div><p>prose {i}</p>'
+        for i in range(3)) + "</div>")
+    chapters = split(body(html))
+    assert [c.title for c in chapters] == ["Canto 0", "Canto 1", "Canto 2"]
+    for c in chapters:
+        page = BeautifulSoup(c.html, "lxml")
+        assert dead_rules(c.html, [".book h2", ".book p", ".book .poem p.i2"]) == []
+        assert page.select_one("div.book")["lang"] == "la"
+    assert 'id="b"' in chapters[0].html and 'id="b"' not in chapters[1].html + chapters[2].html
+
+
+def test_nested_wrappers_opened_at_headings_are_each_kept():
+    html = ('<div class="volume">' + "".join(
+        f'<div class="part">' + "".join(f"<h2>C{p}{c}</h2><p>t</p>" for c in range(2)) + "</div>" for p in range(2))
+        + "</div>")
+    chapters = split(body(html))
+    assert len(chapters) == 4
+    for c in chapters:
+        assert dead_rules(c.html, [".volume .part h2", ".volume .part p"]) == []
