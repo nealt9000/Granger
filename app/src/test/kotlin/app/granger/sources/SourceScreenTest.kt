@@ -186,4 +186,94 @@ class SourceScreenTest {
         compose.onNodeWithText("Developer docs").performClick()
         assertThat(opened).isTrue()
     }
+
+    // --- Plan WF: Wikipedia as one row ---
+
+    private val wikipedia = ItemRow(
+        "wikipedia_en_top_maxi", "Wikipedia", "English · Updated September 2026 · CC BY-SA",
+        "The free encyclopedia, from 100 essential articles to all of it.", 6_990_000_000, ItemStatus.NotInstalled, packId = null,
+        license = "CC BY-SA 4.0", setId = "wikipedia_en",
+        slices = listOf(
+            SliceChoice("wikipedia_en_100", "100 essential articles", 333_000_000, chosen = false),
+            SliceChoice("wikipedia_en_top", "Best 50,000 articles", 6_990_000_000, chosen = true),
+            SliceChoice("wikipedia_en_top1m", "Top 1 million articles", 49_400_000_000, chosen = false),
+            SliceChoice("wikipedia_en_all", "Everything", 127_400_000_000, chosen = false),
+        ),
+        pictures = listOf(
+            PictureChoice("maxi", "With pictures", chosen = true),
+            PictureChoice("nopic", "No pictures", chosen = false),
+            PictureChoice("mini", "Mini (intro paragraphs only)", chosen = false),
+        ),
+        subjects = "subjects:wikipedia_en:wikipedia_en_top",
+    )
+
+    @Test fun theWikipediaRowOffersHowMuchAndPicturesAndASubject() {
+        val calls = mutableListOf<String>()
+        compose.setContent {
+            CatalogItemRow(
+                wikipedia, onGet = { calls += "get" }, onCancel = {}, onRetry = {}, onRemove = {},
+                onChooseSlice = { calls += "slice $it" }, onChoosePictures = { calls += "pictures $it" },
+                onAddSubject = { calls += "subjects" },
+            )
+        }
+        compose.onNodeWithText("Wikipedia").assertIsDisplayed()
+        compose.onNodeWithText("How much").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Best 50,000 articles, 7.0 GB").assertIsSelected()
+        compose.onNodeWithContentDescription("Top 1 million articles, 49 GB").assertIsNotSelected().performClick()
+        compose.onNodeWithContentDescription("No pictures").performClick()
+        compose.onNodeWithText("Add a subject").performClick()
+        compose.onNodeWithText("Get").performClick()
+        assertThat(calls).containsExactly("slice wikipedia_en_top1m", "pictures nopic", "subjects", "get").inOrder()
+    }
+
+    @Test fun aPicturesChoiceTheSliceLacksIsGreyedWithItsReason() {
+        compose.setContent {
+            CatalogItemRow(
+                wikipedia.copy(
+                    id = "wikipedia_en_100",
+                    slices = wikipedia.slices.map { it.copy(chosen = it.zimName == "wikipedia_en_100") },
+                    pictures = wikipedia.pictures.map {
+                        if (it.flavour == "maxi") it else it.copy(enabled = false, reason = "Not offered for 100 essential articles")
+                    },
+                ),
+                onGet = {}, onCancel = {}, onRetry = {}, onRemove = {},
+            )
+        }
+        compose.onNodeWithContentDescription("Mini (intro paragraphs only), Not offered for 100 essential articles").assertIsNotEnabled()
+    }
+
+    @Test fun aSliceInsideTheOneOnThePhoneReadsSoWithNoGet() {
+        val calls = mutableListOf<String>()
+        compose.setContent {
+            CatalogItemRow(
+                wikipedia.copy(
+                    insideOf = "Inside your Top 1 million", packId = "u-top1m",
+                    slices = wikipedia.slices.map {
+                        when (it.zimName) {
+                            "wikipedia_en_top1m" -> it.copy(installed = true)
+                            "wikipedia_en_100", "wikipedia_en_top" -> it.copy(inside = "Inside your Top 1 million")
+                            else -> it
+                        }
+                    },
+                ),
+                onGet = { calls += "get" }, onCancel = {}, onRetry = {}, onRemove = {}, onOpen = { calls += "open" },
+            )
+        }
+        compose.onNodeWithContentDescription("Best 50,000 articles, 7.0 GB, Inside your Top 1 million").assertIsSelected()
+        compose.onNodeWithContentDescription("Top 1 million articles, 49 GB, installed").assertIsDisplayed()
+        compose.onNodeWithText("Get").assertDoesNotExist()
+        compose.onNodeWithText("Open").performClick()
+        assertThat(calls).containsExactly("open")
+    }
+
+    @Test fun aSubjectSaysWhatItAdds() {
+        compose.setContent {
+            CatalogItemRow(
+                ItemRow("wikipedia_en_medicine_maxi", "WikiMed", "English", "", 1_860_000_000, ItemStatus.NotInstalled, null,
+                    adds = "Adds about 69,600 articles to your Best 50,000 (95% new)"),
+                onGet = {}, onCancel = {}, onRetry = {}, onRemove = {},
+            )
+        }
+        compose.onNodeWithText("Adds about 69,600 articles to your Best 50,000 (95% new)").assertIsDisplayed()
+    }
 }

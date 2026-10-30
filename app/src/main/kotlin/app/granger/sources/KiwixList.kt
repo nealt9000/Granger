@@ -6,14 +6,24 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
+import kotlin.math.ceil
+import kotlin.math.roundToLong
 
 /**
  * One pack of the Kiwix list, whatever its flavours (Plan KB Decision 8): every catalog entry with the same ZIM name,
  * [flavours] with pictures first, and the one shown by [default].
  */
-data class PackGroup(val zimName: String, val flavours: List<PackEntry>, val default: PackEntry) {
-    /** The pack's name without a flavour's own words: "WikiMed", not "WikiMed (no pictures)". */
+data class PackGroup(
+    val zimName: String,
+    val flavours: List<PackEntry>,
+    val default: PackEntry,
+    /** A set's one row (Plan WF Decision 3): [flavours] are every flavour of every slice, smallest slice first. */
+    val setId: String? = null,
+) {
+    /** The pack's name without a flavour's own words: "WikiMed", not "WikiMed (no pictures)"; a set's own name. */
     val title: String get() = KiwixList.groupTitle(this)
+
+    val isSet: Boolean get() = setId != null
 
     val featured: Boolean get() = flavours.any { it.featured }
 
@@ -82,12 +92,96 @@ object KiwixList {
      * largest featured that fits in [freeBytes], else the smallest featured), else the largest flavour that fits, else
      * the smallest; with [freeBytes] null every flavour fits.
      */
-    fun group(packs: List<PackEntry>, freeBytes: Long? = null): List<PackGroup> =
+    fun group(packs: List<PackEntry>, freeBytes: Long? = null, sets: Boolean = false): List<PackGroup> {
         // Keyed by ZIM name for a flavour, by id (apart from any ZIM name) for anything else.
-        packs.groupBy { if (it.zimName.isNotBlank() && flavourOf(it).isNotBlank()) "zim:${it.zimName}" else "id:${it.id}" }.values.map { entries ->
-            val flavours = entries.sortedBy { FLAVOUR_ORDER.indexOf(flavourOf(it)).let { i -> if (i < 0) FLAVOUR_ORDER.size else i } }
+        val groups = packs.groupBy { if (it.zimName.isNotBlank() && flavourOf(it).isNotBlank()) "zim:${it.zimName}" else "id:${it.id}" }.values.map { entries ->
+            val flavours = entries.sortedBy(::flavourRank)
             PackGroup(flavours.first().zimName.ifBlank { flavours.first().id }, flavours, defaultOf(flavours, freeBytes))
         }
+        return if (sets) mergeSets(groups, freeBytes) else groups
+    }
+
+    private fun flavourRank(entry: PackEntry) = FLAVOUR_ORDER.indexOf(flavourOf(entry)).let { i -> if (i < 0) FLAVOUR_ORDER.size else i }
+
+    /** [groups] with each set's slices made one group, at the place of its first slice (Plan WF Decision 3). */
+    private fun mergeSets(groups: List<PackGroup>, freeBytes: Long?): List<PackGroup> {
+        val bySet = groups.filter { g -> g.flavours.all { it.isSlice } }.groupBy { it.default.setId }
+        val placed = HashSet<String>()
+        return groups.mapNotNull { g ->
+            val setId = g.default.setId.takeIf { g.flavours.all { it.isSlice } } ?: return@mapNotNull g
+            if (!placed.add(setId)) return@mapNotNull null
+            val flavours = bySet.getValue(setId).flatMap { it.flavours }.sortedWith(compareBy({ it.setRank }, ::flavourRank))
+            PackGroup("set:$setId", flavours, defaultOf(flavours, freeBytes), setId)
+        }
+    }
+
+    // --- Sets (Plan WF) ---
+
+    /** A set's name and line, by set id; a set this doesn't know takes its slices' title before the colon. */
+    private val SET_TEXT = mapOf(
+        "wikipedia_en" to ("Wikipedia" to "The free encyclopedia, from 100 essential articles to all of it."),
+        "wikivoyage_en" to ("Wikivoyage" to "The free travel guide, from Europe to the whole world."),
+    )
+
+    fun setTitle(setId: String, entries: List<PackEntry>): String =
+        SET_TEXT[setId]?.first ?: entries.firstOrNull()?.title?.substringBefore(": ").orEmpty()
+
+    fun setDescription(setId: String, entries: List<PackEntry>): String =
+        SET_TEXT[setId]?.second ?: entries.maxByOrNull { it.setRank }?.description.orEmpty()
+
+    /** One slice of a set's row: its ZIM name, rank, label and flavours (with pictures first). */
+    data class Slice(val zimName: String, val rank: Int, val label: String, val entries: List<PackEntry>)
+
+    /** [group]'s slices, smallest first. */
+    fun slices(group: PackGroup): List<Slice> = group.flavours.groupBy { it.zimName }.values
+        .map { e -> Slice(e.first().zimName, e.first().setRank, e.first().setLabel, e.sortedBy(::flavourRank)) }
+        .sortedBy { it.rank }
+
+    /** The pictures choice a slice entry is: its flavour, an unflavoured slice (the 100) counting as with pictures. */
+    fun picturesOf(entry: PackEntry): String = flavourOf(entry).ifBlank { "maxi" }
+
+    /** [slice]'s entry for the [pictures] choice, else its first (it doesn't offer that choice). */
+    fun entryFor(slice: Slice, pictures: String): PackEntry =
+        slice.entries.firstOrNull { picturesOf(it) == pictures } ?: slice.entries.first()
+
+    /** A slice's name in a sentence: "Best 50,000", "Top 1 million", "Everything". */
+    fun shortLabel(label: String): String = label.removeSuffix(" articles")
+
+    /** Whether [slice] (of rank [slice].setRank, the set's top rank [topRank]) holds [subject]'s articles. */
+    fun covers(slice: PackEntry, subject: PackEntry, topRank: Int): Boolean =
+        slice.setRank >= topRank || (subject.adds[slice.zimName]?.let { it < app.granger.core.catalog.COVERED_SHARE } ?: false)
+
+    /** What a subject's row says about [slice] (Plan WF Decision 4): its [text], and whether it is [covered] already. */
+    data class Adds(val text: String, val covered: Boolean)
+
+    /**
+     * "Adds about 69,600 articles to your Best 50,000 (95% new)" against the [installed] slice, or "… to Top 1 million …"
+     * against a chosen one; "Already inside your Wikipedia" when the slice covers it. Null when the catalog doesn't say.
+     */
+    fun adds(subject: PackEntry, slice: PackEntry, topRank: Int, setTitle: String, installed: Boolean): Adds? {
+        val name = shortLabel(slice.setLabel)
+        if (covers(slice, subject, topRank)) {
+            return Adds(if (installed) "Already inside your $setTitle" else "Already inside $name", covered = installed)
+        }
+        val share = subject.adds[slice.zimName] ?: return null
+        val your = if (installed) "your " else ""
+        // Half rounds down: the shares are stored to three places, so 0.955 is a 95.499 % measured.
+        val percent = "${ceil(share * 100 - 0.5).toInt().coerceIn(1, 100)}% new"
+        if (subject.articles <= 0) return Adds("Adds to $your$name ($percent)", false)
+        val count = String.format(Locale.ENGLISH, "%,d", roundCount((subject.articles * share).roundToLong()))
+        return Adds("Adds about $count articles to $your$name ($percent)", false)
+    }
+
+    /** A count as a line says it: to the nearest 10 under 1,000, 100 under 10,000, else to three figures. */
+    fun roundCount(n: Long): Long {
+        if (n < 10) return n
+        val step = when {
+            n < 1_000 -> 10L
+            n < 10_000 -> 100L
+            else -> generateSequence(1L) { it * 10 }.first { n / it < 1_000 }
+        }
+        return (n + step / 2) / step * step
+    }
 
     private fun defaultOf(flavours: List<PackEntry>, freeBytes: Long?): PackEntry {
         val pool = flavours.filter { it.featured }.ifEmpty { flavours }
@@ -97,6 +191,7 @@ object KiwixList {
 
     /** The flavour with pictures names the pack, less "(no pictures)" or "(with pictures)" if a title carries it. */
     fun groupTitle(group: PackGroup): String {
+        group.setId?.let { return setTitle(it, group.flavours) }
         val named = group.flavours.firstOrNull { flavourOf(it) == "maxi" } ?: group.default
         return named.title.replace(FLAVOUR_WORDS, "").trim()
     }

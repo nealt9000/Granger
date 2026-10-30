@@ -119,9 +119,12 @@ class FakeLibrary : Library {
     /** Each [supersede] as old to new; [supersedes] says whether it works. */
     val superseded = mutableListOf<Pair<String, String>>()
     var supersedes = true
-    override suspend fun supersede(oldPackId: String, newPackId: String): Boolean {
+    /** The [supersede]s made across a set (Plan WF), as old to new. */
+    val supersededAcross = mutableListOf<Pair<String, String>>()
+    override suspend fun supersede(oldPackId: String, newPackId: String, acrossNames: Boolean): Boolean {
         if (!supersedes || packList.value.none { it.id == newPackId }) return false
         superseded += oldPackId to newPackId
+        if (acrossNames) supersededAcross += oldPackId to newPackId
         packList.update { list -> list.filterNot { it.id == oldPackId } }
         bookmarkList.update { list -> list.map { if (it.packId == oldPackId) it.copy(packId = newPackId) else it } }
         return true

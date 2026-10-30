@@ -43,6 +43,9 @@ interface BookmarkDao {
     @Query("DELETE FROM bookmarks WHERE packId = :packId AND path = :path")
     suspend fun delete(packId: String, path: String)
 
+    @Query("SELECT * FROM bookmarks WHERE packId = :packId")
+    suspend fun forPack(packId: String): List<Bookmark>
+
     /** Moves bookmarks to another pack; one that already exists there wins. */
     @Query("UPDATE OR IGNORE bookmarks SET packId = :to WHERE packId = :from")
     suspend fun moveToPack(from: String, to: String)
@@ -61,6 +64,12 @@ interface ReadingPositionDao {
 
     @Query("SELECT * FROM reading_positions WHERE packId = :packId ORDER BY updatedAt DESC LIMIT 1")
     suspend fun lastRead(packId: String): ReadingPosition?
+
+    @Query("SELECT * FROM reading_positions WHERE packId = :packId")
+    suspend fun forPack(packId: String): List<ReadingPosition>
+
+    @Query("DELETE FROM reading_positions WHERE packId = :packId AND path = :path")
+    suspend fun delete(packId: String, path: String)
 
     @Query("UPDATE OR IGNORE reading_positions SET packId = :to WHERE packId = :from")
     suspend fun moveToPack(from: String, to: String)
@@ -155,6 +164,9 @@ interface SessionDao {
 
     @Query("SELECT * FROM history ORDER BY openedAt DESC")
     fun observeHistory(): Flow<List<HistoryEntry>>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM history WHERE packId = :packId AND path = :path)")
+    suspend fun hasHistory(packId: String, path: String): Boolean
 
     /** Moves history to another pack; an article already recorded there wins. */
     @Query("UPDATE OR IGNORE history SET packId = :to WHERE packId = :from")

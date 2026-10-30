@@ -44,7 +44,7 @@ fun ticks(millis: Long): Flow<Unit> = flow {
  */
 class DownloadsViewModel(
     private val downloads: Downloads,
-    library: Library,
+    private val library: Library,
     bookshelf: Bookshelf,
     private val sessions: ReadingSessions,
     private val appScope: CoroutineScope,
@@ -57,6 +57,7 @@ class DownloadsViewModel(
     private val freeBytes: (File) -> Long = { it.usableSpace },
     /** Where the page is worked out (and the volumes listed): off the main thread; tests pass theirs. */
     work: CoroutineDispatcher = Dispatchers.Default,
+    private val tidyDismissals: app.granger.sources.TidyDismissals = app.granger.sources.TidyDismissals(),
 ) : ViewModel() {
     private val catalogIds = catalog?.state?.map { s -> s.catalog?.let { c -> (c.packs + c.models + c.books + c.voices).mapTo(HashSet()) { it.id } } }
         ?: flowOf(null)
@@ -76,6 +77,22 @@ class DownloadsViewModel(
         val summary = DownloadQueueSummary.of(records, live, clock(), spaces.associate { it.root to it.freeBytes })
         DownloadsModel.of(records, summary, today(), shelf.packs, shelf.books, shelf.ids, spaces)
     }.flowOn(work).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DownloadsUi())
+
+    /** A bigger slice is in: the offers to remove the smaller (Plan WF Decision 5); never removed without a yes. */
+    val tidy: StateFlow<List<app.granger.sources.TidyOffer>> =
+        combine(catalog?.state ?: flowOf(null), downloads.records, library.packs, tidyDismissals.keys) { c, records, packs, keys ->
+            app.granger.sources.SetTidy.offers(c?.catalog, records, packs, keys)
+        }.flowOn(work).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Yes to a tidy offer: the smaller slice goes, its places and bookmarks moving to the bigger. */
+    fun removeSmaller(offer: app.granger.sources.TidyOffer) {
+        appScope.launch {
+            if (!app.granger.sources.SetTidy.remove(offer, library, downloads)) tidyDismissals.dismiss(offer.key)
+        }
+    }
+
+    /** Keep both: the offer doesn't come back. */
+    fun keepBoth(offer: app.granger.sources.TidyOffer) = tidyDismissals.dismiss(offer.key)
 
     /** The clock the page's "Trying again in 2 min" reads. */
     fun now(): Long = clock()

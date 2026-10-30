@@ -267,4 +267,35 @@ class OnboardingModelTest {
             .isEqualTo("Quick ones first: the voice and the Classics land in a few minutes.")
         assertThat(OnboardingModel.quickFirstText(Review(emptyList(), 0))).isNull()
     }
+
+    // --- Plan WF: of two slices of one set, only the biggest is queued ---
+
+    private val wfTop = packEntry("wikipedia_en_top_maxi", size = 7_000, zimName = "wikipedia_en_top")
+        .copy(family = "wikipedia", setId = "wikipedia_en", setRank = 2, setLabel = "Best 50,000 articles")
+    private val wfTop1m = packEntry("wikipedia_en_top1m_nopic", size = 17_000, zimName = "wikipedia_en_top1m")
+        .copy(family = "wikipedia", setId = "wikipedia_en", setRank = 3, setLabel = "Top 1 million articles")
+    private val wfCatalog = catalogOf(
+        packs = listOf(wfTop, wfTop1m, medline),
+        presets = listOf(
+            Preset("efficient", "Efficient start", listOf("wikipedia_en_top_maxi")),
+            Preset("comprehensive", "Comprehensive library", listOf("wikipedia_en_top_maxi", "wikipedia_en_top1m_nopic", "medlineplus.gov_en_all")),
+        ),
+    )
+
+    @Test fun best50000AndTop1MillionBothChosenQueueOnlyTheBigger() {
+        val start = OnboardingModel.startChoices(wfCatalog, emptySet())[1]
+        assertThat(start.chosen().flatMap { it.items }.map { it.id }).containsAtLeast("wikipedia_en_top_maxi", "wikipedia_en_top1m_nopic")
+        val review = OnboardingModel.review(
+            start, emptySet(), null, emptyList(), freeBytes = 100_000, containment = app.granger.core.catalog.Containment(wfCatalog),
+        )
+        assertThat(review.items.map { it.id }).containsExactly("wikipedia_en_top1m_nopic", "medlineplus.gov_en_all")
+        assertThat(review.bytes).isEqualTo(17_000L + 375L)
+        assertThat(review.notes).containsExactly("Wikipedia Top 1 million covers Best 50,000, so only Top 1 million is queued.")
+        // Without the bigger one ticked, the smaller is queued as before, with no note.
+        val one = OnboardingModel.review(
+            start, setOf("wikipedia_en_top1m_nopic"), null, emptyList(), 100_000, containment = app.granger.core.catalog.Containment(wfCatalog),
+        )
+        assertThat(one.items.map { it.id }).contains("wikipedia_en_top_maxi")
+        assertThat(one.notes).isEmpty()
+    }
 }

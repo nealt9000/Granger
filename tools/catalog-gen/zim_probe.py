@@ -6,6 +6,8 @@ catalog packs in under eight minutes). Validated byte for byte against libzim.
 
   zim_probe.py metadata FILE_OR_URL                 # the pack's metadata and main page, as JSON
   zim_probe.py entry FILE_OR_URL PATH --out FILE    # one entry's bytes (redirects followed), e.g. database.js
+  zim_probe.py titles FILE_OR_URL --out FILE [--redirects FILE] [--budget MB]
+                                                    # its article paths, one per line, and counts as JSON
   zim_probe.py probe --catalog catalog/catalog.json --out tools/catalog-gen/pack_contents.json \\
                      [--cache probe.jsonl] [--workers 8]
                                                     # every pack's scraper, refreshing pack_contents.json
@@ -13,6 +15,10 @@ catalog packs in under eight minutes). Validated byte for byte against libzim.
 `probe` keeps one line per pack in the cache (default: next to the output, `.probe.jsonl`), so a rerun asks only for
 the packs it hasn't read yet. pack_contents.json maps each ZIM name to its `Scraper` metadata; catalog_gen.py marks a
 pack's `content` "books" from it (Plan KB Decision 2).
+
+`titles` reads only the directory entries (Plan WF Decision 1): libzim writes them back to back, in path order, just
+before the path-pointer list, so one stream over that region lists every path without touching article content. An
+article is a namespace C (A in old ZIMs) text/html entry that isn't a redirect; redirects are listed apart.
 """
 import argparse
 import concurrent.futures
@@ -24,7 +30,9 @@ import struct
 import sys
 import threading
 import time
+import unicodedata
 import urllib.error
+import urllib.parse
 import urllib.request
 
 BUDGET = 64 * 1024 * 1024
@@ -193,6 +201,54 @@ class Zim:
             return None
         return self.follow(e)
 
+    def dirents(self):
+        """
+        Every dirent as (ns, path, kind, cluster, blob) in path order, kind "article", "redirect" or "other" (cluster
+        and blob None for a redirect), streamed from the
+        directory region [first dirent, path-pointer list). Falls back to one read per path pointer when the region
+        doesn't parse to exactly [entry_count] dirents.
+        """
+        start, = struct.unpack("<Q", self.r.read(self.path_ptr, 8))
+        end = self.path_ptr
+        last, = struct.unpack("<Q", self.r.read(self.path_ptr + 8 * (self.entry_count - 1), 8))
+        if not start <= last < end:
+            yield from self._dirents_by_pointer()
+            return
+        out = []
+        buf, pos = b"", 0
+        for chunk in self.r.stream(start, end, chunk=1 << 20):
+            buf += chunk
+            while True:
+                parsed = _parse_dirent(buf, pos)
+                if parsed is None:
+                    break
+                e, pos = parsed
+                out.append(e)
+            buf, pos = buf[pos:], 0
+            if len(out) > self.entry_count:
+                break
+        # Index i must be the i-th entry in path order, as the path-pointer list (and redirect targets) count them.
+        if buf or len(out) != self.entry_count or any(
+                (a[0], a[1].encode()) >= (b[0], b[1].encode()) for a, b in zip(out, out[1:])):
+            yield from self._dirents_by_pointer()
+            return
+        for ns, path, mime, cluster, blob in out:
+            yield ns, path, self._kind(ns, mime), cluster, blob
+
+    def _kind(self, ns, mime):
+        if mime == 0xFFFF:
+            return "redirect"
+        if ns in ("C", "A") and mime < len(self.mimes) and self.mimes[mime].startswith("text/html"):
+            return "article"
+        return "other"
+
+    def _dirents_by_pointer(self):
+        for i in range(self.entry_count):
+            e = self.dirent(i)
+            mime = 0xFFFF if "redirect" in e else (self.mimes.index(e["mime"]) if e["mime"] in self.mimes else -1)
+            yield (e["ns"], e["path"], self._kind(e["ns"], mime) if mime >= 0 else "other", e.get("cluster"),
+                   e.get("blob"))
+
     def follow(self, e, hops=5):
         while "redirect" in e and hops > 0:
             e = self.dirent(e["redirect"])
@@ -263,6 +319,94 @@ class Zim:
         if self.main_page == 0xFFFFFFFF:
             return None
         return self.follow(self.dirent(self.main_page))
+
+
+def _parse_dirent(buf, pos):
+    """
+    ((ns, path, mime index, cluster, blob), next position) for the dirent at [pos] in [buf], or None when it runs off
+    the end. Cluster and blob are None for a redirect.
+    """
+    if len(buf) - pos < 8:
+        return None
+    mime, extra, ns = struct.unpack_from("<HBB", buf, pos)
+    p = pos + (12 if mime == 0xFFFF else 8 if mime in (0xFFFE, 0xFFFD) else 16)
+    z = buf.find(b"\x00", p)
+    if z < 0:
+        return None
+    z2 = buf.find(b"\x00", z + 1)
+    if z2 < 0 or z2 + 1 + extra > len(buf):
+        return None
+    cluster, blob = struct.unpack_from("<II", buf, pos + 8) if p == pos + 16 else (None, None)
+    return (chr(ns), buf[p:z].decode("utf-8", "replace"), mime, cluster, blob), z2 + 1 + extra
+
+
+def normalise_path(path):
+    """A path as Plan WF compares them: URL-decoded, Unicode NFC, spaces as underscores."""
+    return unicodedata.normalize("NFC", urllib.parse.unquote(path)).replace(" ", "_")
+
+
+# Older mwoffliner writes a redirect to a section ("Abyssinian lion" -> Lion#Subspecies) as a ~220-byte HTML page with
+# a meta refresh, after the articles, thousands to a cluster. A cluster that averages under this many stored bytes a
+# blob, over at least STUB_MIN_BLOBS blobs, holds those pages, not articles (real articles, even mini ones, run to
+# kilobytes).
+STUB_BYTES_PER_BLOB = 120
+STUB_MIN_BLOBS = 64
+
+
+def stub_clusters(z, blobs):
+    """
+    The clusters, of [blobs] ({cluster: blob count}), of at least STUB_MIN_BLOBS blobs averaging under
+    STUB_BYTES_PER_BLOB stored bytes.
+    """
+    if not blobs:
+        return set()
+    n = z.cluster_count
+    ptrs = struct.unpack(f"<{n}Q", z.r.read(z.cluster_ptr, 8 * n))
+    ends = ptrs[1:] + (z.checksum_pos,)
+    return {c for c, k in blobs.items()
+            if c < n and k >= STUB_MIN_BLOBS and (ends[c] - ptrs[c]) / k < STUB_BYTES_PER_BLOB}
+
+
+def titles(src, budget=BUDGET, reader=Reader, max_region=None):
+    """
+    The pack at [src]'s article paths and redirect paths (each sorted), with counts and bytes fetched. Section
+    redirect pages (see STUB_BYTES_PER_BLOB) are counted as `stubCount` and listed with the redirects. An "error"
+    instead when the directory region is bigger than [max_region] bytes (checked before it is read) or the budget runs
+    out.
+    """
+    t = time.time()
+    r = reader(src, budget)
+    out = {"src": src}
+    try:
+        z = Zim(r)
+        start, = struct.unpack("<Q", r.read(z.path_ptr, 8))
+        out.update(version=f"{z.major}.{z.minor}", entryCount=z.entry_count, region=z.path_ptr - start)
+        if max_region is not None and z.path_ptr - start > max_region:
+            raise BudgetExceeded(f"directory region is {z.path_ptr - start} bytes, over {max_region}")
+        html, redirects, other = [], [], 0
+        blobs = {}  # cluster -> blobs in it, from the highest blob index any entry names
+        for ns, path, kind, cluster, blob in z.dirents():
+            if cluster is not None:
+                blobs[cluster] = max(blobs.get(cluster, 0), blob + 1)
+            if kind == "article":
+                html.append((path, cluster))
+            elif kind == "redirect" and ns in ("C", "A"):
+                redirects.append(path)
+            else:
+                other += 1
+        tiny = stub_clusters(z, blobs)
+        articles = [path for path, c in html if c not in tiny]
+        stubs = [path for path, c in html if c in tiny]
+        out.update(articles=articles, redirects=sorted(redirects + stubs), articleCount=len(articles),
+                   redirectCount=len(redirects), stubCount=len(stubs), otherCount=other)
+    except BudgetExceeded as error:
+        out["error"] = f"budget: {error}"
+    except Exception as error:  # noqa: BLE001
+        out["error"] = f"{type(error).__name__}: {error}"
+    finally:
+        r.close()
+    out.update(bytes=r.fetched, requests=r.requests, seconds=round(time.time() - t, 2), mirror=r.final_url)
+    return out
 
 
 def parse_counter(text):
@@ -378,6 +522,8 @@ def main(argv):
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("metadata"); p.add_argument("src")
     p = sub.add_parser("entry"); p.add_argument("src"); p.add_argument("path"); p.add_argument("--out", required=True)
+    p = sub.add_parser("titles"); p.add_argument("src"); p.add_argument("--out", required=True)
+    p.add_argument("--redirects"); p.add_argument("--budget", type=int, default=BUDGET >> 20, help="MB")
     p = sub.add_parser("probe"); p.add_argument("--catalog", required=True); p.add_argument("--out", required=True)
     p.add_argument("--cache"); p.add_argument("--workers", type=int, default=8)
     args = parser.parse_args(argv)
@@ -387,6 +533,16 @@ def main(argv):
         data = read_entry(args.src, args.path)
         pathlib.Path(args.out).write_bytes(data)
         print(f"{args.path}: {len(data)} bytes -> {args.out}")
+    elif args.command == "titles":
+        result = titles(args.src, budget=args.budget << 20)
+        if result.get("error"):
+            print(json.dumps(result, indent=1))
+            raise SystemExit(1)
+        pathlib.Path(args.out).write_text("".join(p + "\n" for p in result.pop("articles")), encoding="utf-8")
+        redirects = result.pop("redirects")
+        if args.redirects:
+            pathlib.Path(args.redirects).write_text("".join(p + "\n" for p in redirects), encoding="utf-8")
+        print(json.dumps(result, indent=1))
     else:
         catalog = json.loads(pathlib.Path(args.catalog).read_text(encoding="utf-8"))
         cache = args.cache or str(pathlib.Path(args.out).with_suffix(".probe.jsonl"))

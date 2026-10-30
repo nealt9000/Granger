@@ -102,6 +102,35 @@ class PublishedCatalogTest {
             .containsExactly("", 771, "maxi", 93, "nopic", 50, "mini", 10)
     }
 
+    /** Plan WF: Wikipedia and Wikivoyage as sets, the subjects with what they add, the sample marked. */
+    @Test fun publishedCatalogCarriesTheWikipediaFamily() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+
+        val wikipedia = catalog.packs.filter { it.setId == "wikipedia_en" }
+        assertThat(wikipedia.map { it.zimName to it.setRank }.distinct().sortedBy { it.second }).containsExactly(
+            "wikipedia_en_100" to 1, "wikipedia_en_top" to 2, "wikipedia_en_top1m" to 3, "wikipedia_en_all" to 4,
+        ).inOrder()
+        assertThat(wikipedia.map { it.setLabel }.distinct()).containsExactly(
+            "100 essential articles", "Best 50,000 articles", "Top 1 million articles", "Everything",
+        )
+        assertThat(wikipedia.size).isEqualTo(10)
+        assertThat(catalog.packs.single { it.id == "wikipedia_en_top_nopic" }.title).isEqualTo("Wikipedia: Best 50,000 articles")
+        val voyage = catalog.packs.filter { it.setId == "wikivoyage_en" }
+        assertThat(voyage.map { it.setLabel }.distinct()).containsExactly("Europe", "The whole world")
+
+        val subjects = catalog.packs.filter { it.isSubject }
+        assertThat(subjects.map { it.zimName }.distinct()).hasSize(24)
+        assertThat(subjects.all { it.subjectOf == "wikipedia_en" && it.articles > 0 }).isTrue()
+        val med = catalog.packs.single { it.id == "wikipedia_en_medicine_maxi" }
+        assertThat(med.adds.getValue("wikipedia_en_top")).isWithin(0.001).of(0.955)
+        assertThat(med.adds.getValue("wikipedia_en_top1m")).isWithin(0.001).of(0.656)
+        // Every flavour of a curated pack takes its base title (the KB title bug).
+        assertThat(catalog.packs.filter { it.zimName == "wikipedia_en_medicine" }.map { it.title }.distinct()).containsExactly("WikiMed")
+        assertThat(catalog.packs.filter { it.sample }.map { it.zimName }.distinct()).containsExactly("wikipedia_en_ray-charles")
+    }
+
     /** Plan H4: the calibrated tiers and the containment table. */
     @Test fun publishedCatalogCarriesTheCalibration() {
         val bytes = repoFile("catalog/catalog.json").readBytes()

@@ -49,6 +49,10 @@ interface Library {
      * entry go as [remove] takes them, but its bookmarks, reading places, tabs and history move to the new pack, as a
      * new snapshot inherits them. False, with nothing changed, when the new pack isn't readable, the two aren't the same
      * ZIM name, or the old file can't be deleted.
+     *
+     * With [acrossNames] the two may be different ZIMs of one set (Plan WF Decision 5: Top 1 million takes Best 50,000's
+     * place). Article paths match across a set's slices; a bookmark or reading place whose article the new pack lacks
+     * is kept as a history row instead.
      */
-    suspend fun supersede(oldPackId: String, newPackId: String): Boolean = false
+    suspend fun supersede(oldPackId: String, newPackId: String, acrossNames: Boolean = false): Boolean = false
 }

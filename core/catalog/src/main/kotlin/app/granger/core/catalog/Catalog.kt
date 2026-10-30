@@ -77,9 +77,32 @@ data class PackEntry(
     val flavour: String = "",
     /** The pack's search vectors (Plan R1), downloaded with it; null when it has none, and in older catalogs. */
     val vectors: VectorsEntry? = null,
+    /**
+     * The set this pack is a slice of (Plan WF Decision 2): "wikipedia_en", "wikivoyage_en"; blank for any other pack,
+     * and in older catalogs. A slice of higher [setRank] holds the smaller ones' articles.
+     */
+    @SerialName("set") val setId: String = "",
+    /** The slice's place in its set, 1 the smallest; 0 when [setId] is blank. */
+    val setRank: Int = 0,
+    /** How much the slice is, as its choice says it: "Best 50,000 articles", "Everything", "Europe". */
+    val setLabel: String = "",
+    /** The set this pack is a subject of (WikiMed, Chemistry: "wikipedia_en"); blank for any other pack. */
+    val subjectOf: String = "",
+    /** A subject's share of articles not in each slice of its set, by the slice's ZIM name (Plan WF Decision 1). */
+    val adds: Map<String, Double> = emptyMap(),
+    /** The pack's article count, measured (Plan WF Task 1); 0 when unknown. */
+    val articles: Long = 0,
+    /** A test pack (the 2 MB Ray Charles sample): kept in the catalog, left off the lists. */
+    val sample: Boolean = false,
 ) : CatalogItem {
     /** A bundle of books (Gutenberg, nautilus): listed under Books and opened as a collection (Plan KB). */
     val isBookPack: Boolean get() = content == CONTENT_BOOKS
+
+    /** A slice of a set (Plan WF). */
+    val isSlice: Boolean get() = setId.isNotBlank() && setRank > 0
+
+    /** A subject pack of a set (Plan WF). */
+    val isSubject: Boolean get() = subjectOf.isNotBlank()
 }
 
 /** An e-book (EPUB) the reader opens. */
@@ -223,3 +246,34 @@ data class Onboarding(
 /** A use-case chip: what it adds, as readiness-style tokens the parser has resolved. */
 @Serializable
 data class UseCase(val id: String, val title: String, val blurb: String = "", val items: List<String> = emptyList())
+
+/** A subject under this share new to a slice of its set is inside it (Plan WF Decision 5). */
+const val COVERED_SHARE = 0.05
+
+/**
+ * Which ZIMs hold which (Plan H4 Decision 5, Plan WF Decision 5): the readiness `contains` table; every bigger slice of
+ * a set holds the smaller; a subject is held by its set's top slice (the whole of it) and by any slice it adds under
+ * [COVERED_SHARE] to. Built once per catalog; [containers] is memoised.
+ */
+class Containment(private val catalog: Catalog?) {
+    private val byZim = catalog?.packs.orEmpty().filter { it.zimName.isNotBlank() }.groupBy { it.zimName }
+    private val slicesBySet = catalog?.packs.orEmpty().filter { it.isSlice }.groupBy { it.setId }
+    private val memo = HashMap<String, Set<String>>()
+
+    /** The ZIM names that hold [zimName]'s articles; never [zimName] itself. */
+    fun containers(zimName: String): Set<String> = memo.getOrPut(zimName) {
+        val out = LinkedHashSet<String>()
+        catalog?.readiness?.containers(zimName)?.let(out::addAll)
+        val entry = byZim[zimName]?.firstOrNull()
+        if (entry != null && entry.isSlice) {
+            slicesBySet[entry.setId].orEmpty().filter { it.setRank > entry.setRank }.mapTo(out) { it.zimName }
+        }
+        if (entry != null && entry.isSubject) {
+            val slices = slicesBySet[entry.subjectOf].orEmpty()
+            val top = slices.maxOfOrNull { it.setRank }
+            slices.filter { it.setRank == top || (entry.adds[it.zimName] ?: 1.0) < COVERED_SHARE }.mapTo(out) { it.zimName }
+        }
+        out.remove(zimName)
+        out
+    }
+}
