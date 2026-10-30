@@ -110,6 +110,8 @@ class PlayerEngine(
      * Null (the default, and tests without one): starting the voice pauses music, as in V1.
      */
     private val musicUnderFactory: (() -> Pair<ExoPlayer, ReplayGainProcessor?>)? = null,
+    /** The voice's notification title for a source's title: "Reading · <title>" from [R.string.player_reading_title]. */
+    private val readingTitle: (String) -> String = { it },
 ) : PlayerHub {
     private enum class Mode { NONE, MUSIC, BOOK, VOICE }
 
@@ -1048,7 +1050,7 @@ class PlayerEngine(
     private fun carrier(source: ReadSource, section: String?): MediaSource {
         val item = MediaItem.Builder()
             .setMediaId("voice:${source.key}")
-            .setMediaMetadata(MediaMetadata.Builder().setTitle("Reading · ${source.title}").setArtist(section).setAlbumTitle(source.title).build())
+            .setMediaMetadata(MediaMetadata.Builder().setTitle(readingTitle(source.title)).setArtist(section).setAlbumTitle(source.title).build())
             .build()
         return CarrierSource(item, CARRIER_US)
     }

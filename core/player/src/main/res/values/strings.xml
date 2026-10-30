@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The media notification's and lock screen's title while the voice reads aloud. %1$s is the article's or book's title. -->
+    <string name="player_reading_title">Reading · %1$s</string>
+</resources>
