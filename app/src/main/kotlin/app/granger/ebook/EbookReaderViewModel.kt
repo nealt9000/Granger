@@ -53,6 +53,7 @@ import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.Url
+import org.readium.r2.shared.util.use
 
 data class EbookUi(
     val title: String = "",
@@ -154,6 +155,9 @@ class EbookReaderViewModel(
 ) : ViewModel() {
     /** The open PDF is in colour ([pdfColour]): Night doesn't invert it. */
     @Volatile private var colour = false
+
+    /** Where the anchored contents rows start in their files ([TocPlace.anchorStarts]), by file; read after opening. */
+    @Volatile private var anchorStarts: Map<String, Map<String, Double>> = emptyMap()
 
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -270,6 +274,7 @@ class EbookReaderViewModel(
             }
             savedState[TARGET_CONSUMED] = true
             if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
+            if (!pdf) launch { readAnchorStarts(opened) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
             launch {
@@ -373,6 +378,27 @@ class EbookReaderViewModel(
         _state.update { it.copy(toc = entries.map { e -> TocRow(e.title, "$href#page=${e.page}", e.depth) }).derived() }
     }
 
+    /** Reads the files holding several contents rows, to tell which of them the reader is in. */
+    private suspend fun readAnchorStarts(opened: Publication) {
+        val wanted = TocPlace.anchorsByFile(_state.value.toc)
+        if (wanted.isEmpty()) return
+        val starts = withContext(io) {
+            wanted.mapNotNull { (file, fragments) ->
+                try {
+                    val link = Url(file)?.let(opened::linkWithHref) ?: return@mapNotNull null
+                    val bytes = opened.get(link)?.use { it.read().getOrNull() } ?: return@mapNotNull null
+                    file to TocPlace.anchorStarts(String(bytes), fragments)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+            }.toMap()
+        }
+        anchorStarts = starts
+        _state.update { it.derived() }
+    }
+
     private fun flatten(links: List<Link>, depth: Int): List<TocRow> =
         links.flatMap { listOf(TocRow(it.title.orEmpty().trim(), it.href.toString(), depth)) + flatten(it.children, depth + 1) }
 
@@ -396,7 +422,7 @@ class EbookReaderViewModel(
             // One file: the row is the last outline entry at or before the page.
             here.locations.position?.let { pdfTocIndex(toc, it) }
         } else {
-            toc.indexOfLast { row -> Url(row.href)?.let { sameFile(it, here.href) } == true }.takeIf { it >= 0 }
+            TocPlace.index(toc, here, anchorStarts)
         }
         val marked = bookmarks.any { m -> parse(m.locatorJson)?.let { isSamePlace(it, here) } == true }
         return copy(currentTocIndex = index, isBookmarkedHere = marked)
