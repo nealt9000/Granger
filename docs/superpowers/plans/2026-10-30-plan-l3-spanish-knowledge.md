@@ -131,8 +131,8 @@ A domain with no list for a language is empty in that language.
 
 **Files:** `curated.json`.
 
-- [ ] **Step 1: Curated rows** for the Spanish anchors, with Spanish titles and English `i18n` (`i18n.en`): Top (maxi and nopic), All (maxi and nopic), WikiMed en español (maxi and nopic), Wikcionario (nopic), Wikiviajes (maxi and nopic), and English Wiktionary for learners (already curated). Featured marks them under Recommended for a Spanish user.
-- [ ] **Step 2: The Spanish lists** (research §1.1, with §7's calls). Each domain gets `languages.es` and `i18n.es.title` (research §1.5):
+- [x] **Step 1: Curated rows** for the Spanish anchors, with Spanish titles and English `i18n` (`i18n.en`): Top (maxi and nopic), All (maxi and nopic), WikiMed en español (maxi and nopic), Wikcionario (nopic), Wikiviajes (maxi and nopic), and English Wiktionary for learners (already curated). Featured marks them under Recommended for a Spanish user.
+- [x] **Step 2: The Spanish lists** (research §1.1, with §7's calls). Each domain gets `languages.es` and `i18n.es.title` (research §1.5):
 
   | Domain | essential | comprehensive adds |
   | --- | --- | --- |
@@ -147,13 +147,34 @@ A domain with no list for a language is empty in that language.
   | thought | `@clasicos-granger` | `wikipedia_es_history_maxi` |
 
   `@clasicos-granger` resolves only once Task 4's release is listed. Until then leave it out, and say so in the commit.
-- [ ] **Step 3: Use cases** in Spanish: the same seven ids, with `languages.es.items` from the Spanish packs and `i18n.es` titles and blurbs. Leave out a use case with nothing Spanish to add, rather than padding it with English packs.
-- [ ] **Step 4: Sizes.** Build, then print the per-language table. Expected, packs only and before L4's vectors:
+- [x] **Step 3: Use cases** in Spanish: the same seven ids, with `languages.es.items` from the Spanish packs and `i18n.es` titles and blurbs. Leave out a use case with nothing Spanish to add, rather than padding it with English packs.
+- [x] **Step 4: Sizes.** Build, then print the per-language table. Expected, packs only and before L4's vectors:
   - Efficient: about 9.5 GB with pictures, 5.5 GB with Save space.
   - Comprehensive: about 48.2 GB with pictures, 24.4 GB with Save space.
 
   Write the real table into this plan.
-- [ ] **Step 5: Neal signs off the lists and sizes.** This is the spec §5.2 sign-off, and it happens before any signing.
+
+  **Measured 2026-10-30** (dry build of the live feed; packs only, no vectors, `family:maps` left out; `@clasicos-granger` not yet listed, about 0.07 GB more once it is). "Save space" swaps each pack for its `_nopic` sibling where one exists, as `OnboardingModel` does.
+
+  | Domain (es) | Efficient | Efficient, Save space | Comprehensive | Comprehensive, Save space |
+  | --- | ---: | ---: | ---: | ---: |
+  | medicine | 0.47 | 0.17 | 2.24 | 1.94 |
+  | food | 0.00 | 0.00 | 2.09 | 2.09 |
+  | making | 3.68 | 3.68 | 4.38 | 4.38 |
+  | science | 0.82 | 0.24 | 1.05 | 0.32 |
+  | technology | 0.23 | 0.10 | 0.23 | 0.10 |
+  | maps | 0.14 | 0.04 | 0.46 | 0.11 |
+  | reference | 4.07 | 1.21 | 37.70 | 14.15 |
+  | literature | 0.00 | 0.00 | 0.58 | 0.43 |
+  | thought | 0.00 | 0.00 | 0.69 | 0.20 |
+  | **Whole start** | **9.40 GB** | **5.44 GB** | **46.66 GB** | **22.86 GB** |
+
+  - Per-domain Comprehensive counts the subject packs; the whole start drops them and Top as held by `wikipedia_es_all`.
+  - `efficient-es` (8 packs): WikiMed en español, iFixit en español, physics, chemistry, mathematics, computer, Wikiviajes, Top (all maxi).
+  - `comprehensive-es` (14 packs): MedlinePlus, Ready.gov, Scoutwiki, iFixit, Low-tech Magazine, Wikiviajes, Wikipedia en español (all, maxi), Wikcionario, Wikilibros, Wikiversidad, Vikidia, Spanish Language SE, Wikisource, Wikiquote.
+  - Comprehensive is 1.5 GB under the expected 48.2 / 24.4 GB because those totals still counted Stack Overflow en español (1.44 GB), which stays out of the tiers.
+  - English is unchanged: 17.7 GB / 99.7 GB.
+- [ ] **Step 5: Neal signs off the lists and sizes.** *(Waiting: the lists, copy and sizes are committed on the branch for his review; nothing is signed.)* This is the spec §5.2 sign-off, and it happens before any signing.
 - [ ] **Step 6:** Commit "L3: Spanish tiers, presets and onboarding".
 
 ## Task 4: Clásicos Granger (desk, Mac)

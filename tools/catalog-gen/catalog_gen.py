@@ -763,9 +763,10 @@ def onboarding_block(block, packs, books, collections):
     return {"useCases": use_cases, "larger": larger, "covered": covered}
 
 
-# The generated tier presets: id, English title, other languages' titles. Friend review (L2): "Inicio eficiente" and
-# "Biblioteca completa" wait for the native speaker's read, like the rest of L2's Spanish.
-TIER_PRESETS = (("efficient", "Efficient start", {"es": {"title": "Inicio eficiente"}}),
+# The generated tier presets: id, English title, other languages' titles. Friend review (L2): "Comienzo eficiente" and
+# "Biblioteca completa" wait for the native speaker's read, like the rest of L2's Spanish. Not "Inicio eficiente": the
+# L2 glossary gives "Inicio" to Home, and L2's own strings say "el comienzo Eficiente".
+TIER_PRESETS = (("efficient", "Efficient start", {"es": {"title": "Comienzo eficiente"}}),
                 ("comprehensive", "Comprehensive library", {"es": {"title": "Biblioteca completa"}}))
 
 

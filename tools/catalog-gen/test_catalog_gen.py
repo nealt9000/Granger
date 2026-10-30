@@ -1265,7 +1265,7 @@ def test_each_language_gets_its_tier_presets(tmp_path, monkeypatch):
     assert presets["comprehensive-es"]["items"] == ["wikipedia_es_all_maxi"]
     assert presets["efficient-es"]["language"] == "es"
     assert presets["efficient-es"]["title"] == "Efficient start"
-    assert presets["efficient-es"]["i18n"] == {"es": {"title": "Inicio eficiente"}}
+    assert presets["efficient-es"]["i18n"] == {"es": {"title": "Comienzo eficiente"}}
     assert presets["comprehensive-es"]["i18n"] == {"es": {"title": "Biblioteca completa"}}
     # The English presets keep their ids, items and title, with no language.
     assert presets["efficient"]["items"][:2] == ["wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic"]
@@ -1409,3 +1409,23 @@ def test_real_spanish_wikipedia_is_one_family():
     assert all(set(v["adds"]) == {"wikipedia_es_top"} for v in subjects.values())
     curated = json.loads((HERE / "curated.json").read_text(encoding="utf-8"))
     assert curated["readiness"]["contains"]["wikipedia_es_all"] == ["wikipedia_es_*"]
+
+
+def test_real_curated_spanish_tiers_follow_neals_calls():
+    curated = json.loads((HERE / "curated.json").read_text(encoding="utf-8"))
+    domains = {d["id"]: d for d in curated["readiness"]["domains"]}
+    for d in domains.values():
+        assert d["i18n"]["es"]["title"], d["id"]
+        assert d["languages"]["es"]["essential"] or d["languages"]["es"]["comprehensive"], d["id"]
+    es = {k: d["languages"]["es"] for k, d in domains.items()}
+    tokens = [t for lists in es.values() for t in lists["essential"] + lists["comprehensive"]]
+    assert "es.stackoverflow.com_mul_all" not in tokens  # stays out, as English Stack Overflow does
+    assert "ready.gov_es_all" in es["food"]["comprehensive"] and not es["food"]["essential"]  # call 2
+    assert "ifixit_es_all" in es["making"]["essential"]  # call 3
+    assert "wikipedia_es_all_maxi" in es["reference"]["comprehensive"]  # call 1
+    assert not any(t.startswith(("kiwix.ecured", "marxists.org", "khanacademy", "ted_")) for t in tokens)
+    for u in curated["onboarding"]["useCases"]:
+        assert u["i18n"]["es"]["title"] and u["i18n"]["es"]["blurb"], u["id"]
+    featured = {(p["name"], p.get("flavour", "")) for p in curated["packs"]}
+    assert {("wikipedia_es_top", "maxi"), ("wikipedia_es_all", "nopic"), ("wiktionary_es_all", "nopic"),
+            ("wikipedia_es_medicine", "maxi"), ("wikivoyage_es_all", "maxi")} <= featured

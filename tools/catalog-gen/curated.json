@@ -123,6 +123,114 @@
       "nonCommercial": true,
       "title": "iFixit repair guides",
       "description": "Step-by-step repair guides for phones, computers, appliances, cars and more, written by iFixit's community"
+    },
+    {
+      "name": "wikipedia_es_medicine",
+      "flavour": "nopic",
+      "category": "Medical",
+      "license": "CC BY-SA 4.0",
+      "title": "WikiMed en español (sin imágenes)",
+      "i18n": {
+        "en": {
+          "title": "WikiMed in Spanish (no pictures)"
+        }
+      }
+    },
+    {
+      "name": "wikipedia_es_medicine",
+      "flavour": "maxi",
+      "category": "Medical",
+      "license": "CC BY-SA 4.0",
+      "title": "WikiMed en español",
+      "i18n": {
+        "en": {
+          "title": "WikiMed in Spanish"
+        }
+      }
+    },
+    {
+      "name": "wikipedia_es_top",
+      "flavour": "nopic",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikipedia en español: los mejores artículos (sin imágenes)",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Spanish: best articles (no pictures)"
+        }
+      }
+    },
+    {
+      "name": "wikipedia_es_top",
+      "flavour": "maxi",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikipedia en español: los mejores artículos",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Spanish: best articles"
+        }
+      }
+    },
+    {
+      "name": "wikipedia_es_all",
+      "flavour": "nopic",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikipedia en español: todo (sin imágenes)",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Spanish: everything (no pictures)"
+        }
+      }
+    },
+    {
+      "name": "wikipedia_es_all",
+      "flavour": "maxi",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikipedia en español: todo",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Spanish: everything"
+        }
+      }
+    },
+    {
+      "name": "wiktionary_es_all",
+      "flavour": "nopic",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikcionario",
+      "i18n": {
+        "en": {
+          "title": "Wiktionary in Spanish"
+        }
+      }
+    },
+    {
+      "name": "wikivoyage_es_all",
+      "flavour": "nopic",
+      "category": "Regional",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikiviajes, guía de viajes (sin imágenes)",
+      "i18n": {
+        "en": {
+          "title": "Wikivoyage travel guide in Spanish (no pictures)"
+        }
+      }
+    },
+    {
+      "name": "wikivoyage_es_all",
+      "flavour": "maxi",
+      "category": "Regional",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikiviajes, guía de viajes",
+      "i18n": {
+        "en": {
+          "title": "Wikivoyage travel guide in Spanish"
+        }
+      }
     }
   ],
   "books": [
@@ -241,7 +349,7 @@
     }
   ],
   "readiness": {
-    "_about": "The readiness tiers (spec 2026-10-21-home-readiness-onboarding-design.md §3.5). An item is a catalog id, \"@<collection>\" (the collection's books whose own domain is this one) or \"family:<name>\" (any pack of the family; the region's map is chosen in onboarding). catalog_gen.py checks every token, folds essential into comprehensive and generates the efficient and comprehensive presets. \"contains\" maps a ZIM name to the ZIM names whose articles it holds (\"prefix*\" allowed): a held pack counts as installed, and the presets and tier sizes leave it out beside its container (Plan H4).",
+    "_about": "The readiness tiers (spec 2026-10-21-home-readiness-onboarding-design.md §3.5). An item is a catalog id, \"@<collection>\" (the collection's books whose own domain is this one) or \"family:<name>\" (any pack of the family; the region's map is chosen in onboarding). catalog_gen.py checks every token, folds essential into comprehensive and generates the efficient and comprehensive presets. \"contains\" maps a ZIM name to the ZIM names whose articles it holds (\"prefix*\" allowed): a held pack counts as installed, and the presets and tier sizes leave it out beside its container (Plan H4). Plan L3: a domain's \"languages\" holds its lists in another language (Spanish: \"es\"), checked and folded the same way, and catalog_gen.py generates efficient-<code> and comprehensive-<code> presets from them; \"i18n\" holds its title in other languages.",
     "domains": [
       {
         "id": "medicine",
@@ -254,7 +362,22 @@
           "medlineplus.gov_en_all",
           "zimgit-medicine_en",
           "wwwnc.cdc.gov_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Medicina y primeros auxilios"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [
+              "wikipedia_es_medicine_maxi"
+            ],
+            "comprehensive": [
+              "medlineplus.gov_es_all"
+            ]
+          }
+        }
       },
       {
         "id": "food",
@@ -275,7 +398,21 @@
           "cooking.stackexchange.com_en_all",
           "gardening.stackexchange.com_en_all",
           "outdoors.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Comida, agua y supervivencia"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [],
+            "comprehensive": [
+              "ready.gov_es_all",
+              "scoutwiki.org_es_all_maxi"
+            ]
+          }
+        }
       },
       {
         "id": "making",
@@ -294,7 +431,22 @@
           "engineering.stackexchange.com_en_all",
           "3dprinting.stackexchange.com_en_all",
           "arduino.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Fabricación, reparación e ingeniería"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [
+              "ifixit_es_all"
+            ],
+            "comprehensive": [
+              "solar.lowtechmagazine.com_mul_all"
+            ]
+          }
+        }
       },
       {
         "id": "science",
@@ -316,7 +468,25 @@
           "physics.stackexchange.com_en_all",
           "chemistry.stackexchange.com_en_all",
           "biology.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Ciencia y matemáticas"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [
+              "wikipedia_es_physics_maxi",
+              "wikipedia_es_chemistry_maxi",
+              "wikipedia_es_mathematics_maxi"
+            ],
+            "comprehensive": [
+              "wikipedia_es_molcell_maxi",
+              "wikipedia_es_climate-change_maxi"
+            ]
+          }
+        }
       },
       {
         "id": "technology",
@@ -334,7 +504,20 @@
           "security.stackexchange.com_en_all",
           "networkengineering.stackexchange.com_en_all",
           "raspberrypi.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Tecnología e informática"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [
+              "wikipedia_es_computer_maxi"
+            ],
+            "comprehensive": []
+          }
+        }
       },
       {
         "id": "maps",
@@ -348,7 +531,23 @@
           "openstreetmap-wiki_en_all_maxi",
           "wikipedia_en_geography_maxi",
           "travel.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Mapas, lugares y viajes"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [
+              "family:maps",
+              "wikivoyage_es_all_maxi"
+            ],
+            "comprehensive": [
+              "wikipedia_es_geography_maxi"
+            ]
+          }
+        }
       },
       {
         "id": "reference",
@@ -364,7 +563,27 @@
           "citizendium.org_en_all_maxi",
           "english.stackexchange.com_en_all",
           "ell.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Consulta general"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [
+              "wikipedia_es_top_maxi"
+            ],
+            "comprehensive": [
+              "wikipedia_es_all_maxi",
+              "wiktionary_es_all_nopic",
+              "wikibooks_es_all_maxi",
+              "wikiversity_es_all_maxi",
+              "vikidia_es_all_maxi",
+              "spanish.stackexchange.com_mul_all"
+            ]
+          }
+        }
       },
       {
         "id": "literature",
@@ -377,7 +596,21 @@
           "wikisource_en_all_maxi",
           "literature.stackexchange.com_en_all",
           "writing.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Literatura y artes"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [],
+            "comprehensive": [
+              "wikisource_es_all_maxi",
+              "wikiquote_es_all_maxi"
+            ]
+          }
+        }
       },
       {
         "id": "thought",
@@ -396,7 +629,20 @@
           "buddhism.stackexchange.com_en_all",
           "hinduism.stackexchange.com_en_all",
           "hermeneutics.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Religión, filosofía e historia"
+          }
+        },
+        "languages": {
+          "es": {
+            "essential": [],
+            "comprehensive": [
+              "wikipedia_es_history_maxi"
+            ]
+          }
+        }
       }
     ],
     "contains": {
@@ -416,7 +662,7 @@
     }
   },
   "onboarding": {
-    "_about": "Onboarding's tables (Plan H3, spec 2026-10-21-home-readiness-onboarding-design.md §6). A use case's items use the readiness grammar (a catalog id, \"@<collection>\" for the collection's books, \"family:<name>\" for any pack of the family); the app shows what each adds beyond the start choice and what is installed. regions.larger names the maps packs that are continents or multi-country areas, so the region picker lists countries first; regions.covered names, per larger pack, the places inside it that have no pack of their own, so searching for one finds the pack (Neal, 2026-10-22: Puerto Rico is in Central America). catalog_gen.py checks every token.",
+    "_about": "Onboarding's tables (Plan H3, spec 2026-10-21-home-readiness-onboarding-design.md §6). A use case's items use the readiness grammar (a catalog id, \"@<collection>\" for the collection's books, \"family:<name>\" for any pack of the family); the app shows what each adds beyond the start choice and what is installed. regions.larger names the maps packs that are continents or multi-country areas, so the region picker lists countries first; regions.covered names, per larger pack, the places inside it that have no pack of their own, so searching for one finds the pack (Neal, 2026-10-22: Puerto Rico is in Central America). catalog_gen.py checks every token. Plan L3: a use case's \"languages\" holds its items in another language (a use case with none in a language isn't offered in it), and \"i18n\" its title and blurb.",
     "useCases": [
       {
         "id": "offgrid",
@@ -430,7 +676,23 @@
           "zimgit-water_en",
           "zimgit-food-preparation_en",
           "zimgit-medicine_en"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Sin red y emergencias",
+            "blurb": "Qué hacer cuando la luz, el agua o la clínica quedan fuera de alcance."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "ready.gov_es_all",
+              "wikipedia_es_medicine_maxi",
+              "scoutwiki.org_es_all_maxi",
+              "solar.lowtechmagazine.com_mul_all"
+            ]
+          }
+        }
       },
       {
         "id": "travel",
@@ -439,7 +701,21 @@
         "items": [
           "wikivoyage_en_all_maxi",
           "openstreetmap-wiki_en_all_maxi"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Viajes",
+            "blurb": "Guías y mapas para el camino; el mapa de tu región se elige arriba."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "wikivoyage_es_all_maxi",
+              "wikipedia_es_geography_maxi"
+            ]
+          }
+        }
       },
       {
         "id": "study",
@@ -453,7 +729,25 @@
           "wikipedia_en_chemistry_maxi",
           "oer4schools_en_all",
           "milneopentextbooks.org_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Estudio",
+            "blurb": "Libros de texto y cursos, de la escuela a la universidad."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "wikibooks_es_all_maxi",
+              "wikiversity_es_all_maxi",
+              "vikidia_es_all_maxi",
+              "wikipedia_es_mathematics_maxi",
+              "wikipedia_es_physics_maxi",
+              "wikipedia_es_chemistry_maxi"
+            ]
+          }
+        }
       },
       {
         "id": "build",
@@ -467,7 +761,21 @@
           "diy.stackexchange.com_en_all",
           "electronics.stackexchange.com_en_all",
           "family:energypedia"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Construir y reparar",
+            "blurb": "Arreglar, fabricar y dar energía a las cosas."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "ifixit_es_all",
+              "solar.lowtechmagazine.com_mul_all"
+            ]
+          }
+        }
       },
       {
         "id": "medical",
@@ -479,7 +787,21 @@
           "zimgit-medicine_en",
           "wwwnc.cdc.gov_en_all",
           "family:mdwiki"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Trabajo sanitario",
+            "blurb": "Consulta clínica más allá de los primeros auxilios."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "wikipedia_es_medicine_maxi",
+              "medlineplus.gov_es_all"
+            ]
+          }
+        }
       },
       {
         "id": "software",
@@ -492,7 +814,21 @@
           "unix.stackexchange.com_en_all",
           "openwrt.org_en_all",
           "family:mediawiki"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Software",
+            "blurb": "Documentación y respuestas sobre programación y sistemas."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "wikipedia_es_computer_maxi",
+              "es.stackoverflow.com_mul_all"
+            ]
+          }
+        }
       },
       {
         "id": "faith",
@@ -507,7 +843,20 @@
           "judaism.stackexchange.com_en_all",
           "buddhism.stackexchange.com_en_all",
           "hinduism.stackexchange.com_en_all"
-        ]
+        ],
+        "i18n": {
+          "es": {
+            "title": "Fe y filosofía",
+            "blurb": "Escrituras, filosofía e historia, y las preguntas que la gente se hace sobre ellas."
+          }
+        },
+        "languages": {
+          "es": {
+            "items": [
+              "wikipedia_es_history_maxi"
+            ]
+          }
+        }
       }
     ],
     "regions": {
