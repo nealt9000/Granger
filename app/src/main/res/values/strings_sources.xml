@@ -10,18 +10,18 @@
     <string name="sources_group_books">Books</string>
     <string name="sources_group_audio">Audiobooks &amp; music</string>
     <string name="sources_group_models">Models &amp; voices</string>
-    <string name="sources_link_kiwix">Kiwix</string>
+    <string name="sources_link_kiwix" translatable="false">Kiwix</string>
     <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicine, how-to and more, offline</string>
     <string name="sources_link_classics">Granger Classics</string>
     <string name="sources_link_classics_sub">Public-domain e-books, ready to read</string>
-    <string name="sources_link_gutenberg">Project Gutenberg</string>
+    <string name="sources_link_gutenberg" translatable="false">Project Gutenberg</string>
     <string name="sources_link_gutenberg_sub">Public-domain books by subject, in packs from Kiwix</string>
     <!-- Kiwix's book packs (nautilus libraries): Food for Preppers, Water, Prunelle. -->
     <string name="sources_link_kiwix_books">Kiwix libraries</string>
     <string name="sources_link_kiwix_books_sub">Guides and handbooks: food, water, medicine, knots and more</string>
     <string name="sources_link_archive_books">Archive.org books</string>
     <string name="sources_link_archive_books_sub">Out-of-copyright books from the Internet Archive</string>
-    <string name="sources_link_librivox">LibriVox</string>
+    <string name="sources_link_librivox" translatable="false">LibriVox</string>
     <string name="sources_link_librivox_sub">Public-domain audiobooks, read by volunteers</string>
     <string name="sources_link_archive_audiobooks">Archive.org audiobooks</string>
     <string name="sources_link_archive_audiobooks_sub">Spoken word from the Internet Archive</string>
@@ -34,10 +34,10 @@
     <string name="sources_import_own_sub">EPUB, PDF, TXT or Markdown books from this phone</string>
 
     <!-- A source screen's title. -->
-    <string name="sources_scope_granger">Granger</string>
-    <string name="sources_scope_kiwix">Kiwix</string>
+    <string name="sources_scope_granger" translatable="false">Granger</string>
+    <string name="sources_scope_kiwix" translatable="false">Kiwix</string>
     <string name="sources_scope_models">Models</string>
-    <string name="sources_scope_gutenberg">Project Gutenberg</string>
+    <string name="sources_scope_gutenberg" translatable="false">Project Gutenberg</string>
     <string name="sources_scope_kiwix_books">Kiwix libraries</string>
 
     <!-- A source screen. -->

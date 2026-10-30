@@ -36,10 +36,10 @@
     </plurals>
 
     <!-- The source names an empty Music or Audiobooks screen links to. -->
-    <string name="library_link_granger">Granger</string>
-    <string name="library_link_kiwix">Kiwix</string>
-    <string name="library_link_archive">Archive.org</string>
-    <string name="library_link_librivox">LibriVox</string>
+    <string name="library_link_granger" translatable="false">Granger</string>
+    <string name="library_link_kiwix" translatable="false">Kiwix</string>
+    <string name="library_link_archive" translatable="false">Archive.org</string>
+    <string name="library_link_librivox" translatable="false">LibriVox</string>
 
     <!-- A collection. -->
     <!-- Copies a book pack's books out so Search and Ask can read them in full. -->
