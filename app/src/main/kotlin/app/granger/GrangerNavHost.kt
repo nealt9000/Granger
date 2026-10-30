@@ -618,7 +618,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
     /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page; [linkText] may name it. */
     suspend fun openPackDocument(packId: String, path: String, linkText: String) {
-        // A Gutenberg pack's EPUB opens as its book row (Plan GB), copied out by the reader on its first open.
+        // A book pack's file opens as its listed row (Plan GB, Plan KB Decision 4), copied out by the reader on its first
+        // open, whatever its type.
+        container.packBookLinks.bookFor(packId, path)?.let { book ->
+            val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
+            nav.showTab(tab, keepCurrent = true)
+            return
+        }
         if (path.endsWith(".epub", ignoreCase = true)) {
             val book = container.gutenbergBooks.bookFor(packId, path)
             if (book == null) {

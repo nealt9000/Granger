@@ -274,11 +274,19 @@ private val IMPORT_TYPES = arrayOf(
 internal fun rowCountText(row: CollectionRow): String {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
-    // A Gutenberg collection is called by its subject; the line under it says whose (Plan GB Decision 2), and, as the
-    // collection's header does, how many of its books are searchable in full once any are.
-    if (!Filing.isGutenbergCollection(row.collection.defaultKey)) return counts
+    // A book pack's collection is called by its subject or pack; the line under it says whose (Plan GB Decision 2, Plan
+    // KB Decision 7), and, as the collection's header does, how many of its books are searchable in full once any are.
+    val key = row.collection.defaultKey
+    if (!Filing.isBookPackCollection(key)) return counts
     val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
-    val header = GutenbergHeader(pack = null, books = rows.sumOf { it.books.size }, searchable = searchable)
+    val books = rows.sumOf { it.books.size }
+    val header = GutenbergHeader(pack = null, books = books, searchable = searchable)
+    if (Filing.isKiwixBooksCollection(key)) {
+        // "Kiwix library · 17 documents · 3 searchable in full" (Plan KB Decision 7).
+        val kiwix = header.copy(provider = KIWIX_LIBRARY, noun = "document")
+        return listOfNotNull(if (books > 0) kiwix.provenance else KIWIX_LIBRARY, kiwix.searchableText.takeIf { searchable > 0 })
+            .joinToString(" · ")
+    }
     return listOfNotNull(GutenbergNames.PROVIDER, counts.ifEmpty { null }, header.searchableText.takeIf { searchable > 0 })
         .joinToString(" · ")
 }

@@ -60,17 +60,17 @@ interface PackBookSource {
  * with it the place and marks. Its `filePath` is in [dir], there only once it has been opened.
  */
 open class PackBooks(
-    private val db: LibraryDatabase,
+    protected val db: LibraryDatabase,
     val source: PackBookSource,
     private val archiveOf: (packId: String) -> ZimArchive?,
     /** Where opened books are copied: the internal volume's `books/<source>`. */
     private val dir: () -> File,
-    private val coversDir: File,
+    protected val coversDir: File,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
-    private val pdfCovers: PdfCovers = PlatformPdfCovers,
+    protected val pdfCovers: PdfCovers = PlatformPdfCovers,
 ) {
-    private val dao = db.bookDao()
+    protected val dao = db.bookDao()
     private val mutex = Mutex()
     private val origin = source.origin
 
@@ -134,21 +134,26 @@ open class PackBooks(
                     }
                 }
             }
-            if (writes.isEmpty() && gone.isEmpty()) return@withContext emptyList()
-            db.withTransaction {
-                if (writes.isNotEmpty()) dao.upsertAll(writes)
+            if (writes.isNotEmpty() || gone.isNotEmpty()) {
+                db.withTransaction {
+                    if (writes.isNotEmpty()) dao.upsertAll(writes)
+                    for (book in gone) {
+                        dao.deleteChunks(book.id)
+                        dao.delete(book.id)
+                    }
+                }
                 for (book in gone) {
-                    dao.deleteChunks(book.id)
-                    dao.delete(book.id)
+                    File(book.filePath).delete()
+                    book.coverPath?.let { File(it).delete() }
                 }
             }
-            for (book in gone) {
-                File(book.filePath).delete()
-                book.coverPath?.let { File(it).delete() }
-            }
+            afterSync(readable.map { it.first })
             writes
         }
     }
+
+    /** Runs at the end of [sync], under its lock and on [io], with the packs whose books were listed. */
+    protected open suspend fun afterSync(listed: List<Pack>) {}
 
     /**
      * Copies [book]'s file out of its pack when it isn't there (the first open, or storage cleared), then reads its
@@ -231,7 +236,7 @@ open class PackBooks(
     private class Cover(val bytes: ByteArray?, val extension: String?)
 
     /** Writes an opened book's own cover to `coversDir/<sha1 of id>.<ext>`; null if it has none or it can't be written. */
-    private fun writeCover(id: String, bytes: ByteArray?, extension: String?): String? {
+    protected fun writeCover(id: String, bytes: ByteArray?, extension: String?): String? {
         if (bytes == null) return null
         val ext = extension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
         val target = File(coversDir, "${sha1(id)}.$ext")
@@ -253,7 +258,7 @@ open class PackBooks(
         fun refOf(book: Book): String = book.id.removePrefix(BookIds.of(book.origin, ""))
 
         /** A PDF's first-page cover, as tall as the shelf's other PDF covers ([RoomBookshelf]). */
-        private const val COVER_HEIGHT_PX = 600
+        internal const val COVER_HEIGHT_PX = 600
 
         private val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
 

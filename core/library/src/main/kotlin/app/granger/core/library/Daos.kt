@@ -267,6 +267,10 @@ interface BookDao {
     @Query("DELETE FROM book_marks WHERE bookId = :bookId")
     suspend fun deleteMarks(bookId: String)
 
+    /** Hands every bookmark and highlight of book [from] to book [to] (Plan KB: a pack document adopted by its row). */
+    @Query("UPDATE book_marks SET bookId = :to WHERE bookId = :from")
+    suspend fun moveMarks(from: String, to: String)
+
     @Query("DELETE FROM book_positions WHERE bookId LIKE :prefix || '%' AND bookId NOT IN (SELECT id FROM books)")
     suspend fun deleteOrphanPositions(prefix: String)
 

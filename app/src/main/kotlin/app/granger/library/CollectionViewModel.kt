@@ -18,8 +18,8 @@ import app.granger.core.library.BookPosition
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Filing
-import app.granger.core.library.GutenbergBooks
-import app.granger.core.library.isGutenberg
+import app.granger.core.library.PackBooks
+import app.granger.core.library.isBookPack
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -122,17 +122,18 @@ class CollectionViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     /**
-     * A Gutenberg collection's header (Plan GB Decision 5): its pack, when installed, for the overflow; how many books it
-     * lists and how many are searchable in full; and the "Make all searchable…" run, if one is going. Null for any
-     * other collection.
+     * A book pack's collection's header (Plan GB Decision 5, Plan KB Decision 7): its pack, when installed, for the
+     * overflow; whose it is ("Project Gutenberg", "Kiwix library"); how many books it lists and how many are searchable
+     * in full; and the "Make all searchable…" run, if one is going. Null for any other collection.
      */
     val gutenbergHeader: StateFlow<GutenbergHeader?> = combine(
         ui, library.packs, gutenberg?.progress ?: flowOf(emptyMap()),
     ) { row, packs, runs ->
-        val key = row?.collection?.defaultKey?.takeIf(Filing::isGutenbergCollection) ?: return@combine null
-        val pack = packs.firstOrNull { it.isGutenberg && Filing.defaultKey(it) == key }
-        val packName = pack?.name ?: row.books.firstOrNull()?.let(GutenbergBooks::packNameOf)
-        GutenbergHeader(pack, row.books.size, row.books.count { it.searchableInFull }, packName?.let(runs::get))
+        val key = row?.collection?.defaultKey?.takeIf(Filing::isBookPackCollection) ?: return@combine null
+        val pack = packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
+        val packName = pack?.name ?: row.books.firstOrNull()?.let(PackBooks::packNameOf)
+        val header = GutenbergHeader(pack, row.books.size, row.books.count { it.searchableInFull }, packName?.let(runs::get))
+        if (Filing.isKiwixBooksCollection(key)) header.copy(provider = KIWIX_LIBRARY, noun = "document") else header
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** What "Make all searchable…" would take here; null when it isn't offered. */
@@ -145,7 +146,7 @@ class CollectionViewModel(
     /** Copies out and indexes every book here not yet on the phone, in the app's scope; leaving doesn't stop it. */
     fun makeAllSearchable() {
         val books = ui.value?.books.orEmpty()
-        val packName = gutenbergHeader.value?.pack?.name ?: books.firstOrNull()?.let(GutenbergBooks::packNameOf) ?: return
+        val packName = gutenbergHeader.value?.pack?.name ?: books.firstOrNull()?.let(PackBooks::packNameOf) ?: return
         gutenberg?.makeSearchable(packName, books)
     }
 
@@ -232,11 +233,23 @@ class CollectionViewModel(
     }
 }
 
-/** A Gutenberg collection's [pack] (null once it's gone), its [books], how many are [searchable] in full, and a run's [progress]. */
-data class GutenbergHeader(val pack: Pack?, val books: Int, val searchable: Int, val progress: SearchableProgress? = null) {
-    /** "Project Gutenberg · 1,284 books". */
-    val provenance: String get() =
-        "${app.granger.core.library.GutenbergNames.PROVIDER} · ${number(books)} ${if (books == 1) "book" else "books"}"
+/** Whose a nautilus pack's collection is (Plan KB Decision 7): "Kiwix library · 17 documents". */
+const val KIWIX_LIBRARY = "Kiwix library"
+
+/**
+ * A book pack's collection's [pack] (null once it's gone), its [books], how many are [searchable] in full, and a run's
+ * [progress]; [provider] and [noun] say whose it is and what it holds.
+ */
+data class GutenbergHeader(
+    val pack: Pack?,
+    val books: Int,
+    val searchable: Int,
+    val progress: SearchableProgress? = null,
+    val provider: String = app.granger.core.library.GutenbergNames.PROVIDER,
+    val noun: String = "book",
+) {
+    /** "Project Gutenberg · 1,284 books", "Kiwix library · 17 documents". */
+    val provenance: String get() = "$provider · ${number(books)} ${if (books == 1) noun else "${noun}s"}"
 
     /** "37 searchable in full". */
     val searchableText: String get() = "${number(searchable)} searchable in full"

@@ -635,6 +635,63 @@ class ThemeShots {
         }
     }
 
+    /** Food for Preppers as its collection (Plan KB Decision 7), at 360 dp: PDFs, one opened with a first-page cover, a scan. */
+    private fun kiwixBooksShot(name: String, view: ShelfView) {
+        val coverDir = File(System.getProperty("java.io.tmpdir"), "kb-covers").apply { mkdirs() }
+        val docs = listOf(
+            "Philmont Trail Cookbook" to "Various", "Camping Recipes" to "Various", "Dutch Oven Cooking" to "Various",
+            "Food Storage in the Home" to "Utah State University", "Home Canning Guide" to "USDA",
+            "Drying Foods" to "University of Georgia", "Making Jerky at Home Safely" to "USDA",
+            "Bread Baking Basics" to "Various", "Root Cellaring" to "Various", "Emergency Food Storage" to "FEMA",
+        )
+        val books = docs.mapIndexed { i, (title, author) ->
+            app.granger.book("book:nautilus:zimgit-food-preparation_en/Food Preparation (${i + 1}).pdf", title, author = author).copy(
+                origin = app.granger.core.library.BookOrigin.NAUTILUS,
+                sourceRef = "zimgit-food-preparation_en/files/Food Preparation (${i + 1}).pdf",
+                format = app.granger.core.library.BookFormat.PDF,
+                indexedAt = if (i in setOf(0, 1, 3)) 5L else null, searchable = i != 3,
+            )
+        }.mapIndexed { i, book ->
+            if (i !in setOf(0, 1, 3)) return@mapIndexed book
+            val file = File(coverDir, "$i.png")
+            val bmp = Bitmap.createBitmap(200, 260, Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(bmp)
+            canvas.drawColor(android.graphics.Color.WHITE)
+            val ink = android.graphics.Paint().apply { color = android.graphics.Color.rgb(40, 60, 40) }
+            canvas.drawRect(16f, 20f, 184f, 60f, ink)
+            for (line in 0 until 9) canvas.drawRect(16f, 80f + line * 18f, 120f + (line * 23) % 60, 88f + line * 18f, ink)
+            file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            book.copy(coverPath = file.path)
+        }
+        val key = "kiwixbooks-zimgit-food-preparation_en"
+        val shelves = app.granger.FakeShelves()
+        shelves.shelfList.value = listOf(
+            app.granger.core.library.Shelf(
+                MediaType("literature", "Literature", true, 0),
+                listOf(CollectionRow(ShelfCollection("c:$key", "Food for Preppers", "literature", false, defaultKey = key), emptyList(), books)),
+            ),
+        )
+        val library = app.granger.FakeLibrary().apply {
+            packList.value = listOf(pack("u-food", "Food for Preppers").copy(name = "zimgit-food-preparation_en", scraper = "nautiluszim 1.1.1"))
+        }
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.BOOKS, view) }
+        val vm = app.granger.library.CollectionViewModel(
+            "c:$key", shelves, library, app.granger.FakeReadingSessions(), app.granger.FakeBookshelf().apply { positionMap.value = mapOf(books[1].id to app.granger.core.library.BookPosition(books[1].id, "{}", 0.4, "", 1L)) }, app.granger.FakeDownloads(),
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main), viewPrefs = prefs,
+            compute = kotlinx.coroutines.Dispatchers.Main,
+        )
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.library.CollectionScreen(vm, onOpened = {}, onOpenPack = {}, onGetBooks = {}, onOpenCollection = {}, onBack = {}) }
+        }
+    }
+
+    @Test fun kiwixBooksList() = kiwixBooksShot("kiwixbooks-list", ShelfView.LIST)
+
+    @Test fun kiwixBooksGrid() = kiwixBooksShot("kiwixbooks-grid", ShelfView.GRID)
+
     @Test fun gutenbergList() = gutenbergShot("gutenberg-list", ShelfView.LIST)
 
     @Test fun gutenbergGrid() = gutenbergShot("gutenberg-grid", ShelfView.GRID)
