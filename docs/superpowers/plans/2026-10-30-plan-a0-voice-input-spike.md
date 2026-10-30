@@ -54,16 +54,16 @@
 
 **Files:** create `voiceinput/PhraseRecorder.kt` (`AudioRecord`, 16 kHz mono PCM16 → WAV under `files/asr/<phrase-id>.wav`), `voiceinput/ReplayRecognizer.kt`, `tools/asr/phrases.json`.
 
-- [ ] `PhraseRecorder`: shows a phrase, records while a button is held, saves, shows the next. Re-record allowed. Phrases come from `phrases.json` pushed to `files/asr/`.
-- [ ] `ReplayRecognizer`: writes a WAV's PCM into a `ParcelFileDescriptor.createPipe()` and starts the on-device recognizer with `EXTRA_AUDIO_SOURCE` and the encoding, rate and channel extras, `EXTRA_LANGUAGE = en-US`, `EXTRA_PARTIAL_RESULTS`, optional `EXTRA_BIASING_STRINGS`. Times: start → first partial, end of audio → final result. Logs `Asr: replay {...}` with the transcript and confidences.
+- [x] `PhraseRecorder`: shows a phrase, records while a button is held, saves, shows the next. Re-record allowed. Phrases come from `phrases.json` pushed to `files/asr/`. *Done 2026-10-30 as tap Record / tap Stop and next (holding a button tends to clip the first word), from the `VOICE_RECOGNITION` mic source; Back, Skip, Again.*
+- [x] `ReplayRecognizer`: writes a WAV's PCM into a `ParcelFileDescriptor.createPipe()` and starts the on-device recognizer with `EXTRA_AUDIO_SOURCE` and the encoding, rate and channel extras, `EXTRA_LANGUAGE = en-US`, `EXTRA_PARTIAL_RESULTS`, optional `EXTRA_BIASING_STRINGS`. Times: start → first partial, end of audio → final result. Logs `Asr: replay {...}` with the transcript and confidences. *Done inside `RecognizerProbe.recognize` (segmented session by default); `--es bias names|library` and `--es only q,n,c` pick the list and the WAVs.*
 - [x] **The pipe check:** record three phrases on the Mac with the phone in hand, replay them, and confirm the transcripts are real. If the on-device recognizer ignores the pipe, say so in the results and fall back: Neal reads each phrase live for each condition (Tasks 4 and 5 get shorter: names only, two conditions). *Done early, in Task 1, with macOS `say` WAVs: the pipe works, but only as a **segmented session**, with **1.5 s of trailing silence** and **500 ms between sessions** (results doc, Task 1).*
-- [ ] **Commit.** `Voice input spike: record phrases once, replay them into the recognizer`
+- [x] **Commit.** `Voice input spike: record phrases once, replay them into the recognizer`
 
 ### Task 3: The phrases and Neal's reading
 
-- [ ] Write `tools/asr/phrases.json` (ids, kind `question` / `name` / `command`, the text, accepted alternatives for names). Neal looks it over before the reading.
+- [x] Write `tools/asr/phrases.json` (ids, kind `question` / `name` / `command`, the text, accepted alternatives for names). Neal looks it over before the reading. *Written: 25 questions (24 with eval ids, plus a new Thucydides one), 20 names from the phone's library said as "Open …", 15 commands. `tools/asr/bias_list.py` builds `bias-library.json` (1,396 strings) and `bias-names.json` from a copy of `library.db`.*
 - [ ] **Neal's session (about 15 minutes):** read all 60 into `PhraseRecorder`. Pull the WAVs to `tools/asr/audio/` on the Mac (git-ignored; Neal's voice stays off GitHub).
-- [ ] `tools/asr/score.py`: reads the logcat JSON, scores word error rate and name hits per condition, prints a table. Two unit tests on the normaliser (numbers, punctuation).
+- [x] `tools/asr/score.py`: reads the logcat JSON, scores word error rate and name hits per condition, prints a table. Two unit tests on the normaliser (numbers, punctuation). *Four tests, passing (`~/.venvs/granger-vectors/bin/python -m pytest tools/asr/tests`). Name hits are scored exact and with spaces ignored.*
 - [ ] **Commit.** `Voice input spike: phrases and the scorer`
 
 ### Task 4: Accuracy and speed, replayed
