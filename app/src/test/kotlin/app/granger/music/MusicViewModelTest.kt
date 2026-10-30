@@ -2,6 +2,8 @@ package app.granger.music
 
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.Albums
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.MediaOrigin
@@ -62,13 +64,13 @@ class MusicViewModelTest {
         val mix = playlists.create("Mix", listOf("track:phone:j1", "track:phone:r1"))
 
         val all = vm(null).ui.filterNotNull().first()
-        assertThat(all.title).isEqualTo("All music")
+        assertThat(all.title).isEqualTo(UiText.Res(R.string.music_all))
         assertThat(all.songs.map { it.id }).containsExactly("track:phone:j1", "track:phone:r1", "track:phone:r2")
         assertThat(all.albums.map { it.title }).containsExactly("Kind of Blue", "Abbey Road")
         assertThat(all.playlists.map { it.id }).containsExactly(mix)
 
         val scoped = vm("c-rock").ui.filterNotNull().first()
-        assertThat(scoped.title).isEqualTo("Rock shelf")
+        assertThat(scoped.title).isEqualTo(UiText.Raw("Rock shelf"))
         assertThat(scoped.songs.map { it.id }).containsExactly("track:phone:r1", "track:phone:r2")
         assertThat(scoped.albums.map { it.title }).containsExactly("Abbey Road")
         assertThat(scoped.artists.map { it.name }).containsExactly("Beatles")

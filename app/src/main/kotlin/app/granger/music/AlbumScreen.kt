@@ -28,8 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.library.PackStatus
 import app.granger.media.DownloadControls
 import app.granger.media.DownloadUnit
@@ -52,11 +54,11 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(loaded?.album?.title.orEmpty()) },
-                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(loaded?.album?.title?.let { shownName(it) }.orEmpty()) },
+                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
                 actions = {
                     if (loaded != null) Box {
-                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         AlbumMenu(loaded.album, menu, { menu = false }, vm, dialogs, nav)
                     }
                 },
@@ -74,12 +76,12 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
         LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
             item {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    AlbumCover(album.coverPath, album.title, Modifier.width(140.dp))
+                    AlbumCover(album.coverPath, shownName(album.title), Modifier.width(140.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(album.title, style = MaterialTheme.typography.titleLarge)
+                        Text(shownName(album.title), style = MaterialTheme.typography.titleLarge)
                         for (artist in albumArtistNames(album)) {
                             Text(
-                                artist, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary,
+                                shownName(artist), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.clickable { nav.onArtist(artist) }.padding(vertical = 2.dp),
                             )
                         }
@@ -104,7 +106,7 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
             items(rows, key = { row -> if (row is AlbumRow.Song) row.track.id else "disc:${(row as AlbumRow.Disc).number}" }) { row ->
                 when (row) {
                     is AlbumRow.Disc -> Text(
-                        "Disc ${row.number}", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        stringResource(R.string.music_disc, row.number), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                     )
                     is AlbumRow.Song -> Box(Modifier.citedTint(citedMarked && row.track.id == marked)) {

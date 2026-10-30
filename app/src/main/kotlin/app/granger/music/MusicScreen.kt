@@ -1,5 +1,6 @@
 package app.granger.music
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import app.granger.library.SourceLink
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,8 +54,9 @@ import app.granger.library.ConfirmDialog
 import app.granger.library.NameDialog
 
 /** In tab order. */
-enum class MusicTab(val title: String) {
-    ALBUMS("Albums"), ARTISTS("Artists"), SONGS("Songs"), GENRES("Genres"), PLAYLISTS("Playlists"), FOLDERS("Folders");
+enum class MusicTab(@StringRes val title: Int) {
+    ALBUMS(R.string.music_tab_albums), ARTISTS(R.string.music_tab_artists), SONGS(R.string.music_tab_songs),
+    GENRES(R.string.music_tab_genres), PLAYLISTS(R.string.music_tab_playlists), FOLDERS(R.string.music_tab_folders);
 
     companion object {
         /** The tab Music opens on. */
@@ -71,11 +75,11 @@ fun MusicScreen(vm: MusicViewModel, nav: MusicNav) {
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text(loaded?.title.orEmpty()) },
-                    navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                    title = { Text(loaded?.title?.resolve().orEmpty()) },
+                    navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
                 )
                 PrimaryScrollableTabRow(selectedTabIndex = tab.ordinal, edgePadding = 8.dp) {
-                    for (t in MusicTab.entries) Tab(selected = tab == t, onClick = { tab = t }, text = { Text(t.title) })
+                    for (t in MusicTab.entries) Tab(selected = tab == t, onClick = { tab = t }, text = { Text(stringResource(t.title)) })
                 }
             }
         },
@@ -85,7 +89,7 @@ fun MusicScreen(vm: MusicViewModel, nav: MusicNav) {
             // Nothing in this scope at all: say so once, with where to get some (playlists still work).
             if (ui.songs.isEmpty() && tab != MusicTab.PLAYLISTS) {
                 EmptyMedia(
-                    "No music yet",
+                    stringResource(R.string.music_none_yet),
                     links = listOf(SourceLink.ARCHIVE_ORG_MUSIC),
                     onOpenSource = nav.onOpenSource,
                     onMediaSettings = nav.onMediaSettings,
@@ -95,26 +99,26 @@ fun MusicScreen(vm: MusicViewModel, nav: MusicNav) {
             when (tab) {
                 MusicTab.SONGS -> SongsTab(ui, vm, dialogs, nav)
                 MusicTab.ALBUMS -> AlbumsTab(ui, vm, dialogs, nav)
-                MusicTab.ARTISTS -> if (ui.artistSections.isEmpty) Empty("No artists") else ShelfList(ui.artistSections, Modifier.fillMaxSize(), contentType = "artist") { artist ->
+                MusicTab.ARTISTS -> if (ui.artistSections.isEmpty) Empty(stringResource(R.string.music_no_artists)) else ShelfList(ui.artistSections, Modifier.fillMaxSize(), contentType = "artist") { artist ->
                     ListItem(
                         modifier = Modifier.clickable { nav.onArtist(artist.name) },
-                        headlineContent = { Text(artist.name) },
-                        supportingContent = { Text(listOf(albumCount(artist.albumCount), songCount(artist.songCount)).joinToString(" · ")) },
+                        headlineContent = { Text(shownName(artist.name)) },
+                        supportingContent = { Text(stringResource(R.string.music_albums_and_songs, albumCount(artist.albumCount), songCount(artist.songCount))) },
                     )
                 }
                 MusicTab.GENRES -> LazyColumn(Modifier.fillMaxSize()) {
-                    if (ui.genres.isEmpty()) item { Empty("No genres") }
+                    if (ui.genres.isEmpty()) item { Empty(stringResource(R.string.music_no_genres)) }
                     items(ui.genres, key = { it.name }) { genre ->
                         ListItem(
                             modifier = Modifier.clickable { nav.onGenre(genre.name) },
-                            headlineContent = { Text(genre.name) },
+                            headlineContent = { Text(shownName(genre.name)) },
                             supportingContent = { Text(songCount(genre.songCount)) },
                         )
                     }
                 }
                 MusicTab.PLAYLISTS -> PlaylistsTab(ui.playlists, vm, nav)
                 MusicTab.FOLDERS -> LazyColumn(Modifier.fillMaxSize()) {
-                    if (ui.folders.isEmpty()) item { Empty("No folders") }
+                    if (ui.folders.isEmpty()) item { Empty(stringResource(R.string.music_no_folders)) }
                     items(ui.folders, key = { it.path }) { folder ->
                         ListItem(
                             modifier = Modifier.clickable { nav.onFolder(folder.path) },
@@ -140,7 +144,7 @@ fun EmptyMedia(text: String, links: List<SourceLink>, onOpenSource: ((SourceLink
         Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (onOpenSource != null) for (link in links) OutlinedButton(onClick = { onOpenSource(link) }) { Text(link.title) }
-            if (onMediaSettings != null) TextButton(onClick = onMediaSettings) { Text("Music & audiobooks settings") }
+            if (onMediaSettings != null) TextButton(onClick = onMediaSettings) { Text(stringResource(R.string.music_media_settings)) }
         }
     }
 }
@@ -153,21 +157,22 @@ internal fun Empty(text: String) {
 /** Songs (Plan LV): the shared list, under letters for Title, Artist and Album. No grid: a song has no cover of its own. */
 @Composable
 private fun SongsTab(ui: MusicUi, vm: MusicViewModel, dialogs: MusicDialogs, nav: MusicNav) {
-    val source = MusicSources.songs(ui.title.ifBlank { "Songs" })
+    val source = MusicSources.songs(ui.title.resolve().ifBlank { stringResource(R.string.music_songs) })
     val songs = ui.songs
     // A tap plays the list as shown, from the tapped song.
     val index = remember(songs) { songs.withIndex().associate { it.value.id to it.index } }
+    val songSorts = SongSort.entries.associateWith { stringResource(it.label) }
     ShelfList(
         ui.songSections,
         Modifier.fillMaxSize(),
         contentType = "song",
         header = {
             item(key = "header", contentType = "header") {
-                ShelfHeader(ui.sort, SongSort.entries, { it.label }, vm::setSort, leading = {
-                    OutlinedButton(onClick = { vm.play(songs, null, source, shuffle = true) }, enabled = songs.isNotEmpty()) { Text("Shuffle all") }
+                ShelfHeader(ui.sort, SongSort.entries, { songSorts.getValue(it) }, vm::setSort, leading = {
+                    OutlinedButton(onClick = { vm.play(songs, null, source, shuffle = true) }, enabled = songs.isNotEmpty()) { Text(stringResource(R.string.music_shuffle_all)) }
                 })
             }
-            if (songs.isEmpty()) item(key = "none") { Empty("No songs") }
+            if (songs.isEmpty()) item(key = "none") { Empty(stringResource(R.string.music_no_songs)) }
         },
     ) { track ->
         SongRow(track, vm, dialogs, nav, onPlay = { vm.play(songs, index[track.id], source) })
@@ -178,12 +183,13 @@ private fun SongsTab(ui: MusicUi, vm: MusicViewModel, dialogs: MusicDialogs, nav
 @Composable
 private fun AlbumsTab(ui: MusicUi, vm: MusicViewModel, dialogs: MusicDialogs, nav: MusicNav) {
     if (ui.albumSections.isEmpty) {
-        Empty("No albums")
+        Empty(stringResource(R.string.music_no_albums))
         return
     }
     val view by vm.albumView.collectAsStateWithLifecycle()
+    val albumSorts = AlbumSort.entries.associateWith { stringResource(it.label) }
     val header: @Composable () -> Unit = {
-        ShelfHeader(ui.albumSort, AlbumSort.entries, { it.label }, vm::setAlbumSort, view = view, onToggleView = vm::toggleAlbumView)
+        ShelfHeader(ui.albumSort, AlbumSort.entries, { albumSorts.getValue(it) }, vm::setAlbumSort, view = view, onToggleView = vm::toggleAlbumView)
     }
     if (view == ShelfView.LIST) {
         ShelfList(ui.albumSections, Modifier.fillMaxSize(), contentType = "album", header = { item(key = "header", contentType = "header") { header() } }) { album ->
@@ -218,7 +224,7 @@ private fun PlaylistsTab(playlists: List<Playlist>, vm: MusicViewModel, nav: Mus
             ListItem(
                 modifier = Modifier.clickable { dialog = PlaylistDialog.New },
                 leadingContent = { Icon(Icons.Filled.Add, contentDescription = null) },
-                headlineContent = { Text("New playlist") },
+                headlineContent = { Text(stringResource(R.string.music_new_playlist)) },
             )
         }
         items(playlists, key = { it.id }) { playlist ->
@@ -229,8 +235,8 @@ private fun PlaylistsTab(playlists: List<Playlist>, vm: MusicViewModel, nav: Mus
                     headlineContent = { Text(playlist.name) },
                 )
                 DropdownMenu(menu, { menu = false }) {
-                    DropdownMenuItem(text = { Text("Rename") }, onClick = { menu = false; dialog = PlaylistDialog.Rename(playlist) })
-                    DropdownMenuItem(text = { Text("Delete") }, onClick = { menu = false; dialog = PlaylistDialog.Delete(playlist) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.music_rename)) }, onClick = { menu = false; dialog = PlaylistDialog.Rename(playlist) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.common_delete)) }, onClick = { menu = false; dialog = PlaylistDialog.Delete(playlist) })
                 }
             }
         }
@@ -243,7 +249,8 @@ private fun PlaylistDialogs(dialog: PlaylistDialog?, vm: MusicViewModel, onDone:
     when (dialog) {
         null -> Unit
         PlaylistDialog.New -> NameDialog(
-            title = "New playlist", label = "Playlist name", confirm = "Create",
+            title = stringResource(R.string.music_new_playlist), label = stringResource(R.string.music_playlist_name),
+            confirm = stringResource(R.string.music_create),
             onConfirm = { vm.createPlaylist(it); onDone() }, onDismiss = onDone,
         )
         is PlaylistDialog.Rename -> RenamePlaylistDialog(dialog.playlist, vm, onDone)
@@ -254,7 +261,8 @@ private fun PlaylistDialogs(dialog: PlaylistDialog?, vm: MusicViewModel, onDone:
 @Composable
 internal fun RenamePlaylistDialog(playlist: Playlist, vm: MusicViewModel, onDone: () -> Unit) {
     NameDialog(
-        title = "Rename playlist", label = "Playlist name", confirm = "Rename", initial = playlist.name,
+        title = stringResource(R.string.music_rename_playlist), label = stringResource(R.string.music_playlist_name),
+        confirm = stringResource(R.string.music_rename), initial = playlist.name,
         onConfirm = { vm.renamePlaylist(playlist.id, it); onDone() }, onDismiss = onDone,
     )
 }
@@ -262,9 +270,9 @@ internal fun RenamePlaylistDialog(playlist: Playlist, vm: MusicViewModel, onDone
 @Composable
 internal fun DeletePlaylistDialog(playlist: Playlist, vm: MusicViewModel, onDone: () -> Unit) {
     ConfirmDialog(
-        title = "Delete playlist?",
-        message = "${playlist.name} will be deleted. The songs stay on the phone.",
-        confirm = "Delete",
+        title = stringResource(R.string.music_delete_playlist),
+        message = stringResource(R.string.music_delete_playlist_message, playlist.name),
+        confirm = stringResource(R.string.common_delete),
         onConfirm = { vm.deletePlaylist(playlist.id); onDone() },
         onDismiss = onDone,
     )

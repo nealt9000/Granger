@@ -32,11 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.R
-import app.granger.core.library.Albums
 import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
+import app.granger.music.trackAlbum
 
 /**
  * The music player (Auxio-style): cover, title/artist/album, seek bar, transport, shuffle, repeat and the queue.
@@ -68,7 +68,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    Albums.title(music.track), style = MaterialTheme.typography.bodyMedium,
+                    trackAlbum(music.track), style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }
