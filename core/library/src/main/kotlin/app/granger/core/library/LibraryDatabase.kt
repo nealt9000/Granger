@@ -21,7 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AlbumNote::class, RailPin::class,
         HomeFeed::class, HomeDraw::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -214,6 +214,16 @@ abstract class LibraryDatabase : RoomDatabase() {
         }
 
         /**
+         * Plan KB Decision 3: the ZIM's `Scraper`, which says whether a pack is a bundle of books. Null for every pack
+         * until the library's next refresh reads it from the file ([RoomLibrary.refresh] rewrites a row that differs).
+         */
+        val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE packs ADD COLUMN scraper TEXT")
+            }
+        }
+
+        /**
          * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
          * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
          * and the like, should the user have moved one here); of the keys with a `:`, only `pack:` ones are packs'.
@@ -259,6 +269,7 @@ abstract class LibraryDatabase : RoomDatabase() {
                 .addMigrations(
                     MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
                     MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
+                    MIGRATION_14_15,
                 )
                 .addCallback(SeedCallback)
                 .build()

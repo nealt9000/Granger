@@ -29,4 +29,4 @@ object GutenbergNames {
         subject(name, description).takeIf { it.isNotEmpty() }?.let { "$it · $PROVIDER" } ?: PROVIDER
 }
 
-val Pack.isGutenberg: Boolean get() = GutenbergNames.isGutenberg(name)
+val Pack.isGutenberg: Boolean get() = bookSource == BookOrigin.GUTENBERG

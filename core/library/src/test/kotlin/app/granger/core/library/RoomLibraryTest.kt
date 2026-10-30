@@ -269,6 +269,24 @@ class RoomLibraryTest {
         )
     }
 
+    /** Plan KB Decision 3: a pack's scraper is read from its file, and a row from before version 15 gets it on refresh. */
+    @Test fun aPacksScraperIsReadAndBackfilledOnRefresh() = test {
+        opener.archives["water.zim"] = {
+            FakeZimArchive("u-w", "Water", name = "zimgit-water_en", scraper = "nautiluszim 1.1.1")
+        }
+        File(internal, "water.zim").writeText("zim u-w")
+        library.refresh()
+        val pack = packs().single()
+        assertThat(pack.scraper).isEqualTo("nautiluszim 1.1.1")
+        assertThat(pack.bookSource).isEqualTo(BookOrigin.NAUTILUS)
+        // A row written before the column (scraper null) is rewritten by the next refresh, keeping its addedAt.
+        db.packDao().upsert(pack.copy(scraper = null, addedAt = 7L))
+        assertThat(packs().single().bookSource).isNull()
+        library.refresh()
+        assertThat(packs().single().scraper).isEqualTo("nautiluszim 1.1.1")
+        assertThat(packs().single().addedAt).isEqualTo(7L)
+    }
+
     @Test fun updatedSnapshotKeepsBookmarksPositionsAndAddedAt() = test {
         val old = zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top", paths = setOf("index", "C++"))
         library.refresh()

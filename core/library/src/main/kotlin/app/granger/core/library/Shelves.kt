@@ -116,8 +116,11 @@ class RoomShelves(
         val albums: List<AlbumSummary>,
         val audiobooks: List<Audiobook>,
         val albumOrigins: Map<String, MediaOrigin>,
-        /** The Gutenberg packs, not shelved themselves: their books are (Plan GB Decision 1); they name the books' collections. */
-        val gutenbergPacks: List<Pack> = emptyList(),
+        /**
+         * The book packs (Gutenberg, nautilus), not shelved themselves: their books are (Plan GB Decision 1, Plan KB
+         * Decision 3); they name the books' collections.
+         */
+        val bookPacks: List<Pack> = emptyList(),
     )
 
     /** What filing needs to know about an item. [folderKey] is the `defaultKey` of the folder a new collection for it goes in. */
@@ -130,13 +133,13 @@ class RoomShelves(
     )
 
     private fun filables(items: Items): List<Filable> {
-        val (packs, books, albums, audiobooks, origins, gutenbergPacks) = items
+        val (packs, books, albums, audiobooks, origins, bookPacks) = items
         return packs.map { pack ->
             val key = Filing.defaultKey(pack)
             Filable(Filing.packKey(pack), key, { Filing.defaultName(key, pack) }, Filing.defaultMediaType(pack), Filing.folderKey(pack))
         } + books.map { book ->
             val key = Filing.defaultKey(book)
-            Filable(Filing.bookKey(book), key, { Filing.defaultName(key, book, gutenbergPacks) }, Filing.defaultMediaType(book))
+            Filable(Filing.bookKey(book), key, { Filing.defaultName(key, book, bookPacks) }, Filing.defaultMediaType(book))
         } + albums.map { album ->
             mediaFilable(Filing.albumKey(album), origins[album.key] ?: MediaOrigin.PHONE, Filing.defaultMediaType(album))
         } + audiobooks.map { book ->
@@ -197,8 +200,8 @@ class RoomShelves(
         val items = combine(library.packs, bookshelf.books, media.tracks, media.audiobooks) { packs, books, tracks, audiobooks ->
             val origins = HashMap<String, MediaOrigin>()
             tracks.forEach { origins.putIfAbsent(it.albumKey, it.origin) }
-            val (gutenberg, shelved) = packs.partition { it.isGutenberg }
-            Items(shelved, books.filter { it.onShelf }, Albums.summaries(tracks), audiobooks, origins, gutenberg)
+            val (bookPacks, shelved) = packs.partition { it.isBookPack }
+            Items(shelved, books.filter { it.onShelf }, Albums.summaries(tracks), audiobooks, origins, bookPacks)
         }
         return combine(items, dao.observeMediaTypes(), dao.observeCollections(), dao.observePlacements()) { it, _, _, _ -> it }
     }

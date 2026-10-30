@@ -1,7 +1,7 @@
 package app.granger.library
 
 import app.granger.core.library.Book
-import app.granger.core.library.BookOrigin
+import app.granger.core.library.isPackBook
 import app.granger.core.library.GutenbergBooks
 import java.io.File
 import kotlinx.coroutines.CancellationException
@@ -23,8 +23,11 @@ data class SearchableCost(val books: Int, val bytes: Long, val freeBytes: Long) 
     val fits: Boolean get() = bytes <= freeBytes
 }
 
-/** Whether a Gutenberg book's full text is in Search and Ask (Plan GB Decision 6): it's been opened and indexed. */
-val Book.searchableInFull: Boolean get() = origin == BookOrigin.GUTENBERG && indexedAt != null && searchable
+/**
+ * Whether a pack book's full text is in Search and Ask (Plan GB Decision 6): it's been opened and indexed, and has text
+ * (a scanned PDF hasn't).
+ */
+val Book.searchableInFull: Boolean get() = origin.isPackBook && indexedAt != null && searchable
 
 /**
  * "Make all searchable…" for a Gutenberg collection (Plan GB Decision 5): every book not yet copied out of its pack is
@@ -48,7 +51,7 @@ class GutenbergShelf(
 
     /** What copying out the [rows] not yet on the phone takes, against the free space where they'd go. */
     suspend fun cost(rows: List<Book>): SearchableCost = withContext(io) {
-        val pending = rows.filter { it.origin == BookOrigin.GUTENBERG && !File(it.filePath).isFile }
+        val pending = rows.filter { it.origin.isPackBook && !File(it.filePath).isFile }
         val target = dir().apply { mkdirs() }
         SearchableCost(pending.size, pending.sumOf { it.sizeBytes }, target.usableSpace)
     }
@@ -60,7 +63,7 @@ class GutenbergShelf(
         if (!started) return
         scope.launch {
             try {
-                val pending = withContext(io) { rows.filter { it.origin == BookOrigin.GUTENBERG && !File(it.filePath).isFile } }
+                val pending = withContext(io) { rows.filter { it.origin.isPackBook && !File(it.filePath).isFile } }
                 var done = rows.size - pending.size
                 publish(packName, done, rows.size)
                 for ((i, book) in pending.withIndex()) {
