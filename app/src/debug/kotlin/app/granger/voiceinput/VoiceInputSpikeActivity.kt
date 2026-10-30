@@ -33,8 +33,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import app.granger.core.speech.Wav
 import java.io.File
+import org.json.JSONObject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -44,7 +46,7 @@ import kotlinx.coroutines.withContext
  * Start with `adb shell am start -n app.granger/.voiceinput.VoiceInputSpikeActivity`.
  *
  * Unattended runs take `--es run probe|download|replay|bias` (comma-separated allowed), `--es lang en-US`,
- * `--ez paced false` (replay as fast as the pipe takes it). The run ends with an `Asr: auto done` line.
+ * `--ez paced false` (replay as fast as the pipe takes it), `--ei tail 300` (ms of silence after each WAV), `--ez partials false`, `--ez segmented true` (a segmented session over the audio source). The run ends with an `Asr: auto done` line.
  * `RECORD_AUDIO` is asked for on first open; `adb shell pm grant app.granger android.permission.RECORD_AUDIO` also works.
  */
 class VoiceInputSpikeActivity : ComponentActivity() {
@@ -53,6 +55,9 @@ class VoiceInputSpikeActivity : ComponentActivity() {
     private lateinit var logFile: File
     private lateinit var asrDir: File
     private lateinit var probe: RecognizerProbe
+    private var tailMs = 1500
+    private var partials = true
+    private var segmented = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +84,9 @@ class VoiceInputSpikeActivity : ComponentActivity() {
         if (savedInstanceState == null) intent.getStringExtra("run")?.let { runs ->
             val lang = intent.getStringExtra("lang") ?: "en-US"
             val paced = intent.getBooleanExtra("paced", true)
+            tailMs = intent.getIntExtra("tail", tailMs)
+            partials = intent.getBooleanExtra("partials", partials)
+            segmented = intent.getBooleanExtra("segmented", segmented)
             launchRun {
                 for (run in runs.split(',').map { it.trim() }) when (run) {
                     "probe" -> probeAll()
@@ -110,18 +118,37 @@ class VoiceInputSpikeActivity : ComponentActivity() {
         if (files.isEmpty()) { log("Asr: no WAVs in ${asrDir.path}"); return }
         for (file in files) {
             val pcm = withContext(Dispatchers.IO) { Wav.read(file) }
-            log("Asr: replay ${probe.recognize(pcm, lang, paced = paced).put("file", file.name)}")
+            delay(GAP_MS)
+            log("Asr: replay ${probe.recognize(pcm, lang, paced = paced, tailMs = tailMs, partials = partials, segmented = segmented).put("file", file.name)}")
         }
     }
 
-    /** The probe WAV with biasing lists of growing size, to find where the recognizer refuses or stops answering. */
+    /**
+     * Biasing lists of growing size, each holding the real names plus filler, replayed against the WAV that says
+     * one of them (`probe-p3.wav`, "Wikivoyage", else the first): where the recognizer refuses the list, and where
+     * the name stops being helped.
+     */
     private suspend fun biasCap(lang: String) {
-        val file = wavs().firstOrNull() ?: run { log("Asr: no WAVs in ${asrDir.path}"); return }
+        val all = wavs()
+        val file = all.firstOrNull { it.name.contains("p3") } ?: all.firstOrNull() ?: run { log("Asr: no WAVs in ${asrDir.path}"); return }
         val pcm = withContext(Dispatchers.IO) { Wav.read(file) }
-        for (size in listOf(0, 10, 100, 500, 1000, 5000)) {
-            val bias = List(size) { "Granger shelf ${it + 1}" }
-            log("Asr: bias ${probe.recognize(pcm, lang, bias = bias.takeIf { size > 0 }).put("file", file.name)}")
+        val names = listOf("Wikivoyage", "Meditations", "Marcus Aurelius")
+        for (size in listOf(0, 3, 10, 100, 500, 1000, 5000)) {
+            val bias = (names + List(maxOf(0, size - names.size)) { "Granger shelf ${it + 1}" }).take(size)
+            log("Asr: bias ${recognizeWithRetry(pcm, lang, bias.takeIf { size > 0 }).put("file", file.name)}")
         }
+    }
+
+    /**
+     * One recognition, retried once after a pause on `SERVER_DISCONNECTED`: a recognizer opened straight after the
+     * last one closed sometimes finds the service still going down.
+     */
+    private suspend fun recognizeWithRetry(pcm: app.granger.core.speech.Pcm, lang: String, bias: List<String>?): JSONObject {
+        delay(GAP_MS)
+        val first = probe.recognize(pcm, lang, bias = bias, paced = true, tailMs = tailMs, partials = partials, segmented = segmented)
+        if (first.optString("error") != "SERVER_DISCONNECTED") return first
+        delay(1_000)
+        return probe.recognize(pcm, lang, bias = bias, paced = true, tailMs = tailMs, partials = partials, segmented = segmented).put("retried", true)
     }
 
     private fun launchRun(block: suspend () -> Unit) {
@@ -166,5 +193,6 @@ class VoiceInputSpikeActivity : ComponentActivity() {
 
     private companion object {
         const val TAG = "Granger"
+        const val GAP_MS = 500L
     }
 }

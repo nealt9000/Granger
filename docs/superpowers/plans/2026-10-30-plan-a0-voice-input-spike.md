@@ -44,11 +44,11 @@
 
 **Files:** create `app/src/debug/kotlin/app/granger/voiceinput/VoiceInputSpikeActivity.kt`, `RecognizerProbe.kt`; modify `app/src/debug/AndroidManifest.xml` (the activity, `RECORD_AUDIO`, a `<queries>` entry for `android.speech.RecognitionService`), `app/src/debug/kotlin/app/granger/spike/SpikeActivity.kt` (a button to the new screen).
 
-- [ ] `RecognizerProbe`: `SpeechRecognizer.isRecognitionAvailable`, `isOnDeviceRecognitionAvailable`; on the on-device recognizer, `checkRecognitionSupport` for `en-US` and `en-GB`, logging `installedOnDeviceLanguages`, `pendingOnDeviceLanguages`, `supportedOnDeviceLanguages` and `onlineLanguages`. One `Asr: probe {...}` JSON line.
-- [ ] If English is supported but not installed: a button that calls `triggerModelDownload` and logs the outcome and how long until `installedOnDeviceLanguages` includes it. Record the download size if the system shows it.
-- [ ] Find the largest biasing list the recognizer takes: 10, 100, 500, 1,000 strings; record where it errors or silently stops helping (the latter is judged in Task 4).
-- [ ] Build, install, run the probe. Record the results in the results doc.
-- [ ] **Commit.** `Voice input spike: what the Pixel 6 recognizer supports`
+- [x] `RecognizerProbe`: `SpeechRecognizer.isRecognitionAvailable`, `isOnDeviceRecognitionAvailable`; on the on-device recognizer, `checkRecognitionSupport` for `en-US` and `en-GB`, logging `installedOnDeviceLanguages`, `pendingOnDeviceLanguages`, `supportedOnDeviceLanguages` and `onlineLanguages`. One `Asr: probe {...}` JSON line. *Done 2026-10-30: `en-US` installed, `en-GB` downloadable; details in the results doc.*
+- [x] If English is supported but not installed: a button that calls `triggerModelDownload` and logs the outcome and how long until `installedOnDeviceLanguages` includes it. Record the download size if the system shows it. *Written (`--es run download`); not run, since `en-US` is installed. Running it for `en-GB` is Neal's call.*
+- [x] Find the largest biasing list the recognizer takes: 10, 100, 500, 1,000 strings; record where it errors or silently stops helping (the latter is judged in Task 4). *Done: up to 5,000 accepted. But even three real names didn't fix "Wikivoyage"; Task 4 decides whether biasing helps at all.*
+- [x] Build, install, run the probe. Record the results in the results doc.
+- [x] **Commit.** `Voice input spike: what the Pixel 6 recognizer supports`
 
 ### Task 2: Record once, replay through a pipe
 
@@ -56,7 +56,7 @@
 
 - [ ] `PhraseRecorder`: shows a phrase, records while a button is held, saves, shows the next. Re-record allowed. Phrases come from `phrases.json` pushed to `files/asr/`.
 - [ ] `ReplayRecognizer`: writes a WAV's PCM into a `ParcelFileDescriptor.createPipe()` and starts the on-device recognizer with `EXTRA_AUDIO_SOURCE` and the encoding, rate and channel extras, `EXTRA_LANGUAGE = en-US`, `EXTRA_PARTIAL_RESULTS`, optional `EXTRA_BIASING_STRINGS`. Times: start → first partial, end of audio → final result. Logs `Asr: replay {...}` with the transcript and confidences.
-- [ ] **The pipe check:** record three phrases on the Mac with the phone in hand, replay them, and confirm the transcripts are real. If the on-device recognizer ignores the pipe, say so in the results and fall back: Neal reads each phrase live for each condition (Tasks 4 and 5 get shorter: names only, two conditions).
+- [x] **The pipe check:** record three phrases on the Mac with the phone in hand, replay them, and confirm the transcripts are real. If the on-device recognizer ignores the pipe, say so in the results and fall back: Neal reads each phrase live for each condition (Tasks 4 and 5 get shorter: names only, two conditions). *Done early, in Task 1, with macOS `say` WAVs: the pipe works, but only as a **segmented session**, with **1.5 s of trailing silence** and **500 ms between sessions** (results doc, Task 1).*
 - [ ] **Commit.** `Voice input spike: record phrases once, replay them into the recognizer`
 
 ### Task 3: The phrases and Neal's reading

@@ -100,8 +100,10 @@ class RecognizerProbe(private val context: Context, private val scope: Coroutine
         bias: List<String>? = null,
         paced: Boolean = true,
         tailMs: Int = 300,
+        partials: Boolean = true,
+        segmented: Boolean = false,
     ): JSONObject {
-        val out = JSONObject().put("language", language).put("bias", bias?.size ?: 0).put("paced", paced)
+        val out = JSONObject().put("language", language).put("bias", bias?.size ?: 0).put("paced", paced).put("tailMs", tailMs).put("partials", partials).put("segmented", segmented)
             .put("audioMs", pcm.samples.size * 1000L / pcm.sampleRate)
         val bytes = pcm16(pcm, tailMs)
         val start = SystemMonoClock.nanos()
@@ -124,6 +126,7 @@ class RecognizerProbe(private val context: Context, private val scope: Coroutine
                     override fun onEndOfSpeech() { out.put("endOfSpeechMs", msSince(start)) }
                     override fun onEvent(eventType: Int, params: Bundle?) {}
                     override fun onPartialResults(partial: Bundle?) {
+                        partial?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()?.let { out.put("lastPartial", it) }
                         if (!out.has("firstPartialMs")) {
                             out.put("firstPartialMs", msSince(start))
                             out.put("firstPartial", partial?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull())
@@ -135,19 +138,35 @@ class RecognizerProbe(private val context: Context, private val scope: Coroutine
                         if (audioEnd > 0) out.put("finalAfterAudioMs", (SystemMonoClock.nanos() - audioEnd) / 1_000_000)
                         out.put("results", JSONArray(results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty()))
                         results?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)?.let { c -> out.put("confidence", JSONArray(c.toList())) }
+                        results?.let { b -> out.put("resultKeys", JSONObject().apply { for (k in b.keySet()) put(k, describe(b, k)) }) }
+                        finish(out)
+                    }
+
+                    // A segmented session (`EXTRA_SEGMENTED_SESSION` = `EXTRA_AUDIO_SOURCE`) reports each segment here
+                    // and ends with onEndOfSegmentedSession instead of onResults.
+                    override fun onSegmentResults(segment: Bundle) {
+                        if (!out.has("firstSegmentMs")) out.put("firstSegmentMs", msSince(start))
+                        val segments = out.optJSONArray("segments") ?: JSONArray().also { out.put("segments", it) }
+                        segments.put(segment.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull())
+                    }
+
+                    override fun onEndOfSegmentedSession() {
+                        out.put("finalMs", msSince(start))
+                        if (audioEnd > 0) out.put("finalAfterAudioMs", (SystemMonoClock.nanos() - audioEnd) / 1_000_000)
                         finish(out)
                     }
 
                     override fun onError(error: Int) { finish(out.put("error", errorName(error)).put("errorMs", msSince(start))) }
                 })
                 val intent = intent(language).apply {
-                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, partials)
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, read)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, pcm.sampleRate)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
                     if (bias != null) putExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, ArrayList(bias))
+                    if (segmented) putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_AUDIO_SOURCE)
                 }
                 recognizer.startListening(intent)
                 scope.launch(Dispatchers.IO) {
@@ -170,6 +189,14 @@ class RecognizerProbe(private val context: Context, private val scope: Coroutine
             }
         }
         return result ?: out.put("error", "timeout")
+    }
+
+    @Suppress("DEPRECATION")
+    private fun describe(b: Bundle, key: String): String = when (val v = b.get(key)) {
+        is FloatArray -> v.toList().toString()
+        is IntArray -> v.toList().toString()
+        is LongArray -> v.toList().toString()
+        else -> v.toString()
     }
 
     private fun intent(language: String) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
