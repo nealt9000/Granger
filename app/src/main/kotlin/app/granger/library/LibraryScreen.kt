@@ -274,8 +274,13 @@ private val IMPORT_TYPES = arrayOf(
 internal fun rowCountText(row: CollectionRow): String {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
-    // A Gutenberg collection is called by its subject; the line under it says whose (Plan GB Decision 2).
-    return if (Filing.isGutenbergCollection(row.collection.defaultKey)) "${GutenbergNames.PROVIDER} · $counts" else counts
+    // A Gutenberg collection is called by its subject; the line under it says whose (Plan GB Decision 2), and, as the
+    // collection's header does, how many of its books are searchable in full once any are.
+    if (!Filing.isGutenbergCollection(row.collection.defaultKey)) return counts
+    val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
+    val header = GutenbergHeader(pack = null, books = rows.sumOf { it.books.size }, searchable = searchable)
+    return listOfNotNull(GutenbergNames.PROVIDER, counts.ifEmpty { null }, header.searchableText.takeIf { searchable > 0 })
+        .joinToString(" · ")
 }
 
 private fun countText(packs: Int, books: Int, albums: Int = 0, audiobooks: Int = 0): String = listOfNotNull(

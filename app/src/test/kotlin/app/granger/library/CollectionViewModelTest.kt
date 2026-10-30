@@ -382,7 +382,8 @@ class CollectionViewModelTest {
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
         assertThat(header.text).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
-        assertThat(rowCountText(gutenbergRow)).isEqualTo("Project Gutenberg · 3 books")
+        // The Library's row says the same (Plan GB walkthrough).
+        assertThat(rowCountText(gutenbergRow)).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
     }
 
     @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {

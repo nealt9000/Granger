@@ -118,6 +118,19 @@ class LibraryViewModelTest {
         assertThat(rowCountText(kinds.single().collections[1])).isEqualTo("Project Gutenberg · 3 books")
     }
 
+    @Test fun aGutenbergRowSaysHowManyAreSearchableInFullOnceAnyAre() {
+        fun gutenberg(id: Int, indexed: Boolean) = book("g$id").copy(
+            id = "book:gutenberg:$id", origin = app.granger.core.library.BookOrigin.GUTENBERG, indexedAt = if (indexed) 5L else null,
+        )
+        fun row(vararg books: app.granger.core.library.Book) = CollectionRow(
+            ShelfCollection("c:gutenberg-m", "Music and books on music", "literature", userCreated = false, defaultKey = "gutenberg-m"),
+            emptyList(), books = books.toList(),
+        )
+        assertThat(rowCountText(row(gutenberg(1, true), gutenberg(2, false), gutenberg(3, false))))
+            .isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        assertThat(rowCountText(row(gutenberg(1, false)))).isEqualTo("Project Gutenberg · 1 book")
+    }
+
     @Test fun anotherMediaTypeWithBooksComesAfterBooks() {
         val video = Shelf(MediaType("video", "Video", builtIn = false, sortOrder = 5), listOf(bookRow("Lectures", 1)))
         val kinds = libraryKinds(listOf(video, shelf("Literature").copy(collections = listOf(bookRow("Classics", 1))), shelf("Maps", "OpenStreetMap" to 1)))
