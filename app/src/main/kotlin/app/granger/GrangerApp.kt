@@ -117,6 +117,7 @@ import app.granger.ebook.ReadiumBookOpener
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.SharedDownloadPrefs
 import app.granger.launch.SessionMarker
+import app.granger.library.shelf.LibraryViewPrefs
 import app.granger.widget.PlayerWidget
 import app.granger.widget.WidgetModel
 import app.granger.widget.WidgetModelStore
@@ -406,6 +407,9 @@ class AppContainer(context: Context) {
     val playlists: Playlists = RoomPlaylists(libraryDb)
     val sessions: ReadingSessions = RoomReadingSessions(libraryDb)
     val bookOpener: BookOpener = ReadiumBookOpener(context)
+
+    /** Each library shelf kind's view (list or grid) and sort (Plan LV). */
+    val libraryViews = LibraryViewPrefs(context)
 
     /** How books look; one set for every book. */
     val readingPrefs = ReadingPrefsStore(context.getSharedPreferences("reading", Context.MODE_PRIVATE))
