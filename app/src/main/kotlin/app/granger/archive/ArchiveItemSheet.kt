@@ -20,34 +20,40 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.granger.R
 import app.granger.core.archive.AudioOffer
 import app.granger.core.archive.Offer
 import app.granger.formatBytes
 import app.granger.sources.ItemStatus
 import app.granger.sources.ItemStatusText
 
-/** The label for what an item offers; null when the guess is unknown. */
+/** The label for what an item offers; null when the guess is unknown. EPUB and PDF are format names, the same in every language. */
+@Composable
 internal fun offerLabel(offer: Offer?): String? = when (offer) {
     is Offer.Download -> when (offer.kind) {
         app.granger.core.archive.TextKind.EPUB -> "EPUB"
-        app.granger.core.archive.TextKind.TEXT -> "Plain text"
-        app.granger.core.archive.TextKind.OCR_TEXT -> if (offer.pdf != null) "OCR text: may have errors · PDF" else "OCR text: may have errors"
+        app.granger.core.archive.TextKind.TEXT -> stringResource(R.string.archive_offer_plain_text)
+        app.granger.core.archive.TextKind.OCR_TEXT ->
+            stringResource(if (offer.pdf != null) R.string.archive_offer_ocr_pdf else R.string.archive_offer_ocr)
         app.granger.core.archive.TextKind.PDF -> "PDF"
     }
-    Offer.LendOnly -> "Borrow on archive.org"
-    Offer.Nothing -> "No downloadable text"
+    Offer.LendOnly -> stringResource(R.string.archive_borrow)
+    Offer.Nothing -> stringResource(R.string.archive_no_text)
     null -> null
 }
 
 /** The label for what an audio item offers: its format on a row, "7 tracks · VBR MP3" once its files are known. */
+@Composable
 internal fun audioLabel(offer: AudioOffer?): String? = when (offer) {
     is AudioOffer.Tracks ->
         if (offer.files.isEmpty()) offer.format
-        else "${offer.files.size} ${if (offer.files.size == 1) "track" else "tracks"} · ${offer.format}"
-    AudioOffer.LendOnly -> "Borrow on archive.org"
-    AudioOffer.Nothing -> "No downloadable audio"
+        else pluralStringResource(R.plurals.archive_tracks, offer.files.size, offer.files.size, offer.format)
+    AudioOffer.LendOnly -> stringResource(R.string.archive_borrow)
+    AudioOffer.Nothing -> stringResource(R.string.archive_no_audio)
     null -> null
 }
 
@@ -80,7 +86,7 @@ internal fun ArchiveItemSheet(
             Text(item?.title?.ifBlank { null } ?: sheet.identifier, style = MaterialTheme.typography.titleLarge)
             when {
                 sheet.loading -> Box(Modifier.fillMaxWidth().padding(24.dp), Alignment.Center) { CircularProgressIndicator() }
-                sheet.error != null -> Text(sheet.error, color = MaterialTheme.colorScheme.error)
+                sheet.error != null -> Text(sheet.error.resolve(), color = MaterialTheme.colorScheme.error)
             }
             if (item != null) {
                 val byline = listOf(item.creator, item.date).filter { it.isNotBlank() }.joinToString(" · ")
@@ -100,7 +106,7 @@ internal fun ArchiveItemSheet(
             }
             val downloading = sheet.status is ItemStatus.Queued || sheet.status is ItemStatus.Downloading
             if (downloading && sheet.filesTotal > 0) {
-                Text("Downloading: ${sheet.filesDone} of ${sheet.filesTotal}", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.archive_downloading_files, sheet.filesDone, sheet.filesTotal), style = MaterialTheme.typography.bodyMedium)
             }
             ItemStatusText(sheet.status)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -108,18 +114,18 @@ internal fun ArchiveItemSheet(
                 // The PDF beside the text, side by side with Get: its own download, and its own book once in.
                 if (sheet.pdfSizeBytes != null && sheet.status !is ItemStatus.InLibrary) {
                     when (sheet.pdfStatus) {
-                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text("Get PDF · ${formatBytes(sheet.pdfSizeBytes)}") }
+                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text(stringResource(R.string.archive_get_pdf, formatBytes(sheet.pdfSizeBytes))) }
                         ItemStatus.Installed, ItemStatus.UpdateAvailable ->
-                            Text("PDF in your library", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.archive_pdf_in_library), style = MaterialTheme.typography.bodySmall)
                         else -> Text(
-                            "PDF: " + pdfStatusText(sheet.pdfStatus),
+                            pdfStatusText(sheet.pdfStatus),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
             }
-            OutlinedButton(onClick = onOpenInBrowser) { Text("View on archive.org") }
+            OutlinedButton(onClick = onOpenInBrowser) { Text(stringResource(R.string.archive_view_on_site)) }
             Box(Modifier.padding(bottom = 16.dp))
         }
     }
@@ -138,33 +144,34 @@ private fun SheetButtons(
 ) {
     // The ledger decides first: something installed or in flight is managed whatever the metadata offers now.
     when (sheet.status) {
-        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
+        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
         is ItemStatus.Failed -> {
-            TextButton(onClick = onCancel) { Text("Cancel") }
-            Button(onClick = onRetry) { Text("Retry") }
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+            Button(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
         }
-        ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
+        ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
         is ItemStatus.Partial -> {
-            TextButton(onClick = onRemove) { Text("Remove") }
-            Button(onClick = onGet) { Text("Get the rest") }
+            TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            Button(onClick = onGet) { Text(stringResource(R.string.archive_get_the_rest)) }
         }
-        is ItemStatus.InLibrary -> Button(onClick = onOpenInLibrary) { Text("Open") }
+        is ItemStatus.InLibrary -> Button(onClick = onOpenInLibrary) { Text(stringResource(R.string.common_open)) }
         else -> when {
-            audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text("Get") }
-            audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
+            audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text(stringResource(R.string.common_get)) }
+            audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text(stringResource(R.string.archive_borrow)) }
             sheet.offer is Offer.Download -> Button(onClick = onGet) {
-                Text(sheet.sizeBytes?.let { "Get · ${formatBytes(it)}" } ?: "Get")
+                Text(sheet.sizeBytes?.let { stringResource(R.string.archive_get_size, formatBytes(it)) } ?: stringResource(R.string.common_get))
             }
-            sheet.offer == Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
+            sheet.offer == Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text(stringResource(R.string.archive_borrow)) }
             else -> Unit
         }
     }
 }
 
 /** Where the PDF's own download stands, in a few words; the sheet's Cancel and Retry act on both downloads. */
+@Composable
 private fun pdfStatusText(status: ItemStatus): String = when (status) {
-    is ItemStatus.Queued -> "queued"
-    is ItemStatus.Downloading -> "downloading, ${(status.fraction * 100).toInt()}%"
-    is ItemStatus.Failed -> "failed"
-    else -> ""
+    is ItemStatus.Queued -> stringResource(R.string.archive_pdf_queued)
+    is ItemStatus.Downloading -> stringResource(R.string.archive_pdf_downloading, (status.fraction * 100).toInt())
+    is ItemStatus.Failed -> stringResource(R.string.archive_pdf_failed)
+    else -> stringResource(R.string.archive_pdf_other)
 }

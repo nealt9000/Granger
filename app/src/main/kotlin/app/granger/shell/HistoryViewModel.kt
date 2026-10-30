@@ -1,6 +1,8 @@
 package app.granger.shell
 
 import androidx.lifecycle.ViewModel
+import app.granger.R
+import app.granger.UiText
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Book
 import app.granger.core.library.BookIds
@@ -33,7 +35,8 @@ class HistoryViewModel(
     /** Stops the voice (not music). */
     private val stopVoice: () -> Unit = {},
 ) : ViewModel() {
-    data class Row(val packId: String, val path: String, val title: String, val packTitle: String, val available: Boolean)
+    /** [packTitle] is the pack's title or the book's author (content), or "Removed pack" or "Removed book". */
+    data class Row(val packId: String, val path: String, val title: String, val packTitle: UiText, val available: Boolean)
 
     data class Ui(val history: List<Row>, val saved: List<Row>)
 
@@ -46,7 +49,7 @@ class HistoryViewModel(
         val needle = filter.trim()
         Ui(
             history = history.sortedByDescending { it.openedAt }.map { row(it.packId, it.path, it.title, byId, booksById) }
-                .filter { needle.isEmpty() || it.title.contains(needle, ignoreCase = true) || it.packTitle.contains(needle, ignoreCase = true) },
+                .filter { needle.isEmpty() || it.title.contains(needle, ignoreCase = true) || (it.packTitle as? UiText.Raw)?.text.orEmpty().contains(needle, ignoreCase = true) },
             saved = bookmarks.map { row(it.packId, it.path, it.title, byId, booksById) },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -92,11 +95,11 @@ class HistoryViewModel(
     private fun row(packId: String, path: String, title: String, packs: Map<String, Pack>, books: Map<String, Book>): Row {
         if (BookIds.isBook(packId)) {
             val book = books[packId]
-            val byline = if (book == null) REMOVED_BOOK else book.author
+            val byline = if (book == null) REMOVED_BOOK else UiText.Raw(book.author)
             return Row(packId, path, book?.title ?: title, byline, book?.status == PackStatus.OK)
         }
         val pack = packs[packId]
-        return Row(packId, path, title, pack?.title ?: REMOVED_PACK, pack?.status == PackStatus.OK)
+        return Row(packId, path, title, pack?.title?.let(UiText::Raw) ?: REMOVED_PACK, pack?.status == PackStatus.OK)
     }
 
     companion object {
@@ -108,7 +111,7 @@ class HistoryViewModel(
          */
         fun keptTab(backStackTabIds: List<Long?>): Set<Long> = setOfNotNull(backStackTabIds.dropLast(1).lastOrNull())
 
-        const val REMOVED_PACK = "Removed pack"
-        const val REMOVED_BOOK = "Removed book"
+        val REMOVED_PACK = UiText.Res(R.string.shell_removed_pack)
+        val REMOVED_BOOK = UiText.Res(R.string.shell_removed_book)
     }
 }

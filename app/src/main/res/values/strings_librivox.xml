@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The LibriVox screen's title: the free audiobook site's name. -->
+    <string name="librivox_title">LibriVox</string>
+    <string name="librivox_footer">LibriVox recordings are in the public domain. Files are served by the Internet Archive.</string>
+    <string name="librivox_search_placeholder">Search LibriVox by title or author</string>
+    <!-- Tabs: LibriVox's books, and what's been downloaded from it. -->
+    <string name="librivox_tab_browse">Browse</string>
+    <string name="librivox_tab_installed">Installed</string>
+    <string name="librivox_empty_installed">Nothing downloaded from LibriVox yet.</string>
+    <string name="librivox_empty_search">Nothing matches that search.</string>
+    <string name="librivox_load_more">Load more</string>
+    <!-- Gets the chapters still missing from a partly downloaded book. -->
+    <string name="librivox_get_the_rest">Get the rest</string>
+    <!-- %1$s is the book's title. -->
+    <string name="librivox_remove_title">Remove %1$s?</string>
+    <string name="librivox_remove_this_book">Remove this book?</string>
+    <string name="librivox_remove_body">This deletes its files. Your place and bookmarks are kept.</string>
+
+    <!-- The book sheet's title when the book's own is unknown. -->
+    <string name="librivox_book_fallback">LibriVox book</string>
+    <!-- Who reads the book; %1$s is a list of names, such as "A, B, C". -->
+    <string name="librivox_read_by">Read by %1$s</string>
+    <!-- %1$s is the first three readers' names; %2$d how many more there are. -->
+    <plurals name="librivox_read_by_more">
+        <item quantity="one">Read by %1$s and %2$d more</item>
+        <item quantity="other">Read by %1$s and %2$d more</item>
+    </plurals>
+    <!-- A book's length: hours and minutes, abbreviated. -->
+    <string name="librivox_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="librivox_duration_hours">%1$d h</string>
+    <string name="librivox_duration_minutes">%1$d min</string>
+    <!-- A row's details: the author, then the book's length, such as "H. G. Wells · 4 h 9 min". -->
+    <string name="librivox_row_details">%1$s · %2$s</string>
+    <plurals name="librivox_chapters">
+        <item quantity="one">%1$d chapter</item>
+        <item quantity="other">%1$d chapters</item>
+    </plurals>
+    <!-- The chapters and their total size, such as "13 chapters · 92 MB". -->
+    <plurals name="librivox_chapters_size">
+        <item quantity="one">%1$d chapter · %2$s</item>
+        <item quantity="other">%1$d chapters · %2$s</item>
+    </plurals>
+    <!-- %1$d of %2$d chapters are in. -->
+    <plurals name="librivox_downloading_chapters">
+        <item quantity="one">Downloading: %1$d of %2$d chapter</item>
+        <item quantity="other">Downloading: %1$d of %2$d chapters</item>
+    </plurals>
+    <string name="librivox_view_on_site">View on LibriVox</string>
+
+    <!-- Why a book can't be got. -->
+    <string name="librivox_incomplete">This book\'s files aren\'t all on archive.org.</string>
+    <string name="librivox_not_on_archive">This book isn\'t on archive.org yet.</string>
+    <string name="librivox_not_found">Not found on LibriVox</string>
+    <string name="librivox_offline">Couldn\'t reach LibriVox. Check your connection and try again.</string>
+</resources>
