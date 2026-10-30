@@ -98,60 +98,73 @@ Each task converts its packages under the conventions, lowers or removes those f
 | 7 | `core/` modules: downloads, media, player, speech, taglib, books, zim, ai, archive | Android library modules get their own `res/values/strings.xml` (`<module>_` names). Pure-Kotlin messages become types mapped in `app/`. `ArchiveQuery` shelf titles become an enum mapped in `app/archive` |
 | 8 (last) | sources, library, widget, top-level files (`Bytes.kt`, `GrangerNavHost.kt`, `MainActivity.kt`, `GrangerApp.kt`) | The open `gb-gutenberg` branch touches `sources/`, `library/` and `MainActivity.kt`, and `bugs-2026-10-30` touches `widget/WidgetUpdater.kt`, so convert these after those branches merge. `Bytes.kt` uses the locale's decimal separator; its tests pin `Locale.US`. **widget done** (2026-10-30): `WidgetModel` holds `UiText`; `WidgetModelStore` keeps it as JSON with stable resource names |
 
-Steps for each package:
-- [ ] **Step 1:** List the package's literals with the guard's patterns plus `grep -nE '"[A-Z][^"]{2,}"'`. Sort each into translate or keep (convention 6).
-- [ ] **Step 2:** Add the strings and plurals to `strings_<package>.xml`. Each gets a one-line comment where the context isn't obvious; translators read these comments.
-- [ ] **Step 3:** Replace the call sites. Use `UiText` in view models and helpers, and turn string-building helpers (such as `SearchScreen.artist()`) into `@Composable` functions or `UiText`-returning ones.
-- [ ] **Step 4:** Fix the tests: assertions keep their English text where Robolectric supplies it, and JVM tests move to Robolectric or assert `UiText`.
-- [ ] **Step 5:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.<package>.*' --tests '*HardcodedStrings*'` passes. Commit "L1: <package> strings to resources".
+Steps for each package *(all of Tasks 2–8 done; Task 8 on 2026-10-30 after merging main's KB, WF, GB, IA, DL, LV and bug-pass work: sources, library, `Bytes.kt` and the top-level files, one commit each; `MainActivity.kt` and `GrangerApp.kt` had no strings of their own beyond 8b's)*:
+- [x] **Step 1:** List the package's literals with the guard's patterns plus `grep -nE '"[A-Z][^"]{2,}"'`. Sort each into translate or keep (convention 6).
+- [x] **Step 2:** Add the strings and plurals to `strings_<package>.xml`. Each gets a one-line comment where the context isn't obvious; translators read these comments.
+- [x] **Step 3:** Replace the call sites. Use `UiText` in view models and helpers, and turn string-building helpers (such as `SearchScreen.artist()`) into `@Composable` functions or `UiText`-returning ones.
+- [x] **Step 4:** Fix the tests: assertions keep their English text where Robolectric supplies it, and JVM tests move to Robolectric or assert `UiText`.
+- [x] **Step 5:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.<package>.*' --tests '*HardcodedStrings*'` passes. Commit "L1: <package> strings to resources".
+
+The merge of main (2026-10-30) put main's new English in the converted packages into their strings files too: archive.org sets (parts, Choose parts, Get all, the large-download prompt per kind), Read as ebook and an ebook's original pages, the voices' names, and Plan WF's "covers" lines in Readiness and onboarding.
 
 ## Task 8b: Follow-ups found while merging
 
 Things the package tasks left for after the merge, because they cross task boundaries:
 
-- [ ] `LaunchDecider.MISSING_NOTICE` goes through `LibraryRoute(notice: String?)` in `GrangerNavHost.kt`. Make the route carry a string id (Task 3, with Task 8's files).
+- [x] `LaunchDecider.MISSING_NOTICE` goes through `LibraryRoute(notice: String?)` in `GrangerNavHost.kt`. Make the route carry a string id (Task 3, with Task 8's files). *Done: `LibraryRoute(notice: LibraryNotice?, noticeTitle: String?)`; `LibraryNotice` is an enum holding its string (an id that survives a rebuild, unlike a resource int).*
 - [x] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
 - [x] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
-- [ ] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays.
-- [ ] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).
+- [x] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays. *Done: `ImportResult.message` moved to the app as `library.importProblem`. The `UNKNOWN_*` values stay as placeholders (stored, sorted, compared) and are shown only through music's strings, now in Search and Android Auto too.*
+- [x] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).
 - [x] DevDocsFixes.kt's injected "☰ Contents" button: pass the label into the script from a resource (Task 5).
 - [ ] **Saved in the database, decide in L2:**
   - PDF bookmark "p. N"
   - PDF place title "Page N"
   - the chat title "About: …"
+  - an ebook's original pages' tab title, "… (original pages)" (Plan IA)
+  - Home's drawn cards (`Cards`, stored in `home_feeds`): `chunkLabel`'s "Chapter N" / "Page N" in a card's subtitle
+  - the default collection and media type names (`Filing`: Granger Classics, My books, On this phone; Music, Audiobooks), and Gutenberg's pack titles ("Every English book", `LibraryDatabase` migration)
 
   The voice's copy of the medical text (`AnswerText.MEDICAL`) follows `SpokenText`'s language in L4. A test pins it to the banner's English (Task 5).
-- [ ] Strings left as `UiText.Raw` or `String` at task boundaries:
-  - `MediaDownloader.get()` notices (Task 4's packages)
-  - `ItemStatus.Failed` / `InLibrary` (sources, Task 8)
-  - `RailViewModel.pin()` / `resume()` notices, read by GrangerNavHost (`shell_pins_full` and `shell_cant_play` exist)
-  - `RailTabUi.subtitle` "Removed pack/book" as Home builds it (`shell_removed_*` exist)
+- [x] Strings left as `UiText.Raw` or `String` at task boundaries:
+  - `MediaDownloader.get()` notices (Task 4's packages): `UiText`
+  - `ItemStatus.Failed` / `InLibrary` (sources, Task 8): `Failed(reason: String?)` keeps the downloader's stored reason (L2), null reads "Download failed"; `InLibrary(LibraryShelf)`
+  - `RailViewModel.pin()` / `resume()` notices, read by GrangerNavHost (`shell_pins_full` and `shell_cant_play` exist): `pin` hands back `UiText`, `resume` a `LibraryNotice`
+  - `RailTabUi.subtitle` "Removed pack/book" as Home builds it (`shell_removed_*` exist): `RailTabUi.subtitle` is `UiText`
 
   (Task 6)
-- [ ] **Saved in book data:** archive.org's OCR note and the "(PDF)" suffix, matched with `removePrefix`. Decide in L2 with the other saved strings (Task 6).
-- [ ] **Android Auto:** `media/AutoBrowseTree` folder names ("Recent", "Music", "Nothing here yet"…). Take a `(Int) -> String` from `GrangerApp.kt` (Task 4).
-- [ ] **English constants kept for other packages:**
+- [ ] **Saved in book data:** archive.org's OCR note and the "(PDF)" suffix, matched with `removePrefix`. Decide in L2 with the other saved strings (Task 6). *Plan IA's set parts also save "Part N" as a part's title when it has none (`ArchiveParts`), and Nautilus books "(2 of 3)" (`NautilusBooks`).*
+- [x] **Android Auto:** `media/AutoBrowseTree` folder names ("Recent", "Music", "Nothing here yet"…). Take a `(Int) -> String` from `GrangerApp.kt` (Task 4).
+- [x] **English constants kept for other packages:**
   - ~~`chapterTitle` and `voiceSubtitle` (widget)~~ done: deleted, the widget uses `chapterName`/`voiceState`
-  - `ALL_MUSIC` and `ALL_AUDIOBOOKS` (library)
-  - `UNKNOWN_AUTHOR`
-  - `MediaDownloader`'s "Download failed"
+  - ~~`ALL_MUSIC` and `ALL_AUDIOBOOKS` (library)~~ deleted: the Library uses `music_all` / `audiobooks_all`
+  - ~~`UNKNOWN_AUTHOR`~~ deleted: Search uses `audiobooks_unknown_author`
+  - ~~`MediaDownloader`'s "Download failed"~~ `sources_download_failed`, through `failedText`
 
   (Task 4)
-- [ ] **Passed through as English by Task 2:**
+- [x] **Passed through as English by Task 2:**
   - ~~`QueueText`~~ done (see the Task 7 item)
   - `row.error` (the stored download error, L2)
-  - `chunkLabel`
-  - `AskReach.text`
-  - `GetMoreLink`
-  - `formatBytes`
+  - `chunkLabel`: written into Home's stored cards, so L2 (above)
+  - ~~`AskReach.text`~~ `UiText`
+  - ~~`GetMoreLink`~~ string ids
+  - ~~`formatBytes`~~ the locale's decimal separator (neutral Latin American Spanish, `es-419`, writes "2.0 GB" like English; `es` writes "2,0 GB")
   - ~~`WidgetModel`~~ done with the widget (Listen's card now takes `UiText`)
-  - the volume label
+  - ~~the volume label~~ the system's description, else `downloads_volume_*` (Task 7)
 - [ ] **Changes to the English the walkthrough should confirm:**
   - Readiness's "is from" date is now localised ("Jan 10, 2025", not "2025-01-10"). Task 2; a one-line revert if Neal prefers ISO.
   - Downloads say "1 of 1 track" and "1 of 1 chapter" (Tasks 4 and 6).
+  - archive.org's large-download prompt for some of a set's parts: main said "This 3 parts is 234 MB. Download it?"; now "These 3 parts are 234 MB. Download them?" (one: "This part is …").
+  - "Queued 1 downloads." is now "Queued 1 download." (a preset or a set of one queued).
+  - Kiwix's "Adds about 1 articles…" reads "Adds about 1 article…" at one.
+  - Making a pack's books searchable with one book left says "Making 1 book searchable…" / "Copies the 1 book not yet opened…, so Search and Ask can read it in full."
+  - Pack row language names now come from the phone's locale (same English names; a Spanish phone shows "inglés").
 - [ ] **Not in L1, noted for L2:**
   - Download error messages are stored in `downloads.db`, and `isGone` matches them as text. Translating them needs a stored error code (a schema change).
-  - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3).
+  - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3). So do `PdfToEpub`'s "Notes", "Opening pages", "Pages N–M" and its EPUB's "Contents" (Plan IA).
+  - `PdfToEpub.Report.why` (why a PDF won't make an ebook, "no chapters") is the converter's English; the notice wraps it in a translated sentence.
+  - Kiwix's set names and slice labels (`setLabel`, "Best 50,000 articles", and `shortLabel`'s " articles") are catalog data (L3).
+  - Search matches a folded family by its English words (`KiwixList.Folded.words`), like the catalog's own words (L3/L4).
 
 ## Task 9: Zero and lock
 
