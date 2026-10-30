@@ -80,34 +80,36 @@ A domain with no list for a language is empty in that language.
 
 ## Task 0: Worktree
 
-- [ ] **Step 1:** Run `git worktree add .claude/worktrees/l3 -b l3-spanish-knowledge main`. Then run `git submodule update --init` and copy `local.properties`.
-- [ ] **Step 2:** Run `python -m pytest tools/catalog-gen tools/pack-builder/tests` and `./gradlew testDebugUnitTest`, and record the counts.
+- [x] **Step 1:** Run `git worktree add .claude/worktrees/l3 -b l3-spanish-knowledge main`. Then run `git submodule update --init` and copy `local.properties`.
+- [x] **Step 2:** Run `python -m pytest tools/catalog-gen tools/pack-builder/tests` and `./gradlew testDebugUnitTest`, and record the counts.
+  - 2026-10-30 at bad36fef: pytest 96 (catalog-gen) + 84 (pack-builder); `./gradlew testDebugUnitTest` 2553 (53 skipped, 0 failed).
 
 ## Task 1: The generator learns languages (desk, `tools/catalog-gen`)
 
 **Files:** `catalog_gen.py`, `test_catalog_gen.py`, `kiwix_families.json`, `curated.json` (`kiwix.languages` only).
 
-- [ ] **Step 1: Codes.**
+- [x] **Step 1: Codes.**
   - Add `bcp47(code)`: `eng` → `en`, `spa` → `es`, and `eng,spa` → `en,es` (keep the order; drop duplicates). Use a small table for the codes Kiwix uses, and pass through unknown codes.
   - Apply it in `opds_entries` (`language`), `release_entry` and `book_entries`.
   - The voices' `en-US` stays as written; voice language is L5's.
   - Tests: the mapping, a `mul` pack, and a release descriptor that already says `en`.
-- [ ] **Step 2: Families.**
+- [x] **Step 2: Families.**
   - Generalise the `_en`-only Wikipedia subject rows to `^wikipedia_[a-z]{2,3}_<subject>$`: medicine, physics, chemistry, mathematics, molcell, climate-change, history, geography, computer, movies, football, basketball and comics (research §1.4 (1)).
   - Add held rows `^kiwix\.ecured_` (`"hold": "licence-nc"`) and `^marxists\.org_` (`"hold": "licence-mixed"`), each with its evidence URL from research §2.
   - Pin `wiktionary_es_all` to the `nopic` flavour, so the stale unflavoured 2025 build isn't listed. Do it as a curated row, or as a family-row `flavours` rule if one exists. Otherwise add the smallest rule that does it, with a test.
   - `ifixit_es_all` needs no change: the `^ifixit_` row already flags it as non-commercial.
-- [ ] **Step 3: Kiwix languages.** Set `curated.json` `kiwix.languages` to `["eng", "spa"]`. A dry `build` against the live feed should list about 63 new Spanish entries (research §0), and the report should name ecured and marxists as held.
-- [ ] **Step 4: `i18n` passthrough.**
+- [x] **Step 3: Kiwix languages.** Set `curated.json` `kiwix.languages` to `["eng", "spa"]`. A dry `build` against the live feed should list about 63 new Spanish entries (research §0), and the report should name ecured and marxists as held.
+  - Dry build 2026-10-30: Kiwix lists 430 `spa` entries; 67 listed with `es` (62 new Spanish-only, plus the 5 multilingual packs already listed). Held: `kiwix.ecured` (licence-nc), `marxists.org` (licence-mixed), the stale unflavoured `wiktionary_es_all` (flavour), 356 TED and Khan Academy (video). No family-table row: inciclopedia, partituras-gratis.es, wikidex.
+- [x] **Step 4: `i18n` passthrough.**
   - `readiness_block`, `onboarding_block` and the preset code copy an `i18n` object through. They check that it's a map from a language code to string fields, and fail the build otherwise.
   - `apply_sets` copies a set's `i18n` (title, description, per-slice label) onto every flavour of each slice as `i18n.es.title` (as "<set>: <label>") and `i18n.es.setLabel`.
-- [ ] **Step 5: Per-language tiers.**
+- [x] **Step 5: Per-language tiers.**
   - `readiness_block` reads `languages.<code>.essential/comprehensive`, checks every token as it checks the English ones, folds essential into comprehensive, and emits `languages` on the domain.
   - It generates `efficient-<code>` and `comprehensive-<code>` presets with `language` and `i18n` titles ("Inicio eficiente" and "Biblioteca completa"; mark both for the friend review).
   - `@<collection>` expands by collection and domain as today.
   - `onboarding_block` does the same for use cases.
-- [ ] **Step 6: Sizes per language.** `tier_sizes(catalog, language="en")` reads that language's lists, and the CLI prints one table per language. Tests use a small Spanish fixture with a held subject pack.
-- [ ] **Step 7:** Commit "L3: the catalog generator learns languages".
+- [x] **Step 6: Sizes per language.** `tier_sizes(catalog, language="en")` reads that language's lists, and the CLI prints one table per language. Tests use a small Spanish fixture with a held subject pack.
+- [x] **Step 7:** Commit "L3: the catalog generator learns languages".
 
 ## Task 2: The Spanish Wikipedia set (desk, Mac)
 

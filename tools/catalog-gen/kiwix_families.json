@@ -1852,6 +1852,18 @@
    "domain": "reference"
   },
   {
+   "family": "kiwix.ecured",
+   "match": "^kiwix\\.ecured_",
+   "category": "Reference",
+   "license": "Non-commercial (EcuRed's own terms)",
+   "nonCommercial": true,
+   "noDerivatives": false,
+   "hold": "licence-nc",
+   "source": "https://www.ecured.cu/EcuRed:Derechos_de_autor",
+   "note": "Plan L3 research §2: no standard licence; EcuRed's policy lets articles be copied 'sin fines comerciales', with attribution and the same terms on derivatives (in effect BY-NC-SA). The ZIM is a 2019 snapshot. Held so the report names it.",
+   "domain": "reference"
+  },
+  {
    "family": "lgbtqia.wiki",
    "match": "^lgbtqia\\.wiki_",
    "category": "Reference",
@@ -1862,6 +1874,18 @@
    "source": "https://lgbtqia.wiki/wiki/LGBTQIA%2B_Wiki:Copyrights",
    "note": "Some older pages carry a Fandom CC BY-SA 3.0 notice.",
    "domain": "reference"
+  },
+  {
+   "family": "marxists.org",
+   "match": "^marxists\\.org_",
+   "category": "Reference",
+   "license": "Mixed (per work)",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": "licence-mixed",
+   "source": "https://www.marxists.org/espanol/admin/index.htm",
+   "note": "Plan L3 research §2: no blanket licence. Most material is public domain or free to use, MIA's own material is CC BY-SA 2.0, and third-party translations are hosted with permission, per work (the 2014 Lawrence & Wishart takedown). Held so the report names it.",
+   "domain": "thought"
   },
   {
    "family": "milneopentextbooks.org",
@@ -1937,98 +1961,98 @@
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_medicine$",
+   "match": "^wikipedia_[a-z]{2,3}_medicine$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "medicine"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_(physics|chemistry|mathematics|astronomy|molcell|climate-change)$",
+   "match": "^wikipedia_[a-z]{2,3}_(physics|chemistry|mathematics|astronomy|molcell|climate-change)$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "science"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_history$",
+   "match": "^wikipedia_[a-z]{2,3}_history$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "thought"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_geography$",
+   "match": "^wikipedia_[a-z]{2,3}_geography$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "maps"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_computer$",
+   "match": "^wikipedia_[a-z]{2,3}_computer$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "technology"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_knots$",
+   "match": "^wikipedia_[a-z]{2,3}_knots$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "making"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_(movies|indian-cinema|nollywood|ray-charles)$",
+   "match": "^wikipedia_[a-z]{2,3}_(movies|indian-cinema|nollywood|ray-charles)$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": "literature"
   },
   {
    "family": "wikipedia",
-   "match": "^wikipedia_en_(baseball|basketball|cricket|football|golf|ice-hockey|tennis|comics)$",
+   "match": "^wikipedia_[a-z]{2,3}_(baseball|basketball|cricket|football|golf|ice-hockey|tennis|comics)$",
    "category": "Reference",
    "license": "CC BY-SA 4.0",
    "nonCommercial": false,
    "noDerivatives": false,
    "hold": null,
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-   "note": "H1 sub-row of wikipedia: the first matching row wins.",
+   "note": "H1 sub-row of wikipedia: the first matching row wins. Any language's subject pack (Plan L3).",
    "domain": null
   },
   {
@@ -2054,6 +2078,21 @@
    "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
    "note": "Per-file image licenses.",
    "domain": "reference"
+  },
+  {
+   "family": "wiktionary",
+   "match": "^wiktionary_es_all$",
+   "category": "Reference",
+   "license": "CC BY-SA 4.0",
+   "nonCommercial": false,
+   "noDerivatives": false,
+   "hold": null,
+   "source": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+   "note": "Plan L3: Kiwix still lists a stale unflavoured wiktionary_es_all (2025-03) beside the nopic build; only nopic is listed.",
+   "domain": "reference",
+   "flavours": [
+    "nopic"
+   ]
   },
   {
    "family": "wiktionary",

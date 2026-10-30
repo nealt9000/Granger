@@ -94,6 +94,7 @@ def test_opds_entries():
     assert entries[0]["uuid"] == "1f8cf2fe-e076-e018-2e09-004387350cba"
     assert entries[0]["length"] == 1047708672
     assert "_ftindex:yes" in entries[0]["tags"]
+    assert entries[0]["language"] == "en"  # Kiwix's "eng" as BCP-47 (Plan L3)
 
 
 def test_metalink_sorts_mirrors_by_priority():
@@ -219,6 +220,7 @@ def test_release_pack_comes_from_its_descriptor(tmp_path):
     assert entry["title"] == "Granger Classics" and entry["license"] == "Public domain (US)"
     assert set(entry) == set(cg.pack_entry(CURATED_MED, fake_fetch(ROUTES)))  # same keys as a Kiwix pack
     assert entry["topics"] == [] and entry["zimUuid"] == DESCRIPTOR["zimUuid"]
+    assert entry["language"] == "en"  # the descriptor's "eng" as BCP-47 (Plan L3)
 
 
 def test_release_size_mismatch_fails(tmp_path):
@@ -505,13 +507,13 @@ READINESS = {"domains": [
 
 
 def readiness_build(tmp_path, monkeypatch, readiness=READINESS, families=DOMAIN_FAMILIES, books=THOUGHT_BOOKS, onboarding=None,
-                    extra=()):
+                    extra=(), languages=("eng",)):
     (tmp_path / "families.json").write_text(json.dumps({"families": families}))
     (tmp_path / "books.json").write_text(json.dumps(books))
     monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
     xml = feed(feed_entry("wikipedia_en_medicine", "nopic"), feed_entry("wikipedia_en_top", "nopic"),
                feed_entry("maps_en_france"), feed_entry("maps_en_spain"), *extra)
-    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [],
+    curated = {"kiwix": {"languages": list(languages), "families": "families.json"}, "packs": [], "models": [],
                "books": [BOOK_ROW], "presets": [], "readiness": readiness}
     if onboarding is not None:
         curated["onboarding"] = onboarding
@@ -1108,11 +1110,289 @@ def test_the_sets_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, capsy
     assert "3 slice entries, 4 subject entries" in capsys.readouterr().out
 
 
+L3_SET_FIELDS = ("setTitle", "setDescription", "i18n")
+
+
 def test_real_pack_sets_load_and_the_published_catalog_carries_them():
     sets = cg.load_sets(HERE / "pack_sets.json")
     catalog = json.loads((HERE.parents[1] / "catalog" / "catalog.json").read_text(encoding="utf-8"))
     packs = json.loads(json.dumps(catalog["packs"]))
     curated = json.loads((HERE / "curated.json").read_text(encoding="utf-8"))
-    assert cg.apply_sets(packs, sets, curated["packs"]) == []
+    missing = cg.apply_sets(packs, sets, curated["packs"])
+    if any("setTitle" in p for p in catalog["packs"]):
+        assert missing == []
+    else:
+        # The published catalog predates Plan L3: no Spanish packs yet, and no set copy on the slices.
+        assert all(name.startswith("wikipedia_es_") for name in missing), missing
+        for p in packs:
+            for f in L3_SET_FIELDS:
+                p.pop(f, None)
     # Applying again changes nothing: the published catalog already has them.
     assert packs == catalog["packs"]
+
+
+# --- Plan L3: languages ---
+
+def test_bcp47_maps_kiwix_codes_and_keeps_order():
+    assert cg.bcp47("eng") == "en"
+    assert cg.bcp47("spa") == "es"
+    assert cg.bcp47("eng,spa") == "en,es"
+    assert cg.bcp47("spa,eng,spa") == "es,en"  # duplicates dropped, order kept
+    assert cg.bcp47("mul") == "mul"
+    assert cg.bcp47("en") == "en"  # already BCP-47
+    assert cg.bcp47("xyz") == "xyz"  # unknown codes pass through
+    assert cg.bcp47("") == ""
+
+
+def test_books_carry_bcp47_languages(tmp_path, monkeypatch):
+    books = json.loads(json.dumps(BOOKS))
+    books["books"][0]["language"] = "spa"
+    (tmp_path / "books.json").write_text(json.dumps(books))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in BOOKS["books"]}
+    catalog = cg.build({"packs": [], "models": [], "books": [BOOK_ROW], "presets": []}, fake_fetch(ROUTES),
+                       head=lambda url: sizes[url])
+    assert [b["language"] for b in catalog["books"]] == ["es", "en"]
+
+
+def test_kiwix_lists_each_configured_language_and_counts_them_in_the_report():
+    xml = feed(feed_entry("wikipedia_en_physics", "maxi"),
+               feed_entry("wikipedia_es_physics", "maxi", language="spa"),
+               feed_entry("es.stackoverflow.com_mul_all", language="eng,spa", category="stack_exchange"),
+               feed_entry("wikipedia_fr_physique", "maxi", language="fra"),
+               feed_entry("ted_es_ciencia", language="spa"))
+    packs, report = cg.kiwix_entries({"languages": ["eng", "spa"]}, FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                                     feed_fetch(xml), workers=2, sleep=lambda s: None)
+    by_id = {p["id"]: p for p in packs}
+    assert set(by_id) == {"wikipedia_en_physics_maxi", "wikipedia_es_physics_maxi", "es.stackoverflow.com_mul_all"}
+    assert by_id["wikipedia_es_physics_maxi"]["language"] == "es"
+    assert by_id["es.stackoverflow.com_mul_all"]["language"] == "en,es"
+    assert report[0] == "Kiwix packs in eng, spa: 4; listed 3, curated 0"
+    # A multilingual pack counts in each of its languages.
+    assert report[1:3] == ["  en: 2; listed 2, curated 0", "  es: 3; listed 2, curated 0"]
+
+
+def test_a_rows_flavours_hold_back_its_other_builds():
+    families = [{"family": "wiktionary", "match": "^wiktionary_es_all$", "category": "Reference",
+                 "license": "CC BY-SA 4.0", "flavours": ["nopic"]},
+                {"family": "wiktionary", "match": "^wiktionary_", "category": "Reference", "license": "CC BY-SA 4.0"}]
+    xml = feed(feed_entry("wiktionary_es_all", "nopic", language="spa"),
+               feed_entry("wiktionary_es_all", language="spa", updated="2025-03-02"),
+               feed_entry("wiktionary_en_all"))
+    packs, report = cg.kiwix_entries({"languages": ["eng", "spa"]}, families, cg.kiwix_feed(feed_fetch(xml)), set(),
+                                     feed_fetch(xml), workers=2, sleep=lambda s: None)
+    assert {p["id"] for p in packs} == {"wiktionary_es_all_nopic", "wiktionary_en_all"}
+    assert "Held back (flavour): 1\n  wiktionary: 1" in "\n".join(report)
+
+
+def _real_row(name, flavour=""):
+    table = json.loads((cg.REPO_ROOT / "tools/catalog-gen/kiwix_families.json").read_text())["families"]
+    return cg.family_of({"name": name, "flavour": flavour, "category": ""}, table)
+
+
+def test_real_family_table_files_spanish_packs():
+    # The Wikipedia subject rows match any language.
+    for name, domain in (("wikipedia_es_medicine", "medicine"), ("wikipedia_es_climate-change", "science"),
+                         ("wikipedia_es_history", "thought"), ("wikipedia_es_geography", "maps"),
+                         ("wikipedia_es_computer", "technology"), ("wikipedia_es_movies", "literature"),
+                         ("wikipedia_es_football", None), ("wikipedia_es_comics", None),
+                         ("wikipedia_es_top", "reference"), ("wikipedia_en_medicine", "medicine")):
+        assert _real_row(name)["domain"] == domain, name
+    assert _real_row("kiwix.ecured_es_all")["hold"] == "licence-nc"
+    assert _real_row("marxists.org_es_all")["hold"] == "licence-mixed"
+    assert _real_row("kiwix.ecured_es_all")["source"] and _real_row("marxists.org_es_all")["source"]
+    # iFixit en español is listed like ifixit_en_all: non-commercial, not held.
+    ifixit = _real_row("ifixit_es_all")
+    assert ifixit["nonCommercial"] is True and not ifixit["hold"]
+    assert _real_row("wiktionary_es_all")["flavours"] == ["nopic"]
+    assert "flavours" not in _real_row("wiktionary_en_all")
+
+
+def test_real_curated_kiwix_languages_are_english_and_spanish():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
+    assert curated["kiwix"]["languages"] == ["eng", "spa"]
+
+
+ES_FEED = (feed_entry("wikipedia_es_medicine", "maxi", language="spa"),
+           feed_entry("wikipedia_es_medicine", "nopic", language="spa"),
+           feed_entry("wikipedia_es_top", "maxi", language="spa"),
+           feed_entry("wikipedia_es_all", "maxi", language="spa"),
+           feed_entry("wikipedia_es_history", "maxi", language="spa"))
+ES_FAMILIES = [{"family": "wikipedia", "match": "^wikipedia_[a-z]{2,3}_medicine", "category": "Medical",
+                "license": "CC BY-SA 4.0", "domain": "medicine"},
+               {"family": "wikipedia", "match": "^wikipedia_[a-z]{2,3}_history", "category": "Reference",
+                "license": "CC BY-SA 4.0", "domain": "thought"}] + DOMAIN_FAMILIES
+ES_READINESS = {"domains": [
+    {"id": "medicine", "title": "Medicine & first aid",
+     "essential": ["wikipedia_en_medicine_nopic"], "comprehensive": [],
+     "i18n": {"es": {"title": "Medicina y primeros auxilios"}},
+     "languages": {"es": {"essential": ["wikipedia_es_medicine_maxi"], "comprehensive": ["wikipedia_es_medicine_maxi"]}}},
+    {"id": "maps", "title": "Maps, places & travel", "essential": ["family:maps"], "comprehensive": [],
+     "languages": {"es": {"essential": [], "comprehensive": []}}},
+    {"id": "reference", "title": "General reference", "essential": ["wikipedia_en_top_nopic"], "comprehensive": [],
+     "languages": {"es": {"essential": ["wikipedia_es_top_maxi"], "comprehensive": ["wikipedia_es_all_maxi"]}}},
+    {"id": "literature", "title": "Literature & the arts", "essential": ["@granger-classics"], "comprehensive": []},
+    {"id": "thought", "title": "Religion, philosophy & history", "essential": ["@granger-classics"], "comprehensive": [],
+     "languages": {"es": {"comprehensive": ["wikipedia_es_history_maxi"]}}},
+], "contains": {"wikipedia_es_all": ["wikipedia_es_*"]}}
+
+
+def es_build(tmp_path, monkeypatch, readiness=ES_READINESS, onboarding=None):
+    return readiness_build(tmp_path, monkeypatch, readiness=readiness, families=ES_FAMILIES, extra=ES_FEED,
+                           onboarding=onboarding, languages=("eng", "spa"))
+
+
+def test_domains_carry_their_lists_per_language(tmp_path, monkeypatch):
+    catalog = es_build(tmp_path, monkeypatch)
+    domains = {d["id"]: d for d in catalog["readiness"]["domains"]}
+    # English stays where it was.
+    assert domains["medicine"]["essential"] == ["wikipedia_en_medicine_nopic"]
+    assert domains["medicine"]["languages"] == {"es": {"essential": ["wikipedia_es_medicine_maxi"],
+                                                       "comprehensive": ["wikipedia_es_medicine_maxi"]}}
+    assert domains["medicine"]["i18n"] == {"es": {"title": "Medicina y primeros auxilios"}}
+    # Essential folds into comprehensive; a language with nothing in a domain is left off it.
+    assert domains["reference"]["languages"]["es"]["comprehensive"] == ["wikipedia_es_top_maxi", "wikipedia_es_all_maxi"]
+    assert domains["thought"]["languages"]["es"] == {"essential": [], "comprehensive": ["wikipedia_es_history_maxi"]}
+    assert "languages" not in domains["maps"] and "languages" not in domains["literature"]
+    assert "i18n" not in domains["maps"]
+
+
+def test_each_language_gets_its_tier_presets(tmp_path, monkeypatch):
+    catalog = es_build(tmp_path, monkeypatch)
+    presets = {p["id"]: p for p in catalog["presets"]}
+    assert presets["efficient-es"]["items"] == ["wikipedia_es_medicine_maxi", "wikipedia_es_top_maxi"]
+    # Everything wikipedia_es_all holds (Top, the subjects) is left out beside it.
+    assert presets["comprehensive-es"]["items"] == ["wikipedia_es_all_maxi"]
+    assert presets["efficient-es"]["language"] == "es"
+    assert presets["efficient-es"]["title"] == "Efficient start"
+    assert presets["efficient-es"]["i18n"] == {"es": {"title": "Inicio eficiente"}}
+    assert presets["comprehensive-es"]["i18n"] == {"es": {"title": "Biblioteca completa"}}
+    # The English presets keep their ids, items and title, with no language.
+    assert presets["efficient"]["items"][:2] == ["wikipedia_en_medicine_nopic", "wikipedia_en_top_nopic"]
+    assert "language" not in presets["efficient"]
+    assert [p["id"] for p in catalog["presets"]][-4:] == ["efficient", "comprehensive", "efficient-es", "comprehensive-es"]
+
+
+def test_a_catalog_without_languages_has_only_the_english_presets(tmp_path, monkeypatch):
+    catalog = readiness_build(tmp_path, monkeypatch)
+    assert [p["id"] for p in catalog["presets"]] == ["granger-classics", "efficient", "comprehensive"]
+    assert not any("languages" in d for d in catalog["readiness"]["domains"])
+
+
+def test_language_lists_are_checked(tmp_path, monkeypatch):
+    for languages, match in (({"es": {"essential": ["wikipedia_es_atlantis"]}}, "wikipedia_es_atlantis"),
+                             ({"es": {"essential": ["@lost-books"]}}, "@lost-books"),
+                             ({"es": {"extra": []}}, "takes lists"),
+                             ({"Spanish": {"essential": []}}, "language code"),
+                             ({"en": {"essential": []}}, "other than en")):
+        bad = {"domains": [{"id": "maps", "title": "Maps", "essential": [], "comprehensive": [], "languages": languages}]}
+        with pytest.raises(SystemExit, match=match):
+            es_build(tmp_path, monkeypatch, readiness=bad)
+
+
+def test_i18n_is_checked(tmp_path, monkeypatch):
+    for i18n in ({"es": "Mapas"}, {"es": {"title": 3}}, {"es": {"title": " "}}, {"Spanish": {"title": "Mapas"}}, ["es"]):
+        bad = {"domains": [{"id": "maps", "title": "Maps", "essential": [], "comprehensive": [], "i18n": i18n}]}
+        with pytest.raises(SystemExit, match="i18n"):
+            es_build(tmp_path, monkeypatch, readiness=bad)
+
+
+def test_tier_sizes_per_language(tmp_path, monkeypatch):
+    catalog = es_build(tmp_path, monkeypatch)
+    es = cg.tier_sizes(catalog, "es")
+    # Every feed pack is 1000 bytes; a domain counts its own packs, and "All" drops what wikipedia_es_all holds.
+    assert es["medicine"] == (1000, 1000)
+    assert es["reference"] == (1000, 1000)  # Top is held by All
+    assert es["thought"] == (0, 1000)  # the held subject pack still counts within its own domain
+    assert es["maps"] == (0, 0) and es["literature"] == (0, 0)
+    assert es["All"] == (2000, 1000)
+    assert cg.tier_sizes(catalog) == cg.tier_sizes(catalog, "en")
+    assert cg.tier_languages(catalog) == ["en", "es"]
+
+
+def test_use_cases_carry_items_and_copy_per_language(tmp_path, monkeypatch):
+    onboarding = {"useCases": [
+        {"id": "medical", "title": "Medical work", "blurb": "Clinical references.",
+         "items": ["wikipedia_en_medicine_nopic"],
+         "i18n": {"es": {"title": "Trabajo sanitario", "blurb": "Consulta clínica."}},
+         "languages": {"es": {"items": ["wikipedia_es_medicine_maxi", "wikipedia_es_medicine_maxi"]}}},
+        {"id": "faith", "title": "Faith & philosophy", "items": ["@granger-classics"],
+         "languages": {"es": {"items": []}}}]}
+    block = es_build(tmp_path, monkeypatch, onboarding=onboarding)["onboarding"]
+    medical, faith = block["useCases"]
+    assert medical["items"] == ["wikipedia_en_medicine_nopic"]
+    assert medical["languages"] == {"es": {"items": ["wikipedia_es_medicine_maxi"]}}
+    assert medical["i18n"] == {"es": {"title": "Trabajo sanitario", "blurb": "Consulta clínica."}}
+    # No Spanish items: not offered in Spanish.
+    assert "languages" not in faith and "i18n" not in faith
+    bad = {"useCases": [{"id": "x", "title": "X", "items": ["wikipedia_en_top_nopic"],
+                         "languages": {"es": {"items": ["wikipedia_es_atlantis"]}}}]}
+    with pytest.raises(SystemExit, match=r"onboarding x \(es\): unknown item"):
+        es_build(tmp_path, monkeypatch, onboarding=bad)
+
+
+def test_presets_and_collections_carry_their_copy(tmp_path, monkeypatch):
+    (tmp_path / "books.json").write_text(json.dumps({**BOOKS, "collection": "clasicos-granger"}))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in BOOKS["books"]}
+    row = {**BOOK_ROW, "title": "Clásicos Granger: todos los libros", "language": "spa",
+           "i18n": {"en": {"title": "Clásicos Granger: all books"}}}
+    curated = {"packs": [], "models": [], "books": [row],
+               "presets": [{"id": "starter", "title": "Starter", "items": [], "i18n": {"es": {"title": "Para empezar"}}}]}
+    presets = {p["id"]: p for p in cg.build(curated, fake_fetch(ROUTES), head=lambda url: sizes[url])["presets"]}
+    assert presets["starter"]["i18n"] == {"es": {"title": "Para empezar"}}
+    assert presets["clasicos-granger"] == {"id": "clasicos-granger", "title": "Clásicos Granger: todos los libros",
+                                           "items": ["gc-hamlet", "gc-macbeth"], "language": "es",
+                                           "i18n": {"en": {"title": "Clásicos Granger: all books"}}}
+    curated["presets"][0]["i18n"] = {"es": {"title": ""}}
+    with pytest.raises(SystemExit, match="preset starter: i18n"):
+        cg.build(curated, fake_fetch(ROUTES), head=lambda url: sizes[url])
+
+
+def test_a_curated_packs_copy_reaches_every_flavour_without_flavour_words(tmp_path):
+    packs = _family_packs()
+    curated = [{"name": "wikipedia_en_medicine", "flavour": "nopic", "title": "WikiMed (no pictures)",
+                "i18n": {"es": {"title": "WikiMed en inglés (no pictures)"}}}]
+    cg.apply_sets(packs, cg.load_sets(_sets_file(tmp_path)), curated)
+    meds = [p for p in packs if p["zimName"] == "wikipedia_en_medicine"]
+    assert {p["i18n"]["es"]["title"] for p in meds} == {"WikiMed en inglés"}
+    # pin copies a curated row's i18n onto its own entry.
+    p = cg.pack_entry({**CURATED_MED, "i18n": {"es": {"title": "WikiMed"}}}, fake_fetch(ROUTES))
+    assert p["i18n"] == {"es": {"title": "WikiMed"}}
+    assert "i18n" not in cg.pack_entry(CURATED_MED, fake_fetch(ROUTES))
+
+
+ES_SETS = {"sets": {"wikipedia_es": {
+    "title": "Wikipedia en español", "description": "La enciclopedia libre.",
+    "i18n": {"en": {"title": "Wikipedia in Spanish", "description": "The free encyclopedia, in Spanish."}},
+    "slices": [{"zimName": "wikipedia_es_top", "rank": 1, "label": "Los 348.000 mejores artículos", "articles": 348403,
+                "i18n": {"en": {"label": "Best 348,000 articles"}}},
+               {"zimName": "wikipedia_es_all", "rank": 2, "label": "Todo", "articles": 4232639}]}},
+    "subjects": {}}
+
+
+def test_sets_carry_their_copy_onto_every_flavour_of_a_slice(tmp_path):
+    packs = [{"id": f"{z}_{f}", "zimName": z, "flavour": f, "title": z}
+             for z in ("wikipedia_es_top", "wikipedia_es_all") for f in ("maxi", "nopic")]
+    curated = [{"name": "wikipedia_es_top", "flavour": "maxi", "title": "Wikipedia en español: lo mejor",
+                "i18n": {"en": {"title": "Spanish Wikipedia: the best"}}}]
+    assert cg.apply_sets(packs, cg.load_sets(_sets_file(tmp_path, ES_SETS)), curated) == []
+    by = {p["id"]: p for p in packs}
+    top = by["wikipedia_es_top_nopic"]
+    assert top["title"] == "Wikipedia en español: Los 348.000 mejores artículos"
+    assert (top["setTitle"], top["setDescription"]) == ("Wikipedia en español", "La enciclopedia libre.")
+    assert top["i18n"] == {"en": {"title": "Wikipedia in Spanish: Best 348,000 articles",
+                                  "setLabel": "Best 348,000 articles", "setTitle": "Wikipedia in Spanish",
+                                  "setDescription": "The free encyclopedia, in Spanish."}}
+    # A slice with no label of its own in a language takes the set's.
+    assert by["wikipedia_es_all_maxi"]["i18n"]["en"]["title"] == "Wikipedia in Spanish: Todo"
+    bad = json.loads(json.dumps(ES_SETS))
+    bad["sets"]["wikipedia_es"]["slices"][0]["i18n"] = {"en": "Best"}
+    with pytest.raises(SystemExit, match="i18n"):
+        cg.load_sets(_sets_file(tmp_path, bad))
+
+
+def test_base_title_drops_spanish_flavour_words_too():
+    assert cg.base_title("Wikcionario (sin imágenes)") == "Wikcionario"
+    assert cg.base_title("WikiMed en español (con imágenes)") == "WikiMed en español"
+    assert cg.base_title("WikiMed (no pictures)") == "WikiMed"
