@@ -41,7 +41,7 @@ class ZimWebViewClient(
         ZimUrls.parse(url)?.takeIf { it.packId == APP_PACK }?.let { return appAsset(view, it.path) }
         return when (val response = resolver.response(url)) {
             is ZimResponse.Content -> {
-                val bytes = if (response.mimeType == "text/html") patched(response.bytes, response.encoding) else response.bytes
+                val bytes = if (response.mimeType == "text/html") patched(view, response.bytes, response.encoding) else response.bytes
                 WebResourceResponse(response.mimeType, response.encoding, ByteArrayInputStream(bytes))
             }
             ZimResponse.NotFound -> notFound(view)
@@ -56,10 +56,10 @@ class ZimWebViewClient(
         return WebResourceResponse(mimeType, "UTF-8", assets.open("$ASSET_DIR/$name"))
     }
 
-    private fun patched(bytes: ByteArray, encoding: String?): ByteArray {
+    private fun patched(view: WebView, bytes: ByteArray, encoding: String?): ByteArray {
         val charset = encoding?.let { runCatching { Charset.forName(it) }.getOrNull() } ?: Charsets.UTF_8
         val html = String(bytes, charset)
-        val fixed = DevDocsFixes.patch(MainPageFixes.patch(html))
+        val fixed = DevDocsFixes.patch(MainPageFixes.patch(html), view.context.getString(R.string.reader_devdocs_contents))
         return if (fixed === html) bytes else fixed.toByteArray(charset)
     }
 

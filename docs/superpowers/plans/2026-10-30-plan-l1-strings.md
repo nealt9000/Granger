@@ -114,7 +114,7 @@ Things the package tasks left for after the merge, because they cross task bound
 - [x] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
 - [ ] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays.
 - [ ] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).
-- [ ] DevDocsFixes.kt's injected "☰ Contents" button: pass the label into the script from a resource (Task 5).
+- [x] DevDocsFixes.kt's injected "☰ Contents" button: pass the label into the script from a resource (Task 5).
 - [ ] **Saved in the database, decide in L2:**
   - PDF bookmark "p. N"
   - PDF place title "Page N"
