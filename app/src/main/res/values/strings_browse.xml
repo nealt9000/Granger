@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Browse tool's title: the installed packs. -->
+    <string name="browse_title">Browse</string>
+    <!-- The + button's description: get more packs. -->
+    <string name="browse_get_more">Get more</string>
+    <string name="browse_downloads">Downloads</string>
+    <!-- The Downloads menu item with how many are in progress. %1$d is the count. -->
+    <string name="browse_downloads_count">Downloads (%1$d)</string>
+    <string name="browse_readiness">Readiness</string>
+    <string name="browse_nothing_yet">Nothing to browse yet</string>
+    <!-- A suggested first pack. %1$s is its size, such as 1.2 GB. -->
+    <string name="browse_suggest_map">A map of your region · %1$s</string>
+    <string name="browse_suggest_encyclopedia">An encyclopedia · %1$s</string>
+    <string name="browse_get_packs">Get packs</string>
+    <!-- %1$s is the folder on the phone where packs can be copied. -->
+    <string name="browse_copy_zims">Or copy .zim files into %1$s</string>
+    <!-- A section header's arrow. -->
+    <string name="browse_collapse">Collapse</string>
+    <string name="browse_expand">Expand</string>
+    <string name="browse_show_fewer">Show fewer</string>
+    <!-- Shows every pack in a section. %1$d is how many. -->
+    <string name="browse_show_all">Show all %1$d</string>
+    <!-- Section for packs with no knowledge area. -->
+    <string name="browse_section_other">Other</string>
+    <!-- Section for map files. -->
+    <string name="browse_section_maps">Maps</string>
+    <!-- %1$s is the pack's title. -->
+    <string name="browse_remove_title">Remove %1$s?</string>
+    <string name="browse_remove_body">%1$s will be deleted from this phone. You can download it again later.</string>
+    <string name="browse_pack_missing">File not found. Reinsert the SD card or download the pack again.</string>
+    <string name="browse_pack_corrupt">This file is damaged and can\'t be opened.</string>
+    <string name="browse_remove_from_phone">Remove from phone</string>
+</resources>

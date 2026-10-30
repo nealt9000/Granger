@@ -3,7 +3,6 @@ app/src/main/kotlin/app/granger/archive/ArchiveScreen.kt	23
 app/src/main/kotlin/app/granger/archive/WaiverDialog.kt	3
 app/src/main/kotlin/app/granger/audiobooks/AudiobookScreen.kt	11
 app/src/main/kotlin/app/granger/audiobooks/AudiobookShelfScreen.kt	3
-app/src/main/kotlin/app/granger/browse/BrowseScreen.kt	12
 app/src/main/kotlin/app/granger/downloads/DownloadsScreen.kt	14
 app/src/main/kotlin/app/granger/ebook/BookSearchPanel.kt	2
 app/src/main/kotlin/app/granger/ebook/EbookReaderScreen.kt	1
