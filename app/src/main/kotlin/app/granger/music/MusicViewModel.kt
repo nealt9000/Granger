@@ -50,9 +50,6 @@ import kotlinx.coroutines.launch
 /** The Music media type's id (seeded). */
 const val MUSIC_TYPE_ID = "music"
 
-/** The name of the unscoped Music view (exact, per the plan). Music shows [R.string.music_all]; this English copy is the Library row's until library/ moves to resources (Plan L1 Task 8). */
-const val ALL_MUSIC = "All music"
-
 const val UNKNOWN_GENRE = MediaNames.UNKNOWN_GENRE
 
 /** How the Songs tab is ordered; [byName] sorts file under letters (Plan LV Decision 4). */

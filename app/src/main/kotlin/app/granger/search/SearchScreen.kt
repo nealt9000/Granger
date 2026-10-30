@@ -50,7 +50,6 @@ import app.granger.BookTarget
 import app.granger.R
 import app.granger.UiText
 import app.granger.audiobooks.AudiobookCover
-import app.granger.audiobooks.UNKNOWN_AUTHOR
 import app.granger.core.books.PdfText
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Albums
@@ -250,15 +249,16 @@ private fun <T> LazyListScope.results(
 /** The second line of each music and audiobook result (the copy is fixed by plan M3), and the Show all row. */
 internal object SearchRows {
     fun artist(a: ArtistHit): UiText = UiText.Plural(R.plurals.search_artist_line, a.albumCount, a.albumCount)
-    fun album(a: AlbumSummary): UiText = UiText.Res(R.string.search_album_line, a.albumArtist)
+    fun album(a: AlbumSummary): UiText = UiText.Res(R.string.search_album_line, app.granger.music.shownNameText(a.albumArtist))
     fun song(t: Track): UiText = UiText.Res(
         R.string.search_song_line,
-        MusicCatalog.trackArtistsOf(t).joinToString(", ").ifBlank { Albums.UNKNOWN_ARTIST },
-        Albums.title(t),
+        MusicCatalog.trackArtistsOf(t).joinToString(", ").ifBlank { null }?.let { app.granger.music.shownNameText(it) }
+            ?: UiText.Res(R.string.music_unknown_artist),
+        app.granger.music.shownNameText(Albums.title(t)),
     )
     fun audiobook(b: Audiobook): UiText {
-        val author = b.author.ifBlank { UNKNOWN_AUTHOR }
-        return if (b.narrator.isBlank()) UiText.Raw(author) else UiText.Res(R.string.search_audiobook_read_by, author, b.narrator)
+        val author: UiText = b.author.ifBlank { null }?.let { UiText.Raw(it) } ?: UiText.Res(R.string.audiobooks_unknown_author)
+        return if (b.narrator.isBlank()) author else UiText.Res(R.string.search_audiobook_read_by, author, b.narrator)
     }
 
     /** A [capped] group may hold more than were fetched, so it doesn't claim to show them all. */

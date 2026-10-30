@@ -12,8 +12,6 @@
     <string name="library_books">Books</string>
     <string name="library_collapse">Collapse</string>
     <string name="library_expand">Expand</string>
-    <string name="library_all_music">All music</string>
-    <string name="library_all_audiobooks">All audiobooks</string>
     <plurals name="library_audiobooks">
         <item quantity="one">%d audiobook</item>
         <item quantity="other">%d audiobooks</item>

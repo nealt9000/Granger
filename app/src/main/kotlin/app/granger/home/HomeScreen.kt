@@ -239,7 +239,7 @@ private val TileHeight = 88.dp
 @Composable
 private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
     val tab = entry.tab
-    Card(title = tab.title, subtitle = tab.subtitle, enabled = tab.available, onClick = onClick) {
+    Card(title = tab.title, subtitle = tab.subtitle.resolve(), enabled = tab.available, onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val cover = rememberRailCover(tab.coverPath, maxWidth)
             if (cover != null) {

@@ -151,7 +151,7 @@ class ThemeShots {
         storage = listOf(StorageRow(Source.KIWIX, 11_100_000_000, 40)),
         needsCatalogRefresh = false,
     )
-    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = true), at = 5L, pinned = true)
+    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", app.granger.UiText.Raw("Birds of the world"), 'O', available = true, current = true), at = 5L, pinned = true)
     private val blue = RailEntry.Play("album:Blue", "Blue", at = 1L)
     private val dayFeed = FeedUi(
         HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("October 26"),

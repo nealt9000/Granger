@@ -83,8 +83,8 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(1, "gone", "x-ray"), tab(2, "b", "Aspirin"), tab(3, "a", "Hamlet"))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.tabs).containsExactly(
-            RailTabUi(3, "Hamlet", "Classics", 'H', available = true, current = false, coverPath = null, packId = "a", path = "Hamlet"),
-            RailTabUi(2, "Aspirin", "WikiMed", 'A', available = false, current = false, coverPath = null, packId = "b", path = "Aspirin"),
+            RailTabUi(3, "Hamlet", app.granger.UiText.Raw("Classics"), 'H', available = true, current = false, coverPath = null, packId = "a", path = "Hamlet"),
+            RailTabUi(2, "Aspirin", app.granger.UiText.Raw("WikiMed"), 'A', available = false, current = false, coverPath = null, packId = "b", path = "Aspirin"),
             RailTabUi(1, "x-ray", RailViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null, packId = "gone", path = "x-ray"),
         ).inOrder()
     }
@@ -506,7 +506,7 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma").copy(path = ""))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.tabs.single()).isEqualTo(
-            RailTabUi(4, "Emma", "Chapter 3 · 43%", 'E', available = true, current = false, coverPath = "/covers/a.jpg"),
+            RailTabUi(4, "Emma", app.granger.UiText.Res(app.granger.R.string.shell_chapter_percent, "Chapter 3", 43), 'E', available = true, current = false, coverPath = "/covers/a.jpg"),
         )
     }
 
@@ -514,7 +514,7 @@ class RailViewModelTest {
         bookshelf.bookList.value = listOf(book("book:granger:1", "Emma", author = "Jane Austen"))
         sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma"))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
-        assertThat(ui.tabs.single().subtitle).isEqualTo("Jane Austen")
+        assertThat(ui.tabs.single().subtitle).isEqualTo(app.granger.UiText.Raw("Jane Austen"))
     }
 
     @Test fun missingBookTabIsUnavailable() = runTest(main.dispatcher) {

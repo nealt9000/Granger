@@ -241,7 +241,7 @@ internal fun LazyListScope.kindRows(
         item(key = if (music) "all-music" else "all-audiobooks") {
             ListItem(
                 modifier = Modifier.clickable { if (music) onOpenMusic(null) else onOpenAudiobooks(null) }.padding(start = 16.dp),
-                headlineContent = { Text(stringResource(if (music) R.string.library_all_music else R.string.library_all_audiobooks)) },
+                headlineContent = { Text(stringResource(if (music) R.string.music_all else R.string.audiobooks_all)) },
                 supportingContent = {
                     Text(countText(0, 0, kind.allCollections.sumOf { it.albums.size }, kind.allCollections.sumOf { it.audiobooks.size }).resolve())
                 },

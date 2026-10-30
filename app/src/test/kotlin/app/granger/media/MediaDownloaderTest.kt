@@ -98,7 +98,7 @@ class MediaDownloaderTest {
     @Test fun refusedGetLeavesNoFolder() = runTest {
         downloads.nextResult = EnqueueResult.NoSpace(5_000_000)
         val notice = downloader().get(book)
-        assertThat(notice).isEqualTo("Not enough space on Internal storage for Time Machine: free up ${formatBytes(5_000_000)}.")
+        assertThat(notice?.resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Not enough space on Internal storage for Time Machine: free up ${formatBytes(5_000_000)}.")
         assertThat(dir().exists()).isFalse()
     }
 
@@ -107,14 +107,14 @@ class MediaDownloaderTest {
         d.get(book)
         arrive(0 until 3)
         downloads.nextResult = EnqueueResult.NoSpace(1_000)
-        assertThat(d.get(book)).startsWith("Not enough space on Internal storage")
+        assertThat(d.get(book)?.resolve(ApplicationProvider.getApplicationContext())).startsWith("Not enough space on Internal storage")
         assertThat((0 until 3).all { File(dir(), book.files[it].name).isFile }).isTrue()
         assertThat(MediaManifests.read(dir())).isNotNull()
     }
 
     @Test fun noVolumeIsANotice() = runTest {
         volumes.volumes = emptyList()
-        assertThat(downloader().get(book)).isEqualTo("No storage is available right now.")
+        assertThat(downloader().get(book)?.resolve(ApplicationProvider.getApplicationContext())).isEqualTo("No storage is available right now.")
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
@@ -241,7 +241,7 @@ class MediaDownloaderTest {
                 .copy(groupId = group),
         )
         val notice = downloader().get(book)
-        assertThat(notice).isEqualTo("Time Machine is on storage that isn't available right now. Put it back to finish it, or remove it first.")
+        assertThat(notice?.resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Time Machine is on storage that isn't available right now. Put it back to finish it, or remove it first.")
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(dir().exists()).isFalse()
     }

@@ -278,7 +278,7 @@ class LibriVoxViewModel(
                 val manifest = MediaDownloads.bookManifest(offer, archive, now())
                 fileCounts[groupOf(id)] = manifest.files.size
                 // MediaDownloader (the media package) still hands back English; L1 Task 4 converts it.
-                media.get(manifest)?.let(UiText::Raw)
+                media.get(manifest)
             }
             is LibriVoxOffer.Incomplete -> INCOMPLETE
             LibriVoxOffer.NotOnArchive -> NOT_ON_ARCHIVE

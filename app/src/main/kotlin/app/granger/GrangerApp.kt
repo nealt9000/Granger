@@ -488,7 +488,7 @@ class AppContainer(context: Context) {
 
     /** What Android Auto browses, searches and plays; reaches the session through [playerHub]. */
     val autoBrowse: AutoBrowseTree by lazy {
-        AutoBrowseTree(media, playlists, playback, mediaIndex, playResumer, songs, playerHub, artwork)
+        AutoBrowseTree(media, playlists, playback, mediaIndex, playResumer, songs, playerHub, artwork, context::getString)
     }
 
     /** Plays a recent play again (the rail, Android Auto); voices through [resumeVoice]. */

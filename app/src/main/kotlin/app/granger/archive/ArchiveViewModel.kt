@@ -562,8 +562,7 @@ class ArchiveViewModel(
         }
         val manifest = MediaDownloads.albumManifest(item, offer, kind, client, now())
         fileCounts[groupOf(identifier)] = manifest.files.size
-        // MediaDownloader (the media package) still hands back English; L1 Task 4 converts it.
-        return media!!.get(manifest)?.let(UiText::Raw)
+        return media!!.get(manifest)
     }
 
     private fun waiverNeeded(filtered: Boolean) = audio && filtered && !kind.datedRecordings

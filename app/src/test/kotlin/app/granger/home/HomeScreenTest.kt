@@ -45,7 +45,7 @@ class HomeScreenTest {
         storage = emptyList(),
         needsCatalogRefresh = false,
     )
-    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = false), at = 5L)
+    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", app.granger.UiText.Raw("Birds of the world"), 'O', available = true, current = false), at = 5L)
     private val blue = RailEntry.Play("album:Blue", "Blue", at = 1L)
     private val dayFeed = FeedUi(
         HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("October 22"),

@@ -42,8 +42,8 @@ class RailTest {
     private val calls = mutableListOf<String>()
     private var expanded by mutableStateOf(false)
 
-    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = false), at = 5L, pinned = true)
-    private val gone = RailEntry.Tab(RailTabUi(2L, "Gone", "A removed pack", 'G', available = false, current = false), at = 4L)
+    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", app.granger.UiText.Raw("Birds of the world"), 'O', available = true, current = false), at = 5L, pinned = true)
+    private val gone = RailEntry.Tab(RailTabUi(2L, "Gone", app.granger.UiText.Raw("A removed pack"), 'G', available = false, current = false), at = 4L)
     private val cats = RailEntry.Search("cats", at = 3L)
     private val chat = RailEntry.Chat(7L, "About owls", at = 2L)
     private val blue = RailEntry.Play("album:Blue", "Blue", at = 1L)

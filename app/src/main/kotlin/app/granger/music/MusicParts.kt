@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Albums
 import app.granger.core.library.PackStatus
@@ -78,11 +79,14 @@ data class MusicNav(
  * sorted and compared in English), so only their display goes through resources.
  */
 @Composable
-internal fun shownName(name: String): String = when (name) {
-    Albums.UNKNOWN_ARTIST -> stringResource(R.string.music_unknown_artist)
-    Albums.UNKNOWN_ALBUM -> stringResource(R.string.music_unknown_album)
-    MediaNames.UNKNOWN_GENRE -> stringResource(R.string.music_unknown_genre)
-    else -> name
+internal fun shownName(name: String): String = shownNameText(name).resolve()
+
+/** [shownName] for code without Compose: a placeholder's resource, else the name itself. */
+internal fun shownNameText(name: String): UiText = when (name) {
+    Albums.UNKNOWN_ARTIST -> UiText.Res(R.string.music_unknown_artist)
+    Albums.UNKNOWN_ALBUM -> UiText.Res(R.string.music_unknown_album)
+    MediaNames.UNKNOWN_GENRE -> UiText.Res(R.string.music_unknown_genre)
+    else -> UiText.Raw(name)
 }
 
 /** Display names, with the "Unknown …" fallbacks applied here rather than stored. */

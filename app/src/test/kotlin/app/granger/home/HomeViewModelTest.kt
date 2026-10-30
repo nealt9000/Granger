@@ -97,7 +97,7 @@ class HomeViewModelTest {
     }
 
     private fun tab(id: Long, title: String) =
-        RailEntry.Tab(RailTabUi(id, title, "A pack", title.first(), available = true, current = false), at = id)
+        RailEntry.Tab(RailTabUi(id, title, app.granger.UiText.Raw("A pack"), title.first(), available = true, current = false), at = id)
 
     private fun installWikipedia() {
         library.packList.value = listOf(wikipedia)
@@ -139,19 +139,19 @@ class HomeViewModelTest {
     @Test fun continueLeavesOutMainPagesAndIndexPages() = runTest(main.dispatcher) {
         installWikipedia()
         fun page(id: Long, packId: String, path: String) =
-            RailEntry.Tab(RailTabUi(id, path, "A pack", 'P', available = true, current = false, packId = packId, path = path), at = id)
+            RailEntry.Tab(RailTabUi(id, path, app.granger.UiText.Raw("A pack"), 'P', available = true, current = false, packId = packId, path = path), at = id)
         val cat = page(1, "u1", "Cat")
         val front = page(2, "u1", "index")
         val user = page(3, "se", "users/7/apocalypse")
         val tags = page(4, "se", "tags")
         val question = page(5, "se", "questions/12/the-end")
-        val book = RailEntry.Tab(RailTabUi(6, "Emma", "Jane Austen", 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
+        val book = RailEntry.Tab(RailTabUi(6, "Emma", app.granger.UiText.Raw("Jane Austen"), 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
         rail.value = RailUi(listOf(cat, front, user, tags, question, book))
         assertThat(viewModel().ui.value.continueCards).containsExactly(cat, question, book).inOrder()
     }
 
     @Test fun continueCardsIsPureOverTheMainPaths() {
-        val front = RailEntry.Tab(RailTabUi(1, "WikEM", "WikEM", 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
+        val front = RailEntry.Tab(RailTabUi(1, "WikEM", app.granger.UiText.Raw("WikEM"), 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
         assertThat(HomeViewModel.continueCards(RailUi(listOf(front)))).containsExactly(front)
         assertThat(HomeViewModel.continueCards(RailUi(listOf(front)), mapOf("w" to "Main_Page"))).isEmpty()
     }

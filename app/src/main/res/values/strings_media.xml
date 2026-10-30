@@ -56,4 +56,12 @@
     <string name="media_documents_summary">Music and audiobooks</string>
     <string name="media_documents_music">Music</string>
     <string name="media_documents_audiobooks">Audiobooks</string>
+    <!-- Android Auto's folders. -->
+    <string name="media_auto_recent">Recent</string>
+    <string name="media_auto_music">Music</string>
+    <string name="media_auto_audiobooks">Audiobooks</string>
+    <!-- An empty Android Auto folder. -->
+    <string name="media_auto_nothing">Nothing here yet</string>
+    <!-- A download already part-way onto storage that's now gone (an SD card taken out); %1$s is its title. -->
+    <string name="media_unmounted">%1$s is on storage that isn\'t available right now. Put it back to finish it, or remove it first.</string>
 </resources>
