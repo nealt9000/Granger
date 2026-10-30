@@ -1,5 +1,7 @@
 package app.granger.reader
 
+import androidx.annotation.StringRes
+import app.granger.R
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
@@ -27,7 +29,7 @@ class PackDocuments(
 ) {
     sealed interface Opened {
         data class Ready(val book: Book) : Opened
-        data class Failed(val message: String) : Opened
+        data class Failed(@StringRes val message: Int) : Opened
     }
 
     /** Each pack's list of documents, file name to title ([NautilusDatabase]), read once; empty for a pack without one. */
@@ -39,21 +41,21 @@ class PackDocuments(
      * the entry nor the PDF has a title ([PackDocumentTitle]).
      */
     suspend fun open(packId: String, path: String, linkText: String = ""): Opened = withContext(io) {
-        val archive = archiveOf(packId) ?: return@withContext Opened.Failed("Couldn't open this PDF: the pack isn't readable.")
-        val entry = archive.entry(path) ?: return@withContext Opened.Failed("Couldn't open this PDF: it isn't in this pack.")
+        val archive = archiveOf(packId) ?: return@withContext Opened.Failed(R.string.reader_pdf_unreadable_pack)
+        val entry = archive.entry(path) ?: return@withContext Opened.Failed(R.string.reader_pdf_not_in_pack)
         val file = fileFor(packId, entry.path)
         if (!(file.isFile && file.length() == entry.sizeBytes)) {
             val free = file.parentFile?.apply { mkdirs() }?.usableSpace ?: 0L
-            if (free < entry.sizeBytes) return@withContext Opened.Failed("Couldn't open this PDF: not enough space for it.")
+            if (free < entry.sizeBytes) return@withContext Opened.Failed(R.string.reader_pdf_no_space)
             val partial = File(file.parentFile, ".incoming-${file.name}")
             if (!archive.copyTo(entry.path, partial) || !partial.renameTo(file)) {
                 partial.delete()
-                return@withContext Opened.Failed("Couldn't open this PDF: copying it out of the pack failed.")
+                return@withContext Opened.Failed(R.string.reader_pdf_copy_failed)
             }
         }
         val listedTitle = listedTitles(packId, archive)[entry.path.removePrefix(NautilusDatabase.FILES)].orEmpty()
         val book = bookshelf.registerPackDocument(packId, entry.path, entry.title, file, linkText, listedTitle)
-            ?: return@withContext Opened.Failed("Couldn't open this PDF: it is damaged or protected.")
+            ?: return@withContext Opened.Failed(R.string.reader_pdf_damaged)
         Opened.Ready(book)
     }
 

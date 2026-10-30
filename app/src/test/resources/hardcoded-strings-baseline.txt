@@ -40,9 +40,6 @@ app/src/main/kotlin/app/granger/player/ReaderTab.kt	8
 app/src/main/kotlin/app/granger/player/SleepTimerSheet.kt	2
 app/src/main/kotlin/app/granger/player/SpeedSheet.kt	4
 app/src/main/kotlin/app/granger/player/VoiceButton.kt	1
-app/src/main/kotlin/app/granger/reader/ReaderBars.kt	8
-app/src/main/kotlin/app/granger/reader/ReaderScreen.kt	8
-app/src/main/kotlin/app/granger/reader/WikiContents.kt	2
 app/src/main/kotlin/app/granger/readiness/ReadinessScreen.kt	10
 app/src/main/kotlin/app/granger/research/ResearchScreen.kt	23
 app/src/main/kotlin/app/granger/search/SearchScreen.kt	3
