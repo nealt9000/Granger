@@ -39,9 +39,9 @@
 
 ### Task 2: Generate the dialogue set
 
-- [ ] About 320 dialogue passages per voice (`script3`, ~31 min quoted each; 15 Gutenberg books incl. Treasure Island, Peter Pan, The Railway Children, Five Children and It, Alice; Neal's Mary Poppins is in copyright), `v4/round3.sh`. Was: about 400 dialogue passages per voice (aim: 25–30 min of quoted speech after QC), on the Mac overnight, with retakes for failures as in round 2.
-- [ ] Cut, QC, and fold in round 2's 140 quoted lines, cut the same way.
-- [ ] Build `dataset/<voice>-2slot/`: all round-2 narration plus the new narration pieces as `narration`, all dialogue pieces as `dialogue`. Record the minutes per slot.
+- [x] About 320 dialogue passages per voice (`script3`, ~31 min quoted each; 15 Gutenberg books incl. Treasure Island, Peter Pan, The Railway Children, Five Children and It, Alice; Neal's Mary Poppins is in copyright), `v4/round3.sh`. Was: about 400 dialogue passages per voice (aim: 25–30 min of quoted speech after QC), on the Mac overnight, with retakes for failures as in round 2.
+- [x] Cut and QC (take 0, then takes 1–2 for lines with a failed piece). Round 2's 140 quoted lines are left out of narration rather than cut: the new pieces already reach the target. *Done 2026-10-30 00:09; most WER failures are names Whisper misspells (Pumblechook, Mavis).*
+- [x] Build `dataset/<voice>-2slot/`: all round-2 narration plus the new narration pieces as `narration`, all dialogue pieces as `dialogue`. Record the minutes per slot. *Nanny: narration 1915 clips / 172.5 min, dialogue 484 / 29.6 min (515 MB). Professor: narration 1770 / 151.6 min, dialogue 417 / 25.2 min (451 MB).*
 
 ### Task 3: Train
 
