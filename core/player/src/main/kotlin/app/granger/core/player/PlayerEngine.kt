@@ -203,6 +203,9 @@ class PlayerEngine(
     private var mix = prefs.getFloat(PlayerSettingsKeys.MIX_LEVEL, PlayerSettingsKeys.DEFAULT_MIX).coerceIn(0f, 1f)
     private val voiceOverMusic: Boolean get() = mode == Mode.VOICE && musicUnder != null
 
+    /** The voice is reading (or about to): music started now goes under it. A paused voice gives way to the music instead. */
+    private val voiceReading: Boolean get() = mode == Mode.VOICE && loaded && player.playWhenReady && !voiceEnded
+
     /** The second player, for tests. */
     internal val musicUnderPlayer: ExoPlayer? get() = musicUnder
 
@@ -216,6 +219,12 @@ class PlayerEngine(
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) = refresh()
         override fun onPlaybackStateChanged(playbackState: Int) = refresh()
+
+        // With the voice paused, the music's own play is all that keeps the ticker (and the Music tab's bar) going.
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            updateTicker()
+            refresh()
+        }
 
         override fun onPlayerError(error: PlaybackException) {
             val p = musicUnder ?: return
@@ -508,7 +517,7 @@ class PlayerEngine(
         val list = found.map { it.second }
         val q = MusicQueue(list.map { it.id }, start, random)
         if (shuffle) q.setShuffle(true)
-        if (mode == Mode.VOICE && loaded && musicUnderFactory != null) {
+        if (voiceReading && musicUnderFactory != null) {
             // Music started while the voice reads goes under it (Plan V2); the voice keeps reading.
             sourceKey = source.key
             startMusicUnder(q, list.associateBy { it.id }, positionMs = 0L, play = focus.request(speech = true))
@@ -600,7 +609,7 @@ class PlayerEngine(
             PlayerMode.MUSIC -> {
                 // Music while the voice reads goes under it (Plan V2): the Music tab's play starts the saved queue there.
                 if (voiceOverMusic) return@submit musicUnderPlay()
-                if (this.mode == Mode.VOICE && loaded && musicUnderFactory != null) {
+                if (voiceReading && musicUnderFactory != null) {
                     val state = playback.musicState() ?: return@submit
                     val restored = restoreQueue(state, random) { media.track(it) } ?: return@submit
                     sourceKey = state.sourceKey
@@ -810,6 +819,13 @@ class PlayerEngine(
         } else {
             musicUnderPlay()
         }
+    }
+
+    override fun seekMusic(positionMs: Long) = submit {
+        val p = musicUnder ?: return@submit
+        if (!voiceOverMusic) return@submit
+        p.seekTo(positionMs.coerceAtLeast(0L))
+        refresh()
     }
 
     override fun nextMusic() = submit {

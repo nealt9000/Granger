@@ -149,7 +149,12 @@ class EbookReaderViewModel(
     private val pdfOutline: (File) -> List<OutlineEntry> = PdfInspector::outline,
     /** A PDF's links within itself as PdfBox reads them, for a link PDFium found but couldn't place (called on [io]). */
     private val pdfLinks: (File) -> List<PdfLink> = PdfLinks::read,
+    /** Whether a PDF is in colour, which Night leaves in its own colours (called on [io]; the app passes PdfColour). */
+    private val pdfColour: (File) -> Boolean = { false },
 ) : ViewModel() {
+    /** The open PDF is in colour ([pdfColour]): Night doesn't invert it. */
+    @Volatile private var colour = false
+
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
         private set
@@ -243,7 +248,13 @@ class EbookReaderViewModel(
             val targetUsed = savedState.get<Boolean>(TARGET_CONSUMED) == true
             val initial = StartLocator.choose(opened, saved?.locatorJson, target.takeUnless { targetUsed })
             val pdf = opened.conformsTo(Profile.PDF)
-            val factory = if (pdf) BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight, prefsStore.prefs.value.pdfFitWidth) else BookNavigator.Epub(EpubNavigatorFactory(opened))
+            // A comic or a magazine keeps its colours in Night; only black-and-white pages are inverted.
+            colour = pdf && withContext(io) { pdfColour(file) }
+            val factory = if (pdf) {
+                BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight && !colour, prefsStore.prefs.value.pdfFitWidth)
+            } else {
+                BookNavigator.Epub(EpubNavigatorFactory(opened))
+            }
             bookId = book.id
             if (pdf) pdfFile = file
             navigatorFactory = factory
@@ -276,7 +287,7 @@ class EbookReaderViewModel(
         viewModelScope.launch {
             prefsStore.prefs.collect { prefs ->
                 (navigatorFactory as? BookNavigator.Pdf)?.let {
-                    it.night = prefs.pdfNight
+                    it.night = prefs.pdfNight && !colour
                     it.fitWidth = prefs.pdfFitWidth
                 }
                 _state.update { it.copy(prefs = prefs) }

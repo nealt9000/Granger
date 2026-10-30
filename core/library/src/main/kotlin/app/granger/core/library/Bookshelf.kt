@@ -2,6 +2,7 @@ package app.granger.core.library
 
 import androidx.room.withTransaction
 import app.granger.core.books.BookMeta
+import app.granger.core.books.ComicToPdf
 import app.granger.core.books.DrmKind
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
@@ -67,8 +68,8 @@ interface Bookshelf {
     /**
      * Registers a finished download of [origin] with source reference [ref]; null if the file isn't a readable EPUB
      * or PDF.
-     * A `.txt` file is converted to an EPUB beside it (null if it is over the size limit). Non-blank [details]
-     * fields win over the EPUB's own metadata.
+     * A `.txt` file is converted to an EPUB beside it (null if it is over the size limit), and a comic (`.cbz`,
+     * `.cbr`) to a PDF of its pages. Non-blank [details] fields win over the book's own metadata.
      */
     suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails? = null): Book?
 
@@ -133,9 +134,10 @@ class RoomBookshelf(
 
     override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? =
         withContext(io) {
-            if (isPdfName(file.name)) {
-                val meta = (PdfInspector.inspect(file) as? Inspection.Ok)?.meta ?: return@withContext null
-                return@withContext register(BookIds.of(origin, ref), origin, ref, file, meta, details, BookFormat.PDF)
+            val pdf = if (ComicToPdf.isComicName(file.name)) convertComic(file) ?: return@withContext null else file
+            if (isPdfName(pdf.name)) {
+                val meta = (PdfInspector.inspect(pdf) as? Inspection.Ok)?.meta ?: return@withContext null
+                return@withContext register(BookIds.of(origin, ref), origin, ref, pdf, meta, details, BookFormat.PDF)
             }
             val epub = if (file.extension.equals("txt", ignoreCase = true)) {
                 convertText(file, details?.title?.takeIf { it.isNotBlank() }) ?: return@withContext null
@@ -168,6 +170,12 @@ class RoomBookshelf(
         } finally {
             partial.delete()
         }
+    }
+
+    /** Converts the comic [archive] to `<name>.pdf` beside it; null if it can't be read. Leaves the archive in place. */
+    private fun convertComic(archive: File): File? {
+        val target = File(archive.parentFile, archive.nameWithoutExtension + ".pdf")
+        return target.takeIf { ComicToPdf.convert(archive, it) }
     }
 
     override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = withContext(io) {
@@ -275,13 +283,15 @@ class RoomBookshelf(
             .distinctBy { it.absolutePath }
             .flatMap { strays(it, knownPaths) }
         val archiveDirs = dirs.map { File(it, "archive-org") }
-        // A verified text download whose conversion never happened (the process died) is converted now.
+        // A verified text or comic download whose conversion never happened (the process died) is converted now.
         for (dir in archiveDirs) {
             for (txt in dir.listFiles().orEmpty()) {
-                if (!txt.isFile || !txt.extension.equals("txt", ignoreCase = true) || txt.name.startsWith(".incoming-")) continue
-                if (File(dir, txt.nameWithoutExtension + ".epub").exists()) continue
+                if (!txt.isFile || txt.name.startsWith(".incoming-")) continue
+                val comic = ComicToPdf.isComicName(txt.name)
+                if (!comic && !txt.extension.equals("txt", ignoreCase = true)) continue
+                if (File(dir, txt.nameWithoutExtension + if (comic) ".pdf" else ".epub").exists()) continue
                 try {
-                    convertText(txt, null)
+                    if (comic) convertComic(txt) else convertText(txt, null)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -317,10 +327,13 @@ class RoomBookshelf(
         val book = dao.get(id) ?: return@withContext true
         val file = File(book.filePath)
         if (file.exists() && !file.delete()) return@withContext false
-        // A converted text book's source stays beside it; left alone, the next refresh() would convert it again.
-        if (book.origin == BookOrigin.ARCHIVE_ORG && book.format == BookFormat.EPUB) {
-            val txt = File(file.parentFile, file.nameWithoutExtension + ".txt")
-            if (txt.exists() && !txt.delete()) return@withContext false
+        // A converted text or comic book's source stays beside it; left alone, the next refresh() would convert it again.
+        if (book.origin == BookOrigin.ARCHIVE_ORG) {
+            val sources = if (book.format == BookFormat.EPUB) listOf("txt") else listOf("cbz", "cbr")
+            for (extension in sources) {
+                val source = File(file.parentFile, file.nameWithoutExtension + ".$extension")
+                if (source.exists() && !source.delete()) return@withContext false
+            }
         }
         book.coverPath?.let { File(it).delete() }
         db.withTransaction {

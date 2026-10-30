@@ -55,6 +55,8 @@ object ArchiveDownloads {
         val extension = when {
             pdfCopy || offer.kind == TextKind.PDF -> "pdf"
             offer.kind == TextKind.EPUB -> "epub"
+            // Filed as a PDF of its pages beside it (Bookshelf.addDownloaded); the name only has to say "comic".
+            offer.kind == TextKind.COMIC -> if (file.format.contains("RAR") || file.name.endsWith(".cbr", ignoreCase = true)) "cbr" else "cbz"
             else -> "txt"
         }
         val title = item.title.ifBlank { identifier }

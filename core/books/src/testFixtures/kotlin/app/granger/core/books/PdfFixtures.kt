@@ -131,6 +131,18 @@ object PdfFixtures {
         return out
     }
 
+    /** [text] behind a user password: it can't be opened without one. */
+    fun passwordLocked(dir: File, name: String = "secret.pdf"): File {
+        val plain = text(dir, "plain-$name")
+        val out = File(dir, name)
+        PDDocument.load(plain).use { doc ->
+            doc.protect(StandardProtectionPolicy("owner", "user", AccessPermission()).apply { encryptionKeyLength = 128 })
+            doc.save(out)
+        }
+        plain.delete()
+        return out
+    }
+
     /** The first 300 bytes of [text]: the header and little else (PdfBox recovers a file cut much later). */
     fun truncated(dir: File, name: String = "broken.pdf"): File {
         val whole = text(dir, "whole-$name")

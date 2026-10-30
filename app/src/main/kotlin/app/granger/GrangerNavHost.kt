@@ -33,6 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.granger.archive.ArchiveScreen
+import app.granger.core.library.PdfColour
 import app.granger.core.player.NowPlaying
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.player.PlayerMode
@@ -501,12 +502,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 skipForwardSeconds = { container.playerPrefs.getInt(PlayerSettingsKeys.SKIP_FORWARD_S, PlayerViewModel.DEFAULT_SKIP_S) },
                 audiobooks = container.shelves.audioShelves.map { it.audiobooks },
                 chooseVoice = container.voicePrefs::setVoice,
+                focus = container.playerFocus,
             )
         }
     } else {
         null
     }
     val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
+    val miniUi by (player?.mini ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
 
     val entry by nav.currentBackStackEntryAsState()
     val destination = entry?.destination
@@ -762,8 +765,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         } else {
             {
                 MiniPlayer(
-                    playerUi,
-                    onPlayPause = player::playPause,
+                    miniUi,
+                    onPlayPause = player::miniPlayPause,
                     onSecondary = player::secondary,
                     onOpen = { nav.togglePlayer(player) },
                     skipBackS = player.skipBackS(),
@@ -928,6 +931,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             restore = container::restoreBook, savedPlace = container.voicePlace,
+                            pdfColour = PdfColour::isColour,
                         )
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
@@ -1121,13 +1125,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<ListenRoute> {
                 ListenScreen(
-                    viewModel { if (Features.PLAYER) ListenViewModel(container.shelves, container.playerHub) else ListenViewModel(container.shelves) },
+                    viewModel {
+                        if (Features.PLAYER) ListenViewModel(container.shelves, container.playerHub, container.playerFocus) else ListenViewModel(container.shelves)
+                    },
                     ListenActions(
                         onOpenPlayer = ::openPlayer,
                         // As the widget's play: the live item, else what the card says would resume.
                         onPlayPause = {
                             if (Features.PLAYER) scope.launch {
-                                playFromWidget(container.playerHub, resumeVoice = { key, title -> container.playResumer.resume(key, title) })
+                                playFromWidget(
+                                    container.playerHub, container.playerFocus,
+                                    resumeVoice = { key, title -> container.playResumer.resume(key, title) },
+                                )
                             }
                         },
                         onOpenMusic = { id -> nav.navigate(MusicRoute(id)) },

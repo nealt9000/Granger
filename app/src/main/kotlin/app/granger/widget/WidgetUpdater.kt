@@ -2,6 +2,8 @@ package app.granger.widget
 
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
+import app.granger.player.PlayerFocus
+import app.granger.player.oneSide
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -14,11 +16,14 @@ import kotlinx.coroutines.launch
  * saved state; never while the saved state is still unread with nothing loaded. Progress is drawn as of the last render, so the widget never wakes the phone every second (Review
  * Focus 6). A failed render is logged and the next change tries again.
  */
-class WidgetUpdater(hub: PlayerHub, scope: CoroutineScope, render: suspend (WidgetModel) -> Unit) {
+class WidgetUpdater(hub: PlayerHub, scope: CoroutineScope, focus: PlayerFocus = PlayerFocus(), render: suspend (WidgetModel) -> Unit) {
     init {
         scope.launch {
             // Nothing loaded and the saved state not read yet (a cold start): that's not "Nothing playing", so wait.
-            combine(hub.ui, hub.saved) { ui, saved -> if (ui.now == NowPlaying.Idle && !saved.loaded) null else WidgetModel.of(ui, saved) }
+            // With music under the voice, the side the mini-player shows (PlayerFocus).
+            combine(hub.ui, hub.saved, focus.prefersMusic) { ui, saved, music ->
+                if (ui.now == NowPlaying.Idle && !saved.loaded) null else WidgetModel.of(ui.oneSide(music), saved)
+            }
                 .filterNotNull()
                 .distinctUntilChanged { old, new -> old.sameButProgress(new) }
                 .collect { model ->

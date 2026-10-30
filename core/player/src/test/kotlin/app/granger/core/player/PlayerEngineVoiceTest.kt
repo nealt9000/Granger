@@ -449,6 +449,50 @@ class PlayerEngineVoiceTest {
         assertThat(under.currentMediaItemIndex).isEqualTo(1)
     }
 
+    @Test fun musicUnderAPausedVoiceKeepsItsBarMoving() {
+        val e = mixEngine()
+        e.readOverMusic(rig.songs())
+        e.playPause()                                   // the voice pauses; the music plays on under it
+        rig.idle()
+        val before = (e.ui.value.now as NowPlaying.Voice).musicPositionMs
+        run(e.musicUnderPlayer!!).untilPosition(0, before + 3_000)
+        rig.idle()
+        val now = e.ui.value.now as NowPlaying.Voice
+        assertThat(now.musicPlaying).isTrue()
+        assertThat(now.musicPositionMs).isGreaterThan(before)   // ticks, not only on the next play or pause
+    }
+
+    @Test fun theMusicTabsSeekMovesTheMusicUnderTheVoiceNotTheVoice() {
+        val e = mixEngine()
+        e.readOverMusic(rig.songs())
+        e.playPause()
+        rig.idle()
+        val sentence = e.voiceProgress.value?.utterance?.text
+        e.seekMusic(30_000L)
+        rig.idle()
+        assertThat(e.musicUnderPlayer!!.currentPosition).isAtLeast(30_000L)
+        assertThat((e.ui.value.now as NowPlaying.Voice).musicPositionMs).isAtLeast(30_000L)
+        assertThat(e.voiceProgress.value?.utterance?.text).isEqualTo(sentence)
+    }
+
+    @Test fun startingMusicWhileTheVoiceIsPausedPlaysItOnItsOwn() {
+        val e = mixEngine()
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        e.playPause()
+        rig.idle()
+        val ids = rig.songs()
+        e.playTracks(ids, 1, shuffle = false, source = PlaySource("songs", "Songs"))
+        rig.idle()
+        val now = e.ui.value.now
+        assertThat(now).isInstanceOf(NowPlaying.Music::class.java)
+        assertThat((now as NowPlaying.Music).track.id).isEqualTo(ids[1])
+        assertThat(e.musicUnderPlayer).isNull()
+        assertThat(e.player.volume).isWithin(0.001f).of(1f)
+        assertThat(e.ui.value.playing).isTrue()
+        assertThat(runBlocking { rig.playback.voiceState("text:article") }).isNotNull()   // the book keeps its place
+    }
+
     @Test fun theVoiceEndingHandsTheModeBackToMusicAtFullVolume() {
         val e = mixEngine()
         val ids = rig.songs()
@@ -551,7 +595,7 @@ class PlayerEngineVoiceTest {
         assertThat(e.musicUnderPlayer!!.volume).isWithin(0.001f).of(0.6f)
     }
 
-    @Test fun restoreAfterDeathBringsTheVoiceBackAloneAndTheMusicTabPutsTheQueueUnderIt() {
+    @Test fun restoreAfterDeathBringsTheVoiceBackAloneAndTheMusicTabPlaysTheQueueOnItsOwn() {
         val first = mixEngine()
         val ids = rig.songs()
         first.readOverMusic(ids)
@@ -567,10 +611,12 @@ class PlayerEngineVoiceTest {
         assertThat(second.musicUnderPlayer).isNull()
         assertThat(second.ui.value.playing).isFalse()
 
+        // The voice is paused, so the Music tab's play doesn't go under it: the music is the mode, the book keeps its place.
         second.activate(PlayerMode.MUSIC)
         rig.idle()
-        assertThat((second.ui.value.now as NowPlaying.Voice).music?.track?.id).isEqualTo(ids[0])
-        assertThat(second.musicUnderPlayer!!.playWhenReady).isTrue()
-        assertThat(second.ui.value.playing).isFalse()                           // the voice stays paused until play
+        assertThat((second.ui.value.now as NowPlaying.Music).track.id).isEqualTo(ids[0])
+        assertThat(second.musicUnderPlayer).isNull()
+        assertThat(second.ui.value.playing).isTrue()
+        assertThat(runBlocking { rig.playback.voiceState("text:article") }).isNotNull()
     }
 }

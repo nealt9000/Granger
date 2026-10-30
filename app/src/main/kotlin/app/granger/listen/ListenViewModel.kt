@@ -10,6 +10,8 @@ import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
 import app.granger.library.KindRow
 import app.granger.library.listenKinds
+import app.granger.player.PlayerFocus
+import app.granger.player.oneSide
 import app.granger.widget.WidgetModel
 import app.granger.widget.resumeMode
 import kotlinx.coroutines.flow.Flow
@@ -76,7 +78,8 @@ class ListenViewModel(
     player: Flow<PlayerUi> = flowOf(PlayerUi.IDLE),
     saved: Flow<SavedModes> = flowOf(SavedModes.UNKNOWN),
 ) : ViewModel() {
-    constructor(shelves: Shelves, hub: PlayerHub) : this(shelves, hub.ui, hub.saved)
+    constructor(shelves: Shelves, hub: PlayerHub, focus: PlayerFocus = PlayerFocus()) :
+        this(shelves, combine(hub.ui, focus.prefersMusic, PlayerUi::oneSide), hub.saved)
 
     // The card ignores the position, so the player's ticks don't redraw the screen.
     private val card = combine(player, saved, ::nowPlayingCard).distinctUntilChanged()

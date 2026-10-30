@@ -152,10 +152,9 @@ class ArchiveViewModelTest {
         assertThat(ui.tab).isEqualTo(ArchiveTab.BROWSE)
         assertThat(ui.total).isEqualTo(1341)
         assertThat(ui.rows.first().identifier).isEqualTo("HistoryOfTheFrickCompany")
-        // The search-time guess: OCR text, with a PDF alongside.
+        // The search-time guess: an Image Container PDF means the uploader's PDF, which beats the OCR text.
         val preview = ui.rows.first().preview as Offer.Download
-        assertThat(preview.kind).isEqualTo(TextKind.OCR_TEXT)
-        assertThat(preview.pdf).isNotNull()
+        assertThat(preview.kind).isEqualTo(TextKind.PDF)
         assertThat(ui.canLoadMore).isTrue()
         assertThat(ui.error).isNull()
     }

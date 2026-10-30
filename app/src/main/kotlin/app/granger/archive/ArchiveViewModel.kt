@@ -639,6 +639,7 @@ class ArchiveViewModel(
             "epub" -> TextKind.EPUB
             "txt" -> TextKind.TEXT
             "pdf" -> TextKind.PDF
+            "cbz", "cbr" -> TextKind.COMIC
             else -> return null
         }
         return Offer.Download(PLACEHOLDER, kind)
