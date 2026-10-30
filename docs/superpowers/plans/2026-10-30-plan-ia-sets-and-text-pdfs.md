@@ -167,42 +167,42 @@ Two parts, in order: sets first, since they are smaller and shippable alone, the
 
 ### Task 0: Corpus and fixtures
 
-- [ ] Save the metadata JSON of `BatmanTheDarkKnightReturns03of041986` and `national-geographic-magazine-complete-pdf` as `core/archive` test fixtures (trim NatGeo to 40 files, keeping the specials and a year boundary).
-- [ ] Find and list in `tools/pdf-eval/corpus.tsv` about 25 archive.org items, with kinds and sizes and nothing downloaded into the repo:
+- [x] Save the metadata JSON of `BatmanTheDarkKnightReturns03of041986` and `national-geographic-magazine-complete-pdf` as `core/archive` test fixtures (trim NatGeo to 40 files, keeping the specials and a year boundary).
+- [ ] (Moved to the start of part 2, 2026-10-30.) Find and list in `tools/pdf-eval/corpus.tsv` about 25 archive.org items, with kinds and sizes and nothing downloaded into the repo:
   - comic runs (CBR and CBZ, one with a RAR5 part);
   - magazine runs;
   - a book in volumes;
   - one item whose "parts" are chapters;
   - born-digital PDFs: a novel, verse (the Odyssey), a textbook with figures, a two-column paper, a footnoted history, a cookbook with tables, a children's picture book;
   - two scans' Text PDFs, as controls.
-- [ ] Commit: "Plan IA Task 0: archive.org sets and text PDFs to test against".
+- [x] Commit: "Plan IA Task 0: archive.org sets and text PDFs to test against".
 
 ### Task 1: Parts and natural order (`core`)
 
-- [ ] Move `PAGE_ORDER` to `core/text` `NaturalOrder` and point `ComicToPdf` at it, with no change in behaviour (its test moves too).
-- [ ] `ArchiveParts.of(item, kind)` (Decisions 1 and 2), with cleaned titles. `choose()` fills `Offer.Download.parts`, with its file still the first part.
-- [ ] Tests: Batman gives 4 parts in order with titles "01 (of 04) (1986)"…; NatGeo (fixture) gives 40 parts in date order, specials last; a 3-page errata PDF beside a 300-page book is not a part; a single-file item has one part; derived EPUBs are never parts.
-- [ ] Commit.
+- [x] Move `PAGE_ORDER` to `core/text` `NaturalOrder` and point `ComicToPdf` at it, with no change in behaviour (its test moves too).
+- [x] `ArchiveParts.of(item, kind)` (Decisions 1 and 2), with cleaned titles. `choose()` fills `Offer.Download.parts`, with its file still the first part.
+- [x] Tests: Batman gives 4 parts in order with titles "01 (of 04) (1986)"…; NatGeo (fixture) gives 40 parts in date order, specials last; a 3-page errata PDF beside a 300-page book is not a part; a single-file item has one part; derived EPUBs are never parts.
+- [x] Commit.
 
 ### Task 2: Getting and filing parts
 
-- [ ] `ArchiveDownloads.spec(item, part)`, part item ids, files and sidecars (Decision 3), and `identifierOf` for `~` and `#`.
-- [ ] Get all queues the missing parts as group `archive-org:<id>`. Get part n queues one.
+- [x] `ArchiveDownloads.spec(item, part)`, part item ids, files and sidecars (Decision 3), and `identifierOf` for `~` and `#`.
+- [x] Get all queues the missing parts as group `archive-org:<id>`. Get part n queues one.
 - [x] Filing: a part is placed in its set's collection (Decision 4), created on the first part. (A legacy `<id>` book stays as it is: Decision 3.)
-- [ ] `refresh()` files stray parts (`<id>~nn.*`) with their sidecars. `remove()` and Remove all take parts and their sources.
-- [ ] Tests (Robolectric, `BookshelfTest`, `ArchiveViewModelTest`):
+- [x] `refresh()` files stray parts (`<id>~nn.*`) with their sidecars. `remove()` and Remove all take parts and their sources.
+- [x] Tests (Robolectric, `BookshelfTest`, `ArchiveViewModelTest`):
   - two of four parts get, land in the set's collection, titled and ordered;
   - Get all skips the installed ones;
   - the legacy book counts as part 1;
   - removing the last part removes the empty set collection;
   - a user's move of the set survives a new part arriving.
-- [ ] Commit.
+- [x] Commit.
 
 ### Task 3: The sheet for a set
 
-- [ ] The set line, Get all · total (with the large prompt on the total), and Choose parts (Decision 5): a filter over 20 parts, and each row's status and action, from the downloads ledger and the shelf.
-- [ ] The search row shows "n parts" once known.
-- [ ] Tests: `ArchiveItemSheetTest` for the line, buttons and row states; the large prompt for NatGeo's total.
+- [x] The set line, Get all · total (with the large prompt on the total), and Choose parts (Decision 5): a filter over 20 parts, and each row's status and action, from the downloads ledger and the shelf.
+- [x] The search row shows "n parts" once known.
+- [x] Tests: `ArchiveItemSheetTest` for the line, buttons and row states; the large prompt for NatGeo's total.
 - [ ] Phone check (say on the channel first):
   - get Batman's parts 2 and 3 one at a time, then Get all (only part 4 is fetched);
   - the set in the Library, in order;
