@@ -1,5 +1,6 @@
 package app.granger.research
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -81,29 +82,18 @@ import app.granger.research.ResearchViewModel.TurnUi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val PLACEHOLDER = "Ask about anything in your library"
-private const val DECLINED = "Not in your library."
-private const val UNVERIFIED = "Couldn't answer from these passages."
-private const val MEDICAL = AnswerText.MEDICAL
-
-private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
-private const val MODELS_MISSING = "Ask needs the librarian on this phone. Get it in Settings → Models."
-private const val INTRO = "Ask a question; the librarian answers from your library and shows where each part came from. " +
-    "It's a preview: it can be wrong, so check the sources."
-private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
-private const val SEARCH_FAILED = "Couldn't search your library. Try again."
-private const val INTERRUPTED = "Stopped before an answer."
-private const val SOURCE_GONE = "That source is no longer in your library."
-
 /** How long a source card stays outlined after its citation is tapped. */
 private const val FLASH_MS = 1_500L
 
-private fun Stage.label() = when (this) {
-    Stage.LOADING_MODEL -> "Loading the model…"
-    Stage.SEARCHING -> "Searching your library…"
-    Stage.RANKING -> "Ranking passages…"
-    Stage.WRITING -> "Writing…"
-}
+@Composable
+private fun Stage.label() = stringResource(
+    when (this) {
+        Stage.LOADING_MODEL -> R.string.research_stage_loading_model
+        Stage.SEARCHING -> R.string.research_stage_searching
+        Stage.RANKING -> R.string.research_stage_ranking
+        Stage.WRITING -> R.string.research_stage_writing
+    },
+)
 
 /** One row of the thread; [key] keeps rows apart in the list and lets a citation find its source card. */
 private sealed interface ThreadRow {
@@ -175,6 +165,7 @@ fun ResearchScreen(
     val list = rememberLazyListState()
     val rows = rows(state)
     var flashing by remember { mutableStateOf<String?>(null) }
+    val sourceGone = stringResource(R.string.research_source_gone)
     // Follow the reply as it streams, unless the user has scrolled up to read. Saved, like the list's position, so
     // rotation or Back from a citation leaves the thread where the user was.
     var follow by rememberSaveable { mutableStateOf(true) }
@@ -193,14 +184,14 @@ fun ResearchScreen(
     fun open(turnId: Long, n: Int) {
         scope.launch {
             when (val target = viewModel.open(turnId, n)) {
-                CitationTarget.Gone -> snackbar.showSnackbar(SOURCE_GONE)
+                CitationTarget.Gone -> snackbar.showSnackbar(sourceGone)
                 else -> onOpenCitation(target)
             }
         }
     }
 
     fun play(turnId: Long, n: Int) {
-        scope.launch { if (!viewModel.play(turnId, n)) snackbar.showSnackbar(SOURCE_GONE) }
+        scope.launch { if (!viewModel.play(turnId, n)) snackbar.showSnackbar(sourceGone) }
     }
 
     fun cite(turnId: Long, n: Int) {
@@ -266,22 +257,22 @@ fun ResearchScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
                 title = { AskTitle() },
                 actions = {
                     // Recent chats live behind their own button, not in the new chat (Neal, U3a walkthrough).
                     val others = state.recentChats.filter { it.id != state.chatId }
                     if (others.isNotEmpty()) {
-                        IconButton(onClick = { chatsOpen = true }) { Icon(painterResource(R.drawable.ic_history), contentDescription = "Chats") }
+                        IconButton(onClick = { chatsOpen = true }) { Icon(painterResource(R.drawable.ic_history), contentDescription = stringResource(R.string.research_chats)) }
                     }
-                    IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = "New chat") }
+                    IconButton(onClick = onNewChat) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.research_new_chat)) }
                     var menu by remember { mutableStateOf(false) }
                     Box {
-                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
-                                text = { Text("Delete chat") },
+                                text = { Text(stringResource(R.string.research_delete_chat)) },
                                 enabled = state.chatId != null,
                                 onClick = {
                                     menu = false
@@ -298,8 +289,8 @@ fun ResearchScreen(
             Column(Modifier.navigationBarsPadding().imePadding()) {
                 when (state.readiness) {
                     ResearchReadiness.MODELS_MISSING ->
-                        if (librarian != null) LibrarianNotice(librarian, onGetLibrarian) else Notice(MODELS_MISSING, "Get models", onGetModels)
-                    ResearchReadiness.UNSUPPORTED -> Notice("Ask needs a phone with 6 GB of memory.")
+                        if (librarian != null) LibrarianNotice(librarian, onGetLibrarian) else Notice(stringResource(R.string.research_models_missing), stringResource(R.string.research_get_models), onGetModels)
+                    ResearchReadiness.UNSUPPORTED -> Notice(stringResource(R.string.research_unsupported))
                     ResearchReadiness.READY -> Unit
                 }
                 state.quote?.let { QuoteCard(it, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) }
@@ -339,7 +330,7 @@ fun ResearchScreen(
                         onPlay = if (viewModel.canPlay && row.passage.kind == SourceKind.MEDIA) ({ play(row.turnId, row.n) }) else null,
                     )
                     ThreadRow.Intro -> Text(
-                        INTRO,
+                        stringResource(R.string.research_intro),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
@@ -371,16 +362,16 @@ private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, runnin
             onValueChange = { viewModel.input = it },
             modifier = Modifier.weight(1f).focusRequester(requester),
             enabled = enabled,
-            placeholder = { Text(PLACEHOLDER) },
+            placeholder = { Text(stringResource(R.string.research_placeholder)) },
             maxLines = 5,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { if (!running && canSend) viewModel.send() }),
         )
         if (running) {
-            TextButton(onClick = viewModel::stop) { Text("Stop") }
+            TextButton(onClick = viewModel::stop) { Text(stringResource(R.string.common_stop)) }
         } else {
             IconButton(onClick = viewModel::send, enabled = enabled && canSend) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.research_send))
             }
         }
     }
@@ -402,7 +393,7 @@ private fun AnswerBlock(
 ) {
     val turn = ui.turn
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (ui.medical) Banner(MEDICAL)
+        if (ui.medical) Banner(stringResource(R.string.research_medical))
         when (turn.outcome) {
             TurnOutcome.PENDING -> {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -415,9 +406,9 @@ private fun AnswerBlock(
                 AnswerBody(turn.answer, onCite)
                 if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
             }
-            TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
+            TurnOutcome.UNVERIFIED -> Text(stringResource(R.string.research_unverified), style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
-                Text(DECLINED, style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.research_declined), style = MaterialTheme.typography.bodyLarge)
                 if (ui.guessing) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
@@ -425,30 +416,30 @@ private fun AnswerBlock(
                     }
                 }
                 if (ui.guessFailed) {
-                    Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
-                    OutlinedButton(onClick = onReadiness) { Text("Readiness") }
+                    Text(stringResource(R.string.research_model_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                    OutlinedButton(onClick = onReadiness) { Text(stringResource(R.string.research_readiness)) }
                 }
                 val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
                 if (guessText.isNotBlank()) GuessCard(guessText)
                 if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
                 if (!ui.guessing) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = onSearch) { Text("Search instead") }
-                        if (ui.offersGuess) OutlinedButton(onClick = onGuess, enabled = !running) { Text("Best guess") }
+                        OutlinedButton(onClick = onSearch) { Text(stringResource(R.string.research_search_instead)) }
+                        if (ui.offersGuess) OutlinedButton(onClick = onGuess, enabled = !running) { Text(stringResource(R.string.research_best_guess)) }
                     }
                 }
             }
             TurnOutcome.INTERRUPTED -> {
-                Text(INTERRUPTED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
+                Text(stringResource(R.string.research_interrupted), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedButton(onClick = onRetry, enabled = !running) { Text(stringResource(R.string.common_retry)) }
             }
             TurnOutcome.SEARCH_FAILED -> {
-                Text(SEARCH_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
-                OutlinedButton(onClick = onRetry, enabled = !running) { Text("Retry") }
+                Text(stringResource(R.string.research_search_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                OutlinedButton(onClick = onRetry, enabled = !running) { Text(stringResource(R.string.common_retry)) }
             }
             TurnOutcome.FAILED -> {
-                Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
-                OutlinedButton(onClick = onReadiness) { Text("Readiness") }
+                Text(stringResource(R.string.research_model_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                OutlinedButton(onClick = onReadiness) { Text(stringResource(R.string.research_readiness)) }
             }
         }
     }
@@ -476,7 +467,7 @@ private fun GuessCard(text: String) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            BEST_GUESS_LABEL,
+            stringResource(R.string.research_best_guess_label),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
@@ -509,7 +500,7 @@ private fun QuoteCard(passage: Passage, modifier: Modifier = Modifier) {
             .padding(12.dp),
     ) {
         Text(
-            "“${passage.text.trim()}”",
+            stringResource(R.string.research_quoted, passage.text.trim()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 4,
@@ -528,7 +519,7 @@ private fun QuoteCard(passage: Passage, modifier: Modifier = Modifier) {
 @Composable
 private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> Unit, onPlay: (() -> Unit)? = null) {
     val shape = RoundedCornerShape(8.dp)
-    val byline = sourceByline(passage)
+    val byline = sourceByline(passage, stringResource(R.string.research_source_album), stringResource(R.string.research_source_audiobook))
     Column(
         Modifier
             .padding(horizontal = 16.dp)
@@ -551,7 +542,7 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
                 IconButton(onClick = onPlay, modifier = Modifier.size(36.dp)) {
                     Icon(
                         painterResource(R.drawable.ic_play),
-                        contentDescription = "Play ${passage.heading.ifBlank { passage.sourceTitle }}",
+                        contentDescription = stringResource(R.string.research_play_source, passage.heading.ifBlank { passage.sourceTitle }),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -599,7 +590,7 @@ internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onDelet
     var confirm by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Text(
-            "Recent chats",
+            stringResource(R.string.research_recent_chats),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
@@ -612,20 +603,20 @@ internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onDelet
                 )
             }
         }
-        TextButton(onClick = { confirm = true }, modifier = Modifier.padding(horizontal = 8.dp)) { Text("Delete all chats") }
+        TextButton(onClick = { confirm = true }, modifier = Modifier.padding(horizontal = 8.dp)) { Text(stringResource(R.string.research_delete_all_chats)) }
     }
     if (confirm) {
         AlertDialog(
             onDismissRequest = { confirm = false },
-            title = { Text("Delete all chats?") },
-            text = { Text("Every chat goes, this one too, with its answers and sources.") },
+            title = { Text(stringResource(R.string.research_delete_all_chats_title)) },
+            text = { Text(stringResource(R.string.research_delete_all_chats_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirm = false
                     onDeleteAll()
-                }) { Text("Delete all") }
+                }) { Text(stringResource(R.string.research_delete_all)) }
             },
-            dismissButton = { TextButton(onClick = { confirm = false }) { Text("Keep") } },
+            dismissButton = { TextButton(onClick = { confirm = false }) { Text(stringResource(R.string.common_keep)) } },
         )
     }
 }
@@ -634,9 +625,9 @@ internal fun ChatsSheet(chats: List<ChatSummary>, onDismiss: () -> Unit, onDelet
 @Composable
 internal fun AskTitle() {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("Ask")
+        Text(stringResource(R.string.research_title))
         Text(
-            "Preview",
+            stringResource(R.string.research_preview),
             Modifier
                 .padding(start = 10.dp)
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
@@ -654,7 +645,7 @@ internal fun LibrarianNotice(ui: LibrarianUi, onGet: () -> Unit) {
         when {
             ui.downloading -> {
                 Text(
-                    "Downloading the librarian · ${formatBytes(ui.bytesDone)} of ${formatBytes(ui.bytes)}",
+                    stringResource(R.string.research_librarian_downloading, formatBytes(ui.bytesDone), formatBytes(ui.bytes)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -664,16 +655,16 @@ internal fun LibrarianNotice(ui: LibrarianUi, onGet: () -> Unit) {
                 )
             }
             ui.failed -> {
-                Text("The librarian's download stopped.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OutlinedButton(onClick = onGet) { Text("Try again") }
+                Text(stringResource(R.string.research_librarian_stopped), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedButton(onClick = onGet) { Text(stringResource(R.string.research_try_again)) }
             }
             else -> {
                 Text(
-                    "Ask needs the librarian on this phone: ${ui.items.first().title.substringBefore(" (")}, ${formatBytes(ui.bytes)}.",
+                    stringResource(R.string.research_librarian_needed, ui.items.first().title.substringBefore(" ("), formatBytes(ui.bytes)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Button(onClick = onGet) { Text("Get the librarian · ${formatBytes(ui.bytes)}") }
+                Button(onClick = onGet) { Text(stringResource(R.string.research_get_librarian, formatBytes(ui.bytes))) }
             }
         }
     }

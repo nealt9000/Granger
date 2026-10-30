@@ -38,7 +38,10 @@ class Librarian(
         state.catalog?.let { uiOf(models(it, dense), records) }
     }
 
-    /** Queues what isn't on the phone, retries what stopped; a problem comes back as a sentence, else null. */
+    /**
+     * Queues what isn't on the phone, retries what stopped; a problem comes back as a sentence, else null.
+     * Still English: GrangerNavHost toasts the String, so this becomes UiText when Plan L1 Task 8 converts that file.
+     */
     suspend fun get(): String? {
         val items = catalog.state.value.catalog?.let { models(it, dense) }.orEmpty()
         if (items.isEmpty()) return null

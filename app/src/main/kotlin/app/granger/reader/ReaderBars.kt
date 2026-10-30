@@ -1,5 +1,8 @@
 package app.granger.reader
 
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import app.granger.UiText
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -56,14 +59,8 @@ import app.granger.shell.ChromeSlideMs
 import app.granger.shell.LocalShellOverlay
 import app.granger.shell.SafeDrawingIgnoringBars
 
-/**
- * What the wiki's main-page button says (TalkBack): the pack's main page, not Home, which is the app's (Plan U3b
- * Decision 5), though the icon is a house.
- */
-const val MAIN_PAGE = "Main page"
-
 /** An entry in a reader's ⋯ menu. */
-data class ReaderMenuItem(val label: String, val onClick: () -> Unit)
+data class ReaderMenuItem(@StringRes val label: Int, val onClick: () -> Unit)
 
 /**
  * What the reader bars offer (Plan U3c Decision 4), the same for the wiki, e-books and PDFs: a null hides its
@@ -85,7 +82,7 @@ data class ReaderBarActions(
     val onContents: (() -> Unit)? = null,
     val onSearch: (() -> Unit)? = null,
     /** What TalkBack reads for Search: "Search Wikipedia", "Search in book". */
-    val searchLabel: String = "Search",
+    val searchLabel: UiText = UiText.Res(R.string.common_search),
     /** Aa: the text sheet. */
     val onTextSettings: (() -> Unit)? = null,
     val onBookmark: (() -> Unit)? = null,
@@ -173,7 +170,7 @@ fun ReaderTopBar(title: String, actions: ReaderBarActions, modifier: Modifier = 
             Modifier.fillMaxWidth().windowInsetsPadding(ReaderTopBarInsets).height(ReaderTopBarHeight).padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = actions.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+            IconButton(onClick = actions.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
             Text(
                 title,
                 Modifier.weight(1f).padding(horizontal = 4.dp).testTag(ReaderBarTags.TITLE),
@@ -181,17 +178,20 @@ fun ReaderTopBar(title: String, actions: ReaderBarActions, modifier: Modifier = 
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
             )
-            actions.onMainPage?.let { IconButton(onClick = it) { Icon(Icons.Filled.Home, contentDescription = MAIN_PAGE) } }
+            actions.onMainPage?.let { IconButton(onClick = it) {
+                // The pack's main page, not Home, which is the app's (Plan U3b Decision 5), though the icon is a house.
+                Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.reader_main_page))
+            } }
             actions.onListen?.let {
                 IconButton(onClick = it, modifier = Modifier.testTag(ListenTags.LISTEN)) {
-                    Icon(painterResource(R.drawable.ic_headphones), contentDescription = "Listen")
+                    Icon(painterResource(R.drawable.ic_headphones), contentDescription = stringResource(R.string.reader_listen))
                 }
             }
             if (actions.menu.isNotEmpty()) Box {
-                IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     actions.menu.forEach { item ->
-                        DropdownMenuItem(text = { Text(item.label) }, onClick = { menuOpen = false; item.onClick() })
+                        DropdownMenuItem(text = { Text(stringResource(item.label)) }, onClick = { menuOpen = false; item.onClick() })
                     }
                 }
             }
@@ -209,19 +209,20 @@ fun ReaderBottomBar(actions: ReaderBarActions, modifier: Modifier = Modifier, pr
         Column(Modifier.windowInsetsPadding(ReaderBottomBarInsets).padding(vertical = 4.dp)) {
             if (progress != null) Box(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) { progress() }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                actions.onContents?.let { IconButton(onClick = it) { Icon(Icons.Filled.Menu, contentDescription = "Contents") } }
-                actions.onSearch?.let { IconButton(onClick = it) { Icon(Icons.Filled.Search, contentDescription = actions.searchLabel) } }
+                actions.onContents?.let { IconButton(onClick = it) { Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.reader_contents)) } }
+                actions.onSearch?.let { IconButton(onClick = it) { Icon(Icons.Filled.Search, contentDescription = actions.searchLabel.resolve()) } }
                 actions.onTextSettings?.let {
-                    IconButton(onClick = it, Modifier.semantics { contentDescription = "Text settings" }) {
-                        Text("Aa", style = MaterialTheme.typography.titleMedium)
+                    val textSettings = stringResource(R.string.reader_text_settings)
+                    IconButton(onClick = it, Modifier.semantics { contentDescription = textSettings }) {
+                        Text("Aa", style = MaterialTheme.typography.titleMedium) // l10n-ignore: the Aa glyph is the button's icon
                     }
                 }
                 actions.onBookmark?.let {
                     IconButton(onClick = it) {
                         if (actions.bookmarked) {
-                            Icon(Icons.Filled.Star, contentDescription = "Remove bookmark", tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Filled.Star, contentDescription = stringResource(R.string.reader_remove_bookmark), tint = MaterialTheme.colorScheme.primary)
                         } else {
-                            Icon(painterResource(R.drawable.ic_star_border), contentDescription = "Add bookmark")
+                            Icon(painterResource(R.drawable.ic_star_border), contentDescription = stringResource(R.string.reader_add_bookmark))
                         }
                     }
                 }

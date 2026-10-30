@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The wiki reader and the bars every reader shares (Plan L1). -->
+
+    <!-- TalkBack for the wiki's house button: the pack's own main page, not the app's Home. -->
+    <string name="reader_main_page">Main page</string>
+    <!-- TalkBack for the top bar's headphones button: read this page aloud. -->
+    <string name="reader_listen">Listen</string>
+    <!-- TalkBack for the bottom bar's buttons. -->
+    <string name="reader_contents">Contents</string>
+    <string name="reader_text_settings">Text settings</string>
+    <string name="reader_remove_bookmark">Remove bookmark</string>
+    <string name="reader_add_bookmark">Add bookmark</string>
+
+    <!-- The wiki reader's ⋯ menu. -->
+    <string name="reader_random_article">Random article</string>
+    <string name="reader_find_in_page">Find in page</string>
+    <string name="reader_no_random_article">This pack has no articles to pick from.</string>
+
+    <!-- The pack search's prompt. %1$s is the pack's title, such as Wikipedia. -->
+    <string name="reader_search_pack">Search %1$s</string>
+    <string name="reader_search_this_pack">Search this pack</string>
+    <string name="reader_close_search">Close search</string>
+    <string name="reader_no_pack_matches">No matches in this pack.</string>
+
+    <!-- Find in page. %1$d is the match shown, %2$d how many there are. -->
+    <string name="reader_find_count">%1$d of %2$d</string>
+    <string name="reader_find_no_matches">No matches</string>
+    <string name="reader_close_find">Close find</string>
+    <string name="reader_previous_match">Previous match</string>
+    <string name="reader_next_match">Next match</string>
+
+    <!-- The chip that brings the page back to the sentence being read aloud. -->
+    <string name="reader_follow">Follow</string>
+    <string name="reader_no_app_for_link">No app on this phone can open that link.</string>
+
+    <!-- The wiki's contents side sheet. -->
+    <string name="reader_contents_title">Contents</string>
+    <string name="reader_no_sections">This page has no sections.</string>
+
+    <!-- The text-selection menu's own actions, before the system's Copy. -->
+    <!-- Ask Research about the selected text. -->
+    <string name="reader_select_ask">Ask</string>
+    <!-- Start reading aloud at the selected text. -->
+    <string name="reader_select_read_from_here">Read from here</string>
+
+    <!-- Why a pack couldn't be shown. -->
+    <string name="reader_pack_unavailable">This pack is missing or damaged. Check that its file is still on the phone or SD card.</string>
+    <string name="reader_no_main_page">This pack has no main page. Use Search to open an article.</string>
+    <string name="reader_tab_gone">This bookmark was removed.</string>
+    <!-- Shown in place of a page a link points to that the pack doesn't have. -->
+    <string name="reader_page_not_in_pack">This page isn\'t in this pack.</string>
+
+    <!-- Why a PDF in a pack couldn't be opened. -->
+    <string name="reader_pdf_unreadable_pack">Couldn\'t open this PDF: the pack isn\'t readable.</string>
+    <string name="reader_pdf_not_in_pack">Couldn\'t open this PDF: it isn\'t in this pack.</string>
+    <string name="reader_pdf_no_space">Couldn\'t open this PDF: not enough space for it.</string>
+    <string name="reader_pdf_copy_failed">Couldn\'t open this PDF: copying it out of the pack failed.</string>
+    <string name="reader_pdf_damaged">Couldn\'t open this PDF: it is damaged or protected.</string>
+</resources>

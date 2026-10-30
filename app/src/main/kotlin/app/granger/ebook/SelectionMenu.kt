@@ -1,19 +1,21 @@
 package app.granger.ebook
 
+import androidx.annotation.StringRes
+import app.granger.R
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import app.granger.Features
 
 /** What the text-selection menu offers, in this order. */
-enum class SelectionAction(val label: String) {
-    COPY("Copy"),
-    HIGHLIGHT("Highlight"),
-    NOTE("Note"),
-    DEFINE("Define"),
-    SEARCH("Search"),
-    RESEARCH("Ask"),
-    READ_ALOUD("Read from here"),
+enum class SelectionAction(@StringRes val label: Int) {
+    COPY(R.string.ebook_select_copy),
+    HIGHLIGHT(R.string.ebook_select_highlight),
+    NOTE(R.string.ebook_select_note),
+    DEFINE(R.string.ebook_select_define),
+    SEARCH(R.string.common_search),
+    RESEARCH(R.string.ebook_select_ask),
+    READ_ALOUD(R.string.ebook_select_read_from_here),
 }
 
 /** A menu tap, with the menu to close once the screen has read the selection and acted. */

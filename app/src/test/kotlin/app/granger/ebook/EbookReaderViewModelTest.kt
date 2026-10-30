@@ -1,5 +1,6 @@
 package app.granger.ebook
 
+import app.granger.UiText
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
@@ -741,8 +742,9 @@ class EbookReaderViewModelTest {
         val ui = vm.state.value.search
         assertThat(ui.running).isFalse()
         assertThat(ui.results.map { it.markId }).containsExactly(1L, 2L, null).inOrder()
-        assertThat(ui.results[0].chapter).startsWith("Your highlight")
-        assertThat(ui.results[1].chapter).startsWith("Your note")
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        assertThat(ui.results[0].chapter.resolve(context)).startsWith("Your highlight")
+        assertThat(ui.results[1].chapter.resolve(context)).startsWith("Your note")
         val text = ui.results[2]
         assertThat(text.before).isEqualTo("a ")
         assertThat(text.match).isEqualTo("fire")
@@ -798,7 +800,7 @@ class EbookReaderViewModelTest {
         assertThat(vm.state.value.searchHit).isNotNull()
         vm.search("water")
         assertThat(vm.state.value.searchHit).isNull()
-        vm.goToHit(BookSearchRow(hit("c003.xhtml", "", "x", ""), "", "", "x", "", null))
+        vm.goToHit(BookSearchRow(hit("c003.xhtml", "", "x", ""), UiText.Raw(""), "", "x", "", null))
         vm.open(Panel.SEARCH)
         vm.open(null)
         assertThat(vm.state.value.searchHit).isNull()
