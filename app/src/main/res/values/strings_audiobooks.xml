@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Audiobooks shelf and a book's page (Plan L1). Chapters and bookmarks share the player's words (strings_player.xml). -->
+
+    <!-- The unscoped shelf's title (a collection's name otherwise). -->
+    <string name="audiobooks_all">All audiobooks</string>
+    <!-- A book with no author tag. -->
+    <string name="audiobooks_unknown_author">Unknown author</string>
+    <string name="audiobooks_none_yet">No audiobooks yet</string>
+    <!-- The row of books part-way through. -->
+    <string name="audiobooks_continue">Continue</string>
+
+    <!-- Sort orders. -->
+    <string name="audiobooks_sort_title">Title</string>
+    <string name="audiobooks_sort_author">Author</string>
+    <!-- By when each book was last played. -->
+    <string name="audiobooks_sort_recent">Recent</string>
+
+    <!-- A book's state. -->
+    <string name="audiobooks_missing">Missing</string>
+    <string name="audiobooks_finished">Finished</string>
+    <string name="audiobooks_not_started">Not started</string>
+    <!-- How far through a book. %1$d is a percentage. -->
+    <string name="audiobooks_percent">%1$d%%</string>
+    <!-- %1$d is a percentage, %2$s the time left (1:23:45). -->
+    <string name="audiobooks_percent_left">%1$d%% · %2$s left</string>
+    <!-- %1$s is the narrator's name. -->
+    <string name="audiobooks_read_by">Read by %1$s</string>
+    <string name="audiobooks_missing_files">Missing: its files aren\'t on this phone</string>
+
+    <!-- The book page's main button. -->
+    <string name="audiobooks_play_from_start">Play from start</string>
+    <string name="audiobooks_resume">Resume</string>
+    <string name="audiobooks_mark_finished">Mark as finished</string>
+    <string name="audiobooks_mark_unfinished">Mark as unfinished</string>
+
+    <!-- Bookmarks on the book page. -->
+    <string name="audiobooks_no_bookmarks">No bookmarks yet. Add them from the player.</string>
+    <string name="audiobooks_edit_note">Edit note</string>
+    <string name="audiobooks_delete_bookmark">Delete bookmark?</string>
+    <!-- A bookmark's note: the dialog's title and the field's label. -->
+    <string name="audiobooks_note">Note</string>
+    <string name="audiobooks_save">Save</string>
+</resources>
