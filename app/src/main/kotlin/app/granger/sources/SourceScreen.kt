@@ -10,10 +10,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -376,82 +385,136 @@ internal fun CatalogItemRow(
     row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit = {},
     onChooseFlavour: (String) -> Unit = {},
 ) {
-    val status = row.status
-    val opens = row.packId != null
     var licenceShown by rememberSaveable(row.id) { mutableStateOf(false) }
+    val toggleLicence = if (row.license.isNotBlank()) Modifier.clickable { licenceShown = !licenceShown } else Modifier
+    if (row.flavours.isNotEmpty()) {
+        FlavouredRow(row, licenceShown, toggleLicence, onGet, onCancel, onRetry, onRemove, onOpen, onChooseFlavour)
+        return
+    }
+    val status = row.status
     ListItem(
-        modifier = if (row.license.isNotBlank()) Modifier.clickable { licenceShown = !licenceShown } else Modifier,
+        modifier = toggleLicence,
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
                 if (row.description.isNotBlank()) {
                     Text(row.description, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                if (row.flavours.isNotEmpty()) {
-                    FlowRow(Modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        for (flavour in row.flavours) {
-                            FilterChip(
-                                selected = flavour.chosen,
-                                onClick = { onChooseFlavour(flavour.id) },
-                                label = {
-                                    Column {
-                                        Text(flavour.label, style = MaterialTheme.typography.labelMedium)
-                                        Text(formatBytes(flavour.sizeBytes), style = MaterialTheme.typography.labelSmall)
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    Text(row.details, style = MaterialTheme.typography.bodySmall)
-                } else {
-                    Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
-                }
+                Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
                 if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall)
                 row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall) }
-                when {
-                    row.installedFlavour != null && (row.switches || status == ItemStatus.Installed || status == ItemStatus.UpdateAvailable) ->
-                        Text("Installed: ${row.installedFlavour}", color = MaterialTheme.colorScheme.primary)
-                    else -> ItemStatusText(status)
-                }
-                if (row.installedFlavour != null && status == ItemStatus.UpdateAvailable) Text("A newer version is available")
+                ItemStatusText(status)
             }
         },
-        trailingContent = {
-            if (row.switches) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (opens) TextButton(onClick = onOpen) { Text("Open") }
-                    TextButton(onClick = onGet) { Text("Switch") }
-                }
-                return@ListItem
-            }
-            when (status) {
-                ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text("Get") }
-                ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (opens) TextButton(onClick = onOpen) { Text("Open") } else TextButton(onClick = onRemove) { Text("Remove") }
-                    TextButton(onClick = onGet) { Text("Update") }
-                    if (opens) RemoveMenu(row.title, onRemove)
-                }
-                is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
-                is ItemStatus.Failed -> Row {
-                    TextButton(onClick = onCancel) { Text("Cancel") }
-                    TextButton(onClick = onRetry) { Text("Retry") }
-                }
-                ItemStatus.Installed -> if (opens) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        TextButton(onClick = onOpen) { Text("Open") }
-                        RemoveMenu(row.title, onRemove)
-                    }
-                } else {
-                    TextButton(onClick = onRemove) { Text("Remove") }
-                }
-                is ItemStatus.Partial -> Row {
-                    TextButton(onClick = onRemove) { Text("Remove") }
-                    TextButton(onClick = onGet) { Text("Get the rest") }
-                }
-                ItemStatus.NeedsMoreMemory, is ItemStatus.InLibrary -> Unit
-            }
-        },
+        trailingContent = { RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen) },
     )
+}
+
+/**
+ * A pack with flavours (Plan KB walkthrough, 360 dp): the title on its own line, wrapping rather than cut short; the
+ * description; the flavours as radio rows, "With pictures · 7.0 GB", the one on the phone marked Installed; the
+ * details; then the actions on their own line, so neither the title nor the choices are squeezed by them.
+ */
+@Composable
+private fun FlavouredRow(
+    row: ItemRow, licenceShown: Boolean, toggleLicence: Modifier,
+    onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit,
+    onChooseFlavour: (String) -> Unit,
+) {
+    val variant = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)) {
+        // The title and description show the full licence on a tap, as a compact row does; the choices are their own.
+        Column(Modifier.fillMaxWidth().then(toggleLicence)) {
+            Text(row.title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            if (row.description.isNotBlank()) {
+                Text(row.description, style = MaterialTheme.typography.bodyMedium, color = variant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        Column(Modifier.padding(vertical = 4.dp).selectableGroup().testTag(SourceTags.FLAVOURS)) {
+            for (flavour in row.flavours) FlavourOption(flavour) { onChooseFlavour(flavour.id) }
+        }
+        Text(row.details, style = MaterialTheme.typography.bodySmall, color = variant)
+        if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall, color = variant)
+        row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall, color = variant) }
+        // Installed is on its choice; what's left is a download's progress or trouble, or an update.
+        if (row.status != ItemStatus.Installed && !row.switches) {
+            CompositionLocalProvider(LocalContentColor provides variant) { ItemStatusText(row.status) }
+        }
+        Row(Modifier.fillMaxWidth().testTag(SourceTags.ACTIONS), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+            RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen)
+        }
+    }
+}
+
+/** One flavour: a radio row read as "With pictures, 7.0 GB, installed". */
+@Composable
+private fun FlavourOption(flavour: FlavourChoice, onChoose: () -> Unit) {
+    val size = formatBytes(flavour.sizeBytes)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = flavour.chosen, role = Role.RadioButton, onClick = onChoose)
+            .clearAndSetSemantics {
+                contentDescription = listOfNotNull(flavour.label, size, "installed".takeIf { flavour.installed }).joinToString(", ")
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = flavour.chosen, onClick = null)
+        Text(
+            "${flavour.label} · $size",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 12.dp).weight(1f),
+        )
+        if (flavour.installed) {
+            Text("Installed", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+/** What a row's buttons are for its status: Get, Open, Switch, Update, Cancel, Retry, Remove. */
+@Composable
+private fun RowActions(row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit) {
+    val opens = row.packId != null
+    if (row.switches) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (opens) TextButton(onClick = onOpen) { Text("Open") }
+            TextButton(onClick = onGet) { Text("Switch") }
+        }
+        return
+    }
+    when (val status = row.status) {
+        ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text("Get") }
+        ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
+            if (opens) TextButton(onClick = onOpen) { Text("Open") } else TextButton(onClick = onRemove) { Text("Remove") }
+            TextButton(onClick = onGet) { Text("Update") }
+            if (opens) RemoveMenu(row.title, onRemove)
+        }
+        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
+        is ItemStatus.Failed -> Row {
+            TextButton(onClick = onCancel) { Text("Cancel") }
+            TextButton(onClick = onRetry) { Text("Retry") }
+        }
+        ItemStatus.Installed -> if (opens) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = onOpen) { Text("Open") }
+                RemoveMenu(row.title, onRemove)
+            }
+        } else {
+            TextButton(onClick = onRemove) { Text("Remove") }
+        }
+        is ItemStatus.Partial -> Row {
+            TextButton(onClick = onRemove) { Text("Remove") }
+            TextButton(onClick = onGet) { Text("Get the rest") }
+        }
+        ItemStatus.NeedsMoreMemory, is ItemStatus.InLibrary -> Unit
+    }
+}
+
+/** Test tags for a pack row with flavours. */
+internal object SourceTags {
+    const val FLAVOURS = "source-flavours"
+    const val ACTIONS = "source-actions"
 }
 
 /** A row's overflow, holding Remove (which still asks first). */

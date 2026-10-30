@@ -81,8 +81,8 @@ data class ItemRow(
     val opensFamily: String? = null,
 )
 
-/** One flavour of a pack's row: "With pictures 6.9 GB". */
-data class FlavourChoice(val id: String, val label: String, val sizeBytes: Long, val chosen: Boolean)
+/** One flavour of a pack's row: "With pictures · 6.9 GB"; [installed] when it is the one on the phone. */
+data class FlavourChoice(val id: String, val label: String, val sizeBytes: Long, val chosen: Boolean, val installed: Boolean = false)
 
 /**
  * A Get that asks first (Plan KB Decision 9): [title] is [sizeBytes], [freeBytes] free on [volumeLabel]; [smaller] is
@@ -490,7 +490,9 @@ class SourceViewModel(
             val switches = installed != null && installed.id != entry.id && status(entry) == ItemStatus.NotInstalled
             return base.copy(
                 title = group.title,
-                flavours = group.flavours.map { FlavourChoice(it.id, KiwixList.flavourLabel(it.flavour), it.downloadBytes, it.id == entry.id) },
+                flavours = group.flavours.map {
+                    FlavourChoice(it.id, KiwixList.flavourLabel(it.flavour), it.downloadBytes, it.id == entry.id, installed = it.id == installed?.id)
+                },
                 installedFlavour = installed?.let { KiwixList.flavourLabel(it.flavour).lowercase() },
                 switches = switches,
                 packId = base.packId ?: if (switches) installedPackId(installed!!, recordsById[installed.id].orEmpty(), packs) else null,

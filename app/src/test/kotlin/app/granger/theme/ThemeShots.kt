@@ -701,7 +701,10 @@ class ThemeShots {
         }
     }
 
-    /** The Kiwix list's rows in plain words (Plan KB Decisions 8 and 9): a pack with flavours, one installed, a plain one. */
+    /**
+     * The Kiwix list's rows in plain words (Plan KB Decisions 8 and 9, walkthrough layout): a pack with flavours as radio
+     * rows, one with a flavour installed and another chosen (Switch), a plain one kept compact.
+     */
     @Test fun kiwixRows() = shoot("kiwix-rows") {
         val flavours = listOf(
             app.granger.sources.FlavourChoice("top_maxi", "With pictures", 6_990_000_000, chosen = true),
@@ -719,7 +722,7 @@ class ThemeShots {
                 1_860_000_000, app.granger.sources.ItemStatus.NotInstalled, "u-med",
                 flavours = listOf(
                     app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
-                    app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false),
+                    app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
                 ),
                 installedFlavour = "no pictures", switches = true, license = "CC BY-SA 4.0",
             ),

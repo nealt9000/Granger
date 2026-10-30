@@ -818,6 +818,9 @@ class SourceViewModelTest {
         assertThat(other.installedFlavour).isEqualTo("no pictures")
         assertThat(other.switches).isTrue()
         assertThat(other.packId).isEqualTo("u-wikipedia_en_medicine_nopic")
+        // The choice on the phone is marked on its own radio row; the chosen one is another.
+        assertThat(other.flavours.filter { it.installed }.map { it.id }).containsExactly("wikipedia_en_medicine_nopic")
+        assertThat(other.flavours.filter { it.chosen }.map { it.id }).containsExactly("wikipedia_en_medicine_maxi")
     }
 
     @Test fun languagesDatesAndLicencesAreInPlainWords() {
