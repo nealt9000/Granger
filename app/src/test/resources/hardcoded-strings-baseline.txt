@@ -10,7 +10,6 @@ app/src/main/kotlin/app/granger/ebook/ReaderControls.kt	1
 app/src/main/kotlin/app/granger/ebook/TextSettingsSheet.kt	2
 app/src/main/kotlin/app/granger/home/AddFeedPanel.kt	6
 app/src/main/kotlin/app/granger/home/HomeScreen.kt	9
-app/src/main/kotlin/app/granger/home/ReadinessStrip.kt	1
 app/src/main/kotlin/app/granger/library/CollectionScreen.kt	26
 app/src/main/kotlin/app/granger/library/LibraryScreen.kt	8
 app/src/main/kotlin/app/granger/library/OrganizeDialogs.kt	16
@@ -45,7 +44,6 @@ app/src/main/kotlin/app/granger/player/VoiceButton.kt	1
 app/src/main/kotlin/app/granger/reader/ReaderBars.kt	8
 app/src/main/kotlin/app/granger/reader/ReaderScreen.kt	8
 app/src/main/kotlin/app/granger/reader/WikiContents.kt	2
-app/src/main/kotlin/app/granger/readiness/ReadinessScreen.kt	10
 app/src/main/kotlin/app/granger/research/ResearchScreen.kt	23
 app/src/main/kotlin/app/granger/settings/MediaSettingsSection.kt	14
 app/src/main/kotlin/app/granger/settings/SettingsScreen.kt	14

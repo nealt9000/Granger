@@ -1,5 +1,8 @@
 package app.granger.readiness
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
@@ -30,8 +33,15 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class ReadinessViewModelTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun UiText?.text() = this?.resolve(context)
     @get:Rule val main = MainDispatcherRule()
 
     private val downloads = FakeDownloads()
@@ -308,7 +318,7 @@ class ReadinessViewModelTest {
     }
 
     @Test fun shownSignalsCapAtThreeUntilShowAll() {
-        val signals = (1..5).map { Signal.Unsearchable("p$it", "Pack $it can't be searched: the pack has no index.") }
+        val signals = (1..5).map { Signal.Unsearchable("p$it", UiText.Raw("Pack $it can't be searched: the pack has no index.")) }
         assertThat(shownSignals(signals, showAll = false)).hasSize(SHOWN_SIGNALS)
         assertThat(shownSignals(signals, showAll = true)).hasSize(5)
         assertThat(shownSignals(signals.take(2), showAll = false)).hasSize(2)
@@ -317,10 +327,10 @@ class ReadinessViewModelTest {
     @Test fun coverageTextReadsTheStatus() {
         fun d(coverage: Coverage, installed: Long, essential: Long = 1_000, comprehensive: Long = 4_000) =
             DomainCoverage("x", "X", coverage, installed, essential, comprehensive, emptyList())
-        assertThat(coverageText(d(Coverage.NONE, 0))).isEqualTo("Nothing yet · the essentials are 1.0 KB")
-        assertThat(coverageText(d(Coverage.NONE, 0, essential = 0))).isEqualTo("Nothing yet")
-        assertThat(coverageText(d(Coverage.NONE, 500))).isEqualTo("No essentials yet · 500 B held · the essentials are 1.0 KB")
-        assertThat(coverageText(d(Coverage.BASIC, 1_200))).isEqualTo("Basic · 1.2 KB of 4.0 KB")
-        assertThat(coverageText(d(Coverage.COMPREHENSIVE, 5_000))).isEqualTo("Comprehensive · 5.0 KB")
+        assertThat(coverageText(d(Coverage.NONE, 0)).text()).isEqualTo("Nothing yet · the essentials are 1.0 KB")
+        assertThat(coverageText(d(Coverage.NONE, 0, essential = 0)).text()).isEqualTo("Nothing yet")
+        assertThat(coverageText(d(Coverage.NONE, 500)).text()).isEqualTo("No essentials yet · 500 B held · the essentials are 1.0 KB")
+        assertThat(coverageText(d(Coverage.BASIC, 1_200)).text()).isEqualTo("Basic · 1.2 KB of 4.0 KB")
+        assertThat(coverageText(d(Coverage.COMPREHENSIVE, 5_000)).text()).isEqualTo("Comprehensive · 5.0 KB")
     }
 }

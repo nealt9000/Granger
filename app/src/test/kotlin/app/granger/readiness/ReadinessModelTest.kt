@@ -1,5 +1,8 @@
 package app.granger.readiness
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import app.granger.SHA_A
 import app.granger.book
 import app.granger.core.catalog.BookEntry
@@ -15,9 +18,16 @@ import app.granger.pack
 import app.granger.record
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.time.LocalDate
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class ReadinessModelTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun UiText?.text() = this?.resolve(context)
     private fun packEntry(id: String, zimName: String, domain: String, size: Long, family: String = "wikipedia", fts: Boolean = true, snapshot: String = "2026-10-10") =
         PackEntry(
             id = id, title = "Title $id", category = "Reference", language = "eng", sizeBytes = size, sha256 = SHA_A,
@@ -76,7 +86,7 @@ class ReadinessModelTest {
         // Maps' only essential is a family token, so it has no signal (onboarding picks the region).
         val empty = r.signals.filterIsInstance<Signal.EmptyDomain>()
         assertThat(empty.map { it.domain }).containsExactly("medicine", "making", "reference", "thought").inOrder()
-        assertThat(empty.first().text).isEqualTo("Nothing yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
+        assertThat(empty.first().text.text()).isEqualTo("Nothing yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
         // The smallest missing Classics book of the domain is the one named.
         assertThat(empty.last().item.id).isEqualTo("gc-republic")
     }
@@ -86,7 +96,7 @@ class ReadinessModelTest {
         val r = report(packs = listOf(installed(medline)))
         assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.NONE)
         val signal = r.signals.filterIsInstance<Signal.EmptyDomain>().single { it.domain == "medicine" }
-        assertThat(signal.text).isEqualTo("No essentials yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
+        assertThat(signal.text.text()).isEqualTo("No essentials yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
     }
 
     @Test fun oneEssentialPackMakesBasic() {
@@ -170,10 +180,10 @@ class ReadinessModelTest {
         val stale = r.signals.filterIsInstance<Signal.Stale>().single()
         assertThat(stale.packId).isEqualTo("wikipedia_en_medicine_nopic")
         assertThat(stale.domain).isEqualTo("medicine")
-        assertThat(stale.text).isEqualTo("Title wikipedia_en_medicine_nopic is from 2025-01-10; a newer one is in the catalog.")
+        assertThat(stale.text.text()).isEqualTo("Title wikipedia_en_medicine_nopic is from Jan 10, 2025; a newer one is in the catalog.")
         val unsearchable = r.signals.filterIsInstance<Signal.Unsearchable>().single()
         assertThat(unsearchable.packId).isEqualTo("u-ifixit_en_all")
-        assertThat(unsearchable.text).isEqualTo("Title ifixit_en_all can't be searched: the pack has no index.")
+        assertThat(unsearchable.text.text()).isEqualTo("Title ifixit_en_all can't be searched: the pack has no index.")
     }
 
     @Test fun aMapWithoutAnIndexIsNotUnsearchable() {

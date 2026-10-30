@@ -1,5 +1,8 @@
 package app.granger.readiness
 
+import androidx.annotation.StringRes
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
@@ -19,6 +22,8 @@ import app.granger.sources.CatalogScope
 import app.granger.sources.scopeOf
 import java.net.URI
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /** How much of a knowledge domain the phone holds (spec §3.4). */
 enum class Coverage { NONE, BASIC, COMPREHENSIVE }
@@ -39,27 +44,27 @@ data class DomainCoverage(
 
 /** One sentence about a gap, with what the screen can do about it (spec §4). */
 sealed interface Signal {
-    val text: String
+    val text: UiText
 
     /** Nothing of the domain is installed; [item] is the smallest missing essential. */
-    data class EmptyDomain(val domain: String, val item: CatalogItem, override val text: String) : Signal
+    data class EmptyDomain(val domain: String, val item: CatalogItem, override val text: UiText) : Signal
 
     /** An installed pack over a year old whose catalog entry has a newer snapshot. */
-    data class Stale(val domain: String?, val packId: String, override val text: String) : Signal
+    data class Stale(val domain: String?, val packId: String, override val text: UiText) : Signal
 
     /** An installed pack without a full-text index: Search and Research can't look inside it. */
-    data class Unsearchable(val packId: String, override val text: String) : Signal
+    data class Unsearchable(val packId: String, override val text: UiText) : Signal
 }
 
-enum class Source(val title: String) {
-    KIWIX("Kiwix"),
-    GRANGER("Granger"),
-    ARCHIVE_ORG("Archive.org"),
-    LIBRIVOX("LibriVox"),
-    MY_BOOKS("My books"),
-    MODELS("AI models"),
-    VOICES("Voices"),
-    PHONE_MEDIA("Music & audiobooks on the phone"),
+enum class Source(@StringRes val title: Int) {
+    KIWIX(R.string.readiness_source_kiwix),
+    GRANGER(R.string.readiness_source_granger),
+    ARCHIVE_ORG(R.string.readiness_source_archive_org),
+    LIBRIVOX(R.string.readiness_source_librivox),
+    MY_BOOKS(R.string.readiness_source_my_books),
+    MODELS(R.string.readiness_source_models),
+    VOICES(R.string.readiness_source_voices),
+    PHONE_MEDIA(R.string.readiness_source_phone_media),
 }
 
 data class StorageRow(
@@ -200,8 +205,8 @@ object ReadinessModel {
         val empty = domains.filter { it.coverage == Coverage.NONE && it.missingEssential.isNotEmpty() }.map { d ->
             val item = d.missingEssential.first()
             // A domain can hold packs outside its tiers (Stack Overflow in Technology): its bar isn't empty, only its essentials.
-            val lead = if (d.installedBytes > 0L) "No essentials yet for" else "Nothing yet for"
-            Signal.EmptyDomain(d.id, item, "$lead ${d.title}. Get ${item.title}, ${formatBytes(item.downloadBytes)}.")
+            val text = if (d.installedBytes > 0L) R.string.readiness_signal_no_essentials_for else R.string.readiness_signal_nothing_for
+            Signal.EmptyDomain(d.id, item, UiText.Res(text, d.title, item.title, formatBytes(item.downloadBytes)))
         }
         val recordByPath = installed.associateBy { it.filePath }
         val stale = packs.sortedBy { it.title.lowercase() }.mapNotNull { pack ->
@@ -209,14 +214,17 @@ object ReadinessModel {
             val installedDate = parseDate(recordByPath[pack.filePath]?.snapshotDate ?: pack.date) ?: return@mapNotNull null
             val newest = parseDate(entry.snapshotDate) ?: return@mapNotNull null
             if (installedDate.plusDays(STALE_AFTER_DAYS) < today && newest > installedDate) {
-                Signal.Stale(entry.domain.ifBlank { null }, entry.id, "${pack.title} is from $installedDate; a newer one is in the catalog.")
+                Signal.Stale(
+                    entry.domain.ifBlank { null }, entry.id,
+                    UiText.Res(R.string.readiness_signal_stale, pack.title, installedDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))),
+                )
             } else {
                 null
             }
         }
         // A map has nothing to search by text: its missing index isn't a gap (Neal, U3a walkthrough).
         val unsearchable = packs.filterNot { it.hasFulltextIndex || resolved.entryOf(it)?.family == "maps" }.sortedBy { it.title.lowercase() }.map { pack ->
-            Signal.Unsearchable(pack.id, "${pack.title} can't be searched: the pack has no index.")
+            Signal.Unsearchable(pack.id, UiText.Res(R.string.readiness_signal_unsearchable, pack.title))
         }
         return empty + stale + unsearchable
     }
