@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The app's top-level screens (GrangerNavHost, MainActivity). -->
+    <!-- Said when a cited article's page is gone from its pack, so its main page opened instead. -->
+    <string name="app_page_moved">That page is no longer in this pack.</string>
+    <!-- A link in a book pack to a book the pack doesn't list. -->
+    <string name="app_book_not_in_pack">Couldn\'t open this book: it isn\'t in this pack\'s list.</string>
+</resources>

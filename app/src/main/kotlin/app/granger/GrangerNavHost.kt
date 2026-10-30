@@ -184,8 +184,6 @@ private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumR
 @Serializable data class AudiobookRoute(val audiobookId: String, val chapter: Int? = null)
 
 private fun NavDestination.isAudiobooks() = hasRoute<AudiobookShelfRoute>() || hasRoute<AudiobookRoute>()
-/** Said when a cited article's page is gone from its pack, so its main page opened instead (research spec §7). */
-const val PAGE_MOVED = "That page is no longer in this pack."
 
 /** An article; [fragment] scrolls its first page to that section (a cited passage's heading), and [quote] is marked there. */
 @Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null, val quote: String? = null)
@@ -651,7 +649,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         if (path.endsWith(".epub", ignoreCase = true)) {
             val book = container.gutenbergBooks.bookFor(packId, path)
             if (book == null) {
-                android.widget.Toast.makeText(appContext, "Couldn't open this book: it isn't in this pack's list.", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(appContext, R.string.app_book_not_in_pack, android.widget.Toast.LENGTH_LONG).show()
                 return
             }
             val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
@@ -1042,7 +1040,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             when (target) {
                                 is CitationTarget.Article -> {
                                     nav.showTab(tab, fragment = target.fragment, quote = target.quote)
-                                    if (target.moved) Toast.makeText(appContext, PAGE_MOVED, Toast.LENGTH_LONG).show()
+                                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
                                 }
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)
                                 is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
@@ -1143,7 +1141,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
                         .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
-                        ?.title ?: "No offline voice on this phone",
+                        ?.title ?: stringResource(R.string.settings_voice_none),
                     onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
                     audiobooks = remember { container.shelves.audioShelves }.collectAsStateWithLifecycle(AudioShelves.NONE).value.audiobooks,
                 )
