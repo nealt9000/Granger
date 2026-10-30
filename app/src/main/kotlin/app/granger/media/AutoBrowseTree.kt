@@ -23,7 +23,6 @@ import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
 import app.granger.music.MusicCatalog
 import app.granger.music.MusicSources
-import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -73,7 +72,7 @@ class AutoBrowseTree(
         parentId == MUSIC -> listOf(albumsFolder(), artistsFolder(), playlistsFolder())
         parentId == RECENT -> recents().map { (play, item) -> item.takeIf { play != null } }.filterNotNull()
         parentId == ALBUMS -> withContext(compute) {
-            albums(present()).sortedWith(compareBy({ it.title.lowercase(Locale.ROOT) }, { it.key })).map(::albumItem)
+            present().let { tracks -> MusicCatalog.albumsByTitle(albums(tracks), tracks) }.map(::albumItem)
         }
         parentId == ARTISTS -> withContext(compute) { MusicCatalog.artists(present()).map { artistItem(it.name) } }
         parentId == PLAYLISTS -> playlists.all.first().map(::playlistItem)
@@ -253,7 +252,7 @@ class AutoBrowseTree(
         return media.track(id.substring(at + ENTRY.length))?.takeIf { it.albumKey == key && it.status != PackStatus.MISSING }
     }
 
-    /** Present audiobooks as the shelf orders them: part-way by last played, unplayed by title, finished last. */
+    /** Present audiobooks for a car: part-way by last played, unplayed by title, finished last ([AudiobookShelf.order]). */
     private suspend fun shelf(): List<Audiobook> {
         val books = media.audiobooks.first().filter { it.status == PackStatus.OK }
         val chapters = media.allChapters.first().groupBy { it.audiobookId }

@@ -77,6 +77,9 @@ private val TopInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowIns
  */
 val LocalShellOverlay = compositionLocalOf { WindowInsets(0, 0, 0, 0) }
 
+/** The edge the rail is on, for screens that keep things off it (a shelf's letter strip, Plan LV Decision 4). */
+val LocalRailSide = compositionLocalOf { RailSide.LEFT }
+
 /** How long the reading chrome takes to slide away or back. */
 const val ChromeSlideMs = 200
 
@@ -191,7 +194,7 @@ fun GrangerShell(
                         .fillMaxWidth()
                         // The mini-player above already sits below the status bar; the screen's top bar shouldn't pad again.
                         .then(if (miniPlayer != null && !reading) Modifier.consumeWindowInsets(TopInsets) else Modifier),
-                ) { CompositionLocalProvider(LocalShellOverlay provides overlay) { content() } }
+                ) { CompositionLocalProvider(LocalShellOverlay provides overlay, LocalRailSide provides side) { content() } }
             }
             if (inLayout && right) {
                 NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, actions, side, onTab, onHistory, onSearch, onChat, onPlay, onReading)

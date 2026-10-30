@@ -48,6 +48,8 @@ import app.granger.core.library.Albums
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Track
 import app.granger.library.MovePackDialog
+import app.granger.library.shelf.ShelfCoverSize
+import app.granger.library.shelf.ShelfRow
 import app.granger.player.PlayingBars
 import app.granger.player.formatTime
 import app.granger.shell.rememberRailCover
@@ -218,6 +220,23 @@ fun AlbumCell(album: AlbumSummary, vm: MusicViewModel, dialogs: MusicDialogs, na
                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
         }
+        AlbumMenu(album, menu, { menu = false }, vm, dialogs, nav)
+    }
+}
+
+/** An album in the list (Plan LV): a 48 dp cover, the title, and "artist · year". Long-press: as [AlbumCell]. */
+@Composable
+fun AlbumListRow(album: AlbumSummary, vm: MusicViewModel, dialogs: MusicDialogs, nav: MusicNav) {
+    var menu by remember { mutableStateOf(false) }
+    Box {
+        ShelfRow(
+            title = album.title,
+            subtitle = (listOf(albumArtistNames(album).joinToString(", ")) + listOfNotNull(album.year.ifEmpty { null })).joinToString(" · "),
+            cover = { AlbumCover(album.coverPath, album.title, Modifier.size(ShelfCoverSize)) },
+            onClick = { nav.onAlbum(album.key) },
+            onLongClick = { menu = true },
+            dimmed = album.status != PackStatus.OK,
+        )
         AlbumMenu(album, menu, { menu = false }, vm, dialogs, nav)
     }
 }

@@ -13,16 +13,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.draw.alpha
@@ -50,11 +48,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
+import app.granger.library.shelf.ShelfCoverSize
+import app.granger.library.shelf.ShelfGrid
+import app.granger.library.shelf.ShelfList
+import app.granger.library.shelf.ShelfRow
+import app.granger.library.shelf.ShelfView
+import app.granger.library.shelf.ViewToggle
+import app.granger.theme.readout
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /**
@@ -81,6 +88,7 @@ fun CollectionScreen(
     val superseded by viewModel.superseded.collectAsStateWithLifecycle()
     val shown by viewModel.books.collectAsStateWithLifecycle()
     val sort by viewModel.sort.collectAsStateWithLifecycle()
+    val view by viewModel.view.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     // The collection disappears when its last pack moves out or it is deleted; leave once it has been seen.
     var seen by remember { mutableStateOf(false) }
@@ -130,102 +138,113 @@ fun CollectionScreen(
                     supportingContent = { Text(rowCountText(child)) },
                 )
             }
-        } else if (loaded != null) LazyVerticalGrid(
-            columns = GridCells.Adaptive(104.dp),
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(loaded.packs, key = { "pack:${it.id}" }, span = { GridItemSpan(maxLineSpan) }) { pack ->
-                Column {
-                    Box {
-                        var packMenu by remember { mutableStateOf(false) }
-                        PackRow(
-                            pack,
-                            replaced = pack.id in superseded,
-                            onClick = { onOpenPack(pack.id) },
-                            onLongClick = { packMenu = true },
-                            onGetBooks = onGetBooks,
+        } else if (loaded != null) {
+            // Above the books, in either view: the packs, then the Find field and the chips once there are books.
+            val head = buildList {
+                for (pack in loaded.packs) add(HeadItem("pack:${pack.id}", "pack") {
+                    Column {
+                        Box {
+                            var packMenu by remember { mutableStateOf(false) }
+                            PackRow(
+                                pack,
+                                replaced = pack.id in superseded,
+                                onClick = { onOpenPack(pack.id) },
+                                onLongClick = { packMenu = true },
+                                onGetBooks = onGetBooks,
+                            )
+                            DropdownMenu(packMenu, { packMenu = false }) {
+                                DropdownMenuItem(
+                                    text = { Text("Move to collection…") },
+                                    onClick = { packMenu = false; dialog = CollectionDialog.MovePack(pack) },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Remove from phone") },
+                                    onClick = { packMenu = false; dialog = CollectionDialog.RemovePack(pack) },
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                })
+                if (shown.total > 0) {
+                    add(HeadItem("find", "find") {
+                        OutlinedTextField(
+                            value = viewModel.findText,
+                            onValueChange = viewModel::setQuery,
+                            placeholder = { Text("Find a title or author") },
+                            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                            trailingIcon = if (viewModel.findText.isEmpty()) null else {
+                                { IconButton(onClick = { viewModel.setQuery("") }) { Icon(Icons.Filled.Close, contentDescription = "Clear") } }
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                         )
-                        DropdownMenu(packMenu, { packMenu = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Move to collection…") },
-                                onClick = { packMenu = false; dialog = CollectionDialog.MovePack(pack) },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Remove from phone") },
-                                onClick = { packMenu = false; dialog = CollectionDialog.RemovePack(pack) },
-                            )
+                    })
+                    // The sort chips, and at their end the view toggle (in the top bar it pushed a long name onto two lines at 360 dp).
+                    add(HeadItem("sort", "chips") {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            LazyRow(
+                                Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                items(BookSort.entries, key = { it.name }) { option ->
+                                    FilterChip(selected = sort == option, onClick = { viewModel.setSort(option) }, label = { Text(option.label) })
+                                }
+                            }
+                            ViewToggle(view, viewModel::toggleView)
                         }
-                    }
-                    HorizontalDivider()
+                    })
+                    // Granger Classics: the catalog's kinds (novels, drama, philosophy, …); one chip shows that kind alone.
+                    if (shown.categories.isNotEmpty()) add(HeadItem("categories", "chips") {
+                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item(key = "all") {
+                                FilterChip(selected = shown.category == null, onClick = { viewModel.setCategory(null) }, label = { Text("All") })
+                            }
+                            items(shown.categories, key = { it }) { category ->
+                                FilterChip(
+                                    selected = shown.category == category,
+                                    onClick = { viewModel.setCategory(if (shown.category == category) null else category) },
+                                    label = { Text(category) },
+                                )
+                            }
+                        }
+                    })
+                    if (shown.books.isEmpty()) add(HeadItem("none", "none") {
+                        Text(
+                            "No books match.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+                        )
+                    })
                 }
             }
-            if (shown.total > 0) {
-                item(key = "find", span = { GridItemSpan(maxLineSpan) }, contentType = "find") {
-                    OutlinedTextField(
-                        value = viewModel.findText,
-                        onValueChange = viewModel::setQuery,
-                        placeholder = { Text("Find a title or author") },
-                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                        trailingIcon = if (viewModel.findText.isEmpty()) null else {
-                            { IconButton(onClick = { viewModel.setQuery("") }) { Icon(Icons.Filled.Close, contentDescription = "Clear") } }
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
+            val open = { book: Book -> scope.launch { viewModel.openBook(book)?.let(onOpened) }; Unit }
+            if (view == ShelfView.LIST) ShelfList(
+                shown.sections,
+                Modifier.padding(padding).fillMaxSize(),
+                contentType = "book",
+                header = { for (h in head) item(key = h.key, contentType = h.contentType) { h.content() } },
+            ) { book ->
+                Box {
+                    var bookMenu by remember { mutableStateOf(false) }
+                    BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
+                    BookMenu(bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
                 }
-                item(key = "sort", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
-                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(BookSort.entries, key = { it.name }) { option ->
-                            FilterChip(selected = sort == option, onClick = { viewModel.setSort(option) }, label = { Text(option.label) })
-                        }
-                    }
-                }
-                // Granger Classics: the catalog's kinds (novels, drama, philosophy, …); one chip shows that kind alone.
-                if (shown.categories.isNotEmpty()) item(key = "categories", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
-                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        item(key = "all") {
-                            FilterChip(selected = shown.category == null, onClick = { viewModel.setCategory(null) }, label = { Text("All") })
-                        }
-                        items(shown.categories, key = { it }) { category ->
-                            FilterChip(
-                                selected = shown.category == category,
-                                onClick = { viewModel.setCategory(if (shown.category == category) null else category) },
-                                label = { Text(category) },
-                            )
-                        }
-                    }
-                }
-                if (shown.books.isEmpty()) item(key = "none", span = { GridItemSpan(maxLineSpan) }, contentType = "none") {
-                    Text(
-                        "No books match.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
-                    )
-                }
-            }
-            items(shown.books, key = { "book:${it.id}" }, contentType = { "book" }) { book ->
+            } else ShelfGrid(
+                shown.sections,
+                cellMin = 104.dp,
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp),
+                headerIndent = 8.dp,
+                contentType = "book",
+                header = { for (h in head) item(key = h.key, span = { GridItemSpan(maxLineSpan) }, contentType = h.contentType) { h.content() } },
+            ) { book ->
                 Box(Modifier.padding(horizontal = 8.dp)) {
                     var bookMenu by remember { mutableStateOf(false) }
-                    BookCell(
-                        book,
-                        progress = positions[book.id]?.totalProgression,
-                        onClick = { scope.launch { viewModel.openBook(book)?.let(onOpened) } },
-                        onLongClick = { bookMenu = true },
-                    )
-                    DropdownMenu(bookMenu, { bookMenu = false }) {
-                        DropdownMenuItem(
-                            text = { Text("Move to collection…") },
-                            onClick = { bookMenu = false; dialog = CollectionDialog.MoveBook(book) },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Remove from phone") },
-                            onClick = { bookMenu = false; dialog = CollectionDialog.RemoveBook(book) },
-                        )
-                    }
+                    BookCell(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
+                    BookMenu(bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
                 }
             }
         }
@@ -289,6 +308,17 @@ fun CollectionScreen(
     }
 }
 
+/** A row above the books, in either view: a pack, the Find field, the chips. */
+private class HeadItem(val key: String, val contentType: String, val content: @Composable () -> Unit)
+
+@Composable
+private fun BookMenu(open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
+    DropdownMenu(open, onClose) {
+        DropdownMenuItem(text = { Text("Move to collection…") }, onClick = { onClose(); onMove() })
+        DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { onClose(); onRemove() })
+    }
+}
+
 private sealed interface CollectionDialog {
     data class MovePack(val pack: Pack) : CollectionDialog
     data class RemovePack(val pack: Pack) : CollectionDialog
@@ -333,10 +363,42 @@ private fun PackRow(pack: Pack, replaced: Boolean, onClick: () -> Unit, onLongCl
     )
 }
 
+/**
+ * A book in the list (Plan LV Decision 2): its cover, title, author, the format label, and how far through it the
+ * reader is once started. A missing or damaged book is dimmed and says so.
+ */
+@Composable
+internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongClick: () -> Unit) {
+    val readable = book.status == PackStatus.OK
+    val problem = when (book.status) {
+        PackStatus.OK -> null
+        PackStatus.MISSING -> "File not found"
+        PackStatus.CORRUPT -> "Damaged"
+    }
+    val label = formatLabel(book)
+    ShelfRow(
+        title = book.title,
+        subtitle = book.author,
+        cover = { BookCover(book, Modifier.height(ShelfCoverSize)) },
+        onClick = { if (readable) onClick() },
+        onLongClick = onLongClick,
+        dimmed = !readable,
+        detail = if (label == null && problem == null) null else {
+            {
+                if (label != null) Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (problem != null) Text(problem, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+            }
+        },
+        trailing = progress?.takeIf { readable && it > 0.0 }?.let { p ->
+            { Text("${(p * 100).roundToInt().coerceIn(1, 100)}%", style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        },
+    )
+}
+
 /** A book in the grid: its cover, title (two lines), author (one) and a thin bar for how far through it the reader is. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLongClick: () -> Unit) {
+internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLongClick: () -> Unit) {
     val readable = book.status == PackStatus.OK
     Column(
         Modifier.combinedClickable(onClick = { if (readable) onClick() }, onLongClick = onLongClick),

@@ -64,12 +64,13 @@ class AudiobooksViewModelTest {
     private val hub = FakePlayerHub()
 
     private val records = MutableStateFlow<List<DownloadRecord>>(emptyList())
+    private val viewPrefs = app.granger.library.shelf.LibraryViewPrefs()
     private val removed = mutableListOf<String>()
 
     private fun TestScope.vm(collectionId: String? = null): AudiobooksViewModel {
         val vm = AudiobooksViewModel(
             collectionId, media, shelves, listening, hub, now = { 1_000L }, compute = main.dispatcher,
-            downloads = records, remover = { removed += it },
+            downloads = records, remover = { removed += it }, viewPrefs = viewPrefs,
         )
         backgroundScope.launch { vm.shelf.collect {} }
         return vm
@@ -93,9 +94,9 @@ class AudiobooksViewModelTest {
         media.chapterList.update { it + chapters }
     }
 
-    @Test fun shelfOrdersByLastPlayedThenUnplayedThenFinished() = runTest(main.dispatcher) {
+    @Test fun shelfIsAToZWithAContinueRowOfBooksPartWay() = runTest(main.dispatcher) {
         val older = book("older", "Zebra")
-        val newer = book("newer", "Yak")
+        val newer = book("newer", "The Yak")
         val alpha = book("alpha", "alpha")
         val beta = book("beta", "Beta")
         val doneLately = book("done-lately", "Aardvark")
@@ -110,12 +111,12 @@ class AudiobooksViewModelTest {
 
         val shelf = vm().shelf.filterNotNull().filter { it.books.size == 6 }.first()
         assertThat(shelf.title).isEqualTo(ALL_AUDIOBOOKS)
+        assertThat(shelf.sort).isEqualTo(AudiobookSort.TITLE)
+        // Every book A–Z, finished ones in their place and The Yak under Y (Plan LV Decision 7).
         assertThat(shelf.books.map { it.book.sourceRef })
-            .containsExactly("newer", "older", "alpha", "beta", "done-lately", "done-long-ago").inOrder()
-        assertThat(shelf.books.map { it.listening }).containsExactly(
-            Listening.IN_PROGRESS, Listening.IN_PROGRESS, Listening.UNPLAYED, Listening.UNPLAYED,
-            Listening.FINISHED, Listening.FINISHED,
-        ).inOrder()
+            .containsExactly("done-long-ago", "done-lately", "alpha", "beta", "newer", "older").inOrder()
+        // Continue: the part-way books, last played first; they stay in the list too.
+        assertThat(shelf.continueRow.map { it.book.sourceRef }).containsExactly("newer", "older").inOrder()
 
         // A collection's shelf holds only the audiobooks placed in it.
         val type = MediaType("audiobooks", "Audiobooks", true, 2)
@@ -126,7 +127,39 @@ class AudiobooksViewModelTest {
         shelves.shelfList.value = listOf(Shelf(type, listOf(row)))
         val scoped = vm("c-mine").shelf.filterNotNull().filter { it.books.isNotEmpty() }.first()
         assertThat(scoped.title).isEqualTo("Mine")
-        assertThat(scoped.books.map { it.book.sourceRef }).containsExactly("older", "alpha").inOrder()
+        assertThat(scoped.books.map { it.book.sourceRef }).containsExactly("alpha", "older").inOrder()
+    }
+
+    @Test fun continueHoldsAtMostFourByLastPlayed() = runTest(main.dispatcher) {
+        val books = (1..6).map { book("b$it", "Book $it") }
+        for (b in books) add(b, chaptersOf(b, 100_000L))
+        listening.stateList.value = books.mapIndexed { i, b -> state(b, "track:phone:${b.sourceRef}-0", 10_000L, updatedAt = i.toLong()) }
+        val shelf = vm().shelf.filterNotNull().filter { it.books.size == 6 }.first()
+        assertThat(shelf.continueRow.map { it.book.sourceRef }).containsExactly("b6", "b5", "b4", "b3").inOrder()
+        // Nothing part-way: no Continue row.
+        listening.stateList.value = emptyList()
+        assertThat(vm().shelf.filterNotNull().filter { it.books.size == 6 }.first().continueRow).isEmpty()
+    }
+
+    @Test fun theSortAndViewAreRememberedAndRecentHasNoLetters() = runTest(main.dispatcher) {
+        val books = (1..40).map { book("b$it", "Book $it").copy(author = if (it == 1) "" else "Ann Author$it") }
+        for (b in books) add(b, chaptersOf(b, 100_000L))
+        listening.stateList.value = listOf(state(books[9], "track:phone:b10-0", 10_000L, updatedAt = 9L))
+        val first = vm()
+        assertThat(first.shelf.filterNotNull().filter { it.books.size == 40 }.first().sections.lettered).isTrue()
+        assertThat(first.view.value).isEqualTo(app.granger.library.shelf.ShelfView.LIST)
+        first.setSort(AudiobookSort.AUTHOR)
+        first.toggleView()
+        val again = vm()
+        val byAuthor = again.shelf.filterNotNull().filter { it.sort == AudiobookSort.AUTHOR && it.books.size == 40 }.first()
+        assertThat(again.view.value).isEqualTo(app.granger.library.shelf.ShelfView.GRID)
+        // By surname ("Author10" …), the book with no author last, under #.
+        assertThat(byAuthor.sections.letters).containsExactly("A", "#").inOrder()
+        assertThat(byAuthor.books.last().book.sourceRef).isEqualTo("b1")
+        again.setSort(AudiobookSort.RECENT)
+        val recent = vm().shelf.filterNotNull().filter { it.sort == AudiobookSort.RECENT && it.books.size == 40 }.first()
+        assertThat(recent.sections.lettered).isFalse()
+        assertThat(recent.books.first().book.sourceRef).isEqualTo("b10")
     }
 
     @Test fun progressIsChapterOffsetPlusPositionOverDuration() = runTest(main.dispatcher) {

@@ -35,9 +35,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.material.icons.filled.Check
+import app.granger.library.shelf.ShelfCoverSize
+import app.granger.library.shelf.ShelfGrid
+import app.granger.library.shelf.ShelfHeader
+import app.granger.library.shelf.ShelfList
+import app.granger.library.shelf.ShelfRow
+import app.granger.library.shelf.ShelfView
+import app.granger.theme.readout
+import kotlin.math.roundToInt
 import app.granger.library.SourceLink
 import app.granger.music.EmptyMedia
 import app.granger.shell.rememberRailCover
@@ -59,7 +74,10 @@ fun AudiobookCover(path: String?, title: String, modifier: Modifier = Modifier) 
     }
 }
 
-/** Voice-style shelf: covers with progress, part-way books first by last played, then unplayed, then finished. */
+/**
+ * The audiobook shelf (Plan LV): a Continue row of the books part-way through, then every book as an A–Z list (or the
+ * cover grid) by Title, Author or Recent. A missing book is dimmed in both views; a finished one is ticked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudiobookShelfScreen(
@@ -71,6 +89,7 @@ fun AudiobookShelfScreen(
     onMediaSettings: (() -> Unit)? = null,
 ) {
     val loaded by vm.shelf.collectAsStateWithLifecycle()
+    val view by vm.view.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -80,7 +99,7 @@ fun AudiobookShelfScreen(
         },
     ) { padding ->
         val ui = loaded ?: return@Scaffold
-        if (ui.books.isEmpty()) {
+        if (ui.sections.isEmpty) {
             Box(Modifier.padding(padding)) {
                 EmptyMedia(
                     "No audiobooks yet",
@@ -91,21 +110,95 @@ fun AudiobookShelfScreen(
             }
             return@Scaffold
         }
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(150.dp),
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            items(ui.books, key = { it.book.id }) { item -> ShelfCell(item) { onBook(item.book.id) } }
+        // The grid already pads its edges by 12 dp; the row lines up with the list's 16 either way.
+        val continueRow: @Composable (inset: Dp) -> Unit = { inset -> ContinueRow(ui.continueRow, inset, onBook) }
+        val header: @Composable () -> Unit = {
+            ShelfHeader(ui.sort, AudiobookSort.entries, { it.label }, vm::setSort, view = view, onToggleView = vm::toggleView)
+        }
+        if (view == ShelfView.LIST) {
+            ShelfList(
+                ui.sections,
+                Modifier.padding(padding).fillMaxSize(),
+                contentType = "audiobook",
+                header = {
+                    if (ui.continueRow.isNotEmpty()) item(key = "continue", contentType = "continue") { continueRow(16.dp) }
+                    item(key = "header", contentType = "header") { header() }
+                },
+            ) { item -> AudiobookRow(item) { onBook(item.book.id) } }
+        } else {
+            ShelfGrid(
+                ui.sections,
+                cellMin = 150.dp,
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                // 12 dp edges and gaps, so two 150 dp columns still fit beside the rail and the letter strip on a 411 dp phone.
+                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 16.dp),
+                verticalSpacing = 20.dp,
+                headerIndent = 4.dp,
+                contentType = "audiobook",
+                header = {
+                    if (ui.continueRow.isNotEmpty()) item(key = "continue", span = { GridItemSpan(maxLineSpan) }, contentType = "continue") { continueRow(4.dp) }
+                    item(key = "header", span = { GridItemSpan(maxLineSpan) }, contentType = "header") { header() }
+                },
+            ) { item -> ShelfCell(item) { onBook(item.book.id) } }
         }
     }
 }
 
+/** "Continue": the books part-way through, last played first (Plan LV Decision 7). */
 @Composable
-private fun ShelfCell(item: ShelfBook, onClick: () -> Unit) {
-    Column(Modifier.clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun ContinueRow(books: List<ShelfBook>, inset: Dp, onBook: (String) -> Unit) {
+    Column(Modifier.padding(top = 8.dp, bottom = 8.dp)) {
+        Text(
+            "Continue",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(start = inset, bottom = 8.dp),
+        )
+        LazyRow(contentPadding = PaddingValues(horizontal = inset), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(books, key = { it.book.id }) { item -> ShelfCell(item, Modifier.width(120.dp)) { onBook(item.book.id) } }
+        }
+    }
+}
+
+/** A book in the list: its cover, title, author; how far through once started, a tick once finished. */
+@Composable
+private fun AudiobookRow(item: ShelfBook, onClick: () -> Unit) {
+    ShelfRow(
+        title = item.book.title,
+        subtitle = item.book.author.ifBlank { UNKNOWN_AUTHOR },
+        cover = { AudiobookCover(item.book.coverPath, item.book.title, Modifier.size(ShelfCoverSize)) },
+        onClick = onClick,
+        dimmed = item.missing,
+        detail = if (item.missing) {
+            { Text("Missing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
+        } else {
+            null
+        },
+        trailing = when {
+            item.missing -> null
+            item.listening == Listening.FINISHED -> {
+                {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                        Text("Finished", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+            item.listening == Listening.IN_PROGRESS -> {
+                {
+                    Text(
+                        "${(item.fraction * 100).roundToInt().coerceIn(1, 99)}%",
+                        style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            else -> null
+        },
+    )
+}
+
+@Composable
+private fun ShelfCell(item: ShelfBook, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Column(modifier.clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         AudiobookCover(item.book.coverPath, item.book.title, Modifier.fillMaxWidth().alpha(if (item.missing) 0.4f else 1f))
         LinearProgressIndicator(progress = { item.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp))
         Text(item.book.title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)

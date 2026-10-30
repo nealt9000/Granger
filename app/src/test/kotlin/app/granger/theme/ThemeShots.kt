@@ -52,6 +52,19 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.foundation.layout.aspectRatio
+import app.granger.core.library.ShelfKey
+import app.granger.library.shelf.ShelfGrid
+import app.granger.library.shelf.ShelfHeader
+import app.granger.library.shelf.ShelfList
+import app.granger.library.shelf.ShelfRow
+import app.granger.library.shelf.ShelfSections
+import app.granger.library.shelf.ShelfView
+import app.granger.library.shelf.ViewToggle
+import app.granger.library.shelf.sortedByShelfKey
+import app.granger.settings.RailSide
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.performClick
 import app.granger.book
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.FeedKind
@@ -425,6 +438,202 @@ class ThemeShots {
             app.granger.reader.ReaderBottomBar(actions, progress = progress)
         }
     }
+
+    /** Sixty classics, for the shared shelf's shots (Plan LV Task 2). */
+    private val classics = listOf(
+        "The Adventures of Tom Sawyer" to "Mark Twain", "Aesop's Fables" to "Aesop", "Anna Karenina" to "Leo Tolstoy",
+        "Around the World in Eighty Days" to "Jules Verne", "The Awakening" to "Kate Chopin", "Beowulf" to "",
+        "Bleak House" to "Charles Dickens", "The Brothers Karamazov" to "Fyodor Dostoevsky", "Candide" to "Voltaire",
+        "The Call of the Wild" to "Jack London", "A Christmas Carol" to "Charles Dickens", "Crime and Punishment" to "Fyodor Dostoevsky",
+        "David Copperfield" to "Charles Dickens", "Don Quixote" to "Miguel de Cervantes", "Dracula" to "Bram Stoker",
+        "Emma" to "Jane Austen", "Émile" to "Jean-Jacques Rousseau", "Frankenstein" to "Mary Shelley",
+        "Great Expectations" to "Charles Dickens", "Gulliver's Travels" to "Jonathan Swift", "Hamlet" to "William Shakespeare",
+        "Heart of Darkness" to "Joseph Conrad", "The Iliad" to "Homer", "The Importance of Being Earnest" to "Oscar Wilde",
+        "Ivanhoe" to "Walter Scott", "Jane Eyre" to "Charlotte Brontë", "The Jungle Book" to "Rudyard Kipling",
+        "Kidnapped" to "Robert Louis Stevenson", "King Lear" to "William Shakespeare", "Leviathan" to "Thomas Hobbes",
+        "Little Women" to "Louisa May Alcott", "Madame Bovary" to "Gustave Flaubert", "Middlemarch" to "George Eliot",
+        "Moby-Dick" to "Herman Melville", "Narrative of the Life of Frederick Douglass" to "Frederick Douglass",
+        "North and South" to "Elizabeth Gaskell", "The Odyssey" to "Homer", "Oliver Twist" to "Charles Dickens",
+        "Paradise Lost" to "John Milton", "Persuasion" to "Jane Austen", "The Picture of Dorian Gray" to "Oscar Wilde",
+        "Pride and Prejudice" to "Jane Austen", "The Prince" to "Niccolò Machiavelli", "Robinson Crusoe" to "Daniel Defoe",
+        "The Scarlet Letter" to "Nathaniel Hawthorne", "Sense and Sensibility" to "Jane Austen", "Siddhartha" to "Hermann Hesse",
+        "A Tale of Two Cities" to "Charles Dickens", "The Time Machine" to "H. G. Wells", "Treasure Island" to "Robert Louis Stevenson",
+        "Ulysses" to "James Joyce", "Utopia" to "Thomas More", "Vanity Fair" to "William Makepeace Thackeray",
+        "The War of the Worlds" to "H. G. Wells", "Walden" to "Henry David Thoreau", "Wuthering Heights" to "Emily Brontë",
+        "The Yellow Wallpaper" to "Charlotte Perkins Gilman", "Zadig" to "Voltaire", "1984" to "George Orwell",
+        "20,000 Leagues Under the Sea" to "Jules Verne",
+    )
+
+    private fun classicsShelf() = ShelfSections.of(
+        classics.sortedByShelfKey({ ShelfKey.of(it.first) }), byName = true, key = { it.first },
+        letter = { ShelfKey.letter(ShelfKey.of(it.first)) },
+    )
+
+    /** The shared shelf in a collection's frame: the rail on [side], a top bar with the view toggle, a find field. */
+    @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ShelfShot(view: ShelfView, side: RailSide = RailSide.LEFT) {
+        GrangerShell(
+            rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, side = side,
+        ) {
+            androidx.compose.material3.Scaffold(
+                topBar = {
+                    androidx.compose.material3.TopAppBar(
+                        title = { Text("Granger Classics") },
+                        actions = { ViewToggle(view) {} },
+                    )
+                },
+            ) { padding ->
+                val shelf = classicsShelf()
+                val find: () -> Unit = {}
+                if (view == ShelfView.LIST) {
+                    ShelfList(shelf, Modifier.padding(padding).fillMaxSize(), header = {
+                        item { ShelfHeader("Title", listOf("Title", "Author", "Recently read"), { it }, {}) }
+                    }) { (title, author) ->
+                        ShelfRow(
+                            title, author, cover = { Box(Modifier.size(32.dp, 48.dp).clip(RoundedCornerShape(4.dp))) { MediaTile(title, MediaKind.BOOK) } },
+                            onClick = find,
+                            detail = { Text("EPUB", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        )
+                    }
+                } else {
+                    ShelfGrid(
+                        shelf, cellMin = 104.dp, modifier = Modifier.padding(padding).fillMaxSize(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    ) { (title, author) ->
+                        Column {
+                            Box(Modifier.fillMaxWidth().aspectRatio(2f / 3f).clip(RoundedCornerShape(4.dp))) { MediaTile(title, MediaKind.BOOK) }
+                            Text(title, style = MaterialTheme.typography.bodySmall, maxLines = 2, minLines = 2, color = MaterialTheme.colorScheme.onSurface)
+                            Text(author, style = MaterialTheme.typography.labelSmall, maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun shelfList() = shoot("shelf-list") { ShelfShot(ShelfView.LIST) }
+
+    @Test fun shelfGrid() = shoot("shelf-grid") { ShelfShot(ShelfView.GRID) }
+
+    @Test fun shelfListRailRight() = shoot("shelf-list-rail-right") { ShelfShot(ShelfView.LIST, RailSide.RIGHT) }
+
+    /** Mid-drag: the bubble beside the thumb, the list at M. */
+    @Test fun shelfDrag() {
+        var night by mutableStateOf(true)
+        compose.setContent { GrangerTheme(night = night) { ShelfShot(ShelfView.LIST) } }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { down(center) }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { moveBy(androidx.compose.ui.geometry.Offset(0f, height * 11.5f)) }
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "shelf-drag-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    /** Classics as the collection screen shows it, at 360 dp: the find field, chips and toggle with the list or grid. */
+    private fun booksShot(name: String, view: ShelfView) {
+        val shelves = app.granger.FakeShelves()
+        val books = classics.mapIndexed { i, (title, author) -> app.granger.book("c$i", title, author = author) }
+        shelves.shelfList.value = listOf(
+            app.granger.core.library.Shelf(
+                MediaType("lit", "Literature", true, 0),
+                listOf(CollectionRow(ShelfCollection("c:gc", "Granger Classics", "lit", false, defaultKey = "gc"), emptyList(), books)),
+            ),
+        )
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.BOOKS, view) }
+        val catalog = app.granger.FakeCatalogSource(
+            app.granger.catalogOf(books = books.mapIndexed { i, b -> app.granger.bookEntry(b.sourceRef, listOf("Novels & stories", "Drama", "Philosophy")[i % 3]) }),
+        )
+        val vm = app.granger.library.CollectionViewModel(
+            "c:gc", shelves, app.granger.FakeLibrary(), app.granger.FakeReadingSessions(), app.granger.FakeBookshelf(), app.granger.FakeDownloads(),
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main), catalog = catalog, viewPrefs = prefs,
+            compute = kotlinx.coroutines.Dispatchers.Main,
+        )
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.library.CollectionScreen(vm, onOpened = {}, onOpenPack = {}, onGetBooks = {}, onOpenCollection = {}, onBack = {}) }
+        }
+    }
+
+    @Test fun booksList() = booksShot("books-list", ShelfView.LIST)
+
+    @Test fun booksGrid() = booksShot("books-grid", ShelfView.GRID)
+
+    /** All music, forty albums of two songs, at 360 dp; [tab] is clicked before the shot. */
+    private fun musicShot(name: String, tab: String, albumView: ShelfView = ShelfView.LIST) {
+        val tracks = classics.take(40).flatMapIndexed { i, (title, author) ->
+            (1..2).map { n ->
+                app.granger.music.song("s$i-$n", title = if (n == 1) title else "$title, part two", album = title, albumArtists = author.ifEmpty { "Anonymous" },
+                    trackNo = n, date = "${1900 + i}")
+            }
+        }
+        val media = app.granger.music.FakeMediaLibrary(tracks)
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.ALBUMS, albumView) }
+        val vm = app.granger.music.MusicViewModel(
+            null, media, app.granger.FakeShelves(), app.granger.music.FakePlaylists(media), FakePlayerHub(),
+            compute = kotlinx.coroutines.Dispatchers.Main, viewPrefs = prefs,
+        )
+        val nav = app.granger.music.MusicNav({}, {}, {}, {}, {}, {})
+        var night by mutableStateOf(true)
+        compose.setContent {
+            GrangerTheme(night = night) {
+                GrangerShell(
+                    rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
+                    onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+                ) { app.granger.music.MusicScreen(vm, nav) }
+            }
+        }
+        compose.onNode(androidx.compose.ui.test.hasText(tab) and androidx.compose.ui.test.hasClickAction()).performClick()
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    @Test fun musicSongs() = musicShot("music-songs", "Songs")
+
+    @Test fun musicAlbumsList() = musicShot("music-albums-list", "Albums")
+
+    @Test fun musicAlbumsGrid() = musicShot("music-albums-grid", "Albums", ShelfView.GRID)
+
+    @Test fun musicArtists() = musicShot("music-artists", "Artists")
+
+    /** Forty audiobooks, three part-way, two finished, one missing, at 360 dp. */
+    private fun audiobooksShot(name: String, view: ShelfView) {
+        val media = app.granger.music.FakeMediaLibrary()
+        val books = classics.take(40).mapIndexed { i, (title, author) ->
+            audiobook("a$i", title, author, durationMs = 100_000L).let { if (i == 5) it.copy(status = app.granger.core.library.PackStatus.MISSING) else it }
+        }
+        media.bookList.value = books
+        media.chapterList.value = books.map { chapter(it, 0, 100_000L) }
+        val listening = app.granger.audiobooks.FakeListening()
+        listening.stateList.value = listOf(2 to 40L, 9 to 30L, 17 to 20L).map { (i, at) ->
+            app.granger.core.library.AudiobookState(books[i].id, "track:phone:a$i-f", 35_000L, 1f, true, 0, false, at)
+        } + listOf(0, 3).map { i -> app.granger.core.library.AudiobookState(books[i].id, "track:phone:a$i-f", 100_000L, 1f, true, 0, true, 5L) }
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.AUDIOBOOKS, view) }
+        val vm = app.granger.audiobooks.AudiobooksViewModel(
+            null, media, app.granger.FakeShelves(), listening, FakePlayerHub(), compute = kotlinx.coroutines.Dispatchers.Main, viewPrefs = prefs,
+        )
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.audiobooks.AudiobookShelfScreen(vm, onBook = {}, onBack = {}) }
+        }
+    }
+
+    @Test fun audiobooksList() = audiobooksShot("audiobooks-list", ShelfView.LIST)
+
+    @Test fun audiobooksGrid() = audiobooksShot("audiobooks-grid", ShelfView.GRID)
 
     /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
     @Composable

@@ -18,6 +18,16 @@ import app.granger.player.bookProgressAt
 import app.granger.player.chapterAt
 import app.granger.core.downloads.DownloadRecord
 import app.granger.media.MediaDownloads
+import app.granger.core.library.SearchText
+import app.granger.core.library.ShelfKey
+import app.granger.library.authorKey
+import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfKind
+import app.granger.library.shelf.ShelfSections
+import app.granger.library.shelf.ShelfView
+import app.granger.library.shelf.sortNamed
+import app.granger.library.shelf.sortedByShelfKey
+import app.granger.library.shelf.toggled
 import app.granger.sources.ItemStatus
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -72,7 +82,22 @@ data class ShelfBook(val book: Audiobook, val listening: Listening, val progress
     val fraction: Float get() = fractionOf(progress)
 }
 
-data class AudiobookShelfUi(val title: String, val books: List<ShelfBook>)
+/** How the audiobook shelf is ordered (Plan LV Decision 5); Recent is by last played, with no letters. */
+enum class AudiobookSort(val label: String) { TITLE("Title"), AUTHOR("Author"), RECENT("Recent") }
+
+/**
+ * The shelf: every book as [sections] (A–Z under letters when long and sorted by name), and [continueRow], the books
+ * part-way through by last played, at most [AudiobookShelf.CONTINUE_MAX] (Plan LV Decision 7). [books] is [sections]
+ * in the order shown.
+ */
+data class AudiobookShelfUi(
+    val title: String,
+    val sections: ShelfSections<ShelfBook>,
+    val continueRow: List<ShelfBook> = emptyList(),
+    val sort: AudiobookSort = AudiobookSort.TITLE,
+) {
+    val books: List<ShelfBook> get() = sections.items.map { it.value }
+}
 
 /**
  * [currentChapter]: the ordinal the listener is in, while part-way. [bookmarks] are in book order. A downloaded book
@@ -120,16 +145,42 @@ object AudiobookShelf {
         if (state == null) bookProgressAt(chapters, "", 0L, book.durationMs)
         else bookProgressAt(chapters, state.trackId, state.positionMs, book.durationMs, state.finished)
 
-    private val byTitle = compareBy<ShelfBook>({ it.book.title.lowercase(Locale.ROOT) }, { it.book.id })
-    private val byLastPlayed = compareByDescending<ShelfBook> { it.lastPlayedAt ?: 0L }.then(byTitle)
+    /** The Continue row holds at most this many books. */
+    const val CONTINUE_MAX = 4
 
-    /** Part-way books by last played, then unplayed ones by title, then finished ones by last played (Voice). */
+    private fun titleKey(b: ShelfBook) = ShelfKey.of(b.book.title)
+    private val byTitle = compareBy<ShelfBook>({ it.book.title.lowercase(Locale.ROOT) }, { it.book.id })
+    private val byLastPlayed = compareByDescending<ShelfBook> { it.lastPlayedAt ?: 0L }.thenBy(::titleKey).then(byTitle)
+
+    /**
+     * Every book by [sort], finished ones in their place (Plan LV Decision 7): Title A–Z by [ShelfKey]; Author by
+     * surname as books are, unknown authors last; Recent by last played, never-played ones after by title.
+     */
+    fun sections(books: List<ShelfBook>, sort: AudiobookSort): ShelfSections<ShelfBook> = when (sort) {
+        AudiobookSort.TITLE -> ShelfSections.of(books.sortedByShelfKey(::titleKey, byTitle), byName = true, key = { it.book.id }) {
+            ShelfKey.letter(titleKey(it))
+        }
+        AudiobookSort.AUTHOR -> ShelfSections.of(
+            books.sortedWith(
+                compareBy<ShelfBook> { it.book.author.isBlank() }.thenBy { authorKey(it.book.author) }
+                    .thenBy { SearchText.fold(it.book.author) }.thenBy(::titleKey).then(byTitle),
+            ),
+            byName = true, key = { it.book.id },
+        ) { ShelfKey.letter(authorKey(it.book.author)) }
+        AudiobookSort.RECENT -> ShelfSections.of(books.sortedWith(byLastPlayed), byName = false, key = { it.book.id }) { "" }
+    }
+
+    /** Android Auto's order: part-way books by last played, then unplayed ones by title, then finished ones by last played (Voice). */
     fun order(books: List<ShelfBook>): List<ShelfBook> {
         val groups = books.groupBy { it.listening }
         return groups[Listening.IN_PROGRESS].orEmpty().sortedWith(byLastPlayed) +
             groups[Listening.UNPLAYED].orEmpty().sortedWith(byTitle) +
             groups[Listening.FINISHED].orEmpty().sortedWith(byLastPlayed)
     }
+
+    /** The books part-way through, last played first: the Continue row. */
+    fun continueRow(books: List<ShelfBook>): List<ShelfBook> =
+        books.filter { it.listening == Listening.IN_PROGRESS }.sortedWith(byLastPlayed).take(CONTINUE_MAX)
 
     fun shelfBook(book: Audiobook, chapters: List<AudiobookChapter>, state: AudiobookState?) =
         ShelfBook(book, listening(state), progress(book, chapters, state), state?.updatedAt)
@@ -165,6 +216,8 @@ class AudiobooksViewModel(
     private val downloads: Flow<List<DownloadRecord>> = flowOf(emptyList()),
     /** Removes a downloaded book's files by its group (`MediaDownloader.remove`, run in the app scope). */
     private val remover: (groupId: String) -> Unit = {},
+    /** The shelf's remembered sort and view (Plan LV). */
+    private val viewPrefs: LibraryViewPrefs = LibraryViewPrefs(),
 ) : ViewModel() {
     /** Groups' file counts from their manifests, read once (on [compute]). */
     private val fileCounts = ConcurrentHashMap<String, Int>()
@@ -183,11 +236,22 @@ class AudiobooksViewModel(
         }.distinctUntilChanged()
 
     /** Null until loaded. */
-    val shelf: StateFlow<AudiobookShelfUi?> = combine(scope, media.allChapters, listening.states) { (title, books), chapters, states ->
+    val shelf: StateFlow<AudiobookShelfUi?> = combine(
+        scope, media.allChapters, listening.states, viewPrefs.sort(ShelfKind.AUDIOBOOKS),
+    ) { (title, books), chapters, states, sortName ->
         val chaptersOf = chapters.groupBy { it.audiobookId }
         val stateOf = states.associateBy { it.audiobookId }
-        AudiobookShelfUi(title, AudiobookShelf.order(books.map { AudiobookShelf.shelfBook(it, chaptersOf[it.id].orEmpty(), stateOf[it.id]) }))
+        val shelfBooks = books.map { AudiobookShelf.shelfBook(it, chaptersOf[it.id].orEmpty(), stateOf[it.id]) }
+        val sort = sortNamed(sortName, AudiobookSort.TITLE)
+        AudiobookShelfUi(title, AudiobookShelf.sections(shelfBooks, sort), AudiobookShelf.continueRow(shelfBooks), sort)
     }.flowOn(compute).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** List (the default) or the cover grid. */
+    val view: StateFlow<ShelfView> = viewPrefs.view(ShelfKind.AUDIOBOOKS)
+
+    fun setSort(sort: AudiobookSort) = viewPrefs.setSort(ShelfKind.AUDIOBOOKS, sort.name)
+
+    fun toggleView() = viewPrefs.setView(ShelfKind.AUDIOBOOKS, view.value.toggled())
 
     /** Null while loading, or if there's no such book. */
     fun book(id: String): Flow<AudiobookPage?> = combine(page(id), hub.ui.map { inPlayer(it, id) to it.playing }.distinctUntilChanged()) { page, (loaded, playing) ->
