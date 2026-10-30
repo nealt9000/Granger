@@ -905,7 +905,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.readingPrefs, container.appScope,
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
-                            restore = container.packDocuments::restore, savedPlace = container.voicePlace,
+                            restore = container::restoreBook, savedPlace = container.voicePlace,
                         )
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },

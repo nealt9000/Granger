@@ -79,7 +79,10 @@ interface Bookshelf {
      */
     suspend fun import(displayName: String, open: () -> InputStream): ImportResult
 
-    /** Deletes the file, cover and search text; the position and marks are kept. False if the file can't be deleted. */
+    /**
+     * Deletes the file, cover and search text; the position and marks are kept. A Gutenberg book's row stays while its
+     * pack lists it, to be copied out again when opened. False if the file can't be deleted.
+     */
     suspend fun remove(id: String): Boolean
 
     /**
@@ -254,6 +257,8 @@ class RoomBookshelf(
         val known = dao.getAll()
         for (book in known) {
             val status = when {
+                // A Gutenberg book is copied out of its pack only when opened; its pack decides ([GutenbergBooks.sync]).
+                book.origin == BookOrigin.GUTENBERG && !File(book.filePath).exists() -> book.status
                 !File(book.filePath).exists() -> PackStatus.MISSING
                 // A damaged file stays damaged until it inspects cleanly; a returning file is otherwise OK.
                 book.status == PackStatus.CORRUPT && inspect(File(book.filePath)) !is Inspection.Ok ->
@@ -320,7 +325,8 @@ class RoomBookshelf(
         book.coverPath?.let { File(it).delete() }
         db.withTransaction {
             dao.deleteChunks(id)
-            dao.delete(id)
+            // A Gutenberg book stays listed while its pack is installed: only the copy and its search text go.
+            if (book.origin == BookOrigin.GUTENBERG) dao.upsert(book.copy(coverPath = null, indexedAt = null)) else dao.delete(id)
         }
         true
     }

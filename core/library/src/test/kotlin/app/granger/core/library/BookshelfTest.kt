@@ -44,6 +44,27 @@ class BookshelfTest {
         RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, pdfCovers = { _, _ -> pngCover })
     }
 
+    @Test fun aGutenbergBookNotYetOpenedStaysListedThroughARefresh() = test {
+        val unopened = book("43349", BookOrigin.GUTENBERG).copy(filePath = File(booksDir, "gutenberg/43349.epub").absolutePath)
+        db.bookDao().upsert(unopened)
+        shelf.refresh()
+        assertThat(shelf.book(unopened.id)!!.status).isEqualTo(PackStatus.OK)
+    }
+
+    @Test fun removingAGutenbergBookDeletesOnlyItsCopy() = test {
+        val file = TestEpubs.build(File(booksDir, "gutenberg").apply { mkdirs() }, name = "43349.epub")
+        val cover = File(coversDir.apply { mkdirs() }, "c.png").apply { writeBytes(pngCover) }
+        db.bookDao().upsert(
+            book("43349", BookOrigin.GUTENBERG).copy(filePath = file.absolutePath, coverPath = cover.absolutePath, indexedAt = 5L),
+        )
+        assertThat(shelf.remove(BookIds.of(BookOrigin.GUTENBERG, "43349"))).isTrue()
+        val row = shelf.book(BookIds.of(BookOrigin.GUTENBERG, "43349"))!!
+        assertThat(file.exists()).isFalse()
+        assertThat(cover.exists()).isFalse()
+        assertThat(row.coverPath).isNull()
+        assertThat(row.indexedAt).isNull()
+    }
+
     @Test fun importsAPdf() = test {
         val source = PdfFixtures.text(src)
         val result = pdfShelf.import("water.pdf") { source.inputStream() }
