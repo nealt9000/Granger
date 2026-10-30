@@ -111,7 +111,7 @@ Things the package tasks left for after the merge, because they cross task bound
 
 - [ ] `LaunchDecider.MISSING_NOTICE` goes through `LibraryRoute(notice: String?)` in `GrangerNavHost.kt`. Make the route carry a string id (Task 3, with Task 8's files).
 - [x] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
-- [ ] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
+- [x] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
 - [ ] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays.
 - [ ] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).
 - [ ] DevDocsFixes.kt's injected "☰ Contents" button: pass the label into the script from a resource (Task 5).
@@ -138,7 +138,7 @@ Things the package tasks left for after the merge, because they cross task bound
 
   (Task 4)
 - [ ] **Passed through as English by Task 2:**
-  - `QueueText` (see the Task 7 item)
+  - ~~`QueueText`~~ done (see the Task 7 item)
   - `row.error` (the stored download error, L2)
   - `chunkLabel`
   - `AskReach.text`

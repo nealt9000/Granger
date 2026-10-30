@@ -126,8 +126,7 @@ object DownloadQueueSummary {
 }
 
 /**
- * Plain words for the queue's figures, shared by the screens and the notification. The [Resources] forms are the ones
- * to use; the English-only forms are kept until the app's downloads and Home screens move over (Plan L1), then go.
+ * Plain words for the queue's figures, shared by the screens and the notification.
  */
 object QueueText {
     /** Rounded so it doesn't jump about: "about 25 min", "about 3 h". */
@@ -159,41 +158,6 @@ object QueueText {
         val locale = res.configuration.locales[0]
         val ordinal = MessageFormat("{0,ordinal}", locale).format(arrayOf(n))
         return res.getString(R.string.downloads_place_in_line, ordinal)
-    }
-
-    @Deprecated("English only: use timeLeft(resources, millis)")
-    fun timeLeft(millis: Long): String {
-        val (unit, n) = roundLeft(millis)
-        return when (unit) {
-            Span.NONE -> "less than a minute"
-            Span.MIN -> "about $n min"
-            Span.H -> "about $n h"
-            Span.DAYS -> "about $n days"
-            Span.S -> error("not a time left")
-        }
-    }
-
-    @Deprecated("English only: use inTime(resources, millis)")
-    fun inTime(millis: Long): String {
-        val (unit, n) = roundIn(millis)
-        return when (unit) {
-            Span.MIN -> "in $n min"
-            Span.H -> "in $n h"
-            else -> "in $n s"
-        }
-    }
-
-    @Deprecated("English only: use place(resources, n)")
-    fun place(n: Int): String {
-        if (n <= 1) return "Next"
-        val suffix = when {
-            n % 100 in 11..13 -> "th"
-            n % 10 == 1 -> "st"
-            n % 10 == 2 -> "nd"
-            n % 10 == 3 -> "rd"
-            else -> "th"
-        }
-        return "$n$suffix in line"
     }
 
     private enum class Span { NONE, S, MIN, H, DAYS }

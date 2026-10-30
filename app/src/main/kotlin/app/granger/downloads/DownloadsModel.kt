@@ -1,6 +1,7 @@
 package app.granger.downloads
 
 import android.content.Context
+import android.content.res.Resources
 import app.granger.R
 import app.granger.UiText
 import app.granger.core.downloads.DownloadRecord
@@ -234,12 +235,12 @@ object DownloadsModel {
 }
 
 /** A waiting row's reason, as it reads (Plan DL Decision 4). [now] is for "Trying again in 2 min". */
-fun reasonText(reason: WaitReason, now: Long): UiText = when (reason) {
+fun reasonText(res: Resources, reason: WaitReason, now: Long): UiText = when (reason) {
     WaitReason.Paused -> UiText.Res(R.string.downloads_reason_paused)
     WaitReason.WaitingForWifi -> UiText.Res(R.string.downloads_reason_wifi)
-    is WaitReason.Retrying -> UiText.Res(R.string.downloads_reason_retrying, QueueText.inTime(reason.at - now), reason.attempt, MAX_ATTEMPTS)
+    is WaitReason.Retrying -> UiText.Res(R.string.downloads_reason_retrying, QueueText.inTime(res, reason.at - now), reason.attempt, MAX_ATTEMPTS)
     is WaitReason.NeedsSpace -> UiText.Res(R.string.downloads_reason_space, formatBytes(reason.bytes))
-    is WaitReason.InLine -> UiText.Raw(QueueText.place(reason.place))
+    is WaitReason.InLine -> UiText.Raw(QueueText.place(res, reason.place))
 }
 
 private fun bytesOf(row: DownloadRow) = UiText.Res(R.string.downloads_bytes_of, formatBytes(row.bytesDone), formatBytes(row.bytes))
@@ -263,7 +264,7 @@ fun downloadsText(context: Context, row: DownloadRow, now: Long = System.current
         }
         RowState.QUEUED -> {
             parts += sizeText(row)
-            parts += if (row.notInCatalog) notInCatalog else row.reason?.let { reasonText(it, now) } ?: UiText.Res(R.string.downloads_queued)
+            parts += if (row.notInCatalog) notInCatalog else row.reason?.let { reasonText(context.resources, it, now) } ?: UiText.Res(R.string.downloads_queued)
         }
         RowState.FAILED -> parts += when {
             row.notInCatalog && !row.gone -> notInCatalog
@@ -279,11 +280,11 @@ fun downloadsText(context: Context, row: DownloadRow, now: Long = System.current
 }
 
 /** The header's first line: "3 of 14 · 1.2 of 9.8 GB · about 25 min left", or "Paused · 11 waiting". */
-fun headerText(h: DownloadsHeader): UiText {
+fun headerText(res: Resources, h: DownloadsHeader): UiText {
     if (h.paused) return UiText.Res(R.string.downloads_header_paused, h.waiting)
     val done = formatBytes(h.bytesDone)
     val total = formatBytes(h.bytes)
-    return h.timeLeftMillis?.let { UiText.Res(R.string.downloads_header_progress_left, h.filesDone, h.files, done, total, QueueText.timeLeft(it)) }
+    return h.timeLeftMillis?.let { UiText.Res(R.string.downloads_header_progress_left, h.filesDone, h.files, done, total, QueueText.timeLeft(res, it)) }
         ?: UiText.Res(R.string.downloads_header_progress, h.filesDone, h.files, done, total)
 }
 

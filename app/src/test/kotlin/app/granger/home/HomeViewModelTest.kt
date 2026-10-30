@@ -243,7 +243,7 @@ class HomeViewModelTest {
         val vm = viewModel()
         val card = vm.ui.value.downloads as DownloadsCard.Active
         assertThat(homeDownloadsTitle(card).text()).isEqualTo("Downloading Wikivoyage")
-        assertThat(homeDownloadsText(card).text()).isEqualTo("1 of 2 · 250 B of 400 B")
+        assertThat(homeDownloadsText(context.resources, card).text()).isEqualTo("1 of 2 · 250 B of 400 B")
         assertThat(card.fraction).isEqualTo(250f / 400f)
     }
 
@@ -254,7 +254,7 @@ class HomeViewModelTest {
         val vm = viewModel()
         val card = vm.ui.value.downloads as DownloadsCard.Active
         assertThat(homeDownloadsTitle(card).text()).isEqualTo("Downloads paused")
-        assertThat(homeDownloadsText(card).text()).isEqualTo("Paused · 2 waiting")
+        assertThat(homeDownloadsText(context.resources, card).text()).isEqualTo("Paused · 2 waiting")
         vm.resumeDownloads()
         vm.pauseDownloads()
         testScheduler.advanceUntilIdle()

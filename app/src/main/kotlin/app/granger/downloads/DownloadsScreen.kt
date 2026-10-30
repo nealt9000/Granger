@@ -170,7 +170,7 @@ fun DownloadsContent(ui: DownloadsUi, onBack: () -> Unit, actions: DownloadsActi
 private fun Header(h: DownloadsHeader, actions: DownloadsActions) {
     Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) {
         LinearProgressIndicator(progress = { h.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
-        Text(headerText(h).resolve(), style = MaterialTheme.typography.bodyMedium)
+        Text(headerText(LocalContext.current.resources, h).resolve(), style = MaterialTheme.typography.bodyMedium)
         // The speed beside the button while it downloads; otherwise the storage line takes its place.
         val speed = h.bytesPerSecond?.takeIf { !h.paused }?.let { stringResource(R.string.downloads_speed, formatBytes(it)) }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {

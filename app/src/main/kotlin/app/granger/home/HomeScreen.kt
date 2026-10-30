@@ -1,5 +1,7 @@
 package app.granger.home
 
+import android.content.res.Resources
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.granger.UiText
@@ -343,7 +345,7 @@ private fun DownloadsCardView(card: DownloadsCard, onOpen: () -> Unit, actions: 
                     )
                     LinearProgressIndicator(progress = { card.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp))
                     Text(
-                        homeDownloadsText(card).resolve(),
+                        homeDownloadsText(LocalContext.current.resources, card).resolve(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -375,11 +377,11 @@ fun homeDownloadsTitle(card: DownloadsCard.Active): UiText = when {
 }
 
 /** "3 of 14 · 1.2 GB of 9.8 GB · about 25 min left", or "Paused · 11 waiting". */
-fun homeDownloadsText(card: DownloadsCard.Active): UiText {
+fun homeDownloadsText(res: Resources, card: DownloadsCard.Active): UiText {
     if (card.paused) return UiText.Res(R.string.home_downloads_paused_waiting, card.waiting)
     val done = app.granger.formatBytes(card.bytesDone)
     val total = app.granger.formatBytes(card.bytes)
     return card.timeLeftMillis?.let {
-        UiText.Res(R.string.home_downloads_progress_left, card.filesDone, card.files, done, total, app.granger.core.downloads.QueueText.timeLeft(it))
+        UiText.Res(R.string.home_downloads_progress_left, card.filesDone, card.files, done, total, app.granger.core.downloads.QueueText.timeLeft(res, it))
     } ?: UiText.Res(R.string.home_downloads_progress, card.filesDone, card.files, done, total)
 }

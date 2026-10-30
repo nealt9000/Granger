@@ -69,17 +69,17 @@ class DownloadsModelTest {
         assertThat(ui.upNext.map { it.title.text() to it.groupLabel.text() }).containsExactly("Title c" to "Setting up", "Title d" to "Setting up").inOrder()
         assertThat(ui.upNext.map { downloadsText(context, it, now) }).containsExactly("1.0 KB · Next", "1.0 KB · 2nd in line").inOrder()
         val header = ui.header!!
-        assertThat(headerText(header).text()).isEqualTo("1 of 4 · 1.5 KB of 4.0 KB · less than a minute left")
+        assertThat(headerText(context.resources, header).text()).isEqualTo("1 of 4 · 1.5 KB of 4.0 KB · less than a minute left")
         assertThat(header.bytesPerSecond).isEqualTo(100)
     }
 
     @Test fun eachWaitingReasonReads() {
-        assertThat(reasonText(WaitReason.Paused, now).text()).isEqualTo("Paused")
-        assertThat(reasonText(WaitReason.WaitingForWifi, now).text()).isEqualTo("Waiting for Wi-Fi")
-        assertThat(reasonText(WaitReason.Retrying(now + 120_000, 3), now).text()).isEqualTo("Trying again in 2 min (attempt 3 of 10)")
-        assertThat(reasonText(WaitReason.NeedsSpace(1_200_000_000), now).text()).isEqualTo("Needs 1.2 GB more space")
-        assertThat(reasonText(WaitReason.InLine(1), now).text()).isEqualTo("Next")
-        assertThat(reasonText(WaitReason.InLine(4), now).text()).isEqualTo("4th in line")
+        assertThat(reasonText(context.resources, WaitReason.Paused, now).text()).isEqualTo("Paused")
+        assertThat(reasonText(context.resources, WaitReason.WaitingForWifi, now).text()).isEqualTo("Waiting for Wi-Fi")
+        assertThat(reasonText(context.resources, WaitReason.Retrying(now + 120_000, 3), now).text()).isEqualTo("Trying again in 2 min (attempt 3 of 10)")
+        assertThat(reasonText(context.resources, WaitReason.NeedsSpace(1_200_000_000), now).text()).isEqualTo("Needs 1.2 GB more space")
+        assertThat(reasonText(context.resources, WaitReason.InLine(1), now).text()).isEqualTo("Next")
+        assertThat(reasonText(context.resources, WaitReason.InLine(4), now).text()).isEqualTo("4th in line")
     }
 
     @Test fun aRowWaitingForWifiSaysSo() {
@@ -94,7 +94,7 @@ class DownloadsModelTest {
         )
         assertThat(ui.now).isNull()
         assertThat(ui.header!!.paused).isTrue()
-        assertThat(headerText(ui.header!!).text()).isEqualTo("Paused · 2 waiting")
+        assertThat(headerText(context.resources, ui.header!!).text()).isEqualTo("Paused · 2 waiting")
         assertThat(ui.upNext.map { downloadsText(context, it, now) }).containsExactly("200 B of 1.0 KB · Paused", "1.0 KB · Paused").inOrder()
     }
 
