@@ -1,18 +1,9 @@
-app/src/main/kotlin/app/granger/archive/ArchiveItemSheet.kt	14
-app/src/main/kotlin/app/granger/archive/ArchiveScreen.kt	23
-app/src/main/kotlin/app/granger/archive/WaiverDialog.kt	3
 app/src/main/kotlin/app/granger/audiobooks/AudiobookScreen.kt	11
 app/src/main/kotlin/app/granger/audiobooks/AudiobookShelfScreen.kt	3
-app/src/main/kotlin/app/granger/browse/BrowseScreen.kt	12
-app/src/main/kotlin/app/granger/downloads/DownloadsScreen.kt	14
-app/src/main/kotlin/app/granger/home/AddFeedPanel.kt	6
-app/src/main/kotlin/app/granger/home/HomeScreen.kt	9
-app/src/main/kotlin/app/granger/home/ReadinessStrip.kt	1
 app/src/main/kotlin/app/granger/library/CollectionScreen.kt	26
 app/src/main/kotlin/app/granger/library/LibraryScreen.kt	8
 app/src/main/kotlin/app/granger/library/OrganizeDialogs.kt	16
 app/src/main/kotlin/app/granger/library/shelf/ShelfView.kt	4
-app/src/main/kotlin/app/granger/listen/ListenScreen.kt	4
 app/src/main/kotlin/app/granger/media/DownloadControls.kt	4
 app/src/main/kotlin/app/granger/music/AddToPlaylistSheet.kt	5
 app/src/main/kotlin/app/granger/music/AlbumScreen.kt	2
@@ -35,8 +26,6 @@ app/src/main/kotlin/app/granger/player/ReaderTab.kt	8
 app/src/main/kotlin/app/granger/player/SleepTimerSheet.kt	2
 app/src/main/kotlin/app/granger/player/SpeedSheet.kt	4
 app/src/main/kotlin/app/granger/player/VoiceButton.kt	1
-app/src/main/kotlin/app/granger/readiness/ReadinessScreen.kt	10
-app/src/main/kotlin/app/granger/search/SearchScreen.kt	3
 app/src/main/kotlin/app/granger/sources/GetMoreScreen.kt	2
 app/src/main/kotlin/app/granger/sources/SourceScreen.kt	28
 app/src/main/kotlin/app/granger/widget/PlayerWidget.kt	2

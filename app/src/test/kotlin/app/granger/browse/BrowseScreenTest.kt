@@ -1,5 +1,6 @@
 package app.granger.browse
 
+import app.granger.UiText
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -41,7 +42,7 @@ class BrowseScreenTest {
     private fun SemanticsNodeInteraction.left() = getBoundsInRoot().left
 
     @Test fun eachPackIsARowWithItsSizeAndAskLineAndOpens() {
-        show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(gone, wikipedia)), BrowseSection(MAPS_SECTION, "Maps", listOf(iceland)))))
+        show(BrowseUi(listOf(BrowseSection("reference", UiText.Raw("General reference"), listOf(gone, wikipedia)), BrowseSection(MAPS_SECTION, UiText.Raw("Maps"), listOf(iceland)))))
         compose.onNodeWithText("1.2 GB · Ask: by meaning and keywords").assertExists()
         // Maps say nothing about Ask.
         compose.onNodeWithText("80 MB").assertExists()
@@ -58,7 +59,7 @@ class BrowseScreenTest {
 
     @Test fun aSectionShowsFourPacksUntilShowAll() {
         val six = (1..6).map { PackItem(pack("p$it", "Pack $it"), AskReach.KEYWORDS) }
-        show(BrowseUi(listOf(BrowseSection("science", "Science & math", six))))
+        show(BrowseUi(listOf(BrowseSection("science", UiText.Raw("Science & math"), six))))
         compose.onNodeWithText("Pack 4").assertExists()
         compose.onNodeWithText("Pack 5").assertDoesNotExist()
         compose.onNodeWithText("Show all 6").performClick()
@@ -69,12 +70,12 @@ class BrowseScreenTest {
 
     @Test fun fourPacksOrFewerHaveNoShowAll() {
         val four = (1..4).map { PackItem(pack("p$it", "Pack $it"), AskReach.KEYWORDS) }
-        show(BrowseUi(listOf(BrowseSection("science", "Science & math", four))))
+        show(BrowseUi(listOf(BrowseSection("science", UiText.Raw("Science & math"), four))))
         compose.onNodeWithText("Show all", substring = true).assertDoesNotExist()
     }
 
     @Test fun aLongPressRemovesThePackAfterAsking() {
-        show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(wikipedia)))))
+        show(BrowseUi(listOf(BrowseSection("reference", UiText.Raw("General reference"), listOf(wikipedia)))))
         compose.onNodeWithText("Wikipedia").performTouchInput { longClick() }
         compose.onNodeWithText("Remove from phone").performClick()
         compose.onNodeWithText("Remove Wikipedia?").assertExists()
@@ -83,7 +84,7 @@ class BrowseScreenTest {
     }
 
     @Test fun theHeaderIsGetMoreThenMoreWithDownloadsAndReadiness() {
-        show(BrowseUi(listOf(BrowseSection("reference", "General reference", listOf(wikipedia)))))
+        show(BrowseUi(listOf(BrowseSection("reference", UiText.Raw("General reference"), listOf(wikipedia)))))
         assertThat(compose.onNodeWithContentDescription("Get more").left()).isLessThan(compose.onNodeWithContentDescription("More").left())
         compose.onNodeWithContentDescription("Get more").performClick()
         compose.onNodeWithContentDescription("More").performClick()
@@ -95,7 +96,7 @@ class BrowseScreenTest {
 
     @Test fun anEmptyBrowseSuggestsWhatToGetFirst() {
         show(BrowseUi(emptyList(), listOf(BrowseSuggestion("Wikipedia (top)", 1_000_000_000, map = false, domain = "reference"), BrowseSuggestion("France", 300_000_000, map = true, domain = "maps"))))
-        compose.onNodeWithText(NOTHING_TO_BROWSE).assertExists()
+        compose.onNodeWithText("Nothing to browse yet").assertExists()
         compose.onNodeWithText("A map of your region · 300 MB").assertExists()
         compose.onNodeWithText("Wikipedia (top)").performClick()
         compose.onNodeWithText("France").performClick()

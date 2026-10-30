@@ -1,5 +1,8 @@
 package app.granger.downloads
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import app.granger.book
 import app.granger.core.downloads.DownloadLive
 import app.granger.core.downloads.DownloadQueueSummary
@@ -14,8 +17,15 @@ import app.granger.pack
 import app.granger.record
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class DownloadsModelTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun UiText?.text() = this?.resolve(context)
     private val midnight = 10_000L
     private val now = 20_000L
 
@@ -52,29 +62,29 @@ class DownloadsModelTest {
             running("b", done = 500, rate = 100),
         )
         val current = ui.now!!
-        assertThat(current.title).isEqualTo("Title b")
-        assertThat(current.groupLabel).isEqualTo("Setting up")
-        assertThat(downloadsText(current, now, speed = 100)).isEqualTo("500 B of 1.0 KB · 100 B/s")
+        assertThat(current.title.text()).isEqualTo("Title b")
+        assertThat(current.groupLabel.text()).isEqualTo("Setting up")
+        assertThat(downloadsText(context, current, now, speed = 100)).isEqualTo("500 B of 1.0 KB · 100 B/s")
         // The group's files appear in place, labelled by the group.
-        assertThat(ui.upNext.map { it.title to it.groupLabel }).containsExactly("Title c" to "Setting up", "Title d" to "Setting up").inOrder()
-        assertThat(ui.upNext.map { downloadsText(it, now) }).containsExactly("1.0 KB · Next", "1.0 KB · 2nd in line").inOrder()
+        assertThat(ui.upNext.map { it.title.text() to it.groupLabel.text() }).containsExactly("Title c" to "Setting up", "Title d" to "Setting up").inOrder()
+        assertThat(ui.upNext.map { downloadsText(context, it, now) }).containsExactly("1.0 KB · Next", "1.0 KB · 2nd in line").inOrder()
         val header = ui.header!!
-        assertThat(headerText(header)).isEqualTo("1 of 4 · 1.5 KB of 4.0 KB · less than a minute left")
+        assertThat(headerText(header).text()).isEqualTo("1 of 4 · 1.5 KB of 4.0 KB · less than a minute left")
         assertThat(header.bytesPerSecond).isEqualTo(100)
     }
 
     @Test fun eachWaitingReasonReads() {
-        assertThat(reasonText(WaitReason.Paused, now)).isEqualTo("Paused")
-        assertThat(reasonText(WaitReason.WaitingForWifi, now)).isEqualTo("Waiting for Wi-Fi")
-        assertThat(reasonText(WaitReason.Retrying(now + 120_000, 3), now)).isEqualTo("Trying again in 2 min (attempt 3 of 10)")
-        assertThat(reasonText(WaitReason.NeedsSpace(1_200_000_000), now)).isEqualTo("Needs 1.2 GB more space")
-        assertThat(reasonText(WaitReason.InLine(1), now)).isEqualTo("Next")
-        assertThat(reasonText(WaitReason.InLine(4), now)).isEqualTo("4th in line")
+        assertThat(reasonText(WaitReason.Paused, now).text()).isEqualTo("Paused")
+        assertThat(reasonText(WaitReason.WaitingForWifi, now).text()).isEqualTo("Waiting for Wi-Fi")
+        assertThat(reasonText(WaitReason.Retrying(now + 120_000, 3), now).text()).isEqualTo("Trying again in 2 min (attempt 3 of 10)")
+        assertThat(reasonText(WaitReason.NeedsSpace(1_200_000_000), now).text()).isEqualTo("Needs 1.2 GB more space")
+        assertThat(reasonText(WaitReason.InLine(1), now).text()).isEqualTo("Next")
+        assertThat(reasonText(WaitReason.InLine(4), now).text()).isEqualTo("4th in line")
     }
 
     @Test fun aRowWaitingForWifiSaysSo() {
         val ui = ui(listOf(rec("a", DownloadState.QUEUED, done = 312)), DownloadLive(unmetered = false, batchStartedAt = midnight))
-        assertThat(downloadsText(ui.upNext.single(), now)).isEqualTo("312 B of 1.0 KB · Waiting for Wi-Fi")
+        assertThat(downloadsText(context, ui.upNext.single(), now)).isEqualTo("312 B of 1.0 KB · Waiting for Wi-Fi")
     }
 
     @Test fun pausedTheHeaderSaysHowManyWait() {
@@ -84,21 +94,21 @@ class DownloadsModelTest {
         )
         assertThat(ui.now).isNull()
         assertThat(ui.header!!.paused).isTrue()
-        assertThat(headerText(ui.header!!)).isEqualTo("Paused · 2 waiting")
-        assertThat(ui.upNext.map { downloadsText(it, now) }).containsExactly("200 B of 1.0 KB · Paused", "1.0 KB · Paused").inOrder()
+        assertThat(headerText(ui.header!!).text()).isEqualTo("Paused · 2 waiting")
+        assertThat(ui.upNext.map { downloadsText(context, it, now) }).containsExactly("200 B of 1.0 KB · Paused", "1.0 KB · Paused").inOrder()
     }
 
     @Test fun theStorageLineNamesTheVolume() {
         val records = listOf(rec("a", DownloadState.QUEUED, size = 9_800_000_000).copy(filePath = "/phone/packs/a.zim"))
         val ui = ui(records, volumes = listOf(VolumeSpace("/phone", "Phone", 41_000_000_000)))
-        assertThat(storageText(ui.header!!)).isEqualTo("9.8 GB to go · 41 GB free on Phone")
+        assertThat(storageText(ui.header!!).text()).isEqualTo("9.8 GB to go · 41 GB free on Phone")
     }
 
     @Test fun failuresAreStoppedWithTheirReason() {
         val ui = ui(listOf(rec("x", DownloadState.FAILED).copy(error = "The checksum didn't match.")))
         assertThat(ui.header).isNull()
         assertThat(ui.stopped.single().itemIds).containsExactly("x")
-        assertThat(downloadsText(ui.stopped.single(), now)).isEqualTo("The checksum didn't match.")
+        assertThat(downloadsText(context, ui.stopped.single(), now)).isEqualTo("The checksum didn't match.")
         assertThat(ui.retriable).hasSize(1)
     }
 
@@ -116,7 +126,7 @@ class DownloadsModelTest {
         val row = ui.stopped.single()
         assertThat(row.gone).isTrue()
         assertThat(row.removeOnly).isTrue()
-        assertThat(downloadsText(row, now)).isEqualTo("Kiwix no longer offers this file")
+        assertThat(downloadsText(context, row, now)).isEqualTo("Kiwix no longer offers this file")
         assertThat(ui.retriable).isEmpty()
     }
 
@@ -131,9 +141,9 @@ class DownloadsModelTest {
             ),
             catalogIds = setOf("kept"),
         )
-        val byTitle = (ui.upNext + ui.stopped).associateBy { it.title }
-        assertThat(downloadsText(byTitle.getValue("Title dropped"), now)).isEqualTo("1.0 KB · No longer in the catalog")
-        assertThat(downloadsText(byTitle.getValue("Title failed"), now)).isEqualTo("No longer in the catalog")
+        val byTitle = (ui.upNext + ui.stopped).associateBy { it.title.text() }
+        assertThat(downloadsText(context, byTitle.getValue("Title dropped"), now)).isEqualTo("1.0 KB · No longer in the catalog")
+        assertThat(downloadsText(context, byTitle.getValue("Title failed"), now)).isEqualTo("No longer in the catalog")
         assertThat(byTitle.getValue("Title failed").removeOnly).isTrue()
         assertThat(byTitle.getValue("Title kept").notInCatalog).isFalse()
         assertThat(byTitle.getValue("Title ia-book").notInCatalog).isFalse()
@@ -154,9 +164,9 @@ class DownloadsModelTest {
                 vectorsOf("g1", DownloadState.INSTALLED, updated = midnight + 300),
             ),
         )
-        assertThat(ui.doneToday.map { it.title }).containsExactly("Title noon", "Setting up", "Title morning").inOrder()
+        assertThat(ui.doneToday.map { it.title.text() }).containsExactly("Title noon", "Setting up", "Title morning").inOrder()
         val setup = ui.doneToday[1]
-        assertThat(downloadsText(setup, now)).isEqualTo("2 files · 2.1 KB + index for Ask")
+        assertThat(downloadsText(context, setup, now)).isEqualTo("2 files · 2.1 KB + index for Ask")
     }
 
     @Test fun nothingLeftIsEmpty() {
@@ -169,8 +179,8 @@ class DownloadsModelTest {
             rec("t$i", DownloadState.QUEUED, kind = ItemKind.AUDIO, group = group, title = "Blue").copy(filePath = "/music/blue/0$i Track.mp3")
         }
         val rows = ui(tracks).upNext
-        assertThat(rows.map { it.title }).containsExactly("01 Track.mp3", "02 Track.mp3").inOrder()
-        assertThat(rows.map { it.groupLabel }.distinct()).containsExactly("Blue")
+        assertThat(rows.map { it.title.text() }).containsExactly("01 Track.mp3", "02 Track.mp3").inOrder()
+        assertThat(rows.map { it.groupLabel.text() }.distinct()).containsExactly("Blue")
     }
 
     @Test fun vectorsFoldIntoTheirPacksRowOrShowAsItsIndex() {
@@ -183,10 +193,10 @@ class DownloadsModelTest {
             ),
             packs = listOf(pack("wiki", "Wikipedia")),
         )
-        assertThat(ui.upNext.map { it.title }).containsExactly("Wikipedia", "Title med").inOrder()
+        assertThat(ui.upNext.map { it.title.text() }).containsExactly("Wikipedia", "Title med").inOrder()
         val index = ui.upNext[0]
         assertThat(index.indexOnly).isTrue()
-        assertThat(downloadsText(index, now)).isEqualTo("Index for Ask · 100 B · Next")
+        assertThat(downloadsText(context, index, now)).isEqualTo("Index for Ask · 100 B · Next")
         val med = ui.upNext[1]
         assertThat(med.withIndex).isTrue()
         assertThat(med.itemIds).containsExactly("med", "med.vectors").inOrder()
@@ -202,7 +212,7 @@ class DownloadsModelTest {
             ),
             packs = listOf(pack("wiki", "Wikipedia")), books = listOf(book("book:granger:emma", "Emma").copy(filePath = "/books/emma.epub")),
         )
-        assertThat(ui.doneToday.map { it.title to it.open }).containsExactly(
+        assertThat(ui.doneToday.map { it.title.text() to it.open }).containsExactly(
             "Wikipedia" to OpenTarget.Pack("wiki"),
             "Emma" to OpenTarget.Book("book:granger:emma"),
             "Title model" to null,

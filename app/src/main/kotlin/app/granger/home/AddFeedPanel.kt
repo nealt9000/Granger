@@ -1,5 +1,8 @@
 package app.granger.home
 
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import app.granger.core.library.FeedKind
 
 /** What a feed kind is called on Home. */
-val FeedKind.label: String
-    get() = when (this) {
-        FeedKind.RANDOM -> "Random"
-        FeedKind.ON_THIS_DAY -> "On this day"
-        FeedKind.SEARCH -> "Search"
+val FeedKind.label: Int
+    @StringRes get() = when (this) {
+        FeedKind.RANDOM -> R.string.home_kind_random
+        FeedKind.ON_THIS_DAY -> R.string.home_kind_on_this_day
+        FeedKind.SEARCH -> R.string.home_kind_search
     }
 
 /** Adding a feed is a scope, a kind and (for Search) a query: no per-widget code (spec §5). Sits at the top of Home. */
@@ -50,27 +53,27 @@ fun AddFeedPanel(choices: List<ScopeChoice>, onAdd: (FeedScope, FeedKind, String
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(16.dp),
     ) {
-        Text("Add feed", style = MaterialTheme.typography.titleMedium)
-        Text("From", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 12.dp))
+        Text(stringResource(R.string.home_add_feed), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.home_add_from), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 12.dp))
         Column(Modifier.selectableGroup()) {
-            choices.forEachIndexed { i, choice -> Choice(choice.label, i == scopeIndex) { scopeIndex = i } }
+            choices.forEachIndexed { i, choice -> Choice(choice.label.resolve(), i == scopeIndex) { scopeIndex = i } }
         }
-        Text("Show", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 12.dp))
+        Text(stringResource(R.string.home_add_show), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 12.dp))
         Column(Modifier.selectableGroup()) {
-            for (k in FeedKind.entries) Choice(k.label, k == kind) { kind = k }
+            for (k in FeedKind.entries) Choice(stringResource(k.label), k == kind) { kind = k }
         }
         if (kind == FeedKind.SEARCH) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text("Search for") },
+                label = { Text(stringResource(R.string.home_add_search_for)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
         }
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onCancel) { Text("Cancel") }
-            TextButton(enabled = canAdd, onClick = { onAdd(choices[scopeIndex].scope, kind, query.trim()) }) { Text("Add") }
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+            TextButton(enabled = canAdd, onClick = { onAdd(choices[scopeIndex].scope, kind, query.trim()) }) { Text(stringResource(R.string.home_add)) }
         }
     }
 }

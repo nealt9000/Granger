@@ -1,5 +1,9 @@
 package app.granger.home
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.R
+import app.granger.UiText
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -37,17 +41,17 @@ class HomeScreenTest {
     private val ids = listOf("medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought")
     private val report = ReadinessReport(
         domains = ids.mapIndexed { i, id -> DomainCoverage(id, id, if (i == 0) Coverage.BASIC else Coverage.NONE, 0, 100, 400, emptyList()) },
-        signals = listOf(Signal.Unsearchable("p", "Owls can't be searched: the pack has no index.")),
+        signals = listOf(Signal.Unsearchable("p", app.granger.UiText.Raw("Owls can't be searched: the pack has no index."))),
         storage = emptyList(),
         needsCatalogRefresh = false,
     )
     private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = false), at = 5L)
     private val blue = RailEntry.Play("album:Blue", "Blue", at = 1L)
     private val dayFeed = FeedUi(
-        HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), "Wikipedia",
-        Drawn("October 22", listOf(Card("794 – Kyoto founded.", "Events", CardTarget.Article("u1", "October_22", "Events")))),
+        HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("October 22"),
+        Drawn(listOf(Card("794 – Kyoto founded.", "Events", CardTarget.Article("u1", "October_22", "Events")))),
     )
-    private val drawing = FeedUi(HomeFeed(2, "collection:c:granger-classics", FeedKind.RANDOM, "", 1, 0), "Granger Classics", null)
+    private val drawing = FeedUi(HomeFeed(2, "collection:c:granger-classics", FeedKind.RANDOM, "", 1, 0), UiText.Raw("Granger Classics"), UiText.Raw("Random from Granger Classics"), null)
 
     private val actions = FeedActions(
         onAdd = { scope, kind, query -> calls += "add:${scope.text}:$kind:$query" },
@@ -141,7 +145,7 @@ class HomeScreenTest {
                 StorageRow(Source.values().last(), 9_000_000_000, 900, referencedOnly = true),
             ),
         )
-        assertThat(stripStatus(held)).isEqualTo("> ${formatBytes(11_500_000_000)} here, ready offline.")
+        assertThat(stripStatus(held)?.resolve(ApplicationProvider.getApplicationContext<Context>())).isEqualTo("> ${formatBytes(11_500_000_000)} here, ready offline.")
         show(HomeUi(strip = held))
         compose.onNodeWithText("> ${formatBytes(11_500_000_000)} here, ready offline.").assertIsDisplayed()
     }
@@ -162,7 +166,7 @@ class HomeScreenTest {
     }
 
     @Test fun addFeedTakesAScopeAKindAndAQuery() {
-        val choices = listOf(ScopeChoice(FeedScope.Library, "Whole library"), ScopeChoice(FeedScope.Pack("wikipedia_en_all"), "Wikipedia"))
+        val choices = listOf(ScopeChoice(FeedScope.Library, UiText.Res(R.string.home_scope_whole_library)), ScopeChoice(FeedScope.Pack("wikipedia_en_all"), UiText.Raw("Wikipedia")))
         show(HomeUi(strip = report, scopeChoices = choices))
         compose.onNodeWithContentDescription("Add feed").performClick()
         compose.onNodeWithText("Add feed").assertIsDisplayed()

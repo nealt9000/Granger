@@ -38,6 +38,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
@@ -45,6 +46,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.BookTarget
+import app.granger.R
+import app.granger.UiText
 import app.granger.audiobooks.AudiobookCover
 import app.granger.audiobooks.UNKNOWN_AUTHOR
 import app.granger.core.books.PdfText
@@ -108,13 +111,13 @@ fun SearchScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
                 title = {
                     TextField(
                         value = viewModel.searchText,
                         onValueChange = viewModel::onQueryChange,
-                        placeholder = { Text("Search your library") },
+                        placeholder = { Text(stringResource(R.string.search_placeholder)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { dropKeyboard() }),
@@ -129,11 +132,11 @@ fun SearchScreen(
         Box(Modifier.padding(padding).fillMaxSize()) {
             if (state.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
             if (nothingFound) {
-                Text("Nothing in your library matches.", Modifier.align(Alignment.Center).padding(24.dp))
+                Text(stringResource(R.string.search_nothing_found), Modifier.align(Alignment.Center).padding(24.dp))
             }
             LazyColumn(Modifier.fillMaxSize(), state = list) {
                 if (state.query.isBlank() && state.recent.isNotEmpty()) {
-                    item { SectionHeader("Recent") }
+                    item { SectionHeader(stringResource(R.string.search_recent)) }
                     items(state.recent, key = { "r:$it" }) { recent ->
                         ListItem(
                             modifier = Modifier.clickable { viewModel.onQueryChange(recent) },
@@ -141,7 +144,7 @@ fun SearchScreen(
                         )
                     }
                 }
-                if (state.titles.isNotEmpty()) item { SectionHeader("Titles") }
+                if (state.titles.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_titles)) }
                 results(state, SearchGroup.TITLES, state.titles, { _, hit -> "t:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
@@ -150,7 +153,7 @@ fun SearchScreen(
                         supportingContent = { Text(listOf(hit.author, hit.packTitle).filter { it.isNotBlank() }.joinToString(" · ")) },
                     )
                 }
-                if (state.fullText.isNotEmpty()) item { SectionHeader("Articles") }
+                if (state.fullText.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_articles)) }
                 results(state, SearchGroup.FULL_TEXT, state.fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
@@ -165,15 +168,15 @@ fun SearchScreen(
                         },
                     )
                 }
-                if (state.books.isNotEmpty()) item { SectionHeader("Books") }
+                if (state.books.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_books)) }
                 results(state, SearchGroup.BOOKS, state.books, { _, hit -> "b:${hit.bookId}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.bookTitle) },
                         supportingContent = {
                             Column {
-                                SearchRows.bookLine(hit).takeIf { it.isNotBlank() }?.let { Text(it) }
-                                PdfText.pageOf(hit.href)?.let { Text("p. $it") }
+                                SearchRows.bookLine(hit)?.let { Text(it.resolve()) }
+                                PdfText.pageOf(hit.href)?.let { Text(stringResource(R.string.search_page, it)) }
                                 if (hit.snippet.isNotBlank()) {
                                     Text(AnnotatedString.fromHtml(hit.snippet), maxLines = 3, overflow = TextOverflow.Ellipsis)
                                 }
@@ -183,26 +186,26 @@ fun SearchScreen(
                 }
                 val music = state.media
                 if (music.artists.isNotEmpty() || music.albums.isNotEmpty() || music.songs.isNotEmpty()) {
-                    item { SectionHeader("Music") }
+                    item { SectionHeader(stringResource(R.string.search_music)) }
                 }
                 results(state, SearchGroup.ARTISTS, music.artists, { _, artist -> "ma:${artist.name}" }, ::toggle) { artist ->
-                    MediaRow(artist.name, SearchRows.artist(artist), { AlbumCover(artist.coverPath, artist.name, it, MediaKind.ARTIST) }) {
+                    MediaRow(artist.name, SearchRows.artist(artist).resolve(), { AlbumCover(artist.coverPath, artist.name, it, MediaKind.ARTIST) }) {
                         media { onOpenArtist(artist.name) }
                     }
                 }
                 results(state, SearchGroup.ALBUMS, music.albums, { _, album -> "mb:${album.key}" }, ::toggle) { album ->
-                    MediaRow(album.title, SearchRows.album(album), { AlbumCover(album.coverPath, album.title, it) }) {
+                    MediaRow(album.title, SearchRows.album(album).resolve(), { AlbumCover(album.coverPath, album.title, it) }) {
                         media { onOpenAlbum(album.key) }
                     }
                 }
                 results(state, SearchGroup.SONGS, music.songs, { _, track -> "ms:${track.id}" }, ::toggle) { track ->
-                    MediaRow(track.title, SearchRows.song(track), { AlbumCover(track.coverPath, track.title, it) }) {
+                    MediaRow(track.title, SearchRows.song(track).resolve(), { AlbumCover(track.coverPath, track.title, it) }) {
                         media { onPlaySong(track) }
                     }
                 }
-                if (music.audiobooks.isNotEmpty()) item { SectionHeader("Audiobooks") }
+                if (music.audiobooks.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_audiobooks)) }
                 results(state, SearchGroup.AUDIOBOOKS, music.audiobooks, { _, book -> "mk:${book.id}" }, ::toggle) { book ->
-                    MediaRow(book.title, SearchRows.audiobook(book), { AudiobookCover(book.coverPath, book.title, it) }) {
+                    MediaRow(book.title, SearchRows.audiobook(book).resolve(), { AudiobookCover(book.coverPath, book.title, it) }) {
                         media { onOpenAudiobook(book.id) }
                     }
                 }
@@ -232,7 +235,7 @@ private fun <T> LazyListScope.results(
             val text = if (group in state.expanded) SearchRows.showFewer(group) else SearchRows.showAll(group, all.size, group in state.capped)
             ListItem(
                 modifier = Modifier.clickable { onToggle(group, shown.size) },
-                headlineContent = { Text(text, color = MaterialTheme.colorScheme.primary) },
+                headlineContent = { Text(text.resolve(), color = MaterialTheme.colorScheme.primary) },
             )
         }
     }
@@ -240,23 +243,66 @@ private fun <T> LazyListScope.results(
 
 /** The second line of each music and audiobook result (the copy is fixed by plan M3), and the Show all row. */
 internal object SearchRows {
-    fun artist(a: ArtistHit) = "Artist · ${a.albumCount} ${if (a.albumCount == 1) "album" else "albums"}"
-    fun album(a: AlbumSummary) = "Album · ${a.albumArtist}"
-    fun song(t: Track) = "Song · ${MusicCatalog.trackArtistsOf(t).joinToString(", ").ifBlank { Albums.UNKNOWN_ARTIST }} · ${Albums.title(t)}"
-    fun audiobook(b: Audiobook): String {
+    fun artist(a: ArtistHit): UiText = UiText.Plural(R.plurals.search_artist_line, a.albumCount, a.albumCount)
+    fun album(a: AlbumSummary): UiText = UiText.Res(R.string.search_album_line, a.albumArtist)
+    fun song(t: Track): UiText = UiText.Res(
+        R.string.search_song_line,
+        MusicCatalog.trackArtistsOf(t).joinToString(", ").ifBlank { Albums.UNKNOWN_ARTIST },
+        Albums.title(t),
+    )
+    fun audiobook(b: Audiobook): UiText {
         val author = b.author.ifBlank { UNKNOWN_AUTHOR }
-        return if (b.narrator.isBlank()) author else "$author · read by ${b.narrator}"
+        return if (b.narrator.isBlank()) UiText.Raw(author) else UiText.Res(R.string.search_audiobook_read_by, author, b.narrator)
     }
 
     /** A [capped] group may hold more than were fetched, so it doesn't claim to show them all. */
-    fun showAll(group: SearchGroup, count: Int, capped: Boolean) =
-        if (capped) "Show the first $count ${group.noun}" else "Show all $count ${group.noun}"
+    fun showAll(group: SearchGroup, count: Int, capped: Boolean): UiText {
+        val id = if (capped) {
+            when (group) {
+                SearchGroup.TITLES -> R.plurals.search_show_first_titles
+                SearchGroup.ARTISTS -> R.plurals.search_show_first_artists
+                SearchGroup.ALBUMS -> R.plurals.search_show_first_albums
+                SearchGroup.SONGS -> R.plurals.search_show_first_songs
+                SearchGroup.AUDIOBOOKS -> R.plurals.search_show_first_audiobooks
+                SearchGroup.FULL_TEXT -> R.plurals.search_show_first_articles
+                SearchGroup.BOOKS -> R.plurals.search_show_first_books
+            }
+        } else {
+            when (group) {
+                SearchGroup.TITLES -> R.plurals.search_show_all_titles
+                SearchGroup.ARTISTS -> R.plurals.search_show_all_artists
+                SearchGroup.ALBUMS -> R.plurals.search_show_all_albums
+                SearchGroup.SONGS -> R.plurals.search_show_all_songs
+                SearchGroup.AUDIOBOOKS -> R.plurals.search_show_all_audiobooks
+                SearchGroup.FULL_TEXT -> R.plurals.search_show_all_articles
+                SearchGroup.BOOKS -> R.plurals.search_show_all_books
+            }
+        }
+        return UiText.Plural(id, count, count)
+    }
 
-    fun showFewer(group: SearchGroup) = "Show fewer ${group.noun}"
+    fun showFewer(group: SearchGroup): UiText = UiText.Res(
+        when (group) {
+            SearchGroup.TITLES -> R.string.search_show_fewer_titles
+            SearchGroup.ARTISTS -> R.string.search_show_fewer_artists
+            SearchGroup.ALBUMS -> R.string.search_show_fewer_albums
+            SearchGroup.SONGS -> R.string.search_show_fewer_songs
+            SearchGroup.AUDIOBOOKS -> R.string.search_show_fewer_audiobooks
+            SearchGroup.FULL_TEXT -> R.string.search_show_fewer_articles
+            SearchGroup.BOOKS -> R.string.search_show_fewer_books
+        },
+    )
 
-    /** A book result's line under its title: the author, and "3 matches" when the book matched in more than one place. */
-    fun bookLine(hit: BookHit): String =
-        listOfNotNull(hit.author.ifBlank { null }, if (hit.matches > 1) "${hit.matches} matches" else null).joinToString(" · ")
+    /**
+     * A book result's line under its title: the author, and "3 matches" when the book matched in more than one place;
+     * null when it has neither.
+     */
+    fun bookLine(hit: BookHit): UiText? = when {
+        hit.matches > 1 && hit.author.isNotBlank() -> UiText.Plural(R.plurals.search_book_matches_by, hit.matches, hit.matches, hit.author)
+        hit.matches > 1 -> UiText.Plural(R.plurals.search_book_matches, hit.matches, hit.matches)
+        hit.author.isNotBlank() -> UiText.Raw(hit.author)
+        else -> null
+    }
 
     /**
      * Whether an article's [snippet] shows the match, so it's worth showing: it holds one of [query]'s words, case and

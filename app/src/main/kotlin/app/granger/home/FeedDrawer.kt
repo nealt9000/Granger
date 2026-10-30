@@ -1,5 +1,7 @@
 package app.granger.home
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.Book
 import app.granger.core.library.BookChunk
 import app.granger.core.library.BookHit
@@ -12,6 +14,8 @@ import app.granger.core.library.Pack
 import app.granger.core.library.PageTitles
 import app.granger.core.zim.ZimArchive
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.random.Random
 import org.jsoup.Jsoup
 
@@ -34,12 +38,12 @@ class FeedDrawer(
     suspend fun draw(feed: HomeFeed, scope: Resolved, day: LocalDate): Drawn? {
         val random = Random(seed(day, feed.id))
         val drawn = when (feed.kind) {
-            FeedKind.RANDOM -> Drawn("Random from ${scope.name}", random(scope, random))
-            FeedKind.ON_THIS_DAY -> Drawn(DayPage.title(day), onThisDay(scope, day, random))
+            FeedKind.RANDOM -> Drawn(random(scope, random))
+            FeedKind.ON_THIS_DAY -> Drawn(onThisDay(scope, day, random))
             FeedKind.SEARCH -> {
                 val query = feed.query.trim()
                 if (query.isEmpty()) return null
-                Drawn("$query · ${scope.name}", search(scope, query, random))
+                Drawn(search(scope, query, random))
             }
         }
         return drawn.takeIf { it.cards.isNotEmpty() }
@@ -111,6 +115,7 @@ class FeedDrawer(
         }
         fun pick(lines: List<String>, n: Int, section: String) =
             lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
+        // The section names are the English Wikipedia's (the card's line and its anchor): data, not UI (L3 makes them per language).
         return pick(page.events, 3, "Events") + pick(page.births, 1, "Births") + pick(page.deaths, 1, "Deaths")
     }
 
@@ -174,6 +179,15 @@ class FeedDrawer(
 
         /** Subjects (lower-cased substrings) of books one dips into rather than reads through. */
         val DIP_IN = listOf("poetry", "poem", "scripture", "religion", "philosophy", "quotation", "aphorism", "essay", "proverb")
+
+        /** A feed's row title for [day]: "Random from Wikipedia", "October 22", "cats · Wikipedia". */
+        fun title(feed: HomeFeed, scope: Resolved, day: LocalDate): UiText = when (feed.kind) {
+            FeedKind.RANDOM ->
+                if (scope.name == LIBRARY_NAME) UiText.Res(R.string.home_feed_random_from_library) else UiText.Res(R.string.home_feed_random_from, scope.name)
+            // In the app's language; DayPage.title is the English page title it looks up.
+            FeedKind.ON_THIS_DAY -> UiText.Res(R.string.home_feed_day, day.month.getDisplayName(TextStyle.FULL, Locale.getDefault()), day.dayOfMonth)
+            FeedKind.SEARCH -> UiText.Res(R.string.home_feed_search, feed.query.trim(), scope.name)
+        }
 
         /** The same day and feed draw the same cards; another day draws others. */
         fun seed(day: LocalDate, feedId: Long): Long = day.toEpochDay() xor (feedId * 0x9E3779B97F4A7C15uL.toLong())

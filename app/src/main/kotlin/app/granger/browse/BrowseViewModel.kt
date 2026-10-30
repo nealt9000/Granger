@@ -2,6 +2,8 @@ package app.granger.browse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.Domain
@@ -30,7 +32,7 @@ import kotlinx.coroutines.launch
 data class PackItem(val pack: Pack, val ask: AskReach? = null)
 
 /** One of Browse's sections, shown only when it holds a pack; [id] keeps its collapsed state. */
-data class BrowseSection(val id: String, val title: String, val packs: List<PackItem>)
+data class BrowseSection(val id: String, val title: UiText, val packs: List<PackItem>)
 
 /** A pack an empty Browse suggests, as Pick a start would: the encyclopedia, and the phone's region's map. */
 data class BrowseSuggestion(val title: String, val bytes: Long, val map: Boolean, val domain: String?)
@@ -79,9 +81,9 @@ fun browseSections(
     fun items(packs: Map<String, Pack>?, map: Boolean) =
         packs.orEmpty().values.sortedBy { it.title.lowercase() }.map { PackItem(it, if (map) null else ask(it)) }
     return (
-        domains.map { BrowseSection(it.id, it.title, items(byDomain[it.id], map = false)) } +
-            BrowseSection(OTHER_SECTION, "Other", items(byDomain[OTHER_SECTION], map = false)) +
-            BrowseSection(MAPS_SECTION, "Maps", items(maps, map = true))
+        domains.map { BrowseSection(it.id, UiText.Raw(it.title), items(byDomain[it.id], map = false)) } +
+            BrowseSection(OTHER_SECTION, UiText.Res(R.string.browse_section_other), items(byDomain[OTHER_SECTION], map = false)) +
+            BrowseSection(MAPS_SECTION, UiText.Res(R.string.browse_section_maps), items(maps, map = true))
         ).filter { it.packs.isNotEmpty() }
 }
 

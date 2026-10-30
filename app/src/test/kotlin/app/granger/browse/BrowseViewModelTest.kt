@@ -1,5 +1,7 @@
 package app.granger.browse
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
@@ -36,6 +38,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class BrowseViewModelTest {
     @get:Rule val main = MainDispatcherRule()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val shelves = FakeShelves()
     private val library = FakeLibrary()
     private val downloads = FakeDownloads()
@@ -66,7 +69,7 @@ class BrowseViewModelTest {
         )
         val ui = BrowseViewModel(shelves, library).ui.filterNotNull().first()
         // No catalog: every pack that isn't a map is Other.
-        assertThat(ui.sections.map { it.title }).containsExactly("Other", "Maps").inOrder()
+        assertThat(ui.sections.map { it.title.resolve(context) }).containsExactly("Other", "Maps").inOrder()
         // Not one Kiwix folder: each pack, by title, wherever it's filed (the user's own collection too). No books.
         assertThat(ui.sections[0].packs.map { it.pack.title }).containsExactly("DevDocs: Kotlin", "Medicine", "Wikipedia").inOrder()
         assertThat(ui.sections[1].packs.map { it.pack.title }).containsExactly("Iceland")
@@ -124,7 +127,7 @@ class BrowseViewModelTest {
         val ui = BrowseViewModel(shelves, library, FakeCatalogSource(catalog), downloads.records).ui.filterNotNull()
             .first { it.sections.size > 2 }
         assertThat(ui.sections.map { it.id }).containsExactly("medicine", "making", "maps", "reference", OTHER_SECTION, MAPS_SECTION).inOrder()
-        assertThat(ui.sections.map { it.title }).containsExactly(
+        assertThat(ui.sections.map { it.title.resolve(context) }).containsExactly(
             "Medicine & first aid", "Making, repair & engineering", "Maps, places & travel", "General reference", "Other", "Maps",
         ).inOrder()
         val titles = ui.sections.associate { it.id to it.packs.map { item -> item.pack.title } }

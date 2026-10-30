@@ -7,34 +7,45 @@ import app.granger.core.library.MediaNames
 import app.granger.core.library.MediaOrigin
 import app.granger.core.library.PackStatus
 import app.granger.music.song
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /** The second lines of music and audiobook results, as plan M3's copy fixes them. */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class SearchRowsTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun UiText?.text() = this?.resolve(context).orEmpty()
+
     @Test fun rowsUseThePlannedCopy() {
-        assertThat(SearchRows.artist(ArtistHit("Gustav Holst", 3, null))).isEqualTo("Artist · 3 albums")
-        assertThat(SearchRows.artist(ArtistHit("Gustav Holst", 1, null))).isEqualTo("Artist · 1 album")
+        assertThat(SearchRows.artist(ArtistHit("Gustav Holst", 3, null)).text()).isEqualTo("Artist · 3 albums")
+        assertThat(SearchRows.artist(ArtistHit("Gustav Holst", 1, null)).text()).isEqualTo("Artist · 1 album")
         val mars = song("1", "Mars", album = "The Planets", albumArtists = "Gustav Holst", artists = "London Symphony Orchestra")
-        assertThat(MediaNames.albums(listOf(mars)).single().let(SearchRows::album)).isEqualTo("Album · Gustav Holst")
-        assertThat(SearchRows.song(mars)).isEqualTo("Song · London Symphony Orchestra · The Planets")
+        assertThat(MediaNames.albums(listOf(mars)).single().let(SearchRows::album).text()).isEqualTo("Album · Gustav Holst")
+        assertThat(SearchRows.song(mars).text()).isEqualTo("Song · London Symphony Orchestra · The Planets")
         val book = Audiobook("audiobook:phone:1", MediaOrigin.PHONE, "1", "The Jungle Book", "Rudyard Kipling", "", "", null, 0L, PackStatus.OK, 0L)
-        assertThat(SearchRows.audiobook(book)).isEqualTo("Rudyard Kipling")
-        assertThat(SearchRows.audiobook(book.copy(narrator = "Kara Shallenberg"))).isEqualTo("Rudyard Kipling · read by Kara Shallenberg")
+        assertThat(SearchRows.audiobook(book).text()).isEqualTo("Rudyard Kipling")
+        assertThat(SearchRows.audiobook(book.copy(narrator = "Kara Shallenberg")).text()).isEqualTo("Rudyard Kipling · read by Kara Shallenberg")
     }
 
     @Test fun showAllSaysHowManyAndOwnsUpToACap() {
-        assertThat(SearchRows.showAll(SearchGroup.TITLES, 12, capped = false)).isEqualTo("Show all 12 titles")
-        assertThat(SearchRows.showAll(SearchGroup.SONGS, 25, capped = true)).isEqualTo("Show the first 25 songs")
-        assertThat(SearchRows.showFewer(SearchGroup.FULL_TEXT)).isEqualTo("Show fewer article matches")
-        assertThat(SearchRows.showAll(SearchGroup.BOOKS, 9, capped = false)).isEqualTo("Show all 9 books")
+        assertThat(SearchRows.showAll(SearchGroup.TITLES, 12, capped = false).text()).isEqualTo("Show all 12 titles")
+        assertThat(SearchRows.showAll(SearchGroup.SONGS, 25, capped = true).text()).isEqualTo("Show the first 25 songs")
+        assertThat(SearchRows.showFewer(SearchGroup.FULL_TEXT).text()).isEqualTo("Show fewer article matches")
+        assertThat(SearchRows.showAll(SearchGroup.BOOKS, 9, capped = false).text()).isEqualTo("Show all 9 books")
     }
 
     @Test fun aBookSaysHowManyPlacesMatched() {
         val emma = BookHit("b:emma", "Emma", "Jane Austen", "ch2", 0.0, "", matches = 3)
-        assertThat(SearchRows.bookLine(emma)).isEqualTo("Jane Austen · 3 matches")
-        assertThat(SearchRows.bookLine(emma.copy(matches = 1))).isEqualTo("Jane Austen")
-        assertThat(SearchRows.bookLine(emma.copy(author = ""))).isEqualTo("3 matches")
+        assertThat(SearchRows.bookLine(emma).text()).isEqualTo("Jane Austen · 3 matches")
+        assertThat(SearchRows.bookLine(emma.copy(matches = 1)).text()).isEqualTo("Jane Austen")
+        assertThat(SearchRows.bookLine(emma.copy(author = "")).text()).isEqualTo("3 matches")
     }
 
     @Test fun aSnippetMatchesWhenItHoldsAQueryWordOrAMark() {

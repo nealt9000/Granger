@@ -23,9 +23,12 @@ sealed interface CardTarget {
 @Serializable
 data class Card(val title: String, val subtitle: String, val target: CardTarget, val imagePath: String? = null)
 
-/** A feed's cards for the day, with the row's title. [version] is [Cards.VERSION] when drawn; older draws are redone. */
+/**
+ * A feed's cards for the day. [version] is [Cards.VERSION] when drawn; older draws are redone. The row's title isn't
+ * stored, so it follows the app's language ([FeedDrawer.title]); a cached draw's old `title` field is ignored.
+ */
 @Serializable
-data class Drawn(val title: String, val cards: List<Card>, val version: Int = 0)
+data class Drawn(val cards: List<Card>, val version: Int = 0)
 
 object Cards {
     /** Bumped when what a draw carries changes (1: article thumbnails), so a cached draw from before is redrawn. */
