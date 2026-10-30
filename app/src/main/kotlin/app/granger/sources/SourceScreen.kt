@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -64,13 +66,22 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import app.granger.formatBytes
+import app.granger.core.library.ShelfKey
+import app.granger.library.shelf.ShelfList
+import app.granger.library.shelf.ShelfSections
 
 private fun sectionKey(index: Int, section: Section) = "section-$index-${section.title}"
 private fun moreKey(index: Int, section: Section) = "more-$index-${section.title}"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, onOpenPack: (packId: String) -> Unit = {}) {
+fun SourceScreen(
+    viewModel: SourceViewModel,
+    title: String,
+    onBack: () -> Unit,
+    onOpenPack: (packId: String) -> Unit = {},
+    onOpenFamily: (family: String) -> Unit = {},
+) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
@@ -112,7 +123,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title) },
+                title = { Text(ui.familyTitle ?: title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
@@ -125,12 +136,12 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
+        val header: LazyListScope.() -> Unit = {
             item(key = "search") {
                 OutlinedTextField(
                     value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
-                    placeholder = { Text("Search ${title}") },
+                    placeholder = { Text("Search ${ui.familyTitle ?: title}") },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -210,6 +221,35 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
                 }
                 HorizontalDivider()
             }
+        }
+        val rowItem: @Composable (ItemRow) -> Unit = { row ->
+            if (row.opensFamily != null) {
+                FamilyRow(row) { onOpenFamily(row.opensFamily) }
+            } else {
+                CatalogItemRow(
+                    row,
+                    onGet = {
+                        beforeDownload()
+                        viewModel.get(row.id)
+                    },
+                    onCancel = { viewModel.cancel(row.id) },
+                    onRetry = { viewModel.retry(row.id) },
+                    onRemove = { confirmRemove = row },
+                    onOpen = { row.packId?.let(onOpenPack) },
+                    onChooseFlavour = viewModel::chooseFlavour,
+                )
+            }
+            HorizontalDivider()
+        }
+        if (ui.familyTitle != null) {
+            // A folded family's own list (Plan KB Decision 10): A–Z on the shared shelf, with the letter strip.
+            val rows = ui.sections.flatMap { it.rows }
+            val shelf = remember(rows) {
+                ShelfSections.of(rows, byName = true, key = { it.id }, letter = { ShelfKey.letter(ShelfKey.of(it.title)) })
+            }
+            ShelfList(shelf, Modifier.padding(padding).fillMaxSize(), state = list, header = header) { row -> rowItem(row) }
+        } else LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
+            header()
             for ((index, section) in ui.sections.withIndex()) {
                 // Indexed: a pack category and a book category can share a name.
                 item(key = sectionKey(index, section)) {
@@ -220,21 +260,7 @@ fun SourceScreen(viewModel: SourceViewModel, title: String, onBack: () -> Unit, 
                         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 4.dp),
                     )
                 }
-                items(section.rows, key = { it.id }) { row ->
-                    CatalogItemRow(
-                        row,
-                        onGet = {
-                            beforeDownload()
-                            viewModel.get(row.id)
-                        },
-                        onCancel = { viewModel.cancel(row.id) },
-                        onRetry = { viewModel.retry(row.id) },
-                        onRemove = { confirmRemove = row },
-                        onOpen = { row.packId?.let(onOpenPack) },
-                        onChooseFlavour = viewModel::chooseFlavour,
-                    )
-                    HorizontalDivider()
-                }
+                items(section.rows, key = { it.id }) { row -> rowItem(row) }
                 if (section.foldable) {
                     item(key = moreKey(index, section)) {
                         val text = if (section.rows.size < section.total) "Show all ${section.total} ${section.noun}" else "Show fewer ${section.noun}"
@@ -298,6 +324,17 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
             }
         },
         trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text("Get all") } },
+    )
+}
+
+/** A folded family's row (Plan KB Decision 10): "Developer docs", "243 packs", opening its own list. */
+@Composable
+internal fun FamilyRow(row: ItemRow, onOpen: () -> Unit) {
+    ListItem(
+        modifier = Modifier.clickable(onClick = onOpen),
+        headlineContent = { Text(row.title) },
+        supportingContent = { Text(row.details, style = MaterialTheme.typography.bodySmall) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
     )
 }
 

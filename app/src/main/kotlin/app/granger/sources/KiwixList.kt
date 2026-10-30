@@ -1,6 +1,7 @@
 package app.granger.sources
 
 import app.granger.core.catalog.PackEntry
+import app.granger.core.library.SearchText
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -63,6 +64,56 @@ object KiwixList {
     /** The flavour smaller than [entry] in its [group] that comes closest to it; null when there's none. */
     fun smallerThan(group: PackGroup?, entry: PackEntry): PackEntry? =
         group?.flavours?.filter { it.sizeBytes < entry.sizeBytes }?.maxByOrNull { it.sizeBytes }
+
+    // --- Folded families (Decision 10) ---
+
+    /** A big family the Kiwix list shows as one row, "[label] · 243 [noun]", opening its own A–Z list. */
+    data class Folded(val family: String, val label: String, val noun: String)
+
+    /** The families folded away; a new row here folds another (Plan KB Decision 10). */
+    val FOLDED = listOf(
+        Folded("devdocs", "Developer docs", "packs"),
+        Folded("stack_exchange", "Q&A sites", "packs"),
+        Folded("maps", "Maps", "regions"),
+    )
+
+    fun folded(family: String): Folded? = FOLDED.firstOrNull { it.family == family }
+
+    /** A folded family's row text: "Developer docs · 243 packs". */
+    fun foldedText(folded: Folded, count: Int): String = "${folded.label} · $count ${folded.noun}"
+
+    // --- Search (Decision 11) ---
+
+    /**
+     * Whether every word of [words] (folded, from [SearchText.words]) is somewhere in [group]: its titles, description,
+     * ZIM name, category, family (and its label) or a language's name. Accents fold, so "encyclopedie" finds
+     * "Encyclopédie" and the other way round.
+     */
+    fun matches(group: PackGroup, words: List<String>): Boolean {
+        if (words.isEmpty()) return true
+        val haystack = SearchText.fold(searchText(group))
+        return words.all { it in haystack }
+    }
+
+    /** Whether every word is in the pack's own title: such a match ranks first. */
+    fun titleMatches(group: PackGroup, words: List<String>): Boolean {
+        if (words.isEmpty()) return false
+        val title = SearchText.fold(group.flavours.joinToString(" ") { it.title } + " " + group.title)
+        return words.all { it in title }
+    }
+
+    private fun searchText(group: PackGroup): String = buildList {
+        add(group.title)
+        for (entry in group.flavours) {
+            add(entry.title)
+            add(entry.description)
+            add(entry.zimName)
+            add(entry.category)
+            add(entry.family)
+            folded(entry.family)?.let { add(it.label) }
+            entry.language.split(',').forEach { add(languageName(it)) }
+        }
+    }.joinToString(" ")
 
     // --- Plain words (Decision 9) ---
 

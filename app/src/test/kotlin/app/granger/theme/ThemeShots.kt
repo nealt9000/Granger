@@ -750,6 +750,47 @@ class ThemeShots {
         )
     }
 
+    /** The Kiwix list (Plan KB Decisions 8 and 10), or one folded [family]'s A–Z list, from a catalog in the shape of Kiwix's. */
+    private fun kiwixListShot(name: String, family: String?, query: String = "") {
+        fun entry(id: String, title: String, category: String, family: String, size: Long, flavour: String = "", zim: String = id, featured: Boolean = false) =
+            app.granger.packEntry(id, category = category, size = size, urls = listOf("https://download.kiwix.org/zim/$id.zim"), zimName = zim, featured = featured)
+                .copy(title = title, family = family, flavour = flavour, snapshotDate = "2026-10-10")
+        val docs = listOf("Angular", "Bash", "C", "C++", "CSS", "Django", "Docker", "Git", "Go", "HTML", "JavaScript", "Kotlin", "Node.js",
+            "PostgreSQL", "Python", "React", "Rust", "Sass", "SQLite", "Vue")
+            .flatMap { lang -> (0 until 3).map { i -> lang + listOf("", " 2", " 3")[i] } }
+        val packs = listOf(
+            entry("wikipedia_en_medicine_maxi", "WikiMed", "Medical", "wikipedia", 1_860_000_000, "maxi", "wikipedia_en_medicine", featured = true),
+            entry("wikipedia_en_medicine_nopic", "WikiMed (no pictures)", "Medical", "wikipedia", 1_050_000_000, "nopic", "wikipedia_en_medicine", featured = true),
+            entry("wikipedia_en_medicine_mini", "WikiMed Medical Encyclopedia", "Medical", "wikipedia", 170_000_000, "mini", "wikipedia_en_medicine"),
+            entry("mdwiki_en_all", "MDWiki", "Medical", "mdwiki", 2_300_000_000),
+            entry("freecodecamp_en_javascript", "freeCodeCamp JavaScript", "Programming", "freecodecamp", 9_000_000),
+            entry("cooking.stackexchange.com_en_all", "Cooking Stack Exchange", "Q&A", "stack_exchange", 230_000_000),
+            entry("diy.stackexchange.com_en_all", "DIY Stack Exchange", "Q&A", "stack_exchange", 900_000_000),
+            entry("maps_en_france", "France", "Maps", "maps", 3_000_000_000),
+            entry("maps_en_spain", "Spain", "Maps", "maps", 1_200_000_000),
+        ) + docs.map { entry("devdocs_en_${it.lowercase().replace(" ", "-")}", "$it Docs", "Programming", "devdocs", 3_000_000) }
+        val vm = app.granger.sources.SourceViewModel(
+            app.granger.sources.CatalogScope.KIWIX, app.granger.FakeCatalogSource(app.granger.catalogOf(packs)), app.granger.FakeDownloads(),
+            app.granger.FakeLibrary(), app.granger.FakeBookshelf(),
+            app.granger.FakeVolumes(listOf(app.granger.volume("/internal", "Phone", free = 41_000_000_000))), app.granger.FakePrefs(),
+            app.granger.core.ai.DeviceTier.ASK, kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main),
+            io = kotlinx.coroutines.Dispatchers.Main, family = family,
+        )
+        if (query.isNotEmpty()) vm.setQuery(query)
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.BROWSE,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.sources.SourceScreen(vm, title = "Kiwix", onBack = {}) }
+        }
+    }
+
+    @Test fun kiwixList() = kiwixListShot("kiwix-list", null)
+
+    @Test fun kiwixFamily() = kiwixListShot("kiwix-family", "devdocs")
+
+    @Test fun kiwixSearch() = kiwixListShot("kiwix-search", null, query = "wiki medicine")
+
     @Test fun kiwixBooksList() = kiwixBooksShot("kiwixbooks-list", ShelfView.LIST)
 
     @Test fun kiwixBooksGrid() = kiwixBooksShot("kiwixbooks-grid", ShelfView.GRID)

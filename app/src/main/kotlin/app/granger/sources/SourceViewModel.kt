@@ -32,6 +32,7 @@ import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.formatBytes
+import app.granger.library.shelf.sortedByShelfKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +77,8 @@ data class ItemRow(
     val switches: Boolean = false,
     /** The full licence, for the row's details (its short name is in [details]); blank for anything but a pack. */
     val license: String = "",
+    /** A folded family's row (Plan KB Decision 10): the family it opens, its packs A–Z. */
+    val opensFamily: String? = null,
 )
 
 /** One flavour of a pack's row: "With pictures 6.9 GB". */
@@ -174,6 +177,8 @@ data class SourceUi(
     val domainTitle: String? = null,
     /** A big Get waiting on its question (Plan KB Decision 9). */
     val sizeCheck: SizeCheck? = null,
+    /** One folded family's A–Z list ("Developer docs"), when this screen is one (Plan KB Decision 10); else null. */
+    val familyTitle: String? = null,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -207,6 +212,8 @@ class SourceViewModel(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** Opened from Readiness: the Kiwix list filtered to this domain until the chip is closed. */
     private val domain: String? = null,
+    /** Opened from a folded family's row: that family's packs A–Z, with their own search (Plan KB Decision 10). */
+    private val family: String? = null,
 ) : ViewModel() {
     private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: String?, val domainCleared: Boolean)
 
@@ -467,6 +474,11 @@ class SourceViewModel(
                 license = (item as? PackEntry)?.license.orEmpty(),
             )
         }
+        /** A folded family's row: "Developer docs", "243 packs". */
+        fun familyRow(folded: KiwixList.Folded, count: Int) = ItemRow(
+            "family:${folded.family}", folded.label, "$count ${folded.noun}", "", 0L, ItemStatus.NotInstalled, null,
+            opensFamily = folded.family,
+        )
         val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
         /** One row for a pack and its flavours (Plan KB Decision 8): the chosen flavour, else the installed, else the default. */
         fun groupRow(group: PackGroup): ItemRow {
@@ -490,22 +502,28 @@ class SourceViewModel(
         val domainId = s.domain?.takeIf { kiwix }
         val domainTitle = domainId?.let { id -> current?.readiness?.domains?.firstOrNull { it.id == id }?.title }
         val inDomain = domainTitle != null
+        val familyView = family?.takeIf { kiwix }?.let(KiwixList::folded)
+        val words = app.granger.core.library.SearchText.words(needle)
         /** Whether [item] belongs on this list at all, before the tab and the search. */
         fun inList(item: CatalogItem): Boolean {
             // A readiness domain lists its packs whichever scope they're offered in: Food keeps Water and Food for
             // Preppers, which are offered under Books (Plan KB Decision 6).
             if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES)) return false
+            if (familyView != null && (item !is PackEntry || item.family != familyView.family)) return false
             return !(inDomain && (item !is PackEntry || item.domain != domainId))
         }
-        fun shown(item: CatalogItem): Boolean {
-            if (!inList(item)) return false
+        fun inTab(item: CatalogItem): Boolean {
             val status = status(item)
-            val inTab = when (s.tab) {
+            return when (s.tab) {
                 SourceTab.BROWSE -> true
                 SourceTab.INSTALLED -> status == ItemStatus.Installed || status == ItemStatus.UpdateAvailable ||
                     recordsById[item.id].orEmpty().any { it.isActive }
                 SourceTab.UPDATES -> status == ItemStatus.UpdateAvailable
             }
+        }
+        fun shown(item: CatalogItem): Boolean {
+            if (!inList(item)) return false
+            val inTab = inTab(item)
             val texts = when (item) {
                 // The ZIM name too, so "stackoverflow" finds Stack Overflow.
                 is PackEntry -> listOf(item.title, item.description, item.zimName)
@@ -514,7 +532,7 @@ class SourceViewModel(
             }
             return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
         }
-        val categories = if (!kiwix || current == null || inDomain) emptyList() else
+        val categories = if (!kiwix || current == null || inDomain || familyView != null) emptyList() else
             current.packs.filter { scopeOf(it) == scope }.map { it.category }.distinct()
                 .sortedWith(compareBy({ categoryRank(it) }, { it }))
         // A chip shows one category whole; a category that has left the catalog falls back to All.
@@ -534,9 +552,17 @@ class SourceViewModel(
             if (kiwix) {
                 // One row per pack, whatever its flavours (Plan KB Decision 8): chips, search and Recommended work on them.
                 val free = volumeRows.firstOrNull { it.path == s.selectedPath }?.freeBytes ?: volumeRows.firstOrNull()?.freeBytes
+                // Search: every word, in any order, anywhere in a pack's words; title hits first (Plan KB Decision 11).
                 val groups = KiwixList.group(
                     current.packs.filter { inList(it) && (chosen == null || it.category == chosen) }, free,
-                ).filter { group -> group.flavours.any(::shown) }
+                ).filter { group -> group.flavours.any(::inTab) && KiwixList.matches(group, words) }
+                    .sortedByDescending { KiwixList.titleMatches(it, words) }
+                if (familyView != null) {
+                    // A folded family's own list: its packs A–Z, for the letter strip.
+                    val rows = groups.sortedByShelfKey({ app.granger.core.library.ShelfKey.of(it.title) }).map(::groupRow)
+                    if (rows.isNotEmpty()) add(Section(familyView.label, rows))
+                    return@buildList
+                }
                 val (featured, rest) = if (inDomain) {
                     val domain = current.readiness!!.domains.first { it.id == domainId }
                     val tierIds = (domain.essential + domain.comprehensive).distinct()
@@ -548,13 +574,20 @@ class SourceViewModel(
                     groups.partition { chosen == null && it.featured }
                 }
                 if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::groupRow)))
+                // The big families fold to one row each, in their category, until a search looks inside (Decision 10).
+                val foldFamilies = needle.isEmpty() && !inDomain
                 rest.groupBy { it.default.category }
                     .toList()
                     .sortedWith(compareBy({ categoryRank(it.first) }, { it.first }))
                     .forEach { (category, entries) ->
-                        val open = !folds || category in s.expanded || entries.size <= FOLDED_ROWS
-                        val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::groupRow)
-                        add(Section(category, rows, entries.size, foldable = folds && entries.size > FOLDED_ROWS))
+                        val familyRows = if (!foldFamilies) emptyList() else entries
+                            .mapNotNull { g -> KiwixList.folded(g.default.family) }.distinct()
+                            .map { f -> familyRow(f, entries.count { it.default.family == f.family }) }
+                        val loose = if (!foldFamilies) entries else entries.filter { KiwixList.folded(it.default.family) == null }
+                        val total = familyRows.size + loose.size
+                        val open = !folds || category in s.expanded || total <= FOLDED_ROWS
+                        val rows = familyRows + (if (open) loose else loose.take((FOLDED_ROWS - familyRows.size).coerceAtLeast(0))).map(::groupRow)
+                        add(Section(category, rows, total, foldable = folds && total > FOLDED_ROWS))
                     }
                 return@buildList
             }
@@ -622,6 +655,7 @@ class SourceViewModel(
             category = chosen,
             domainTitle = domainTitle,
             sizeCheck = s.sizeCheck,
+            familyTitle = familyView?.label,
         )
     }
 

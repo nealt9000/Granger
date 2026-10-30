@@ -86,4 +86,13 @@ class SourceScreenTest {
         compose.onNodeWithText("Get 220 GB").assertIsDisplayed()
         compose.onNodeWithText("Cancel").assertIsDisplayed()
     }
+
+    @Test fun aFoldedFamilysRowOpensItsList() {
+        var opened = false
+        val row = ItemRow("family:devdocs", "Developer docs", "243 packs", "", 0L, ItemStatus.NotInstalled, null, opensFamily = "devdocs")
+        compose.setContent { FamilyRow(row) { opened = true } }
+        compose.onNodeWithText("243 packs").assertIsDisplayed()
+        compose.onNodeWithText("Developer docs").performClick()
+        assertThat(opened).isTrue()
+    }
 }

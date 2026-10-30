@@ -865,4 +865,114 @@ class SourceViewModelTest {
         assertThat(vm.ui.value.sizeCheck).isNull()
         assertThat(downloads.enqueued.map { it.first }).containsExactly(nopic.id)
     }
+
+    // --- Plan KB: folded families and better search ---
+
+    private fun devdocs(name: String, title: String) =
+        kiwix("devdocs_en_$name", "Programming", zimName = "devdocs_en_$name").copy(title = title, family = "devdocs")
+    private fun site(name: String) =
+        kiwix("$name.stackexchange.com_en_all", "Q&A", zimName = "$name.stackexchange.com_en_all")
+            .copy(title = "${name.replaceFirstChar { it.uppercase() }} Stack Exchange", family = "stack_exchange")
+    private fun map(region: String) =
+        kiwix("maps_en_$region", "Maps", zimName = "maps_en_$region").copy(title = "Map of ${region.replaceFirstChar { it.uppercase() }}", family = "maps")
+
+    private val familyCatalog = catalogOf(
+        listOf(
+            devdocs("python", "Python Docs"), devdocs("rust", "Rust Docs"), devdocs("go", "Go Docs"), devdocs("bash", "Bash Docs"),
+            kiwix("freecodecamp_en_javascript", "Programming", zimName = "freecodecamp_en_javascript").copy(title = "freeCodeCamp JavaScript", family = "freecodecamp"),
+            site("cooking"), site("diy"), site("gardening"),
+            map("france"), map("spain"), map("chile"),
+            kiwix("wikipedia_en_medicine_maxi", "Medical", zimName = "wikipedia_en_medicine").copy(title = "WikiMed", description = "The largest medical encyclopedia, from Wikipedia", family = "wikipedia"),
+            kiwix("mdwiki_en_all", "Medical", zimName = "mdwiki_en_all").copy(title = "MDWiki", description = "Medicine articles from WikiProjectMed", family = "mdwiki"),
+            kiwix("encyclopedie_fr_all", "Reference", zimName = "encyclopedie_fr_all").copy(title = "Encyclopédie de Diderot", language = "fra", family = "encyclopedie"),
+            kiwix("medline", "Medical", zimName = "medlineplus.gov_en_all").copy(title = "MedlinePlus", family = "medlineplus.gov"),
+        ),
+    )
+
+    private fun TestScope.familyViewModel(family: String?): SourceViewModel {
+        val vm = SourceViewModel(
+            CatalogScope.KIWIX, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK,
+            appScope = this, io = main.dispatcher, family = family,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    @Test fun theBigFamiliesFoldToOneRowEachAndMapsLeaveTheList() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = familyCatalog)
+        val ui = familyViewModel(null).ui.value
+        val programming = ui.sections.single { it.title == "Programming" }
+        assertThat(programming.rows.map { it.title }).containsExactly("Developer docs", "freeCodeCamp JavaScript").inOrder()
+        assertThat(programming.rows.first().details).isEqualTo("4 packs")
+        assertThat(programming.rows.first().opensFamily).isEqualTo("devdocs")
+        val qa = ui.sections.single { it.title == "Q&A" }.rows.single()
+        assertThat(qa.title to qa.details).isEqualTo("Q&A sites" to "3 packs")
+        // Maps are one row, "Maps · 3 regions".
+        val maps = ui.sections.single { it.title == "Maps" }.rows.single()
+        assertThat(KiwixList.foldedText(KiwixList.folded("maps")!!, 3)).isEqualTo("Maps · 3 regions")
+        assertThat(maps.title to maps.details).isEqualTo("Maps" to "3 regions")
+        assertThat(ui.sections.flatMap { it.rows }.map { it.id }.filter { it.startsWith("maps_") }).isEmpty()
+    }
+
+    @Test fun aFoldedFamilyOpensItsOwnListAToZWithItsOwnSearch() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = familyCatalog)
+        val vm = familyViewModel("devdocs")
+        val ui = vm.ui.value
+        assertThat(ui.familyTitle).isEqualTo("Developer docs")
+        assertThat(ui.categories).isEmpty()
+        assertThat(ui.sections.single().rows.map { it.title }).containsExactly("Bash Docs", "Go Docs", "Python Docs", "Rust Docs").inOrder()
+        vm.setQuery("rust")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single().rows.map { it.title }).containsExactly("Rust Docs")
+        val maps = familyViewModel("maps").ui.value
+        assertThat(maps.familyTitle).isEqualTo("Maps")
+        assertThat(maps.sections.single().rows.map { it.title }).containsExactly("Map of Chile", "Map of France", "Map of Spain").inOrder()
+    }
+
+    @Test fun pythonFindsPythonDocsFromTheTopList() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = familyCatalog)
+        val vm = familyViewModel(null)
+        vm.setQuery("python")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Python Docs")
+        // A search looks inside the folded families: no family rows while searching.
+        vm.setQuery("docs")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Bash Docs", "Go Docs", "Python Docs", "Rust Docs")
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.none { it.opensFamily != null }).isTrue()
+    }
+
+    @Test fun twoWordsMatchInEitherOrderAndTitleHitsRankFirst() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = familyCatalog)
+        val vm = familyViewModel(null)
+        for (query in listOf("medicine wiki", "wiki medicine", "  WIKI   Medicine ")) {
+            vm.setQuery(query)
+            testScheduler.advanceUntilIdle()
+            // WikiMed: "wiki" in its title, "medicine" in its ZIM name. MDWiki: both in its title and description.
+            assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("WikiMed", "MDWiki")
+        }
+        vm.setQuery("med")
+        testScheduler.advanceUntilIdle()
+        // Every Medical pack has "med" somewhere; those with it in the title come first.
+        val medical = vm.ui.value.sections.single { it.title == "Medical" }.rows.map { it.title }
+        assertThat(medical).containsExactly("WikiMed", "MedlinePlus", "MDWiki").inOrder()
+        vm.setQuery("cooking stack")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Cooking Stack Exchange")
+        // Category and language names count too.
+        vm.setQuery("french reference")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Encyclopédie de Diderot")
+    }
+
+    @Test fun accentsFoldEitherWay() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = familyCatalog)
+        val vm = familyViewModel(null)
+        for (query in listOf("Encyclopédie", "encyclopedie", "ENCYCLOPEDIE diderot")) {
+            vm.setQuery(query)
+            testScheduler.advanceUntilIdle()
+            assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Encyclopédie de Diderot")
+        }
+    }
 }

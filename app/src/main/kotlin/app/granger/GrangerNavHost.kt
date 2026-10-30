@@ -278,8 +278,11 @@ fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
 
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
-/** [domain] filters the Kiwix list to a readiness domain (Plan H1); null is the whole catalog. */
-@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null)
+/**
+ * [domain] filters the Kiwix list to a readiness domain (Plan H1); [family] is one folded family's A–Z list (Plan KB
+ * Decision 10); null for both is the whole catalog.
+ */
+@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null, val family: String? = null)
 /** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
 @Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
 /** The LibriVox source: Recently added, six genres and search (Plan M2). */
@@ -1057,12 +1060,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
+                            family = route.family,
                         )
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
                     // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
                     onOpenPack = ::openPackOrCollection,
+                    onOpenFamily = { family -> nav.navigate(SourceRoute(source, family = family)) },
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->
