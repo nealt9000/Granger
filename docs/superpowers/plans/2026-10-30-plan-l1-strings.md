@@ -129,6 +129,26 @@ Things the package tasks left for after the merge, because they cross task bound
 
   (Task 6)
 - [ ] **Saved in book data:** archive.org's OCR note and the "(PDF)" suffix, matched with `removePrefix`. Decide in L2 with the other saved strings (Task 6).
+- [ ] **Android Auto:** `media/AutoBrowseTree` folder names ("Recent", "Music", "Nothing here yet"…). Take a `(Int) -> String` from `GrangerApp.kt` (Task 4).
+- [ ] **English constants kept for other packages:**
+  - `chapterTitle` and `voiceSubtitle` (widget)
+  - `ALL_MUSIC` and `ALL_AUDIOBOOKS` (library)
+  - `UNKNOWN_AUTHOR`
+  - `MediaDownloader`'s "Download failed"
+
+  (Task 4)
+- [ ] **Passed through as English by Task 2:**
+  - `QueueText` (see the Task 7 item)
+  - `row.error` (the stored download error, L2)
+  - `chunkLabel`
+  - `AskReach.text`
+  - `GetMoreLink`
+  - `formatBytes`
+  - `WidgetModel`
+  - the volume label
+- [ ] **Changes to the English the walkthrough should confirm:**
+  - Readiness's "is from" date is now localised ("Jan 10, 2025", not "2025-01-10"). Task 2; a one-line revert if Neal prefers ISO.
+  - Downloads say "1 of 1 track" and "1 of 1 chapter" (Tasks 4 and 6).
 - [ ] **Not in L1, noted for L2:**
   - Download error messages are stored in `downloads.db`, and `isGone` matches them as text. Translating them needs a stored error code (a schema change).
   - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3).
