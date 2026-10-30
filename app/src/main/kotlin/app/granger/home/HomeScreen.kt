@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -56,7 +55,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
 import app.granger.core.library.FeedKind
 import app.granger.shell.RailEntry
+import app.granger.shell.mediaKind
 import app.granger.shell.rememberRailCover
+import app.granger.theme.MediaTile
 
 /** What the screen can do for a feed. */
 class FeedActions(
@@ -209,7 +210,7 @@ private fun FeedHeading(title: String, first: Boolean, last: Boolean, onRemove: 
 private val CardWidth = 132.dp
 private val TileHeight = 88.dp
 
-/** A reading tab: its cover when it has one, else a letter tile; greyed when its pack is gone. */
+/** A reading tab: its cover when it has one, else the themed tile (Plan U3c Decision 6); greyed when its pack is gone. */
 @Composable
 private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
     val tab = entry.tab
@@ -219,16 +220,17 @@ private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
             if (cover != null) {
                 Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             } else {
-                LetterTile(tab.initial.toString())
+                MediaTile(tab.title, tab.mediaKind())
             }
         }
     }
 }
 
+/** Something played: the themed tile with its title and what it played (Continue keeps no covers for plays). */
 @Composable
 private fun PlayCard(entry: RailEntry.Play, onClick: () -> Unit) {
     Card(title = entry.title, subtitle = entry.kind, enabled = true, onClick = onClick) {
-        IconTile(rememberVectorPainter(Icons.Filled.PlayArrow))
+        MediaTile(entry.title, entry.mediaKind())
     }
 }
 
@@ -268,13 +270,6 @@ private fun TargetIcon(card: Card) {
 private fun IconTile(painter: Painter) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Icon(painter, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-@Composable
-private fun LetterTile(letter: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(letter, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

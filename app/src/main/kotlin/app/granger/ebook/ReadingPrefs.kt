@@ -41,6 +41,8 @@ data class ReadingPrefs(
     val pdfScroll: Boolean = false,
     /** PDFs: a page fills the width (scroll down it) instead of fitting whole on screen. */
     val pdfFitWidth: Boolean = false,
+    /** The wiki reader's text size (Plan U3c Decision 4): the WebView's `textZoom`, a percent, 80..160 in steps of 10. */
+    val wikiTextZoom: Int = 100,
 ) {
     /**
      * Readium's preferences. Publisher styles are always off so the reader's choices win over the book's CSS
@@ -93,6 +95,9 @@ data class ReadingPrefs(
     /** The page is Night: chosen, or Match app while the app is in Night. */
     val pageNight: Boolean get() = theme == ReadingTheme.NIGHT || (theme == ReadingTheme.APP && appNight)
 
+    /** A wiki page is darkened: Night chosen, or Match app while the app is in [appNight]. Sepia reads as Day there. */
+    fun wikiNight(appNight: Boolean): Boolean = theme == ReadingTheme.NIGHT || (theme == ReadingTheme.APP && appNight)
+
     /** PDF pages are drawn inverted: Night is the one theme a PDF honours. */
     val pdfNight: Boolean get() = pageNight
 
@@ -104,6 +109,7 @@ data class ReadingPrefs(
         fontScale = (fontScale.coerceIn(MIN_FONT_SCALE, MAX_FONT_SCALE) / FONT_SCALE_STEP).roundToInt() * FONT_SCALE_STEP,
         lineHeight = lineHeight.coerceIn(MIN_LINE_HEIGHT, MAX_LINE_HEIGHT),
         margins = margins.coerceIn(MIN_MARGINS, MAX_MARGINS),
+        wikiTextZoom = (wikiTextZoom.coerceIn(MIN_WIKI_ZOOM, MAX_WIKI_ZOOM) / WIKI_ZOOM_STEP.toDouble()).roundToInt() * WIKI_ZOOM_STEP,
     )
 
     companion object {
@@ -115,6 +121,9 @@ data class ReadingPrefs(
         const val MIN_MARGINS = 0.5
         const val MAX_MARGINS = 2.0
         const val PDF_PAGE_SPACING = 8.0
+        const val MIN_WIKI_ZOOM = 80
+        const val MAX_WIKI_ZOOM = 160
+        const val WIKI_ZOOM_STEP = 10
     }
 }
 
@@ -140,6 +149,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             .putString(KEY_THEME, clamped.theme.name)
             .putBoolean(KEY_PDF_SCROLL, clamped.pdfScroll)
             .putBoolean(KEY_PDF_FIT_WIDTH, clamped.pdfFitWidth)
+            .putInt(KEY_WIKI_TEXT_ZOOM, clamped.wikiTextZoom)
             .apply()
     }
 
@@ -155,6 +165,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             theme = enumOr(shared.getString(KEY_THEME, null), d.theme),
             pdfScroll = shared.getBoolean(KEY_PDF_SCROLL, d.pdfScroll),
             pdfFitWidth = shared.getBoolean(KEY_PDF_FIT_WIDTH, d.pdfFitWidth),
+            wikiTextZoom = shared.getInt(KEY_WIKI_TEXT_ZOOM, d.wikiTextZoom),
         ).clamped()
     }
 
@@ -170,5 +181,6 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
         const val KEY_THEME = "theme"
         const val KEY_PDF_SCROLL = "pdf_scroll"
         const val KEY_PDF_FIT_WIDTH = "pdf_fit_width"
+        const val KEY_WIKI_TEXT_ZOOM = "wiki_text_zoom"
     }
 }

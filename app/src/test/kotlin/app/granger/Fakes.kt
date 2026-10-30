@@ -174,6 +174,16 @@ class FakeReadingSessions : ReadingSessions {
         return id
     }
 
+    override suspend fun newTab(packId: String, path: String, title: String): Long {
+        val time = ++clock
+        historyList.update { list ->
+            listOf(HistoryEntry(packId, path, title, time)) + list.filterNot { it.packId == packId && it.path == path }
+        }
+        val id = (tabs.value.maxOfOrNull { it.id } ?: 0L) + 1
+        tabs.update { it + ReadingTab(id, packId, path, title, time, onRail = true, backStack = path) }
+        return id
+    }
+
     override suspend fun showInTab(tabId: Long, packId: String, path: String, title: String) {
         tabs.update { list -> list.map { if (it.id == tabId) it.copy(packId = packId, path = path, title = title) else it } }
     }
@@ -278,8 +288,18 @@ class FakeBookshelf : Bookshelf {
 
     /** Pack documents registered, as (zimId, path, title); each becomes a PDF book whose file is the one given. */
     val packDocuments = mutableListOf<Triple<String, String, String>>()
-    override suspend fun registerPackDocument(zimId: String, path: String, title: String, file: File): Book {
+
+    /** The link text each registration in [packDocuments] was given. */
+    val packDocumentLinkTexts = mutableListOf<String>()
+
+    /** The pack's listed title each registration in [packDocuments] was given. */
+    val packDocumentListedTitles = mutableListOf<String>()
+    override suspend fun registerPackDocument(
+        zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
+    ): Book {
         packDocuments += Triple(zimId, path, title)
+        packDocumentLinkTexts += linkText
+        packDocumentListedTitles += listedTitle
         val book = book(BookIds.of(BookOrigin.PACK, "$zimId/$path"), title).copy(
             origin = BookOrigin.PACK, sourceRef = "$zimId/$path", filePath = file.absolutePath, format = BookFormat.PDF,
         )

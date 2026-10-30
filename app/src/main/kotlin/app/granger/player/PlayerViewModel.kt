@@ -140,6 +140,8 @@ class PlayerViewModel(
     private val skipBackSeconds: () -> Int = { DEFAULT_SKIP_S },
     private val skipForwardSeconds: () -> Int = { DEFAULT_SKIP_S },
     audiobooks: Flow<Boolean> = flowOf(true),
+    /** Keeps the voice picked in Reader as the user's choice (Settings' voice), so the next read uses it too. */
+    private val chooseVoice: (VoiceId) -> Unit = {},
 ) : ViewModel() {
     val ui: StateFlow<PlayerUi> = hub.ui
     val queue: StateFlow<List<Track>> = hub.queue
@@ -225,7 +227,11 @@ class PlayerViewModel(
     fun setMixLevel(level: Float) = hub.setMixLevel(level)
     fun playPauseMusic() = hub.playPauseMusic()
     fun nextMusic() = hub.nextMusic()
-    fun setVoice(id: VoiceId) = hub.setVoice(id)
+    /** Reads on in [id] now, and keeps it as the voice for every read after this one until another is picked. */
+    fun setVoice(id: VoiceId) {
+        chooseVoice(id)
+        hub.setVoice(id)
+    }
 
     /** Music is playing under the voice: the Music tab shows it and its controls drive it, not the voice. */
     fun musicUnderVoice(): NowPlaying.Voice? = (hub.ui.value.now as? NowPlaying.Voice)?.takeIf { it.music != null }

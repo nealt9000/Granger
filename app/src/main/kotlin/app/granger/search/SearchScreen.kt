@@ -58,6 +58,7 @@ import app.granger.core.library.SearchText
 import app.granger.core.library.Track
 import app.granger.music.AlbumCover
 import app.granger.music.MusicCatalog
+import app.granger.theme.MediaKind
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -185,23 +186,23 @@ fun SearchScreen(
                     item { SectionHeader("Music") }
                 }
                 results(state, SearchGroup.ARTISTS, music.artists, { _, artist -> "ma:${artist.name}" }, ::toggle) { artist ->
-                    MediaRow(artist.name, SearchRows.artist(artist), { AlbumCover(artist.coverPath, it) }) {
+                    MediaRow(artist.name, SearchRows.artist(artist), { AlbumCover(artist.coverPath, artist.name, it, MediaKind.ARTIST) }) {
                         media { onOpenArtist(artist.name) }
                     }
                 }
                 results(state, SearchGroup.ALBUMS, music.albums, { _, album -> "mb:${album.key}" }, ::toggle) { album ->
-                    MediaRow(album.title, SearchRows.album(album), { AlbumCover(album.coverPath, it) }) {
+                    MediaRow(album.title, SearchRows.album(album), { AlbumCover(album.coverPath, album.title, it) }) {
                         media { onOpenAlbum(album.key) }
                     }
                 }
                 results(state, SearchGroup.SONGS, music.songs, { _, track -> "ms:${track.id}" }, ::toggle) { track ->
-                    MediaRow(track.title, SearchRows.song(track), { AlbumCover(track.coverPath, it) }) {
+                    MediaRow(track.title, SearchRows.song(track), { AlbumCover(track.coverPath, track.title, it) }) {
                         media { onPlaySong(track) }
                     }
                 }
                 if (music.audiobooks.isNotEmpty()) item { SectionHeader("Audiobooks") }
                 results(state, SearchGroup.AUDIOBOOKS, music.audiobooks, { _, book -> "mk:${book.id}" }, ::toggle) { book ->
-                    MediaRow(book.title, SearchRows.audiobook(book), { AudiobookCover(book.coverPath, it) }) {
+                    MediaRow(book.title, SearchRows.audiobook(book), { AudiobookCover(book.coverPath, book.title, it) }) {
                         media { onOpenAudiobook(book.id) }
                     }
                 }

@@ -73,7 +73,7 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
         LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
             item {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    AlbumCover(album.coverPath, Modifier.width(140.dp))
+                    AlbumCover(album.coverPath, album.title, Modifier.width(140.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(album.title, style = MaterialTheme.typography.titleLarge)
                         for (artist in albumArtistNames(album)) {

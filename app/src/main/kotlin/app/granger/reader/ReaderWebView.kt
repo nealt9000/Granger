@@ -10,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.ui.graphics.toArgb
+import androidx.webkit.ScriptHandler
 import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import app.granger.ebook.SelectionBridge
 import app.granger.theme.FieldColors
@@ -27,7 +29,9 @@ enum class SelectionAction(val label: String) {
 /**
  * A WebView configured for ZIM content that can report and restore how far down the page it is. A middle tap on the
  * page calls [onToggleChrome]; a selection action calls [onSelectionAction] with the selected text (for Read from
- * here, the page script's `{id, prefix, offset}` of the selection's block); the user's own scrolls call [onUserScroll].
+ * here, the page script's `{id, prefix, offset}` of the selection's block); scrolls other than the voice's call
+ * [onUserScroll] with their distance in dp and whether a finger moved the page. Every page gets the reader's bars'
+ * padding ([setChromePadding]).
  */
 @SuppressLint("SetJavaScriptEnabled", "ViewConstructor", "JavascriptInterface")
 class ReaderWebView(
@@ -35,9 +39,11 @@ class ReaderWebView(
     client: ZimWebViewClient,
     onToggleChrome: () -> Unit = {},
     private val onSelectionAction: (SelectionAction, String) -> Unit = { _, _ -> },
-    onUserScroll: () -> Unit = {},
+    onUserScroll: (dyDp: Float, byHand: Boolean) -> Unit = { _, _ -> },
     night: Boolean = true,
 ) : WebView(context) {
+    private val bridge = GrangerBridge(onToggleChrome, onUserScroll)
+
     init {
         // Compose's AndroidView adds views with wrap-content params, which puts WebView in "zero layout height" mode:
         // percentage heights then resolve to 0 and pages built on them (Kiwix main pages) render blank.
@@ -62,8 +68,35 @@ class ReaderWebView(
             }
         }
         setBackgroundColor((if (night) NightColors else FieldColors).background.toArgb()) // no wrong-colour flash before the first page paints
-        addJavascriptInterface(GrangerBridge(onToggleChrome, onUserScroll), ReaderPageScript.BRIDGE_NAME)
+        addJavascriptInterface(bridge, ReaderPageScript.BRIDGE_NAME)
         webViewClient = client
+    }
+
+    /** The words of the link last tapped on the page, when it went to [url]; empty otherwise ([GrangerBridge.linkTextFor]). */
+    fun tappedLinkText(url: String): String = bridge.linkTextFor(url)
+
+    private var chromePadding: String? = null
+    private var chromePaddingAtStart: ScriptHandler? = null
+
+    /**
+     * Pads every page for the reader's bars over it: [topDp] and [bottomDp], and the rail's [leftDp] or [rightDp]. Set
+     * before a page loads, it is there from the page's first paint where the WebView runs scripts at document start;
+     * [applyChromePadding] puts it on a page that has loaded.
+     */
+    fun setChromePadding(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int = 0) {
+        val script = chromePaddingScript(topDp, bottomDp, leftDp, rightDp)
+        if (script == chromePadding) return
+        chromePadding = script
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            chromePaddingAtStart?.remove()
+            chromePaddingAtStart = WebViewCompat.addDocumentStartJavaScript(this, script, setOf("*"))
+        }
+        applyChromePadding()
+    }
+
+    /** The bars' padding on the page shown now. */
+    fun applyChromePadding() {
+        chromePadding?.let { evaluateJavascript(it, null) }
     }
 
     /** 0 at the top, 1 at the bottom; 0 when the page does not scroll. */

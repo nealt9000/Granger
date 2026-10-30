@@ -33,6 +33,19 @@ class InstalledVoicesTest {
     }
 
     @Test
+    fun aResumeReadsInTheChosenVoiceWhileItIsInstalledElseTheSavedOne() = runTest {
+        val volume = tmp.newFolder("r")
+        voiceDir(File(volume, "voices"), "vits-piper-en_US-ljspeech-medium")
+        val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { listOf(systemVoice) }, noFactory, noFactory)
+        val professor = VoiceId.Granger("vits-piper-en_GB-granger_professor-medium")
+        val ljspeech = VoiceId.Granger("vits-piper-en_US-ljspeech-medium")
+        assertThat(voices.forResume(systemVoice.id, ljspeech)).isEqualTo(systemVoice.id)      // lists the voices first
+        assertThat(voices.forResume(professor, ljspeech)).isEqualTo(ljspeech)                 // not installed: the text's own
+        assertThat(voices.forResume(null, ljspeech)).isEqualTo(ljspeech)
+        assertThat(voices.forResume(null, null)).isNull()
+    }
+
+    @Test
     fun grangerVoicesAreRankedCatalogThenPiperThenTheRest() = runTest {
         val volume = tmp.newFolder("v")
         voiceDir(File(volume, "voices"), "kokoro-int8-multi-lang-v1_1")       // first by name, last by rank

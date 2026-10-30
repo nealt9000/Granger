@@ -19,16 +19,27 @@ import org.junit.rules.TemporaryFolder
 class PackDocumentsTest {
     @get:Rule val tmp = TemporaryFolder()
 
-    /** One PDF entry, `docs/water.pdf`; [copies] counts copies out, and [failCopy] makes them fail. */
-    private class PdfPack : ZimArchive {
+    /**
+     * One PDF entry, [pdfPath]; [copies] counts copies out, and [failCopy] makes them fail. [database], when set, is
+     * the pack's `database.js` (a nautilus pack's list of documents), and [databaseReads] counts its reads.
+     */
+    private class PdfPack(private val pdfPath: String = PATH) : ZimArchive {
         var copies = 0
         var failCopy = false
+        var database: String? = null
+        var databaseReads = 0
         override val uuid = "zim1"
         override val metadata = ZimMetadata("Water", "", "eng", "", "water")
         override val mainPath: String? = null
         override val hasFulltextIndex = false
-        override fun resolvePath(path: String) = path.takeIf { it == PATH }
-        override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "application/pdf", BYTES) }
+        override fun resolvePath(path: String) = path.takeIf { it == pdfPath }
+        override fun read(path: String): ZimItem? {
+            if (path == "database.js") {
+                databaseReads++
+                return database?.let { ZimItem(path, "application/javascript", it.toByteArray()) }
+            }
+            return resolvePath(path)?.let { ZimItem(it, "application/pdf", BYTES) }
+        }
         override fun entry(path: String) = resolvePath(path)?.let { ZimEntry(it, "Water treatment", "application/pdf", BYTES.size.toLong()) }
         override fun copyTo(path: String, out: File): Boolean {
             copies++
@@ -64,15 +75,35 @@ class PackDocumentsTest {
         assertThat(file.parentFile).isEqualTo(File(dir, "zim1"))
         assertThat(file.readBytes()).isEqualTo(PdfPack.BYTES)
         assertThat(bookshelf.packDocuments).containsExactly(Triple("zim1", PdfPack.PATH, "Water treatment"))
+        assertThat(bookshelf.packDocumentLinkTexts).containsExactly("")
 
-        // A second tap reuses the file.
-        docs.open("zim1", PdfPack.PATH)
+        // A second tap reuses the file; the link's words go with it, to name it if nothing better does.
+        docs.open("zim1", PdfPack.PATH, "Treating water")
         assertThat(pack.copies).isEqualTo(1)
+        assertThat(bookshelf.packDocumentLinkTexts.last()).isEqualTo("Treating water")
         // Gone (storage cleared): restore copies it out again.
         file.delete()
         assertThat(docs.restore(opened.book)).isTrue()
         assertThat(file.isFile).isTrue()
         assertThat(pack.copies).isEqualTo(2)
+        // Its name stands in for the link's words, which are gone.
+        assertThat(bookshelf.packDocumentLinkTexts.last()).isEqualTo("Water treatment")
+    }
+
+    @Test fun aNautilusPacksListNamesItsPdfsReadOnce() = runTest(UnconfinedTestDispatcher()) {
+        // zimgit-food-preparation_en_2025-04-11.zim: the link's words were the file's name (2026-10-29).
+        val path = "files/Food Preparation (2).pdf"
+        val nautilus = PdfPack(path).apply {
+            database = "var DATABASE = [\n{'_id': '00001', 'ti': 'Camping Recipes', 'fp': ['Food Preparation (2).pdf']},\n];"
+        }
+        val docs = PackDocuments(bookshelf, { nautilus }, { dir }, UnconfinedTestDispatcher(testScheduler))
+        docs.open("zim1", path, "Food Preparation (2)")
+        docs.open("zim1", path, "Food Preparation (2)")
+        assertThat(bookshelf.packDocumentListedTitles).containsExactly("Camping Recipes", "Camping Recipes")
+        assertThat(nautilus.databaseReads).isEqualTo(1)
+        // A pack without a list lists nothing.
+        documents(UnconfinedTestDispatcher(testScheduler)).open("zim1", PdfPack.PATH)
+        assertThat(bookshelf.packDocumentListedTitles.last()).isEmpty()
     }
 
     @Test fun aFailedCopySaysWhyAndLeavesNothing() = runTest(UnconfinedTestDispatcher()) {

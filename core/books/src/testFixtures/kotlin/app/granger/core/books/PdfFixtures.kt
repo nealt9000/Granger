@@ -2,13 +2,19 @@ package app.granger.core.books
 
 import android.content.Context
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import com.tom_roush.pdfbox.pdmodel.PDDestinationNameTreeNode
 import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.PDDocumentNameDictionary
 import com.tom_roush.pdfbox.pdmodel.PDPage
 import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
 import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
 import com.tom_roush.pdfbox.pdmodel.encryption.AccessPermission
 import com.tom_roush.pdfbox.pdmodel.encryption.StandardProtectionPolicy
 import com.tom_roush.pdfbox.pdmodel.font.PDType1Font
+import com.tom_roush.pdfbox.pdmodel.interactive.action.PDActionGoTo
+import com.tom_roush.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitDestination
 import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline
 import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
 import java.io.File
@@ -70,6 +76,47 @@ object PdfFixtures {
                 s.fill()
             }
         }
+    }
+
+    /**
+     * Four pages, as a contents page links to its chapters, each link made a different way: page 1 is "Contents",
+     * with links (at [LINK_RECTS]) to page 2 by a direct destination, to page 3 by a GoTo action, and to page 4 by a
+     * named destination ("storage", in the catalog's name tree). The outline nests the chapters under "Water" and
+     * reaches them the same three ways.
+     */
+    fun linked(dir: File, name: String = "linked.pdf"): File = write(dir, name) { doc ->
+        val pages = listOf("Contents", "Boiling", "Filters", "Storage").mapIndexed { i, head -> page(doc, listOf(head), number = i + 1) }
+        val names = PDDestinationNameTreeNode().apply { names = mapOf("storage" to fit(pages[3])) }
+        doc.documentCatalog.names = PDDocumentNameDictionary(doc.documentCatalog).apply { dests = names }
+        fun direct() = fit(pages[1])
+        fun action() = PDActionGoTo().apply { destination = fit(pages[2]) }
+        fun named() = PDNamedDestination("storage")
+        pages[0].annotations = LINK_RECTS.mapIndexed { i, r ->
+            PDAnnotationLink().apply {
+                rectangle = PDRectangle(r[0], r[1], r[2] - r[0], r[3] - r[1])
+                when (i) {
+                    0 -> destination = direct()
+                    1 -> action = action()
+                    else -> destination = named()
+                }
+            }
+        }
+        val water = PDOutlineItem().apply { title = "Water"; setDestination(fit(pages[0])) }
+        water.addLast(PDOutlineItem().apply { title = "Boiling"; destination = direct() })
+        water.addLast(PDOutlineItem().apply { title = "Filters"; action = action() })
+        water.addLast(PDOutlineItem().apply { title = "Storage"; destination = named() })
+        doc.documentCatalog.documentOutline = PDDocumentOutline().apply { addLast(water) }
+    }
+
+    /** [linked]'s three links on page 1, each `[left, bottom, right, top]` in PDF points. */
+    val LINK_RECTS = listOf(floatArrayOf(72f, 600f, 300f, 620f), floatArrayOf(72f, 570f, 300f, 590f), floatArrayOf(72f, 540f, 300f, 560f))
+
+    private fun fit(page: PDPage) = PDPageFitDestination().apply { this.page = page }
+
+    /** One blank page whose info dictionary's Title is [title], as junk as its maker left it. */
+    fun titled(dir: File, title: String, name: String = "titled.pdf"): File = write(dir, name) { doc ->
+        doc.addPage(PDPage(PDRectangle.LETTER))
+        doc.documentInformation.title = title
     }
 
     /** [text] with an owner password only: it opens without a password, but it is encrypted. */

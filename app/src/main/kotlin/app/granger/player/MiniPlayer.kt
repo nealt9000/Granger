@@ -47,15 +47,19 @@ enum class MiniPlayerPlacement {
 
     /** In the shell's slot at the top of the content column, pushing the screen down. */
     PUSH,
+
+    /** In a reader: over the top of the page, sliding away and back with the reader's chrome (Plan U3c Decision 5). */
+    OVERLAY,
 }
 
 /**
- * Nothing loaded, or the full-screen player showing: hidden. In a reader it follows the reader's chrome (the rail's
- * visibility); whenever it shows it pushes the screen (the reader's page too) down.
+ * Nothing loaded, or the full-screen player showing: hidden. In a reader it goes over the page, the reader reading
+ * aloud its own page or book too: it is the one place for Pause, Stop and the player (Plan U3c walkthrough); elsewhere
+ * it pushes the screen down.
  */
-fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean, railVisible: Boolean): MiniPlayerPlacement = when {
+fun miniPlayerPlacement(loaded: Boolean, onPlayer: Boolean, reading: Boolean): MiniPlayerPlacement = when {
     !loaded || onPlayer -> MiniPlayerPlacement.HIDDEN
-    reading -> if (railVisible) MiniPlayerPlacement.PUSH else MiniPlayerPlacement.HIDDEN
+    reading -> MiniPlayerPlacement.OVERLAY
     else -> MiniPlayerPlacement.PUSH
 }
 
@@ -87,7 +91,7 @@ fun MiniPlayer(
                 Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = if (voice) "Open the voice" else "Open player", onClick = onOpen).padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PlayerCover(info.coverPath, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
+                PlayerCover(info.coverPath, info.title, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(

@@ -33,6 +33,15 @@ class ReadingSessionsTest {
         assertThat(sessions.history.first()).hasSize(2)
     }
 
+    @Test fun newTabOpensASecondTabOnTheSamePage() = runTest {
+        val first = sessions.openTab("p", "Main", "Wiki")
+        val second = sessions.newTab("p", "Main", "Wiki")
+        assertThat(second).isNotEqualTo(first)
+        assertThat(sessions.railTabs().first().map { it.id }).containsExactly(second, first).inOrder()
+        assertThat(sessions.tab(second)?.backStack).isEqualTo("Main")
+        assertThat(sessions.history.first().map { it.path }).containsExactly("Main")
+    }
+
     @Test fun navigatingWithinATabUpdatesIt() = runTest {
         val id = sessions.openTab("p", "Cat", "Cat")
         sessions.showInTab(id, "p", "Dog", "Dog")

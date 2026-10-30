@@ -21,7 +21,12 @@ import androidx.navigation.compose.rememberNavController
 import app.granger.LibraryRoute
 import app.granger.ListenPlayerRoute
 import app.granger.SearchRoute
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookOrigin
+import app.granger.core.library.ReadingTab
 import app.granger.core.player.PlayerUi
+import app.granger.core.speech.ReadSourceKey
+import app.granger.shell.readSourceKeyOf
 import app.granger.togglePlayer
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -169,15 +174,38 @@ class MiniPlayerTest {
         compose.onNodeWithText("Song A").assertExists()
     }
 
-    @Test fun miniPlayerPlacementFollowsTheReaderChrome() {
+    @Test fun miniPlayerPlacementPushesEverywhereButTheReaders() {
         // Non-reading screens: always there when something is loaded, pushing the screen down.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.PUSH)
-        // Reading: only with the reader's chrome (and the rail), and then it pushes the page down like anywhere else.
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, railVisible = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true, railVisible = true)).isEqualTo(MiniPlayerPlacement.PUSH)
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = false)).isEqualTo(MiniPlayerPlacement.PUSH)
+        // Reading: over the page, sliding with the reader's chrome (Plan U3c Decision 5), whether that shows or not.
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.OVERLAY)
         // Nothing loaded, or the full-screen player showing instead.
-        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
-        assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false, railVisible = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = false, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = true, reading = false)).isEqualTo(MiniPlayerPlacement.HIDDEN)
+    }
+
+    /**
+     * Plan U3c walkthrough: the mini player is the one place for playback controls, in the reader reading its own page
+     * aloud too: it shows over the page with Pause and Back a sentence, and its tap opens the player (voice, speed, Stop).
+     */
+    @Test fun inTheReaderTheVoiceIsReadingTheMiniPlayerHasTheControls() {
+        assertThat(miniPlayerPlacement(loaded = true, onPlayer = false, reading = true)).isEqualTo(MiniPlayerPlacement.OVERLAY)
+        val calls = mutableListOf<String>()
+        compose.setContent {
+            MiniPlayer(voiceUi("Photosynthesis"), onPlayPause = { calls += "pause" }, onSecondary = { calls += "back" }, onOpen = { calls += "open" })
+        }
+        compose.onNodeWithTag(MiniPlayerTags.PLAY_PAUSE).assertContentDescriptionEquals("Pause").performClick()
+        compose.onNodeWithTag(MiniPlayerTags.SECONDARY).assertContentDescriptionEquals("Back a sentence").performClick()
+        compose.onNodeWithTag(MiniPlayerTags.TITLE, useUnmergedTree = true).performClick()
+        assertThat(calls).containsExactly("pause", "back", "open").inOrder()
+    }
+
+    @Test fun theReadersSourceIsItsTabsPageOrBook() {
+        val article = ReadingTab(1, "wiki", "Owls", "Owls", 1L, onRail = true)
+        val book = ReadingTab(2, BookIds.of(BookOrigin.IMPORT, "b"), "", "A book", 2L, onRail = true)
+        assertThat(readSourceKeyOf(article)).isEqualTo(ReadSourceKey.article("wiki", "Owls"))
+        assertThat(readSourceKeyOf(book)).isEqualTo(ReadSourceKey.book(book.packId))
     }
 
     @Test fun seekBarSeeksOnReleaseNotWhileDragging() {

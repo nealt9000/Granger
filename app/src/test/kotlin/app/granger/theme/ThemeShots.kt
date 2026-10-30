@@ -19,14 +19,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import app.granger.research.AnswerBody
 import app.granger.R
+import app.granger.browse.BrowseActions
+import app.granger.browse.BrowseContent
+import app.granger.browse.BrowseSection
+import app.granger.browse.BrowseUi
+import app.granger.browse.MAPS_SECTION
+import app.granger.browse.OTHER_SECTION
+import app.granger.browse.PackItem
 import app.granger.library.KindRow
+import app.granger.sources.AskReach
 import app.granger.listen.CardKind
 import app.granger.listen.ListenActions
 import app.granger.listen.ListenContent
 import app.granger.listen.ListenUi
 import app.granger.listen.NowPlayingCard
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.fillMaxWidth
+import app.granger.audiobooks.AudiobookCover
+import app.granger.music.AlbumCover
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -140,6 +154,23 @@ class ThemeShots {
         }
     }
 
+    /** An Ask answer with a heading, lists that wrap, code and citations (Plan U3c Decision 8). */
+    @Test fun answer() = shoot("answer") {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(16.dp)) {
+            AnswerBody(
+                "Owls hunt mostly at night, by **sound** as much as sight [1].\n\n## How they hunt\n\n" +
+                    "1. They perch and listen, turning the head through as much as 270 degrees to place a sound [2].\n" +
+                    "2. They glide down on soft-edged feathers that make almost no noise.\n" +
+                    "  - The *barn owl* can strike in total darkness [3].\n" +
+                    "  - Others need some light.\n" +
+                    "10. They swallow small prey whole.\n\n" +
+                    "The pellets they cough up (search `owl pellet`) show what they ate:\n" +
+                    "- bones\n- fur and feathers, which the stomach can't break down and presses into a neat bundle [1, 2]",
+                onCite = {},
+            )
+        }
+    }
+
     @Test fun railExpanded() = shoot("rail") {
         GrangerShell(
             rail = RailUi(listOf(owls, RailEntry.Search("sextant", at = 3L), RailEntry.Chat(7L, "About owls", at = 2L), blue)),
@@ -149,17 +180,56 @@ class ThemeShots {
         ) { Box(Modifier.fillMaxSize()) }
     }
 
+    /** The Library is books (Plan U3c Decision 2): the Kiwix folder here is Browse's, and doesn't show. */
     @Test fun library() = shoot("library") {
         val wikipedia = CollectionRow(ShelfCollection("c:kiwix", "Kiwix", "literature", false, defaultKey = "kiwix"), listOf(pack("w")))
-        val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = listOf(book("b")))
+        val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = List(12) { book("b$it") })
+        val mine = CollectionRow(ShelfCollection("c:mine", "My books", "literature", false, defaultKey = "mine"), emptyList(), books = listOf(book("m")))
+        val archive = CollectionRow(ShelfCollection("c:ao", "Archive.org", "literature", false, defaultKey = "ao"), emptyList(), books = List(3) { book("a$it") })
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             LibraryContent(
-                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, wikipedia)))), false),
-                "/packs", SnackbarHostState(), {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
+                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(archive, classics, wikipedia, mine)))), false),
+                SnackbarHostState(), {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
+            )
+        }
+    }
+
+    /** Browse's home (Plan U3c Decision 1): each pack a row under its knowledge area, then Other, then the maps. */
+    @Test fun browse() = shoot("browse") {
+        val gb = 1_000_000_000L
+        val medicine = listOf(
+            PackItem(pack("med", "WikEM emergency medicine").copy(sizeBytes = 45_000_000), AskReach.KEYWORDS),
+            PackItem(pack("wikimed", "WikiMed").copy(sizeBytes = 2 * gb), AskReach.MEANING),
+        )
+        val making = listOf(PackItem(pack("knots", "Knots (Wikipedia)").copy(sizeBytes = 30_000_000), AskReach.MEANING))
+        val reference = listOf(
+            PackItem(pack("wiki", "Wikipedia").copy(sizeBytes = 48 * gb), AskReach.MEANING),
+            PackItem(pack("wikt", "Wiktionary").copy(sizeBytes = 8 * gb), AskReach.MEANING),
+        )
+        val travel = listOf(PackItem(pack("voy", "Wikivoyage travel guide").copy(sizeBytes = 900_000_000), AskReach.MEANING))
+        val other = listOf(PackItem(pack("dev", "DevDocs: Kotlin").copy(sizeBytes = 20_000_000), AskReach.KEYWORDS))
+        val maps = listOf(PackItem(pack("uk", "United Kingdom").copy(sizeBytes = 1_400_000_000)))
+        GrangerShell(
+            rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.BROWSE,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            BrowseContent(
+                BrowseUi(
+                    listOf(
+                        BrowseSection("medicine", "Medicine & first aid", medicine),
+                        BrowseSection("making", "Making, repair & engineering", making),
+                        BrowseSection("maps", "Maps, places & travel", travel),
+                        BrowseSection("reference", "General reference", reference),
+                        BrowseSection(OTHER_SECTION, "Other", other),
+                        BrowseSection(MAPS_SECTION, "Maps", maps),
+                    ),
+                ),
+                "/packs", downloadsBadge = 0, BrowseActions(),
             )
         }
     }
@@ -174,7 +244,12 @@ class ThemeShots {
                 previous = "Chapter 1: Peter Breaks Through.", next = "They soon know that they will grow up.",
             )
         }
-        val voices = listOf(app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), "Granger voice (ljspeech)", "en-US"))
+        val voices = listOf(
+            app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_US-ljspeech-medium"), "Granger voice (ljspeech)", "en-US"),
+            app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.Granger("vits-piper-en_GB-granger_professor-medium"), "Granger voice (professor)", "en-GB"),
+        ) + (1..6).map { i ->
+            app.granger.core.speech.Voice(app.granger.core.speech.VoiceId.System("com.google.android.tts", "en-us-x-io$i-local"), "System voice io$i (en-US)", "en-US")
+        }
         shoot("reader") { ListenPlayerScreen(PlayerViewModel(hub), onClose = {}, voices = voices) }
     }
 
@@ -183,6 +258,45 @@ class ThemeShots {
         val chapters = listOf(chapter(book, 0, 60_000L), chapter(book, 1, 60_000L))
         shoot("audiobook") {
             ListenPlayerScreen(PlayerViewModel(FakePlayerHub(bookUi(book, chapters[1], chapterCount = 2, positionMs = 20_000L)), chapters = { MutableStateFlow(chapters) }), onClose = {})
+        }
+    }
+
+    /**
+     * Missing art (Plan U3c Decision 6, W8): an album grid with no covers and an audiobook, the small tiles at the
+     * sizes they're drawn (queue, Browse, mini player, search, Listen), the rail's tab, play, search and chat, and
+     * the mini player, all on the themed tile.
+     */
+    @Config(qualifiers = "w360dp-h720dp-xxhdpi")
+    @Test fun tiles() = shoot("tiles") {
+        val rail = RailUi(
+            listOf(
+                owls.copy(tab = owls.tab.copy(packId = "wiki", path = "A/Owl")), blue,
+                RailEntry.Play("audiobook:t", "Treasure Island", at = 1L), RailEntry.Search("sextant", at = 3L), RailEntry.Chat(7L, "About owls", at = 2L),
+            ),
+        )
+        GrangerShell(
+            rail = rail, expanded = false, railVisible = true, selected = RailTool.LISTEN,
+            onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
+            actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
+        ) {
+            Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+                Column(Modifier.weight(1f).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    val albums = listOf("Kind of Blue", "A Love Supreme", "The Köln Concert", "Moanin'", "1984", "(What's the Story) Morning Glory?")
+                    for (row in albums.chunked(3)) Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        for (title in row) Column(Modifier.weight(1f)) {
+                            AlbumCover(null, title, Modifier.fillMaxWidth())
+                            Text(title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AudiobookCover(null, "Treasure Island", Modifier.size(72.dp))
+                        for ((size, kind) in listOf(40 to MediaKind.MUSIC, 40 to MediaKind.REFERENCE, 44 to MediaKind.VOICE, 48 to MediaKind.ARTIST, 56 to MediaKind.AUDIOBOOK)) {
+                            Box(Modifier.size(size.dp).clip(RoundedCornerShape(6.dp))) { MediaTile("Moby-Dick", kind) }
+                        }
+                    }
+                }
+                MiniPlayer(musicUi(app.granger.player.track("a", "Blue in Green", artists = "Miles Davis")), onPlayPause = {}, onSecondary = {}, onOpen = {})
+            }
         }
     }
 
@@ -239,13 +353,89 @@ class ThemeShots {
         File(out, "listen-icons.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /**
+     * Browse's icon (Plan U3c Decision 1): the globe (Material public, wired) beside the compass (explore), each in the
+     * rail's order with the other tools, Browse selected at the foot and the full rail's Browse row at 20 dp. Field on
+     * the left, Night on the right.
+     */
+    @Config(qualifiers = "w720dp-h560dp-xxhdpi")
+    @Test fun browseIcons() {
+        val candidates = listOf("globe" to R.drawable.ic_browse, "compass" to R.drawable.ic_browse_alt)
+        compose.setContent {
+            Row(Modifier.fillMaxSize()) {
+                for (night in listOf(false, true)) GrangerTheme(night = night) {
+                    Row(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
+                        for ((name, icon) in candidates) IconColumn(name, icon, Modifier.weight(1f), tool = "Browse")
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+        File(out).mkdirs()
+        File(out, "browse-icons.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    /**
+     * The readers' shared bars (Plan U3c Decision 4) over a stand-in page, at 360 dp: the wiki idle and reading aloud
+     * (no playback buttons in the bar; the mini player above it has them), and an EPUB with its place and slider.
+     */
+    private fun wikiBars(voice: app.granger.player.VoiceButton) = app.granger.reader.wikiBarActions(
+        packTitle = "Wikipedia", hasPack = true, hasPage = true, hasHome = true, bookmarked = false, onBack = {}, onListen = {}, voice = voice,
+    )
+
+    private val wikiPage = "Photosynthesis is a system of biological processes by which photosynthetic organisms, such as most plants, " +
+        "algae and cyanobacteria, convert light energy, typically from sunlight, into the chemical energy necessary to fuel their metabolism."
+
+    @Test fun barsWiki() = shoot("bars-wiki") { ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.IDLE), wikiPage) }
+
+    @Test fun barsWikiReading() = shoot("bars-wiki-reading") {
+        ReaderShot("Photosynthesis", wikiBars(app.granger.player.VoiceButton.READING), wikiPage) {
+            MiniPlayer(app.granger.player.voiceUi("Photosynthesis", section = "Overview"), onPlayPause = {}, onSecondary = {}, onOpen = {})
+        }
+    }
+
+    @Test fun barsEpub() {
+        val locator = org.readium.r2.shared.publication.Locator(
+            href = org.readium.r2.shared.util.Url("c1.xhtml")!!, mediaType = org.readium.r2.shared.util.mediatype.MediaType.XHTML,
+            title = "Chapter 1", locations = org.readium.r2.shared.publication.Locator.Locations(position = 12, totalProgression = 0.04),
+        )
+        val book = app.granger.ebook.bookBarActions(isPdf = false, bookmarked = true, onBack = {}, onListen = {})
+        shoot("bars-epub") {
+            ReaderShot(
+                "Pride and Prejudice", book,
+                "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+                progress = { app.granger.ebook.BookProgress(locator, 410) {} },
+            )
+        }
+    }
+
+    /** A reader's bars over [text]; [mini], the mini player the shell draws over the page, above the top bar. */
     @Composable
-    private fun IconColumn(name: String, listen: Int, modifier: Modifier) {
+    private fun ReaderShot(
+        title: String, actions: app.granger.reader.ReaderBarActions, text: String,
+        progress: (@Composable () -> Unit)? = null, mini: (@Composable () -> Unit)? = null,
+    ) {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            mini?.invoke()
+            app.granger.reader.ReaderTopBar(title, actions)
+            Box(Modifier.weight(1f).fillMaxWidth().padding(16.dp)) {
+                Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            }
+            app.granger.reader.ReaderBottomBar(actions, progress = progress)
+        }
+    }
+
+    /** One candidate's column: the rail's tools with [icon] as [tool] (Listen or Browse), that tool selected, its full-rail row. */
+    @Composable
+    private fun IconColumn(name: String, icon: Int, modifier: Modifier, tool: String = "Listen") {
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
-        val tools = listOf(
+        val listen = if (tool == "Listen") icon else R.drawable.ic_headphones
+        val tools = listOfNotNull(
             "Home" to painterResource(R.drawable.ic_owl),
             "Search" to rememberVectorPainter(Icons.Filled.Search),
             "Ask" to painterResource(R.drawable.ic_research),
+            if (tool == "Browse") "Browse" to painterResource(icon) else null,
             "Library" to painterResource(R.drawable.ic_library_books_open),
             "Listen" to painterResource(listen),
             "Settings" to rememberVectorPainter(Icons.Filled.Settings),
@@ -256,10 +446,10 @@ class ThemeShots {
                 IconButton(onClick = {}) { Icon(painter, contentDescription = label, tint = muted) }
             }
             // Selected, as the rail draws the tool you're in.
-            IconButton(onClick = {}) { Icon(painterResource(listen), contentDescription = "Listen", tint = MaterialTheme.colorScheme.primary) }
+            IconButton(onClick = {}) { Icon(painterResource(icon), contentDescription = tool, tint = MaterialTheme.colorScheme.primary) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(painterResource(listen), contentDescription = null, tint = muted, modifier = Modifier.size(20.dp))
-                Text("Listen", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                Icon(painterResource(icon), contentDescription = null, tint = muted, modifier = Modifier.size(20.dp))
+                Text(tool, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }

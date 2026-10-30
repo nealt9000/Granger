@@ -81,7 +81,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
         LazyColumn(Modifier.padding(padding).fillMaxSize(), state = list) {
             item {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    AudiobookCover(book.coverPath, Modifier.width(140.dp).alpha(if (loaded.missing) 0.4f else 1f))
+                    AudiobookCover(book.coverPath, book.title, Modifier.width(140.dp).alpha(if (loaded.missing) 0.4f else 1f))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(book.title, style = MaterialTheme.typography.titleLarge)
                         Text(book.author.ifBlank { UNKNOWN_AUTHOR }, style = MaterialTheme.typography.bodyMedium)

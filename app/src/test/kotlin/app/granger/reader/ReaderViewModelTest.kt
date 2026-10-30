@@ -352,6 +352,53 @@ class ReaderViewModelTest {
         assertThat(vm.state.value.chromeVisible).isTrue()
     }
 
+    @Test fun aScrollByHandHidesTheChromePast24DpDownAndShowsItPast48DpUp() = runTest(main.dispatcher) {
+        // Plan U3c Decision 5. The distance counts in one direction; turning round starts it again.
+        val vm = reader("C++")
+        vm.onUserScroll(20f, byHand = true)
+        vm.onUserScroll(-5f, byHand = true)
+        vm.onUserScroll(20f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.onUserScroll(5f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        // Down more: stays away. Up 40 then down, then up 40: not 48 in one go.
+        vm.onUserScroll(300f, byHand = true)
+        vm.onUserScroll(-40f, byHand = true)
+        vm.onUserScroll(1f, byHand = true)
+        vm.onUserScroll(-40f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isFalse()
+        vm.onUserScroll(-9f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        // Further up keeps it; the next scroll down starts from nothing.
+        vm.onUserScroll(-100f, byHand = true)
+        vm.onUserScroll(20f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isTrue()
+    }
+
+    @Test fun thePagesOwnScrollsNeverMoveTheChrome() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        vm.onUserScroll(5_000f, byHand = false)
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.toggleChrome()
+        vm.onUserScroll(-5_000f, byHand = false)
+        assertThat(vm.state.value.chromeVisible).isFalse()
+    }
+
+    @Test fun findThePackSearchAndPanelsKeepTheChromeWhileScrolling() = runTest(main.dispatcher) {
+        val vm = reader("C++")
+        vm.startFind()
+        vm.onUserScroll(100f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        assertThat(vm.state.value.findQuery).isEqualTo("")
+        vm.endFind()
+        vm.open(ReaderViewModel.Panel.TEXT)
+        vm.onUserScroll(100f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isTrue()
+        vm.open(null)
+        vm.onUserScroll(100f, byHand = true)
+        assertThat(vm.state.value.chromeVisible).isFalse()
+    }
+
     @Test fun findOpensTheChromeAndHidingTheChromeEndsIt() = runTest(main.dispatcher) {
         val vm = reader("C++")
         vm.startFind()

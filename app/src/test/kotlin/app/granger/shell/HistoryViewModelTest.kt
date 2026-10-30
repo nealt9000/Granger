@@ -110,8 +110,11 @@ class HistoryViewModelTest {
         pins.pin("tab:$pinned")
         pins.pin("search:holst")
         val vm = HistoryViewModel(sessions, library, bookshelf, pins, hidden)
-        vm.clear(keepTabIds = setOf(current))
+        var left: Set<Long>? = null
+        vm.clear(keepTabIds = setOf(current)) { left = it }
         testScheduler.advanceUntilIdle()
+        // The NavHost takes every other tab's reader off the back stack (Plan U3c walkthrough).
+        assertThat(left).containsExactly(pinned, current)
         assertThat(sessions.historyList.value).isEmpty()
         assertThat(sessions.searchRows.value.map { it.query }).containsExactly("holst")
         assertThat(sessions.tabs.value.filter { it.onRail }.map { it.id }).containsExactly(pinned, current)
@@ -142,5 +145,19 @@ class HistoryViewModelTest {
         HistoryViewModel(sessions, library, bookshelf, pins, hidden).clear(kept)
         testScheduler.advanceUntilIdle()
         assertThat(sessions.tabs.value.filter { it.onRail }.map { it.id }).containsExactly(pinned, nearest)
+    }
+
+    /** Plan U3c walkthrough: a reader under Home stayed on the rail after Clear history, though it wasn't on screen. */
+    @Test fun clearFromAnotherScreenKeepsNoReaderTab() = runTest(main.dispatcher) {
+        val buried = sessions.openTab("a", "Bats", "Bats")
+        sessions.openTab("a", "Cats", "Cats")
+        // The reader, then Home over it, then History.
+        val kept = HistoryViewModel.keptTab(listOf(null, buried, null, null))
+        assertThat(kept).isEmpty()
+        assertThat(HistoryViewModel.keptTab(listOf(null))).isEmpty()
+        assertThat(HistoryViewModel.keptTab(emptyList())).isEmpty()
+        HistoryViewModel(sessions, library, bookshelf, pins, hidden).clear(kept)
+        testScheduler.advanceUntilIdle()
+        assertThat(sessions.tabs.value.filter { it.onRail }).isEmpty()
     }
 }

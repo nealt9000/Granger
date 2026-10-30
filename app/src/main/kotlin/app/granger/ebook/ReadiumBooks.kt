@@ -53,7 +53,7 @@ const val BookLink: Int = 0xFFB8662A.toInt()
  * The navigator's configuration. ReadiumCSS night mode paints links #63caff, which beats the theme's text colour;
  * links take [BookLink] instead, in every theme, visited or not. Readium's own inset padding is off: it reads
  * the window's cutout directly, and would add the notch again below the reader's top bar. The reader pads the page
- * itself (readerPageInsets), the same way as the web reader's.
+ * itself (ReaderBookPageInsets), for the cutout and the rail over it.
  */
 fun readerConfiguration(): EpubNavigatorFragment.Configuration {
     val accent = CssColor.Int(BookLink)
@@ -175,11 +175,15 @@ sealed interface BookNavigator {
      * A PDF. [night] and [fitWidth] are read each time PDFium lays the document out, and the reader rebuilds the
      * navigator when either changes. PDFium has no theme, so Night inverts the page there. Readium leaves the
      * viewer's fit at its default, every page scaled by the widest one, so one foldout map shrinks every other page
-     * and pushes a page fitted to the width off to the right: each page is fitted on its own instead.
+     * and pushes a page fitted to the width off to the right: each page is fitted on its own instead. Link taps go to
+     * [links], not the viewer's own handler, so the reader can follow a link PDFium found but couldn't place.
      */
     class Pdf(publication: Publication, initialNight: Boolean, initialFitWidth: Boolean = false) : BookNavigator {
         @Volatile var night: Boolean = initialNight
         @Volatile var fitWidth: Boolean = initialFitWidth
+
+        /** The PDF's link taps, for the reader to follow. */
+        val links = PdfLinkTaps()
         val factory: PdfiumNavigatorFactory = PdfiumNavigatorFactory(
             publication,
             PdfiumEngineProvider(
@@ -188,6 +192,7 @@ sealed interface BookNavigator {
                         configurator.nightMode(night)
                             .fitEachPage(true)
                             .pageFitPolicy(if (fitWidth) FitPolicy.WIDTH else FitPolicy.BOTH)
+                            .linkHandler(links)
                     }
                 },
             ),

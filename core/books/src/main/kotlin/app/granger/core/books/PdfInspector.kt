@@ -66,9 +66,24 @@ object PdfInspector {
         )
     }
 
+    /**
+     * [file]'s outline, read with PdfBox: empty when it has none or can't be read. The reader asks for it when
+     * PDFium's outline comes back empty, or with no entry it can place on a page.
+     */
+    fun outline(file: File): List<OutlineEntry> = try {
+        loadPdf(file).use { if (it.isEncrypted) emptyList() else outline(it) }
+    } catch (e: IOException) {
+        emptyList()
+    } catch (e: RuntimeException) {
+        emptyList()
+    }
+
     private fun date(c: Calendar) = "%04d-%02d-%02d".format(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH))
 
-    /** Depth-first; entries whose destination isn't a page in this document are skipped. */
+    /**
+     * Depth-first, each entry with its depth (0 at the top). Entries whose destination isn't a page in this document
+     * are skipped; PdfBox follows a destination given directly, by name, or through a GoTo action.
+     */
     private fun outline(doc: PDDocument): List<OutlineEntry> {
         val root = doc.documentCatalog.documentOutline ?: return emptyList()
         val out = ArrayList<OutlineEntry>()
@@ -78,7 +93,7 @@ object PdfInspector {
                 val page = try { item.findDestinationPage(doc) } catch (_: IOException) { null }
                 val index = page?.let { doc.pages.indexOf(it) } ?: -1
                 val title = item.title?.trim().orEmpty()
-                if (index >= 0 && title.isNotEmpty()) out += OutlineEntry(title, index + 1)
+                if (index >= 0 && title.isNotEmpty()) out += OutlineEntry(title, index + 1, depth)
                 walk(item, depth + 1)
             }
         }

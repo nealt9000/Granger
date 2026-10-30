@@ -7,13 +7,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AssistChip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -51,8 +58,9 @@ object ReaderTags {
     const val MIX = "reader_mix"
     const val MUSIC_PLAY_PAUSE = "reader_music_play_pause"
     const val MUSIC_NEXT = "reader_music_next"
-    const val VOICE_CHIP = "reader_voice"
-    const val MORE_VOICES = "reader_more_voices"
+    const val VOICE = "reader_voice"
+    const val VOICE_OPTION = "reader_voice_option"
+    const val SYSTEM_VOICES = "reader_system_voices"
     const val SPEED = "reader_speed"
     const val STOP = "reader_stop"
     const val OPEN = "reader_open"
@@ -112,28 +120,48 @@ internal fun SpeedRow(speed: Float, onSpeed: (Float) -> Unit) {
 }
 
 /**
- * The installed voices as chips; the one reading is selected. As in Settings, the Granger voices and the one reading are
- * listed, and every other system voice waits behind a "System voices (N)" chip (Plan U2 Decision 9).
+ * The voice reading, as a dropdown showing the chosen one. Its menu lists the Granger voices (and the one reading) first,
+ * as Settings does ([splitVoices], Plan U2 Decision 9), then every other system voice under a "System voices" label.
+ * Picking the voice already reading does nothing.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VoiceRow(voices: List<Voice>, chosen: VoiceId, onVoice: (VoiceId) -> Unit) {
-    var showMore by remember { mutableStateOf(false) }
-    val (shown, more) = splitVoices(voices, chosen)
-    Text("Voice", style = MaterialTheme.typography.bodyLarge)
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        (if (showMore) shown + more else shown).forEach { v ->
-            FilterChip(
-                selected = v.id == chosen,
-                onClick = { if (v.id != chosen) onVoice(v.id) },
-                label = { Text(v.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                modifier = Modifier.testTag(ReaderTags.VOICE_CHIP),
-            )
-        }
-        if (more.isNotEmpty() && !showMore) {
-            AssistChip(onClick = { showMore = true }, label = { Text("System voices (${more.size})") }, modifier = Modifier.testTag(ReaderTags.MORE_VOICES))
+    var open by remember { mutableStateOf(false) }
+    val (first, system) = splitVoices(voices, chosen)
+    val reading = voices.firstOrNull { it.id == chosen }
+    ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }) {
+        OutlinedTextField(
+            value = reading?.title ?: "",
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            label = { Text("Voice") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = open) },
+            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).testTag(ReaderTags.VOICE),
+        )
+        ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            first.forEach { v -> VoiceOption(v, v.id == chosen) { open = false; if (v.id != chosen) onVoice(v.id) } }
+            if (system.isNotEmpty()) {
+                Text(
+                    "System voices", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag(ReaderTags.SYSTEM_VOICES),
+                )
+                system.forEach { v -> VoiceOption(v, v.id == chosen) { open = false; if (v.id != chosen) onVoice(v.id) } }
+            }
         }
     }
+}
+
+/** One voice in [VoiceRow]'s menu, ticked when it's the one reading. */
+@Composable
+private fun VoiceOption(voice: Voice, reading: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(voice.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        onClick = onClick,
+        trailingIcon = if (reading) ({ Icon(Icons.Filled.Check, contentDescription = "Reading") }) else null,
+        modifier = Modifier.testTag(ReaderTags.VOICE_OPTION),
+    )
 }
 
 /** The music under the voice: its level, and the track with its own play/pause and next (spec decision 1). */

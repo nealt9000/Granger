@@ -21,8 +21,8 @@ class BookMeta(
     val outline: List<OutlineEntry> = emptyList(),
 )
 
-/** A PDF outline entry and the 1-based page it opens at. */
-data class OutlineEntry(val title: String, val page: Int)
+/** A PDF outline entry, the 1-based page it opens at, and how deep it sits in the outline (0 at the top). */
+data class OutlineEntry(val title: String, val page: Int, val depth: Int = 0)
 
 sealed interface Inspection {
     data class Ok(val meta: BookMeta) : Inspection

@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.ShelfCollection
-import app.granger.pack
+import app.granger.book
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -24,16 +24,17 @@ class LibraryScreenTest {
     @get:Rule val compose = createComposeRule()
 
     private val calls = mutableListOf<String>()
-    private val wikipedia = CollectionRow(
-        ShelfCollection("c:wikipedia", "Wikipedia", "literature", userCreated = false, defaultKey = "wikipedia"), listOf(pack("w")),
+    private val classics = CollectionRow(
+        ShelfCollection("c:gc", "Granger Classics", "literature", userCreated = false, defaultKey = "gc"), emptyList(), books = listOf(book("b")),
     )
 
     private fun show(ui: LibraryUi, badge: Int = 0) = compose.setContent {
         LibraryContent(
-            ui, "/packs", SnackbarHostState(),
+            ui, SnackbarHostState(),
             onOpenCollection = { calls += "collection:$it" },
             onSearch = { calls += "search" }, onReadiness = { calls += "readiness" }, downloadsBadge = badge,
-            onDownloads = { calls += "downloads" }, onGetMore = { calls += "more" }, onImport = {},
+            onDownloads = { calls += "downloads" }, onGetMore = { calls += "more" }, onImport = { calls += "import" },
+            onOpenSource = { calls += "source:$it" },
         )
     }
 
@@ -58,16 +59,22 @@ class LibraryScreenTest {
     }
 
     @Test fun eachKindOpensToItsCollections() {
-        show(LibraryUi(listOf(KindRow(REFERENCE_KIND, "Encyclopedias & reference", "literature", listOf(wikipedia))), emptyLibrary = false))
-        compose.onNodeWithText("Wikipedia").performClick()
-        compose.onNodeWithText("Encyclopedias & reference").performClick()
-        compose.onNodeWithText("Wikipedia").assertDoesNotExist()
-        assertThat(calls).containsExactly("collection:c:wikipedia")
+        show(LibraryUi(listOf(KindRow(BOOKS_KIND, "Books", "literature", listOf(classics))), emptyLibrary = false))
+        compose.onNodeWithText("Granger Classics").performClick()
+        compose.onNodeWithText("Books").performClick()
+        compose.onNodeWithText("Granger Classics").assertDoesNotExist()
+        assertThat(calls).containsExactly("collection:c:gc")
     }
 
-    @Test fun anEmptyLibraryPointsToGetMore() {
+    /** Plan U3c Decision 2: the Library is books, so an empty one offers the book sources (and Import), not packs. */
+    @Test fun anEmptyLibraryOffersTheBookSources() {
         show(LibraryUi(emptyList(), emptyLibrary = true))
-        compose.onNodeWithText("Get packs and books →").performClick()
-        assertThat(calls).containsExactly("more")
+        compose.onNodeWithText(NO_BOOKS).assertIsDisplayed()
+        compose.onNodeWithText("Granger Classics").performClick()
+        compose.onNodeWithText("Archive.org books").performClick()
+        compose.onNodeWithText("Import your own EPUB, PDF, TXT or Markdown books").performClick()
+        compose.onNodeWithText("Get packs and books →").assertDoesNotExist()
+        compose.onNodeWithText(".zim", substring = true).assertDoesNotExist()
+        assertThat(calls).containsExactly("source:GRANGER_CLASSICS", "source:ARCHIVE_ORG_BOOKS", "import").inOrder()
     }
 }

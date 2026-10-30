@@ -1,6 +1,7 @@
 package app.granger.player
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -96,18 +97,34 @@ class ReaderTabTest {
 
     @Test fun pickingAnotherVoiceAsksForItAndTheChosenOneIsInert() {
         reader(voiceUi())
-        compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP)[0].performScrollTo().performClick()   // the one reading: inert
-        compose.onNodeWithTag(ReaderTags.MORE_VOICES).performScrollTo().performClick()
-        compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP)[1].performScrollTo().performClick()
+        compose.onNodeWithTag(ReaderTags.VOICE).performScrollTo().assertTextContains("Granger voice (ljspeech)").performClick()
+        compose.onAllNodesWithTag(ReaderTags.VOICE_OPTION)[0].performClick()      // the one reading: inert
+        assertThat(calls).isEmpty()
+        compose.onNodeWithTag(ReaderTags.VOICE).performClick()
+        compose.onAllNodesWithTag(ReaderTags.VOICE_OPTION)[1].performClick()
         assertThat(calls).containsExactly("voice:system:com.google.android.tts:en-us-x-iob-local")
     }
 
-    @Test fun systemVoicesWaitBehindOneChip() {
+    @Test fun theVoiceMenuListsGrangerVoicesThenSystemVoicesUnderTheirLabel() {
         reader(voiceUi())
-        compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP).assertCountEquals(1)
-        compose.onNodeWithTag(ReaderTags.MORE_VOICES).performScrollTo().assertTextEquals("System voices (1)").performClick()
-        compose.onAllNodesWithTag(ReaderTags.VOICE_CHIP).assertCountEquals(2)
-        compose.onAllNodesWithTag(ReaderTags.MORE_VOICES).assertCountEquals(0)
+        compose.onAllNodesWithTag(ReaderTags.VOICE_OPTION).assertCountEquals(0)       // closed until tapped
+        compose.onNodeWithTag(ReaderTags.VOICE).performScrollTo().performClick()
+        val options = compose.onAllNodesWithTag(ReaderTags.VOICE_OPTION)
+        options.assertCountEquals(2)
+        options[0].assertTextContains("Granger voice (ljspeech)")
+        options[1].assertTextContains("System voice iob (en-US)")
+        compose.onNodeWithTag(ReaderTags.SYSTEM_VOICES).assertTextEquals("System voices")
+        val label = compose.onNodeWithTag(ReaderTags.SYSTEM_VOICES).fetchSemanticsNode().boundsInRoot.top
+        assertThat(options[0].fetchSemanticsNode().boundsInRoot.top).isLessThan(label)
+        assertThat(options[1].fetchSemanticsNode().boundsInRoot.top).isGreaterThan(label)
+    }
+
+    @Test fun stopAndOpenSitWithTheTransportAboveTheVoice() {
+        reader(voiceUi())
+        val stop = compose.onNodeWithTag(ReaderTags.STOP).fetchSemanticsNode().boundsInRoot.top
+        assertThat(stop).isGreaterThan(compose.onNodeWithTag(ReaderTags.PLAY_PAUSE).fetchSemanticsNode().boundsInRoot.top)
+        assertThat(stop).isLessThan(compose.onNodeWithTag(ReaderTags.SPEED).fetchSemanticsNode().boundsInRoot.top)
+        assertThat(stop).isLessThan(compose.onNodeWithTag(ReaderTags.VOICE).fetchSemanticsNode().boundsInRoot.top)
     }
 
     @Test fun chaptersListTheTextsChaptersWithTheCurrentOneAndAPickMovesTheVoice() {

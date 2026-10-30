@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import app.granger.R
 import app.granger.core.player.NowPlaying
 import app.granger.shell.rememberRailCover
+import app.granger.theme.MediaKind
+import app.granger.theme.MediaTile
 import app.granger.theme.readout
 
 /** What both players show at the top: the cover and two lines. */
@@ -67,24 +69,19 @@ internal fun chapterTitle(book: NowPlaying.Book): String = book.chapter.title.if
 internal fun fraction(positionMs: Long, durationMs: Long): Float =
     if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
 
-/** A square cover from [path], or a music note (headphones for a book, a page for the voice) on a plain tile when there's none. */
+/**
+ * A square cover from [path], or the themed tile (Plan U3c Decision 6) with [title] and a music note (headphones for a
+ * book, a speaker for the voice) when there's none.
+ */
 @Composable
-internal fun PlayerCover(path: String?, book: Boolean, size: Dp, modifier: Modifier = Modifier, voice: Boolean = false) {
+internal fun PlayerCover(path: String?, title: String, book: Boolean, size: Dp, modifier: Modifier = Modifier, voice: Boolean = false) {
     val cover = rememberRailCover(path, size)
     val shape = RoundedCornerShape(if (size > 100.dp) 12.dp else 6.dp)
-    Box(
-        modifier.size(size).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier.size(size).clip(shape), contentAlignment = Alignment.Center) {
         if (cover != null) {
             Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Icon(
-                painterResource(if (voice) R.drawable.ic_library else if (book) R.drawable.ic_headphones else R.drawable.ic_music_note),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(size / 2),
-            )
+            MediaTile(title, if (voice) MediaKind.VOICE else if (book) MediaKind.AUDIOBOOK else MediaKind.MUSIC)
         }
     }
 }

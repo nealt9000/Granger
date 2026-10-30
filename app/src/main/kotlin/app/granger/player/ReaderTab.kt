@@ -82,8 +82,9 @@ fun PlayerViewModel.readerControls(onOpen: (NowPlaying.Voice) -> Unit, onResume:
 /**
  * The player's Reader tab (Plan U2 Decision 5), the voice's full player: the title and section; the sentence being
  * read in large type with the ones around it dimmed; previous paragraph, back a sentence, play/pause, next sentence,
- * next paragraph; the text's chapters (a book's contents, an article's sections); the speed and the voice; the music under the voice with its level and its own play/pause and next,
- * when music plays; the sleep timer; Stop; and Open, to the page being read. With the voice not loaded it offers to
+ * next paragraph, with Stop and Open (to the page being read) under them; the text's chapters (a book's contents, an
+ * article's sections); the speed and the voice (a dropdown); the music under the voice with its level and its own
+ * play/pause and next, when music plays; and the sleep timer. With the voice not loaded it offers to
  * resume the last thing read ([SavedModes.voice]) and says how to start one.
  */
 @Composable
@@ -123,6 +124,11 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
             }
             IconButton(onClick = controls.onNextParagraph) { Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next paragraph") }
         }
+        // Stop and Open sit with the transport, not under the settings below.
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = controls.onStop, modifier = Modifier.weight(1f).testTag(ReaderTags.STOP)) { Text("Stop") }
+            Button(onClick = { controls.onOpen(voice) }, modifier = Modifier.weight(1f).testTag(ReaderTags.OPEN)) { Text("Open") }
+        }
         chapters?.takeIf { it.chapters.isNotEmpty() }?.let { c ->
             HorizontalDivider()
             Row(
@@ -161,10 +167,6 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (ui.sleepRemainingMs != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = controls.onStop, modifier = Modifier.weight(1f).testTag(ReaderTags.STOP)) { Text("Stop") }
-            Button(onClick = { controls.onOpen(voice) }, modifier = Modifier.weight(1f).testTag(ReaderTags.OPEN)) { Text("Open") }
         }
     }
     val shown = chapters

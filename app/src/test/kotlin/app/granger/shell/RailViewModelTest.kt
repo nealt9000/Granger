@@ -363,6 +363,121 @@ class RailViewModelTest {
         assertThat(vm.ui.first { it.entries.isEmpty() }.entries).isEmpty()
     }
 
+    /**
+     * Plan U3c walkthrough: removing the tab on screen left it on the rail. Its page had been read aloud, and that
+     * play's "Read aloud" row, kept off while the tab was there, took its place under the same title.
+     */
+    @Test fun removingATabReadAloudTakesItsPlayOffTooUntilReadAgain() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20).copy(path = "Owls"))
+        plays.value = listOf(RecentPlay("voice:pack:a/Owls", "Owls", 40))
+        current.value = 5
+        val vm = RailViewModel(
+            sessions, library, bookshelf, chats, current, pins, hidden, order, plays, voice = voice, now = { 100L },
+        )
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5")
+        vm.remove(vm.ui.value.entries.single())
+        current.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries).isEmpty()
+        assertThat(vm.ui.value.recent).isEmpty()
+        // Read aloud again: the play comes back.
+        plays.value = listOf(RecentPlay("voice:pack:a/Owls", "Owls", 150))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("play:voice:pack:a/Owls")
+        collecting.cancel()
+    }
+
+    private val stops = mutableListOf<String>()
+
+    /** The voice reading [sourceKey]; a stop takes it off, as the hub does. */
+    private fun reading(sourceKey: String, title: String) {
+        voice.value = app.granger.core.player.NowPlaying.Voice(sourceKey, title, null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+    }
+
+    private val stopVoice = { stops += voice.value?.sourceKey.orEmpty(); voice.value = null }
+
+    private fun voiceVm() = RailViewModel(
+        sessions, library, bookshelf, chats, current, pins, hidden, order, plays, voice = voice, now = { 100L }, stopVoice = stopVoice,
+    )
+
+    /**
+     * Plan U3c walkthrough (b): "Remove from rail" on the open tab whose page was being read aloud left an "Owls" on
+     * the rail: the voice went on, and its Reading row took the tab's place. Removing it stops the voice.
+     */
+    @Test fun removingATabWhosePageIsReadAloudStopsTheVoiceAndLeavesNothingOfIt() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20), tab(6, "a", "Bats", openedAt = 10))
+        plays.value = listOf(RecentPlay("voice:pack:a/Owls", "Owls", 40))
+        current.value = 5
+        reading("pack:a/Owls", "Owls")
+        val vm = voiceVm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5", "tab:6").inOrder()
+        vm.remove(vm.ui.value.entries.first())
+        current.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(stops).containsExactly("pack:a/Owls")
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:6")
+        assertThat(vm.ui.value.recent.map { it.key }).containsExactly("tab:6")
+        collecting.cancel()
+    }
+
+    @Test fun removingAnotherTabOrTheReadingRowStopsOnlyForItsOwnVoice() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(6, "a", "Bats", openedAt = 10))
+        plays.value = listOf(RecentPlay("voice:text:answer:1", "Why tides?", 40))
+        reading("text:answer:1", "Why tides?")
+        val vm = voiceVm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1", "tab:6").inOrder()
+        vm.remove(vm.ui.value.entries.last())                   // a tab the voice isn't reading: it reads on
+        testScheduler.advanceUntilIdle()
+        assertThat(stops).isEmpty()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1")
+        vm.remove(vm.ui.value.entries.single())                 // the Reading row: the voice stops, its play stays off
+        testScheduler.advanceUntilIdle()
+        assertThat(stops).containsExactly("text:answer:1")
+        assertThat(vm.ui.value.entries).isEmpty()
+        collecting.cancel()
+    }
+
+    /**
+     * Plan U3c walkthrough (a): Clear history with the voice reading left two items, the kept page and the voice's
+     * Reading row. Clear stops the voice unless it reads the kept page, and the rail shows that page alone.
+     */
+    @Test fun clearHistoryStopsTheVoiceUnlessItReadsTheKeptPage() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        val owls = sessions.openTab("a", "Owls", "Owls")
+        sessions.openTab("a", "Bats", "Bats")
+        plays.value = listOf(RecentPlay("voice:pack:a/Bats", "Bats", 40))
+        reading("pack:a/Bats", "Bats")
+        val rail = voiceVm()
+        val history = HistoryViewModel(
+            sessions, library, bookshelf, pins, hidden, forgetPlays = { plays.value = emptyList() }, now = { 2_000L },
+            readingAloud = { voice.value?.sourceKey }, stopVoice = stopVoice,
+        )
+        val collecting = backgroundScope.launch { rail.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        history.clear(keepTabIds = setOf(owls))
+        testScheduler.advanceUntilIdle()
+        assertThat(stops).containsExactly("pack:a/Bats")
+        assertThat(rail.ui.value.entries.map { it.key }).containsExactly("tab:$owls")
+
+        // Reading the kept page: it reads on, and the page is one entry, badged.
+        reading("pack:a/Owls", "Owls")
+        history.clear(keepTabIds = setOf(owls))
+        testScheduler.advanceUntilIdle()
+        assertThat(stops).containsExactly("pack:a/Bats")
+        assertThat(rail.ui.value.entries.map { it.key }).containsExactly("tab:$owls")
+        assertThat(rail.ui.value.tabs.single().readingAloud).isTrue()
+        collecting.cancel()
+    }
+
     @Test fun removeSearchDeletesTheRecentSearch() = runTest(main.dispatcher) {
         sessions.searchRows.value = listOf(RecentSearch("cats", 2), RecentSearch("dogs", 1))
         val vm = vm()

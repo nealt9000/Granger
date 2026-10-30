@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -58,16 +59,22 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.Features
 import app.granger.R
 import app.granger.settings.RailSide
+import app.granger.theme.MediaKind
+import app.granger.theme.MediaTile
 
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
 enum class RailTool(val label: String, val shown: Boolean) {
     HOME("Home", true),
     SEARCH("Search", true),
     RESEARCH("Ask", Features.RESEARCH),
+    /** The wiki and Kiwix packs and the maps, browsed as linked sites (Plan U3c Decision 1). */
+    BROWSE("Browse", true),
+    /** Books: what you read through (Plan U3c Decision 2). */
     LIBRARY("Library", true),
     /** Your player and your audio collection (Plan U2 Decision 4). */
     LISTEN("Listen", Features.PLAYER),
@@ -84,6 +91,19 @@ class RailEntryActions(
 internal val NarrowRailWidth = 56.dp
 internal val ExpandedRailWidth = 200.dp
 
+/** A narrow-rail tile's height, and the gap below it: each open item or History takes a 56 dp slot. */
+private val NarrowRailTile = 48.dp
+private val NarrowRailGap = 8.dp
+
+/** How many of the narrow rail's open items fit in [height], and whether History does; History is the first to fit. */
+internal data class NarrowRailFit(val items: Int, val history: Boolean)
+
+internal fun narrowRailItemsThatFit(height: Dp, entries: Int): NarrowRailFit {
+    // n slots need n tiles and n - 1 gaps.
+    val slots = ((height + NarrowRailGap) / (NarrowRailTile + NarrowRailGap)).toInt().coerceAtLeast(0)
+    return NarrowRailFit(items = (slots - 1).coerceIn(0, entries), history = slots >= 1)
+}
+
 /** The tools at the top; Research also needs a phone that can run it ([showResearch]). */
 private fun topTools(showResearch: Boolean) =
     RailTool.entries.filter { it.shown && it != RailTool.SETTINGS && (it != RailTool.RESEARCH || showResearch) }
@@ -94,13 +114,15 @@ private fun railInsets(side: RailSide) = SafeDrawingIgnoringBars.only(WindowInse
 
 /**
  * The tool's own drawable; null for Search and Settings, which use Material's vectors. The owl in the G is Home (Plan
- * U3b Decision 5); an open book is the Library, and ic_library stays for articles. Listen is library_music, a stack of
- * records: the player and the collection (Plan U2 Decision 4).
+ * U3b Decision 5); an open book is the Library, and ic_library stays for articles. Listen is headphones: the player and
+ * the collection (Plan U2 Decision 4). Browse is a globe, Material's public (Plan U3c Decision 1; ic_browse_alt, a
+ * compass, is the candidate).
  */
 @DrawableRes
 internal fun RailTool.drawable(): Int? = when (this) {
     RailTool.HOME -> R.drawable.ic_owl
     RailTool.RESEARCH -> R.drawable.ic_research
+    RailTool.BROWSE -> R.drawable.ic_browse
     RailTool.LIBRARY -> R.drawable.ic_library_books_open
     RailTool.LISTEN -> R.drawable.ic_headphones
     RailTool.SEARCH, RailTool.SETTINGS -> null
@@ -178,16 +200,24 @@ internal fun NarrowRail(
     ) {
         topTools(showResearch).forEach { tool -> ToolIcon(tool, selected == tool) { onTool(tool) } }
         RailDivider(Modifier.width(32.dp))
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            rail.entries.forEach { entry ->
-                EntryTile(entry, openAction(entry, onTab, onSearch, onChat, onPlay, onReading), actions)
-            }
-            IconButton(onClick = onHistory) {
-                Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        // The tools and Settings always show; the open items take whole slots of what's left, History first, and drop
+        // from the end (Plan U3c Decision 3). No scrolling, so a short rail (the keyboard up) never cuts a tile in half.
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            val shown = narrowRailItemsThatFit(maxHeight, rail.entries.size)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(NarrowRailGap),
+            ) {
+                rail.entries.take(shown.items).forEach { entry ->
+                    Box(Modifier.size(NarrowRailTile), contentAlignment = Alignment.Center) {
+                        EntryTile(entry, openAction(entry, onTab, onSearch, onChat, onPlay, onReading), actions)
+                    }
+                }
+                if (shown.history) {
+                    IconButton(onClick = onHistory) {
+                        Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
         }
         ToolIcon(RailTool.SETTINGS, selected == RailTool.SETTINGS) { onTool(RailTool.SETTINGS) }
@@ -335,8 +365,9 @@ private fun WithPinDot(pinned: Boolean, content: @Composable () -> Unit) {
 }
 
 /**
- * A tab's letter tile; the current tab is outlined in the accent, an unavailable one greyed out, and one the voice is
- * reading wears a speaker badge at its bottom corner (Plan U3b, Neal's walkthrough: one entry per book).
+ * A tab's tile: its cover, or the themed tile (Plan U3c Decision 6). The current tab is outlined in the accent, an
+ * unavailable one greyed out, and one the voice is reading wears a speaker badge at its bottom corner (Plan U3b,
+ * Neal's walkthrough: one entry per book).
  */
 @Composable
 private fun LetterTile(tab: RailTabUi, size: Int = 36) {
@@ -347,7 +378,6 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
                 .size(size.dp)
                 .alpha(if (tab.available) 1f else 0.4f)
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .then(if (tab.current) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier),
             contentAlignment = Alignment.Center,
         ) {
@@ -355,11 +385,24 @@ private fun LetterTile(tab: RailTabUi, size: Int = 36) {
             if (cover != null) {
                 Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             } else {
-                Text(tab.initial.toString(), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                MediaTile(tab.title, tab.mediaKind())
             }
         }
         if (tab.readingAloud) ReadingBadge(Modifier.align(Alignment.BottomEnd))
     }
+}
+
+/** An article tab's glyph is a page; a book's, a book. */
+internal fun RailTabUi.mediaKind(): MediaKind = if (packId.isEmpty()) MediaKind.BOOK else MediaKind.ARTICLE
+
+/** A play's glyph, by what it played. */
+internal fun RailEntry.Play.mediaKind(): MediaKind = when {
+    playKey.startsWith("audiobook:") -> MediaKind.AUDIOBOOK
+    playKey.startsWith("playlist:") -> MediaKind.PLAYLIST
+    playKey.startsWith("artist:") -> MediaKind.ARTIST
+    playKey.startsWith("folder:") -> MediaKind.FOLDER
+    playKey.startsWith("voice:") -> MediaKind.VOICE
+    else -> MediaKind.MUSIC // album:, genre:, songs
 }
 
 /** The small speaker on a tab the voice is reading. */
@@ -378,14 +421,20 @@ private fun ReadingBadge(modifier: Modifier) {
     }
 }
 
-/** A search's, chat's or play's tile in the narrow rail: its icon on the same rounded square as a letter tile. */
+/**
+ * A search's, chat's or play's tile in the narrow rail, on the themed tile (Plan U3c Decision 6): a play shows its
+ * title's initial and what it played; a search, a chat or the voice its glyph alone.
+ */
 @Composable
 private fun IconTile(entry: RailEntry) {
-    Box(
-        Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(entry.painter(), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+    Box(Modifier.size(36.dp).clip(RoundedCornerShape(8.dp))) {
+        when (entry) {
+            is RailEntry.Play -> MediaTile(entry.title, entry.mediaKind())
+            is RailEntry.Search -> MediaTile(null, MediaKind.SEARCH)
+            is RailEntry.Chat -> MediaTile(null, MediaKind.CHAT)
+            is RailEntry.Reading -> MediaTile(null, MediaKind.VOICE)
+            is RailEntry.Tab -> MediaTile(entry.tab.title, entry.tab.mediaKind())
+        }
     }
 }
 

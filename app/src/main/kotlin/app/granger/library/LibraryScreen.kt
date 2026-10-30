@@ -6,9 +6,7 @@ import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,12 +53,15 @@ import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
 import app.granger.music.ALL_MUSIC
 import app.granger.music.MUSIC_TYPE_ID
+import app.granger.sources.GetMoreLink
 
-/** What the phone holds to read, by kind (Plan U3b Decision 4; music and audiobooks are Listen's, U2); getting more is in Get more, what's coming in Downloads. */
+/**
+ * The books the phone holds, by kind (Plan U3b Decision 4; music and audiobooks are Listen's, U2; packs and maps are
+ * Browse's, U3c); getting more is in Get more, what's coming in Downloads.
+ */
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel,
-    packsFolder: String,
     /** Shown once as a snackbar, e.g. why the app didn't resume reading. */
     notice: String?,
     onOpenCollection: (collectionId: String) -> Unit,
@@ -72,6 +72,8 @@ fun LibraryScreen(
     onDownloads: () -> Unit = {},
     /** Where sources live (Plan U3b Decision 2). */
     onGetMore: () -> Unit = {},
+    /** A book source the empty Library links to. */
+    onOpenSource: (GetMoreLink) -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -96,20 +98,20 @@ fun LibraryScreen(
         viewModel.import(uris)
     }
     LibraryContent(
-        ui, packsFolder, snackbar, onOpenCollection, onSearch, onReadiness,
-        downloadsBadge, onDownloads, onGetMore, onImport = { picker.launch(IMPORT_TYPES) },
+        ui, snackbar, onOpenCollection, onSearch, onReadiness,
+        downloadsBadge, onDownloads, onGetMore, onImport = { picker.launch(IMPORT_TYPES) }, onOpenSource = onOpenSource,
     )
 }
 
 /**
  * The header (Search, Downloads with its badge, Get more, and Readiness and Import books… in the overflow) and one row
- * per kind, each opening to its collections. Null [ui] is still loading.
+ * per kind, each opening to its collections. With no books, [NO_BOOKS] and the [BOOK_SOURCES]. Null [ui] is still
+ * loading.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryContent(
     ui: LibraryUi?,
-    packsFolder: String,
     snackbar: SnackbarHostState,
     onOpenCollection: (collectionId: String) -> Unit,
     onSearch: () -> Unit,
@@ -118,6 +120,7 @@ fun LibraryContent(
     onDownloads: () -> Unit,
     onGetMore: () -> Unit,
     onImport: () -> Unit,
+    onOpenSource: (GetMoreLink) -> Unit = {},
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // Kind row ids the user has collapsed; all start expanded.
@@ -159,17 +162,26 @@ fun LibraryContent(
         val loaded = ui ?: return@Scaffold
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             if (loaded.emptyLibrary) {
-                item {
-                    Column(
-                        Modifier.padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text("No packs installed yet.", style = MaterialTheme.typography.titleMedium)
-                        TextButton(onClick = onGetMore) { Text("Get packs and books →") }
-                        Text("Or copy .zim files into $packsFolder", style = MaterialTheme.typography.bodySmall)
-                        if (Features.IMPORT) {
-                            Text("Or import your own EPUB, PDF, TXT or Markdown books", style = MaterialTheme.typography.bodySmall)
+                item(key = "empty") {
+                    Text(
+                        NO_BOOKS,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                    )
+                }
+                for (source in BOOK_SOURCES) {
+                    item(key = "source:$source") {
+                        ListItem(
+                            modifier = Modifier.clickable { onOpenSource(source) },
+                            headlineContent = { Text(source.title) },
+                            supportingContent = { Text(source.subtitle) },
+                        )
+                    }
+                }
+                if (Features.IMPORT) {
+                    item(key = "import") {
+                        TextButton(onClick = onImport, modifier = Modifier.padding(horizontal = 8.dp)) {
+                            Text("Import your own EPUB, PDF, TXT or Markdown books")
                         }
                     }
                 }
@@ -246,6 +258,11 @@ internal fun LazyListScope.kindRows(
     }
     item(key = "divider:$id") { HorizontalDivider() }
 }
+
+const val NO_BOOKS = "No books yet"
+
+/** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2). */
+internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.ARCHIVE_ORG_BOOKS)
 
 private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",

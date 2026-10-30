@@ -56,7 +56,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            PlayerCover(music.track.coverPath, book = false, size = coverSize)
+            PlayerCover(music.track.coverPath, music.track.title, book = false, size = coverSize)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     music.track.title, style = MaterialTheme.typography.titleLarge, maxLines = 2,

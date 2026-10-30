@@ -2,10 +2,13 @@ package app.granger.shell
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -25,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
 import androidx.compose.foundation.layout.union
@@ -33,7 +37,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -46,6 +53,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import app.granger.settings.RailSide
 
@@ -59,6 +69,16 @@ val SafeDrawingIgnoringBars: WindowInsets
     @Composable get() = WindowInsets.systemBarsIgnoringVisibility.union(WindowInsets.displayCutout).union(WindowInsets.ime)
 
 private val TopInsets @Composable get() = SafeDrawingIgnoringBars.only(WindowInsetsSides.Top)
+
+/**
+ * What the shell draws over a reader's page (Plan U3c Decision 5): the narrow rail on its side and the mini-player
+ * along the top, with their insets. A reader's bars and panels keep clear of it; it is the same whether the chrome
+ * shows or not, so they don't move when it slides. Empty outside the readers, where the shell lays both out.
+ */
+val LocalShellOverlay = compositionLocalOf { WindowInsets(0, 0, 0, 0) }
+
+/** How long the reading chrome takes to slide away or back. */
+const val ChromeSlideMs = 200
 
 /**
  * The inset side on the rail's edge. The app is always laid out left to right (no RTL support), so Start is the left
@@ -93,9 +113,12 @@ fun rememberShellState(): ShellState = rememberSaveable(saver = ShellState.Saver
  * tapping the rail's background expands it. Either rail's items open with [onTab], [onHistory], [onSearch], [onChat],
  * [onPlay] and [onReading] (Plan U3b Decision 6); a long press on any item offers [actions]. Tapping the scrim, Back,
  * or choosing an item collapses the expanded rail. [miniPlayer] is drawn above [content] in the
- * content column, pushing it down, and takes the status bar's inset for itself. In a reader ([reading]) the rail can
- * be hidden for full-screen reading; the edge swipe then stays live, as the way back to the chrome. [showResearch] is
- * false on phones below the ASK tier, which hides the Research tool.
+ * content column, pushing it down, and takes the status bar's inset for itself. In a reader ([reading]) the page
+ * keeps the whole screen: the rail and the mini-player are drawn over it ([LocalShellOverlay]) and slide away with the
+ * reader's chrome ([railVisible]); the edge swipe then stays live, as the way back to the chrome. With [railStays] (the
+ * wiki reader, Plan U3c walkthrough) the rail keeps its place while the chrome is away, and only the mini-player
+ * slides: no empty strip where the rail was, and the page's padding for it stays right. [showResearch] is false on
+ * phones below the ASK tier, which hides the Research tool.
  */
 @Composable
 fun GrangerShell(
@@ -116,10 +139,13 @@ fun GrangerShell(
     side: RailSide = RailSide.LEFT,
     showResearch: Boolean = false,
     reading: Boolean = false,
+    railStays: Boolean = false,
     miniPlayer: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val open = expanded && railVisible
+    // The rail on screen: with the chrome, or in the wiki reader always.
+    val railShown = railVisible || (reading && railStays)
+    val open = expanded && railShown
     // In a reader the swipe stays live while the rail is hidden: it is the way back to the chrome.
     val edgeSwipeActive = (railVisible || reading) && !expanded
     BackHandler(enabled = open, onBack = onToggleExpanded)
@@ -130,8 +156,23 @@ fun GrangerShell(
             .then(if (edgeSwipeActive) Modifier.edgeSwipe(side, onEdgeSwipe) else Modifier),
     ) {
         val right = side == RailSide.RIGHT
+        // A reader's page has the whole screen; the rail and the mini-player go over it (below), not beside it.
+        val inLayout = railVisible && !reading
+        val density = LocalDensity.current
+        val direction = LocalLayoutDirection.current
+        // The rail's width with its side's inset, as the narrow rail lays itself out; the mini-player's as measured.
+        val railInset = SafeDrawingIgnoringBars.only(side.insetSide)
+        val railWidth = with(density) { NarrowRailWidth.roundToPx() } +
+            (if (right) railInset.getRight(density, direction) else railInset.getLeft(density, direction))
+        var miniHeight by remember { mutableIntStateOf(0) }
+        val overlay = if (!reading) WindowInsets(0, 0, 0, 0) else WindowInsets(
+            left = if (right) 0 else railWidth,
+            top = if (miniPlayer != null) miniHeight else 0,
+            right = if (right) railWidth else 0,
+            bottom = 0,
+        )
         Row(Modifier.fillMaxSize()) {
-            if (railVisible && !right) {
+            if (inLayout && !right) {
                 NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, actions, side, onTab, onHistory, onSearch, onChat, onPlay, onReading)
             }
             Column(
@@ -139,9 +180,9 @@ fun GrangerShell(
                     .weight(1f)
                     .fillMaxHeight()
                     // The rail already pads for its side's inset (landscape cutout); screens shouldn't again.
-                    .then(if (railVisible) Modifier.consumeWindowInsets(SafeDrawingIgnoringBars.only(side.insetSide)) else Modifier),
+                    .then(if (inLayout) Modifier.consumeWindowInsets(SafeDrawingIgnoringBars.only(side.insetSide)) else Modifier),
             ) {
-                if (miniPlayer != null) {
+                if (miniPlayer != null && !reading) {
                     Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).windowInsetsPadding(TopInsets)) { miniPlayer() }
                 }
                 Box(
@@ -149,10 +190,40 @@ fun GrangerShell(
                         .weight(1f)
                         .fillMaxWidth()
                         // The mini-player above already sits below the status bar; the screen's top bar shouldn't pad again.
-                        .then(if (miniPlayer != null) Modifier.consumeWindowInsets(TopInsets) else Modifier),
-                ) { content() }
+                        .then(if (miniPlayer != null && !reading) Modifier.consumeWindowInsets(TopInsets) else Modifier),
+                ) { CompositionLocalProvider(LocalShellOverlay provides overlay) { content() } }
             }
-            if (railVisible && right) {
+            if (inLayout && right) {
+                NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, actions, side, onTab, onHistory, onSearch, onChat, onPlay, onReading)
+            }
+        }
+        if (reading) {
+            // Over the page: they slide off their edges with the reader's bars and back with them (Plan U3c Decision 5);
+            // the rail stays where [railStays].
+            if (miniPlayer != null) {
+                val railDp = with(density) { railWidth.toDp() }
+                AnimatedVisibility(
+                    railVisible,
+                    modifier = Modifier.align(Alignment.TopStart).padding(start = if (right) 0.dp else railDp, end = if (right) railDp else 0.dp),
+                    enter = slideInVertically(tween(ChromeSlideMs)) { -it },
+                    exit = slideOutVertically(tween(ChromeSlideMs)) { -it },
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .onSizeChanged { miniHeight = it.height }
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .windowInsetsPadding(TopInsets),
+                    ) { miniPlayer() }
+                }
+            }
+            val offscreenRail = { width: Int -> if (right) width else -width }
+            AnimatedVisibility(
+                railShown,
+                modifier = Modifier.align(if (right) Alignment.CenterEnd else Alignment.CenterStart),
+                enter = slideInHorizontally(tween(ChromeSlideMs), initialOffsetX = offscreenRail),
+                exit = slideOutHorizontally(tween(ChromeSlideMs), targetOffsetX = offscreenRail),
+            ) {
                 NarrowRail(rail, selected, showResearch, onToggleExpanded, onTool, actions, side, onTab, onHistory, onSearch, onChat, onPlay, onReading)
             }
         }

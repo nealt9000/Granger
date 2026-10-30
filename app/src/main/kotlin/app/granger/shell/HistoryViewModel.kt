@@ -28,6 +28,10 @@ class HistoryViewModel(
     /** Forgets every recorded play (`PlaybackDao.deleteRecentPlays`). */
     private val forgetPlays: suspend () -> Unit = {},
     private val now: () -> Long = System::currentTimeMillis,
+    /** The source the voice is reading now (`pack:<id>/<path>`, `book:<id>`, …); null when it isn't loaded. */
+    private val readingAloud: () -> String? = { null },
+    /** Stops the voice (not music). */
+    private val stopVoice: () -> Unit = {},
 ) : ViewModel() {
     data class Row(val packId: String, val path: String, val title: String, val packTitle: String, val available: Boolean)
 
@@ -64,16 +68,24 @@ class HistoryViewModel(
      * Clear history (Plan U3b Decision 7): History, recent searches and plays go, and every reading tab leaves the rail
      * but the pinned ones and [keepTabIds] (the page you came from). Pinned searches stay with their pins. The rail's
      * cut-off moves to now, so nothing unpinned from before (an Ask chat, a play) shows there or in Continue again
-     * (Plan U3b, Neal's walkthrough). Reading places, bookmarks, Saved and the chats themselves stay.
+     * (Plan U3b, Neal's walkthrough). Reading places, bookmarks, Saved and the chats themselves stay. [onCleared] gets
+     * the tabs left on the rail (kept and pinned) once it's done, for the NavHost to take the closed ones' readers off
+     * the back stack (Plan U3c walkthrough). The voice stops unless it reads a tab that stays (the page kept, or a
+     * pinned one): its Reading row would stay on the rail beside the kept page (Plan U3c walkthrough). Music plays on.
      */
-    fun clear(keepTabIds: Set<Long>) {
+    fun clear(keepTabIds: Set<Long>, onCleared: (keptTabIds: Set<Long>) -> Unit = {}) {
         hidden.clear(now())
         viewModelScope.launch {
             forgetPlays()
             val pinned = pins.pins.first().map { it.key }
             val tabs = pinned.filter { it.startsWith(RailEntry.TAB) }.mapNotNull { it.removePrefix(RailEntry.TAB).toLongOrNull() }
             val searches = pinned.filter { it.startsWith(RailEntry.SEARCH) }.map { it.removePrefix(RailEntry.SEARCH) }
+            readingAloud()?.let { reading ->
+                val staying = (keepTabIds + tabs).mapNotNullTo(HashSet()) { id -> sessions.tab(id)?.let(::readSourceKeyOf) }
+                if (reading !in staying) stopVoice()
+            }
             sessions.clearHistory(keepTabIds + tabs, searches.toSet())
+            onCleared(keepTabIds + tabs)
         }
     }
 
@@ -89,10 +101,12 @@ class HistoryViewModel(
 
     companion object {
         /**
-         * What Clear history keeps from the back stack under History, given each entry's reading tab (null for other
-         * screens), bottom first: only the nearest, the page you came from (Plan U3b, Neal's walkthrough).
+         * What Clear history keeps from the back stack, given each entry's reading tab (null for other screens), bottom
+         * first and History itself on top: the page you came from, when the screen right under History is a reader
+         * (Plan U3b, Neal's walkthrough). Nothing when you came from Home, Browse or any other screen: a reader buried
+         * under it isn't on screen, so its tab goes with the rest (Plan U3c walkthrough: it stayed on the rail).
          */
-        fun keptTab(backStackTabIds: List<Long?>): Set<Long> = setOfNotNull(backStackTabIds.lastOrNull { it != null })
+        fun keptTab(backStackTabIds: List<Long?>): Set<Long> = setOfNotNull(backStackTabIds.dropLast(1).lastOrNull())
 
         const val REMOVED_PACK = "Removed pack"
         const val REMOVED_BOOK = "Removed book"

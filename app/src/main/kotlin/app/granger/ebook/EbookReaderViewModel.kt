@@ -5,6 +5,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.BookTarget
+import app.granger.core.books.OutlineEntry
+import app.granger.core.books.PdfInspector
+import app.granger.core.books.PdfLink
+import app.granger.core.books.PdfLinks
 import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
@@ -57,7 +61,7 @@ data class EbookUi(
     val publication: Publication? = null,
     /** Where the navigator opens. */
     val initial: Locator? = null,
-    /** The top bar and the side rail. Up when the reader opens and when its tab is returned to; a middle tap hides them for full-screen reading. An error keeps them up so the user can leave. */
+    /** The bars, the side rail and the mini-player. Up when the reader opens and when its tab is returned to; a page turn hides them and a middle tap toggles them. An error keeps them up so the user can leave. */
     val chromeVisible: Boolean = true,
     /** The place on screen now; null until the navigator reports one. */
     val locator: Locator? = null,
@@ -141,6 +145,10 @@ class EbookReaderViewModel(
     private val restore: suspend (Book) -> Boolean = { false },
     /** A text's saved place (Plan U2): Listen goes on from it when the page is at or before it ([listenStart]). */
     private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
+    /** A PDF's outline as PdfBox reads it, for when PDFium's has nothing to show (called on [io]). */
+    private val pdfOutline: (File) -> List<OutlineEntry> = PdfInspector::outline,
+    /** A PDF's links within itself as PdfBox reads them, for a link PDFium found but couldn't place (called on [io]). */
+    private val pdfLinks: (File) -> List<PdfLink> = PdfLinks::read,
 ) : ViewModel() {
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -173,6 +181,12 @@ class EbookReaderViewModel(
     /** The open book's id; set with [navigatorFactory]. */
     var bookId: String? = null
         private set
+
+    /** The open PDF's file, for PdfBox; null for an EPUB. */
+    private var pdfFile: File? = null
+
+    /** The open PDF's links as PdfBox read them, the first time a tapped link needed them. */
+    private var pdfLinkList: List<PdfLink>? = null
     /** The open publication; whoever takes it out closes it. */
     private val publication = AtomicReference<Publication?>(null)
 
@@ -184,6 +198,10 @@ class EbookReaderViewModel(
     private var readSource: BookReadSource? = null
     private var following = true
     private var voiceMovedAt = 0L
+
+    // A finger on the page (Plan U3c Decision 5): a page change while it's down or just after is a turn by hand.
+    private var pageTouched = false
+    private var pageTouchedAt = Long.MIN_VALUE / 2
 
     init {
         SelectionBridge.sink = selectionSink
@@ -227,6 +245,7 @@ class EbookReaderViewModel(
             val pdf = opened.conformsTo(Profile.PDF)
             val factory = if (pdf) BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight, prefsStore.prefs.value.pdfFitWidth) else BookNavigator.Epub(EpubNavigatorFactory(opened))
             bookId = book.id
+            if (pdf) pdfFile = file
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
             appScope.launch { sessions.showInTab(tabId, book.id, "", book.title) }
@@ -239,6 +258,7 @@ class EbookReaderViewModel(
                 ).derived()
             }
             savedState[TARGET_CONSUMED] = true
+            if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
             launch {
@@ -275,6 +295,8 @@ class EbookReaderViewModel(
      */
     fun onLocator(locator: Locator, onScreen: Boolean = true) {
         if (!onScreen) return
+        val before = _state.value.locator
+        if (before != null && turnedByHand(before, locator)) hideChromeForReading()
         _state.update { it.copy(locator = locator).derived() }
         val id = bookId ?: return
         unsaved = locator
@@ -320,6 +342,24 @@ class EbookReaderViewModel(
         if (!ui.isPdf) return ""
         val page = locator.locations.position ?: return ""
         return pdfTocIndex(ui.toc, page)?.let { ui.toc[it].title.ifBlank { null } } ?: "Page $page"
+    }
+
+    /**
+     * PDFium reads some PDFs' outlines as nothing, or as entries with no page (a destination it can't follow), and
+     * Contents would say there is none: PdfBox's reading of [file] is shown instead, when it finds one. When it finds
+     * none either, PDFium's rows that go nowhere are dropped, so Contents says the PDF has no list.
+     */
+    private suspend fun pdfOutlineInstead(opened: Publication, file: File) {
+        val href = opened.readingOrder.firstOrNull()?.href?.toString() ?: return
+        val entries = try {
+            withContext(io) { pdfOutline(file) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Granger", "Couldn't read the PDF's outline", e)
+            emptyList()
+        }
+        _state.update { it.copy(toc = entries.map { e -> TocRow(e.title, "$href#page=${e.page}", e.depth) }).derived() }
     }
 
     private fun flatten(links: List<Link>, depth: Int): List<TocRow> =
@@ -385,6 +425,36 @@ class EbookReaderViewModel(
         val fragment = target.fragment
         val locator = if (fragment == null) base else base.copy(locations = base.locations.copy(fragments = listOf(fragment)))
         jump(locator)
+    }
+
+    /**
+     * A link tapped on a PDF page, to another page of it (a web link is the screen's): the page PDFium gave, or when
+     * it gave none it can use, the page PdfBox finds for the link's box ([PdfLinks.target]), nearest the page shown.
+     * A link neither can place is ignored.
+     */
+    fun onPdfLink(tap: PdfLinkTap) {
+        val pages = _state.value.positionsCount
+        val given = tap.page?.takeIf { it >= 0 && (pages == 0 || it < pages) }
+        if (given != null) return goToPdfPage(given)
+        val file = pdfFile ?: return
+        val shown = (_state.value.locator?.locations?.position ?: 1) - 1
+        viewModelScope.launch {
+            val links = pdfLinkList ?: try {
+                withContext(io) { pdfLinks(file) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Couldn't read the PDF's links", e)
+                emptyList()
+            }.also { pdfLinkList = it }
+            PdfLinks.target(links, tap.left, tap.top, tap.right, tap.bottom, shown)?.let(::goToPdfPage)
+        }
+    }
+
+    /** Opens the PDF at its 0-based page [index], as a Contents row does. */
+    private fun goToPdfPage(index: Int) {
+        val href = _state.value.publication?.readingOrder?.firstOrNull()?.href ?: return
+        goTo("$href#page=${index + 1}")
     }
 
     /** The slider's release: [p] is the share of the whole book. */
@@ -473,16 +543,20 @@ class EbookReaderViewModel(
         }
     }
 
-    /** A search result: jump there and mark the match on the page. */
+    /** A search result: jump there and mark the match on the page, with the panel and the chrome out of the way ([jump]). */
     fun goToHit(row: BookSearchRow) {
         val locator = row.locator ?: return
         if (row.markId != null && row.markId in _state.value.unplaceable) return
-        _state.update { it.copy(panel = null, searchHit = if (row.markId == null) locator else null) }
+        _state.update { it.copy(panel = null, chromeVisible = false, searchHit = if (row.markId == null) locator else null) }
         _navigation.trySend(locator)
     }
 
+    /**
+     * A jump from the Contents, Bookmarks or Search panel: the panel closes and the chrome slides away (Plan U3c), since
+     * it lies over the page (Decision 5) and would cover the chapter's first lines until a tap. A tap brings it back.
+     */
     private fun jump(locator: Locator) {
-        _state.update { it.copy(panel = null) }
+        _state.update { it.copy(panel = null, chromeVisible = false) }
         _navigation.trySend(locator)
     }
 
@@ -491,6 +565,30 @@ class EbookReaderViewModel(
     }
 
     fun updatePrefs(prefs: ReadingPrefs) = prefsStore.update(prefs)
+
+    /**
+     * A finger went [down] on the page, or came up. Page changes while it's down, and up to [PAGE_TURN_GRACE_MS] after,
+     * are the reader's own turns (a swipe, an edge tap, a link), which hide the chrome; others (the slider, Contents,
+     * a search hit, the voice, a new text size, the navigator settling as it opens) leave it.
+     */
+    fun onPageTouch(down: Boolean) {
+        pageTouched = down
+        pageTouchedAt = now()
+    }
+
+    private fun turnedByHand(before: Locator, after: Locator): Boolean {
+        val moved = before.href != after.href || before.locations.progression != after.locations.progression ||
+            before.locations.position != after.locations.position
+        if (!moved) return false
+        val t = now()
+        if (t - voiceMovedAt <= VOICE_MOVE_GRACE_MS) return false
+        return pageTouched || t - pageTouchedAt <= PAGE_TURN_GRACE_MS
+    }
+
+    /** A page turn by hand: the chrome slides away, unless a panel or a highlight's sheet is open over the page. */
+    private fun hideChromeForReading() {
+        _state.update { if (!it.chromeVisible || it.panel != null || it.editingHighlight != null) it else it.copy(chromeVisible = false) }
+    }
 
     /** A middle tap. Errors keep the chrome up. */
     fun toggleChrome() {
@@ -595,6 +693,8 @@ class EbookReaderViewModel(
         const val SAVE_DEBOUNCE_MS = 1_000L
         /** A page change this soon after the voice asked for one is the voice's, not the user's. */
         const val VOICE_MOVE_GRACE_MS = 1_500L
+        /** A page change this soon after a finger left the page is its turn: the turn's animation runs on after it lifts. */
+        const val PAGE_TURN_GRACE_MS = 1_000L
         const val TARGET_CONSUMED = "targetConsumed"
     }
 }

@@ -51,6 +51,7 @@ import app.granger.GrangerApp
 import app.granger.MainActivity
 import app.granger.R
 import app.granger.theme.FieldColors
+import app.granger.theme.FieldKit
 import app.granger.theme.NightColors
 import java.io.File
 import kotlinx.coroutines.flow.filterNotNull
@@ -107,7 +108,9 @@ private val OnSurface = ColorProvider(day = FieldColors.onSurface, night = Night
 private val OnSurfaceVariant = ColorProvider(day = FieldColors.onSurfaceVariant, night = NightColors.onSurfaceVariant)
 private val Accent = ColorProvider(day = FieldColors.primary, night = NightColors.primary)
 private val Track = ColorProvider(day = FieldColors.outlineVariant, night = NightColors.outlineVariant)
-private val CoverGround = ColorProvider(day = FieldColors.surfaceContainerHigh, night = NightColors.surfaceContainerHigh)
+// Missing art on the app's themed tile (Plan U3c Decision 6): gunmetal and a lantern glyph, the same day and night.
+private val CoverGround = ColorProvider(day = FieldKit.Gunmetal, night = FieldKit.Gunmetal)
+private val CoverGlyph = ColorProvider(day = FieldKit.Lantern, night = FieldKit.Lantern)
 
 /** The Player screen of Granger, opened by the cover and text. */
 internal fun openPlayerAction(context: Context): Action = actionStartActivity(MainActivity.openPlayerIntent(context))
@@ -194,7 +197,7 @@ private fun Cover(cover: ImageProvider?, book: Boolean, sizeDp: Int, open: Actio
         Box(modifier.background(CoverGround), contentAlignment = Alignment.Center) {
             Image(
                 ImageProvider(if (book) R.drawable.ic_headphones else R.drawable.ic_music_note), contentDescription = null,
-                colorFilter = ColorFilter.tint(OnSurfaceVariant), modifier = GlanceModifier.size((sizeDp / 2).dp),
+                colorFilter = ColorFilter.tint(CoverGlyph), modifier = GlanceModifier.size((sizeDp / 2).dp),
             )
         }
     }
