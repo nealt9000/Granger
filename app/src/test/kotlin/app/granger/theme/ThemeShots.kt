@@ -662,4 +662,71 @@ class ThemeShots {
             }
         }
     }
+
+    // Plan DL Task 3: Downloads at 360 dp. An onboarding round running, a paused queue, and a retrying and a stopped file.
+    private val dlNow = 1_000_000L
+    private fun dl(
+        id: String, title: String, state: app.granger.core.downloads.DownloadState, size: Long, done: Long = 0, order: Long = 0,
+        group: String? = "onboarding:1", wifiOnly: Boolean = true, attempts: Int = 0, retryAt: Long? = null, error: String? = null,
+        kind: app.granger.core.downloads.ItemKind = app.granger.core.downloads.ItemKind.PACK,
+    ) = app.granger.core.downloads.DownloadRecord(
+        itemId = id, hash = "a".repeat(64), kind = kind, title = title, urls = listOf("https://download.kiwix.org/zim/$id.zim"),
+        sizeBytes = size, filePath = "/phone/packs/$id.zim", snapshotDate = "", groupId = group, wifiOnly = wifiOnly, state = state,
+        bytesDone = done, error = error, createdAt = dlNow - 600_000, updatedAt = dlNow - 60_000, queueOrder = order, attempts = attempts,
+        retryAt = retryAt,
+    )
+
+    private val dlRound = listOf(
+        dl("voice", "Granger voice", app.granger.core.downloads.DownloadState.INSTALLED, 80_000_000, kind = app.granger.core.downloads.ItemKind.VOICE),
+        dl("gc-hamlet", "Hamlet", app.granger.core.downloads.DownloadState.INSTALLED, 400_000, kind = app.granger.core.downloads.ItemKind.BOOK),
+        dl("wikipedia_en_medicine_maxi", "WikiMed", app.granger.core.downloads.DownloadState.RUNNING, 1_860_000_000, done = 612_000_000, order = 2),
+        dl("zimgit-knots_en", "Knots", app.granger.core.downloads.DownloadState.QUEUED, 31_000_000, order = 3),
+        dl("ifixit_en_all", "iFixit repair guides", app.granger.core.downloads.DownloadState.QUEUED, 3_570_000_000, order = 4),
+        dl("wikivoyage_en_all_maxi", "Wikivoyage travel guides", app.granger.core.downloads.DownloadState.QUEUED, 1_020_000_000, order = 5),
+        dl("wikipedia_en_top_maxi", "Wikipedia: best articles", app.granger.core.downloads.DownloadState.QUEUED, 6_990_000_000, order = 6),
+        dl("gemma", "Gemma 4 E2B", app.granger.core.downloads.DownloadState.QUEUED, 2_000_000_000, order = 7, kind = app.granger.core.downloads.ItemKind.MODEL),
+    )
+
+    @Composable
+    private fun DownloadsShot(records: List<app.granger.core.downloads.DownloadRecord>, live: app.granger.core.downloads.DownloadLive) {
+        val volumes = listOf(app.granger.downloads.VolumeSpace("/phone", "Phone", 41_000_000_000))
+        val summary = app.granger.core.downloads.DownloadQueueSummary.of(records, live, dlNow, volumes.associate { it.root to it.freeBytes })
+        val ui = app.granger.downloads.DownloadsModel.of(records, summary, dlNow - 3_600_000, volumes = volumes)
+        app.granger.downloads.DownloadsContent(ui, onBack = {}, app.granger.downloads.DownloadsActions(), now = dlNow)
+    }
+
+    @Test fun downloadsRunning() = shoot("downloads-running") {
+        DownloadsShot(
+            dlRound,
+            app.granger.core.downloads.DownloadLive(
+                app.granger.core.downloads.QueueProgress("wikipedia_en_medicine_maxi", "a".repeat(64), 612_000_000, 2_100_000),
+                batchStartedAt = dlNow - 600_000,
+            ),
+        )
+    }
+
+    @Test fun downloadsPaused() = shoot("downloads-paused") {
+        DownloadsShot(
+            dlRound.map { if (it.state == app.granger.core.downloads.DownloadState.RUNNING) it.copy(state = app.granger.core.downloads.DownloadState.QUEUED) else it },
+            app.granger.core.downloads.DownloadLive(paused = true, batchStartedAt = dlNow - 600_000),
+        )
+    }
+
+    @Config(qualifiers = "w360dp-h1400dp-xxhdpi")
+    @Test fun downloadsTrouble() = shoot("downloads-trouble") {
+        val trouble = dlRound.map {
+            when (it.itemId) {
+                "zimgit-knots_en" -> it.copy(attempts = 2, retryAt = dlNow + 115_000, error = "download.kiwix.org closed the connection early")
+                else -> it
+            }
+        } + dl("wikem_en_all_maxi", "WikEM emergency medicine", app.granger.core.downloads.DownloadState.FAILED, 375_000_000, order = 1, error = "Kiwix no longer offers this file") +
+            dl("gc-emma", "Emma", app.granger.core.downloads.DownloadState.FAILED, 900_000, order = 1, error = "Checksum mismatch: the download didn't match its expected checksum.", kind = app.granger.core.downloads.ItemKind.BOOK)
+        DownloadsShot(
+            trouble,
+            app.granger.core.downloads.DownloadLive(
+                app.granger.core.downloads.QueueProgress("wikipedia_en_medicine_maxi", "a".repeat(64), 612_000_000, 2_100_000),
+                batchStartedAt = dlNow - 600_000,
+            ),
+        )
+    }
 }

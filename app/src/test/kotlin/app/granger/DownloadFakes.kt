@@ -147,7 +147,16 @@ class FakeDownloads : Downloads {
     override suspend fun recover() { calls += "recover" }
     override suspend fun pause() { calls += "pause"; pausedFlow.value = true }
     override suspend fun resume() { calls += "resume"; pausedFlow.value = false }
-    override suspend fun downloadNext(itemId: String) { calls += "next:$itemId" }
+    /** As the real one: the item moves ahead of everything else waiting, behind the file running. */
+    override suspend fun downloadNext(itemId: String) {
+        calls += "next:$itemId"
+        list.update { all ->
+            val moved = all.firstOrNull { it.itemId == itemId && it.state == DownloadState.QUEUED } ?: return@update all
+            val rest = all - moved
+            val at = rest.indexOfFirst { it.state == DownloadState.QUEUED }.takeIf { it >= 0 } ?: rest.size
+            rest.take(at) + moved + rest.drop(at)
+        }
+    }
 
     /** Each enqueueGroup call: the group id, its specs in order, and the volume. */
     val enqueuedGroups = mutableListOf<Triple<String, List<DownloadSpec>, File>>()
