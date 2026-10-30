@@ -1,0 +1,566 @@
+[
+  {
+    "id": "mixed-es-en-001",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿para qué sirve el nudo as de guía?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Bowline",
+        "quote": "simple knot used to form a fixed loop at the end of a rope"
+      }
+    ],
+    "reference": "Para hacer una gaza (un lazo fijo) en el extremo de una cuerda; es fácil de hacer y de deshacer aun después de cargarlo.",
+    "goodGuess": null,
+    "notes": "Spanish question, English knots pack. 'as de guía' is the Spanish name of the bowline."
+  },
+  {
+    "id": "mixed-es-en-002",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "se puede usar el nudo llano para unir dos cuerdas",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Reef_knot",
+        "quote": "warns that this knot should never be used to bend two ropes"
+      }
+    ],
+    "reference": "No es recomendable: el nudo llano (rizo) puede volcarse y soltarse, y el International Guild of Knot Tyers advierte que nunca se use para unir dos cuerdas.",
+    "goodGuess": null,
+    "notes": "Spanish question, English knots pack. 'nudo llano' = reef knot."
+  },
+  {
+    "id": "mixed-es-en-003",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿para qué sirve el nudo del camionero?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Trucker's_hitch",
+        "quote": "making a rope very tight, such as to secure an object to a vehicle"
+      }
+    ],
+    "reference": "Para tensar mucho una cuerda, por ejemplo para sujetar una carga a un vehículo.",
+    "goodGuess": null,
+    "notes": "Spanish question, English knots pack. The location has an apostrophe; the path is exact."
+  },
+  {
+    "id": "mixed-es-en-004",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿el ballestrinque es un nudo seguro?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Clove_hitch",
+        "quote": "but it is not particularly secure in either application"
+      }
+    ],
+    "reference": "No mucho: sirve para sujetar el centro de una cuerda a un poste, pero como nudo de amarre o de atadura no es especialmente seguro.",
+    "goodGuess": null,
+    "notes": "Spanish question, English knots pack. 'ballestrinque' = clove hitch."
+  },
+  {
+    "id": "mixed-es-en-005",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "por qué a veces el agua caliente se congela más rápido que la fría",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Mpemba_effect",
+        "quote": "can freeze more quickly than colder ones, for similar volumes"
+      }
+    ],
+    "reference": "Es el efecto Mpemba: la observación de que líquidos muy calientes pueden congelarse antes que otros más fríos en condiciones parecidas; lleva el nombre de Erasto Mpemba, un estudiante tanzano de los años sesenta. No se observa en todos los montajes.",
+    "goodGuess": null,
+    "notes": "Spanish question, English physics pack."
+  },
+  {
+    "id": "mixed-es-en-006",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿a qué número llega siempre la rutina de Kaprekar?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_mathematics",
+        "location": "Kaprekar's_routine",
+        "quote": "with at least two distinct digits will reach 6174 within seven iterations"
+      }
+    ],
+    "reference": "A 6174 (la constante de Kaprekar): cualquier número de cuatro cifras con al menos dos dígitos distintos llega a él en siete pasos o menos.",
+    "goodGuess": null,
+    "notes": "Spanish question, English mathematics pack."
+  },
+  {
+    "id": "mixed-es-en-007",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "de qué está hecha la termita que se usa para soldar rieles",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_chemistry",
+        "location": "Thermite",
+        "quote": "is a pyrotechnic composition of metal powder and metal oxide"
+      }
+    ],
+    "reference": "De un polvo metálico (a menudo aluminio) y un óxido metálico (por ejemplo óxido de hierro) que reaccionan en una reacción redox muy caliente.",
+    "goodGuess": null,
+    "notes": "Spanish question, English chemistry pack. Trap: 'termita' is also the insect (termite); the welding context picks thermite."
+  },
+  {
+    "id": "mixed-es-en-008",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿qué causa la enfermedad de mano, pie y boca?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Hand,_foot,_and_mouth_disease",
+        "quote": "is a common infection caused by a group of enteroviruses"
+      }
+    ],
+    "reference": "Es una infección común causada por un grupo de enterovirus (como el coxsackievirus A16 y el enterovirus 71).",
+    "goodGuess": null,
+    "notes": "Spanish question, English WikiMed. Medical, general fact."
+  },
+  {
+    "id": "mixed-es-en-009",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿a quién le da la enfermedad de Kawasaki?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_medicine",
+        "location": "Kawasaki_disease",
+        "quote": "mainly affects children under 5 years of age"
+      }
+    ],
+    "reference": "Es un síndrome de causa desconocida que produce fiebre y afecta sobre todo a niños menores de 5 años; es una forma de vasculitis.",
+    "goodGuess": null,
+    "notes": "Spanish question, English WikiMed (wikipedia_es_top has no article on it). Medical, general fact."
+  },
+  {
+    "id": "mixed-es-en-010",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "por qué las gotas de agua bailan en una sartén muy caliente",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_physics",
+        "location": "Leidenfrost_effect",
+        "quote": "produces an insulating vapor layer that keeps the liquid from boiling rapidly"
+      }
+    ],
+    "reference": "Por el efecto Leidenfrost: la superficie, mucho más caliente que el punto de ebullición, forma una capa de vapor aislante sobre la que la gota flota sin hervir enseguida.",
+    "goodGuess": null,
+    "notes": "Spanish question, English physics pack (no Spanish article)."
+  },
+  {
+    "id": "mixed-es-en-011",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué nudo sirve para unir dos cuerdas de distinto grosor?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Sheet_bend",
+        "quote": "it is practical for joining lines of different diameter or rigidity"
+      }
+    ],
+    "reference": "La vuelta de escota (sheet bend), práctica para unir cabos de distinto diámetro o rigidez.",
+    "goodGuess": null,
+    "notes": "Spanish question, English knots pack."
+  },
+  {
+    "id": "mixed-es-en-012",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "para qué usan los escaladores el nudo prusik",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_en_knots",
+        "location": "Prusik",
+        "quote": "is a friction hitch or knot used to attach a loop of cord around a rope"
+      }
+    ],
+    "reference": "Es un nudo de fricción que sujeta un anillo de cordino alrededor de una cuerda; agarra la cuerda cuando se carga y sirve para ascender por ella o asegurarse.",
+    "goodGuess": null,
+    "notes": "Spanish question, English knots pack (wikipedia_es_top only lists the name)."
+  },
+  {
+    "id": "mixed-es-en-013",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién va a ganar la Copa América 2028?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future. Spanish question; the library holds English packs."
+  },
+  {
+    "id": "mixed-es-en-014",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuánto cuesta el pasaje de micro en mi ciudad",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local fact, no city named."
+  },
+  {
+    "id": "mixed-es-en-015",
+    "group": "mixed-es-en",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuál es la clave de mi cuenta del banco?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "mixed-en-es-001",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how much is the entrance fee at tikal for foreigners",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Tikal",
+        "quote": "las entradas para adultos son q150 ($ 20us) para extranjeros"
+      }
+    ],
+    "reference": "Q150 (about US$20) for foreign adults; Q25 for Guatemalans; children under 12 free.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikivoyage."
+  },
+  {
+    "id": "mixed-en-es-002",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "are there ATMs at Tikal?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Tikal",
+        "quote": "no hay cajeros automáticos en tikal"
+      }
+    ],
+    "reference": "No: there are no ATMs at Tikal, so bring enough cash.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikivoyage. 'ATM' vs 'cajero automático'."
+  },
+  {
+    "id": "mixed-en-es-003",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how long is the rambla in montevideo",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Montevideo",
+        "quote": "con 22 km de largo cubre la costa de montevideo"
+      }
+    ],
+    "reference": "About 22 km; it runs along Montevideo's coast.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikivoyage."
+  },
+  {
+    "id": "mixed-en-es-004",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "when is the guelaguetza festival in oaxaca",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Oaxaca_de_Juárez",
+        "quote": "los días principales son los lunes siguientes al 16 de julio"
+      }
+    ],
+    "reference": "In July: the main days are the Mondays after 16 July.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikivoyage. Path has an accent (Juárez)."
+  },
+  {
+    "id": "mixed-en-es-005",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what does cachivache mean",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "cachivache",
+        "quote": "mueble o utensilio que está deteriorado"
+      }
+    ],
+    "reference": "A broken-down piece of furniture or utensil, a piece of junk (also a broken appliance in Venezuela, or, as an insult, a rude impostor).",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wiktionary. English Wiktionary (not on this Mac) may also define it on the phone."
+  },
+  {
+    "id": "mixed-en-es-006",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "where does the word chévere come from",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "chévere",
+        "quote": "documentada en cuba a partir de finales del siglo xix"
+      }
+    ],
+    "reference": "Its origin is uncertain: it is recorded in Cuba from the late 19th century, perhaps from Igbo or Efik.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wiktionary."
+  },
+  {
+    "id": "mixed-en-es-007",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what is the origin of the mexican slang word chamba",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "chamba",
+        "quote": "una creencia popular la deriva del inglés chamber"
+      }
+    ],
+    "reference": "Uncertain: it appears no earlier than the 19th century; one theory derives it from old Spanish 'cambia'; the popular story that it comes from English 'chamber' (braceros at the American Chamber of Commerce in the 1940s) can't be right, since the word is older.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wiktionary."
+  },
+  {
+    "id": "mixed-en-es-008",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what is the popol vuh",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Popol_Vuh",
+        "quote": "es el nombre de una recopilación bilingüe de narraciones míticas, legendarias e históricas"
+      }
+    ],
+    "reference": "A bilingual collection of mythical, legendary and historical narratives of the K'iche' (Quiché) Maya of Guatemala; the name means book of the council.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikipedia (wikipedia_en_top has no Popol Vuh article)."
+  },
+  {
+    "id": "mixed-en-es-009",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "what are arepas made of",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Arepa",
+        "quote": "laborado principalmente con masa de maíz molido"
+      }
+    ],
+    "reference": "Mainly ground maize dough (maize flour), shaped round and flat and cooked on a griddle, baked or fried.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikipedia ('maize' vs 'maíz'; no English article in wikipedia_en_top)."
+  },
+  {
+    "id": "mixed-en-es-010",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "which poet was called the tenth muse",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Juana_Inés_de_la_Cruz",
+        "quote": "conocida como la décima musa"
+      }
+    ],
+    "reference": "Sor Juana Inés de la Cruz, the 17th-century Mexican nun and poet.",
+    "goodGuess": null,
+    "notes": "English question, Spanish Wikipedia."
+  },
+  {
+    "id": "mixed-en-es-011",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "when was the battle of boyaca",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Batalla_de_Boyacá",
+        "quote": "este acontecimiento tuvo lugar el día 7 de agosto de 1819"
+      }
+    ],
+    "reference": "7 August 1819, near Tunja, Colombia.",
+    "goodGuess": null,
+    "notes": "English question typed without the accent (Boyacá); Spanish Wikipedia."
+  },
+  {
+    "id": "mixed-en-es-012",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "how many verses does martin fierro have",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "El_Gaucho_Martín_Fierro",
+        "quote": "consta de 2316 versos y 13 cantos"
+      }
+    ],
+    "reference": "2,316 verses in 13 cantos (the first part, 1872).",
+    "goodGuess": null,
+    "notes": "English question without accents; Spanish Wikipedia."
+  },
+  {
+    "id": "mixed-en-es-013",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what will the mexican peso be worth next week",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: it hasn't happened yet.",
+    "notes": "The future. English question; the library holds Spanish packs."
+  },
+  {
+    "id": "mixed-en-es-014",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what time does the bakery on my street open",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's a local fact no library holds.",
+    "notes": "Local fact."
+  },
+  {
+    "id": "mixed-en-es-015",
+    "group": "mixed-en-es",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "what's my wife's favorite song",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "Can't know: that's personal and isn't in any library.",
+    "notes": "Personal fact."
+  }
+]

@@ -1,0 +1,1886 @@
+[
+  {
+    "id": "es-history-001",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "en que año se fundo tenochtitlan",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "México-Tenochtitlan",
+        "quote": "se fundó en una isla en el lago de texcoco en 1325"
+      }
+    ],
+    "reference": "En 1325 (según la tradición, el 13 de marzo de 1325), en una isla del lago de Texcoco.",
+    "goodGuess": null,
+    "notes": "Typed without accents. Path has a hyphen: México-Tenochtitlan."
+  },
+  {
+    "id": "es-history-002",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuándo fue la batalla de Ayacucho?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Batalla_de_Ayacucho",
+        "quote": "el 9 de diciembre de 1824"
+      }
+    ],
+    "reference": "El 9 de diciembre de 1824, en la pampa de Quinua, cerca de Ayacucho (Perú).",
+    "goodGuess": null,
+    "notes": "Spanish date format 'd de mes de aaaa'."
+  },
+  {
+    "id": "es-history-003",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuánto duró la guerra de los cien años",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Guerra_de_los_Cien_Años",
+        "quote": "fecha 24 de mayo de 1337-19 de octubre de 1453"
+      }
+    ],
+    "reference": "Más de cien años: de 1337 a 1453 (116 años).",
+    "goodGuess": null,
+    "notes": "Range trap: the dates are written '24 de mayo de 1337-19 de octubre de 1453'; ñ in the path."
+  },
+  {
+    "id": "es-history-004",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién fue el primer presidente de México?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Guadalupe_Victoria",
+        "quote": "se desempeñó como el primer presidente de méxico"
+      }
+    ],
+    "reference": "Guadalupe Victoria, de 1824 a 1829.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-history-005",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien capturó a atahualpa",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Atahualpa",
+        "quote": "fue capturado en cajamarca por los conquistadores españoles encabezados por francisco pizarro"
+      }
+    ],
+    "reference": "Los conquistadores españoles encabezados por Francisco Pizarro, en Cajamarca; lo ejecutaron meses después (1533).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-history-006",
+    "group": "history",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿en qué fecha cayó Constantinopla?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Caída_de_Constantinopla",
+        "quote": "fecha 7 de abril-29 de mayo de 1453"
+      }
+    ],
+    "reference": "El 29 de mayo de 1453, tras un sitio que empezó el 7 de abril.",
+    "goodGuess": null,
+    "notes": "Range trap: '7 de abril-29 de mayo de 1453'; the fall is the end date."
+  },
+  {
+    "id": "es-who-wrote-001",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien escribio rayuela",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Rayuela_(novela)",
+        "quote": "es la segunda novela del escritor argentino julio cortázar"
+      }
+    ],
+    "reference": "El escritor argentino Julio Cortázar (1963).",
+    "goodGuess": null,
+    "notes": "Typed without accents."
+  },
+  {
+    "id": "es-who-wrote-002",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿de quién es la novela del coronel viejo que cada viernes espera una carta que nunca llega?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "El_coronel_no_tiene_quien_le_escriba",
+        "quote": "es una novela corta publicada por el escritor colombiano gabriel garcía márquez en 1961"
+      }
+    ],
+    "reference": "Es El coronel no tiene quien le escriba, de Gabriel García Márquez (1961).",
+    "goodGuess": null,
+    "notes": "Describes the book instead of naming it."
+  },
+  {
+    "id": "es-who-wrote-003",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "el libro de la familia que vive siete generaciones en un pueblo inventado, de quién es",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Cien_años_de_soledad",
+        "quote": "narra la historia de la familia buendía a lo largo de siete generaciones"
+      }
+    ],
+    "reference": "Cien años de soledad, de Gabriel García Márquez: la familia Buendía en Macondo.",
+    "goodGuess": null,
+    "notes": "Describes the book. The author is named in the same article's lead."
+  },
+  {
+    "id": "es-who-wrote-004",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién escribió La casa de los espíritus?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "La_casa_de_los_espíritus",
+        "quote": "es la primera novela de la escritora chilena isabel allende"
+      }
+    ],
+    "reference": "La escritora chilena Isabel Allende; fue su primera novela (1982).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-who-wrote-005",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "pedro páramo de quién es",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Juan_Rulfo",
+        "quote": "y su novela pedro páramo"
+      }
+    ],
+    "reference": "De Juan Rulfo, publicada en 1955.",
+    "goodGuess": null,
+    "notes": "There is no Pedro Páramo article in wikipedia_es_top; the answer is in Juan Rulfo's."
+  },
+  {
+    "id": "es-who-wrote-006",
+    "group": "who-wrote",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién escribió el Martín Fierro?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "El_Gaucho_Martín_Fierro",
+        "quote": "militar argentino josé hernández en 1872"
+      }
+    ],
+    "reference": "José Hernández, en 1872 (la continuación, La vuelta de Martín Fierro, es de 1879).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-literature-001",
+    "group": "literature",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿en qué ciudad escribió Cortázar Rayuela?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Rayuela_(novela)",
+        "quote": "escrita en parís y publicada por primera vez el 28 de junio de 1963"
+      }
+    ],
+    "reference": "En París; se publicó el 28 de junio de 1963.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-science-001",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "por qué el cielo es azul",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Dispersión_de_Rayleigh",
+        "quote": "de la luz solar en la atmósfera es la principal razón de que el cielo se vea azul"
+      }
+    ],
+    "reference": "Por la dispersión de Rayleigh: la atmósfera dispersa más la luz azul, de longitud de onda corta, que la roja.",
+    "goodGuess": null,
+    "notes": "Vocabulary gap: the article is titled 'Dispersión de Rayleigh'."
+  },
+  {
+    "id": "es-science-002",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "de dónde les viene el color verde a las plantas",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Fotosíntesis",
+        "quote": "esta coloración es debida a la presencia del pigmento clorofila"
+      }
+    ],
+    "reference": "De la clorofila, el pigmento de los cloroplastos.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-science-003",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿en qué año publicó Newton la ley de la gravedad?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Ley_de_gravitación_universal",
+        "quote": "publicado el 5 de julio de 1687"
+      }
+    ],
+    "reference": "En 1687 (el 5 de julio), en los Principia.",
+    "goodGuess": null,
+    "notes": "'ley de la gravedad' vs the article's 'ley de gravitación universal'."
+  },
+  {
+    "id": "es-science-004",
+    "group": "science",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien descubrio el electron",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Electrón",
+        "quote": "no fue identificado como una partícula hasta 1897 por joseph john thomson"
+      }
+    ],
+    "reference": "J. J. Thomson y su equipo, en 1897.",
+    "goodGuess": null,
+    "notes": "Typed without accents (electrón)."
+  },
+  {
+    "id": "es-geography-general-001",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuál es el lago más alto del mundo por el que pueden navegar barcos?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Lago_Titicaca",
+        "quote": "es el lago navegable más alto del mundo"
+      }
+    ],
+    "reference": "El lago Titicaca, entre Bolivia y Perú, a unos 3812 m.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-geography-general-002",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuál es la capital de bolivia, la paz o sucre",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Bolivia",
+        "quote": "sucre es la capital del país, pero la capital administrativa (sede de gobierno) se encuentra en la paz"
+      }
+    ],
+    "reference": "Sucre es la capital; La Paz es la sede de gobierno (capital administrativa de facto).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-geography-general-003",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿dónde nace el río Amazonas?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Río_Amazonas",
+        "quote": "nace en los andes del sur de perú y es el más largo del mundo"
+      }
+    ],
+    "reference": "En los Andes del sur del Perú (nevado Mismi, Arequipa).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-geography-general-004",
+    "group": "geography-general",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "es cierto que el atacama es el desierto más seco del mundo",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Desierto_de_Atacama",
+        "quote": "no es el desierto más árido del mundo, correspondiendo esta denominación a los valles secos de mcmurdo"
+      }
+    ],
+    "reference": "Es el lugar no polar más árido de la Tierra, pero no el más árido del mundo: ese título es de los valles secos de McMurdo (Antártida).",
+    "goodGuess": null,
+    "notes": "A nuance the reply must keep."
+  },
+  {
+    "id": "es-vocab-gap-001",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿de dónde viene la papa?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Solanum_tuberosum",
+        "quote": "originaria de la región que comprende el altiplano de los andes centrales"
+      }
+    ],
+    "reference": "Del altiplano de los Andes centrales, donde se domesticó.",
+    "goodGuess": null,
+    "notes": "Regional word: 'papa' (Latin America) vs the article title 'Solanum tuberosum' and Spain's 'patata'."
+  },
+  {
+    "id": "es-vocab-gap-002",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "de dónde es originaria la palta",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Persea_americana",
+        "quote": "es una especie originaria de mesoamérica"
+      }
+    ],
+    "reference": "De Mesoamérica: del centro y este de México hasta el noroeste de Costa Rica.",
+    "goodGuess": null,
+    "notes": "Regional word: 'palta' (Southern Cone, Peru) for aguacate; article title 'Persea americana'."
+  },
+  {
+    "id": "es-vocab-gap-003",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿de dónde son originarios los porotos?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Phaseolus_vulgaris",
+        "quote": "fue domesticado en méxico, centroamérica y la región sur de los andes"
+      }
+    ],
+    "reference": "De América: se domesticaron en México, Centroamérica y el sur de los Andes hace unos 8000 años.",
+    "goodGuess": null,
+    "notes": "Regional word: 'poroto' (Southern Cone) for frijol; article title 'Phaseolus vulgaris'."
+  },
+  {
+    "id": "es-vocab-gap-004",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién hizo la primera llamada desde un celular?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Teléfono_móvil",
+        "quote": "martin cooper de motorola hizo la primera publicidad de una llamada con teléfono móvil portátil"
+      }
+    ],
+    "reference": "Martin Cooper, de Motorola, el 3 de abril de 1973, con un prototipo DynaTAC.",
+    "goodGuess": null,
+    "notes": "'celular' (Latin America) vs the article's 'teléfono móvil'."
+  },
+  {
+    "id": "es-vocab-gap-005",
+    "group": "vocab-gap",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "qué comen los picaflores",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Trochilidae",
+        "quote": "se alimentan del néctar de flores y son polinizadores importantes"
+      }
+    ],
+    "reference": "Néctar de flores (y son polinizadores importantes).",
+    "goodGuess": null,
+    "notes": "Regional word: 'picaflor' for colibrí; article title 'Trochilidae'."
+  },
+  {
+    "id": "es-follow-up-001",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿y cómo murió?",
+    "priorQuestion": "¿quién fue Túpac Amaru II?",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Túpac_Amaru_II",
+        "quote": "fue muerto decapitado y descuartizado"
+      }
+    ],
+    "reference": "Fue ejecutado el 18 de mayo de 1781 en la plaza de armas del Cusco: decapitado y descuartizado (antes intentaron descuartizarlo vivo con caballos).",
+    "goodGuess": null,
+    "notes": "'he' is Túpac Amaru II."
+  },
+  {
+    "id": "es-follow-up-002",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "en qué año lo pintó",
+    "priorQuestion": "quién pintó el guernica",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Guernica_(cuadro)",
+        "quote": "entre los meses de mayo y junio de 1937"
+      }
+    ],
+    "reference": "En 1937, entre mayo y junio, en París.",
+    "goodGuess": null,
+    "notes": "'lo' is the Guernica."
+  },
+  {
+    "id": "es-follow-up-003",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿con quién se casó?",
+    "priorQuestion": "¿quién fue Frida Kahlo?",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Frida_Kahlo",
+        "quote": "la artista contrajo matrimonio con diego rivera el 21 de agosto de 1929"
+      }
+    ],
+    "reference": "Con el pintor Diego Rivera (en 1929; se divorciaron en 1940 y volvieron a casarse ese mismo año).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-follow-up-004",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿y en qué año fue?",
+    "priorQuestion": "quién descubrió la penicilina",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Penicilina",
+        "quote": "ocurrió en la mañana del viernes 28 de septiembre de 1928"
+      }
+    ],
+    "reference": "En 1928 (el 28 de septiembre, según Fleming).",
+    "goodGuess": null,
+    "notes": "Not medical: history of medicine (as in the English labels)."
+  },
+  {
+    "id": "es-follow-up-005",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuándo le dieron el nobel",
+    "priorQuestion": "¿quién fue Pablo Neruda?",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Pablo_Neruda",
+        "quote": "en 1971 neruda recibió el premio nobel de literatura"
+      }
+    ],
+    "reference": "En 1971.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-follow-up-006",
+    "group": "follow-up",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿y cuál era su comida favorita?",
+    "priorQuestion": "¿quién fue Simón Bolívar?",
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay un registro fiable de la comida favorita de Bolívar.",
+    "notes": "Unanswerable follow-up: the topic is in the library but the fact isn't (checked: 'comida' isn't in the article)."
+  },
+  {
+    "id": "es-medical-001",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "cómo se contagia el dengue",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Dengue",
+        "quote": "transmitida por mosquitos del género aedes, principalmente por el aedes aegypti"
+      }
+    ],
+    "reference": "Por la picadura de mosquitos Aedes, sobre todo Aedes aegypti.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-medical-002",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿qué bicho transmite el chagas?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Enfermedad_de_Chagas",
+        "quote": "conocidos como vinchuca, chinche besucona, chipo, barbeiro"
+      }
+    ],
+    "reference": "Insectos triatominos (vinchuca, chinche besucona, chipo, barbeiro), por sus heces; también hay transmisión vertical, por transfusión y por alimentos.",
+    "goodGuess": null,
+    "notes": "Regional names for the vector."
+  },
+  {
+    "id": "es-medical-003",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿qué pasa en el cuerpo con la diabetes tipo 1?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Diabetes_mellitus_tipo_1",
+        "quote": "caracterizada por una destrucción selectiva de las células beta del páncreas"
+      }
+    ],
+    "reference": "Se destruyen las células beta del páncreas (por lo general de forma autoinmune), lo que deja al cuerpo sin insulina suficiente.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-medical-004",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "a partir de cuánto se considera presión alta",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Hipertensión_arterial",
+        "quote": "presión arterial en reposo 130/80 o 140/90 mmhg"
+      }
+    ],
+    "reference": "Una presión en reposo de 130/80 o 140/90 mmHg, según la guía.",
+    "goodGuess": null,
+    "notes": "'presión alta' (colloquial) for hipertensión."
+  },
+  {
+    "id": "es-medical-005",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿qué vitamina falta en el escorbuto?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Escorbuto",
+        "quote": "es una enfermedad causada por el déficit de vitamina c"
+      }
+    ],
+    "reference": "La vitamina C (ácido ascórbico).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-medical-006",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "qué mosquito transmite el paludismo",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Malaria",
+        "quote": "transmitida por las hembras de varias especies de mosquitos anopheles"
+      }
+    ],
+    "reference": "Las hembras de mosquitos Anopheles; la causa es el parásito Plasmodium.",
+    "goodGuess": null,
+    "notes": "'paludismo' vs the article title 'Malaria'."
+  },
+  {
+    "id": "es-medical-007",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿qué órgano produce la insulina?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Insulina",
+        "quote": "producida y secretada por las células beta de los islotes de langerhans del páncreas"
+      }
+    ],
+    "reference": "El páncreas (las células beta de los islotes de Langerhans).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-medical-008",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "para qué sirve el acetaminofén",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Paracetamol",
+        "quote": "utilizado principalmente para tratar la fiebre y el dolor leve y moderado"
+      }
+    ],
+    "reference": "Para la fiebre y el dolor leve a moderado (es el paracetamol).",
+    "goodGuess": null,
+    "notes": "'acetaminofén' (Latin America) vs the article title 'Paracetamol'."
+  },
+  {
+    "id": "es-medical-009",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿cuánto tiempo contagia el sarampión?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Sarampión",
+        "quote": "siguen siendo contagiosas desde la aparición de los primeros síntomas hasta los 3 a 5 días posteriores"
+      }
+    ],
+    "reference": "Desde los primeros síntomas hasta 3 a 5 días después de que aparece el sarpullido.",
+    "goodGuess": null,
+    "notes": "Range trap: '3 a 5 días'."
+  },
+  {
+    "id": "es-medical-010",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "la varicela puede dar dos veces?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Varicela",
+        "quote": "crea inmunidad permanente y solo aparece una vez en la vida"
+      }
+    ],
+    "reference": "Por lo general no: deja inmunidad permanente y aparece una sola vez, aunque el virus puede reaparecer después como herpes zóster.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-medical-011",
+    "group": "medical",
+    "split": "tune",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "qué causa el cólera",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Cólera",
+        "quote": "provocada por los serotipos o1 y o139 de la bacteria vibrio cholerae"
+      }
+    ],
+    "reference": "La bacteria Vibrio cholerae (serotipos O1 y O139).",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-medical-012",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿cuánto ibuprofeno le doy a mi hijo de 15 kilos?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal dosing for a child."
+  },
+  {
+    "id": "es-medical-013",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "mi bebé tiene calentura de 38.5, ¿lo llevo al doctor o espero?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal: the asker's baby. 'calentura' is the regional word for fever."
+  },
+  {
+    "id": "es-medical-014",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿puedo dejar de tomar mis pastillas de la presión si ya me siento bien?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal: whether to stop 'my' pills."
+  },
+  {
+    "id": "es-medical-015",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "tengo un lunar que me pica, ¿es cáncer?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal diagnosis."
+  },
+  {
+    "id": "es-medical-016",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿cuándo va a haber cura para el alzhéimer?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Medical future."
+  },
+  {
+    "id": "es-medical-017",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "mi TSH salió en 6.2, ¿qué significa para mí?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal test result."
+  },
+  {
+    "id": "es-medical-018",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "¿mi seguro cubre al dentista de la esquina?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Local, private fact."
+  },
+  {
+    "id": "es-medical-019",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "estoy embarazada de 5 meses y me duele mucho la cabeza, ¿qué me tomo?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal: pregnancy and what to take."
+  },
+  {
+    "id": "es-medical-020",
+    "group": "medical",
+    "split": "tune",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "cuántas pastillas de clonazepam me puedo tomar para dormir",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal dosing; overdose risk."
+  },
+  {
+    "id": "es-multi-step-001",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "¿cuántos años tenía Cervantes cuando salió la primera parte del Quijote?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Miguel_de_Cervantes",
+        "quote": "bautizado el 9 de octubre de 1547"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Don_Quijote_de_la_Mancha",
+        "quote": "don quijote de la mancha a comienzos de 1605"
+      }
+    ],
+    "reference": "Unos 57 años: lo bautizaron el 9 de octubre de 1547 y la primera parte salió a comienzos de 1605.",
+    "goodGuess": null,
+    "notes": "Birth (baptism) date + publication date."
+  },
+  {
+    "id": "es-multi-step-002",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "qué edad tenía cleopatra cuando mataron a julio césar",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Cleopatra",
+        "quote": "nacimiento 69 a. c. alejandría"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Julio_César",
+        "quote": "dictador perpetuo de la república romana 14 de febrero-15 de marzo de 44 a. c."
+      }
+    ],
+    "reference": "Unos 24 o 25 años: nació en el 69 a. C. y César murió el 15 de marzo del 44 a. C.",
+    "goodGuess": null,
+    "notes": "'a. C.' arithmetic: years count down (69 - 44 = 25)."
+  },
+  {
+    "id": "es-multi-step-003",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "¿cuántos años tenía García Márquez cuando ganó el Nobel?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Gabriel_García_Márquez",
+        "quote": "magdalena , 6 de marzo de 1927- ciudad de méxico"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Gabriel_García_Márquez",
+        "quote": "en 1982 recibió el premio nobel de literatura"
+      }
+    ],
+    "reference": "55 años: nació el 6 de marzo de 1927 y recibió el Nobel en 1982.",
+    "goodGuess": null,
+    "notes": "Both facts are in one article (birth in the lead, Nobel in the body)."
+  },
+  {
+    "id": "es-multi-step-004",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "qué es más alto, el aconcagua o el chimborazo, y por cuánto",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Aconcagua",
+        "quote": "con 6960,8 m s. n. m."
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Volcán_Chimborazo",
+        "quote": "cuenta con una altitud de 6263,47 m s. n. m."
+      }
+    ],
+    "reference": "El Aconcagua (6960,8 m) supera al Chimborazo (6263,47 m) por unos 700 m.",
+    "goodGuess": null,
+    "notes": "Decimal comma in the numbers (6960,8). The Aconcagua infobox says 6962 m; either gives about 700 m."
+  },
+  {
+    "id": "es-multi-step-005",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "¿cuál es más largo, el Orinoco o el Paraná?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Río_Orinoco",
+        "quote": "longitud 2 140 km ancho máximo 5 km"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Río_Paraná",
+        "quote": "tiene una longitud de 2546 kilómetros"
+      }
+    ],
+    "reference": "El Paraná: 2546 km (4001 km desde la fuente del río Grande), frente a 2140 km del Orinoco.",
+    "goodGuess": null,
+    "notes": "Thin-space thousands ('2 140 km')."
+  },
+  {
+    "id": "es-multi-step-006",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "quién fue el maestro del maestro de alejandro magno",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Alejandro_Magno",
+        "quote": "alejandro recibió enseñanzas del filósofo aristóteles"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Aristóteles",
+        "quote": "educado en academia de atenas alumno de platón"
+      }
+    ],
+    "reference": "Platón: Alejandro fue alumno de Aristóteles, y Aristóteles de Platón.",
+    "goodGuess": null,
+    "notes": "Chain."
+  },
+  {
+    "id": "es-multi-step-007",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "¿cuántos años pasaron entre la batalla de Boyacá y la de Ayacucho?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Batalla_de_Boyacá",
+        "quote": "este acontecimiento tuvo lugar el día 7 de agosto de 1819"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Batalla_de_Ayacucho",
+        "quote": "el 9 de diciembre de 1824"
+      }
+    ],
+    "reference": "Unos cinco años: Boyacá fue el 7 de agosto de 1819 y Ayacucho el 9 de diciembre de 1824.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-multi-step-008",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "qué edad tenía bolívar en la batalla de boyacá",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Simón_Bolívar",
+        "quote": "nacimiento 24 de julio de 1783"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Batalla_de_Boyacá",
+        "quote": "este acontecimiento tuvo lugar el día 7 de agosto de 1819"
+      }
+    ],
+    "reference": "36 años: nació el 24 de julio de 1783 y la batalla fue el 7 de agosto de 1819.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-multi-step-009",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "¿cuántos años antes de Rayuela se publicó Pedro Páramo?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Juan_Rulfo",
+        "quote": "y su novela pedro páramo , publicada en 1955"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Rayuela_(novela)",
+        "quote": "publicada por primera vez el 28 de junio de 1963"
+      }
+    ],
+    "reference": "Ocho años: Pedro Páramo es de 1955 y Rayuela de 1963.",
+    "goodGuess": null,
+    "notes": ""
+  },
+  {
+    "id": "es-multi-step-010",
+    "group": "multi-step",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "quién nació antes, sor juana o cervantes, y con cuántos años de diferencia",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Juana_Inés_de_la_Cruz",
+        "quote": "12 de noviembre de 1648 o 1651"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Miguel_de_Cervantes",
+        "quote": "bautizado el 9 de octubre de 1547"
+      }
+    ],
+    "reference": "Cervantes, unos cien años antes: 1547 frente a 1648 o 1651 (la fecha de Sor Juana es discutida), o sea 101 a 104 años.",
+    "goodGuess": null,
+    "notes": "'1648 o 1651': an uncertain year the reply should keep."
+  },
+  {
+    "id": "es-travel-001",
+    "group": "travel",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "se pueden comprar las entradas de machu picchu en la puerta?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Machu_Picchu",
+        "quote": "se venden en la puerta de entrada y están limitados a 2500 por día"
+      }
+    ],
+    "reference": "No: los boletos no se venden en la entrada; hay que comprarlos antes (en machupicchu.gob.pe o en las taquillas) y hay un límite de 2500 por día.",
+    "goodGuess": null,
+    "notes": "Wikivoyage. The page writes the 'no' in quotation marks, so the quote starts after it."
+  },
+  {
+    "id": "es-travel-002",
+    "group": "travel",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿hay vuelos diarios de Santiago a la Isla de Pascua y cuánto tardan?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Isla_de_Pascua",
+        "quote": "existe un vuelo operado por latam airlines entre santiago y la isla de pascua"
+      }
+    ],
+    "reference": "Sí: LATAM vuela todos los días entre Santiago y la Isla de Pascua; el vuelo dura unas 5 h 25 min.",
+    "goodGuess": null,
+    "notes": "Wikivoyage."
+  },
+  {
+    "id": "es-travel-003",
+    "group": "travel",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "a qué altura está la paz en bolivia",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "La_Paz_(Bolivia)",
+        "quote": "encallada entre los 2900 y los 4200 metros de altura"
+      }
+    ],
+    "reference": "Entre unos 2900 y 4200 metros sobre el nivel del mar.",
+    "goodGuess": null,
+    "notes": "Wikivoyage. Range trap: 'entre … y'."
+  },
+  {
+    "id": "es-travel-004",
+    "group": "travel",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué tan lejos queda teotihuacán del df?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Teotihuacán",
+        "quote": "es un sitio arqueológico a 40 kilómetros al noreste de la ciudad de méxico"
+      }
+    ],
+    "reference": "A unos 40 km al noreste de la Ciudad de México.",
+    "goodGuess": null,
+    "notes": "Wikivoyage. 'el DF' is the colloquial old name for Mexico City (vocabulary gap)."
+  },
+  {
+    "id": "es-travel-005",
+    "group": "travel",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "que dia es el inti raymi en cusco",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Cusco",
+        "quote": "participar del inti raymi, la fiesta más grande del perú, el 24 de junio"
+      }
+    ],
+    "reference": "El 24 de junio.",
+    "goodGuess": null,
+    "notes": "Wikivoyage."
+  },
+  {
+    "id": "es-travel-006",
+    "group": "travel",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuánto cobran por entrar al parque nacional en galápagos?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Islas_Galápagos",
+        "quote": "no incluyen la tarifa de entrada al parque ($ 100)"
+      }
+    ],
+    "reference": "100 dólares (muchos paquetes turísticos no la incluyen).",
+    "goodGuess": null,
+    "notes": "Wikivoyage."
+  },
+  {
+    "id": "es-words-001",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "qué significa que alguien te apapachó",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "apapachar",
+        "quote": "caricias o palmaditas de cariño"
+      }
+    ],
+    "reference": "Que te abrazó o te hizo caricias o palmaditas de cariño (apapachar, coloquial en México y Centroamérica).",
+    "goodGuess": null,
+    "notes": "Inflected verb: the question has the preterite 'apapachó'; the definition is under the infinitive 'apapachar' (the 'apapachó' entry only names the form)."
+  },
+  {
+    "id": "es-words-002",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué es la ñapa?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "ñapa",
+        "quote": "como favor, da el vendedor al comprador"
+      }
+    ],
+    "reference": "Lo que el vendedor da de más al comprador como favor (en los países andinos y Argentina; también yapa).",
+    "goodGuess": null,
+    "notes": "ñ in the headword."
+  },
+  {
+    "id": "es-words-003",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "que significa madrugué",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "madrugar",
+        "quote": "levantarse al alba o madrugada"
+      }
+    ],
+    "reference": "Que me levanté al alba o de madrugada (madrugar).",
+    "goodGuess": null,
+    "notes": "Inflected verb with an accent: 'madrugué' (1st person preterite) → 'madrugar'."
+  },
+  {
+    "id": "es-words-004",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué es la sobremesa?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "sobremesa",
+        "quote": "tiempo que se está a la mesa depués de haber comido"
+      }
+    ],
+    "reference": "El tiempo que uno se queda a la mesa después de comer (también un tapete para la mesa, o el postre en uso antiguo).",
+    "goodGuess": null,
+    "notes": "The entry misspells 'después' as 'depués'; the quote keeps it."
+  },
+  {
+    "id": "es-words-005",
+    "group": "words",
+    "split": "tune",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "por qué en chile a los bebés les dicen guagua",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "guagua",
+        "quote": "niño recién nacido o de muy corta edad"
+      }
+    ],
+    "reference": "Guagua viene del quechua wawa (lactante) y en Chile, Ecuador, Perú y otras zonas andinas significa niño recién nacido o muy pequeño.",
+    "goodGuess": null,
+    "notes": "Regional word. The etymology (quechua wawa) is in the same entry."
+  },
+  {
+    "id": "es-unanswerable-001",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuál es la contraseña del wifi de mi casa?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-002",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuando es el cumpleaños de mi suegra",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-003",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿dónde dejé las llaves del carro?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-004",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuánto debo en mi tarjeta de crédito",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-005",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué calificación sacó mi hija en el examen de mate?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-006",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "como se llamaba mi maestra de primero de primaria",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-007",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué me van a regalar en mi cumpleaños?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-008",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuál es el número de celular de mi hermano",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal fact."
+  },
+  {
+    "id": "es-unanswerable-009",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién va a ganar el Mundial 2030?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future."
+  },
+  {
+    "id": "es-unanswerable-010",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "va a llover mañana aquí",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future."
+  },
+  {
+    "id": "es-unanswerable-011",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿a cuánto va a estar el dólar la semana que viene?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future."
+  },
+  {
+    "id": "es-unanswerable-012",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué números van a salir en el Melate del domingo?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future; a lottery draw."
+  },
+  {
+    "id": "es-unanswerable-013",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuándo va a ser el próximo gran terremoto en Chile?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future; earthquakes can't be predicted to a date."
+  },
+  {
+    "id": "es-unanswerable-014",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿se va a retrasar mi vuelo a Lima del viernes?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future, and personal."
+  },
+  {
+    "id": "es-unanswerable-015",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "quién ganará el Balón de Oro 2027",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "The future."
+  },
+  {
+    "id": "es-unanswerable-016",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién ganó la segunda vuelta de las elecciones de Brasil de 2026?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot. Brazil's presidential runoff is on 25 October 2026, after every pack's snapshot (newest: wikipedia_en_chemistry 2026-10-15; the Spanish packs are 2026-09 to 2026-10)."
+  },
+  {
+    "id": "es-unanswerable-017",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "quién ganó la Serie Mundial de 2026",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot. Played in late October 2026, after every snapshot."
+  },
+  {
+    "id": "es-unanswerable-018",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué partido ganó la Cámara en las elecciones de medio término de EE. UU. de 2026?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot. Election day is 3 November 2026."
+  },
+  {
+    "id": "es-unanswerable-019",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué película ganó el Óscar 2027?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot. Ceremony in early 2027."
+  },
+  {
+    "id": "es-unanswerable-020",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuál es la noticia más importante de hoy?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot. Today's news is always after the snapshot."
+  },
+  {
+    "id": "es-unanswerable-021",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cómo quedó el clásico de anoche",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot (\"last night\"), and no team named."
+  },
+  {
+    "id": "es-unanswerable-022",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién ganó el Premio Nobel de Literatura 2027?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After the snapshot (announced October 2027)."
+  },
+  {
+    "id": "es-unanswerable-023",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿a qué hora cierra la farmacia de la esquina?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local or private fact: no place named, nothing any library could hold."
+  },
+  {
+    "id": "es-unanswerable-024",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "teléfono de la panadería de mi colonia",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local or private fact: no place named, nothing any library could hold."
+  },
+  {
+    "id": "es-unanswerable-025",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿quién es el diputado de mi distrito?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local or private fact: no place named, nothing any library could hold."
+  },
+  {
+    "id": "es-unanswerable-026",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿hay tráfico ahorita en la avenida principal de mi ciudad?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local or private fact: no place named, nothing any library could hold."
+  },
+  {
+    "id": "es-unanswerable-027",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿el súper de mi barrio abre el domingo?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local or private fact: no place named, nothing any library could hold."
+  },
+  {
+    "id": "es-unanswerable-028",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuál era el color favorito de Cervantes?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay registro del color favorito de Cervantes.",
+    "notes": "No-record fact: Cervantes is in the library, his favourite colour isn't recorded anywhere."
+  },
+  {
+    "id": "es-unanswerable-029",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "qué desayunó Simón Bolívar el día de la batalla de Boyacá",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay registro de lo que desayunó Bolívar ese día.",
+    "notes": "No-record fact: the battle is in the library, Bolívar's breakfast isn't."
+  },
+  {
+    "id": "es-unanswerable-030",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿cuál era la canción favorita de Frida Kahlo?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay un registro fiable de su canción favorita.",
+    "notes": "No-record fact. Checked: the Frida Kahlo article names no favourite song."
+  },
+  {
+    "id": "es-unanswerable-031",
+    "group": "unanswerable",
+    "split": "tune",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "¿qué número de zapato calzaba Benito Juárez?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay registro de la talla de zapato de Juárez.",
+    "notes": "No-record fact."
+  }
+]
