@@ -1,10 +1,12 @@
-"""A pack's manifest: its title list and Gutenberg source ids, and the checks every entry must pass.
+"""A pack's manifest: its title list and source ids, and the checks every entry must pass.
 
-Each work is checked against its Gutenberg RDF record: public domain in the USA, English, and a title that
+Each Gutenberg work is checked against its RDF record: public domain in the USA, English, and a title that
 matches, so a mistyped id can't slip a different book into the pack. `published` is checked against the
-US public-domain line: the year the reproduced edition or translation first appeared. A work from another
-source has no RDF record, so its row must carry a `licence` naming its public-domain dedication and the URL
-it was read from.
+US public-domain line: the year the reproduced edition or translation first appeared.
+
+An eBible work (`"source": "ebible"`, `"ebible": "<id>"`) is a modern translation its makers dedicated to
+the public domain, so it skips the year line; its `licence` must quote that dedication with its URL, and the
+eBible details page must still say "Public Domain".
 
 Reading settings: `verse` turns verse layout on or off (the default follows the section), `lineNumbers` puts
 line numbers in the margin or drops them, and `titleOverrides` replaces contents titles by page number.
@@ -20,7 +22,6 @@ from typing import Callable
 
 PD_LINE = 1930
 PD_RIGHTS = "Public domain in the USA."
-SOURCES = ("gutenberg", "ebible")
 VERSE_SECTIONS = {"poetry", "drama", "libretti", "scripture"}
 LINE_NUMBERS = ("margin", "drop")
 SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -47,11 +48,18 @@ class WorkSpec:
     line_numbers: str = "margin"
     title_overrides: dict[str, str] = field(default_factory=dict)
     source: str = "gutenberg"
+    ebible: str | None = None
     licence: str | None = None
 
     @property
     def reads_as_verse(self) -> bool:
         return self.verse if self.verse is not None else self.section in VERSE_SECTIONS
+
+    @property
+    def where(self) -> str:
+        if self.source == "ebible":
+            return f"{self.slug} (ebible {self.ebible})"
+        return f"{self.slug} (#{self.gutenberg})"
 
 
 @dataclass
@@ -78,7 +86,7 @@ def load(path: Path) -> Manifest:
                       published=int(w["published"]), section=w["section"], split_at=w.get("splitAt"),
                       title_check=w.get("titleCheck", True), verse=w.get("verse"),
                       line_numbers=w.get("lineNumbers", "margin"), title_overrides=w.get("titleOverrides", {}),
-                      source=w.get("source", "gutenberg"), licence=w.get("licence"))
+                      source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"))
              for w in data["works"]]
     return Manifest(name=data["name"], title=data["title"], description=data["description"],
                     language=data["language"], sections=[(s["id"], s["title"]) for s in data["sections"]],
@@ -97,40 +105,36 @@ def _words(text: str) -> set[str]:
     return set(re.sub(r"[^a-z0-9]+", " ", plain).split()) - STOP_WORDS
 
 
-def validate(m: Manifest, rdf_for: Callable[[int], Rdf]) -> list[str]:
+def validate(m: Manifest, rdf_for: Callable[[int], Rdf],
+             ebible_page_for: Callable[[str], bytes] | None = None) -> list[str]:
     errors = []
     sections = {section_id for section_id, _ in m.sections}
     slugs = Counter(w.slug for w in m.works)
-    ids = Counter(w.gutenberg for w in m.works if w.gutenberg is not None)
+    ids = Counter(w.gutenberg for w in m.works if w.source == "gutenberg")
+    ebibles = Counter(w.ebible for w in m.works if w.source == "ebible")
     for w in m.works:
-        where = f"{w.slug} (#{w.gutenberg})" if w.source == "gutenberg" else f"{w.slug} ({w.source})"
+        where = w.where
         if not SLUG.match(w.slug):
             errors.append(f"{where}: slug must be lowercase words joined by hyphens")
         if slugs[w.slug] > 1:
             errors.append(f"{where}: slug used more than once")
             slugs[w.slug] = 1
-        if w.gutenberg is not None and ids[w.gutenberg] > 1:
-            errors.append(f"{where}: Gutenberg id used more than once")
-            ids[w.gutenberg] = 1
         if w.section not in sections:
             errors.append(f"{where}: unknown section {w.section!r}")
         if w.split_at is not None and w.split_at not in ("h1", "h2", "h3", "h4"):
             errors.append(f"{where}: splitAt must be h1-h4 or null, not {w.split_at!r}")
+        errors += [f"{where}: {e}" for e in _reading_errors(w)]
+        if w.source == "ebible":
+            errors += _validate_ebible(w, ebibles, ebible_page_for)
+            continue
+        if w.source != "gutenberg" or w.gutenberg is None:
+            errors.append(f"{where}: source must be gutenberg (with an id) or ebible, not {w.source!r}")
+            continue
+        if ids[w.gutenberg] > 1:
+            errors.append(f"{where}: Gutenberg id used more than once")
+            ids[w.gutenberg] = 1
         if w.published > PD_LINE:
             errors.append(f"{where}: published {w.published}, after the {PD_LINE} public-domain line")
-        errors += [f"{where}: {e}" for e in _reading_errors(w)]
-        if w.source not in SOURCES:
-            errors.append(f"{where}: unknown source {w.source!r}")
-            continue
-        if w.source != "gutenberg":
-            licence = w.licence or ""
-            if not (re.search(r"public domain", licence, re.I) and re.search(r"https://\S+", licence)):
-                errors.append(f"{where}: licence must name its public-domain dedication and source URL, "
-                              f"not {w.licence!r}")
-            continue
-        if w.gutenberg is None:
-            errors.append(f"{where}: a Gutenberg work needs its Gutenberg id")
-            continue
         rdf = rdf_for(w.gutenberg)
         if " ".join(rdf.rights.split()) != PD_RIGHTS:
             errors.append(f"{where}: rights are {rdf.rights!r}")
@@ -152,4 +156,20 @@ def _reading_errors(w: WorkSpec) -> list[str]:
             isinstance(k, str) and k.isdigit() and int(k) >= 1 and isinstance(v, str) and v.strip()
             for k, v in overrides.items()):
         errors.append(f"titleOverrides must map page numbers (\"1\", \"2\", ...) to titles, not {overrides!r}")
+    return errors
+
+
+def _validate_ebible(w: WorkSpec, ebibles: Counter, page_for: Callable[[str], bytes] | None) -> list[str]:
+    errors = []
+    if not w.ebible or not re.fullmatch(r"[a-z0-9-]+", w.ebible):
+        return [f"{w.where}: ebible id must be lowercase letters, digits and hyphens"]
+    if ebibles[w.ebible] > 1:
+        errors.append(f"{w.where}: eBible id used more than once")
+        ebibles[w.ebible] = 1
+    if not w.licence or "public domain" not in w.licence.lower() or "https://" not in w.licence:
+        errors.append(f"{w.where}: licence must quote the public-domain dedication and its URL")
+    if page_for is not None:
+        page = page_for(w.ebible).decode("utf-8", "replace").lower()
+        if "public domain" not in page:
+            errors.append(f"{w.where}: the eBible details page no longer says Public Domain")
     return errors

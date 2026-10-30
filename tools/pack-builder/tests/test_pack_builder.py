@@ -156,3 +156,35 @@ def test_validate_command_refuses_a_copyrighted_work(tmp_path, monkeypatch, caps
         pack_builder.main(["validate", "--manifest", str(tmp_path / "manifest.json")])
     assert caught.value.code == 1
     assert "modern-book (#1342): rights are" in capsys.readouterr().err
+
+
+class FakeEBible:
+    def books(self, ebible_id):
+        assert ebible_id == "engtest"
+        return [("FRT", "\\id FRT\n\\h Preface\n\\ip Front matter."),
+                ("PSA", fixture("psalms-sample.usfm").decode()),
+                ("OBA", "\\id OBA\n\\h Obadiah\n\\c 1\n\\p\n\\v 1 The vision of Obadiah.\n")]
+
+
+def test_ebible_rows_build_through_usfm_and_describe_like_any_book(tmp_path):
+    import zipfile
+    from pack_builder import build_epubs, describe_epubs
+    data = {"name": "granger_test", "title": "Granger Test", "language": "eng", "description": "Test pack",
+            "sections": [{"id": "scripture", "title": "Scripture & religion"}],
+            "works": [{"source": "ebible", "ebible": "engtest", "slug": "test-bible", "title": "The Test Bible",
+                       "author": "", "translator": None, "published": 2000, "section": "scripture",
+                       "licence": "https://ebible.test: Public Domain"}]}
+    (tmp_path / "manifest.json").write_text(json.dumps(data))
+    m = load(tmp_path / "manifest.json")
+    out = tmp_path / "out"
+    out.mkdir()
+    [path] = build_epubs(m, FakeSource(), out, "2026-10-30", FakeEBible())
+    z = zipfile.ZipFile(path)
+    nav = z.read("OEBPS/nav.xhtml").decode()
+    assert ">Psalms<" in nav and ">Obadiah<" in nav and "Preface" not in nav
+    page = z.read("OEBPS/c001.xhtml").decode()
+    assert 'class="gv"' in page and 'class="v"' in page and "\\" not in page
+    assert "https://ebible.org/find/details.php?id=engtest" in z.read("OEBPS/content.opf").decode().lower()
+    assert "sup.v" in z.read("OEBPS/book.css").decode()
+    d = describe_epubs(out, "https://example.test/classics", m)
+    assert d["books"][0]["id"] == "gc-test-bible" and d["books"][0]["title"] == "The Test Bible"

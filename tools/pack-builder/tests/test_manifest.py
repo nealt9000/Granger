@@ -119,3 +119,38 @@ def test_non_gutenberg_work_needs_a_public_domain_licence_with_its_url(tmp_path)
     m = manifest(tmp_path, **ebible, licence=good)
     assert m.works[0].gutenberg is None and m.works[0].licence == good
     assert validate(m, no_rdf) == []
+
+
+def ebible_row(**work):
+    row = {"source": "ebible", "ebible": "engbsb", "slug": "berean-standard-bible", "title": "Berean Standard Bible",
+           "author": "", "translator": None, "published": 2016, "section": "scripture", "splitAt": None,
+           "licence": 'https://berean.bible/terms.htm: "officially dedicated to the public domain"'}
+    row.update(work)
+    return row
+
+
+def ebible_manifest(tmp_path, **work):
+    m = manifest(tmp_path)
+    data = json.loads((tmp_path / "manifest.json").read_text())
+    data["works"].append(ebible_row(**work))
+    (tmp_path / "manifest.json").write_text(json.dumps(data))
+    return load(tmp_path / "manifest.json")
+
+
+def test_ebible_rows_load_and_skip_the_rdf_and_year_checks(tmp_path):
+    m = ebible_manifest(tmp_path)
+    w = m.works[1]
+    assert (w.source, w.ebible, w.gutenberg, w.published) == ("ebible", "engbsb", None, 2016)
+    assert m.works[0].source == "gutenberg" and m.works[0].licence is None
+    looked_up = []
+    assert validate(m, lambda i: looked_up.append(i) or rdf_ok(i), lambda i: b"<b>Public Domain</b>") == []
+    assert looked_up == [2800]
+
+
+def test_ebible_rows_need_a_quoted_licence_with_its_url_and_a_public_domain_page(tmp_path):
+    errors = validate(ebible_manifest(tmp_path, licence="free"), rdf_ok, lambda i: b"Public Domain")
+    assert any("licence" in e and "berean-standard-bible (ebible engbsb)" in e for e in errors)
+    errors = validate(ebible_manifest(tmp_path), rdf_ok, lambda i: b"All rights reserved")
+    assert any("Public Domain" in e for e in errors)
+    assert any("ebible id" in e for e in validate(ebible_manifest(tmp_path, ebible="../x"), rdf_ok))
+    assert any("source" in e for e in validate(manifest(tmp_path, source="wikisource"), rdf_ok))
