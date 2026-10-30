@@ -47,7 +47,18 @@ data class DownloadRecord(
     val verifiedAt: Long? = null,
     val createdAt: Long,
     val updatedAt: Long,
+    /** Its place in the one download queue, lowest first (Plan DL Decision 2); ties go to the older record. */
+    @ColumnInfo(defaultValue = "0")
+    val queueOrder: Long = 0,
+    /** Tries that failed in a way worth retrying; at [MAX_ATTEMPTS] the record is FAILED. */
+    @ColumnInfo(defaultValue = "0")
+    val attempts: Int = 0,
+    /** When a record that failed for now may run again; null means as soon as its turn comes. */
+    val retryAt: Long? = null,
 )
+
+/** Tries per download before it is FAILED with its last error (Plan DL Decision 4). */
+const val MAX_ATTEMPTS = 10
 
 val DownloadRecord.file: File get() = File(filePath)
 val DownloadRecord.partFile: File get() = File("$filePath.part")

@@ -21,6 +21,7 @@ import app.granger.core.downloads.AndroidVolumes
 import app.granger.core.downloads.DownloadDatabase
 import app.granger.core.downloads.DownloadManager
 import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadQueue
 import app.granger.core.downloads.DownloadRunner
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
@@ -32,6 +33,7 @@ import app.granger.core.downloads.VoiceUnpacker
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.file
 import app.granger.core.downloads.WorkManagerScheduler
+import app.granger.core.downloads.isUnmetered
 import app.granger.core.speech.InstalledVoices
 import app.granger.core.speech.ReadAddress
 import app.granger.core.speech.ReadSource
@@ -193,7 +195,7 @@ open class GrangerApp : Application(), DownloadsHost {
         container.appScope.launch { container.mediaDownloader.rescanQuietly() }
     }
 
-    override val downloadRunner: DownloadRunner get() = container.downloadRunner
+    override val downloadQueue: DownloadQueue get() = container.downloadQueue
 }
 
 /**
@@ -459,9 +461,15 @@ class AppContainer(context: Context) {
 
     private val downloadDao = DownloadDatabase.create(context).downloadDao()
 
+    /** The one download queue (Plan DL Decision 1), drained by the `download-queue` worker. */
+    val downloadQueue: DownloadQueue by lazy {
+        DownloadQueue(downloadDao, downloadRunner, downloadPrefs, unmetered = { isUnmetered(context) })
+    }
+
     val downloads: Downloads = DownloadManager(
         dao = downloadDao,
-        scheduler = WorkManagerScheduler(context),
+        scheduler = WorkManagerScheduler(context) { downloadQueue },
+        prefs = downloadPrefs,
         // Every installed pack and book counts towards the cap, SD card included (spec "Storage cap").
         // Books are not in the library yet, so they come from the downloads ledger.
         installedPackBytes = {
@@ -487,6 +495,16 @@ class AppContainer(context: Context) {
                 // The verified zip becomes voices/<id>/ and goes away; the voice list picks the new voice up.
                 VoiceUnpacker.unpack(record.file).onFailure { Log.w("Granger", "Couldn't unpack the voice ${record.itemId}", it) }
                 installedVoices.refresh()
+            }
+            // Its vectors go right behind it, before the queue moves on (Plan DL Decision 2).
+            if (record.kind == ItemKind.PACK || record.kind == ItemKind.BOOK) {
+                try {
+                    vectorDownloads.reconcile(catalog.state.value.catalog, downloadDao.getAll())
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w("Granger", "Couldn't queue the search vectors of ${record.itemId}", e)
+                }
             }
         },
     )
@@ -550,11 +568,11 @@ class AppContainer(context: Context) {
     /** Search vectors follow their pack or book (Plan R1 Task 10): queued when it installs, removed with it. */
     private val vectorDownloads = VectorDownloads(downloads) { downloadPrefs.wifiOnly }
 
-    /** Schedules unfinished downloads again, keeping those still scheduled; see [Downloads.resume]. */
+    /** Starts the download queue, recovering a file left running by a run that died; see [Downloads.recover]. */
     fun resumeDownloads() {
         appScope.launch {
             try {
-                downloads.resume()
+                downloads.recover()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

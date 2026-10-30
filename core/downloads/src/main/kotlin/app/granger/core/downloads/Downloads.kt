@@ -8,6 +8,9 @@ import app.granger.core.catalog.VoiceEntry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -34,8 +37,11 @@ data class DownloadSpec(
 
 /** What the app's screens use to download, cancel and check items. */
 interface Downloads {
-    /** Every version of every item, oldest first. */
+    /** Every version of every item, in queue order (Plan DL Decision 2). */
     val records: Flow<List<DownloadRecord>>
+
+    /** Pause all is on: nothing downloads until [resume]. */
+    val paused: StateFlow<Boolean>
 
     /** Checks the cap and free space on [volumeRoot], then queues [item]. */
     suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
@@ -61,23 +67,33 @@ interface Downloads {
     /** Stores the result of a full checksum check from Readiness. */
     suspend fun recordCheck(itemId: String, hash: String, verified: Boolean)
 
-    /** Applies the Wi-Fi-only setting to every unfinished download. */
+    /** Applies the Wi-Fi-only setting to every unfinished download, keeping the queue's order. */
     suspend fun setWifiOnly(wifiOnly: Boolean)
 
     /**
-     * Schedules every unfinished download outside a group again, keeping any whose job is still there. A queued record
-     * can outlive its job (seen after a reinstall: 18 vectors downloads stayed queued with no job), and nothing else
-     * would start it. Called once when the app starts. Groups are left as they are: their chains can't be checked
-     * without restarting them.
+     * Called once when the app starts (Plan DL Decision 1): a record left RUNNING by a run that died goes back to
+     * QUEUED (its part file stays), and the queue is started. A group whose chain was lost before Plan DL resumes too.
      */
+    suspend fun recover()
+
+    /** Pause all (Plan DL Decision 3): the running file goes back to waiting, its part file kept; survives a restart. */
+    suspend fun pause()
+
+    /** Ends Pause all: the queue carries on, the paused file from where it was. */
     suspend fun resume()
 
+    /** Moves a waiting item ahead of everything else waiting. It starts when the current file finishes. */
+    suspend fun downloadNext(itemId: String)
+
     /**
-     * Queues [specs] (every one with groupId == [groupId]) as one, in list order. Specs whose exact hash is already
+     * Queues [specs] (every one with groupId == [groupId]) as one, in list order: at the back of the queue (setup), or
+     * [next], right behind the file now downloading (an album you asked for). Specs whose exact hash is already
      * installed are skipped; one already active is left as it is. One space check covers the bytes still to fetch:
      * everything is queued or nothing. There's no cap: only free space on [volumeRoot] is checked.
      */
-    suspend fun enqueueGroup(groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
+    suspend fun enqueueGroup(
+        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean, next: Boolean = false,
+    ): EnqueueResult
 
     /** Stops the group's unfinished files and deletes their parts; installed files and their records stay. */
     suspend fun cancelGroup(groupId: String)
@@ -89,22 +105,28 @@ interface Downloads {
     suspend fun retryGroup(groupId: String)
 }
 
-/** Runs downloads in the background; the WorkManager implementation is in DownloadWorker.kt. */
+/** Runs the one download queue in the background; the WorkManager implementation is in DownloadWorker.kt. */
 interface DownloadScheduler {
-    /** Starts [record]'s download; with [replace], restarts it (it resumes from its part file). */
-    fun schedule(record: DownloadRecord, replace: Boolean = false)
+    /** There may be something new to run: makes sure the queue runs, on an unmetered network if [unmeteredOnly]. */
+    fun ensure(unmeteredOnly: Boolean)
 
-    fun cancel(itemId: String)
+    /** Stops [itemId]'s download if it is the one running, and returns once it has; the queue moves on. */
+    suspend fun stopRun(itemId: String)
 
-    /** Runs [records] one after another, in order, after whatever [groupId] already has queued; [replace] starts the chain afresh. */
-    fun scheduleGroup(groupId: String, records: List<DownloadRecord>, replace: Boolean = false)
+    /** Stops the queue (Pause all) and returns once the running file has gone back to waiting. */
+    suspend fun stopQueue()
 
-    fun cancelGroup(groupId: String)
+    /** Whether [itemId] is downloading now. */
+    fun isRunning(itemId: String): Boolean
+
+    /** Drops work queued before Plan DL (one job per item, a chain per group); the queue runs those records now. */
+    fun forgetLegacyWork() {}
 }
 
 class DownloadManager(
     private val dao: DownloadDao,
     private val scheduler: DownloadScheduler,
+    private val prefs: QueuePrefs = MemoryQueuePrefs(),
     private val installedPackBytes: suspend () -> Long,
     private val capBytes: () -> Long = { Long.MAX_VALUE },
     private val freeBytes: (File) -> Long = { it.usableSpace },
@@ -114,6 +136,32 @@ class DownloadManager(
     private val mutex = Mutex()
 
     override val records: Flow<List<DownloadRecord>> = dao.observeAll()
+
+    private val _paused = MutableStateFlow(prefs.paused)
+    override val paused: StateFlow<Boolean> = _paused.asStateFlow()
+
+    /** Starts the queue if anything waits; Pause all keeps it stopped. */
+    private suspend fun wake() {
+        if (prefs.paused) return
+        val waiting = dao.waiting()
+        if (waiting.isNotEmpty()) withContext(io) { scheduler.ensure(unmeteredOnly = waiting.all { it.wifiOnly }) }
+    }
+
+    /**
+     * The first of [count] places right behind the file now downloading, ahead of everything else waiting (Plan DL
+     * Decision 2). The running file moves forward if it must, so it stays at the front.
+     */
+    private suspend fun nextOrder(count: Int = 1, except: String? = null): Long {
+        val waiting = dao.waiting().filter { it.itemId != except }
+        val running = waiting.firstOrNull { it.state == DownloadState.RUNNING || scheduler.isRunning(it.itemId) }
+        val others = waiting.filter { it !== running }
+        val first = (others.minOfOrNull { it.queueOrder } ?: ((running?.queueOrder ?: dao.maxQueueOrder() ?: 0) + count + 1)) - count
+        if (running != null && running.queueOrder >= first) dao.setQueueOrder(running.itemId, running.hash, first - 1)
+        return first
+    }
+
+    /** The first place after everything already queued. */
+    private suspend fun backOrder(): Long = (dao.maxQueueOrder() ?: -1) + 1
 
     override suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult =
         enqueue(specOf(item), volumeRoot, wifiOnly)
@@ -153,14 +201,16 @@ class DownloadManager(
             state = DownloadState.QUEUED,
             createdAt = t,
             updatedAt = t,
+            // Something you start yourself goes next; a pack's vectors, queued as it installs, follow right after it.
+            queueOrder = nextOrder(),
         )
         dao.upsert(record)
-        scheduler.schedule(record)
+        wake()
         EnqueueResult.Queued
     }
 
     override suspend fun enqueueGroup(
-        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean,
+        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean, next: Boolean,
     ): EnqueueResult = mutex.withLock {
         require(specs.all { it.groupId == groupId }) { "Every spec in group $groupId must carry its groupId" }
         val root = volumeRoot.absoluteFile
@@ -195,7 +245,8 @@ class DownloadManager(
         )
         if (verdict != EnqueueResult.Queued) return@withLock verdict
         val t = now()
-        val records = toFetch.map { spec ->
+        val base = if (next) nextOrder(toFetch.size) else backOrder()
+        val records = toFetch.mapIndexed { i, spec ->
             DownloadRecord(
                 itemId = spec.itemId,
                 hash = spec.hash,
@@ -211,72 +262,70 @@ class DownloadManager(
                 state = DownloadState.QUEUED,
                 createdAt = t,
                 updatedAt = t,
+                queueOrder = base + i,
             )
         }
         dao.upsertAll(records)
-        // WorkManager's enqueue calls are many and blocking-ish: off the caller's (often the main) thread.
-        withContext(io) { scheduler.scheduleGroup(groupId, records) }
+        wake()
         EnqueueResult.Queued
     }
 
     override suspend fun cancelGroup(groupId: String) = mutex.withLock {
-        scheduler.cancelGroup(groupId)
         for (itemId in dao.forGroup(groupId).filter { it.isActive }.map { it.itemId }.distinct()) cancelLocked(itemId)
     }
 
     override suspend fun removeGroup(groupId: String) = mutex.withLock {
-        scheduler.cancelGroup(groupId)
         for (itemId in dao.forGroup(groupId).map { it.itemId }.distinct()) removeLocked(itemId)
     }
 
+    /** The failed files go back in their stored places, so the group keeps its order. */
     override suspend fun retryGroup(groupId: String) = mutex.withLock {
         val t = now()
-        val queued = dao.forGroup(groupId).filter { it.state == DownloadState.FAILED }.map {
-            it.copy(state = DownloadState.QUEUED, error = null, hashFailures = 0, updatedAt = t)
-        }
+        val queued = dao.forGroup(groupId).filter { it.state == DownloadState.FAILED }.map { it.requeued(t) }
         if (queued.isEmpty()) return@withLock
-        queued.forEach { dao.upsert(it) }
-        scheduler.scheduleGroup(groupId, queued)
+        dao.upsertAll(queued)
+        wake()
     }
 
-    /**
-     * Ungrouped records restart on their own ([replace] as asked). A grouped one joins the end of its group's
-     * chain, so the group still runs one file at a time.
-     */
-    private fun reschedule(record: DownloadRecord, replace: Boolean) {
-        val group = record.groupId
-        if (group == null) scheduler.schedule(record, replace) else scheduler.scheduleGroup(group, listOf(record))
-    }
+    /** Back to waiting with a fresh set of tries and checksum retries. */
+    private fun DownloadRecord.requeued(t: Long) =
+        copy(state = DownloadState.QUEUED, error = null, hashFailures = 0, attempts = 0, retryAt = null, updatedAt = t)
 
     private fun specOf(item: CatalogItem): DownloadSpec = downloadSpecOf(item)
 
     override suspend fun retry(itemId: String) = mutex.withLock {
         val failed = dao.forItem(itemId).firstOrNull { it.state == DownloadState.FAILED } ?: return@withLock
-        val queued = failed.copy(state = DownloadState.QUEUED, error = null, hashFailures = 0, updatedAt = now())
-        dao.upsert(queued)
-        reschedule(queued, replace = true)
+        dao.upsert(failed.requeued(now()))
+        wake()
     }
 
     override suspend fun cancel(itemId: String) = mutex.withLock { cancelLocked(itemId) }
 
+    /**
+     * The records change first and the run is stopped after, so the queue, moving on, can't start the file again; the
+     * part file goes once the run has let go of it.
+     */
     private suspend fun cancelLocked(itemId: String) {
-        scheduler.cancel(itemId)
-        val hasInstalledVersion = dao.forItem(itemId).any { !it.isActive }
-        for (record in dao.forItem(itemId).filter { it.isActive }) {
-            val fileExists = withContext(io) { record.partFile.delete(); record.file.exists() }
+        val versions = dao.forItem(itemId)
+        val hasInstalledVersion = versions.any { !it.isActive }
+        val active = versions.filter { it.isActive }
+        for (record in active) {
+            val fileExists = withContext(io) { record.file.exists() }
             if (fileExists && !hasInstalledVersion) {
                 // A cancelled repair: the verified file is still there, so keep its ledger row.
                 // (With another installed version, a file at this path belongs to that version.)
                 dao.upsert(
                     record.copy(
                         state = DownloadState.INSTALLED, bytesDone = record.sizeBytes, error = null,
-                        hashFailures = 0, verifiedAt = null, updatedAt = now(),
+                        hashFailures = 0, verifiedAt = null, updatedAt = now(), attempts = 0, retryAt = null,
                     ),
                 )
             } else {
                 dao.delete(record.itemId, record.hash)
             }
         }
+        scheduler.stopRun(itemId)
+        withContext(io) { active.forEach { it.partFile.delete() } }
     }
 
     override suspend fun remove(itemId: String) = mutex.withLock { removeLocked(itemId) }
@@ -290,10 +339,11 @@ class DownloadManager(
     }
 
     private suspend fun removeLocked(itemId: String) {
-        scheduler.cancel(itemId)
-        for (record in dao.forItem(itemId)) {
-            dao.delete(record.itemId, record.hash)
-            withContext(io) {
+        val versions = dao.forItem(itemId)
+        for (record in versions) dao.delete(record.itemId, record.hash)
+        scheduler.stopRun(itemId)
+        withContext(io) {
+            for (record in versions) {
                 record.partFile.delete()
                 record.file.delete()
             }
@@ -304,30 +354,47 @@ class DownloadManager(
         val versions = dao.forItem(itemId)
         if (versions.any { it.isActive }) return@withLock
         val installed = versions.firstOrNull { it.state == DownloadState.INSTALLED } ?: return@withLock
-        val queued = installed.copy(state = DownloadState.QUEUED, bytesDone = 0, error = null, hashFailures = 0, verifiedAt = null, updatedAt = now())
+        val queued = installed.requeued(now()).copy(bytesDone = 0, verifiedAt = null, queueOrder = nextOrder())
         dao.upsert(queued)
-        reschedule(queued, replace = true)
+        wake()
     }
 
     override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) {
         dao.setVerifiedAt(itemId, hash, if (verified) now() else null)
     }
 
+    /** The order is stored, so nothing moves; the queue looks again under the new rule. */
     override suspend fun setWifiOnly(wifiOnly: Boolean) = mutex.withLock {
         dao.setWifiOnlyForActive(wifiOnly)
-        val pending = dao.getAll().filter { it.state == DownloadState.QUEUED || it.state == DownloadState.RUNNING }
-        for (record in pending.filter { it.groupId == null }) {
-            scheduler.schedule(record, replace = true)
+        wake()
+    }
+
+    override suspend fun recover() = mutex.withLock {
+        withContext(io) { scheduler.forgetLegacyWork() }
+        val t = now()
+        for (stale in dao.waiting().filter { it.state == DownloadState.RUNNING && !scheduler.isRunning(it.itemId) }) {
+            dao.requeueIfRunning(stale.itemId, stale.hash, t)
         }
-        // Each group's chain starts afresh with the new network rule, its files still in order.
-        for ((groupId, records) in pending.filter { it.groupId != null }.groupBy { it.groupId!! }) {
-            scheduler.scheduleGroup(groupId, records.sortedBy { it.itemId }, replace = true)
-        }
+        wake()
+    }
+
+    override suspend fun pause() = mutex.withLock {
+        prefs.paused = true
+        _paused.value = true
+        scheduler.stopQueue()
     }
 
     override suspend fun resume() = mutex.withLock {
-        val pending = dao.getAll().filter { (it.state == DownloadState.QUEUED || it.state == DownloadState.RUNNING) && it.groupId == null }
-        for (record in pending) scheduler.schedule(record, replace = false)
+        prefs.paused = false
+        _paused.value = false
+        wake()
+    }
+
+    override suspend fun downloadNext(itemId: String) = mutex.withLock {
+        val record = dao.forItem(itemId).firstOrNull { it.state == DownloadState.QUEUED } ?: return@withLock
+        if (scheduler.isRunning(itemId)) return@withLock
+        dao.setQueueOrder(record.itemId, record.hash, nextOrder(except = itemId))
+        wake()
     }
 }
 

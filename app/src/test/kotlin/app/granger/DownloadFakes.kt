@@ -139,15 +139,26 @@ class FakeDownloads : Downloads {
     override suspend fun repair(itemId: String) { calls += "repair:$itemId" }
     override suspend fun recordCheck(itemId: String, hash: String, verified: Boolean) { calls += "check:$itemId:$verified" }
     override suspend fun setWifiOnly(wifiOnly: Boolean) { calls += "wifi:$wifiOnly" }
-    override suspend fun resume() { calls += "resume" }
+    val pausedFlow = MutableStateFlow(false)
+    override val paused: StateFlow<Boolean> = pausedFlow
+    override suspend fun recover() { calls += "recover" }
+    override suspend fun pause() { calls += "pause"; pausedFlow.value = true }
+    override suspend fun resume() { calls += "resume"; pausedFlow.value = false }
+    override suspend fun downloadNext(itemId: String) { calls += "next:$itemId" }
 
     /** Each enqueueGroup call: the group id, its specs in order, and the volume. */
     val enqueuedGroups = mutableListOf<Triple<String, List<DownloadSpec>, File>>()
 
-    override suspend fun enqueueGroup(groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+    /** The groups queued to go next rather than at the back. */
+    val groupsNext = mutableListOf<String>()
+
+    override suspend fun enqueueGroup(
+        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean, next: Boolean,
+    ): EnqueueResult {
         specs.forEach(onEnqueue)
         enqueuedGroups += Triple(groupId, specs, volumeRoot)
         calls += "enqueueGroup:$groupId"
+        if (next) groupsNext += groupId
         val result = nextResult
         if (result == EnqueueResult.Queued) {
             list.update {
@@ -185,4 +196,5 @@ class FakePrefs(
     override var wifiOnly: Boolean = true,
     override var volumePath: String? = null,
     override var askBeforeLarge: Boolean = true,
+    override var paused: Boolean = false,
 ) : DownloadPrefs

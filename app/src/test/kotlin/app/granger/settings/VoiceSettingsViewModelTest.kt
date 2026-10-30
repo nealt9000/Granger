@@ -55,6 +55,7 @@ class VoiceSettingsViewModelTest {
         override var wifiOnly = true
         override var volumePath: String? = null
         override var askBeforeLarge = true
+        override var paused = false
     }
 
     private fun voiceDir(root: File, id: String) {

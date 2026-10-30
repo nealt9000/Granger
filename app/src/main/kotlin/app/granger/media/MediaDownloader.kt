@@ -87,7 +87,8 @@ class MediaDownloader(
             write(dir, volume.root, m)
             existed
         }
-        val result = downloads.enqueueGroup(group, MediaDownloads.specs(m), volume.root, prefs.wifiOnly)
+        // An album you asked for goes next in the queue (Plan DL Decision 2).
+        val result = downloads.enqueueGroup(group, MediaDownloads.specs(m), volume.root, prefs.wifiOnly, next = true)
         when (result) {
             EnqueueResult.Queued, EnqueueResult.AlreadyActive -> null
             // Every file is in already: the new manifest may name it differently, so file it again.
