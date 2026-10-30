@@ -3,8 +3,8 @@
 Each book's page opens with its `\\h` name as an `h2`, and each `\\c` becomes an `h3` ("Chapter N", or
 "Psalm N" where the book sets a `\\cl` label). Verse numbers are small superscripts. Poetry (`\\q1`-`\\q4`)
 becomes verse lines, `<div class="gv">` holding `<span class="gv-l">` lines indented by margin-left, the same
-markup the Gutenberg verse pass writes, and `\\b` becomes a stanza gap. Section headings (`\\s`, `\\s1`,
-`\\s2`) become `h4`.
+markup as the Gutenberg verse pass (`verse.py`, whose `CSS` styles both), and `\\b` becomes a stanza gap. Section
+headings (`\\s`, `\\s1`, `\\s2`) become `h4`.
 
 Footnotes, cross-references, parallel-passage lines (`\\r`), figures and word-level data (Strong's numbers)
 are dropped; `\\nd` keeps its text in small capitals, and `\\wj` and `\\add` keep their text plainly. Front
@@ -27,9 +27,7 @@ LABELS = {"PSA": "Psalm"}
 CSS = """
 sup.v { font-size: .6em; line-height: 0; vertical-align: super; opacity: .75; }
 .nd { font-variant: small-caps; }
-.gv { text-align: start; text-indent: 0; hyphens: manual; -webkit-hyphens: manual; margin: 0 0 .8em; }
-.gv-l { display: block; padding-left: 1.5em; text-indent: -1.5em; }
-.gv-gap { display: block; height: .75em; }
+div.gv { margin: 0 0 .8em; }
 .gv-l.qr { text-align: right; }
 .gv-l.qc { text-align: center; }
 p.pi, p.pm, p.mi { margin-left: 1.5em; }

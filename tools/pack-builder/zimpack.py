@@ -43,6 +43,7 @@ class Work:
     chapters: list[Chapter]
     styles: str = ""
     line_numbers: str = "margin"  # "margin" or "drop", for EPUBs
+    verse: bool = False  # lines of verse become hanging blocks, for EPUBs
 
 
 @dataclass

@@ -14,6 +14,7 @@ tools/catalog-gen turns into a catalog entry. Sources are cached in ~/.cache/gra
 eBible Bibles (`"source": "ebible"` rows, converted by usfm.py) in ~/.cache/granger/ebible/.
 """
 import argparse
+import dataclasses
 import datetime
 import hashlib
 import json
@@ -28,6 +29,7 @@ import epubpack
 import gutenberg
 import manifest as manifests
 import usfm
+import verse
 import zimpack
 from manifest import Manifest, WorkSpec
 from sources import EBibleSource, GutenbergSource, ebible_details_url
@@ -39,7 +41,8 @@ def _ebible_work(spec: WorkSpec, ebible: EBibleSource) -> zimpack.Work:
     if unknown:
         print(f"WARNING {spec.where}: USFM markers dropped, text kept: {dict(unknown)}")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
-                        published=spec.published, section=spec.section, chapters=pages, styles=usfm.CSS)
+                        published=spec.published, section=spec.section, chapters=pages, styles=usfm.CSS,
+                        verse=spec.reads_as_verse)
 
 
 def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EBibleSource | None = None) -> Path:
@@ -47,7 +50,8 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EB
     for spec in m.works:
         if spec.source == "ebible":
             ebible = ebible or EBibleSource()
-            works.append(_ebible_work(spec, ebible))
+            work = _ebible_work(spec, ebible)
+            works.append(dataclasses.replace(work, styles=work.styles + "\n" + verse.CSS))
             continue
         try:
             cleaned = gutenberg.clean(source.html(spec.gutenberg))
@@ -83,7 +87,7 @@ def _work(spec, source, ebible) -> zimpack.Work:
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                         published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
-                        line_numbers=spec.line_numbers)
+                        line_numbers=spec.line_numbers, verse=spec.reads_as_verse)
 
 
 def _source_url(spec: WorkSpec) -> str:

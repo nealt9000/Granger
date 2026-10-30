@@ -360,3 +360,22 @@ def test_colophon_source_line_comes_from_the_caller(tmp_path):
     text = z.read("OEBPS/colophon.xhtml").decode()
     assert "From the World English Bible at eBible.org" in text and "Gutenberg" not in text
     assert "This edition first published 1920" in text and 'class="author"' not in text
+
+
+def test_a_verse_work_gets_verse_lines_and_the_verse_rules_after_its_own(tmp_path):
+    html = '<h2>Book I</h2><p class="poem">\nOf Mans First Disobedience<br/>\nOf that Forbidden Tree<br/>\n</p>'
+    w = work(html=html, styles="p.poem { margin-left: 30%; text-indent: 2em }")
+    w.verse = True
+    z = build(tmp_path, w)
+    page = z.read("OEBPS/c001.xhtml").decode()
+    assert '<p class="poem gv"><span class="gv-l">Of Mans First Disobedience</span>' in page
+    css = z.read("OEBPS/book.css").decode()
+    assert css.index("p.poem {") < css.index(".gv {") < css.index("div.stanza > p")
+
+
+def test_a_prose_work_keeps_its_line_breaks_and_gets_no_wrapper_rules(tmp_path):
+    html = '<h2>Chapter I</h2><p>\nTwinkle, twinkle, little bat!<br/>\nHow I wonder what you’re at!<br/>\n</p>'
+    z = build(tmp_path, work(html=html))
+    assert "gv" not in z.read("OEBPS/c001.xhtml").decode()
+    css = z.read("OEBPS/book.css").decode()
+    assert ".gv-l {" in css and "div.stanza" not in css

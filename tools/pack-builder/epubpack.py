@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 from lxml import etree
 
 import covers
+import verse
 from chapters import PAGE_NUMBER, clean_title
 from zimpack import Work
 
@@ -132,6 +133,15 @@ def scrub_css(css: str, line_numbers: str = "margin") -> str:
     return "\n".join(rules + boosts)
 
 
+def _book_css(work: Work) -> str:
+    """Granger's rules, then the work's, then the verse rules, which must outrank the work's at equal weight
+    (`p.poem { text-indent: 2em }` against `p.gv`)."""
+    parts = [BOOK_CSS, scrub_css(work.styles, work.line_numbers), verse.CSS]
+    if work.verse:
+        parts.append(verse.WRAPPER_CSS)
+    return "\n".join(p for p in parts if p) + "\n"
+
+
 def _fit_sides(prop: str, value: str) -> str:
     """Side margins and paddings that won't squeeze a phone's column: over 5% to at most 2em, over 6em to 30%."""
     important = _IMPORTANT.search(value)
@@ -239,11 +249,13 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
             wrapper.append(soup.new_tag("dd"))
 
 
-def _prepare(html: str, line_numbers: str = "margin") -> BeautifulSoup:
+def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False) -> BeautifulSoup:
     soup = BeautifulSoup(html, "lxml")
     _drop_page_numbers(soup)
     if line_numbers == "drop":
         _drop_page_numbers(soup, LINE_NUMBER)
+    if reads_as_verse:
+        verse.mark(soup)
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
@@ -374,13 +386,13 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
         ("OEBPS/content.opf", _opf(work, meta, len(work.chapters))),
         ("OEBPS/nav.xhtml", _nav(work, meta, titles)),
         ("OEBPS/toc.ncx", _ncx(work, meta, titles)),
-        ("OEBPS/book.css", BOOK_CSS + "\n" + scrub_css(work.styles, work.line_numbers) + "\n"),
+        ("OEBPS/book.css", _book_css(work)),
         ("OEBPS/cover.jpg", cover_jpeg),
         ("OEBPS/cover.xhtml", _page(title, meta.language,
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
         ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
-    soups = [_prepare(chapter.html, work.line_numbers) for chapter in work.chapters]
+    soups = [_prepare(chapter.html, work.line_numbers, work.verse) for chapter in work.chapters]
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))

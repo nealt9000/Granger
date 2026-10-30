@@ -185,6 +185,7 @@ def test_ebible_rows_build_through_usfm_and_describe_like_any_book(tmp_path):
     page = z.read("OEBPS/c001.xhtml").decode()
     assert 'class="gv"' in page and 'class="v"' in page and "\\" not in page
     assert "https://ebible.org/find/details.php?id=engtest" in z.read("OEBPS/content.opf").decode().lower()
-    assert "sup.v" in z.read("OEBPS/book.css").decode()
+    css = z.read("OEBPS/book.css").decode()
+    assert "sup.v" in css and css.count(".gv-l {") == 1  # the verse rules once, from verse.CSS
     d = describe_epubs(out, "https://example.test/classics", m)
     assert d["books"][0]["id"] == "gc-test-bible" and d["books"][0]["title"] == "The Test Bible"
