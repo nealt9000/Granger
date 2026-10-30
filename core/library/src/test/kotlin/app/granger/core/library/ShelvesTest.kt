@@ -208,6 +208,20 @@ class ShelvesTest {
         assertThat(mine.packs).isEmpty()
     }
 
+    @Test fun anArchiveSetsPartsShareTheirOwnCollection() = runTest {
+        val (s, _) = shelves()
+        bookshelf.state.value = listOf(
+            book("run~02", BookOrigin.ARCHIVE_ORG, title = "Batman (1986) · 02 (of 04)"),
+            book("run~01", BookOrigin.ARCHIVE_ORG, title = "Batman (1986) · 01 (of 04)"),
+            book("ia1", BookOrigin.ARCHIVE_ORG),
+        )
+        val shelf = s.shelves.first().single()
+        assertThat(shelf.collections.map { it.collection.name }).containsExactly("Archive.org", "Batman (1986)").inOrder()
+        val set = shelf.collections.first { it.collection.defaultKey == "archive-org:run" }
+        assertThat(set.books.map { it.sourceRef }).containsExactly("run~01", "run~02")
+        assertThat(shelf.collections.first { it.collection.defaultKey == "archive-org" }.books.map { it.sourceRef }).containsExactly("ia1")
+    }
+
     @Test fun movedBookKeepsItsPlace() = runTest {
         val (s, _) = shelves()
         val pride = book("pride")

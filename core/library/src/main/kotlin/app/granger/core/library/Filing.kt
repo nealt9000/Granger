@@ -69,10 +69,26 @@ object Filing {
     /** Identity of a book across re-downloads: its id, which is derived from origin and source. */
     fun bookKey(book: Book): String = book.id
 
-    fun defaultKey(book: Book): String = BOOK_COLLECTIONS.getValue(book.origin).first
+    /**
+     * By origin; a part of an archive.org set (its ref `<identifier>~03`, Plan IA) goes in its set's own collection,
+     * `archive-org:<identifier>`, so the parts sit together and in order.
+     */
+    fun defaultKey(book: Book): String {
+        if (book.origin == BookOrigin.ARCHIVE_ORG && SET_PART in book.sourceRef) {
+            return BOOK_COLLECTIONS.getValue(BookOrigin.ARCHIVE_ORG).first + ":" + book.sourceRef.substringBefore(SET_PART)
+        }
+        return BOOK_COLLECTIONS.getValue(book.origin).first
+    }
 
+    /** A set's collection is named for its item: the part's title before " · " ("Batman (1986) · 02 (of 04)"). */
     fun defaultName(key: String, book: Book): String =
-        BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second ?: book.title
+        BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second
+            ?: book.title.substringBeforeLast(SET_TITLE).takeIf { key.startsWith("archive-org:") && SET_TITLE in book.title }
+            ?: book.title
+
+    /** How an archive.org part's ref and title mark it (ArchiveDownloads.PART_SEPARATOR and PART_TITLE_SEPARATOR in the app). */
+    private const val SET_PART = '~'
+    private const val SET_TITLE = " · "
 
     /** Every book is reading material. */
     @Suppress("UNUSED_PARAMETER")

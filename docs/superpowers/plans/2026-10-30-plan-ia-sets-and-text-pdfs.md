@@ -78,7 +78,7 @@ All settled with Neal, 2026-10-30 (D6, D7 and D9 were his calls on the draft).
    - `~` is not in archive.org's identifier alphabet, so no part id can collide with an item id.
    - `ArchiveDownloads.identifierOf` takes everything before `~` or `#`.
    - Each part has its own sidecar, `<id>~<nn>.json`, so its title is "Item title · part title".
-   - **Legacy:** a book already filed as `<id>` (Batman's first part from the bug pass) counts as part 1 when the item's parts are listed, and is never downloaded again.
+   - **Legacy (changed while building, 2026-10-30):** a book already filed as `<id>` (Batman's first part from the bug pass) is left as it is, an ordinary Archive.org book; it isn't counted as part 1. Only Neal's phone has one, and Remove plus Get all is simpler than special-casing it in filing and status.
 4. **A set in the Library (recommended).** Parts file into a collection named for the item ("Batman The Dark Knight Returns (1986)"), made on the first part and kept while any part is there.
    - The collection's `defaultKey` is `archive-org:<id>`, so filing is idempotent and a user's move (`userSet`) wins, as for every collection.
    - Within it, parts list in part order: the shelf's sort is by title, and the zero-padded numbers keep that right.
@@ -188,7 +188,7 @@ Two parts, in order: sets first, since they are smaller and shippable alone, the
 
 - [ ] `ArchiveDownloads.spec(item, part)`, part item ids, files and sidecars (Decision 3), and `identifierOf` for `~` and `#`.
 - [ ] Get all queues the missing parts as group `archive-org:<id>`. Get part n queues one.
-- [ ] Filing: a part is placed in its set's collection (Decision 4), created on the first part. A legacy `<id>` book is part 1.
+- [x] Filing: a part is placed in its set's collection (Decision 4), created on the first part. (A legacy `<id>` book stays as it is: Decision 3.)
 - [ ] `refresh()` files stray parts (`<id>~nn.*`) with their sidecars. `remove()` and Remove all take parts and their sources.
 - [ ] Tests (Robolectric, `BookshelfTest`, `ArchiveViewModelTest`):
   - two of four parts get, land in the set's collection, titled and ordered;

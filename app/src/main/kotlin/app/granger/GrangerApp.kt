@@ -236,7 +236,9 @@ internal suspend fun onBookInstalled(
  */
 internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, record: DownloadRecord, startIndexing: () -> Unit) {
     val identifier = ArchiveDownloads.identifierOf(record.itemId)
-    val sidecar = identifier?.takeIf { ArchiveQuery.isValidIdentifier(it) }?.let { ArchiveDownloads.sidecarFile(sidecarDir, it) }
+    // A part has its own sidecar (titled for it); the PDF beside a text shares the text's.
+    val sidecar = identifier?.takeIf { ArchiveQuery.isValidIdentifier(it) }
+        ?.let { ArchiveDownloads.sidecarFile(sidecarDir, ArchiveDownloads.sidecarKeyOf(record.itemId) ?: it) }
     val details = sidecar?.let { ArchiveDownloads.readSidecar(it)?.first }
     onBookInstalled(
         bookshelf, File(record.filePath),
