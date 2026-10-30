@@ -71,7 +71,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }
-            SeekBar(ui.positionMs, ui.durationMs, { p -> control { seekTo(p) } }, label = "Seek in track")
+            SeekBar(ui.positionMs, ui.durationMs, { p -> control { musicSeekTo(p) } }, label = "Seek in track")
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

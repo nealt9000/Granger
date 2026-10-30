@@ -462,6 +462,19 @@ class PlayerEngineVoiceTest {
         assertThat(now.musicPositionMs).isGreaterThan(before)   // ticks, not only on the next play or pause
     }
 
+    @Test fun theMusicTabsSeekMovesTheMusicUnderTheVoiceNotTheVoice() {
+        val e = mixEngine()
+        e.readOverMusic(rig.songs())
+        e.playPause()
+        rig.idle()
+        val sentence = e.voiceProgress.value?.utterance?.text
+        e.seekMusic(30_000L)
+        rig.idle()
+        assertThat(e.musicUnderPlayer!!.currentPosition).isAtLeast(30_000L)
+        assertThat((e.ui.value.now as NowPlaying.Voice).musicPositionMs).isAtLeast(30_000L)
+        assertThat(e.voiceProgress.value?.utterance?.text).isEqualTo(sentence)
+    }
+
     @Test fun startingMusicWhileTheVoiceIsPausedPlaysItOnItsOwn() {
         val e = mixEngine()
         e.readAloud(source(), null, null)

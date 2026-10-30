@@ -262,6 +262,7 @@ class PlayerViewModel(
     fun musicPlayPause() = if (musicUnderVoice() != null) hub.playPauseMusic() else hub.playPause()
     fun musicNext() = if (musicUnderVoice() != null) hub.nextMusic() else hub.next()
     fun musicPrevious() { if (musicUnderVoice() == null) hub.previous() }
+    fun musicSeekTo(positionMs: Long) = if (musicUnderVoice() != null) hub.seekMusic(positionMs) else hub.seekTo(positionMs)
 
     fun next() = hub.next()
     fun previous() = hub.previous()

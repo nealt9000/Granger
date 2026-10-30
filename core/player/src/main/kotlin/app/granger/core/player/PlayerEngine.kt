@@ -821,6 +821,13 @@ class PlayerEngine(
         }
     }
 
+    override fun seekMusic(positionMs: Long) = submit {
+        val p = musicUnder ?: return@submit
+        if (!voiceOverMusic) return@submit
+        p.seekTo(positionMs.coerceAtLeast(0L))
+        refresh()
+    }
+
     override fun nextMusic() = submit {
         val p = musicUnder ?: return@submit
         val target = p.nextMediaItemIndex
