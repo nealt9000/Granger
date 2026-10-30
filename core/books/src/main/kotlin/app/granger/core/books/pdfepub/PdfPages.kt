@@ -1,0 +1,330 @@
+package app.granger.core.books.pdfepub
+
+import android.graphics.Bitmap
+import android.graphics.Path
+import android.graphics.PointF
+import com.tom_roush.pdfbox.contentstream.PDFGraphicsStreamEngine
+import com.tom_roush.pdfbox.cos.COSName
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.PDPage
+import com.tom_roush.pdfbox.pdmodel.font.PDFont
+import com.tom_roush.pdfbox.pdmodel.graphics.image.PDImage
+import com.tom_roush.pdfbox.pdmodel.graphics.image.PDImageXObject
+import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.text.TextPosition
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import kotlin.math.abs
+
+/** A run of text in one style within a line or a paragraph. */
+internal data class Span(val text: String, val italic: Boolean = false, val bold: Boolean = false)
+
+/**
+ * One line of a page as a reader sees it: [x] to [right] across, its baseline [y] from the page's top, its biggest
+ * font [size], and its [spans]. [bold] and [italic] say whether most of its characters are.
+ */
+internal data class TextLine(
+    val page: Int,
+    val x: Float,
+    val right: Float,
+    val y: Float,
+    val size: Float,
+    val spans: List<Span>,
+    val bold: Boolean,
+    val italic: Boolean,
+    /** 0 on a one-column page and for the left column, 1 for the right, -1 for a line across both. */
+    val column: Int = 0,
+) {
+    val text: String get() = spans.joinToString("") { it.text }
+}
+
+/** A picture drawn on a page, with its place (top-down) and its bytes ready for the EPUB. */
+internal class PagePicture(
+    val page: Int, val x: Float, val y: Float, val w: Float, val h: Float, val bytes: ByteArray, val mediaType: String,
+)
+
+/** A page's lines in reading order, and its pictures; [complex] when its layout has three or more columns. */
+internal class PageText(
+    val index: Int,
+    val width: Float,
+    val height: Float,
+    val lines: List<TextLine>,
+    val pictures: List<PagePicture>,
+    val complex: Boolean,
+    /** Characters drawn on the page, spaces aside: the quality gate's denominator. */
+    val rawChars: Int,
+)
+
+/** Reads a PDF page by page into lines and pictures (Plan IA converter stage 1). */
+internal object PdfPages {
+    /** Pictures smaller than this share of the page (icons, rules, ornaments) are left out. */
+    private const val MIN_PICTURE = 1f / 16f
+
+    /** The longest side a picture keeps; bigger ones are scaled down. */
+    private const val MAX_PICTURE_PX = 1600
+
+    fun read(doc: PDDocument, index: Int): PageText {
+        val page = doc.getPage(index)
+        val box = page.cropBox ?: page.mediaBox
+        val width = abs(box.width)
+        val height = abs(box.height)
+        val glyphs = glyphs(doc, index)
+        val (lines, complex) = Lines.of(index, glyphs, width)
+        val pictures = pictures(page, index, width * height)
+        return PageText(index, width, height, lines, pictures, complex, glyphs.count { !it.unicode.isNullOrBlank() })
+    }
+
+    private fun glyphs(doc: PDDocument, index: Int): List<TextPosition> {
+        val collector = Collector()
+        collector.startPage = index + 1
+        collector.endPage = index + 1
+        try {
+            collector.getText(doc)
+        } catch (_: IOException) {
+            // What was read before the damage stands.
+        }
+        return collector.glyphs
+    }
+
+    /** Every glyph as drawn, without the stripper's own line building. */
+    private class Collector : PDFTextStripper() {
+        val glyphs = mutableListOf<TextPosition>()
+
+        init {
+            sortByPosition = true
+        }
+
+        override fun processTextPosition(text: TextPosition) {
+            // Some PDFs fake bold by drawing a glyph twice, a hair apart: keep one.
+            val last = glyphs.lastOrNull()
+            if (last != null && last.unicode == text.unicode && abs(last.xDirAdj - text.xDirAdj) < text.fontSizeInPt * 0.1f &&
+                abs(last.yDirAdj - text.yDirAdj) < 0.5f
+            ) return
+            glyphs += text
+        }
+    }
+
+    private fun pictures(page: PDPage, index: Int, pageArea: Float): List<PagePicture> {
+        val engine = PictureFinder(page, index, pageArea * MIN_PICTURE)
+        try {
+            engine.processPage(page)
+        } catch (_: IOException) {
+            // Pictures found before the damage stand.
+        }
+        return engine.found
+    }
+
+    private class PictureFinder(page: PDPage, private val index: Int, private val minArea: Float) : PDFGraphicsStreamEngine(page) {
+        val found = mutableListOf<PagePicture>()
+        private val pageHeight = abs((page.cropBox ?: page.mediaBox).height)
+
+        override fun drawImage(pdImage: PDImage) {
+            val m = graphicsState.currentTransformationMatrix
+            val w = abs(m.scaleX)
+            val h = abs(m.scaleY)
+            if (w * h < minArea) return
+            val encoded = encode(pdImage) ?: return
+            found += PagePicture(index, m.translateX, pageHeight - (m.translateY + h), w, h, encoded.first, encoded.second)
+        }
+
+        /** A JPEG as it is; anything else decoded and stored as PNG (with transparency) or JPEG. */
+        private fun encode(image: PDImage): Pair<ByteArray, String>? = try {
+            val x = image as? PDImageXObject
+            if (x != null && x.suffix == "jpg" && x.width <= MAX_PICTURE_PX && x.height <= MAX_PICTURE_PX) {
+                x.stream.createInputStream(listOf(COSName.DCT_DECODE.name)).use { it.readBytes() } to "image/jpeg"
+            } else {
+                image.image?.let { b ->
+                    val scale = minOf(1f, MAX_PICTURE_PX.toFloat() / maxOf(b.width, b.height))
+                    val sized = if (scale < 1f) Bitmap.createScaledBitmap(b, (b.width * scale).toInt().coerceAtLeast(1), (b.height * scale).toInt().coerceAtLeast(1), true) else b
+                    val png = sized.hasAlpha()
+                    val bytes = ByteArrayOutputStream().also {
+                        sized.compress(if (png) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG, 85, it)
+                    }.toByteArray()
+                    if (sized !== b) sized.recycle()
+                    b.recycle()
+                    bytes to if (png) "image/png" else "image/jpeg"
+                }
+            }
+        } catch (_: IOException) {
+            null
+        } catch (_: RuntimeException) {
+            null
+        } catch (_: OutOfMemoryError) {
+            null
+        }
+
+        override fun appendRectangle(p0: PointF, p1: PointF, p2: PointF, p3: PointF) = Unit
+        override fun clip(windingRule: Path.FillType) = Unit
+        override fun moveTo(x: Float, y: Float) = Unit
+        override fun lineTo(x: Float, y: Float) = Unit
+        override fun curveTo(x1: Float, y1: Float, x2: Float, y2: Float, x3: Float, y3: Float) = Unit
+        override fun getCurrentPoint(): PointF = PointF(0f, 0f)
+        override fun closePath() = Unit
+        override fun endPath() = Unit
+        override fun strokePath() = Unit
+        override fun fillPath(windingRule: Path.FillType) = Unit
+        override fun fillAndStrokePath(windingRule: Path.FillType) = Unit
+        override fun shadingFill(shadingName: COSName) = Unit
+    }
+
+    /** Bold and italic from the font's name and descriptor ("Minion-BoldIt", weight 700, the italic flag). */
+    fun style(font: PDFont?): Pair<Boolean, Boolean> {
+        val name = font?.name.orEmpty().substringAfter('+').lowercase()
+        val descriptor = try { font?.fontDescriptor } catch (_: RuntimeException) { null }
+        val bold = Regex("bold|black|heavy|semibold|demi|-bd|bd$").containsMatchIn(name) ||
+            (descriptor?.fontWeight ?: 0f) >= 600f || descriptor?.isForceBold == true
+        val italic = Regex("italic|oblique|-it$|-it[^a-z]|it$|slanted").containsMatchIn(name) || descriptor?.isItalic == true
+        return bold to italic
+    }
+}
+
+/** Glyphs into lines (Plan IA converter stage 1): baselines, spaces, margin line numbers, columns. */
+internal object Lines {
+    /** A gap wider than this many font sizes splits a line into segments (columns, a margin number). */
+    private const val SEGMENT_GAP = 2.0f
+
+    private class Segment(val glyphs: List<TextPosition>) {
+        val x: Float = glyphs.first().xDirAdj
+        val right: Float = glyphs.maxOf { it.xDirAdj + it.widthDirAdj }
+        val text: String get() = glyphs.joinToString("") { it.unicode.orEmpty() }
+    }
+
+    /** The page's lines in reading order, and whether its layout was too complex to trust (three or more columns). */
+    fun of(page: Int, glyphs: List<TextPosition>, pageWidth: Float): Pair<List<TextLine>, Boolean> {
+        // Spaces are left out and put back from the gaps: some PDFs fill a gap (before a margin number) with them.
+        val rows = rows(glyphs.filter { !it.unicode.isNullOrBlank() })
+        val segmented = rows.map { segments(it) }
+        // Margin line numbers (verse's every tenth line, a legal text's) are dropped: a lone number far from the text.
+        val cleaned = segmented.map { segs -> if (segs.size > 1) segs.filterNot { isMarginNumber(it) } else segs }.filter { it.isNotEmpty() }
+        val multi = cleaned.count { it.size >= 3 }
+        val complex = cleaned.isNotEmpty() && multi * 5 > cleaned.size
+        val gutter = gutter(cleaned, pageWidth)
+        val lines = if (gutter == null || complex) {
+            cleaned.map { line(page, it.flatMap(Segment::glyphs)) }
+        } else {
+            twoColumns(page, cleaned, gutter)
+        }
+        return lines to complex
+    }
+
+    /** Glyphs grouped by baseline: a glyph joins a row when its baseline is within half its size of the row's. */
+    private fun rows(glyphs: List<TextPosition>): List<List<TextPosition>> {
+        val sorted = glyphs.sortedWith(compareBy({ it.yDirAdj }, { it.xDirAdj }))
+        val rows = mutableListOf<MutableList<TextPosition>>()
+        var baseline = Float.NaN
+        for (g in sorted) {
+            val size = g.fontSizeInPt.takeIf { it > 0f } ?: g.heightDir
+            if (rows.isEmpty() || abs(g.yDirAdj - baseline) > size * 0.5f) {
+                rows += mutableListOf(g)
+                baseline = g.yDirAdj
+            } else {
+                rows.last() += g
+            }
+        }
+        return rows.map { row -> row.sortedBy { it.xDirAdj } }
+    }
+
+    private fun segments(row: List<TextPosition>): List<Segment> {
+        val out = mutableListOf<MutableList<TextPosition>>()
+        var right = Float.NEGATIVE_INFINITY
+        for (g in row) {
+            val size = g.fontSizeInPt.takeIf { it > 0f } ?: 10f
+            if (out.isEmpty() || g.xDirAdj - right > size * SEGMENT_GAP) out += mutableListOf(g) else out.last() += g
+            right = maxOf(right, g.xDirAdj + g.widthDirAdj)
+        }
+        return out.map { Segment(it) }
+    }
+
+    private fun isMarginNumber(s: Segment): Boolean = s.text.trim().let { it.isNotEmpty() && it.length <= 4 && it.all(Char::isDigit) }
+
+    /**
+     * The x of a gutter between two columns: the middle of the gap that splits most of the page's two-segment lines in
+     * the same place. Null for a single-column page.
+     */
+    private fun gutter(rows: List<List<Segment>>, pageWidth: Float): Float? {
+        val splits = rows.filter { it.size == 2 }.map { (it[0].right + it[1].x) / 2f }
+        if (rows.isEmpty() || splits.size * 5 < rows.size * 2) return null      // under 40% of lines
+        val median = splits.sorted()[splits.size / 2]
+        val near = splits.count { abs(it - median) < pageWidth * 0.05f }
+        return median.takeIf { near * 3 >= splits.size * 2 && it > pageWidth * 0.3f && it < pageWidth * 0.7f }
+    }
+
+    /** Left column, then right, within each run of lines between full-width ones (a title across both columns). */
+    private fun twoColumns(page: Int, rows: List<List<Segment>>, gutter: Float): List<TextLine> {
+        val out = mutableListOf<TextLine>()
+        val left = mutableListOf<TextLine>()
+        val right = mutableListOf<TextLine>()
+        fun flush() { out += left; out += right; left.clear(); right.clear() }
+        for (segs in rows) {
+            val l = segs.filter { it.right <= gutter }
+            val r = segs.filter { it.x >= gutter }
+            val across = segs - l.toSet() - r.toSet()
+            if (across.isNotEmpty()) {
+                flush()
+                out += line(page, segs.flatMap(Segment::glyphs)).copy(column = -1)
+                continue
+            }
+            if (l.isNotEmpty()) left += line(page, l.flatMap(Segment::glyphs))
+            if (r.isNotEmpty()) right += line(page, r.flatMap(Segment::glyphs)).copy(column = 1)
+        }
+        flush()
+        return out
+    }
+
+    /** One line from its glyphs: spaces where the gaps are, spans by style. */
+    private fun line(page: Int, glyphs: List<TextPosition>): TextLine {
+        val spans = mutableListOf<Span>()
+        val text = StringBuilder()
+        var style: Pair<Boolean, Boolean>? = null
+        var right = Float.NaN
+        var boldChars = 0
+        var italicChars = 0
+        var chars = 0
+        fun flush() {
+            if (text.isNotEmpty()) spans += Span(text.toString(), italic = style!!.second, bold = style!!.first)
+            text.setLength(0)
+        }
+        for (g in glyphs) {
+            val s = PdfPages.style(g.font)
+            val size = g.fontSizeInPt.takeIf { it > 0f } ?: 10f
+            val gap = if (right.isNaN()) 0f else g.xDirAdj - right
+            val u = g.unicode.orEmpty()
+            if (style != null && s != style) flush()
+            style = s
+            if (gap > size * 0.18f && text.lastOrNull() != ' ' && spans.lastOrNull()?.text?.endsWith(" ") != true && !u.startsWith(" ")) {
+                text.append(' ')
+            }
+            text.append(u)
+            right = g.xDirAdj + g.widthDirAdj
+            if (u.isNotBlank()) {
+                chars += u.length
+                if (s.first) boldChars += u.length
+                if (s.second) italicChars += u.length
+            }
+        }
+        flush()
+        val merged = spans.fold(mutableListOf<Span>()) { acc, sp ->
+            val last = acc.lastOrNull()
+            if (last != null && last.italic == sp.italic && last.bold == sp.bold) acc[acc.size - 1] = last.copy(text = last.text + sp.text) else acc += sp
+            acc
+        }
+        return TextLine(
+            page = page,
+            x = glyphs.first().xDirAdj,
+            right = glyphs.maxOf { it.xDirAdj + it.widthDirAdj },
+            y = glyphs.maxOf { it.yDirAdj },
+            size = glyphs.maxOf { it.fontSizeInPt.takeIf { s -> s > 0f } ?: 10f },
+            spans = trimSpans(merged),
+            bold = chars > 0 && boldChars * 2 > chars,
+            italic = chars > 0 && italicChars * 2 > chars,
+        )
+    }
+
+    private fun trimSpans(spans: List<Span>): List<Span> {
+        if (spans.isEmpty()) return spans
+        val out = spans.toMutableList()
+        out[0] = out[0].copy(text = out[0].text.trimStart())
+        out[out.size - 1] = out[out.size - 1].copy(text = out[out.size - 1].text.trimEnd())
+        return out.filter { it.text.isNotEmpty() }
+    }
+}

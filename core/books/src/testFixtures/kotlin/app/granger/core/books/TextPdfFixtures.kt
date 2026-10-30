@@ -23,9 +23,10 @@ import java.io.File
 object TextPdfFixtures {
     const val WIDTH = 612f
     const val HEIGHT = 792f
-    val REGULAR: PDFont = PDType1Font.TIMES_ROMAN
-    val BOLD: PDFont = PDType1Font.TIMES_BOLD
-    val ITALIC: PDFont = PDType1Font.TIMES_ITALIC
+    // Read on use: PdfBox's standard fonts need PdfFixtures.init first.
+    val REGULAR: PDFont get() = PDType1Font.TIMES_ROMAN
+    val BOLD: PDFont get() = PDType1Font.TIMES_BOLD
+    val ITALIC: PDFont get() = PDType1Font.TIMES_ITALIC
 
     /** [y] is the baseline from the page's top, as a reader sees it. */
     data class Line(
