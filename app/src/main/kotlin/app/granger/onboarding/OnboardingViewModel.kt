@@ -88,7 +88,7 @@ data class OnboardingUi(
 class OnboardingViewModel(
     private val catalog: CatalogSource,
     library: Library,
-    downloads: Downloads,
+    private val downloads: Downloads,
     private val volumes: VolumeSource,
     private val prefs: DownloadPrefs,
     private val tier: DeviceTier,
@@ -262,9 +262,11 @@ class OnboardingViewModel(
 
     fun toggleUseCase(id: String) = useCaseIds.update { if (id in it) it - id else it + id }
 
+    /** Also applies to what's already downloading, as Settings' switch does. */
     fun setWifiOnly(on: Boolean) {
         prefs.wifiOnly = on
         wifiOnly.value = on
+        viewModelScope.launch { downloads.setWifiOnly(on) }
     }
 
     fun chooseVolume(path: String) {
@@ -293,7 +295,10 @@ class OnboardingViewModel(
             }
             val group = "onboarding:${now()}"
             starting.value = true
-            val problem = when (val result = enqueue(group, review.items, volume, wifiOnly.value)) {
+            // Quick wins first (Plan DL Decision 5): the queue takes the group in this order.
+            val domains = catalog.state.value.catalog?.readiness?.domains.orEmpty().map { it.id }
+            val order = OnboardingModel.downloadOrder(review.items, domains, ui.value.region?.takeUnless { it.installed }?.pack?.id)
+            val problem = when (val result = enqueue(group, order, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace -> "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)} or untick something."
                 is EnqueueResult.OverCap -> "That would bring your downloads to ${formatBytes(result.wouldUseBytes)}, over the ${formatBytes(result.capBytes)} limit."

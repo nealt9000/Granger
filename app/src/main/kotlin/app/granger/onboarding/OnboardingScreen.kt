@@ -399,7 +399,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
                     "${formatBytes(ui.review.bytes)} of ${formatBytes(ui.review.freeBytes)} free",
                     color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
                 )
-                // Home's setup bar counts the files only; say what the difference is (Plan U3a Decision 5).
+                OnboardingModel.quickFirstText(ui.review)?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                // Home's card counts the files only; say what the difference is (Plan U3a Decision 5).
                 if (ui.review.indexBytes > 0L) {
                     Text(
                         "Includes ${formatBytes(ui.review.indexBytes)} of indexes for Ask, fetched after their packs.",

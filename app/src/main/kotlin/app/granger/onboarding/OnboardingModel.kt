@@ -4,8 +4,11 @@ import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
+import app.granger.core.catalog.ModelEntry
+import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.UseCase
+import app.granger.core.catalog.VoiceEntry
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.vectors
 import app.granger.research.Librarian
@@ -208,6 +211,51 @@ object OnboardingModel {
             if (useCaseLines.isNotEmpty()) add(ReviewGroup("What you'll use it for", useCaseLines))
         }
         return Review(groups, freeBytes)
+    }
+
+    /** The Granger Classics' collection id. */
+    const val CLASSICS = "granger-classics"
+
+    /** Small packs land early (Plan DL Decision 5): 200 MB or less. */
+    const val SMALL_PACK_BYTES = 200L * 1000 * 1000
+
+    /** A region's map lands early when it's 2 GB or less; a bigger one waits with the rest. */
+    const val QUICK_MAP_BYTES = 2L * 1000 * 1000 * 1000
+
+    /**
+     * The order setup downloads [items] in (Plan DL Decision 5, quick wins first): the voice; the Granger Classics; small
+     * packs in readiness-domain order ([domains]); the region's map ([regionPackId]) if it isn't big; everything else
+     * smallest first (so Wikipedia Top and big maps come last among the packs); then Ask's models, the chat model
+     * before the embedder. The review keeps its own grouping; only the queue takes this order.
+     */
+    fun downloadOrder(items: List<CatalogItem>, domains: List<String>, regionPackId: String?): List<CatalogItem> {
+        fun tier(item: CatalogItem): Int = when {
+            item is VoiceEntry -> 0
+            item is BookEntry && item.collection == CLASSICS -> 1
+            item is PackEntry && item.id == regionPackId -> if (item.sizeBytes <= QUICK_MAP_BYTES) 3 else 4
+            item is PackEntry && item.sizeBytes <= SMALL_PACK_BYTES -> 2
+            item is ModelEntry -> 5
+            else -> 4
+        }
+        fun domainRank(item: CatalogItem) = (item as? PackEntry)?.domain?.let { d -> domains.indexOf(d).takeIf { it >= 0 } } ?: domains.size
+        val order = compareBy<Pair<Int, CatalogItem>> { tier(it.second) }
+            .thenBy { (_, item) -> if (tier(item) == 2) domainRank(item) else 0 }
+            .thenBy { (_, item) -> if (tier(item) == 4) item.downloadBytes else 0L }
+            .thenBy { (_, item) -> if (item is ModelEntry && item.role == ModelRole.EMBEDDER) 1 else 0 }
+            .thenBy { it.first }
+        return items.withIndex().map { it.index to it.value }.sortedWith(order).map { it.second }
+    }
+
+    /** The review's one line on the order (Plan DL Decision 5); null when nothing quick is coming. */
+    fun quickFirstText(review: Review): String? {
+        val voice = review.items.any { it is VoiceEntry }
+        val classics = review.items.any { it is BookEntry && it.collection == CLASSICS }
+        return when {
+            voice && classics -> "Quick ones first: the voice and the Classics land in a few minutes."
+            voice -> "Quick ones first: the voice lands in a few minutes."
+            classics -> "Quick ones first: the Classics land in a few minutes."
+            else -> null
+        }
     }
 
     /** A token's items: a catalog item, a collection's books, or a family's smallest pack. */

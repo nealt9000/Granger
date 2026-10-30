@@ -206,4 +206,65 @@ class OnboardingModelTest {
         assertThat(saving.lines.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "medlineplus.gov_en_all", "collection:granger-classics").inOrder()
         assertThat(saving.bytes()).isLessThan(withPictures.bytes())
     }
+
+    // Plan DL Decision 5: quick wins first.
+    private val domains = listOf("medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought")
+    private val voice = app.granger.core.catalog.VoiceEntry(
+        id = "granger-voice", title = "Granger voice", engine = "piper", language = "en-GB", sizeBytes = 80_000_000, sha256 = "b".repeat(64),
+        url = "https://a.test/voice.zip", license = "CC0",
+    )
+    private fun mb(id: String, mb: Long, domain: String) = packEntry(id, size = mb * 1_000_000).copy(domain = domain)
+    private val wikimed = mb("wikipedia_en_medicine_maxi", 1_860, "medicine")
+    private val foodPrep = mb("zimgit-food-preparation_en", 50, "food")
+    private val water = mb("zimgit-water_en", 30, "food")
+    private val knots = mb("zimgit-knots_en", 31, "making")
+    private val ifixit = mb("ifixit_en_all", 3_570, "technology")
+    private val sciences = mb("libretexts.org_en_chem", 150, "science")
+    private val wikivoyage = mb("wikivoyage_en_all_maxi", 1_020, "reference")
+    private val top = mb("wikipedia_en_top_maxi", 6_990, "reference")
+    private val peruMap = mb("maps_en_peru", 500, "maps")
+    private val franceMap = mb("maps_en_france", 4_000, "maps")
+    private val gemma = modelEntry("gemma-4-e2b", size = 2_000_000_000)
+    private val embedderGemma = modelEntry("embeddinggemma", role = ModelRole.EMBEDDER, size = 300_000_000)
+
+    private fun order(vararg items: app.granger.core.catalog.CatalogItem, region: String? = null) =
+        OnboardingModel.downloadOrder(items.toList(), domains, region).map { it.id }
+
+    @Test fun anEfficientStartLandsTheVoiceAndTheClassicsFirstAndTheModelsLast() {
+        // As the review lists them: the preset's lines (Classics last), the voice, Ask's models, the region.
+        val ids = order(
+            wikimed, foodPrep, water, knots, ifixit, sciences, wikivoyage, top, bible, hamlet, voice, gemma, embedderGemma, peruMap,
+            region = "maps_en_peru",
+        )
+        assertThat(ids).containsExactly(
+            "granger-voice", "gc-bible", "gc-hamlet",
+            // Small packs in readiness-domain order.
+            "zimgit-food-preparation_en", "zimgit-water_en", "zimgit-knots_en", "libretexts.org_en_chem",
+            "maps_en_peru",
+            // The rest smallest first: Wikipedia Top last among the packs.
+            "wikivoyage_en_all_maxi", "wikipedia_en_medicine_maxi", "ifixit_en_all", "wikipedia_en_top_maxi",
+            "gemma-4-e2b", "embeddinggemma",
+        ).inOrder()
+    }
+
+    @Test fun aComprehensiveStartPutsAMapOver2GbWithTheRest() {
+        val ids = order(top, embedderGemma, gemma, franceMap, wikimed, hamlet, knots, voice, region = "maps_en_france")
+        assertThat(ids).containsExactly(
+            "granger-voice", "gc-hamlet", "zimgit-knots_en", "wikipedia_en_medicine_maxi", "maps_en_france", "wikipedia_en_top_maxi",
+            "gemma-4-e2b", "embeddinggemma",
+        ).inOrder()
+    }
+
+    @Test fun aStarterWithoutTheVoiceOrModelsStillPutsTheQuickOnesFirst() {
+        // A release-shaped catalog offers no models: none are queued.
+        val ids = order(top, knots, hamlet, bible)
+        assertThat(ids).containsExactly("gc-hamlet", "gc-bible", "zimgit-knots_en", "wikipedia_en_top_maxi").inOrder()
+    }
+
+    @Test fun theReviewSaysQuickOnesComeFirst() {
+        val line = Line("x", "x", listOf(voice, hamlet), installed = false)
+        assertThat(OnboardingModel.quickFirstText(Review(listOf(ReviewGroup("Start", listOf(line))), 0)))
+            .isEqualTo("Quick ones first: the voice and the Classics land in a few minutes.")
+        assertThat(OnboardingModel.quickFirstText(Review(emptyList(), 0))).isNull()
+    }
 }

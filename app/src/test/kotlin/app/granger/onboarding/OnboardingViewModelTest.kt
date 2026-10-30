@@ -106,6 +106,25 @@ class OnboardingViewModelTest {
         assertThat(viewModel(DeviceTier.ASK).ui.value.phone.volumes.single().label).isEqualTo("Internal storage")
     }
 
+    @Test fun theGroupIsQueuedQuickWinsFirstNotInReviewOrder() = runTest(main.dispatcher) {
+        val big = packEntry("wikipedia_en_top_maxi", size = 6_990_000_000).copy(family = "wikipedia")
+        val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
+        catalog.mutable.value = CatalogState(
+            catalog = full.copy(
+                packs = full.packs + big, models = listOf(e2b),
+                presets = listOf(Preset("efficient", "Efficient start", listOf("wikipedia_en_top_maxi", "wikipedia_en_medicine_nopic", "gc-bible"))),
+            ),
+        )
+        volumes.volumes = listOf(volume("/internal", "Internal storage", free = 100_000_000_000, total = 128_000_000_000))
+        val vm = viewModel(DeviceTier.ASK)
+        vm.chooseRegion(null); settle()
+        // The review keeps the preset's grouping; the queue gets the Classics first and Ask's model last.
+        assertThat(vm.ui.value.review.items.map { it.id }.first()).isEqualTo("wikipedia_en_top_maxi")
+        vm.start(); settle()
+        assertThat(enqueued.single().second)
+            .containsExactly("gc-bible", "wikipedia_en_medicine_nopic", "wikipedia_en_top_maxi", "gemma-4-e2b-gpu").inOrder()
+    }
+
     @Test fun askIsOfferedTickedAndGoesIntoTheReviewAndTheGroup() = runTest(main.dispatcher) {
         val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
         catalog.mutable.value = CatalogState(catalog = full.copy(models = listOf(e2b)))
@@ -230,8 +249,11 @@ class OnboardingViewModelTest {
 
         vm.setWifiOnly(false)
         vm.start(); settle()
+        // Quick wins first (Plan DL Decision 5): the small pack, then the region's map.
         assertThat(enqueued).containsExactly(Triple("onboarding:42", listOf("wikipedia_en_medicine_nopic", "maps_en_peru"), false))
         assertThat(prefs.wifiOnly).isFalse()
+        // The switch also applies to what's already downloading.
+        assertThat(downloads.calls).contains("wifi:false")
         assertThat(onboardingPrefs.done).isTrue()
         assertThat(vm.finished.value).isTrue()
     }
