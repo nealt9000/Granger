@@ -4,6 +4,8 @@ Everything before the start marker and after the end marker goes (the Gutenberg 
 and so does every remaining block that names Project Gutenberg: their trademark license lets anyone
 redistribute a public-domain text freely once every reference to Project Gutenberg is removed. Images,
 scripts and external links go too, since packs are text-only and the reader never touches the network.
+So do the shells those cuts leave: empty boilerplate headers and footers, blocks with nothing in them (an
+emptied figure, a `<p>&nbsp;</p>` spacer), and a transcriber's note that only speaks of the cover art.
 """
 import re
 from dataclasses import dataclass
@@ -25,6 +27,10 @@ NOTICE = re.compile(r"[Cc]opyright|[Pp]ublished|[Ee]dition|[Pp]rinted|[Rr]eprint
 FRONT_MATTER_CHARS = 12_000
 # Branding removal that takes more text than it leaves, past this much, means a wrapper holding the book went.
 GUTTED_CHARS = 10_000
+NO_PHRASING_CHILDREN = {"ul", "ol", "dl", "table", "thead", "tbody", "tfoot", "tr", "colgroup"}
+NOTE_HEADING = re.compile(r"^\W*transcriber[’'`]?s?\s+notes?\W*$", re.I)
+COVER_ART = re.compile(r"\bcover[\s-]+(art|image|picture|illustration|design)|\bpublic domain\b", re.I)
+NOTE_CHARS = 400
 
 
 class CleaningError(ValueError):
@@ -65,6 +71,7 @@ def clean(html: bytes) -> Cleaned:
         if SCHEME.match(link["href"].strip()):
             unwrap_link(link)
     removed, removed_chars = _drop_branding(root)
+    _drop_leftovers(root)
 
     body = soup.new_tag("div")
     for child in list(root.contents):
@@ -149,6 +156,38 @@ def _drop_branding(root: Tag) -> tuple[int, int]:
             chars += len(block.get_text().strip())
             block.decompose()
         removed += 1
+
+
+def _drop_leftovers(root: Tag) -> None:
+    for shell in root.select("header.pg-boilerplate, footer.pg-boilerplate"):
+        if not shell.get_text().strip():
+            shell.decompose()
+    _drop_cover_notes(root)
+    for block in reversed(root.find_all(["div", "p"])):  # innermost first, so emptied wrappers go too
+        if block.parent is None or block.parent.name in NO_PHRASING_CHILDREN or block.get_text().strip():
+            continue
+        children = [c for c in block.contents if not (isinstance(c, NavigableString) and not c.strip())]
+        if all(isinstance(c, Tag) and c.name == "span" and set(c.attrs) == {"id"} and not c.contents
+               for c in children):
+            if block.get("id"):
+                block.insert_before(BeautifulSoup("", "lxml").new_tag("span", attrs={"id": block["id"]}))
+            for span in children:
+                block.insert_before(span.extract())
+            block.decompose()
+
+
+def _drop_cover_notes(root: Tag) -> None:
+    """Removes a transcriber's note box whose every sentence is about the cover art; a note on the text stays."""
+    for heading in root.find_all(string=lambda s: isinstance(s, NavigableString) and NOTE_HEADING.match(s)):
+        box = next((p for p in heading.parents if " ".join(p.get_text().split()) != " ".join(heading.split())),
+                   None)
+        if box is None or box is root or box.decomposed:
+            continue
+        text = " ".join(box.get_text(" ").split())
+        rest = text.replace(" ".join(heading.split()), "", 1)
+        sentences = [s for s in re.split(r"(?<=[.!?])\s+", rest) if s.strip(" .:")]
+        if len(text) <= NOTE_CHARS and sentences and all(COVER_ART.search(s) for s in sentences):
+            box.decompose()
 
 
 def later_edition_notices(body: Tag, after: int = 1930) -> list[str]:

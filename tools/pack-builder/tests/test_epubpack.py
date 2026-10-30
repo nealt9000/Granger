@@ -201,3 +201,12 @@ def test_definition_list_cut_between_term_and_definition_stays_valid(tmp_path):
     assert ends_with_term.startswith("<dl><dt>1.</dt><dd>one</dd><dt>2.</dt><dd/></dl>")
     starts_with_definition = chapter1(tmp_path, "<dd>two</dd><dt>3.</dt><dd>three</dd>").split("<body>")[1]
     assert starts_with_definition.startswith("<dl><dt/><dd>two</dd><dt>3.</dt><dd>three</dd></dl>")
+
+
+def test_fixed_widths_in_inline_styles_are_dropped_except_on_media(tmp_path):
+    page = chapter1(tmp_path, '<div class="figcenter" style="width: 500px">a</div>'
+                              '<p style="width:45%; margin-left: 2em">b</p><table style="WIDTH: 80%"><tr><td>c</td>'
+                              '</tr></table><svg style="width: 10em"></svg>')
+    assert 'class="figcenter">a' in page and 'style="margin-left: 2em"' in page
+    assert "<table>" in page and "width: 10em" in page
+    assert "500px" not in page and "45%" not in page and "80%" not in page

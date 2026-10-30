@@ -99,6 +99,7 @@ _OBSOLETE_ATTRIBUTES = ("align", "valign", "bgcolor", "border", "cellpadding", "
                         "frame", "hspace", "vspace", "noshade", "nowrap", "rules", "summary", "char", "charoff",
                         "text", "link", "vlink", "alink", "background")
 _NO_PHRASING_CHILDREN = {"ul", "ol", "dl", "table", "thead", "tbody", "tfoot", "tr", "colgroup", "select"}
+_MEDIA = {"img", "svg", "canvas", "video", "iframe", "object", "embed", "input", "source"}
 _SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 
 
@@ -129,7 +130,8 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
         for attr in _OBSOLETE_ATTRIBUTES:
             if tag.name != "meta":
                 tag.attrs.pop(attr, None)
-        if tag.name not in ("img", "svg", "canvas", "video", "iframe", "object", "embed", "input", "source"):
+        media = tag.name in _MEDIA
+        if not media:
             tag.attrs.pop("width", None)
             tag.attrs.pop("height", None)
         if tag.name == "a" and "name" in tag.attrs:
@@ -139,8 +141,9 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
             elif tag["id"] != name:
                 tag.insert_before(soup.new_tag("span", attrs={"id": name}))
         if tag.get("style"):
+            # A fixed width (an emptied figure's `width: 500px`) would only narrow the column on a phone.
             declarations = [d for d in tag["style"].split(";") if d.strip() and d.count("'") % 2 == 0
-                            and d.count('"') % 2 == 0]
+                            and d.count('"') % 2 == 0 and (media or d.split(":", 1)[0].strip().lower() != "width")]
             if declarations:
                 tag["style"] = "; ".join(d.strip() for d in declarations)
             else:

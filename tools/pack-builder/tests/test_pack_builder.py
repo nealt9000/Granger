@@ -142,3 +142,17 @@ def test_any_exception_type_is_wrapped_with_the_slug(tmp_path, monkeypatch):
     with pytest.raises(BuildError, match=r"^modern-book \(#1342\): ") as caught:
         build_epubs(two_works(tmp_path), FakeSource(), tmp_path, "2026-10-17")
     assert isinstance(caught.value.__cause__, UnicodeDecodeError)
+
+
+def test_validate_command_refuses_a_copyrighted_work(tmp_path, monkeypatch, capsys):
+    import pack_builder
+
+    class Copyrighted:
+        def rdf(self, book_id):
+            return fixture("pg-copyrighted.rdf") if book_id == 1342 else fixture("pg2800.rdf")
+    monkeypatch.setattr(pack_builder, "GutenbergSource", Copyrighted)
+    two_works(tmp_path)
+    with pytest.raises(SystemExit) as caught:
+        pack_builder.main(["validate", "--manifest", str(tmp_path / "manifest.json")])
+    assert caught.value.code == 1
+    assert "modern-book (#1342): rights are" in capsys.readouterr().err

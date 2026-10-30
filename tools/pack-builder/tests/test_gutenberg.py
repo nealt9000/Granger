@@ -120,3 +120,51 @@ def test_unwrap_link_keeps_both_id_and_name_as_targets():
     soup = BeautifulSoup('<p><a id="a" name="b">x</a></p>', "lxml")
     unwrap_link(soup.a)
     assert {t["id"] for t in soup.find_all(id=True)} == {"a", "b"}
+
+
+def modern_body(**replacements):
+    html = fixture("pg-modern.html")
+    for old, new in replacements.items():
+        html = html.replace(old.encode(), new.encode())
+    return gutenberg.clean(html).body
+
+
+def test_empty_boilerplate_header_and_footer_shells_are_removed():
+    html = (b"<html><body><header class='pg-boilerplate pgheader' id='pg-header'><div id='pg-start-separator'>"
+            b"</div></header><div style='text-align:center'></div><h2>I</h2><p>The work.</p>"
+            b"<div style='text-align:center'></div><footer class='pg-boilerplate' id='pg-footer'>"
+            b"<div id='pg-end-separator'></div></footer></body></html>")
+    body = gutenberg.clean(html).body
+    assert body.find(["header", "footer"]) is None and body.find(id=True) is None
+    assert str(body) == "<div><h2>I</h2><p>The work.</p></div>"
+
+
+def test_childless_textless_blocks_go_but_their_ids_stay():
+    html = (b"<html><body><div id='pg-start-separator'></div><h2>I</h2>"
+            b"<div class='figcenter' style='width: 500px'><img src='a.jpg' alt=''></div>"
+            b"<p class='i20'>I.</p><p>&nbsp;</p><p id='stanza2'> \n</p><div id='fig1'><div></div></div>"
+            b"<p>Line one<br>line two</p><p><br></p><table><tr><td></td></tr></table>"
+            b"<div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert "figcenter" not in body and "&nbsp;" not in body and "\xa0" not in body
+    assert '<span id="stanza2"></span>' in body and '<span id="fig1"></span>' in body
+    assert "<p>Line one<br/>line two</p>" in body and "<td></td>" in body and "<p><br/></p>" in body
+    assert body.count("<p") == 3 and "<div" not in body.replace("<div>", "", 1)
+
+
+def test_cover_art_transcribers_note_is_dropped():
+    note = ('<div style="margin-top: 5%; border: 1px solid;"><div style="text-align: center;">'
+            '<b>Transcriber’s Notes</b></div><ul><li>New original cover art included with this eBook is granted '
+            'to the public domain.</li></ul></div>')
+    body = modern_body(**{"<h2>Chapter 5</h2>": note + "<h2>Chapter 5</h2>"})
+    assert "Transcriber" not in body.get_text() and "Chapter 5" in body.get_text()
+    short = '<div class="tnote"><p>Transcriber\'s Note:</p><p>The cover image was created by the transcriber.</p></div>'
+    assert "Transcriber" not in modern_body(**{"<h2>Chapter 5</h2>": short + "<h2>Chapter 5</h2>"}).get_text()
+
+
+def test_transcribers_note_with_real_content_is_kept():
+    note = ('<div class="tnote"><p><b>Transcriber’s Note:</b></p><p>Obvious printer’s errors have been corrected. '
+            'The cover image was created by the transcriber and is placed in the public domain.</p></div>')
+    assert "Obvious printer" in modern_body(**{"<h2>Chapter 5</h2>": note + "<h2>Chapter 5</h2>"}).get_text()
+    inline = "<div><p>Transcriber's Note:</p><p>The cover of the first edition reads 'Tales'.</p></div>"
+    assert "first edition" in modern_body(**{"<h2>Chapter 5</h2>": inline + "<h2>Chapter 5</h2>"}).get_text()

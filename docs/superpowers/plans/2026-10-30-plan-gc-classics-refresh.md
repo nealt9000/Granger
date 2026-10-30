@@ -146,10 +146,15 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
 
 ### Part 1: the builder reads verse well
 
-- [ ] **Task 1: leftovers and the rights guard** (R7, Decision 7)
+- [x] **Task 1: leftovers and the rights guard** (R7, Decision 7)
   - `gutenberg.clean` and `epubpack._prepare` remove empty `header`/`footer` boilerplate, childless and textless `div`/`p` (their ids are kept as spans), fixed `width` in inline styles on non-media elements, and a Transcriber's Note whose only subject is the cover art.
   - The manifest gains `verse`, `lineNumbers`, `titleOverrides`, `source` and `licence`; `validate` checks RDF rights.
   - Tests are added in `tests/test_gutenberg.py`, `test_epubpack.py` and `test_pack_builder.py`. One fixture is a copyrighted RDF, which must fail validation.
+  - **Done 2026-10-30. As built:**
+    - `gutenberg.clean` drops the empty `pg-boilerplate` shells, empty `div`/`p` (innermost first, so an emptied figure wrapper goes too; text of only spaces or nbsp counts as empty; blocks directly in a list or table are left alone) and the cover-art note. A note goes only when it is in a box of at most 400 characters and every sentence after its heading mentions cover art/image or the public domain; "Obvious errors corrected. The cover image…" stays. `width` in inline styles is dropped in `epubpack._fix_attributes`, next to the `width` attribute.
+    - `titleOverrides` maps a page number as a string (`"3"` is `c003.xhtml`) to its contents title. Task 1 only loads and checks it; Task 5 applies it.
+    - `gutenberg` is optional on a row whose `source` isn't `gutenberg`. Such a row skips the RDF checks and must carry a `licence` that says "public domain" and holds an `https://` URL. `WorkSpec.reads_as_verse` gives the verse default (poetry, drama, libretti, scripture).
+    - The rights check is now exact ("Public domain in the USA.", whitespace-normalised) rather than a prefix match.
 - [ ] **Task 2: splitting keeps wrappers** (R6)
   - When `_flatten`/`_by_size` open a wrapper, each run of its children is re-wrapped in a shallow copy with the same tag and class and no id.
   - Test with a Faerie Queene-shaped fixture (`div.poem > div.stanza > p.i2`) split across two pages: `deadrules.py` must report the indent rules as live.
