@@ -74,6 +74,7 @@ class DownloadRunner(
                         return fail(record, "Not enough free space: about $mb MB more is needed.", hashFailures)
                     }
                     is DownloadResult.Failed -> {
+                        if (result.gone) return fail(record, GoneFile.message(record.urls), hashFailures)
                         if (result.permanent) return fail(record, result.reason, hashFailures)
                         val queued = dao.setActiveState(itemId, hash, DownloadState.QUEUED, result.reason, part.length(), hashFailures, now())
                         return if (queued == 0) RunOutcome.GONE else RunOutcome.RETRY

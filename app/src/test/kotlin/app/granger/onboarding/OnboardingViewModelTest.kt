@@ -41,18 +41,18 @@ class OnboardingViewModelTest {
 
     private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
     private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
-    private val wikem = packEntry("wikem_en_all_maxi", size = 375).copy(family = "wikem")
+    private val medline = packEntry("medlineplus.gov_en_all", size = 375).copy(family = "medlineplus.gov")
     private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
     private val europe = packEntry("maps_en_europe", size = 20_000).copy(family = "maps", title = "Europe")
     private val bible = bookEntry("gc-bible", category = "Scripture & religion").copy(sizeBytes = 10, collection = "granger-classics")
     private val full = catalogOf(
-        packs = listOf(med, wikem, peru, europe),
+        packs = listOf(med, medline, peru, europe),
         books = listOf(bible),
         presets = listOf(
             Preset("efficient", "Efficient start", listOf("wikipedia_en_medicine_nopic", "gc-bible")),
-            Preset("comprehensive", "Comprehensive library", listOf("wikipedia_en_medicine_nopic", "gc-bible", "wikem_en_all_maxi")),
+            Preset("comprehensive", "Comprehensive library", listOf("wikipedia_en_medicine_nopic", "gc-bible", "medlineplus.gov_en_all")),
         ),
-    ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("wikem_en_all_maxi"))), larger = listOf("maps_en_europe")))
+    ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("medlineplus.gov_en_all"))), larger = listOf("maps_en_europe")))
 
     private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true): OnboardingViewModel {
         val vm = OnboardingViewModel(
@@ -206,13 +206,13 @@ class OnboardingViewModelTest {
 
     @Test fun choicesFlowIntoTheReviewAndStartEnqueuesOneGroup() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = full)
-        library.packList.value = listOf(app.granger.pack("u-wikem", "WikEM").copy(name = "wikem_en_all"))
-        downloads.list.value = listOf(record("wikem_en_all_maxi", DownloadState.INSTALLED))
+        library.packList.value = listOf(app.granger.pack("u-medline", "MedlinePlus").copy(name = "medlineplus.gov_en_all"))
+        downloads.list.value = listOf(record("medlineplus.gov_en_all", DownloadState.INSTALLED))
         val vm = viewModel()
         assertThat(vm.ui.value.noCatalog).isFalse()
         assertThat(vm.ui.value.starts.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()
         assertThat(vm.ui.value.phone.efficientBytes).isEqualTo(1_010)
-        // Comprehensive adds nothing for WikEM: it is installed.
+        // Comprehensive adds nothing for MedlinePlus: it is installed.
         assertThat(vm.ui.value.phone.comprehensiveBytes).isEqualTo(1_010)
 
         vm.chooseStart("comprehensive")
@@ -222,7 +222,7 @@ class OnboardingViewModelTest {
         vm.chooseRegion("maps_en_peru")
         vm.toggleUseCase("medical"); settle()
         val ui = vm.ui.value
-        assertThat(ui.additions.single().lines).isEmpty() // WikEM is installed: the chip adds nothing.
+        assertThat(ui.additions.single().lines).isEmpty() // MedlinePlus is installed: the chip adds nothing.
         assertThat(ui.review.groups.map { it.title }).containsExactly("Your picks", "Your region").inOrder() // Classics unticked: no longer the preset
         assertThat(ui.review.items.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "maps_en_peru")
         assertThat(ui.review.bytes).isEqualTo(1_500)

@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-10-28T14:36:52Z",
+  "generatedAt": "2026-10-30T11:06:19Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -60,36 +60,6 @@
         "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikipedia_en_medicine_nopic_2026-10-10.gvec",
         "sha256": "5e3f12fd1904b3ca0002661448c9d893125787a67c9e31b968b937e1aacd5dfa",
         "sizeBytes": 106815260,
-        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
-        "dims": 256,
-        "dtype": "int8",
-        "chunkerVersion": 1
-      }
-    },
-    {
-      "id": "wikem_en_all_maxi",
-      "title": "WikEM emergency medicine",
-      "description": "The world's largest emergency medicine open-access resource",
-      "category": "Medical",
-      "language": "eng",
-      "sizeBytes": 374632362,
-      "sha256": "7bbdd705544616df1ff37f8b4e0e5382e7b4d92532feecea42227af4169fbd7f",
-      "urls": [
-        "https://download.kiwix.org/zim/other/wikem_en_all_maxi_2026-07.zim"
-      ],
-      "snapshotDate": "2026-07-24",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "2a517a3f-68d0-4f27-508f-20a7ed5fd4f1",
-      "zimName": "wikem_en_all",
-      "featured": true,
-      "family": "wikem",
-      "domain": "medicine",
-      "vectors": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikem_en_all_maxi_2026-07-24.gvec",
-        "sha256": "3ac793999ffae46ffc9e37c890296bbe77c044aac2580acd87f2e8f2afb30f2d",
-        "sizeBytes": 12246267,
         "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
         "dims": 256,
         "dtype": "int8",
@@ -7279,36 +7249,6 @@
       "featured": false,
       "family": "wwwnc.cdc.gov",
       "domain": "medicine"
-    },
-    {
-      "id": "wikem_en_all_nopic",
-      "title": "WikEM",
-      "description": "The world's largest emergency medicine open-access resource",
-      "category": "Medical",
-      "language": "eng",
-      "sizeBytes": 346946448,
-      "sha256": "831c6cad5dac7c51fe3cc12d226d8bd411b3883c8c83643f2c167d12928f5dd5",
-      "urls": [
-        "https://download.kiwix.org/zim/other/wikem_en_all_nopic_2026-07.zim"
-      ],
-      "snapshotDate": "2026-07-24",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "be20c57a-317a-800d-bfaf-c24cc6bb08c1",
-      "zimName": "wikem_en_all",
-      "featured": false,
-      "family": "wikem",
-      "domain": "medicine",
-      "vectors": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/wikem_en_all_maxi_2026-07-24.gvec",
-        "sha256": "3ac793999ffae46ffc9e37c890296bbe77c044aac2580acd87f2e8f2afb30f2d",
-        "sizeBytes": 12246267,
-        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
-        "dims": 256,
-        "dtype": "int8",
-        "chunkerVersion": 1
-      }
     },
     {
       "id": "wikivet.net_en_all_maxi",
@@ -30436,7 +30376,6 @@
       "title": "Comprehensive library",
       "items": [
         "wikipedia_en_medicine_maxi",
-        "wikem_en_all_maxi",
         "medlineplus.gov_en_all",
         "zimgit-medicine_en",
         "wwwnc.cdc.gov_en_all",
@@ -30902,7 +30841,6 @@
         ],
         "comprehensive": [
           "wikipedia_en_medicine_maxi",
-          "wikem_en_all_maxi",
           "medlineplus.gov_en_all",
           "zimgit-medicine_en",
           "wwwnc.cdc.gov_en_all"
@@ -31090,8 +31028,7 @@
           "appropedia_en_all_maxi",
           "zimgit-water_en",
           "zimgit-food-preparation_en",
-          "zimgit-medicine_en",
-          "wikem_en_all_maxi"
+          "zimgit-medicine_en"
         ]
       },
       {
@@ -31137,7 +31074,6 @@
         "blurb": "Clinical references beyond first aid.",
         "items": [
           "wikipedia_en_medicine_maxi",
-          "wikem_en_all_maxi",
           "medlineplus.gov_en_all",
           "zimgit-medicine_en",
           "wwwnc.cdc.gov_en_all",

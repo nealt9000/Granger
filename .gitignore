@@ -18,3 +18,5 @@ models/
 # Python tooling caches
 __pycache__/
 tools/catalog-gen/.pytest_cache/
+# check-links stamps (Plan DL)
+*.links-ok

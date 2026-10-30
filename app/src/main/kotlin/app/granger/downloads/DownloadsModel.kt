@@ -5,6 +5,8 @@ import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VectorDownloads
 import app.granger.core.downloads.isActive
+import app.granger.core.downloads.isFromCatalog
+import app.granger.core.downloads.isGone
 import app.granger.core.library.Book
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -47,12 +49,19 @@ data class DownloadRow(
     val error: String? = null,
     val wifiOnly: Boolean = false,
     val open: OpenTarget? = null,
+    /** Every address answered 404 or 410: Retry won't help, so the row offers Remove (Plan DL Decision 10). */
+    val gone: Boolean = false,
+    /** A catalog item that a newer catalog no longer lists, still waiting or stopped: it offers Remove. */
+    val notInCatalog: Boolean = false,
     /** When it joined the queue: its oldest unfinished file. */
     val queuedAt: Long = 0,
     /** When its last file changed; for a finished row, when it finished. */
     val finishedAt: Long = 0,
 ) {
     val isGroup: Boolean get() = groupId != null
+
+    /** Remove instead of Retry: the file can't be fetched again. */
+    val removeOnly: Boolean get() = gone || notInCatalog
     val fraction: Float get() = if (bytes > 0) (bytesDone.toFloat() / bytes).coerceIn(0f, 1f) else 0f
 }
 
@@ -75,9 +84,12 @@ object DownloadsModel {
     /**
      * Builds the sections from every download record. A record counts while it's unfinished, or once it was installed
      * at or after [since] (midnight today). [packs] and [books] give an installed item its library title and what Open
-     * opens.
+     * opens. [catalogIds] is every item the current catalog lists, null while there is none.
      */
-    fun of(records: List<DownloadRecord>, since: Long, packs: List<Pack> = emptyList(), books: List<Book> = emptyList()): DownloadsUi {
+    fun of(
+        records: List<DownloadRecord>, since: Long, packs: List<Pack> = emptyList(), books: List<Book> = emptyList(),
+        catalogIds: Set<String>? = null,
+    ): DownloadsUi {
         fun shown(r: DownloadRecord) = r.isActive || r.updatedAt >= since
         val packByPath = packs.associateBy { it.filePath }
         val bookByPath = books.associateBy { it.filePath }
@@ -111,7 +123,10 @@ object DownloadsModel {
                 else -> main.first().title
             }
             val vecs = folded[key].orEmpty()
-            row(key, title, main, vecs, group, open = if (group == null) openOf(main.first(), packByPath, bookByPath) else null)
+            row(
+                key, title, main, vecs, group, open = if (group == null) openOf(main.first(), packByPath, bookByPath) else null,
+                catalogIds = catalogIds,
+            )
         } + indexOnly.map { (itemId, vecs) ->
             val parent = VectorDownloads.parentOf(itemId)?.let { p -> own.firstOrNull { it.itemId == p } }
             row(
@@ -134,8 +149,10 @@ object DownloadsModel {
 
     private fun row(
         key: String, title: String, main: List<DownloadRecord>, vecs: List<DownloadRecord>, group: String?, open: OpenTarget?,
+        catalogIds: Set<String>? = null,
     ): DownloadRow {
         val all = main + vecs
+        val item = main.firstOrNull()?.takeIf { group == null }
         val state = when {
             all.any { it.state == DownloadState.FAILED } -> RowState.FAILED
             all.any { it.state == DownloadState.RUNNING } -> RowState.RUNNING
@@ -157,6 +174,9 @@ object DownloadsModel {
             error = all.firstOrNull { it.state == DownloadState.FAILED }?.error,
             wifiOnly = all.any { it.isActive && it.wifiOnly },
             open = if (state == RowState.DONE) open else null,
+            gone = item != null && main.any { it.isGone },
+            notInCatalog = item != null && catalogIds != null && state != RowState.DONE && item.isFromCatalog &&
+                item.itemId !in catalogIds,
             queuedAt = all.filter { it.isActive }.minOfOrNull { it.createdAt } ?: Long.MAX_VALUE,
             finishedAt = all.maxOf { it.updatedAt },
         )
@@ -172,6 +192,9 @@ object DownloadsModel {
     }
 }
 
+/** Said of an item a newer catalog dropped (Plan DL Decision 10). */
+const val NOT_IN_CATALOG = "No longer in the catalog"
+
 /** The line under a row's title: how far it is, or why it stopped. */
 fun downloadsText(row: DownloadRow): String {
     val parts = mutableListOf<String>()
@@ -179,8 +202,13 @@ fun downloadsText(row: DownloadRow): String {
     if (row.isGroup) parts += "${row.files.count { it.state == DownloadState.INSTALLED }} of ${row.files.size}"
     parts += when (row.state) {
         RowState.RUNNING -> "${formatBytes(row.bytesDone)} of ${formatBytes(row.bytes)}"
-        RowState.QUEUED -> if (row.wifiOnly) "Waiting for Wi-Fi" else "Queued"
+        RowState.QUEUED -> when {
+            row.notInCatalog -> NOT_IN_CATALOG
+            row.wifiOnly -> "Waiting for Wi-Fi"
+            else -> "Queued"
+        }
         RowState.FAILED -> when {
+            row.notInCatalog && !row.gone -> NOT_IN_CATALOG
             row.isGroup -> "${row.failed} failed"
             else -> row.error ?: "Failed"
         }

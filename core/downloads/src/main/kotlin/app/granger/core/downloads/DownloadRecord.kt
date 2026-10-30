@@ -52,3 +52,19 @@ data class DownloadRecord(
 val DownloadRecord.file: File get() = File(filePath)
 val DownloadRecord.partFile: File get() = File("$filePath.part")
 val DownloadRecord.isActive: Boolean get() = state != DownloadState.INSTALLED
+
+/**
+ * A file every address answered 404 or 410 for (Plan DL Decision 10): retrying won't bring it back, so it is FAILED at
+ * once and offers Remove. The record's error is [message], which every screen can show as it is; [isGone] reads it back.
+ */
+object GoneFile {
+    const val KIWIX = "Kiwix no longer offers this file"
+    const val OTHER = "This file is no longer offered"
+
+    fun message(urls: List<String>): String = if (urls.any { it.isKiwix() }) KIWIX else OTHER
+
+    private fun String.isKiwix() = substringAfter("://").substringBefore('/').let { it == "kiwix.org" || it.endsWith(".kiwix.org") }
+}
+
+val DownloadRecord.isGone: Boolean
+    get() = state == DownloadState.FAILED && (error == GoneFile.KIWIX || error == GoneFile.OTHER)

@@ -163,6 +163,22 @@ class FileDownloaderTest {
         assertThat(result.reason).contains("404")
     }
 
+    @Test fun aFileEveryMirrorAnswers404Or410ForIsGone() = runTest {
+        server.status[a] = 404
+        server.status[b] = 410
+        val result = downloader.download(request(a, b), part) as DownloadResult.Failed
+        assertThat(result.gone).isTrue()
+        assertThat(result.permanent).isTrue()
+    }
+
+    @Test fun oneMirrorStillServingIsNotGone() = runTest {
+        server.status[a] = 404
+        server.status[b] = 403
+        assertThat((downloader.download(request(a, b), part) as DownloadResult.Failed).gone).isFalse()
+        server.status[b] = 503
+        assertThat((downloader.download(request(a, b), part) as DownloadResult.Failed).gone).isFalse()
+    }
+
     @Test fun aMirrorWithADifferentFileIsPermanent() = runTest {
         server.files[a] = Random(5).nextBytes(5_000)
         val result = downloader.download(request(a), part) as DownloadResult.Failed

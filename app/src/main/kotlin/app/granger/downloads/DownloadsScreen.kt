@@ -52,6 +52,7 @@ fun DownloadsScreen(
     val scope = rememberCoroutineScope()
     DownloadsContent(
         ui, onBack, viewModel::cancel, viewModel::retry,
+        onRemove = viewModel::remove,
         onOpen = { row ->
             when (val target = row.open) {
                 is OpenTarget.Pack -> onOpenPack(target.packId)
@@ -73,6 +74,7 @@ fun DownloadsContent(
     onRetry: (DownloadRow) -> Unit,
     onOpen: (DownloadRow) -> Unit,
     onGetMore: () -> Unit,
+    onRemove: (DownloadRow) -> Unit = {},
 ) {
     var expanded by rememberSaveable { mutableStateOf(emptyList<String>()) }
     Scaffold(
@@ -108,6 +110,7 @@ fun DownloadsContent(
                             onCancel = { onCancel(row) },
                             onRetry = { onRetry(row) },
                             onOpen = { onOpen(row) },
+                            onRemove = { onRemove(row) },
                         )
                     }
                     if (open) {
@@ -136,6 +139,7 @@ private fun fileText(state: DownloadState) = when (state) {
 @Composable
 private fun DownloadItem(
     row: DownloadRow, open: Boolean, onToggle: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onOpen: () -> Unit,
+    onRemove: () -> Unit,
 ) {
     val tap = when {
         row.isGroup -> onToggle
@@ -165,13 +169,16 @@ private fun DownloadItem(
             }
         },
         trailingContent = {
-            when (row.state) {
+            when {
+                row.removeOnly -> TextButton(onClick = onRemove) { Text("Remove") }
+                else -> when (row.state) {
                 RowState.RUNNING, RowState.QUEUED -> TextButton(onClick = onCancel) { Text("Cancel") }
                 RowState.FAILED -> Row {
                     TextButton(onClick = onCancel) { Text("Cancel") }
                     TextButton(onClick = onRetry) { Text("Retry") }
                 }
                 RowState.DONE -> if (row.open != null) TextButton(onClick = onOpen) { Text("Open") }
+                }
             }
         },
         modifier = if (tap == null) Modifier else Modifier.clickable(onClick = tap),

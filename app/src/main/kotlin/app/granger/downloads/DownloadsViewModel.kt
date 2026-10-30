@@ -2,6 +2,7 @@ package app.granger.downloads
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.Downloads
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
@@ -12,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -28,10 +31,14 @@ class DownloadsViewModel(
     bookshelf: Bookshelf,
     private val sessions: ReadingSessions,
     private val appScope: CoroutineScope,
+    catalog: CatalogSource? = null,
     private val today: () -> Long = ::startOfToday,
 ) : ViewModel() {
-    val ui: StateFlow<DownloadsUi> = combine(downloads.records, library.packs, bookshelf.books) { records, packs, books ->
-        DownloadsModel.of(records, today(), packs, books)
+    private val catalogIds = catalog?.state?.map { s -> s.catalog?.let { c -> (c.packs + c.models + c.books + c.voices).mapTo(HashSet()) { it.id } } }
+        ?: flowOf(null)
+
+    val ui: StateFlow<DownloadsUi> = combine(downloads.records, library.packs, bookshelf.books, catalogIds) { records, packs, books, ids ->
+        DownloadsModel.of(records, today(), packs, books, ids)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DownloadsUi())
 
     /** Stops the row's group and items; what's installed stays. */
@@ -48,6 +55,11 @@ class DownloadsViewModel(
             row.groupId?.let { downloads.retryGroup(it) }
             row.itemIds.forEach { downloads.retry(it) }
         }
+    }
+
+    /** Deletes a row that can't be fetched again (withdrawn, or gone from the catalog), part file and all. */
+    fun remove(row: DownloadRow) {
+        appScope.launch { row.itemIds.forEach { downloads.remove(it) } }
     }
 
     /** Opens a finished book in its rail tab and returns the tab id. Packs open through the NavHost's openPack. */

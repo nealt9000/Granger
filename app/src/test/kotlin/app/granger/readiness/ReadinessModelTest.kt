@@ -33,7 +33,7 @@ class ReadinessModelTest {
 
     private val medNopic = packEntry("wikipedia_en_medicine_nopic", "wikipedia_en_medicine", "medicine", 1_000)
     private val medMaxi = packEntry("wikipedia_en_medicine_maxi", "wikipedia_en_medicine", "medicine", 1_800)
-    private val wikem = packEntry("wikem_en_all_maxi", "wikem_en_all", "medicine", 400, family = "wikem")
+    private val medline = packEntry("medlineplus.gov_en_all", "medlineplus.gov_en_all", "medicine", 400, family = "medlineplus.gov")
     private val top = packEntry("wikipedia_en_top_nopic", "wikipedia_en_top", "reference", 2_700)
     private val france = packEntry("maps_en_france", "maps_en_france", "maps", 300, family = "maps")
     private val spain = packEntry("maps_en_spain", "maps_en_spain", "maps", 200, family = "maps")
@@ -45,7 +45,7 @@ class ReadinessModelTest {
     private val readiness = Readiness(
         listOf(
             Domain("medicine", "Medicine & first aid", essential = listOf("wikipedia_en_medicine_nopic"),
-                comprehensive = listOf("wikipedia_en_medicine_nopic", "wikem_en_all_maxi")),
+                comprehensive = listOf("wikipedia_en_medicine_nopic", "medlineplus.gov_en_all")),
             Domain("making", "Making, repair & engineering", essential = listOf("ifixit_en_all"), comprehensive = listOf("ifixit_en_all")),
             Domain("maps", "Maps, places & travel", essential = listOf("family:maps"), comprehensive = listOf("family:maps")),
             Domain("reference", "General reference", essential = listOf("wikipedia_en_top_nopic"), comprehensive = listOf("wikipedia_en_top_nopic")),
@@ -53,7 +53,7 @@ class ReadinessModelTest {
         ),
     )
     private val catalog = Catalog(
-        1, "2026-10-22T00:00:00Z", packs = listOf(medNopic, medMaxi, wikem, top, france, spain, ifixit),
+        1, "2026-10-22T00:00:00Z", packs = listOf(medNopic, medMaxi, medline, top, france, spain, ifixit),
         books = listOf(bible, republic, hamlet), readiness = readiness,
     )
     private val today = LocalDate.of(2026, 10, 22)
@@ -82,8 +82,8 @@ class ReadinessModelTest {
     }
 
     @Test fun aDomainHoldingOnlyPacksOutsideItsEssentialsSaysSo() {
-        // WikEM is comprehensive-only: the bar shows it, so the signal mustn't say "Nothing yet" (Plan H4 walkthrough).
-        val r = report(packs = listOf(installed(wikem)))
+        // MedlinePlus is comprehensive-only: the bar shows it, so the signal mustn't say "Nothing yet" (Plan H4 walkthrough).
+        val r = report(packs = listOf(installed(medline)))
         assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.NONE)
         val signal = r.signals.filterIsInstance<Signal.EmptyDomain>().single { it.domain == "medicine" }
         assertThat(signal.text).isEqualTo("No essentials yet for Medicine & first aid. Get Title wikipedia_en_medicine_nopic, 1.0 KB.")
@@ -108,13 +108,13 @@ class ReadinessModelTest {
     }
 
     @Test fun everyComprehensiveItemMakesComprehensive() {
-        val r = report(packs = listOf(installed(medNopic), installed(wikem)))
+        val r = report(packs = listOf(installed(medNopic), installed(medline)))
         assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.COMPREHENSIVE)
         assertThat(domain(r, "medicine").installedBytes).isEqualTo(1_400)
     }
 
     @Test fun aMissingOrCorruptPackCountsForNothing() {
-        val r = report(packs = listOf(installed(medNopic, status = PackStatus.MISSING), installed(wikem, status = PackStatus.CORRUPT)))
+        val r = report(packs = listOf(installed(medNopic, status = PackStatus.MISSING), installed(medline, status = PackStatus.CORRUPT)))
         val med = domain(r, "medicine")
         assertThat(med.coverage).isEqualTo(Coverage.NONE)
         assertThat(med.installedBytes).isEqualTo(0)
@@ -215,7 +215,7 @@ class ReadinessModelTest {
         }
         val model = record("e2b", DownloadState.INSTALLED, kind = ItemKind.MODEL, sizeBytes = 2_000, filePath = "/internal/models/e2b.litertlm")
         val voice = record("ljspeech", DownloadState.INSTALLED, kind = ItemKind.VOICE, sizeBytes = 67, filePath = "/internal/voices/ljspeech.zip")
-        val queued = record("wikem_en_all_maxi", DownloadState.QUEUED, sizeBytes = 400)
+        val queued = record("medlineplus.gov_en_all", DownloadState.QUEUED, sizeBytes = 400)
         val imported = book("my-notes").copy(origin = BookOrigin.IMPORT, sizeBytes = 9)
         val r = report(records = listOf(kiwix, granger, archiveBook) + chapters + album + listOf(model, voice, queued), books = listOf(imported))
         val rows = r.storage.associateBy { it.source }
@@ -248,11 +248,11 @@ class ReadinessModelTest {
 
     private val top1m = packEntry("wikipedia_en_top1m_nopic", "wikipedia_en_top1m", "reference", 17_000)
     private val calibrated = Catalog(
-        1, "2026-10-22T00:00:00Z", packs = listOf(medNopic, medMaxi, wikem, top, top1m),
+        1, "2026-10-22T00:00:00Z", packs = listOf(medNopic, medMaxi, medline, top, top1m),
         readiness = Readiness(
             listOf(
                 Domain("medicine", "Medicine & first aid", essential = listOf("wikipedia_en_medicine_nopic"),
-                    comprehensive = listOf("wikipedia_en_medicine_nopic", "wikipedia_en_medicine_maxi", "wikem_en_all_maxi")),
+                    comprehensive = listOf("wikipedia_en_medicine_nopic", "wikipedia_en_medicine_maxi", "medlineplus.gov_en_all")),
                 Domain("reference", "General reference", essential = listOf("wikipedia_en_top_nopic"),
                     comprehensive = listOf("wikipedia_en_top_nopic", "wikipedia_en_top1m_nopic")),
             ),

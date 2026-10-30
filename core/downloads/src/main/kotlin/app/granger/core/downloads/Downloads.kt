@@ -332,6 +332,17 @@ class DownloadManager(
 }
 
 /**
+ * Whether this record came from the catalog, so the catalog dropping its item means something (Plan DL Decision 10).
+ * Books from archive.org, albums and vectors were never catalog items by their own id.
+ */
+val DownloadRecord.isFromCatalog: Boolean
+    get() = when (kind) {
+        ItemKind.PACK, ItemKind.MODEL, ItemKind.VOICE -> true
+        ItemKind.BOOK -> filePath.contains("${File.separator}books${File.separator}granger${File.separator}")
+        ItemKind.AUDIO, ItemKind.VECTORS -> false
+    }
+
+/**
  * The spec a catalog item downloads as. Packs and books count against the storage cap; models and voices do not. Each
  * pack snapshot and book release gets its own file, so an update never overwrites the pack being read. [groupId] puts
  * the item in a group (one file at a time, one progress), as onboarding's setup does (Plan H3).

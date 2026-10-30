@@ -3,6 +3,7 @@ package app.granger.downloads
 import app.granger.book
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
+import app.granger.core.downloads.GoneFile
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.VectorDownloads
 import app.granger.pack
@@ -168,5 +169,38 @@ class DownloadsModelTest {
     @Test fun anUnfinishedRowOpensNothing() {
         val ui = DownloadsModel.of(listOf(rec("wiki", DownloadState.RUNNING).copy(filePath = "/packs/wiki.zim")), midnight, packs = listOf(pack("wiki")))
         assertThat(ui.now.single().open).isNull()
+    }
+
+    @Test fun aFileKiwixWithdrewOffersRemoveNotRetry() {
+        val gone = rec("wikem", DownloadState.FAILED).copy(error = GoneFile.KIWIX)
+        val row = DownloadsModel.of(listOf(gone), midnight).stopped.single()
+        assertThat(row.gone).isTrue()
+        assertThat(row.removeOnly).isTrue()
+        assertThat(downloadsText(row)).isEqualTo("Kiwix no longer offers this file")
+    }
+
+    @Test fun anItemANewCatalogDroppedSaysSoAndOffersRemove() {
+        val ui = DownloadsModel.of(
+            listOf(
+                rec("dropped", DownloadState.QUEUED),
+                rec("kept", DownloadState.QUEUED),
+                rec("failed", DownloadState.FAILED).copy(error = "x answered 503"),
+                // An archive.org book was never in the catalog: it isn't flagged.
+                rec("ia-book", DownloadState.QUEUED, kind = ItemKind.BOOK).copy(filePath = "/internal/books/archive-org/x.epub"),
+            ),
+            midnight, catalogIds = setOf("kept"),
+        )
+        val byTitle = (ui.now + ui.stopped).associateBy { it.title }
+        assertThat(byTitle.getValue("Title dropped").notInCatalog).isTrue()
+        assertThat(downloadsText(byTitle.getValue("Title dropped"))).isEqualTo("No longer in the catalog")
+        assertThat(downloadsText(byTitle.getValue("Title failed"))).isEqualTo("No longer in the catalog")
+        assertThat(byTitle.getValue("Title failed").removeOnly).isTrue()
+        assertThat(byTitle.getValue("Title kept").notInCatalog).isFalse()
+        assertThat(byTitle.getValue("Title ia-book").notInCatalog).isFalse()
+    }
+
+    @Test fun withNoCatalogNothingIsFlagged() {
+        val row = DownloadsModel.of(listOf(rec("x", DownloadState.QUEUED)), midnight, catalogIds = null).now.single()
+        assertThat(row.notInCatalog).isFalse()
     }
 }

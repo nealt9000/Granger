@@ -122,11 +122,33 @@ class DownloadRunnerTest {
     }
 
     @Test fun aPermanentFailureFailsWithItsReason() = runTest {
-        val record = queued() // the server has no such file: 404
+        server.status[url] = 403
+        val record = queued()
         assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
         val stored = record()!!
         assertThat(stored.state).isEqualTo(DownloadState.FAILED)
-        assertThat(stored.error).contains("404")
+        assertThat(stored.error).contains("403")
+        assertThat(stored.isGone).isFalse()
+    }
+
+    @Test fun aFileKiwixWithdrewFailsAtOnceAsGone() = runTest {
+        val kiwix = "https://download.kiwix.org/zim/other/wikem_en_all_maxi_2026-07.zim"
+        server.status[kiwix] = 404
+        val record = queued().copy(urls = listOf(kiwix)).also { dao.upsert(it) }
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
+        val stored = record()!!
+        assertThat(stored.state).isEqualTo(DownloadState.FAILED)
+        assertThat(stored.error).isEqualTo("Kiwix no longer offers this file")
+        assertThat(stored.isGone).isTrue()
+        // No retry: one request, and the part file (empty here) stays only for Remove to clear.
+        assertThat(server.requests).hasSize(1)
+    }
+
+    @Test fun aFileGoneFromAnotherServerSaysSoWithoutNamingKiwix() = runTest {
+        val record = queued() // the server has no such file: 404
+        assertThat(runner.run("med", record.hash)).isEqualTo(RunOutcome.FAILED)
+        assertThat(record()!!.error).isEqualTo("This file is no longer offered")
+        assertThat(record()!!.isGone).isTrue()
     }
 
     @Test fun givingUpFailsWithTheLastError() = runTest {

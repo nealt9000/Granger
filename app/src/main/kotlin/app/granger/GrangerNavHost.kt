@@ -1180,7 +1180,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             composable<DownloadsRoute> {
                 DownloadsScreen(
                     viewModel = viewModel {
-                        DownloadsViewModel(container.downloads, container.library, container.bookshelf, container.sessions, container.appScope)
+                        DownloadsViewModel(
+                            container.downloads, container.library, container.bookshelf, container.sessions, container.appScope,
+                            container.catalog,
+                        )
                     },
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,
