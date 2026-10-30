@@ -59,7 +59,7 @@ A born-digital PDF and a scan's Text PDF are told apart by their fonts:
 
 ## Decisions
 
-Recommended answers are marked; the ones marked **open** wait for Neal.
+All settled with Neal, 2026-10-30 (D6, D7 and D9 were his calls on the draft).
 
 1. **What a part is.** An item's parts are its originals of the kind `choose()` picked: every comic, every uploaded PDF, every uploaded EPUB or text.
    - Derived files never count. Neither do tiny extras: a part must be at least 10% of the median part's size, so a cover JPEG or a 3-page errata PDF is left out.
@@ -94,13 +94,13 @@ Recommended answers are marked; the ones marked **open** wait for Neal.
    - at most 10% of its text is drawn in `GlyphLessFont` or render mode 3;
    - fewer than 30% of the sampled pages are covered by one page-sized image.
    - Scans, comics and image-only PDFs stay PDFs.
-   - **Imports (open):** recommended not by default, since you chose a PDF. A ⋯ "Read as ebook" on a PDF would convert one on request. That is a small follow-up because the converter is the same.
-7. **Keep the PDF beside the ebook (open; recommended: kept and reachable).**
+   - **Imports (Neal: agreed):** not by default, since you chose a PDF. A ⋯ "Read as ebook" on any text PDF converts it on request (Task 8).
+7. **Keep the PDF beside the ebook, with a way to remove it (Neal, 2026-10-30).**
    - The EPUB is the book. The PDF stays on disk, and the reader's ⋯ menu offers **Original pages**, which opens the PDF at the same chapter.
-   - The second copy costs the PDF's size (the Odyssey's is 2.5 MB; a born-digital textbook can be 50 MB).
-   - Alternatives: (b) delete the PDF after a good conversion; (c) file both as two books, as "Get PDF" does for scans today.
+   - The same menu and the book's details offer **Remove original pages · 2.5 MB**, which deletes the PDF and keeps the ebook. Original pages then goes from the menu.
+   - The PDF's size is the cost of keeping it (the Odyssey's is 2.5 MB; a born-digital textbook can be 50 MB).
 8. **A conversion that doesn't come out well stays a PDF.** The quality gate (Task 7) scores every conversion. A PDF that fails it is filed as a PDF exactly as today, with a log line saying why. A bad ebook is worse than good pages.
-9. **Existing archive.org PDFs (open; recommended: convert on request).** Books already in the Library aren't converted behind your back, because their place, bookmarks and highlights are on PDF pages. An archive.org PDF that would convert gets ⋯ "Read as ebook" (the same action as Decision 6). Its place carries over by chapter, then by progression; its highlights don't.
+9. **Existing archive.org PDFs: converted on request (Neal: agreed).** Books already in the Library aren't converted behind your back, because their place, bookmarks and highlights are on PDF pages. An archive.org PDF that would convert gets ⋯ "Read as ebook" (the same action as Decision 6). Its place carries over by chapter, then by progression; its highlights don't.
 
 ## The converter (`PdfToEpub`, `core/books`)
 
@@ -156,7 +156,7 @@ Every stage returns numbers for the gate:
   - `remove()` deletes the PDF too.
 - `Filing.kt`: the set collection.
 - `GrangerApp.kt`: `fileBookRecord` uses part sidecars and places parts in their set.
-- The ebook reader's ⋯ menu gets Original pages (Decision 7) and Read as ebook (Decisions 6 and 9; only if Neal says yes).
+- The ebook reader's ⋯ menu gets Original pages and Remove original pages (Decision 7); a PDF's gets Read as ebook (Decisions 6 and 9).
 - Roadmap: the IA row.
 
 ## Tasks
@@ -247,9 +247,9 @@ Two parts, in order: sets first, since they are smaller and shippable alone, the
 
 - [ ] `choose()` offers `PDF_TEXT` for an uploaded born-digital PDF. This can only be confirmed after the download, so the offer says "PDF, read as an ebook when it can be"; `PdfOrigin` decides at filing time.
 - [ ] `addDownloaded` converts and files the EPUB (or the PDF on a gate failure). `refresh()` converts strays. `remove()` takes both.
-- [ ] Original pages in the reader's ⋯ (Decision 7), opening the PDF at the chapter's first page.
-- [ ] Read as ebook on archive.org PDFs already filed (Decision 9) and, if Neal says yes, on imports (Decision 6).
-- [ ] Tests: `BookshelfTest` (a born-digital PDF becomes an EPUB with the PDF beside it; a scan stays a PDF; a gate failure stays a PDF); `EbookReaderViewModelTest` (Original pages opens the PDF at the chapter's page).
+- [ ] Original pages in the reader's ⋯ (Decision 7), opening the PDF at the chapter's first page; Remove original pages · size there and in the book's details, which deletes the PDF and keeps the ebook (the source no longer counts as unconverted on `refresh()`).
+- [ ] Read as ebook on text PDFs already in the Library, archive.org's and imports alike (Decisions 6 and 9), with the gate deciding as on arrival.
+- [ ] Tests: `BookshelfTest` (a born-digital PDF becomes an EPUB with the PDF beside it; a scan stays a PDF; a gate failure stays a PDF; Remove original pages deletes the PDF and a refresh doesn't convert again; Read as ebook on an import); `EbookReaderViewModelTest` (Original pages opens the PDF at the chapter's page).
 - [ ] Commit.
 
 ### Task 9: Walkthrough on the Pixel (say on the channel first)
