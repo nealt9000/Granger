@@ -121,6 +121,14 @@ Things the package tasks left for after the merge, because they cross task bound
   - the chat title "About: …"
 
   The voice's copy of the medical text (`AnswerText.MEDICAL`) follows `SpokenText`'s language in L4. A test pins it to the banner's English (Task 5).
+- [ ] Strings left as `UiText.Raw` or `String` at task boundaries:
+  - `MediaDownloader.get()` notices (Task 4's packages)
+  - `ItemStatus.Failed` / `InLibrary` (sources, Task 8)
+  - `RailViewModel.pin()` / `resume()` notices, read by GrangerNavHost (`shell_pins_full` and `shell_cant_play` exist)
+  - `RailTabUi.subtitle` "Removed pack/book" as Home builds it (`shell_removed_*` exist)
+
+  (Task 6)
+- [ ] **Saved in book data:** archive.org's OCR note and the "(PDF)" suffix, matched with `removePrefix`. Decide in L2 with the other saved strings (Task 6).
 - [ ] **Not in L1, noted for L2:**
   - Download error messages are stored in `downloads.db`, and `isGone` matches them as text. Translating them needs a stored error code (a schema change).
   - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3).
