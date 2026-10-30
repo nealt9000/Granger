@@ -121,6 +121,7 @@ class PlaybackService : MediaLibraryService() {
             defaultVoiceSpeed = deps.voiceSpeed,
             // Music under the voice (Plan V2) plays on a second player built like the first, with its own gain processor.
             musicUnderFactory = { ReplayGainProcessor().let { rg -> buildPlayer(this, rg) to rg } },
+            readingTitle = { getString(R.string.player_reading_title, it) },
         )
         engine = e
         val power = getSystemService(android.os.PowerManager::class.java)

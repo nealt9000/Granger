@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A downloaded Granger voice in the voice lists. %1$s is the voice's or speaker's name, such as "Maggie". -->
+    <string name="speech_granger_voice">Granger voice (%1$s)</string>
+    <!-- One of the phone's own text-to-speech voices. %1$s is the engine's short code for it, such as "iom";
+         %2$s is its language tag, such as "en-US". -->
+    <string name="speech_system_voice">System voice %1$s (%2$s)</string>
+    <!-- The phone's own text-to-speech voice when it has no code of its own. %1$s is its language tag, such as "en-US". -->
+    <string name="speech_system_voice_default">System voice default (%1$s)</string>
+</resources>

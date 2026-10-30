@@ -45,14 +45,28 @@ sealed interface LibriVoxQuery {
 }
 
 /** Recently added plus six genres (decided with Neal: the API has no popularity, so no "Most downloaded"). */
-enum class LibriVoxShelf(val title: String, val query: LibriVoxQuery) {
-    RECENT("Recently added", LibriVoxQuery.Recent),
-    FICTION("Fiction", LibriVoxQuery.Genre("General Fiction")),
-    POETRY("Poetry", LibriVoxQuery.Genre("Poetry")),
-    CHILDREN("Children's", LibriVoxQuery.Genre("Children's Fiction")),
-    SCIENCE_FICTION("Science fiction", LibriVoxQuery.Genre("Science Fiction")),
-    DETECTIVE("Mystery & detective", LibriVoxQuery.Genre("Detective Fiction")),
-    PHILOSOPHY("Philosophy", LibriVoxQuery.Genre("Philosophy")),
+/** [title] is the chip's string resource. */
+enum class LibriVoxShelf(val title: Int, val query: LibriVoxQuery) {
+    RECENT(R.string.archive_librivox_shelf_recent, LibriVoxQuery.Recent),
+    FICTION(R.string.archive_librivox_shelf_fiction, LibriVoxQuery.Genre("General Fiction")),
+    POETRY(R.string.archive_librivox_shelf_poetry, LibriVoxQuery.Genre("Poetry")),
+    CHILDREN(R.string.archive_librivox_shelf_children, LibriVoxQuery.Genre("Children's Fiction")),
+    SCIENCE_FICTION(R.string.archive_librivox_shelf_science_fiction, LibriVoxQuery.Genre("Science Fiction")),
+    DETECTIVE(R.string.archive_librivox_shelf_detective, LibriVoxQuery.Genre("Detective Fiction")),
+    PHILOSOPHY(R.string.archive_librivox_shelf_philosophy, LibriVoxQuery.Genre("Philosophy")),
 }
 
-class LibriVoxError(message: String) : Exception(message)
+/** Why a LibriVox call failed, for the screen to word: [text] is its string resource, formatted with [LibriVoxError.code] for [ANSWERED]. */
+enum class LibriVoxProblem(val text: Int) {
+    NOT_FOUND(R.string.archive_librivox_error_not_found),
+    UNREACHABLE(R.string.archive_librivox_error_unreachable),
+    BUSY(R.string.archive_librivox_error_busy),
+    ANSWERED(R.string.archive_librivox_error_answered),
+    UNREADABLE(R.string.archive_librivox_error_unreadable),
+}
+
+/** [message] is the English wording, for logs; screens show [problem] through its string. [code] is the HTTP status. */
+class LibriVoxError(val problem: LibriVoxProblem, message: String, val code: Int = 0) : Exception(message) {
+    /** [LibriVoxProblem.text]'s format args. */
+    val textArgs: List<Any> get() = if (problem == LibriVoxProblem.ANSWERED) listOf(code) else emptyList()
+}

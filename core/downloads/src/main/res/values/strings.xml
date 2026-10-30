@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The notification channel's name in the phone's notification settings. -->
+    <string name="downloads_channel">Downloads</string>
+    <!-- The download notification's button: pauses every download. -->
+    <string name="downloads_pause">Pause</string>
+    <!-- The download notification's title. %1$s is the file's title, such as "Wikipedia Top". -->
+    <string name="downloads_notification_title">Downloading %1$s</string>
+    <!-- The download notification's title before the first file has started. -->
+    <string name="downloads_notification_title_plain">Downloading</string>
+    <!-- Files finished out of the files in this round, such as "3 of 14". -->
+    <string name="downloads_notification_files">%1$d of %2$d</string>
+    <!-- %1$s is a rounded time, such as "about 25 min". -->
+    <string name="downloads_notification_time_left">%1$s left</string>
+    <string name="downloads_notification_starting">Starting…</string>
+
+    <!-- Storage names when the phone gives none. -->
+    <string name="downloads_volume_sd_card">SD card</string>
+    <string name="downloads_volume_internal">Internal storage</string>
+
+    <!-- Time left for the downloads, rounded; followed by "left". -->
+    <string name="downloads_time_left_under_minute">less than a minute</string>
+    <plurals name="downloads_time_left_minutes">
+        <item quantity="one">about %d min</item>
+        <item quantity="other">about %d min</item>
+    </plurals>
+    <plurals name="downloads_time_left_hours">
+        <item quantity="one">about %d h</item>
+        <item quantity="other">about %d h</item>
+    </plurals>
+    <plurals name="downloads_time_left_days">
+        <item quantity="one">about %d day</item>
+        <item quantity="other">about %d days</item>
+    </plurals>
+
+    <!-- When a download tries again, such as "Trying again in 2 min". -->
+    <plurals name="downloads_in_seconds">
+        <item quantity="one">in %d s</item>
+        <item quantity="other">in %d s</item>
+    </plurals>
+    <plurals name="downloads_in_minutes">
+        <item quantity="one">in %d min</item>
+        <item quantity="other">in %d min</item>
+    </plurals>
+    <plurals name="downloads_in_hours">
+        <item quantity="one">in %d h</item>
+        <item quantity="other">in %d h</item>
+    </plurals>
+
+    <!-- A waiting download's place in the queue: the first to go. -->
+    <string name="downloads_place_next">Next</string>
+    <!-- A waiting download's place in the queue. %1$s is an ordinal number, such as "2nd". -->
+    <string name="downloads_place_in_line">%1$s in line</string>
+</resources>
