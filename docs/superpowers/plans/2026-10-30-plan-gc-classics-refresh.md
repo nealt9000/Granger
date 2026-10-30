@@ -179,7 +179,7 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
       - Faerie Queene: the 1,108 `.linenum` go from `position: absolute` over the words to small right-floated numbers. With `"drop"` they're gone, 0 left. The `.poem` hanging indent and `i2` indents show.
     - epubcheck isn't installed on this Mac, so `min()` in `book.css` hasn't been through epubcheck yet; Task 10 runs it.
     - **For Task 4/6:** in Faerie Queene, `.poem`'s clamped 2em on both sides plus the 3em hang leaves about 270 px for verse at 390 px, so many lines still wrap (they hang). Task 4's `p.gv` margin reset doesn't cover this, because these lines aren't `<br>` blocks. Consider clamping `.poem`'s right margin to 0 or the 2em cap lower if Task 6 measures it as a problem.
-- [ ] **Task 4: verse blocks** (R1, R2, Decision 2, and R9 if it passes)
+- [x] **Task 4: verse blocks** (R1, R2, Decision 2, and R9 if it passes)
   - Port `fixproto.py` into `epubpack._prepare`, gated on the work's `verse` setting, and append the audit's verse CSS (§5) to `BOOK_CSS`.
   - Tests cover:
     - `<br>` lines becoming `gv-l`, and stanza gaps;
@@ -188,11 +188,26 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
     - a `<pre>` becoming a `gv-pre` div;
     - the drop cap being unwrapped;
     - a prose paragraph with two `<br>` and lines over 90 characters being left alone.
-- [ ] **Task 5: headings, the contents and Keats** (R8, Decision 3)
+  - **Done 2026-10-30. As built:**
+    - The pass is its own module, `verse.py` (`mark`, `CSS`, `WRAPPER_CSS`), called from `epubpack._prepare` when `zimpack.Work.verse` is set (`pack_builder._work` sets it from `WorkSpec.reads_as_verse`, for Gutenberg and eBible rows).
+    - **CSS placement:** `verse.CSS` goes into `book.css` *after* the work's rules rather than into `BOOK_CSS`, because it must outrank them at equal weight (`p.poem { text-indent }` against `p.gv`). It is in every book (inert without the classes) and is the one copy: `usfm.CSS` keeps only `div.gv { margin: 0 0 .8em }` and its `qr`/`qc` lines; the ZIM build adds `verse.CSS` to an eBible work's styles. `.gv-pre` gets 1em top and bottom, as a `pre` had.
+    - **Verse works only** (`WRAPPER_CSS`): the audit's one-element-per-line hang, plus `div.poem, div.stanza, div.poetry, div.verse { margin-left: 0; margin-right: 0 }`. Measured on Faerie Queene at 390 px: with Task 3's clamped margins 4,613 of 7,391 lines wrapped (all hanging); with the wrapper margins zeroed, 2,822. `div.poem > p` (0,1,2) also outranks FQ's own 3em hang, so its lines hang 1.5em like the rest.
+    - **Indents:** ordinary spaces count beyond the least that any line *starting after a newline* carries; a line with no newline before it (Keats's `<span>G</span>lory`) isn't counted, so it isn't outdented against the source's pretty-printing. No-break spaces always count.
+    - Lines are joined by a newline text node and a margin note is followed by a space, so a page's plain text (search, vectors, Listen) keeps lines apart; rendering is unchanged.
+    - An anchor alone on an empty line moves onto the next line. Blocks already `gv` (usfm) and anything inside them are skipped.
+    - **R9 is in:** a verse block's first line matching `^[A-Z][A-Z .,'’-]{0,38}\.$`, when the block has more lines, gets `gv-sp` (`font-variant-caps: all-small-caps`). Clean in Hamlet (`POLONIUS.`) at 100% and 125%; Medea is unaffected (its speakers are separate `p.char`, now centred). It also catches a heading-like first line such as Keats's `DEDICATION.`.
+    - **Measured** (138 verse-section books including the 3 eBibles, Noto Serif, Readium CSS 3.4.0, the audit's `render.py`; books with ≥100 lines): flush continuation rows 158,597 → **17** at 390/100%, 217,817 → **37** at 360/100%, 305,816 → **101** at 390/125%. No book is at or above 2% at any setting (worst: G&S 0.4% at 125%, Martha 0.3%, Duchess of Malfi 0.3%). Lost alignment 8,496 → 0. The prototype's 1,766 rows were all Keats; Keats is now 0 (Task 5).
+    - epubcheck on all 143 rebuilt books (138 verse + 5 prose): 0 errors and 0 warnings except Ramayan (2 errors: a `dl` cut between `dt` and `dd` at the c556/c557 boundary). The same 2 errors occur at the pre-Task-4 commit `0d12c419`, so they come from Task 2's wrapper copies, not from this task; Task 10 needs a fix.
+- [x] **Task 5: headings, the contents and Keats** (R8, Decision 3)
   - `clean_title` takes the full stop off all-caps titles and puts them in title case, e.g. "BOOK I." becomes "Book I".
   - Heading text in the page gets the same treatment.
   - Add `titleOverrides` for the long front-matter titles in Faerie Queene, Beowulf and the Metamorphoses.
   - Add the Word-export flattening rule; tests use a Keats-shaped fixture.
+  - **Done 2026-10-30. As built:**
+    - `chapters.clean_title` title-cases each segment that is all capitals (a size split's `(part N)` is set aside) and drops its closing full stop, keeping Roman numerals, initials (`U.S.A.`) and an ellipsis; small words stay lower except first or after a full stop. `epubpack._quiet_headings` does the same to `h1`–`h6` text in every work, prose too (`<br>` in a heading starts a new sentence). In novels and philosophy this is the only change apart from `verse.CSS` in `book.css` (checked against the pre-Task-4 build of Republic, Consolation of Philosophy, Alice, Looking-Glass and Ivanhoe).
+    - `titleOverrides` replace contents (and page `<title>`) titles; a key naming a page the book doesn't have fails the build, so an override that drifts out of date is caught. Rows added: Faerie Queene (all 31 pages: Introduction, Letter to Raleigh, "Dedication; Cantos I–IV", "Cantos IV–VII", "Cantos VII–X", "Cantos X–XII", then "Notes: Canto N"/"Questions: Canto N", Glossary; the poem's cantos are `p.i16` text, not headings, so its pages are size splits) and Beowulf ("Prelude; I–XXXIV", "XXXV–XLIII", "Footnotes"). Metamorphoses is left to Task 8.
+    - **Word exports** (`verse.flatten_word_export`, verse works only, and only on a page with `xhtml_` classes): unwraps spans whose classes are all `xhtml_font*` (not `xhtml_big`, which carries real sizing, e.g. Medea's headings), turns single-column `table.xhtml_*` into a `div` per non-empty cell (keeping its `style`), and unwraps every `blockquote` whose only child is an attribute-less `div` (Word's indent levels). Real quotations stay.
+    - **Keats Poems 1817 passes:** 0 flush wraps at all three settings (was 96%), so the edition stays. Lines wrapping (hanging) at 390 px: 460 of 1,819 (1,274 with one blockquote level left).
 - [ ] **Task 6: the verse check**
   - Move the audit's `render.py` and `compare.py` into `tools/pack-builder/verse_check/`, with a README covering Chrome, Readium CSS taken from the app's AAR, and Noto Serif.
   - Rebuild the 135 verse-section books plus Hamlet and run the check at 390 px and 360 px at 100%, and at 390 px at 125%.
