@@ -68,7 +68,7 @@
 
 **What stays, dormant:** the app's dialogue-slot code (a voice without a `granger.dialogue_speaker` reads as before), `cut_quotes.py`, `build_slots.py`, `say.py --dialogue`, and the two-slot runs' checkpoints in `runs-pod/<voice>-2slot/`.
 
-**Lessons for the next pod run:** one network volume for two runs fills with full 25-epoch snapshots (0.9 GB each): slim them on the pod as they land (`/root/vt/slimmer.sh`). After the first few epochs a 4090 does ~17–19 s an epoch on ~200 min, not 35–39. The pod's own `RUNPOD_API_KEY` can't remove pods; Neal's key (`runpodctl config --apiKey`) can.
+**Lessons for the next pod run:** one network volume for two runs fills with full 25-epoch snapshots (0.9 GB each): slim them on the pod as they land (`/root/vt/slimmer.sh`). A 4090 does ~40–45 s an epoch on ~200 min (measured after the resume; an earlier 17–19 s guess assumed the runs stopped just before the volume check, not hours earlier). The pod's own `RUNPOD_API_KEY` can't remove pods; Neal's key (`runpodctl config --apiKey`) can.
 
 ## The phone
 
