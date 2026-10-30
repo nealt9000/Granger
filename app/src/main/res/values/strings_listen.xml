@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Listen tool's title. -->
+    <string name="listen_title">Listen</string>
+    <!-- The + button's description: get more audio. -->
+    <string name="listen_get_more">Get more</string>
+    <string name="listen_find_on_phone">Find music on this phone</string>
+    <string name="listen_nothing_yet">Nothing to listen to yet</string>
+    <!-- Accessibility action on the Now playing card. -->
+    <string name="listen_open_player">Open player</string>
+    <!-- The Now playing card's label: what the card holds. -->
+    <string name="listen_last_read">Last read</string>
+    <string name="listen_last_played">Last played</string>
+    <string name="listen_paused">Paused</string>
+    <!-- The voice is reading a text aloud. -->
+    <string name="listen_reading_aloud">Reading aloud</string>
+    <string name="listen_now_playing">Now playing</string>
+</resources>
