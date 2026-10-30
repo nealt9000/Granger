@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.PackStatus
 import app.granger.media.DownloadControls
+import app.granger.media.DownloadUnit
 import app.granger.media.citedMark
 import app.granger.media.citedTint
 import app.granger.player.formatTime
@@ -89,7 +90,7 @@ fun AlbumScreen(vm: MusicViewModel, albumKey: String, nav: MusicNav, marked: Str
             }
             if (download != null && remove != null) {
                 item(key = "download") {
-                    DownloadControls(album.title, download, loaded.filesDone, loaded.filesTotal, "tracks", onRemove = remove)
+                    DownloadControls(album.title, download, loaded.filesDone, loaded.filesTotal, DownloadUnit.TRACKS, onRemove = remove)
                 }
             }
             item {

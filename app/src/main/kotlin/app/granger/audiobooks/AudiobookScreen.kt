@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.core.library.AudioBookmark
 import app.granger.library.ConfirmDialog
 import app.granger.media.DownloadControls
+import app.granger.media.DownloadUnit
 import app.granger.media.citedMark
 import app.granger.media.citedTint
 import app.granger.player.formatTime
@@ -120,7 +121,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
             }
             if (download != null && remove != null) {
                 item(key = "download") {
-                    DownloadControls(book.title, download, loaded.filesDone, loaded.filesTotal, "chapters", onRemove = remove)
+                    DownloadControls(book.title, download, loaded.filesDone, loaded.filesTotal, DownloadUnit.CHAPTERS, onRemove = remove)
                 }
             }
             if (book.description.isNotBlank()) item { Description(book.description) }

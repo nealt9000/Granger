@@ -20,7 +20,6 @@ app/src/main/kotlin/app/granger/library/shelf/ShelfView.kt	4
 app/src/main/kotlin/app/granger/librivox/LibriVoxScreen.kt	16
 app/src/main/kotlin/app/granger/librivox/LibriVoxSheet.kt	9
 app/src/main/kotlin/app/granger/listen/ListenScreen.kt	4
-app/src/main/kotlin/app/granger/media/DownloadControls.kt	4
 app/src/main/kotlin/app/granger/music/AddToPlaylistSheet.kt	5
 app/src/main/kotlin/app/granger/music/AlbumScreen.kt	2
 app/src/main/kotlin/app/granger/music/ArtistScreen.kt	1
