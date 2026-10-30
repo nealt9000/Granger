@@ -1,6 +1,8 @@
 package app.granger.home
 
 import androidx.lifecycle.ViewModel
+import app.granger.R
+import app.granger.UiText
 import androidx.lifecycle.viewModelScope
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.DownloadQueueSummary
@@ -41,11 +43,11 @@ import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** A feed's row: [drawn] is null while its cards are being drawn. */
-data class FeedUi(val feed: HomeFeed, val scopeName: String, val drawn: Drawn?)
+/** A feed's row: [title] once drawn ([FeedDrawer.title]); [drawn] is null while its cards are being drawn. */
+data class FeedUi(val feed: HomeFeed, val scopeName: UiText, val title: UiText, val drawn: Drawn?)
 
 /** A scope the Add feed dialog offers. */
-data class ScopeChoice(val scope: FeedScope, val label: String)
+data class ScopeChoice(val scope: FeedScope, val label: UiText)
 
 /** Home (spec §5): the readiness strip, where you left off, then the feeds. */
 data class HomeUi(
@@ -128,13 +130,13 @@ class HomeViewModel(
     private val feedRows: Flow<List<FeedUi>> = combine(homeFeeds.feeds, snapshot, day) { feeds, snap, d ->
         Triple(feeds.mapNotNull { feed -> FeedScope.parse(feed.scope)?.resolve(snap)?.let { Planned(feed, it) } }, snap, d)
     }.transformLatest { (planned, snap, d) ->
-        val rows = planned.map { FeedUi(it.feed, it.scope.name, cached(it, snap, d)) }.toMutableList()
+        val rows = planned.map { FeedUi(it.feed, it.scope.name, FeedDrawer.title(it.feed, it.scope, d), cached(it, snap, d)) }.toMutableList()
         emit(rows.toList())
         for ((i, plan) in planned.withIndex()) {
             if (rows[i].drawn != null) continue
             val drawn = withContext(io) { runCatching { drawer.draw(plan.feed, plan.scope, d) }.getOrNull() }
             if (drawn != null) homeFeeds.saveDraw(HomeDraw(plan.feed.id, d.toString(), Cards.encode(drawn)))
-            rows[i] = rows[i].copy(drawn = drawn ?: Drawn(rows[i].scopeName, emptyList()))
+            rows[i] = rows[i].copy(drawn = drawn ?: Drawn(emptyList()))
             emit(rows.toList())
         }
     }
@@ -275,13 +277,13 @@ class HomeViewModel(
 
         /** What the Add feed dialog offers: the library, each whole pack, each collection, music and audiobooks when there are any. */
         fun scopeChoices(snap: LibrarySnapshot): List<ScopeChoice> {
-            val choices = mutableListOf(ScopeChoice(FeedScope.Library, "Whole library"))
+            val choices = mutableListOf(ScopeChoice(FeedScope.Library, UiText.Res(R.string.home_scope_whole_library)))
             snap.packs.filter { it.status == PackStatus.OK && it.name.isNotBlank() }.sortedBy { it.title.lowercase() }
-                .mapTo(choices) { ScopeChoice(FeedScope.Pack(it.name), it.title) }
+                .mapTo(choices) { ScopeChoice(FeedScope.Pack(it.name), UiText.Raw(it.title)) }
             snap.shelves.flatMap { it.allCollections }.filterNot { it.isFolder || it.isEmpty }
-                .mapTo(choices) { ScopeChoice(FeedScope.Collection(it.collection.id), it.collection.name) }
-            if (snap.albums.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Music, "Music")
-            if (snap.audiobooks.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Audiobooks, "Audiobooks")
+                .mapTo(choices) { ScopeChoice(FeedScope.Collection(it.collection.id), UiText.Raw(it.collection.name)) }
+            if (snap.albums.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Music, UiText.Res(R.string.home_scope_music))
+            if (snap.audiobooks.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Audiobooks, UiText.Res(R.string.home_scope_audiobooks))
             return choices
         }
     }

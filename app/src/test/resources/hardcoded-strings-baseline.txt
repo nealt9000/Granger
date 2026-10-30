@@ -8,8 +8,6 @@ app/src/main/kotlin/app/granger/ebook/EbookReaderScreen.kt	1
 app/src/main/kotlin/app/granger/ebook/HighlightSheet.kt	4
 app/src/main/kotlin/app/granger/ebook/ReaderControls.kt	1
 app/src/main/kotlin/app/granger/ebook/TextSettingsSheet.kt	2
-app/src/main/kotlin/app/granger/home/AddFeedPanel.kt	6
-app/src/main/kotlin/app/granger/home/HomeScreen.kt	9
 app/src/main/kotlin/app/granger/library/CollectionScreen.kt	26
 app/src/main/kotlin/app/granger/library/LibraryScreen.kt	8
 app/src/main/kotlin/app/granger/library/OrganizeDialogs.kt	16

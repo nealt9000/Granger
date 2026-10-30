@@ -146,15 +146,15 @@ class ThemeShots {
     private val ids = listOf("medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought")
     private val report = ReadinessReport(
         domains = ids.mapIndexed { i, id -> DomainCoverage(id, id, if (i < 3) Coverage.BASIC else Coverage.NONE, 0, 100, 400, emptyList()) },
-        signals = listOf(Signal.Unsearchable("p", "Owls can't be searched: the pack has no index.")),
+        signals = listOf(Signal.Unsearchable("p", app.granger.UiText.Raw("Owls can't be searched: the pack has no index."))),
         storage = listOf(StorageRow(Source.KIWIX, 11_100_000_000, 40)),
         needsCatalogRefresh = false,
     )
     private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = true), at = 5L, pinned = true)
     private val blue = RailEntry.Play("album:Blue", "Blue", at = 1L)
     private val dayFeed = FeedUi(
-        HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), "Wikipedia",
-        Drawn("October 26", listOf(Card("1863 – The Football Association is founded in London.", "Events", CardTarget.Article("u1", "October_26", "Events")))),
+        HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("October 26"),
+        Drawn(listOf(Card("1863 – The Football Association is founded in London.", "Events", CardTarget.Article("u1", "October_26", "Events")))),
     )
 
     @Test fun home() = shoot("home") {
@@ -254,12 +254,12 @@ class ThemeShots {
             BrowseContent(
                 BrowseUi(
                     listOf(
-                        BrowseSection("medicine", "Medicine & first aid", medicine),
-                        BrowseSection("making", "Making, repair & engineering", making),
-                        BrowseSection("maps", "Maps, places & travel", travel),
-                        BrowseSection("reference", "General reference", reference),
-                        BrowseSection(OTHER_SECTION, "Other", other),
-                        BrowseSection(MAPS_SECTION, "Maps", maps),
+                        BrowseSection("medicine", app.granger.UiText.Raw("Medicine & first aid"), medicine),
+                        BrowseSection("making", app.granger.UiText.Raw("Making, repair & engineering"), making),
+                        BrowseSection("maps", app.granger.UiText.Raw("Maps, places & travel"), travel),
+                        BrowseSection("reference", app.granger.UiText.Raw("General reference"), reference),
+                        BrowseSection(OTHER_SECTION, app.granger.UiText.Raw("Other"), other),
+                        BrowseSection(MAPS_SECTION, app.granger.UiText.Raw("Maps"), maps),
                     ),
                 ),
                 "/packs", downloadsBadge = 0, BrowseActions(),
@@ -340,7 +340,7 @@ class ThemeShots {
     @Test fun listen() = shoot("listen") {
         val phone = CollectionRow(ShelfCollection("c:phone", "Phone", "music", false, defaultKey = "phone"), emptyList(), albums = emptyList())
         val librivox = CollectionRow(ShelfCollection("c:lv", "LibriVox", "audiobooks", false, defaultKey = "lv"), emptyList(), audiobooks = listOf(audiobook("t")))
-        val card = NowPlayingCard("Now playing", "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true)
+        val card = NowPlayingCard(app.granger.R.string.listen_now_playing, "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true)
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},

@@ -1,5 +1,8 @@
 package app.granger.home
 
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import app.granger.UiText
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -118,8 +121,8 @@ fun HomeContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Home") },
-                actions = { IconButton(onClick = { adding = true }) { Icon(Icons.Filled.Add, contentDescription = "Add feed") } },
+                title = { Text(stringResource(R.string.home_title)) },
+                actions = { IconButton(onClick = { adding = true }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.home_add_feed)) } },
             )
         },
     ) { padding ->
@@ -139,7 +142,7 @@ fun HomeContent(
                 }
             }
             if (ui.continueCards.isNotEmpty()) {
-                item(key = "continue") { Heading("Continue") }
+                item(key = "continue") { Heading(stringResource(R.string.home_continue)) }
                 item(key = "continue-row") {
                     CardRow(ui.continueCards, key = { it.key }, tag = "continue-row") { entry ->
                         when (entry) {
@@ -153,7 +156,7 @@ fun HomeContent(
             for ((i, row) in ui.feeds.withIndex()) {
                 item(key = "feed-${row.feed.id}") {
                     FeedHeading(
-                        title = row.drawn?.title ?: "${row.feed.kind.label} · ${row.scopeName}",
+                        title = if (row.drawn != null) row.title.resolve() else stringResource(R.string.home_feed_pending, stringResource(row.feed.kind.label), row.scopeName.resolve()),
                         first = i == 0,
                         last = i == ui.feeds.lastIndex,
                         onRemove = { actions.onRemove(row.feed.id) },
@@ -164,7 +167,7 @@ fun HomeContent(
                     val drawn = row.drawn
                     if (drawn == null) {
                         Text(
-                            "Drawing…",
+                            stringResource(R.string.home_drawing),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -209,9 +212,9 @@ private fun FeedHeading(title: String, first: Boolean, last: Boolean, onRemove: 
     Box {
         Heading(title, Modifier.combinedClickable(onClick = {}, onLongClick = { menu = true }))
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            if (!first) DropdownMenuItem(text = { Text("Move up") }, onClick = { menu = false; onMove(true) })
-            if (!last) DropdownMenuItem(text = { Text("Move down") }, onClick = { menu = false; onMove(false) })
-            DropdownMenuItem(text = { Text("Remove") }, onClick = { menu = false; onRemove() })
+            if (!first) DropdownMenuItem(text = { Text(stringResource(R.string.home_move_up)) }, onClick = { menu = false; onMove(true) })
+            if (!last) DropdownMenuItem(text = { Text(stringResource(R.string.home_move_down)) }, onClick = { menu = false; onMove(false) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.common_remove)) }, onClick = { menu = false; onRemove() })
         }
     }
 }
@@ -333,50 +336,50 @@ private fun DownloadsCardView(card: DownloadsCard, onOpen: () -> Unit, actions: 
             is DownloadsCard.Active -> {
                 Column(Modifier.weight(1f).padding(vertical = 4.dp)) {
                     Text(
-                        homeDownloadsTitle(card),
+                        homeDownloadsTitle(card).resolve(),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     LinearProgressIndicator(progress = { card.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp))
                     Text(
-                        homeDownloadsText(card),
+                        homeDownloadsText(card).resolve(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 if (card.paused) {
-                    IconButton(onClick = actions.onResume) { Icon(Icons.Filled.PlayArrow, contentDescription = "Resume downloads") }
+                    IconButton(onClick = actions.onResume) { Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.home_downloads_resume)) }
                 } else {
-                    IconButton(onClick = actions.onPause) { Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause downloads") }
+                    IconButton(onClick = actions.onPause) { Icon(painterResource(R.drawable.ic_pause), contentDescription = stringResource(R.string.home_downloads_pause)) }
                 }
             }
             is DownloadsCard.Stopped -> {
                 Text(
-                    "${card.count} stopped",
+                    pluralStringResource(R.plurals.home_downloads_stopped, card.count, card.count),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f),
                 )
-                if (card.retriable.isNotEmpty()) TextButton(onClick = { actions.onRetry(card) }) { Text("Retry") }
-                IconButton(onClick = { actions.onDismiss(card) }) { Icon(Icons.Filled.Close, contentDescription = "Close") }
+                if (card.retriable.isNotEmpty()) TextButton(onClick = { actions.onRetry(card) }) { Text(stringResource(R.string.common_retry)) }
+                IconButton(onClick = { actions.onDismiss(card) }) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close)) }
             }
         }
     }
 }
 
 /** The file downloading now; "Downloads paused" while paused. */
-fun homeDownloadsTitle(card: DownloadsCard.Active): String = when {
-    card.paused -> "Downloads paused"
-    else -> card.title?.let { "Downloading $it" } ?: "Downloading"
+fun homeDownloadsTitle(card: DownloadsCard.Active): UiText = when {
+    card.paused -> UiText.Res(R.string.home_downloads_paused)
+    else -> card.title?.let { UiText.Res(R.string.common_downloading_named, it) } ?: UiText.Res(R.string.common_downloading)
 }
 
 /** "3 of 14 · 1.2 GB of 9.8 GB · about 25 min left", or "Paused · 11 waiting". */
-fun homeDownloadsText(card: DownloadsCard.Active): String {
-    if (card.paused) return "Paused · ${card.waiting} waiting"
-    val parts = mutableListOf(
-        "${card.filesDone} of ${card.files}", "${app.granger.formatBytes(card.bytesDone)} of ${app.granger.formatBytes(card.bytes)}",
-    )
-    card.timeLeftMillis?.let { parts += "${app.granger.core.downloads.QueueText.timeLeft(it)} left" }
-    return parts.joinToString(" · ")
+fun homeDownloadsText(card: DownloadsCard.Active): UiText {
+    if (card.paused) return UiText.Res(R.string.home_downloads_paused_waiting, card.waiting)
+    val done = app.granger.formatBytes(card.bytesDone)
+    val total = app.granger.formatBytes(card.bytes)
+    return card.timeLeftMillis?.let {
+        UiText.Res(R.string.home_downloads_progress_left, card.filesDone, card.files, done, total, app.granger.core.downloads.QueueText.timeLeft(it))
+    } ?: UiText.Res(R.string.home_downloads_progress, card.filesDone, card.files, done, total)
 }
