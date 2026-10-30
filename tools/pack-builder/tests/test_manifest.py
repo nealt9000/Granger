@@ -154,3 +154,11 @@ def test_ebible_rows_need_a_quoted_licence_with_its_url_and_a_public_domain_page
     assert any("Public Domain" in e for e in errors)
     assert any("ebible id" in e for e in validate(ebible_manifest(tmp_path, ebible="../x"), rdf_ok))
     assert any("source" in e for e in validate(manifest(tmp_path, source="wikisource"), rdf_ok))
+
+
+def test_cut_after_is_read_and_must_be_text(tmp_path):
+    assert manifest(tmp_path).works[0].cut_after is None
+    assert manifest(tmp_path, cutAfter="bury us all!”").works[0].cut_after == "bury us all!”"
+    assert validate(manifest(tmp_path, cutAfter="bury us all!”"), rdf_ok) == []
+    assert any("cutAfter" in e for e in validate(manifest(tmp_path, cutAfter=""), rdf_ok))
+    assert any("cutAfter" in e for e in validate(manifest(tmp_path, cutAfter=3), rdf_ok))

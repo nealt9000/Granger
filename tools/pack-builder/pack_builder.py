@@ -54,7 +54,7 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EB
             works.append(dataclasses.replace(work, styles=work.styles + "\n" + verse.CSS))
             continue
         try:
-            cleaned = gutenberg.clean(source.html(spec.gutenberg))
+            cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
         except gutenberg.CleaningError as error:
             raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         for notice in gutenberg.later_edition_notices(cleaned.body):
@@ -79,7 +79,7 @@ class BuildError(Exception):
 def _work(spec, source, ebible) -> zimpack.Work:
     if spec.source == "ebible":
         return _ebible_work(spec, ebible)
-    cleaned = gutenberg.clean(source.html(spec.gutenberg))
+    cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
     pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),

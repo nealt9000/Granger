@@ -53,7 +53,9 @@ class Cleaned:
     branding_removed: int
 
 
-def clean(html: bytes) -> Cleaned:
+def clean(html: bytes, cut_after: str | None = None) -> Cleaned:
+    """The work alone. `cut_after` (the manifest's `cutAfter`) is the work's last words: anything after them, such
+    as a publisher's catalogue, goes too. They must appear exactly once, so a changed source fails the build."""
     soup = BeautifulSoup(html, "lxml")
     styles = _styles(soup)
     for comment in soup.find_all(string=lambda s: isinstance(s, Comment)):
@@ -67,6 +69,8 @@ def clean(html: bytes) -> Cleaned:
         raise NotAGutenbergBook("no Project Gutenberg start and end markers")
     _drop_after(end, root)
     _drop_before(start, root)
+    if cut_after:
+        _cut_after(soup, root, cut_after)
 
     for image in root.select("h1 img[alt], h2 img[alt], h3 img[alt], h4 img[alt], h5 img[alt], h6 img[alt]"):
         image.replace_with(image["alt"])
@@ -120,6 +124,19 @@ def _text_marker(soup: BeautifulSoup, root: Tag, pattern: re.Pattern) -> Tag | N
     marker = soup.new_tag("span")
     string.replace_with(NavigableString(text[:match.start()]), marker, NavigableString(text[match.end():]))
     return marker
+
+
+def _cut_after(soup: BeautifulSoup, root: Tag, words: str) -> None:
+    pattern = re.compile(r"\s+".join(map(re.escape, words.split())))
+    found = root.find_all(string=pattern)
+    if len(found) != 1 or len(pattern.findall(str(found[0]))) != 1:
+        raise CleaningError(f"cutAfter {words!r} found {sum(len(pattern.findall(str(f))) for f in found)} times, "
+                            "not once")
+    text = str(found[0])
+    match = pattern.search(text)
+    marker = soup.new_tag("span")
+    found[0].replace_with(NavigableString(text[:match.end()]), marker, NavigableString(text[match.end():]))
+    _drop_after(marker, root)
 
 
 def _drop_before(marker: Tag, root: Tag) -> None:

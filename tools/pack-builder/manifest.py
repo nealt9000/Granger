@@ -10,6 +10,7 @@ eBible details page must still say "Public Domain".
 
 Reading settings: `verse` turns verse layout on or off (the default follows the section), `lineNumbers` puts
 line numbers in the margin or drops them, and `titleOverrides` replaces contents titles by page number.
+`cutAfter` gives a Gutenberg work's last words, so whatever follows them (a publisher's catalogue) is cut.
 """
 import json
 import re
@@ -50,6 +51,7 @@ class WorkSpec:
     source: str = "gutenberg"
     ebible: str | None = None
     licence: str | None = None
+    cut_after: str | None = None
 
     @property
     def reads_as_verse(self) -> bool:
@@ -86,7 +88,8 @@ def load(path: Path) -> Manifest:
                       published=int(w["published"]), section=w["section"], split_at=w.get("splitAt"),
                       title_check=w.get("titleCheck", True), verse=w.get("verse"),
                       line_numbers=w.get("lineNumbers", "margin"), title_overrides=w.get("titleOverrides", {}),
-                      source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"))
+                      source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"),
+                      cut_after=w.get("cutAfter"))
              for w in data["works"]]
     return Manifest(name=data["name"], title=data["title"], description=data["description"],
                     language=data["language"], sections=[(s["id"], s["title"]) for s in data["sections"]],
@@ -151,6 +154,8 @@ def _reading_errors(w: WorkSpec) -> list[str]:
         errors.append(f"verse must be true, false or left out, not {w.verse!r}")
     if w.line_numbers not in LINE_NUMBERS:
         errors.append(f"lineNumbers must be one of {LINE_NUMBERS}, not {w.line_numbers!r}")
+    if w.cut_after is not None and not (isinstance(w.cut_after, str) and w.cut_after.strip()):
+        errors.append(f"cutAfter must be the work's last words, not {w.cut_after!r}")
     overrides = w.title_overrides
     if not isinstance(overrides, dict) or not all(
             isinstance(k, str) and k.isdigit() and int(k) >= 1 and isinstance(v, str) and v.strip()

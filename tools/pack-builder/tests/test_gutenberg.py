@@ -193,3 +193,18 @@ def test_faded_page_notices_at_the_start_are_dropped():
 def test_faded_pages_in_the_text_are_kept():
     line = "<p>Then we turn back to these faded pages, and read the quaintly earnest words.</p>"
     assert "faded pages" in modern_body(**{"<h2>Chapter 1</h2>": line + "<h2>Chapter 1</h2>"}).get_text()
+
+
+def test_cut_after_drops_everything_after_the_works_last_words():
+    html = fixture("pg-modern.html")
+    c = gutenberg.clean(html.replace(b"<h2>Chapter 5</h2>", b"<p>He said, \xe2\x80\x9cbury us all!\xe2\x80\x9d Then "
+                                     b"silence.</p><div><p>THE MODERN LIBRARY</p></div><h2>Chapter 5</h2>"),
+                        cut_after="bury us all!”")
+    text = c.body.get_text()
+    assert text.rstrip().endswith("bury us all!”") and "MODERN LIBRARY" not in text and "Chapter 5" not in text
+    assert "Chapter 1" in text
+
+
+def test_cut_after_text_that_isnt_there_fails_the_build():
+    with pytest.raises(gutenberg.CleaningError, match="cutAfter"):
+        gutenberg.clean(fixture("pg-modern.html"), cut_after="words the book doesn't have")
