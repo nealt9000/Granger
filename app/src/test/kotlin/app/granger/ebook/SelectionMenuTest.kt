@@ -96,8 +96,7 @@ class SelectionMenuTest {
 
     @Test fun noInquireLabelLeft() {
         val labels = SelectionAction.entries.map { it.label } +
-            app.granger.reader.SelectionAction.entries.map { it.label } +
-            app.granger.shell.RailTool.entries.map { it.label }
+            app.granger.reader.SelectionAction.entries.map { it.label }
         assertThat(labels.filter { "Inquire" in it }).isEmpty()
     }
 

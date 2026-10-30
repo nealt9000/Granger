@@ -50,6 +50,14 @@ class RailTest {
 
     private var rail by mutableStateOf(RailUi(listOf(owls, gone, cats, chat, blue)))
 
+    private fun RailTool.text() =
+        androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>().getString(label)
+
+    /** The rail's tool labels are resources now; this check moved here from SelectionMenuTest (Plan L1). */
+    @Test fun noInquireLabelLeft() {
+        assertThat(RailTool.entries.map { it.text() }.filter { "Inquire" in it }).isEmpty()
+    }
+
     private fun shell(showResearch: Boolean = false) = compose.setContent {
         GrangerShell(
             showResearch = showResearch,
@@ -121,8 +129,8 @@ class RailTest {
 
     /** The Player tool is Listen: your player and your collection, a stack of records (Plan U2 Decision 4). */
     @Test fun listenIsTheToolForThePlayerAndTheCollection() {
-        assertThat(RailTool.LISTEN.label).isEqualTo("Listen")
-        assertThat(RailTool.entries.map { it.label }).doesNotContain("Player")
+        assertThat(RailTool.LISTEN.text()).isEqualTo("Listen")
+        assertThat(RailTool.entries.map { it.text() }).doesNotContain("Player")
         assertThat(RailTool.LISTEN.drawable()).isEqualTo(app.granger.R.drawable.ic_headphones)
         // Home, Library and Listen each have their own mark.
         assertThat(listOf(RailTool.HOME, RailTool.LIBRARY, RailTool.LISTEN).map { it.drawable() }.toSet()).hasSize(3)
@@ -134,7 +142,7 @@ class RailTest {
 
     /** Plan U3c Decision 1: Browse, a globe, between Ask and Library; Settings stays at the foot. */
     @Test fun browseSitsBetweenAskAndLibrary() {
-        assertThat(RailTool.entries.map { it.label })
+        assertThat(RailTool.entries.map { it.text() })
             .containsExactly("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings").inOrder()
         assertThat(RailTool.BROWSE.shown).isTrue()
         assertThat(RailTool.BROWSE.drawable()).isEqualTo(app.granger.R.drawable.ic_browse)

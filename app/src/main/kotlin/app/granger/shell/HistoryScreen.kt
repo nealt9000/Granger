@@ -39,7 +39,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.granger.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
@@ -66,31 +68,31 @@ fun HistoryScreen(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("Clear history?") },
-            text = { Text("This forgets what you've opened, searched and played, and empties the rail. Pinned items and the page you came from stay. Ask's chats stay in Ask.") },
+            title = { Text(stringResource(R.string.shell_clear_history_title)) },
+            text = { Text(stringResource(R.string.shell_clear_history_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clear(keepTabIds(), onCleared)
                     confirmClear = false
-                }) { Text("Clear") }
+                }) { Text(stringResource(R.string.shell_clear)) }
             },
-            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Keep") } },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.common_keep)) } },
         )
     }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("History") },
+                title = { Text(stringResource(R.string.shell_history)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
                 actions = {
                     var menu by remember { mutableStateOf(false) }
                     Box {
-                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menu = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
-                                text = { Text("Clear history") },
+                                text = { Text(stringResource(R.string.shell_clear_history)) },
                                 onClick = {
                                     menu = false
                                     confirmClear = true
@@ -104,14 +106,14 @@ fun HistoryScreen(
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             PrimaryTabRow(selectedTabIndex = page) {
-                Tab(selected = page == 0, onClick = { page = 0 }, text = { Text("History") })
-                Tab(selected = page == 1, onClick = { page = 1 }, text = { Text("Saved") })
+                Tab(selected = page == 0, onClick = { page = 0 }, text = { Text(stringResource(R.string.shell_history)) })
+                Tab(selected = page == 1, onClick = { page = 1 }, text = { Text(stringResource(R.string.shell_saved)) })
             }
             if (page == 0) {
                 OutlinedTextField(
                     value = filter,
                     onValueChange = { filter = it; viewModel.setFilter(it) },
-                    placeholder = { Text("Filter history") },
+                    placeholder = { Text(stringResource(R.string.shell_filter_history)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 )
@@ -122,9 +124,9 @@ fun HistoryScreen(
                 Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
                     Text(
                         when {
-                            page == 1 -> "No saved articles yet. Tap the star while reading to save one."
-                            filter.isBlank() -> "Nothing opened yet."
-                            else -> "Nothing in History matches."
+                            page == 1 -> stringResource(R.string.shell_no_saved)
+                            filter.isBlank() -> stringResource(R.string.shell_nothing_opened)
+                            else -> stringResource(R.string.shell_no_history_match)
                         },
                     )
                 }
@@ -141,14 +143,15 @@ fun HistoryScreen(
                         headlineContent = { Text(row.title) },
                         supportingContent = {
                             Text(
-                                if (row.available) row.packTitle else "${row.packTitle} · not available",
+                                if (row.available) row.packTitle.resolve()
+                                else stringResource(R.string.shell_subtitle_not_available, row.packTitle.resolve()),
                                 color = if (row.available) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
                             )
                         },
                         trailingContent = if (page == 1) {
                             {
                                 IconButton(onClick = { viewModel.unsave(row) }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Remove from saved")
+                                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.shell_remove_from_saved))
                                 }
                             }
                         } else {

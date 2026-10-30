@@ -52,8 +52,6 @@ app/src/main/kotlin/app/granger/search/SearchScreen.kt	3
 app/src/main/kotlin/app/granger/settings/MediaSettingsSection.kt	14
 app/src/main/kotlin/app/granger/settings/SettingsScreen.kt	14
 app/src/main/kotlin/app/granger/settings/VoiceSettingsScreen.kt	15
-app/src/main/kotlin/app/granger/shell/HistoryScreen.kt	12
-app/src/main/kotlin/app/granger/shell/Rail.kt	7
 app/src/main/kotlin/app/granger/sources/GetMoreScreen.kt	2
 app/src/main/kotlin/app/granger/sources/SourceScreen.kt	28
 app/src/main/kotlin/app/granger/widget/PlayerWidget.kt	2

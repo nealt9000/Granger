@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The rail's tools. Keep these short: they label icons in a narrow side rail. -->
+    <string name="shell_tool_home">Home</string>
+    <string name="shell_tool_search">Search</string>
+    <!-- The research assistant, which answers questions from the downloaded knowledge. -->
+    <string name="shell_tool_ask">Ask</string>
+    <!-- Wikipedia and other packs, browsed as linked sites. -->
+    <string name="shell_tool_browse">Browse</string>
+    <!-- Books. -->
+    <string name="shell_tool_library">Library</string>
+    <!-- The player and the audio collection. -->
+    <string name="shell_tool_listen">Listen</string>
+    <string name="shell_tool_settings">Settings</string>
+
+    <!-- What TalkBack reads for a rail item. %1$s is its title or search. -->
+    <string name="shell_tab_not_available">%1$s, not available</string>
+    <string name="shell_tab_reading_aloud">%1$s, reading aloud</string>
+    <string name="shell_tab_not_available_reading_aloud">%1$s, not available, reading aloud</string>
+    <string name="shell_recent_search">Recent search: %1$s</string>
+    <string name="shell_ask_chat">Ask chat: %1$s</string>
+    <string name="shell_play_again">Play again: %1$s</string>
+    <string name="shell_reading_aloud">Reading aloud: %1$s</string>
+    <!-- A rail tab's second line. %1$s is its pack's title, its book's author or where the book is. -->
+    <string name="shell_subtitle_not_available">%1$s · not available</string>
+    <string name="shell_subtitle_reading_aloud">%1$s · reading aloud</string>
+    <string name="shell_subtitle_not_available_reading_aloud">%1$s · not available · reading aloud</string>
+    <!-- The rail's label above pinned items, and their state for TalkBack. -->
+    <string name="shell_pinned">Pinned</string>
+    <string name="shell_history">History</string>
+    <string name="shell_unavailable">This pack or book isn\'t available. Check that it\'s still on the phone or SD card.</string>
+    <!-- A long press on a rail item; TalkBack reads these as the long-press action. -->
+    <string name="shell_unpin_or_remove">Unpin or remove from rail</string>
+    <string name="shell_pin_or_remove">Pin to top or remove from rail</string>
+    <string name="shell_unpin">Unpin</string>
+    <string name="shell_pin_to_top">Pin to top</string>
+    <string name="shell_remove_from_rail">Remove from rail</string>
+
+    <!-- What a rail or Continue item played. -->
+    <string name="shell_kind_audiobook">Audiobook</string>
+    <string name="shell_kind_read_aloud">Read aloud</string>
+    <string name="shell_kind_playlist">Playlist</string>
+    <string name="shell_kind_artist">Artist</string>
+    <string name="shell_kind_genre">Genre</string>
+    <string name="shell_kind_folder">Folder</string>
+    <string name="shell_kind_songs">Songs</string>
+    <string name="shell_kind_album">Album</string>
+
+    <!-- The History screen. -->
+    <string name="shell_clear_history_title">Clear history?</string>
+    <string name="shell_clear_history_body">This forgets what you\'ve opened, searched and played, and empties the rail. Pinned items and the page you came from stay. Ask\'s chats stay in Ask.</string>
+    <string name="shell_clear">Clear</string>
+    <string name="shell_clear_history">Clear history</string>
+    <!-- The tab of starred articles. -->
+    <string name="shell_saved">Saved</string>
+    <string name="shell_filter_history">Filter history</string>
+    <string name="shell_no_saved">No saved articles yet. Tap the star while reading to save one.</string>
+    <string name="shell_nothing_opened">Nothing opened yet.</string>
+    <string name="shell_no_history_match">Nothing in History matches.</string>
+    <string name="shell_remove_from_saved">Remove from saved</string>
+    <!-- In place of a pack's or book's name once it's gone. -->
+    <string name="shell_removed_pack">Removed pack</string>
+    <string name="shell_removed_book">Removed book</string>
+
+    <!-- When every pin is taken. %1$d is how many can be pinned. -->
+    <plurals name="shell_pins_full">
+        <item quantity="one">%1$d item is pinned already. Unpin it first.</item>
+        <item quantity="other">%1$d items are pinned already. Unpin one first.</item>
+    </plurals>
+    <!-- %1$s is what was played: an album, playlist or book. -->
+    <string name="shell_cant_play">“%1$s” can\'t be played: it\'s no longer in the library, or none of its files are on the phone.</string>
+</resources>

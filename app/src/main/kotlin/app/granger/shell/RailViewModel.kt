@@ -1,7 +1,11 @@
 package app.granger.shell
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
 import app.granger.core.library.Book
 import app.granger.core.library.BookIds
 import app.granger.core.library.BookPosition
@@ -79,16 +83,20 @@ sealed interface RailEntry {
         override val key get() = "$PLAY$playKey"
 
         /** What was played, by its key: "Album", "Audiobook", "Read aloud" (Plan U3b Decision 12). */
-        val kind: String get() = when {
-            playKey.startsWith("audiobook:") -> "Audiobook"
-            playKey.startsWith("voice:") -> "Read aloud"
-            playKey.startsWith("playlist:") -> "Playlist"
-            playKey.startsWith("artist:") -> "Artist"
-            playKey.startsWith("genre:") -> "Genre"
-            playKey.startsWith("folder:") -> "Folder"
-            playKey == "songs" -> "Songs"
-            else -> "Album"
+        @get:StringRes
+        val kindRes: Int get() = when {
+            playKey.startsWith("audiobook:") -> R.string.shell_kind_audiobook
+            playKey.startsWith("voice:") -> R.string.shell_kind_read_aloud
+            playKey.startsWith("playlist:") -> R.string.shell_kind_playlist
+            playKey.startsWith("artist:") -> R.string.shell_kind_artist
+            playKey.startsWith("genre:") -> R.string.shell_kind_genre
+            playKey.startsWith("folder:") -> R.string.shell_kind_folder
+            playKey == "songs" -> R.string.shell_kind_songs
+            else -> R.string.shell_kind_album
         }
+
+        /** [kindRes] as text, read in composition (Home's Continue card shows it). */
+        val kind: String @Composable get() = stringResource(kindRes)
     }
 
     /** The voice reading [title] now (Plan V2): heads the list while it is loaded; tapping it opens the page. Not pinnable. */
@@ -168,6 +176,7 @@ class RailViewModel(
         } catch (e: Exception) {
             false
         }
+        // GrangerNavHost passes this to the Library as its route's notice (L1 Task 8: R.string.shell_cant_play).
         return if (played) null else "“${item.title}” can't be played: it's no longer in the library, or none of its files are on the phone."
     }
 
@@ -289,7 +298,7 @@ class RailViewModel(
             RailTabUi(
                 tabId = tab.id,
                 title = book?.title ?: tab.title,
-                subtitle = book?.let { bookSubtitle(it, shelf.positions[it.id]) } ?: HistoryViewModel.REMOVED_BOOK,
+                subtitle = book?.let { bookSubtitle(it, shelf.positions[it.id]) } ?: REMOVED_BOOK,
                 initial = initialOf(book?.title ?: tab.title),
                 available = book?.status == PackStatus.OK,
                 current = tab.id == current,
@@ -300,7 +309,7 @@ class RailViewModel(
             RailTabUi(
                 tabId = tab.id,
                 title = tab.title,
-                subtitle = pack?.title ?: HistoryViewModel.REMOVED_PACK,
+                subtitle = pack?.title ?: REMOVED_PACK,
                 initial = initialOf(tab.title),
                 available = pack?.status == PackStatus.OK,
                 current = tab.id == current,
@@ -380,7 +389,15 @@ class RailViewModel(
         /** How many of each kind the rail watches; every recent search (50 are kept). */
         const val SCAN = 50
 
+        // GrangerNavHost toasts this (L1 Task 8 makes it R.plurals.shell_pins_full, with MAX_RAIL_PINS).
         const val PINS_FULL = "$MAX_RAIL_PINS items are pinned already. Unpin one first."
+
+        /**
+         * A gone pack's or book's subtitle. RailTabUi.subtitle is text that Home shows too, so these stay English until
+         * it becomes UiText with home (R.string.shell_removed_pack and shell_removed_book are ready).
+         */
+        const val REMOVED_PACK = "Removed pack"
+        const val REMOVED_BOOK = "Removed book"
 
         /** A read-aloud play's key prefix: "voice:" and the source key. */
         private const val VOICE_PLAY = "voice:"
