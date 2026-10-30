@@ -113,6 +113,14 @@ Things the package tasks left for after the merge, because they cross task bound
 - [ ] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
 - [ ] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
 - [ ] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays.
+- [ ] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).
+- [ ] DevDocsFixes.kt's injected "☰ Contents" button: pass the label into the script from a resource (Task 5).
+- [ ] **Saved in the database, decide in L2:**
+  - PDF bookmark "p. N"
+  - PDF place title "Page N"
+  - the chat title "About: …"
+
+  The voice's copy of the medical text (`AnswerText.MEDICAL`) follows `SpokenText`'s language in L4. A test pins it to the banner's English (Task 5).
 - [ ] **Not in L1, noted for L2:**
   - Download error messages are stored in `downloads.db`, and `isGone` matches them as text. Translating them needs a stored error code (a schema change).
   - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3).
