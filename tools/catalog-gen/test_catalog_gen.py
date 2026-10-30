@@ -1396,3 +1396,16 @@ def test_base_title_drops_spanish_flavour_words_too():
     assert cg.base_title("Wikcionario (sin imágenes)") == "Wikcionario"
     assert cg.base_title("WikiMed en español (con imágenes)") == "WikiMed en español"
     assert cg.base_title("WikiMed (no pictures)") == "WikiMed"
+
+
+def test_real_spanish_wikipedia_is_one_family():
+    sets = cg.load_sets(HERE / "pack_sets.json")
+    es = sets["sets"]["wikipedia_es"]
+    assert [x["zimName"] for x in es["slices"]] == ["wikipedia_es_top", "wikipedia_es_all"]
+    assert es["i18n"]["en"]["title"] == "Wikipedia in Spanish"
+    assert [x["i18n"]["en"]["label"] for x in es["slices"]] == ["Best 50,000 articles", "Everything"]
+    subjects = {k: v for k, v in sets["subjects"].items() if v["subjectOf"] == "wikipedia_es"}
+    assert "wikipedia_es_medicine" in subjects and len(subjects) == 14
+    assert all(set(v["adds"]) == {"wikipedia_es_top"} for v in subjects.values())
+    curated = json.loads((HERE / "curated.json").read_text(encoding="utf-8"))
+    assert curated["readiness"]["contains"]["wikipedia_es_all"] == ["wikipedia_es_*"]

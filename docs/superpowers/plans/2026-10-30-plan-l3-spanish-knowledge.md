@@ -113,18 +113,19 @@ A domain with no list for a language is empty in that language.
 
 ## Task 2: The Spanish Wikipedia set (desk, Mac)
 
-- [ ] **Step 1:** Run `zim_probe.py titles` (range reads; nothing is downloaded whole) over:
+- [x] **Step 1:** Run `zim_probe.py titles` (range reads; nothing is downloaded whole) over:
   - `wikipedia_es_top_mini`
   - `wikipedia_es_all_mini` (if it's over budget, take Kiwix's count and treat it as holding every subject, as WF did for English Everything)
   - each `wikipedia_es_*` subject pack's smallest flavour
-- [ ] **Step 2:** Add to `pack_sets.json`:
-  - the `wikipedia_es` set: rank 1 `wikipedia_es_top` ("Los 348.000 mejores artículos"), rank 2 `wikipedia_es_all` ("Todo")
+- [x] **Step 2:** Add to `pack_sets.json`:
+  - the `wikipedia_es` set: rank 1 `wikipedia_es_top` ("Los 348.000 mejores artículos"; measured: "Los 50.000 mejores artículos"), rank 2 `wikipedia_es_all` ("Todo")
   - the subjects, with their `adds` against Top
-  - `i18n` for the English user who browses Spanish packs: English title "Wikipedia in Spanish", labels "Best 348,000 articles" and "Everything". The Spanish copy is the set's own.
+  - `i18n` for the English user who browses Spanish packs: English title "Wikipedia in Spanish", labels "Best 348,000 articles" (measured: "Best 50,000 articles") and "Everything". The Spanish copy is the set's own.
 
   A one-slice set isn't a set, so `wikivoyage_es` stays a plain pack.
-- [ ] **Step 3:** Add `"wikipedia_es_all": ["wikipedia_es_*"]` to `readiness.contains` (the prefix covers Top too). The app's `Containment` also reads the sets, but the generator's presets and `tier_sizes` read only `contains`, as for English. Check that `tier_sizes` drops every Spanish subject and Top from `comprehensive-es`.
-- [ ] **Step 4:** Commit "L3: Spanish Wikipedia as one family".
+- [x] **Step 3:** Add `"wikipedia_es_all": ["wikipedia_es_*"]` to `readiness.contains` (the prefix covers Top too). The app's `Containment` also reads the sets, but the generator's presets and `tier_sizes` read only `contains`, as for English. Check that `tier_sizes` drops every Spanish subject and Top from `comprehensive-es`.
+  - Measured 2026-10-30 (`zim_probe.py titles` on each smallest flavour): **Top holds 50,002 articles, not 348,000**. Kiwix's 348,403 counts Top's 290,127 redirects too, as English Top is also 50,002. So Top's label is "Los 50.000 mejores artículos" / "Best 50,000 articles". Everything's directory is 244 MB, over budget: its count is Kiwix's `Counter` (2,142,129 text/html; Kiwix's 4.23M again counts redirects), and it holds every subject. Each subject adds 80–98 % to Top (chemistry 0.805 … basketball 0.984), so none counts as held by Top.
+- [x] **Step 4:** Commit "L3: Spanish Wikipedia as one family".
 
 ## Task 3: Spanish tiers, presets, onboarding and copy (desk)
 

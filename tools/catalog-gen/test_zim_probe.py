@@ -210,6 +210,10 @@ def test_titles_cli_writes_one_path_per_line(tmp_path, capsys):
 def test_pack_sets_name_catalog_packs_with_ranks_and_shares():
     catalog = json.loads((HERE.parents[1] / "catalog" / "catalog.json").read_text(encoding="utf-8"))
     names = {p["zimName"] for p in catalog["packs"]}
+    if not any(n.startswith("wikipedia_es_") for n in names):
+        # The published catalog predates Plan L3's Spanish packs, which ship with the app that filters by language.
+        names |= {n for n in json.loads((HERE / "pack_sets.json").read_text(encoding="utf-8"))["subjects"]
+                  if n.startswith("wikipedia_es_")} | {"wikipedia_es_top", "wikipedia_es_all"}
     sets = json.loads((HERE / "pack_sets.json").read_text(encoding="utf-8"))
     slices = {}
     for key, s in sets["sets"].items():

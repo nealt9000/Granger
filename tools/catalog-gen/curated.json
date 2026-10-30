@@ -409,6 +409,9 @@
       ],
       "wikipedia_en_top": [
         "wikipedia_en_100"
+      ],
+      "wikipedia_es_all": [
+        "wikipedia_es_*"
       ]
     }
   },

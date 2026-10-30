@@ -1,5 +1,5 @@
 {
-  "about": "Plan WF Decision 1: the Wikipedia and Wikivoyage sets (rank 1 = smallest) and each Wikipedia subject pack's article count and `adds`, the share of its articles NOT in that slice (a path counts as in when the slice has it as an article or a redirect). Measured 2026-10-30 by zim_probe.py titles on each pack's smallest flavour; section-redirect pages are not counted as articles. Everything's directory (1.0 GB) was over budget: its count is Kiwix's, and it is taken to contain every subject.",
+  "about": "Plan WF Decision 1: the Wikipedia and Wikivoyage sets (rank 1 = smallest) and each Wikipedia subject pack's article count and `adds`, the share of its articles NOT in that slice (a path counts as in when the slice has it as an article or a redirect). Measured 2026-10-30 by zim_probe.py titles on each pack's smallest flavour; section-redirect pages are not counted as articles. Everything's directory (1.0 GB) was over budget: its count is Kiwix's, and it is taken to contain every subject. Plan L3: the Spanish set, measured the same way on 2026-10-30 against Top only; Everything's directory (244 MB) was over budget, so its count is Kiwix's and it is taken to contain every subject. A set or slice's `i18n` gives its copy in other languages (here English, for an English reader browsing Spanish packs).",
   "measured": "2026-10-30",
   "sets": {
     "wikipedia_en": {
@@ -53,6 +53,43 @@
           "label": "The whole world",
           "articles": 34600,
           "measuredFrom": "wikivoyage_en_all_nopic"
+        }
+      ]
+    },
+    "wikipedia_es": {
+      "title": "Wikipedia en español",
+      "description": "La enciclopedia libre, de los 50.000 mejores artículos a toda ella.",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Spanish",
+          "description": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
+        }
+      },
+      "slices": [
+        {
+          "zimName": "wikipedia_es_top",
+          "rank": 1,
+          "label": "Los 50.000 mejores artículos",
+          "articles": 50002,
+          "measuredFrom": "wikipedia_es_top_mini",
+          "i18n": {
+            "en": {
+              "label": "Best 50,000 articles"
+            }
+          }
+        },
+        {
+          "zimName": "wikipedia_es_all",
+          "rank": 2,
+          "label": "Todo",
+          "articles": 2142129,
+          "measuredFrom": "wikipedia_es_all_mini",
+          "articlesFrom": "Kiwix Counter metadata (text/html); directory not read, over budget (244 MB)",
+          "i18n": {
+            "en": {
+              "label": "Everything"
+            }
+          }
         }
       ]
     }
@@ -296,6 +333,118 @@
         "wikipedia_en_100": 1.0,
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.866
+      }
+    },
+    "wikipedia_es_basketball": {
+      "subjectOf": "wikipedia_es",
+      "articles": 12461,
+      "measuredFrom": "wikipedia_es_basketball_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.984
+      }
+    },
+    "wikipedia_es_chemistry": {
+      "subjectOf": "wikipedia_es",
+      "articles": 3700,
+      "measuredFrom": "wikipedia_es_chemistry_mini",
+      "adds": {
+        "wikipedia_es_top": 0.805
+      }
+    },
+    "wikipedia_es_climate-change": {
+      "subjectOf": "wikipedia_es",
+      "articles": 1303,
+      "measuredFrom": "wikipedia_es_climate-change_mini",
+      "adds": {
+        "wikipedia_es_top": 0.853
+      }
+    },
+    "wikipedia_es_comics": {
+      "subjectOf": "wikipedia_es",
+      "articles": 7527,
+      "measuredFrom": "wikipedia_es_comics_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.929
+      }
+    },
+    "wikipedia_es_computer": {
+      "subjectOf": "wikipedia_es",
+      "articles": 14091,
+      "measuredFrom": "wikipedia_es_computer_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.901
+      }
+    },
+    "wikipedia_es_football": {
+      "subjectOf": "wikipedia_es",
+      "articles": 80553,
+      "measuredFrom": "wikipedia_es_football_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.97
+      }
+    },
+    "wikipedia_es_geography": {
+      "subjectOf": "wikipedia_es",
+      "articles": 7752,
+      "measuredFrom": "wikipedia_es_geography_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.869
+      }
+    },
+    "wikipedia_es_history": {
+      "subjectOf": "wikipedia_es",
+      "articles": 17634,
+      "measuredFrom": "wikipedia_es_history_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.899
+      }
+    },
+    "wikipedia_es_mathematics": {
+      "subjectOf": "wikipedia_es",
+      "articles": 7783,
+      "measuredFrom": "wikipedia_es_mathematics_mini",
+      "adds": {
+        "wikipedia_es_top": 0.885
+      }
+    },
+    "wikipedia_es_medicine": {
+      "subjectOf": "wikipedia_es",
+      "articles": 19727,
+      "measuredFrom": "wikipedia_es_medicine_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.864
+      }
+    },
+    "wikipedia_es_molcell": {
+      "subjectOf": "wikipedia_es",
+      "articles": 5630,
+      "measuredFrom": "wikipedia_es_molcell_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.856
+      }
+    },
+    "wikipedia_es_movies": {
+      "subjectOf": "wikipedia_es",
+      "articles": 72361,
+      "measuredFrom": "wikipedia_es_movies_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.948
+      }
+    },
+    "wikipedia_es_physics": {
+      "subjectOf": "wikipedia_es",
+      "articles": 7848,
+      "measuredFrom": "wikipedia_es_physics_mini",
+      "adds": {
+        "wikipedia_es_top": 0.844
+      }
+    },
+    "wikipedia_es_venezuela": {
+      "subjectOf": "wikipedia_es",
+      "articles": 8601,
+      "measuredFrom": "wikipedia_es_venezuela_nopic",
+      "adds": {
+        "wikipedia_es_top": 0.946
       }
     }
   }
