@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Words used in three or more packages (Plan L1). Package strings live in strings_<package>.xml. -->
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_ok">OK</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_remove">Remove</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_close">Close</string>
+    <string name="common_keep">Keep</string>
+    <!-- The overflow menu button's description. -->
+    <string name="common_more">More</string>
+    <string name="common_open">Open</string>
+    <string name="common_play">Play</string>
+    <string name="common_pause">Pause</string>
+    <string name="common_stop">Stop</string>
+    <string name="common_search">Search</string>
+    <string name="common_settings">Settings</string>
+    <string name="common_done">Done</string>
+    <!-- Download something: Get the rest, Get the Granger voice. -->
+    <string name="common_get">Get</string>
+    <string name="common_downloading">Downloading</string>
+    <!-- %1$s is what's downloading, such as a pack's title. -->
+    <string name="common_downloading_named">Downloading %1$s</string>
+
+    <plurals name="common_books">
+        <item quantity="one">%d book</item>
+        <item quantity="other">%d books</item>
+    </plurals>
+    <plurals name="common_albums">
+        <item quantity="one">%d album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
+</resources>

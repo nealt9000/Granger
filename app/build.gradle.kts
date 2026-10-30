@@ -48,6 +48,8 @@ android {
             it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
             // ThemeShots renders the main screens to PNGs only when asked: ./gradlew testDebugUnitTest --tests '*ThemeShots*' -PthemeShots
             it.systemProperty("granger.themeShots", if (project.hasProperty("themeShots")) layout.buildDirectory.dir("theme-shots").get().asFile.path else "")
+            // HardcodedStringsTest rewrites its baseline only when asked: ./gradlew :app:testDebugUnitTest --tests '*HardcodedStrings*' -PwriteBaseline
+            it.systemProperty("l1.writeBaseline", if (project.hasProperty("writeBaseline")) "true" else "")
         }
     }
     compileOptions {

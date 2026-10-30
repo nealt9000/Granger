@@ -58,8 +58,8 @@ The `core/` modules with text: `downloads`, `media`, `player`, `speech`, `taglib
 
 ## Task 0: Worktree
 
-- [ ] **Step 1:** `git worktree add .claude/worktrees/l1 -b l1-strings main`, then `git submodule update --init` in the worktree, then copy `local.properties`.
-- [ ] **Step 2:** Baseline run: `./gradlew testDebugUnitTest`. Record the test count.
+- [x] **Step 1:** `git worktree add .claude/worktrees/l1 -b l1-strings main`, then `git submodule update --init` in the worktree, then copy `local.properties`.
+- [x] **Step 2:** Baseline run: `./gradlew testDebugUnitTest`. Record the test count. *(2026-10-30: 2315 tests across app and the ten Android core modules, 35 skipped, 0 failures.)*
 
 ## Task 1: Foundation: `UiText`, the guard test, common strings
 
@@ -70,9 +70,9 @@ The `core/` modules with text: `downloads`, `media`, `player`, `speech`, `taglib
 - Create `app/src/test/resources/hardcoded-strings-baseline.txt`
 - Create `app/src/main/res/values/strings_common.xml`
 
-- [ ] **Step 1: `UiText`.** A sealed interface with three cases: `Res(@StringRes id, vararg args)`, `Plural(@PluralsRes id, count, vararg args)`, and `Raw(text)` for content such as titles that isn't translated. It has `@Composable fun resolve(): String` and `fun resolve(context: Context): String`. Args can themselves be `UiText` and are resolved recursively.
-- [ ] **Step 2: Unit tests.** Under Robolectric: `Res` with and without format args, `Plural` for counts 1 and 2, `Raw`, and nested args.
-- [ ] **Step 3: The guard test.** It scans `app/src/main/kotlin` and each `core/*/src/main/kotlin` and counts, per file:
+- [x] **Step 1: `UiText`.** A sealed interface with three cases: `Res(@StringRes id, vararg args)`, `Plural(@PluralsRes id, count, vararg args)`, and `Raw(text)` for content such as titles that isn't translated. It has `@Composable fun resolve(): String` and `fun resolve(context: Context): String`. Args can themselves be `UiText` and are resolved recursively.
+- [x] **Step 2: Unit tests.** Under Robolectric: `Res` with and without format args, `Plural` for counts 1 and 2, `Raw`, and nested args.
+- [x] **Step 3: The guard test.** It scans `app/src/main/kotlin` and each `core/*/src/main/kotlin` and counts, per file:
   - `Text("<Capital or digit>…")`
   - `contentDescription = "…"` with a non-empty value
   - `label|title|text|message|placeholder|body|supportingText = "<Capital>…"` when used as a named argument
@@ -80,9 +80,9 @@ The `core/` modules with text: `downloads`, `media`, `player`, `speech`, `taglib
   - `setContentTitle("…"` and `setContentText("…"`
 
   Files whose name contains `Spike` or `Debug` are skipped, as are lines marked `// l10n-ignore: <why>`. The test fails if any file's count is above its line in `hardcoded-strings-baseline.txt` (`path<TAB>count`, sorted), or if a file has hits but no line. When a count goes down it prints a reminder to lower the baseline.
-- [ ] **Step 4: Generate the baseline.** Do it with a one-off `main` in the test, or a `-PwriteBaseline` property. Commit it.
-- [ ] **Step 5: Common strings.** Move the common words used in three or more packages into `strings_common.xml`: Back, Cancel, OK, Retry, Remove, Delete, Close, More options, Open, Play, Pause, Search, Settings, Done, Get, Downloading…. Find them with `grep -rhoE '"(Back|Cancel|…)"' | sort | uniq -c`. Don't convert any call sites yet.
-- [ ] **Step 6:** `./gradlew :app:testDebugUnitTest --tests '*UiText*' --tests '*HardcodedStrings*'` passes. Commit "L1: UiText, the hardcoded-strings guard, common strings".
+- [x] **Step 4: Generate the baseline.** Do it with a one-off `main` in the test, or a `-PwriteBaseline` property. Commit it. *(Done with `-PwriteBaseline`; first baseline 458 hits in 61 files.)*
+- [x] **Step 5: Common strings.** Move the common words used in three or more packages into `strings_common.xml`: Back, Cancel, OK, Retry, Remove, Delete, Close, More options, Open, Play, Pause, Search, Settings, Done, Get, Downloading…. Find them with `grep -rhoE '"(Back|Cancel|…)"' | sort | uniq -c`. Don't convert any call sites yet.
+- [x] **Step 6:** `./gradlew :app:testDebugUnitTest --tests '*UiText*' --tests '*HardcodedStrings*'` passes. Commit "L1: UiText, the hardcoded-strings guard, common strings".
 
 ## Tasks 2–8: Convert by package group
 
