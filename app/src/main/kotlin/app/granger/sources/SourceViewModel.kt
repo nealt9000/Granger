@@ -460,7 +460,11 @@ class SourceViewModel(
             current.books.filter(::shown).groupBy { it.category }
                 .forEach { (category, entries) -> add(section(category, entries, folding = booksFold, noun = "books")) }
         }
-        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { it.items.isNotEmpty() }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
+        // Granger's screen is Get more's Granger Classics, under Books: only a set of books is offered there. Starter,
+        // Efficient and Comprehensive bring Kiwix's wikis and the models, which aren't books (Plan GB walkthrough).
+        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { preset ->
+            preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry }
+        }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
