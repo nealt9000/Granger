@@ -117,3 +117,22 @@ def test_page_href_names_cross_page_targets():
     html = '<h2>A</h2><p><a href="#z">to Z</a></p><h2>B</h2><p>b</p><h2 id="z">C</h2><p>x</p>'
     chapters = split(body(html), page_href=lambda i: f"c{i + 1:03d}.xhtml")
     assert 'href="c003.xhtml#z"' in chapters[0].html
+
+
+# --- Clásicos Granger (Plan L3) ---
+
+def test_spanish_clean_title_drops_byline_and_indice_but_keeps_por_que():
+    from chapters import clean_title
+    author = "Benito Pérez Galdós"
+    assert clean_title("Marianela — por B. Pérez Galdós — I", "Marianela", author, 0, "es") == "I"
+    assert clean_title("ÍNDICE", "Marianela", author, 3, "es") == "Parte 4"
+    assert clean_title("Por qué no me caso", "Cuentos", author, 0, "es") == "Por qué no me caso"
+    assert clean_title("Capítulo III — La Nela", "Marianela", author, 0, "es") == "Capítulo III — La Nela"
+
+
+def test_spanish_clean_title_translates_the_titles_split_makes_up():
+    from chapters import clean_title
+    assert clean_title("Front matter", "X", "", 0, "es") == "Preliminares"
+    assert clean_title("Part 2", "X", "", 1, "es") == "Parte 2"
+    assert clean_title("Capítulo I (part 3)", "X", "", 1, "es") == "Capítulo I (parte 3)"
+    assert clean_title("Front matter", "X", "", 0) == "Front matter"

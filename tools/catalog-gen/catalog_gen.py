@@ -76,6 +76,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 RELEASE_KEYS = ("id", "description", "language", "sizeBytes", "sha256", "urls", "snapshotDate",
                 "hasFulltextIndex", "zimUuid", "zimName")
 # Readiness (Plan H1): a Classics book's domain comes from its section; what isn't scripture or philosophy is literature.
+# A descriptor whose manifest names each section's domain (Clásicos Granger, Plan L3) carries it per book, and that wins.
 BOOK_DOMAINS = {"Scripture & religion": "thought", "Philosophy": "thought"}
 BOOK_DOMAIN_DEFAULT = "literature"
 
@@ -369,7 +370,7 @@ def book_entries(curated, head=http_head, root=None):
             "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
             "license": curated["license"], "collection": descriptor["collection"],
             "published": book["published"],
-            "domain": BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
+            "domain": book.get("domain") or BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
         })
     return descriptor["collection"], entries
 

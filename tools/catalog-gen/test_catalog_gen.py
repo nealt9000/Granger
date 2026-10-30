@@ -267,6 +267,21 @@ def test_book_release_adds_books_and_preset(tmp_path, monkeypatch):
             "items": ["gc-hamlet", "gc-macbeth"]} in catalog["presets"]
 
 
+def test_book_domain_from_the_descriptor_wins_over_the_section_title(tmp_path, monkeypatch):
+    # Clásicos Granger: Spanish section titles aren't in BOOK_DOMAINS, so the manifest's domain rides on each book.
+    books = {"releaseDate": "2026-10-30", "collection": "clasicos-granger", "books": [
+        {**BOOKS["books"][0], "id": "gc-es-criterio", "section": "Ensayo y pensamiento", "language": "es",
+         "domain": "thought"},
+        {**BOOKS["books"][1], "id": "gc-es-marianela", "section": "Novelas", "language": "es"}]}
+    (tmp_path / "books.json").write_text(json.dumps(books))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in books["books"]}
+    catalog = cg.build({"packs": [], "models": [], "books": [BOOK_ROW], "presets": []}, fake_fetch(ROUTES),
+                       head=lambda url: sizes[url])
+    assert {b["id"]: b["domain"] for b in catalog["books"]} == {"gc-es-criterio": "thought",
+                                                                "gc-es-marianela": "literature"}
+
+
 def test_book_size_mismatch_fails(tmp_path, monkeypatch):
     (tmp_path / "books.json").write_text(json.dumps(BOOKS))
     monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)

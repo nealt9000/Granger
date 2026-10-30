@@ -201,3 +201,27 @@ def test_definition_list_cut_between_term_and_definition_stays_valid(tmp_path):
     assert ends_with_term.startswith("<dl><dt>1.</dt><dd>one</dd><dt>2.</dt><dd/></dl>")
     starts_with_definition = chapter1(tmp_path, "<dd>two</dd><dt>3.</dt><dd>three</dd>").split("<body>")[1]
     assert starts_with_definition.startswith("<dl><dt/><dd>two</dd><dt>3.</dt><dd>three</dd></dl>")
+
+
+# --- Clásicos Granger (Plan L3) ---
+
+def test_book_id_takes_the_manifest_prefix():
+    assert epubpack.book_id("marianela", "gc-es-") == "gc-es-marianela"
+
+
+def test_spanish_translation_title_says_trad():
+    w = Work("biblia", "Nuevo Testamento", "", "Casiodoro de Reina", 1909, "escritura", [])
+    assert epubpack.display_title(w, "es") == "Nuevo Testamento (trad. Casiodoro de Reina)"
+
+
+def test_spanish_book_speaks_spanish(tmp_path):
+    w = work(title="Marianela", author="Benito Pérez Galdós")
+    z = build(tmp_path, w, language="es", collection="Clásicos Granger", section_title="Novelas")
+    opf = etree.fromstring(z.read("OEBPS/content.opf"))
+    text = lambda tag: [e.text for e in opf.iter(DC + tag)]
+    assert text("language") == ["es"] and text("rights") == ["Dominio público en los Estados Unidos."]
+    props = {m.get("property"): m.text for m in opf.iter(OPF + "meta") if m.get("property")}
+    assert props["belongs-to-collection"] == "Clásicos Granger"
+    nav = z.read("OEBPS/nav.xhtml").decode()
+    assert "<h1>Índice</h1>" in nav and "Portada" in nav and "Contents" not in nav
+    assert 'lang="es"' in z.read("OEBPS/c001.xhtml").decode()
