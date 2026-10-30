@@ -29,9 +29,6 @@ app/src/main/kotlin/app/granger/music/GenreScreen.kt	1
 app/src/main/kotlin/app/granger/music/MusicParts.kt	13
 app/src/main/kotlin/app/granger/music/MusicScreen.kt	14
 app/src/main/kotlin/app/granger/music/PlaylistScreen.kt	7
-app/src/main/kotlin/app/granger/onboarding/BrandLockup.kt	1
-app/src/main/kotlin/app/granger/onboarding/OnboardingModel.kt	1
-app/src/main/kotlin/app/granger/onboarding/OnboardingScreen.kt	26
 app/src/main/kotlin/app/granger/player/AudioBookmarksSheet.kt	3
 app/src/main/kotlin/app/granger/player/AudiobookPlayerScreen.kt	5
 app/src/main/kotlin/app/granger/player/ChaptersSheet.kt	1

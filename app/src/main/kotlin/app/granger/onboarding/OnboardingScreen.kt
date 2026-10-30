@@ -51,6 +51,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import app.granger.formatBytes
 
 /** What the screen asks of the view model; a plain class so the content can be tested with lambdas. */
@@ -101,14 +104,16 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
 }
 
 private val Step.title: String
-    get() = when (this) {
-        Step.WELCOME -> "Welcome"
-        Step.PHONE -> "This phone"
-        Step.START -> "Pick a start"
-        Step.REGION -> "Your region"
-        Step.USES -> "What you'll use it for"
-        Step.REVIEW -> "Review and start"
-    }
+    @Composable get() = stringResource(
+        when (this) {
+            Step.WELCOME -> R.string.onboarding_step_welcome
+            Step.PHONE -> R.string.onboarding_step_phone
+            Step.START -> R.string.onboarding_step_start
+            Step.REGION -> R.string.onboarding_your_region
+            Step.USES -> R.string.onboarding_uses
+            Step.REVIEW -> R.string.onboarding_step_review
+        },
+    )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,28 +124,33 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
         topBar = {
             TopAppBar(
                 title = { Text(ui.step.title) },
-                actions = { TextButton(onClick = actions.onSkip) { Text("Skip") } },
+                actions = { TextButton(onClick = actions.onSkip) { Text(stringResource(R.string.onboarding_skip)) } },
             )
         },
         bottomBar = {
             Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text("Back") } else Spacer(Modifier)
+                if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text(stringResource(R.string.common_back)) } else Spacer(Modifier)
                 when (ui.step) {
-                    Step.WELCOME -> Button(onClick = actions.onNext) { Text("Get started") }
+                    Step.WELCOME -> Button(onClick = actions.onNext) { Text(stringResource(R.string.onboarding_get_started)) }
                     Step.REVIEW -> Button(onClick = actions.onStart, enabled = !ui.starting) {
                         if (ui.starting) {
                             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.width(8.dp))
                         }
-                        Text(if (ui.review.isEmpty) "Finish" else if (ui.starting) "Starting…" else "Start")
+                        Text(
+                            stringResource(
+                                if (ui.review.isEmpty) R.string.onboarding_finish
+                                else if (ui.starting) R.string.onboarding_starting else R.string.onboarding_start,
+                            ),
+                        )
                     }
-                    else -> Button(onClick = actions.onNext) { Text("Next") }
+                    else -> Button(onClick = actions.onNext) { Text(stringResource(R.string.onboarding_next)) }
                 }
             }
         },
         snackbarHost = {
             ui.notice?.let { notice ->
-                Snackbar(action = { TextButton(onClick = actions.onClearNotice) { Text("OK") } }) { Text(notice) }
+                Snackbar(action = { TextButton(onClick = actions.onClearNotice) { Text(stringResource(R.string.common_ok)) } }) { Text(notice.resolve()) }
             }
         },
     ) { padding ->
@@ -169,10 +179,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome() {
         Column(Modifier.fillMaxWidth().padding(top = 48.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             BrandLockup()
             Spacer(Modifier.height(28.dp))
-            Text("The world’s knowledge.\nYours to keep.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.onboarding_tagline), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(12.dp))
             Text(
-                "Encyclopedias, maps, manuals, books and your own music, with a reader and a librarian you can ask: all on your phone, all working with no signal.",
+                stringResource(R.string.onboarding_intro),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
@@ -181,17 +191,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome() {
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.phone(ui: OnboardingUi) {
-    item { Text(ui.phone.tierLine, style = MaterialTheme.typography.bodyLarge) }
-    ui.phone.researchLine?.let { line -> item { Text(line, Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyMedium) } }
-    item { Text("Storage", Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+    item { Text(ui.phone.tierLine.resolve(), style = MaterialTheme.typography.bodyLarge) }
+    ui.phone.researchLine?.let { line -> item { Text(line.resolve(), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyMedium) } }
+    item { Text(stringResource(R.string.onboarding_storage), Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
     items(ui.phone.volumes, key = { it.root.path }) { volume ->
-        Text("${volume.label}: ${formatBytes(volume.freeBytes)} free of ${formatBytes(volume.totalBytes)}", Modifier.padding(top = 4.dp))
+        Text(stringResource(R.string.onboarding_volume_free_of, volume.label, formatBytes(volume.freeBytes), formatBytes(volume.totalBytes)), Modifier.padding(top = 4.dp))
     }
     if (ui.phone.efficientBytes > 0L) {
         item {
             Text(
-                "The Efficient start is ${formatBytes(ui.phone.efficientBytes)}; the Comprehensive library is ${formatBytes(ui.phone.comprehensiveBytes)}. " +
-                    "A full Wikipedia alone is about 100 GB.",
+                stringResource(R.string.onboarding_start_sizes, formatBytes(ui.phone.efficientBytes), formatBytes(ui.phone.comprehensiveBytes)),
                 Modifier.padding(top = 20.dp),
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -204,10 +213,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
         item {
             if (ui.catalogFailed) {
                 Column {
-                    Text("Couldn't reach the catalog. Check the connection and try again.", style = MaterialTheme.typography.bodyLarge)
-                    Button(onClick = actions.onRefreshCatalog, modifier = Modifier.padding(top = 12.dp)) { Text("Try again") }
+                    Text(stringResource(R.string.onboarding_catalog_failed), style = MaterialTheme.typography.bodyLarge)
+                    Button(onClick = actions.onRefreshCatalog, modifier = Modifier.padding(top = 12.dp)) { Text(stringResource(R.string.onboarding_try_again)) }
                     Text(
-                        "Or tap Next: Home and the Library are yours either way.",
+                        stringResource(R.string.onboarding_catalog_failed_next),
                         Modifier.padding(top = 12.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -216,7 +225,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Text("Getting the list of packs…", Modifier.padding(start = 12.dp), style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.onboarding_catalog_loading), Modifier.padding(start = 12.dp), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -226,23 +235,31 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
         Column(Modifier.selectableGroup()) {
             for (choice in ui.starts) {
                 Choice(
-                    title = "${choice.title} · ${formatBytes(choice.bytes(ui.unticked))}",
-                    blurb = choice.blurb,
+                    title = stringResource(R.string.onboarding_title_size, choice.title, formatBytes(choice.bytes(ui.unticked))),
+                    blurb = choice.blurb.resolve(),
                     selected = choice.id == ui.startId,
                 ) { actions.onChooseStart(choice.id) }
             }
-            Choice("Neither, I'll choose later", "Home and the Library are yours either way.", selected = ui.startId == null) { actions.onChooseStart(null) }
+            Choice(stringResource(R.string.onboarding_neither), stringResource(R.string.onboarding_neither_blurb), selected = ui.startId == null) { actions.onChooseStart(null) }
         }
     }
     ui.askLine?.let { ask ->
         // Offered under every choice, Neither included: Granger Classics alone is enough to ask (Plan U3a Decision 2).
         item(key = "ask") {
-            Extra("${ask.title} · ${formatBytes(ask.bytes)}", "The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.", ui.askChosen, actions.onToggleAsk)
+            Extra(
+                stringResource(R.string.onboarding_title_size, ask.title.resolve(), formatBytes(ask.bytes)),
+                stringResource(R.string.onboarding_ask_blurb), ui.askChosen,
+                actions.onToggleAsk,
+            )
         }
     }
     ui.voiceLine?.let { voice ->
         item(key = "voice") {
-            Extra("${voice.title} · ${formatBytes(voice.bytes)}", "A Granger voice reads books and articles to you, with no signal.", ui.voiceChosen, actions.onToggleVoice)
+            Extra(
+                stringResource(R.string.onboarding_title_size, voice.title.resolve(), formatBytes(voice.bytes)),
+                stringResource(R.string.onboarding_voice_blurb), ui.voiceChosen,
+                actions.onToggleVoice,
+            )
         }
     }
     val start = ui.start ?: return
@@ -252,8 +269,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Save space")
-                Text("Encyclopedias without their pictures: the same articles, a poorer read.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.onboarding_save_space))
+                Text(stringResource(R.string.onboarding_save_space_blurb), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Switch(checked = ui.saveSpace, onCheckedChange = null)
         }
@@ -267,9 +284,14 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
         ) {
             Checkbox(checked = ticked || line.installed, onCheckedChange = null, enabled = !line.installed)
             Column(Modifier.padding(start = 8.dp).weight(1f)) {
-                Text(line.title)
+                Text(line.title.resolve())
+                val size = if (line.count > 1) {
+                    stringResource(R.string.onboarding_title_size, pluralStringResource(R.plurals.common_books, line.count, line.count), formatBytes(line.bytes))
+                } else {
+                    formatBytes(line.bytes)
+                }
                 Text(
-                    listOfNotNull(if (line.count > 1) "${line.count} books" else null, formatBytes(line.bytes), if (line.installed) "on the phone" else null).joinToString(" · "),
+                    if (line.installed) stringResource(R.string.onboarding_on_the_phone, size) else size,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -280,7 +302,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
         val free = ui.chosenVolume?.freeBytes ?: 0L
         val total = start.bytes(ui.unticked)
         Text(
-            "${formatBytes(total)} of ${formatBytes(free)} free",
+            stringResource(R.string.onboarding_of_free, formatBytes(total), formatBytes(free)),
             Modifier.padding(top = 12.dp),
             color = if (total > free) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
@@ -288,13 +310,13 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: OnboardingUi, actions: OnboardingActions) {
-    item { Text("A map of where you are, for finding your way with no signal.", style = MaterialTheme.typography.bodyMedium) }
+    item { Text(stringResource(R.string.onboarding_region_intro), style = MaterialTheme.typography.bodyMedium) }
     item {
         val keyboard = closeKeyboard()
         OutlinedTextField(
             value = ui.regionQuery,
             onValueChange = actions.onRegionQuery,
-            label = { Text("Country or area") },
+            label = { Text(stringResource(R.string.onboarding_region_search)) },
             singleLine = true,
             // Done puts the keyboard away, so the results and Next show whole.
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -304,30 +326,31 @@ private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: Onboarding
     }
     ui.region?.let { region ->
         if (ui.regionSuggested) {
-            item { Text("Suggested from this phone", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+            item { Text(stringResource(R.string.onboarding_region_suggested), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
         }
         item {
-            Text("${region.title} · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(top = 8.dp))
+            val text = stringResource(R.string.onboarding_title_size, region.title, formatBytes(region.bytes))
+            Text(if (region.installed) stringResource(R.string.onboarding_on_the_phone, text) else text, Modifier.padding(top = 8.dp))
         }
         item {
             val keyboard = closeKeyboard()
-            TextButton(onClick = { keyboard(); actions.onChooseRegion(null) }) { Text("No region") }
+            TextButton(onClick = { keyboard(); actions.onChooseRegion(null) }) { Text(stringResource(R.string.onboarding_no_region)) }
         }
     }
     val offered = ui.suggestion?.takeIf { ui.region == null && ui.regionQuery.isBlank() }
     offered?.let { suggestion ->
-        item { Text("Suggested from this phone", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+        item { Text(stringResource(R.string.onboarding_region_suggested), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
         item(key = "suggested") { RegionRow(suggestion, ui, actions) }
-        item { Text("Other countries", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+        item { Text(stringResource(R.string.onboarding_other_countries), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
     }
     val shown = if (ui.regionQuery.isBlank() && ui.region != null) Regions(emptyList(), emptyList()) else ui.regions
     items(shown.countries.take(if (ui.regionQuery.isBlank()) 12 else 40), key = { "c-${it.pack.id}" }) { RegionRow(it, ui, actions) }
-    if (shown.larger.isNotEmpty()) item { Text("Larger areas", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
+    if (shown.larger.isNotEmpty()) item { Text(stringResource(R.string.onboarding_larger_areas), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
     items(shown.larger, key = { "l-${it.pack.id}" }) { RegionRow(it, ui, actions) }
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi, actions: OnboardingActions) {
-    item { Text("Add packs for what you'll use Granger for. You can change this later in Settings.", style = MaterialTheme.typography.bodyMedium) }
+    item { Text(stringResource(R.string.onboarding_uses_intro), style = MaterialTheme.typography.bodyMedium) }
     items(ui.additions, key = { it.useCase.id }) { addition ->
         val on = addition.useCase.id in ui.useCaseIds
         Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
@@ -335,12 +358,15 @@ private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi
                 FilterChip(selected = on, onClick = { actions.onToggleUseCase(addition.useCase.id) }, label = { Text(addition.useCase.title) })
                 Spacer(Modifier.weight(1f))
                 OnboardingViewModel.DOMAIN_OF[addition.useCase.id]?.let { domain ->
-                    TextButton(onClick = { actions.onSeeDomain(domain) }) { Text("See") }
+                    TextButton(onClick = { actions.onSeeDomain(domain) }) { Text(stringResource(R.string.onboarding_see)) }
                 }
             }
             Text(
-                if (addition.lines.isEmpty()) "${addition.useCase.blurb} Already covered by your choices."
-                else "${addition.useCase.blurb} Adds ${formatBytes(addition.bytes)} · ${addition.packs} ${if (addition.packs == 1) "item" else "items"}.",
+                if (addition.lines.isEmpty()) stringResource(R.string.onboarding_use_covered, addition.useCase.blurb)
+                else stringResource(
+                    R.string.onboarding_use_adds, addition.useCase.blurb, formatBytes(addition.bytes),
+                    pluralStringResource(R.plurals.onboarding_items, addition.packs, addition.packs),
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -374,20 +400,24 @@ private fun RegionRow(region: Region, ui: OnboardingUi, actions: OnboardingActio
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = region.pack.id == ui.region?.pack?.id, onClick = null)
-        val via = region.place?.let { " · in ${region.pack.title}" }.orEmpty()
-        Text("${region.title}$via · ${formatBytes(region.bytes)}${if (region.installed) " · on the phone" else ""}", Modifier.padding(start = 8.dp))
+        val text = if (region.place != null) {
+            stringResource(R.string.onboarding_region_in, region.title, region.pack.title, formatBytes(region.bytes))
+        } else {
+            stringResource(R.string.onboarding_title_size, region.title, formatBytes(region.bytes))
+        }
+        Text(if (region.installed) stringResource(R.string.onboarding_on_the_phone, text) else text, Modifier.padding(start = 8.dp))
     }
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: OnboardingUi, actions: OnboardingActions) {
     if (ui.review.isEmpty) {
-        item { Text("Nothing to download yet. Home and the Library are ready; the Kiwix screen has everything else.", style = MaterialTheme.typography.bodyLarge) }
+        item { Text(stringResource(R.string.onboarding_review_empty), style = MaterialTheme.typography.bodyLarge) }
     }
     for (group in ui.review.groups) {
-        item(key = "g-${group.title}") { Text(group.title, Modifier.padding(top = 12.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+        item(key = "g-${group.title}") { Text(group.title.resolve(), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
         items(group.lines, key = { "r-${it.id}" }) { line ->
             Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                Text(line.title, Modifier.weight(1f))
+                Text(line.title.resolve(), Modifier.weight(1f))
                 Text(formatBytes(line.bytes), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -396,16 +426,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
         item {
             Column(Modifier.padding(top = 12.dp)) {
                 Text(
-                    "${formatBytes(ui.review.bytes)} of ${formatBytes(ui.review.freeBytes)} free",
+                    stringResource(R.string.onboarding_of_free, formatBytes(ui.review.bytes), formatBytes(ui.review.freeBytes)),
                     color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
                 )
                 OnboardingModel.quickFirstText(ui.review)?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(it.resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 // Home's card counts the files only; say what the difference is (Plan U3a Decision 5).
                 if (ui.review.indexBytes > 0L) {
                     Text(
-                        "Includes ${formatBytes(ui.review.indexBytes)} of indexes for Ask, fetched after their packs.",
+                        stringResource(R.string.onboarding_indexes, formatBytes(ui.review.indexBytes)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -414,19 +444,19 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
         }
         item {
             Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Download on Wi-Fi only", Modifier.weight(1f))
+                Text(stringResource(R.string.onboarding_wifi_only), Modifier.weight(1f))
                 Switch(checked = ui.wifiOnly, onCheckedChange = actions.onWifiOnly)
             }
         }
         if (ui.phone.volumes.size > 1) {
-            item { Text("Store on", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.labelLarge) }
+            item { Text(stringResource(R.string.onboarding_store_on), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.labelLarge) }
             items(ui.phone.volumes, key = { "v-${it.root.path}" }) { volume ->
                 Row(
                     Modifier.fillMaxWidth().selectable(selected = volume.root.path == ui.volumePath, role = Role.RadioButton) { actions.onChooseVolume(volume.root.path) }.padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(selected = volume.root.path == ui.volumePath, onClick = null)
-                    Text("${volume.label} · ${formatBytes(volume.freeBytes)} free", Modifier.padding(start = 8.dp))
+                    Text(stringResource(R.string.onboarding_volume_free, volume.label, formatBytes(volume.freeBytes)), Modifier.padding(start = 8.dp))
                 }
             }
         }
