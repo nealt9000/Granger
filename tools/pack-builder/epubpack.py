@@ -12,12 +12,12 @@ from html import escape
 from pathlib import Path
 
 import lxml.html
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 
 import covers
 import verse
-from chapters import PAGE_NUMBER, clean_title
+from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_case
 from zimpack import Work
 
 COLLECTION = "Granger Classics"
@@ -255,10 +255,29 @@ def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = Fal
     if line_numbers == "drop":
         _drop_page_numbers(soup, LINE_NUMBER)
     if reads_as_verse:
+        verse.flatten_word_export(soup)
         verse.mark(soup)
+    _quiet_headings(soup)
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
+
+
+def _quiet_headings(soup: BeautifulSoup) -> None:
+    """Headings in capitals in title case, without a closing full stop, as in the contents ("BOOK I." -> "Book I")."""
+    for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+        if not shouting(heading.get_text()):
+            continue
+        first = True
+        for node in list(heading.descendants):
+            if isinstance(node, Tag):
+                first = first or node.name == "br"  # a heading set on two lines starts again on the second
+            elif type(node) is NavigableString:
+                text, first = title_case(str(node), first)
+                node.replace_with(text)
+        last = next((s for s in reversed(heading.find_all(string=True)) if s.strip()), None)
+        if last is not None:
+            last.replace_with(drop_full_stop(str(last)))
 
 
 def _body(soup: BeautifulSoup) -> str:
@@ -287,7 +306,12 @@ def _page(title: str, language: str, body: str) -> str:
 
 
 def _titles(work: Work) -> list[str]:
-    return [clean_title(c.title, work.title, work.author, i) for i, c in enumerate(work.chapters)]
+    """Contents titles: the manifest's override for a page ("3" is the third), else its cleaned heading."""
+    missing = sorted(set(work.title_overrides) - {str(i + 1) for i in range(len(work.chapters))}, key=int)
+    if missing:
+        raise ValueError(f"titleOverrides name pages {missing}, but the book has {len(work.chapters)}")
+    return [work.title_overrides.get(str(i + 1)) or clean_title(c.title, work.title, work.author, i)
+            for i, c in enumerate(work.chapters)]
 
 
 def _nav(work: Work, meta: BookMeta, titles: list[str]) -> str:

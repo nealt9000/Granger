@@ -44,6 +44,8 @@ _BLOCKS = ["p", "div", "table", "ul", "ol", "dl", "blockquote", "pre", "h1", "h2
 _MAX_LINE = 90
 _TRAILING_NUMBER = re.compile(r"[ \t\xa0]{3,}(\[?\d{1,4}\]?)\s*$")
 _GLOSS = re.compile(r"(\S)[ \t]{6,}(\S.*)$", re.S)
+_WORD = re.compile(r"^xhtml_")
+_WORD_FONT = re.compile(r"^xhtml_font")
 _SPEAKER = re.compile(r"^[A-Z][A-Z .,'’-]{0,38}\.$")
 
 
@@ -65,6 +67,41 @@ def is_verse_block(block: Tag) -> bool:
     lines = [" ".join(_text(g).split()) for g in _groups(block)]
     lines = [line for line in lines if line]
     return bool(lines) and sum(map(len, lines)) / len(lines) <= _MAX_LINE
+
+
+def flatten_word_export(soup: BeautifulSoup) -> None:
+    """Undoes a word processor's layout in a page that has its `xhtml_` classes: `span.xhtml_font*` wrappers
+    (which hold the `<br>` lines, so the verse rule can't see them), single-column tables laid out as pages
+    (each cell becomes a `div`) and the `blockquote > div` pairs it nests for each level of indent."""
+    if soup.find(class_=_WORD) is None:
+        return
+    for span in soup.find_all("span", class_=_WORD_FONT):
+        if all(_WORD_FONT.match(c) for c in span["class"]):
+            span.unwrap()
+    for table in reversed(soup.find_all("table")):
+        rows = table.find_all("tr")
+        cells = [row.find_all(["td", "th"], recursive=False) for row in rows]
+        if (not any(c.startswith("xhtml_") for c in table.get("class") or ()) or not rows
+                or any(len(c) > 1 or (c and c[0].name == "th") for c in cells)):
+            continue
+        for cell in (c[0] for c in cells if c):
+            if not cell.get_text().strip() and cell.find(True) is None:
+                continue
+            div = soup.new_tag("div", attrs={k: v for k, v in cell.attrs.items() if k in ("id", "class", "style")})
+            for child in list(cell.contents):
+                div.append(child.extract())
+            table.insert_before(div)
+        table.decompose()
+    for quote in soup.find_all("blockquote"):
+        inner = _only_child(quote, "div")
+        if inner is not None and not inner.attrs:
+            inner.unwrap()
+            quote.unwrap()
+
+
+def _only_child(tag: Tag, name: str) -> Tag | None:
+    children = [c for c in tag.contents if not (isinstance(c, NavigableString) and not c.strip())]
+    return children[0] if len(children) == 1 and isinstance(children[0], Tag) and children[0].name == name else None
 
 
 def _text(nodes) -> str:

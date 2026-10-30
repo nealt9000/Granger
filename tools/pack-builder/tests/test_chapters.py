@@ -97,9 +97,9 @@ def test_a_heading_only_part_merges_into_the_next():
 def test_clean_title_drops_byline_and_contents():
     from chapters import clean_title
     assert clean_title("by William Shakespeare — Contents", "Hamlet", "William Shakespeare", 0) == "Part 1"
-    assert clean_title("ACT I — Scene II", "Hamlet", "William Shakespeare", 3) == "ACT I — Scene II"
+    assert clean_title("ACT I — Scene II", "Hamlet", "William Shakespeare", 3) == "Act I — Scene II"
     assert clean_title("Hamlet — Table of Contents", "Hamlet", "", 4) == "Part 5"
-    assert clean_title("Hamlet — ACT I", "Hamlet", "", 0) == "ACT I"
+    assert clean_title("Hamlet — ACT I", "Hamlet", "", 0) == "Act I"
 
 
 def test_clean_title_strips_numeric_markers():
@@ -176,3 +176,19 @@ def test_nested_wrappers_opened_at_headings_are_each_kept():
     assert len(chapters) == 4
     for c in chapters:
         assert dead_rules(c.html, [".volume .part h2", ".volume .part p"]) == []
+
+
+def test_clean_title_quietens_titles_in_capitals():
+    from chapters import clean_title
+    def t(title):
+        return clean_title(title, "Paradise Lost", "John Milton", 0)
+    assert t("BOOK I.") == "Book I"
+    assert t("CANTO THE SECOND.") == "Canto the Second"
+    assert t("THE ARGUMENT.") == "The Argument"
+    assert t("BOOK IV. THE ARGUMENT.") == "Book IV. The Argument"
+    assert t("LOVE’S LABOUR’S LOST — ’TIS PITY") == "Love’s Labour’s Lost — ’Tis Pity"
+    assert t("THE TROJAN-WOMEN") == "The Trojan-Women"
+    assert t("NOTES ON THE U.S.A.") == "Notes on the U.S.A."
+    assert t("QUESTIONS AND TOPICS (part 2)") == "Questions and Topics (part 2)"
+    assert t("SCENE I. A room in the castle.") == "SCENE I. A room in the castle."  # not all capitals
+    assert t("THE END...") == "The End..."

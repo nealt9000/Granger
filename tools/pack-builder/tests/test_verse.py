@@ -97,3 +97,52 @@ def test_an_anchor_on_an_empty_line_moves_onto_the_next_line():
     spans = page.p.find_all("span", recursive=False)
     assert [s["class"] for s in spans] == [["gv-l"], ["gv-gap"], ["gv-l"]]
     assert spans[2].find("a")["id"] == "l2"
+
+
+KEATS = """
+<table class="xhtml_table_width" style="border-spacing: 2px; width: 100%"><tbody>
+<tr><td style="text-align: center"><p><span class="xhtml_font_face xhtml_font_size xhtml_font"
+ style="font-size: medium">DEDICATION.<br/>
+<br/>
+        TO LEIGH HUNT, ESQ.</span></p></td></tr>
+<tr><td> </td></tr>
+<tr><td>
+<blockquote><div>
+<blockquote><div>
+<blockquote><div>
+<p><span class="xhtml_font_face xhtml_font_size xhtml_font" style="font-size: large">G</span><span
+ class="xhtml_font_face xhtml_font">lory
+              and loveliness have passed away;<br/>
+                For if we wander out in early morn,<br/>
+              Into the east, to meet the smiling day:</span></p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</td></tr></tbody></table>
+<table><tr><td>a</td></tr></table>
+<p><span class="xhtml_big">BIG</span></p>
+<blockquote><p>A real quotation.</p></blockquote>
+"""
+
+
+def test_a_word_export_is_flattened_so_its_verse_lines_are_found():
+    soup = BeautifulSoup(f"<div id='page'>{KEATS}</div>", "lxml")
+    verse.flatten_word_export(soup)
+    verse.mark(soup)
+    page = soup.find(id="page")
+    assert page.find("table", class_="xhtml_table_width") is None
+    assert page.find("table") is not None  # not a word processor's: kept
+    assert page.find(class_="xhtml_font") is None and page.find(class_="xhtml_big") is not None
+    cells = page.find_all("div", recursive=False)
+    assert cells[0]["style"] == "text-align: center" and len(cells) == 2  # the empty cell is gone
+    assert [q.get_text() for q in page.find_all("blockquote")] == ["A real quotation."]  # Word's indents go
+    assert lines(page.find_all("p")[1]) == [("Glory and loveliness have passed away;", None),
+                                             ("For if we wander out in early morn,", "margin-left: min(0.60em, 35%)"),
+                                             ("Into the east, to meet the smiling day:", None)]
+
+
+def test_a_page_with_no_word_processor_classes_is_left_alone():
+    html = "<table><tr><td><blockquote><div><p>a<br/>b<br/>c</p></div></blockquote></td></tr></table>"
+    soup = BeautifulSoup(f"<div id='page'>{html}</div>", "lxml")
+    verse.flatten_word_export(soup)
+    assert str(soup.find(id="page")) == f'<div id="page">{html}</div>'

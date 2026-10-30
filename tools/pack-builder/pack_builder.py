@@ -42,7 +42,7 @@ def _ebible_work(spec: WorkSpec, ebible: EBibleSource) -> zimpack.Work:
         print(f"WARNING {spec.where}: USFM markers dropped, text kept: {dict(unknown)}")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                         published=spec.published, section=spec.section, chapters=pages, styles=usfm.CSS,
-                        verse=spec.reads_as_verse)
+                        verse=spec.reads_as_verse, title_overrides=spec.title_overrides)
 
 
 def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EBibleSource | None = None) -> Path:
@@ -87,7 +87,8 @@ def _work(spec, source, ebible) -> zimpack.Work:
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                         published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
-                        line_numbers=spec.line_numbers, verse=spec.reads_as_verse)
+                        line_numbers=spec.line_numbers, verse=spec.reads_as_verse,
+                        title_overrides=spec.title_overrides)
 
 
 def _source_url(spec: WorkSpec) -> str:

@@ -41,12 +41,61 @@ def page_name(index: int) -> str:
 
 
 def clean_title(title: str, work_title: str, author: str, index: int) -> str:
-    """A chapter title for a reader's contents list: no byline, no "Contents", no repeat of the work's title."""
+    """A chapter title for a reader's contents list: no byline, no "Contents", no repeat of the work's title,
+    and no shouting ("BOOK I." reads "Book I")."""
     segments = (s.strip() for s in re.sub(r"<\d+>", "", title).split(" — "))
     kept = [s for s in segments
             if s and not re.match(r"by\s", s, re.I) and s.lower() not in ("contents", "table of contents")
             and s.lower() != work_title.strip().lower()]
-    return " — ".join(kept) or f"Part {index + 1}"
+    return " — ".join(map(_quieter, kept)) or f"Part {index + 1}"
+
+
+def _quieter(segment: str) -> str:
+    """One title segment, title-cased if it's in capitals; a size split's "(part 2)" doesn't count."""
+    m = _PART_SUFFIX.search(segment)
+    head, tail = (segment[:m.start()], m.group(0)) if m else (segment, "")
+    if not shouting(head):
+        return segment
+    return drop_full_stop(title_case(head)[0]) + tail
+
+
+_PART_SUFFIX = re.compile(r"\s*\(part \d+\)$")
+_ROMAN = re.compile(r"M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
+_SMALL_WORDS = {"a", "an", "and", "as", "at", "but", "by", "for", "from", "in", "into", "nor", "of", "on", "or",
+                "the", "to", "upon", "with"}
+_WORD = re.compile(r"[^\W\d_][^\s\-–—/]*")
+
+
+def shouting(text: str) -> bool:
+    """True when the text has capital letters and no small ones."""
+    return any(c.isupper() for c in text) and not any(c.islower() for c in text)
+
+
+def title_case(text: str, first: bool = True) -> tuple[str, bool]:
+    """Capitals to title case: "CANTO THE SECOND" -> "Canto the Second", keeping Roman numerals ("BOOK IV")
+    and initials ("U.S.A."). Also returns whether the next word starts a sentence, for text split across nodes."""
+    def word(m: re.Match) -> str:
+        nonlocal first
+        token = m.group(0)
+        bare = token.rstrip(".,;:!?’'\")»”")
+        starts, first = first, token.endswith((".", ":", "!", "?"))
+        if "." in bare or (bare and _ROMAN.fullmatch(bare)):  # initials ("U.S.A.") or a numeral
+            return token
+        if not starts and bare.lower() in _SMALL_WORDS:
+            return token.lower()
+        return token[0] + token[1:].lower()
+
+    if not any(c.isalpha() for c in text):
+        return text, first
+    return _WORD.sub(word, text), first
+
+
+def drop_full_stop(text: str) -> str:
+    """"Book I." -> "Book I", but not an ellipsis or the last stop of initials ("U.S.A.")."""
+    stripped = text.rstrip()
+    if stripped.endswith(".") and "." not in stripped.split()[-1][:-1]:
+        return stripped[:-1] + text[len(stripped):]
+    return text
 
 
 def split(body: Tag, split_at: str | None = None, max_bytes: int = 150_000,

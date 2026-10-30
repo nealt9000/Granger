@@ -44,6 +44,7 @@ class Work:
     styles: str = ""
     line_numbers: str = "margin"  # "margin" or "drop", for EPUBs
     verse: bool = False  # lines of verse become hanging blocks, for EPUBs
+    title_overrides: dict[str, str] = field(default_factory=dict)  # contents titles by page number, for EPUBs
 
 
 @dataclass

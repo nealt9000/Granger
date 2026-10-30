@@ -2,6 +2,7 @@ import io
 import re
 import zipfile
 
+import pytest
 from lxml import etree
 
 import epubpack
@@ -379,3 +380,23 @@ def test_a_prose_work_keeps_its_line_breaks_and_gets_no_wrapper_rules(tmp_path):
     assert "gv" not in z.read("OEBPS/c001.xhtml").decode()
     css = z.read("OEBPS/book.css").decode()
     assert ".gv-l {" in css and "div.stanza" not in css
+
+
+def test_headings_in_capitals_are_quietened_in_the_page(tmp_path):
+    page = chapter1(tmp_path, '<h2><a id="b1"></a><b>BOOK I.</b></h2><h3>SPENSER’S<br/>THE FAERIE QUEENE</h3>'
+                              '<h3>SCENE I. A room.</h3><p>THE END.</p>')
+    assert '<h2><a id="b1"/><b>Book I</b></h2>' in page
+    assert "<h3>Spenser’s<br/>The Faerie Queene</h3>" in page
+    assert "<h3>SCENE I. A room.</h3>" in page and "<p>THE END.</p>" in page
+
+
+def test_title_overrides_name_pages_in_the_contents(tmp_path):
+    w = work(html="".join(f"<h2>CANTO {n}</h2><p>t</p>" for n in ("I", "II", "III")))
+    w.title_overrides = {"2": "Cantos II–IV"}
+    z = build(tmp_path, w)
+    nav = z.read("OEBPS/nav.xhtml").decode()
+    assert ">Canto I</a>" in nav and ">Cantos II–IV</a>" in nav and ">Canto III</a>" in nav
+    assert "<title>The Modern Book — Cantos II–IV</title>" in z.read("OEBPS/c002.xhtml").decode()
+    w.title_overrides = {"4": "Canto IV"}  # the book has three pages: the manifest is out of date
+    with pytest.raises(ValueError, match=r"pages \['4'\], but the book has 3"):
+        build(tmp_path, w)
