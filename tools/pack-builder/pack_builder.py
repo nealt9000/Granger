@@ -79,9 +79,11 @@ def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str) -> l
             meta = epubpack.BookMeta(
                 id=epubpack.book_id(spec.slug), title=epubpack.display_title(work), author=spec.author,
                 translator=spec.translator, published=spec.published, section_title=sections[spec.section],
-                language="en", source_url=f"https://www.gutenberg.org/ebooks/{spec.gutenberg}", date=date)
+                language="en", source_url=f"https://www.gutenberg.org/ebooks/{spec.gutenberg}", date=date,
+                source_line=f"From Project Gutenberg ebook #{spec.gutenberg}")
             path = Path(out) / f"{meta.id}_{date}.epub"
-            epubpack.write_epub(path, work, meta, covers.cover_jpeg(meta.title, spec.author))
+            cover = covers.cover_jpeg(spec.title, spec.author, spec.translator, spec.section, sections[spec.section])
+            epubpack.write_epub(path, work, meta, cover)
         except Exception as error:
             raise BuildError(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         files.append(path)

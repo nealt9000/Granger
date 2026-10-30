@@ -15,11 +15,13 @@ import lxml.html
 from bs4 import BeautifulSoup
 from lxml import etree
 
+import covers
 from chapters import PAGE_NUMBER, clean_title
 from zimpack import Work
 
 COLLECTION = "Granger Classics"
 RIGHTS = "Public domain in the USA."
+TAGLINE = "The world’s knowledge. Yours to keep."
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
 
@@ -35,6 +37,14 @@ td, th { padding: .2em .5em; vertical-align: top; }
 img { max-width: 100%; }
 .cover { text-align: center; margin: 0; padding: 0; }
 .cover img { max-height: 100vh; }
+.colophon { text-align: center; margin: 3em 0 0; }
+.colophon svg { width: 5em; height: 5em; }
+.colophon .collection { font-variant: small-caps; letter-spacing: .14em; margin: .4em 0 2.5em; }
+.colophon h1 { margin: 0 0 .4em; }
+.colophon .author { font-style: italic; }
+.colophon .facts { margin-top: 2.5em; font-size: .9em; }
+.colophon .facts p { margin: 0 0 .3em; }
+.colophon .tagline { margin-top: 2.5em; font-style: italic; }
 """.strip()
 
 LINE_NUMBER = {"linenum", "linenumber", "lineno", "line-number", "linenr"}
@@ -74,6 +84,7 @@ class BookMeta:
     language: str
     source_url: str
     date: str
+    source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"
 
 
 def book_id(slug: str) -> str:
@@ -273,7 +284,8 @@ def _nav(work: Work, meta: BookMeta, titles: list[str]) -> str:
     body = (f'<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>{items}</ol></nav>'
             '<nav epub:type="landmarks" hidden="hidden"><h1>Landmarks</h1><ol>'
             '<li><a epub:type="cover" href="cover.xhtml">Cover</a></li>'
-            f'<li><a epub:type="bodymatter" href="{first}">Start of text</a></li></ol></nav>')
+            f'<li><a epub:type="bodymatter" href="{first}">Start of text</a></li>'
+            '<li><a epub:type="backmatter" href="colophon.xhtml">Colophon</a></li></ol></nav>')
     return _page(display_title(work), meta.language, body)
 
 
@@ -301,10 +313,12 @@ def _opf(work: Work, meta: BookMeta, count: int) -> str:
                 '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>'
                 '<item id="css" href="book.css" media-type="text/css"/>'
                 '<item id="cover-image" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>'
-                '<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>')
+                '<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>'
+                '<item id="colophon" href="colophon.xhtml" media-type="application/xhtml+xml" properties="svg"/>')
     manifest += "".join(f'<item id="c{i + 1:03d}" href="{chapter_href(i)}" media-type="application/xhtml+xml"/>'
                         for i in range(count))
-    spine = '<itemref idref="cover"/>' + "".join(f'<itemref idref="c{i + 1:03d}"/>' for i in range(count))
+    spine = ('<itemref idref="cover"/>' + "".join(f'<itemref idref="c{i + 1:03d}"/>' for i in range(count))
+             + '<itemref idref="colophon"/>')
     return (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">'
@@ -319,6 +333,33 @@ def _opf(work: Work, meta: BookMeta, count: int) -> str:
         '<meta refines="#collection" property="collection-type">set</meta>'
         f'</metadata><manifest>{manifest}</manifest><spine toc="ncx">{spine}</spine>'
         '<guide><reference type="cover" title="Cover" href="cover.xhtml"/></guide></package>')
+
+
+def _owl_svg() -> str:
+    """The owl inline: the mark in the text colour so it suits any reader theme, lantern eyes, ink pupils."""
+    view, (eyes, pupils, mark) = covers.owl_paths()
+    paths = "".join(f'<path fill="{fill}" fill-rule="evenodd" d="{d}"/>'
+                    for d, fill in ((mark, "currentColor"), (eyes, covers.LANTERN), (pupils, "#1F1813")))
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {view:g} {view:g}" role="img" '
+            f'aria-label="Granger">{paths}</svg>')
+
+
+def _colophon(work: Work, meta: BookMeta) -> str:
+    """The last page: the owl, the collection, the book and where its text came from."""
+    lines = [f"<h1>{escape(work.title, quote=False)}</h1>"]
+    if meta.author:
+        lines.append(f'<p class="author">{escape(meta.author, quote=False)}</p>')
+    if meta.translator:
+        lines.append(f"<p>Translated by {escape(meta.translator, quote=False)}</p>")
+    facts = [f"This {'translation' if meta.translator else 'edition'} first published {meta.published}"]
+    if meta.source_line:
+        facts.append(meta.source_line)
+    facts.append(RIGHTS)
+    body = (f'<section class="colophon" epub:type="colophon">{_owl_svg()}'
+            f'<p class="collection">{COLLECTION}</p>{"".join(lines)}'
+            f'<div class="facts">{"".join(f"<p>{escape(f, quote=False)}</p>" for f in facts)}</div>'
+            f'<p class="tagline">{escape(TAGLINE, quote=False)}</p></section>')
+    return _page(f"{display_title(work)} — Colophon", meta.language, body)
 
 
 def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None:
@@ -337,6 +378,7 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
         ("OEBPS/cover.jpg", cover_jpeg),
         ("OEBPS/cover.xhtml", _page(title, meta.language,
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
+        ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
     soups = [_prepare(chapter.html, work.line_numbers) for chapter in work.chapters]
     _unwrap_dangling_links(soups)

@@ -202,7 +202,7 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
 
 ### Part 2: the brand
 
-- [ ] **Task 7: covers and colophon** (Decisions 4 and 5)
+- [x] **Task 7: covers and colophon** (Decisions 4 and 5)
   - Rewrite `covers.cover_jpeg(title, author, translator, section_id, section_title)` from `docs/superpowers/brand/2026-10-30-classics-covers/sections.py`, with grounds keyed by section id. Wrap long author and translator lines.
   - Add Spectral and its OFL licence to `assets/fonts/`. Remove `flame-mark.png` and EB Garamond.
   - `epubpack` writes `colophon.xhtml` (spine after the text, landmark `backmatter`) and the OPF lists it.
@@ -212,6 +212,12 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
     - the longest title, author and translator in the manifest fit without clipping;
     - the colophon shows the Gutenberg number.
   - Render a contact sheet of every cover to `build/` and look at it before going on.
+  - Done 2026-10-30 on `gc-covers`. Deviations and notes:
+    - The owl rasteriser is a small pure-Python port (absolute M/L/H/V/C/Z, Béziers in 12 steps, even-odd), so no fontTools or numpy; its masks match `render_svg.mask` pixel for pixel. The SVG is copied to `assets/granger-mark-owl.svg`.
+    - Wrapping goes beyond the draft: a title never leaves "The", "of" and the like alone on a line, prefers not to end a line on an article or preposition ("The Wealth / of Nations"), and is balanced, so "The King James Bible" now reads "The King / James Bible" rather than the board's "The King James / Bible". Names wrap in a wider box (88%) and are balanced over two lines. A long block first rises (to 170 px), then the title shrinks, then the names shrink; nothing is cut and there is no ellipsis.
+    - The colophon's owl is inline SVG: the mark in `currentColor` so it follows the reader theme, lantern eyes, ink pupils. Its source line is `BookMeta.source_line`, set by the caller ("From Project Gutenberg ebook #N"), so an eBible work can name its own. The year reads "This edition first published N" (or "This translation…"), since `published` is the reproduced edition's year.
+    - The contact sheet went to the session scratchpad rather than `build/`. epubcheck isn't installed on this Mac (no jar, no Java runtime on the path); Task 10 runs it.
+    - Manifest data seen on the sheet, for Task 8: many novel titles lack their leading "The" (Jungle Book, Secret Garden, Scarlet Letter, Moonstone, Time Machine, …), and Scarlet Pimpernel's author reads "Emmuska Orczy Orczy".
 
 ### Part 3: the collection
 
