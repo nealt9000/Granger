@@ -198,10 +198,21 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
   - Apply the replacement, additions, splits into volumes, metadata fixes and the new description.
   - Run `validate`, which runs the rights guard.
   - Build the new works and look at each one's first chapter and contents.
-- [ ] **Task 9: eBible Bibles** (Decision 8)
+- [x] **Task 9: eBible Bibles** (Decision 8)
   - Add `EBibleSource` (cached) and `usfm.py` with tests on a small USFM fixture: chapters, verse numbers, `\q1`/`\q2` lines, `\s` headings, and footnotes dropped.
   - `build-epubs` and `describe-epubs` send `source: ebible` rows through it.
   - Build WEB, BSB and JPS. Check Genesis 1, Psalm 23, Isaiah 40, Matthew 5 and, in WEB, Tobit 1 and Sirach 1.
+  - **Done 2026-10-30 (gc-ebible).** Source: `https://eBible.org/Scriptures/<id>_usfm.zip`, linked from each details page; the zip and the details page are cached in `~/.cache/granger/ebible/<id>/`. Only flat `NN-BOOK<id>.usfm` members are read, straight into memory. `validate` checks that each eBible row's `licence` quotes the dedication with its URL and that the details page still says "Public Domain"; eBible rows skip the RDF and 1930 checks.
+  - `engwebu` does include the Deuterocanon (81 books plus the glossary), so the plan's id stands.
+  - Built: WEB 1.9 MB, 103 pages; BSB 1.6 MB, 87 pages; JPS 1.1 MB, 52 pages. The largest page is 148 KB. Every `\v` appears as a verse number except 29 WEB verses that are only a footnote (for example Acts 8:37 and Sirach 1:5); these are dropped with the footnotes.
+  - **Deviations:**
+    - A book over the page budget splits at chapter boundaries into even pages, such as "Psalms 1–39" and "Isaiah 30–47".
+    - In the Psalms the chapter heading reads "Psalm N", from the source's `\cl` or a default; elsewhere it reads "Chapter N". A one-chapter book (Obadiah, Jude, Psalm 151) has no chapter heading.
+    - `\ms` ("BOOK 1") sits above the chapter heading, and `\d` psalm titles are kept in italics. `\r` parallel-passage lines are dropped, like cross-references.
+    - The WEB preface (FRT) is skipped. The WEB glossary (GLO) is kept as the last page.
+    - Verse markup is written inline, with the R1 classes and CSS carried in the work's styles, so it doesn't depend on Task 4.
+    - JPS sets its poetry as prose, so its Psalms have no verse lines. Its books follow eBible's order, which is the Christian Old Testament order, not the Tanakh's.
+    - epubcheck isn't installed on this Mac. The XHTML parses as XML and has no duplicate ids; run epubcheck in Task 10.
 
 ### Part 4: release
 
