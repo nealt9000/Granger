@@ -46,7 +46,7 @@
 ### Task 3: Train
 
 - [ ] Two pods, a fresh volume, upload both sets (~1 GB). `pod_finish.sh` also keeps the best full checkpoint, rsynced before the pod is removed.
-- [ ] 800 epochs from `lj-med_1000.ckpt`, two speakers. Listen to the e400 snapshot early (both slots, "After the rain" split by hand) before letting it run to the end.
+- [x] 800 epochs from `lj-med_1000.ckpt`, two speakers. Listen to the e400 snapshot early (both slots, "After the rain" split by hand) before letting it run to the end. *2026-10-30: the volume filled at ~e475/e531 (full 0.9 GB snapshots every 25 epochs, two runs on one 50 GB volume); slimmed, resumed into version_1, a pod-side slimmer now slims each snapshot. e400 (`v4/listen-e400/`, `say.py --dialogue`): the dialogue slot learned a pitch level (Nanny +1.1 st, teacher +1.4; Professor +1.3 st, teacher −0.3), not pace, range or inflection. **Neal: deadpan straight through, no progress toward the goal.** Runs left to finish (~$3) for the full checkpoint; pods removed by the watchers.*
 
 ### Task 4: The app reads quotes in the dialogue slot (`v4-voice-settings`)
 
@@ -66,5 +66,5 @@ Shared with the U3c walkthrough. On 2026-10-29 the installed build was `v4-phone
 
 ## Not this plan
 
-- **KittenTTS** (StyleTTS2 family, Apache-2.0): checked 2026-10-29 for its delivery. Pixel 6 RTF screen on, 2 threads: nano 0.20, micro 0.39, mini 0.82, against our Piper's 0.10; only nano fits screen off. No training code is public (custom voices are KittenML's paid service), so it can't take our voices; it's evidence for what the StyleTTS2 family's delivery buys, if Neal's ear says it is better.
+- **KittenTTS** (StyleTTS2 family, Apache-2.0): checked 2026-10-29 for its delivery. Pixel 6 RTF screen on, 2 threads: nano 0.20, micro 0.39, mini 0.82, against our Piper's 0.10; only nano fits screen off. No training code is public (custom voices are KittenML's paid service), so it can't take our voices; it's evidence for what the StyleTTS2 family's delivery buys, if Neal's ear says it is better. *Neal 2026-10-30: flat straight through on all voices, slightly behind our round-2 voices on the phone; so a small StyleTTS2 student is not expected to fix delivery either.*
 - Piper high: 8× medium's cost on the Pixel (RTF 0.99 on, 1.38 off), out.
