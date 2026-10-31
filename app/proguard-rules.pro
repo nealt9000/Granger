@@ -5,6 +5,8 @@
 -keep class org.kiwix.** { *; }
 # sherpa-onnx (the voice); its JNI reads config fields by name
 -keep class com.k2fsa.sherpa.onnx.** { *; }
+# ...and calls our chunk callback by name and signature (SherpaTts.chunkCallback); read-aloud crashed without it
+-keepclassmembers class * { java.lang.Integer invoke(float[]); }
 # LiteRT-LM (the on-phone model)
 -keep class com.google.ai.edge.litertlm.** { *; }
 -dontwarn com.google.ai.edge.litertlm.**
