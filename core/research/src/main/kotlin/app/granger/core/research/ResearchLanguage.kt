@@ -86,6 +86,43 @@ enum class ResearchLanguage(val tag: String) {
             }
         }
 
+        /** Whether a question in [languages] matches words with [foldVowels] on both sides: when Spanish is among them. */
+        fun foldsVowels(languages: List<ResearchLanguage>): Boolean = ES in languages
+
+        /**
+         * [text] with á é í ó ú ü as a e i o u (capitals as capitals): how keyword and passage words are matched for a
+         * Spanish question ([foldsVowels]), since phones type "quien fundo Bogota" for "quién fundó Bogotá". ñ stays ñ
+         * ("año" isn't "ano"), case and every other mark are left alone, and a decomposed acute or diaeresis after a
+         * vowel goes too. [text] itself when there's nothing to fold, so most text costs one scan and no copy.
+         */
+        fun foldVowels(text: String): String {
+            var i = 0
+            while (i < text.length && !foldable(text, i)) i++
+            if (i == text.length) return text
+            val out = StringBuilder(text.length).append(text, 0, i)
+            while (i < text.length) {
+                val c = text[i]
+                when {
+                    !foldable(text, i) -> out.append(c)
+                    c == ACUTE || c == DIAERESIS -> Unit
+                    else -> out.append(VOWELS[FOLDABLE.indexOf(c)])
+                }
+                i++
+            }
+            return out.toString()
+        }
+
+        private const val FOLDABLE = "áéíóúüÁÉÍÓÚÜ"
+        private const val VOWELS = "aeiouuAEIOUU"
+        private const val ACUTE = '\u0301'
+        private const val DIAERESIS = '\u0308'
+
+        private fun foldable(text: String, i: Int): Boolean {
+            val c = text[i]
+            if (c < 'Á') return false // ASCII and most Latin-1: the common case, one comparison
+            return if (c == ACUTE || c == DIAERESIS) i > 0 && text[i - 1] in "aeiouAEIOU" else FOLDABLE.indexOf(c) >= 0
+        }
+
         /** The main language of [question]: the first of [of]. */
         fun main(question: String): ResearchLanguage = of(question).first()
     }
