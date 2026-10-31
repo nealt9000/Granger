@@ -54,6 +54,15 @@ class DownloadNotificationsTest {
         assertThat(notificationText(res, QueueSummary())).isEqualTo("Downloading" to "Starting…")
     }
 
+    /** Plan L2 Task 3 Step 5: under Spanish the notification reads in Spanish. */
+    @Config(qualifiers = "es")
+    @Test fun inSpanish() {
+        assertThat(notificationText(res, summary)).isEqualTo("Descargando Wikipedia Top" to "3 de 14 · faltan unos 25 min")
+        assertThat(notificationText(res, QueueSummary())).isEqualTo("Descargando" to "Empezando…")
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        assertThat(DownloadNotifications(context).build(summary).actions.single().title.toString()).isEqualTo("Pausar")
+    }
+
     @Test fun plainWordsFromResources() {
         assertThat(QueueText.timeLeft(res, 20_000)).isEqualTo("less than a minute")
         assertThat(QueueText.timeLeft(res, 4 * 60_000L)).isEqualTo("about 4 min")

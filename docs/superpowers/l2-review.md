@@ -6,8 +6,8 @@ This is Claude's draft (Plan L2, Task 1). Please change anything that reads as a
 
 ## How to see the app in Spanish
 
-- **Now:** set the phone's language to Español (Settings → System → Languages). Granger follows it.
-- **Once Plan L2 Task 3 lands:** Granger → Settings → Appearance → Language → Español, or on Android 13+ the phone's Settings → Apps → Granger → Language. Only Granger changes.
+- **Just Granger:** Granger → Settings → Appearance → Language → Español. On Android 13+ the phone's Settings → Apps → Granger → Language does the same. The rest of the phone stays as it is.
+- **The whole phone:** set the phone's language to Español (Settings → System → Languages). Granger follows it while its Language is "Follow the phone".
 - Catalog copy (pack titles, knowledge areas such as "Medicine", use-case blurbs, the names of the Efficient and Comprehensive starts) and the packs' own content stay in English until Plan L3. You will see English there; that's expected.
 - Dates, numbers and sizes ("1,5 GB", "10 ene 2025") are checked in Task 4, so leave them for now.
 
@@ -107,6 +107,7 @@ Words the draft added, used the same way everywhere:
 | `music_sort_date_added` | Fecha en que se agregó | A sort order. |
 | `audiobooks_missing` | No encontrado | A book whose files are gone. |
 | `ebook_tab_gone`, `reader_tab_gone` | Este marcador se quitó. | The English says "bookmark", but this shows when the rail item that opened the page is gone. The draft follows the English; it may change. |
+| `settings_language_system` | Igual que el teléfono (Español) | Matches the theme's "Igual que el teléfono". The language in brackets is the phone's, named in itself. |
 | `*_percent` | 25% | No space before %, as most Latin American apps write it; RAE prefers "25 %". |
 | `library_*searchable*`, `library_full_text` | Hacer todos buscables…; Buscable por completo; 312 buscables por completo | *Buscable* is used in software but isn't in every dictionary. The alternative is longer: "se puede buscar en todo el texto". |
 | `library_new_media_type` | Nuevo tipo de contenido | A top-level group such as Books or Music. *Tipo de medio* is the literal, but reads as technical. |

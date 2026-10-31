@@ -66,6 +66,10 @@ fun SettingsScreen(
     onMediaSettings: (() -> Unit)? = null,
     /** The phone holds an audiobook: the row reads "Music & audiobooks", else "Music" (Plan U2 Decision 7). */
     audiobooks: Boolean = false,
+    /** Settings → Appearance → Language (Plan L2 Task 3); null leaves the row out. */
+    onLanguage: (() -> Unit)? = null,
+    /** The language row's summary: the current choice, as the Language screen names it. */
+    languageSummary: String = "",
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -141,6 +145,7 @@ fun SettingsScreen(
             }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
+                if (onLanguage != null) LinkRow(stringResource(R.string.settings_language), languageSummary, onLanguage)
                 HorizontalDivider()
             }
             item(key = "about") {
@@ -261,7 +266,7 @@ internal fun AppearanceSection(
 }
 
 @Composable
-private fun <T> RadioGroup(choices: List<T>, chosen: T, label: @Composable (T) -> String, onChoose: (T) -> Unit) {
+internal fun <T> RadioGroup(choices: List<T>, chosen: T, label: @Composable (T) -> String, onChoose: (T) -> Unit) {
     Column(Modifier.selectableGroup()) {
         for (choice in choices) {
             Row(

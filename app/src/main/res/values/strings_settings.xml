@@ -43,6 +43,15 @@
     <string name="settings_theme_night">Night (dark)</string>
     <string name="settings_open_to_resume">Where I left off</string>
     <string name="settings_open_to_home">Home</string>
+    <!-- Settings → Appearance → Language (Plan L2): the row, and the screen it opens. -->
+    <string name="settings_language">Language</string>
+    <!-- The Language screen's section for the app's own words (Plan L3 adds one for the library's languages). -->
+    <string name="settings_language_app">App language</string>
+    <!-- %1$s is the phone's language, named in itself, such as Español. -->
+    <string name="settings_language_system">Follow the phone (%1$s)</string>
+    <!-- Each language is named in itself, whatever the app is in. -->
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_spanish" translatable="false">Español</string>
 
     <!-- Storage. %1$s is free space, %2$s what Granger uses, both like "2.0 GB". -->
     <string name="settings_storage_usage">%1$s free · Granger uses %2$s</string>

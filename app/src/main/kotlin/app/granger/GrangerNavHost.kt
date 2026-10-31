@@ -109,7 +109,9 @@ import app.granger.settings.MediaSettingsScreen
 import app.granger.settings.ResolverFolderGrants
 import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
+import app.granger.settings.LanguageSettingsScreen
 import app.granger.settings.VoiceSettingsScreen
+import app.granger.settings.languageLabel
 import app.granger.settings.VoiceSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -356,6 +358,8 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 @Serializable object DownloadsRoute
 /** Settings → Voice (Plan V1). */
 @Serializable object VoiceRoute
+/** Settings → Appearance → Language (Plan L2 Task 3). */
+@Serializable object LanguageRoute
 
 /**
  * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
@@ -384,7 +388,7 @@ internal fun railToolOf(
         destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() || destination.hasRoute<LanguageRoute>() -> RailTool.SETTINGS
     else -> null
 }
 
@@ -1147,7 +1151,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ?.title ?: stringResource(R.string.settings_voice_none),
                     onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
                     audiobooks = remember { container.shelves.audioShelves }.collectAsStateWithLifecycle(AudioShelves.NONE).value.audiobooks,
+                    onLanguage = { nav.navigate(LanguageRoute) { launchSingleTop = true } },
+                    languageSummary = languageLabel(
+                        container.appLanguages.language.collectAsStateWithLifecycle().value, container.appLanguages.phoneLocale(),
+                    ),
                 )
+            }
+            composable<LanguageRoute> {
+                LanguageSettingsScreen(container.appLanguages, onBack = { nav.popBackStack() })
             }
             composable<MediaSettingsRoute> {
                 MediaSettingsScreen(

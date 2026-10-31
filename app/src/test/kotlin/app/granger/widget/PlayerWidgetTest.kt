@@ -56,4 +56,14 @@ class PlayerWidgetTest {
         onNode(hasText("Open Granger")).assertExists()
         onNode(hasTestTag(PlayerWidgetTags.PLAY_PAUSE)).assertDoesNotExist()
     }
+
+    /** Plan L2 Task 3 Step 5: under Spanish the widget reads in Spanish. */
+    @Config(qualifiers = "es")
+    @Test fun emptyInSpanish() = runGlanceAppWidgetUnitTest {
+        setContext(context)
+        setAppWidgetSize(PlayerWidget.MEDIUM)
+        provideComposable { PlayerWidgetContent(WidgetModel.EMPTY, cover = null) }
+        onNode(hasText("No se está reproduciendo nada")).assertExists()
+        onNode(hasText("Abrir Granger")).assertExists()
+    }
 }

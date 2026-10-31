@@ -37,6 +37,11 @@ android {
             }
         }
     }
+    // Android 13+ lists the app's languages (English, Español) in Settings → Apps → Granger → Language (Plan L2
+    // Task 3). The locales come from the values-* folders; res/resources.properties names the default's.
+    androidResources {
+        generateLocaleConfig = true
+    }
     buildFeatures {
         compose = true
         buildConfig = true

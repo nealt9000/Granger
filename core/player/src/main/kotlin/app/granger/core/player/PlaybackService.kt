@@ -1,7 +1,9 @@
 package app.granger.core.player
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.util.Log
 import androidx.media3.common.AudioAttributes
@@ -94,6 +96,14 @@ class PlaybackService : MediaLibraryService() {
     private var session: MediaLibrarySession? = null
     private var headset: HeadsetAutoplay? = null
     private val callbackScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /**
+     * In the app's language (Plan L2 Task 3). On API 33+ Android gives the service the per-app language itself; below
+     * 33 the app puts the language chosen in its Settings on the application's resources, and the service follows them.
+     */
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(followAppLocales(base))
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -477,4 +487,12 @@ internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine
             Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM, Player.COMMAND_SEEK_TO_MEDIA_ITEM, Player.COMMAND_SEEK_TO_DEFAULT_POSITION,
         )
     }
+}
+
+/** [base], or [base] in the application's locales when they differ (the app's own language below API 33). */
+internal fun followAppLocales(base: Context): Context {
+    val app = base.applicationContext ?: return base
+    val locales = app.resources.configuration.locales
+    if (locales == base.resources.configuration.locales) return base
+    return base.createConfigurationContext(Configuration(base.resources.configuration).apply { setLocales(locales) })
 }

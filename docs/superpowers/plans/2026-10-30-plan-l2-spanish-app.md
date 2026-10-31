@@ -94,20 +94,20 @@ Use these words everywhere. If a string needs a different word, keep the glossar
 
 ## Task 3: The language setting
 
-- [ ] **Step 1: Locale config.** Turn on `androidResources { generateLocaleConfig = true }` and add `res/resources.properties` (`unqualifiedResLocale=en-US`). Then Android 13+'s system screen (Settings → Apps → Granger → Language) lists English and Español.
-- [ ] **Step 2: `AppLanguage`** (in `settings/`), with Follow the phone (default), English and Español.
+- [x] **Step 1: Locale config.** Turn on `androidResources { generateLocaleConfig = true }` and add `res/resources.properties` (`unqualifiedResLocale=en-US`). Then Android 13+'s system screen (Settings → Apps → Granger → Language) lists English and Español.
+- [x] **Step 2: `AppLanguage`** (in `settings/`), with Follow the phone (default), English and Español.
   - **API 33+:** use `LocaleManager.applicationLocales`.
   - **API 29–32:** store the choice in `SharedPreferences`, and wrap the context in `attachBaseContext` for `MainActivity` and the services that build notifications (the playback service, download workers). Read the stored value through `AppLanguage`.
   - First check whether `androidx.appcompat`'s `AppCompatDelegate.setApplicationLocales` covers `FragmentActivity` on 29–32 with less code. If it does, use it; otherwise use the wrapper.
-- [ ] **Step 3: Settings → Appearance → Language.**
+- [x] **Step 3: Settings → Appearance → Language.**
   - The choices show in their own language ("English", "Español"). Follow the phone shows the phone's current language.
   - A change applies at once by recreating the activity. Nothing else is reset.
-- [ ] **Step 4:** Tests:
+- [x] **Step 4:** Tests:
   - The choice persists.
   - Follow the phone clears the override.
   - On API 33+ the platform call is made; on API 29–32 the wrapper sets the locale.
-- [ ] **Step 5:** Run the widget and the notifications under Spanish in Robolectric. Their text resolves in Spanish.
-- [ ] **Step 6:** Commit.
+- [x] **Step 5:** Run the widget and the notifications under Spanish in Robolectric. Their text resolves in Spanish.
+- [x] **Step 6:** Commit.
 
 ## Task 4: Fit and formats (desk)
 

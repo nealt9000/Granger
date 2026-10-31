@@ -34,6 +34,9 @@
     <string name="settings_theme_night">Noche (oscuro)</string>
     <string name="settings_open_to_resume">Donde lo dejé</string>
     <string name="settings_open_to_home">Inicio</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_app">Idioma de la app</string>
+    <string name="settings_language_system">Igual que el teléfono (%1$s)</string>
 
     <string name="settings_storage_usage">%1$s libres · Granger usa %2$s</string>
     <string name="settings_storage_usage_queued">%1$s libres · Granger usa %2$s · %3$s por descargar</string>
