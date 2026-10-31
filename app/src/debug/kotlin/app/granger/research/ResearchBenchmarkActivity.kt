@@ -30,6 +30,7 @@ import app.granger.core.research.PassageEmbedder
 import app.granger.core.research.PassageFinder
 import app.granger.core.research.Ranking
 import app.granger.core.research.ResearchEvent
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.ResearchModels
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.ResearchRequest
@@ -245,13 +246,18 @@ class ResearchBenchmarkActivity : ComponentActivity() {
         /** The top score under Plan 8's first scoring (a keyword counted only with all its words), for comparison. */
         var wholeKeywordTop: Double? = null
 
-        fun finder(finder: PassageFinder) = PassageFinder { words ->
+        fun finder(finder: PassageFinder) = object : PassageFinder {
+            override suspend fun find(keywords: List<String>) = find(keywords, Keywords.ENGLISH)
+            override suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>) = record(finder, keywords, languages)
+        }
+
+        private suspend fun record(finder: PassageFinder, words: List<String>, languages: List<ResearchLanguage>): List<Passage> {
             keywords = words
             val start = SystemClock.elapsedRealtime()
-            finder.find(words).also { found ->
+            return finder.find(words, languages).also { found ->
                 val ms = SystemClock.elapsedRealtime() - start
                 Log.i(TAG, "Research: (b)    find $ms ms, ${found.size} passages, ${found.groupingBy { it.kind }.eachCount()}")
-                val score = LexicalScore.scorer(words)
+                val score = LexicalScore.scorer(words, languages)
                 found.forEach { lexical += score(it) to it.text }
                 dump?.let { file ->
                     val rows = found.joinToString(",") { p ->

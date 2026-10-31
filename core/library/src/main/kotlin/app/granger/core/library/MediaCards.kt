@@ -2,6 +2,7 @@ package app.granger.core.library
 
 import app.granger.core.research.Keywords
 import app.granger.core.research.Passage
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.SourceMeta
 
@@ -50,10 +51,10 @@ object MediaCards {
     /**
      * The song or chapter whose title holds the most of the keywords' words (whole words, folded; stopwords and words
      * under three letters left out); ties go to the earliest, and null when no title holds any (only the album or book
-     * matched).
+     * matched). [languages] are the question's, whose stopwords those are: English alone by default.
      */
-    fun bestPart(work: MediaWork, keywords: List<String>): Int? {
-        val wanted = keywords.flatMap(MediaText::words).filter { it.length >= 3 && !Keywords.isStopword(it) }.toSet()
+    fun bestPart(work: MediaWork, keywords: List<String>, languages: List<ResearchLanguage> = Keywords.ENGLISH): Int? {
+        val wanted = keywords.flatMap(MediaText::words).filter { it.length >= 3 && !Keywords.isStopword(it, languages) }.toSet()
         if (wanted.isEmpty()) return null
         var best: Int? = null
         var bestCount = 0

@@ -6,6 +6,7 @@ import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Passage
 import app.granger.core.research.PassageFinder
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.SourceMeta
 import app.granger.core.zim.ZimArchive
@@ -65,7 +66,10 @@ class LibraryPassageFinder(
     private val packMs = ConcurrentHashMap<String, Long>()
     @Volatile private var fulltextMs = 0L
 
-    override suspend fun find(keywords: List<String>): List<Passage> {
+    override suspend fun find(keywords: List<String>): List<Passage> = find(keywords, Keywords.ENGLISH)
+
+    /** [languages] are the question's: whose stopwords the book, card and media matching leave out (English by default). */
+    override suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> {
         lastTimings = null
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
@@ -80,9 +84,9 @@ class LibraryPassageFinder(
                     SliceDedupe.apply(found, packs, slices, library::archive, { p -> p.sourceId.takeIf { p.kind == SourceKind.ARTICLE } }, { it.location })
                 }
             }
-            val books = async { timed { books(words, collections) } }
-            val cards = async { timed { cards(words, packs, collections) } }
-            val media = async { timed { mediaCards(words) } }
+            val books = async { timed { books(words, collections, languages) } }
+            val cards = async { timed { cards(words, packs, collections, languages) } }
+            val media = async { timed { mediaCards(words, languages) } }
             val (a, b, c, m) = awaitAll(articles, books, cards, media)
             lastTimings = KeywordTimings(fulltextMs, a.second - fulltextMs, b.second, c.second, m.second, packMs.toMap())
             a.first + b.first + c.first + m.first
@@ -116,7 +120,7 @@ class LibraryPassageFinder(
      * keywords' lexical score, at most [mediaCards]. A keyword of several words that matches nothing is tried word by
      * word, stopwords left out: the rewrite's "money from" still finds the song *Money*.
      */
-    private suspend fun mediaCards(words: List<String>): List<Passage> {
+    private suspend fun mediaCards(words: List<String>, languages: List<ResearchLanguage>): List<Passage> {
         val index = media ?: return emptyList()
         if (mediaCards <= 0) return emptyList()
         return try {
@@ -124,14 +128,14 @@ class LibraryPassageFinder(
                 index.works(listOf(keyword), MEDIA_PER_KEYWORD).ifEmpty {
                     val parts = Keywords.words(keyword)
                     if (parts.size < 2) emptyList()
-                    else parts.filterNot(Keywords::isStopword).flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }
+                    else parts.filterNot { Keywords.isStopword(it, languages) }.flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }
                 }
             }.distinctBy { it.id }
-            val score = LexicalScore.scorer(words)
+            val score = LexicalScore.scorer(words, languages)
             // Stable: equal scores keep the index's order. Scored as whole works, so focusing a card on a song or
             // chapter that matched doesn't change which works are kept.
             works.map { it to score(MediaCards.passage(it)) }.sortedByDescending { it.second }.take(mediaCards)
-                .map { (work, _) -> MediaCards.passage(work, MediaCards.bestPart(work, words)) }
+                .map { (work, _) -> MediaCards.passage(work, MediaCards.bestPart(work, words, languages)) }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -194,10 +198,10 @@ class LibraryPassageFinder(
         }
     }
 
-    private suspend fun books(words: List<String>, collections: Map<String, String>): List<Passage> =
+    private suspend fun books(words: List<String>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> =
         try {
             val named = try {
-                namedBookPassages(words)
+                namedBookPassages(words, languages)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
@@ -224,8 +228,8 @@ class LibraryPassageFinder(
         }
 
     /** For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. */
-    private suspend fun namedBookPassages(words: List<String>): List<BookPassage> {
-        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot(Keywords::isStopword).toSet()
+    private suspend fun namedBookPassages(words: List<String>, languages: List<ResearchLanguage>): List<BookPassage> {
+        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }.toSet()
         if (keywordWords.isEmpty()) return emptyList()
         val books = try {
             bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
@@ -235,7 +239,7 @@ class LibraryPassageFinder(
             return emptyList()
         }
         val named = books.mapNotNull { book ->
-            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { it !in GENERIC_TITLE_WORDS && !Keywords.isStopword(it) }.toSet()
+            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { it !in GENERIC_TITLE_WORDS && !Keywords.isStopword(it, languages) }.toSet()
             val naming = keywordWords.filter { word -> Keywords.alternatives(word).any { it in titleWords } }.toSet()
             if (naming.isEmpty()) null else book to naming
         }.sortedByDescending { it.second.size }.take(NAMED_BOOKS)
@@ -245,7 +249,7 @@ class LibraryPassageFinder(
         }
     }
 
-    private suspend fun cards(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
+    private suspend fun cards(words: List<String>, packs: List<Pack>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> {
         val books = try {
             bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
         } catch (e: CancellationException) {
@@ -254,10 +258,10 @@ class LibraryPassageFinder(
             emptyList()
         }
         // Regex matching over every book and pack: off the caller's (main) thread.
-        return withContext(io) { matchCards(words, books, packs, collections) }
+        return withContext(io) { matchCards(words, books, packs, collections, languages) }
     }
 
-    private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
+    private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> {
         val mentions = mentions(words)
         val made = books.mapNotNull { book ->
             attempt {
@@ -282,7 +286,7 @@ class LibraryPassageFinder(
                 Passage(SourceKind.CARD, pack.id, pack.title, packTitle = pack.title, text = text, meta = SourceMeta(date = pack.date, collection = collections[pack.id].orEmpty()))
             }
         }
-        val score = LexicalScore.scorer(words)
+        val score = LexicalScore.scorer(words, languages)
         return made.map { it to score(it) }.sortedByDescending { it.second }.take(cards).map { it.first }
     }
 

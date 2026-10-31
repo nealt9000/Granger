@@ -13,6 +13,7 @@ import app.granger.core.research.PassageFinder
 import app.granger.core.research.PriorTurn
 import app.granger.core.research.PassageEmbedder
 import app.granger.core.research.ResearchEvent
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.ResearchModels
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.ResearchRequest
@@ -41,6 +42,9 @@ fun evalSourceName(packNames: Map<String, String>): (Passage) -> String =
 class RecordingFinder(private val inner: PassageFinder, private val clock: () -> Long = { System.nanoTime() / 1_000_000 }) : PassageFinder {
     var keywords: List<String> = emptyList()
         private set
+    /** The last call's question languages (L4): English unless the pipeline passed others. */
+    var languages: List<ResearchLanguage> = Keywords.ENGLISH
+        private set
     var passages: List<Passage> = emptyList()
         private set
     var ms: Long? = null
@@ -51,15 +55,19 @@ class RecordingFinder(private val inner: PassageFinder, private val clock: () ->
 
     fun reset() {
         keywords = emptyList()
+        languages = Keywords.ENGLISH
         passages = emptyList()
         ms = null
         timings = null
     }
 
-    override suspend fun find(keywords: List<String>): List<Passage> {
+    override suspend fun find(keywords: List<String>): List<Passage> = find(keywords, Keywords.ENGLISH)
+
+    override suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> {
         this.keywords = keywords
+        this.languages = languages
         val start = clock()
-        return inner.find(keywords).also {
+        return inner.find(keywords, languages).also {
             passages = it
             ms = clock() - start
             timings = (inner as? LibraryPassageFinder)?.lastTimings
@@ -68,7 +76,7 @@ class RecordingFinder(private val inner: PassageFinder, private val clock: () ->
 
     /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
     fun scored(): List<Pair<Passage, Double>> {
-        val score = LexicalScore.scorer(keywords)
+        val score = LexicalScore.scorer(keywords, languages)
         return passages.map { it to score(it) }.sortedByDescending { it.second }
     }
 }

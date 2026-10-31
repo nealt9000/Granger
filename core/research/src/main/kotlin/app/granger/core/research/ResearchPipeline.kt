@@ -19,9 +19,16 @@ fun interface DenseFinder {
     suspend fun find(query: FloatArray): List<Passage>
 }
 
-/** Searches the library for passages matching the keywords. */
+/**
+ * Searches the library for passages matching the keywords. [languages] are the question's ([ResearchLanguage.of]):
+ * whose stopwords a finder leaves out when it matches words itself. A finder that matches no words of its own needs
+ * only the one-argument [find]; the pipeline calls the two-argument one, which is the English [find] unless overridden.
+ * (A fun interface's one abstract method can't have a default value, hence the two.)
+ */
 fun interface PassageFinder {
     suspend fun find(keywords: List<String>): List<Passage>
+
+    suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> = find(keywords)
 }
 
 /** Streams a model's reply to [prompt] in chunks. */
@@ -189,7 +196,7 @@ class ResearchPipeline(
         val all = try {
             coroutineScope {
                 val byMeaning = dense?.let { d -> async { denseHits(d, request, languages) } }
-                finder.find(Keywords.searchTerms(keywords)).also { hits = byMeaning?.await() }
+                finder.find(Keywords.searchTerms(keywords), languages).also { hits = byMeaning?.await() }
             }
         } catch (e: CancellationException) {
             throw e
