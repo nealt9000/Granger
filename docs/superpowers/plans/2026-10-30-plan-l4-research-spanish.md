@@ -54,3 +54,25 @@ This closes the first and last "English-only, outside this pass" items above.
 - Catalogue and media card labels ("Title:", "In your library as"), and a PDF page heading ("p. 12"), are English prompt text.
 - Whole-word matching (`LexicalScore`, the cards' `mentions`) is accent-sensitive. An unaccented Spanish keyword ("fundo", "publico") doesn't match "fundó"/"publicó". Folding would change some English matches ("cafe"/"café"), so it waits for the Spanish baseline.
 - `multistep.amount` reads English numbers only ("1,500"; Spanish "1.500" and "2,5" aren't read).
+
+## Accents (2026-10-31)
+
+This closes the whole-word, `GENERIC_TITLE_WORDS` and `multistep.amount` items above. Before: 262 `:core:research`, 407 `:core:library`, 108 app Research/Ask/Passage tests, and 143 eval tests. After: 269, 410, 108 and 147, all passing.
+
+- **The rule.** When the question's languages include ES (`ResearchLanguage.foldsVowels`), words are matched with á é í ó ú ü folded to a e i o u on both sides (`ResearchLanguage.foldVowels`). ñ stays ñ, so "ano" doesn't match "año". Case is handled as before, and grave, circumflex and other marks are left alone. A decomposed acute or diaeresis after a vowel is dropped too. Without ES, the code takes the old path unchanged.
+- **Matchers changed.**
+  - `LexicalScore.scorer`: the keyword words, the passage's heading and text (folded once per passage, not per keyword), and its title words. This also covers `Ranking` and the finder's card and media scores.
+  - `LibraryPassageFinder.mentions`: the card gate. Patterns are built once, and each field is folded once per book or pack.
+  - `namedBookPassages`: keyword and title words, and the words it leaves for the in-book search.
+- **Already accent-blind, unchanged.** These fold every mark, ñ too, and did so for English as well:
+  - `MediaCards.bestPart` and `MediaIndex.works` (via `MediaText.fold`).
+  - `CitedQuote`, `YearFacts` and `Entities`' name matching.
+  - The book index (SQLite FTS4 `unicode61`, which removes diacritics by default).
+  - libzim's full-text and title search. On `wikipedia_es_top`, "Bogota"/"Bogotá", "fundo"/"fundó", "ano"/"año" and "senal"/"señal" give identical hit counts in both. So a Spanish ZIM search for "ano" also returns "año" pages, and only the lexical score keeps them apart.
+- **Spanish generic title words.** `GENERIC_TITLE_WORDS_ES` (folded) applies with ES: libro(s), obra(s), completa(s)/completo(s), tomo(s), volumen/volúmenes, reunidas, colección, selectas, escogidas, selección, edición, traducido/a, traducción, trad, español, castellano, versión, antología, poesías, cuentos, novelas. The English list always applies.
+- **Speed.** `foldVowels` returns the same string when there's nothing to fold. Its scan costs one comparison per ASCII character. It never uses `Regex.findAll`.
+- **Eval.** `replay.scorer` mirrors the folding (`language.fold_vowels`). Old and new replays of all 28 recorded runs with `found.jsonl` are byte-identical (baseline and fiction rankers). `multistep.amount` reads "1.500", "1.500,5" and "2,5" for Spanish-led items (ES first), and lets a unit carry accents ("años"). "1,500" stays 1500, as in Mexico, and "1.5" stays 1.5. Over 5,957 recorded replies, English amounts and worked facts are unchanged.
+- **Judgement calls.**
+  - The folding applies to `[EN, ES]` questions too: keyword-only English questions such as "Lake Como villas". There, "cafe" now matches "café". `LanguageLayerTest`, `LibraryLanguageTest` and the 28 replays show no change on the eval sets.
+  - For amounts, only an ES-first item reads Spanish numbers, so English-led ones stay byte-identical.
+  - ï, ö and the like aren't folded, since Spanish doesn't use them.
