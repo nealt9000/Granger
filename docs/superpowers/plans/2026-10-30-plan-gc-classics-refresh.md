@@ -305,7 +305,8 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
   - Run `describe-epubs` into `releases/granger_classics_books.json`.
   - Regenerate the catalog from main, run `check-links`, and re-sign.
   - Add the roadmap row GC.
-- [ ] **Task 13: phone walkthrough** (when the phone is free; one app on the phone)
+- [x] **Task 13: phone walkthrough** (when the phone is free; one app on the phone)
+  - **Passed 2026-10-31** (Neal, on the phone).
   - Update the Classics from Get more → Updates.
   - Look at the covers in the list and grid in Field and Night.
   - Open Paradise Lost, Hamlet, Leaves of Grass, the WEB Psalms and Meditations (Long), at the default size and at a large one.
