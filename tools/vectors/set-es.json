@@ -1,5 +1,5 @@
 {
- "comment": "The Spanish vector set (languages spec §6.1, Plan L4): the Spanish essential tier plus Wikipedia history (as English has) and Clásicos Granger, with set.json's caps for the same kinds of pack. Each pack is built from its _nopic file, whose snapshot matches the _maxi entry the tiers list, so catalog_gen's attach_vectors puts the vectors on both flavours (as R1 did for medicine, top and history). Snapshots are those of the catalog built from the live Kiwix feed on 2026-10-31.",
+ "comment": "The Spanish vector set (languages spec §6.1, Plan L4): the Spanish essential tier plus Wikipedia history (as English has) and Clásicos Granger, with set.json's caps for the same kinds of pack. Each pack is built from its _nopic file, whose snapshot matches the _maxi entry the tiers list, so catalog_gen's attach_vectors puts the vectors on both flavours (as R1 did for medicine, top and history). Snapshots are those of the catalog built from the live Kiwix feed on 2026-10-31. Trimmed 2026-10-31 to fit about 14 h of Mac embedding (1.80M chunks at set.json's caps): top, history and computer 12 to 8, iFixit 8 to 4 (as the Stack Exchanges). Top at 8 still holds 45 of the 46 tune-es answers whose quote is found in an article.",
  "language": "es",
  "packs": [
   {
@@ -10,7 +10,7 @@
   {
    "id": "ifixit_es_all",
    "domain": "making",
-   "maxChunksPerArticle": 8
+   "maxChunksPerArticle": 4
   },
   {
    "id": "wikipedia_es_physics_nopic",
@@ -30,7 +30,7 @@
   {
    "id": "wikipedia_es_computer_nopic",
    "domain": "technology",
-   "maxChunksPerArticle": 12
+   "maxChunksPerArticle": 8
   },
   {
    "id": "wikivoyage_es_all_nopic",
@@ -39,12 +39,12 @@
   {
    "id": "wikipedia_es_top_nopic",
    "domain": "reference",
-   "maxChunksPerArticle": 12
+   "maxChunksPerArticle": 8
   },
   {
    "id": "wikipedia_es_history_nopic",
    "domain": "thought",
-   "maxChunksPerArticle": 12
+   "maxChunksPerArticle": 8
   }
  ],
  "keywordOnly": {
