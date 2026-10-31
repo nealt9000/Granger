@@ -73,7 +73,7 @@ data class ReaderControls(
 /** [Reader]'s controls through [PlayerViewModel], with the app's [onOpen] and [onResume]. */
 fun PlayerViewModel.readerControls(onOpen: (NowPlaying.Voice) -> Unit, onResume: (SavedVoice) -> Unit) = ReaderControls(
     onPlayPause = ::playPause, onPreviousParagraph = ::previousParagraph, onBackSentence = ::previousSentence,
-    onNextSentence = ::nextSentence, onNextParagraph = ::nextParagraph, onSpeed = ::setSpeed, onVoice = ::setVoice,
+    onNextSentence = ::nextSentence, onNextParagraph = ::nextParagraph, onSpeed = ::setVoiceSpeed, onVoice = ::setVoice,
     onMix = ::setMixLevel, onPlayPauseMusic = ::playPauseMusic, onNextMusic = ::nextMusic,
     chapters = ::voiceChapters, onChapter = ::jumpToChapter,
     onSleep = ::startSleepTimer, onCancelSleep = ::cancelSleepTimer, onStop = ::stopVoice, onOpen = onOpen, onResume = onResume,
