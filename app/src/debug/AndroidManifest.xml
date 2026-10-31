@@ -25,6 +25,10 @@
             android:exported="true"
             android:label="Voice spike" />
         <activity
+            android:name="app.granger.ebook.PdfBenchActivity"
+            android:exported="true"
+            android:label="PDF bench" />
+        <activity
             android:name="app.granger.eval.EvalActivity"
             android:exported="true"
             android:launchMode="singleTop"

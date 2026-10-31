@@ -4,6 +4,7 @@ import app.granger.core.books.DrmKind
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfFixtures
+import app.granger.core.books.TextPdfFixtures
 import app.granger.core.books.TestEpubs
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -44,6 +45,27 @@ class BookshelfTest {
         RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, pdfCovers = { _, _ -> pngCover })
     }
 
+    @Test fun aGutenbergBookNotYetOpenedStaysListedThroughARefresh() = test {
+        val unopened = book("43349", BookOrigin.GUTENBERG).copy(filePath = File(booksDir, "gutenberg/43349.epub").absolutePath)
+        db.bookDao().upsert(unopened)
+        shelf.refresh()
+        assertThat(shelf.book(unopened.id)!!.status).isEqualTo(PackStatus.OK)
+    }
+
+    @Test fun removingAGutenbergBookDeletesOnlyItsCopy() = test {
+        val file = TestEpubs.build(File(booksDir, "gutenberg").apply { mkdirs() }, name = "43349.epub")
+        val cover = File(coversDir.apply { mkdirs() }, "c.png").apply { writeBytes(pngCover) }
+        db.bookDao().upsert(
+            book("43349", BookOrigin.GUTENBERG).copy(filePath = file.absolutePath, coverPath = cover.absolutePath, indexedAt = 5L),
+        )
+        assertThat(shelf.remove(BookIds.of(BookOrigin.GUTENBERG, "43349"))).isTrue()
+        val row = shelf.book(BookIds.of(BookOrigin.GUTENBERG, "43349"))!!
+        assertThat(file.exists()).isFalse()
+        assertThat(cover.exists()).isFalse()
+        assertThat(row.coverPath).isNull()
+        assertThat(row.indexedAt).isNull()
+    }
+
     @Test fun importsAPdf() = test {
         val source = PdfFixtures.text(src)
         val result = pdfShelf.import("water.pdf") { source.inputStream() }
@@ -69,9 +91,6 @@ class BookshelfTest {
         val source = PdfFixtures.passwordLocked(src)
         val result = pdfShelf.import("locked.pdf") { source.inputStream() }
         assertThat(result).isEqualTo(ImportResult.Protected(DrmKind.PDF_ENCRYPTED))
-        assertThat(result.message("locked.pdf")).isEqualTo(
-            "locked.pdf is password-protected or encrypted. Granger can't open it and won't remove the protection.",
-        )
         assertThat(importFiles()).isEmpty()
     }
 
@@ -267,6 +286,86 @@ class BookshelfTest {
         assertThat(pdfShelf.book("book:archive-org:strip")!!.format).isEqualTo(BookFormat.PDF)
     }
 
+    // ---- PDFs made on a computer become ebooks (Plan IA) ----
+
+    private fun prosePdf(dir: File, name: String, hidden: Boolean = false): File {
+        val mono = com.tom_roush.pdfbox.pdmodel.font.PDType1Font.COURIER
+        val pages = (1..4).map { p ->
+            TextPdfFixtures.Page(
+                (0 until 40).map { i ->
+                    val text = "page $p line $i of a book set in plain words on a page of prose".padEnd(64, 'x').take(64)
+                        .let { if (i % 8 == 7) it.dropLast(1) + "." else it }
+                    TextPdfFixtures.Line(text, 72f + 14f * i, if (i % 8 == 0) 90f else 72f, 10f, mono, hidden = hidden)
+                },
+            )
+        }
+        return TextPdfFixtures.build(dir, name, pages, title = "A Book of Prose")
+    }
+
+    @Test fun anArchiveTextPdfArrivesAsAnEbookWithItsPdfKept() = test {
+        val pdf = prosePdf(archiveDir, "prose.pdf")
+        val book = pdfShelf.addDownloaded(pdf, BookOrigin.ARCHIVE_ORG, "prose", BookDetails("Prose", "A. Writer", "", emptyList(), "", "en"))!!
+        assertThat(book.format).isEqualTo(BookFormat.EPUB)
+        assertThat(book.filePath).endsWith("prose.pdf.epub")
+        assertThat(book.title).isEqualTo("Prose")
+        assertThat(pdf.exists()).isTrue()
+        assertThat(pdfShelf.originalPagesBytes(book.id)).isEqualTo(pdf.length())
+
+        val pages = pdfShelf.originalPages(book.id)!!
+        assertThat(pages.id).isEqualTo(BookIds.pagesOf(book.id))
+        assertThat(pages.format).isEqualTo(BookFormat.PDF)
+        assertThat(pages.onShelf).isFalse()
+
+        // A refresh files nothing new: the PDF is the ebook's pages, not a book of its own.
+        pdfShelf.refresh()
+        assertThat(pdfShelf.books.first().filter { it.onShelf }.map { it.id }).containsExactly(book.id)
+
+        assertThat(pdfShelf.removeOriginalPages(book.id)).isTrue()
+        assertThat(pdf.exists()).isFalse()
+        assertThat(pdfShelf.book(pages.id)).isNull()
+        assertThat(pdfShelf.originalPages(book.id)).isNull()
+        assertThat(File(book.filePath).exists()).isTrue()
+    }
+
+    @Test fun removingAnEbookMadeFromAPdfRemovesItsPagesToo() = test {
+        val pdf = prosePdf(archiveDir, "gone.pdf")
+        val book = pdfShelf.addDownloaded(pdf, BookOrigin.ARCHIVE_ORG, "gone")!!
+        pdfShelf.originalPages(book.id)
+        assertThat(pdfShelf.remove(book.id)).isTrue()
+        assertThat(pdf.exists()).isFalse()
+        assertThat(pdfShelf.book(BookIds.pagesOf(book.id))).isNull()
+        pdfShelf.refresh()
+        assertThat(pdfShelf.book(book.id)).isNull()
+    }
+
+    @Test fun aScanAndAPdfAskedForAsAPdfStayPdfs() = test {
+        val scan = prosePdf(archiveDir, "scan.pdf", hidden = true)
+        assertThat(pdfShelf.addDownloaded(scan, BookOrigin.ARCHIVE_ORG, "scan")!!.format).isEqualTo(BookFormat.PDF)
+        val copy = prosePdf(archiveDir, "text.pdf")
+        assertThat(pdfShelf.addDownloaded(copy, BookOrigin.ARCHIVE_ORG, "text#pdf")!!.format).isEqualTo(BookFormat.PDF)
+        assertThat(File(archiveDir, "text.pdf.epub").exists()).isFalse()
+    }
+
+    @Test fun readAsEbookTurnsAnImportedPdfIntoAnEbookAndGivesItsPlaceToItsPages() = test {
+        val source = prosePdf(src, "mine.pdf")
+        val id = (pdfShelf.import("mine.pdf") { source.inputStream() } as ImportResult.Imported).bookId
+        pdfShelf.savePosition(id, "{\"href\":\"page/3\"}", 0.5, "Page 3")
+        pdfShelf.addMark(BookAnnotation(0, id, MarkKind.BOOKMARK, "{}", "p. 3", "", "", 1, 1))
+
+        val report = pdfShelf.readAsEbook(id)!!
+        assertThat(report.passes).isTrue()
+        val book = pdfShelf.book(id)!!
+        assertThat(book.format).isEqualTo(BookFormat.EPUB)
+        assertThat(book.filePath).endsWith(".pdf.epub")
+        assertThat(pdfShelf.position(id)).isNull()
+        val pages = BookIds.pagesOf(id)
+        assertThat(pdfShelf.position(pages)!!.chapterTitle).isEqualTo("Page 3")
+        assertThat(pdfShelf.marks(pages).first().single().text).isEqualTo("p. 3")
+        assertThat(pdfShelf.book(pages)!!.onShelf).isFalse()
+        // An ebook isn't made into one again.
+        assertThat(pdfShelf.readAsEbook(id)).isNull()
+    }
+
     @Test fun archiveTextOverTheLimitIsRefused() = test {
         val small = RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, maxTextBytes = 10)
         val txt = File(archiveDir, "big.txt").apply { writeText("x".repeat(100)) }
@@ -392,8 +491,6 @@ class BookshelfTest {
         val source = TestEpubs.build(src, "locked.epub", drmFiles = mapOf("META-INF/license.lcpl" to "{}"))
         val result = shelf.import("locked.epub") { source.inputStream() }
         assertThat(result).isEqualTo(ImportResult.Protected(DrmKind.LCP))
-        assertThat(result.message("locked.epub"))
-            .isEqualTo("locked.epub is copy-protected (DRM). Granger can't open it and won't remove the protection.")
         assertThat(importFiles()).isEmpty()
         assertThat(shelf.books.first()).isEmpty()
     }
@@ -402,15 +499,12 @@ class BookshelfTest {
         val zipLike = File(src, "broken.epub").apply { writeBytes("PK\u0003\u0004garbage".toByteArray()) }
         val result = shelf.import("broken.epub") { zipLike.inputStream() }
         assertThat(result).isInstanceOf(ImportResult.Damaged::class.java)
-        assertThat(result.message("broken.epub")).isEqualTo("broken.epub is damaged or isn't a complete e-book.")
 
         val empty = File(src, "empty.epub").apply { writeBytes(ByteArray(0)) }
         assertThat(shelf.import("empty.epub") { empty.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
 
         val binary = File(src, "scan.pdf").apply { writeBytes(byteArrayOf(0x25, 0x50, 0x44, 0x46, 0, 1, 2, 0)) }
         assertThat(shelf.import("scan.pdf") { binary.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
-        assertThat(ImportResult.Unsupported.message("story.docx"))
-            .isEqualTo("story.docx isn't an EPUB, PDF, TXT or Markdown file.")
 
         assertThat(importFiles()).isEmpty()
         assertThat(shelf.books.first()).isEmpty()
@@ -467,6 +561,17 @@ class BookshelfTest {
             listOf(a.copy(indexedAt = 5L, title = "Renamed")),
         ).ignoringIndexedAt().toList()
         assertThat(emitted.map { it.single().title }).containsExactly("a", "Renamed").inOrder()
+    }
+
+    @Test fun aGutenbergBookBecomingIndexedIsAChange() = test {
+        val g = book("1", BookOrigin.GUTENBERG)
+        val emitted = kotlinx.coroutines.flow.flowOf(
+            listOf(g),
+            listOf(g.copy(indexedAt = 5L)),
+            // Indexed again: still searchable in full, nothing to redraw.
+            listOf(g.copy(indexedAt = 9L)),
+        ).ignoringIndexedAt().toList()
+        assertThat(emitted.map { it.single().indexedAt }).containsExactly(null, 5L).inOrder()
     }
 
     @Test fun textNameStartingWithPkIsConverted() = test {

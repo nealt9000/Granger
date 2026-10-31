@@ -45,6 +45,7 @@ object CatalogParser {
             .filter { valid(it) && DATE.matches(it.snapshotDate) }
             .distinctBy { it.id }
             .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
+            .map(::family)
         val books = entries<BookEntry>(root, "books", retryWithout = VECTORS)
             .filter { valid(it) && DATE.matches(it.releaseDate) }
             .distinctBy { it.id }
@@ -125,6 +126,19 @@ object CatalogParser {
         }
 
     private const val VECTORS = "vectors"
+
+    /**
+     * [pack]'s Wikipedia-family fields made consistent (Plan WF): a set without a rank of 1 or more is no set, a
+     * subject's shares outside 0..1 are dropped, and a pack is never both a slice and a subject.
+     */
+    private fun family(pack: PackEntry): PackEntry {
+        var p = pack
+        if (p.setId.isBlank() || p.setRank < 1) p = p.copy(setId = "", setRank = 0, setLabel = "")
+        if (p.isSlice || p.subjectOf.isBlank()) p = p.copy(subjectOf = "", adds = emptyMap())
+        val adds = p.adds.filterValues { it in 0.0..1.0 }
+        if (adds.size != p.adds.size) p = p.copy(adds = adds)
+        return if (p.articles < 0) p.copy(articles = 0) else p
+    }
 
     /** A vectors object that names a file we can fetch and check, built by a chunker and at dims the phone can scan. */
     private fun valid(v: VectorsEntry): Boolean =

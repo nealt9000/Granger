@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -164,6 +165,11 @@ fun ArchiveScreen(
             onRetry = { viewModel.retryDownload(sheet.identifier) },
             onRemove = { confirmRemove = sheet.identifier to (sheet.item?.title?.ifBlank { null } ?: sheet.identifier) },
             onOpenInBrowser = { openInBrowser(sheet.identifier) },
+            onGetPart = { number ->
+                beforeDownload()
+                viewModel.getPart(sheet.identifier, number)
+            },
+            onRemovePart = { number -> viewModel.removePart(sheet.identifier, number) },
             onDismiss = viewModel::closeItem,
             onOpenInLibrary = {
                 viewModel.closeItem()
@@ -206,7 +212,15 @@ internal fun LargeDownloadDialog(confirm: ConfirmLarge, onDownload: (dontAskAgai
         onDismissRequest = onDismiss,
         title = {
             val size = app.granger.formatBytes(confirm.bytes)
-            Text(stringResource(if (confirm.isPdf) R.string.archive_large_pdf else R.string.archive_large_download, size))
+            Text(
+                when (confirm.what) {
+                    LargeWhat.PDF -> stringResource(R.string.archive_large_pdf, size)
+                    LargeWhat.DOWNLOAD -> stringResource(R.string.archive_large_download, size)
+                    LargeWhat.PART -> stringResource(R.string.archive_large_part, size)
+                    LargeWhat.SET -> stringResource(R.string.archive_large_set, size)
+                    LargeWhat.PARTS -> pluralStringResource(R.plurals.archive_large_parts, confirm.count, confirm.count, size)
+                },
+            )
         },
         text = {
             // The whole row toggles, not just the box: the label is the bigger target.
@@ -391,7 +405,11 @@ private fun ArchiveResultRow(
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
-                if (row.details.isNotBlank()) Text(row.details, style = MaterialTheme.typography.bodySmall)
+                if (row.parts > 0) {
+                    Text(pluralStringResource(R.plurals.archive_row_parts, row.parts, row.parts, row.details), style = MaterialTheme.typography.bodySmall)
+                } else if (row.details.isNotBlank()) {
+                    Text(row.details, style = MaterialTheme.typography.bodySmall)
+                }
                 (audioLabel(row.audio) ?: offerLabel(row.preview))?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(row.status)
             }

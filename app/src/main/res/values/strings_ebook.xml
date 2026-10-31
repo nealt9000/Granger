@@ -102,4 +102,19 @@
     <string name="ebook_tab_gone">This bookmark was removed.</string>
     <string name="ebook_book_gone">This book isn\'t on the phone any more. Check the SD card, or download it again from Granger.</string>
     <string name="ebook_book_damaged">This book couldn\'t be opened. Try removing it, then download or import it again.</string>
+
+    <!-- An ebook made from a PDF (Plan IA): the PDF it came from, "the original pages". -->
+    <string name="ebook_original_pages">Original pages</string>
+    <!-- %1$s is the PDF's size. -->
+    <string name="ebook_remove_original_pages">Remove original pages · %1$s</string>
+    <string name="ebook_remove_original_title">Remove the original pages?</string>
+    <string name="ebook_remove_original_body">The PDF this ebook was made from goes, and with it the book as printed. The ebook stays.</string>
+    <string name="ebook_original_pages_removed">Original pages removed</string>
+    <string name="ebook_original_pages_not_removed">Couldn\'t remove the original pages</string>
+    <!-- Turns a PDF into an ebook whose text reflows. -->
+    <string name="ebook_read_as_ebook">Read as ebook</string>
+    <string name="ebook_making_ebook">Making an ebook of this PDF…</string>
+    <string name="ebook_cant_make_ebook">Couldn\'t make an ebook of this PDF</string>
+    <!-- %1$s is the converter's reason, in English, such as "no chapters". -->
+    <string name="ebook_pdf_reads_badly">This PDF doesn\'t read well as an ebook (%1$s), so it stays as pages.</string>
 </resources>

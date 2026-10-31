@@ -64,4 +64,8 @@
     <string name="research_delete_all_chats_title">Delete all chats?</string>
     <string name="research_delete_all_chats_body">Every chat goes, this one too, with its answers and sources.</string>
     <string name="research_delete_all">Delete all</string>
+    <!-- Getting Ask's models. %1$s is the storage, such as Internal storage; %2$s the space needed. -->
+    <string name="research_librarian_no_space">Not enough space on %1$s: free up %2$s.</string>
+    <!-- %1$s is the downloads limit. -->
+    <string name="research_librarian_over_cap">That would bring your downloads over the %1$s limit.</string>
 </resources>

@@ -60,8 +60,6 @@ import app.granger.shell.rememberRailCover
 import app.granger.theme.MediaKind
 import app.granger.theme.MediaTile
 
-/** Search's English copy until search/ moves to resources (Plan L1 Task 2); the shelf shows [R.string.audiobooks_unknown_author]. */
-internal const val UNKNOWN_AUTHOR = "Unknown author"
 
 /** A book's author as shown: "Unknown author" when it has none. */
 @Composable

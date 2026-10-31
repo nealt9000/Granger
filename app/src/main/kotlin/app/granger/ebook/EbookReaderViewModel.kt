@@ -16,6 +16,7 @@ import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.MarkKind
 import app.granger.core.library.ReadingSessions
+import app.granger.core.library.onShelf
 import app.granger.core.player.NowPlaying
 import app.granger.player.VoiceButton
 import app.granger.core.player.PlayerHub
@@ -48,6 +49,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
+import org.readium.r2.shared.publication.Layout
 import org.readium.r2.shared.publication.Publication.Profile
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
@@ -55,6 +57,7 @@ import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.Url
+import org.readium.r2.shared.util.use
 
 data class EbookUi(
     val title: String = "",
@@ -101,6 +104,20 @@ data class EbookUi(
      * PDF ones.
      */
     val isPdf: Boolean = false,
+    /**
+     * A fixed-layout EPUB (a picture book, FixedPages): pages as drawn, one at a time, so the text settings are off.
+     */
+    val fixedLayout: Boolean = false,
+    /** Whether the book has words to read aloud or search; a picture book's pages may hold only pictures. */
+    val hasText: Boolean = true,
+    /** An ebook made from a PDF (Plan IA): the size of its original pages, which ⋯ opens or removes; null without them. */
+    val originalPagesBytes: Long? = null,
+    /** A PDF on the shelves, which ⋯ Read as ebook can make an ebook (Plan IA Decisions 6 and 9). */
+    val canReadAsEbook: Boolean = false,
+    /** Read as ebook is working. */
+    val makingEbook: Boolean = false,
+    /** Something the reader says once (Read as ebook's outcome), then [noticeShown] clears. */
+    val notice: UiText? = null,
 )
 
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
@@ -156,6 +173,9 @@ class EbookReaderViewModel(
 ) : ViewModel() {
     /** The open PDF is in colour ([pdfColour]): Night doesn't invert it. */
     @Volatile private var colour = false
+
+    /** Where the anchored contents rows start in their files ([TocPlace.anchorStarts]), by file; read after opening. */
+    @Volatile private var anchorStarts: Map<String, Map<String, Double>> = emptyMap()
 
     /** Set in [onCleared]; a cleared reader no longer claims the shared singletons ([OpenBooks], [SelectionBridge]). */
     @Volatile var isCleared: Boolean = false
@@ -252,6 +272,8 @@ class EbookReaderViewModel(
             val pdf = opened.conformsTo(Profile.PDF)
             // A comic or a magazine keeps its colours in Night; only black-and-white pages are inverted.
             colour = pdf && withContext(io) { pdfColour(file) }
+            val fixed = !pdf && opened.metadata.layout == Layout.FIXED
+            val text = !fixed || withContext(io) { FixedPages.scan(opened, stopAtUnsized = false).hasText }
             val factory = if (pdf) {
                 BookNavigator.Pdf(opened, prefsStore.prefs.value.pdfNight && !colour, prefsStore.prefs.value.pdfFitWidth)
             } else {
@@ -267,11 +289,16 @@ class EbookReaderViewModel(
             _state.update {
                 it.copy(
                     loading = false, publication = opened, initial = initial, searchHit = hit,
-                    toc = flatten(opened.tableOfContents, 0), isPdf = pdf,
+                    toc = flatten(opened.tableOfContents, 0), isPdf = pdf, fixedLayout = fixed, hasText = text,
                 ).derived()
             }
             savedState[TARGET_CONSUMED] = true
+            launch {
+                val pages = bookshelf.originalPagesBytes(book.id)
+                _state.update { it.copy(originalPagesBytes = pages, canReadAsEbook = pdf && book.onShelf) }
+            }
             if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
+            if (!pdf) launch { readAnchorStarts(opened) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
             launch {
@@ -295,6 +322,60 @@ class EbookReaderViewModel(
                 _state.update { it.copy(prefs = prefs) }
             }
         }
+    }
+
+    /** Opens the PDF this ebook was made from in its own tab (Plan IA); the tab's id, or null when it has none. */
+    suspend fun openOriginalPages(): Long? {
+        val id = bookId ?: return null
+        val pages = bookshelf.originalPages(id) ?: return null
+        return sessions.openTab(pages.id, "", pages.title + ORIGINAL_PAGES_TITLE)
+    }
+
+    /** Deletes the PDF this ebook was made from; the ebook stays (Plan IA Decision 7). */
+    fun removeOriginalPages() {
+        val id = bookId ?: return
+        appScope.launch {
+            val removed = bookshelf.removeOriginalPages(id)
+            _state.update {
+                if (removed) it.copy(originalPagesBytes = null, notice = UiText.Res(R.string.ebook_original_pages_removed))
+                else it.copy(notice = UiText.Res(R.string.ebook_original_pages_not_removed))
+            }
+        }
+    }
+
+    /**
+     * Makes this PDF an ebook (Plan IA). On success [onDone] runs, to open the book again as the ebook; else the notice
+     * says why not.
+     */
+    fun readAsEbook(onDone: () -> Unit) {
+        val id = bookId ?: return
+        if (_state.value.makingEbook) return
+        _state.update { it.copy(makingEbook = true) }
+        appScope.launch {
+            val report = try {
+                bookshelf.readAsEbook(id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Read as ebook failed", e)
+                null
+            }
+            _state.update {
+                it.copy(
+                    makingEbook = false,
+                    notice = when {
+                        report == null -> UiText.Res(R.string.ebook_cant_make_ebook)
+                        report.passes -> null
+                        else -> UiText.Res(R.string.ebook_pdf_reads_badly, report.why)
+                    },
+                )
+            }
+            if (report?.passes == true) withContext(Dispatchers.Main) { onDone() }
+        }
+    }
+
+    fun noticeShown() {
+        _state.update { it.copy(notice = null) }
     }
 
     private fun fail(message: UiText) {
@@ -377,6 +458,27 @@ class EbookReaderViewModel(
         _state.update { it.copy(toc = entries.map { e -> TocRow(e.title, "$href#page=${e.page}", e.depth) }).derived() }
     }
 
+    /** Reads the files holding several contents rows, to tell which of them the reader is in. */
+    private suspend fun readAnchorStarts(opened: Publication) {
+        val wanted = TocPlace.anchorsByFile(_state.value.toc)
+        if (wanted.isEmpty()) return
+        val starts = withContext(io) {
+            wanted.mapNotNull { (file, fragments) ->
+                try {
+                    val link = Url(file)?.let(opened::linkWithHref) ?: return@mapNotNull null
+                    val bytes = opened.get(link)?.use { it.read().getOrNull() } ?: return@mapNotNull null
+                    file to TocPlace.anchorStarts(String(bytes), fragments)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+            }.toMap()
+        }
+        anchorStarts = starts
+        _state.update { it.derived() }
+    }
+
     private fun flatten(links: List<Link>, depth: Int): List<TocRow> =
         links.flatMap { listOf(TocRow(it.title.orEmpty().trim(), it.href.toString(), depth)) + flatten(it.children, depth + 1) }
 
@@ -400,7 +502,7 @@ class EbookReaderViewModel(
             // One file: the row is the last outline entry at or before the page.
             here.locations.position?.let { pdfTocIndex(toc, it) }
         } else {
-            toc.indexOfLast { row -> Url(row.href)?.let { sameFile(it, here.href) } == true }.takeIf { it >= 0 }
+            TocPlace.index(toc, here, anchorStarts)
         }
         val marked = bookmarks.any { m -> parse(m.locatorJson)?.let { isSamePlace(it, here) } == true }
         return copy(currentTocIndex = index, isBookmarkedHere = marked)
@@ -711,6 +813,9 @@ class EbookReaderViewModel(
         /** A page change this soon after a finger left the page is its turn: the turn's animation runs on after it lifts. */
         const val PAGE_TURN_GRACE_MS = 1_000L
         const val TARGET_CONSUMED = "targetConsumed"
+
+        /** After the title of an ebook's original pages, on their tab. */
+        const val ORIGINAL_PAGES_TITLE = " (original pages)"
     }
 }
 

@@ -5,31 +5,15 @@ import org.junit.Test
 import java.io.File
 
 /**
- * A ratchet on English text written straight into the code: each file may have at most the hits its line in
- * hardcoded-strings-baseline.txt allows, and a file with hits needs a line. Plan L1 lowers the baseline package by
- * package until it's empty. A line that has to keep a literal says why with `// l10n-ignore: <why>`.
- *
- * Rewrite the baseline after converting a file: ./gradlew :app:testDebugUnitTest --tests '*HardcodedStrings*' -PwriteBaseline
+ * No English text written straight into the code (Plan L1 Task 9): UI text comes from string resources, or [UiText]
+ * from code without Compose. A line that has to keep a literal says why with `// l10n-ignore: <why>`. Files whose name
+ * holds `Spike` or `Debug` are debug-only and skipped.
  */
 class HardcodedStringsTest {
-    @Test fun noFileHasMoreHardcodedStringsThanItsBaseline() {
-        val counts = scan(repoRoot())
-        val baselineFile = File(repoRoot(), BASELINE)
-        if (System.getProperty("l1.writeBaseline").orEmpty().isNotEmpty()) {
-            baselineFile.writeText(counts.entries.joinToString("") { "${it.key}\t${it.value}\n" })
-            println("Wrote ${counts.size} files, ${counts.values.sum()} hits, to $BASELINE")
-            return
-        }
-        val baseline = baselineFile.readLines().filter { it.isNotBlank() }.associate { line ->
-            line.split('\t').let { it[0] to it[1].toInt() }
-        }
-        val over = counts.filter { (path, n) -> n > (baseline[path] ?: 0) }
-            .map { (path, n) -> "$path: $n hardcoded strings, baseline ${baseline[path] ?: "none"}" }
-        baseline.filter { (path, n) -> (counts[path] ?: 0) < n }.forEach { (path, n) ->
-            println("$path is down to ${counts[path] ?: 0} from $n: lower its line in $BASELINE")
-        }
-        assertWithMessage("Use string resources (or UiText) for UI text; see Plan L1.\n" + over.joinToString("\n"))
-            .that(over).isEmpty()
+    @Test fun noFileHasHardcodedUiText() {
+        val hits = scan(repoRoot()).map { (path, n) -> "$path: $n hardcoded strings" }
+        assertWithMessage("Use string resources (or UiText) for UI text, or mark the line `// l10n-ignore: <why>`; see Plan L1.\n" + hits.joinToString("\n"))
+            .that(hits).isEmpty()
     }
 
     @Test fun thePatternsCatchUiTextAndLeaveIdsAlone() {
@@ -63,8 +47,6 @@ class HardcodedStringsTest {
     }
 
     companion object {
-        private const val BASELINE = "app/src/test/resources/hardcoded-strings-baseline.txt"
-
         private val patterns = listOf(
             // Text("Cancel"), Text("3 items"), and templates with words in them: Text("${pack.title} will be deleted").
             Regex("""\bText\(\s*"([^"]*)""""),

@@ -120,6 +120,21 @@ class PlayerEngineVoiceTest {
         assertThat(e.voiceProgress.value?.utterance?.text).isAnyOf("Three four five.", "Six.")
     }
 
+    /**
+     * Plan GB walkthrough: Listen tapped twice while the voice was still loading. Each play queued its own opening of the
+     * speech engine; the second reopened the voice paused under a carrier already playing, so nothing was heard until
+     * play was pressed in the big player.
+     */
+    @Test fun twoListensBeforeTheVoiceOpensStillSpeak() {
+        val e = engine()
+        e.readAloud(source(), null, null)
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(4)
+        assertThat(e.ui.value.playing).isTrue()
+        assertThat(speeches.flatMap { it.spoken }).contains("One two.")
+        assertThat(e.voiceProgress.value?.utterance?.text).isAnyOf("Three four five.", "Six.")
+    }
+
     @Test fun endOfChapterStopsTheVoiceAtTheChaptersEndNotAtTheEstimate() {
         val e = engine()
         e.readAloud(chaptered(), null, null)

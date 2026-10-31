@@ -8,9 +8,15 @@ enum class TextKind { EPUB, TEXT, OCR_TEXT, PDF, COMIC }
 sealed interface Offer {
     /**
      * [file] of [kind] to download. [pdf] is the item's best PDF beside a text download (TEXT, OCR_TEXT, or an EPUB
-     * archive.org made from a scan), which can be got as a second book (Plan P2); null otherwise.
+     * archive.org made from a scan), which can be got as a second book (Plan P2); null otherwise. [parts] are the
+     * item's parts in order when it has several (Plan IA), [file] the first; empty for one file, and for a preview.
      */
-    data class Download(val file: ArchiveFile, val kind: TextKind, val pdf: ArchiveFile? = null) : Offer
+    data class Download(
+        val file: ArchiveFile, val kind: TextKind, val pdf: ArchiveFile? = null, val parts: List<Part> = emptyList(),
+    ) : Offer {
+        val isSet: Boolean get() = parts.size > 1
+        val totalBytes: Long get() = if (isSet) parts.sumOf { it.sizeBytes } else file.sizeBytes ?: 0L
+    }
     data object LendOnly : Offer
     data object Nothing : Offer
 }
@@ -31,18 +37,18 @@ object ArchiveOffers {
         val convertible = usable.filter { (it.sizeBytes ?: 0) <= maxTextBytes }
         val epubs = usable.filter { it.format == "EPUB" }
 
-        // An EPUB or a text its uploader made is the book.
-        epubs.filter { it.source == "original" }.maxByOrNull { it.sizeBytes ?: 0 }
-            ?.let { return Offer.Download(it, TextKind.EPUB) }
-        convertible.firstOrNull { it.source == "original" && it.format == "Text" }
-            ?.let { return Offer.Download(it, TextKind.TEXT, pdf) }
+        // An EPUB or a text its uploader made is the book; several are a set (Plan IA).
+        val uploadedEpubs = ArchiveParts.of(item, TextKind.EPUB, usable)
+        if (uploadedEpubs.size > 1) return set(item, TextKind.EPUB, usable)
+        uploadedEpubs.firstOrNull()?.let { return Offer.Download(it, TextKind.EPUB) }
+        val texts = ArchiveParts.of(item, TextKind.TEXT, convertible)
+        if (texts.size > 1) return set(item, TextKind.TEXT, convertible)
+        texts.firstOrNull()?.let { return Offer.Download(it, TextKind.TEXT, pdf) }
         // What the uploader made otherwise, a comic or a PDF (a magazine, a scan, a born-digital book), reads better as
         // itself than as the EPUB archive.org makes from it: OCR text a page per file, with no chapters, and pictures
-        // cut out of the page (Pixel 6 walkthrough, 2026-10-30). A multi-part item offers its first part.
-        usable.filter { it.source == "original" && isComic(it) }.minByOrNull { it.name }
-            ?.let { return Offer.Download(it, TextKind.COMIC) }
-        bestPdf(usable.filter { it.source == "original" })
-            ?.let { return Offer.Download(it, TextKind.PDF) }
+        // cut out of the page (Pixel 6 walkthrough, 2026-10-30). An item of several offers them all, as a set (Plan IA).
+        if (usable.any { it.source == "original" && isComic(it) }) return set(item, TextKind.COMIC, usable)
+        if (bestPdf(usable.filter { it.source == "original" }) != null) return set(item, TextKind.PDF, usable)
         // archive.org's EPUB from a scan: its text for reading and Listen, with the scan's PDF beside it.
         epubs.maxByOrNull { it.sizeBytes ?: 0 }
             ?.let { return Offer.Download(it, TextKind.EPUB, pdf) }
@@ -52,6 +58,13 @@ object ArchiveOffers {
         if (item.files.any { it.isPrivate && isTextOrPdf(it) }) return Offer.LendOnly
         if (pdf != null) return Offer.Download(pdf, TextKind.PDF)
         return Offer.Nothing
+    }
+
+    /** [item]'s [kind] files as one offer: its first, with every part when there are several. */
+    private fun set(item: ArchiveItem, kind: TextKind, usable: List<ArchiveFile>): Offer.Download {
+        val files = ArchiveParts.of(item, kind, usable)
+        val parts = if (files.size > 1) ArchiveParts.numbered(item, files) else emptyList()
+        return Offer.Download(files.first(), kind, parts = parts)
     }
 
     /** A guess from search formats, before the item's metadata is fetched; the file is a placeholder. */

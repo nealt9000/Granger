@@ -51,6 +51,13 @@ interface Speech : AutoCloseable {
      * the time to first audio. Each [Pcm] carries its sample rate. Cancelling the collector stops the engine early.
      */
     fun synthesize(text: String, speed: Float = 1f): Flow<Pcm>
+
+    /**
+     * As [synthesize], for a sentence that starts inside a quote when [quoteOpen] (the paragraph's earlier sentences
+     * opened it). Engines that read quoted speech in a voice of its own split the sentence at its quotes; the rest
+     * read it whole.
+     */
+    fun synthesize(text: String, speed: Float, quoteOpen: Boolean): Flow<Pcm> = synthesize(text, speed)
 }
 
 interface SpeechFactory {

@@ -530,12 +530,13 @@ private fun TabRowContent(entry: RailEntry.Tab) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            val subtitle = tab.subtitle.resolve()
             Text(
                 when {
-                    tab.available && !tab.readingAloud -> tab.subtitle
-                    tab.available -> stringResource(R.string.shell_subtitle_reading_aloud, tab.subtitle)
-                    !tab.readingAloud -> stringResource(R.string.shell_subtitle_not_available, tab.subtitle)
-                    else -> stringResource(R.string.shell_subtitle_not_available_reading_aloud, tab.subtitle)
+                    tab.available && !tab.readingAloud -> subtitle
+                    tab.available -> stringResource(R.string.shell_subtitle_reading_aloud, subtitle)
+                    !tab.readingAloud -> stringResource(R.string.shell_subtitle_not_available, subtitle)
+                    else -> stringResource(R.string.shell_subtitle_not_available_reading_aloud, subtitle)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

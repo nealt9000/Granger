@@ -60,7 +60,7 @@ class ListenViewModelTest {
     @Test fun theShelvesAreMusicThenAudiobooksAndOnlyAudio() = runTest(main.dispatcher) {
         shelves.shelfList.value = listOf(shelf("Literature", "Wikipedia"), shelf("Audiobooks", "LibriVox"), shelf("Music", "Phone", "Archive.org"))
         val ui = vm().ui.filterNotNull().first()
-        assertThat(ui.shelves.map { it.title }).containsExactly("Music", "Audiobooks").inOrder()
+        assertThat(ui.shelves.map { it.title.resolve(ApplicationProvider.getApplicationContext()) }).containsExactly("Music", "Audiobooks").inOrder()
         assertThat(ui.shelves[0].collections.map { it.collection.name }).containsExactly("Phone", "Archive.org").inOrder()
         assertThat(ui.empty).isFalse()
     }
@@ -89,7 +89,7 @@ class ListenViewModelTest {
         assertThat(ui.shelves).isEmpty()
         assertThat(ui.nowPlaying).isNull()
         // The empty state's sources are Get more's audio rows.
-        assertThat(AUDIO_SOURCES.map { it.title }).containsExactly("LibriVox", "Archive.org audiobooks", "Archive.org music").inOrder()
+        assertThat(AUDIO_SOURCES.map { context.getString(it.title) }).containsExactly("LibriVox", "Archive.org audiobooks", "Archive.org music").inOrder()
     }
 
     @Test fun nowPlayingFollowsThePlayer() = runTest(main.dispatcher) {

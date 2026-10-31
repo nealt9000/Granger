@@ -298,7 +298,7 @@ class ReadAloudEngine(
         if (u.kind == UtteranceKind.CODE_OMITTED && u.text.isEmpty()) return null
         return try {
             val start = System.nanoTime()
-            val chunks = s.synthesize(u.text, speed).toList()
+            val chunks = s.synthesize(u.text, speed, u.quoteOpen).toList()
             val pcm = if (chunks.isEmpty()) null else Pcm(Wav.concat(chunks.map { it.samples }), chunks.first().sampleRate)
             _stats.tryEmit(SentenceStat(u.address, u.text.length, (System.nanoTime() - start) / 1_000_000, pcm?.durationMs ?: 0))
             pcm

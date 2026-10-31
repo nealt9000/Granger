@@ -273,6 +273,27 @@ class LibraryPassageFinderTest {
         assertThat(p.meta.collection).isEqualTo("Classics")
     }
 
+    @Test fun aGutenbergBooksTextIsFoundOnlyAfterItsFirstOpen() = test {
+        val archive = GutenbergFixtures.archive(tmp.newFolder("src"))
+        val pack = GutenbergFixtures.pack(archive).also { db.packDao().upsert(it) }
+        val gutenberg = GutenbergBooks(db, { archive.takeIf { _ -> it == pack.id } }, { File(booksDir, "gutenberg") }, File(tmp.root, "covers"), dispatcher)
+        gutenberg.sync(listOf(pack))
+        index.indexPending()
+        fun rows() = kotlinx.coroutines.runBlocking { db.bookDao().byOrigin(BookOrigin.GUTENBERG) }
+        val keywords = listOf("gutenberg number 48417")
+
+        val before = finder(emptyList(), emptyMap(), books = rows()).find(keywords)
+        assertThat(before.filter { it.kind == SourceKind.BOOK }).isEmpty()
+        // Its title is there at once: a card for the book the question names.
+        val card = finder(emptyList(), emptyMap(), books = rows()).find(listOf("pennsylvania dutch")).filter { it.kind == SourceKind.CARD }
+        assertThat(card.map { it.sourceId }).contains(BookIds.of(BookOrigin.GUTENBERG, "48417"))
+
+        assertThat(gutenberg.restore(db.bookDao().get(BookIds.of(BookOrigin.GUTENBERG, "48417"))!!)).isTrue()
+        index.indexPending()
+        val after = finder(emptyList(), emptyMap(), books = rows()).find(keywords).filter { it.kind == SourceKind.BOOK }
+        assertThat(after.map { it.sourceId }).containsExactly(BookIds.of(BookOrigin.GUTENBERG, "48417"))
+    }
+
     @Test fun aPdfPassageIsHeadedByItsPage() = test {
         PdfFixtures.init(androidx.test.core.app.ApplicationProvider.getApplicationContext())
         val file = PdfFixtures.text(File(booksDir, "archive-org").apply { mkdirs() }, "water.pdf")

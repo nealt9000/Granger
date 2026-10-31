@@ -28,6 +28,9 @@ android {
         // A second debug install beside the first, with its own empty data, for fresh-install walkthroughs:
         // ./gradlew installDebug -Pfresh
         getByName("debug") {
+            // en-XA (accented, longer) and ar-XB (right to left): a phone set to either shows any text that isn't a
+            // resource as plain English (Plan L1 Task 9). PseudoLocaleTest checks the main screens with en-XA.
+            isPseudoLocalesEnabled = true
             if (project.hasProperty("fresh")) {
                 applicationIdSuffix = ".fresh"
                 manifestPlaceholders["appLabel"] = "Granger Fresh"
@@ -48,8 +51,6 @@ android {
             it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
             // ThemeShots renders the main screens to PNGs only when asked: ./gradlew testDebugUnitTest --tests '*ThemeShots*' -PthemeShots
             it.systemProperty("granger.themeShots", if (project.hasProperty("themeShots")) layout.buildDirectory.dir("theme-shots").get().asFile.path else "")
-            // HardcodedStringsTest rewrites its baseline only when asked: ./gradlew :app:testDebugUnitTest --tests '*HardcodedStrings*' -PwriteBaseline
-            it.systemProperty("l1.writeBaseline", if (project.hasProperty("writeBaseline")) "true" else "")
         }
     }
     compileOptions {

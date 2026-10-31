@@ -22,16 +22,17 @@ import kotlinx.coroutines.launch
  * An archive source the empty Music and Audiobooks screens (and an empty Listen) link to. The three archive.org links are its texts,
  * spoken-word and music views.
  */
-enum class SourceLink(val title: String) {
-    GRANGER("Granger"), KIWIX("Kiwix"), ARCHIVE_ORG("Archive.org"),
-    LIBRIVOX("LibriVox"), ARCHIVE_ORG_SPOKEN("Archive.org"), ARCHIVE_ORG_MUSIC("Archive.org"),
+enum class SourceLink(@androidx.annotation.StringRes val title: Int) {
+    GRANGER(app.granger.R.string.library_link_granger), KIWIX(app.granger.R.string.library_link_kiwix),
+    ARCHIVE_ORG(app.granger.R.string.library_link_archive), LIBRIVOX(app.granger.R.string.library_link_librivox),
+    ARCHIVE_ORG_SPOKEN(app.granger.R.string.library_link_archive), ARCHIVE_ORG_MUSIC(app.granger.R.string.library_link_archive),
 }
 
 /**
  * One Library row: a kind of thing the phone holds, opening to its collections (Plan U3b Decision 4). [mediaTypeId] is
  * the media type its collections are filed under; [id] keeps its collapsed state.
  */
-data class KindRow(val id: String, val title: String, val mediaTypeId: String, val collections: List<CollectionRow>) {
+data class KindRow(val id: String, val title: app.granger.UiText, val mediaTypeId: String, val collections: List<CollectionRow>) {
     /** Every collection here, each folder followed by its children. */
     val allCollections: List<CollectionRow> get() = collections.flatMap { it.withChildren }
 }
@@ -54,8 +55,9 @@ fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
     val literature = shelves.firstOrNull { it.mediaType.id == LITERATURE }
     val rest = shelves.filter { it.mediaType.id != LITERATURE && it.mediaType.id !in AUDIO_TYPE_IDS }
     return (
-        listOfNotNull(literature?.let { KindRow(BOOKS_KIND, "Books", LITERATURE, it.bookCollections()) }) +
-            rest.map { KindRow(it.mediaType.id, it.mediaType.name, it.mediaType.id, it.bookCollections()) }
+        listOfNotNull(literature?.let { KindRow(BOOKS_KIND, app.granger.UiText.Res(app.granger.R.string.library_books), LITERATURE, it.bookCollections()) }) +
+            // A media type's name is saved in library.db (the defaults in English): translating it is L2's.
+            rest.map { KindRow(it.mediaType.id, app.granger.UiText.Raw(it.mediaType.name), it.mediaType.id, it.bookCollections()) }
         ).filter { it.collections.isNotEmpty() }
 }
 
@@ -69,7 +71,7 @@ fun listenKinds(shelves: List<Shelf>): List<KindRow> {
     val audio = AudioShelves.of(shelves)
     val held = mapOf(MUSIC_TYPE_ID to audio.music, AUDIOBOOKS_TYPE_ID to audio.audiobooks)
     return AUDIO_TYPE_IDS.filter { held[it] == true }
-        .mapNotNull { id -> byId[id]?.let { KindRow(id, it.mediaType.name, id, it.collections) } }
+        .mapNotNull { id -> byId[id]?.let { KindRow(id, app.granger.UiText.Raw(it.mediaType.name), id, it.collections) } }
         .filter { it.collections.isNotEmpty() }
 }
 
@@ -84,10 +86,10 @@ class LibraryViewModel(
     private val importer: ImportRunner,
     private val appScope: CoroutineScope,
 ) : ViewModel() {
-    private val _notice = MutableStateFlow<String?>(null)
+    private val _notice = MutableStateFlow<app.granger.UiText?>(null)
 
     /** What the last import did, shown once as a snackbar. */
-    val notice: StateFlow<String?> = _notice
+    val notice: StateFlow<app.granger.UiText?> = _notice
 
     fun dismissNotice() {
         _notice.value = null

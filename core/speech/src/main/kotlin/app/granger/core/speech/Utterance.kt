@@ -65,6 +65,8 @@ data class Utterance(
     /** The sentence's character range within its block's folded text, for the reader's highlight. */
     val start: Int = 0,
     val end: Int = text.length,
+    /** Whether the sentence starts inside a quote its paragraph opened earlier ([QuoteSpans]). */
+    val quoteOpen: Boolean = false,
 )
 
 /** A block of a source as its reader hands it over: a heading, a paragraph, a list item, a code block. */
@@ -95,9 +97,10 @@ object Utterances {
                 }
                 BlockKind.PARAGRAPH, BlockKind.LIST_ITEM -> {
                     val sentences = Sentences.sentences(block.text)
+                    val open = QuoteSpans.openAtStart(sentences.map { it.text })
                     sentences.mapIndexed { i, s ->
                         val last = i == sentences.lastIndex
-                        Utterance(address(block.id, i), UtteranceKind.SENTENCE, s.text, paragraph, if (last) PARAGRAPH_PAUSE_MS else SENTENCE_PAUSE_MS, s.start, s.end)
+                        Utterance(address(block.id, i), UtteranceKind.SENTENCE, s.text, paragraph, if (last) PARAGRAPH_PAUSE_MS else SENTENCE_PAUSE_MS, s.start, s.end, open[i])
                     }
                 }
             }

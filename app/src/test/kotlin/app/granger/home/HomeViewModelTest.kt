@@ -97,7 +97,7 @@ class HomeViewModelTest {
     }
 
     private fun tab(id: Long, title: String) =
-        RailEntry.Tab(RailTabUi(id, title, "A pack", title.first(), available = true, current = false), at = id)
+        RailEntry.Tab(RailTabUi(id, title, app.granger.UiText.Raw("A pack"), title.first(), available = true, current = false), at = id)
 
     private fun installWikipedia() {
         library.packList.value = listOf(wikipedia)
@@ -139,19 +139,19 @@ class HomeViewModelTest {
     @Test fun continueLeavesOutMainPagesAndIndexPages() = runTest(main.dispatcher) {
         installWikipedia()
         fun page(id: Long, packId: String, path: String) =
-            RailEntry.Tab(RailTabUi(id, path, "A pack", 'P', available = true, current = false, packId = packId, path = path), at = id)
+            RailEntry.Tab(RailTabUi(id, path, app.granger.UiText.Raw("A pack"), 'P', available = true, current = false, packId = packId, path = path), at = id)
         val cat = page(1, "u1", "Cat")
         val front = page(2, "u1", "index")
         val user = page(3, "se", "users/7/apocalypse")
         val tags = page(4, "se", "tags")
         val question = page(5, "se", "questions/12/the-end")
-        val book = RailEntry.Tab(RailTabUi(6, "Emma", "Jane Austen", 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
+        val book = RailEntry.Tab(RailTabUi(6, "Emma", app.granger.UiText.Raw("Jane Austen"), 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
         rail.value = RailUi(listOf(cat, front, user, tags, question, book))
         assertThat(viewModel().ui.value.continueCards).containsExactly(cat, question, book).inOrder()
     }
 
     @Test fun continueCardsIsPureOverTheMainPaths() {
-        val front = RailEntry.Tab(RailTabUi(1, "WikEM", "WikEM", 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
+        val front = RailEntry.Tab(RailTabUi(1, "WikEM", app.granger.UiText.Raw("WikEM"), 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
         assertThat(HomeViewModel.continueCards(RailUi(listOf(front)))).containsExactly(front)
         assertThat(HomeViewModel.continueCards(RailUi(listOf(front)), mapOf("w" to "Main_Page"))).isEmpty()
     }
@@ -306,5 +306,56 @@ class HomeViewModelTest {
         val choices = viewModel().ui.value.scopeChoices
         assertThat(choices.map { it.label.text() }).containsExactly("Whole library", "Wikipedia").inOrder()
         assertThat(choices.last().scope).isEqualTo(FeedScope.Pack("wikipedia_en_all"))
+    }
+
+    // --- Plan WF Decision 5: a bigger slice is in, the smaller is offered for removal, never removed by itself ---
+
+    private val wfTop = packEntry("wikipedia_en_top_nopic", zimName = "wikipedia_en_top", size = 2_700_000_000)
+        .copy(setId = "wikipedia_en", setRank = 2, setLabel = "Best 50,000 articles")
+    private val wfTop1m = packEntry("wikipedia_en_top1m_nopic", zimName = "wikipedia_en_top1m", size = 17_000_000_000)
+        .copy(setId = "wikipedia_en", setRank = 3, setLabel = "Top 1 million articles")
+
+    private fun TestScope.tidyViewModel(dismissals: app.granger.sources.TidyDismissals): HomeViewModel {
+        catalog.mutable.value = app.granger.core.catalog.CatalogState(catalog = app.granger.catalogOf(listOf(wfTop, wfTop1m)))
+        library.packList.value = listOf(
+            pack(wfTop.zimUuid).copy(name = wfTop.zimName, sizeBytes = 2_700_000_000),
+            pack(wfTop1m.zimUuid).copy(name = wfTop1m.zimName),
+        )
+        val drawer = FeedDrawer({ library.archives[it.id] }, { emptyList() }, { emptyList() }, librarySearch)
+        val vm = HomeViewModel(
+            catalog, library, bookshelf, downloads, rail, homeFeeds, drawer, shelves, media, prefs,
+            io = main.dispatcher, today = { today }, tidyDismissals = dismissals,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    @Test fun homeOffersToRemoveTheSmallerSliceAndRemovesItOnlyOnAYes() = runTest(main.dispatcher) {
+        val vm = tidyViewModel(app.granger.sources.TidyDismissals())
+        val offer = vm.ui.value.tidy.single()
+        assertThat(offer.text.text()).isEqualTo("Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.")
+        // Nothing has been removed by just showing it.
+        assertThat(library.superseded).isEmpty()
+        assertThat(downloads.calls).isEmpty()
+        vm.removeSmaller(offer)
+        testScheduler.advanceUntilIdle()
+        assertThat(library.supersededAcross).containsExactly(wfTop.zimUuid to wfTop1m.zimUuid)
+        assertThat(downloads.calls).containsExactly("remove:${wfTop.id}")
+        assertThat(vm.ui.value.tidy).isEmpty()
+    }
+
+    @Test fun keepBothIsRememberedAndTheOfferDoesntComeBack() = runTest(main.dispatcher) {
+        val saved = mutableListOf<Set<String>>()
+        val vm = tidyViewModel(app.granger.sources.TidyDismissals { saved += it })
+        val offer = vm.ui.value.tidy.single()
+        vm.keepBoth(offer)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.tidy).isEmpty()
+        assertThat(saved.last()).containsExactly(offer.key)
+        assertThat(library.superseded).isEmpty()
+        // A new launch reads the answer back.
+        val again = tidyViewModel(app.granger.sources.TidyDismissals(saved.last()))
+        assertThat(again.ui.value.tidy).isEmpty()
     }
 }

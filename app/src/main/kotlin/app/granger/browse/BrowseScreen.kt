@@ -227,7 +227,7 @@ private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemo
             headlineContent = { Text(pack.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
             supportingContent = {
                 Column {
-                    Text(listOfNotNull(formatBytes(pack.sizeBytes), item.ask?.text).joinToString(" · "))
+                    Text(item.ask?.let { stringResource(R.string.sources_dotted, formatBytes(pack.sizeBytes), it.text.resolve()) } ?: formatBytes(pack.sizeBytes))
                     if (problem != null) Text(problem, color = MaterialTheme.colorScheme.error)
                 }
             },

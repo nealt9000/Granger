@@ -13,6 +13,7 @@ class ZimResolverTest {
             "leaf.png" to ("image/png" to "PNG"),
             "app.js" to ("application/javascript" to "1"),
             "docs/water.pdf" to ("application/pdf" to "%PDF-1.4"),
+            "A Middle High German Primer.22636.epub" to ("application/epub+zip" to "PK"),
         ),
         redirects = mapOf("Plants" to "Photosynthesis", "Water" to "docs/water.pdf"),
     )
@@ -61,6 +62,13 @@ class ZimResolverTest {
         assertThat(resolver.linkAction(ZimUrls.forEntry("p", "index"))).isEqualTo(LinkAction.Load)
         assertThat(ZimResolver.isPdf("application/pdf; charset=binary")).isTrue()
         assertThat(ZimResolver.isPdf("text/html")).isFalse()
+    }
+
+    @Test fun aTappedEpubOpensAsADocument() {
+        assertThat(resolver.linkAction(ZimUrls.forEntry("p", "A Middle High German Primer.22636.epub")))
+            .isEqualTo(LinkAction.OpenDocument("p", "A Middle High German Primer.22636.epub"))
+        assertThat(ZimResolver.isEpub("application/epub+zip")).isTrue()
+        assertThat(ZimResolver.isEpub("application/zip")).isFalse()
     }
 
     @Test fun copyToWritesTheEntry() {

@@ -1,0 +1,42 @@
+# Hand-written lines every teacher-voice speaker reads (make_script.py --extra). Spoken form: no digits, since
+# SpokenText writes numbers out before Piper. British spelling. Not the held-out listening lines.
+Scholars spent decades on the Rosetta inscription before anyone could read a single royal name.
+Australia is both a country and a continent, and much of its area is desert.
+The ferry from Alexandria to Malta took three days in calm weather.
+Her grandmother kept a copy of Pamela on the shelf beside the china.
+Cinnamon, vanilla and a little sugar were all the recipe asked for.
+The war ended in nineteen forty-five, but rationing in Britain lasted until nineteen fifty-four.
+The library was founded in the eighteen sixties and rebuilt after the fire of nineteen oh eight.
+Add two hundred and fifty millilitres of clean water and stir for thirty seconds.
+The trail climbs nine hundred metres over roughly six kilometres.
+At twenty past seven, the light over the harbour turned from grey to gold.
+The fever had lasted three days, and her temperature was thirty-nine degrees.
+Keep the wound clean and dry, and change the dressing twice a day.
+If the bleeding does not stop after ten minutes of firm pressure, get help immediately.
+Do not give anything by mouth to someone who is not fully awake.
+Here is what I found in your library.
+I couldn't find an answer to that in the books and articles on this phone.
+According to the encyclopaedia, the bridge was finished in the autumn of eighteen ninety.
+Would you like me to keep reading, or go back to the start of the chapter?
+Chapter twelve. The Return.
+Part two: the long winter.
+Why would anyone leave a house like that, with the doors wide open?
+"Never," said the old man. "Not while I'm alive."
+She laughed, and then, quite suddenly, she was crying.
+What a beautiful morning it is!
+Oh, I see. So that's where you put it.
+Well, perhaps. But I wouldn't count on it.
+First, find a dry place out of the wind; second, make a fire; and third, boil some water.
+The colours of the leaves in October are remarkable: red, amber, ochre and a deep brown.
+The theatre was full, and the orchestra had already begun to tune.
+Mathematics, philosophy and music were taught together in the old schools.
+Photosynthesis turns sunlight, water and carbon dioxide into sugar and oxygen.
+The Thames rises in Gloucestershire and flows east to London and the sea.
+Leicester, Worcester and Edinburgh are not pronounced the way they are spelled.
+The professor paused, took off her glasses, and looked out of the window for a long while.
+It's not that I can't, you understand. It's that I'd rather not.
+Quietly, carefully, he lifted the latch and stepped out into the night.
+The storm had passed by midnight, leaving the lanes flooded and the hedgerows bent.
+They walked along the canal path as far as the lock, and then turned back.
+Rice should be rinsed, then simmered gently with the lid on for about fifteen minutes.
+Is there anything else you'd like to know?

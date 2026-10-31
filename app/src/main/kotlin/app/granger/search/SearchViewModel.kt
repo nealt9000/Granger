@@ -84,7 +84,10 @@ class SearchViewModel(
         fun <T> shown(group: SearchGroup, all: List<T>): List<T> = if (group in expanded) all else all.take(group.preview)
     }
 
-    private val query = MutableStateFlow(initialQuery.trim())
+    /** The trimmed query, and how many times [refresh] has asked for it again. */
+    private data class Request(val text: String, val generation: Int = 0)
+
+    private val query = MutableStateFlow(Request(initialQuery.trim()))
     private val _state = MutableStateFlow(State(query = initialQuery))
     val state: StateFlow<State> = _state.asStateFlow()
 
@@ -101,13 +104,20 @@ class SearchViewModel(
             sessions.recentSearches().collect { recent -> _state.update { it.copy(recent = recent) } }
         }
         viewModelScope.launch {
-            // The seed query is searched at once; anything typed afterwards is debounced.
+            // The seed query and a refresh are searched at once; anything typed afterwards is debounced.
             var seed = true
+            var generation = 0
+            var lastText = ""
             query.debounce {
-                val wait = if (seed && it.isNotBlank()) 0L else DEBOUNCE_MS
+                val wait = if ((seed || it.generation != generation) && it.text.isNotBlank()) 0L else DEBOUNCE_MS
                 seed = false
+                generation = it.generation
                 wait
-            }.distinctUntilChanged().collectLatest { q ->
+            }.distinctUntilChanged().collectLatest { request ->
+                val q = request.text
+                // A refresh keeps the groups opened with Show all.
+                val again = q == lastText
+                lastText = q
                 if (q.isBlank()) {
                     _state.update {
                         it.copy(
@@ -117,7 +127,7 @@ class SearchViewModel(
                     }
                     return@collectLatest
                 }
-                _state.update { it.copy(searching = true, expanded = emptySet(), capped = emptySet()) }
+                _state.update { it.copy(searching = true, expanded = if (again) it.expanded else emptySet(), capped = emptySet()) }
                 // Each group's results land with its cap, so its Show all label is right from the first frame.
                 val titles = search.titles(q)
                 _state.update {
@@ -159,8 +169,23 @@ class SearchViewModel(
 
     fun onQueryChange(text: String) {
         searchText = text
-        query.value = text.trim()
+        query.update { it.copy(text = text.trim()) }
         _state.update { it.copy(query = text) }
+    }
+
+    /**
+     * Searches the current query again: on submit, and when Search is shown again. Results are otherwise kept for an
+     * unchanged query, so coming Back from a book opened (and so indexed) since would show the old ones.
+     */
+    fun refresh() {
+        if (query.value.text.isNotBlank()) query.update { it.copy(generation = it.generation + 1) }
+    }
+
+    private var shown = false
+
+    /** Search is on screen (resumed); every time after the first, the query is searched again ([refresh]). */
+    fun onShown() {
+        if (shown) refresh() else shown = true
     }
 
     /** Show all, or Show fewer, for [group]. */
@@ -170,18 +195,18 @@ class SearchViewModel(
 
     /** Remembers the current query as a recent search; called when a music or audiobook result is opened or played. */
     suspend fun recordSearch() {
-        sessions.recordSearch(query.value)
+        sessions.recordSearch(query.value.text)
     }
 
     /** Remembers the current query as a recent search, opens the hit in a new rail tab and returns its id. */
     suspend fun open(hit: SearchHit): Long {
-        sessions.recordSearch(query.value)
+        sessions.recordSearch(query.value.text)
         return sessions.openTab(hit.packId, hit.path, hit.title)
     }
 
     /** Remembers the current query, opens (or reuses) the book's tab, and returns it with the place to open at. */
     suspend fun openBook(hit: BookHit): Pair<Long, BookTarget> {
-        sessions.recordSearch(query.value)
+        sessions.recordSearch(query.value.text)
         return sessions.openTab(hit.bookId, "", hit.bookTitle) to BookTarget(hit.href, hit.progression, hit.quote)
     }
 

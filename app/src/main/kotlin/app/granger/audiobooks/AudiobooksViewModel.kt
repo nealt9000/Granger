@@ -52,9 +52,6 @@ import kotlinx.coroutines.launch
 /** The Audiobooks media type's id (seeded). */
 const val AUDIOBOOKS_TYPE_ID = "audiobooks"
 
-/** The unscoped shelf, mirroring Music's "All music". The shelf shows [R.string.audiobooks_all]; this English copy is the Library row's until library/ moves to resources (Plan L1 Task 8). */
-const val ALL_AUDIOBOOKS = "All audiobooks"
-
 /** The listener's audiobook rows: positions and bookmarks ([PlaybackDao] in the app). */
 interface AudiobookListening {
     val states: Flow<List<AudiobookState>>

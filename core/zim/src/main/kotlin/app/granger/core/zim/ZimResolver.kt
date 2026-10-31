@@ -16,7 +16,7 @@ sealed interface LinkAction {
     data class Redirect(val url: String) : LinkAction
     /** Leave the app (system browser, mail, maps). */
     data class External(val url: String) : LinkAction
-    /** A document the WebView can't show (a PDF): the e-book reader opens it (Plan P2). */
+    /** A document the WebView can't show (a PDF, Plan P2; an EPUB, Plan GB): the e-book reader opens it. */
     data class OpenDocument(val packId: String, val path: String) : LinkAction
     /** javascript:, file:, intent: and anything else unsafe. */
     data object Ignore : LinkAction
@@ -48,7 +48,8 @@ class ZimResolver(
         // loads the URL and shouldInterceptRequest serves it from a background thread.
         val archive = cachedArchiveFor(zim.packId) ?: return LinkAction.Load
         val target = archive.resolvePath(zim.path) ?: return LinkAction.Load
-        if (isPdf(archive.entry(target)?.mimeType)) return LinkAction.OpenDocument(zim.packId, target)
+        val mimeType = archive.entry(target)?.mimeType
+        if (isPdf(mimeType) || isEpub(mimeType)) return LinkAction.OpenDocument(zim.packId, target)
         return if (target == zim.path) {
             LinkAction.Load
         } else {
@@ -61,6 +62,9 @@ class ZimResolver(
         private val TEXT_TYPES = setOf("application/javascript", "application/json", "application/xml", "image/svg+xml")
 
         fun isPdf(mimeType: String?): Boolean = mimeType != null && splitMimeType(mimeType).first == "application/pdf"
+
+        /** A Gutenberg pack's book (Plan GB): opened as a book, not shown as a page of bytes. */
+        fun isEpub(mimeType: String?): Boolean = mimeType != null && splitMimeType(mimeType).first == "application/epub+zip"
 
         /** Splits `text/html; charset=utf-8` into the MIME type and encoding WebResourceResponse wants. */
         fun splitMimeType(raw: String): Pair<String, String?> {

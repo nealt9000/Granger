@@ -6,6 +6,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaConstants
 import app.granger.audiobooks.AudiobookShelf
 import app.granger.core.library.AlbumSummary
+import app.granger.R
 import app.granger.core.library.Albums
 import app.granger.core.library.Audiobook
 import app.granger.core.library.MediaIndex
@@ -53,10 +54,20 @@ class AutoBrowseTree(
     private val songs: SongPlayer,
     private val hub: PlayerHub,
     private val artwork: Artwork,
+    /** A string resource in the phone's language (the app passes its context's getString). */
+    private val text: (Int) -> String,
     private val compute: CoroutineDispatcher = Dispatchers.Default,
 ) : MediaBrowseTree {
 
+    // The root is the app's name, the same in every language.
     override fun root(): MediaItem = folder(ROOT, "Granger", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+
+    /** A name as shown: the library's Unknown artist and Unknown album placeholders in the phone's language. */
+    private fun shown(name: String): String = when (name) {
+        Albums.UNKNOWN_ARTIST -> text(R.string.music_unknown_artist)
+        Albums.UNKNOWN_ALBUM -> text(R.string.music_unknown_album)
+        else -> name
+    }
 
     override suspend fun children(parentId: String, page: Int, pageSize: Int): List<MediaItem>? {
         val all = list(parentId) ?: return null
@@ -307,36 +318,36 @@ class AutoBrowseTree(
 
     // ---- items ----
 
-    private fun recentFolder() = folder(RECENT, "Recent", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
-    private fun musicFolder() = folder(MUSIC, "Music", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
-    private fun audiobooksFolder() = folder(AUDIOBOOKS, "Audiobooks", MediaMetadata.MEDIA_TYPE_FOLDER_AUDIO_BOOKS, grid = true)
-    private fun albumsFolder() = folder(ALBUMS, "Albums", MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS, grid = true)
-    private fun artistsFolder() = folder(ARTISTS, "Artists", MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS)
-    private fun playlistsFolder() = folder(PLAYLISTS, "Playlists", MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS)
+    private fun recentFolder() = folder(RECENT, text(R.string.media_auto_recent), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+    private fun musicFolder() = folder(MUSIC, text(R.string.media_auto_music), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+    private fun audiobooksFolder() = folder(AUDIOBOOKS, text(R.string.media_auto_audiobooks), MediaMetadata.MEDIA_TYPE_FOLDER_AUDIO_BOOKS, grid = true)
+    private fun albumsFolder() = folder(ALBUMS, text(R.string.music_tab_albums), MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS, grid = true)
+    private fun artistsFolder() = folder(ARTISTS, text(R.string.music_tab_artists), MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS)
+    private fun playlistsFolder() = folder(PLAYLISTS, text(R.string.music_tab_playlists), MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS)
 
     private fun albumItem(a: AlbumSummary) =
-        item("$ALBUM${a.key}", a.title, a.albumArtist, a.coverPath, MediaMetadata.MEDIA_TYPE_ALBUM, browsable = true, playable = true)
+        item("$ALBUM${a.key}", shown(a.title), shown(a.albumArtist), a.coverPath, MediaMetadata.MEDIA_TYPE_ALBUM, browsable = true, playable = true)
 
     /** An artist: browsable (its albums, as a grid) and playable (its songs). */
     private fun artistItem(name: String) =
-        item("$ARTIST$name", name, null, null, MediaMetadata.MEDIA_TYPE_ARTIST, browsable = true, playable = true, grid = true)
+        item("$ARTIST$name", shown(name), null, null, MediaMetadata.MEDIA_TYPE_ARTIST, browsable = true, playable = true, grid = true)
 
     private fun songItem(t: Track) = playable(
-        "$ALBUM${t.albumKey}$ENTRY${t.id}", t.title, MediaNames.trackArtistsOf(t).joinToString(", "), t.coverPath,
-        MediaMetadata.MEDIA_TYPE_MUSIC, album = Albums.title(t),
+        "$ALBUM${t.albumKey}$ENTRY${t.id}", t.title, MediaNames.trackArtistsOf(t).joinToString(", ", transform = ::shown), t.coverPath,
+        MediaMetadata.MEDIA_TYPE_MUSIC, album = shown(Albums.title(t)),
     )
 
     private fun playlistItem(p: Playlist) =
         item("$PLAYLIST${p.id}", p.name, null, null, MediaMetadata.MEDIA_TYPE_PLAYLIST, browsable = true, playable = true)
 
     private fun entryItem(playlistId: Long, ordinal: Int, t: Track) = playable(
-        "$PLAYLIST$playlistId$ENTRY$ordinal", t.title, MediaNames.trackArtistsOf(t).joinToString(", "), t.coverPath,
-        MediaMetadata.MEDIA_TYPE_MUSIC, album = Albums.title(t),
+        "$PLAYLIST$playlistId$ENTRY$ordinal", t.title, MediaNames.trackArtistsOf(t).joinToString(", ", transform = ::shown), t.coverPath,
+        MediaMetadata.MEDIA_TYPE_MUSIC, album = shown(Albums.title(t)),
     )
 
     private fun bookItem(b: Audiobook) = playable(b.id, b.title, b.author, b.coverPath, MediaMetadata.MEDIA_TYPE_AUDIO_BOOK)
 
-    private fun nothing() = item(EMPTY, "Nothing here yet", null, null, MediaMetadata.MEDIA_TYPE_MIXED, browsable = false, playable = false)
+    private fun nothing() = item(EMPTY, text(R.string.media_auto_nothing), null, null, MediaMetadata.MEDIA_TYPE_MIXED, browsable = false, playable = false)
 
     private fun folder(id: String, title: String, type: Int, grid: Boolean = false) =
         item(id, title, null, null, type, browsable = true, playable = false, grid = grid)

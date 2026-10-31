@@ -66,6 +66,87 @@ class ShelvesTest {
         assertThat(db.shelfDao().getCollections()).containsExactlyElementsIn(collections)
     }
 
+    private fun gutenbergBook(id: String, title: String, packName: String = "gutenberg_en_lcc-m") =
+        book(id, BookOrigin.GUTENBERG, title).copy(sourceRef = "$packName/$title.$id.epub")
+
+    @Test fun aGutenbergPacksBooksAreACollectionBesideTheClassicsAndThePackIsntShelved() = runTest {
+        val music = named("g1", "gutenberg_en_lcc-m").copy(description = "Music and books on music")
+        bookshelf.state.value = listOf(
+            book("hamlet", title = "Hamlet"),
+            gutenbergBook("1000", "Beethoven"), gutenbergBook("1001", "Bach"),
+        )
+        val (s, _) = shelves(top, music)
+        val literature = s.shelves.first().single()
+        val top = literature.collections.filter { it.collection.parentId == null }
+        assertThat(top.map { it.collection.name }).containsExactly("Granger Classics", "Kiwix", "Music and books on music").inOrder()
+        val gutenberg = top.first { it.collection.name == "Music and books on music" }
+        assertThat(gutenberg.collection.id).isEqualTo("c:gutenberg-m")
+        assertThat(gutenberg.collection.defaultKey).isEqualTo("gutenberg-m")
+        assertThat(gutenberg.books.map { it.title }).containsExactly("Bach", "Beethoven")
+        // The pack is the file and the download; its books are the way in, so it's on no shelf (nor in Browse).
+        assertThat(literature.allCollections.flatMap { it.packs }.map { it.id }).containsExactly(this@ShelvesTest.top.id)
+        assertThat(db.shelfDao().getPlacements().map { it.packKey }).doesNotContain("gutenberg_en_lcc-m")
+    }
+
+    @Test fun gutenbergCollectionKeysAndNames() {
+        assertThat(Filing.gutenbergKey("gutenberg_en_lcc-m")).isEqualTo("gutenberg-m")
+        assertThat(Filing.gutenbergKey("gutenberg_en_lcc-pf")).isEqualTo("gutenberg-pf")
+        assertThat(Filing.gutenbergKey("gutenberg_en_all")).isEqualTo("gutenberg-en_all")
+        val music = named("g1", "gutenberg_en_lcc-m").copy(description = "music and books on music")
+        assertThat(Filing.defaultKey(music)).isEqualTo("gutenberg-m")
+        assertThat(Filing.folderKey(music)).isNull()
+        assertThat(Filing.defaultName("gutenberg-m", music)).isEqualTo("Music and books on music")
+        val bach = gutenbergBook("1001", "Bach")
+        assertThat(Filing.defaultKey(bach)).isEqualTo("gutenberg-m")
+        assertThat(Filing.defaultName("gutenberg-m", bach, listOf(music))).isEqualTo("Music and books on music")
+        // Its pack gone, the collection is still somebody's.
+        assertThat(Filing.defaultName("gutenberg-m", bach)).isEqualTo("Project Gutenberg")
+        assertThat(Filing.isGutenbergCollection("gutenberg-m")).isTrue()
+        assertThat(Filing.isGutenbergCollection("granger-classics")).isFalse()
+    }
+
+    /** Plan KB Decision 3: a pack's scraper says whether it is a bundle of books, whatever its name. */
+    @Test fun aPacksBookSourceComesFromItsScraper() {
+        assertThat(named("g", "gutenberg_en_lcc-m").bookSource).isEqualTo(BookOrigin.GUTENBERG)
+        assertThat(named("g2", "my_classics").copy(scraper = "gutenberg2zim-3.0.1").bookSource).isEqualTo(BookOrigin.GUTENBERG)
+        assertThat(named("w", "zimgit-water_en").copy(scraper = "nautiluszim 1.1.1").bookSource).isEqualTo(BookOrigin.NAUTILUS)
+        // Not read yet, or a website: not a book pack.
+        assertThat(named("w2", "zimgit-water_en").bookSource).isNull()
+        assertThat(top.copy(scraper = "mwoffliner 2.1.1").isBookPack).isFalse()
+        assertThat(named("z", "survivorlibrary.com_en_all").copy(scraper = "warc2zim 2.3.1,zimit 3.1.3").isBookPack).isFalse()
+    }
+
+    private fun nautilusBook(fp: String, title: String, packName: String = "zimgit-water_en") =
+        book("$packName/$fp", BookOrigin.NAUTILUS, title).copy(sourceRef = "$packName/files/$fp", format = BookFormat.PDF)
+
+    @Test fun nautilusCollectionKeysAndNames() {
+        val water = named("w1", "zimgit-water_en").copy(title = "Water", scraper = "nautiluszim 1.1.1")
+        assertThat(Filing.defaultKey(water)).isEqualTo("kiwixbooks-zimgit-water_en")
+        assertThat(Filing.folderKey(water)).isNull()
+        assertThat(Filing.defaultName("kiwixbooks-zimgit-water_en", water)).isEqualTo("Water")
+        val book = nautilusBook("Water (1).pdf", "Distillation For Home Water Treatment")
+        assertThat(Filing.defaultKey(book)).isEqualTo("kiwixbooks-zimgit-water_en")
+        assertThat(Filing.defaultName("kiwixbooks-zimgit-water_en", book, listOf(water))).isEqualTo("Water")
+        assertThat(Filing.defaultName("kiwixbooks-zimgit-water_en", book)).isEqualTo("zimgit-water_en")
+        assertThat(Filing.isKiwixBooksCollection("kiwixbooks-zimgit-water_en")).isTrue()
+        assertThat(Filing.isBookPackCollection("kiwixbooks-zimgit-water_en")).isTrue()
+        assertThat(Filing.isBookPackCollection("gutenberg-m")).isTrue()
+        assertThat(Filing.isBookPackCollection("pack:zimgit-water_en")).isFalse()
+    }
+
+    @Test fun aNautilusPacksDocumentsAreItsOwnCollectionAndThePackIsntShelved() = runTest {
+        val water = named("w1", "zimgit-water_en").copy(title = "Water", scraper = "nautiluszim 1.1.1")
+        bookshelf.state.value = listOf(nautilusBook("Water (1).pdf", "Distillation"), nautilusBook("Water (2).pdf", "Purifying Water"))
+        val (s, _) = shelves(top, water)
+        val literature = s.shelves.first().single()
+        val row = literature.collections.single { it.collection.name == "Water" }
+        assertThat(row.collection.id).isEqualTo("c:kiwixbooks-zimgit-water_en")
+        assertThat(row.collection.parentId).isNull()
+        assertThat(row.books.map { it.title }).containsExactly("Distillation", "Purifying Water")
+        assertThat(literature.allCollections.flatMap { it.packs }.map { it.id }).containsExactly(this@ShelvesTest.top.id)
+        assertThat(db.shelfDao().getPlacements().map { it.packKey }).doesNotContain("zimgit-water_en")
+    }
+
     @Test fun blankNameFilesUnderOther() = runTest {
         val (s, _) = shelves(pack("x1"))
         val row = s.shelves.first().single().collections.single()
@@ -206,6 +287,20 @@ class ShelvesTest {
         val mine = shelf.collections.first { it.collection.defaultKey == "my-books" }
         assertThat(mine.books.map { it.sourceRef }).containsExactly("abc")
         assertThat(mine.packs).isEmpty()
+    }
+
+    @Test fun anArchiveSetsPartsShareTheirOwnCollection() = runTest {
+        val (s, _) = shelves()
+        bookshelf.state.value = listOf(
+            book("run~02", BookOrigin.ARCHIVE_ORG, title = "Batman (1986) · 02 (of 04)"),
+            book("run~01", BookOrigin.ARCHIVE_ORG, title = "Batman (1986) · 01 (of 04)"),
+            book("ia1", BookOrigin.ARCHIVE_ORG),
+        )
+        val shelf = s.shelves.first().single()
+        assertThat(shelf.collections.map { it.collection.name }).containsExactly("Archive.org", "Batman (1986)").inOrder()
+        val set = shelf.collections.first { it.collection.defaultKey == "archive-org:run" }
+        assertThat(set.books.map { it.sourceRef }).containsExactly("run~01", "run~02")
+        assertThat(shelf.collections.first { it.collection.defaultKey == "archive-org" }.books.map { it.sourceRef }).containsExactly("ia1")
     }
 
     @Test fun movedBookKeepsItsPlace() = runTest {

@@ -60,6 +60,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -266,12 +267,13 @@ fun LetterStrip(letters: List<String>, onLetter: (String) -> Unit, side: RailSid
                     if (entry == null) {
                         Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.clearAndSetSemantics {})
                     } else {
+                        val jumpTo = stringResource(R.string.library_jump_to, entry)
                         Text(
                             entry,
                             style = MaterialTheme.typography.labelSmall,
                             color = if (entry == dragging) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.clearAndSetSemantics {
-                                contentDescription = "Jump to $entry"
+                                contentDescription = jumpTo
                                 onClick { jump(entry); true }
                             },
                         )
@@ -337,7 +339,7 @@ fun <S> ShelfHeader(
         Spacer(Modifier.weight(1f))
         if (sorts.size > 1) Box {
             var open by remember { mutableStateOf(false) }
-            TextButton(onClick = { open = true }) { Text("Sort: ${label(sort)}") }
+            TextButton(onClick = { open = true }) { Text(stringResource(R.string.library_sort, label(sort))) }
             DropdownMenu(open, { open = false }) {
                 for (s in sorts) DropdownMenuItem(text = { Text(label(s)) }, onClick = { open = false; onSort(s) })
             }
@@ -351,9 +353,9 @@ fun <S> ShelfHeader(
 fun ViewToggle(view: ShelfView, onToggle: () -> Unit) {
     IconButton(onClick = onToggle) {
         if (view == ShelfView.LIST) {
-            Icon(painterResource(R.drawable.ic_grid_view), contentDescription = "Show as grid")
+            Icon(painterResource(R.drawable.ic_grid_view), contentDescription = stringResource(R.string.library_show_grid))
         } else {
-            Icon(painterResource(R.drawable.ic_view_list), contentDescription = "Show as list")
+            Icon(painterResource(R.drawable.ic_view_list), contentDescription = stringResource(R.string.library_show_list))
         }
     }
 }

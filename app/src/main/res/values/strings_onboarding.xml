@@ -109,4 +109,8 @@
     <string name="onboarding_no_space">Not enough space on %1$s: free up %2$s or untick something.</string>
     <!-- %1$s is the total downloads would reach, %2$s the limit. -->
     <string name="onboarding_over_cap">That would bring your downloads to %1$s, over the %2$s limit.</string>
+    <!-- Of two slices of one set, only the bigger is queued (Plan WF). %1$s is the set, such as Wikipedia; %2$s the bigger slice, such as Top 1 million; %3$s the smaller, such as Best 50,000. -->
+    <string name="onboarding_held_slice">%1$s %2$s covers %3$s, so only %2$s is queued.</string>
+    <!-- %1$s is the bigger pack's title; %2$s the one it holds. -->
+    <string name="onboarding_held">%1$s covers %2$s, so it isn\'t queued.</string>
 </resources>

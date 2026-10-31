@@ -80,7 +80,7 @@ class ArchiveScreenTest {
         val opened = mutableListOf<String>()
         val ui = ArchiveUi(
             kind = ArchiveKind.SPOKEN_WORD, shelf = ArchiveShelf.SPOKEN_MOST_DOWNLOADED, filtered = false, loading = false,
-            rows = listOf(ArchiveRow("holst", "The Planets", "", null, ItemStatus.InLibrary("Music"), AudioOffer.Tracks(emptyList(), "VBR MP3", null, 0))),
+            rows = listOf(ArchiveRow("holst", "The Planets", "", null, ItemStatus.InLibrary(app.granger.sources.LibraryShelf.MUSIC), AudioOffer.Tracks(emptyList(), "VBR MP3", null, 0))),
         )
         compose.setContent {
             ArchiveContent(

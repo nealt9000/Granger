@@ -1,6 +1,0 @@
-app/src/main/kotlin/app/granger/library/CollectionScreen.kt	26
-app/src/main/kotlin/app/granger/library/LibraryScreen.kt	8
-app/src/main/kotlin/app/granger/library/OrganizeDialogs.kt	16
-app/src/main/kotlin/app/granger/library/shelf/ShelfView.kt	4
-app/src/main/kotlin/app/granger/sources/GetMoreScreen.kt	2
-app/src/main/kotlin/app/granger/sources/SourceScreen.kt	28
