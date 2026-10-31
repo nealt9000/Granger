@@ -16,6 +16,11 @@ import java.util.Locale
  *   ("Frankenstein; or, The Modern Prometheus is an 1818 Gothic novel").
  *
  * Nothing is parsed from the question beyond the names and those words; the question's own numbers are never used.
+ *
+ * Spanish (languages spec §6.2) adds its months ("18 de junio de 1815"), eras ("a. C."), ranges ("de 1810 a 1825",
+ * "entre 1810 y 1825") and event words, when the question may be Spanish ([ResearchLanguage.of]). Only the parsing is
+ * Spanish: the block is prompt text, and stays English until the Spanish eval has a baseline. A century ("siglo XIX",
+ * like "19th century") gives no year.
  */
 object YearFacts {
     /** A date as precise as the passage gives it; [month] and [day] are 0 when it doesn't. */
@@ -49,6 +54,28 @@ object YearFacts {
     private val BC = Regex("\\s*(BC|BCE|B\\.C\\.)\\b")
     private val SQUARE = Regex("\\[[^\\]]*\\]")
     private val SENTENCE = Regex("(?<=[.!?])\\s+(?=[\"'(\\[]?[A-Z0-9])")
+    private val DASH = Regex("\\s*[–—]\\s*|(?<=\\d)-(?=\\d)")
+
+    /** Spanish months, as Spanish writes them (lower case), or capitalised; "setiembre" is September too. */
+    private val MESES = listOf(
+        "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+    )
+    private val MONTH_NUMBERS: Map<String, Int> =
+        (MONTH_NAMES.mapIndexed { i, m -> m to i + 1 } + MESES.mapIndexed { i, m -> m to i + 1 } + ("setiembre" to 9))
+            .flatMap { (m, n) -> listOf(m to n, m.replaceFirstChar { it.uppercaseChar() } to n) }.toMap()
+    private val MESES_PATTERN = (MESES + "setiembre").joinToString("|") { "[${it[0].uppercaseChar()}${it[0]}]${it.substring(1)}" }
+    private const val Y = "(1\\d{3}|20\\d{2})"
+    /** "de 1810 a 1825", "desde 1810 hasta 1825", "entre 1810 y 1825", "1810-1825": the last group matched is the end. */
+    private val RANGE_ES = Regex("\\b(?:(?:de|desde) $Y (?:a|hasta) $Y|entre $Y y $Y|$Y\\s*[–—-]\\s*$Y)\\b")
+    /** "a. C.", "a.C.", "a. de C.", "antes de Cristo", "a. e. c.", "AEC", "a. n. e.": a year BC isn't one we count. */
+    private const val BC_ES = "\\s*(?:a\\.\\s?C\\.|a\\.\\s?de\\s?C\\.|antes de Cristo|a\\.\\s?e\\.\\s?c\\.|AEC\\b|a\\.\\s?n\\.\\s?e\\.)"
+    /**
+     * Sentences may open with ¿ ¡ « or an accented capital; "a. C.", "Sr." and the like don't end one, so "1000 a. C."
+     * keeps its era.
+     */
+    private val SENTENCE_ES = Regex("(?<=[.!?])(?<!\\b(?:a|d|e|c|Sr|Sra|Dr|Dra|Sto|Sta|Ud|Uds)\\.)\\s+(?=[¿¡«\"'(\\[]?[\\p{Lu}0-9])")
+    /** Spanish leads put the birthplace after the year: "(Alcalá de Henares, 29 de septiembre de 1547-Madrid, …)". */
+    private val DASH_ES = Regex("\\s*[–—]\\s*|(?<=\\d)-(?=\\d)|(?<=\\d)-(?=\\p{Lu})")
     private val WORD = Regex("[\\p{L}]+")
     private val MARKS = Regex("\\p{M}+")
     private val SPACES = Regex("\\s+")
@@ -81,9 +108,122 @@ object YearFacts {
     /** Words for an end: a range's last year is the one asked about ("the Wall fell": 1961 to 1989). */
     private val ENDS = setOf("fell", "fall", "fallen", "demolished", "ended", "end", "ending", "collapse", "collapsed", "breach")
 
+    /** The Spanish words that ask how long or whether, folded. "Nació" and "murió" are the lifespan, as "born" and "died". */
+    private val STOP_ES = setOf(
+        "el", "la", "los", "las", "lo", "un", "una", "unos", "unas", "de", "del", "al", "en", "que", "quien", "quienes",
+        "cual", "cuales", "cuando", "donde", "como", "cuanto", "cuanta", "cuantos", "cuantas", "por", "para", "con", "sin",
+        "sobre", "entre", "desde", "hasta", "tras", "se", "su", "sus", "le", "les", "fue", "fueron", "era", "eran", "es",
+        "son", "ser", "sido", "estaba", "habia", "hubo", "haber", "pudo", "podria", "tenia", "tenian", "tiene", "tuvo",
+        "edad", "anos", "ano", "antes", "despues", "pasaron", "paso", "pasado", "mismo", "misma", "tiempo", "aun",
+        "todavia", "vivo", "viva", "vivia", "vivio", "vida", "mayor", "menor", "mas", "menos", "primero", "primera",
+        "nacio", "nacido", "nacida", "nacimiento", "murio", "muerto", "muerta", "muerte", "fallecio", "fallecido",
+        "fallecida", "diferencia", "ver", "alrededor", "entonces", "eso", "esto", "este", "esta", "ese", "esa", "ha",
+        "han", "hay", "algo", "mientras", "aunque", "pero", "porque",
+    )
+
+    /** The Spanish question words and passage words for them, folded, as [GROUPS]. */
+    private val GROUPS_ES = listOf(
+        setOf(
+            "salio", "publico", "publicada", "publicado", "publicacion", "publicar", "publicaron", "aparecio", "edito",
+            "editada", "editado", "imprimio", "impresa", "impreso", "escribio", "escrita", "escrito", "estreno",
+            "estrenada", "estrenado",
+        ),
+        setOf("llego", "llegaron", "llegada", "llegar", "alcanzo", "desembarco", "desembarcaron", "navego", "zarpo", "viaje", "viajes"),
+        setOf("cayo", "caida", "derribado", "derribo", "demolido", "demolicion", "abrio", "apertura"),
+        setOf("demostro", "demostracion", "demostrado", "probo", "prueba", "resolvio", "resuelto"),
+        setOf("gano", "ganar", "gana", "ganador", "premio", "premiado", "recibio", "otorgado", "otorgo", "concedido", "galardonado"),
+        setOf(
+            "presidente", "presidencia", "investido", "elegido", "asumio", "goberno", "gobierno", "reino", "reinado",
+            "coronado", "coronada", "coronacion",
+        ),
+        setOf("firmo", "firmado", "firmada", "adopto", "adoptada", "proclamo", "proclamada", "declaro", "declarada", "promulgo", "promulgada"),
+        setOf(
+            "construyo", "construido", "construida", "construccion", "fundo", "fundada", "fundado", "fundacion", "completado",
+            "completada", "establecido", "establecida", "inauguro", "inaugurado", "inaugurada",
+        ),
+        setOf("descubrio", "descubierto", "descubrimiento", "invento", "inventado", "invencion"),
+        setOf("comenzo", "comienzo", "empezo", "inicio", "iniciada", "iniciado"),
+        setOf("termino", "finalizo", "fin", "acabo", "concluyo"),
+        setOf("tabla", "periodica"),
+    )
+    private val ENDS_ES = setOf("cayo", "caida", "derribado", "derribo", "demolido", "demolicion", "termino", "finalizo", "fin", "acabo", "concluyo")
+
+    /**
+     * Spanish puts the verb first in "cuando salió el Quijote", "se publicó Pedro Páramo": a word after one of these
+     * (and no name between) goes to the name after it, as an English -ing word does.
+     */
+    /** Between a word and the name after it: up to three words, then "de", "del" or "de la/los/las". */
+    private val OF_NAME_ES = Regex("\\s+(?:\\p{L}+\\s+){0,3}?(?:de|del)(?: la| los| las)?\\s+")
+    private val LIVE_TO_SEE_ES = Regex("\\bllego\\b(?=.*\\ba ver\\b)|\\ba ver\\b")
+    private val FORWARD_ES = setOf("cuando", "se", "mientras", "tras", "hasta", "desde")
+
+    /** The lists for a question's languages: English is the lists as they were; Spanish adds its own. */
+    private class Rules(
+        val date: Regex,
+        val range: Regex,
+        val bc: Regex,
+        val sentence: Regex,
+        val dash: Regex,
+        val stop: Set<String>,
+        val groups: List<Set<String>>,
+        val ends: Set<String>,
+        val english: Boolean,
+        val spanish: Boolean,
+        /** Spanish's verb-first words ([FORWARD_ES]), and whether "X de Name" gives X to the name. */
+        val forward: Set<String> = emptySet(),
+        val ofName: Boolean = false,
+    )
+
+    private val NEVER = "(?!)()()()"
+    private val EN_RULES = Rules(DATE, RANGE, BC, SENTENCE, DASH, STOP, GROUPS, ENDS, english = true, spanish = false)
+    private val ES_RULES = Rules(
+        Regex("(?:(\\d{1,2}) (?:de )?($MESES_PATTERN) (?:de |del )?(\\d{3,4})|$NEVER|($MESES_PATTERN) (?:de |del )?(\\d{3,4})|\\b(\\d{3,4})\\b)"),
+        RANGE_ES, Regex(BC_ES), SENTENCE_ES, DASH_ES, STOP_ES, GROUPS_ES, ENDS_ES, english = false, spanish = true,
+        forward = FORWARD_ES, ofName = true,
+    )
+    private val DATE_BOTH = Regex(
+        "(?:(\\d{1,2}) (?:de )?($MONTHS|$MESES_PATTERN) (?:de |del )?(\\d{3,4})|($MONTHS) (\\d{1,2}), (\\d{3,4})|" +
+            "($MONTHS|$MESES_PATTERN) (?:de |del )?(\\d{3,4})|\\b(\\d{3,4})\\b)",
+    )
+    private val RANGE_BOTH = Regex(RANGE.pattern + "|" + RANGE_ES.pattern)
+    private val BC_BOTH = Regex(BC.pattern + "|" + BC_ES)
+
+    /** Spanish first ("¿Cuántos años tenía…?" with an English word): every list of both. */
+    private val SPANISH_LEADS_RULES = Rules(
+        DATE_BOTH, RANGE_BOTH, BC_BOTH, SENTENCE_ES, DASH_ES, STOP + STOP_ES, GROUPS + GROUPS_ES, ENDS + ENDS_ES,
+        english = true, spanish = true, forward = FORWARD_ES, ofName = true,
+    )
+
+    /**
+     * English first, Spanish possible: Spanish dates, eras and ranges (no English text reads like them), English
+     * sentences and dashes, and only the Spanish words that aren't English too ([SpanishWords]).
+     */
+    private val ENGLISH_LEADS_RULES = Rules(
+        DATE_BOTH, RANGE_BOTH, BC_BOTH, SENTENCE, DASH,
+        STOP + STOP_ES.filterNot { it in SpanishWords.ENGLISH_TOO },
+        GROUPS + GROUPS_ES.map { g -> g.filterNot { it in SpanishWords.ENGLISH_TOO }.toSet() },
+        ENDS + ENDS_ES.filterNot { it in SpanishWords.ENGLISH_TOO },
+        english = true, spanish = true, forward = FORWARD_ES.filterNot { it in SpanishWords.ENGLISH_TOO }.toSet(),
+    )
+
+    private fun rules(languages: List<ResearchLanguage>): Rules = when {
+        ResearchLanguage.ES !in languages -> EN_RULES
+        ResearchLanguage.EN !in languages -> ES_RULES
+        SpanishWords.leads(languages) -> SPANISH_LEADS_RULES
+        else -> ENGLISH_LEADS_RULES
+    }
+
+    /** Where a range's end year starts: the last group it matched ("1961 to 1989", "entre 1810 y 1825"). */
+    private fun endAt(m: MatchResult): Int = m.groups.drop(1).last { it != null }!!.range.first
+
     /** The lines to add before the question, or null when fewer than two named things have dates. */
-    fun block(question: String, keywords: List<String>, passages: List<Passage>): String? {
-        val things = things(question, keywords, passages)
+    fun block(
+        question: String,
+        keywords: List<String>,
+        passages: List<Passage>,
+        languages: List<ResearchLanguage> = ResearchLanguage.of(question),
+    ): String? {
+        val things = things(question, keywords, passages, languages)
         val worked = worked(things)
         if (worked.isEmpty()) return null
         return buildString {
@@ -95,34 +235,40 @@ object YearFacts {
     }
 
     /** The named things with dates, in the question's order, at most three. */
-    fun things(question: String, keywords: List<String>, passages: List<Passage>): List<Thing> {
+    fun things(
+        question: String,
+        keywords: List<String>,
+        passages: List<Passage>,
+        languages: List<ResearchLanguage> = ResearchLanguage.of(question),
+    ): List<Thing> {
+        val rules = rules(languages)
         // The question's own names; the rewrite's keywords only for a question typed in lower case ("periodic table"
         // is a keyword, but in the question it is what Mendeleev did).
         // A keyword must be in the question itself: "how old is the universe" was given "cosmology".
-        val names = Entities.runs(question).ifEmpty { keywords.filter { fold(question).contains(fold(it)) } }.map(::fold).distinct()
-        val words = eventWords(question, names)
+        val names = Entities.runs(question, languages).ifEmpty { keywords.filter { fold(question).contains(fold(it)) } }.map(::fold).distinct()
+        val words = eventWords(question, names, languages)
         val texts = passages.map { it.text.take(SEEN_CHARS) }
         val out = mutableListOf<Thing>()
         for (name in names) {
             if (out.size == 3) break
-            val articles = passages.indices.filter { passages[it].kind == SourceKind.ARTICLE && Entities.match(passages[it].sourceTitle, name) > 0 }
+            val articles = passages.indices.filter { passages[it].kind == SourceKind.ARTICLE && Entities.match(passages[it].sourceTitle, name, languages) > 0 }
             val label = articles.firstOrNull()?.let { passages[it].sourceTitle.substringBefore(" (") } ?: display(question, name)
             var thing = Thing(label)
             articles.firstNotNullOfOrNull { i ->
-                if (Entities.match(passages[i].sourceTitle, name) >= 2) lifespan(texts[i])?.let { i to it } else null
+                if (Entities.match(passages[i].sourceTitle, name, languages) >= 2) lifespan(texts[i], languages)?.let { i to it } else null
             }?.let { (i, life) -> thing = thing.copy(born = life.first, died = life.second, lifeAt = i + 1) }
             val mine = words[name].orEmpty()
             val lifeYears = setOfNotNull(thing.born?.year, thing.died?.year)
-            val event = if (mine.isNotEmpty()) eventFor(name, mine, articles, passages, texts, lifeYears) else null
+            val event = if (mine.isNotEmpty()) eventFor(name, mine, articles, passages, texts, lifeYears, rules) else null
             thing = when {
                 event != null -> thing.copy(event = event.first, eventAt = event.second, quote = event.third)
                 // A work or an event with no sentence for its words: the first year of its lead, or the end of the
                 // lead's first range for an end ("the Berlin Wall fell": "from 1961 to 1989").
                 thing.born == null -> articles.firstNotNullOfOrNull { i ->
-                    val first = SENTENCE.split(texts[i]).firstOrNull { YEAR.containsMatchIn(it) } ?: return@firstNotNullOfOrNull null
-                    val range = if (mine.any { it in ENDS }) RANGE.find(first) else null
-                    val at = range?.groups?.get(2)?.range?.first ?: YEAR.find(first)!!.range.first
-                    if (BC.matchesAt(first, at + 4)) null else dateIn(first, at)?.let { Triple(it, i + 1, clause(first, at)) }
+                    val first = rules.sentence.split(texts[i]).firstOrNull { YEAR.containsMatchIn(it) } ?: return@firstNotNullOfOrNull null
+                    val range = if (mine.any { it in rules.ends }) rules.range.find(first) else null
+                    val at = range?.let(::endAt) ?: YEAR.find(first)!!.range.first
+                    if (rules.bc.matchesAt(first, at + 4)) null else dateIn(first, at, rules)?.let { Triple(it, i + 1, clause(first, at)) }
                 }?.let { thing.copy(event = it.first, eventAt = it.second, quote = it.third) } ?: thing
                 else -> thing
             }
@@ -140,7 +286,7 @@ object YearFacts {
             // another question (r5-t4-facts: "In 1911, Mendeleev had died" for his periodic table; Columbus's death for
             // his landfall). Without it the block is left out rather than misleading.
             // Only a word of the groups asks for an event: "could Jane Austen have read" doesn't.
-            if (mine.any { w -> GROUPS.any { w in it } } && thing.event == null && thing.born != null) return emptyList()
+            if (mine.any { w -> rules.groups.any { w in it } } && thing.event == null && thing.born != null) return emptyList()
             if (thing.born != null || thing.event != null) out += thing
         }
         return out
@@ -238,7 +384,8 @@ object YearFacts {
     private fun cite(vararg n: Int): String = n.filter { it > 0 }.distinct().sorted().joinToString("][")
 
     /** "(… 30 August 1797 – 1 February 1851)" or "(1775–1817)": the first bracket of a lead with a date each side of a dash. */
-    fun lifespan(text: String): Pair<Date, Date>? {
+    fun lifespan(text: String, languages: List<ResearchLanguage> = Keywords.ENGLISH): Pair<Date, Date>? {
+        val rules = rules(languages)
         val open = text.indexOf('(').takeIf { it in 0..400 } ?: return null
         var depth = 0
         var close = -1
@@ -248,19 +395,19 @@ object YearFacts {
         }
         if (close < 0) return null
         val inside = SQUARE.replace(text.substring(open + 1, close), " ").replace(Regex("\\([^()]*\\)"), " ").replace(SPACES, " ")
-        val dash = Regex("\\s*[–—]\\s*|(?<=\\d)-(?=\\d)").findAll(inside).lastOrNull { m ->
+        val dash = rules.dash.findAll(inside).lastOrNull { m ->
             YEAR.containsMatchIn(inside.substring(0, m.range.first)) && YEAR.containsMatchIn(inside.substring(m.range.last + 1))
         } ?: return null
         val left = inside.substring(0, dash.range.first)
         val right = inside.substring(dash.range.last + 1)
-        val born = DATE.findAll(left).mapNotNull { date(it) }.lastOrNull() ?: return null
-        val died = DATE.findAll(right).mapNotNull { date(it) }.firstOrNull() ?: return null
+        val born = rules.date.findAll(left).mapNotNull { date(it) }.lastOrNull() ?: return null
+        val died = rules.date.findAll(right).mapNotNull { date(it) }.firstOrNull() ?: return null
         return if (died.year >= born.year && died.year - born.year < 130) born to died else null
     }
 
     private fun date(m: MatchResult): Date? {
         val g = m.groupValues
-        fun month(s: String) = MONTH_NAMES.indexOf(s) + 1
+        fun month(s: String) = MONTH_NUMBERS.getValue(s)
         return when {
             g[1].isNotEmpty() -> Date(g[3].toInt(), month(g[2]), g[1].toInt())
             g[4].isNotEmpty() -> Date(g[6].toInt(), month(g[4]), g[5].toInt())
@@ -271,9 +418,9 @@ object YearFacts {
     }
 
     /** The full date around the year at [at] in [sentence] ("on 24 November 1859"), or the year alone. */
-    private fun dateIn(sentence: String, at: Int): Date? {
+    private fun dateIn(sentence: String, at: Int, rules: Rules): Date? {
         val year = sentence.substring(at, at + 4).toIntOrNull() ?: return null
-        return DATE.findAll(sentence).mapNotNull { m -> date(m)?.takeIf { it.year == year && at in m.range } }.firstOrNull() ?: Date(year)
+        return rules.date.findAll(sentence).mapNotNull { m -> date(m)?.takeIf { it.year == year && at in m.range } }.firstOrNull() ?: Date(year)
     }
 
     /**
@@ -287,12 +434,14 @@ object YearFacts {
         passages: List<Passage>,
         texts: List<String>,
         lifeYears: Set<Int>,
+        rules: Rules,
     ): Triple<Date, Int, String>? {
-        val wanted = expand(words)
+        val groups = rules.groups
+        val wanted = words + groups.filter { g -> words.any { it in g } }.flatten()
         var best: Triple<Int, Date, Pair<Int, String>>? = null
         for (i in passages.indices) {
             val own = i in articles
-            for (s in SENTENCE.split(texts[i])) {
+            for (s in rules.sentence.split(texts[i])) {
                 if (!YEAR.containsMatchIn(s)) continue
                 val folded = fold(s)
                 if (!own && !folded.contains(name)) continue
@@ -300,15 +449,15 @@ object YearFacts {
                 if (found.isEmpty()) continue
                 // Another article's sentence counts only on one of the groups' words: "bible" alone took the
                 // Methuselah Foundation's 2003.
-                if (!own && found.none { f -> GROUPS.any { f.value in it } }) continue
+                if (!own && found.none { f -> groups.any { f.value in it } }) continue
                 // Each of the question's words counts once, however many of its group the sentence has; the name's own
                 // article wins a tie, then the earlier sentence (a lead's first edition before a later translation).
-                val score = 2 * GROUPS.count { g -> g.any { it in words } && found.any { it.value in g } } +
-                    2 * found.count { f -> f.value in words && GROUPS.none { f.value in it } } + (if (own) 1 else 0)
+                val score = 2 * groups.count { g -> g.any { it in words } && found.any { it.value in g } } +
+                    2 * found.count { f -> f.value in words && groups.none { f.value in it } } + (if (own) 1 else 0)
                 if (best != null && score <= best.first) continue
-                val range = if (found.any { it.value in ENDS }) RANGE.find(s) else null
+                val range = if (found.any { it.value in rules.ends }) rules.range.find(s) else null
                 val at = if (range != null) {
-                    range.groups[2]!!.range.first
+                    endAt(range)
                 } else {
                     // In another article, the first year after the name: "Madoc ... sailed to the Americas in 1170, over
                     // 300 years before Christopher Columbus's voyage in 1492" is 1492 for Columbus.
@@ -316,8 +465,8 @@ object YearFacts {
                     (YEAR.findAll(s).firstOrNull { it.range.first > from } ?: if (own) YEAR.find(s) else null)?.range?.first ?: continue
                 }
                 // A person's own birth or death year is their lifespan, not the event; a year BC isn't one we can count.
-                if (s.substring(at, at + 4).toInt() in lifeYears || BC.matchesAt(s, at + 4)) continue
-                val d = dateIn(s, at) ?: continue
+                if (s.substring(at, at + 4).toInt() in lifeYears || rules.bc.matchesAt(s, at + 4)) continue
+                val d = dateIn(s, at, rules) ?: continue
                 best = Triple(score, d, (i + 1) to clause(s, at))
             }
         }
@@ -335,23 +484,32 @@ object YearFacts {
      * Each of the question's content words, given to a name: the one it follows ("Columbus reached"), or for an -ing
      * word the one after it ("publishing On the Origin of Species"); before any name, the first name after it.
      */
-    fun eventWords(question: String, names: List<String>): Map<String, Set<String>> {
-        val q = fold(question)
+    fun eventWords(question: String, names: List<String>, languages: List<ResearchLanguage> = ResearchLanguage.of(question)): Map<String, Set<String>> {
+        val rules = rules(languages)
+        // "¿Llegó Darwin a ver…?" is "did Darwin live to see", not an arrival: blanked, so the places stay put.
+        val q = fold(question).let { if (rules.spanish) LIVE_TO_SEE_ES.replace(it) { m -> " ".repeat(m.value.length) } else it }
         val nameWords = names.flatMap { it.split(' ') }.toSet()
         val at = names.mapNotNull { n -> q.indexOf(n).takeIf { it >= 0 }?.let { n to it } }.sortedBy { it.second }
         val out = HashMap<String, MutableSet<String>>()
         for (m in WORD.findAll(q)) {
             val w = m.value
-            if (w in STOP || w in nameWords || w.length < 3) continue
-            val before = at.lastOrNull { it.second < m.range.first }?.first
+            if (w in rules.stop || w in nameWords || w.length < 3) continue
+            val beforeAt = at.lastOrNull { it.second < m.range.first }
+            val before = beforeAt?.first
             val after = at.firstOrNull { it.second > m.range.first }?.first
-            val owner = (if (w.endsWith("ing") && after != null) after else before ?: after) ?: continue
+            val afterAt = at.firstOrNull { it.second > m.range.first }?.second
+            // Spanish: after "cuando", "se" and the like since the last name, the word is the next name's; so is one
+            // that names it with "de" ("la batalla de Boyacá", "la tabla periódica de Mendeléyev").
+            val forward = afterAt != null && (
+                WORD.findAll(q.substring(beforeAt?.let { it.second + it.first.length }?.coerceAtMost(m.range.first) ?: 0, m.range.first))
+                    .any { it.value in rules.forward } ||
+                    (rules.ofName && afterAt > m.range.last && OF_NAME_ES.matches(q.substring(m.range.last + 1, afterAt)))
+                )
+            val owner = (if ((rules.english && w.endsWith("ing") && after != null) || forward) after else before ?: after) ?: continue
             out.getOrPut(owner) { mutableSetOf() } += w
         }
         return out
     }
-
-    private fun expand(words: Set<String>): Set<String> = words + GROUPS.filter { g -> words.any { it in g } }.flatten()
 
     private fun display(question: String, name: String): String {
         val i = fold(question).indexOf(name)
