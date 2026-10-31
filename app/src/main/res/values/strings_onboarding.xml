@@ -117,4 +117,8 @@
     <string name="onboarding_held_slice">%1$s %2$s covers %3$s, so only %2$s is queued.</string>
     <!-- %1$s is the bigger pack's title; %2$s the one it holds. -->
     <string name="onboarding_held">%1$s covers %2$s, so it isn\'t queued.</string>
+    <!-- Pick a start's line, and the review's heading, for a second library language's encyclopedia (Plan L3). %1$s is the
+         language named in the app's language: "Encyclopedia in Spanish". -->
+    <string name="onboarding_second_encyclopedia">Encyclopedia in %1$s</string>
+    <string name="onboarding_second_blurb">Your second language\'s encyclopedia, beside the start.</string>
 </resources>

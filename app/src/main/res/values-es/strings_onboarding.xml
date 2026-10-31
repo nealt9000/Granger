@@ -80,4 +80,6 @@
 
     <string name="onboarding_held_slice">%1$s %2$s incluye %3$s, así que solo se pone en cola %2$s.</string>
     <string name="onboarding_held">%1$s incluye %2$s, así que no se pone en cola.</string>
+    <string name="onboarding_second_encyclopedia">Enciclopedia en %1$s</string>
+    <string name="onboarding_second_blurb">La enciclopedia de tu segundo idioma, junto al comienzo.</string>
 </resources>

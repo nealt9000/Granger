@@ -61,4 +61,6 @@
 
     <string name="readiness_covers_slice">%1$s %2$s incluye %3$s</string>
     <string name="readiness_covers">%1$s incluye %2$s</string>
+    <string name="readiness_no_packs_in">Todavía no hay paquetes en %1$s para esta área</string>
+    <string name="readiness_no_packs_in_yours">Todavía no hay paquetes en los idiomas de tu biblioteca para esta área</string>
 </resources>

@@ -142,3 +142,17 @@ Found in Task 4's Spanish theme shots (`ThemeShotsSpanish`), and shortened:
 - The Library's title, "Biblioteca", shrinks slightly to fit beside its four buttons rather than end in "…"; the Get more tabs ("Descargado") shrink the same way. English is unchanged.
 
 Still English in Spanish, by design until L3: catalog copy, and the names of the collections the app files books into ("Granger Classics", "My books", "Archive.org"), which are stored in the library when the collection is made.
+
+## Plan L3: Spanish knowledge
+
+New strings from L3 (the library's languages, Spanish packs and Clásicos Granger), with what Claude was least sure of.
+
+- `settings_language_library`: "Idiomas de tu biblioteca". The library's languages are the languages of what you download (packs, starts, Readiness), not the app's text.
+- `settings_language_library_blurb`: "Los comienzos, Preparación y Conseguir más los usan. El primero es el principal." "Comienzos" follows L2's "Elige un comienzo"; "inicio" is Home in the glossary.
+- `settings_language_main` / `settings_language_make_main`: "Idioma principal" / "Hacer principal". Is "Hacer principal" natural for a small button, or is "Usar como principal" better?
+- `onboarding_also_language`: "¿También en %1$s?", where %1$s is the language in lower case ("¿También en inglés?"). It's a checkbox on Welcome, shown only on a phone set to two languages.
+- `onboarding_also_language_blurb`, `onboarding_second_blurb`: "Suma su enciclopedia a tu comienzo…". "Suma" or "Agrega"?
+- `onboarding_second_encyclopedia`: "Enciclopedia en %1$s" ("Enciclopedia en inglés").
+- `readiness_no_packs_in`: "Todavía no hay paquetes en %1$s para esta área" ("…en español…"). "Área" for a Readiness domain, as the English says "area".
+- `sources_all_languages`: "Todos los idiomas", a chip over the Get more lists.
+- Catalog copy (from `tools/catalog-gen/curated.json` and `pack_sets.json`, not the app's resources) is listed in Plan L3 Task 3 for the same review: domain titles, "Comienzo eficiente", "Biblioteca completa", use-case titles and blurbs, the Spanish Wikipedia set's labels.

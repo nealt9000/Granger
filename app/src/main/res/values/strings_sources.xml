@@ -245,4 +245,6 @@
     <string name="sources_tidy_keep_both">Keep both</string>
     <!-- %1$s is the smaller slice, such as Best 50,000. -->
     <string name="sources_tidy_remove">Remove %1$s</string>
+    <!-- A chip over a Get more list (Plan L3): the list shows the library's languages; on, it shows packs in every language. -->
+    <string name="sources_all_languages">All languages</string>
 </resources>

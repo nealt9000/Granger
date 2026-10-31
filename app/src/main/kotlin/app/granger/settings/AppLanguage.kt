@@ -103,7 +103,7 @@ class AppLanguages(
     val code: Flow<String> get() = state.map { codeOf(it) }
 
     /** [code] now. */
-    fun code(): String = codeOf(state.value)
+    fun currentCode(): String = codeOf(state.value)
 
     private fun codeOf(choice: AppLanguage): String =
         choice.language ?: phoneLocale().language.takeIf { phone -> AppLanguage.entries.any { it.language == phone } } ?: "en"

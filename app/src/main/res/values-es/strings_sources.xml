@@ -192,4 +192,5 @@
     <string name="sources_tidy_text">%1$s ya está. ¿Quitar %2$s (%3$s)? Tus lugares y marcadores se trasladan.</string>
     <string name="sources_tidy_keep_both">Conservar ambos</string>
     <string name="sources_tidy_remove">Quitar %1$s</string>
+    <string name="sources_all_languages">Todos los idiomas</string>
 </resources>

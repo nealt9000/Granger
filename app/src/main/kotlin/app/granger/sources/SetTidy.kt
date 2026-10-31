@@ -81,7 +81,7 @@ object SetTidy {
                 val bytes = ok.firstOrNull { it.id == smallPackId }?.sizeBytes ?: small.sizeBytes
                 TidyOffer(
                     "${small.id}>${big.id}", big.id, small.id, bigPackId, smallPackId, bytes, text(big, small, bytes),
-                    KiwixList.shortLabel(small.setLabel),
+                    KiwixList.shortLabel(small),
                 )
             }.filterNot { it.key in dismissed }
         }
@@ -89,7 +89,7 @@ object SetTidy {
 
     /** "Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across." */
     fun text(big: PackEntry, small: PackEntry, smallBytes: Long): UiText =
-        UiText.Res(R.string.sources_tidy_text, KiwixList.shortLabel(big.setLabel), KiwixList.shortLabel(small.setLabel), formatBytes(smallBytes))
+        UiText.Res(R.string.sources_tidy_text, KiwixList.shortLabel(big), KiwixList.shortLabel(small), formatBytes(smallBytes))
 
     /** Yes: the smaller slice gives way to the bigger, its places and bookmarks moving across. False when it couldn't. */
     suspend fun remove(offer: TidyOffer, library: Library, downloads: Downloads): Boolean {

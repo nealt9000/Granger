@@ -130,26 +130,49 @@ object KiwixList {
     // --- Sets (Plan WF) ---
 
     /**
-     * A set's name and line, by set id; a set this doesn't know takes its slices' title before the colon. The names are
-     * the projects' own, the same in every language.
+     * The English sets' lines as resources, so the Spanish app has them in Spanish (the catalog writes no Spanish copy
+     * for an English set). A set this doesn't know takes its catalog copy (Plan L3).
      */
     private val SET_TEXT = mapOf(
         "wikipedia_en" to ("Wikipedia" to R.string.sources_set_wikipedia),
         "wikivoyage_en" to ("Wikivoyage" to R.string.sources_set_wikivoyage),
     )
 
-    fun setTitle(setId: String, entries: List<PackEntry>): String =
-        SET_TEXT[setId]?.first ?: entries.firstOrNull()?.title?.substringBefore(": ").orEmpty()
+    /** The app's language: catalog copy is picked by it (Plan L3), as [languageName] names languages in it. */
+    private fun appLanguage(): String = Locale.getDefault().language
 
+    /** [entry]'s copy in the app's language, when the catalog has one. */
+    private fun copy(entry: PackEntry): app.granger.core.catalog.Copy? = entry.i18n[app.granger.core.catalog.Languages.normalise(appLanguage())]
+
+    /**
+     * A set's name (Plan L3): the catalog's copy in the app's language ("Wikipedia in Spanish" for an English reader),
+     * else its own name ("Wikipedia en español"), else (older catalogs) the English sets' names, else its slices' title
+     * before the colon.
+     */
+    fun setTitle(setId: String, entries: List<PackEntry>): String =
+        entries.firstNotNullOfOrNull { copy(it)?.setTitle?.ifBlank { null } }
+            ?: entries.firstNotNullOfOrNull { it.setTitle.ifBlank { null } }
+            ?: SET_TEXT[setId]?.first ?: entries.firstOrNull()?.title?.substringBefore(": ").orEmpty()
+
+    /** A set's line: the catalog's copy in the app's language, else the English sets' resources, else the catalog's own. */
     fun setDescription(setId: String, entries: List<PackEntry>): UiText =
-        SET_TEXT[setId]?.second?.let { UiText.Res(it) } ?: UiText.Raw(entries.maxByOrNull { it.setRank }?.description.orEmpty())
+        entries.firstNotNullOfOrNull { copy(it)?.setDescription?.ifBlank { null } }?.let { UiText.Raw(it) }
+            ?: SET_TEXT[setId]?.second?.let { UiText.Res(it) }
+            ?: entries.firstNotNullOfOrNull { it.setDescription.ifBlank { null } }?.let { UiText.Raw(it) }
+            ?: UiText.Raw(entries.maxByOrNull { it.setRank }?.description.orEmpty())
+
+    /** A slice's label in the app's language: "Best 50,000 articles" for an English reader of Spanish Top. */
+    fun label(entry: PackEntry): String = copy(entry)?.setLabel?.ifBlank { null } ?: entry.setLabel
+
+    /** An item's title in the app's language: a pack's curated copy (Plan L3), else the catalog's own. */
+    fun title(item: app.granger.core.catalog.CatalogItem): String = (item as? PackEntry)?.title(appLanguage()) ?: item.title
 
     /** One slice of a set's row: its ZIM name, rank, label and flavours (with pictures first). */
     data class Slice(val zimName: String, val rank: Int, val label: String, val entries: List<PackEntry>)
 
     /** [group]'s slices, smallest first. */
     fun slices(group: PackGroup): List<Slice> = group.flavours.groupBy { it.zimName }.values
-        .map { e -> Slice(e.first().zimName, e.first().setRank, e.first().setLabel, e.sortedBy(::flavourRank)) }
+        .map { e -> Slice(e.first().zimName, e.first().setRank, label(e.first()), e.sortedBy(::flavourRank)) }
         .sortedBy { it.rank }
 
     /** The pictures choice a slice entry is: its flavour, an unflavoured slice (the 100) counting as with pictures. */
@@ -159,8 +182,11 @@ object KiwixList {
     fun entryFor(slice: Slice, pictures: String): PackEntry =
         slice.entries.firstOrNull { picturesOf(it) == pictures } ?: slice.entries.first()
 
-    /** A slice's name in a sentence: "Best 50,000", "Top 1 million", "Everything". The label is the catalog's (L3). */
-    fun shortLabel(label: String): String = label.removeSuffix(" articles")
+    /** A slice's name in a sentence: "Best 50,000", "Top 1 million", "Everything"; "Los 50.000 mejores" in Spanish. */
+    fun shortLabel(label: String): String = label.removeSuffix(" articles").removeSuffix(" artículos")
+
+    /** [entry]'s slice name in a sentence, in the app's language. */
+    fun shortLabel(entry: PackEntry): String = shortLabel(label(entry))
 
     /** Whether [slice] (of rank [slice].setRank, the set's top rank [topRank]) holds [subject]'s articles. */
     fun covers(slice: PackEntry, subject: PackEntry, topRank: Int): Boolean =
@@ -174,7 +200,7 @@ object KiwixList {
      * against a chosen one; "Already inside your Wikipedia" when the slice covers it. Null when the catalog doesn't say.
      */
     fun adds(subject: PackEntry, slice: PackEntry, topRank: Int, setTitle: String, installed: Boolean): Adds? {
-        val name = shortLabel(slice.setLabel)
+        val name = shortLabel(slice)
         if (covers(slice, subject, topRank)) {
             return Adds(
                 if (installed) UiText.Res(R.string.sources_adds_inside_your, setTitle) else UiText.Res(R.string.sources_adds_inside, name),
@@ -217,7 +243,7 @@ object KiwixList {
     fun groupTitle(group: PackGroup): String {
         group.setId?.let { return setTitle(it, group.flavours) }
         val named = group.flavours.firstOrNull { flavourOf(it) == "maxi" } ?: group.default
-        return named.title.replace(FLAVOUR_WORDS, "").trim()
+        return title(named).replace(FLAVOUR_WORDS, "").trim()
     }
 
     private val FLAVOUR_WORDS = Regex("\\s*\\((no|with) pictures\\)\\s*$", RegexOption.IGNORE_CASE)

@@ -84,7 +84,7 @@ fun browseSections(
     fun items(packs: Map<String, Pack>?, map: Boolean) =
         packs.orEmpty().values.sortedBy { it.title.lowercase() }.map { PackItem(it, if (map) null else ask(it)) }
     return (
-        domains.map { BrowseSection(it.id, UiText.Raw(it.title), items(byDomain[it.id], map = false)) } +
+        domains.map { BrowseSection(it.id, UiText.Raw(it.title(java.util.Locale.getDefault().language)), items(byDomain[it.id], map = false)) } +
             BrowseSection(OTHER_SECTION, UiText.Res(R.string.browse_section_other), items(byDomain[OTHER_SECTION], map = false)) +
             BrowseSection(MAPS_SECTION, UiText.Res(R.string.browse_section_maps), items(maps, map = true))
         ).filter { it.packs.isNotEmpty() }
@@ -113,16 +113,16 @@ fun installedAskReach(pack: Pack, catalog: Catalog?, records: List<DownloadRecor
 }
 
 /**
- * What an empty Browse suggests (Pick a start's suggestion): the encyclopedia of the Efficient start, and the map of the
- * phone's country ([countryCode]), each when the catalog has one.
+ * What an empty Browse suggests (Pick a start's suggestion): the encyclopedia of the Efficient start in the main library
+ * [language] (Plan L3), and the map of the phone's country ([countryCode]), each when the catalog has one.
  */
-fun browseSuggestions(catalog: Catalog?, countryCode: String): List<BrowseSuggestion> {
+fun browseSuggestions(catalog: Catalog?, countryCode: String, language: String = app.granger.core.catalog.ENGLISH): List<BrowseSuggestion> {
     if (catalog == null) return emptyList()
-    val efficient = catalog.presets.firstOrNull { it.id == OnboardingModel.EFFICIENT }?.items.orEmpty().toSet()
+    val efficient = catalog.tierPresets(language).firstOrNull()?.items.orEmpty().toSet()
     val encyclopedias = catalog.packs.filter { it.family == "wikipedia" }
     val encyclopedia = encyclopedias.firstOrNull { it.id in efficient } ?: encyclopedias.firstOrNull { it.featured }
     val region = OnboardingModel.suggestedRegion(OnboardingModel.regions(catalog, emptySet()), countryCode)?.pack
-    fun PackEntry.suggestion(map: Boolean) = BrowseSuggestion(title, sizeBytes, map, domain.ifBlank { null })
+    fun PackEntry.suggestion(map: Boolean) = BrowseSuggestion(app.granger.sources.KiwixList.title(this), sizeBytes, map, domain.ifBlank { null })
     return listOfNotNull(encyclopedia?.suggestion(map = false), region?.suggestion(map = true))
 }
 
@@ -133,18 +133,20 @@ class BrowseViewModel(
     private val catalog: CatalogSource? = null,
     records: Flow<List<DownloadRecord>> = flowOf(emptyList()),
     countryCode: String = java.util.Locale.getDefault().country,
+    /** The library's languages, main first (Plan L3): the suggestion is the main one's encyclopedia. */
+    knowledge: Flow<List<String>> = flowOf(listOf(app.granger.core.catalog.ENGLISH)),
 ) : ViewModel() {
     /** Null until the shelves first load. */
     val ui: StateFlow<BrowseUi?> = combine(
-        shelves.shelves, catalog?.state ?: flowOf(null), records,
-    ) { list, state, recs ->
+        shelves.shelves, catalog?.state ?: flowOf(null), records, knowledge,
+    ) { list, state, recs, langs ->
         val catalog = state?.catalog
         val sections = browseSections(
             list,
             domains = catalog?.readiness?.domains.orEmpty(),
             domainOf = { installedEntry(it, catalog, recs)?.domain },
         ) { installedAskReach(it, catalog, recs) }
-        BrowseUi(sections, if (sections.isEmpty()) browseSuggestions(state?.catalog, countryCode) else emptyList())
+        BrowseUi(sections, if (sections.isEmpty()) browseSuggestions(state?.catalog, countryCode, langs.firstOrNull() ?: app.granger.core.catalog.ENGLISH) else emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {

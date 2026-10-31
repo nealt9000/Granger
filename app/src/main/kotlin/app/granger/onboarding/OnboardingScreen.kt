@@ -70,6 +70,7 @@ class OnboardingActions(
     val onToggleVoice: () -> Unit = {},
     val onToggleSaveSpace: () -> Unit = {},
     val onToggleAlso: () -> Unit = {},
+    val onToggleSecond: () -> Unit = {},
     val onRegionQuery: (String) -> Unit = {},
     val onChooseRegion: (String?) -> Unit = {},
     val onToggleUseCase: (String) -> Unit = {},
@@ -99,6 +100,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
             onToggleVoice = viewModel::toggleVoice,
             onToggleSaveSpace = viewModel::toggleSaveSpace,
             onToggleAlso = viewModel::toggleAlso,
+            onToggleSecond = viewModel::toggleSecond,
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
@@ -256,6 +258,15 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
             Choice(stringResource(R.string.onboarding_neither), stringResource(R.string.onboarding_neither_blurb), selected = ui.startId == null) { actions.onChooseStart(null) }
         }
     }
+    ui.secondLine?.let { second ->
+        item(key = "second") {
+            Extra(
+                stringResource(R.string.onboarding_title_size, second.title.resolve(), formatBytes(second.bytes)),
+                stringResource(R.string.onboarding_second_blurb), ui.secondChosen,
+                actions.onToggleSecond,
+            )
+        }
+    }
     ui.askLine?.let { ask ->
         // Offered under every choice, Neither included: Granger Classics alone is enough to ask (Plan U3a Decision 2).
         item(key = "ask") {
@@ -368,16 +379,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi
         val on = addition.useCase.id in ui.useCaseIds
         Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                FilterChip(selected = on, onClick = { actions.onToggleUseCase(addition.useCase.id) }, label = { Text(addition.useCase.title) })
+                FilterChip(selected = on, onClick = { actions.onToggleUseCase(addition.useCase.id) }, label = { Text(addition.title) })
                 Spacer(Modifier.weight(1f))
                 OnboardingViewModel.DOMAIN_OF[addition.useCase.id]?.let { domain ->
                     TextButton(onClick = { actions.onSeeDomain(domain) }) { Text(stringResource(R.string.onboarding_see)) }
                 }
             }
             Text(
-                if (addition.lines.isEmpty()) stringResource(R.string.onboarding_use_covered, addition.useCase.blurb)
+                if (addition.lines.isEmpty()) stringResource(R.string.onboarding_use_covered, addition.blurb)
                 else stringResource(
-                    R.string.onboarding_use_adds, addition.useCase.blurb, formatBytes(addition.bytes),
+                    R.string.onboarding_use_adds, addition.blurb, formatBytes(addition.bytes),
                     pluralStringResource(R.plurals.onboarding_items, addition.packs, addition.packs),
                 ),
                 style = MaterialTheme.typography.bodySmall,

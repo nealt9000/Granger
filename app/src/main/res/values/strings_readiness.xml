@@ -85,4 +85,8 @@
     <string name="readiness_covers_slice">%1$s %2$s covers %3$s</string>
     <!-- %1$s is the bigger pack's title; %2$s the one it holds. -->
     <string name="readiness_covers">%1$s covers %2$s</string>
+    <!-- A domain with no packs in the library's language (Plan L3). %1$s is the language, named in the app's language: "Spanish". -->
+    <string name="readiness_no_packs_in">No %1$s packs for this area yet</string>
+    <!-- As above, with more than one library language. -->
+    <string name="readiness_no_packs_in_yours">No packs in your library\'s languages for this area yet</string>
 </resources>

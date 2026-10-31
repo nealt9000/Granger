@@ -192,6 +192,18 @@ fun SourceScreen(
                     }
                 }
             }
+            if (ui.languageChip) {
+                // Plan L3: the list shows the library's languages; this shows every language's packs.
+                item(key = "languages") {
+                    Row(Modifier.padding(horizontal = 16.dp)) {
+                        FilterChip(
+                            selected = ui.allLanguages,
+                            onClick = { viewModel.setAllLanguages(!ui.allLanguages) },
+                            label = { Text(stringResource(R.string.sources_all_languages)) },
+                        )
+                    }
+                }
+            }
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in SourceTab.entries) {

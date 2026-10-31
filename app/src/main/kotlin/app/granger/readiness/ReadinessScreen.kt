@@ -59,6 +59,8 @@ fun coverageText(domain: DomainCoverage): UiText {
     return when (domain.coverage) {
         // A domain can hold packs outside its tiers (the bar shows them) and still have no essential.
         Coverage.NONE -> when {
+            // No tiers in any of the library's languages (Plan L3).
+            domain.installedBytes == 0L && domain.emptyNote != null -> domain.emptyNote
             domain.installedBytes > 0L && domain.essentialBytes > 0L -> UiText.Res(R.string.readiness_coverage_held_essentials, held, essentials)
             domain.installedBytes > 0L -> UiText.Res(R.string.readiness_coverage_held, held)
             domain.essentialBytes > 0L -> UiText.Res(R.string.readiness_coverage_nothing_essentials, essentials)

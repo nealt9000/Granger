@@ -346,29 +346,33 @@ None of the five mentions Gutenberg.
 
 ## Task 7: Readiness, Pick a start and Get more by language (app)
 
-- [ ] **Step 1: Readiness.**
+- [x] **Step 1: Readiness.**
   - `ReadinessModel` measures each domain over the knowledge languages: best coverage, with a missing essential taken from the first language.
   - An empty domain in every knowledge language says "No Spanish packs for this area yet" (a resource string, with the language name as an argument).
   - Domain titles come from `i18n`.
   - Signals are unchanged.
-- [ ] **Step 2: Pick a start.**
+- [x] **Step 2: Pick a start.**
   - `OnboardingModel.choices` uses `catalog.tierPresets(first)`.
   - Save space swaps flavours as today.
   - A second language adds its `reference` essential as its own Review group.
   - Use cases read the first language's items, plus the second language's when it's on.
   - `voiceLine` is unchanged (L5).
-- [ ] **Step 3: Get more.**
+- [x] **Step 3: Get more.**
   - The Kiwix list's language facet defaults to the knowledge languages; multilingual packs count for each of their languages.
   - Recommended shows the featured packs in the knowledge languages.
   - Set rows take their title and description from the catalog's set `i18n`, replacing `KiwixList`'s hardcoded `wikipedia_en` copy.
   - `SourceViewModel.OWN_ROW_SUBJECTS` holds the medicine subject of every language.
   - An installed pack in another language always shows.
-- [ ] **Step 4: Browse.** The empty-Browse suggestion takes the encyclopedia from the first language's Efficient preset.
-- [ ] **Step 5: Tests.**
+- [x] **Step 4: Browse.** The empty-Browse suggestion takes the encyclopedia from the first language's Efficient preset.
+- [x] **Step 5: Tests.**
   - A Spanish-only user sees Spanish tiers and starts.
   - An English user sees exactly today's lists. Pin this with the current `ReadinessModelTest` and `OnboardingModelTest` expectations unchanged.
   - A bilingual user gets best-of coverage.
-- [ ] **Step 6:** Commit.
+- [x] **Step 6:** Commit.
+  - Done. Choices where the plan left room:
+    - **Readiness:** a language whose list has no essential tier (Spanish Food) counts as Basic once any of its comprehensive items is here; otherwise such a domain could never leave None short of the whole tier. The bar's sizes are the first knowledge language's with tiers. A domain with no tiers in any knowledge language says "No Spanish packs for this area yet" in place of its status line, and raises no signal.
+    - **Pick a start:** the start ids stay `efficient` / `comprehensive` whatever the language, so the rest of onboarding is unchanged. The second language's encyclopedia is an extra under the starts, ticked by default ("Encyclopedia in Spanish", like Ask and the voice) and its own Review group. A use case with no items in any knowledge language isn't offered.
+    - **Get more:** the pack lists (Kiwix, Gutenberg, Kiwix books) and Granger's books show the knowledge languages, `mul` packs and anything installed or downloading; an "All languages" chip shows the rest. **A search looks in every language**, so the existing search tests keep their French pack. Granger's collection presets also follow the knowledge languages. The set copy comes from the catalog (`i18n.<app>.setTitle` etc., then `setTitle`); the two English sets keep their resource line, the only Spanish their copy has. `OWN_ROW_SUBJECTS` is now `ownRow()`, `^wikipedia_[a-z]{2,3}_medicine$`. Curated pack titles show the app language's copy (`KiwixList.title`).
 
 ## Task 8: Clásicos Granger in the app
 

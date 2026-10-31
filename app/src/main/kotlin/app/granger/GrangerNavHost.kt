@@ -855,7 +855,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, knowledge = container.knowledgeLanguages.languages) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -1096,7 +1096,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
-                            family = route.family,
+                            family = route.family, knowledge = container.knowledgeLanguages.languages,
                         )
                     },
                     title = stringResource(source.title),
@@ -1236,6 +1236,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
+                            knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
@@ -1269,6 +1270,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             knowledge = container.knowledgeLanguages.languages,
                             setKnowledge = container.knowledgeLanguages::set,
                             phoneLocales = container.appLanguages::phoneLocales,
+                            appLanguage = container.appLanguages::currentCode,
                         )
                     },
                     onDone = { nav.popBackStack() },
@@ -1304,6 +1306,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ReadinessViewModel(
                             container.downloads, container.library, container.bookshelf, container.catalog, container.volumes,
                             container.deviceTier, container.totalRamBytes, container.appScope,
+                            knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
                         )
                     },
                     onBack = { nav.popBackStack() },

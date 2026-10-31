@@ -113,11 +113,16 @@ class HomeViewModel(
     private val today: () -> LocalDate = LocalDate::now,
     private val clock: () -> Long = System::currentTimeMillis,
     private val tidyDismissals: app.granger.sources.TidyDismissals = app.granger.sources.TidyDismissals(),
+    /** The library's languages, main first, and the app's (Plan L3): the strip measures and titles domains by them. */
+    knowledge: Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
+    appLanguage: Flow<String> = kotlinx.coroutines.flow.flowOf(app.granger.core.catalog.ENGLISH),
 ) : ViewModel() {
     private val day = MutableStateFlow(today())
 
-    private val strip = combine(catalog.state, library.packs, bookshelf.books, downloads.records) { c, packs, books, records ->
-        ReadinessModel.report(c.catalog, packs, books, records, day.value)
+    private val languages = combine(knowledge, appLanguage) { k, a -> k to a }
+
+    private val strip = combine(catalog.state, library.packs, bookshelf.books, downloads.records, languages) { c, packs, books, records, (langs, app) ->
+        ReadinessModel.report(c.catalog, packs, books, records, day.value, langs, app)
     }.flowOn(io)
 
     private val mediaItems = combine(media.tracks, media.audiobooks) { tracks, audiobooks -> Albums.summaries(tracks) to audiobooks }

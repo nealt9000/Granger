@@ -89,6 +89,9 @@ data class OnboardingUi(
      * has tiers for (Neal's call 4); null otherwise.
      */
     val alsoLanguage: String? = null,
+    /** A second library language's encyclopedia, offered under the start choices; null with one language. */
+    val secondLine: Line? = null,
+    val secondChosen: Boolean = true,
 ) {
     /** Whether [alsoLanguage] is one of the library's languages. */
     val alsoOn: Boolean get() = alsoLanguage != null && alsoLanguage in languages
@@ -120,6 +123,8 @@ class OnboardingViewModel(
     private val setKnowledge: (List<String>) -> Unit = {},
     /** The phone's languages in order, whatever the app is set to. */
     private val phoneLocales: () -> List<java.util.Locale> = { emptyList() },
+    /** The app's language, for the catalog's copy (Plan L3). */
+    private val appLanguage: () -> String = { ENGLISH },
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
         { group, items, volume, wifi -> downloads.enqueueGroup(group, items.map { downloadSpecOf(it, group) }, volume.root, wifi) },
 ) : ViewModel() {
@@ -133,6 +138,7 @@ class OnboardingViewModel(
     private val askChosen = MutableStateFlow(true)
     private val voiceChosen = MutableStateFlow(true)
     private val saveSpace = MutableStateFlow(false)
+    private val secondChosen = MutableStateFlow(true)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<UiText?>(null)
@@ -147,7 +153,7 @@ class OnboardingViewModel(
         val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>,
         val languages: List<String>,
     )
-    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean)
+    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean, val secondChosen: Boolean)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: UiText?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList, knowledge) { c, records, packs, vols, langs ->
@@ -156,9 +162,9 @@ class OnboardingViewModel(
             langs.ifEmpty { listOf(ENGLISH) },
         )
     }
-    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen, saveSpace) { values ->
+    private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen, saveSpace, secondChosen) { values ->
         @Suppress("UNCHECKED_CAST")
-        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean, values[8] as Boolean)
+        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean, values[8] as Boolean, values[9] as Boolean)
     }
     private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
@@ -192,7 +198,10 @@ class OnboardingViewModel(
 
     private fun build(f: Facts, c: Choices, s: Setup): OnboardingUi {
         val catalog = f.catalog
-        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, c.saveSpace) }.orEmpty()
+        val appLang = appLanguage()
+        // The main library language's starts; a second language adds its encyclopedia as its own line (Plan L3).
+        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, c.saveSpace, f.languages.first(), appLang) }.orEmpty()
+        val secondLine = f.languages.getOrNull(1)?.let { lang -> catalog?.let { OnboardingModel.secondLine(it, lang, f.installed, c.saveSpace) } }
         val start = starts.firstOrNull { it.id == c.startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
         val suggestion = OnboardingModel.suggestedRegion(regions, countryCode)
@@ -201,7 +210,8 @@ class OnboardingViewModel(
             else (regions.countries + regions.larger).firstOrNull { it.pack.id == c.regionId }
         val chosen = start?.chosen(c.unticked).orEmpty().flatMap { it.items }.mapTo(HashSet()) { it.id }
         region?.let { chosen += it.pack.id }
-        val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen) }.orEmpty()
+        secondLine?.takeIf { c.secondChosen }?.items?.mapTo(chosen) { it.id }
+        val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen, f.languages, appLang) }.orEmpty()
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
         val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: f.volumes.firstOrNull()
         val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
@@ -209,11 +219,14 @@ class OnboardingViewModel(
         val review = OnboardingModel.review(
             start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
             containment = catalog?.let { app.granger.core.catalog.Containment(it) },
+            second = secondLine?.takeIf { c.secondChosen },
         )
         val phoneLanguages = KnowledgeLanguages.phoneLanguages(phoneLocales(), catalog?.languages.orEmpty())
         return OnboardingUi(
             languages = f.languages,
             alsoLanguage = KnowledgeLanguages.secondOffer(f.languages, phoneLanguages),
+            secondLine = secondLine,
+            secondChosen = c.secondChosen,
             step = c.step,
             noCatalog = catalog == null,
             refreshing = f.refreshing,
@@ -290,6 +303,8 @@ class OnboardingViewModel(
     fun toggleVoice() = voiceChosen.update { !it }
 
     fun toggleSaveSpace() = saveSpace.update { !it }
+
+    fun toggleSecond() = secondChosen.update { !it }
 
     /** Welcome's "Also Spanish?": adds the offered language to the library's languages, after the main one, or takes it off. */
     fun toggleAlso() {

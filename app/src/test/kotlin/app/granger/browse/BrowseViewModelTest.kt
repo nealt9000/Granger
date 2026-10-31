@@ -178,6 +178,17 @@ class BrowseViewModelTest {
         assertThat(browseSuggestions(catalog, "JP").map { it.title }).containsExactly("Pack wikipedia_en_top")
     }
 
+    @Test fun anEmptyBrowseSuggestsTheMainLibraryLanguagesEncyclopedia() {
+        val en = packEntry("wikipedia_en_top").copy(family = "wikipedia", domain = "reference")
+        val es = packEntry("wikipedia_es_top").copy(family = "wikipedia", domain = "reference", language = "es")
+        val catalog = catalogOf(
+            packs = listOf(en, es),
+            presets = listOf(Preset("efficient", "Efficient", listOf(en.id)), Preset("efficient-es", "Efficient", listOf(es.id), language = "es")),
+        )
+        assertThat(browseSuggestions(catalog, "JP", "es").map { it.title }).containsExactly("Pack wikipedia_es_top")
+        assertThat(browseSuggestions(catalog, "JP").map { it.title }).containsExactly("Pack wikipedia_en_top")
+    }
+
     @Test fun refreshRescansAndRemoveDeletesThePack() = runTest(main.dispatcher) {
         val vm = BrowseViewModel(shelves, library)
         vm.refresh()
