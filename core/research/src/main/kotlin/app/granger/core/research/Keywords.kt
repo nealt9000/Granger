@@ -75,7 +75,18 @@ object Medical {
         .map { "\\b$it\\b" }
     private val PATTERN = Regex((TERMS + WHOLE_WORDS).joinToString("|"), RegexOption.IGNORE_CASE)
 
-    fun looksMedical(text: String): Boolean = PATTERN.containsMatchIn(text)
+    /**
+     * Each language's lexicon that [text] may be in ([ResearchLanguage.of]): English unless it's clearly Spanish
+     * (Spanish "mole" is a sauce), Spanish ([MedicalEs]) unless it's clearly English, so an English question gets
+     * exactly what it got before Spanish.
+     */
+    fun looksMedical(text: String): Boolean {
+        val languages = ResearchLanguage.of(text)
+        return (ResearchLanguage.EN in languages && english(text)) || (ResearchLanguage.ES in languages && MedicalEs.looksMedical(text))
+    }
+
+    /** The English lexicon alone, as it was before Spanish. */
+    internal fun english(text: String): Boolean = PATTERN.containsMatchIn(text)
 }
 
 /**
@@ -122,11 +133,16 @@ object PersonalMedical {
     private fun normal(q: String) = q.replace('’', '\'')
 
     /** Phrasings that are personal medical questions on their own (the unambiguous ones). */
-    fun strong(question: String): Boolean = normal(question).let { q -> STRONG.any { it.containsMatchIn(q) } }
+    fun strong(question: String): Boolean =
+        normal(question).let { q -> STRONG.any { it.containsMatchIn(q) } } || PersonalMedicalEs.strong(question)
 
-    /** [medicalSignal] is the pipeline's combined medical flag for the question; generic phrasings need it. */
-    fun matches(question: String, medicalSignal: Boolean): Boolean {
+    /** The English phrasings alone, as they were before Spanish. */
+    internal fun english(question: String, medicalSignal: Boolean): Boolean {
         val q = normal(question)
         return STRONG.any { it.containsMatchIn(q) } || (medicalSignal && GENERIC.any { it.containsMatchIn(q) })
     }
+
+    /** [medicalSignal] is the pipeline's combined medical flag for the question; generic phrasings need it. */
+    fun matches(question: String, medicalSignal: Boolean): Boolean =
+        english(question, medicalSignal) || PersonalMedicalEs.matches(question, medicalSignal)
 }
