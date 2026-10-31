@@ -421,4 +421,43 @@ class LibraryPassageFinderTest {
         val named = finder(emptyList(), emptyMap(), books = listOf(book), bookLimit = 0).find(listOf("las", "azules"))
         assertThat(named.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("ballenas azules")
     }
+
+    @Test fun aSpanishQuestionNamesABookWithoutItsAccents() = test {
+        val fierro = addBook("fierro", "Martín Fierro", "<p>filler</p>", "<p>el gaucho canta su pena</p>")
+        index.indexPending()
+        val es = listOf(ResearchLanguage.ES)
+        val spanish = finder(emptyList(), emptyMap(), books = listOf(fierro), bookLimit = 0).find(listOf("martin", "gaucho"), es)
+        assertThat(spanish.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("el gaucho canta su pena")
+        // English alone: "martin" isn't "martín", as before.
+        val english = finder(emptyList(), emptyMap(), books = listOf(fierro), bookLimit = 0).find(listOf("martin", "gaucho"))
+        assertThat(english.filter { it.kind == SourceKind.BOOK }).isEmpty()
+    }
+
+    @Test fun spanishGenericTitleWordsDoNotName() = test {
+        val obras = addBook("dario", "Obras completas de Rubén Darío", "<p>filler</p>", "<p>el cisne blanco</p>")
+        index.indexPending()
+        val es = listOf(ResearchLanguage.ES)
+        suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>?) = finder(emptyList(), emptyMap(), books = listOf(obras), bookLimit = 0)
+            .let { f -> if (languages == null) f.find(keywords) else f.find(keywords, languages) }
+            .filter { it.kind == SourceKind.BOOK }.map { it.text }
+        assertThat(find(listOf("obras", "cisne"), es)).isEmpty()
+        assertThat(find(listOf("completas", "cisne"), es)).isEmpty()
+        assertThat(find(listOf("dario", "cisne"), es)).containsExactly("el cisne blanco")
+        // English alone keeps its own list: "obras" names the book there, as before.
+        assertThat(find(listOf("obras", "cisne"), null)).containsExactly("el cisne blanco")
+    }
+
+    @Test fun aSpanishQuestionsCardMatchesWithoutAccentsButKeepsEne() = test {
+        val file = TestEpubs.build(File(booksDir, "granger").apply { mkdirs() }, "cien_2026-01-01.epub", title = "Cien años de soledad", chapters = listOf("<p>x</p>"))
+        val book = shelf.addDownloaded(file, BookOrigin.GRANGER, "cien")!!.copy(author = "Gabriel García Márquez")
+        val es = listOf(ResearchLanguage.ES)
+        suspend fun cards(keywords: List<String>, languages: List<ResearchLanguage>?) = finder(emptyList(), emptyMap(), books = listOf(book))
+            .let { f -> if (languages == null) f.find(keywords) else f.find(keywords, languages) }
+            .filter { it.kind == SourceKind.CARD }.map { it.sourceId }
+        assertThat(cards(listOf("garcia marquez"), es)).containsExactly(book.id)
+        assertThat(cards(listOf("García Márquez"), es)).containsExactly(book.id)
+        assertThat(cards(listOf("garcia marquez"), null)).isEmpty()
+        assertThat(cards(listOf("cien anos"), es)).isEmpty()
+        assertThat(cards(listOf("cien años"), es)).containsExactly(book.id)
+    }
 }

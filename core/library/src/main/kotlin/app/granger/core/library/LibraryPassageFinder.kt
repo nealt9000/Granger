@@ -229,9 +229,16 @@ class LibraryPassageFinder(
             emptyList()
         }
 
-    /** For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. */
+    /**
+     * For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. For a
+     * Spanish question, keyword and title words meet with accented vowels folded, and Spanish generic title words
+     * ([GENERIC_TITLE_WORDS_ES]) don't name a book either.
+     */
     private suspend fun namedBookPassages(words: List<String>, languages: List<ResearchLanguage>): List<BookPassage> {
-        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }.toSet()
+        val fold = ResearchLanguage.foldsVowels(languages)
+        val folded: (String) -> String = if (fold) ResearchLanguage::foldVowels else { w -> w }
+        val generic = if (fold) GENERIC_TITLE_WORDS + GENERIC_TITLE_WORDS_ES else GENERIC_TITLE_WORDS
+        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }.map(folded).toSet()
         if (keywordWords.isEmpty()) return emptyList()
         val books = try {
             bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
@@ -241,12 +248,12 @@ class LibraryPassageFinder(
             return emptyList()
         }
         val named = books.mapNotNull { book ->
-            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { it !in GENERIC_TITLE_WORDS && !Keywords.isStopword(it, languages) }.toSet()
+            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { !Keywords.isStopword(it, languages) }.map(folded).filter { it !in generic }.toSet()
             val naming = keywordWords.filter { word -> Keywords.alternatives(word).any { it in titleWords } }.toSet()
             if (naming.isEmpty()) null else book to naming
         }.sortedByDescending { it.second.size }.take(NAMED_BOOKS)
         return named.flatMap { (book, naming) ->
-            val rest = words.map { k -> Keywords.words(k).filter { it.lowercase() !in naming }.joinToString(" ") }.filter { it.isNotEmpty() }
+            val rest = words.map { k -> Keywords.words(k).filter { folded(it.lowercase()) !in naming }.joinToString(" ") }.filter { it.isNotEmpty() }
             if (rest.isEmpty()) emptyList() else bookIndex.passagesIn(book.id, rest)
         }
     }
@@ -264,7 +271,7 @@ class LibraryPassageFinder(
     }
 
     private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> {
-        val mentions = mentions(words)
+        val mentions = mentions(words, languages)
         val made = books.mapNotNull { book ->
             attempt {
                 if (!mentions(arrayOf(book.title, book.author, book.subjects, book.description))) return@attempt null
@@ -305,15 +312,22 @@ class LibraryPassageFinder(
 
     /**
      * Whether every word of some keyword appears in the fields, as whole words. The patterns are compiled once per
-     * search, not once per book and field.
+     * search, not once per book and field. For a Spanish question ([ResearchLanguage.foldsVowels]) both sides have
+     * their accented vowels folded, each field once per book.
      */
-    private fun mentions(keywords: List<String>): (Array<out String>) -> Boolean {
+    private fun mentions(keywords: List<String>, languages: List<ResearchLanguage>): (Array<out String>) -> Boolean {
+        val fold = ResearchLanguage.foldsVowels(languages)
         val patterns = keywords.map { keyword ->
             Keywords.words(keyword).map { word ->
-                Regex("(?<![\\p{L}\\p{N}])${Regex.escape(word)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
+                val w = if (fold) ResearchLanguage.foldVowels(word) else word
+                Regex("(?<![\\p{L}\\p{N}])${Regex.escape(w)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
             }
         }.filter { it.isNotEmpty() }
-        return { fields -> patterns.any { words -> words.all { whole -> fields.any { whole.containsMatchIn(it) } } } }
+        if (!fold) return { fields -> patterns.any { words -> words.all { whole -> fields.any { whole.containsMatchIn(it) } } } }
+        return { fields ->
+            val texts = fields.map(ResearchLanguage::foldVowels)
+            patterns.any { words -> words.all { whole -> texts.any { whole.containsMatchIn(it) } } }
+        }
     }
 
     private companion object {
@@ -329,6 +343,18 @@ class LibraryPassageFinder(
         val GENERIC_TITLE_WORDS = setOf(
             "book", "books", "complete", "works", "volume", "vol", "collected", "selected", "edition",
             "translated", "tr", "english", "version", "standard",
+        )
+
+        /**
+         * [GENERIC_TITLE_WORDS]' Spanish counterparts, vowels folded ([ResearchLanguage.foldVowels]), for a Spanish
+         * question: "Obras completas de X" is not named by "obras". The kinds of book (antología, poesías, cuentos,
+         * novelas) are here too, as Spanish collections are titled by them.
+         */
+        val GENERIC_TITLE_WORDS_ES = setOf(
+            "libro", "libros", "obra", "obras", "completa", "completas", "completo", "completos", "tomo", "tomos",
+            "volumen", "volumenes", "reunidas", "coleccion", "selectas", "escogidas", "seleccion", "edicion", "traducido",
+            "traducida", "traduccion", "trad", "espanol", "castellano", "version", "antologia", "poesias", "cuentos",
+            "novelas",
         )
     }
 }
