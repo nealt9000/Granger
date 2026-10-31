@@ -90,8 +90,10 @@ class MedicalEsTest {
         assertThat(Medical.looksMedical("¿Qué es la Migraña?")).isTrue()
         assertThat(Medical.looksMedical("cómo cambiar las pastillas de freno")).isFalse()
         assertThat(Medical.looksMedical("qué fue la fiebre del oro")).isFalse()
-        // Spanish "mole" is a sauce: the English lexicon is off for a clearly Spanish question.
-        assertThat(Medical.looksMedical("receta del mole poblano")).isFalse()
+        // Spanish "mole" is a sauce: the English lexicon is off for a clearly Spanish question. A fragment whose only
+        // Spanish words are English too ("receta del mole") keeps it on: a stray banner beats losing "hay fever".
+        assertThat(Medical.looksMedical("¿cómo se hace el mole poblano?")).isFalse()
+        assertThat(Medical.looksMedical("hay fever remedies")).isTrue()
         assertThat(Medical.looksMedical("How do I remove a mole?")).isTrue()
     }
 

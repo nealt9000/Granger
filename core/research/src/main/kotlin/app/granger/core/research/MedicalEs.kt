@@ -13,7 +13,7 @@ package app.granger.core.research
 object MedicalEs {
     private val TERMS = listOf(
         // Symptoms and signs.
-        "sintoma", "dolor de", "fiebre", "calentura", "sangr(?!ia)", "hemorragi", "vomit", "diarrea", "estrenimiento",
+        "sintoma", "dolor de", "fiebre", "calentura", "hemorragi", "vomit", "diarrea", "estrenimiento",
         "nausea", "mareo", "desmay", "convuls", "hinch", "inflamaci", "bulto", "flema", "sarpullido", "roncha",
         "comezon", "picazon", "ardor al", "mancha en la piel", "secuela", "palpitaci", "taquicardia", "hormigueo",
         "entumec", "falta de aire", "dificultad para respirar", "no puede respirar", "no puedo respirar",
@@ -57,6 +57,7 @@ object MedicalEs {
     ).map { "\\b$it\\b" }
     /** Phrases a question's words make together. */
     private val PHRASES = listOf(
+        "\\bsangr(?!ia)",
         "\\b(azucar|glucosa) (en|de|a) \\d",
         "\\bpresion (en|de) \\d+( ?/ ?\\d+)?\\b(?! ?(atm|bar|pa|kpa|psi))",
         "\\b(la|de|tengo|ataque de) gota\\b",

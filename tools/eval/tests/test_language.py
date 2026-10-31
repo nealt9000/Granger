@@ -93,6 +93,7 @@ def test_the_spanish_medical_lexicon_is_the_apps():
     rows = labels("medical-labels-es.jsonl") + labels("medical-heldout-es.jsonl")
     assert [r["q"] for r in rows if r["medical"] and not (looks(r["q"]) or strong(r["q"]))] == []
     assert [r["q"] for r in rows if r["kind"] == "other" and (looks(r["q"]) or strong(r["q"]))] == []
-    # "mole" is a sauce in a Spanish question; the English lexicon is off.
-    assert not looks("receta del mole poblano") and looks("How do I remove a mole?")
+    # "mole" is a sauce in a clearly Spanish question, so the English lexicon is off; "hay fever" keeps it on.
+    assert not looks("¿cómo se hace el mole poblano?") and looks("How do I remove a mole?")
+    assert looks("hay fever remedies")
     assert looks("fiebre en bebes") and not looks("qué fue la fiebre del oro")

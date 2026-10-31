@@ -30,20 +30,25 @@ enum class ResearchLanguage(val tag: String) {
             "se", "su", "sus", "mi", "mis", "lo", "le", "les", "pero", "porque", "mas", "muy", "fue", "era", "eran",
             "esta", "estan", "estoy", "hay", "tiene", "tienen", "tengo", "entre", "sobre", "desde", "hasta", "sin",
             "este", "estos", "estas", "ese", "esa", "esos", "esas", "yo", "tu", "te", "nos", "y", "o", "ya", "si",
-            "puedo", "puede", "debo", "hago", "hace", "sirve", "significa", "cuantos", "pasa", "dia", "dias",
+            "puedo", "puede", "debo", "hago", "hace", "sirve", "sirven", "significa", "pasa", "dia", "dias",
+            "aqui", "ahi", "alli", "todavia", "tambien", "siempre", "nunca", "ayer", "hoy", "manana", "anoche", "ahora",
+            "despues", "antes", "mucho", "mucha", "muchos", "muchas", "poco", "algo", "alguien", "nadie", "cada", "otro",
+            "otra", "otros", "mismo", "eres", "somos", "estamos", "tienes", "quiero", "quieres", "voy", "vamos", "ser",
+            "estar", "tener", "hacer", "mejor", "peor", "cuentame", "hablame", "explicame", "quisiera", "podrias",
         )
         private val WORD = Regex("[\\p{L}\\p{N}]+")
         private val MARKS = Regex("\\p{M}+")
-        private val SPANISH_MARKS = Regex("[¿¡ñÑ]")
+        private val SPANISH_MARKS = Regex("[¿¡]")
 
         /** Lower case, accents off, ’ as ': how every Spanish list here is written and matched. */
         fun fold(text: String): String =
             MARKS.replace(Normalizer.normalize(text, Normalizer.Form.NFD), "").lowercase(Locale.ROOT).replace('’', '\'')
 
         /**
-         * The languages [question] is in, the main one first. Signs are function words only one language uses (¿ ¡ ñ
-         * count as two Spanish ones). Spanish signs and no English ones: Spanish alone. Both: Spanish needs two to
-         * count, and the one with more leads. Neither: both, English first.
+         * The languages [question] is in, the main one first. Signs are function words only one language uses (¿ and ¡
+         * count as two Spanish ones). Spanish signs and no English ones: Spanish alone, if one of them isn't an English
+         * word too ([SpanishWords.ENGLISH_TOO]), else both, English first. Both kinds: Spanish needs two to count, and
+         * the one with more leads. Neither: both, English first.
          */
         fun of(question: String): List<ResearchLanguage> {
             val tokens = WORD.findAll(question).toList()
@@ -52,9 +57,14 @@ enum class ResearchLanguage(val tag: String) {
                 !(m.value.first().isUpperCase() && tokens.getOrNull(i + 1)?.value?.first()?.isUpperCase() == true)
             }.map { fold(it.value) }
             val en = words.count { it in ENGLISH }
-            val es = words.count { it in SPANISH } + if (SPANISH_MARKS.containsMatchIn(question)) 2 else 0
+            val marks = if (SPANISH_MARKS.containsMatchIn(question)) 2 else 0
+            val es = words.count { it in SPANISH } + marks
+            // Spanish words that are English words too ("hay fever", "Victorian era", "Lake Como") don't make a question
+            // Spanish alone, or "hay fever remedies" would lose the English medical lexicon.
+            val plainlySpanish = words.count { it in SPANISH && it !in SpanishWords.ENGLISH_TOO } + marks
             return when {
-                es >= 1 && en == 0 -> listOf(ES)
+                plainlySpanish >= 1 && en == 0 -> listOf(ES)
+                es >= 1 && en == 0 -> listOf(EN, ES)
                 es >= 2 && es > en -> listOf(ES, EN)
                 es >= 2 -> listOf(EN, ES)
                 en >= 1 -> listOf(EN)

@@ -51,7 +51,7 @@ AFTER_TENGO = {"algo", "algun", "alguna", "algunos", "algunas", "a", "de"}
 BANDWIDTH_ES = re.compile(r"\bancho de banda\b|\bbanda ancha\b")
 
 WORD = re.compile(r"[^\W_]+")  # Kotlin's [\p{L}\p{N}]+
-SPANISH_MARKS = re.compile(r"[¿¡ñÑ]")
+SPANISH_MARKS = re.compile(r"[¿¡]")
 
 
 def fold(text):
@@ -67,9 +67,14 @@ def of(question):
     words = [fold(t) for i, t in enumerate(tokens)
              if not (t[0].isupper() and i + 1 < len(tokens) and tokens[i + 1][0].isupper())]
     en = sum(1 for w in words if w in ENGLISH_SIGNS)
-    es = sum(1 for w in words if w in SPANISH_SIGNS) + (2 if SPANISH_MARKS.search(question) else 0)
-    if es >= 1 and en == 0:
+    marks = 2 if SPANISH_MARKS.search(question) else 0
+    es = sum(1 for w in words if w in SPANISH_SIGNS) + marks
+    # Spanish words that are English too ("hay fever") don't make a question Spanish alone.
+    plainly = sum(1 for w in words if w in SPANISH_SIGNS and w not in ENGLISH_TOO) + marks
+    if plainly >= 1 and en == 0:
         return (ES,)
+    if es >= 1 and en == 0:
+        return (EN, ES)
     if es >= 2 and es > en:
         return (ES, EN)
     if es >= 2:

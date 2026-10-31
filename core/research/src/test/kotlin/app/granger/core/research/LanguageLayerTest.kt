@@ -61,10 +61,10 @@ class LanguageLayerTest {
         )
 
         /**
-         * Of [AMBIGUOUS], those [ResearchLanguage.of] reads as Spanish alone (one Spanish function word, no English one):
-         * the detector's call, not the lists', so they're pinned here rather than held to English.
+         * Of [AMBIGUOUS], those [ResearchLanguage.of] reads as Spanish alone. None: a Spanish word that's an English word
+         * too doesn't make a question Spanish alone, so "hay fever remedies" keeps the English medical lexicon.
          */
-        val READ_AS_SPANISH = listOf("Lake Como villas", "Victorian era fashion", "hay fever remedies", "El Niño effects", "Para handball")
+        val READ_AS_SPANISH = emptyList<String>()
     }
 
     @Test fun theDetectorsSpanishReadingsArePinned() {
