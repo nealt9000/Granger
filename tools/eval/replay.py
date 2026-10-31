@@ -101,11 +101,13 @@ def is_lead(p):
 def scorer(keywords, languages=ENGLISH_ONLY):
     """LexicalScore.scorer: each keyword counts for the share of its words present; title and lead bonuses."""
     # Each keyword is a list of alternatives (`wine|strong drink`, or just itself), each a list of words.
+    # A Spanish question's words meet with accented vowels folded on both sides (ResearchLanguage.foldVowels).
+    fold = language.fold_vowels if language.folds_vowels(languages) else (lambda s: s)
     groups = []
     for k in keywords:
         alts = []
         for v in (x.strip() for x in k.split("|")):
-            g = list(dict.fromkeys(w.lower() for w in words(v) if not is_stopword(w.lower(), languages)))
+            g = list(dict.fromkeys(fold(w.lower()) for w in words(v) if not is_stopword(w.lower(), languages)))
             if g:
                 alts.append(g)
         if alts:
@@ -115,9 +117,9 @@ def scorer(keywords, languages=ENGLISH_ONLY):
     patterns = {w: _whole_word(w) for alts in groups for g in alts for w in g}
 
     def score(p):
-        text = _ascii_lower("%s %s" % (p.get("heading") or "", p.get("text") or ""))
+        text = _ascii_lower(fold("%s %s" % (p.get("heading") or "", p.get("text") or "")))
         present = {w for w, rx in patterns.items() if rx.search(text)}
-        title_words = {w.lower() for w in words(p.get("title") or "")}
+        title_words = {w.lower() for w in words(fold(p.get("title") or ""))}
         in_title = any(all(alternatives(w) & title_words for w in g) for alts in groups for g in alts)
         # A keyword counts for its best alternative.
         found = sum(max(sum(1 for w in g if w in present) / len(g) for g in alts) for alts in groups)

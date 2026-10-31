@@ -133,3 +133,26 @@ def test_a_keyword_counts_for_its_best_alternative():
     assert of(kjv, ["alcohol|strong drink|wine", "tomorrow"]) == pytest.approx(0.5)
     assert of(P("strong winds"), ["alcohol|strong spirits"]) == pytest.approx(0.5)
     assert of(P("nothing here", title="Wine"), ["alcohol|wine"]) == pytest.approx(0.1)
+
+
+def test_a_spanish_question_matches_without_accents_but_keeps_ene():
+    es = ("es",)
+    bogota = P("Gonzalo Jiménez de Quesada fundó Santafé de Bogotá en 1538.", title="Bogotá")
+    accented = scorer(["fundó", "Bogotá"], es)(bogota)
+    assert accented == pytest.approx(1.1)
+    assert scorer(["fundo", "bogota"], es)(bogota) == accented
+    assert scorer(["fundo", "bogota"], ("en", "es"))(bogota) == accented
+    assert scorer(["publicó"], es)(P("Se publico en Bogota.")) == pytest.approx(1.0)
+    assert scorer(["simon bolivar"], es)(P("nada", title="Simón Bolívar", kind="ARTICLE", heading="Vida")) == pytest.approx(0.1)
+    assert scorer(["ano"], es)(P("El año 1810.")) == 0.0
+    assert scorer(["senal trafico"], es)(P("Una señal de tráfico.")) == pytest.approx(0.5)
+    # English alone: accents still matter.
+    assert of(bogota, ["fundo", "bogota"]) == 0.0
+
+
+def test_fold_vowels_is_the_apps():
+    import language
+    assert language.fold_vowels("Fundó Bogotá, pingüino, ÁÉÍÓÚÜ") == "Fundo Bogota, pinguino, AEIOUU"
+    assert language.fold_vowels("año, señal, Ñandú") == "año, señal, Ñandu"
+    assert language.fold_vowels("café à la crème, naïve") == "cafe à la crème, naïve"
+    assert language.fold_vowels("fundé pingüino año") == "funde pinguino año"

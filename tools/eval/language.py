@@ -60,6 +60,20 @@ def fold(text):
     return "".join(c for c in nfd if not unicodedata.category(c).startswith("M")).lower().replace("’", "'")
 
 
+_VOWELS = str.maketrans("áéíóúüÁÉÍÓÚÜ", "aeiouuAEIOUU")
+_LOOSE_MARK = re.compile(r"(?<=[aeiouAEIOU])[\u0301\u0308]")
+
+
+def folds_vowels(languages):
+    """ResearchLanguage.foldsVowels: Spanish questions match words with accented vowels folded."""
+    return ES in languages
+
+
+def fold_vowels(text):
+    """ResearchLanguage.foldVowels: á é í ó ú ü as a e i o u, ñ and case kept; a decomposed acute or diaeresis after a vowel goes too."""
+    return _LOOSE_MARK.sub("", text).translate(_VOWELS)
+
+
 def of(question):
     """ResearchLanguage.of: (EN,), (ES,), or both with the main one first."""
     tokens = WORD.findall(question)
