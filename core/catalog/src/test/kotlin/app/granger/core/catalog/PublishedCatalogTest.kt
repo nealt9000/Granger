@@ -147,4 +147,14 @@ class PublishedCatalogTest {
         assertThat(comprehensive).contains("wikipedia_en_medicine_maxi")
         assertThat(comprehensive).doesNotContain("wikipedia_en_medicine_nopic")
     }
+
+    /** Plan F1 part 2: release builds offer only the models that passed their eval: the librarian and its embedder, not E4B. */
+    @Test fun publishedCatalogOffersTheEvaluatedModelsInRelease() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+
+        assertThat(catalog.forBuild(includeUnevaluatedModels = false).models.map { it.id })
+            .containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m")
+    }
 }

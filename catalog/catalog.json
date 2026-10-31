@@ -22144,7 +22144,7 @@
       "sha256": "a53a59001894c58e6bdb5b9b227709f91a2e3e556baa7d85acf9c55402ba5cf5",
       "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1/gemma-4-E2B-it-gpu.litertlm",
       "license": "Apache-2.0",
-      "evalPassed": false
+      "evalPassed": true
     },
     {
       "id": "gemma-4-e4b-gpu",
@@ -22168,7 +22168,7 @@
       "sha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
       "url": "https://huggingface.co/litert-community/embeddinggemma-2-text-270m-litert-lm/resolve/9be6e8b90982095dc05c2bd162e4b954ee4dbac7/embeddinggemma-2-text-270m.litertlm",
       "license": "Apache-2.0",
-      "evalPassed": false
+      "evalPassed": true
     }
   ],
   "books": [
