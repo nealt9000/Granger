@@ -28,17 +28,29 @@ object CitedQuote {
     private val group = Regex("\\[(\\d+(?:\\s*,\\s*\\d+)*)]")
     private val word = Regex("[\\p{L}\\p{N}]+")
     private val marks = Regex("\\p{M}+")
+    private val SPANISH = Locale.forLanguageTag("es")
 
-    /** Null when [text] has no words at all. */
-    fun pick(answer: String, n: Int, text: String): Quote? {
-        val sentences = sentences(text).filter { word.containsMatchIn(text.substring(it)) }
+    /**
+     * Null when [text] has no words at all. [languages] are the question's ([ResearchLanguage.of]), English alone by
+     * default; [passageLanguage] is the passage's, when known. The passage's sentences break by its language, or else
+     * the question's main one; the answer's by the question's; stopwords are those of every language named.
+     */
+    fun pick(
+        answer: String,
+        n: Int,
+        text: String,
+        languages: List<ResearchLanguage> = Keywords.ENGLISH,
+        passageLanguage: ResearchLanguage? = null,
+    ): Quote? {
+        val sentences = sentences(text, passageLanguage ?: languages.first()).filter { word.containsMatchIn(text.substring(it)) }
         if (sentences.isEmpty()) return null
-        val claim = contentWords(claims(answer, n).joinToString(" ").replace(group, " "))
+        val stops = (languages + listOfNotNull(passageLanguage)).distinct()
+        val claim = contentWords(claims(answer, n, languages.first()).joinToString(" ").replace(group, " "), stops)
         val eligible = sentences.filter { word.findAll(text.substring(it)).count() >= MIN_WORDS }.ifEmpty { sentences }
         var best = eligible.first()
         var bestScore = 0.0
         for (range in eligible) {
-            val words = contentWords(text.substring(range))
+            val words = contentWords(text.substring(range), stops)
             if (words.isEmpty()) continue
             val score = words.count { it in claim } / sqrt(words.size.toDouble())
             if (score > bestScore) {
@@ -60,8 +72,8 @@ object CitedQuote {
     }
 
     /** The answer's sentences and lines that cite [n]; the whole answer when none does. */
-    internal fun claims(answer: String, n: Int): List<String> {
-        val pieces = answer.split('\n').flatMap { line -> sentences(line).map { line.substring(it) } }
+    internal fun claims(answer: String, n: Int, language: ResearchLanguage = ResearchLanguage.EN): List<String> {
+        val pieces = answer.split('\n').flatMap { line -> sentences(line, language).map { line.substring(it) } }
         val citing = pieces.filter { piece ->
             group.findAll(piece).any { m -> m.groupValues[1].split(',').any { it.trim().toIntOrNull() == n } }
         }
@@ -69,15 +81,15 @@ object CitedQuote {
     }
 
     /** Folded content words: lower case, accents off, no stopwords and nothing under three letters (as [Keywords.extract]). */
-    internal fun contentWords(s: String): Set<String> =
-        word.findAll(fold(s)).map { it.value }.filter { it.length >= 3 && !Keywords.isStopword(it) }.toSet()
+    internal fun contentWords(s: String, languages: List<ResearchLanguage> = Keywords.ENGLISH): Set<String> =
+        word.findAll(fold(s)).map { it.value }.filter { it.length >= 3 && !Keywords.isStopword(it, languages) }.toSet()
 
     internal fun fold(s: String): String = marks.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase(Locale.ROOT)
 
-    /** Sentence ranges in [text], paragraph by paragraph: a sentence never runs across a `\n`. */
-    private fun sentences(text: String): List<IntRange> {
+    /** Sentence ranges in [text], paragraph by paragraph: a sentence never runs across a `\n`. Breaks by [language]'s rules. */
+    internal fun sentences(text: String, language: ResearchLanguage = ResearchLanguage.EN): List<IntRange> {
         val out = mutableListOf<IntRange>()
-        val it = BreakIterator.getSentenceInstance(Locale.ENGLISH)
+        val it = BreakIterator.getSentenceInstance(if (language == ResearchLanguage.ES) SPANISH else Locale.ENGLISH)
         var from = 0
         while (from <= text.length) {
             val to = text.indexOf('\n', from).let { i -> if (i < 0) text.length else i }
