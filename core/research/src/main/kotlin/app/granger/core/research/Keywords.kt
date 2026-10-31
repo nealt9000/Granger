@@ -1,6 +1,10 @@
 package app.granger.core.research
 
-/** Keyword fallback for when the model's rewrite fails. */
+/**
+ * Keyword fallback for when the model's rewrite fails, and the stopwords every keyword check shares. English is the
+ * list it always was; Spanish (languages spec §6.2) applies only when the question may be Spanish
+ * ([ResearchLanguage.of]), checked on folded words so "cuántos" and "cuantos" are one.
+ */
 object Keywords {
     private val STOPWORDS = setOf(
         "the", "and", "for", "are", "but", "not", "you", "all", "any", "can", "had", "her", "was", "one", "our",
@@ -13,16 +17,53 @@ object Keywords {
         "here", "each", "few", "both", "between", "through", "during", "before", "after", "above", "below", "off",
         "cant", "dont", "isnt", "doesnt", "didnt", "whats", "hows",
     )
+
+    /**
+     * Spanish stopwords, folded ([ResearchLanguage.fold]): articles, prepositions, pronouns, question words, the common
+     * forms of ser, estar, haber, tener, hacer, decir and poder, and the asking words ("dime", "explica", "cuéntame").
+     * Those that are English words too ("son", "sea", "con", "los") count only when Spanish leads ([SpanishWords]).
+     */
+    private val STOPWORDS_ES = setOf(
+        // Articles and contractions.
+        "el", "la", "los", "las", "un", "una", "unos", "unas", "lo", "al", "del",
+        // Prepositions.
+        "a", "ante", "bajo", "con", "contra", "de", "desde", "durante", "en", "entre", "hacia", "hasta", "para", "por",
+        "segun", "sin", "sobre", "tras",
+        // Conjunctions.
+        "y", "e", "o", "u", "ni", "pero", "sino", "que", "porque", "pues", "aunque", "si", "mientras",
+        // Pronouns, possessives, demonstratives.
+        "yo", "tu", "ella", "ellos", "ellas", "usted", "ustedes", "nosotros", "nosotras", "vosotros", "me", "te", "se",
+        "nos", "os", "le", "les", "mi", "mis", "tus", "su", "sus", "nuestro", "nuestra", "nuestros", "nuestras", "este",
+        "esta", "estos", "estas", "ese", "esa", "esos", "esas", "esto", "eso", "aquel", "aquella", "aquellos",
+        "aquellas", "aquello", "algo", "alguien", "algun", "alguno", "alguna", "algunos", "algunas", "nada", "nadie",
+        "otro", "otra", "otros", "otras", "todo", "toda", "todos", "todas", "mismo", "misma", "cuyo", "cuya",
+        // Question words (folded, so with and without accents).
+        "quien", "quienes", "cual", "cuales", "cuando", "donde", "adonde", "como", "cuanto", "cuanta", "cuantos", "cuantas",
+        // Adverbs.
+        "muy", "mas", "menos", "tan", "tanto", "ya", "aqui", "alli", "ahi", "alla", "tambien", "asi", "no", "solo", "bien",
+        // ser, estar, haber, tener, hacer, decir, poder.
+        "ser", "soy", "eres", "es", "somos", "son", "era", "eran", "eras", "eramos", "fue", "fui", "fueron", "sido", "sea", "sean", "seria",
+        "estar", "estoy", "estamos", "estan", "estaba", "estaban", "estuvo", "estado",
+        "haber", "he", "has", "ha", "hemos", "han", "hay", "habia", "habian", "hubo", "habido",
+        "tener", "tengo", "tiene", "tienes", "tienen", "tenia", "tenian", "tuvo",
+        "hacer", "hago", "hace", "hacen", "hizo", "hecho",
+        "decir", "dice", "dicen", "dijo", "decia",
+        "poder", "puedo", "puede", "pueden", "podia", "pudo", "podria",
+        // Asking.
+        "dime", "explica", "explicame", "cuentame", "sabes",
+    )
     private val SPLIT = Regex("[^\\p{L}\\p{N}']+")
     private val POSSESSIVE = Regex("'s(?![\\p{L}\\p{N}])")
     private val SPACES = Regex("\\s+")
     private val WORD = Regex("[\\p{L}\\p{N}]+")
 
-    fun extract(question: String, max: Int = 6): List<String> =
+    /** [languages] are the question's: English unless it's clearly Spanish, Spanish unless it's clearly English. */
+    fun extract(question: String, max: Int = 6, languages: List<ResearchLanguage> = ResearchLanguage.of(question)): List<String> =
         question.lowercase().replace('\u2019', '\'').split(SPLIT)
-            .map { it.trim('\'').removeSuffix("'s") }
+            // Spanish has no 's possessive; "'s" comes off for English only.
+            .map { it.trim('\'').let { w -> if (ResearchLanguage.EN in languages) w.removeSuffix("'s") else w } }
             // Inner apostrophes stay (O'Brien), as in passage text; the stopword check ignores them (don't = dont).
-            .filter { it.length >= 3 && it.replace("'", "") !in STOPWORDS }
+            .filter { it.length >= 3 && !isStopword(it.replace("'", ""), languages) }
             .distinct()
             .take(max)
 
@@ -32,7 +73,19 @@ object Keywords {
     /** [word], lowercased, and the title word it is an alias of, if any. */
     fun alternatives(word: String): Set<String> = word.lowercase().let { w -> ALIASES[w]?.let { setOf(w, it) } ?: setOf(w) }
 
-    fun isStopword(word: String): Boolean = word.lowercase() in STOPWORDS
+    /**
+     * Whether [word] is a stopword in any of [languages], the question's ([ResearchLanguage.of]). English alone by
+     * default, as before Spanish; a Spanish word is checked folded, so "cuántos" is "cuantos".
+     */
+    fun isStopword(word: String, languages: List<ResearchLanguage> = ENGLISH): Boolean {
+        if (ResearchLanguage.EN in languages && word.lowercase() in STOPWORDS) return true
+        if (ResearchLanguage.ES !in languages) return false
+        val folded = ResearchLanguage.fold(word)
+        return folded in STOPWORDS_ES && SpanishWords.counts(word.lowercase(), languages)
+    }
+
+    /** English alone: the default wherever a keyword or passage is checked without its question. */
+    val ENGLISH: List<ResearchLanguage> = listOf(ResearchLanguage.EN)
 
     /** A keyword's alternatives: the rewrite's alternates variant writes a group as `wine|strong drink`; a plain keyword is its own only one. */
     fun variants(keyword: String): List<String> = keyword.split('|').map { it.trim() }.filter { it.isNotEmpty() }

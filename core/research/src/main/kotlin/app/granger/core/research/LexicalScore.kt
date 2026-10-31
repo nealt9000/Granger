@@ -9,18 +9,20 @@ object LexicalScore {
     private const val TITLE_BONUS = 0.1
     private const val LEAD_BONUS = 0.3
 
-    fun of(passage: Passage, keywords: List<String>): Double = scorer(keywords)(passage)
+    /** [languages] are the question's ([ResearchLanguage.of]): whose stopwords don't count. English alone by default. */
+    fun of(passage: Passage, keywords: List<String>, languages: List<ResearchLanguage> = Keywords.ENGLISH): Double =
+        scorer(keywords, languages)(passage)
 
     /**
      * [of] for many passages: the keyword patterns are built once. Every keyword word weighs the same; word rarity is
      * not used, since in a search's results the question's own topic word is in nearly every passage and would count least.
      * An article's opening passage (see [isLead]) that matches at least one word gets [LEAD_BONUS].
      */
-    fun scorer(keywords: List<String>): (Passage) -> Double {
+    fun scorer(keywords: List<String>, languages: List<ResearchLanguage> = Keywords.ENGLISH): (Passage) -> Double {
         // Each keyword is a list of alternatives (one, unless the rewrite gave `wine|strong drink`), each a list of words.
         val groups = keywords
             .map { k ->
-                Keywords.variants(k).map { v -> Keywords.words(v).map { it.lowercase() }.filterNot(Keywords::isStopword).distinct() }
+                Keywords.variants(k).map { v -> Keywords.words(v).map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }.distinct() }
                     .filter { it.isNotEmpty() }
             }
             .filter { it.isNotEmpty() }
