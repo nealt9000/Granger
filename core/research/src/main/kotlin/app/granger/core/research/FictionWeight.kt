@@ -13,15 +13,29 @@ class FictionWeight(private val fiction: () -> Set<String>, private val weight: 
     }
 
     private fun literary(question: String, keywords: List<String>, found: List<Passage>, ids: Set<String>): Boolean {
-        if (Keywords.words(question).any { it.lowercase() in LITERARY }) return true
+        val languages = ResearchLanguage.of(question)
+        if (literary(question, languages)) return true
         val titles = found.filter { it.sourceId in ids }.map { p -> Keywords.words(p.sourceTitle).map { it.lowercase() }.toSet() }
         return keywords.any { k ->
-            val words = Keywords.words(k).map { it.lowercase() }.filterNot(Keywords::isStopword)
+            val words = Keywords.words(k).map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }
             words.isNotEmpty() && titles.any { t -> words.all { it in t } }
         }
     }
 
     companion object {
+        /**
+         * Whether [question] has a cue word in one of [languages] ([ResearchLanguage.of]): [LITERARY] for English,
+         * [LITERARY_ES] (folded) or "obra de teatro" for Spanish.
+         */
+        fun literary(question: String, languages: List<ResearchLanguage> = ResearchLanguage.of(question)): Boolean {
+            val words = Keywords.words(question)
+            if (ResearchLanguage.EN in languages && words.any { it.lowercase() in LITERARY }) return true
+            if (ResearchLanguage.ES !in languages) return false
+            val folded = words.map(ResearchLanguage::fold)
+            return folded.any { it in LITERARY_ES && SpanishWords.counts(it, languages) } ||
+                folded.windowed(3).any { it == listOf("obra", "de", "teatro") }
+        }
+
         /** R0's choice: it removes novels from factual questions' passages and costs no recall at 0.7 or lower. */
         const val DEFAULT = 0.7
 
@@ -30,6 +44,14 @@ class FictionWeight(private val fiction: () -> Set<String>, private val weight: 
             "character", "characters", "chapter", "scene", "act", "stanza", "line", "lines", "quote", "quotes", "say", "says",
             "said", "narrator", "hero", "heroine", "fiction", "author", "wrote", "written", "book", "books", "literature",
             "opera", "libretto", "verse", "verses",
+        )
+
+        /** The Spanish cue words, folded ([ResearchLanguage.fold]): "poesía" is "poesia". */
+        val LITERARY_ES = setOf(
+            "novela", "novelas", "cuento", "cuentos", "relato", "relatos", "poema", "poemas", "poesia", "poeta", "poetisa",
+            "dramaturgo", "dramaturga", "personaje", "personajes", "capitulo", "capitulos", "escena", "acto", "estrofa",
+            "verso", "versos", "cita", "citas", "dice", "dijo", "narrador", "narradora", "heroe", "heroina", "ficcion",
+            "autor", "autora", "escribio", "escrito", "escrita", "libro", "libros", "literatura", "opera", "libreto",
         )
     }
 }
