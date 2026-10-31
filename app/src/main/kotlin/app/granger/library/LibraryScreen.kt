@@ -43,8 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.Features
@@ -140,8 +140,9 @@ fun LibraryContent(
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                // One line: on a narrow phone the actions leave it short, and a word broken in two reads worse.
-                title = { Text(stringResource(R.string.library_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                // One line: on a narrow phone the actions leave it short, and a word broken in two reads worse. It
+                // shrinks a little rather than cut "Biblioteca" (Plan L2 Task 4).
+                title = { app.granger.theme.FitText(stringResource(R.string.library_title), minSize = 16.sp) },
                 actions = {
                     IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.common_search)) }
                     IconButton(onClick = onDownloads) {

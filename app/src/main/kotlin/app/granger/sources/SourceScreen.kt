@@ -71,6 +71,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
@@ -194,7 +195,7 @@ fun SourceScreen(
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in SourceTab.entries) {
-                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(stringResource(tab.title)) })
+                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { app.granger.theme.FitText(stringResource(tab.title), minSize = 11.sp) })
                     }
                 }
             }

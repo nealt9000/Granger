@@ -111,11 +111,12 @@ Use these words everywhere. If a string needs a different word, keep the glossar
 
 ## Task 4: Fit and formats (desk)
 
-- [ ] **Step 1:** Run the theme shots (`-PthemeShots`) under `qualifiers = "es"` for the screens they cover. Look at each for clipped or wrapped labels: rail, chips, buttons, top bars. Shorten in Spanish, or let the layout wrap, whichever the screen allows.
-- [ ] **Step 2: Formats.** Check dates, numbers and sizes in Spanish:
+- [x] **Step 1:** Run the theme shots (`-PthemeShots`) under `qualifiers = "es"` for the screens they cover. Look at each for clipped or wrapped labels: rail, chips, buttons, top bars. Shorten in Spanish, or let the layout wrap, whichever the screen allows.
+- [x] **Step 2: Formats.** Check dates, numbers and sizes in Spanish:
   - "10 ene 2025"
   - "1,5 GB" (Spanish decimal comma)
   - "hace 5 minutos" style where the app says "5 min ago"
+  - Done 2026-10-30: `ThemeShotsSpanish` writes the shots to `app/build/theme-shots/es`; `SpanishFormatsTest` checks the formats. The app shows no past relative times ("ago"); its times are durations ("unos 25 min", "en 2 min"). Formats follow the locale: plain `es` gives "1,5 GB" and "27.700", an es-419 country may differ.
 - [ ] **Step 3:** Commit.
 
 ## Task 5: Walkthrough (needs the phone, after A0 is done with it)

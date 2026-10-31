@@ -47,7 +47,7 @@
     <string name="music_albums_and_songs">%1$s · %2$s</string>
 
     <string name="music_shuffle">Aleatorio</string>
-    <string name="music_shuffle_all">Reproducir todo al azar</string>
+    <string name="music_shuffle_all">Todo aleatorio</string>
     <string name="music_play_next">Reproducir a continuación</string>
     <string name="music_add_to_queue">Agregar a la cola</string>
     <string name="music_add_to_playlist_menu">Agregar a una lista…</string>

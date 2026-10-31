@@ -36,7 +36,7 @@
     <string name="sources_tab_browse">Explorar</string>
     <!-- "Installed" is "Descargado", as on Archive.org and LibriVox's tabs. -->
     <string name="sources_tab_installed">Descargado</string>
-    <string name="sources_tab_updates">Actualizaciones</string>
+    <string name="sources_tab_updates">Actualizar</string>
     <string name="sources_storage_summary">%1$s libres en %2$s · Granger usa %3$s</string>
     <string name="sources_no_match">Nada coincide con esa búsqueda.</string>
     <string name="sources_nothing_yet">Aún no hay nada aquí.</string>
@@ -171,8 +171,8 @@
     <string name="sources_set_wikipedia">La enciclopedia libre: de 100 artículos esenciales a la versión completa.</string>
     <string name="sources_set_wikivoyage">La guía de viajes libre: de Europa al mundo entero.</string>
     <string name="sources_set_subjects">Temas de %1$s</string>
-    <string name="sources_family_devdocs">Documentación para desarrolladores</string>
-    <string name="sources_family_stack_exchange">Sitios de preguntas y respuestas</string>
+    <string name="sources_family_devdocs">Programación</string>
+    <string name="sources_family_stack_exchange">Preguntas y respuestas</string>
     <string name="sources_family_maps">Mapas</string>
     <string name="sources_adds_to">Amplía %1$s (%2$d%% nuevo)</string>
     <string name="sources_adds_to_your">Amplía tu %1$s (%2$d%% nuevo)</string>

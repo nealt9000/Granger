@@ -45,7 +45,7 @@
     <string name="library_no_books_match">Ningún libro coincide.</string>
     <string name="library_sort_title">Título</string>
     <string name="library_sort_author">Autor</string>
-    <string name="library_sort_recent">Leídos hace poco</string>
+    <string name="library_sort_recent">Recientes</string>
     <string name="library_remove_from_phone_title">¿Quitar del teléfono?</string>
     <string name="library_remove_book_body">Se eliminará %1$s de este teléfono. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
     <string name="library_remove_pack_body">Se eliminará %1$s de este teléfono. Puedes volver a descargarlo más tarde.</string>

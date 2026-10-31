@@ -111,7 +111,6 @@ Words the draft added, used the same way everywhere:
 | `*_percent` | 25% | No space before %, as most Latin American apps write it; RAE prefers "25 %". |
 | `library_*searchable*`, `library_full_text` | Hacer todos buscables…; Buscable por completo; 312 buscables por completo | *Buscable* is used in software but isn't in every dictionary. The alternative is longer: "se puede buscar en todo el texto". |
 | `library_new_media_type` | Nuevo tipo de contenido | A top-level group such as Books or Music. *Tipo de medio* is the literal, but reads as technical. |
-| `library_sort_recent` | Leídos hace poco | A sort order, "Recently read". *Leídos recientemente* is longer. |
 | `sources_preset_title`, `archive_large_set` | Conjunto %1$s ("Conjunto Clásicos Granger") | A ready-made set of downloads. Does *conjunto* read naturally before a name? |
 | `sources_pictures_only` | Con imágenes (única opción) | English "With pictures only". Spanish can't put *solo* before a capitalised choice name, so the draft puts a note after it. |
 | `sources_get_smaller` | Descargar la versión sin imágenes, 7,0 GB | English "Get no pictures, 7.0 GB"; *la versión* was added so the flavour reads as a noun. |
@@ -132,5 +131,14 @@ Words the draft added, used the same way everywhere:
 - `downloads_time_left_*`, `downloads_in_*`: min, h and s stay abbreviated, as in English.
 - `readiness_show_all`: "Mostrar todo (%1$d)", which also avoids choosing a gender for "gaps".
 - `onboarding_your_picks`: "Lo que elegiste" for "Your picks".
-- `sources_family_stack_exchange`: "Sitios de preguntas y respuestas" is long for a row title; English is "Q&A sites". Task 4 checks it fits.
-- `sources_family_devdocs`: "Documentación para desarrolladores", also long for a row title.
+
+Found in Task 4's Spanish theme shots (`ThemeShotsSpanish`), and shortened:
+
+- `sources_family_devdocs`: "Programación", not "Documentación para desarrolladores", which took three lines as a screen title and two in its search box. English is "Developer docs".
+- `sources_family_stack_exchange`: "Preguntas y respuestas", not "Sitios de preguntas y respuestas", for the same reason. English is "Q&A sites".
+- `sources_tab_updates`: "Actualizar", not "Actualizaciones", which broke mid-word in a third of the screen's width. A verb as a tab's name: does it read as "the ones to update"?
+- `library_sort_recent`: "Recientes", as on Audiobooks, not "Leídos hace poco", in a row of sort chips.
+- `music_shuffle_all`: "Todo aleatorio", not "Reproducir todo al azar", which pushed "Ordenar: Título" into a column of word pieces.
+- The Library's title, "Biblioteca", shrinks slightly to fit beside its four buttons rather than end in "…"; the Get more tabs ("Descargado") shrink the same way. English is unchanged.
+
+Still English in Spanish, by design until L3: catalog copy, and the names of the collections the app files books into ("Granger Classics", "My books", "Archive.org"), which are stored in the library when the collection is made.

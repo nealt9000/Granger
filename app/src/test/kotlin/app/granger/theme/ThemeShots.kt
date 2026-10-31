@@ -126,11 +126,18 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "w360dp-h640dp-xxhdpi")
-class ThemeShots {
+open class ThemeShots {
     @get:Rule val compose = createComposeRule()
-    private val out = System.getProperty("granger.themeShots").orEmpty()
+
+    /** A subfolder for a language's shots ([ThemeShotsSpanish]); empty for English. */
+    protected open val language: String get() = ""
+    private val out = System.getProperty("granger.themeShots").orEmpty().let { if (it.isEmpty() || language.isEmpty()) it else "$it/$language" }
 
     @Before fun onlyWhenAsked() = assumeTrue(out.isNotEmpty())
+
+    /** A resource in the shot's language, for finding what to tap. */
+    private fun text(id: Int, vararg args: Any): String =
+        androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>().getString(id, *args)
 
     private fun shoot(name: String, content: @Composable () -> Unit) {
         var night by mutableStateOf(true)
@@ -300,7 +307,7 @@ class ThemeShots {
      * sizes they're drawn (queue, Browse, mini player, search, Listen), the rail's tab, play, search and chat, and
      * the mini player, all on the themed tile.
      */
-    @Config(qualifiers = "w360dp-h720dp-xxhdpi")
+    @Config(qualifiers = "+w360dp-h720dp")
     @Test fun tiles() = shoot("tiles") {
         val rail = RailUi(
             listOf(
@@ -367,7 +374,7 @@ class ThemeShots {
      * PNG: Field on the left, Night on the right. Each column is the narrow rail's tools with Listen selected at the
      * foot, and the full rail's Listen row at 20 dp.
      */
-    @Config(qualifiers = "w720dp-h520dp-xxhdpi")
+    @Config(qualifiers = "+w720dp-h520dp")
     @Test fun listenIcons() {
         val candidates = listOf(
             "headphones" to R.drawable.ic_headphones,
@@ -392,7 +399,7 @@ class ThemeShots {
      * rail's order with the other tools, Browse selected at the foot and the full rail's Browse row at 20 dp. Field on
      * the left, Night on the right.
      */
-    @Config(qualifiers = "w720dp-h560dp-xxhdpi")
+    @Config(qualifiers = "+w720dp-h560dp")
     @Test fun browseIcons() {
         val candidates = listOf("globe" to R.drawable.ic_browse, "compass" to R.drawable.ic_browse_alt)
         compose.setContent {
@@ -544,8 +551,8 @@ class ThemeShots {
     @Test fun shelfDrag() {
         var night by mutableStateOf(true)
         compose.setContent { GrangerTheme(night = night) { ShelfShot(ShelfView.LIST) } }
-        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { down(center) }
-        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { moveBy(androidx.compose.ui.geometry.Offset(0f, height * 11.5f)) }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription(text(R.string.library_jump_to, "A"))).performTouchInput { down(center) }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription(text(R.string.library_jump_to, "A"))).performTouchInput { moveBy(androidx.compose.ui.geometry.Offset(0f, height * 11.5f)) }
         for (n in listOf(true, false)) {
             night = n
             compose.waitForIdle()
@@ -916,7 +923,7 @@ class ThemeShots {
     @Test fun booksGrid() = booksShot("books-grid", ShelfView.GRID)
 
     /** All music, forty albums of two songs, at 360 dp; [tab] is clicked before the shot. */
-    private fun musicShot(name: String, tab: String, albumView: ShelfView = ShelfView.LIST) {
+    private fun musicShot(name: String, tab: Int, albumView: ShelfView = ShelfView.LIST) {
         val tracks = classics.take(40).flatMapIndexed { i, (title, author) ->
             (1..2).map { n ->
                 app.granger.music.song("s$i-$n", title = if (n == 1) title else "$title, part two", album = title, albumArtists = author.ifEmpty { "Anonymous" },
@@ -939,7 +946,7 @@ class ThemeShots {
                 ) { app.granger.music.MusicScreen(vm, nav) }
             }
         }
-        compose.onNode(androidx.compose.ui.test.hasText(tab) and androidx.compose.ui.test.hasClickAction()).performClick()
+        compose.onNode(androidx.compose.ui.test.hasText(text(tab)) and androidx.compose.ui.test.hasClickAction()).performClick()
         for (n in listOf(true, false)) {
             night = n
             compose.waitForIdle()
@@ -949,13 +956,13 @@ class ThemeShots {
         }
     }
 
-    @Test fun musicSongs() = musicShot("music-songs", "Songs")
+    @Test fun musicSongs() = musicShot("music-songs", R.string.music_tab_songs)
 
-    @Test fun musicAlbumsList() = musicShot("music-albums-list", "Albums")
+    @Test fun musicAlbumsList() = musicShot("music-albums-list", R.string.music_tab_albums)
 
-    @Test fun musicAlbumsGrid() = musicShot("music-albums-grid", "Albums", ShelfView.GRID)
+    @Test fun musicAlbumsGrid() = musicShot("music-albums-grid", R.string.music_tab_albums, ShelfView.GRID)
 
-    @Test fun musicArtists() = musicShot("music-artists", "Artists")
+    @Test fun musicArtists() = musicShot("music-artists", R.string.music_tab_artists)
 
     /** Forty audiobooks, three part-way, two finished, one missing, at 360 dp. */
     private fun audiobooksShot(name: String, view: ShelfView) {
@@ -1062,7 +1069,7 @@ class ThemeShots {
         )
     }
 
-    @Config(qualifiers = "w360dp-h1400dp-xxhdpi")
+    @Config(qualifiers = "+w360dp-h1400dp")
     @Test fun downloadsTrouble() = shoot("downloads-trouble") {
         val trouble = dlRound.map {
             when (it.itemId) {
@@ -1079,4 +1086,13 @@ class ThemeShots {
             ),
         )
     }
+}
+
+/**
+ * The same screens in Spanish (Plan L2 Task 4), under app/build/theme-shots/es, for clipped or wrapped labels:
+ * ./gradlew :app:testDebugUnitTest --tests '*ThemeShotsSpanish*' -PthemeShots
+ */
+@Config(qualifiers = "+es")
+class ThemeShotsSpanish : ThemeShots() {
+    override val language: String get() = "es"
 }
