@@ -19,7 +19,7 @@ class ContentsPanelTest {
 
     @Test fun aPdfWithNoOutlineSaysSo() {
         compose.setContent { ContentsPanel(EbookUi(isPdf = true), onGoTo = {}, onMark = {}, onDismiss = {}) }
-        compose.onNodeWithText(NO_PDF_CONTENTS).assertIsDisplayed()
+        compose.onNodeWithText("This PDF has no contents list of its own. If it has a contents page, it's in the pages.").assertIsDisplayed()
     }
 
     @Test fun aBookWithNoContentsSaysSo() {

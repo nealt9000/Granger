@@ -23,6 +23,8 @@ class MediaDocuments(
     private val volumes: () -> List<Volume>,
     private val volumeKey: (File) -> String,
     private val titleOf: (File) -> String?,
+    /** The Files app's name for a shelf folder, [MUSIC] or [AUDIOBOOKS] (from resources: [MediaSharing.shelfName]). */
+    private val shelfName: (String) -> String,
 ) {
     data class Doc(
         val id: String,
@@ -81,7 +83,7 @@ class MediaDocuments(
     }
 
     private fun shelfDoc(shelf: String) =
-        Doc(shelf, if (shelf == MUSIC) "Music" else "Audiobooks", Document.MIME_TYPE_DIR, null, null, isDir = true)
+        Doc(shelf, shelfName(shelf), Document.MIME_TYPE_DIR, null, null, isDir = true)
 
     private fun items(volume: Volume, shelf: String): List<Doc> {
         val key = volumeKey(volume.root)

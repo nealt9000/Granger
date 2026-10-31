@@ -1,5 +1,7 @@
 package app.granger.onboarding
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
@@ -19,7 +21,8 @@ import app.granger.research.Librarian
  */
 data class Line(
     val id: String,
-    val title: String,
+    /** A catalog title ([UiText.Raw]), or the app's own name for the line (Ask, the voice, the Classics). */
+    val title: UiText,
     val items: List<CatalogItem>,
     val installed: Boolean,
 ) {
@@ -28,7 +31,7 @@ data class Line(
 }
 
 /** Efficient or Comprehensive (spec §6, step 3), built from the generated preset of that name. */
-data class StartChoice(val id: String, val title: String, val blurb: String, val lines: List<Line>) {
+data class StartChoice(val id: String, val title: String, val blurb: UiText, val lines: List<Line>) {
     /** What downloading it would add, with [unticked] lines and installed ones left out. */
     fun bytes(unticked: Set<String> = emptySet()): Long = chosen(unticked).sumOf { it.bytes }
 
@@ -64,14 +67,14 @@ data class Addition(val useCase: UseCase, val lines: List<Line>) {
     val packs: Int get() = lines.sumOf { it.count }
 }
 
-data class ReviewGroup(val title: String, val lines: List<Line>)
+data class ReviewGroup(val title: UiText, val lines: List<Line>)
 
 /** The review step: every item once, the total against the chosen volume's free space. */
 data class Review(
     val groups: List<ReviewGroup>,
     val freeBytes: Long,
     /** What was left out because a bigger pack in the review holds it (Plan WF Decision 5). */
-    val notes: List<String> = emptyList(),
+    val notes: List<UiText> = emptyList(),
 ) {
     val lines: List<Line> get() = groups.flatMap { it.lines }
     val items: List<CatalogItem> get() = lines.flatMap { it.items }
@@ -97,8 +100,8 @@ object OnboardingModel {
      */
     fun startChoices(catalog: Catalog, installed: Set<String>, saveSpace: Boolean = false): List<StartChoice> {
         val blurbs = mapOf(
-            EFFICIENT to "The essentials of every domain: enough to answer most questions, in the least space.",
-            COMPREHENSIVE to "Everything the readiness model counts, for a phone that can hold it.",
+            EFFICIENT to UiText.Res(R.string.onboarding_blurb_efficient),
+            COMPREHENSIVE to UiText.Res(R.string.onboarding_blurb_comprehensive),
         )
         return listOf(EFFICIENT, COMPREHENSIVE).mapNotNull { id ->
             val preset = catalog.presets.firstOrNull { it.id == id } ?: return@mapNotNull null
@@ -115,7 +118,7 @@ object OnboardingModel {
     fun askLine(catalog: Catalog, tier: DeviceTier, dense: Boolean, installed: Set<String>): Line? {
         if (tier < DeviceTier.ASK) return null
         val items = Librarian.models(catalog, dense).filter { it.id !in installed }
-        return if (items.isEmpty()) null else Line(ASK, "Ask (Preview)", items, installed = false)
+        return if (items.isEmpty()) null else Line(ASK, UiText.Res(R.string.onboarding_ask_line), items, installed = false)
     }
 
     /**
@@ -125,7 +128,7 @@ object OnboardingModel {
     fun voiceLine(catalog: Catalog, installed: Set<String>): Line? {
         if (catalog.voices.any { it.id in installed }) return null
         val voice = catalog.voices.firstOrNull { it.id == VOICE_ID } ?: catalog.voices.firstOrNull() ?: return null
-        return Line(VOICE, "Read aloud", listOf(voice), installed = false)
+        return Line(VOICE, UiText.Res(R.string.onboarding_voice_line), listOf(voice), installed = false)
     }
 
     /** [item]'s no-pictures flavour (`…_nopic`, same ZIM), or [item] itself. */
@@ -153,6 +156,7 @@ object OnboardingModel {
     fun suggestedRegion(regions: Regions, countryCode: String): Region? {
         val code = countryCode.uppercase()
         if (code.isBlank()) return null
+        // English on purpose, whatever the phone's language: this matches the catalog's English map titles, not UI (L3).
         val name = java.util.Locale("", code).getDisplayCountry(java.util.Locale.ENGLISH)
         val titles = listOfNotNull(name.takeIf { it.isNotBlank() && it != code }, REGION_ALIASES[code])
         return titles.firstNotNullOfOrNull { t -> regions.countries.firstOrNull { it.place == null && it.pack.title.equals(t, ignoreCase = true) } }
@@ -204,17 +208,17 @@ object OnboardingModel {
             start?.let { s ->
                 // The preset's name only while it is the preset: trimmed, it's the user's own (Plan U3a Decision 5).
                 val whole = s.lines.none { !it.installed && it.id in unticked }
-                s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) s.title else "Your picks", it)) }
+                s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) UiText.Raw(s.title) else UiText.Res(R.string.onboarding_your_picks), it)) }
             }
             // Under its own heading the line is "The librarian", not "Ask (Preview)" twice.
-            voice?.let { v -> listOf(v.copy(title = v.items.single().title)).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(v.title, it)) } }
-            ask?.let { listOf(it.copy(title = "The librarian")).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
+            voice?.let { v -> listOf(v.copy(title = UiText.Raw(v.items.single().title))).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(v.title, it)) } }
+            ask?.let { listOf(it.copy(title = UiText.Res(R.string.onboarding_the_librarian))).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             region?.takeUnless { it.installed }?.let { r ->
-                listOf(Line(r.pack.id, r.title, listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }
-                    ?.let { add(ReviewGroup("Your region", it)) }
+                listOf(Line(r.pack.id, UiText.Raw(r.title), listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }
+                    ?.let { add(ReviewGroup(UiText.Res(R.string.onboarding_your_region), it)) }
             }
             val useCaseLines = additions.flatMap { it.lines }.fresh()
-            if (useCaseLines.isNotEmpty()) add(ReviewGroup("What you'll use it for", useCaseLines))
+            if (useCaseLines.isNotEmpty()) add(ReviewGroup(UiText.Res(R.string.onboarding_uses), useCaseLines))
         }
         return if (containment == null) Review(groups, freeBytes) else held(groups, freeBytes, containment)
     }
@@ -244,13 +248,13 @@ object OnboardingModel {
     }
 
     /** "Wikipedia Top 1 million covers Best 50,000, so only Top 1 million is queued." */
-    fun heldText(holder: PackEntry, held: PackEntry): String =
+    fun heldText(holder: PackEntry, held: PackEntry): UiText =
         if (holder.isSlice && held.isSlice && holder.setId == held.setId) {
             val big = app.granger.sources.KiwixList.shortLabel(holder.setLabel)
             val set = app.granger.sources.KiwixList.setTitle(holder.setId, listOf(holder))
-            "$set $big covers ${app.granger.sources.KiwixList.shortLabel(held.setLabel)}, so only $big is queued."
+            UiText.Res(R.string.onboarding_held_slice, set, big, app.granger.sources.KiwixList.shortLabel(held.setLabel))
         } else {
-            "${holder.title} covers ${held.title}, so it isn't queued."
+            UiText.Res(R.string.onboarding_held, holder.title, held.title)
         }
 
     /** The Granger Classics' collection id. */
@@ -287,13 +291,13 @@ object OnboardingModel {
     }
 
     /** The review's one line on the order (Plan DL Decision 5); null when nothing quick is coming. */
-    fun quickFirstText(review: Review): String? {
+    fun quickFirstText(review: Review): UiText? {
         val voice = review.items.any { it is VoiceEntry }
         val classics = review.items.any { it is BookEntry && it.collection == CLASSICS }
         return when {
-            voice && classics -> "Quick ones first: the voice and the Classics land in a few minutes."
-            voice -> "Quick ones first: the voice lands in a few minutes."
-            classics -> "Quick ones first: the Classics land in a few minutes."
+            voice && classics -> UiText.Res(R.string.onboarding_quick_voice_classics)
+            voice -> UiText.Res(R.string.onboarding_quick_voice)
+            classics -> UiText.Res(R.string.onboarding_quick_classics)
             else -> null
         }
     }
@@ -319,7 +323,7 @@ object OnboardingModel {
             if (item is PackEntry && item.zimName.isNotBlank() && largestFlavour[item.zimName] != item.id) continue
             when (item) {
                 is BookEntry -> bookLines.getOrPut(item.collection) { mutableListOf() }.also { if (it.isEmpty()) out += PLACEHOLDER }.add(item)
-                else -> out += Line(item.id, item.title, listOf(item), installed = item.id in installed)
+                else -> out += Line(item.id, UiText.Raw(item.title), listOf(item), installed = item.id in installed)
             }
         }
         var next = bookLines.entries.iterator()
@@ -331,10 +335,10 @@ object OnboardingModel {
         }
     }
 
-    private fun collectionTitle(collection: String) = when (collection) {
-        "granger-classics" -> "Granger Classics"
-        else -> collection.replace('-', ' ').replaceFirstChar { it.uppercase() }
+    private fun collectionTitle(collection: String): UiText = when (collection) {
+        CLASSICS -> UiText.Res(R.string.onboarding_granger_classics)
+        else -> UiText.Raw(collection.replace('-', ' ').replaceFirstChar { it.uppercase() })
     }
 
-    private val PLACEHOLDER = Line("", "", emptyList(), installed = false)
+    private val PLACEHOLDER = Line("", UiText.Raw(""), emptyList(), installed = false)
 }

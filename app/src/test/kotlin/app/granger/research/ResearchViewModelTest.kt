@@ -890,7 +890,7 @@ class ResearchViewModelTest {
     }
 
     @Test fun aFocusedMediaCardsBylineNamesItsPart() {
-        assertThat(sourceByline(media(1).copy(heading = "Mars"))).isEqualTo("Artist 1 · Album · Mars")
+        assertThat(sourceByline(media(1).copy(heading = "Mars"), "Album", "Audiobook")).isEqualTo("Artist 1 · Album · Mars")
     }
 
     @Test fun mediaAlbumCitationOpensTheAlbum() = runTest(main.dispatcher) {
@@ -933,10 +933,10 @@ class ResearchViewModelTest {
     }
 
     @Test fun mediaSourceCardBylineSaysAlbumOrAudiobook() {
-        assertThat(sourceByline(media(1))).isEqualTo("Artist 1 · Album")
-        assertThat(sourceByline(mediaBook("audiobook:phone:x", author = "Rudyard Kipling"))).isEqualTo("Rudyard Kipling · Audiobook")
-        assertThat(sourceByline(mediaBook("audiobook:phone:x", author = ""))).isEqualTo("Your audiobooks · Audiobook")
-        assertThat(sourceByline(article(1))).isEqualTo("Pack 1")
+        assertThat(sourceByline(media(1), "Album", "Audiobook")).isEqualTo("Artist 1 · Album")
+        assertThat(sourceByline(mediaBook("audiobook:phone:x", author = "Rudyard Kipling"), "Album", "Audiobook")).isEqualTo("Rudyard Kipling · Audiobook")
+        assertThat(sourceByline(mediaBook("audiobook:phone:x", author = ""), "Album", "Audiobook")).isEqualTo("Your audiobooks · Audiobook")
+        assertThat(sourceByline(article(1), "Album", "Audiobook")).isEqualTo("Pack 1")
     }
 
     @Test fun deletingTheChatRemovesIt() = runTest(main.dispatcher) {

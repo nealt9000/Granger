@@ -14,7 +14,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.granger.R
 import app.granger.core.player.SleepSetting
 
 /**
@@ -26,20 +29,20 @@ import app.granger.core.player.SleepSetting
 fun SleepTimerSheet(remainingMs: Long?, onStart: (SleepSetting) -> Unit, onCancel: () -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.navigationBarsPadding().padding(bottom = 16.dp)) {
-            Text("Sleep timer", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+            Text(stringResource(R.string.player_sleep_timer), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
             if (remainingMs != null) {
                 Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Stops in ${formatTime(remainingMs)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary,
+                        stringResource(R.string.player_stops_in, formatTime(remainingMs)), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = onCancel) { Text("Cancel timer") }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.player_cancel_timer)) }
                 }
             }
             PlayerViewModel.SLEEP_MINUTES.forEach { minutes ->
-                SleepChoice("$minutes minutes") { onStart(SleepSetting.After(minutes * 60_000L)) }
+                SleepChoice(pluralStringResource(R.plurals.player_minutes, minutes, minutes)) { onStart(SleepSetting.After(minutes * 60_000L)) }
             }
-            SleepChoice("End of chapter") { onStart(SleepSetting.EndOfChapter) }
+            SleepChoice(stringResource(R.string.player_end_of_chapter)) { onStart(SleepSetting.EndOfChapter) }
         }
     }
 }

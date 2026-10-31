@@ -110,8 +110,12 @@ class SystemSpeech internal constructor(private val engine: TtsEngine, override 
     override fun close() {}
 
     /** Opens system voices over one shared engine, created on first use. */
-    class Factory(private val create: suspend () -> TtsEngine, private val scratch: File) : SpeechFactory {
-        constructor(context: Context) : this({ AndroidTtsEngine.create(context) }, File(context.cacheDir, "speech"))
+    class Factory(
+        private val create: suspend () -> TtsEngine,
+        private val scratch: File,
+        private val titles: VoiceTitles = VoiceTitles.BARE,
+    ) : SpeechFactory {
+        constructor(context: Context) : this({ AndroidTtsEngine.create(context) }, File(context.cacheDir, "speech"), VoiceTitles.of(context))
 
         private val lock = Mutex()
         private var engine: TtsEngine? = null
@@ -124,17 +128,17 @@ class SystemSpeech internal constructor(private val engine: TtsEngine, override 
             return e.voices()
                 .filter { it.offline && Locale.forLanguageTag(it.languageTag).language == Locale.ENGLISH.language }
                 .sortedWith(compareByDescending<TtsVoice> { it.quality }.thenBy { it.name })
-                .map { Voice(VoiceId.System(e.engineName, it.name), title(it.name, it.languageTag), it.languageTag) }
+                .map { Voice(VoiceId.System(e.engineName, it.name), title(it.name, it.languageTag, titles), it.languageTag) }
         }
 
         companion object {
             /** "en-us-x-iom-local" (en-US) → "System voice iom (en-US)": the engine's voice names are codes, so the code is kept, short. */
-            fun title(name: String, languageTag: String): String {
+            fun title(name: String, languageTag: String, titles: VoiceTitles): String {
                 val short = name.lowercase()
                     .removePrefix(languageTag.lowercase()).removePrefix("-")
                     .removePrefix("x-").removeSuffix("-local").removeSuffix("-network")
-                    .ifBlank { "default" }
-                return "System voice $short ($languageTag)"
+                    .ifBlank { null }
+                return titles.system(short, languageTag)
             }
         }
 

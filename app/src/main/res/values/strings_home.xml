@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">Home</string>
+    <!-- The + button and the panel that adds a feed (a row of suggestions) to Home. -->
+    <string name="home_add_feed">Add feed</string>
+    <!-- Heading over the tabs and plays to pick up where you left off. -->
+    <string name="home_continue">Continue</string>
+    <!-- A feed's row while its cards are being picked. -->
+    <string name="home_drawing">Drawing…</string>
+    <!-- A feed's long-press menu. -->
+    <string name="home_move_up">Move up</string>
+    <string name="home_move_down">Move down</string>
+
+    <!-- Add feed: the heading over where the feed draws from. -->
+    <string name="home_add_from">From</string>
+    <!-- Add feed: the heading over what kind of feed. -->
+    <string name="home_add_show">Show</string>
+    <!-- Add feed: the query of a Search feed. -->
+    <string name="home_add_search_for">Search for</string>
+    <string name="home_add">Add</string>
+
+    <!-- Kinds of feed. -->
+    <string name="home_kind_random">Random</string>
+    <!-- A feed of what happened on today's date in past years. -->
+    <string name="home_kind_on_this_day">On this day</string>
+    <string name="home_kind_search">Search</string>
+
+    <!-- Where a feed draws from. -->
+    <string name="home_scope_whole_library">Whole library</string>
+    <!-- The whole library, inside a feed's title: "cats · the library". -->
+    <string name="home_scope_the_library">the library</string>
+    <string name="home_scope_music">Music</string>
+    <string name="home_scope_audiobooks">Audiobooks</string>
+
+    <!-- A feed's title. %1$s is a pack or collection, such as Wikipedia. -->
+    <string name="home_feed_random_from">Random from %1$s</string>
+    <string name="home_feed_random_from_library">Random from the library</string>
+    <!-- An On this day feed's title. %1$s is the month's name, %2$d the day of the month: October 22. -->
+    <string name="home_feed_day">%1$s %2$d</string>
+    <!-- A Search feed's title. %1$s is the query, %2$s where it searches. -->
+    <string name="home_feed_search">%1$s · %2$s</string>
+    <!-- A feed's title while it's being drawn. %1$s is its kind (Random), %2$s where it draws from. -->
+    <string name="home_feed_pending">%1$s · %2$s</string>
+
+    <!-- The Home downloads card. -->
+    <string name="home_downloads_paused">Downloads paused</string>
+    <!-- %1$d is how many files wait. -->
+    <string name="home_downloads_paused_waiting">Paused · %1$d waiting</string>
+    <!-- Files done of files, then bytes done of bytes: 3 of 14 · 1.2 GB of 9.8 GB. -->
+    <string name="home_downloads_progress">%1$d of %2$d · %3$s of %4$s</string>
+    <!-- As above, then the time left; %5$s is about 25 min. -->
+    <string name="home_downloads_progress_left">%1$d of %2$d · %3$s of %4$s · %5$s left</string>
+    <string name="home_downloads_resume">Resume downloads</string>
+    <string name="home_downloads_pause">Pause downloads</string>
+    <!-- Downloads that stopped with an error. -->
+    <plurals name="home_downloads_stopped">
+        <item quantity="one">%1$d stopped</item>
+        <item quantity="other">%1$d stopped</item>
+    </plurals>
+
+    <!-- The readiness strip's status line. %1$s is how much Granger holds, such as 11.5 GB. -->
+    <string name="home_strip_status">&gt; %1$s here, ready offline.</string>
+</resources>

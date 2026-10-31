@@ -1,5 +1,7 @@
 package app.granger.listen
 
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,7 +66,6 @@ class ListenActions(
 /** The audio sources an empty Listen links to: Get more's own rows (Plan U2 Decision 4). Podcasts join them once they exist. */
 internal val AUDIO_SOURCES = listOf(GetMoreLink.LIBRIVOX, GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS, GetMoreLink.ARCHIVE_ORG_MUSIC)
 
-const val FIND_ON_PHONE = "Find music on this phone"
 const val NOW_PLAYING_TAG = "listenNowPlaying"
 
 @Composable
@@ -76,7 +77,7 @@ fun ListenScreen(viewModel: ListenViewModel, actions: ListenActions) {
 /**
  * Listen's home (Plan U2 Decision 4): your player and your collection. The Now playing card on top, then the Music
  * and Audiobooks shelves with the Library's rows; with no audio yet, "Nothing to listen to yet", the audio sources
- * and [FIND_ON_PHONE]. Null [ui] is still loading.
+ * and Find music on this phone. Null [ui] is still loading.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,13 +88,13 @@ fun ListenContent(ui: ListenUi?, actions: ListenActions) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Listen", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(stringResource(R.string.listen_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
-                    IconButton(onClick = actions.onGetMore) { Icon(Icons.Filled.Add, contentDescription = "Get more") }
+                    IconButton(onClick = actions.onGetMore) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.listen_get_more)) }
                     Box {
-                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
-                            DropdownMenuItem(text = { Text(FIND_ON_PHONE) }, onClick = { menuOpen = false; actions.onFindOnPhone() })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.listen_find_on_phone)) }, onClick = { menuOpen = false; actions.onFindOnPhone() })
                         }
                     }
                 },
@@ -106,7 +107,7 @@ fun ListenContent(ui: ListenUi?, actions: ListenActions) {
             if (loaded.empty) {
                 item(key = "empty") {
                     Text(
-                        "Nothing to listen to yet",
+                        stringResource(R.string.listen_nothing_yet),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                     )
@@ -115,14 +116,14 @@ fun ListenContent(ui: ListenUi?, actions: ListenActions) {
                     item(key = "source:$source") {
                         ListItem(
                             modifier = Modifier.clickable { actions.onOpenSource(source) },
-                            headlineContent = { Text(source.title) },
-                            supportingContent = { Text(source.subtitle) },
+                            headlineContent = { Text(stringResource(source.title)) },
+                            supportingContent = { Text(stringResource(source.subtitle)) },
                         )
                     }
                 }
                 item(key = "find-on-phone") {
                     OutlinedButton(onClick = actions.onFindOnPhone, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                        Text(FIND_ON_PHONE)
+                        Text(stringResource(R.string.listen_find_on_phone))
                     }
                 }
             }
@@ -149,16 +150,17 @@ private fun NowPlayingCardRow(card: NowPlayingCard, actions: ListenActions) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag(NOW_PLAYING_TAG),
     ) {
         Row(
-            Modifier.clickable(onClickLabel = "Open player", onClick = actions.onOpenPlayer).padding(12.dp),
+            Modifier.clickable(onClickLabel = stringResource(R.string.listen_open_player), onClick = actions.onOpenPlayer).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PlayerCover(card.coverPath, card.title, book = card.kind == CardKind.AUDIOBOOK, size = 56.dp, voice = card.kind == CardKind.VOICE)
+            val title = card.title.resolve()
+            PlayerCover(card.coverPath, title, book = card.kind == CardKind.AUDIOBOOK, size = 56.dp, voice = card.kind == CardKind.VOICE)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(card.label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                Text(card.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(card.label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Text(title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    card.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    card.subtitle.resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }

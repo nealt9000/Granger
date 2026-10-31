@@ -2,6 +2,8 @@ package app.granger.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogSource
@@ -33,9 +35,9 @@ enum class Step { WELCOME, PHONE, START, REGION, USES, REVIEW }
 
 /** This phone (step 2). */
 data class PhoneUi(
-    val tierLine: String,
+    val tierLine: UiText,
     /** Whether this phone can run Ask, and where to get it; null when there's nothing to say. */
-    val researchLine: String?,
+    val researchLine: UiText?,
     val volumes: List<Volume>,
     val efficientBytes: Long,
     val comprehensiveBytes: Long,
@@ -48,7 +50,7 @@ data class OnboardingUi(
     val refreshing: Boolean = false,
     /** The fetch onboarding started failed; Pick a start offers Try again, and Next still works. */
     val catalogFailed: Boolean = false,
-    val phone: PhoneUi = PhoneUi("", null, emptyList(), 0, 0),
+    val phone: PhoneUi = PhoneUi(UiText.Raw(""), null, emptyList(), 0, 0),
     val starts: List<StartChoice> = emptyList(),
     /** [OnboardingModel.EFFICIENT], [OnboardingModel.COMPREHENSIVE], or null for "I'll choose later". */
     val startId: String? = OnboardingModel.EFFICIENT,
@@ -73,7 +75,7 @@ data class OnboardingUi(
     val review: Review = Review(emptyList(), 0),
     val wifiOnly: Boolean = true,
     val volumePath: String? = null,
-    val notice: String? = null,
+    val notice: UiText? = null,
     /** Start was tapped and the downloads are being written; the button waits. */
     val starting: Boolean = false,
 ) {
@@ -114,7 +116,7 @@ class OnboardingViewModel(
     private val saveSpace = MutableStateFlow(false)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
-    private val notice = MutableStateFlow<String?>(null)
+    private val notice = MutableStateFlow<UiText?>(null)
     private val starting = MutableStateFlow(false)
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
 
@@ -124,7 +126,7 @@ class OnboardingViewModel(
 
     private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
     private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean)
-    private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: String?, val starting: Boolean)
+    private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: UiText?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
         Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
@@ -219,15 +221,15 @@ class OnboardingViewModel(
     }
 
     /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
-    private fun tierLine(): String = when (tier) {
-        DeviceTier.LIBRARY_ONLY -> "A library phone, with ${formatBytes(totalRamBytes)} of memory."
-        DeviceTier.ASK -> "A library phone that can run Ask, with ${formatBytes(totalRamBytes)} of memory."
+    private fun tierLine(): UiText = when (tier) {
+        DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_tier_library, formatBytes(totalRamBytes))
+        DeviceTier.ASK -> UiText.Res(R.string.onboarding_tier_ask, formatBytes(totalRamBytes))
     }
 
     /** [offered]: Pick a start offers Ask's models. */
-    private fun researchLine(offered: Boolean): String = when (tier) {
-        DeviceTier.LIBRARY_ONLY -> "Ask, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library."
-        DeviceTier.ASK -> if (offered) "Ask, the librarian, runs on this phone. You can get it on the next screen." else "Ask, the librarian, runs on this phone."
+    private fun researchLine(offered: Boolean): UiText = when (tier) {
+        DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_research_needs_memory)
+        DeviceTier.ASK -> UiText.Res(if (offered) R.string.onboarding_research_offered else R.string.onboarding_research_runs)
     }
 
     fun refreshVolumes() {
@@ -301,8 +303,8 @@ class OnboardingViewModel(
             val order = OnboardingModel.downloadOrder(review.items, domains, ui.value.region?.takeUnless { it.installed }?.pack?.id)
             val problem = when (val result = enqueue(group, order, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
-                is EnqueueResult.NoSpace -> "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)} or untick something."
-                is EnqueueResult.OverCap -> "That would bring your downloads to ${formatBytes(result.wouldUseBytes)}, over the ${formatBytes(result.capBytes)} limit."
+                is EnqueueResult.NoSpace -> UiText.Res(R.string.onboarding_no_space, volume.label, formatBytes(result.neededBytes))
+                is EnqueueResult.OverCap -> UiText.Res(R.string.onboarding_over_cap, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
             }
             if (problem != null) {
                 starting.value = false

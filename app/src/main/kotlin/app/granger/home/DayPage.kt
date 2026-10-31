@@ -13,7 +13,10 @@ data class DayPage(val events: List<String>, val births: List<String>, val death
         private const val MAX_LINE = 220
         private val SECTIONS = setOf("Events", "Births", "Deaths")
 
-        /** "October 22", as Wikipedia titles the day article. */
+        /**
+         * "October 22", as Wikipedia titles the day article. Locale.ENGLISH on purpose: this matches the English
+         * Wikipedia's page titles (data, not UI); L3 makes it per language. The feed's shown title is FeedDrawer.title.
+         */
         fun title(day: LocalDate): String = "${day.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${day.dayOfMonth}"
 
         /** The paths to try, in order, for the day article in a Wikipedia pack. */

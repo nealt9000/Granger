@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.R
@@ -88,7 +90,7 @@ fun MiniPlayer(
     ) {
         Column(Modifier.fillMaxWidth().height(MiniPlayerHeight)) {
             Row(
-                Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = if (voice) "Open the voice" else "Open player", onClick = onOpen).padding(start = 8.dp),
+                Modifier.fillMaxWidth().weight(1f).clickable(onClickLabel = stringResource(if (voice) R.string.player_open_voice else R.string.player_open_player), onClick = onOpen).padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 PlayerCover(info.coverPath, info.title, book, size = 44.dp, modifier = Modifier.testTag(MiniPlayerTags.COVER), voice = voice)
@@ -116,11 +118,11 @@ fun MiniPlayer(
                 }
                 IconButton(onClick = onSecondary, modifier = Modifier.testTag(MiniPlayerTags.SECONDARY)) {
                     if (voice) {
-                        Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back a sentence")
+                        Icon(painterResource(R.drawable.ic_replay), contentDescription = stringResource(R.string.player_back_sentence))
                     } else if (book) {
-                        Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back $skipBackS seconds")
+                        Icon(painterResource(R.drawable.ic_replay), contentDescription = pluralStringResource(R.plurals.player_back_seconds, skipBackS, skipBackS))
                     } else {
-                        Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next track")
+                        Icon(painterResource(R.drawable.ic_skip_next), contentDescription = stringResource(R.string.player_next_track))
                     }
                 }
             }

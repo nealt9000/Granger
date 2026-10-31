@@ -212,6 +212,7 @@ class ResearchViewModel(
         pendingQuote.value = null
         if (quote != null) savedState[QUOTE_USED] = true
         val newTitle = if (quote != null && question == EMPTY_QUOTE_QUESTION) {
+            // Stored as the chat's title, so it stays a literal until a chat can carry its quote instead (L2).
             "About: " + quote.text.trim().take(QUOTE_TITLE).trimEnd()
         } else {
             cutAtWord(question, TITLE)
@@ -567,13 +568,13 @@ internal const val ALBUM_SOURCE = "album:"
 
 /**
  * A source card's second line: the author (or the pack, for an article without one) and the heading; for an album or
- * audiobook, the artist or author (else "Your music" / "Your audiobooks"), "Album" or "Audiobook", and the cited song or
- * chapter.
+ * audiobook, the artist or author (else "Your music" / "Your audiobooks"), [album] or [audiobook] ("Album", "Audiobook"),
+ * and the cited song or chapter.
  */
-internal fun sourceByline(passage: Passage): String {
+internal fun sourceByline(passage: Passage, album: String, audiobook: String): String {
     val who = passage.meta.author.ifBlank { passage.packTitle }
     val what = if (passage.kind != SourceKind.MEDIA) passage.heading
-    else if (passage.sourceId.startsWith(ALBUM_SOURCE)) "Album" else "Audiobook"
+    else if (passage.sourceId.startsWith(ALBUM_SOURCE)) album else audiobook
     // A card focused on a song or chapter names it too.
     val part = if (passage.kind == SourceKind.MEDIA) passage.heading else ""
     return listOf(who, what, part).filter { it.isNotBlank() }.joinToString(" · ")

@@ -78,7 +78,7 @@ class ArchiveSetSheetTest {
         val rows = listOf(PartRow(1, "1889-02 001-3", 10, ItemStatus.NotInstalled), PartRow(2, "Special Issue", 10, ItemStatus.NotInstalled))
         assertThat(filterParts(rows, " special ").map { it.number }).containsExactly(2)
         assertThat(filterParts(rows, "").size).isEqualTo(2)
-        assertThat(partStatusText(PartRow(1, "x", 1_000, ItemStatus.Failed("timed out")))).isEqualTo("${formatBytes(1_000)} · stopped: timed out")
+        assertThat(partStatusText(PartRow(1, "x", 1_000, ItemStatus.Failed("timed out"))).resolve(androidx.test.core.app.ApplicationProvider.getApplicationContext())).isEqualTo("${formatBytes(1_000)} · stopped: timed out")
     }
 
     private fun androidx.compose.ui.test.junit4.ComposeContentTestRule.onAllNodesWithTextGet(text: String) =

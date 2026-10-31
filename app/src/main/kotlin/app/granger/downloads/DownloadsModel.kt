@@ -1,5 +1,9 @@
 package app.granger.downloads
 
+import android.content.Context
+import android.content.res.Resources
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
@@ -34,14 +38,14 @@ sealed interface OpenTarget {
  */
 data class DownloadRow(
     val key: String,
-    val title: String,
+    val title: UiText,
     val state: RowState,
     val bytesDone: Long,
     val bytes: Long,
     /** The group the file belongs to, for Cancel all; null outside a group. */
     val groupId: String? = null,
     /** "Setting up", or the album's title. */
-    val groupLabel: String? = null,
+    val groupLabel: UiText? = null,
     /** What Download next, Cancel, Retry and Remove act on: the item and its vectors. */
     val itemIds: List<String> = emptyList(),
     val withIndex: Boolean = false,
@@ -102,9 +106,6 @@ data class DownloadsUi(
 data class VolumeSpace(val root: String, val label: String, val freeBytes: Long)
 
 object DownloadsModel {
-    /** What a group from onboarding is called (its ids are `onboarding:<epoch>`). */
-    const val SETUP_TITLE = "Setting up"
-
     /** Up next shows this many rows before "Show all n". */
     const val UP_NEXT_SHOWN = 20
 
@@ -142,7 +143,7 @@ object DownloadsModel {
                 val all = listOf(r) + vecs
                 DownloadRow(
                     key = (if (r.kind == ItemKind.VECTORS) "index:" else "item:") + r.itemId,
-                    title = titleOf(r),
+                    title = UiText.Raw(titleOf(r)),
                     state = state,
                     bytesDone = all.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
                     bytes = all.sumOf { it.sizeBytes },
@@ -219,8 +220,9 @@ object DownloadsModel {
     fun badge(records: List<DownloadRecord>): Int =
         records.filter { it.isActive && it.kind != ItemKind.VECTORS }.distinctBy { it.groupId ?: it.itemId }.size
 
-    fun groupLabel(groupId: String, r: DownloadRecord): String =
-        if (groupId.startsWith(HomeViewModel.SETUP_GROUP)) SETUP_TITLE else r.title
+    /** "Setting up" for a group from onboarding (its ids are `onboarding:<epoch>`), else the group's title. */
+    fun groupLabel(groupId: String, r: DownloadRecord): UiText =
+        if (groupId.startsWith(HomeViewModel.SETUP_GROUP)) UiText.Res(R.string.downloads_setting_up) else UiText.Raw(r.title)
 
     /** An album's files all carry the album's title: they are told apart by name. */
     private fun fileName(r: DownloadRecord) = if (r.kind == ItemKind.AUDIO) File(r.filePath).name else r.title
@@ -232,59 +234,64 @@ object DownloadsModel {
     }
 }
 
-/** Said of an item a newer catalog dropped (Plan DL Decision 10). */
-const val NOT_IN_CATALOG = "No longer in the catalog"
-
 /** A waiting row's reason, as it reads (Plan DL Decision 4). [now] is for "Trying again in 2 min". */
-fun reasonText(reason: WaitReason, now: Long): String = when (reason) {
-    WaitReason.Paused -> "Paused"
-    WaitReason.WaitingForWifi -> "Waiting for Wi-Fi"
-    is WaitReason.Retrying -> "Trying again ${QueueText.inTime(reason.at - now)} (attempt ${reason.attempt} of $MAX_ATTEMPTS)"
-    is WaitReason.NeedsSpace -> "Needs ${formatBytes(reason.bytes)} more space"
-    is WaitReason.InLine -> QueueText.place(reason.place)
+fun reasonText(res: Resources, reason: WaitReason, now: Long): UiText = when (reason) {
+    WaitReason.Paused -> UiText.Res(R.string.downloads_reason_paused)
+    WaitReason.WaitingForWifi -> UiText.Res(R.string.downloads_reason_wifi)
+    is WaitReason.Retrying -> UiText.Res(R.string.downloads_reason_retrying, QueueText.inTime(res, reason.at - now), reason.attempt, MAX_ATTEMPTS)
+    is WaitReason.NeedsSpace -> UiText.Res(R.string.downloads_reason_space, formatBytes(reason.bytes))
+    is WaitReason.InLine -> UiText.Raw(QueueText.place(res, reason.place))
 }
 
-/** "312 of 980 MB" once a file has begun, its size before. */
-private fun sizeText(row: DownloadRow) =
-    if (row.bytesDone > 0 && row.bytesDone < row.bytes) "${formatBytes(row.bytesDone)} of ${formatBytes(row.bytes)}" else formatBytes(row.bytes)
+private fun bytesOf(row: DownloadRow) = UiText.Res(R.string.downloads_bytes_of, formatBytes(row.bytesDone), formatBytes(row.bytes))
 
-/** The line under a row's title: how far it is, why it waits, or why it stopped. [speed] is the running file's. */
-fun downloadsText(row: DownloadRow, now: Long = System.currentTimeMillis(), speed: Long? = null): String {
-    val parts = mutableListOf<String>()
-    if (row.indexOnly) parts += "Index for Ask"
+/** "312 of 980 MB" once a file has begun, its size before. */
+private fun sizeText(row: DownloadRow): UiText =
+    if (row.bytesDone > 0 && row.bytesDone < row.bytes) bytesOf(row) else UiText.Raw(formatBytes(row.bytes))
+
+/**
+ * The line under a row's title: how far it is, why it waits, or why it stopped, its parts joined by " · ". [speed] is
+ * the running file's.
+ */
+fun downloadsText(context: Context, row: DownloadRow, now: Long = System.currentTimeMillis(), speed: Long? = null): String {
+    val parts = mutableListOf<UiText>()
+    if (row.indexOnly) parts += UiText.Res(R.string.downloads_index_for_ask)
+    val notInCatalog = UiText.Res(R.string.downloads_not_in_catalog)
     when (row.state) {
         RowState.RUNNING -> {
-            parts += "${formatBytes(row.bytesDone)} of ${formatBytes(row.bytes)}"
-            speed?.let { parts += "${formatBytes(it)}/s" }
+            parts += bytesOf(row)
+            speed?.let { parts += UiText.Res(R.string.downloads_speed, formatBytes(it)) }
         }
         RowState.QUEUED -> {
             parts += sizeText(row)
-            parts += if (row.notInCatalog) NOT_IN_CATALOG else row.reason?.let { reasonText(it, now) } ?: "Queued"
+            parts += if (row.notInCatalog) notInCatalog else row.reason?.let { reasonText(context.resources, it, now) } ?: UiText.Res(R.string.downloads_queued)
         }
         RowState.FAILED -> parts += when {
-            row.notInCatalog && !row.gone -> NOT_IN_CATALOG
-            else -> row.error ?: "Failed"
+            row.notInCatalog && !row.gone -> notInCatalog
+            else -> row.error?.let { UiText.Raw(it) } ?: UiText.Res(R.string.downloads_failed)
         }
         RowState.DONE -> {
-            if (row.isGroup) parts += "${row.groupFiles} ${if (row.groupFiles == 1) "file" else "files"}"
-            parts += formatBytes(row.bytes)
+            if (row.isGroup) parts += UiText.Plural(R.plurals.downloads_files, row.groupFiles, row.groupFiles)
+            parts += UiText.Raw(formatBytes(row.bytes))
         }
     }
-    val line = parts.joinToString(" · ")
-    return if (row.withIndex) "$line + index for Ask" else line
+    val line = parts.joinToString(" · ") { it.resolve(context) }
+    return if (row.withIndex) context.getString(R.string.downloads_with_index, line) else line
 }
 
 /** The header's first line: "3 of 14 · 1.2 of 9.8 GB · about 25 min left", or "Paused · 11 waiting". */
-fun headerText(h: DownloadsHeader): String {
-    if (h.paused) return "Paused · ${h.waiting} waiting"
-    val parts = mutableListOf("${h.filesDone} of ${h.files}", "${formatBytes(h.bytesDone)} of ${formatBytes(h.bytes)}")
-    h.timeLeftMillis?.let { parts += "${QueueText.timeLeft(it)} left" }
-    return parts.joinToString(" · ")
+fun headerText(res: Resources, h: DownloadsHeader): UiText {
+    if (h.paused) return UiText.Res(R.string.downloads_header_paused, h.waiting)
+    val done = formatBytes(h.bytesDone)
+    val total = formatBytes(h.bytes)
+    return h.timeLeftMillis?.let { UiText.Res(R.string.downloads_header_progress_left, h.filesDone, h.files, done, total, QueueText.timeLeft(res, it)) }
+        ?: UiText.Res(R.string.downloads_header_progress, h.filesDone, h.files, done, total)
 }
 
 /** The storage line: "9.8 GB to go · 41 GB free on Phone". */
-fun storageText(h: DownloadsHeader): String {
-    val togo = "${formatBytes(h.bytesToGo)} to go"
-    val free = h.freeBytes ?: return togo
-    return "$togo · ${formatBytes(free)} free on ${h.volumeLabel ?: "this phone"}"
+fun storageText(h: DownloadsHeader): UiText {
+    val togo = formatBytes(h.bytesToGo)
+    val free = h.freeBytes ?: return UiText.Res(R.string.downloads_to_go, togo)
+    return h.volumeLabel?.let { UiText.Res(R.string.downloads_to_go_free, togo, formatBytes(free), it) }
+        ?: UiText.Res(R.string.downloads_to_go_free_phone, togo, formatBytes(free))
 }

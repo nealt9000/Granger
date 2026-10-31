@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ask (Research): questions answered from the user's library (Plan L1). -->
+
+    <!-- The screen's title, with its Preview tag beside it. -->
+    <string name="research_title">Ask</string>
+    <string name="research_preview">Preview</string>
+    <string name="research_chats">Chats</string>
+    <string name="research_new_chat">New chat</string>
+    <string name="research_delete_chat">Delete chat</string>
+    <string name="research_send">Send</string>
+    <string name="research_placeholder">Ask about anything in your library</string>
+    <string name="research_intro">Ask a question; the librarian answers from your library and shows where each part came from. It\'s a preview: it can be wrong, so check the sources.</string>
+
+    <!-- Why Ask can't run here. -->
+    <string name="research_models_missing">Ask needs the librarian on this phone. Get it in Settings → Models.</string>
+    <string name="research_get_models">Get models</string>
+    <string name="research_unsupported">Ask needs a phone with 6 GB of memory.</string>
+
+    <!-- The librarian (the answering model) download. %1$s is how much is downloaded, %2$s the total, such as 1.1 GB. -->
+    <string name="research_librarian_downloading">Downloading the librarian · %1$s of %2$s</string>
+    <string name="research_librarian_stopped">The librarian\'s download stopped.</string>
+    <string name="research_try_again">Try again</string>
+    <!-- %1$s is the model's name, such as Gemma 4 E2B; %2$s its size, such as 2.2 GB. -->
+    <string name="research_librarian_needed">Ask needs the librarian on this phone: %1$s, %2$s.</string>
+    <!-- %1$s is the download's size, such as 2.2 GB. -->
+    <string name="research_get_librarian">Get the librarian · %1$s</string>
+
+    <!-- What the answer is doing while it's written. -->
+    <string name="research_stage_loading_model">Loading the model…</string>
+    <string name="research_stage_searching">Searching your library…</string>
+    <string name="research_stage_ranking">Ranking passages…</string>
+    <string name="research_stage_writing">Writing…</string>
+
+    <!-- Above an answer about health. Keep in step with AnswerText.MEDICAL, which the voice reads. -->
+    <string name="research_medical">Not medical advice. If you can reach emergency services or a professional, do so.</string>
+
+    <!-- Why a turn has no answer, and what to do next. -->
+    <string name="research_declined">Not in your library.</string>
+    <string name="research_unverified">Couldn\'t answer from these passages.</string>
+    <string name="research_best_guess_label">I couldn\'t find this in your library. Here\'s my best guess, so take it with a grain of salt.</string>
+    <string name="research_model_failed">The model needs repair. Check it in Readiness.</string>
+    <string name="research_search_failed">Couldn\'t search your library. Try again.</string>
+    <string name="research_interrupted">Stopped before an answer.</string>
+    <string name="research_source_gone">That source is no longer in your library.</string>
+    <!-- Opens the Readiness screen. -->
+    <string name="research_readiness">Readiness</string>
+    <!-- A button: run a plain library search for the question. -->
+    <string name="research_search_instead">Search instead</string>
+    <!-- A button: show the model's answer anyway, marked as a guess. -->
+    <string name="research_best_guess">Best guess</string>
+
+    <!-- A quoted passage. %1$s is the passage's text. -->
+    <string name="research_quoted">“%1$s”</string>
+    <!-- TalkBack for a source card's Play button. %1$s is the song, chapter or album. -->
+    <string name="research_play_source">Play %1$s</string>
+    <!-- What kind of source a card is, in its byline. -->
+    <string name="research_source_album">Album</string>
+    <string name="research_source_audiobook">Audiobook</string>
+
+    <!-- The recent chats sheet. -->
+    <string name="research_recent_chats">Recent chats</string>
+    <string name="research_delete_all_chats">Delete all chats</string>
+    <string name="research_delete_all_chats_title">Delete all chats?</string>
+    <string name="research_delete_all_chats_body">Every chat goes, this one too, with its answers and sources.</string>
+    <string name="research_delete_all">Delete all</string>
+    <!-- Getting Ask's models. %1$s is the storage, such as Internal storage; %2$s the space needed. -->
+    <string name="research_librarian_no_space">Not enough space on %1$s: free up %2$s.</string>
+    <!-- %1$s is the downloads limit. -->
+    <string name="research_librarian_over_cap">That would bring your downloads over the %1$s limit.</string>
+</resources>

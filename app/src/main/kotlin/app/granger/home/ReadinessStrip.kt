@@ -1,5 +1,8 @@
 package app.granger.home
 
+import androidx.compose.ui.res.stringResource
+import app.granger.R
+import app.granger.UiText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,31 +36,32 @@ fun dotAlpha(coverage: Coverage): Float = when (coverage) {
 }
 
 /** The strip's one sentence: the first signal, else why there is none. */
-fun stripText(report: ReadinessReport): String = report.signals.firstOrNull()?.text
-    ?: if (report.needsCatalogRefresh) "Refresh the catalog to see your coverage." else "Ready."
+fun stripText(report: ReadinessReport): UiText = report.signals.firstOrNull()?.text
+    ?: UiText.Res(if (report.needsCatalogRefresh) R.string.readiness_refresh_catalog else R.string.readiness_ready)
 
 /**
  * The command-line status voice (brand brief §8; Plan T1, Task 5): what Granger holds on this phone, which all works
  * with no signal. Null with nothing held. The phone's own media is referenced, not held, so it doesn't count.
  */
-fun stripStatus(report: ReadinessReport): String? {
+fun stripStatus(report: ReadinessReport): UiText? {
     val held = report.storage.filterNot { it.referencedOnly }.sumOf { it.bytes }
-    return if (held > 0) "> ${formatBytes(held)} here, ready offline." else null
+    return if (held > 0) UiText.Res(R.string.home_strip_status, formatBytes(held)) else null
 }
 
 /** The status line, nine dots coloured by status and one suggestion sentence; the whole strip opens Readiness. */
 @Composable
 fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val readiness = stringResource(R.string.readiness_title)
     Column(
         modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .semantics { contentDescription = "Readiness" }
+            .semantics { contentDescription = readiness }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         stripStatus(report)?.let { status ->
-            Text(status, style = MaterialTheme.typography.labelMedium.status, color = GrangerTheme.extras.status)
+            Text(status.resolve(), style = MaterialTheme.typography.labelMedium.status, color = GrangerTheme.extras.status)
         }
         if (report.domains.isNotEmpty()) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -72,6 +76,6 @@ fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modif
                 }
             }
         }
-        Text(stripText(report), style = MaterialTheme.typography.bodyMedium)
+        Text(stripText(report).resolve(), style = MaterialTheme.typography.bodyMedium)
     }
 }

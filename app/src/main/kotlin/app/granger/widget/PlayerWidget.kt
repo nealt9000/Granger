@@ -153,23 +153,23 @@ fun PlayerWidgetContent(model: WidgetModel, cover: ImageProvider?) {
                 } else {
                     Spacer(GlanceModifier.width(8.dp))
                     Column(GlanceModifier.defaultWeight().clickable(open)) {
-                        Text(model.title, maxLines = 1,
+                        Text(model.title.resolve(context), maxLines = 1,
                             style = TextStyle(color = OnSurface, fontSize = 14.sp, fontWeight = FontWeight.Medium),
                             modifier = GlanceModifier.semantics { testTag = PlayerWidgetTags.TITLE })
-                        Text(model.subtitle, maxLines = 1, style = TextStyle(color = OnSurfaceVariant, fontSize = 12.sp),
+                        Text(model.subtitle.resolve(context), maxLines = 1, style = TextStyle(color = OnSurfaceVariant, fontSize = 12.sp),
                             modifier = GlanceModifier.semantics { testTag = PlayerWidgetTags.SUBTITLE })
                     }
                 }
                 Button(
                     if (model.playing) R.drawable.ic_pause else R.drawable.ic_play,
-                    if (model.playing) "Pause" else "Play",
+                    context.getString(if (model.playing) R.string.widget_pause else R.string.widget_play),
                     actionRunCallback<PlayPauseAction>(), PlayerWidgetTags.PLAY_PAUSE,
                 )
                 if (!small && model.secondary != Secondary.NONE) {
                     val back = model.secondary == Secondary.BACK
                     Button(
                         if (back) R.drawable.ic_replay else R.drawable.ic_skip_next,
-                        if (back) "Back" else "Next track",
+                        context.getString(if (back) R.string.widget_back else R.string.widget_next_track),
                         actionRunCallback<SecondaryAction>(), PlayerWidgetTags.SECONDARY,
                     )
                 }
@@ -189,10 +189,11 @@ fun PlayerWidgetContent(model: WidgetModel, cover: ImageProvider?) {
 
 @Composable
 private fun Cover(cover: ImageProvider?, book: Boolean, sizeDp: Int, open: Action) {
+    val label = LocalContext.current.getString(R.string.widget_open_player)
     val modifier = GlanceModifier.size(sizeDp.dp).cornerRadius(8.dp).clickable(open)
-        .semantics { testTag = PlayerWidgetTags.COVER; contentDescription = "Open player" }
+        .semantics { testTag = PlayerWidgetTags.COVER; contentDescription = label }
     if (cover != null) {
-        Image(cover, contentDescription = "Open player", contentScale = ContentScale.Crop, modifier = modifier)
+        Image(cover, contentDescription = label, contentScale = ContentScale.Crop, modifier = modifier)
     } else {
         Box(modifier.background(CoverGround), contentAlignment = Alignment.Center) {
             Image(

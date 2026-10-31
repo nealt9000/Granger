@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_chapter_number">Capítulo %1$d</string>
+    <string name="player_chapter_of">%1$s · %2$d de %3$d</string>
+    <string name="player_book_progress">Libro: %1$s de %2$s · %3$d%%</string>
+    <string name="player_bookmark_title">%1$s · %2$s</string>
+
+    <string name="player_reading">Leyendo</string>
+    <string name="player_finished_reading">Lectura terminada</string>
+    <string name="player_reading_section">Leyendo · %1$s</string>
+    <string name="player_finished_reading_section">Lectura terminada · %1$s</string>
+
+    <string name="player_top_read_aloud">Lectura en voz alta</string>
+    <string name="player_top_read_aloud_finished">Lectura en voz alta · terminada</string>
+    <string name="player_top_reading_aloud">Leyendo en voz alta</string>
+    <string name="player_top_now_playing">Reproduciendo · %1$d de %2$d</string>
+    <string name="player_top_under_voice">De fondo · %1$d de %2$d</string>
+    <string name="player_top_paused">En pausa · %1$d de %2$d</string>
+    <string name="player_top_audiobook_paused">Audiolibro · en pausa</string>
+    <string name="player_music">Música</string>
+    <string name="player_audiobook">Audiolibro</string>
+    <string name="player_audiobooks">Audiolibros</string>
+    <string name="player_tab_reader">Lector</string>
+    <string name="player_nothing_played">Aún no has reproducido nada</string>
+    <string name="player_music_shelf">Estante de música</string>
+    <string name="player_audiobooks_shelf">Estante de audiolibros</string>
+    <string name="player_close">Cerrar el reproductor</string>
+
+    <string name="player_seek">Buscar posición</string>
+    <string name="player_seek_chapter">Buscar posición en el capítulo</string>
+    <string name="player_seek_track">Buscar posición en la pista</string>
+    <string name="player_previous_chapter">Capítulo anterior</string>
+    <string name="player_next_chapter">Capítulo siguiente</string>
+    <string name="player_previous_track">Pista anterior</string>
+    <string name="player_next_track">Pista siguiente</string>
+    <plurals name="player_back_seconds">
+        <item quantity="one">Retroceder %d segundo</item>
+        <item quantity="many">Retroceder %d segundos</item>
+        <item quantity="other">Retroceder %d segundos</item>
+    </plurals>
+    <plurals name="player_forward_seconds">
+        <item quantity="one">Avanzar %d segundo</item>
+        <item quantity="many">Avanzar %d segundos</item>
+        <item quantity="other">Avanzar %d segundos</item>
+    </plurals>
+    <string name="player_back_sentence">Oración anterior</string>
+    <string name="player_next_sentence">Oración siguiente</string>
+    <string name="player_previous_paragraph">Párrafo anterior</string>
+    <string name="player_next_paragraph">Párrafo siguiente</string>
+    <string name="player_shuffle_on">Aleatorio activado</string>
+    <string name="player_shuffle_off">Aleatorio desactivado</string>
+    <string name="player_repeat_all">Repetir todo</string>
+    <string name="player_repeat_one">Repetir una</string>
+    <string name="player_repeat_off">Repetición desactivada</string>
+    <string name="player_playing">Reproduciendo</string>
+    <string name="player_paused">En pausa</string>
+    <string name="player_open_voice">Abrir la voz</string>
+    <string name="player_open_player">Abrir el reproductor</string>
+
+    <string name="player_chapters">Capítulos</string>
+    <string name="player_playback_speed_value">Velocidad de reproducción %1$s</string>
+    <!-- Short label under the button: "Dormir" alone would read as an order to sleep, so this names the timer. -->
+    <string name="player_sleep">Temporizador</string>
+    <string name="player_sleep_timer">Temporizador de apagado</string>
+    <string name="player_sleep_timer_left">Temporizador de apagado, quedan %1$s</string>
+    <string name="player_bookmark">Marcador</string>
+    <string name="player_add_bookmark">Agregar marcador</string>
+    <string name="player_bookmarks">Marcadores</string>
+    <string name="player_skip_silence">Saltar silencios</string>
+    <string name="player_volume_boost">Aumentar volumen</string>
+    <string name="player_queue">Cola</string>
+
+    <string name="player_no_chapters">Aún no hay capítulos</string>
+    <string name="player_add_here">Agregar aquí</string>
+    <string name="player_no_bookmarks">Aún no hay marcadores en este libro</string>
+    <string name="player_delete_bookmark">Eliminar el marcador %1$s</string>
+    <string name="player_playback_speed">Velocidad de reproducción</string>
+    <string name="player_slower">Más lento</string>
+    <string name="player_faster">Más rápido</string>
+    <string name="player_stops_in">Se detiene en %1$s</string>
+    <string name="player_cancel_timer">Cancelar el temporizador</string>
+    <plurals name="player_minutes">
+        <item quantity="one">%d minuto</item>
+        <item quantity="many">%d minutos</item>
+        <item quantity="other">%d minutos</item>
+    </plurals>
+    <string name="player_end_of_chapter">Final del capítulo</string>
+    <string name="player_move_up">Subir</string>
+    <string name="player_move_down">Bajar</string>
+    <string name="player_remove_from_queue">Quitar %1$s de la cola</string>
+
+    <string name="player_speed">Velocidad</string>
+    <string name="player_reading_speed">Velocidad de lectura</string>
+    <string name="player_voice">Voz</string>
+    <string name="player_system_voices">Voces del sistema</string>
+    <string name="player_music_under_voice">Música de fondo</string>
+    <string name="player_pause_music">Pausar la música</string>
+    <string name="player_play_music">Reproducir la música</string>
+    <string name="player_off">Desactivado</string>
+    <string name="player_open_hint">Abre un libro o artículo y toca Escuchar</string>
+    <string name="player_resume">Reanudar %1$s</string>
+    <string name="player_resume_section">Reanudar %1$s · %2$s</string>
+    <string name="player_listen">Escuchar</string>
+</resources>

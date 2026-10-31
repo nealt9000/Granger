@@ -28,17 +28,20 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35], qualifiers = "w400dp-h1200dp")
 class GetMoreScreenTest {
     @get:Rule val compose = createComposeRule()
+    private val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+    private val GetMoreLink.label: String get() = context.getString(title)
+    private val importYourOwn get() = context.getString(app.granger.R.string.sources_import_own)
 
     @Test fun theFourSectionsListEverySourceOnce() {
-        assertThat(GET_MORE_SECTIONS.map { it.first })
+        assertThat(GET_MORE_SECTIONS.map { context.getString(it.first.heading) })
             .containsExactly("Knowledge packs", "Books", "Audiobooks & music", "Models & voices").inOrder()
         assertThat(GET_MORE_SECTIONS.flatMap { it.second }).containsExactlyElementsIn(GetMoreLink.entries)
         // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7); Kiwix libraries after it (Plan KB).
-        assertThat(GET_MORE_SECTIONS.single { it.first == "Books" }.second)
+        assertThat(GET_MORE_SECTIONS.single { it.first == GetMoreGroup.BOOKS }.second)
             .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
-        assertThat(GetMoreLink.KIWIX_BOOKS.title).isEqualTo("Kiwix libraries")
+        assertThat(GetMoreLink.KIWIX_BOOKS.label).isEqualTo("Kiwix libraries")
         // Archive.org once per kind, its kind in the name.
-        assertThat(GetMoreLink.entries.map { it.title }.filter { it.startsWith("Archive.org") })
+        assertThat(GetMoreLink.entries.map { it.label }.filter { it.startsWith("Archive.org") })
             .containsExactly("Archive.org books", "Archive.org audiobooks", "Archive.org music")
     }
 
@@ -46,7 +49,7 @@ class GetMoreScreenTest {
         val opened = mutableListOf<GetMoreLink>()
         compose.setContent { GetMoreScreen(onOpen = { opened += it }, onBack = {}) }
         compose.onNodeWithText("Knowledge packs").assertIsDisplayed()
-        for (link in GetMoreLink.entries) compose.onNodeWithText(link.title).performClick()
+        for (link in GetMoreLink.entries) compose.onNodeWithText(link.label).performClick()
         assertThat(opened).containsExactlyElementsIn(GetMoreLink.entries).inOrder()
     }
 
@@ -63,12 +66,12 @@ class GetMoreScreenTest {
         compose.setContent { GetMoreScreen(onOpen = { opened += it }, onBack = {}, only = GetMoreFor.BOOKS, onImport = { imports++ }) }
         compose.onNodeWithText("Get books").assertIsDisplayed()
         for (link in GetMoreLink.entries - getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }.toSet()) {
-            compose.onNodeWithText(link.title).assertDoesNotExist()
+            compose.onNodeWithText(link.label).assertDoesNotExist()
         }
         compose.onNodeWithText("Knowledge packs").assertDoesNotExist()
         compose.onNodeWithText("Audiobooks & music").assertDoesNotExist()
-        for (link in getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }) compose.onNodeWithText(link.title).performClick()
-        compose.onNodeWithText(IMPORT_YOUR_OWN).performClick()
+        for (link in getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }) compose.onNodeWithText(link.label).performClick()
+        compose.onNodeWithText(importYourOwn).performClick()
         assertThat(opened).containsExactlyElementsIn(getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }).inOrder()
         assertThat(imports).isEqualTo(1)
     }
@@ -76,11 +79,11 @@ class GetMoreScreenTest {
     @Test fun listensGetMoreHasNoBooksNorImport() {
         compose.setContent { GetMoreScreen(onOpen = {}, onBack = {}, only = GetMoreFor.LISTEN) }
         compose.onNodeWithText("Get audiobooks & music").assertIsDisplayed()
-        for (link in getMoreSections(GetMoreFor.LISTEN).flatMap { it.second }) compose.onNodeWithText(link.title).assertIsDisplayed()
+        for (link in getMoreSections(GetMoreFor.LISTEN).flatMap { it.second }) compose.onNodeWithText(link.label).assertIsDisplayed()
         for (link in listOf(GetMoreLink.KIWIX, GetMoreLink.KIWIX_BOOKS, GetMoreLink.GUTENBERG, GetMoreLink.MODELS)) {
-            compose.onNodeWithText(link.title).assertDoesNotExist()
+            compose.onNodeWithText(link.label).assertDoesNotExist()
         }
-        compose.onNodeWithText(IMPORT_YOUR_OWN).assertDoesNotExist()
+        compose.onNodeWithText(importYourOwn).assertDoesNotExist()
     }
 
     @Test fun eachRowsRouteIsTodaysSourceScreen() {
@@ -120,7 +123,7 @@ class GetMoreScreenTest {
         }
     }
 
-    private val installed = ItemRow("med", "Medicine", "eng", "", 1_000, ItemStatus.Installed, packId = "u-med", ask = AskReach.KEYWORDS)
+    private val installed = ItemRow("med", "Medicine", app.granger.UiText.Raw("eng"), app.granger.UiText.Raw(""), 1_000, ItemStatus.Installed, packId = "u-med", ask = AskReach.KEYWORDS)
 
     @Test fun anInstalledPackOpensAndRemoveIsInItsOverflow() {
         val calls = mutableListOf<String>()

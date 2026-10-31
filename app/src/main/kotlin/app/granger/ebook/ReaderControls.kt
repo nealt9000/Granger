@@ -1,5 +1,7 @@
 package app.granger.ebook
 
+import app.granger.R
+import app.granger.UiText
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -43,7 +45,7 @@ internal fun bookBarActions(
     onListen = onListen?.takeIf { !isPdf && hasText && voice == VoiceButton.IDLE },
     onContents = onContents,
     onSearch = onSearch.takeIf { !isPdf && hasText },
-    searchLabel = "Search in book",
+    searchLabel = UiText.Res(R.string.ebook_search_in_book),
     onTextSettings = onTextSettings.takeIf { isPdf || !fixedLayout },
     onBookmark = onBookmark,
     bookmarked = bookmarked,
@@ -68,7 +70,7 @@ fun BookProgress(locator: Locator?, positionsCount: Int, onSeek: (Double) -> Uni
     Column {
         if (locator != null) {
             Text(
-                ProgressLabel.of(locator, positionsCount),
+                ProgressLabel.of(locator, positionsCount).resolve(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

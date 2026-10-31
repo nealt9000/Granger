@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="library_title">Biblioteca</string>
+    <string name="library_downloads">Descargas</string>
+    <string name="library_readiness">Preparación</string>
+    <string name="library_import_books">Importar libros…</string>
+    <string name="library_no_books">Aún no hay libros</string>
+    <string name="library_import_own">Importa tus propios libros EPUB, PDF, TXT o Markdown</string>
+    <string name="library_books">Libros</string>
+    <string name="library_collapse">Contraer</string>
+    <string name="library_expand">Expandir</string>
+    <plurals name="library_audiobooks">
+        <item quantity="one">%d audiolibro</item>
+        <item quantity="many">%d audiolibros</item>
+        <item quantity="other">%d audiolibros</item>
+    </plurals>
+    <string name="library_dotted">%1$s · %2$s</string>
+    <string name="library_kiwix_library">Biblioteca de Kiwix</string>
+    <plurals name="library_books_counted">
+        <item quantity="one">%1$s libro</item>
+        <item quantity="many">%1$s libros</item>
+        <item quantity="other">%1$s libros</item>
+    </plurals>
+    <plurals name="library_documents">
+        <item quantity="one">%1$s documento</item>
+        <item quantity="many">%1$s documentos</item>
+        <item quantity="other">%1$s documentos</item>
+    </plurals>
+    <!-- "Searchable in full" is "buscable por completo" throughout: Buscar and Preguntar can read the whole book. -->
+    <plurals name="library_searchable_in_full">
+        <item quantity="one">%1$s buscable por completo</item>
+        <item quantity="many">%1$s buscables por completo</item>
+        <item quantity="other">%1$s buscables por completo</item>
+    </plurals>
+
+    <string name="library_make_searchable_menu">Hacer todos buscables…</string>
+    <string name="library_open_pack_pages">Abrir las páginas del paquete</string>
+    <string name="library_remove_pack">Quitar paquete</string>
+    <string name="library_move_collection">Mover colección a…</string>
+    <string name="library_rename">Cambiar nombre</string>
+    <string name="library_move_to_collection">Mover a una colección…</string>
+    <string name="library_remove_from_phone">Quitar del teléfono</string>
+    <string name="library_find_title_author">Buscar un título o autor</string>
+    <string name="library_clear">Borrar</string>
+    <string name="library_no_books_match">Ningún libro coincide.</string>
+    <string name="library_sort_title">Título</string>
+    <string name="library_sort_author">Autor</string>
+    <string name="library_sort_recent">Recientes</string>
+    <string name="library_remove_from_phone_title">¿Quitar del teléfono?</string>
+    <string name="library_remove_book_body">Se eliminará %1$s de este teléfono. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
+    <string name="library_remove_pack_body">Se eliminará %1$s de este teléfono. Puedes volver a descargarlo más tarde.</string>
+    <string name="library_remove_book_pack_body">Se eliminará %1$s de este teléfono. Puedes volver a descargarlo más tarde. Sus libros se van con él; se conservan tus lugares, marcadores y resaltados.</string>
+    <string name="library_rename_collection">Cambiar nombre de la colección</string>
+    <string name="library_collection_name">Nombre de la colección</string>
+    <string name="library_delete_collection_title">¿Eliminar la colección?</string>
+    <string name="library_delete_collection_body">Sus paquetes vuelven a sus colecciones habituales. No se quita nada del teléfono.</string>
+    <string name="library_searchable_full">Buscable por completo</string>
+    <string name="library_title_only_scan">Solo el título: es un escaneo</string>
+    <string name="library_titles_only">Solo títulos hasta que lo abras</string>
+    <string name="library_making_searchable">Haciendo buscables: %1$s de %2$s copiados</string>
+    <string name="library_not_enough_space">No hay espacio suficiente</string>
+    <plurals name="library_searchable_no_room">
+        <item quantity="one">Hacer buscable %1$s libro requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
+        <item quantity="many">Hacer buscables los %1$s libros requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
+        <item quantity="other">Hacer buscables los %1$s libros requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
+    </plurals>
+    <string name="library_make_searchable_title">¿Hacer todos buscables?</string>
+    <plurals name="library_make_searchable_body">
+        <item quantity="one">Copia fuera del paquete %1$s libro aún sin abrir, para que Buscar y Preguntar puedan leerlo completo. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="many">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar y Preguntar puedan leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="other">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar y Preguntar puedan leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+    </plurals>
+    <string name="library_make_searchable">Hacer buscables</string>
+    <string name="library_pack_missing">No se encontró el archivo. Vuelve a insertar la tarjeta SD o descarga el paquete de nuevo.</string>
+    <string name="library_pack_corrupt">Este archivo está dañado y no se puede abrir.</string>
+    <string name="library_replaced_by_classics">Reemplazado por los libros electrónicos de Clásicos Granger</string>
+    <string name="library_get_ebooks">Descargar los libros electrónicos</string>
+    <string name="library_file_not_found">Archivo no encontrado</string>
+    <string name="library_damaged">Dañado</string>
+    <string name="library_percent">%1$d%%</string>
+    <string name="library_full_text">Texto completo</string>
+    <string name="library_pdf_not_searchable">PDF · No buscable</string>
+
+    <string name="library_new_collection">Nueva colección</string>
+    <string name="library_move">Mover</string>
+    <!-- "Media type" (Books, Music…) is "tipo de contenido": "tipo de medio" reads as technical. -->
+    <string name="library_new_media_type">Nuevo tipo de contenido</string>
+    <string name="library_media_type_name">Nombre del tipo de contenido</string>
+    <string name="library_new_collection_choice">Nueva colección…</string>
+    <string name="library_new_media_type_choice">Nuevo tipo de contenido…</string>
+
+    <string name="library_jump_to">Ir a %1$s</string>
+    <string name="library_sort">Ordenar: %1$s</string>
+    <string name="library_show_grid">Ver como cuadrícula</string>
+    <string name="library_show_list">Ver como lista</string>
+
+    <plurals name="library_imported">
+        <item quantity="one">Se importó %d libro.</item>
+        <item quantity="many">Se importaron %d libros.</item>
+        <item quantity="other">Se importaron %d libros.</item>
+    </plurals>
+    <plurals name="library_already_there">
+        <item quantity="one">%d ya estaba en Mis libros.</item>
+        <item quantity="many">%d ya estaban en Mis libros.</item>
+        <item quantity="other">%d ya estaban en Mis libros.</item>
+    </plurals>
+    <string name="library_nothing_imported">No se importó nada.</string>
+    <string name="library_sentences">%1$s %2$s</string>
+    <string name="library_a_file">Un archivo</string>
+    <string name="library_import_encrypted">%1$s está protegido con contraseña o cifrado. Granger no puede abrirlo y no quitará la protección.</string>
+    <string name="library_import_drm">%1$s tiene protección anticopia (DRM). Granger no puede abrirlo y no quitará la protección.</string>
+    <string name="library_import_unsupported">%1$s no es un archivo EPUB, PDF, TXT ni Markdown.</string>
+    <string name="library_import_damaged">%1$s está dañado o no es un libro electrónico completo.</string>
+</resources>

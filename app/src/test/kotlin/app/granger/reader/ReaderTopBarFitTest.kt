@@ -63,13 +63,13 @@ class ReaderTopBarFitTest {
 
     @Test fun idleTheBarsFitAndTheTitleIsWhole() {
         bars(VoiceButton.IDLE)
-        assertBarsFit("Back", MAIN_PAGE, "Listen", "More")
+        assertBarsFit("Back", "Main page", "Listen", "More")
         assertThat(title().layout().whole()).isTrue()
     }
 
     @Test fun readingMainPageStaysAndTheTitleKeepsItsRoom() {
         bars(VoiceButton.READING)
-        assertBarsFit("Back", MAIN_PAGE, "More")
+        assertBarsFit("Back", "Main page", "More")
         for (n in listOf("Listen", "Pause", "Stop")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
         assertThat(title().layout().whole()).isTrue()
         // Back, Main page and ⋯ leave the title well over a third of the bar.
@@ -82,6 +82,6 @@ class ReaderTopBarFitTest {
         val r = title().layout()
         assertThat(r.lineCount).isEqualTo(1)
         assertThat(r.isLineEllipsized(0)).isTrue()
-        assertBarsFit("Back", MAIN_PAGE, "More")
+        assertBarsFit("Back", "Main page", "More")
     }
 }

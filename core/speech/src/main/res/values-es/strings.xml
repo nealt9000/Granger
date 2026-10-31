@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="speech_granger_voice">Voz de Granger (%1$s)</string>
+    <string name="speech_system_voice">Voz del sistema %1$s (%2$s)</string>
+    <string name="speech_system_voice_default">Voz del sistema predeterminada (%1$s)</string>
+</resources>

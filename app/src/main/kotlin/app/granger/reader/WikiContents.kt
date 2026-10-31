@@ -1,5 +1,7 @@
 package app.granger.reader
 
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,11 +38,11 @@ fun WikiContentsPanel(sections: List<ArticleSection>?, onJump: (ArticleSection) 
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(Modifier.windowInsetsPadding(SidePanelInsets)) {
-                Text("Contents", Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.reader_contents_title), Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
                 when {
                     sections == null -> Unit
                     sections.isEmpty() -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
-                        Text("This page has no sections.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.reader_no_sections), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
                     }
                     else -> LazyColumn(contentPadding = PaddingValues(bottom = 8.dp)) {
                         items(sections, key = { it.blockId }) { section ->

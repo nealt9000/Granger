@@ -1,10 +1,13 @@
 package app.granger.librivox
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.archive.ArchiveError
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.LibriVoxBook
@@ -40,13 +43,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class LibriVoxTab(val title: String) { BROWSE("Browse"), INSTALLED("Installed") }
+enum class LibriVoxTab(@StringRes val title: Int) { BROWSE(R.string.librivox_tab_browse), INSTALLED(R.string.librivox_tab_installed) }
 
 data class LibriVoxRow(
     val id: String,
     val title: String,
     /** "H. G. Wells · 4 h 9 min" on Browse; the size on Installed. */
-    val details: String,
+    val details: UiText,
     val status: ItemStatus,
 )
 
@@ -58,7 +61,7 @@ data class LibriVoxSheet(
     val offer: LibriVoxOffer?,
     /** The chapters' total size, when the book can be got. */
     val sizeBytes: Long?,
-    val error: String?,
+    val error: UiText?,
     val status: ItemStatus,
     /** Chapters in, and in all ("Downloading: 3 of 13 chapters"); 0 and 0 before the book is known. */
     val filesDone: Int = 0,
@@ -74,9 +77,9 @@ data class LibriVoxUi(
     val rows: List<LibriVoxRow> = emptyList(),
     val loading: Boolean = true,
     val canLoadMore: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val sheet: LibriVoxSheet? = null,
-    val notice: String? = null,
+    val notice: UiText? = null,
 )
 
 /**
@@ -94,7 +97,7 @@ class LibriVoxViewModel(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
-    private data class Sheet(val id: String, val loading: Boolean, val book: LibriVoxBook?, val offer: LibriVoxOffer?, val error: String?)
+    private data class Sheet(val id: String, val loading: Boolean, val book: LibriVoxBook?, val offer: LibriVoxOffer?, val error: UiText?)
 
     private data class State(
         val tab: LibriVoxTab = LibriVoxTab.BROWSE,
@@ -108,9 +111,9 @@ class LibriVoxViewModel(
         val nextOffset: Int = 0,
         val hasMore: Boolean = false,
         val loading: Boolean = true,
-        val error: String? = null,
+        val error: UiText? = null,
         val sheet: Sheet? = null,
-        val notice: String? = null,
+        val notice: UiText? = null,
     )
 
     private val state = MutableStateFlow(State())
@@ -266,7 +269,7 @@ class LibriVoxViewModel(
     }
 
     /** Returns the notice to show, or null when the download is on its way. */
-    private suspend fun getBook(id: String): String? {
+    private suspend fun getBook(id: String): UiText? {
         if (!LibriVoxClient.isValidId(id)) return NOT_FOUND
         // Only a fetched book and item are downloaded from: the sheet's, when it's this book's and has them.
         val offer = state.value.sheet?.takeIf { it.id == id && !it.loading }?.offer ?: fetchOffer(id).second
@@ -274,6 +277,7 @@ class LibriVoxViewModel(
             is LibriVoxOffer.Files -> {
                 val manifest = MediaDownloads.bookManifest(offer, archive, now())
                 fileCounts[groupOf(id)] = manifest.files.size
+                // MediaDownloader (the media package) still hands back English; L1 Task 4 converts it.
                 media.get(manifest)
             }
             is LibriVoxOffer.Incomplete -> INCOMPLETE
@@ -290,10 +294,7 @@ class LibriVoxViewModel(
                 LibriVoxRow(
                     id = book.id,
                     title = decodeEntities(book.title).ifBlank { book.id },
-                    details = listOfNotNull(
-                        decodeEntities(book.authors.joinToString(", ")).ifBlank { null },
-                        durationLabel(book.totalTimeMs),
-                    ).joinToString(" · "),
+                    details = rowDetails(decodeEntities(book.authors.joinToString(", ")), durationLabel(book.totalTimeMs)),
                     status = statusOf(book.id, ours, offerFiles = null),
                 )
             }
@@ -303,7 +304,7 @@ class LibriVoxViewModel(
                 LibriVoxRow(
                     id = id,
                     title = files.first().title.ifBlank { id },
-                    details = formatBytes(files.sumOf { it.sizeBytes }),
+                    details = UiText.Raw(formatBytes(files.sumOf { it.sizeBytes })),
                     status = statusOf(id, ours, offerFiles = null),
                 )
             }
@@ -351,30 +352,38 @@ class LibriVoxViewModel(
         return MediaDownloads.statusOf(group, count, records)
     }
 
-    private fun messageOf(e: Exception): String = when (e) {
-        is LibriVoxError, is ArchiveError -> e.message ?: OFFLINE
+    private fun messageOf(e: Exception): UiText = when (e) {
+        is LibriVoxError -> UiText.Res(e.problem.text, *e.textArgs.toTypedArray())
+        is ArchiveError -> UiText.Res(e.problem.text, *e.textArgs.toTypedArray())
         else -> OFFLINE
     }
 
     private companion object {
         const val DEBOUNCE_MS = 400L
         const val PAGE_SIZE = 50
-        const val INCOMPLETE = "This book's files aren't all on archive.org."
-        const val NOT_ON_ARCHIVE = "This book isn't on archive.org yet."
-        const val NOT_FOUND = "Not found on LibriVox"
-        const val OFFLINE = "Couldn't reach LibriVox. Check your connection and try again."
+        val INCOMPLETE = UiText.Res(R.string.librivox_incomplete)
+        val NOT_ON_ARCHIVE = UiText.Res(R.string.librivox_not_on_archive)
+        val NOT_FOUND = UiText.Res(R.string.librivox_not_found)
+        val OFFLINE = UiText.Res(R.string.librivox_offline)
     }
 }
 
 /** "4 h 9 min", "1 h", "59 min"; null for no time (a book not yet on archive.org). Under a minute reads as 1 min. */
-internal fun durationLabel(ms: Long): String? {
+internal fun durationLabel(ms: Long): UiText? {
     if (ms <= 0) return null
     val minutes = maxOf(1L, ms / 60_000)
-    val h = minutes / 60
-    val m = minutes % 60
+    val h = (minutes / 60).toInt()
+    val m = (minutes % 60).toInt()
     return when {
-        h == 0L -> "$m min"
-        m == 0L -> "$h h"
-        else -> "$h h $m min"
+        h == 0 -> UiText.Res(R.string.librivox_duration_minutes, m)
+        m == 0 -> UiText.Res(R.string.librivox_duration_hours, h)
+        else -> UiText.Res(R.string.librivox_duration_hours_minutes, h, m)
     }
+}
+
+/** A Browse row's details: the authors (content), then the book's length, either of which may be missing. */
+private fun rowDetails(authors: String, duration: UiText?): UiText = when {
+    authors.isBlank() -> duration ?: UiText.Raw("")
+    duration == null -> UiText.Raw(authors)
+    else -> UiText.Res(R.string.librivox_row_details, authors, duration)
 }

@@ -23,6 +23,8 @@ import app.granger.music.FakeMediaLibrary
 import app.granger.record
 import app.granger.sources.ItemStatus
 import app.granger.volume
+import app.granger.R
+import app.granger.UiText
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.io.IOException
@@ -171,7 +173,9 @@ class LibriVoxViewModelTest {
         assertThat(ui.shelf).isNull()
         assertThat(ui.rows.first().id).isEqualTo("817")
         assertThat(ui.rows.first().title).isEqualTo("Time Machine")
-        assertThat(ui.rows.first().details).isEqualTo("H. G. Wells · 4 h 9 min")
+        assertThat(ui.rows.first().details).isEqualTo(
+            UiText.Res(R.string.librivox_row_details, "H. G. Wells", UiText.Res(R.string.librivox_duration_hours_minutes, 4, 9)),
+        )
         // Clearing the box goes back to Recently added.
         vm.setQuery("")
         settle { lists().size == 3 && !vm.ui.value.loading }
@@ -192,7 +196,7 @@ class LibriVoxViewModelTest {
     @Test fun busyShowsTheMessageWithRetry() = runTest(main.dispatcher) {
         librivoxStatus = 429
         val vm = viewModel()
-        assertThat(vm.ui.value.error).isEqualTo("LibriVox is busy right now. Try again in a minute.")
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(app.granger.core.archive.LibriVoxProblem.BUSY.text))
         assertThat(vm.ui.value.rows).isEmpty()
         assertThat(vm.ui.value.loading).isFalse()
         librivoxStatus = null
@@ -274,7 +278,7 @@ class LibriVoxViewModelTest {
         assertThat(vm.ui.value.sheet!!.sizeBytes).isNull()
         vm.get("817")
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo("This book's files aren't all on archive.org.")
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.librivox_incomplete))
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(File(mediaRoot, "audiobooks/librivox/817").exists()).isFalse()
     }
@@ -292,7 +296,7 @@ class LibriVoxViewModelTest {
         assertThat(requests.none { it.host == "archive.org" }).isTrue()
         vm.get("817")
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo("This book isn't on archive.org yet.")
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.librivox_not_on_archive))
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
@@ -300,7 +304,7 @@ class LibriVoxViewModelTest {
         offline = true
         downloads.list.value = installed(13) + record("med", DownloadState.INSTALLED)
         val vm = viewModel()
-        assertThat(vm.ui.value.error).contains("Couldn't reach LibriVox")
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(R.string.librivox_offline))
         vm.setTab(LibriVoxTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         val row = vm.ui.value.rows.single()

@@ -1,5 +1,10 @@
 package app.granger.home
 
+import app.granger.R
+import app.granger.UiText
+import java.time.Month
+import java.time.format.TextStyle
+import java.util.Locale
 import app.granger.FakeZimArchive
 import app.granger.book
 import app.granger.core.library.AlbumSummary
@@ -58,14 +63,15 @@ class FeedDrawerTest {
     private fun feed(kind: FeedKind, query: String = "", id: Long = 1) = HomeFeed(id, "x", kind, query, 0, 0)
 
     @Test fun randomFromAPackReadsTheTitleAndDropsWikipediasSuffix() = runTest {
-        val drawn = drawer.draw(feed(FeedKind.RANDOM), Resolved("Wikipedia", packs = listOf(wikipedia)), day)!!
-        assertThat(drawn.title).isEqualTo("Random from Wikipedia")
+        val drawn = drawer.draw(feed(FeedKind.RANDOM), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)!!
+        assertThat(FeedDrawer.title(feed(FeedKind.RANDOM), Resolved(UiText.Raw("Wikipedia")), day))
+            .isEqualTo(UiText.Res(R.string.home_feed_random_from, UiText.Raw("Wikipedia")))
         // One random path from the fake, so one distinct card.
         assertThat(drawn.cards).containsExactly(Card("Cat", "Wikipedia", CardTarget.Article("u1", "Cat")))
     }
 
     @Test fun randomFromBooksDipsIntoPoetryAndSuggestsANovelFromTheStart() = runTest {
-        val scope = Resolved("Granger Classics", books = listOf(hamlet, odyssey, leaves))
+        val scope = Resolved(UiText.Raw("Granger Classics"), books = listOf(hamlet, odyssey, leaves))
         val first = drawer.draw(feed(FeedKind.RANDOM), scope, day)!!
         val again = drawer.draw(feed(FeedKind.RANDOM), scope, day)!!
         assertThat(again).isEqualTo(first)
@@ -88,20 +94,21 @@ class FeedDrawerTest {
     }
 
     @Test fun onThisDayReadsTheDayArticlesSections() = runTest {
-        val drawn = drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved("Wikipedia", packs = listOf(wikipedia)), day)!!
-        assertThat(drawn.title).isEqualTo("October 22")
+        val drawn = drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)!!
+        assertThat(FeedDrawer.title(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia")), day))
+            .isEqualTo(UiText.Res(R.string.home_feed_day, Month.OCTOBER.getDisplayName(TextStyle.FULL, Locale.getDefault()), 22))
         assertThat(drawn.cards.map { it.subtitle }).containsExactly("Events", "Events", "Events", "Births", "Deaths").inOrder()
         assertThat(drawn.cards.map { it.title }.distinct()).hasSize(5)
         assertThat(drawn.cards.first().target).isEqualTo(CardTarget.Article("u1", "October_22", fragment = "Events"))
         assertThat(drawn.cards.last().title).isEqualTo("Death one here.")
-        assertThat(drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved("Wikipedia", packs = listOf(wikipedia)), day)).isEqualTo(drawn)
+        assertThat(drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)).isEqualTo(drawn)
     }
 
     @Test fun aPackWithoutTheDayArticleFallsBackToSearch() = runTest {
         val plain = FakeZimArchive(uuid = "u2", paths = setOf("index"), results = (1..8).map { ZimHit("Hit_$it", "Hit $it") })
         val drawer = FeedDrawer({ plain }, { emptyList() }, { emptyList() }, librarySearch)
         val pack = pack("u2", "Wikiquote")
-        val drawn = drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved("Wikiquote", packs = listOf(pack)), day)!!
+        val drawn = drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikiquote"), packs = listOf(pack)), day)!!
         assertThat(drawn.cards).hasSize(FeedDrawer.CARDS)
         assertThat(drawn.cards.map { it.subtitle }.distinct()).containsExactly("Wikiquote")
         assertThat(drawn.cards.map { it.title }.toSet()).hasSize(FeedDrawer.CARDS)
@@ -114,7 +121,7 @@ class FeedDrawerTest {
             contents = mapOf("aljotta/" to "<html><head><title>Aljotta | Based Cooking</title></head><body></body></html>"),
         )
         val drawer = FeedDrawer({ cooking }, { emptyList() }, { emptyList() }, librarySearch)
-        val scope = Resolved("Based Cooking", packs = listOf(pack("u4", "based.cooking LukeSmith")))
+        val scope = Resolved(UiText.Raw("Based Cooking"), packs = listOf(pack("u4", "based.cooking LukeSmith")))
         assertThat(drawer.draw(feed(FeedKind.RANDOM), scope, day)!!.cards.map { it.title }).containsExactly("Aljotta")
         assertThat(drawer.draw(feed(FeedKind.SEARCH, "pie"), scope, day)!!.cards.map { it.title }).containsExactly("Apple Pie")
     }
@@ -125,38 +132,39 @@ class FeedDrawerTest {
             results = listOf(ZimHit("users/7/apocalypse", "User apocalypse"), ZimHit("tags/end", "end"), ZimHit("questions/1/end", "The end")),
         )
         val drawer = FeedDrawer({ se }, { emptyList() }, { emptyList() }, librarySearch)
-        val scope = Resolved("Worldbuilding", packs = listOf(pack("u3", "Worldbuilding")))
+        val scope = Resolved(UiText.Raw("Worldbuilding"), packs = listOf(pack("u3", "Worldbuilding")))
         assertThat(drawer.draw(feed(FeedKind.RANDOM), scope, day)).isNull()
         assertThat(drawer.draw(feed(FeedKind.SEARCH, "end"), scope, day)!!.cards.map { it.title }).containsExactly("The end")
     }
 
     @Test fun searchRotatesWithTheDayAndFiltersBooksToTheScope() = runTest {
-        val scope = Resolved("Wikipedia", packs = listOf(wikipedia))
+        val scope = Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia))
         val today = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day)!!
-        assertThat(today.title).isEqualTo("stoicism · Wikipedia")
+        assertThat(FeedDrawer.title(feed(FeedKind.SEARCH, "stoicism"), scope, day))
+            .isEqualTo(UiText.Res(R.string.home_feed_search, "stoicism", UiText.Raw("Wikipedia")))
         assertThat(today.cards).hasSize(FeedDrawer.CARDS)
         val tomorrow = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day.plusDays(1))!!
         assertThat(tomorrow.cards).isNotEqualTo(today.cards)
         assertThat(drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day)).isEqualTo(today)
 
-        val books = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), Resolved("Classics", books = listOf(hamlet)), day)!!
+        val books = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), Resolved(UiText.Raw("Classics"), books = listOf(hamlet)), day)!!
         assertThat(books.cards).containsExactly(Card("Hamlet", "stoic calm", CardTarget.Book(hamlet.id, "ch2.xhtml", 0.4)))
 
         assertThat(drawer.draw(feed(FeedKind.SEARCH, "  "), scope, day)).isNull()
     }
 
     @Test fun theWholeLibrarySearchesPacksTogetherAndBooks() = runTest {
-        val scope = Resolved("the library", packs = listOf(wikipedia, pack("u9", "Other")), books = listOf(hamlet, odyssey))
+        val scope = Resolved(LIBRARY_NAME, packs = listOf(wikipedia, pack("u9", "Other")), books = listOf(hamlet, odyssey))
         val drawn = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day)!!
         assertThat(drawn.cards.map { it.title }).containsExactly("Stoicism", "Hamlet", "The Odyssey")
     }
 
     @Test fun musicAndAudiobooksDrawAlbumsAndBooks() = runTest {
         val albums = (1..7).map { AlbumSummary("album:$it", "Album $it", "Artist", "", "", 1, 1, null, PackStatus.OK) }
-        val drawn = drawer.draw(feed(FeedKind.RANDOM), Resolved("Music", albums = albums), day)!!
+        val drawn = drawer.draw(feed(FeedKind.RANDOM), Resolved(UiText.Raw("Music"), albums = albums), day)!!
         assertThat(drawn.cards).hasSize(FeedDrawer.CARDS)
         assertThat(drawn.cards.map { it.target }.filterIsInstance<CardTarget.Album>()).hasSize(FeedDrawer.CARDS)
-        val found = drawer.draw(feed(FeedKind.SEARCH, "Album 3"), Resolved("Music", albums = albums), day)!!
+        val found = drawer.draw(feed(FeedKind.SEARCH, "Album 3"), Resolved(UiText.Raw("Music"), albums = albums), day)!!
         assertThat(found.cards.map { it.title }).containsExactly("Album 3")
     }
 
@@ -166,7 +174,7 @@ class FeedDrawerTest {
             seen += path
             if ("<title>" in html) "/cache/$path.jpg" else null
         }
-        val scope = Resolved("Wikipedia", packs = listOf(wikipedia))
+        val scope = Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia))
         val random = drawer.draw(feed(FeedKind.RANDOM), scope, day)!!
         assertThat(random.cards.single().imagePath).isEqualTo("/cache/Cat.jpg")
         val search = drawer.draw(feed(FeedKind.SEARCH, "owls"), scope, day)!!
@@ -177,7 +185,7 @@ class FeedDrawerTest {
     }
 
     @Test fun cardsRoundTripThroughJson() {
-        val drawn = Drawn("October 22", listOf(Card("A", "Events", CardTarget.Article("u1", "October_22", "Events")), Card("B", "", CardTarget.Search("owls"))))
+        val drawn = Drawn(listOf(Card("A", "Events", CardTarget.Article("u1", "October_22", "Events")), Card("B", "", CardTarget.Search("owls"))))
         assertThat(Cards.decode(Cards.encode(drawn))).isEqualTo(drawn.copy(version = Cards.VERSION))
         // A draw from before thumbnails (no version) is redrawn rather than shown.
         assertThat(Cards.decode("{\"title\":\"x\",\"cards\":[]}")).isNull()

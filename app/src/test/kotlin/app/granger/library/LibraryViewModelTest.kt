@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -78,7 +79,7 @@ class LibraryViewModelTest {
         )
         val ui = vm().ui.filterNotNull().first()
         // Music and Audiobooks are Listen's (Plan U2 Decision 4); packs and maps, Browse's.
-        assertThat(ui.kinds.map { it.title }).containsExactly("Books")
+        assertThat(ui.kinds.map { it.title.resolve(ApplicationProvider.getApplicationContext()) }).containsExactly("Books")
         assertThat(ui.kinds.single().collections.map { it.collection.name }).containsExactly("Granger Classics", "My books").inOrder()
         assertThat(ui.kinds.single().id).isEqualTo(BOOKS_KIND)
         assertThat(ui.kinds.single().mediaTypeId).isEqualTo("literature")
@@ -105,7 +106,7 @@ class LibraryViewModelTest {
         val packsOnly = CollectionRow(ShelfCollection("c:ref", "My reference", "literature", userCreated = true, defaultKey = null), listOf(pack("m")))
         val kinds = libraryKinds(listOf(shelf("Literature").copy(collections = listOf(both, packsOnly))))
         assertThat(kinds.single().collections.map { it.collection.name }).containsExactly("Field kit")
-        assertThat(rowCountText(kinds.single().collections.single())).isEqualTo("1 pack · 1 book")
+        assertThat(rowCountText(kinds.single().collections.single()).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("1 pack · 1 book")
     }
 
     @Test fun aGutenbergCollectionSitsBesideTheClassics() {
@@ -115,7 +116,7 @@ class LibraryViewModelTest {
         )
         val kinds = libraryKinds(listOf(shelf("Literature").copy(collections = listOf(bookRow("Granger Classics", 2), gutenberg))))
         assertThat(kinds.single().collections.map { it.collection.name }).containsExactly("Granger Classics", "Music and books on music").inOrder()
-        assertThat(rowCountText(kinds.single().collections[1])).isEqualTo("Project Gutenberg · 3 books")
+        assertThat(rowCountText(kinds.single().collections[1]).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Project Gutenberg · 3 books")
     }
 
     @Test fun aGutenbergRowSaysHowManyAreSearchableInFullOnceAnyAre() {
@@ -126,15 +127,15 @@ class LibraryViewModelTest {
             ShelfCollection("c:gutenberg-m", "Music and books on music", "literature", userCreated = false, defaultKey = "gutenberg-m"),
             emptyList(), books = books.toList(),
         )
-        assertThat(rowCountText(row(gutenberg(1, true), gutenberg(2, false), gutenberg(3, false))))
+        assertThat(rowCountText(row(gutenberg(1, true), gutenberg(2, false), gutenberg(3, false))).resolve(ApplicationProvider.getApplicationContext()))
             .isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
-        assertThat(rowCountText(row(gutenberg(1, false)))).isEqualTo("Project Gutenberg · 1 book")
+        assertThat(rowCountText(row(gutenberg(1, false))).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Project Gutenberg · 1 book")
     }
 
     @Test fun anotherMediaTypeWithBooksComesAfterBooks() {
         val video = Shelf(MediaType("video", "Video", builtIn = false, sortOrder = 5), listOf(bookRow("Lectures", 1)))
         val kinds = libraryKinds(listOf(video, shelf("Literature").copy(collections = listOf(bookRow("Classics", 1))), shelf("Maps", "OpenStreetMap" to 1)))
-        assertThat(kinds.map { it.title }).containsExactly("Books", "Video").inOrder()
+        assertThat(kinds.map { it.title.resolve(ApplicationProvider.getApplicationContext()) }).containsExactly("Books", "Video").inOrder()
         // A type holding only packs (Neal's "Reference") is Browse's.
         assertThat(libraryKinds(listOf(shelf("Reference", "Medicine" to 2)))).isEmpty()
     }
@@ -150,8 +151,8 @@ class LibraryViewModelTest {
             children = shelf("Literature", "Wikipedia" to 3, "DevDocs" to 2).collections,
         )
         assertThat(folder.isFolder).isTrue()
-        assertThat(rowCountText(folder)).isEqualTo("5 packs")
-        assertThat(rowCountText(bookRow("Granger Classics", 1))).isEqualTo("1 book")
+        assertThat(rowCountText(folder).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("5 packs")
+        assertThat(rowCountText(bookRow("Granger Classics", 1)).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("1 book")
     }
 
     @Test fun noAudioKindsAndMusicAloneLeavesTheLibraryEmpty() = runTest(main.dispatcher) {
@@ -175,7 +176,7 @@ class LibraryViewModelTest {
 
     @Test fun listenHasMusicThenAudiobooksEachOnlyWithSomething() {
         val shelves = listOf(audio("Audiobooks", "LibriVox"), shelf("Literature", "Wikipedia" to 1), audio("Music", "Phone", "Archive.org"))
-        assertThat(listenKinds(shelves).map { it.title }).containsExactly("Music", "Audiobooks").inOrder()
+        assertThat(listenKinds(shelves).map { it.title.resolve(ApplicationProvider.getApplicationContext()) }).containsExactly("Music", "Audiobooks").inOrder()
         assertThat(listenKinds(shelves).map { it.mediaTypeId }).containsExactly("music", "audiobooks").inOrder()
         assertThat(listenKinds(listOf(audio("Audiobooks", "LibriVox"), audio("Music"))).map { it.id }).containsExactly("audiobooks")
         assertThat(listenKinds(listOf(shelf("Literature", "Wikipedia" to 1)))).isEmpty()
@@ -194,7 +195,7 @@ class LibraryViewModelTest {
         val vm = vm()
         vm.import(listOf("a.epub", "bad.epub", "b.epub").map { Uri.parse("content://docs/$it") })
         testScheduler.advanceUntilIdle()
-        assertThat(vm.notice.value).isEqualTo("Imported 2 books. bad.epub isn't an EPUB, PDF, TXT or Markdown file.")
+        assertThat(vm.notice.value?.resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Imported 2 books. bad.epub isn't an EPUB, PDF, TXT or Markdown file.")
         vm.dismissNotice()
         assertThat(vm.notice.value).isNull()
     }

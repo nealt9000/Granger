@@ -83,9 +83,9 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(1, "gone", "x-ray"), tab(2, "b", "Aspirin"), tab(3, "a", "Hamlet"))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.tabs).containsExactly(
-            RailTabUi(3, "Hamlet", "Classics", 'H', available = true, current = false, coverPath = null, packId = "a", path = "Hamlet"),
-            RailTabUi(2, "Aspirin", "WikiMed", 'A', available = false, current = false, coverPath = null, packId = "b", path = "Aspirin"),
-            RailTabUi(1, "x-ray", HistoryViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null, packId = "gone", path = "x-ray"),
+            RailTabUi(3, "Hamlet", app.granger.UiText.Raw("Classics"), 'H', available = true, current = false, coverPath = null, packId = "a", path = "Hamlet"),
+            RailTabUi(2, "Aspirin", app.granger.UiText.Raw("WikiMed"), 'A', available = false, current = false, coverPath = null, packId = "b", path = "Aspirin"),
+            RailTabUi(1, "x-ray", RailViewModel.REMOVED_PACK, 'X', available = false, current = false, coverPath = null, packId = "gone", path = "x-ray"),
         ).inOrder()
     }
 
@@ -345,7 +345,7 @@ class RailViewModelTest {
         vm.ui.first { it.recent.size == 7 }
         for (i in 1..6) assertThat(vm.pin(RailEntry.Search("q$i", i.toLong()))).isNull()
         assertThat(vm.pin(RailEntry.Search("q7", 7))).isEqualTo(RailViewModel.PINS_FULL)
-        assertThat(RailViewModel.PINS_FULL).contains("Unpin one first")
+        assertThat(RailViewModel.PINS_FULL).isEqualTo(app.granger.UiText.Plural(app.granger.R.plurals.shell_pins_full, app.granger.core.library.MAX_RAIL_PINS, app.granger.core.library.MAX_RAIL_PINS))
         assertThat(vm.ui.first { it.entries.count { e -> e.pinned } == 6 }.entries.last()).isEqualTo(RailEntry.Search("q7", 7))
     }
 
@@ -506,7 +506,7 @@ class RailViewModelTest {
         sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma").copy(path = ""))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
         assertThat(ui.tabs.single()).isEqualTo(
-            RailTabUi(4, "Emma", "Chapter 3 · 43%", 'E', available = true, current = false, coverPath = "/covers/a.jpg"),
+            RailTabUi(4, "Emma", app.granger.UiText.Res(app.granger.R.string.shell_chapter_percent, "Chapter 3", 43), 'E', available = true, current = false, coverPath = "/covers/a.jpg"),
         )
     }
 
@@ -514,7 +514,7 @@ class RailViewModelTest {
         bookshelf.bookList.value = listOf(book("book:granger:1", "Emma", author = "Jane Austen"))
         sessions.tabs.value = listOf(tab(4, "book:granger:1", "Emma"))
         val ui = vm().ui.first { it.entries.isNotEmpty() }
-        assertThat(ui.tabs.single().subtitle).isEqualTo("Jane Austen")
+        assertThat(ui.tabs.single().subtitle).isEqualTo(app.granger.UiText.Raw("Jane Austen"))
     }
 
     @Test fun missingBookTabIsUnavailable() = runTest(main.dispatcher) {
@@ -530,8 +530,7 @@ class RailViewModelTest {
         media.trackList.value = listOf(song("a", folder = "Old/", status = PackStatus.MISSING))
         for (key in listOf("album:nobody|gone|music/", "playlist:42", "folder:Old/", "artist:Nobody", "audiobook:phone:gone", "nonsense")) {
             val notice = vm.resume(RailEntry.Play(key, "Gone thing", 1))
-            assertThat(notice).isNotNull()
-            assertThat(notice).contains("Gone thing")
+            assertThat(notice).isEqualTo(app.granger.launch.LibraryNotice.CANT_PLAY)
         }
         assertThat(hub.calls).isEmpty()
     }

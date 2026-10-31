@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audiobooks_all">Todos los audiolibros</string>
+    <string name="audiobooks_unknown_author">Autor desconocido</string>
+    <string name="audiobooks_none_yet">Aún no hay audiolibros</string>
+    <string name="audiobooks_continue">Continuar</string>
+
+    <string name="audiobooks_sort_title">Título</string>
+    <string name="audiobooks_sort_author">Autor</string>
+    <string name="audiobooks_sort_recent">Recientes</string>
+
+    <string name="audiobooks_missing">No encontrado</string>
+    <string name="audiobooks_finished">Terminado</string>
+    <string name="audiobooks_not_started">Sin empezar</string>
+    <string name="audiobooks_percent">%1$d%%</string>
+    <string name="audiobooks_percent_left">%1$d%% · quedan %2$s</string>
+    <string name="audiobooks_read_by">Narrado por %1$s</string>
+    <string name="audiobooks_missing_files">No encontrado: sus archivos no están en este teléfono</string>
+
+    <string name="audiobooks_play_from_start">Reproducir desde el inicio</string>
+    <string name="audiobooks_resume">Reanudar</string>
+    <string name="audiobooks_mark_finished">Marcar como terminado</string>
+    <string name="audiobooks_mark_unfinished">Marcar como no terminado</string>
+
+    <string name="audiobooks_no_bookmarks">Aún no hay marcadores. Agrégalos desde el reproductor.</string>
+    <string name="audiobooks_edit_note">Editar nota</string>
+    <string name="audiobooks_delete_bookmark">¿Eliminar el marcador?</string>
+    <string name="audiobooks_note">Nota</string>
+    <string name="audiobooks_save">Guardar</string>
+</resources>

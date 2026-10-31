@@ -81,6 +81,7 @@ class AutoBrowseTreeTest {
         val index = MediaIndex(media, backgroundScope, UnconfinedTestDispatcher(testScheduler))
         return AutoBrowseTree(
             media, playlists, playback, index, PlayResumer(media, playlists, hub), SongPlayer(media, hub), hub, artwork,
+            androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()::getString,
         )
     }
 

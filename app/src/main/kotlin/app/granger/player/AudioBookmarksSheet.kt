@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.R
@@ -42,16 +43,16 @@ fun AudioBookmarksSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding().padding(bottom = 8.dp)) {
             Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Bookmarks", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.player_bookmarks), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 TextButton(onClick = onAdd) {
                     Icon(painterResource(R.drawable.ic_bookmark_border), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.size(8.dp))
-                    Text("Add here")
+                    Text(stringResource(R.string.player_add_here))
                 }
             }
             if (bookmarks.isEmpty()) {
                 Text(
-                    "No bookmarks in this book yet", style = MaterialTheme.typography.bodyMedium,
+                    stringResource(R.string.player_no_bookmarks), style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(24.dp),
                 )
             }
@@ -71,7 +72,7 @@ fun AudioBookmarksSheet(
                             }
                         }
                         IconButton(onClick = { onDelete(bookmark) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Delete bookmark ${bookmark.title}")
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.player_delete_bookmark, bookmark.title))
                         }
                     }
                 }

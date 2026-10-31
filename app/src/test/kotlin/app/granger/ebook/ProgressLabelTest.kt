@@ -1,5 +1,7 @@
 package app.granger.ebook
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,17 +21,20 @@ class ProgressLabelTest {
         locations = Locator.Locations(position = position, totalProgression = total),
     )
 
+    private fun label(locator: Locator, positionsCount: Int) =
+        ProgressLabel.of(locator, positionsCount).resolve(ApplicationProvider.getApplicationContext<Context>())
+
     @Test fun withPositions() {
-        assertThat(ProgressLabel.of(locator("ACT III — Scene I", 120, 0.29), 410))
+        assertThat(label(locator("ACT III — Scene I", 120, 0.29), 410))
             .isEqualTo("ACT III — Scene I · p. 120 of 410")
     }
 
     @Test fun withoutPositionsUsesPercent() {
-        assertThat(ProgressLabel.of(locator("Two", 3, 0.294), 0)).isEqualTo("Two · 29%")
+        assertThat(label(locator("Two", 3, 0.294), 0)).isEqualTo("Two · 29%")
     }
 
     @Test fun blankChapterTitleIsDropped() {
-        assertThat(ProgressLabel.of(locator("  ", 5, 0.1), 50)).isEqualTo("p. 5 of 50")
-        assertThat(ProgressLabel.of(locator(null, null, 0.5), 0)).isEqualTo("50%")
+        assertThat(label(locator("  ", 5, 0.1), 50)).isEqualTo("p. 5 of 50")
+        assertThat(label(locator(null, null, 0.5), 0)).isEqualTo("50%")
     }
 }

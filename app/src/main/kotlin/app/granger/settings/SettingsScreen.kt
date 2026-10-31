@@ -41,7 +41,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.stringResource
 import app.granger.BuildConfig
+import app.granger.R
 import app.granger.onboarding.BrandLockup
 import app.granger.formatBytes
 
@@ -64,6 +66,10 @@ fun SettingsScreen(
     onMediaSettings: (() -> Unit)? = null,
     /** The phone holds an audiobook: the row reads "Music & audiobooks", else "Music" (Plan U2 Decision 7). */
     audiobooks: Boolean = false,
+    /** Settings → Appearance → Language (Plan L2 Task 3); null leaves the row out. */
+    onLanguage: (() -> Unit)? = null,
+    /** The language row's summary: the current choice, as the Language screen names it. */
+    languageSummary: String = "",
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -86,33 +92,34 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.common_settings)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
             )
         },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             item(key = "library") {
-                SettingsHeader("Library & storage")
+                SettingsHeader(stringResource(R.string.settings_section_library))
                 StorageSection(ui, viewModel::selectVolume)
                 ListItem(
-                    headlineContent = { Text("Download on Wi-Fi only") },
-                    supportingContent = { Text("Turn off to use mobile data") },
+                    headlineContent = { Text(stringResource(R.string.settings_wifi_only)) },
+                    supportingContent = { Text(stringResource(R.string.settings_wifi_only_summary)) },
                     trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
                 )
                 ListItem(
-                    headlineContent = { Text("Ask before downloads over 100 MB") },
-                    supportingContent = { Text("Turn off to get large scans and comic runs without a prompt") },
+                    headlineContent = { Text(stringResource(R.string.settings_ask_large)) },
+                    supportingContent = { Text(stringResource(R.string.settings_ask_large_summary)) },
                     trailingContent = { Switch(checked = ui.askBeforeLarge, onCheckedChange = viewModel::setAskBeforeLarge) },
                 )
                 ListItem(
-                    headlineContent = { Text("Archive.org: show everything") },
+                    headlineContent = { Text(stringResource(R.string.settings_archive_everything)) },
                     supportingContent = {
                         Text(
-                            if (ui.archiveEverything) "On: everything archive.org serves openly. Turning it off keeps downloaded files."
-                            else "Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.",
+                            stringResource(
+                                if (ui.archiveEverything) R.string.settings_archive_everything_on else R.string.settings_archive_everything_off,
+                            ),
                         )
                     },
                     trailingContent = {
@@ -122,26 +129,27 @@ fun SettingsScreen(
                         )
                     },
                 )
-                LinkRow("Set up suggestions again", "Pick a start, your region and what you'll use Granger for", onSetUpAgain)
+                LinkRow(stringResource(R.string.settings_set_up_again), stringResource(R.string.settings_set_up_again_summary), onSetUpAgain)
                 HorizontalDivider()
             }
             if (onVoice != null || onMediaSettings != null) item(key = "listening") {
-                SettingsHeader("Reading & listening")
-                if (onVoice != null) LinkRow("Voice", voiceSummary.ifBlank { "Read aloud" }, onVoice)
-                if (onMediaSettings != null) LinkRow(mediaSettingsTitle(audiobooks), "Folders on this phone, and the player", onMediaSettings)
+                SettingsHeader(stringResource(R.string.settings_section_listening))
+                if (onVoice != null) LinkRow(stringResource(R.string.settings_voice), voiceSummary.ifBlank { stringResource(R.string.settings_voice_summary_default) }, onVoice)
+                if (onMediaSettings != null) LinkRow(mediaSettingsTitle(audiobooks), stringResource(R.string.settings_media_summary), onMediaSettings)
                 HorizontalDivider()
             }
             item(key = "ask") {
-                SettingsHeader("Ask")
-                LinkRow("Models", "AI models for this phone", onModels)
+                SettingsHeader(stringResource(R.string.settings_section_ask))
+                LinkRow(stringResource(R.string.settings_models), stringResource(R.string.settings_models_summary), onModels)
                 HorizontalDivider()
             }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
+                if (onLanguage != null) LinkRow(stringResource(R.string.settings_language), languageSummary, onLanguage)
                 HorizontalDivider()
             }
             item(key = "about") {
-                SettingsHeader("About")
+                SettingsHeader(stringResource(R.string.settings_section_about))
                 About()
             }
         }
@@ -163,7 +171,7 @@ fun MediaSettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onPerm
             TopAppBar(
                 title = { Text(mediaSettingsTitle(controls?.ui?.audiobooks == true)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
             )
         },
@@ -189,7 +197,9 @@ fun MediaSettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onPerm
 }
 
 /** Settings' Music row and screen: audiobooks are named only once there's one on the phone (Plan U2 Decision 7). */
-internal fun mediaSettingsTitle(audiobooks: Boolean): String = if (audiobooks) "Music & audiobooks" else "Music"
+@Composable
+internal fun mediaSettingsTitle(audiobooks: Boolean): String =
+    stringResource(if (audiobooks) R.string.settings_music_and_audiobooks else R.string.settings_music)
 
 /** A section's heading, as Appearance and Music & audiobooks have always drawn theirs. */
 @Composable
@@ -245,18 +255,18 @@ internal fun AppearanceSection(
     onTheme: (ThemeChoice) -> Unit = {},
 ) {
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Appearance", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-        Text("Theme", modifier = Modifier.padding(top = 8.dp))
+        Text(stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        Text(stringResource(R.string.settings_theme), modifier = Modifier.padding(top = 8.dp))
         RadioGroup(ThemeChoice.entries, theme, { it.label }, onTheme)
-        Text("Toolbar side", modifier = Modifier.padding(top = 8.dp))
+        Text(stringResource(R.string.settings_toolbar_side), modifier = Modifier.padding(top = 8.dp))
         RadioGroup(RailSide.entries, side, { it.label }, onSide)
-        Text("Open to", modifier = Modifier.padding(top = 8.dp))
+        Text(stringResource(R.string.settings_open_to), modifier = Modifier.padding(top = 8.dp))
         RadioGroup(OpenTo.entries, openTo, { it.label }, onOpenTo)
     }
 }
 
 @Composable
-private fun <T> RadioGroup(choices: List<T>, chosen: T, label: (T) -> String, onChoose: (T) -> Unit) {
+internal fun <T> RadioGroup(choices: List<T>, chosen: T, label: @Composable (T) -> String, onChoose: (T) -> Unit) {
     Column(Modifier.selectableGroup()) {
         for (choice in choices) {
             Row(
@@ -273,21 +283,27 @@ private fun <T> RadioGroup(choices: List<T>, chosen: T, label: (T) -> String, on
     }
 }
 
-private val RailSide.label get() = when (this) {
-    RailSide.LEFT -> "Left"
-    RailSide.RIGHT -> "Right"
-}
+private val RailSide.label @Composable get() = stringResource(
+    when (this) {
+        RailSide.LEFT -> R.string.settings_side_left
+        RailSide.RIGHT -> R.string.settings_side_right
+    },
+)
 
-private val ThemeChoice.label get() = when (this) {
-    ThemeChoice.SYSTEM -> "Follow the phone"
-    ThemeChoice.FIELD -> "Field (light)"
-    ThemeChoice.NIGHT -> "Night (dark)"
-}
+private val ThemeChoice.label @Composable get() = stringResource(
+    when (this) {
+        ThemeChoice.SYSTEM -> R.string.settings_theme_system
+        ThemeChoice.FIELD -> R.string.settings_theme_field
+        ThemeChoice.NIGHT -> R.string.settings_theme_night
+    },
+)
 
-private val OpenTo.label get() = when (this) {
-    OpenTo.RESUME -> "Where I left off"
-    OpenTo.HOME -> "Home"
-}
+private val OpenTo.label @Composable get() = stringResource(
+    when (this) {
+        OpenTo.RESUME -> R.string.settings_open_to_resume
+        OpenTo.HOME -> R.string.settings_open_to_home
+    },
+)
 
 @Composable
 private fun StorageSection(ui: SettingsUi, onSelect: (String) -> Unit) {
@@ -310,18 +326,22 @@ private fun StorageSection(ui: SettingsUi, onSelect: (String) -> Unit) {
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     )
                     Text(
-                        buildString {
-                            append("${formatBytes(volume.freeBytes)} free · Granger uses ${formatBytes(volume.grangerBytes)}")
-                            if (volume.queuedBytes > 0) append(" · ${formatBytes(volume.queuedBytes)} to download")
+                        if (volume.queuedBytes > 0) {
+                            stringResource(
+                                R.string.settings_storage_usage_queued,
+                                formatBytes(volume.freeBytes), formatBytes(volume.grangerBytes), formatBytes(volume.queuedBytes),
+                            )
+                        } else {
+                            stringResource(R.string.settings_storage_usage, formatBytes(volume.freeBytes), formatBytes(volume.grangerBytes))
                         },
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
         }
-        if (choosable) Text("New downloads go to the selected storage.", style = MaterialTheme.typography.bodySmall)
+        if (choosable) Text(stringResource(R.string.settings_storage_selected), style = MaterialTheme.typography.bodySmall)
         Text(
-            "Uninstalling Granger deletes everything it downloaded.",
+            stringResource(R.string.settings_storage_uninstall),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -336,19 +356,19 @@ private fun About() {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         BrandLockup(markWidth = 64.dp)
-        Text("The world’s knowledge. Yours to keep.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(R.string.settings_about_tagline), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium)
         Text(
-            "Knowledge is a human right.",
+            stringResource(R.string.settings_about_motto),
             style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            "Version ${BuildConfig.VERSION_NAME}",
+            stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            "GPLv3 · source on GitHub",
+            stringResource(R.string.settings_about_license),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

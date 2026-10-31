@@ -17,6 +17,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
+import app.granger.UiText
+import androidx.test.core.app.ApplicationProvider
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -29,12 +31,12 @@ class SourceScreenTest {
     @get:Rule val compose = createComposeRule()
 
     private val flavours = listOf(
-        FlavourChoice("wikipedia_en_top_maxi", "With pictures", 6_990_000_000, chosen = true),
-        FlavourChoice("wikipedia_en_top_nopic", "No pictures", 2_750_000_000, chosen = false),
-        FlavourChoice("wikipedia_en_top_mini", "Mini (intro paragraphs only)", 300_000_000, chosen = false),
+        FlavourChoice("wikipedia_en_top_maxi", UiText.Raw("With pictures"), 6_990_000_000, chosen = true),
+        FlavourChoice("wikipedia_en_top_nopic", UiText.Raw("No pictures"), 2_750_000_000, chosen = false),
+        FlavourChoice("wikipedia_en_top_mini", UiText.Raw("Mini (intro paragraphs only)"), 300_000_000, chosen = false),
     )
     private val top = ItemRow(
-        "wikipedia_en_top_maxi", "Wikipedia: best articles", "English, Russian · Updated March 2026 · CC BY-SA", "",
+        "wikipedia_en_top_maxi", "Wikipedia: best articles", UiText.Raw("English, Russian · Updated March 2026 · CC BY-SA"), UiText.Raw(""),
         6_990_000_000, ItemStatus.NotInstalled, packId = null, flavours = flavours, license = "CC BY-SA 4.0",
     )
 
@@ -61,8 +63,8 @@ class SourceScreenTest {
         compose.setContent {
             CatalogItemRow(
                 top.copy(
-                    flavours = flavours.map { it.copy(installed = it.label == "No pictures") },
-                    installedFlavour = "no pictures", switches = true, packId = "u-top",
+                    flavours = flavours.map { it.copy(installed = it.label == UiText.Raw("No pictures")) },
+                    switches = true, packId = "u-top",
                 ),
                 onGet = { calls += "switch" }, onCancel = {}, onRetry = {}, onRemove = {}, onOpen = { calls += "open" },
             )
@@ -92,8 +94,8 @@ class SourceScreenTest {
             CatalogItemRow(
                 top.copy(
                     id = "wikipedia_en_top_nopic", status = ItemStatus.Installed,
-                    flavours = flavours.map { it.copy(installed = it.label == "No pictures", chosen = it.label == "No pictures") },
-                    installedFlavour = "no pictures", packId = "u-top",
+                    flavours = flavours.map { it.copy(installed = it.label == UiText.Raw("No pictures"), chosen = it.label == UiText.Raw("No pictures")) },
+                    packId = "u-top",
                 ),
                 onGet = { calls += "get" }, onCancel = {}, onRetry = {}, onRemove = {}, onOpen = { calls += "open" },
             )
@@ -105,9 +107,9 @@ class SourceScreenTest {
     }
 
     @Test fun switchTextNamesBothFlavoursAndTheirSizes() {
-        val from = FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true)
-        val to = FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true)
-        assertThat(switchText("WikiMed", from, to)).isEqualTo(
+        val from = FlavourChoice("med_nopic", UiText.Raw("No pictures"), 1_050_000_000, chosen = false, installed = true)
+        val to = FlavourChoice("med_maxi", UiText.Raw("With pictures"), 1_860_000_000, chosen = true)
+        assertThat(switchText("WikiMed", from, to).resolve(ApplicationProvider.getApplicationContext())).isEqualTo(
             "Switch WikiMed from No pictures (1.1 GB) to With pictures (1.9 GB)? The No pictures version is removed once " +
                 "the new one has downloaded. Your places and bookmarks carry over.",
         )
@@ -117,8 +119,8 @@ class SourceScreenTest {
     @Test @Config(qualifiers = "w360dp-h800dp") fun aGroupedRowStacksTitleChoicesAndActionsAt360dp() {
         val long = top.copy(
             title = "Wikipedia: the 50,000 best articles in English, with every picture, every table and every infobox kept",
-            flavours = flavours.map { it.copy(installed = it.label == "No pictures") },
-            installedFlavour = "no pictures", switches = true, packId = "u-top",
+            flavours = flavours.map { it.copy(installed = it.label == UiText.Raw("No pictures")) },
+                    switches = true, packId = "u-top",
         )
         compose.setContent { CatalogItemRow(long, onGet = {}, onCancel = {}, onRetry = {}, onRemove = {}) }
         val title = compose.onNodeWithText(long.title).assertIsDisplayed()
@@ -141,7 +143,7 @@ class SourceScreenTest {
     }
 
     @Test fun aSingleFlavourRowStaysCompact() {
-        val one = ItemRow("knots", "Knots", "English · Updated 2025 · CC BY", "Tying knots", 60_000_000, ItemStatus.NotInstalled, null)
+        val one = ItemRow("knots", "Knots", UiText.Raw("English · Updated 2025 · CC BY"), UiText.Raw("Tying knots"), 60_000_000, ItemStatus.NotInstalled, null)
         compose.setContent { CatalogItemRow(one, onGet = {}, onCancel = {}, onRetry = {}, onRemove = {}) }
         compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)).assertCountEquals(0)
         // Get sits beside the title, as before.
@@ -156,7 +158,7 @@ class SourceScreenTest {
         var dismissed = false
         val check = SizeCheck(
             "wikipedia_en_all_maxi", "Wikipedia", 110_000_000_000, 41_000_000_000, "Phone",
-            smaller = FlavourChoice("wikipedia_en_all_nopic", "No pictures", 48_000_000_000, chosen = false),
+            smaller = FlavourChoice("wikipedia_en_all_nopic", UiText.Raw("No pictures"), 48_000_000_000, chosen = false),
         )
         compose.setContent { SizeCheckDialog(check, onGet = { got += it }, onDismiss = { dismissed = true }) }
         compose.onNodeWithText("Wikipedia is 110 GB").assertIsDisplayed()
@@ -180,7 +182,7 @@ class SourceScreenTest {
 
     @Test fun aFoldedFamilysRowOpensItsList() {
         var opened = false
-        val row = ItemRow("family:devdocs", "Developer docs", "243 packs", "", 0L, ItemStatus.NotInstalled, null, opensFamily = "devdocs")
+        val row = ItemRow("family:devdocs", "Developer docs", UiText.Raw("243 packs"), UiText.Raw(""), 0L, ItemStatus.NotInstalled, null, opensFamily = "devdocs")
         compose.setContent { FamilyRow(row) { opened = true } }
         compose.onNodeWithText("243 packs").assertIsDisplayed()
         compose.onNodeWithText("Developer docs").performClick()
@@ -190,8 +192,8 @@ class SourceScreenTest {
     // --- Plan WF: Wikipedia as one row ---
 
     private val wikipedia = ItemRow(
-        "wikipedia_en_top_maxi", "Wikipedia", "English · Updated September 2026 · CC BY-SA",
-        "The free encyclopedia, from 100 essential articles to all of it.", 6_990_000_000, ItemStatus.NotInstalled, packId = null,
+        "wikipedia_en_top_maxi", "Wikipedia", UiText.Raw("English · Updated September 2026 · CC BY-SA"),
+        UiText.Raw("The free encyclopedia, from 100 essential articles to all of it."), 6_990_000_000, ItemStatus.NotInstalled, packId = null,
         license = "CC BY-SA 4.0", setId = "wikipedia_en",
         slices = listOf(
             SliceChoice("wikipedia_en_100", "100 essential articles", 333_000_000, chosen = false),
@@ -200,9 +202,9 @@ class SourceScreenTest {
             SliceChoice("wikipedia_en_all", "Everything", 127_400_000_000, chosen = false),
         ),
         pictures = listOf(
-            PictureChoice("maxi", "With pictures", chosen = true),
-            PictureChoice("nopic", "No pictures", chosen = false),
-            PictureChoice("mini", "Mini (intro paragraphs only)", chosen = false),
+            PictureChoice("maxi", UiText.Raw("With pictures"), chosen = true),
+            PictureChoice("nopic", UiText.Raw("No pictures"), chosen = false),
+            PictureChoice("mini", UiText.Raw("Mini (intro paragraphs only)"), chosen = false),
         ),
         subjects = "subjects:wikipedia_en:wikipedia_en_top",
     )
@@ -233,7 +235,7 @@ class SourceScreenTest {
                     id = "wikipedia_en_100",
                     slices = wikipedia.slices.map { it.copy(chosen = it.zimName == "wikipedia_en_100") },
                     pictures = wikipedia.pictures.map {
-                        if (it.flavour == "maxi") it else it.copy(enabled = false, reason = "Not offered for 100 essential articles")
+                        if (it.flavour == "maxi") it else it.copy(enabled = false, reason = UiText.Raw("Not offered for 100 essential articles"))
                     },
                 ),
                 onGet = {}, onCancel = {}, onRetry = {}, onRemove = {},
@@ -247,11 +249,11 @@ class SourceScreenTest {
         compose.setContent {
             CatalogItemRow(
                 wikipedia.copy(
-                    insideOf = "Inside your Top 1 million", packId = "u-top1m",
+                    insideOf = UiText.Raw("Inside your Top 1 million"), packId = "u-top1m",
                     slices = wikipedia.slices.map {
                         when (it.zimName) {
                             "wikipedia_en_top1m" -> it.copy(installed = true)
-                            "wikipedia_en_100", "wikipedia_en_top" -> it.copy(inside = "Inside your Top 1 million")
+                            "wikipedia_en_100", "wikipedia_en_top" -> it.copy(inside = UiText.Raw("Inside your Top 1 million"))
                             else -> it
                         }
                     },
@@ -269,8 +271,8 @@ class SourceScreenTest {
     @Test fun aSubjectSaysWhatItAdds() {
         compose.setContent {
             CatalogItemRow(
-                ItemRow("wikipedia_en_medicine_maxi", "WikiMed", "English", "", 1_860_000_000, ItemStatus.NotInstalled, null,
-                    adds = "Adds about 69,600 articles to your Best 50,000 (95% new)"),
+                ItemRow("wikipedia_en_medicine_maxi", "WikiMed", UiText.Raw("English"), UiText.Raw(""), 1_860_000_000, ItemStatus.NotInstalled, null,
+                    adds = UiText.Raw("Adds about 69,600 articles to your Best 50,000 (95% new)")),
                 onGet = {}, onCancel = {}, onRetry = {}, onRemove = {},
             )
         }

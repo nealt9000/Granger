@@ -1,5 +1,7 @@
 package app.granger.library
 
+import app.granger.R
+import app.granger.UiText
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -133,7 +135,7 @@ class CollectionViewModel(
         val pack = packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
         val packName = pack?.name ?: row.books.firstOrNull()?.let(PackBooks::packNameOf)
         val header = GutenbergHeader(pack, row.books.size, row.books.count { it.searchableInFull }, packName?.let(runs::get))
-        if (Filing.isKiwixBooksCollection(key)) header.copy(provider = KIWIX_LIBRARY, noun = "document") else header
+        if (Filing.isKiwixBooksCollection(key)) header.copy(kind = HeaderKind.KIWIX_LIBRARY) else header
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** What "Make all searchable…" would take here; null when it isn't offered. */
@@ -233,29 +235,39 @@ class CollectionViewModel(
     }
 }
 
-/** Whose a nautilus pack's collection is (Plan KB Decision 7): "Kiwix library · 17 documents". */
-const val KIWIX_LIBRARY = "Kiwix library"
+/** Whose a book pack's collection is: Project Gutenberg's books, or a Kiwix library's documents (Plan KB Decision 7). */
+enum class HeaderKind { GUTENBERG, KIWIX_LIBRARY }
 
 /**
  * A book pack's collection's [pack] (null once it's gone), its [books], how many are [searchable] in full, and a run's
- * [progress]; [provider] and [noun] say whose it is and what it holds.
+ * [progress]; [kind] says whose it is and what it holds.
  */
 data class GutenbergHeader(
     val pack: Pack?,
     val books: Int,
     val searchable: Int,
     val progress: SearchableProgress? = null,
-    val provider: String = app.granger.core.library.GutenbergNames.PROVIDER,
-    val noun: String = "book",
+    val kind: HeaderKind = HeaderKind.GUTENBERG,
 ) {
+    /** "Project Gutenberg", "Kiwix library". */
+    val provider: UiText get() = when (kind) {
+        HeaderKind.GUTENBERG -> UiText.Raw(app.granger.core.library.GutenbergNames.PROVIDER)
+        HeaderKind.KIWIX_LIBRARY -> UiText.Res(R.string.library_kiwix_library)
+    }
+
+    /** "1,284 books", "17 documents". */
+    val count: UiText get() = UiText.Plural(
+        if (kind == HeaderKind.KIWIX_LIBRARY) R.plurals.library_documents else R.plurals.library_books_counted, books, number(books),
+    )
+
     /** "Project Gutenberg · 1,284 books", "Kiwix library · 17 documents". */
-    val provenance: String get() = "$provider · ${number(books)} ${if (books == 1) noun else "${noun}s"}"
+    val provenance: UiText get() = UiText.Res(R.string.library_dotted, provider, count)
 
     /** "37 searchable in full". */
-    val searchableText: String get() = "${number(searchable)} searchable in full"
+    val searchableText: UiText get() = UiText.Plural(R.plurals.library_searchable_in_full, searchable, number(searchable))
 
     /** "Project Gutenberg · 1,284 books · 37 searchable in full". */
-    val text: String get() = "$provenance · $searchableText"
+    val text: UiText get() = UiText.Res(R.string.library_dotted, provenance, searchableText)
 
     private fun number(n: Int) = java.text.NumberFormat.getIntegerInstance().format(n)
 }

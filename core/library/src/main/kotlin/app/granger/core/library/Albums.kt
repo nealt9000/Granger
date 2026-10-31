@@ -21,6 +21,8 @@ data class AlbumSummary(
 
 /** Album identity, grouping and track order. */
 object Albums {
+    // Placeholders, not words to show: they are stored, sorted and compared as they are. The app shows each through
+    // its own string (music's shownName), in the phone's language.
     const val UNKNOWN_ALBUM = "Unknown album"
     const val UNKNOWN_ARTIST = "Unknown artist"
 

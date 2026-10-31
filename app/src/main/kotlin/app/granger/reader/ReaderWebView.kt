@@ -1,5 +1,7 @@
 package app.granger.reader
 
+import androidx.annotation.StringRes
+import app.granger.R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Rect
@@ -20,10 +22,10 @@ import app.granger.theme.NightColors
 import org.json.JSONTokener
 
 /** What the text-selection menu offers besides the system's own Copy. [READ_ALOUD] hands over the selection's block (JSON), not its text. */
-enum class SelectionAction(val label: String) {
-    SEARCH("Search"),
-    RESEARCH("Ask"),
-    READ_ALOUD("Read from here"),
+enum class SelectionAction(@StringRes val label: Int) {
+    SEARCH(R.string.common_search),
+    RESEARCH(R.string.reader_select_ask),
+    READ_ALOUD(R.string.reader_select_read_from_here),
 }
 
 /**

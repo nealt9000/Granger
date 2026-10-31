@@ -6,6 +6,8 @@ import app.granger.FakeLibrary
 import app.granger.FakePrefs
 import app.granger.FakeVolumes
 import app.granger.MainDispatcherRule
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import app.granger.bookEntry
 import app.granger.catalogOf
 import app.granger.core.ai.DeviceTier
@@ -26,7 +28,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class OnboardingViewModelTest {
     @get:Rule val main = MainDispatcherRule()
 
@@ -98,11 +105,11 @@ class OnboardingViewModelTest {
     }
 
     @Test fun thisPhoneWordsTheTierAndAskAsReadinessDoes() = runTest(main.dispatcher) {
-        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine).isEqualTo("A library phone, with 8.0 GB of memory.")
-        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine).contains("needs a phone with 6 GB")
-        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine).isEqualTo("A library phone that can run Ask, with 8.0 GB of memory.")
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine.en()).isEqualTo("A library phone, with 8.0 GB of memory.")
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine?.en()).contains("needs a phone with 6 GB")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine.en()).isEqualTo("A library phone that can run Ask, with 8.0 GB of memory.")
         // No models in this catalog (a release build's): Ask runs here, but there's nothing to get on the next screen.
-        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.researchLine).isEqualTo("Ask, the librarian, runs on this phone.")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.phone.researchLine?.en()).isEqualTo("Ask, the librarian, runs on this phone.")
         assertThat(viewModel(DeviceTier.ASK).ui.value.phone.volumes.single().label).isEqualTo("Internal storage")
     }
 
@@ -129,12 +136,12 @@ class OnboardingViewModelTest {
         val e2b = app.granger.modelEntry("gemma-4-e2b-gpu", app.granger.core.catalog.ModelRole.SMALL, size = 2_000)
         catalog.mutable.value = CatalogState(catalog = full.copy(models = listOf(e2b)))
         val vm = viewModel(DeviceTier.ASK)
-        assertThat(vm.ui.value.phone.researchLine).endsWith("You can get it on the next screen.")
+        assertThat(vm.ui.value.phone.researchLine?.en()).endsWith("You can get it on the next screen.")
         assertThat(vm.ui.value.askLine!!.bytes).isEqualTo(2_000)
         assertThat(vm.ui.value.askChosen).isTrue()
         // Under Neither too: Ask needs no preset.
         vm.chooseStart(null); settle()
-        assertThat(vm.ui.value.review.groups.map { it.title }).containsExactly("Ask (Preview)")
+        assertThat(vm.ui.value.review.groups.map { it.title.en() }).containsExactly("Ask (Preview)")
         vm.start(); settle()
         assertThat(enqueued.single().second).containsExactly("gemma-4-e2b-gpu")
     }
@@ -145,7 +152,7 @@ class OnboardingViewModelTest {
         val vm = viewModel(DeviceTier.ASK)
         vm.toggleAsk(); settle()
         assertThat(vm.ui.value.askChosen).isFalse()
-        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Ask (Preview)")
+        assertThat(vm.ui.value.review.groups.map { it.title.en() }).doesNotContain("Ask (Preview)")
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.askLine).isNull()
     }
 
@@ -154,7 +161,7 @@ class OnboardingViewModelTest {
         val vm = viewModel(country = "PE")
         assertThat(vm.ui.value.region!!.title).isEqualTo("Peru")
         assertThat(vm.ui.value.regionSuggested).isTrue()
-        assertThat(vm.ui.value.review.groups.map { it.title }).contains("Your region")
+        assertThat(vm.ui.value.review.groups.map { it.title.en() }).contains("Your region")
         vm.chooseRegion(null); settle()
         assertThat(vm.ui.value.region).isNull()
         assertThat(vm.ui.value.regionSuggested).isFalse()
@@ -191,7 +198,7 @@ class OnboardingViewModelTest {
         val vm = viewModel(country = "US")
         assertThat(vm.ui.value.region).isNull()
         assertThat(vm.ui.value.suggestion!!.title).isEqualTo("United States of America")
-        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Your region")
+        assertThat(vm.ui.value.review.groups.map { it.title.en() }).doesNotContain("Your region")
         vm.chooseRegion("maps_en_usa"); settle()
         assertThat(vm.ui.value.region!!.title).isEqualTo("United States of America")
     }
@@ -204,9 +211,9 @@ class OnboardingViewModelTest {
         catalog.mutable.value = CatalogState(catalog = full.copy(voices = listOf(nanny)))
         val vm = viewModel()
         assertThat(vm.ui.value.voiceLine!!.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
-        assertThat(vm.ui.value.review.groups.map { it.title }).contains("Read aloud")
+        assertThat(vm.ui.value.review.groups.map { it.title.en() }).contains("Read aloud")
         vm.toggleVoice(); settle()
-        assertThat(vm.ui.value.review.groups.map { it.title }).doesNotContain("Read aloud")
+        assertThat(vm.ui.value.review.groups.map { it.title.en() }).doesNotContain("Read aloud")
         // Read-aloud off in this build: no line.
         assertThat(viewModel(offerVoice = false).ui.value.voiceLine).isNull()
     }
@@ -242,7 +249,7 @@ class OnboardingViewModelTest {
         vm.toggleUseCase("medical"); settle()
         val ui = vm.ui.value
         assertThat(ui.additions.single().lines).isEmpty() // MedlinePlus is installed: the chip adds nothing.
-        assertThat(ui.review.groups.map { it.title }).containsExactly("Your picks", "Your region").inOrder() // Classics unticked: no longer the preset
+        assertThat(ui.review.groups.map { it.title.en() }).containsExactly("Your picks", "Your region").inOrder() // Classics unticked: no longer the preset
         assertThat(ui.review.items.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "maps_en_peru")
         assertThat(ui.review.bytes).isEqualTo(1_500)
         assertThat(ui.review.fits).isTrue()
@@ -291,7 +298,7 @@ class OnboardingViewModelTest {
         enqueueResult = EnqueueResult.NoSpace(neededBytes = 5_000)
         val vm = viewModel()
         vm.start(); settle()
-        assertThat(vm.ui.value.notice).contains("free up")
+        assertThat(vm.ui.value.notice?.en()).contains("free up")
         assertThat(vm.finished.value).isFalse()
         assertThat(onboardingPrefs.done).isFalse()
         vm.clearNotice(); settle()
@@ -304,3 +311,6 @@ class OnboardingViewModelTest {
         assertThat(enqueued).hasSize(1)
     }
 }
+
+/** Resources need Robolectric now that the flow's text is [UiText]; the assertions stay in English. */
+private fun UiText.en(): String = resolve(ApplicationProvider.getApplicationContext())

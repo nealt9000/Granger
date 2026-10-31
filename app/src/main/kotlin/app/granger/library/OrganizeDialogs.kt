@@ -11,6 +11,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -70,20 +72,20 @@ fun MovePackDialog(
     val choices = moveChoices(shelves, currentCollectionId, allowNewMediaType)
     when {
         newIn != null -> NameDialog(
-            title = "New collection",
-            label = "Collection name",
-            confirm = "Move",
+            title = stringResource(R.string.library_new_collection),
+            label = stringResource(R.string.library_collection_name),
+            confirm = stringResource(R.string.library_move),
             onConfirm = { onMoveToNewCollection(newIn!!, it); onDismiss() },
             onDismiss = { newIn = null },
         )
         newMediaType -> TwoNameDialog(
-            title = "New media type",
-            firstLabel = "Media type name",
-            secondLabel = "Collection name",
+            title = stringResource(R.string.library_new_media_type),
+            firstLabel = stringResource(R.string.library_media_type_name),
+            secondLabel = stringResource(R.string.library_collection_name),
             onConfirm = { type, collection -> onMoveToNewMediaType(type, collection); onDismiss() },
             onDismiss = { newMediaType = false },
         )
-        else -> ChoiceDialog("Move to collection…", choices, onDismiss) { choice ->
+        else -> ChoiceDialog(stringResource(R.string.library_move_to_collection), choices, onDismiss) { choice ->
             when (choice) {
                 is MoveChoice.Existing -> { onMove(choice.id); onDismiss() }
                 is MoveChoice.NewCollection -> newIn = choice.mediaTypeId
@@ -106,9 +108,9 @@ fun MoveCollectionDialog(
     var creating by rememberSaveable { mutableStateOf(false) }
     if (creating) {
         NameDialog(
-            title = "New media type",
-            label = "Media type name",
-            confirm = "Move",
+            title = stringResource(R.string.library_new_media_type),
+            label = stringResource(R.string.library_media_type_name),
+            confirm = stringResource(R.string.library_move),
             onConfirm = { onMoveToNewMediaType(it); onDismiss() },
             onDismiss = { creating = false },
         )
@@ -116,7 +118,7 @@ fun MoveCollectionDialog(
     }
     val choices = shelves.filter { it.mediaType.id != currentMediaTypeId }
         .map { MoveChoice.Existing(it.mediaType.id, it.mediaType.name) } + MoveChoice.NewMediaType
-    ChoiceDialog("Move collection to…", choices, onDismiss) { choice ->
+    ChoiceDialog(stringResource(R.string.library_move_collection), choices, onDismiss) { choice ->
         when (choice) {
             is MoveChoice.Existing -> { onMove(choice.id); onDismiss() }
             MoveChoice.NewMediaType -> creating = true
@@ -148,11 +150,11 @@ private fun ChoiceDialog(title: String, choices: List<MoveChoice>, onDismiss: ()
                             modifier = Modifier.clickable { onPick(choice) }.padding(start = if (choice.indented) 16.dp else 0.dp),
                         )
                         is MoveChoice.NewCollection -> ListItem(
-                            headlineContent = { Text("New collection…") },
+                            headlineContent = { Text(stringResource(R.string.library_new_collection_choice)) },
                             modifier = Modifier.clickable { onPick(choice) },
                         )
                         MoveChoice.NewMediaType -> ListItem(
-                            headlineContent = { Text("New media type…") },
+                            headlineContent = { Text(stringResource(R.string.library_new_media_type_choice)) },
                             modifier = Modifier.clickable { onPick(choice) },
                         )
                     }
@@ -160,7 +162,7 @@ private fun ChoiceDialog(title: String, choices: List<MoveChoice>, onDismiss: ()
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -180,7 +182,7 @@ fun NameDialog(
         title = { Text(title) },
         text = { OutlinedTextField(name, { name = it }, label = { Text(label) }, singleLine = true) },
         confirmButton = { TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text(confirm) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -204,9 +206,9 @@ private fun TwoNameDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(first, second) }, enabled = first.isNotBlank() && second.isNotBlank()) { Text("Move") }
+            TextButton(onClick = { onConfirm(first, second) }, enabled = first.isNotBlank() && second.isNotBlank()) { Text(stringResource(R.string.library_move)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -217,6 +219,6 @@ fun ConfirmDialog(title: String, message: String, confirm: String, onConfirm: ()
         title = { Text(title) },
         text = { Text(message) },
         confirmButton = { TextButton(onClick = { onConfirm(); onDismiss() }) { Text(confirm) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

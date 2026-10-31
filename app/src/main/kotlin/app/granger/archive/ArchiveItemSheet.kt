@@ -30,37 +30,46 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.archive.AudioOffer
 import app.granger.core.archive.Offer
 import app.granger.formatBytes
 import app.granger.sources.ItemStatus
 import app.granger.sources.ItemStatusText
 
-/** The label for what an item offers; null when the guess is unknown. */
+/** The label for what an item offers; null when the guess is unknown. EPUB and PDF are format names, the same in every language. */
+@Composable
 internal fun offerLabel(offer: Offer?): String? = when (offer) {
-    is Offer.Download -> kindLabel(offer) + if (offer.isSet) " · ${offer.parts.size} parts" else ""
-    Offer.LendOnly -> "Borrow on archive.org"
-    Offer.Nothing -> "No downloadable text"
+    is Offer.Download -> if (offer.isSet) pluralStringResource(R.plurals.archive_offer_parts, offer.parts.size, offer.parts.size, kindLabel(offer)) else kindLabel(offer)
+    Offer.LendOnly -> stringResource(R.string.archive_borrow)
+    Offer.Nothing -> stringResource(R.string.archive_no_text)
     null -> null
 }
 
+@Composable
 private fun kindLabel(offer: Offer.Download): String = when (offer.kind) {
-    app.granger.core.archive.TextKind.EPUB -> if (offer.pdf != null) "EPUB made from a scan · PDF" else "EPUB"
-    app.granger.core.archive.TextKind.TEXT -> "Plain text"
-    app.granger.core.archive.TextKind.OCR_TEXT -> if (offer.pdf != null) "OCR text: may have errors · PDF" else "OCR text: may have errors"
+    app.granger.core.archive.TextKind.EPUB ->
+        if (offer.pdf != null) stringResource(R.string.archive_offer_epub_scan_pdf) else "EPUB"
+    app.granger.core.archive.TextKind.TEXT -> stringResource(R.string.archive_offer_plain_text)
+    app.granger.core.archive.TextKind.OCR_TEXT ->
+        stringResource(if (offer.pdf != null) R.string.archive_offer_ocr_pdf else R.string.archive_offer_ocr)
     app.granger.core.archive.TextKind.PDF -> "PDF"
-    app.granger.core.archive.TextKind.COMIC -> "Comic: its pages, to zoom"
+    app.granger.core.archive.TextKind.COMIC -> stringResource(R.string.archive_offer_comic)
 }
 
 /** The label for what an audio item offers: its format on a row, "7 tracks · VBR MP3" once its files are known. */
+@Composable
 internal fun audioLabel(offer: AudioOffer?): String? = when (offer) {
     is AudioOffer.Tracks ->
         if (offer.files.isEmpty()) offer.format
-        else "${offer.files.size} ${if (offer.files.size == 1) "track" else "tracks"} · ${offer.format}"
-    AudioOffer.LendOnly -> "Borrow on archive.org"
-    AudioOffer.Nothing -> "No downloadable audio"
+        else pluralStringResource(R.plurals.archive_tracks, offer.files.size, offer.files.size, offer.format)
+    AudioOffer.LendOnly -> stringResource(R.string.archive_borrow)
+    AudioOffer.Nothing -> stringResource(R.string.archive_no_audio)
     null -> null
 }
 
@@ -101,7 +110,7 @@ internal fun ArchiveItemSheet(
             Text(item?.title?.ifBlank { null } ?: sheet.identifier, style = MaterialTheme.typography.titleLarge)
             when {
                 sheet.loading -> Box(Modifier.fillMaxWidth().padding(24.dp), Alignment.Center) { CircularProgressIndicator() }
-                sheet.error != null -> Text(sheet.error, color = MaterialTheme.colorScheme.error)
+                sheet.error != null -> Text(sheet.error.resolve(), color = MaterialTheme.colorScheme.error)
             }
             if (item != null) {
                 val byline = listOf(item.creator, item.date).filter { it.isNotBlank() }.joinToString(" · ")
@@ -121,7 +130,7 @@ internal fun ArchiveItemSheet(
             }
             val downloading = sheet.status is ItemStatus.Queued || sheet.status is ItemStatus.Downloading
             if (downloading && sheet.filesTotal > 0) {
-                Text("Downloading: ${sheet.filesDone} of ${sheet.filesTotal}", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.archive_downloading_files, sheet.filesDone, sheet.filesTotal), style = MaterialTheme.typography.bodyMedium)
             }
             ItemStatusText(sheet.status)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -129,19 +138,19 @@ internal fun ArchiveItemSheet(
                 // The PDF beside the text, side by side with Get: its own download, and its own book once in.
                 if (sheet.pdfSizeBytes != null && sheet.status !is ItemStatus.InLibrary) {
                     when (sheet.pdfStatus) {
-                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text("Get PDF · ${formatBytes(sheet.pdfSizeBytes)}") }
+                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text(stringResource(R.string.archive_get_pdf, formatBytes(sheet.pdfSizeBytes))) }
                         ItemStatus.Installed, ItemStatus.UpdateAvailable ->
-                            Text("PDF in your library", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.archive_pdf_in_library), style = MaterialTheme.typography.bodySmall)
                         else -> Text(
-                            "PDF: " + pdfStatusText(sheet.pdfStatus),
+                            pdfStatusText(sheet.pdfStatus),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
             }
-            if (sheet.parts.isNotEmpty()) OutlinedButton(onClick = { choosing = true }) { Text("Choose parts") }
-            OutlinedButton(onClick = onOpenInBrowser) { Text("View on archive.org") }
+            if (sheet.parts.isNotEmpty()) OutlinedButton(onClick = { choosing = true }) { Text(stringResource(R.string.archive_choose_parts)) }
+            OutlinedButton(onClick = onOpenInBrowser) { Text(stringResource(R.string.archive_view_on_site)) }
             Box(Modifier.padding(bottom = 16.dp))
         }
     }
@@ -160,33 +169,37 @@ private fun SheetButtons(
 ) {
     // The ledger decides first: something installed or in flight is managed whatever the metadata offers now.
     when (sheet.status) {
-        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
+        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
         is ItemStatus.Failed -> {
-            TextButton(onClick = onCancel) { Text("Cancel") }
-            Button(onClick = onRetry) { Text("Retry") }
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+            Button(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
         }
-        ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
+        ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
         is ItemStatus.Partial -> {
-            TextButton(onClick = onRemove) { Text("Remove") }
-            Button(onClick = onGet) { Text("Get the rest") }
+            TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            Button(onClick = onGet) { Text(stringResource(R.string.archive_get_the_rest)) }
         }
-        is ItemStatus.InLibrary -> Button(onClick = onOpenInLibrary) { Text("Open") }
+        is ItemStatus.InLibrary -> Button(onClick = onOpenInLibrary) { Text(stringResource(R.string.common_open)) }
         else -> when {
-            audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text("Get") }
-            audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
+            audio is AudioOffer.Tracks -> Button(onClick = onGet) { Text(stringResource(R.string.common_get)) }
+            audio == AudioOffer.LendOnly -> Button(onClick = onOpenInBrowser) { Text(stringResource(R.string.archive_borrow)) }
             sheet.offer is Offer.Download -> Button(onClick = onGet) {
-                val get = if (sheet.parts.isNotEmpty()) "Get all" else "Get"
-                Text(sheet.sizeBytes?.let { "$get · ${formatBytes(it)}" } ?: get)
+                val all = sheet.parts.isNotEmpty()
+                Text(
+                    sheet.sizeBytes?.let { stringResource(if (all) R.string.archive_get_all_size else R.string.archive_get_size, formatBytes(it)) }
+                        ?: stringResource(if (all) R.string.archive_get_all else R.string.common_get),
+                )
             }
-            sheet.offer == Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text("Borrow on archive.org") }
+            sheet.offer == Offer.LendOnly -> Button(onClick = onOpenInBrowser) { Text(stringResource(R.string.archive_borrow)) }
             else -> Unit
         }
     }
 }
 
 /** On the sheet a set's offer line says how much in all too: "Comic: its pages, to zoom · 4 parts · 234 MB". */
+@Composable
 internal fun setLabel(label: String, sheet: ItemSheet): String =
-    if (sheet.parts.isEmpty()) label else label + (sheet.sizeBytes?.let { " · ${formatBytes(it)}" } ?: "")
+    if (sheet.parts.isEmpty()) label else sheet.sizeBytes?.let { stringResource(R.string.archive_label_size, label, formatBytes(it)) } ?: label
 
 /** More parts than this get a filter field over the list. */
 internal const val PARTS_FILTER_FROM = 20
@@ -201,14 +214,14 @@ private fun PartsList(sheet: ItemSheet, onBack: () -> Unit, onGetPart: (Int) -> 
     var query by rememberSaveable { mutableStateOf("") }
     Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("Back") }
-            Text("${sheet.parts.size} parts", style = MaterialTheme.typography.titleMedium)
+            TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
+            Text(pluralStringResource(R.plurals.archive_parts, sheet.parts.size, sheet.parts.size), style = MaterialTheme.typography.titleMedium)
         }
         if (sheet.parts.size > PARTS_FILTER_FROM) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Find a part") },
+                placeholder = { Text(stringResource(R.string.archive_find_part)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().testTag(ArchiveSheetTags.PART_FILTER),
             )
@@ -217,13 +230,13 @@ private fun PartsList(sheet: ItemSheet, onBack: () -> Unit, onGetPart: (Int) -> 
             items(filterParts(sheet.parts, query), key = { it.number }) { part ->
                 ListItem(
                     headlineContent = { Text(part.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-                    supportingContent = { Text(partStatusText(part)) },
+                    supportingContent = { Text(partStatusText(part).resolve()) },
                     trailingContent = {
                         when (part.status) {
-                            ItemStatus.NotInstalled -> TextButton(onClick = { onGetPart(part.number) }) { Text("Get") }
-                            is ItemStatus.Failed -> TextButton(onClick = onRetry) { Text("Retry") }
+                            ItemStatus.NotInstalled -> TextButton(onClick = { onGetPart(part.number) }) { Text(stringResource(R.string.common_get)) }
+                            is ItemStatus.Failed -> TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
                             ItemStatus.Installed, ItemStatus.UpdateAvailable ->
-                                TextButton(onClick = { onRemovePart(part.number) }) { Text("Remove") }
+                                TextButton(onClick = { onRemovePart(part.number) }) { Text(stringResource(R.string.common_remove)) }
                             else -> Unit
                         }
                     },
@@ -235,14 +248,14 @@ private fun PartsList(sheet: ItemSheet, onBack: () -> Unit, onGetPart: (Int) -> 
 }
 
 /** A part's size, and where its download stands when it's in or on its way. */
-internal fun partStatusText(part: PartRow): String {
+internal fun partStatusText(part: PartRow): UiText {
     val size = formatBytes(part.sizeBytes)
     return when (val status = part.status) {
-        is ItemStatus.Queued -> "$size · queued"
-        is ItemStatus.Downloading -> "$size · downloading, ${(status.fraction * 100).toInt()}%"
-        is ItemStatus.Failed -> "$size · stopped: ${status.reason}"
-        ItemStatus.Installed, ItemStatus.UpdateAvailable -> "$size · in your library"
-        else -> size
+        is ItemStatus.Queued -> UiText.Res(R.string.archive_part_queued, size)
+        is ItemStatus.Downloading -> UiText.Res(R.string.archive_part_downloading, size, (status.fraction * 100).toInt())
+        is ItemStatus.Failed -> UiText.Res(R.string.archive_part_stopped, size, app.granger.sources.failedText(status))
+        ItemStatus.Installed, ItemStatus.UpdateAvailable -> UiText.Res(R.string.archive_part_in_library, size)
+        else -> UiText.Raw(size)
     }
 }
 
@@ -252,9 +265,10 @@ object ArchiveSheetTags {
 }
 
 /** Where the PDF's own download stands, in a few words; the sheet's Cancel and Retry act on both downloads. */
+@Composable
 private fun pdfStatusText(status: ItemStatus): String = when (status) {
-    is ItemStatus.Queued -> "queued"
-    is ItemStatus.Downloading -> "downloading, ${(status.fraction * 100).toInt()}%"
-    is ItemStatus.Failed -> "failed"
-    else -> ""
+    is ItemStatus.Queued -> stringResource(R.string.archive_pdf_queued)
+    is ItemStatus.Downloading -> stringResource(R.string.archive_pdf_downloading, (status.fraction * 100).toInt())
+    is ItemStatus.Failed -> stringResource(R.string.archive_pdf_failed)
+    else -> stringResource(R.string.archive_pdf_other)
 }

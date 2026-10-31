@@ -1,5 +1,8 @@
 package app.granger.ebook
 
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,23 +35,23 @@ import kotlin.math.roundToInt
 fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Setting("Typeface") {
-                Chips(listOf(Typeface.SERIF to "Serif", Typeface.SANS to "Sans"), prefs.typeface) { onChange(prefs.copy(typeface = it)) }
+            Setting(R.string.ebook_typeface) {
+                Chips(listOf(Typeface.SERIF to R.string.ebook_typeface_serif, Typeface.SANS to R.string.ebook_typeface_sans), prefs.typeface) { onChange(prefs.copy(typeface = it)) }
             }
-            Setting("Size") {
+            Setting(R.string.ebook_size) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = { onChange(prefs.copy(fontScale = prefs.fontScale - ReadingPrefs.FONT_SCALE_STEP)) },
                         enabled = prefs.fontScale > ReadingPrefs.MIN_FONT_SCALE,
                     ) { Text("−") }
-                    Text("${(prefs.fontScale * 100).roundToInt()}%", modifier = Modifier.width(56.dp), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.ebook_percent, (prefs.fontScale * 100).roundToInt()), modifier = Modifier.width(56.dp), style = MaterialTheme.typography.titleMedium)
                     OutlinedButton(
                         onClick = { onChange(prefs.copy(fontScale = prefs.fontScale + ReadingPrefs.FONT_SCALE_STEP)) },
                         enabled = prefs.fontScale < ReadingPrefs.MAX_FONT_SCALE,
                     ) { Text("+") }
                 }
             }
-            Setting("Line spacing") {
+            Setting(R.string.ebook_line_spacing) {
                 var value by remember(prefs.lineHeight) { mutableFloatStateOf(prefs.lineHeight.toFloat()) }
                 Slider(
                     value = value,
@@ -57,7 +60,7 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
                     valueRange = ReadingPrefs.MIN_LINE_HEIGHT.toFloat()..ReadingPrefs.MAX_LINE_HEIGHT.toFloat(),
                 )
             }
-            Setting("Margins") {
+            Setting(R.string.ebook_margins) {
                 var value by remember(prefs.margins) { mutableFloatStateOf(prefs.margins.toFloat()) }
                 Slider(
                     value = value,
@@ -66,12 +69,12 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
                     valueRange = ReadingPrefs.MIN_MARGINS.toFloat()..ReadingPrefs.MAX_MARGINS.toFloat(),
                 )
             }
-            Setting("Alignment") {
-                Chips(listOf(Align.START to "Left", Align.JUSTIFY to "Justified"), prefs.align) { onChange(prefs.copy(align = it)) }
+            Setting(R.string.ebook_alignment) {
+                Chips(listOf(Align.START to R.string.ebook_align_left, Align.JUSTIFY to R.string.ebook_align_justified), prefs.align) { onChange(prefs.copy(align = it)) }
             }
-            Setting("Theme") {
+            Setting(R.string.ebook_theme) {
                 Chips(
-                    listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.SEPIA to "Sepia", ReadingTheme.NIGHT to "Night"),
+                    listOf(ReadingTheme.APP to R.string.ebook_theme_match_app, ReadingTheme.DAY to R.string.ebook_theme_day, ReadingTheme.SEPIA to R.string.ebook_theme_sepia, ReadingTheme.NIGHT to R.string.ebook_theme_night),
                     prefs.theme,
                 ) { onChange(prefs.copy(theme = it)) }
             }
@@ -88,16 +91,16 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
 fun PdfSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Setting("Pages") {
-                Chips(listOf(false to "Page by page", true to "Scroll"), prefs.pdfScroll) { onChange(prefs.copy(pdfScroll = it)) }
+            Setting(R.string.ebook_pdf_pages) {
+                Chips(listOf(false to R.string.ebook_pdf_page_by_page, true to R.string.ebook_pdf_scroll), prefs.pdfScroll) { onChange(prefs.copy(pdfScroll = it)) }
             }
-            Setting("Fit") {
-                Chips(listOf(false to "Whole page", true to "Width"), prefs.pdfFitWidth) { onChange(prefs.copy(pdfFitWidth = it)) }
+            Setting(R.string.ebook_pdf_fit) {
+                Chips(listOf(false to R.string.ebook_pdf_whole_page, true to R.string.ebook_pdf_width), prefs.pdfFitWidth) { onChange(prefs.copy(pdfFitWidth = it)) }
             }
-            Setting("Theme") {
+            Setting(R.string.ebook_theme) {
                 // Sepia reads as Day on a PDF, so it shows as Day here.
                 val shown = if (prefs.theme == ReadingTheme.SEPIA) ReadingTheme.DAY else prefs.theme
-                Chips(listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.NIGHT to "Night"), shown) {
+                Chips(listOf(ReadingTheme.APP to R.string.ebook_theme_match_app, ReadingTheme.DAY to R.string.ebook_theme_day, ReadingTheme.NIGHT to R.string.ebook_theme_night), shown) {
                     onChange(prefs.copy(theme = it))
                 }
             }
@@ -114,24 +117,26 @@ fun PdfSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDi
 fun WikiTextSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Setting("Text size") {
+            Setting(R.string.ebook_text_size) {
+                val smaller = stringResource(R.string.ebook_smaller_text)
+                val larger = stringResource(R.string.ebook_larger_text)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = { onChange(prefs.copy(wikiTextZoom = prefs.wikiTextZoom - ReadingPrefs.WIKI_ZOOM_STEP)) },
                         enabled = prefs.wikiTextZoom > ReadingPrefs.MIN_WIKI_ZOOM,
-                        modifier = Modifier.semantics { contentDescription = "Smaller text" },
+                        modifier = Modifier.semantics { contentDescription = smaller },
                     ) { Text("−") }
-                    Text("${prefs.wikiTextZoom}%", modifier = Modifier.width(56.dp), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.ebook_percent, prefs.wikiTextZoom), modifier = Modifier.width(56.dp), style = MaterialTheme.typography.titleMedium)
                     OutlinedButton(
                         onClick = { onChange(prefs.copy(wikiTextZoom = prefs.wikiTextZoom + ReadingPrefs.WIKI_ZOOM_STEP)) },
                         enabled = prefs.wikiTextZoom < ReadingPrefs.MAX_WIKI_ZOOM,
-                        modifier = Modifier.semantics { contentDescription = "Larger text" },
+                        modifier = Modifier.semantics { contentDescription = larger },
                     ) { Text("+") }
                 }
             }
-            Setting("Theme") {
+            Setting(R.string.ebook_theme) {
                 val shown = if (prefs.theme == ReadingTheme.SEPIA) ReadingTheme.DAY else prefs.theme
-                Chips(listOf(ReadingTheme.APP to "Match app", ReadingTheme.DAY to "Day", ReadingTheme.NIGHT to "Night"), shown) {
+                Chips(listOf(ReadingTheme.APP to R.string.ebook_theme_match_app, ReadingTheme.DAY to R.string.ebook_theme_day, ReadingTheme.NIGHT to R.string.ebook_theme_night), shown) {
                     onChange(prefs.copy(theme = it))
                 }
             }
@@ -140,18 +145,18 @@ fun WikiTextSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismi
 }
 
 @Composable
-private fun Setting(label: String, content: @Composable () -> Unit) {
+private fun Setting(@StringRes label: Int, content: @Composable () -> Unit) {
     Column {
-        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         content()
     }
 }
 
 @Composable
-private fun <T> Chips(options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit) {
+private fun <T> Chips(options: List<Pair<T, Int>>, selected: T, onSelect: (T) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         options.forEach { (value, label) ->
-            FilterChip(selected = value == selected, onClick = { onSelect(value) }, label = { Text(label) })
+            FilterChip(selected = value == selected, onClick = { onSelect(value) }, label = { Text(stringResource(label)) })
         }
     }
 }

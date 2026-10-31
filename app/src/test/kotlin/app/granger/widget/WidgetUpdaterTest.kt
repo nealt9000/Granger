@@ -48,7 +48,7 @@ class WidgetUpdaterTest {
         assertThat(renders).isEmpty()
         hub.saved.value = SavedModes(SavedMusic(listOf(track("a", "Song A")), 0, 0L, false, 0), null, PlayerMode.MUSIC)
         runCurrent()
-        assertThat(renders.map { it.title }).containsExactly("Song A")
+        assertThat(renders.map { it.title }).containsExactly(app.granger.UiText.Raw("Song A"))
     }
 
     @Test fun switchingPlayersUpdatesTheWidget() = runTest {
@@ -60,6 +60,6 @@ class WidgetUpdaterTest {
         // A chapter change is a change too.
         hub.ui.value = bookUi(b, chapter(b, 1, 100_000L, title = "Two"), chapterCount = 2); runCurrent()
         assertThat(renders).hasSize(3)
-        assertThat(renders.last().title).isEqualTo("Two")
+        assertThat(renders.last().title).isEqualTo(app.granger.UiText.Raw("Two"))
     }
 }

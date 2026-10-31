@@ -27,15 +27,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.granger.R
-import app.granger.core.library.Albums
 import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
+import app.granger.music.trackAlbum
 
 /**
  * The music player (Auxio-style): cover, title/artist/album, seek bar, transport, shuffle, repeat and the queue.
@@ -67,11 +68,11 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    Albums.title(music.track), style = MaterialTheme.typography.bodyMedium,
+                    trackAlbum(music.track), style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }
-            SeekBar(ui.positionMs, ui.durationMs, { p -> control { musicSeekTo(p) } }, label = "Seek in track")
+            SeekBar(ui.positionMs, ui.durationMs, { p -> control { musicSeekTo(p) } }, label = stringResource(R.string.player_seek_track))
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,22 +81,22 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                 ModeToggle(live, onClick = viewModel::toggleShuffle) {
                     Icon(
                         painterResource(R.drawable.ic_shuffle),
-                        contentDescription = if (music.shuffle) "Shuffle on" else "Shuffle off",
+                        contentDescription = stringResource(if (music.shuffle) R.string.player_shuffle_on else R.string.player_shuffle_off),
                         tint = if (music.shuffle) MaterialTheme.colorScheme.primary else LocalContentColor.current,
                     )
                 }
                 // The music transport: the player's, or the music under the voice's when the voice reads over it (Plan V2).
                 IconButton(onClick = { control { musicPrevious() } }, modifier = Modifier.size(56.dp)) {
-                    Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous track", modifier = Modifier.size(36.dp))
+                    Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = stringResource(R.string.player_previous_track), modifier = Modifier.size(36.dp))
                 }
                 BigPlayPause(ui.playing, { if (live) viewModel.musicPlayPause() else viewModel.activate(PlayerMode.MUSIC) })
                 IconButton(onClick = { control { musicNext() } }, modifier = Modifier.size(56.dp)) {
-                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next track", modifier = Modifier.size(36.dp))
+                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = stringResource(R.string.player_next_track), modifier = Modifier.size(36.dp))
                 }
                 ModeToggle(live, onClick = viewModel::cycleRepeat) {
                     Icon(
                         painterResource(if (music.repeat == 2) R.drawable.ic_repeat_one else R.drawable.ic_repeat),
-                        contentDescription = when (music.repeat) { 1 -> "Repeat all"; 2 -> "Repeat one"; else -> "Repeat off" },
+                        contentDescription = stringResource(when (music.repeat) { 1 -> R.string.player_repeat_all; 2 -> R.string.player_repeat_one; else -> R.string.player_repeat_off }),
                         tint = if (music.repeat != 0) MaterialTheme.colorScheme.primary else LocalContentColor.current,
                     )
                 }
@@ -103,7 +104,7 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
             TextButton(onClick = { showQueue = true }) {
                 Icon(painterResource(R.drawable.ic_queue_music), contentDescription = null)
                 Spacer(Modifier.size(8.dp))
-                Text("Queue")
+                Text(stringResource(R.string.player_queue))
             }
             ShelfLink(PlayerMode.MUSIC, onShelf)
             Spacer(Modifier.height(8.dp))

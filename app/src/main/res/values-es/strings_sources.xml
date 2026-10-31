@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sources_get_more">Conseguir más</string>
+    <string name="sources_get_books">Conseguir libros</string>
+    <string name="sources_get_audio">Conseguir audiolibros y música</string>
+    <string name="sources_group_knowledge">Paquetes de conocimiento</string>
+    <string name="sources_group_books">Libros</string>
+    <string name="sources_group_audio">Audiolibros y música</string>
+    <string name="sources_group_models">Modelos y voces</string>
+    <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicina, guías prácticas y más, sin conexión</string>
+    <string name="sources_link_classics">Clásicos Granger</string>
+    <string name="sources_link_classics_sub">Libros electrónicos de dominio público, listos para leer</string>
+    <string name="sources_link_gutenberg_sub">Libros de dominio público por tema, en paquetes de Kiwix</string>
+    <string name="sources_link_kiwix_books">Bibliotecas de Kiwix</string>
+    <string name="sources_link_kiwix_books_sub">Guías y manuales: comida, agua, medicina, nudos y más</string>
+    <string name="sources_link_archive_books">Libros de Archive.org</string>
+    <string name="sources_link_archive_books_sub">Libros sin derechos de autor de Internet Archive</string>
+    <string name="sources_link_librivox_sub">Audiolibros de dominio público, leídos por voluntarios</string>
+    <string name="sources_link_archive_audiobooks">Audiolibros de Archive.org</string>
+    <string name="sources_link_archive_audiobooks_sub">Grabaciones habladas de Internet Archive</string>
+    <string name="sources_link_archive_music">Música de Archive.org</string>
+    <string name="sources_link_archive_music_sub">Grabaciones de Internet Archive</string>
+    <string name="sources_link_models">Modelos y voces</string>
+    <string name="sources_link_models_sub">Lo que hace funcionar Preguntar y la lectura en voz alta</string>
+    <string name="sources_import_own">Importar los tuyos</string>
+    <string name="sources_import_own_sub">Libros EPUB, PDF, TXT o Markdown de este teléfono</string>
+
+    <string name="sources_scope_models">Modelos</string>
+    <string name="sources_scope_kiwix_books">Bibliotecas de Kiwix</string>
+
+    <string name="sources_check_updates">Buscar actualizaciones</string>
+    <string name="sources_search">Buscar en %1$s</string>
+    <string name="sources_show_all_kiwix">Mostrar todo Kiwix</string>
+    <!-- The chip for every category: "Todas" agrees with "categorías". -->
+    <string name="sources_all">Todas</string>
+    <string name="sources_tab_browse">Explorar</string>
+    <!-- "Installed" is "Descargado", as on Archive.org and LibriVox's tabs. -->
+    <string name="sources_tab_installed">Descargado</string>
+    <string name="sources_tab_updates">Actualizar</string>
+    <string name="sources_storage_summary">%1$s libres en %2$s · Granger usa %3$s</string>
+    <string name="sources_no_match">Nada coincide con esa búsqueda.</string>
+    <string name="sources_nothing_yet">Aún no hay nada aquí.</string>
+    <string name="sources_section_recommended">Recomendados</string>
+    <string name="sources_section_subjects">Temas</string>
+    <string name="sources_section_everything">Todo</string>
+    <string name="sources_section_libraries">Bibliotecas</string>
+    <string name="sources_section_models">Modelos de IA</string>
+    <plurals name="sources_show_all_packs">
+        <item quantity="one">Mostrar %d paquete</item>
+        <item quantity="many">Mostrar los %d paquetes</item>
+        <item quantity="other">Mostrar los %d paquetes</item>
+    </plurals>
+    <plurals name="sources_show_all_books">
+        <item quantity="one">Mostrar %d libro</item>
+        <item quantity="many">Mostrar los %d libros</item>
+        <item quantity="other">Mostrar los %d libros</item>
+    </plurals>
+    <string name="sources_show_fewer_packs">Mostrar menos paquetes</string>
+    <string name="sources_show_fewer_books">Mostrar menos libros</string>
+    <string name="sources_remove_title">¿Quitar %1$s?</string>
+    <string name="sources_remove_slice_title">¿Quitar %1$s: %2$s?</string>
+    <string name="sources_remove_pack_body">Se eliminará el archivo, junto con los marcadores y lugares de lectura que guardaste en él.</string>
+    <string name="sources_remove_body">Se eliminará el archivo.</string>
+    <!-- A preset ("Granger Classics set") is a "conjunto": "paquete" is taken by packs. -->
+    <string name="sources_preset_title">Conjunto %1$s</string>
+    <string name="sources_get_all">Descargar todo</string>
+    <plurals name="sources_packs">
+        <item quantity="one">%d paquete</item>
+        <item quantity="many">%d paquetes</item>
+        <item quantity="other">%d paquetes</item>
+    </plurals>
+    <plurals name="sources_models">
+        <item quantity="one">%d modelo</item>
+        <item quantity="many">%d modelos</item>
+        <item quantity="other">%d modelos</item>
+    </plurals>
+    <plurals name="sources_regions">
+        <item quantity="one">%d región</item>
+        <item quantity="many">%d regiones</item>
+        <item quantity="other">%d regiones</item>
+    </plurals>
+    <string name="sources_two_kinds">%1$s y %2$s</string>
+    <string name="sources_three_kinds">%1$s, %2$s y %3$s</string>
+    <string name="sources_preset_all_here">Todo en este teléfono</string>
+    <string name="sources_preset_downloading">%1$d descargando</string>
+    <string name="sources_preset_to_get">Faltan %1$d de %2$d</string>
+    <string name="sources_dotted">%1$s · %2$s</string>
+    <string name="sources_licence">Licencia: %1$s</string>
+
+    <string name="sources_size_check_title">%1$s pesa %2$s</string>
+    <string name="sources_size_check_free">Tienes %1$s libres en %2$s.</string>
+    <string name="sources_size_check_free_phone">Tienes %1$s libres en este teléfono.</string>
+    <string name="sources_size_check_no_room">No hay espacio suficiente para descargarlo.</string>
+    <!-- %1$s is the flavour in lower case, such as "sin imágenes". -->
+    <string name="sources_get_smaller">Descargar la versión %1$s, %2$s</string>
+    <string name="sources_get_size">Descargar %1$s</string>
+
+    <string name="sources_flavour_with_pictures">Con imágenes</string>
+    <string name="sources_flavour_no_pictures">Sin imágenes</string>
+    <string name="sources_flavour_mini">Mini (solo párrafos de introducción)</string>
+    <string name="sources_flavour_standard">Estándar</string>
+    <string name="sources_how_much">Cuánto</string>
+    <string name="sources_pictures">Imágenes</string>
+    <string name="sources_add_subject">Agregar un tema</string>
+    <string name="sources_installed_lower">descargado</string>
+    <string name="sources_installed">Descargado</string>
+    <string name="sources_inside_your">Incluido en tu %1$s</string>
+    <string name="sources_slice_and_pictures">%1$s, %2$s</string>
+    <!-- English "With pictures only"; "Solo Con imágenes" would read badly, so the Spanish puts it after. -->
+    <string name="sources_pictures_only">%1$s (única opción)</string>
+    <string name="sources_not_offered_for">No disponible para %1$s</string>
+    <string name="sources_switch_to">Cambiar a %1$s</string>
+    <string name="sources_switch_to_this">Cambiar a esta</string>
+    <string name="sources_switch">Cambiar</string>
+    <string name="sources_switch_text">¿Cambiar %1$s de %2$s (%3$s) a %4$s (%5$s)? La versión %2$s se quita cuando la nueva termine de descargarse. Tus lugares y marcadores se conservan.</string>
+    <string name="sources_update">Actualizar</string>
+    <string name="sources_more_for">Más opciones de %1$s</string>
+
+    <string name="sources_retrying">Reintentando: %1$s</string>
+    <string name="sources_waiting_wifi">Esperando Wi-Fi</string>
+    <string name="sources_queued_status">En cola</string>
+    <string name="sources_percent">%1$d%%</string>
+    <string name="sources_download_failed">La descarga falló</string>
+    <string name="sources_update_available">Hay una versión más nueva</string>
+    <string name="sources_needs_memory">Necesita un teléfono con más memoria</string>
+    <string name="sources_partly_downloaded">Descargado en parte: %1$d de %2$d</string>
+    <string name="sources_in_your_music">En tu música</string>
+    <string name="sources_in_your_audiobooks">En tus audiolibros</string>
+
+    <string name="sources_preset_already">Todo lo de %1$s ya está aquí o en camino.</string>
+    <string name="sources_couldnt_delete">No se pudo eliminar %1$s.</string>
+    <string name="sources_no_storage">No hay almacenamiento disponible en este momento.</string>
+    <string name="sources_no_space">No hay espacio suficiente en %1$s para %2$s: libera %3$s.</string>
+    <string name="sources_over_cap">Con %1$s tus descargas llegarían a %2$s, por encima del límite de %3$s.</string>
+    <plurals name="sources_queued_before">
+        <item quantity="one">%1$s Se puso en cola %2$d antes de eso.</item>
+        <item quantity="many">%1$s Se pusieron en cola %2$d antes de eso.</item>
+        <item quantity="other">%1$s Se pusieron en cola %2$d antes de eso.</item>
+    </plurals>
+    <plurals name="sources_queued">
+        <item quantity="one">Se puso en cola %d descarga.</item>
+        <item quantity="many">Se pusieron en cola %d descargas.</item>
+        <item quantity="other">Se pusieron en cola %d descargas.</item>
+    </plurals>
+    <string name="sources_catalog_unloaded">No se pudo cargar el catálogo. Conéctate a internet e inténtalo de nuevo.</string>
+    <string name="sources_catalog_offline">Sin conexión: se muestra el catálogo de tu última conexión.</string>
+    <string name="sources_catalog_bad_signature">El catálogo más reciente no pasó el control de seguridad. Se muestra la última copia válida.</string>
+    <string name="sources_catalog_unsupported">Un catálogo más nuevo necesita una actualización de la app. Se muestra la última copia que funciona.</string>
+    <string name="sources_catalog_malformed">No se pudo leer el catálogo más reciente. Se muestra la última copia válida.</string>
+
+    <string name="sources_ask_meaning">Preguntar: por significado y palabras clave</string>
+    <string name="sources_ask_keywords">Preguntar: solo palabras clave</string>
+    <string name="sources_ask_none">Preguntar no puede buscar aquí</string>
+    <string name="sources_model_not_used">Sin usar</string>
+    <string name="sources_model_used_by_ask">Lo usa Preguntar</string>
+    <string name="sources_model_not_used_yet">Aún sin usar</string>
+    <string name="sources_voice">Voz para leer en voz alta</string>
+
+    <string name="sources_updated">Actualizado: %1$s</string>
+    <plurals name="sources_languages_more">
+        <item quantity="one">%1$s y %2$d más</item>
+        <item quantity="many">%1$s y %2$d más</item>
+        <item quantity="other">%1$s y %2$d más</item>
+    </plurals>
+    <string name="sources_licence_not_stated">Licencia no indicada</string>
+    <string name="sources_licence_public_domain">Dominio público</string>
+    <string name="sources_licence_open">Licencias abiertas</string>
+    <string name="sources_licence_cc">Licencias CC</string>
+    <string name="sources_licence_see">Ver licencia</string>
+    <string name="sources_licence_kiwix">%1$s · ofrecido por Kiwix</string>
+    <string name="sources_set_wikipedia">La enciclopedia libre: de 100 artículos esenciales a la versión completa.</string>
+    <string name="sources_set_wikivoyage">La guía de viajes libre: de Europa al mundo entero.</string>
+    <string name="sources_set_subjects">Temas de %1$s</string>
+    <string name="sources_family_devdocs">Programación</string>
+    <string name="sources_family_stack_exchange">Preguntas y respuestas</string>
+    <string name="sources_family_maps">Mapas</string>
+    <string name="sources_adds_to">Amplía %1$s (%2$d%% nuevo)</string>
+    <string name="sources_adds_to_your">Amplía tu %1$s (%2$d%% nuevo)</string>
+    <plurals name="sources_adds_about">
+        <item quantity="one">Agrega unos %1$s artículo a %2$s (%3$d%% nuevo)</item>
+        <item quantity="many">Agrega unos %1$s artículos a %2$s (%3$d%% nuevo)</item>
+        <item quantity="other">Agrega unos %1$s artículos a %2$s (%3$d%% nuevo)</item>
+    </plurals>
+    <plurals name="sources_adds_about_your">
+        <item quantity="one">Agrega unos %1$s artículo a tu %2$s (%3$d%% nuevo)</item>
+        <item quantity="many">Agrega unos %1$s artículos a tu %2$s (%3$d%% nuevo)</item>
+        <item quantity="other">Agrega unos %1$s artículos a tu %2$s (%3$d%% nuevo)</item>
+    </plurals>
+    <string name="sources_adds_inside_your">Ya incluido en tu %1$s</string>
+    <string name="sources_adds_inside">Ya incluido en %1$s</string>
+
+    <string name="sources_tidy_text">%1$s ya está. ¿Quitar %2$s (%3$s)? Tus lugares y marcadores se trasladan.</string>
+    <string name="sources_tidy_keep_both">Conservar ambos</string>
+    <string name="sources_tidy_remove">Quitar %1$s</string>
+</resources>

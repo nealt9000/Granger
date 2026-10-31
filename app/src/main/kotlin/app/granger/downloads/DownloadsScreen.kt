@@ -1,5 +1,7 @@
 package app.granger.downloads
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -81,6 +83,7 @@ fun DownloadsScreen(
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val tidy by viewModel.tidy.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     DownloadsContent(
         ui, onBack,
         DownloadsActions(
@@ -95,7 +98,7 @@ fun DownloadsScreen(
             onOpen = { row ->
                 when (val target = row.open) {
                     is OpenTarget.Pack -> onOpenPack(target.packId)
-                    is OpenTarget.Book -> scope.launch { viewModel.openBook(target, row.title).let(onOpened) }
+                    is OpenTarget.Book -> scope.launch { viewModel.openBook(target, row.title.resolve(context)).let(onOpened) }
                     null -> Unit
                 }
             },
@@ -120,9 +123,9 @@ fun DownloadsContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Downloads") },
+                title = { Text(stringResource(R.string.downloads_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
             )
         },
@@ -136,38 +139,42 @@ fun DownloadsContent(
             if (ui.isEmpty) {
                 item(key = "empty") {
                     Text(
-                        "Nothing downloading.",
+                        stringResource(R.string.downloads_nothing),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
                     )
-                    TextButton(onClick = actions.onGetMore, modifier = Modifier.padding(horizontal = 8.dp)) { Text("Get more →") }
+                    TextButton(onClick = actions.onGetMore, modifier = Modifier.padding(horizontal = 8.dp)) { Text(stringResource(R.string.downloads_get_more)) }
                 }
             }
             ui.header?.let { h -> item(key = "header") { Header(h, actions) } }
             ui.now?.let { row ->
-                item(key = "heading-now") { Heading("Now") }
+                item(key = "heading-now") { Heading(stringResource(R.string.downloads_now)) }
                 item(key = row.key) { DownloadItem(row, now, actions, speed = ui.header?.bytesPerSecond) }
             }
             if (ui.upNext.isNotEmpty()) {
-                item(key = "heading-next") { Heading("Up next") }
+                item(key = "heading-next") { Heading(stringResource(R.string.downloads_up_next)) }
                 val shown = if (showAll) ui.upNext else ui.upNext.take(DownloadsModel.UP_NEXT_SHOWN)
                 for (row in shown) item(key = row.key) { DownloadItem(row, now, actions) }
                 if (shown.size < ui.upNext.size) {
                     item(key = "show-all") {
                         TextButton(onClick = { showAll = true }, modifier = Modifier.padding(horizontal = 8.dp)) {
-                            Text("Show all ${ui.upNext.size}")
+                            Text(stringResource(R.string.downloads_show_all, ui.upNext.size))
                         }
                     }
                 }
             }
             if (ui.stopped.isNotEmpty()) {
                 item(key = "heading-stopped") {
-                    Heading("Stopped", action = if (ui.retriable.size > 1) ({ actions.onRetryAll(ui.retriable) }) else null, actionLabel = "Retry all")
+                    Heading(
+                        stringResource(R.string.downloads_stopped),
+                        action = if (ui.retriable.size > 1) ({ actions.onRetryAll(ui.retriable) }) else null,
+                        actionLabel = stringResource(R.string.downloads_retry_all),
+                    )
                 }
                 for (row in ui.stopped) item(key = "stopped/${row.key}") { DownloadItem(row, now, actions) }
             }
             if (ui.doneToday.isNotEmpty()) {
-                item(key = "heading-done") { Heading("Done today") }
+                item(key = "heading-done") { Heading(stringResource(R.string.downloads_done_today)) }
                 for (row in ui.doneToday) item(key = "done/${row.key}") { DownloadItem(row, now, actions) }
             }
         }
@@ -179,12 +186,12 @@ fun DownloadsContent(
 private fun Header(h: DownloadsHeader, actions: DownloadsActions) {
     Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) {
         LinearProgressIndicator(progress = { h.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
-        Text(headerText(h), style = MaterialTheme.typography.bodyMedium)
+        Text(headerText(LocalContext.current.resources, h).resolve(), style = MaterialTheme.typography.bodyMedium)
         // The speed beside the button while it downloads; otherwise the storage line takes its place.
-        val speed = h.bytesPerSecond?.takeIf { !h.paused }?.let { "${formatBytes(it)}/s" }
+        val speed = h.bytesPerSecond?.takeIf { !h.paused }?.let { stringResource(R.string.downloads_speed, formatBytes(it)) }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
             Text(
-                speed ?: storageText(h),
+                speed ?: storageText(h).resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
@@ -193,18 +200,18 @@ private fun Header(h: DownloadsHeader, actions: DownloadsActions) {
                 FilledTonalButton(onClick = actions.onResume) {
                     Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Resume")
+                    Text(stringResource(R.string.downloads_resume))
                 }
             } else {
                 FilledTonalButton(onClick = actions.onPause) {
                     Icon(painterResource(R.drawable.ic_pause), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Pause all")
+                    Text(stringResource(R.string.downloads_pause_all))
                 }
             }
         }
         if (speed != null) {
-            Text(storageText(h), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(storageText(h).resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -219,16 +226,16 @@ private fun DownloadItem(row: DownloadRow, now: Long, actions: DownloadsActions,
     val tap = if (row.state == RowState.DONE && row.open != null) ({ actions.onOpen(row) }) else null
     ListItem(
         overlineContent = row.groupLabel?.takeIf { row.state != RowState.DONE }?.let { label ->
-            { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            { Text(label.resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) }
         },
-        headlineContent = { Text(row.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+        headlineContent = { Text(row.title.resolve(), maxLines = 2, overflow = TextOverflow.Ellipsis) },
         supportingContent = {
             Column {
                 if (row.state == RowState.RUNNING) {
                     LinearProgressIndicator(progress = { row.fraction }, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 }
                 Text(
-                    downloadsText(row, now, speed),
+                    downloadsText(LocalContext.current, row, now, speed),
                     style = MaterialTheme.typography.bodySmall,
                     color = when {
                         row.state == RowState.FAILED || row.removeOnly -> MaterialTheme.colorScheme.error
@@ -240,12 +247,12 @@ private fun DownloadItem(row: DownloadRow, now: Long, actions: DownloadsActions,
         },
         trailingContent = {
             when {
-                row.removeOnly -> TextButton(onClick = { actions.onRemove(row) }) { Text("Remove") }
+                row.removeOnly -> TextButton(onClick = { actions.onRemove(row) }) { Text(stringResource(R.string.common_remove)) }
                 row.state == RowState.FAILED -> Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { actions.onRetry(row) }) { Text("Retry") }
+                    TextButton(onClick = { actions.onRetry(row) }) { Text(stringResource(R.string.common_retry)) }
                     RowMenu(row, actions)
                 }
-                row.state == RowState.DONE -> if (row.open != null) TextButton(onClick = { actions.onOpen(row) }) { Text("Open") }
+                row.state == RowState.DONE -> if (row.open != null) TextButton(onClick = { actions.onOpen(row) }) { Text(stringResource(R.string.common_open)) }
                 else -> RowMenu(row, actions)
             }
         },
@@ -258,13 +265,13 @@ private fun DownloadItem(row: DownloadRow, now: Long, actions: DownloadsActions,
 private fun RowMenu(row: DownloadRow, actions: DownloadsActions) {
     var open by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More for ${row.title}") }
+        IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.downloads_more_for, row.title.resolve())) }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             val next = row.state == RowState.QUEUED && row.reason != WaitReason.InLine(1)
-            if (next) DropdownMenuItem(text = { Text("Download next") }, onClick = { open = false; actions.onDownloadNext(row) })
-            DropdownMenuItem(text = { Text("Cancel") }, onClick = { open = false; actions.onCancel(row) })
+            if (next) DropdownMenuItem(text = { Text(stringResource(R.string.downloads_download_next)) }, onClick = { open = false; actions.onDownloadNext(row) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.common_cancel)) }, onClick = { open = false; actions.onCancel(row) })
             row.groupLabel?.let { label ->
-                DropdownMenuItem(text = { Text("Cancel all of $label") }, onClick = { open = false; actions.onCancelGroup(row) })
+                DropdownMenuItem(text = { Text(stringResource(R.string.downloads_cancel_all_of, label.resolve())) }, onClick = { open = false; actions.onCancelGroup(row) })
             }
         }
     }

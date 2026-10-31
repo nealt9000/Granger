@@ -1,5 +1,7 @@
 package app.granger.ebook
 
+import app.granger.R
+import app.granger.UiText
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -60,7 +62,7 @@ import org.readium.r2.shared.util.use
 data class EbookUi(
     val title: String = "",
     val loading: Boolean = true,
-    val error: String? = null,
+    val error: UiText? = null,
     val publication: Publication? = null,
     /** Where the navigator opens. */
     val initial: Locator? = null,
@@ -115,7 +117,7 @@ data class EbookUi(
     /** Read as ebook is working. */
     val makingEbook: Boolean = false,
     /** Something the reader says once (Read as ebook's outcome), then [noticeShown] clears. */
-    val notice: String? = null,
+    val notice: UiText? = null,
 )
 
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
@@ -127,15 +129,15 @@ enum class Panel { CONTENTS, SETTINGS, SEARCH }
 
 /** "Chapter · p. 120 of 410", or "Chapter · 29%" while the pages are uncounted. */
 object ProgressLabel {
-    fun of(locator: Locator, positionsCount: Int): String {
+    fun of(locator: Locator, positionsCount: Int): UiText {
         val chapter = locator.title?.trim().orEmpty()
         val position = locator.locations.position
         val where = if (positionsCount > 0 && position != null) {
-            "p. $position of $positionsCount"
+            UiText.Res(R.string.ebook_page_of, position, positionsCount)
         } else {
-            "${((locator.locations.totalProgression ?: 0.0) * 100).toInt().coerceIn(0, 100)}%"
+            UiText.Res(R.string.ebook_percent, ((locator.locations.totalProgression ?: 0.0) * 100).toInt().coerceIn(0, 100))
         }
-        return if (chapter.isEmpty()) where else "$chapter · $where"
+        return if (chapter.isEmpty()) where else UiText.Res(R.string.ebook_chapter_and_place, chapter, where)
     }
 }
 
@@ -335,8 +337,8 @@ class EbookReaderViewModel(
         appScope.launch {
             val removed = bookshelf.removeOriginalPages(id)
             _state.update {
-                if (removed) it.copy(originalPagesBytes = null, notice = "Original pages removed")
-                else it.copy(notice = "Couldn't remove the original pages")
+                if (removed) it.copy(originalPagesBytes = null, notice = UiText.Res(R.string.ebook_original_pages_removed))
+                else it.copy(notice = UiText.Res(R.string.ebook_original_pages_not_removed))
             }
         }
     }
@@ -362,9 +364,9 @@ class EbookReaderViewModel(
                 it.copy(
                     makingEbook = false,
                     notice = when {
-                        report == null -> "Couldn't make an ebook of this PDF"
+                        report == null -> UiText.Res(R.string.ebook_cant_make_ebook)
                         report.passes -> null
-                        else -> "This PDF doesn't read well as an ebook (${report.why}), so it stays as pages."
+                        else -> UiText.Res(R.string.ebook_pdf_reads_badly, report.why)
                     },
                 )
             }
@@ -376,7 +378,7 @@ class EbookReaderViewModel(
         _state.update { it.copy(notice = null) }
     }
 
-    private fun fail(message: String) {
+    private fun fail(message: UiText) {
         _state.update { it.copy(loading = false, error = message, chromeVisible = true) }
     }
 
@@ -425,6 +427,7 @@ class EbookReaderViewModel(
         if (!_state.value.isPdf || page == null) return locator.title.orEmpty()
         val ui = _state.value
         val entry = pdfTocIndex(ui.toc, page)?.let { ui.toc[it].title.ifBlank { null } }
+        // Stored with the bookmark, so it stays a literal until saved marks can carry a page number instead (L2).
         return listOfNotNull(entry, "p. $page").joinToString(" · ")
     }
 
@@ -433,6 +436,7 @@ class EbookReaderViewModel(
         val ui = _state.value
         if (!ui.isPdf) return ""
         val page = locator.locations.position ?: return ""
+        // Stored as the saved place's title, so it stays a literal until the place can carry a page number instead (L2).
         return pdfTocIndex(ui.toc, page)?.let { ui.toc[it].title.ifBlank { null } } ?: "Page $page"
     }
 
@@ -800,9 +804,9 @@ class EbookReaderViewModel(
     }
 
     companion object {
-        const val TAB_GONE = "This bookmark was removed."
-        const val BOOK_GONE = "This book isn't on the phone any more. Check the SD card, or download it again from Granger."
-        const val BOOK_DAMAGED = "This book couldn't be opened. Try removing it, then download or import it again."
+        val TAB_GONE = UiText.Res(R.string.ebook_tab_gone)
+        val BOOK_GONE = UiText.Res(R.string.ebook_book_gone)
+        val BOOK_DAMAGED = UiText.Res(R.string.ebook_book_damaged)
         const val SAVE_DEBOUNCE_MS = 1_000L
         /** A page change this soon after the voice asked for one is the voice's, not the user's. */
         const val VOICE_MOVE_GRACE_MS = 1_500L

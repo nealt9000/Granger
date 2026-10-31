@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_library">Biblioteca y almacenamiento</string>
+    <string name="settings_section_listening">Lectura y audio</string>
+    <string name="settings_section_ask">Preguntar</string>
+    <string name="settings_section_about">Acerca de</string>
+
+    <string name="settings_wifi_only">Descargar solo con Wi-Fi</string>
+    <string name="settings_wifi_only_summary">Desactívalo para usar datos móviles</string>
+    <string name="settings_ask_large">Confirmar descargas de más de 100 MB</string>
+    <string name="settings_ask_large_summary">Desactívalo para descargar escaneos grandes y series de cómics sin aviso</string>
+    <string name="settings_archive_everything">Archive.org: mostrar todo</string>
+    <string name="settings_archive_everything_on">Activado: todo lo que archive.org ofrece abiertamente. Si lo desactivas, se conservan los archivos descargados.</string>
+    <string name="settings_archive_everything_off">Solo se muestran textos de dominio público, publicados en 1930 o antes. Los archivos descargados se quedan. Para activarlo, tendrás que aceptar la responsabilidad.</string>
+    <string name="settings_set_up_again">Volver a configurar las sugerencias</string>
+    <string name="settings_set_up_again_summary">Elige un comienzo, tu región y para qué usarás Granger</string>
+    <string name="settings_voice">Voz</string>
+    <string name="settings_voice_summary_default">Leer en voz alta</string>
+    <string name="settings_media_summary">Carpetas de este teléfono y el reproductor</string>
+    <string name="settings_models">Modelos</string>
+    <string name="settings_models_summary">Modelos de IA para este teléfono</string>
+    <string name="settings_music_and_audiobooks">Música y audiolibros</string>
+    <string name="settings_music">Música</string>
+
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_toolbar_side">Lado de la barra</string>
+    <string name="settings_open_to">Abrir en</string>
+    <string name="settings_side_left">Izquierda</string>
+    <string name="settings_side_right">Derecha</string>
+    <string name="settings_theme_system">Igual que el teléfono</string>
+    <!-- Field and Night are the themes' names: Campo and Noche. -->
+    <string name="settings_theme_field">Campo (claro)</string>
+    <string name="settings_theme_night">Noche (oscuro)</string>
+    <string name="settings_open_to_resume">Donde lo dejé</string>
+    <string name="settings_open_to_home">Inicio</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_app">Idioma de la app</string>
+    <string name="settings_language_system">Igual que el teléfono (%1$s)</string>
+
+    <string name="settings_storage_usage">%1$s libres · Granger usa %2$s</string>
+    <string name="settings_storage_usage_queued">%1$s libres · Granger usa %2$s · %3$s por descargar</string>
+    <string name="settings_storage_selected">Las descargas nuevas van al almacenamiento seleccionado.</string>
+    <string name="settings_storage_uninstall">Si desinstalas Granger, se elimina todo lo que descargó.</string>
+    <string name="settings_internal_storage">Almacenamiento interno</string>
+
+    <string name="settings_about_tagline">El conocimiento del mundo. Tuyo para siempre.</string>
+    <string name="settings_about_motto">El conocimiento es un derecho humano.</string>
+    <string name="settings_about_version">Versión %1$s</string>
+    <string name="settings_about_license">GPLv3 · código fuente en GitHub</string>
+
+    <string name="settings_media_permission">Buscar música y audiolibros en este teléfono</string>
+    <string name="settings_media_permission_granted">Granger los lee donde están y nunca los modifica.</string>
+    <string name="settings_media_permission_denied">Sin permiso. Granger funciona sin él, pero las carpetas que agregues abajo sí lo necesitan.</string>
+    <string name="settings_media_permission_permanently_denied">Sin permiso. Android no volverá a preguntar: permite Música y audio en los ajustes de la app de Granger.</string>
+    <string name="settings_media_allowed">Permitido</string>
+    <string name="settings_media_allow_access">Permitir acceso</string>
+    <string name="settings_media_open_app_settings">Abrir ajustes de la app</string>
+    <string name="settings_media_add_folder">Agregar una carpeta</string>
+    <string name="settings_media_add_folder_summary">Para archivos que la lista de medios del teléfono no encuentra. Granger solo los lee.</string>
+    <string name="settings_media_music_folder">Carpeta de música</string>
+    <string name="settings_media_audiobooks_folder">Carpeta de audiolibros</string>
+    <string name="settings_media_remove_folder">Quitar %1$s</string>
+    <string name="settings_media_rescan">Volver a buscar ahora</string>
+    <string name="settings_media_rescan_idle">Granger vuelve a buscar al iniciarse y cuando cambian los medios del teléfono.</string>
+    <string name="settings_media_scanning">Buscando…</string>
+    <string name="settings_media_found">Se encontraron %1$s y %2$s.</string>
+    <plurals name="settings_songs">
+        <item quantity="one">%d canción</item>
+        <item quantity="many">%d canciones</item>
+        <item quantity="other">%d canciones</item>
+    </plurals>
+    <plurals name="settings_audiobooks">
+        <item quantity="one">%d audiolibro</item>
+        <item quantity="many">%d audiolibros</item>
+        <item quantity="other">%d audiolibros</item>
+    </plurals>
+    <string name="settings_media_scan_failed">La búsqueda no terminó. Inténtalo de nuevo.</string>
+    <string name="settings_media_other_apps">Mostrar en otras apps</string>
+    <string name="settings_media_other_apps_summary">La música y los audiolibros que descargaste con Granger aparecen en la app Archivos y en los selectores de archivos de otras apps, solo para lectura. Los reproductores que solo leen la lista de medios del teléfono no los mostrarán.</string>
+    <string name="settings_replaygain">ReplayGain</string>
+    <string name="settings_replaygain_summary">Iguala el volumen. Automático usa la ganancia del álbum cuando un álbum se reproduce en orden; si no, la de la pista.</string>
+    <string name="settings_replaygain_off">Desactivado</string>
+    <string name="settings_replaygain_track">Pista</string>
+    <string name="settings_replaygain_album">Álbum</string>
+    <string name="settings_replaygain_auto">Automático</string>
+    <string name="settings_skip_back">Retroceder</string>
+    <string name="settings_skip_forward">Avanzar</string>
+    <string name="settings_skip_audiobooks">Audiolibros</string>
+    <string name="settings_seconds_short">%1$d s</string>
+    <string name="settings_headset_autoplay">Reproducir al conectar auriculares</string>
+    <string name="settings_headset_autoplay_summary">Continúa donde lo dejaste</string>
+
+    <string name="settings_voice_reads_with">Lee con</string>
+    <string name="settings_voice_none">No hay ninguna voz sin conexión en este teléfono</string>
+    <string name="settings_voice_none_summary">Descarga la voz de Granger abajo o instala una voz sin conexión para la función de texto a voz del teléfono.</string>
+    <string name="settings_voice_granger">Voz de Granger · %1$s</string>
+    <string name="settings_voice_system">Voz del sistema · %1$s</string>
+    <string name="settings_voice_system_more">Voces del sistema (%1$d)</string>
+    <string name="settings_voice_catalog">Voces de Granger</string>
+    <string name="settings_voice_catalog_empty">El catálogo aún no tiene voces.</string>
+    <string name="settings_voice_download_size">Descarga de %1$s · %2$s</string>
+    <string name="settings_voice_download_failed">Falló la descarga: %1$s</string>
+    <string name="settings_voice_speed">Velocidad</string>
+    <string name="settings_voice_speed_value">%1$.1f×</string>
+    <string name="settings_voice_mark">Marcar la oración que se lee</string>
+    <string name="settings_voice_speak_answers">Leer las respuestas mientras llegan</string>
+    <string name="settings_voice_speak_answers_summary">Preguntar lee en voz alta cada respuesta nueva mientras se escribe. Cualquier respuesta se puede escuchar con su botón de altavoz.</string>
+    <string name="settings_voice_no_storage">No hay almacenamiento para descargar.</string>
+    <string name="settings_voice_no_space">No hay espacio libre suficiente para %1$s.</string>
+    <string name="settings_voice_over_cap">Supera el límite de almacenamiento.</string>
+</resources>

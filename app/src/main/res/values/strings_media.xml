@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Downloaded albums and audiobooks: the progress line and Remove download; the Files app's folders (Plan L1). -->
+    <string name="media_retrying">Retrying</string>
+    <string name="media_waiting_wifi">Waiting for Wi-Fi</string>
+    <string name="media_waiting_connection">Waiting for a connection</string>
+
+    <!-- Retrying, with how many of an album's or book's files are in: %1$d done of %2$d. -->
+    <plurals name="media_retrying_tracks">
+        <item quantity="one">Retrying: %1$d of %2$d track</item>
+        <item quantity="other">Retrying: %1$d of %2$d tracks</item>
+    </plurals>
+    <plurals name="media_waiting_wifi_tracks">
+        <item quantity="one">Waiting for Wi-Fi: %1$d of %2$d track</item>
+        <item quantity="other">Waiting for Wi-Fi: %1$d of %2$d tracks</item>
+    </plurals>
+    <plurals name="media_waiting_connection_tracks">
+        <item quantity="one">Waiting for a connection: %1$d of %2$d track</item>
+        <item quantity="other">Waiting for a connection: %1$d of %2$d tracks</item>
+    </plurals>
+    <plurals name="media_downloading_tracks">
+        <item quantity="one">Downloading: %1$d of %2$d track</item>
+        <item quantity="other">Downloading: %1$d of %2$d tracks</item>
+    </plurals>
+    <plurals name="media_partial_tracks">
+        <item quantity="one">Partly downloaded: %1$d of %2$d track</item>
+        <item quantity="other">Partly downloaded: %1$d of %2$d tracks</item>
+    </plurals>
+    <plurals name="media_retrying_chapters">
+        <item quantity="one">Retrying: %1$d of %2$d chapter</item>
+        <item quantity="other">Retrying: %1$d of %2$d chapters</item>
+    </plurals>
+    <plurals name="media_waiting_wifi_chapters">
+        <item quantity="one">Waiting for Wi-Fi: %1$d of %2$d chapter</item>
+        <item quantity="other">Waiting for Wi-Fi: %1$d of %2$d chapters</item>
+    </plurals>
+    <plurals name="media_waiting_connection_chapters">
+        <item quantity="one">Waiting for a connection: %1$d of %2$d chapter</item>
+        <item quantity="other">Waiting for a connection: %1$d of %2$d chapters</item>
+    </plurals>
+    <plurals name="media_downloading_chapters">
+        <item quantity="one">Downloading: %1$d of %2$d chapter</item>
+        <item quantity="other">Downloading: %1$d of %2$d chapters</item>
+    </plurals>
+    <plurals name="media_partial_chapters">
+        <item quantity="one">Partly downloaded: %1$d of %2$d chapter</item>
+        <item quantity="other">Partly downloaded: %1$d of %2$d chapters</item>
+    </plurals>
+
+    <string name="media_remove_download">Remove download</string>
+    <!-- A confirmation's title. %1$s is the album's or book's title. -->
+    <string name="media_remove_title">Remove %1$s?</string>
+    <string name="media_remove_message">This deletes the downloaded files. Your place and bookmarks are kept.</string>
+
+    <!-- The Files app: Granger's root, its summary, and its two folders. -->
+    <string name="media_documents_summary">Music and audiobooks</string>
+    <string name="media_documents_music">Music</string>
+    <string name="media_documents_audiobooks">Audiobooks</string>
+    <!-- Android Auto's folders. -->
+    <string name="media_auto_recent">Recent</string>
+    <string name="media_auto_music">Music</string>
+    <string name="media_auto_audiobooks">Audiobooks</string>
+    <!-- An empty Android Auto folder. -->
+    <string name="media_auto_nothing">Nothing here yet</string>
+    <!-- A download already part-way onto storage that's now gone (an SD card taken out); %1$s is its title. -->
+    <string name="media_unmounted">%1$s is on storage that isn\'t available right now. Put it back to finish it, or remove it first.</string>
+</resources>

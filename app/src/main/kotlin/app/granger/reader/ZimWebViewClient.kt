@@ -1,5 +1,7 @@
 package app.granger.reader
 
+import android.text.TextUtils
+import app.granger.R
 import android.content.res.AssetManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -36,28 +38,28 @@ class ZimWebViewClient(
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse {
         val url = request.url.toString()
-        ZimUrls.parse(url)?.takeIf { it.packId == APP_PACK }?.let { return appAsset(it.path) }
+        ZimUrls.parse(url)?.takeIf { it.packId == APP_PACK }?.let { return appAsset(view, it.path) }
         return when (val response = resolver.response(url)) {
             is ZimResponse.Content -> {
-                val bytes = if (response.mimeType == "text/html") patched(response.bytes, response.encoding) else response.bytes
+                val bytes = if (response.mimeType == "text/html") patched(view, response.bytes, response.encoding) else response.bytes
                 WebResourceResponse(response.mimeType, response.encoding, ByteArrayInputStream(bytes))
             }
-            ZimResponse.NotFound -> notFound()
+            ZimResponse.NotFound -> notFound(view)
             ZimResponse.Blocked ->
                 WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden", emptyMap(), ByteArrayInputStream(ByteArray(0)))
         }
     }
 
-    private fun appAsset(name: String): WebResourceResponse {
-        if (name !in appFiles) return notFound()
+    private fun appAsset(view: WebView, name: String): WebResourceResponse {
+        if (name !in appFiles) return notFound(view)
         val mimeType = if (name.endsWith(".js")) "application/javascript" else "application/octet-stream"
         return WebResourceResponse(mimeType, "UTF-8", assets.open("$ASSET_DIR/$name"))
     }
 
-    private fun patched(bytes: ByteArray, encoding: String?): ByteArray {
+    private fun patched(view: WebView, bytes: ByteArray, encoding: String?): ByteArray {
         val charset = encoding?.let { runCatching { Charset.forName(it) }.getOrNull() } ?: Charsets.UTF_8
         val html = String(bytes, charset)
-        val fixed = DevDocsFixes.patch(MainPageFixes.patch(html))
+        val fixed = DevDocsFixes.patch(MainPageFixes.patch(html), view.context.getString(R.string.reader_devdocs_contents))
         return if (fixed === html) bytes else fixed.toByteArray(charset)
     }
 
@@ -96,14 +98,14 @@ class ZimWebViewClient(
         if (!isReload) onVisited(url)
     }
 
-    private fun notFound() =
-        WebResourceResponse("text/html", "UTF-8", 404, "Not Found", emptyMap(), ByteArrayInputStream(NOT_FOUND))
+    private fun notFound(view: WebView): WebResourceResponse {
+        val page = "<html><body><p>${TextUtils.htmlEncode(view.context.getString(R.string.reader_page_not_in_pack))}</p></body></html>"
+        return WebResourceResponse("text/html", "UTF-8", 404, "Not Found", emptyMap(), ByteArrayInputStream(page.toByteArray()))
+    }
 
     companion object {
         /** `https://zim.granger.invalid/_granger/<file>` serves `assets/reader/<file>`. */
         const val APP_PACK = "_granger"
         private const val ASSET_DIR = "reader"
-        private val NOT_FOUND =
-            "<html><body><p>This page isn't in this pack.</p></body></html>".toByteArray()
     }
 }

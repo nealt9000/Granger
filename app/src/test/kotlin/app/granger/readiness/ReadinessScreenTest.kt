@@ -1,5 +1,6 @@
 package app.granger.readiness
 
+import app.granger.UiText
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -37,10 +38,10 @@ class ReadinessScreenTest {
             DomainCoverage("reference", "General reference", Coverage.BASIC, 2_750_000_000, 11_900_000_000, 60_000_000_000, emptyList()),
         ),
         signals = listOf(
-            Signal.EmptyDomain("medicine", medline, "Nothing yet for Medicine & first aid. Get MedlinePlus, 370.0 MB."),
-            Signal.Stale("reference", "wikipedia_en_top_nopic", "Wikipedia is from 2025-01-10; a newer one is in the catalog."),
-            Signal.Unsearchable("u-ifixit", "iFixit can't be searched: the pack has no index."),
-            Signal.Unsearchable("u-gutenberg", "Gutenberg can't be searched: the pack has no index."),
+            Signal.EmptyDomain("medicine", medline, UiText.Raw("Nothing yet for Medicine & first aid. Get MedlinePlus, 370.0 MB.")),
+            Signal.Stale("reference", "wikipedia_en_top_nopic", UiText.Raw("Wikipedia is from 2025-01-10; a newer one is in the catalog.")),
+            Signal.Unsearchable("u-ifixit", UiText.Raw("iFixit can't be searched: the pack has no index.")),
+            Signal.Unsearchable("u-gutenberg", UiText.Raw("Gutenberg can't be searched: the pack has no index.")),
         ),
         storage = listOf(StorageRow(Source.KIWIX, 2_750_000_000, 1), StorageRow(Source.GRANGER, 0, 0), StorageRow(Source.PHONE_MEDIA, 0, 0, referencedOnly = true)),
         needsCatalogRefresh = false,

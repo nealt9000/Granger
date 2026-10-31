@@ -1,5 +1,7 @@
 package app.granger.onboarding
 
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import app.granger.bookEntry
 import app.granger.catalogOf
 import app.granger.core.ai.DeviceTier
@@ -11,7 +13,12 @@ import app.granger.modelEntry
 import app.granger.packEntry
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class OnboardingModelTest {
     private val med = packEntry("wikipedia_en_medicine_nopic", size = 1_000, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
     private val medMaxi = packEntry("wikipedia_en_medicine_maxi", size = 1_900, zimName = "wikipedia_en_medicine").copy(family = "wikipedia")
@@ -48,7 +55,7 @@ class OnboardingModelTest {
         val choices = OnboardingModel.startChoices(catalog, installed = setOf("medlineplus.gov_en_all"))
         assertThat(choices.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()
         val efficient = choices[0]
-        assertThat(efficient.lines.map { it.title }).containsExactly("Pack wikipedia_en_medicine_nopic", "Granger Classics").inOrder()
+        assertThat(efficient.lines.map { it.title.en() }).containsExactly("Pack wikipedia_en_medicine_nopic", "Granger Classics").inOrder()
         assertThat(efficient.lines[1].count).isEqualTo(2)
         assertThat(efficient.bytes()).isEqualTo(1_030)
         assertThat(efficient.bytes(unticked = setOf("collection:granger-classics"))).isEqualTo(1_000)
@@ -82,7 +89,7 @@ class OnboardingModelTest {
         assertThat(medical.lines.map { it.id }).containsExactly("mdwiki_en_all_nopic")
         assertThat(medical.bytes).isEqualTo(800)
         val faith = additions.first { it.useCase.id == "faith" }
-        assertThat(faith.lines.single().title).isEqualTo("Granger Classics")
+        assertThat(faith.lines.single().title.en()).isEqualTo("Granger Classics")
         assertThat(faith.packs).isEqualTo(2)
         assertThat(OnboardingModel.additions(catalogOf(), emptySet(), emptySet())).isEmpty()
     }
@@ -93,7 +100,7 @@ class OnboardingModelTest {
         val region = OnboardingModel.regions(catalog, installed).countries.first { it.title == "Peru" }
         val additions = OnboardingModel.additions(catalog, installed, chosen = start.chosen().flatMap { it.items }.map { it.id }.toSet())
         val review = OnboardingModel.review(start, unticked = setOf("wikipedia_en_medicine_nopic"), region, additions, freeBytes = 10_000)
-        assertThat(review.groups.map { it.title }).containsExactly("Comprehensive library", "Your region", "What you'll use it for").inOrder()
+        assertThat(review.groups.map { it.title.en() }).containsExactly("Comprehensive library", "Your region", "What you'll use it for").inOrder()
         assertThat(review.items.map { it.id }).containsExactly(
             "gc-bible", "wikipedia_en_medicine_maxi", "gc-hamlet", "maps_en_peru", "mdwiki_en_all_nopic", "wikivoyage_en_all_maxi",
         )
@@ -119,9 +126,9 @@ class OnboardingModelTest {
 
     @Test fun theReviewKeepsThePresetsNameOnlyWhileItIsWhole() {
         val efficient = OnboardingModel.startChoices(catalog, emptySet()).first { it.id == "efficient" }
-        assertThat(OnboardingModel.review(efficient, emptySet(), null, emptyList(), 10_000).groups.single().title).isEqualTo("Efficient start")
+        assertThat(OnboardingModel.review(efficient, emptySet(), null, emptyList(), 10_000).groups.single().title.en()).isEqualTo("Efficient start")
         val trimmed = OnboardingModel.review(efficient, setOf("wikipedia_en_medicine_nopic"), null, emptyList(), 10_000)
-        assertThat(trimmed.groups.single().title).isEqualTo("Your picks")
+        assertThat(trimmed.groups.single().title.en()).isEqualTo("Your picks")
     }
 
     @Test fun theReviewSaysHowMuchIsAsksIndexes() {
@@ -150,7 +157,7 @@ class OnboardingModelTest {
     @Test fun askIsTheAnsweringModelPlusTheEmbedderWhenDense() {
         val line = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())!!
         assertThat(line.id).isEqualTo(OnboardingModel.ASK)
-        assertThat(line.title).isEqualTo("Ask (Preview)")
+        assertThat(line.title.en()).isEqualTo("Ask (Preview)")
         assertThat(line.items.map { it.id }).containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m").inOrder()
         assertThat(line.bytes).isEqualTo(2_160)
         assertThat(OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = false, installed = emptySet())!!.items.map { it.id })
@@ -173,8 +180,8 @@ class OnboardingModelTest {
     @Test fun theReviewListsAskAsItsOwnGroup() {
         val ask = OnboardingModel.askLine(withModels, DeviceTier.ASK, dense = true, installed = emptySet())
         val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 10_000, ask)
-        assertThat(review.groups.map { it.title }).containsExactly("Ask (Preview)")
-        assertThat(review.groups.single().lines.single().title).isEqualTo("The librarian")
+        assertThat(review.groups.map { it.title.en() }).containsExactly("Ask (Preview)")
+        assertThat(review.groups.single().lines.single().title.en()).isEqualTo("The librarian")
         assertThat(review.bytes).isEqualTo(2_160)
     }
 
@@ -188,13 +195,13 @@ class OnboardingModelTest {
     @Test fun theVoiceLineIsTheNannyUntilAnyCatalogVoiceIsHere() {
         val withVoices = catalog.copy(voices = listOf(ljspeech, nanny))
         val line = OnboardingModel.voiceLine(withVoices, emptySet())!!
-        assertThat(line.title).isEqualTo("Read aloud")
+        assertThat(line.title.en()).isEqualTo("Read aloud")
         assertThat(line.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
         assertThat(OnboardingModel.voiceLine(withVoices, setOf(ljspeech.id))).isNull()
         assertThat(OnboardingModel.voiceLine(catalog, emptySet())).isNull()
         val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 1_000, voice = line)
-        assertThat(review.groups.single().title).isEqualTo("Read aloud")
-        assertThat(review.groups.single().lines.single().title).isEqualTo("Granger voice (Nanny)")
+        assertThat(review.groups.single().title.en()).isEqualTo("Read aloud")
+        assertThat(review.groups.single().lines.single().title.en()).isEqualTo("Granger voice (Nanny)")
     }
 
     @Test fun saveSpaceSwapsEachPackForItsNoPicturesFlavour() {
@@ -262,8 +269,8 @@ class OnboardingModelTest {
     }
 
     @Test fun theReviewSaysQuickOnesComeFirst() {
-        val line = Line("x", "x", listOf(voice, hamlet), installed = false)
-        assertThat(OnboardingModel.quickFirstText(Review(listOf(ReviewGroup("Start", listOf(line))), 0)))
+        val line = Line("x", UiText.Raw("x"), listOf(voice, hamlet), installed = false)
+        assertThat(OnboardingModel.quickFirstText(Review(listOf(ReviewGroup(UiText.Raw("Start"), listOf(line))), 0))?.en())
             .isEqualTo("Quick ones first: the voice and the Classics land in a few minutes.")
         assertThat(OnboardingModel.quickFirstText(Review(emptyList(), 0))).isNull()
     }
@@ -290,7 +297,7 @@ class OnboardingModelTest {
         )
         assertThat(review.items.map { it.id }).containsExactly("wikipedia_en_top1m_nopic", "medlineplus.gov_en_all")
         assertThat(review.bytes).isEqualTo(17_000L + 375L)
-        assertThat(review.notes).containsExactly("Wikipedia Top 1 million covers Best 50,000, so only Top 1 million is queued.")
+        assertThat(review.notes.map { it.en() }).containsExactly("Wikipedia Top 1 million covers Best 50,000, so only Top 1 million is queued.")
         // Without the bigger one ticked, the smaller is queued as before, with no note.
         val one = OnboardingModel.review(
             start, setOf("wikipedia_en_top1m_nopic"), null, emptyList(), 100_000, containment = app.granger.core.catalog.Containment(wfCatalog),
@@ -299,3 +306,6 @@ class OnboardingModelTest {
         assertThat(one.notes).isEmpty()
     }
 }
+
+/** Resources need Robolectric now that the flow's text is [UiText]; the assertions stay in English. */
+private fun UiText.en(): String = resolve(ApplicationProvider.getApplicationContext())

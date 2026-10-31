@@ -72,8 +72,8 @@ class MediaTileTest {
     }
 
     @Test fun railTabsAndPlaysPickTheirGlyph() {
-        val article = RailTabUi(1L, "Owls", "Wikipedia", 'O', available = true, current = false, packId = "wiki", path = "A/Owl")
-        val book = RailTabUi(2L, "Emma", "Jane Austen", 'E', available = true, current = false)
+        val article = RailTabUi(1L, "Owls", app.granger.UiText.Raw("Wikipedia"), 'O', available = true, current = false, packId = "wiki", path = "A/Owl")
+        val book = RailTabUi(2L, "Emma", app.granger.UiText.Raw("Jane Austen"), 'E', available = true, current = false)
         assertThat(article.mediaKind()).isEqualTo(MediaKind.ARTICLE)
         assertThat(book.mediaKind()).isEqualTo(MediaKind.BOOK)
         val plays = mapOf(

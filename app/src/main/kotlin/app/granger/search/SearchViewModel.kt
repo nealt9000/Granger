@@ -32,14 +32,14 @@ fun interface MediaSearch { suspend fun search(query: String): MediaResults }
  * A run of results under one heading (Music has three). Each shows its first [preview] rows, and Show all for the rest;
  * [fetch] is how many are asked for, so a group that fills it may have more than Search knows of.
  */
-enum class SearchGroup(val preview: Int, val fetch: Int, val noun: String) {
-    TITLES(8, ZimLibrarySearch.TITLE_LIMIT, "titles"),
-    ARTISTS(3, MEDIA_FETCH, "artists"),
-    ALBUMS(5, MEDIA_FETCH, "albums"),
-    SONGS(5, MEDIA_FETCH, "songs"),
-    AUDIOBOOKS(5, MEDIA_FETCH, "audiobooks"),
-    FULL_TEXT(8, ZimLibrarySearch.FULL_TEXT_LIMIT, "article matches"),
-    BOOKS(8, BookIndex.LIMIT, "books"),
+enum class SearchGroup(val preview: Int, val fetch: Int) {
+    TITLES(8, ZimLibrarySearch.TITLE_LIMIT),
+    ARTISTS(3, MEDIA_FETCH),
+    ALBUMS(5, MEDIA_FETCH),
+    SONGS(5, MEDIA_FETCH),
+    AUDIOBOOKS(5, MEDIA_FETCH),
+    FULL_TEXT(8, ZimLibrarySearch.FULL_TEXT_LIMIT),
+    BOOKS(8, BookIndex.LIMIT),
 }
 
 private const val MEDIA_FETCH = 25

@@ -49,7 +49,7 @@ class MediaDocumentsProvider : DocumentsProvider() {
                 .add(Root.COLUMN_ROOT_ID, ROOT_ID)
                 .add(Root.COLUMN_DOCUMENT_ID, MediaDocuments.ROOT)
                 .add(Root.COLUMN_TITLE, "Granger")
-                .add(Root.COLUMN_SUMMARY, "Music and audiobooks")
+                .add(Root.COLUMN_SUMMARY, context?.getString(R.string.media_documents_summary))
                 .add(Root.COLUMN_FLAGS, Root.FLAG_LOCAL_ONLY or Root.FLAG_SUPPORTS_IS_CHILD)
                 .add(Root.COLUMN_ICON, R.mipmap.ic_launcher)
                 .add(Root.COLUMN_MIME_TYPES, "audio/*\nimage/*")
@@ -155,7 +155,13 @@ object MediaSharing {
             },
             volumeKey = { root -> volumeKey(storage, root) },
             titleOf = { dir -> MediaManifests.read(dir)?.let(MediaManifests::displayTitle) },
+            shelfName = shelfName(context),
         )
+    }
+
+    /** The shelf folders' names in the Files app. */
+    fun shelfName(context: Context): (String) -> String = { shelf ->
+        context.getString(if (shelf == MediaDocuments.MUSIC) R.string.media_documents_music else R.string.media_documents_audiobooks)
     }
 
     /** The storage volume's UUID, or "primary" for internal storage. */

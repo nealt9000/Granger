@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- archive.org shelves: the chips above an archive.org view's list. -->
+    <string name="archive_shelf_most_downloaded">Most downloaded</string>
+    <string name="archive_shelf_manuals">Technical manuals</string>
+    <string name="archive_shelf_science">Science &amp; engineering</string>
+    <string name="archive_shelf_literature">Literature</string>
+    <string name="archive_shelf_poetry">Poetry</string>
+    <string name="archive_shelf_drama">Drama</string>
+    <!-- Shellac gramophone records that play at 78 revolutions per minute. -->
+    <string name="archive_shelf_78">78 rpm records</string>
+    <string name="archive_shelf_classical">Classical</string>
+    <string name="archive_shelf_folk">Folk &amp; field recordings</string>
+
+    <!-- LibriVox shelves: the chips above the LibriVox list. -->
+    <string name="archive_librivox_shelf_recent">Recently added</string>
+    <string name="archive_librivox_shelf_fiction">Fiction</string>
+    <string name="archive_librivox_shelf_poetry">Poetry</string>
+    <!-- Children's books. -->
+    <string name="archive_librivox_shelf_children">Children\'s</string>
+    <string name="archive_librivox_shelf_science_fiction">Science fiction</string>
+    <string name="archive_librivox_shelf_detective">Mystery &amp; detective</string>
+    <string name="archive_librivox_shelf_philosophy">Philosophy</string>
+
+    <!-- Errors shown in place of an archive.org list or item. -->
+    <string name="archive_error_not_found">Not found on archive.org</string>
+    <string name="archive_error_unreachable">Couldn\'t reach archive.org</string>
+    <!-- %1$d is an HTTP status code, such as 503. -->
+    <string name="archive_error_answered">archive.org answered %1$d</string>
+    <string name="archive_error_unreadable">archive.org sent something Granger couldn\'t read</string>
+
+    <!-- Errors shown in place of a LibriVox list or book. -->
+    <string name="archive_librivox_error_not_found">Not found on LibriVox</string>
+    <string name="archive_librivox_error_unreachable">Couldn\'t reach LibriVox</string>
+    <!-- HTTP 429: LibriVox asked Granger to slow down. -->
+    <string name="archive_librivox_error_busy">LibriVox is busy right now. Try again in a minute.</string>
+    <!-- %1$d is an HTTP status code, such as 500. -->
+    <string name="archive_librivox_error_answered">LibriVox answered %1$d</string>
+    <string name="archive_librivox_error_unreadable">LibriVox sent something Granger couldn\'t read</string>
+</resources>

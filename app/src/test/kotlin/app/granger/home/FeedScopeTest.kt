@@ -1,5 +1,6 @@
 package app.granger.home
 
+import app.granger.UiText
 import app.granger.catalogOf
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.CollectionRow
@@ -37,7 +38,7 @@ class FeedScopeTest {
 
     @Test fun aPackByNameAndAFamilyByPrefixWhenTheCatalogIsNotThere() {
         assertThat(FeedScope.parse("pack:ifixit_en_all")!!.resolve(snapshot())!!.packs).containsExactly(ifixit)
-        assertThat(FeedScope.parse("family:wikiquote")!!.resolve(snapshot())!!.name).isEqualTo("Wikiquote")
+        assertThat(FeedScope.parse("family:wikiquote")!!.resolve(snapshot())!!.name).isEqualTo(UiText.Raw("Wikiquote"))
         assertThat(FeedScope.parse("family:wikivoyage")!!.resolve(snapshot())).isNull() // Only whole packs count.
         assertThat(FeedScope.parse("family:gutenberg")!!.resolve(snapshot())).isNull()
     }
@@ -51,7 +52,7 @@ class FeedScopeTest {
 
     @Test fun collectionsMusicAndTheLibraryResolveToTheirItems() {
         val classics = FeedScope.parse("collection:c:granger-classics")!!.resolve(snapshot())!!
-        assertThat(classics.name).isEqualTo("Granger Classics")
+        assertThat(classics.name).isEqualTo(UiText.Raw("Granger Classics"))
         assertThat(classics.books.map { it.title }).containsExactly("Hamlet")
         assertThat(FeedScope.parse("collection:c:nope")!!.resolve(snapshot())).isNull()
         assertThat(FeedScope.Music.resolve(snapshot())!!.albums).containsExactly(album)

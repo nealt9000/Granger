@@ -1,5 +1,7 @@
 package app.granger.reader
 
+import app.granger.R
+import app.granger.UiText
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -84,7 +86,7 @@ class ReaderViewModel(
         val url: String? = null,
         val page: Page? = null,
         val bookmarked: Boolean = false,
-        val error: String? = null,
+        val error: UiText? = null,
         /** The top bar and the side rail. Up when the reader opens and when its tab is returned to; a middle tap hides them for full-screen reading. An error keeps them up so the user can leave. */
         val chromeVisible: Boolean = true,
         /** Find in page: null when the find bar is closed. */
@@ -276,7 +278,7 @@ class ReaderViewModel(
         null
     }
 
-    private fun fail(message: String) {
+    private fun fail(message: UiText) {
         _state.update { it.copy(error = message, chromeVisible = true) }
     }
 
@@ -496,9 +498,8 @@ class ReaderViewModel(
         private const val SUGGESTION_LIMIT = 10
         private const val FULLTEXT_LIMIT = 25
 
-        const val PACK_UNAVAILABLE =
-            "This pack is missing or damaged. Check that its file is still on the phone or SD card."
-        const val NO_MAIN_PAGE = "This pack has no main page. Use Search to open an article."
-        const val TAB_GONE = "This bookmark was removed."
+        val PACK_UNAVAILABLE = UiText.Res(R.string.reader_pack_unavailable)
+        val NO_MAIN_PAGE = UiText.Res(R.string.reader_no_main_page)
+        val TAB_GONE = UiText.Res(R.string.reader_tab_gone)
     }
 }

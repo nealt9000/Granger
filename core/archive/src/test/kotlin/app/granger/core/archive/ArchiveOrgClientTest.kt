@@ -155,9 +155,12 @@ class ArchiveOrgClientTest {
         server.status["/advancedsearch.php"] = 503
         val e = assertThrows(ArchiveError::class.java) { kotlinx.coroutines.runBlocking { client.search("x", 1) } }
         assertThat(e).hasMessageThat().contains("503")
+        assertThat(e.problem).isEqualTo(ArchiveProblem.ANSWERED)
+        assertThat(e.textArgs).containsExactly(503)
         server.failWith = IOException("boom")
         val e2 = assertThrows(ArchiveError::class.java) { kotlinx.coroutines.runBlocking { client.search("x", 1) } }
         assertThat(e2).hasMessageThat().isEqualTo("Couldn't reach archive.org")
+        assertThat(e2.problem).isEqualTo(ArchiveProblem.UNREACHABLE)
     }
 
     @Test fun malformedBodyIsAnArchiveError() = runTest {

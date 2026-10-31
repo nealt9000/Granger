@@ -1,5 +1,8 @@
 package app.granger.ebook
 
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,29 +63,39 @@ fun HighlightSheet(
             Text(mark.text, maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 HighlightColors.names.forEach { name ->
+                    val swatchName = stringResource(swatchLabel(name))
                     Box(
                         Modifier.size(36.dp).ring(name == color).background(Color(HighlightColors.argb(name)), CircleShape)
                             .clickable {
                                 color = name
                                 onChange(mark.copy(note = note, color = name))
                             }
-                            .semantics { contentDescription = "$name highlight" },
+                            .semantics { contentDescription = swatchName },
                     )
                 }
             }
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text("Note") },
+                label = { Text(stringResource(R.string.ebook_note)) },
                 modifier = Modifier.fillMaxWidth().focusRequester(focus),
                 minLines = 2,
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = onDelete) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-                TextButton(onClick = { save(); onDismiss() }) { Text("Done", color = MaterialTheme.colorScheme.primary) }
+                TextButton(onClick = onDelete) { Text(stringResource(R.string.common_delete), color = MaterialTheme.colorScheme.error) }
+                TextButton(onClick = { save(); onDismiss() }) { Text(stringResource(R.string.common_done), color = MaterialTheme.colorScheme.primary) }
             }
         }
     }
+}
+
+/** What TalkBack calls a swatch: "yellow highlight". */
+@StringRes
+private fun swatchLabel(name: String): Int = when (name) {
+    "green" -> R.string.ebook_highlight_green
+    "blue" -> R.string.ebook_highlight_blue
+    "pink" -> R.string.ebook_highlight_pink
+    else -> R.string.ebook_highlight_yellow
 }
 
 /** A ring around the chosen swatch. */

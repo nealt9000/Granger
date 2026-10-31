@@ -26,7 +26,7 @@ class LaunchDeciderTest {
     @Test fun launchWithMissingBookOpensLibraryWithNotice() {
         val book = tab.copy(id = 9, packId = "book:granger:pg1", path = "")
         assertThat(LaunchDecider.decide(normal.copy(lastTab = book, lastTabPackOk = false)))
-            .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
+            .isEqualTo(StartScreen.Library(LibraryNotice.LAST_READ_MISSING))
     }
 
     @Test fun firstRunOpensHome() {
@@ -47,7 +47,7 @@ class LaunchDeciderTest {
 
     @Test fun launchWithMissingPackOpensLibraryWithNotice() {
         assertThat(LaunchDecider.decide(normal.copy(lastTabPackOk = false)))
-            .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
+            .isEqualTo(StartScreen.Library(LibraryNotice.LAST_READ_MISSING))
     }
 
     @Test fun notOnboardedOpensTheFlowBeforeAnythingElse() {
@@ -62,7 +62,7 @@ class LaunchDeciderTest {
 
     @Test fun openToHomeStillShowsTheMissingPackNotice() {
         assertThat(LaunchDecider.decide(normal.copy(openTo = OpenTo.HOME, lastTabPackOk = false)))
-            .isEqualTo(StartScreen.Library(LaunchDecider.MISSING_NOTICE))
+            .isEqualTo(StartScreen.Library(LibraryNotice.LAST_READ_MISSING))
     }
 
     @Test fun aMissingFileIsNotResumableEvenWhenTheRowIsOk() {

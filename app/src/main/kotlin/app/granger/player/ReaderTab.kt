@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -112,22 +113,22 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
         )
         Sentences(voice, progress)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = controls.onPreviousParagraph) { Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous paragraph") }
-            IconButton(onClick = controls.onBackSentence) { Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back a sentence") }
+            IconButton(onClick = controls.onPreviousParagraph) { Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = stringResource(R.string.player_previous_paragraph)) }
+            IconButton(onClick = controls.onBackSentence) { Icon(painterResource(R.drawable.ic_replay), contentDescription = stringResource(R.string.player_back_sentence)) }
             FilledIconButton(
                 onClick = controls.onPlayPause,
                 modifier = Modifier.size(64.dp).testTag(ReaderTags.PLAY_PAUSE),
                 colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary),
             ) { PlayPauseIcon(ui.playing) }
             IconButton(onClick = controls.onNextSentence, modifier = Modifier.testTag(ReaderTags.NEXT_SENTENCE)) {
-                Icon(painterResource(R.drawable.ic_forward), contentDescription = "Next sentence")
+                Icon(painterResource(R.drawable.ic_forward), contentDescription = stringResource(R.string.player_next_sentence))
             }
-            IconButton(onClick = controls.onNextParagraph) { Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next paragraph") }
+            IconButton(onClick = controls.onNextParagraph) { Icon(painterResource(R.drawable.ic_skip_next), contentDescription = stringResource(R.string.player_next_paragraph)) }
         }
         // Stop and Open sit with the transport, not under the settings below.
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = controls.onStop, modifier = Modifier.weight(1f).testTag(ReaderTags.STOP)) { Text("Stop") }
-            Button(onClick = { controls.onOpen(voice) }, modifier = Modifier.weight(1f).testTag(ReaderTags.OPEN)) { Text("Open") }
+            OutlinedButton(onClick = controls.onStop, modifier = Modifier.weight(1f).testTag(ReaderTags.STOP)) { Text(stringResource(R.string.common_stop)) }
+            Button(onClick = { controls.onOpen(voice) }, modifier = Modifier.weight(1f).testTag(ReaderTags.OPEN)) { Text(stringResource(R.string.common_open)) }
         }
         chapters?.takeIf { it.chapters.isNotEmpty() }?.let { c ->
             HorizontalDivider()
@@ -137,10 +138,10 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
             ) {
                 Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)
                 Spacer(Modifier.size(12.dp))
-                Text("Chapters", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.player_chapters), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 c.current?.let { i -> c.chapters.getOrNull(i)?.let { i to it } }?.let { (i, here) ->
                     Text(
-                        here.title.ifBlank { "Chapter ${i + 1}" }, style = MaterialTheme.typography.bodyMedium,
+                        chapterName(here.title, i).resolve(), style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
                     )
@@ -161,9 +162,9 @@ fun Reader(ui: PlayerUi, progress: VoiceProgress?, saved: SavedModes, voices: Li
         ) {
             Icon(painterResource(R.drawable.ic_timer), contentDescription = null)
             Spacer(Modifier.size(12.dp))
-            Text("Sleep timer", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.player_sleep_timer), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
             Text(
-                ui.sleepRemainingMs?.let { "Stops in ${formatTime(it)}" } ?: "Off",
+                ui.sleepRemainingMs?.let { stringResource(R.string.player_stops_in, formatTime(it)) } ?: stringResource(R.string.player_off),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (ui.sleepRemainingMs != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -203,12 +204,14 @@ private fun NothingRead(last: SavedVoice?, onResume: (SavedVoice) -> Unit) {
             }
         }
         Text(
-            "Open a book or article and tap Listen",
+            stringResource(R.string.player_open_hint),
             style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
         )
     }
 }
 
 /** "Resume Peter Pan · Chapter 3": the last thing read and its section, when it has one. */
-internal fun resumeLabel(last: SavedVoice): String =
-    "Resume " + listOfNotNull(last.title, last.section?.takeIf { it.isNotBlank() }).joinToString(" · ")
+@Composable
+internal fun resumeLabel(last: SavedVoice): String = last.section?.takeIf { it.isNotBlank() }
+    ?.let { stringResource(R.string.player_resume_section, last.title, it) }
+    ?: stringResource(R.string.player_resume, last.title)

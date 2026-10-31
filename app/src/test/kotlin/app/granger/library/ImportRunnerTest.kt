@@ -8,6 +8,7 @@ import app.granger.core.library.ImportResult
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -58,7 +59,7 @@ class ImportRunnerTest {
         val summary = runner(shelf).run(listOf(uri("a.epub"), uri("b.epub"), uri("c.epub")))
         assertThat(shelf.seen).containsExactly("a.epub", "b.epub", "c.epub").inOrder()
         assertThat(summary.imported).isEqualTo(2)
-        assertThat(summary.problems).containsExactly("b.epub is damaged or isn't a complete e-book.")
+        assertThat(summary.problems.map { it.resolve(ApplicationProvider.getApplicationContext()) }).containsExactly("b.epub is damaged or isn't a complete e-book.")
     }
 
     @Test fun aPdfImportsAndAnEncryptedOneSaysWhy() = runTest {
@@ -71,7 +72,7 @@ class ImportRunnerTest {
         )
         val summary = runner(shelf).run(listOf("water.pdf", "locked.pdf", "book.epub").map(::uri))
         assertThat(summary.imported).isEqualTo(2)
-        assertThat(summary.problems).containsExactly(
+        assertThat(summary.problems.map { it.resolve(ApplicationProvider.getApplicationContext()) }).containsExactly(
             "locked.pdf is password-protected or encrypted. Granger can't open it and won't remove the protection.",
         )
     }
@@ -88,16 +89,16 @@ class ImportRunnerTest {
         val summary = runner(shelf).run(listOf("a.epub", "b.epub", "c.epub", "Book.epub").map(::uri))
         assertThat(summary.imported).isEqualTo(2)
         assertThat(summary.alreadyThere).isEqualTo(1)
-        assertThat(summary.text()).isEqualTo(
+        assertThat(summary.text().resolve(ApplicationProvider.getApplicationContext())).isEqualTo(
             "Imported 2 books. 1 was already in My books. " +
                 "Book.epub is copy-protected (DRM). Granger can't open it and won't remove the protection.",
         )
     }
 
     @Test fun textForTheSimpleCases() {
-        assertThat(ImportSummary(3, 0, emptyList()).text()).isEqualTo("Imported 3 books.")
-        assertThat(ImportSummary(1, 0, emptyList()).text()).isEqualTo("Imported 1 book.")
-        assertThat(ImportSummary(0, 2, emptyList()).text()).isEqualTo("2 were already in My books.")
+        assertThat(ImportSummary(3, 0, emptyList()).text().resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Imported 3 books.")
+        assertThat(ImportSummary(1, 0, emptyList()).text().resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Imported 1 book.")
+        assertThat(ImportSummary(0, 2, emptyList()).text().resolve(ApplicationProvider.getApplicationContext())).isEqualTo("2 were already in My books.")
     }
 
     @Test fun unreadableUriIsAProblemNotACrash() = runTest {
@@ -110,7 +111,7 @@ class ImportRunnerTest {
         }.run(listOf(uri("x.epub"), uri("ok.epub")))
         assertThat(summary.imported).isEqualTo(1)
         assertThat(summary.problems).hasSize(1)
-        assertThat(summary.problems.single()).startsWith("x.epub")
+        assertThat(summary.problems.single().resolve(ApplicationProvider.getApplicationContext())).startsWith("x.epub")
     }
 
     @Test fun aSecurityExceptionOnOpenIsAProblemToo() = runTest {

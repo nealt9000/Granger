@@ -9,7 +9,9 @@ import app.granger.library.shelf.ShelfSections
 import app.granger.library.shelf.sortedByShelfKey
 
 /** How a collection's books are ordered (Plan U2 Decision 3). */
-enum class BookSort(val label: String) { TITLE("Title"), AUTHOR("Author"), RECENT("Recently read") }
+enum class BookSort(@androidx.annotation.StringRes val label: Int) {
+    TITLE(app.granger.R.string.library_sort_title), AUTHOR(app.granger.R.string.library_sort_author), RECENT(app.granger.R.string.library_sort_recent),
+}
 
 /**
  * The books a collection shows: [books] after the Find text, the category and the sort, and as [sections] under their

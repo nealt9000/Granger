@@ -5,6 +5,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
 import app.granger.MainActivity
+import app.granger.R
+import app.granger.UiText
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,13 +33,31 @@ class WidgetCacheTest {
     @Test fun lastRenderedModelSurvivesTheProcessAsPaused() {
         val store = WidgetModelStore(context.getSharedPreferences("widget-test", Context.MODE_PRIVATE))
         assertThat(store.load()).isNull()
-        store.save(WidgetModel("Kaa's Hunting", "The Jungle Book", "/covers/jb.jpg", playing = true, Secondary.BACK, 0.4f, empty = false))
+        store.save(WidgetModel(UiText.Raw("Kaa's Hunting"), UiText.Raw("The Jungle Book"), "/covers/jb.jpg", playing = true, Secondary.BACK, 0.4f, empty = false))
         // A new process: nothing is loaded, so it shows paused, with play (which resumes) as the one button.
         assertThat(store.load()).isEqualTo(
-            WidgetModel("Kaa's Hunting", "The Jungle Book", "/covers/jb.jpg", playing = false, Secondary.NONE, 0.4f, empty = false),
+            WidgetModel(UiText.Raw("Kaa's Hunting"), UiText.Raw("The Jungle Book"), "/covers/jb.jpg", playing = false, Secondary.NONE, 0.4f, empty = false),
         )
         store.save(WidgetModel.EMPTY)
         assertThat(store.load()).isEqualTo(WidgetModel.EMPTY)
+    }
+
+    @Test fun savedTextKeepsItsResourceNotItsWords() {
+        val store = WidgetModelStore(context.getSharedPreferences("widget-test-res", Context.MODE_PRIVATE))
+        val chapter = UiText.Res(R.string.player_chapter_number, 3)
+        val reading = UiText.Res(R.string.player_reading_section, "Act I")
+        store.save(WidgetModel(chapter, reading, null, playing = false, Secondary.NONE, null, empty = false))
+        val back = store.load()!!
+        assertThat(back.title).isEqualTo(chapter)
+        assertThat(back.subtitle).isEqualTo(reading)
+        assertThat(back.subtitle.resolve(context)).isEqualTo("Reading · Act I")
+        // A resource the store doesn't know isn't kept: a new process asks the player instead.
+        store.save(WidgetModel(UiText.Res(R.string.widget_open_granger), reading, null, playing = false, Secondary.NONE, null, empty = false))
+        assertThat(store.load()).isNull()
+        // A copy an older build saved as plain words isn't read as text.
+        context.getSharedPreferences("widget-test-res", Context.MODE_PRIVATE).edit()
+            .putBoolean("saved", true).putBoolean("empty", false).putString("title", "Kaa's Hunting").putString("subtitle", "x").commit()
+        assertThat(store.load()).isNull()
     }
 
     @Test fun relaunchFromRecentsDoesNotReopenThePlayer() {

@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -108,7 +109,9 @@ import app.granger.settings.MediaSettingsScreen
 import app.granger.settings.ResolverFolderGrants
 import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
+import app.granger.settings.LanguageSettingsScreen
 import app.granger.settings.VoiceSettingsScreen
+import app.granger.settings.languageLabel
 import app.granger.settings.VoiceSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -153,8 +156,11 @@ import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.ResearchViewModel
 
-/** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
-@Serializable data class LibraryRoute(val notice: String? = null)
+/** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading; [noticeTitle] is the item it names. */
+@Serializable data class LibraryRoute(val notice: app.granger.launch.LibraryNotice? = null, val noticeTitle: String? = null)
+
+/** The Library route's notice in words. */
+internal fun LibraryRoute.noticeText(): UiText? = notice?.let { UiText.Res(it.text, *listOfNotNull(noticeTitle).toTypedArray()) }
 
 /** Home (Plan H2): the readiness strip, Continue and the feeds. A rail tool, pushed over the Library. */
 @Serializable object HomeRoute
@@ -183,8 +189,6 @@ private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumR
 @Serializable data class AudiobookRoute(val audiobookId: String, val chapter: Int? = null)
 
 private fun NavDestination.isAudiobooks() = hasRoute<AudiobookShelfRoute>() || hasRoute<AudiobookRoute>()
-/** Said when a cited article's page is gone from its pack, so its main page opened instead (research spec §7). */
-const val PAGE_MOVED = "That page is no longer in this pack."
 
 /** An article; [fragment] scrolls its first page to that section (a cited passage's heading), and [quote] is marked there. */
 @Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null, val quote: String? = null)
@@ -354,6 +358,8 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 @Serializable object DownloadsRoute
 /** Settings → Voice (Plan V1). */
 @Serializable object VoiceRoute
+/** Settings → Appearance → Language (Plan L2 Task 3). */
+@Serializable object LanguageRoute
 
 /**
  * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
@@ -382,7 +388,7 @@ internal fun railToolOf(
         destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() || destination.hasRoute<LanguageRoute>() -> RailTool.SETTINGS
     else -> null
 }
 
@@ -650,7 +656,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         if (path.endsWith(".epub", ignoreCase = true)) {
             val book = container.gutenbergBooks.bookFor(packId, path)
             if (book == null) {
-                android.widget.Toast.makeText(appContext, "Couldn't open this book: it isn't in this pack's list.", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(appContext, R.string.app_book_not_in_pack, android.widget.Toast.LENGTH_LONG).show()
                 return
             }
             val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
@@ -737,7 +743,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     fun resumePlay(item: RailEntry.Play) {
         scope.launch {
             val notice = railViewModel.resume(item) ?: return@launch
-            nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
+            nav.navigate(LibraryRoute(notice, item.title)) { popUpTo<LibraryRoute> { inclusive = true } }
         }
     }
 
@@ -780,7 +786,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     scope.launch {
                         // All six are taken: say to unpin one first.
                         val notice = railViewModel.pin(entry) ?: return@launch
-                        Toast.makeText(appContext, notice, Toast.LENGTH_LONG).show()
+                        Toast.makeText(appContext, notice.resolve(appContext), Toast.LENGTH_LONG).show()
                     }
                 },
                 onUnpin = railViewModel::unpin,
@@ -835,7 +841,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.appScope,
                         )
                     },
-                    notice = backStackEntry.toRoute<LibraryRoute>().notice,
+                    notice = backStackEntry.toRoute<LibraryRoute>().noticeText(),
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
@@ -1041,7 +1047,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             when (target) {
                                 is CitationTarget.Article -> {
                                     nav.showTab(tab, fragment = target.fragment, quote = target.quote)
-                                    if (target.moved) Toast.makeText(appContext, PAGE_MOVED, Toast.LENGTH_LONG).show()
+                                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
                                 }
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)
                                 is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
@@ -1054,7 +1060,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onGetLibrarian = {
                         container.appScope.launch {
                             container.librarian.get()?.let { problem ->
-                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem, Toast.LENGTH_LONG).show() }
+                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem.resolve(appContext), Toast.LENGTH_LONG).show() }
                             }
                         }
                     },
@@ -1093,7 +1099,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             family = route.family,
                         )
                     },
-                    title = source.title,
+                    title = stringResource(source.title),
                     onBack = { nav.popBackStack() },
                     // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
                     onOpenPack = ::openPackOrCollection,
@@ -1142,10 +1148,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
                         .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
-                        ?.title ?: "No offline voice on this phone",
+                        ?.title ?: stringResource(R.string.settings_voice_none),
                     onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
                     audiobooks = remember { container.shelves.audioShelves }.collectAsStateWithLifecycle(AudioShelves.NONE).value.audiobooks,
+                    onLanguage = { nav.navigate(LanguageRoute) { launchSingleTop = true } },
+                    languageSummary = languageLabel(
+                        container.appLanguages.language.collectAsStateWithLifecycle().value, container.appLanguages.phoneLocale(),
+                    ),
                 )
+            }
+            composable<LanguageRoute> {
+                LanguageSettingsScreen(container.appLanguages, onBack = { nav.popBackStack() })
             }
             composable<MediaSettingsRoute> {
                 MediaSettingsScreen(

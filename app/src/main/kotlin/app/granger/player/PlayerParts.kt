@@ -39,11 +39,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.R
+import app.granger.UiText
 import app.granger.core.player.NowPlaying
 import app.granger.shell.rememberRailCover
 import app.granger.theme.MediaKind
@@ -53,18 +55,30 @@ import app.granger.theme.readout
 /** What both players show at the top: the cover and two lines. */
 internal data class NowInfo(val title: String, val subtitle: String, val coverPath: String?)
 
+@Composable
 internal fun nowInfo(now: NowPlaying): NowInfo? = when (now) {
     is NowPlaying.Music -> NowInfo(now.track.title, now.track.artists.ifBlank { now.track.albumArtists }, now.track.coverPath)
-    is NowPlaying.Book -> NowInfo(now.book.title, chapterTitle(now), now.book.coverPath)
-    is NowPlaying.Voice -> NowInfo(now.title, voiceSubtitle(now), null)
+    is NowPlaying.Book -> NowInfo(now.book.title, chapterName(now).resolve(), now.book.coverPath)
+    is NowPlaying.Voice -> NowInfo(now.title, voiceState(now).resolve(), null)
     NowPlaying.Idle -> null
 }
 
 /** "Reading", with the section when the source has one; "Finished reading" once the voice ran out. */
-internal fun voiceSubtitle(voice: NowPlaying.Voice): String =
-    listOfNotNull(if (voice.ended) "Finished reading" else "Reading", voice.section?.takeIf { it.isNotBlank() }).joinToString(" · ")
+internal fun voiceState(voice: NowPlaying.Voice): UiText = voiceState(voice.section, voice.ended)
 
-internal fun chapterTitle(book: NowPlaying.Book): String = book.chapter.title.ifBlank { "Chapter ${book.chapter.ordinal + 1}" }
+internal fun voiceState(section: String?, ended: Boolean): UiText {
+    val named = section?.takeIf { it.isNotBlank() }
+    return when {
+        named == null -> UiText.Res(if (ended) R.string.player_finished_reading else R.string.player_reading)
+        else -> UiText.Res(if (ended) R.string.player_finished_reading_section else R.string.player_reading_section, named)
+    }
+}
+
+/** A chapter's own title, or "Chapter 3" when it has none ([ordinal] counts from 0). */
+internal fun chapterName(title: String, ordinal: Int): UiText =
+    if (title.isBlank()) UiText.Res(R.string.player_chapter_number, ordinal + 1) else UiText.Raw(title)
+
+internal fun chapterName(book: NowPlaying.Book): UiText = chapterName(book.chapter.title, book.chapter.ordinal)
 
 internal fun fraction(positionMs: Long, durationMs: Long): Float =
     if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
@@ -89,9 +103,9 @@ internal fun PlayerCover(path: String?, title: String, book: Boolean, size: Dp, 
 @Composable
 internal fun PlayPauseIcon(playing: Boolean, modifier: Modifier = Modifier) {
     if (playing) {
-        Icon(painterResource(R.drawable.ic_pause), contentDescription = "Pause", modifier = modifier)
+        Icon(painterResource(R.drawable.ic_pause), contentDescription = stringResource(R.string.common_pause), modifier = modifier)
     } else {
-        Icon(Icons.Filled.PlayArrow, contentDescription = "Play", modifier = modifier)
+        Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.common_play), modifier = modifier)
     }
 }
 
@@ -100,7 +114,7 @@ internal fun PlayPauseIcon(playing: Boolean, modifier: Modifier = Modifier) {
  * on release, with the position let go at.
  */
 @Composable
-internal fun SeekBar(positionMs: Long, durationMs: Long, onSeek: (Long) -> Unit, modifier: Modifier = Modifier, label: String = "Seek") {
+internal fun SeekBar(positionMs: Long, durationMs: Long, onSeek: (Long) -> Unit, modifier: Modifier = Modifier, label: String = stringResource(R.string.player_seek)) {
     var dragging by remember { mutableStateOf<Float?>(null) }
     val duration = durationMs.coerceAtLeast(0L)
     val shown = dragging ?: fraction(positionMs, duration)
@@ -153,8 +167,9 @@ fun PlayingBars(heard: Boolean, modifier: Modifier = Modifier, color: Color = Ma
     } else {
         STILL_BARS
     }
+    val state = stringResource(if (heard) R.string.player_playing else R.string.player_paused)
     Canvas(
-        modifier.size(16.dp).testTag(PlayerTags.PLAYING).semantics { contentDescription = if (heard) "Playing" else "Paused" },
+        modifier.size(16.dp).testTag(PlayerTags.PLAYING).semantics { contentDescription = state },
     ) {
         val bar = size.width / 5
         heights.forEachIndexed { i, h ->

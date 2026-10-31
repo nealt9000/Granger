@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.R
@@ -36,7 +37,7 @@ fun BrandLockup(modifier: Modifier = Modifier, markWidth: Dp = 128.dp) {
         Spacer(Modifier.height(markWidth * 0.16f))
         Image(
             painterResource(R.drawable.granger_wordmark),
-            contentDescription = "Granger",
+            contentDescription = stringResource(R.string.onboarding_brand),
             modifier = Modifier.width(markWidth * 1.6f).aspectRatio(WORDMARK_ASPECT),
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
         )

@@ -1,6 +1,9 @@
 package app.granger.research
 
+import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.test.core.app.ApplicationProvider
+import app.granger.R
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -27,6 +30,12 @@ class AskLandingTest {
         compose.setContent { AskTitle() }
         compose.onNodeWithText("Ask").assertIsDisplayed()
         compose.onNodeWithText("Preview").assertIsDisplayed()
+    }
+
+    /** The banner on screen is a resource; the voice reads AnswerText.MEDICAL. In English they say the same. */
+    @Test fun theMedicalBannerReadsAsTheVoiceSaysIt() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        assertThat(context.getString(R.string.research_medical)).isEqualTo(AnswerText.MEDICAL)
     }
 
     @Test fun missingModelsOfferTheLibrarianInPlace() {

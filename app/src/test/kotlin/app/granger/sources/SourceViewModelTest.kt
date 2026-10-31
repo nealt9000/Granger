@@ -34,10 +34,21 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import java.io.File
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class SourceViewModelTest {
     @get:Rule val main = MainDispatcherRule()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    /** The view model's words in English, as the screen shows them. */
+    private fun UiText?.en(): String? = this?.resolve(context)
 
     private val med = packEntry("med", category = "Medical")
     private val top = packEntry("top", category = "Reference")
@@ -76,12 +87,12 @@ class SourceViewModelTest {
         val ui = viewModel().ui.value
         assertThat(ui.sections.map { it.title }).containsExactly("Medical", "Reference", "Regional").inOrder()
         assertThat(ui.loading).isFalse()
-        assertThat(ui.sections[0].rows.single().details).isEqualTo("English · Updated October 2026 · CC BY-SA")
+        assertThat(ui.sections[0].rows.single().details.en()).isEqualTo("English · Updated October 2026 · CC BY-SA")
     }
 
     @Test fun aPackRowCarriesItsCatalogDescription() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(packEntry("top", description = "The best 50,000 articles"))))
-        assertThat(viewModel().ui.value.sections.flatMap { it.rows }.single().description).isEqualTo("The best 50,000 articles")
+        assertThat(viewModel().ui.value.sections.flatMap { it.rows }.single().description.en()).isEqualTo("The best 50,000 articles")
     }
 
     @Test fun nonCommercialPackShowsProvidedByKiwix() = runTest(main.dispatcher) {
@@ -93,8 +104,8 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("ifixit").details).isEqualTo("English · Updated October 2026 · CC BY-NC-SA · provided by Kiwix")
-        assertThat(rows.getValue("med").details).isEqualTo("English · Updated October 2026 · CC BY-SA")
+        assertThat(rows.getValue("ifixit").details.en()).isEqualTo("English · Updated October 2026 · CC BY-NC-SA · provided by Kiwix")
+        assertThat(rows.getValue("med").details.en()).isEqualTo("English · Updated October 2026 · CC BY-SA")
     }
 
     @Test fun modelsScopeListsTheModelsSection() = runTest(main.dispatcher) {
@@ -110,8 +121,8 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("gemma-embed").description).isEqualTo(if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet")
-        assertThat(rows.getValue("e2b").description).isEmpty()
+        assertThat(rows.getValue("gemma-embed").description.en()).isEqualTo(if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet")
+        assertThat(rows.getValue("e2b").description.en()).isEmpty()
     }
 
     @Test fun theLargeModelSaysItIsNotUsed() = runTest(main.dispatcher) {
@@ -122,9 +133,9 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("e4b").description).isEqualTo("Not used")
+        assertThat(rows.getValue("e4b").description.en()).isEqualTo("Not used")
         assertThat(rows.getValue("e4b").status).isEqualTo(ItemStatus.NeedsMoreMemory)
-        assertThat(rows.getValue("e2b").description).isEmpty()
+        assertThat(rows.getValue("e2b").description.en()).isEmpty()
     }
 
     @Test fun onlyItemsInScopeAreListed() = runTest(main.dispatcher) {
@@ -409,11 +420,11 @@ class SourceViewModelTest {
         val vm = viewModel()
         vm.get("med")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("Not enough space on Internal storage")
-        assertThat(vm.ui.value.notice).contains("2.0 GB")
+        assertThat(vm.ui.value.notice.en()).contains("Not enough space on Internal storage")
+        assertThat(vm.ui.value.notice.en()).contains("2.0 GB")
         vm.dismissNotice()
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).isNull()
+        assertThat(vm.ui.value.notice.en()).isNull()
     }
 
     @Test fun overTheCapTalksAboutDownloadsNotPacks() = runTest(main.dispatcher) {
@@ -421,8 +432,8 @@ class SourceViewModelTest {
         val vm = viewModel()
         vm.get("med")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("your downloads")
-        assertThat(vm.ui.value.notice).doesNotContain("packs")
+        assertThat(vm.ui.value.notice.en()).contains("your downloads")
+        assertThat(vm.ui.value.notice.en()).doesNotContain("packs")
     }
 
     @Test fun grangerListsBooksByCategory() = runTest(main.dispatcher) {
@@ -436,7 +447,7 @@ class SourceViewModelTest {
         assertThat(ui.sections.map { it.title }).containsExactly("Medical", "Novels", "Plays").inOrder()
         val novels = ui.sections.first { it.title == "Novels" }.rows
         assertThat(novels.map { it.id }).containsExactly("emma", "persuasion").inOrder()
-        assertThat(novels.first().details).isEqualTo("An Author · Public domain")
+        assertThat(novels.first().details.en()).isEqualTo("An Author · Public domain")
         assertThat(viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }).isEmpty()
     }
 
@@ -449,7 +460,7 @@ class SourceViewModelTest {
         assertThat(novels.rows).hasSize(SourceViewModel.FOLDED_ROWS)
         assertThat(novels.total).isEqualTo(12)
         assertThat(novels.foldable).isTrue()
-        assertThat(novels.noun).isEqualTo("books")
+        assertThat(novels.noun).isEqualTo(SectionNoun.BOOKS)
         assertThat(vm.ui.value.sections.first { it.title == "Plays" }.foldable).isFalse()
         vm.toggleSection("Novels")
         testScheduler.advanceUntilIdle()
@@ -480,24 +491,24 @@ class SourceViewModelTest {
         )
         val classics = viewModel().ui.value.presets.single()
         assertThat(listOf(classics.packs, classics.books, classics.others)).containsExactly(0, 3, 0).inOrder()
-        assertThat(PresetText.summary(classics)).isEqualTo("3 books · ${app.granger.formatBytes(1_500)}")
-        assertThat(PresetText.status(classics)).isEqualTo("3 of 3 to get")
+        assertThat(PresetText.summary(classics).en()).isEqualTo("3 books · ${app.granger.formatBytes(1_500)}")
+        assertThat(PresetText.status(classics).en()).isEqualTo("3 of 3 to get")
 
         val book = app.granger.core.downloads.ItemKind.BOOK
         downloads.list.value = listOf(record("emma", DownloadState.INSTALLED, kind = book), record("hamlet", DownloadState.RUNNING, kind = book))
-        assertThat(PresetText.status(viewModel().ui.value.presets.single())).isEqualTo("1 downloading · 1 of 3 to get")
+        assertThat(PresetText.status(viewModel().ui.value.presets.single()).en()).isEqualTo("1 downloading · 1 of 3 to get")
 
         downloads.list.value = listOf("emma", "hamlet", "pan").map { record(it, DownloadState.INSTALLED, kind = book) }
-        assertThat(PresetText.status(viewModel().ui.value.presets.single())).isEqualTo("All on this phone")
+        assertThat(PresetText.status(viewModel().ui.value.presets.single()).en()).isEqualTo("All on this phone")
     }
 
     @Test fun presetLinesReadAsPlanned() {
         val efficient = PresetRow("e", "Efficient start", 359, 0, 0, packs = 12, books = 347, totalBytes = 17_700_000_000)
-        assertThat(PresetText.summary(efficient)).startsWith("12 packs and 347 books · ")
-        assertThat(PresetText.summary(efficient.copy(packs = 1, books = 0))).startsWith("1 pack · ")
-        assertThat(PresetText.summary(efficient.copy(others = 2))).startsWith("12 packs, 347 books and 2 models · ")
-        assertThat(PresetText.status(efficient.copy(downloading = 359))).isEqualTo("359 downloading")
-        assertThat(PresetText.status(efficient.copy(onPhone = 359))).isEqualTo("All on this phone")
+        assertThat(PresetText.summary(efficient).en()).startsWith("12 packs and 347 books · ")
+        assertThat(PresetText.summary(efficient.copy(packs = 1, books = 0)).en()).startsWith("1 pack · ")
+        assertThat(PresetText.summary(efficient.copy(others = 2)).en()).startsWith("12 packs, 347 books and 2 models · ")
+        assertThat(PresetText.status(efficient.copy(downloading = 359)).en()).isEqualTo("359 downloading")
+        assertThat(PresetText.status(efficient.copy(onPhone = 359)).en()).isEqualTo("All on this phone")
     }
 
     @Test fun classicsPresetComesFirst() = runTest(main.dispatcher) {
@@ -557,7 +568,7 @@ class SourceViewModelTest {
         val vm = viewModel()
         vm.get("med")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("10 GB")
+        assertThat(vm.ui.value.notice.en()).contains("10 GB")
     }
 
     @Test fun presetSkipsInstalledAndActiveItems() = runTest(main.dispatcher) {
@@ -567,7 +578,7 @@ class SourceViewModelTest {
         vm.getPreset("starter")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued.map { it.first }).containsExactly("e2b", "voyage").inOrder()
-        assertThat(vm.ui.value.notice).isEqualTo("Queued 2 downloads.")
+        assertThat(vm.ui.value.notice.en()).isEqualTo("Queued 2 downloads.")
     }
 
     @Test fun presetWithNothingLeftSaysSo() = runTest(main.dispatcher) {
@@ -577,7 +588,7 @@ class SourceViewModelTest {
         vm.getPreset("starter")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued).isEmpty()
-        assertThat(vm.ui.value.notice).contains("already")
+        assertThat(vm.ui.value.notice.en()).contains("already")
     }
 
     @Test fun presetStopsAtTheFirstSpaceProblem() = runTest(main.dispatcher) {
@@ -586,7 +597,7 @@ class SourceViewModelTest {
         vm.getPreset("starter")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued).hasSize(1)
-        assertThat(vm.ui.value.notice).contains("Not enough space")
+        assertThat(vm.ui.value.notice.en()).contains("Not enough space")
     }
 
     @Test fun removeDeletesThePackThenItsRecords() = runTest(main.dispatcher) {
@@ -618,14 +629,14 @@ class SourceViewModelTest {
         catalog.mutable.value = CatalogState(catalog = null, error = CatalogError.NETWORK)
         val ui = viewModel().ui.value
         assertThat(ui.loading).isFalse()
-        assertThat(ui.catalogProblem).contains("Connect to the internet")
+        assertThat(ui.catalogProblem.en()).contains("Connect to the internet")
         assertThat(ui.sections).isEmpty()
     }
 
     @Test fun aRejectedCatalogUpdateIsExplainedButTheOldOneShows() = runTest(main.dispatcher) {
         catalog.mutable.value = catalog.mutable.value.copy(error = CatalogError.BAD_SIGNATURE)
         val ui = viewModel().ui.value
-        assertThat(ui.catalogProblem).contains("security check")
+        assertThat(ui.catalogProblem.en()).contains("security check")
         assertThat(ui.sections).isNotEmpty()
     }
 
@@ -781,12 +792,12 @@ class SourceViewModelTest {
         val rows = vm.ui.value.sections.flatMap { it.rows }
         val med = rows.single { it.title == "WikiMed" }
         assertThat(rows).hasSize(2)
-        assertThat(med.flavours.map { it.label }).containsExactly("With pictures", "No pictures", KiwixList.MINI).inOrder()
+        assertThat(med.flavours.map { it.label.en() }).containsExactly("With pictures", "No pictures", "Mini (intro paragraphs only)").inOrder()
         assertThat(med.flavours.map { it.sizeBytes }).containsExactly(1_860_000_000L, 1_050_000_000L, 170_000_000L).inOrder()
         // Both featured flavours fit, so the larger is chosen.
         assertThat(med.id).isEqualTo("wikipedia_en_medicine_maxi")
-        assertThat(med.flavours.single { it.chosen }.label).isEqualTo("With pictures")
-        assertThat(med.details).isEqualTo("English · Updated March 2026 · CC BY-SA")
+        assertThat(med.flavours.single { it.chosen }.label.en()).isEqualTo("With pictures")
+        assertThat(med.details.en()).isEqualTo("English · Updated March 2026 · CC BY-SA")
         assertThat(med.license).isEqualTo("CC BY-SA 4.0")
     }
 
@@ -809,7 +820,7 @@ class SourceViewModelTest {
         val vm = viewModel(CatalogScope.KIWIX)
         val installed = vm.ui.value.sections.flatMap { it.rows }.single()
         assertThat(installed.id).isEqualTo("wikipedia_en_medicine_nopic")
-        assertThat(installed.installedFlavour).isEqualTo("no pictures")
+        assertThat(installed.flavours.single { it.installed }.label.en()).isEqualTo("No pictures")
         assertThat(installed.switches).isFalse()
         assertThat(installed.status).isEqualTo(ItemStatus.Installed)
         // The radio starts on the flavour on the phone (Plan KB walkthrough 2), though With pictures is the default.
@@ -818,7 +829,7 @@ class SourceViewModelTest {
         testScheduler.advanceUntilIdle()
         val other = vm.ui.value.sections.flatMap { it.rows }.single()
         assertThat(other.id).isEqualTo("wikipedia_en_medicine_maxi")
-        assertThat(other.installedFlavour).isEqualTo("no pictures")
+        assertThat(other.flavours.single { it.installed }.label.en()).isEqualTo("No pictures")
         assertThat(other.switches).isTrue()
         assertThat(other.packId).isEqualTo("u-wikipedia_en_medicine_nopic")
         // The choice on the phone is marked on its own radio row; the chosen one is another.
@@ -827,19 +838,19 @@ class SourceViewModelTest {
     }
 
     @Test fun languagesDatesAndLicencesAreInPlainWords() {
-        assertThat(KiwixList.languages("eng")).isEqualTo("English")
-        assertThat(KiwixList.languages("eng,rus")).isEqualTo("English, Russian")
-        assertThat(KiwixList.languages("eng,zho")).isEqualTo("English, Chinese")
-        assertThat(KiwixList.languages("eng,fra,deu,nld,spa")).isEqualTo("English, French, German and 2 more")
-        assertThat(KiwixList.updated("2026-03-05")).isEqualTo("Updated March 2026")
-        assertThat(KiwixList.updated("")).isEmpty()
-        assertThat(KiwixList.licence("CC BY-SA 4.0")).isEqualTo("CC BY-SA")
-        assertThat(KiwixList.licence("CC BY-NC-SA 2.5")).isEqualTo("CC BY-NC-SA")
-        assertThat(KiwixList.licence("Open licenses, per project (MIT, Apache, BSD, CC)")).isEqualTo("Open licences")
-        assertThat(KiwixList.licence("Mixed open licenses (mostly CC BY-NC-SA 4.0)")).isEqualTo("Open licences")
-        assertThat(KiwixList.licence("Not stated by the source")).isEqualTo("Licence not stated")
-        assertThat(KiwixList.licence("Public domain (US) / Project Gutenberg License")).isEqualTo("Public domain")
-        assertThat(KiwixList.licence("ODbL 1.0")).isEqualTo("ODbL")
+        assertThat(KiwixList.languages("eng").en()).isEqualTo("English")
+        assertThat(KiwixList.languages("eng,rus").en()).isEqualTo("English, Russian")
+        assertThat(KiwixList.languages("eng,zho").en()).isEqualTo("English, Chinese")
+        assertThat(KiwixList.languages("eng,fra,deu,nld,spa").en()).isEqualTo("English, French, German and 2 more")
+        assertThat(KiwixList.updated("2026-03-05").en()).isEqualTo("Updated March 2026")
+        assertThat(KiwixList.updated("")).isNull()
+        assertThat(KiwixList.licence("CC BY-SA 4.0").en()).isEqualTo("CC BY-SA")
+        assertThat(KiwixList.licence("CC BY-NC-SA 2.5").en()).isEqualTo("CC BY-NC-SA")
+        assertThat(KiwixList.licence("Open licenses, per project (MIT, Apache, BSD, CC)").en()).isEqualTo("Open licences")
+        assertThat(KiwixList.licence("Mixed open licenses (mostly CC BY-NC-SA 4.0)").en()).isEqualTo("Open licences")
+        assertThat(KiwixList.licence("Not stated by the source").en()).isEqualTo("Licence not stated")
+        assertThat(KiwixList.licence("Public domain (US) / Project Gutenberg License").en()).isEqualTo("Public domain")
+        assertThat(KiwixList.licence("ODbL 1.0").en()).isEqualTo("ODbL")
     }
 
     @Test fun aGetOverTenGbAsksWithTheFreeSpaceAndASmallerFlavour() = runTest(main.dispatcher) {
@@ -865,7 +876,7 @@ class SourceViewModelTest {
         val wikipedia = vm.ui.value.sizeCheck!!
         assertThat(wikipedia.title).isEqualTo("Wikipedia")
         assertThat(wikipedia.smaller!!.id).isEqualTo(nopic.id)
-        assertThat(wikipedia.smaller!!.label).isEqualTo("No pictures")
+        assertThat(wikipedia.smaller!!.label.en()).isEqualTo("No pictures")
         vm.confirmGet(wikipedia.smaller!!.id)
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.sizeCheck).isNull()
@@ -910,14 +921,14 @@ class SourceViewModelTest {
         val ui = familyViewModel(null).ui.value
         val programming = ui.sections.single { it.title == "Programming" }
         assertThat(programming.rows.map { it.title }).containsExactly("Developer docs", "freeCodeCamp JavaScript").inOrder()
-        assertThat(programming.rows.first().details).isEqualTo("4 packs")
+        assertThat(programming.rows.first().details.en()).isEqualTo("4 packs")
         assertThat(programming.rows.first().opensFamily).isEqualTo("devdocs")
         val qa = ui.sections.single { it.title == "Q&A" }.rows.single()
-        assertThat(qa.title to qa.details).isEqualTo("Q&A sites" to "3 packs")
+        assertThat(qa.title to qa.details.en()).isEqualTo("Q&A sites" to "3 packs")
         // Maps are one row, "Maps · 3 regions".
         val maps = ui.sections.single { it.title == "Maps" }.rows.single()
-        assertThat(KiwixList.foldedText(KiwixList.folded("maps")!!, 3)).isEqualTo("Maps · 3 regions")
-        assertThat(maps.title to maps.details).isEqualTo("Maps" to "3 regions")
+        assertThat(KiwixList.foldedText(KiwixList.folded("maps")!!, 3).en()).isEqualTo("Maps · 3 regions")
+        assertThat(maps.title to maps.details.en()).isEqualTo("Maps" to "3 regions")
         assertThat(ui.sections.flatMap { it.rows }.map { it.id }.filter { it.startsWith("maps_") }).isEmpty()
     }
 
@@ -925,14 +936,14 @@ class SourceViewModelTest {
         catalog.mutable.value = CatalogState(catalog = familyCatalog)
         val vm = familyViewModel("devdocs")
         val ui = vm.ui.value
-        assertThat(ui.familyTitle).isEqualTo("Developer docs")
+        assertThat(ui.familyTitle.en()).isEqualTo("Developer docs")
         assertThat(ui.categories).isEmpty()
         assertThat(ui.sections.single().rows.map { it.title }).containsExactly("Bash Docs", "Go Docs", "Python Docs", "Rust Docs").inOrder()
         vm.setQuery("rust")
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.sections.single().rows.map { it.title }).containsExactly("Rust Docs")
         val maps = familyViewModel("maps").ui.value
-        assertThat(maps.familyTitle).isEqualTo("Maps")
+        assertThat(maps.familyTitle.en()).isEqualTo("Maps")
         assertThat(maps.sections.single().rows.map { it.title }).containsExactly("Map of Chile", "Map of France", "Map of Spain").inOrder()
     }
 
@@ -1030,7 +1041,7 @@ class SourceViewModelTest {
         assertThat(scopes).containsExactly(CatalogScope.GRANGER, CatalogScope.GUTENBERG, CatalogScope.KIWIX_BOOKS).inOrder()
         for (scope in scopes) {
             val ui = viewModel(scope).ui.value
-            assertWithMessage(scope.title).that(ui.sections.flatMap { it.rows }).isNotEmpty()
+            assertWithMessage(context.getString(scope.title)).that(ui.sections.flatMap { it.rows }).isNotEmpty()
         }
     }
 
@@ -1040,20 +1051,20 @@ class SourceViewModelTest {
      */
     @Test fun everyGroupedPacksChoicesSayWhatDiffersInThePublishedCatalog() {
         val published = publishedCatalog()
-        val meaningful = setOf(KiwixList.WITH_PICTURES, KiwixList.NO_PICTURES, KiwixList.MINI)
+        val meaningful = setOf("With pictures", "No pictures", "Mini (intro paragraphs only)")
         for (packs in listOf(published.packs, published.packs.map { it.copy(flavour = "") })) {
             val groups = KiwixList.group(packs).filter { it.flavours.size > 1 }
             assertThat(groups.size).isAtLeast(40)
             for (group in groups) {
-                val labels = KiwixList.flavourLabels(group)
+                val labels = KiwixList.flavourLabels(group).mapValues { it.value.en() }
                 assertWithMessage(group.zimName).that(labels.values.toSet()).hasSize(group.flavours.size)
                 assertWithMessage(group.zimName).that(meaningful).containsAtLeastElementsIn(labels.values)
                 assertWithMessage(group.zimName).that(group.flavours.map { it.zimName }.distinct()).containsExactly(group.zimName)
             }
             // Wikipedia: best articles is its three flavours, and only them (not the top 1m).
             val top = groups.single { it.zimName == "wikipedia_en_top" }
-            assertThat(top.flavours.map { KiwixList.flavourLabels(top).getValue(it.id) })
-                .containsExactly(KiwixList.WITH_PICTURES, KiwixList.NO_PICTURES, KiwixList.MINI).inOrder()
+            assertThat(top.flavours.map { KiwixList.flavourLabels(top).getValue(it.id).en() })
+                .containsExactly("With pictures", "No pictures", "Mini (intro paragraphs only)").inOrder()
         }
         // MDWiki's unflavoured ZIM is a pack of its own beside its flavour with pictures.
         val mdwiki = KiwixList.group(published.packs).filter { g -> g.flavours.any { it.zimName == "mdwiki_en_all" } }
@@ -1068,11 +1079,11 @@ class SourceViewModelTest {
         fun entry(id: String, flavour: String, date: String, language: String = "eng") =
             app.granger.packEntry(id, zimName = "x_en_all").copy(flavour = flavour, snapshotDate = date, language = language)
         val byDate = KiwixList.group(listOf(entry("a", "maxi", "2026-03-05"), entry("b", "maxi", "2025-11-01"), entry("c", "nopic", "2026-03-05"))).single()
-        assertThat(KiwixList.flavourLabels(byDate)).containsExactly(
+        assertThat(KiwixList.flavourLabels(byDate).mapValues { it.value.en() }).containsExactly(
             "a", "With pictures · Updated March 2026", "b", "With pictures · Updated November 2025", "c", "No pictures",
         )
         val byLanguage = KiwixList.group(listOf(entry("a", "mini", "2026-03-05"), entry("b", "mini", "2026-03-05", "fra"))).single()
-        assertThat(KiwixList.flavourLabels(byLanguage).values).containsExactly("${KiwixList.MINI} · English", "${KiwixList.MINI} · French")
+        assertThat(KiwixList.flavourLabels(byLanguage).values.map { it.en() }).containsExactly("Mini (intro paragraphs only) · English", "Mini (intro paragraphs only) · French")
     }
 
     // --- Plan WF: Wikipedia as one family ---
@@ -1102,11 +1113,11 @@ class SourceViewModelTest {
         val vm = kiwixViewModel()
         val rows = vm.rows()
         val wikipedia = vm.wikipedia()
-        assertThat(wikipedia.description).isEqualTo("The free encyclopedia, from 100 essential articles to all of it.")
+        assertThat(wikipedia.description.en()).isEqualTo("The free encyclopedia, from 100 essential articles to all of it.")
         assertThat(wikipedia.slices.map { it.label }).containsExactly(
             "100 essential articles", "Best 50,000 articles", "Top 1 million articles", "Everything",
         ).inOrder()
-        assertThat(wikipedia.pictures.map { it.label }).containsExactly(KiwixList.WITH_PICTURES, KiwixList.NO_PICTURES, KiwixList.MINI).inOrder()
+        assertThat(wikipedia.pictures.map { it.label.en() }).containsExactly("With pictures", "No pictures", "Mini (intro paragraphs only)").inOrder()
         assertThat(vm.ui.value.sections.first { wikipedia in it.rows }.title).isEqualTo(SourceViewModel.RECOMMENDED)
         val voyage = rows.single { it.title == "Wikivoyage" }
         assertThat(voyage.slices.map { it.label }).containsExactly("Europe", "The whole world").inOrder()
@@ -1120,7 +1131,7 @@ class SourceViewModelTest {
         // A search still finds a subject, with what it adds.
         vm.setQuery("chemistry")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.rows().first { it.title == "Chemistry (Wikipedia)" }.adds).startsWith("Adds about")
+        assertThat(vm.rows().first { it.title == "Chemistry (Wikipedia)" }.adds.en()).startsWith("Adds about")
     }
 
     @Test fun theDefaultIsBest50000WithPictures() = runTest(main.dispatcher) {
@@ -1128,7 +1139,7 @@ class SourceViewModelTest {
         val wikipedia = kiwixViewModel().wikipedia()
         assertThat(wikipedia.id).isEqualTo("wikipedia_en_top_maxi")
         assertThat(wikipedia.slices.single { it.chosen }.label).isEqualTo("Best 50,000 articles")
-        assertThat(wikipedia.pictures.single { it.chosen }.label).isEqualTo(KiwixList.WITH_PICTURES)
+        assertThat(wikipedia.pictures.single { it.chosen }.label.en()).isEqualTo("With pictures")
         assertThat(wikipedia.status).isEqualTo(ItemStatus.NotInstalled)
     }
 
@@ -1148,13 +1159,13 @@ class SourceViewModelTest {
             size("wikipedia_en_100"), size("wikipedia_en_top_nopic"), size("wikipedia_en_top1m_nopic"), size("wikipedia_en_all_nopic"),
         ).inOrder()
         // The 100 comes one way only, and says so.
-        assertThat(nopic.slices.first().note).isEqualTo("With pictures only")
+        assertThat(nopic.slices.first().note.en()).isEqualTo("With pictures only")
         vm.chooseSlice("wikipedia_en", "wikipedia_en_100")
         testScheduler.advanceUntilIdle()
         val hundred = vm.wikipedia()
         assertThat(hundred.id).isEqualTo("wikipedia_en_100")
         assertThat(hundred.pictures.filter { it.enabled }.map { it.flavour }).containsExactly("maxi")
-        assertThat(hundred.pictures.single { it.flavour == "mini" }.reason).isEqualTo("Not offered for 100 essential articles")
+        assertThat(hundred.pictures.single { it.flavour == "mini" }.reason.en()).isEqualTo("Not offered for 100 essential articles")
         vm.chooseSlice("wikipedia_en", "wikipedia_en_top1m")
         vm.choosePictures("wikipedia_en", "mini")
         testScheduler.advanceUntilIdle()
@@ -1177,14 +1188,14 @@ class SourceViewModelTest {
     @Test fun aSubjectSaysWhatItAddsToTheChosenSliceThenTheInstalledOne() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = publishedCatalog())
         val vm = kiwixViewModel()
-        assertThat(vm.wikiMed().adds).isEqualTo("Adds about 69,600 articles to Best 50,000 (95% new)")
+        assertThat(vm.wikiMed().adds.en()).isEqualTo("Adds about 69,600 articles to Best 50,000 (95% new)")
         vm.chooseSlice("wikipedia_en", "wikipedia_en_top1m")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.wikiMed().adds).isEqualTo("Adds about 47,800 articles to Top 1 million (66% new)")
+        assertThat(vm.wikiMed().adds.en()).isEqualTo("Adds about 47,800 articles to Top 1 million (66% new)")
         // Once a slice is on the phone, that is the one compared against, whatever is chosen.
         library.packList.value = installed("wikipedia_en_top_nopic")
         testScheduler.advanceUntilIdle()
-        assertThat(vm.wikiMed().adds).isEqualTo("Adds about 69,600 articles to your Best 50,000 (95% new)")
+        assertThat(vm.wikiMed().adds.en()).isEqualTo("Adds about 69,600 articles to your Best 50,000 (95% new)")
         assertThat(vm.wikiMed().covered).isFalse()
     }
 
@@ -1192,7 +1203,7 @@ class SourceViewModelTest {
         catalog.mutable.value = CatalogState(catalog = publishedCatalog())
         library.packList.value = installed("wikipedia_en_all_nopic")
         val vm = kiwixViewModel()
-        assertThat(vm.wikiMed().adds).isEqualTo("Already inside your Wikipedia")
+        assertThat(vm.wikiMed().adds.en()).isEqualTo("Already inside your Wikipedia")
         assertThat(vm.wikiMed().covered).isTrue()
         val wikipedia = vm.wikipedia()
         assertThat(wikipedia.slices.single { it.chosen }.label).isEqualTo("Everything")
@@ -1204,15 +1215,15 @@ class SourceViewModelTest {
         catalog.mutable.value = CatalogState(catalog = published)
         val vm = kiwixViewModel(family = "subjects:wikipedia_en:wikipedia_en_top1m")
         val ui = vm.ui.value
-        assertThat(ui.familyTitle).isEqualTo("Wikipedia subjects")
+        assertThat(ui.familyTitle.en()).isEqualTo("Wikipedia subjects")
         val rows = ui.sections.single().rows
         val expected = published.packs.filter { it.isSubject && !it.sample }.map { it.zimName }.distinct()
         assertThat(rows).hasSize(expected.size)
         assertThat(rows.map { it.title }).isInOrder(compareBy<String> { app.granger.core.library.ShelfKey.of(it) })
-        assertThat(rows.all { it.adds?.contains("to Top 1 million") == true }).isTrue()
+        assertThat(rows.all { it.adds.en()?.contains("to Top 1 million") == true }).isTrue()
         assertThat(rows.map { it.title }).containsAtLeast("Astronomy", "Chemistry", "WikiMed")
         assertThat(rows.none { it.title.contains("Wikipedia") }).isTrue()
-        assertThat(rows.single { it.title == "WikiMed" }.adds).isEqualTo("Adds about 47,800 articles to Top 1 million (66% new)")
+        assertThat(rows.single { it.title == "WikiMed" }.adds.en()).isEqualTo("Adds about 47,800 articles to Top 1 million (66% new)")
     }
 
     @Test fun addsCountsAreRoundedSensibly() {
@@ -1229,13 +1240,13 @@ class SourceViewModelTest {
         val vm = kiwixViewModel()
         val wikipedia = vm.wikipedia()
         assertThat(wikipedia.slices.single { it.chosen }.label).isEqualTo("Top 1 million articles")
-        assertThat(wikipedia.slices.map { it.inside }).containsExactly(
+        assertThat(wikipedia.slices.map { it.inside.en() }).containsExactly(
             "Inside your Top 1 million", "Inside your Top 1 million", null, null,
         ).inOrder()
         vm.chooseSlice("wikipedia_en", "wikipedia_en_top")
         testScheduler.advanceUntilIdle()
         val top = vm.wikipedia()
-        assertThat(top.insideOf).isEqualTo("Inside your Top 1 million")
+        assertThat(top.insideOf.en()).isEqualTo("Inside your Top 1 million")
         assertThat(top.packId).isEqualTo(publishedCatalog().packs.single { it.id == "wikipedia_en_top1m_nopic" }.zimUuid)
     }
 
@@ -1249,8 +1260,8 @@ class SourceViewModelTest {
         testScheduler.advanceUntilIdle()
         val switch = vm.wikipedia()
         assertThat(switch.switches).isTrue()
-        assertThat(switch.switchFrom!!.label).isEqualTo("Best 50,000 articles, No pictures")
-        assertThat(switch.switchTo!!.label).isEqualTo("Best 50,000 articles, With pictures")
+        assertThat(switch.switchFrom!!.label.en()).isEqualTo("Best 50,000 articles, No pictures")
+        assertThat(switch.switchTo!!.label.en()).isEqualTo("Best 50,000 articles, With pictures")
         // A bigger slice is a Get, not a Switch: the smaller one is offered for removal once it's in (Decision 5).
         vm.chooseSlice("wikipedia_en", "wikipedia_en_top1m")
         testScheduler.advanceUntilIdle()

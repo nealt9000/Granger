@@ -49,4 +49,19 @@ data class ArchiveItem(
     val collections: List<String> = emptyList(),
 )
 
-class ArchiveError(message: String) : Exception(message)
+/**
+ * Why an archive.org call failed, for the screen to word: [text] is its string resource, formatted with
+ * [ArchiveError.code] for [ANSWERED].
+ */
+enum class ArchiveProblem(val text: Int) {
+    NOT_FOUND(R.string.archive_error_not_found),
+    UNREACHABLE(R.string.archive_error_unreachable),
+    ANSWERED(R.string.archive_error_answered),
+    UNREADABLE(R.string.archive_error_unreadable),
+}
+
+/** [message] is the English wording, for logs; screens show [problem] through its string. [code] is the HTTP status. */
+class ArchiveError(val problem: ArchiveProblem, message: String, val code: Int = 0) : Exception(message) {
+    /** [ArchiveProblem.text]'s format args. */
+    val textArgs: List<Any> get() = if (problem == ArchiveProblem.ANSWERED) listOf(code) else emptyList()
+}

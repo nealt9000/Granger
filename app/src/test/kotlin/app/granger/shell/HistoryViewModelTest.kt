@@ -12,6 +12,7 @@ import app.granger.core.library.HistoryEntry
 import app.granger.core.library.PackStatus
 import app.granger.core.library.RecentSearch
 import app.granger.pack
+import app.granger.UiText
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -38,8 +39,8 @@ class HistoryViewModelTest {
         val ui = HistoryViewModel(sessions, library, bookshelf, pins, hidden).ui.filterNotNull().first()
         assertThat(ui.history).containsExactly(
             HistoryViewModel.Row("gone", "X", "X", HistoryViewModel.REMOVED_PACK, available = false),
-            HistoryViewModel.Row("b", "Aspirin", "Aspirin", "WikiMed", available = false),
-            HistoryViewModel.Row("a", "Hamlet", "Hamlet", "Classics", available = true),
+            HistoryViewModel.Row("b", "Aspirin", "Aspirin", UiText.Raw("WikiMed"), available = false),
+            HistoryViewModel.Row("a", "Hamlet", "Hamlet", UiText.Raw("Classics"), available = true),
         ).inOrder()
     }
 
@@ -48,13 +49,13 @@ class HistoryViewModelTest {
         library.bookmarkList.value = listOf(Bookmark("a", "Hamlet", "Hamlet", 3L), Bookmark("gone", "X", "X", 1L))
         val ui = HistoryViewModel(sessions, library, bookshelf, pins, hidden).ui.filterNotNull().first()
         assertThat(ui.saved).containsExactly(
-            HistoryViewModel.Row("a", "Hamlet", "Hamlet", "Classics", available = true),
+            HistoryViewModel.Row("a", "Hamlet", "Hamlet", UiText.Raw("Classics"), available = true),
             HistoryViewModel.Row("gone", "X", "X", HistoryViewModel.REMOVED_PACK, available = false),
         ).inOrder()
     }
 
     @Test fun openingFromHistoryAddsATab() = runTest(main.dispatcher) {
-        val row = HistoryViewModel.Row("a", "Hamlet", "Hamlet", "Classics", available = true)
+        val row = HistoryViewModel.Row("a", "Hamlet", "Hamlet", UiText.Raw("Classics"), available = true)
         val id = HistoryViewModel(sessions, library, bookshelf, pins, hidden).open(row)
         val tab = sessions.tabs.value.single()
         assertThat(tab.id).isEqualTo(id)
@@ -95,7 +96,7 @@ class HistoryViewModelTest {
         val vm = HistoryViewModel(sessions, library, bookshelf, pins, hidden)
         val ui = vm.ui.filterNotNull().first()
         assertThat(ui.history).containsExactly(
-            HistoryViewModel.Row("book:granger:1", "", "Emma", "Jane Austen", available = true),
+            HistoryViewModel.Row("book:granger:1", "", "Emma", UiText.Raw("Jane Austen"), available = true),
             HistoryViewModel.Row("book:granger:gone", "", "Lost", HistoryViewModel.REMOVED_BOOK, available = false),
         ).inOrder()
         val id = vm.open(ui.history.first())

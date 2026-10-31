@@ -38,12 +38,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.formatBytes
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -60,8 +62,6 @@ class BrowseActions(
     val onReadiness: () -> Unit = {},
     val onRemove: (Pack) -> Unit = {},
 )
-
-const val NOTHING_TO_BROWSE = "Nothing to browse yet"
 
 /** How many packs a section shows before its Show all. */
 const val SECTION_PREVIEW = 4
@@ -83,7 +83,7 @@ fun BrowseScreen(viewModel: BrowseViewModel, packsFolder: String, downloadsBadge
 
 /**
  * Browse's home (Plan U3c Decision 1): the packs themselves, by knowledge area, then Other, then Maps, each a row
- * opening the pack's main page. With none, [NOTHING_TO_BROWSE], Pick a start's suggestion and Get packs. Null [ui] is still
+ * opening the pack's main page. With none, Nothing to browse yet, Pick a start's suggestion and Get packs. Null [ui] is still
  * loading.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,21 +98,21 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Browse", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(stringResource(R.string.browse_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 actions = {
-                    IconButton(onClick = { actions.onGetPacks(null) }) { Icon(Icons.Filled.Add, contentDescription = "Get more") }
+                    IconButton(onClick = { actions.onGetPacks(null) }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.browse_get_more)) }
                     Box {
                         IconButton(onClick = { menuOpen = true }) {
                             BadgedBox(badge = { if (downloadsBadge > 0) Badge { Text("$downloadsBadge") } }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more))
                             }
                         }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             DropdownMenuItem(
-                                text = { Text(if (downloadsBadge > 0) "Downloads ($downloadsBadge)" else "Downloads") },
+                                text = { Text(if (downloadsBadge > 0) stringResource(R.string.browse_downloads_count, downloadsBadge) else stringResource(R.string.browse_downloads)) },
                                 onClick = { menuOpen = false; actions.onDownloads() },
                             )
-                            DropdownMenuItem(text = { Text("Readiness") }, onClick = { menuOpen = false; actions.onReadiness() })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.browse_readiness)) }, onClick = { menuOpen = false; actions.onReadiness() })
                         }
                     }
                 },
@@ -124,7 +124,7 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
             if (loaded.empty) {
                 item(key = "empty") {
                     Text(
-                        NOTHING_TO_BROWSE,
+                        stringResource(R.string.browse_nothing_yet),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                     )
@@ -135,16 +135,16 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                             modifier = Modifier.clickable { actions.onGetPacks(suggestion.domain) },
                             headlineContent = { Text(suggestion.title) },
                             supportingContent = {
-                                Text("${if (suggestion.map) "A map of your region" else "An encyclopedia"} · ${formatBytes(suggestion.bytes)}")
+                                Text(stringResource(if (suggestion.map) R.string.browse_suggest_map else R.string.browse_suggest_encyclopedia, formatBytes(suggestion.bytes)))
                             },
                         )
                     }
                 }
                 item(key = "get-packs") {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                        Button(onClick = { actions.onGetPacks(null) }) { Text("Get packs") }
+                        Button(onClick = { actions.onGetPacks(null) }) { Text(stringResource(R.string.browse_get_packs)) }
                         Text(
-                            "Or copy .zim files into $packsFolder",
+                            stringResource(R.string.browse_copy_zims, packsFolder),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 8.dp),
                         )
@@ -158,11 +158,11 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                         modifier = Modifier.clickable {
                             collapsed = if (open) collapsed + section.id else collapsed - section.id
                         },
-                        headlineContent = { Text(section.title, style = MaterialTheme.typography.titleMedium) },
+                        headlineContent = { Text(section.title.resolve(), style = MaterialTheme.typography.titleMedium) },
                         trailingContent = {
                             Icon(
                                 if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                contentDescription = if (open) "Collapse" else "Expand",
+                                contentDescription = stringResource(if (open) R.string.browse_collapse else R.string.browse_expand),
                             )
                         },
                     )
@@ -181,7 +181,7 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                                 onClick = { showingAll = if (all) showingAll - section.id else showingAll + section.id },
                                 modifier = Modifier.padding(start = 8.dp, bottom = 4.dp).testTag(BrowseTags.more(section.id)),
                             ) {
-                                Text(if (all) "Show fewer" else "Show all ${section.packs.size}")
+                                Text(if (all) stringResource(R.string.browse_show_fewer) else stringResource(R.string.browse_show_all, section.packs.size))
                             }
                         }
                     }
@@ -193,10 +193,10 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
     removing?.let { pack ->
         AlertDialog(
             onDismissRequest = { removing = null },
-            title = { Text("Remove ${pack.title}?") },
-            text = { Text("${pack.title} will be deleted from this phone. You can download it again later.") },
-            confirmButton = { TextButton(onClick = { removing = null; actions.onRemove(pack) }) { Text("Remove") } },
-            dismissButton = { TextButton(onClick = { removing = null }) { Text("Keep") } },
+            title = { Text(stringResource(R.string.browse_remove_title, pack.title)) },
+            text = { Text(stringResource(R.string.browse_remove_body, pack.title)) },
+            confirmButton = { TextButton(onClick = { removing = null; actions.onRemove(pack) }) { Text(stringResource(R.string.common_remove)) } },
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.common_keep)) } },
         )
     }
 }
@@ -212,28 +212,28 @@ private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemo
     var menu by remember { mutableStateOf(false) }
     val problem = when (pack.status) {
         PackStatus.OK -> null
-        PackStatus.MISSING -> "File not found. Reinsert the SD card or download the pack again."
-        PackStatus.CORRUPT -> "This file is damaged and can't be opened."
+        PackStatus.MISSING -> stringResource(R.string.browse_pack_missing)
+        PackStatus.CORRUPT -> stringResource(R.string.browse_pack_corrupt)
     }
     Box {
         ListItem(
             modifier = Modifier.combinedClickable(
-                onClickLabel = "Open",
+                onClickLabel = stringResource(R.string.common_open),
                 onClick = { if (pack.status == PackStatus.OK) onOpen() },
-                onLongClickLabel = "Remove from phone",
+                onLongClickLabel = stringResource(R.string.browse_remove_from_phone),
                 onLongClick = { menu = true },
             ),
             leadingContent = { PackTile(pack, map) },
             headlineContent = { Text(pack.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
             supportingContent = {
                 Column {
-                    Text(listOfNotNull(formatBytes(pack.sizeBytes), item.ask?.text).joinToString(" · "))
+                    Text(item.ask?.let { stringResource(R.string.sources_dotted, formatBytes(pack.sizeBytes), it.text.resolve()) } ?: formatBytes(pack.sizeBytes))
                     if (problem != null) Text(problem, color = MaterialTheme.colorScheme.error)
                 }
             },
         )
         DropdownMenu(menu, { menu = false }) {
-            DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { menu = false; onRemove() })
+            DropdownMenuItem(text = { Text(stringResource(R.string.browse_remove_from_phone)) }, onClick = { menu = false; onRemove() })
         }
     }
 }

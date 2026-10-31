@@ -47,8 +47,8 @@ fun BookCover(book: Book, modifier: Modifier = Modifier) {
 }
 
 /** What a book's cell says about its format: nothing for an e-book; "PDF", and whether a scan can't be searched. */
-fun formatLabel(book: Book): String? = when {
+fun formatLabel(book: Book): app.granger.UiText? = when {
     book.format != BookFormat.PDF -> null
-    book.searchable -> "PDF"
-    else -> "PDF · Not searchable"
+    book.searchable -> app.granger.UiText.Raw("PDF")
+    else -> app.granger.UiText.Res(app.granger.R.string.library_pdf_not_searchable)
 }

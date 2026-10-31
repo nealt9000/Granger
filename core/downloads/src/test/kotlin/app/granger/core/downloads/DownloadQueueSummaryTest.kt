@@ -109,17 +109,4 @@ class DownloadQueueSummaryTest {
         val s = DownloadQueueSummary.of(records, live(since = 0), now)
         assertThat(s.files).isEqualTo(2)
     }
-
-    @Test fun plainWords() {
-        assertThat(QueueText.timeLeft(20_000)).isEqualTo("less than a minute")
-        assertThat(QueueText.timeLeft(4 * 60_000L)).isEqualTo("about 4 min")
-        assertThat(QueueText.timeLeft(26 * 60_000L)).isEqualTo("about 25 min")
-        assertThat(QueueText.timeLeft(3 * 3_600_000L + 10 * 60_000L)).isEqualTo("about 3 h")
-        assertThat(QueueText.timeLeft(3 * 86_400_000L)).isEqualTo("about 3 days")
-        assertThat(QueueText.inTime(110_000)).isEqualTo("in 2 min")
-        assertThat(QueueText.inTime(30_000)).isEqualTo("in 30 s")
-        assertThat((1..4).map(QueueText::place)).containsExactly("Next", "2nd in line", "3rd in line", "4th in line").inOrder()
-        assertThat(QueueText.place(11)).isEqualTo("11th in line")
-        assertThat(QueueText.place(22)).isEqualTo("22nd in line")
-    }
 }

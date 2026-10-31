@@ -4,6 +4,8 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.net.Uri
 import android.provider.Settings
 import app.granger.core.books.PdfSupport
@@ -57,6 +59,7 @@ import app.granger.core.library.BookOrigin
 import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
 import app.granger.archive.SharedArchivePrefs
+import app.granger.settings.AppLanguages
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.SharedAppearancePrefs
 import app.granger.archive.ArchiveUserAgent
@@ -174,6 +177,28 @@ import java.util.concurrent.Executors
 
 open class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    /** Below API 33, the app's resources in the language chosen in Settings (Plan L2 Task 3); null follows the phone. */
+    @Volatile private var localized: Resources? = null
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        relocalize()
+    }
+
+    /** Below API 33: downloads, the widget and view models read the application's resources, so they carry the choice. */
+    override fun getResources(): Resources = localized ?: super.getResources()
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // The system has put back the phone's locale and changed the rest (night mode, size); build ours again.
+        relocalize()
+    }
+
+    /** Builds [localized] again from the stored language choice; a no-op on API 33+, where Android does it. */
+    fun relocalize() {
+        localized = AppLanguages.localizedResources(baseContext)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -410,7 +435,7 @@ class AppContainer(context: Context) {
     val installedVoices: InstalledVoices by lazy {
         val dirs = { context.getExternalFilesDirs(null).filterNotNull().map { File(it, "voices") } }
         val system = SystemSpeech.Factory(context)
-        InstalledVoices(dirs, { system.voices() }, SherpaSpeech.Factory(dirs), system)
+        InstalledVoices(dirs, { system.voices() }, SherpaSpeech.Factory(dirs), system, titles = app.granger.core.speech.VoiceTitles.of(context))
     }
 
     /**
@@ -488,7 +513,7 @@ class AppContainer(context: Context) {
 
     /** What Android Auto browses, searches and plays; reaches the session through [playerHub]. */
     val autoBrowse: AutoBrowseTree by lazy {
-        AutoBrowseTree(media, playlists, playback, mediaIndex, playResumer, songs, playerHub, artwork)
+        AutoBrowseTree(media, playlists, playback, mediaIndex, playResumer, songs, playerHub, artwork, context::getString)
     }
 
     /** Plays a recent play again (the rail, Android Auto); voices through [resumeVoice]. */
@@ -547,6 +572,7 @@ class AppContainer(context: Context) {
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
+    val appLanguages: AppLanguages = AppLanguages.create(context, onLegacyChange = { (context as? GrangerApp)?.relocalize() })
     val homePrefs: HomePrefs = SharedHomePrefs(context)
     /** The tidy offers Keep both answered (Plan WF Decision 5), shared by Home and Downloads. */
     val tidyDismissals = app.granger.sources.TidyDismissals.shared(context.getSharedPreferences("home", Context.MODE_PRIVATE))

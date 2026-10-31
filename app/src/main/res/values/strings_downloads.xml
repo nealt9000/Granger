@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="downloads_title">Downloads</string>
+    <string name="downloads_nothing">Nothing downloading.</string>
+    <!-- Goes to where more packs, books and audio can be got. -->
+    <string name="downloads_get_more">Get more →</string>
+    <!-- Section headings. -->
+    <string name="downloads_now">Now</string>
+    <string name="downloads_up_next">Up next</string>
+    <string name="downloads_stopped">Stopped</string>
+    <string name="downloads_done_today">Done today</string>
+    <!-- Shows every waiting download. %1$d is how many. -->
+    <string name="downloads_show_all">Show all %1$d</string>
+    <string name="downloads_retry_all">Retry all</string>
+    <string name="downloads_resume">Resume</string>
+    <string name="downloads_pause_all">Pause all</string>
+    <!-- A row's overflow menu. %1$s is the download's title. -->
+    <string name="downloads_more_for">More for %1$s</string>
+    <!-- Move a waiting download to the front of the queue. -->
+    <string name="downloads_download_next">Download next</string>
+    <!-- Cancels every file of a group. %1$s is the group, such as an album or Setting up. -->
+    <string name="downloads_cancel_all_of">Cancel all of %1$s</string>
+    <!-- The group of downloads first-run setup started. -->
+    <string name="downloads_setting_up">Setting up</string>
+
+    <!-- A download speed. %1$s is a size, such as 1.2 MB. -->
+    <string name="downloads_speed">%1$s/s</string>
+    <!-- Bytes done of bytes: 312 MB of 980 MB. -->
+    <string name="downloads_bytes_of">%1$s of %2$s</string>
+    <!-- The search vectors that let Ask search a pack by meaning. -->
+    <string name="downloads_index_for_ask">Index for Ask</string>
+    <!-- After a row's line when the pack's Ask index downloads with it. %1$s is the line. -->
+    <string name="downloads_with_index">%1$s + index for Ask</string>
+    <!-- A download row's state, a word or two. -->
+    <string name="downloads_queued">Queued</string>
+    <string name="downloads_failed">Failed</string>
+    <!-- Said of an item a newer catalog dropped. -->
+    <string name="downloads_not_in_catalog">No longer in the catalog</string>
+    <!-- A finished group: how many files landed. -->
+    <plurals name="downloads_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+
+    <!-- Why a download waits. -->
+    <string name="downloads_reason_paused">Paused</string>
+    <string name="downloads_reason_wifi">Waiting for Wi-Fi</string>
+    <!-- %1$s is when, such as in 2 min; %2$d the attempt; %3$d the most attempts. -->
+    <string name="downloads_reason_retrying">Trying again %1$s (attempt %2$d of %3$d)</string>
+    <!-- %1$s is a size, such as 1.2 GB. -->
+    <string name="downloads_reason_space">Needs %1$s more space</string>
+
+    <!-- The header while paused. %1$d is how many files wait. -->
+    <string name="downloads_header_paused">Paused · %1$d waiting</string>
+    <!-- Files done of files, then bytes done of bytes: 3 of 14 · 1.2 GB of 9.8 GB. -->
+    <string name="downloads_header_progress">%1$d of %2$d · %3$s of %4$s</string>
+    <!-- As above, then the time left; %5$s is about 25 min. -->
+    <string name="downloads_header_progress_left">%1$d of %2$d · %3$s of %4$s · %5$s left</string>
+    <!-- How much is still to download. %1$s is a size. -->
+    <string name="downloads_to_go">%1$s to go</string>
+    <!-- %1$s is still to download, %2$s the free space, %3$s the storage\'s name, such as Phone or SD card. -->
+    <string name="downloads_to_go_free">%1$s to go · %2$s free on %3$s</string>
+    <string name="downloads_to_go_free_phone">%1$s to go · %2$s free on this phone</string>
+</resources>

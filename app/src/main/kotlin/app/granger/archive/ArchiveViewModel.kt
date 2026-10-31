@@ -1,10 +1,13 @@
 package app.granger.archive
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.archive.ArchiveDoc
 import app.granger.core.archive.ArchiveError
 import app.granger.core.archive.ArchiveFile
@@ -57,7 +60,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Archive.org has no versions, so there's no Updates tab (spec §5). */
-enum class ArchiveTab(val title: String) { BROWSE("Browse"), INSTALLED("Installed") }
+enum class ArchiveTab(@StringRes val title: Int) { BROWSE(R.string.archive_tab_browse), INSTALLED(R.string.archive_tab_installed) }
 
 data class ArchiveRow(
     val identifier: String,
@@ -69,6 +72,8 @@ data class ArchiveRow(
     val status: ItemStatus,
     /** An audio view's guess from the search formats (its files are empty), or null; texts leave it null. */
     val audio: AudioOffer? = null,
+    /** A set's parts on Installed (Plan IA): the row says "2 parts · 110 MB", [details] being the size; 0 for one file. */
+    val parts: Int = 0,
 )
 
 data class ItemSheet(
@@ -77,7 +82,7 @@ data class ItemSheet(
     val item: ArchiveItem?,
     val offer: Offer?,
     val sizeBytes: Long?,
-    val error: String?,
+    val error: UiText?,
     val status: ItemStatus,
     /** An audio item's files in and in all ("Downloading: 3 of 7"); 0 and 0 for texts or before the item is known. */
     val filesDone: Int = 0,
@@ -92,12 +97,17 @@ data class ItemSheet(
 /** One part of a set on the sheet: its [number], [title], size and where its download stands. */
 data class PartRow(val number: Int, val title: String, val sizeBytes: Long, val status: ItemStatus)
 
+/** What a large Get asks about, which the prompt names (Plan P2, Plan IA). */
+enum class LargeWhat { DOWNLOAD, PDF, PART, SET, PARTS }
+
 /**
  * A Get over 100 MB waiting for the user's yes (Plan P2): [pdf] when it's the PDF beside the item's text; [part] when
- * it's one part of a set, [set] when it's every part still missing (Plan IA).
+ * it's one part of a set, [set] when it's every part still missing (Plan IA). [what] names it in the prompt; with
+ * [LargeWhat.PARTS], [count] parts.
  */
 data class ConfirmLarge(
-    val identifier: String, val pdf: Boolean, val bytes: Long, val title: String, val part: Int? = null, val set: Boolean = false,
+    val identifier: String, val pdf: Boolean, val bytes: Long, val what: LargeWhat, val part: Int? = null, val set: Boolean = false,
+    val count: Int = 1,
 )
 
 data class ArchiveUi(
@@ -109,9 +119,9 @@ data class ArchiveUi(
     val total: Int = 0,
     val loading: Boolean = true,
     val canLoadMore: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val sheet: ItemSheet? = null,
-    val notice: String? = null,
+    val notice: UiText? = null,
     val kind: ArchiveKind = ArchiveKind.TEXTS,
     /** The first year the audio filter leaves out: 1926 in 2026. */
     val filterYear: Int = PublicDomain.lastRecordingYear(LocalDate.now()) + 1,
@@ -156,7 +166,7 @@ class ArchiveViewModel(
         val loading: Boolean,
         val item: ArchiveItem?,
         val offer: Offer?,
-        val error: String?,
+        val error: UiText?,
         val audio: AudioOffer? = null,
     )
 
@@ -172,9 +182,9 @@ class ArchiveViewModel(
         val total: Int = 0,
         val page: Int = 0,
         val loading: Boolean = true,
-        val error: String? = null,
+        val error: UiText? = null,
         val sheet: Sheet? = null,
-        val notice: String? = null,
+        val notice: UiText? = null,
         val confirm: ConfirmLarge? = null,
     )
 
@@ -442,7 +452,7 @@ class ArchiveViewModel(
      * Returns the notice to show, or null when the download is on its way or waits on [ArchiveUi.confirm]. With
      * [pdf], the download is the PDF beside the item's text, a second book; without, the item's own download.
      */
-    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean, part: Int? = null): String? {
+    private suspend fun fetchAndEnqueue(identifier: String, pdf: Boolean, confirmed: Boolean, part: Int? = null): UiText? {
         // Only fetched metadata is downloaded from: a preview's file is a placeholder.
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier || !ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
@@ -452,12 +462,12 @@ class ArchiveViewModel(
         if (!prefs.waiverAccepted.value && !ArchiveOffers.isPublicDomain(item)) return NOT_PUBLIC_DOMAIN
         val all = withContext(io) { volumes.list() }
         val volume = all.firstOrNull { it.root.path == downloadPrefs.volumePath } ?: all.firstOrNull()
-            ?: return "No storage is available right now."
+            ?: return UiText.Res(R.string.archive_no_storage)
         if (offer.isSet && !pdf) return enqueueParts(item, offer, part, confirmed, volume.root, volume.label)
         val spec = ArchiveDownloads.spec(item, offer, client, pdfCopy = pdf)
         if (!confirmed && downloadPrefs.askBeforeLarge && spec.sizeBytes > DownloadPrefs.LARGE_DOWNLOAD_BYTES) {
             val isPdf = pdf || offer.kind == TextKind.PDF
-            state.update { it.copy(confirm = ConfirmLarge(identifier, pdf, spec.sizeBytes, if (isPdf) "PDF" else "download")) }
+            state.update { it.copy(confirm = ConfirmLarge(identifier, pdf, spec.sizeBytes, if (isPdf) LargeWhat.PDF else LargeWhat.DOWNLOAD)) }
             return null
         }
         // Written first: the download may finish before enqueue returns. The PDF beside a text shares the item's
@@ -478,10 +488,9 @@ class ArchiveViewModel(
         return when (result) {
             EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
             is EnqueueResult.NoSpace ->
-                "Not enough space on ${volume.label} for ${spec.title}: free up ${formatBytes(result.neededBytes)}."
+                UiText.Res(R.string.archive_no_space, volume.label, spec.title, formatBytes(result.neededBytes))
             is EnqueueResult.OverCap ->
-                "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                    "over the ${formatBytes(result.capBytes)} limit."
+                UiText.Res(R.string.archive_over_cap, spec.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
         }
     }
 
@@ -491,7 +500,7 @@ class ArchiveViewModel(
      */
     private suspend fun enqueueParts(
         item: ArchiveItem, offer: Offer.Download, part: Int?, confirmed: Boolean, root: File, label: String,
-    ): String? {
+    ): UiText? {
         val records = downloads.records.first()
         val count = offer.parts.size
         val wanted = offer.parts.filter { p ->
@@ -503,8 +512,10 @@ class ArchiveViewModel(
         val specs = wanted.map { it to ArchiveDownloads.spec(item, offer, client, part = it) }
         val bytes = specs.sumOf { it.second.sizeBytes }
         if (!confirmed && downloadPrefs.askBeforeLarge && bytes > DownloadPrefs.LARGE_DOWNLOAD_BYTES) {
-            val title = if (part != null) "part" else if (wanted.size == count) "set" else "${wanted.size} parts"
-            state.update { it.copy(confirm = ConfirmLarge(item.identifier, false, bytes, title, part = part, set = part == null)) }
+            val what = if (part != null) LargeWhat.PART else if (wanted.size == count) LargeWhat.SET else LargeWhat.PARTS
+            state.update {
+                it.copy(confirm = ConfirmLarge(item.identifier, false, bytes, what, part = part, set = part == null, count = wanted.size))
+            }
             return null
         }
         for ((p, spec) in specs) {
@@ -520,12 +531,11 @@ class ArchiveViewModel(
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> Unit
                 is EnqueueResult.NoSpace -> {
                     withContext(io) { sidecar.delete() }
-                    return "Not enough space on $label for ${spec.title}: free up ${formatBytes(result.neededBytes)}."
+                    return UiText.Res(R.string.archive_no_space, label, spec.title, formatBytes(result.neededBytes))
                 }
                 is EnqueueResult.OverCap -> {
                     withContext(io) { sidecar.delete() }
-                    return "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                        "over the ${formatBytes(result.capBytes)} limit."
+                    return UiText.Res(R.string.archive_over_cap, spec.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
                 }
             }
         }
@@ -536,17 +546,19 @@ class ArchiveViewModel(
      * Gets an audio item as one group, an album (Music) or an audiobook (Audiobooks). Every check reads the live
      * preference, not the screen's: the waiver may have been withdrawn since this item was reached.
      */
-    private suspend fun fetchAndGetAudio(identifier: String): String? {
+    private suspend fun fetchAndGetAudio(identifier: String): UiText? {
         if (!prefs.waiverAccepted.value && !kind.datedRecordings) return SPOKEN_WORD_GET
         if (!ArchiveQuery.isValidIdentifier(identifier)) return NOTHING_TO_DOWNLOAD
         // Got from the other view: it lives on that shelf, and getting it here would make a second copy of one group.
-        if (media!!.mediaRootOf(groupOf(identifier)) == otherRoot) return "This is already in your $otherShelf."
+        if (media!!.mediaRootOf(groupOf(identifier)) == otherRoot) {
+            return UiText.Res(if (kind == ArchiveKind.MUSIC) R.string.archive_already_in_audiobooks else R.string.archive_already_in_music)
+        }
         val item = state.value.sheet?.item?.takeIf { it.identifier == identifier } ?: client.item(identifier)
         if (item.identifier != identifier) return NOTHING_TO_DOWNLOAD
         val offer = ArchiveAudioOffers.choose(item) as? AudioOffer.Tracks ?: return NOTHING_TO_DOWNLOAD
         if (offer.files.isEmpty()) return NOTHING_TO_DOWNLOAD
         if (!prefs.waiverAccepted.value && !ArchiveOffers.isPublicDomainRecording(item, today())) {
-            return "This recording wasn't published before ${filterYear()}. Show everything to download it."
+            return UiText.Res(R.string.archive_recording_too_new, filterYear())
         }
         val manifest = MediaDownloads.albumManifest(item, offer, kind, client, now())
         fileCounts[groupOf(identifier)] = manifest.files.size
@@ -575,7 +587,7 @@ class ArchiveViewModel(
 
     /** The other audio view's media root and shelf name: where an item got from there lives. */
     private val otherRoot = if (kind == ArchiveKind.MUSIC) "audiobooks" else "music"
-    private val otherShelf = if (kind == ArchiveKind.MUSIC) "Audiobooks" else "Music"
+    private val otherShelf = if (kind == ArchiveKind.MUSIC) app.granger.sources.LibraryShelf.AUDIOBOOKS else app.granger.sources.LibraryShelf.MUSIC
     private val otherFolder = "/$otherRoot/${MediaManifest.ARCHIVE_ORG}/"
 
     private fun buildAudioUi(s: State, records: List<DownloadRecord>): ArchiveUi {
@@ -677,7 +689,8 @@ class ArchiveViewModel(
                 if (parts.isNotEmpty()) return@mapNotNull ArchiveRow(
                     identifier = identifier,
                     title = parts.first().title.substringBeforeLast(ArchiveDownloads.PART_TITLE_SEPARATOR).ifBlank { identifier },
-                    details = "${parts.size} ${if (parts.size == 1) "part" else "parts"} · ${formatBytes(parts.sumOf { it.sizeBytes })}",
+                    details = formatBytes(parts.sumOf { it.sizeBytes }),
+                    parts = parts.size,
                     preview = previewOf(identifier, parts.first().filePath),
                     status = statusOf(identifier, ours),
                 )
@@ -766,7 +779,7 @@ class ArchiveViewModel(
                 DownloadState.QUEUED -> ItemStatus.Queued(active.wifiOnly, active.error)
                 DownloadState.RUNNING ->
                     ItemStatus.Downloading(if (active.sizeBytes > 0) active.bytesDone.toFloat() / active.sizeBytes else 0f)
-                else -> ItemStatus.Failed(active.error ?: "Download failed")
+                else -> ItemStatus.Failed(active.error)
             }
         }
         return if (versions.any { it.state == DownloadState.INSTALLED }) ItemStatus.Installed else ItemStatus.NotInstalled
@@ -787,14 +800,16 @@ class ArchiveViewModel(
         return Offer.Download(PLACEHOLDER, kind)
     }
 
-    private fun messageOf(e: Exception): String = (e as? ArchiveError)?.message ?: OFFLINE
+    // ArchiveError's message is core/archive's English (L1 Task 7).
+    private fun messageOf(e: Exception): UiText =
+        (e as? ArchiveError)?.let { UiText.Res(it.problem.text, *it.textArgs.toTypedArray()) } ?: OFFLINE
 
     private companion object {
         const val DEBOUNCE_MS = 400L
-        const val NOTHING_TO_DOWNLOAD = "Nothing on this item can be downloaded."
-        const val NOT_PUBLIC_DOMAIN = "This item wasn't published in 1930 or earlier. Show everything to download it."
-        const val SPOKEN_WORD_GET = "Show everything to download archive.org spoken word."
-        const val OFFLINE = "Couldn't reach archive.org. Check your connection and try again."
+        val NOTHING_TO_DOWNLOAD = UiText.Res(R.string.archive_nothing_to_download)
+        val NOT_PUBLIC_DOMAIN = UiText.Res(R.string.archive_not_public_domain)
+        val SPOKEN_WORD_GET = UiText.Res(R.string.archive_spoken_word_get)
+        val OFFLINE = UiText.Res(R.string.archive_offline)
         val PLACEHOLDER = ArchiveFile(name = "", format = "", sizeBytes = null, sha1 = null, md5 = null, source = "", isPrivate = false)
     }
 }

@@ -16,8 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.library.PackStatus
 
 /** The songs in one folder, in album order. */
@@ -31,7 +33,7 @@ fun FolderScreen(vm: MusicViewModel, folder: String, nav: MusicNav) {
         topBar = {
             TopAppBar(
                 title = { Text(MusicCatalog.folderName(folder), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
             )
         },
     ) { padding ->
@@ -45,7 +47,7 @@ fun FolderScreen(vm: MusicViewModel, folder: String, nav: MusicNav) {
                     onShuffle = { vm.play(loaded.songs, null, source, shuffle = true) },
                 )
             }
-            if (loaded.songs.isEmpty()) item { Empty("No songs") }
+            if (loaded.songs.isEmpty()) item { Empty(stringResource(R.string.music_no_songs)) }
             itemsIndexed(loaded.songs, key = { _, t -> t.id }) { i, track ->
                 SongRow(track, vm, dialogs, nav, onPlay = { vm.play(loaded.songs, i, source) })
             }

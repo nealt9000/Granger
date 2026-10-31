@@ -46,10 +46,35 @@ class DownloadNotificationsTest {
         files = 14, filesDone = 3, bytes = 9_800, bytesDone = 1_200, timeLeftMillis = 25 * 60_000L,
     )
 
+    private val res = ApplicationProvider.getApplicationContext<android.content.Context>().resources
+
     @Test fun oneNotificationForTheQueue() {
-        assertThat(notificationText(summary)).isEqualTo("Downloading Wikipedia Top" to "3 of 14 · about 25 min left")
-        assertThat(notificationText(summary.copy(timeLeftMillis = null))).isEqualTo("Downloading Wikipedia Top" to "3 of 14")
-        assertThat(notificationText(QueueSummary())).isEqualTo("Downloading" to "Starting…")
+        assertThat(notificationText(res, summary)).isEqualTo("Downloading Wikipedia Top" to "3 of 14 · about 25 min left")
+        assertThat(notificationText(res, summary.copy(timeLeftMillis = null))).isEqualTo("Downloading Wikipedia Top" to "3 of 14")
+        assertThat(notificationText(res, QueueSummary())).isEqualTo("Downloading" to "Starting…")
+    }
+
+    /** Plan L2 Task 3 Step 5: under Spanish the notification reads in Spanish. */
+    @Config(qualifiers = "es")
+    @Test fun inSpanish() {
+        assertThat(notificationText(res, summary)).isEqualTo("Descargando Wikipedia Top" to "3 de 14 · faltan unos 25 min")
+        assertThat(notificationText(res, QueueSummary())).isEqualTo("Descargando" to "Empezando…")
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        assertThat(DownloadNotifications(context).build(summary).actions.single().title.toString()).isEqualTo("Pausar")
+    }
+
+    @Test fun plainWordsFromResources() {
+        assertThat(QueueText.timeLeft(res, 20_000)).isEqualTo("less than a minute")
+        assertThat(QueueText.timeLeft(res, 4 * 60_000L)).isEqualTo("about 4 min")
+        assertThat(QueueText.timeLeft(res, 26 * 60_000L)).isEqualTo("about 25 min")
+        assertThat(QueueText.timeLeft(res, 3 * 3_600_000L + 10 * 60_000L)).isEqualTo("about 3 h")
+        assertThat(QueueText.timeLeft(res, 3 * 86_400_000L)).isEqualTo("about 3 days")
+        assertThat(QueueText.inTime(res, 110_000)).isEqualTo("in 2 min")
+        assertThat(QueueText.inTime(res, 30_000)).isEqualTo("in 30 s")
+        assertThat(QueueText.inTime(res, 3 * 3_600_000L)).isEqualTo("in 3 h")
+        assertThat((1..4).map { QueueText.place(res, it) }).containsExactly("Next", "2nd in line", "3rd in line", "4th in line").inOrder()
+        assertThat(QueueText.place(res, 11)).isEqualTo("11th in line")
+        assertThat(QueueText.place(res, 22)).isEqualTo("22nd in line")
     }
 
     @Test fun itShowsTheRoundsBarAndOffersPause() {

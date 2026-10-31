@@ -22,18 +22,19 @@ enum class ArchiveKind(val noun: String, val base: String, val datedRecordings: 
     ),
 }
 
-enum class ArchiveShelf(val kind: ArchiveKind, val title: String, val clause: String) {
-    MOST_DOWNLOADED(ArchiveKind.TEXTS, "Most downloaded", ""),
-    MANUALS(ArchiveKind.TEXTS, "Technical manuals", "collection:manuals"),
-    SCIENCE(ArchiveKind.TEXTS, "Science & engineering", "subject:(science OR engineering OR mechanics OR chemistry OR physics)"),
-    LITERATURE(ArchiveKind.TEXTS, "Literature", "subject:(fiction OR literature OR poetry OR drama)"),
-    SPOKEN_MOST_DOWNLOADED(ArchiveKind.SPOKEN_WORD, "Most downloaded", ""),
-    SPOKEN_POETRY(ArchiveKind.SPOKEN_WORD, "Poetry", "subject:poetry"),
-    SPOKEN_DRAMA(ArchiveKind.SPOKEN_WORD, "Drama", "subject:(drama OR plays)"),
-    MUSIC_MOST_DOWNLOADED(ArchiveKind.MUSIC, "Most downloaded", ""),
-    MUSIC_78(ArchiveKind.MUSIC, "78 rpm records", "collection:78rpm"),
-    MUSIC_CLASSICAL(ArchiveKind.MUSIC, "Classical", "subject:classical"),
-    MUSIC_FOLK(ArchiveKind.MUSIC, "Folk & field recordings", "subject:(folk OR \"field recordings\")"),
+/** [title] is the chip's string resource. */
+enum class ArchiveShelf(val kind: ArchiveKind, val title: Int, val clause: String) {
+    MOST_DOWNLOADED(ArchiveKind.TEXTS, R.string.archive_shelf_most_downloaded, ""),
+    MANUALS(ArchiveKind.TEXTS, R.string.archive_shelf_manuals, "collection:manuals"),
+    SCIENCE(ArchiveKind.TEXTS, R.string.archive_shelf_science, "subject:(science OR engineering OR mechanics OR chemistry OR physics)"),
+    LITERATURE(ArchiveKind.TEXTS, R.string.archive_shelf_literature, "subject:(fiction OR literature OR poetry OR drama)"),
+    SPOKEN_MOST_DOWNLOADED(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_most_downloaded, ""),
+    SPOKEN_POETRY(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_poetry, "subject:poetry"),
+    SPOKEN_DRAMA(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_drama, "subject:(drama OR plays)"),
+    MUSIC_MOST_DOWNLOADED(ArchiveKind.MUSIC, R.string.archive_shelf_most_downloaded, ""),
+    MUSIC_78(ArchiveKind.MUSIC, R.string.archive_shelf_78, "collection:78rpm"),
+    MUSIC_CLASSICAL(ArchiveKind.MUSIC, R.string.archive_shelf_classical, "subject:classical"),
+    MUSIC_FOLK(ArchiveKind.MUSIC, R.string.archive_shelf_folk, "subject:(folk OR \"field recordings\")"),
     ;
 
     companion object {

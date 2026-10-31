@@ -28,11 +28,19 @@ android {
         // A second debug install beside the first, with its own empty data, for fresh-install walkthroughs:
         // ./gradlew installDebug -Pfresh
         getByName("debug") {
+            // en-XA (accented, longer) and ar-XB (right to left): a phone set to either shows any text that isn't a
+            // resource as plain English (Plan L1 Task 9). PseudoLocaleTest checks the main screens with en-XA.
+            isPseudoLocalesEnabled = true
             if (project.hasProperty("fresh")) {
                 applicationIdSuffix = ".fresh"
                 manifestPlaceholders["appLabel"] = "Granger Fresh"
             }
         }
+    }
+    // Android 13+ lists the app's languages (English, Español) in Settings → Apps → Granger → Language (Plan L2
+    // Task 3). The locales come from the values-* folders; res/resources.properties names the default's.
+    androidResources {
+        generateLocaleConfig = true
     }
     buildFeatures {
         compose = true

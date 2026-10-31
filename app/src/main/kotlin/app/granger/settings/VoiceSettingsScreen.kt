@@ -33,7 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,27 +64,28 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var showMore by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
     LaunchedEffect(ui.notice) {
         val n = ui.notice ?: return@LaunchedEffect
-        snackbar.showSnackbar(n)
+        snackbar.showSnackbar(n.resolve(context))
         viewModel.dismissNotice()
     }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Voice") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(stringResource(R.string.settings_voice)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
-            item(key = "reads-with") { Heading("Reads with") }
+            item(key = "reads-with") { Heading(stringResource(R.string.settings_voice_reads_with)) }
             if (ui.voices.isEmpty()) {
                 item(key = "none") {
                     ListItem(
-                        headlineContent = { Text("No offline voice on this phone") },
-                        supportingContent = { Text("Get the Granger voice below, or install an offline voice for the phone's text-to-speech.") },
+                        headlineContent = { Text(stringResource(R.string.settings_voice_none)) },
+                        supportingContent = { Text(stringResource(R.string.settings_voice_none_summary)) },
                     )
                 }
             }
@@ -94,7 +98,7 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                 val chosen = (ui.chosen ?: ui.voices.first().id) == voice.id
                 ListItem(
                     headlineContent = { Text(voice.title) },
-                    supportingContent = { Text(if (voice.id is VoiceId.Granger) "Granger voice · ${voice.language}" else "System voice · ${voice.language}") },
+                    supportingContent = { Text(stringResource(if (voice.id is VoiceId.Granger) R.string.settings_voice_granger else R.string.settings_voice_system, voice.language)) },
                     leadingContent = { RadioButton(selected = chosen, onClick = null) },
                     modifier = Modifier.selectable(selected = chosen, role = Role.RadioButton, onClick = { viewModel.choose(voice.id) }).testTag(VoiceSettingsTags.VOICE_ROW),
                 )
@@ -102,12 +106,12 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
             if (more.isNotEmpty() && !showMore) {
                 item(key = "more-voices") {
                     TextButton(onClick = { showMore = true }, modifier = Modifier.padding(horizontal = 4.dp).testTag(VoiceSettingsTags.MORE)) {
-                        Text("System voices (${more.size})")
+                        Text(stringResource(R.string.settings_voice_system_more, more.size))
                     }
                 }
             }
-            item(key = "catalog") { Heading("Granger voices") }
-            if (ui.catalog.isEmpty()) item(key = "no-catalog") { ListItem(headlineContent = { Text("The catalog lists no voices yet.") }) }
+            item(key = "catalog") { Heading(stringResource(R.string.settings_voice_catalog)) }
+            if (ui.catalog.isEmpty()) item(key = "no-catalog") { ListItem(headlineContent = { Text(stringResource(R.string.settings_voice_catalog_empty)) }) }
             items(ui.catalog.size, key = { "catalog-${ui.catalog[it].entry.id}" }) { i ->
                 val row = ui.catalog[i]
                 val e = row.entry
@@ -116,17 +120,17 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                         headlineContent = { Text(e.title) },
                         supportingContent = {
                             Column {
-                                Text("${formatBytes(e.sizeBytes)} download · ${e.license}")
+                                Text(stringResource(R.string.settings_voice_download_size, formatBytes(e.sizeBytes), e.license))
                                 if (e.attribution.isNotBlank()) Text(e.attribution, style = MaterialTheme.typography.bodySmall)
-                                row.error?.let { Text("Download failed: $it", color = MaterialTheme.colorScheme.error) }
+                                row.error?.let { Text(stringResource(R.string.settings_voice_download_failed, it), color = MaterialTheme.colorScheme.error) }
                             }
                         },
                         trailingContent = {
                             when {
-                                row.installed -> TextButton(onClick = { viewModel.remove(e) }, modifier = Modifier.testTag(VoiceSettingsTags.REMOVE)) { Text("Remove") }
-                                row.progress != null || row.queued -> TextButton(onClick = { viewModel.cancel(e) }) { Text("Cancel") }
-                                row.error != null -> TextButton(onClick = { viewModel.retry(e) }) { Text("Retry") }
-                                else -> TextButton(onClick = { viewModel.get(e) }, modifier = Modifier.testTag(VoiceSettingsTags.GET)) { Text("Get") }
+                                row.installed -> TextButton(onClick = { viewModel.remove(e) }, modifier = Modifier.testTag(VoiceSettingsTags.REMOVE)) { Text(stringResource(R.string.common_remove)) }
+                                row.progress != null || row.queued -> TextButton(onClick = { viewModel.cancel(e) }) { Text(stringResource(R.string.common_cancel)) }
+                                row.error != null -> TextButton(onClick = { viewModel.retry(e) }) { Text(stringResource(R.string.common_retry)) }
+                                else -> TextButton(onClick = { viewModel.get(e) }, modifier = Modifier.testTag(VoiceSettingsTags.GET)) { Text(stringResource(R.string.common_get)) }
                             }
                         },
                     )
@@ -135,7 +139,7 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                 }
             }
             item(key = "speed") {
-                Heading("Speed")
+                Heading(stringResource(R.string.settings_voice_speed))
                 var dragging by remember { mutableStateOf<Float?>(null) }
                 val shown = dragging ?: ui.speed
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -147,19 +151,19 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                         steps = 12,
                         modifier = Modifier.weight(1f).testTag(VoiceSettingsTags.SPEED),
                     )
-                    Text("%.1f×".format(shown), Modifier.padding(start = 12.dp, top = 12.dp))
+                    Text(stringResource(R.string.settings_voice_speed_value, shown), Modifier.padding(start = 12.dp, top = 12.dp))
                 }
             }
             item(key = "mark") {
                 ListItem(
-                    headlineContent = { Text("Mark the sentence being read") },
+                    headlineContent = { Text(stringResource(R.string.settings_voice_mark)) },
                     trailingContent = { Switch(checked = ui.markSentence, onCheckedChange = viewModel::setMarkSentence, modifier = Modifier.testTag(VoiceSettingsTags.MARK)) },
                 )
             }
             item(key = "speak-answers") {
                 ListItem(
-                    headlineContent = { Text("Speak answers as they arrive") },
-                    supportingContent = { Text("Ask reads a new answer aloud while it is written. Any answer can be read from its speaker button.") },
+                    headlineContent = { Text(stringResource(R.string.settings_voice_speak_answers)) },
+                    supportingContent = { Text(stringResource(R.string.settings_voice_speak_answers_summary)) },
                     trailingContent = { Switch(checked = ui.speakAnswers, onCheckedChange = viewModel::setSpeakAnswers, modifier = Modifier.testTag(VoiceSettingsTags.SPEAK_ANSWERS)) },
                 )
             }

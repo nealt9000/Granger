@@ -2,6 +2,8 @@ package app.granger.player
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.Track
@@ -306,11 +308,11 @@ class PlayerViewModel(
     fun startSleepTimer(setting: SleepSetting) = hub.startSleepTimer(setting)
     fun cancelSleepTimer() = hub.cancelSleepTimer()
 
-    /** A bookmark here, titled with the chapter and the time in it. */
-    fun addBookmark() {
+    /** A bookmark here, titled with the chapter and the time in it; [resolve] turns that title into text to save. */
+    fun addBookmark(resolve: (UiText) -> String) {
         val ui = hub.ui.value
         val book = ui.now as? NowPlaying.Book ?: return
-        val title = "${book.chapter.title.ifBlank { "Chapter ${book.chapter.ordinal + 1}" }} · ${formatTime(ui.positionMs)}"
+        val title = resolve(UiText.Res(R.string.player_bookmark_title, chapterName(book), formatTime(ui.positionMs)))
         viewModelScope.launch { hub.addBookmark(title) }
     }
 

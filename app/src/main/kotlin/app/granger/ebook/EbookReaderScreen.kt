@@ -2,6 +2,9 @@
 
 package app.granger.ebook
 
+import androidx.compose.ui.res.stringResource
+import app.granger.R
+import app.granger.UiText
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -247,35 +250,37 @@ fun EbookReaderScreen(
 
     var confirmRemovePages by remember { mutableStateOf(false) }
     // Making an ebook takes a while on a long book (about 20 s for 600 pages): the message stays until it's done.
+    val making = stringResource(R.string.ebook_making_ebook)
+    val context = LocalContext.current
     LaunchedEffect(state.makingEbook) {
-        if (state.makingEbook) snackbar.showSnackbar("Making an ebook of this PDF…", duration = SnackbarDuration.Indefinite)
+        if (state.makingEbook) snackbar.showSnackbar(making, duration = SnackbarDuration.Indefinite)
     }
     LaunchedEffect(state.notice) {
         state.notice?.let {
-            snackbar.showSnackbar(it)
+            snackbar.showSnackbar(it.resolve(context))
             viewModel.noticeShown()
         }
     }
     if (confirmRemovePages) {
         AlertDialog(
             onDismissRequest = { confirmRemovePages = false },
-            title = { Text("Remove the original pages?") },
-            text = { Text("The PDF this ebook was made from goes, and with it the book as printed. The ebook stays.") },
+            title = { Text(stringResource(R.string.ebook_remove_original_title)) },
+            text = { Text(stringResource(R.string.ebook_remove_original_body)) },
             confirmButton = {
-                TextButton(onClick = { confirmRemovePages = false; viewModel.removeOriginalPages() }) { Text("Remove") }
+                TextButton(onClick = { confirmRemovePages = false; viewModel.removeOriginalPages() }) { Text(stringResource(R.string.common_remove)) }
             },
-            dismissButton = { TextButton(onClick = { confirmRemovePages = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirmRemovePages = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
     // ⋯: an ebook made from a PDF opens or removes its original pages; a PDF can be made an ebook (Plan IA).
     val menu = listOfNotNull(
         state.originalPagesBytes?.let {
-            ReaderMenuItem("Original pages") { scope.launch { viewModel.openOriginalPages()?.let(onOpenTab) } }
+            ReaderMenuItem(R.string.ebook_original_pages) { scope.launch { viewModel.openOriginalPages()?.let(onOpenTab) } }
         },
         state.originalPagesBytes?.let {
-            ReaderMenuItem("Remove original pages · ${app.granger.formatBytes(it)}") { confirmRemovePages = true }
+            ReaderMenuItem(UiText.Res(R.string.ebook_remove_original_pages, app.granger.formatBytes(it))) { confirmRemovePages = true }
         },
-        ReaderMenuItem("Read as ebook") { viewModel.readAsEbook(onReopen) }.takeIf { state.canReadAsEbook && !state.makingEbook },
+        ReaderMenuItem(R.string.ebook_read_as_ebook) { viewModel.readAsEbook(onReopen) }.takeIf { state.canReadAsEbook && !state.makingEbook },
     )
 
     val bars = bookBarActions(
@@ -320,7 +325,7 @@ fun EbookReaderScreen(
                     Modifier.fillMaxSize().windowInsetsPadding(SafeDrawingIgnoringBars.only(WindowInsetsSides.Bottom)).padding(32.dp),
                     Alignment.Center,
                 ) {
-                    Text(error, textAlign = TextAlign.Center)
+                    Text(error.resolve(), textAlign = TextAlign.Center)
                 }
                 state.publication != null && factory != null && bookId != null -> NavigatorHost(
                     bookId = bookId,
@@ -367,7 +372,7 @@ fun EbookReaderScreen(
         if (reading != null && !reading.following) {
             AssistChip(
                 onClick = viewModel::follow,
-                label = { Text("Follow") },
+                label = { Text(stringResource(R.string.ebook_follow)) },
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 96.dp).testTag(EbookTags.FOLLOW),
             )
         }
@@ -413,15 +418,15 @@ private suspend fun define(
     if (word.isEmpty()) return null
     return try {
         when (choice) {
-            is DictionaryChoice.Wiktionary -> if (lookUp(choice.packId, word)) null else "No entry for “$word” in Wiktionary"
-            DictionaryChoice.ProcessText -> if (Dictionary.startProcessText(context, selection)) null else "No dictionary app is installed"
+            is DictionaryChoice.Wiktionary -> if (lookUp(choice.packId, word)) null else context.getString(R.string.ebook_no_wiktionary_entry, word)
+            DictionaryChoice.ProcessText -> if (Dictionary.startProcessText(context, selection)) null else context.getString(R.string.ebook_no_dictionary_app)
             DictionaryChoice.None -> null
         }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         Log.w("Granger", "Looking up “$word” failed", e)
-        "Couldn’t look up “$word”"
+        context.getString(R.string.ebook_lookup_failed, word)
     }
 }
 

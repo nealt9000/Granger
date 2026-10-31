@@ -63,12 +63,12 @@ class SherpaSpeech internal constructor(
         }
 
         /** "Granger voice (ljspeech)"; Granger's own voices drop the prefix: `…-granger_nanny-medium` → "Granger voice (Nanny)". */
-        fun title(dir: String): String {
+        fun title(dir: String, titles: VoiceTitles): String {
             val name = shortName(dir)
-            return "Granger voice (${if (name.startsWith("granger_")) name.removePrefix("granger_").replaceFirstChar { it.uppercase() } else name})"
+            return titles.granger(if (name.startsWith("granger_")) name.removePrefix("granger_").replaceFirstChar { it.uppercase() } else name)
         }
 
         /** A named speaker's title: "Granger voice (Maggie)". */
-        fun speakerTitle(name: String): String = "Granger voice ($name)"
+        fun speakerTitle(name: String, titles: VoiceTitles): String = titles.granger(name)
     }
 }
