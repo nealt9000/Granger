@@ -162,6 +162,12 @@ DATE_MDY = re.compile(_M + r" (\d{1,2}),? (\d{3,4})")
 DATE_DMY = re.compile(r"(\d{1,2}) " + _M + r",? (\d{3,4})")
 YEAR = re.compile(r"\b(\d{1,4})\s*(BC|BCE)\b|\b(1\d{3}|20\d{2})\b")
 AMOUNT = re.compile(r"\b(\d[\d,]*(?:\.\d+)?)\s+([A-Za-z][A-Za-z-]*)")
+# Spanish-led items: the number may use "." for thousands and "," for decimals, and the unit may be accented ("años").
+AMOUNT_ES = re.compile(r"\b(\d(?:[\d.,]*\d)?)\s+([^\W\d_](?:[^\W\d_]|-)*)")
+_THOUSANDS_DOT = re.compile(r"\d{1,3}(?:\.\d{3})+(?:,\d+)?")
+_THOUSANDS_COMMA = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?")
+_DECIMAL_COMMA = re.compile(r"\d+,\d+")
+_DECIMAL_DOT = re.compile(r"\d+(?:\.\d+)?")
 
 
 def when(text, languages=ENGLISH_ONLY, question=None):
@@ -289,8 +295,30 @@ def _when_es(text, languages, question):
     return dates[0][2]
 
 
-def amount(text):
-    """The first number with a unit in [text]: (value, unit, word), the unit singular and lowercase for comparing."""
+def _number_es(s):
+    """A Spanish-written number: "1.500" and "1.500,5" with dot thousands, "2,5" a decimal comma. "1,500" stays a
+    thousand-five-hundred (as in Mexico, and as an English-trained model may write it), and "1.5" a decimal."""
+    if _THOUSANDS_DOT.fullmatch(s):
+        return float(s.replace(".", "").replace(",", "."))
+    if _THOUSANDS_COMMA.fullmatch(s):
+        return float(s.replace(",", ""))
+    if _DECIMAL_COMMA.fullmatch(s):
+        return float(s.replace(",", "."))
+    if _DECIMAL_DOT.fullmatch(s):
+        return float(s)
+    return None
+
+
+def amount(text, languages=ENGLISH_ONLY):
+    """The first number with a unit in [text]: (value, unit, word), the unit singular and lowercase for comparing.
+    An item whose question leads with Spanish ([languages], `language.of`) reads Spanish numbers ([_number_es]);
+    any other reads English ones only, as before."""
+    if language.leads(languages):
+        for m in AMOUNT_ES.finditer(text):
+            value = _number_es(m.group(1))
+            if value is not None:
+                return value, m.group(2).lower().rstrip("s"), m.group(2)
+        return None
     for m in AMOUNT.finditer(text):
         try:
             value = float(m.group(1).replace(",", ""))
@@ -337,7 +365,7 @@ def worked(notes, languages=ENGLISH_ONLY):
                     span = "%d years" % (last[0] - first[0] - (first[0] < 0 < last[0]))
                 out.append('%s ("%s") is earlier than %s ("%s"), by %s.' % (_show(first), fq, _show(last), lq, span))
                 continue
-            na, nb = amount(a), amount(b)
+            na, nb = amount(a, languages), amount(b, languages)
             if na and nb and na[1] == nb[1] and na[0] != nb[0]:
                 big, small, bq, sq = (na, nb, qa, qb) if na[0] > nb[0] else (nb, na, qb, qa)
                 out.append('%s %s ("%s") is more than %s %s ("%s"), by %s %s.' % (

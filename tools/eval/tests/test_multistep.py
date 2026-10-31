@@ -159,3 +159,22 @@ def test_spanish_lists_and_patterns_are_yearfacts():
     assert bc == ms.BC_ES
     rng = re.search(r'val RANGE_ES = Regex\("(.*)"\)', src).group(1).replace("\\\\", "\\").replace("$Y", ms._Y)
     assert rng == ms.RANGE_ES.pattern
+
+
+def test_spanish_led_items_read_spanish_numbers():
+    assert ms.amount("Tiene 1.500 habitantes.", ES) == (1500.0, "habitante", "habitantes")
+    assert ms.amount("Mide 2,5 kilómetros.", ES) == (2.5, "kilómetro", "kilómetros")
+    assert ms.amount("Unos 2.000.000,75 euros.", ES) == (2000000.75, "euro", "euros")
+    assert ms.amount("Vivió 969 años.", ES) == (969.0, "año", "años")
+    # Ambiguous "1,500" stays a thousand five hundred (as in Mexico); "1.5" a decimal.
+    assert ms.amount("Tiene 1,500 habitantes.", ES) == (1500.0, "habitante", "habitantes")
+    assert ms.amount("Mide 1.5 metros.", ES) == (1.5, "metro", "metros")
+    facts = ms.worked([("¿Cuánto mide el puente A?", "Mide 2,5 kilómetros [1]."), ("¿Y el puente B?", "Mide 1,25 kilómetros [2].")], ES)
+    assert facts == ['2.5 kilómetros ("¿Cuánto mide el puente A?") is more than 1.25 kilómetros ("¿Y el puente B?"), by 1.25 kilómetros.']
+
+
+def test_english_and_english_led_items_read_english_numbers_only():
+    for text in ("It has 1,500 people.", "It is 2.5 miles long.", "Mide 2,5 kilómetros.", "Tiene 1.500 habitantes."):
+        assert ms.amount(text, BOTH) == ms.amount(text)
+        assert ms.amount(text, ms.ENGLISH_ONLY) == ms.amount(text)
+    assert ms.amount("Tiene 1.500 habitantes.") == (1.5, "habitante", "habitantes")
