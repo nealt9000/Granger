@@ -293,13 +293,14 @@ Neal, 2026-10-30: "Let's do a round of improvements to the Granger Classics book
   - **Verse check:** as Task 6, PASS at all three settings. The Douay-Rheims has 99 verse lines (its text is prose verses), 0 flush; WEB 23,338 lines and BSB 24,335, 0 flush; JPS has none (its poetry is set as prose).
   - **Looked at** (390 × 844 screenshots under Readium CSS and Noto Serif): Douay-Rheims Genesis 1 (book intro, "Genesis Chapter 1", argument, verses, Challoner's notes indented); Cakes and Ale's opening (now the title page, no Faded Page notices); Guermantes's last page (ends "You'll live to bury us all!""); Meditations (Long) Book I; Metamorphoses VIII–XV "Book the Eighth, Fable I"; Maltese Falcon chapter 1; Consolation Song I (lines hang). Mahabharata's contents read "Book I: Astra Darsana (The Tournament)" … "Glossary of Sanskrit Words".
   - **Seen, not fixed:** Long's Meditations heads its first book "The Thoughts / Of / Marcus Aurelius Antoninus" (a `<br>` in a heading starts a new sentence, so "Of" is capitalised) and its contents read "I." with the stop while II–XII don't. Footnote links show in the browser's link blue in these shots; the reader's theme sets link colour.
-- [ ] **Task 11: vectors**
+- [x] **Task 11: vectors**
   - Rebuild every Classics `.gvec` with `tools/vectors/build.py --only granger-classics` on the Mac, timing it.
   - Upload the vectors under a new `vectors-<date>` tag.
   - Run recall on the R-track eval set to check that dense retrieval over the Classics isn't worse.
   - **Built 2026-10-30** (descriptors committed; `.gvec` files in `~/Developer/Granger/vectors-work/gc-2026-10-30/out/`, not uploaded): 372 books, 286,067 chunks (old 347, 248,383). Paused at 177 for the shared GPU; about 80 minutes each side of the pause at about 3 books a minute.
   - **Recall** (`r5-t7-all`'s 35 book questions, all Classics vectors at once, 256 int8 as on the phone): old top-4 18, top-12 23, top-50 27; new 17, 21, 29. Every drop is a Bible question, and in each the new top hits answer it in another Bible (WEB Matthew 6:34 for "not worrying about tomorrow", BSB and Douay Daniel 6 for the lions' den, BSB "Wine Is a Mocker"). The answers are marked against the KJV only, so these count as misses. Nothing else is worse; Genji authorship and Romans now come back in the top 50.
-- [ ] **Task 12: publish** (after gb-gutenberg has merged)
+- [x] **Task 12: publish** (after gb-gutenberg has merged)
+  - **Done 2026-10-30.** Neal uploaded both releases (`classics-2026-10-30`: 372 EPUBs; `vectors-2026-10-30`: 372 `.gvec`; the auto-mode check blocks Claude from creating public releases). The Classics vector descriptors carry their own `url`, so the packs' vectors stay on `vectors-2026-10-23`. Catalog rebuilt from main: 372 books, all with vectors, no vectors left out; 923 Kiwix packs (Kiwix's own churn: bulbagarden withdrawn, terraria renamed, 13 new snapshots); check-links 1857/1857; signed and verified.
   - Upload the EPUBs to the GitHub release `classics-<date>`. This is outward-facing, so confirm with Neal first.
   - Run `describe-epubs` into `releases/granger_classics_books.json`.
   - Regenerate the catalog from main, run `check-links`, and re-sign.

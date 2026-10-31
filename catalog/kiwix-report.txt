@@ -1,10 +1,10 @@
-Kiwix packs in eng: 1311; listed 908, curated 18
+Kiwix packs in eng: 1309; listed 906, curated 17
 
 Listed, by category and family:
   Games & Hobbies / alexandria.dk: 1
   Games & Hobbies / balatrowiki: 1
   Games & Hobbies / bindingofisaacrebirth: 1
-  Games & Hobbies / bulbagarden: 2
+  Games & Hobbies / bulbagarden: 1
   Games & Hobbies / capoeirawiki.org: 1
   Games & Hobbies / dandwiki: 2
   Games & Hobbies / dwarffortresswiki.org: 1
@@ -78,7 +78,6 @@ Listed, by category and family:
   Medical / mdwiki: 2
   Medical / medlineplus.gov: 1
   Medical / nhs.uk: 1
-  Medical / wikem: 1
   Medical / wikivet.net: 1
   Medical / wwwnc.cdc.gov: 1
   Medical / zimgit-medicine: 1
@@ -164,13 +163,63 @@ Listed, by category and family:
   Science & Math / stacks.math.columbia.edu: 1
   Science & Math / wikispecies: 2
 
+Book packs (Plan KB): 48
+  gutenberg_en_all
+  gutenberg_en_lcc-a
+  gutenberg_en_lcc-c
+  gutenberg_en_lcc-d
+  gutenberg_en_lcc-e
+  gutenberg_en_lcc-f
+  gutenberg_en_lcc-g
+  gutenberg_en_lcc-h
+  gutenberg_en_lcc-j
+  gutenberg_en_lcc-k
+  gutenberg_en_lcc-l
+  gutenberg_en_lcc-m
+  gutenberg_en_lcc-n
+  gutenberg_en_lcc-p
+  gutenberg_en_lcc-pa
+  gutenberg_en_lcc-pb
+  gutenberg_en_lcc-pc
+  gutenberg_en_lcc-pd
+  gutenberg_en_lcc-pe
+  gutenberg_en_lcc-pf
+  gutenberg_en_lcc-pg
+  gutenberg_en_lcc-ph
+  gutenberg_en_lcc-pj
+  gutenberg_en_lcc-pk
+  gutenberg_en_lcc-pl
+  gutenberg_en_lcc-pm
+  gutenberg_en_lcc-pn
+  gutenberg_en_lcc-pq
+  gutenberg_en_lcc-ps
+  gutenberg_en_lcc-pt
+  gutenberg_en_lcc-pz
+  gutenberg_en_lcc-q
+  gutenberg_en_lcc-r
+  gutenberg_en_lcc-s
+  gutenberg_en_lcc-t
+  gutenberg_en_lcc-u
+  gutenberg_en_lcc-v
+  gutenberg_en_lcc-z
+  gutenberg_mul_all
+  prunelle_en_budding-authors
+  prunelle_en_draw-your-african-story
+  prunelle_en_interactive-books
+  usda-2015_en
+  zimgit-food-preparation_en
+  zimgit-knots_en
+  zimgit-medicine_en
+  zimgit-post-disaster_en
+  zimgit-water_en
+
 Listed, by readiness domain:
-  (storage only): 60
+  (storage only): 59
   food: 25
   literature: 78
   making: 23
   maps: 203
-  medicine: 14
+  medicine: 13
   reference: 77
   science: 55
   technology: 356
@@ -198,21 +247,25 @@ Held back (video): 384
 
 No license found: 0
 
-No family-table row: 1
+No family-table row: 2
+  bulbapedia.bulbagarden.net: 1
   wiki.nura.eco: 1
 
 Unsafe ids: 0
 
 Failed to pin: 0
 
+Search vectors left out:
+  none
+
 Readiness tiers, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):
-  medicine: 1.0 GB / 4.4 GB
-  food: 0.1 GB / 4.9 GB
-  making: 3.6 GB / 12.4 GB
-  science: 2.3 GB / 13.7 GB
-  technology: 0.9 GB / 10.9 GB
-  maps: 0.3 GB / 4.0 GB
-  reference: 2.7 GB / 32.9 GB
-  literature: 0.1 GB / 4.6 GB
-  thought: 0.0 GB / 2.5 GB
-  All: 11.1 GB / 90.3 GB
+  medicine: 2.0 GB / 4.2 GB
+  food: 0.1 GB / 5.0 GB
+  making: 3.8 GB / 12.6 GB
+  science: 2.4 GB / 13.8 GB
+  technology: 0.9 GB / 11.3 GB
+  maps: 1.2 GB / 4.2 GB
+  reference: 7.2 GB / 35.0 GB
+  literature: 0.2 GB / 9.9 GB
+  thought: 0.0 GB / 3.9 GB
+  All: 17.8 GB / 99.7 GB
