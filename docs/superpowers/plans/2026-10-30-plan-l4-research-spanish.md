@@ -22,3 +22,15 @@ Spec §6.2's word lists, on `l4-spanish-eval` (commits c1b1a628 to 4fde2dee). Be
 - `ResearchLanguage.of` reads some English keyword-only questions as Spanish alone: "Lake Como villas", "Victorian era fashion", "hay fever remedies", "El Niño effects", "Para handball". `LanguageLayerTest` pins this list. With "hay fever remedies", the English medical lexicon is off, so the question isn't flagged.
 - `MedicalEs.TERMS` has regex syntax such as `sangr(?!ia)`, but its entries go through `Regex.escape`, so that syntax is matched literally.
 - `tools/eval/multistep.py` parses English dates only.
+
+## Medical layer (2026-10-31)
+
+- `ResearchLanguage.of` picks the question's languages. `Medical`/`PersonalMedical` run each language's lists, so English questions get exactly what they got before. `MedicalEsTest` and `LanguageLayerTest` check every English eval question.
+- `MedicalEs`/`PersonalMedicalEs` are the Spanish lexicon and personal phrasings, matched on folded text (no accents).
+- Scores:
+  - Tuning labels (`medical-labels-es`, 141): every medical label caught, every personal one declined.
+  - First held-out (`medical-heldout-es`, 150), first run: 84/100. Its misses were then added, so it's tuning data now.
+  - Clean held-out (`medical-heldout2-es`, 160, never tuned on): 73/110 medical caught, 17/35 personal declined, no ordinary question flagged, none wrongly declined, 9/38 near-misses flagged. `HeldOut2ScoreTest` pins the floor.
+- For scale: the English lexicon catches 46/106 of its own labels. In English, the rewrite model's medical flag catches the rest.
+- **So keywords alone can't meet the spec's "catch every one".** Spanish Ask's medical bar has to be measured with the model's flag (and/or the EmbeddingGemma centroid in `rewrite.py medical`). That means the phone baseline: run the three Spanish label sets through the rewrite and count misses of lexicon OR model. Until that passes, Spanish Ask stays off.
+- Don't add `medical-heldout2-es` misses to the lexicon. If the lexicon grows, write a third fresh list to score it.
