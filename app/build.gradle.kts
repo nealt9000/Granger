@@ -1,8 +1,21 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
+
+// The upload key for Play (Plan F1) lives outside the repo, like the catalog key; backed up by Neal.
+// Without the file a release build still builds, unsigned.
+val uploadProps = Properties().apply {
+    val f = File(System.getProperty("user.home"), ".config/granger/upload.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+// Each commit on main is one version: Play needs the code to climb with every upload. -PversionCode overrides.
+val gitCommitCount: Int = providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
+    .standardOutput.asText.get().trim().toInt()
 
 android {
     namespace = "app.granger"
@@ -11,8 +24,8 @@ android {
         applicationId = "app.granger"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: gitCommitCount
+        versionName = "0.1.$gitCommitCount"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["appLabel"] = "Granger"
         buildConfigField(
@@ -24,7 +37,22 @@ android {
             "\"${rootProject.file("catalog/public-key.txt").readText().trim()}\"",
         )
     }
+    signingConfigs {
+        if (uploadProps.isNotEmpty()) create("upload") {
+            storeFile = File(uploadProps.getProperty("storeFile"))
+            storePassword = uploadProps.getProperty("storePassword")
+            keyAlias = uploadProps.getProperty("keyAlias")
+            keyPassword = uploadProps.getProperty("keyPassword")
+        }
+    }
     buildTypes {
+        // The friend build on Play internal testing: ./gradlew bundleRelease → app/build/outputs/bundle/release/
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfigs.findByName("upload")?.let { signingConfig = it }
+        }
         // A second debug install beside the first, with its own empty data, for fresh-install walkthroughs:
         // ./gradlew installDebug -Pfresh
         getByName("debug") {
