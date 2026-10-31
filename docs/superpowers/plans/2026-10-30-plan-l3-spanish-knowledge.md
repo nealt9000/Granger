@@ -174,7 +174,12 @@ A domain with no list for a language is empty in that language.
   - `comprehensive-es` (14 packs): MedlinePlus, Ready.gov, Scoutwiki, iFixit, Low-tech Magazine, Wikiviajes, Wikipedia en español (all, maxi), Wikcionario, Wikilibros, Wikiversidad, Vikidia, Spanish Language SE, Wikisource, Wikiquote.
   - Comprehensive is 1.5 GB under the expected 48.2 / 24.4 GB because those totals still counted Stack Overflow en español (1.44 GB), which stays out of the tiers.
   - English is unchanged: 17.7 GB / 99.7 GB.
-- [ ] **Step 5: Neal signs off the lists and sizes.** *(Waiting: the lists, copy and sizes are committed on the branch for his review; nothing is signed.)* This is the spec §5.2 sign-off, and it happens before any signing.
+- [x] **Step 5: Neal signs off the lists and sizes.** This is the spec §5.2 sign-off, and it happens before any signing.
+  - **Signed off 2026-10-30:**
+    - The Spanish lists stand as built: Efficient 9.4 GB with pictures (5.4 GB Save space), Comprehensive 46.7 GB (22.9 GB). Packs only.
+    - Stack Overflow en español stays in the Spanish Software use case.
+    - The Clásicos rights rule is Spain and Argentina only (every named person died in 1945 or earlier). Mexico's life + 100 is not applied.
+  - The Spanish copy still goes to the friend review.
 - [ ] **Step 6:** Commit "L3: Spanish tiers, presets and onboarding".
 
 ## Task 4: Clásicos Granger (desk, Mac)
