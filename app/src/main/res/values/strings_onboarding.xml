@@ -26,6 +26,10 @@
     <!-- Welcome. The line break is part of the design. -->
     <string name="onboarding_tagline">The world’s knowledge.\nYours to keep.</string>
     <string name="onboarding_intro">Encyclopedias, maps, manuals, books and your own music, with a reader and a librarian you can ask: all on your phone, all working with no signal.</string>
+    <!-- Welcome's offer of a second library language (Plan L3), when the phone lists two the catalog has. %1$s is the
+         language named in the app's language: "Spanish" here, "inglés" in Spanish. -->
+    <string name="onboarding_also_language">Also %1$s?</string>
+    <string name="onboarding_also_language_blurb">Adds its encyclopedia to your start, and its packs to Get more.</string>
 
     <!-- This phone. %1$s is the phone's memory, like "8.0 GB". -->
     <string name="onboarding_tier_library">A library phone, with %1$s of memory.</string>

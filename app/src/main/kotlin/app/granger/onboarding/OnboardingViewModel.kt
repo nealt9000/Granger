@@ -7,6 +7,7 @@ import app.granger.UiText
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogSource
+import app.granger.core.catalog.ENGLISH
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
@@ -16,12 +17,15 @@ import app.granger.core.downloads.downloadSpecOf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.formatBytes
+import app.granger.settings.KnowledgeLanguages
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.ItemStatus
 import app.granger.sources.statusOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -78,7 +82,17 @@ data class OnboardingUi(
     val notice: UiText? = null,
     /** Start was tapped and the downloads are being written; the button waits. */
     val starting: Boolean = false,
+    /** The library's languages (Plan L3), main first. */
+    val languages: List<String> = listOf(ENGLISH),
+    /**
+     * The second language Welcome offers ("Also Spanish?"): only when the phone lists more than one language the catalog
+     * has tiers for (Neal's call 4); null otherwise.
+     */
+    val alsoLanguage: String? = null,
 ) {
+    /** Whether [alsoLanguage] is one of the library's languages. */
+    val alsoOn: Boolean get() = alsoLanguage != null && alsoLanguage in languages
+
     val start: StartChoice? get() = starts.firstOrNull { it.id == startId }
     val chosenVolume: Volume? get() = phone.volumes.firstOrNull { it.root.path == volumePath } ?: phone.volumes.firstOrNull()
 }
@@ -101,6 +115,11 @@ class OnboardingViewModel(
     private val offerVoice: Boolean = app.granger.Features.READ_ALOUD && app.granger.Features.PLAYER,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
+    /** The library's languages (Plan L3), main first, and how Welcome's offer changes them. */
+    knowledge: Flow<List<String>> = flowOf(listOf(ENGLISH)),
+    private val setKnowledge: (List<String>) -> Unit = {},
+    /** The phone's languages in order, whatever the app is set to. */
+    private val phoneLocales: () -> List<java.util.Locale> = { emptyList() },
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
         { group, items, volume, wifi -> downloads.enqueueGroup(group, items.map { downloadSpecOf(it, group) }, volume.root, wifi) },
 ) : ViewModel() {
@@ -124,12 +143,18 @@ class OnboardingViewModel(
     val finished: StateFlow<Boolean> get() = done
     private val done = MutableStateFlow(false)
 
-    private class Facts(val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>)
+    private class Facts(
+        val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>,
+        val languages: List<String>,
+    )
     private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: UiText?, val starting: Boolean)
 
-    private val facts = combine(catalog.state, downloads.records, library.packs, volumeList) { c, records, packs, vols ->
-        Facts(c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols)
+    private val facts = combine(catalog.state, downloads.records, library.packs, volumeList, knowledge) { c, records, packs, vols, langs ->
+        Facts(
+            c.catalog, c.refreshing, c.catalog == null && !c.refreshing && c.error != null, c.catalog?.let { installedIds(it, records, packs) }.orEmpty(), vols,
+            langs.ifEmpty { listOf(ENGLISH) },
+        )
     }
     private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen, saveSpace) { values ->
         @Suppress("UNCHECKED_CAST")
@@ -185,7 +210,10 @@ class OnboardingViewModel(
             start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
             containment = catalog?.let { app.granger.core.catalog.Containment(it) },
         )
+        val phoneLanguages = KnowledgeLanguages.phoneLanguages(phoneLocales(), catalog?.languages.orEmpty())
         return OnboardingUi(
+            languages = f.languages,
+            alsoLanguage = KnowledgeLanguages.secondOffer(f.languages, phoneLanguages),
             step = c.step,
             noCatalog = catalog == null,
             refreshing = f.refreshing,
@@ -262,6 +290,13 @@ class OnboardingViewModel(
     fun toggleVoice() = voiceChosen.update { !it }
 
     fun toggleSaveSpace() = saveSpace.update { !it }
+
+    /** Welcome's "Also Spanish?": adds the offered language to the library's languages, after the main one, or takes it off. */
+    fun toggleAlso() {
+        val ui = ui.value
+        val also = ui.alsoLanguage ?: return
+        setKnowledge(if (ui.alsoOn) ui.languages - also else ui.languages + also)
+    }
 
     fun toggleUseCase(id: String) = useCaseIds.update { if (id in it) it - id else it + id }
 

@@ -37,6 +37,10 @@
     <string name="settings_language">Idioma</string>
     <string name="settings_language_app">Idioma de la app</string>
     <string name="settings_language_system">Igual que el teléfono (%1$s)</string>
+    <string name="settings_language_library">Idiomas de tu biblioteca</string>
+    <string name="settings_language_library_blurb">Los comienzos, Preparación y Conseguir más los usan. El primero es el principal.</string>
+    <string name="settings_language_main">Idioma principal</string>
+    <string name="settings_language_make_main">Hacer principal</string>
 
     <string name="settings_storage_usage">%1$s libres · Granger usa %2$s</string>
     <string name="settings_storage_usage_queued">%1$s libres · Granger usa %2$s · %3$s por descargar</string>

@@ -1158,7 +1158,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<LanguageRoute> {
-                LanguageSettingsScreen(container.appLanguages, onBack = { nav.popBackStack() })
+                LanguageSettingsScreen(container.appLanguages, container.knowledgeLanguages, onBack = { nav.popBackStack() })
             }
             composable<MediaSettingsRoute> {
                 MediaSettingsScreen(
@@ -1266,6 +1266,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         OnboardingViewModel(
                             container.catalog, container.library, container.downloads, container.volumes, container.downloadPrefs,
                             container.deviceTier, container.totalRamBytes, container.onboardingPrefs,
+                            knowledge = container.knowledgeLanguages.languages,
+                            setKnowledge = container.knowledgeLanguages::set,
+                            phoneLocales = container.appLanguages::phoneLocales,
                         )
                     },
                     onDone = { nav.popBackStack() },

@@ -60,6 +60,7 @@ import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
 import app.granger.archive.SharedArchivePrefs
 import app.granger.settings.AppLanguages
+import app.granger.settings.KnowledgeLanguages
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.SharedAppearancePrefs
 import app.granger.archive.ArchiveUserAgent
@@ -573,6 +574,11 @@ class AppContainer(context: Context) {
     val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
     val appLanguages: AppLanguages = AppLanguages.create(context, onLegacyChange = { (context as? GrangerApp)?.relocalize() })
+
+    /** The languages of the user's library (Plan L3): the app language's by default, when the catalog has tiers for it. */
+    val knowledgeLanguages: KnowledgeLanguages = KnowledgeLanguages.create(
+        context, appLanguages.code, catalog.state.map { it.catalog?.languages.orEmpty() }.distinctUntilChanged(),
+    )
     val homePrefs: HomePrefs = SharedHomePrefs(context)
     /** The tidy offers Keep both answered (Plan WF Decision 5), shared by Home and Downloads. */
     val tidyDismissals = app.granger.sources.TidyDismissals.shared(context.getSharedPreferences("home", Context.MODE_PRIVATE))

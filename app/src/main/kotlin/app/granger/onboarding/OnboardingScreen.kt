@@ -2,6 +2,7 @@ package app.granger.onboarding
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -68,6 +69,7 @@ class OnboardingActions(
     val onToggleAsk: () -> Unit = {},
     val onToggleVoice: () -> Unit = {},
     val onToggleSaveSpace: () -> Unit = {},
+    val onToggleAlso: () -> Unit = {},
     val onRegionQuery: (String) -> Unit = {},
     val onChooseRegion: (String?) -> Unit = {},
     val onToggleUseCase: (String) -> Unit = {},
@@ -96,6 +98,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
             onToggleAsk = viewModel::toggleAsk,
             onToggleVoice = viewModel::toggleVoice,
             onToggleSaveSpace = viewModel::toggleSaveSpace,
+            onToggleAlso = viewModel::toggleAlso,
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
@@ -162,7 +165,7 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             ) {
                 when (ui.step) {
-                    Step.WELCOME -> welcome()
+                    Step.WELCOME -> welcome(ui, actions)
                     Step.PHONE -> phone(ui)
                     Step.START -> start(ui, actions)
                     Step.REGION -> region(ui, actions)
@@ -174,7 +177,7 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
     }
 }
 
-private fun androidx.compose.foundation.lazy.LazyListScope.welcome() {
+private fun androidx.compose.foundation.lazy.LazyListScope.welcome(ui: OnboardingUi, actions: OnboardingActions) {
     item {
         Column(Modifier.fillMaxWidth().padding(top = 48.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             BrandLockup()
@@ -186,6 +189,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome() {
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
+        }
+    }
+    // A phone in two languages the catalog has (Plan L3, Neal's call 4): "Also Spanish?", the language named in the app's.
+    ui.alsoLanguage?.let { code ->
+        item(key = "also") {
+            val appLocale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+            val name = java.util.Locale.forLanguageTag(code).getDisplayLanguage(appLocale)
+            Box(Modifier.padding(top = 32.dp)) {
+                Extra(stringResource(R.string.onboarding_also_language, name), stringResource(R.string.onboarding_also_language_blurb), ui.alsoOn, actions.onToggleAlso)
+            }
         }
     }
 }

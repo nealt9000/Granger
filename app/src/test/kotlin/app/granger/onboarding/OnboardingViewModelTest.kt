@@ -61,11 +61,15 @@ class OnboardingViewModelTest {
         ),
     ).copy(onboarding = Onboarding(listOf(UseCase("medical", "Medical work", "Clinical.", listOf("medlineplus.gov_en_all"))), larger = listOf("maps_en_europe")))
 
+    private val knowledge = kotlinx.coroutines.flow.MutableStateFlow(listOf("en"))
+    private var phone = listOf(java.util.Locale.US)
+
     private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
             countryCode = country, offerVoice = offerVoice, io = main.dispatcher, now = { 42 },
             enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); enqueueResult },
+            knowledge = knowledge, setKnowledge = { knowledge.value = it }, phoneLocales = { phone },
         )
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
@@ -309,6 +313,40 @@ class OnboardingViewModelTest {
         vm.start(); settle()
         assertThat(vm.finished.value).isTrue()
         assertThat(enqueued).hasSize(1)
+    }
+
+    /** [full] with a Spanish medicine list, so the catalog has tiers in English and Spanish (Plan L3). */
+    private val bilingual = full.copy(
+        packs = full.packs + packEntry("wikipedia_es_medicine_maxi", size = 800).copy(language = "es", family = "wikipedia"),
+        readiness = app.granger.core.catalog.Readiness(
+            listOf(
+                app.granger.core.catalog.Domain(
+                    "medicine", "Medicine", listOf("wikipedia_en_medicine_nopic"), listOf("wikipedia_en_medicine_nopic"),
+                    languages = mapOf("es" to app.granger.core.catalog.Tiers(listOf("wikipedia_es_medicine_maxi"), listOf("wikipedia_es_medicine_maxi"))),
+                ),
+            ),
+        ),
+    )
+
+    @Test fun welcomeOffersTheSecondLanguageOnlyWithTwoSupportedPhoneLanguages() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = bilingual)
+        phone = listOf(java.util.Locale.US, java.util.Locale.FRENCH)
+        assertThat(viewModel().ui.value.alsoLanguage).isNull()
+        phone = listOf(java.util.Locale.US, java.util.Locale.forLanguageTag("es-MX"))
+        val vm = viewModel()
+        assertThat(vm.ui.value.alsoLanguage).isEqualTo("es")
+        assertThat(vm.ui.value.alsoOn).isFalse()
+        vm.toggleAlso(); settle()
+        assertThat(knowledge.value).containsExactly("en", "es").inOrder()
+        assertThat(vm.ui.value.alsoOn).isTrue()
+        vm.toggleAlso(); settle()
+        assertThat(knowledge.value).containsExactly("en")
+    }
+
+    @Test fun anEnglishOnlyCatalogOffersNoSecondLanguage() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = full)
+        phone = listOf(java.util.Locale.US, java.util.Locale.forLanguageTag("es-MX"))
+        assertThat(viewModel().ui.value.alsoLanguage).isNull()
     }
 }
 

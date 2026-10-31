@@ -52,6 +52,13 @@
     <!-- Each language is named in itself, whatever the app is in. -->
     <string name="settings_language_english" translatable="false">English</string>
     <string name="settings_language_spanish" translatable="false">Español</string>
+    <!-- The Language screen's second section (Plan L3): which languages the library's packs, starts and Readiness are in. -->
+    <string name="settings_language_library">Your library\'s languages</string>
+    <string name="settings_language_library_blurb">Starts, Readiness and Get more use these. The first is your main one.</string>
+    <!-- Under the main library language, when more than one is on. -->
+    <string name="settings_language_main">Main language</string>
+    <!-- A short button beside another library language: makes it the main one. -->
+    <string name="settings_language_make_main">Make main</string>
 
     <!-- Storage. %1$s is free space, %2$s what Granger uses, both like "2.0 GB". -->
     <string name="settings_storage_usage">%1$s free · Granger uses %2$s</string>

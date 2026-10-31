@@ -8,7 +8,9 @@ import android.content.res.Resources
 import android.os.Build
 import android.os.LocaleList
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 
@@ -93,6 +95,21 @@ class AppLanguages(
     fun refresh() {
         state.value = read()
     }
+
+    /**
+     * The language the app's text is in (Plan L3): the choice, else the phone's first language when the app has text in
+     * it, else English (the unqualified resources).
+     */
+    val code: Flow<String> get() = state.map { codeOf(it) }
+
+    /** [code] now. */
+    fun code(): String = codeOf(state.value)
+
+    private fun codeOf(choice: AppLanguage): String =
+        choice.language ?: phoneLocale().language.takeIf { phone -> AppLanguage.entries.any { it.language == phone } } ?: "en"
+
+    /** The phone's languages in order, whatever the app is set to: onboarding's second-language offer reads them. */
+    fun phoneLocales(): List<Locale> = (platform?.phoneLocales ?: legacyPhoneLocales()).let { list -> (0 until list.size()).map(list::get) }
 
     /** The phone's first language, for "Follow the phone (Español)". */
     fun phoneLocale(): Locale = (platform?.phoneLocales ?: legacyPhoneLocales()).let { if (it.isEmpty) Locale.getDefault() else it[0] }

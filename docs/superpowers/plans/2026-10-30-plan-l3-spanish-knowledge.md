@@ -334,14 +334,15 @@ None of the five mentions Gutenberg.
 
 ## Task 6: Knowledge languages (app)
 
-- [ ] **Step 1: `KnowledgeLanguages`** in `settings/`. It's stored like the other settings, and its default is described under Data shapes. Expose it as a `Flow<List<String>>`.
-- [ ] **Step 2: Settings → Language** (L2 Task 3's screen) gains "Idiomas de tu biblioteca" / "Your library's languages". It lists the languages the catalog has tiers for; at least one stays on. Wording goes through the glossary and both resource files.
-- [ ] **Step 3: Onboarding.** When the phone's `LocaleList` has more than one language the catalog supports, the first step offers the second one ("¿También en inglés?" / "Also Spanish?"). Otherwise nothing new appears (Neal's call 4).
-- [ ] **Step 4: Tests.**
+- [x] **Step 1: `KnowledgeLanguages`** in `settings/`. It's stored like the other settings, and its default is described under Data shapes. Expose it as a `Flow<List<String>>`.
+- [x] **Step 2: Settings → Language** (L2 Task 3's screen) gains "Idiomas de tu biblioteca" / "Your library's languages". It lists the languages the catalog has tiers for; at least one stays on. Wording goes through the glossary and both resource files.
+- [x] **Step 3: Onboarding.** When the phone's `LocaleList` has more than one language the catalog supports, the first step offers the second one ("¿También en inglés?" / "Also Spanish?"). Otherwise nothing new appears (Neal's call 4).
+- [x] **Step 4: Tests.**
   - The default follows the app language.
   - An unsupported app language falls back to `en`.
   - The prompt shows only with two supported phone languages.
-- [ ] **Step 5:** Commit.
+- [x] **Step 5:** Commit.
+  - Done: `settings/KnowledgeLanguages.kt` (SharedPreferences `knowledge`; nothing stored until the user chooses), `AppLanguages.code` (the choice, else the phone's language when the app has text in it, else `en`). Settings → Language shows the second section only when the catalog has tiers in two or more languages: each language named in itself with a checkbox, the last one on can't be unticked, "Main language" under the first, "Make main" beside the others. Onboarding's Welcome step shows "Also Spanish?" / "¿También en inglés?" as an unticked checkbox (it writes the setting at once); the language is named in the app's language.
 
 ## Task 7: Readiness, Pick a start and Get more by language (app)
 

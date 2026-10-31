@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -47,5 +48,33 @@ class LanguageSettingsTest {
         compose.onNodeWithText("Igual que el teléfono (English)").assertIsSelected()
         compose.onNodeWithText("English").performClick()
         assertThat(chosen).containsExactly(AppLanguage.ENGLISH)
+    }
+
+    @Test fun theLibrarysLanguagesShowOnlyWithTwoOffered() {
+        compose.setContent { LanguageSettingsContent(AppLanguage.SYSTEM, Locale.US, {}, {}, LibraryLanguages(listOf("en"), listOf("en"), {})) }
+        compose.onNodeWithText("Your library's languages").assertDoesNotExist()
+    }
+
+    @Test fun theLibrarysLanguagesTickAndMakeMain() {
+        val changes = mutableListOf<List<String>>()
+        compose.setContent {
+            var library by remember { mutableStateOf(listOf("en")) }
+            LanguageSettingsContent(
+                AppLanguage.SYSTEM, Locale.US, {}, {},
+                LibraryLanguages(library, listOf("en", "es"), { library = it; changes += it }),
+            )
+        }
+        compose.onNodeWithText("Your library's languages").assertExists()
+        // The app language's radio row is first; the library's row is the second of each name.
+        compose.onAllNodesWithText("Español")[1].performClick()
+        compose.onNodeWithText("Main language").assertExists()
+        compose.onNodeWithText("Make main").performClick()
+        assertThat(changes).containsExactly(listOf("en", "es"), listOf("es", "en")).inOrder()
+    }
+
+    @Config(qualifiers = "es")
+    @Test fun theLibrarysLanguagesInSpanish() {
+        compose.setContent { LanguageSettingsContent(AppLanguage.SYSTEM, Locale.US, {}, {}, LibraryLanguages(listOf("es"), listOf("en", "es"), {})) }
+        compose.onNodeWithText("Idiomas de tu biblioteca").assertExists()
     }
 }
