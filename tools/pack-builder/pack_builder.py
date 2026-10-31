@@ -9,6 +9,8 @@
   pack_builder.py describe-epubs ~/granger-build/classics-epub --release-url-base <release download url> \\
                            --manifest classics/manifest.json     # writes releases/granger_classics_books.json
 
+Clásicos Granger uses classics/manifest_es.json and --out releases/clasicos_granger_es_books.json.
+
 `build` validates first and stops on any error. `describe` writes the release descriptor that
 tools/catalog-gen turns into a catalog entry. Sources are cached in ~/.cache/granger/gutenberg/.
 """
@@ -40,11 +42,12 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str) -> Path:
             raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
-        pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles))
+        pages = chapters.split(cleaned.body, spec.split_at,
+                               zimpack.chapter_budget(spec.title, cleaned.styles, m.code))
         print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
         works.append(zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                                   published=spec.published, section=spec.section, chapters=pages,
-                                  styles=cleaned.styles))
+                                  styles=cleaned.styles, language=m.code))
     zim = Path(out) / f"{m.name}_{date}.zim"
     info = zimpack.PackInfo(name=m.name, title=m.title, description=m.description, language=m.language,
                             date=date, sections=m.sections)
@@ -57,28 +60,30 @@ class BuildError(Exception):
     """A work failed to build; the message starts with its slug and Gutenberg id."""
 
 
-def _work(spec, source) -> zimpack.Work:
+def _work(spec, source, language: str = "en") -> zimpack.Work:
     cleaned = gutenberg.clean(source.html(spec.gutenberg))
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
-    pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),
+    pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles, language),
                            page_href=epubpack.chapter_href)
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
-                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles)
+                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
+                        language=language)
 
 
 def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str) -> list[Path]:
-    """One EPUB 3 per work: `<out>/gc-<slug>_<date>.epub`. Any failure names the work."""
+    """One EPUB 3 per work: `<out>/<prefix><slug>_<date>.epub`. Any failure names the work."""
     sections = dict(m.sections)
     files = []
     for spec in m.works:
         try:
-            work = _work(spec, source)
+            work = _work(spec, source, m.code)
             meta = epubpack.BookMeta(
-                id=epubpack.book_id(spec.slug), title=epubpack.display_title(work), author=spec.author,
-                translator=spec.translator, published=spec.published, section_title=sections[spec.section],
-                language="en", source_url=f"https://www.gutenberg.org/ebooks/{spec.gutenberg}", date=date)
+                id=epubpack.book_id(spec.slug, m.book_id_prefix), title=epubpack.display_title(work, m.code),
+                author=spec.author, translator=spec.translator, published=spec.published,
+                section_title=sections[spec.section], language=m.code,
+                source_url=f"https://www.gutenberg.org/ebooks/{spec.gutenberg}", date=date, collection=m.title)
             path = Path(out) / f"{meta.id}_{date}.epub"
             epubpack.write_epub(path, work, meta, covers.cover_jpeg(meta.title, spec.author))
         except Exception as error:
@@ -92,7 +97,7 @@ def describe_epubs(directory: Path, url_base: str, m: Manifest) -> dict:
     sections = dict(m.sections)
     books, dates = [], set()
     for spec in m.works:
-        book = epubpack.book_id(spec.slug)
+        book = epubpack.book_id(spec.slug, m.book_id_prefix)
         found = sorted(Path(directory).glob(f"{book}_????-??-??.epub"))
         if len(found) != 1:
             raise SystemExit(f"{book}: expected one EPUB in {directory}, found {len(found)}")
@@ -100,14 +105,19 @@ def describe_epubs(directory: Path, url_base: str, m: Manifest) -> dict:
         dates.add(path.stem.rsplit("_", 1)[1])
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         title = epubpack.display_title(zimpack.Work(spec.slug, spec.title, spec.author, spec.translator,
-                                                    spec.published, spec.section, []))
-        books.append({"id": book, "title": title, "author": spec.author, "translator": spec.translator,
-                      "published": spec.published, "section": sections[spec.section], "language": "en",
-                      "sizeBytes": path.stat().st_size, "sha256": digest,
-                      "urls": [f"{url_base.rstrip('/')}/{path.name}"]})
+                                                    spec.published, spec.section, []), m.code)
+        entry = {"id": book, "title": title, "author": spec.author, "translator": spec.translator,
+                 "published": spec.published, "section": sections[spec.section], "language": m.code,
+                 "sizeBytes": path.stat().st_size, "sha256": digest,
+                 "urls": [f"{url_base.rstrip('/')}/{path.name}"]}
+        if m.domains and spec.section in m.domains:  # read by catalog-gen; the English manifest names none
+            entry["domain"] = m.domains[spec.section]
+        if spec.learner:
+            entry["learner"] = True
+        books.append(entry)
     if len(dates) != 1:
         raise SystemExit(f"EPUBs from several build dates: {sorted(dates)}")
-    return {"releaseDate": dates.pop(), "collection": "granger-classics", "books": books}
+    return {"releaseDate": dates.pop(), "collection": m.collection, "books": books}
 
 
 def describe(zim: Path, url: str) -> dict:

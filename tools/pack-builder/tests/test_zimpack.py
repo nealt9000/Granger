@@ -91,3 +91,15 @@ def test_failed_write_leaves_nothing_at_out(tmp_path, monkeypatch):
 def test_solid_png_is_a_png():
     png = zimpack.solid_png(48, (90, 60, 30))
     assert png.startswith(b"\x89PNG\r\n\x1a\n") and struct.unpack(">II", png[16:24]) == (48, 48)
+
+
+def test_spanish_pages_speak_spanish():
+    info = PackInfo(name="clasicos", title="Clásicos", description="Prueba", language="spa", date="2026-10-30",
+                    sections=[("novelas", "Novelas")])
+    w = Work(slug="fausto", title="Fausto", author="Goethe", translator="Teodoro Llorente", published=1882,
+             section="novelas", chapters=[Chapter("I", "<p>a</p>"), Chapter("II", "<p>b</p>")], language="es")
+    book, chapter = zimpack._book_page(w, dict(info.sections)), zimpack._chapter_page(w, 0)
+    assert "traducción de Teodoro Llorente" in book and 'lang="es"' in book and "Todas las obras" in book
+    assert "Siguiente ›" in chapter and "Next" not in chapter
+    assert "Acerca de esta colección" in zimpack._index_page(info, [w])
+    assert "<th>Obra</th>" in zimpack._about_page(info, [w])

@@ -19,7 +19,13 @@ from chapters import PAGE_NUMBER, clean_title
 from zimpack import Work
 
 COLLECTION = "Granger Classics"
-RIGHTS = "Public domain in the USA."
+# The words a book's own pages show, by its 2-letter language.
+LABELS = {
+    "en": {"contents": "Contents", "landmarks": "Landmarks", "cover": "Cover", "start": "Start of text",
+           "translated": "tr.", "rights": "Public domain in the USA."},
+    "es": {"contents": "Índice", "landmarks": "Puntos de referencia", "cover": "Portada", "start": "Comienzo del texto",
+           "translated": "trad.", "rights": "Dominio público en los Estados Unidos."},
+}
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
 
@@ -53,19 +59,24 @@ class BookMeta:
     language: str
     source_url: str
     date: str
+    collection: str = COLLECTION
 
 
-def book_id(slug: str) -> str:
-    return f"gc-{slug}"
+def labels(language: str) -> dict[str, str]:
+    return LABELS.get(language, LABELS["en"])
+
+
+def book_id(slug: str, prefix: str = "gc-") -> str:
+    return f"{prefix}{slug}"
 
 
 def chapter_href(index: int) -> str:
     return f"c{index + 1:03d}.xhtml"
 
 
-def display_title(work: Work) -> str:
+def display_title(work: Work, language: str = "en") -> str:
     if not work.author and work.translator:
-        return f"{work.title} (tr. {work.translator})"
+        return f"{work.title} ({labels(language)['translated']} {work.translator})"
     return work.title
 
 
@@ -202,18 +213,19 @@ def _page(title: str, language: str, body: str) -> str:
             f"</head><body>{body}</body></html>")
 
 
-def _titles(work: Work) -> list[str]:
-    return [clean_title(c.title, work.title, work.author, i) for i, c in enumerate(work.chapters)]
+def _titles(work: Work, language: str) -> list[str]:
+    return [clean_title(c.title, work.title, work.author, i, language) for i, c in enumerate(work.chapters)]
 
 
 def _nav(work: Work, meta: BookMeta, titles: list[str]) -> str:
+    words = labels(meta.language)
     items = "".join(f'<li><a href="{chapter_href(i)}">{escape(t, quote=False)}</a></li>' for i, t in enumerate(titles))
     first = chapter_href(0) if titles else "cover.xhtml"
-    body = (f'<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>{items}</ol></nav>'
-            '<nav epub:type="landmarks" hidden="hidden"><h1>Landmarks</h1><ol>'
-            '<li><a epub:type="cover" href="cover.xhtml">Cover</a></li>'
-            f'<li><a epub:type="bodymatter" href="{first}">Start of text</a></li></ol></nav>')
-    return _page(display_title(work), meta.language, body)
+    body = (f'<nav epub:type="toc" id="toc"><h1>{words["contents"]}</h1><ol>{items}</ol></nav>'
+            f'<nav epub:type="landmarks" hidden="hidden"><h1>{words["landmarks"]}</h1><ol>'
+            f'<li><a epub:type="cover" href="cover.xhtml">{words["cover"]}</a></li>'
+            f'<li><a epub:type="bodymatter" href="{first}">{words["start"]}</a></li></ol></nav>')
+    return _page(display_title(work, meta.language), meta.language, body)
 
 
 def _ncx(work: Work, meta: BookMeta, titles: list[str]) -> str:
@@ -222,7 +234,7 @@ def _ncx(work: Work, meta: BookMeta, titles: list[str]) -> str:
         f'<content src="{chapter_href(i)}"/></navPoint>' for i, t in enumerate(titles))
     return ('<?xml version="1.0" encoding="utf-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">'
             f'<head><meta name="dtb:uid" content="urn:granger:{escape(meta.id)}"/></head>'
-            f'<docTitle><text>{escape(display_title(work), quote=False)}</text></docTitle><navMap>{points}</navMap></ncx>')
+            f'<docTitle><text>{escape(display_title(work, meta.language), quote=False)}</text></docTitle><navMap>{points}</navMap></ncx>')
 
 
 def _opf(work: Work, meta: BookMeta, count: int) -> str:
@@ -249,20 +261,20 @@ def _opf(work: Work, meta: BookMeta, count: int) -> str:
         '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">'
         '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
         f'<dc:identifier id="book-id">urn:granger:{escape(meta.id)}</dc:identifier>'
-        f'<dc:title>{escape(display_title(work), quote=False)}</dc:title>{people}'
+        f'<dc:title>{escape(display_title(work, meta.language), quote=False)}</dc:title>{people}'
         f'<dc:date>{meta.published}</dc:date><dc:subject>{escape(meta.section_title, quote=False)}</dc:subject>'
         f'<dc:language>{escape(meta.language)}</dc:language><dc:publisher>Granger</dc:publisher>'
-        f'<dc:source>{escape(meta.source_url, quote=False)}</dc:source><dc:rights>{RIGHTS}</dc:rights>'
+        f'<dc:source>{escape(meta.source_url, quote=False)}</dc:source><dc:rights>{labels(meta.language)["rights"]}</dc:rights>'
         f'<meta property="dcterms:modified">{escape(modified)}</meta>'
-        f'<meta property="belongs-to-collection" id="collection">{COLLECTION}</meta>'
+        f'<meta property="belongs-to-collection" id="collection">{escape(meta.collection, quote=False)}</meta>'
         '<meta refines="#collection" property="collection-type">set</meta>'
         f'</metadata><manifest>{manifest}</manifest><spine toc="ncx">{spine}</spine>'
         '<guide><reference type="cover" title="Cover" href="cover.xhtml"/></guide></package>')
 
 
 def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None:
-    title = display_title(work)
-    titles = _titles(work)
+    title = display_title(work, meta.language)
+    titles = _titles(work, meta.language)
     files: list[tuple[str, bytes | str]] = [
         ("META-INF/container.xml",
          '<?xml version="1.0" encoding="utf-8"?>\n<container version="1.0" '
