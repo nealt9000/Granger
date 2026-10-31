@@ -13,6 +13,10 @@ each round is: write prompts here, replay them there, read the replies back.
   multistep.py build    BASE NEW [--strict]     # NEW/results.jsonl: BASE's records, multi-step ones answered this way
 
 A question the model doesn't split keeps BASE's record, so NEW measures the change as the app would see it.
+
+The item's question languages (`language.of`, the app's ResearchLanguage.of) pick how the parts' answers are read for
+--strict's arithmetic: a question that may be Spanish also reads YearFacts' Spanish dates, eras, ranges and event words
+(Plan L4). The worked facts stay English prompt text, as YearFacts' block does. An English question reads as before.
 """
 import argparse
 import datetime
@@ -23,7 +27,9 @@ import sys
 from pathlib import Path
 
 import answerers
+import language
 import merge
+from language import EN, ES, ENGLISH_ONLY
 
 HERE = Path(__file__).resolve().parent
 RUNS = HERE / "runs"
@@ -122,18 +128,21 @@ def refs(question):
     return {int(n) for n in REF.findall(question)}
 
 
-def first_sentence(answer):
+def first_sentence(answer, languages=ENGLISH_ONLY):
+    """[answer]'s first sentence without citations. Spanish first ([languages]) breaks as YearFacts' SENTENCE_ES does."""
     text = CITE.sub("", answer or "").strip()
+    if language.leads(languages) or EN not in languages:
+        return _first_sentence_es(text)
     m = re.search(r"(.+?[.!?])(\s|$)", text)
     return (m.group(1) if m else text).strip()
 
 
-def fill(question, answers):
+def fill(question, answers, languages=ENGLISH_ONLY):
     """[question] with each #n replaced by answer n's first sentence; None while one is missing or declined."""
     need = refs(question)
     if any(n not in answers or answers[n] is None for n in need):
         return None
-    return REF.sub(lambda m: "(%s)" % first_sentence(answers[int(m.group(1))]).rstrip("."), question)
+    return REF.sub(lambda m: "(%s)" % first_sentence(answers[int(m.group(1))], languages).rstrip("."), question)
 
 
 def _cut(text, limit):
@@ -155,8 +164,12 @@ YEAR = re.compile(r"\b(\d{1,4})\s*(BC|BCE)\b|\b(1\d{3}|20\d{2})\b")
 AMOUNT = re.compile(r"\b(\d[\d,]*(?:\.\d+)?)\s+([A-Za-z][A-Za-z-]*)")
 
 
-def when(text):
-    """The first date in [text]: (year, month, day), with month and day 0 for a bare year; BC years are negative."""
+def when(text, languages=ENGLISH_ONLY, question=None):
+    """The first date in [text]: (year, month, day), with month and day 0 for a bare year; BC years are negative.
+    [languages] are the item question's; Spanish among them reads Spanish dates too, and the part's [question] picks
+    the event's year as YearFacts does (`_when_es`). English alone ignores [question]."""
+    if ES in languages:
+        return _when_es(text, languages, question)
     found = []
     for m in DATE_MDY.finditer(text):
         found.append((m.start(), (int(m.group(3)), MONTHS[m.group(1).lower()], int(m.group(2)))))
@@ -165,6 +178,115 @@ def when(text):
     for m in YEAR.finditer(text):
         found.append((m.start(), (-int(m.group(1)), 0, 0) if m.group(1) else (int(m.group(3)), 0, 0)))
     return min(found)[1] if found else None
+
+
+# ---- Spanish dates (Plan L4): YearFacts' Spanish forms, ported so the eval and the app read a date alike ----
+
+def _kotlin_groups(name):
+    """The word sets of YearFacts.kt's `name = listOf(setOf(...), ...)`."""
+    body = language._block((language.KT / "YearFacts.kt").read_text(encoding="utf-8"), name)
+    return [set(re.findall(r'"([^"\\]*)"', g)) for g in re.findall(r"setOf\(([^)]*)\)", body)]
+
+
+MESES = [m for m in re.findall(r'"([^"]*)"', language._block((language.KT / "YearFacts.kt").read_text(encoding="utf-8"),
+                                                               "private val MESES = listOf"))] + ["setiembre"]
+MONTHS_ES = dict({m: n for n, m in enumerate(MESES[:12], 1)}, setiembre=9)
+_MES = "(%s)" % "|".join("[%s%s]%s" % (m[0].upper(), m[0], m[1:]) for m in MESES)
+# "18 de junio de 1815", "18 junio 1815", "3 de enero del 2000".
+DATE_DMY_ES = re.compile(r"(\d{1,2}) (?:de )?" + _MES + r" (?:de |del )?(\d{3,4})")
+# "a. C.", "a.C.", "a. de C.", "antes de Cristo", "a. e. c.", "AEC", "a. n. e." (YearFacts' BC_ES); and their AD forms.
+BC_ES = r"\s*(?:a\.\s?C\.|a\.\s?de\s?C\.|antes de Cristo|a\.\s?e\.\s?c\.|AEC\b|a\.\s?n\.\s?e\.)"
+AD_ES = r"\s*(?:d\.\s?C\.|d\.\s?de\s?C\.|despu[eé]s de Cristo|d\.\s?n\.\s?e\.|e\.\s?c\.|EC\b)"
+YEAR_ES = re.compile(r"\b(\d{1,4})" + BC_ES + r"|\b(\d{1,4})" + AD_ES + r"|\b(1\d{3}|20\d{2})\b")
+_Y = r"(1\d{3}|20\d{2})"
+# YearFacts' RANGE_ES: "de 1810 a 1825", "desde 1810 hasta 1825", "entre 1810 y 1825", "1810-1825"; the last group is the end.
+RANGE_ES = re.compile(r"\b(?:(?:de|desde) %s (?:a|hasta) %s|entre %s y %s|%s\s*[–—-]\s*%s)\b" % ((_Y,) * 6))
+GROUPS_ES = _kotlin_groups("private val GROUPS_ES = listOf")
+ENDS_ES = language.kotlin_set("YearFacts.kt", "private val ENDS_ES = setOf")
+_LETTERS = re.compile(r"[^\W\d_]+")
+# YearFacts' SENTENCE_ES: "a. C.", "Sr." and the like don't end a sentence; one may open with ¿ ¡ « or a capital.
+_NOT_AN_END = {"a", "d", "e", "c", "Sr", "Sra", "Dr", "Dra", "Sto", "Sta", "Ud", "Uds"}
+_END_ES = re.compile(r"[.!?]\s+(?=[¿¡«\"'(\[]?([^\W_]))")
+
+
+def _first_sentence_es(text):
+    for m in _END_ES.finditer(text):
+        nxt = m.group(1)
+        if not (nxt.isupper() or nxt.isdigit()):
+            continue
+        before = re.search(r"(\w+)\.$", text[:m.start() + 1]) if text[m.start()] == "." else None
+        if before and before.group(1) in _NOT_AN_END and (m.start() - len(before.group(1)) == 0 or
+                                                           not text[m.start() - len(before.group(1)) - 1].isalnum()):
+            continue
+        return text[:m.start() + 1].strip()
+    return text.strip()
+
+
+def _event_words(languages):
+    """YearFacts' Spanish event words for [languages]: all of them when Spanish leads, else those that aren't English
+    too (English multistep had no event words, so an English-led question gains only plainly Spanish ones)."""
+    keep = (lambda w: True) if language.leads(languages) else (lambda w: w not in language.ENGLISH_TOO)
+    return [{w for w in g if keep(w)} for g in GROUPS_ES], {w for w in ENDS_ES if keep(w)}
+
+
+def _dates(text, languages):
+    """Every date in [text] as (start, end, (year, month, day)), in order: English forms for English, YearFacts' Spanish
+    ones for Spanish. A year with an era is that era's, not a bare year at the same place ("1000 a. C.")."""
+    found, eras = [], set()
+    if ES in languages:
+        for m in DATE_DMY_ES.finditer(text):
+            found.append((m.start(), m.end(), (int(m.group(3)), MONTHS_ES[m.group(2).lower()], int(m.group(1)))))
+        for m in YEAR_ES.finditer(text):
+            if m.group(1) or m.group(2):
+                eras.add(m.start())
+                found.append((m.start(), m.end(), (-int(m.group(1)), 0, 0) if m.group(1) else (int(m.group(2)), 0, 0)))
+            else:
+                found.append((m.start(), m.end(), (int(m.group(3)), 0, 0)))
+    if EN in languages:
+        for m in DATE_MDY.finditer(text):
+            found.append((m.start(), m.end(), (int(m.group(3)), MONTHS[m.group(1).lower()], int(m.group(2)))))
+        for m in DATE_DMY.finditer(text):
+            found.append((m.start(), m.end(), (int(m.group(3)), MONTHS[m.group(2).lower()], int(m.group(1)))))
+        for m in YEAR.finditer(text):
+            if m.group(1):
+                eras.add(m.start())
+            found.append((m.start(), m.end(), (-int(m.group(1)), 0, 0) if m.group(1) else (int(m.group(3)), 0, 0)))
+    bare = lambda f: not f[2][1] and f[2][0] > 0 and f[1] - f[0] == 4
+    return sorted({f for f in found if not (f[0] in eras and bare(f))}, key=lambda f: (f[0], f[2]))
+
+
+def _date_at(dates, at):
+    """The full date whose match covers the year at [at] (YearFacts' dateIn), else the year there alone."""
+    here = [d for start, _, d in dates if start == at]
+    if not here:
+        return None
+    full = [d for start, end, d in dates if start <= at < end and d[1] and d[0] == here[0][0]]
+    return full[0] if full else here[0]
+
+
+def _when_es(text, languages, question):
+    """when() for a question that may be Spanish. With the part question's event words in [text], the year after the
+    first of them (a range's end for an end word: "cayó ... de 1961 a 1989"), as YearFacts.eventFor; else the first date."""
+    dates = _dates(text, languages)
+    if not dates:
+        return None
+    if question:
+        groups, ends = _event_words(languages)
+        asked = set(_LETTERS.findall(language.fold(question)))
+        wanted = set().union(*(g for g in groups if g & asked))
+        words = [(m.start(), m.group()) for m in _LETTERS.finditer(language.fold(text)) if m.group() in wanted]
+        if words:
+            if any(w in ends for _, w in words):
+                r = RANGE_ES.search(text)
+                if r:
+                    end = [i for i in range(1, r.re.groups + 1) if r.group(i)][-1]
+                    d = _date_at(dates, r.start(end))
+                    if d:
+                        return d
+            after = [f for f in dates if f[0] > words[0][0]]
+            if after:
+                return _date_at(dates, after[0][0]) or after[0][2]
+    return dates[0][2]
 
 
 def amount(text):
@@ -188,15 +310,16 @@ def _num(v):
     return ("%d" % v) if v == int(v) else ("%g" % v)
 
 
-def worked(notes):
+def worked(notes, languages=ENGLISH_ONLY):
     """Facts worked out exactly from the parts' answers: the time between dates, which came first, the difference
-    between amounts with the same unit. [notes] are (question, answer) pairs; [] when nothing can be worked out."""
+    between amounts with the same unit. [notes] are (question, answer) pairs; [] when nothing can be worked out.
+    [languages] are the item question's (`language.of`)."""
     out = []
-    parts = [(q, first_sentence(a)) for q, a in notes]
+    parts = [(q, first_sentence(a, languages)) for q, a in notes]
     for i in range(len(parts)):
         for j in range(i + 1, len(parts)):
             (qa, a), (qb, b) = parts[i], parts[j]
-            da, db = when(a), when(b)
+            da, db = when(a, languages, qa), when(b, languages, qb)
             if da and db and (da[0] != db[0] or (da[1] and db[1])):
                 if da == db:
                     out.append('"%s" and "%s" give the same date, %s.' % (qa, qb, _show(da)))
@@ -386,8 +509,9 @@ def cmd_hop(a):
             s = state[key]
             reply = r.get("reply") or ""
             s["answer"] = None if r.get("outcome") == "declined" or DECLINE in reply else reply
-    todo = []
+    todo, items = [], base_items(a.base)
     for id, qs in parts.items():
+        languages = language.of(items[id]["question"])
         answers = {}
         for n, q in enumerate(qs, 1):
             s = state.get("%s#%d" % (id, n))
@@ -397,7 +521,7 @@ def cmd_hop(a):
             key = "%s#%d" % (id, n)
             if key in state:
                 continue
-            filled = fill(q, answers)
+            filled = fill(q, answers, languages)
             if filled is None and refs(q) and all(m in answers for m in refs(q)):
                 state[key] = {"question": q, "filled": None, "passages": [], "answer": None}  # an earlier part was declined
             elif filled is not None:
@@ -447,7 +571,7 @@ def cmd_combine(a):
     for id, qs in used_parts(a).items():
         passages, notes = combined(items[id], qs, state)
         if passages:
-            facts = worked(notes) if a.strict else None
+            facts = worked(notes, language.of(items[id]["question"])) if a.strict else None
             rows.append({"id": id, "prompt": answer_prompt(items[id]["question"], passages, notes, facts),
                          "passages": len(passages)})
     answerers.write_jsonl(RUNS / a.new / "combine-prompts.jsonl", rows)
