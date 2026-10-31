@@ -1,14 +1,14 @@
 {
  "id": "gc-crito",
  "kind": "book",
- "fileName": "gc-crito_2026-10-17.gvec",
- "sizeBytes": 12186,
- "sha256": "8c8f2276a7cff41ea52cb2a02c825629dabc3ce9580157d9873e22577b5e3cc3",
- "count": 41,
+ "fileName": "gc-crito_2026-10-30.gvec",
+ "sizeBytes": 12484,
+ "sha256": "8cea51261b92c917d05428d49a11880d1a5e654ace3f06cac0e00f3d1d4d1458",
+ "count": 42,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "830b55ac592d539218252d4e504585d827e86a0c29fb5c77649d7ed3f5fa52a2",
+ "sourceSha256": "c304014027dc3034015cbe83939181508c704cbed11337a007b1d31550944435",
  "url": null
 }

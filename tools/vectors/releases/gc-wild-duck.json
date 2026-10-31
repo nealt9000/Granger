@@ -1,14 +1,14 @@
 {
  "id": "gc-wild-duck",
  "kind": "book",
- "fileName": "gc-wild-duck_2026-10-17.gvec",
- "sizeBytes": 108618,
- "sha256": "267581cfe19cb16def6364749f9ad04b15800aede2e568ec91cea5c62a31afae",
- "count": 369,
+ "fileName": "gc-wild-duck_2026-10-30.gvec",
+ "sizeBytes": 108916,
+ "sha256": "1a3fb4745e4c84e70470188a841acf6d2cd0b845dd2bd6d99d7b4fe3498a3d2b",
+ "count": 370,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0a406533e6be9a5c7ff9f32fe6176a697fe2d755b4d3f5fb63e3e40ed5421f63",
+ "sourceSha256": "10bc759d911b4541123ae6225fb44ca8b4be60745477ae8517d390d26b352e67",
  "url": null
 }

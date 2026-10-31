@@ -1,14 +1,14 @@
 {
  "id": "gc-lady-windermere-s-fan",
  "kind": "book",
- "fileName": "gc-lady-windermere-s-fan_2026-10-17.gvec",
- "sizeBytes": 58344,
- "sha256": "8d1a9040f06754bdc2e7df376721156a33550a6bcc17464625bfc724716c628e",
- "count": 198,
+ "fileName": "gc-lady-windermere-s-fan_2026-10-30.gvec",
+ "sizeBytes": 58642,
+ "sha256": "76963e2254e4c179dfbc3c326859ceef04712e34d16c5a2f228a28fd3f0f71fe",
+ "count": 199,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "077bd8e18bd47beb7a662e3d27899a0f59e0ba573ec681e280e5f8c5e5fd5934",
+ "sourceSha256": "1d206601696d2138951b0cc74a23c453e1973132825b40ba16b239b396f08c4c",
  "url": null
 }

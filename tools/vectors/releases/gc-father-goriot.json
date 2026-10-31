@@ -1,14 +1,14 @@
 {
  "id": "gc-father-goriot",
  "kind": "book",
- "fileName": "gc-father-goriot_2026-10-17.gvec",
- "sizeBytes": 210636,
- "sha256": "9b25ebe4ea6c98c4c77f67946efc0706ea1cc5a0e9558d29e3438ac8e2adcca4",
- "count": 716,
+ "fileName": "gc-father-goriot_2026-10-30.gvec",
+ "sizeBytes": 210934,
+ "sha256": "dae77f24069e2c30a61d6d37d9c1b26af61422d208521ce41392916267522ab6",
+ "count": 717,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "123e6d105a4b3e9167b605b59c532418d20dd960df68c7bb2ff74cebe0485b15",
+ "sourceSha256": "6623bbaddf1e299d06e016f4be5b862048778214c1e0d6f41bb8c2bc3a021d99",
  "url": null
 }

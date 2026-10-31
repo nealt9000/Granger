@@ -1,14 +1,14 @@
 {
  "id": "gc-koran-sale",
  "kind": "book",
- "fileName": "gc-koran-sale_2026-10-17.gvec",
- "sizeBytes": 496110,
- "sha256": "6cebc885cdd75c824bfb4ce53d28db2c3f6afb94d82bc781cfefa48a32c67503",
- "count": 1687,
+ "fileName": "gc-koran-sale_2026-10-30.gvec",
+ "sizeBytes": 496408,
+ "sha256": "2d2bfb734be8812ba8b2f017265f54e09bd3630b16409c886351dda60a6fcf71",
+ "count": 1688,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9a75affbc648056019a94dc5bfa3fee2f6dd1ee76649d75aba0e693601e091bd",
+ "sourceSha256": "d4505736cf80430c9aba717fa0234f72caae86c28badeebcdc5cbf664ef443aa",
  "url": null
 }

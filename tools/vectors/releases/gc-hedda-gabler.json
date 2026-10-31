@@ -1,14 +1,14 @@
 {
  "id": "gc-hedda-gabler",
  "kind": "book",
- "fileName": "gc-hedda-gabler_2026-10-17.gvec",
- "sizeBytes": 99504,
- "sha256": "d10f82fd9e8d3a98f0a855cd3f44d36aa7b5dde5276db785e3b814e013a40f54",
- "count": 338,
+ "fileName": "gc-hedda-gabler_2026-10-30.gvec",
+ "sizeBytes": 99802,
+ "sha256": "50d4f864535aae9a8e6075bdd52a667f78763a0b0ef81dabfad3888466d874ad",
+ "count": 339,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e3bdd5f16f7a0cc8e77fbc088c1e1f54b1e74921e0082ef15b38f7c8a6a5bfef",
+ "sourceSha256": "ed0303b8d3e9080f4af1f33301185ae1f395ec36a0d0d91ff87623e0aa3be50c",
  "url": null
 }

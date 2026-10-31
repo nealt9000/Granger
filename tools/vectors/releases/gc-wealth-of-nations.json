@@ -1,14 +1,14 @@
 {
  "id": "gc-wealth-of-nations",
  "kind": "book",
- "fileName": "gc-wealth-of-nations_2026-10-17.gvec",
- "sizeBytes": 573432,
- "sha256": "d0df7aac8a599e9f1ffc28f15e1e0eba2c87d2986756a40cbaf54d8928934444",
- "count": 1950,
+ "fileName": "gc-wealth-of-nations_2026-10-30.gvec",
+ "sizeBytes": 573730,
+ "sha256": "d484c6100979232f386b7d4581bb5bd83a002fabe0aa446e1ba22d55737d26f0",
+ "count": 1951,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6b650e46dcbd49cd4d9b21217095e9ea8041ed9c343245939b7638b6c8e5f605",
+ "sourceSha256": "3eee9417245b5517c2302bb18841d5ce56fd7acd3ebb6cb65bde45a597f92258",
  "url": null
 }

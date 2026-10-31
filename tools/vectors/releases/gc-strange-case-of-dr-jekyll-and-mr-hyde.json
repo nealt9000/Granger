@@ -1,14 +1,14 @@
 {
  "id": "gc-strange-case-of-dr-jekyll-and-mr-hyde",
  "kind": "book",
- "fileName": "gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-10-17.gvec",
- "sizeBytes": 50112,
- "sha256": "87cd4b14445583f9599ee9ea85b7660dddee6cfe7c204728f333570dcd36082b",
- "count": 170,
+ "fileName": "gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-10-30.gvec",
+ "sizeBytes": 50410,
+ "sha256": "cf88f04cd4bfa9256fae2dc8a8b8e0ff887b51807df2c73dfd3a696d07021285",
+ "count": 171,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "36f47f6a31eccc78d452d6ac7f33c877ebbca6cce804401c8f5309c23d1df8c5",
+ "sourceSha256": "f0b0056ee389cd469f89e23ef0f2fdd15e8ec5d6f99db96d91794e7aabfa3033",
  "url": null
 }

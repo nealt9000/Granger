@@ -1,14 +1,14 @@
 {
  "id": "gc-meditations",
  "kind": "book",
- "fileName": "gc-meditations_2026-10-17.gvec",
- "sizeBytes": 143604,
- "sha256": "2604d6b7829795e1bfe699f3ba09d08a61f1f0b56462efcd86563f1a1d73b34d",
- "count": 488,
+ "fileName": "gc-meditations_2026-10-30.gvec",
+ "sizeBytes": 147724,
+ "sha256": "bdc8b567b1cbc663ed4963832d2ee5ba39d8f5cc4b09a63a178c31992440353e",
+ "count": 502,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "dbb4391a70bfed6245eb8da94325ab26ef1c455f57c19330e95d18f24f42a7a8",
+ "sourceSha256": "b193f88cbe4ce12c557ef6c2f53c98aa35198494e0af381fc3aa052c1dd6c3bb",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-thirty-nine-steps",
  "kind": "book",
- "fileName": "gc-thirty-nine-steps_2026-10-17.gvec",
- "sizeBytes": 105678,
- "sha256": "a83a7aebb3ba468fe151769f9becc4e016ec865f2dd533c6ff9b6c594d03585b",
- "count": 359,
+ "fileName": "gc-thirty-nine-steps_2026-10-30.gvec",
+ "sizeBytes": 105976,
+ "sha256": "a6d3ace4c8d8dae8e8bd72b549132632447fc1bd80452c5be44475222a1f3eb9",
+ "count": 360,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "06cfb592851d55d469419a88ad06fc2920f539041019187a1bbe5bef92cab04e",
+ "sourceSha256": "3d44a4aee4ae2383b2fc26495c1a9915bd3b7af32ad73c6ed594918fed62db26",
  "url": null
 }

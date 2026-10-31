@@ -1,14 +1,14 @@
 {
  "id": "gc-germinal",
  "kind": "book",
- "fileName": "gc-germinal_2026-10-17.gvec",
- "sizeBytes": 389388,
- "sha256": "f11adc299f8728f333174f34b8eef8733be4d71d4aba3a088b787ac6264e4059",
- "count": 1324,
+ "fileName": "gc-germinal_2026-10-30.gvec",
+ "sizeBytes": 389686,
+ "sha256": "a147895590724dd7c79d502ce0aa5c1d7eb028b0bb5b680240f3af9fd3b001be",
+ "count": 1325,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a52cd92356a5b0d80d399ccfda91a107aafac70d4216336d93344be507285221",
+ "sourceSha256": "3febb8752f39e8f5e3c670c35359f09a7d45170a203439bdb6e0b014279c4890",
  "url": null
 }

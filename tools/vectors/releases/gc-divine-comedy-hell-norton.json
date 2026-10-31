@@ -1,0 +1,14 @@
+{
+ "id": "gc-divine-comedy-hell-norton",
+ "kind": "book",
+ "fileName": "gc-divine-comedy-hell-norton_2026-10-30.gvec",
+ "sizeBytes": 102448,
+ "sha256": "0088aff38480139698a1728693148502700afa1b1b2833366fa4aa546ae91f31",
+ "count": 348,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1d173c7375827a1ad42f1370f2cfb3657a42c9fa59d3df250732e0ac8013e640",
+ "url": null
+}

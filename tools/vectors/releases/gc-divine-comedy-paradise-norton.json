@@ -1,0 +1,14 @@
+{
+ "id": "gc-divine-comedy-paradise-norton",
+ "kind": "book",
+ "fileName": "gc-divine-comedy-paradise-norton_2026-10-30.gvec",
+ "sizeBytes": 100684,
+ "sha256": "70565e6005f7e6f8d0c35214d05b3f8c45624cf55f5b121b7679a9ae14b9782e",
+ "count": 342,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4decd9e9e0db9cd836da37735b4f649162bdbd0bf499d00966cbff77d549f946",
+ "url": null
+}

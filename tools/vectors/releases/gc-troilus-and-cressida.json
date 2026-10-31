@@ -1,14 +1,14 @@
 {
  "id": "gc-troilus-and-cressida",
  "kind": "book",
- "fileName": "gc-troilus-and-cressida_2026-10-17.gvec",
- "sizeBytes": 80982,
- "sha256": "5e4d6d3dc322298faaaf6b45552d1e2a0d79b059badf2fccbea2112819eb1484",
- "count": 275,
+ "fileName": "gc-troilus-and-cressida_2026-10-30.gvec",
+ "sizeBytes": 81280,
+ "sha256": "48a7e273448a557267bebf8614c59936e89ea1645682d0f7ff3aa1ca3b5667db",
+ "count": 276,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ca9a176e97e7e177fa7d7cb8cd2c92f8ab5a3dd9a51f7321b88b11590d9d6c1d",
+ "sourceSha256": "cc39cf349deaf09f1b0aadac617ab203e4d65dd9e142227e4848203e48c9541c",
  "url": null
 }

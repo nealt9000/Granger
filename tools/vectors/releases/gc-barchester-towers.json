@@ -1,14 +1,14 @@
 {
  "id": "gc-barchester-towers",
  "kind": "book",
- "fileName": "gc-barchester-towers_2026-10-17.gvec",
- "sizeBytes": 447306,
- "sha256": "ea40f903db01f0321b79d7fd61b42bdad7f62d0d40426ffd512b4fb79d88f97d",
- "count": 1521,
+ "fileName": "gc-barchester-towers_2026-10-30.gvec",
+ "sizeBytes": 447604,
+ "sha256": "c078031d5154307150270700bed405f889e3715bf84ea0306899bb5ed07e188d",
+ "count": 1522,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a167e47d1208d7794f5b85448a1efe399772d0976a60af8fe2c58970a4f7d189",
+ "sourceSha256": "ee2c953f00e984e6d0b49627da6100aa7f1eea41629311f37bfd607fde6cff8b",
  "url": null
 }

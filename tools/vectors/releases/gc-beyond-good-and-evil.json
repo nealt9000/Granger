@@ -1,14 +1,14 @@
 {
  "id": "gc-beyond-good-and-evil",
  "kind": "book",
- "fileName": "gc-beyond-good-and-evil_2026-10-17.gvec",
- "sizeBytes": 82452,
- "sha256": "71ae9f991d2b42604c239ff772d4e5507e2c16e1ea60b55d44dc47318cdda154",
+ "fileName": "gc-beyond-good-and-evil_2026-10-30.gvec",
+ "sizeBytes": 82456,
+ "sha256": "b094826c3cc586cd3147daacc6b07b772c984e21ab23ff6d8d2e7b173100b44e",
  "count": 280,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "57bd8ebd015e0bbd82db5c5db994f80c8537d228c1a9f04c6e7cf32a2caaa959",
+ "sourceSha256": "a2b82d98ca2fb2ef24b4dd0fbbc51212b71498407195641fbbf5f2e83804a740",
  "url": null
 }

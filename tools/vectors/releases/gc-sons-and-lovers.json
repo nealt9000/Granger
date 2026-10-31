@@ -1,14 +1,14 @@
 {
  "id": "gc-sons-and-lovers",
  "kind": "book",
- "fileName": "gc-sons-and-lovers_2026-10-17.gvec",
- "sizeBytes": 457008,
- "sha256": "b5ef06ae7b5845d1a73ad84c0d8f7f453cca99c46a33cb3fbbe9a2a5df45e581",
- "count": 1554,
+ "fileName": "gc-sons-and-lovers_2026-10-30.gvec",
+ "sizeBytes": 457306,
+ "sha256": "9dce1673e7d10704fe8777fc97e70b6f9d4fd7f79232dbf79927782e2cfd2668",
+ "count": 1555,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5dc6f5f8e43bb5d334a4082c4786be99a37001f34fa135460ea649f4909026ab",
+ "sourceSha256": "88cdc301b1a664e8bd574259a97737c7362c7d91c1c87540ff926f77f371758d",
  "url": null
 }

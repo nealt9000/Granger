@@ -1,14 +1,14 @@
 {
  "id": "gc-adventures-of-huckleberry-finn",
  "kind": "book",
- "fileName": "gc-adventures-of-huckleberry-finn_2026-10-17.gvec",
- "sizeBytes": 241212,
- "sha256": "59ec892e59923d1e039ef3c27cffb84f71732dda5a87b74029d572899b637d28",
- "count": 820,
+ "fileName": "gc-adventures-of-huckleberry-finn_2026-10-30.gvec",
+ "sizeBytes": 241510,
+ "sha256": "f0dd3bff51b414a2868ea3f354ff97f3b38f69ea6227062fbeaa1b7c73c6435b",
+ "count": 821,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cc68fcc0141353945e9e2d44afd6ddf326633dc0648a3747735490efec8b88cf",
+ "sourceSha256": "9664bf2f41820b3e97cdcc7396de18c633aedfcf2518053201074779646cef88",
  "url": null
 }

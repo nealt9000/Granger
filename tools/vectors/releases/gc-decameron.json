@@ -1,14 +1,14 @@
 {
  "id": "gc-decameron",
  "kind": "book",
- "fileName": "gc-decameron_2026-10-17.gvec",
- "sizeBytes": 401736,
- "sha256": "2bcbfaa7e55d65bca42d5fcd027e3a994a593990b93eb2da21dd5948898e5109",
- "count": 1366,
+ "fileName": "gc-decameron_2026-10-30.gvec",
+ "sizeBytes": 402034,
+ "sha256": "f3e981d04a23e720857aba915293eb0caae92a7b6093a543ea52123fb1f33483",
+ "count": 1367,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1502559123f6e8661b9dbee4b4577b7aee02dded70aa37cbbb6e700805b5a7aa",
+ "sourceSha256": "7d44fa3192f228ab111c79345440358bd7757ee2ae9a857a8dc907718b30173c",
  "url": null
 }

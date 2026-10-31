@@ -1,14 +1,14 @@
 {
  "id": "gc-pragmatism",
  "kind": "book",
- "fileName": "gc-pragmatism_2026-10-17.gvec",
- "sizeBytes": 100386,
- "sha256": "4a65ad33ba54c86f8733845484d11b08b0cde6f9d1b47b994f73290be696e39b",
- "count": 341,
+ "fileName": "gc-pragmatism_2026-10-30.gvec",
+ "sizeBytes": 100684,
+ "sha256": "8e7433ebf39a904bdb4168217ac39165400029397a8a495209c3ced27e1bfe2a",
+ "count": 342,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9c27aaafbbb482514b40493785ef55941fc29684b220e7329bcd2bbf8198a682",
+ "sourceSha256": "3181d92c6a7eeb8a0077d24fe9182a53065212913f7f2abdb8d02c6a20688ca4",
  "url": null
 }

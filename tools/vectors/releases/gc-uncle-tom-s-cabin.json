@@ -1,14 +1,14 @@
 {
  "id": "gc-uncle-tom-s-cabin",
  "kind": "book",
- "fileName": "gc-uncle-tom-s-cabin_2026-10-17.gvec",
- "sizeBytes": 466122,
- "sha256": "0d6b9cb713fc0711938f5a86ee93dc918498415e50b2956e12f4e8825bb92a62",
- "count": 1585,
+ "fileName": "gc-uncle-tom-s-cabin_2026-10-30.gvec",
+ "sizeBytes": 466420,
+ "sha256": "b7894ad3c9a69d26aaa578a1ca1fc825c3abde7d16d950b515370d169d175c04",
+ "count": 1586,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "714364b436820648eb2944b57825649e7de6471f2d882b6886cde87dadd6539e",
+ "sourceSha256": "52c894d822bbdaf70397806d0b8330a120cc22ea019d0b20448bb63d01691f78",
  "url": null
 }

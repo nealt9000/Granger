@@ -1,14 +1,14 @@
 {
  "id": "gc-sir-gawain-and-the-green-knight",
  "kind": "book",
- "fileName": "gc-sir-gawain-and-the-green-knight_2026-10-17.gvec",
- "sizeBytes": 48348,
- "sha256": "b6866b0cad1edec28198940775dfd1a2737b1f277b9b7a721fb9fab69b72888b",
- "count": 164,
+ "fileName": "gc-sir-gawain-and-the-green-knight_2026-10-30.gvec",
+ "sizeBytes": 48646,
+ "sha256": "fc30b41e9932313756e4c611c63d5ea9f194856ca04289312afd3269f8909259",
+ "count": 165,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "acfb700ebc515837ad1a322c716007d8f50c7fab79e563424e4798d350488b3e",
+ "sourceSha256": "ddd79b12b1d1f4824a79b1ba7e59c08d1fa1b09ff595cc0358fcc87a7272fda9",
  "url": null
 }

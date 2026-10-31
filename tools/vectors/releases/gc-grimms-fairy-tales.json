@@ -1,14 +1,14 @@
 {
  "id": "gc-grimms-fairy-tales",
  "kind": "book",
- "fileName": "gc-grimms-fairy-tales_2026-10-17.gvec",
- "sizeBytes": 174180,
- "sha256": "20e3ad52d97d1ff46f6066b7ef0238e0019d5eeb067500a8a5513f5e0f55ad65",
- "count": 592,
+ "fileName": "gc-grimms-fairy-tales_2026-10-30.gvec",
+ "sizeBytes": 174478,
+ "sha256": "13c6782fbe106b13fb078e22329e19797aa8cc16945d0f7d7951025e984faa17",
+ "count": 593,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1b5c46429e03d5c6243259ea943071c50546616fd06e303bae0d7dd4ea2fec74",
+ "sourceSha256": "9ac774929b194f69f10a4435819365ae76965520c8fc1ad33fb4e34fda83b82e",
  "url": null
 }

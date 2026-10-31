@@ -1,14 +1,14 @@
 {
  "id": "gc-man-and-superman",
  "kind": "book",
- "fileName": "gc-man-and-superman_2026-10-17.gvec",
- "sizeBytes": 162126,
- "sha256": "842ad83095e3765a5e07fd76c1ad97cdeee9c28e9ec353b688d3a859c564e635",
- "count": 551,
+ "fileName": "gc-man-and-superman_2026-10-30.gvec",
+ "sizeBytes": 162424,
+ "sha256": "41e612b884e899137044a6a1c7f64a09c6329ec98f8d1e383d29db80ca09f361",
+ "count": 552,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7009bdccec77af1cac072d90232cff60a704923fccede773ea9518d52e0d5f3b",
+ "sourceSha256": "f2e655f63666971ab41d5ae008cd299ec43375ca8cd9c7286d6516d63373cef4",
  "url": null
 }

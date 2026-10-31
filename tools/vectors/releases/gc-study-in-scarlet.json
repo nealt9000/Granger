@@ -1,14 +1,14 @@
 {
  "id": "gc-study-in-scarlet",
  "kind": "book",
- "fileName": "gc-study-in-scarlet_2026-10-17.gvec",
- "sizeBytes": 102444,
- "sha256": "a6316445e1bc5ae156baa0948fd16b5b95c3c9bf302d1d20d084ad552223fa38",
- "count": 348,
+ "fileName": "gc-study-in-scarlet_2026-10-30.gvec",
+ "sizeBytes": 102742,
+ "sha256": "1ab3282d84ca55f502a7ababa13eb7badec09fd7cca477c4740d62b7ebaaa06b",
+ "count": 349,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ed31ad3865ff7ef8b1274b253bdfa3b6a80ad43446d15612a19d1c76d6c647e2",
+ "sourceSha256": "de1630e4748bde1bb097638cd8bd0db88b81791e9c3b1e95d5689674dd221920",
  "url": null
 }

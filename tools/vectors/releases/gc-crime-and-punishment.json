@@ -1,14 +1,14 @@
 {
  "id": "gc-crime-and-punishment",
  "kind": "book",
- "fileName": "gc-crime-and-punishment_2026-10-17.gvec",
- "sizeBytes": 428490,
- "sha256": "5c7bcda42ac5af37bb5d93e5166c48d1996f69e82ac9827ec02a18b66ea81f48",
- "count": 1457,
+ "fileName": "gc-crime-and-punishment_2026-10-30.gvec",
+ "sizeBytes": 429082,
+ "sha256": "f88c45866195b045c5615f7064607a744094ab8204c74f1f3457f86802908c18",
+ "count": 1459,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4eb491d8afe9374a8dc24b894120e918c146aa386f3f84c1313102a6ddff5d0f",
+ "sourceSha256": "752d910474369390c7a6b40c0e7ce3ad6bda0995d1a6c731f89b9cb997660c49",
  "url": null
 }

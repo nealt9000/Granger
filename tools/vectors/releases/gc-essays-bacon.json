@@ -1,14 +1,14 @@
 {
  "id": "gc-essays-bacon",
  "kind": "book",
- "fileName": "gc-essays-bacon_2026-10-17.gvec",
- "sizeBytes": 73338,
- "sha256": "30a4f8f7c2609d793acc123659dbdc985a1da26ba7b8b6bee7c920d5c9c86d1d",
- "count": 249,
+ "fileName": "gc-essays-bacon_2026-10-30.gvec",
+ "sizeBytes": 73636,
+ "sha256": "1bae6309247b9a58dd53d471693acd98f2522e4ca8523e94865d7666d3bd57d9",
+ "count": 250,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5ffe8d61c11baee8132e068a51227c52c6b2662de42f72fcf51da34e5745076e",
+ "sourceSha256": "e9ce640398f01e112e05bb85ea3b54b0b9b21b918cac90def73cdb64516867cf",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-common-sense",
  "kind": "book",
- "fileName": "gc-common-sense_2026-10-17.gvec",
- "sizeBytes": 44232,
- "sha256": "271beacdf5e5c9e11131c7cc3687d5a5bebd0e1c83035784778a7b8b84080d8b",
- "count": 150,
+ "fileName": "gc-common-sense_2026-10-30.gvec",
+ "sizeBytes": 44530,
+ "sha256": "3d985305d20f71fccf0e6c1de69d73af0a25666aca8a1060fec9c530c1f9cebe",
+ "count": 151,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "02629ad1f8a07a91884f119259fc58ed718a1bc1e5250a623314131b84b5dab5",
+ "sourceSha256": "c33e35989ab96ba658ed025a560b98377e7a4a05bc1df17eb1752c77b7425615",
  "url": null
 }

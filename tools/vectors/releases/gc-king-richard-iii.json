@@ -1,14 +1,14 @@
 {
  "id": "gc-king-richard-iii",
  "kind": "book",
- "fileName": "gc-king-richard-iii_2026-10-17.gvec",
- "sizeBytes": 89802,
- "sha256": "08e455bed92ba3d338fe5ae930364dcb0253d3bf949c2d0e02d2700fc5702b10",
- "count": 305,
+ "fileName": "gc-king-richard-iii_2026-10-30.gvec",
+ "sizeBytes": 90100,
+ "sha256": "47b74199a4fbb06416beefa2fa4f0d28ea5ebdd17c60d2961a225c67f65b67e9",
+ "count": 306,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "536d95570566232a5f40d5a217ce351bf9d09a3a12aa08dc6f7ac616022250b6",
+ "sourceSha256": "b972619ca84fd025c65559f2b3dd3b5b7c4c6704bd4c95ce9d0befe4c0f4b3d8",
  "url": null
 }

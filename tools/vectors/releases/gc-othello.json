@@ -1,14 +1,14 @@
 {
  "id": "gc-othello",
  "kind": "book",
- "fileName": "gc-othello_2026-10-17.gvec",
- "sizeBytes": 80982,
- "sha256": "6dd6dd50179c730f110c76d937ceafbd0df466dedd67e67f2fc35de480b9ac28",
- "count": 275,
+ "fileName": "gc-othello_2026-10-30.gvec",
+ "sizeBytes": 81280,
+ "sha256": "5c2c63b53a7c6ab580304c4aacff1c8c362f99d7426980f9eb12ad3015b1aa39",
+ "count": 276,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "17f92085bb9c6e7edba908906a9219bd17c912bd81f9e2b6fcd5cb2af58b7b41",
+ "sourceSha256": "09f2529ac05726cb584b3768f1813acdc19d5ed09461e99362ccfc3cbb00d8f7",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-kidnapped",
  "kind": "book",
- "fileName": "gc-kidnapped_2026-10-17.gvec",
- "sizeBytes": 195348,
- "sha256": "3838ab179adf9b022fca9e99b1f9e3b8cc707ea8f45d0b8725c8d9f36710a9d9",
- "count": 664,
+ "fileName": "gc-kidnapped_2026-10-30.gvec",
+ "sizeBytes": 195646,
+ "sha256": "532b61f2fc39b16633765aee25aa885028d665ec6c908777dc7413e677d52071",
+ "count": 665,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cf029bc50d6a774ff9ffd8de37ff4d2d6c88bb649fa17a8d8acc84ab479048e3",
+ "sourceSha256": "15fdb7422e574f48e53f90956613e9f3145f0f982a0023e32f60e48cb17be1b4",
  "url": null
 }

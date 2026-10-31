@@ -1,14 +1,14 @@
 {
  "id": "gc-tao-te-ching",
  "kind": "book",
- "fileName": "gc-tao-te-ching_2026-10-17.gvec",
- "sizeBytes": 32178,
- "sha256": "1f9909f9c1f8657203adf8c4a888c973765fa56cebe9a3e107987b7d34c5e2e9",
- "count": 109,
+ "fileName": "gc-tao-te-ching_2026-10-30.gvec",
+ "sizeBytes": 32476,
+ "sha256": "e827c6a1659362fcd7d88d399e58b89695c70315de188373525eada6151a9962",
+ "count": 110,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "792cf1fe4c3bc6fb3b0657e60dad21dcf1aaea1e54115ce4ee07599d1c5e3ba3",
+ "sourceSha256": "b9c53e818f5f68514310c9b7faab3de955ed8b104ffffa9afb1a7a6c5289cabb",
  "url": null
 }

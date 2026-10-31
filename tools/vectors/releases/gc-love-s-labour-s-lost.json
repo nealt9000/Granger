@@ -1,14 +1,14 @@
 {
  "id": "gc-love-s-labour-s-lost",
  "kind": "book",
- "fileName": "gc-love-s-labour-s-lost_2026-10-17.gvec",
- "sizeBytes": 65694,
- "sha256": "7b8ffc0465201e90d9253780094addbadb1a6980ce9403540161f182e6a0da69",
- "count": 223,
+ "fileName": "gc-love-s-labour-s-lost_2026-10-30.gvec",
+ "sizeBytes": 65992,
+ "sha256": "fb365bf00507536aecaa15426c9792baeda5af3c68db267007fce381ec05a07f",
+ "count": 224,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8c9b45fe8e9e86b9f80ecf13552213a90778aefde9c62df7c7b1af499dae712f",
+ "sourceSha256": "7973f9d31bb4ee8d66b7e4997b7d9259ea9cf5171ae221aea74945666cd85882",
  "url": null
 }

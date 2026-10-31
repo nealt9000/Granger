@@ -1,14 +1,14 @@
 {
  "id": "gc-man-who-was-thursday",
  "kind": "book",
- "fileName": "gc-man-who-was-thursday_2026-10-17.gvec",
- "sizeBytes": 139194,
- "sha256": "c8e068c2deeb9d45e237d1093bffd12886a66949805340d29441378b32429a4d",
- "count": 473,
+ "fileName": "gc-man-who-was-thursday_2026-10-30.gvec",
+ "sizeBytes": 139492,
+ "sha256": "39226ec01758fc36a9ede8f58760f732f51dc75ce73f27baa7b940de8887298f",
+ "count": 474,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4a564e81804f665f078260086161f8267e97885d53626d6e69fe7943385506ef",
+ "sourceSha256": "aed72c908c8bd6d5ec851f869607dbf09e0a904f25b75e8585dd633088e78b97",
  "url": null
 }

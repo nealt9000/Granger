@@ -1,14 +1,14 @@
 {
  "id": "gc-tristan-and-isolda",
  "kind": "book",
- "fileName": "gc-tristan-and-isolda_2026-10-17.gvec",
- "sizeBytes": 29532,
- "sha256": "55b9e87b8f7abbf5feed300c08b3482dbb0590994d298b27a7b5b3462346610b",
- "count": 100,
+ "fileName": "gc-tristan-and-isolda_2026-10-30.gvec",
+ "sizeBytes": 29830,
+ "sha256": "ee6b6bd4e866fac4bc42f190dc716a627084d20b5f4439ecb9e9ffea1b65a7b9",
+ "count": 101,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "06a137e21ce701e88d0cda25d256512b5361deb4e967314a2ca563fc3904ab44",
+ "sourceSha256": "001022e2627c8c3f4e7faf4bf0bb56c1a3c7ece3d34fe66cbdbf09269134eee6",
  "url": null
 }

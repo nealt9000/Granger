@@ -1,14 +1,14 @@
 {
  "id": "gc-oliver-twist",
  "kind": "book",
- "fileName": "gc-oliver-twist_2026-10-17.gvec",
- "sizeBytes": 433782,
- "sha256": "f619e42a4014aa55cd3645ccc3d90a21ca91242ddd8c7c976817fdab36e7c355",
- "count": 1475,
+ "fileName": "gc-oliver-twist_2026-10-30.gvec",
+ "sizeBytes": 434080,
+ "sha256": "7fd5cee9136e875d85a8dacc4bbb2172720f0d416aa6b6785127598eebba0d06",
+ "count": 1476,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2b4888e8d3852d2558d4859a1118569efbb30b6b9eb93cf85a0378216234233b",
+ "sourceSha256": "11559f3a9109fc66b2a525674afa18b7df1ef9ddd875bae46aa01e408c818c0a",
  "url": null
 }

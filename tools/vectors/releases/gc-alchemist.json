@@ -1,14 +1,14 @@
 {
  "id": "gc-alchemist",
  "kind": "book",
- "fileName": "gc-alchemist_2026-10-17.gvec",
- "sizeBytes": 83922,
- "sha256": "00eae957830c695ddb0b0d73f77e9babe1abf1dd3baaaf242f7f183cb0cf418e",
- "count": 285,
+ "fileName": "gc-alchemist_2026-10-30.gvec",
+ "sizeBytes": 84220,
+ "sha256": "2a88232aaa1313a752246214eada80557884d74899304d667a7a458596c26212",
+ "count": 286,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7780d5e8e7f1dd285708775b21d2780ee464ab042c545c6c613d215fd4b0ab38",
+ "sourceSha256": "5596e26cc1a9588444391fe6231198a9974886ece03fd72c51c375d4cb485e1e",
  "url": null
 }

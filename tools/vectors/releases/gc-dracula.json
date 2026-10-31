@@ -1,14 +1,14 @@
 {
  "id": "gc-dracula",
  "kind": "book",
- "fileName": "gc-dracula_2026-10-17.gvec",
- "sizeBytes": 283548,
- "sha256": "8109ba1673b335e9cf9392c43f619e6506ae69acdf4d49d93941229b20dbbf0d",
- "count": 964,
+ "fileName": "gc-dracula_2026-10-30.gvec",
+ "sizeBytes": 283846,
+ "sha256": "dcacdc4ecf1b82c0eaab3022b5f5b40a78f5f7e3e0d814e8429862a09503e73d",
+ "count": 965,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9d1a32d5328d4d4ea6106b11da2acf11c4c2f1c1c004e6de6d9e67e8b3106ef8",
+ "sourceSha256": "6ad0891d8929a1aed13dcfebfb60d71751e285b236fe417df9e69e1a1aaab4e3",
  "url": null
 }

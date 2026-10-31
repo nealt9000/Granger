@@ -1,14 +1,14 @@
 {
  "id": "gc-return-of-the-native",
  "kind": "book",
- "fileName": "gc-return-of-the-native_2026-10-17.gvec",
- "sizeBytes": 372042,
- "sha256": "0f1a1ca0bc7c8616db279fede5fae7f47386d61b1f098b8d556f35701c0fd7e7",
- "count": 1265,
+ "fileName": "gc-return-of-the-native_2026-10-30.gvec",
+ "sizeBytes": 372340,
+ "sha256": "502a8be0ceab8b4ea9b728d0eedbd3ba79a3f6b4a0156b3a98df99817d3c6aa3",
+ "count": 1266,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4f878baeb0d99b33b59757c72aaaf1949c3363fca53f609485c05172b127040a",
+ "sourceSha256": "1de4283d2616edcbe4cd034acbf8af332fa565f811795fd672de5cb29ec370ff",
  "url": null
 }

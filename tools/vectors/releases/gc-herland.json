@@ -1,14 +1,14 @@
 {
  "id": "gc-herland",
  "kind": "book",
- "fileName": "gc-herland_2026-10-17.gvec",
- "sizeBytes": 158892,
- "sha256": "564b79818a12b12f752c76592fb5069ee9253e18be2ba131a962f82ea5707479",
- "count": 540,
+ "fileName": "gc-herland_2026-10-30.gvec",
+ "sizeBytes": 159190,
+ "sha256": "dfaf00fe2fad62cf6dfccd27204fb6c80fce73670f28a3a983fac817491a32d0",
+ "count": 541,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6c5b7f60c164eafa64380c7f853fd04a2cde887556ffa26b5385f39354267675",
+ "sourceSha256": "e3547578bce0b29f5aba5eb4c2b377b10f39335a6d36c18cac7cdbce243aec3a",
  "url": null
 }

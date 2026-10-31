@@ -1,14 +1,14 @@
 {
  "id": "gc-paradise-lost",
  "kind": "book",
- "fileName": "gc-paradise-lost_2026-10-17.gvec",
- "sizeBytes": 109500,
- "sha256": "ca48a342b596f5d87edebf028aa9af232f3d36e6cd67a7a55cbaf4c7412319d0",
- "count": 372,
+ "fileName": "gc-paradise-lost_2026-10-30.gvec",
+ "sizeBytes": 109798,
+ "sha256": "ea17453a548a376e64d3a5c67eaeace56ffa66ceed3669e28d7912cac94e2b38",
+ "count": 373,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "16d1404264c4a83279cf59b0882ab185d27d3e10819b5883a946778dd0a1f98b",
+ "sourceSha256": "b247d4d62fdaff7735dbeafa714771471ec5c986e0b413d9d7b2caff7d2e0dfa",
  "url": null
 }

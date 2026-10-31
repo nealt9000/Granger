@@ -1,14 +1,14 @@
 {
  "id": "gc-paradise-regained",
  "kind": "book",
- "fileName": "gc-paradise-regained_2026-10-17.gvec",
- "sizeBytes": 13950,
- "sha256": "f9ea55e2c33c5c714f61131d200f173fe543a4d69dab3fa505d77d4833907546",
- "count": 47,
+ "fileName": "gc-paradise-regained_2026-10-30.gvec",
+ "sizeBytes": 14248,
+ "sha256": "d05610660603252b7f640f56fc4bb3a47c6000e2bf31b6b6d17c30712cb243d0",
+ "count": 48,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d7d8ef268cfd6e0a396c61f222490c4918f940bd513e06d2d855d800ce49a76e",
+ "sourceSha256": "ba2f0eaabe891ef71164ceea4a02f1a8998c1552b2fb5406ef707eb514eb38bf",
  "url": null
 }

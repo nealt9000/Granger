@@ -1,14 +1,14 @@
 {
  "id": "gc-macbeth",
  "kind": "book",
- "fileName": "gc-macbeth_2026-10-17.gvec",
- "sizeBytes": 55992,
- "sha256": "e789e25def3d86029377d3f7bc5dbb70f5cb4f6e35d2ad8c5611b5714d83d986",
- "count": 190,
+ "fileName": "gc-macbeth_2026-10-30.gvec",
+ "sizeBytes": 56290,
+ "sha256": "e00024958d9ad0557a57d691b610972c4784857375fbc9903bc9acc741ec06ad",
+ "count": 191,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f13b8055e308a2a801c7c625f51584ef0cf8f8073ff69c8003e101d110d5b3c6",
+ "sourceSha256": "46bcc3e334eb752cb6ed1d33c7eace87980f7154257d92d0830f00d94ad4c4c0",
  "url": null
 }

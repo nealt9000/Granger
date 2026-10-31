@@ -1,14 +1,14 @@
 {
  "id": "gc-vanity-fair",
  "kind": "book",
- "fileName": "gc-vanity-fair_2026-10-17.gvec",
- "sizeBytes": 613122,
- "sha256": "6328f74235cd6b9bb089138e115d245ceb10e821c1d8652eff1f6e96c0752a17",
- "count": 2085,
+ "fileName": "gc-vanity-fair_2026-10-30.gvec",
+ "sizeBytes": 613420,
+ "sha256": "7723a55985e4dea022c408b5888d3c78ec6a003ca749d4b4c6e33ad0a509bbf9",
+ "count": 2086,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1ba1ee1a3644d778478923b9308fb11221e9be54316c03f3308941664690989c",
+ "sourceSha256": "3936f8d027c3cfc2100c2b63cda49eefaf23539ee5e7473ab15fa6774d374b03",
  "url": null
 }

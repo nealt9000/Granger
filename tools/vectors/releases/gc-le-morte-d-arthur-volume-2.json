@@ -1,14 +1,14 @@
 {
  "id": "gc-le-morte-d-arthur-volume-2",
  "kind": "book",
- "fileName": "gc-le-morte-d-arthur-volume-2_2026-10-17.gvec",
- "sizeBytes": 270024,
- "sha256": "86f64472c8b52578307de29e33e40871aaae78453a411941357324bddef7e045",
- "count": 918,
+ "fileName": "gc-le-morte-d-arthur-volume-2_2026-10-30.gvec",
+ "sizeBytes": 270322,
+ "sha256": "ef4d52d272d2e6db1690960055f40528cf80ac630657de0431be4e251283b6ea",
+ "count": 919,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "831eb4cff72e1a474aac6ab80d59dfe5957357434122724405a21a0b220afbe2",
+ "sourceSha256": "bf1f01ac35bb7a3ff9cb3e7f11936488d787f79cda94c6d918a71b17ed557139",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-midsummer-night-s-dream",
  "kind": "book",
- "fileName": "gc-midsummer-night-s-dream_2026-10-17.gvec",
- "sizeBytes": 47172,
- "sha256": "b19d702a5b80fd3b7e70ad4b53f05fcf13bbc0a57f266791c8c6fe4c54a4e93c",
- "count": 160,
+ "fileName": "gc-midsummer-night-s-dream_2026-10-30.gvec",
+ "sizeBytes": 47470,
+ "sha256": "c499ec078ef88d923d5b75d25fe8523e3648351c1bbbc0e02ef5f0cfa9661469",
+ "count": 161,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2592615811a128cd7ffff8211ade3bba5d827958d76b40c15763364189ce11d3",
+ "sourceSha256": "e7675c3c4ba7f1891f823be69e873ed704cecbc6bf164654f494bc1472d1582f",
  "url": null
 }

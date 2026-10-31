@@ -1,14 +1,14 @@
 {
  "id": "gc-treatise-concerning-the-principles-of-human-knowledge",
  "kind": "book",
- "fileName": "gc-treatise-concerning-the-principles-of-human-knowledge_2026-10-17.gvec",
- "sizeBytes": 57168,
- "sha256": "9f7287328231b6c3e9088e08f71ee5dca6f99cad4e89d002b546a514bbc47c00",
- "count": 194,
+ "fileName": "gc-treatise-concerning-the-principles-of-human-knowledge_2026-10-30.gvec",
+ "sizeBytes": 57466,
+ "sha256": "172ad6607fa796082c0c3b041673d3ec7bb3b5db21e9831ea9a85f4fff70cf39",
+ "count": 195,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "246e6ffe4c62c61939234db8e80a77e798b8d4f6474d831c7fb8533f54754bff",
+ "sourceSha256": "c7aab2377e10ee846af524b84363d26b75c985c417367497030193590a63b9b0",
  "url": null
 }

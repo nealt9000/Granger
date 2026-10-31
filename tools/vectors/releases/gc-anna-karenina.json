@@ -1,14 +1,14 @@
 {
  "id": "gc-anna-karenina",
  "kind": "book",
- "fileName": "gc-anna-karenina_2026-10-17.gvec",
- "sizeBytes": 861552,
- "sha256": "e4c4101a87661841f6f2c6f2fcc0d2a6ffb2430e2865d3868b9de42ddcf35081",
- "count": 2930,
+ "fileName": "gc-anna-karenina_2026-10-30.gvec",
+ "sizeBytes": 861850,
+ "sha256": "69567e2504c40a861f4250f5bee1b4c29262ff1f7d4578f489f4224a875a80f4",
+ "count": 2931,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "de213cb5e743c3f64abb129b4e30d5328dc9fb0d97d6edd983c4346392c00094",
+ "sourceSha256": "3b0c6cfdad00c6e6c24a2881c72968a09f3a12d940689b4bdb86344bfca46908",
  "url": null
 }

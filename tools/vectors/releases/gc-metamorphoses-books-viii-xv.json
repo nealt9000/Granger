@@ -1,0 +1,14 @@
+{
+ "id": "gc-metamorphoses-books-viii-xv",
+ "kind": "book",
+ "fileName": "gc-metamorphoses-books-viii-xv_2026-10-30.gvec",
+ "sizeBytes": 243568,
+ "sha256": "6b8b782b80862691aa8d22e92f87ef78ca59c7b34af10e4ac6f7e67bd624de91",
+ "count": 828,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9fa91d27ceef4ecd82943630af743316697cdb5a9cf2c8b2379724c57d58326c",
+ "url": null
+}

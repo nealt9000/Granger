@@ -1,0 +1,14 @@
+{
+ "id": "gc-divine-comedy-purgatory-norton",
+ "kind": "book",
+ "fileName": "gc-divine-comedy-purgatory-norton_2026-10-30.gvec",
+ "sizeBytes": 99802,
+ "sha256": "48b2a9ddde25813cd560a2af754acac6411be2130471e5fe91ca483acd7d768e",
+ "count": 339,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d351a6f0134a5fb4336da440505c52a0215d380f7705a873a6f15bb73f79049a",
+ "url": null
+}

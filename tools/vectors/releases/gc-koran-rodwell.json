@@ -1,14 +1,14 @@
 {
  "id": "gc-koran-rodwell",
  "kind": "book",
- "fileName": "gc-koran-rodwell_2026-10-17.gvec",
- "sizeBytes": 623118,
- "sha256": "7205e2e93fa2b7c8830b0fadfc883b7e5fcbfd880b87fe71ee0746d204d3b77f",
- "count": 2119,
+ "fileName": "gc-koran-rodwell_2026-10-30.gvec",
+ "sizeBytes": 623416,
+ "sha256": "474edf6f808e6ab3fe871c86af1814bf2b24530955ae8201f5dfb6589810ac65",
+ "count": 2120,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "61382c3bc7f615ba4c22c0bcc803e28ec18556572009a02316a571fcafa6f553",
+ "sourceSha256": "1d0484a92fb8ef9b6400b7d49b505928754252b054b666f097f037e275958848",
  "url": null
 }

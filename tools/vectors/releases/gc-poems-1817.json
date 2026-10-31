@@ -1,14 +1,14 @@
 {
  "id": "gc-poems-1817",
  "kind": "book",
- "fileName": "gc-poems-1817_2026-10-17.gvec",
- "sizeBytes": 25416,
- "sha256": "7eac15989d19250d4bb69def9577acd67684d5526baf5e4cd6306b5d32e1ed26",
- "count": 86,
+ "fileName": "gc-poems-1817_2026-10-30.gvec",
+ "sizeBytes": 25714,
+ "sha256": "3f345efe3fc52f6f36842729dcaed0e2a19c8b92e1d7c311f1855e4354232e7a",
+ "count": 87,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "46232bd1468ce0961af4024a3c7f78a692eb317ba1a3daddfa41fdf83d7ebea3",
+ "sourceSha256": "c9701437b0fe64b7311f8cb4b19666e7ce94f321d98387f6a33da205a6ec2034",
  "url": null
 }

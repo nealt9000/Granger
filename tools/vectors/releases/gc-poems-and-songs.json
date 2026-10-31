@@ -1,14 +1,14 @@
 {
  "id": "gc-poems-and-songs",
  "kind": "book",
- "fileName": "gc-poems-and-songs_2026-10-17.gvec",
- "sizeBytes": 217104,
- "sha256": "3821444f9c80dfe6a6b3f0374e43c65b8ac01ac6462b6da7f61e099cd35062f1",
- "count": 738,
+ "fileName": "gc-poems-and-songs_2026-10-30.gvec",
+ "sizeBytes": 217402,
+ "sha256": "c110d5e500410c1eec7e7731960b1e650391a99a676748aa8df93a448e957ddc",
+ "count": 739,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6199cffc90aae7f6ca8f5fb6a12f9b12842f41b88c37f7d12ef8a7c95e01e68c",
+ "sourceSha256": "0b703fcd7432c6bd5be5ec67c173ad7b615aa9291829e627bc7f667c0bf86d68",
  "url": null
 }

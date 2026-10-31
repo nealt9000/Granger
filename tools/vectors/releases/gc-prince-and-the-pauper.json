@@ -1,14 +1,14 @@
 {
  "id": "gc-prince-and-the-pauper",
  "kind": "book",
- "fileName": "gc-prince-and-the-pauper_2026-10-17.gvec",
- "sizeBytes": 165360,
- "sha256": "20cd8202b2405479b9f5946e9eab0481bc3778b93acdf7c36bf5949de6af1a5a",
- "count": 562,
+ "fileName": "gc-prince-and-the-pauper_2026-10-30.gvec",
+ "sizeBytes": 165658,
+ "sha256": "0ceca551d00f0ccc80a20d661efaf679751b65c9742f4c4b858c73bc74f6e174",
+ "count": 563,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7b895406741d147814212dfb8b4e88ce7d4f8e34a7f528ee58e02e0fb8a946be",
+ "sourceSha256": "e8081c0bc72c171b6019302a53b5daf1659f77cf6b751e917914f48b97c68c9e",
  "url": null
 }

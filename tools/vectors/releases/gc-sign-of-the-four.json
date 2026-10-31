@@ -1,14 +1,14 @@
 {
  "id": "gc-sign-of-the-four",
  "kind": "book",
- "fileName": "gc-sign-of-the-four_2026-10-17.gvec",
- "sizeBytes": 96858,
- "sha256": "70e36eebaeb03b7bcc49b490f200bc41dd2b68ea0417e6577988ccc5beb030b1",
- "count": 329,
+ "fileName": "gc-sign-of-the-four_2026-10-30.gvec",
+ "sizeBytes": 97156,
+ "sha256": "55cf3cc0fe12f088b9894274a0547bd0da1be8f3769dca44e4da7a2517139cf7",
+ "count": 330,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "210cd3af6b3b6e9c6003d2f38d60da50b49cdccf7501d599c699eac6e80da1fa",
+ "sourceSha256": "bab2e9e57ac621469bbe201497e70f115b0c9fca829eda90511b07beb23ad4c8",
  "url": null
 }

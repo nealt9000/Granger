@@ -1,14 +1,14 @@
 {
  "id": "gc-school-for-scandal",
  "kind": "book",
- "fileName": "gc-school-for-scandal_2026-10-17.gvec",
- "sizeBytes": 95976,
- "sha256": "a1ff5c2c073d447bcbeb5b787207f27d96e4b897a2e332380d7f984186a79f40",
- "count": 326,
+ "fileName": "gc-school-for-scandal_2026-10-30.gvec",
+ "sizeBytes": 96274,
+ "sha256": "49802ee0ab956ddb756e088ca7fef204aec166953d1f7e9ceca9c9da9ec58527",
+ "count": 327,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5e6f03788f8aa1ce3ee9003b5cfcc16745279f43d59365ce4b5f78beb5e5ec0b",
+ "sourceSha256": "23b4eac598772e971bc6612c1a20c789f08e24ec73dd3b499d0ef8b7a33bd4dc",
  "url": null
 }

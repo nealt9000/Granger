@@ -1,14 +1,14 @@
 {
  "id": "gc-faerie-queene",
  "kind": "book",
- "fileName": "gc-faerie-queene_2026-10-17.gvec",
- "sizeBytes": 265320,
- "sha256": "07cf943d59f12b5e4a49a64b9ae048e1a64a1f9dc233a02f52a2af38988f32f5",
- "count": 902,
+ "fileName": "gc-faerie-queene_2026-10-30.gvec",
+ "sizeBytes": 265618,
+ "sha256": "d5734681c4567d1cbd1af39dab3ff39c8a8ea91b81a19bf921b46a089219076f",
+ "count": 903,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bbade9d4f26d073f6320c9cf3b4519830a1e2561e5188eb94de77a568855d047",
+ "sourceSha256": "27ca665d76f0952d1a80d0934092ef3a62f68861782e90c2ec34cf4cdcf0d1fb",
  "url": null
 }

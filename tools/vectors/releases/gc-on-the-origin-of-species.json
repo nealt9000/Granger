@@ -1,14 +1,14 @@
 {
  "id": "gc-on-the-origin-of-species",
  "kind": "book",
- "fileName": "gc-on-the-origin-of-species_2026-10-17.gvec",
- "sizeBytes": 218280,
- "sha256": "638676c00fb3a2b5bbc331b1c4c14665b6a09fc548602a43b62395c901cbbf45",
+ "fileName": "gc-on-the-origin-of-species_2026-10-30.gvec",
+ "sizeBytes": 218284,
+ "sha256": "45d6a5b2566757ff680762cabab576b9f052ad01363b0270ad9f1a3ca6e49547",
  "count": 742,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "356f489df6a484e7629802b9bab029747532966d23a25fcba17540fd14325903",
+ "sourceSha256": "10f0702f8888cc66c0c225e1bc2b5bbf7b6618bafb8eca562c5e86142b23c4ce",
  "url": null
 }

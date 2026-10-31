@@ -1,14 +1,14 @@
 {
  "id": "gc-howards-end",
  "kind": "book",
- "fileName": "gc-howards-end_2026-10-17.gvec",
- "sizeBytes": 269142,
- "sha256": "673b2e1771ea7cf5a57ece2e4ef948a8816a01121c777ec07cca7654837ee993",
- "count": 915,
+ "fileName": "gc-howards-end_2026-10-30.gvec",
+ "sizeBytes": 269440,
+ "sha256": "dec2352c6e003a497aded239a70936cbddeb99d7d4aed186a6fe5d9245ec1804",
+ "count": 916,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "abcd444e6a230588a2e4cb6c88775fa092ebb342103e60da5286cbd4a8a58d9b",
+ "sourceSha256": "8e92deb8521ba536085ebc59d8223b8524ecaa5a325e4501f6710f9e7f7349da",
  "url": null
 }

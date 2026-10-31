@@ -1,14 +1,14 @@
 {
  "id": "gc-henry-vi-part-3",
  "kind": "book",
- "fileName": "gc-henry-vi-part-3_2026-10-17.gvec",
- "sizeBytes": 73044,
- "sha256": "8cb32613abbc08eefc2a4ba89015d6d0e4a548a76d822456ab3bde453f1ea222",
- "count": 248,
+ "fileName": "gc-henry-vi-part-3_2026-10-30.gvec",
+ "sizeBytes": 73342,
+ "sha256": "894911a645ddb39ba652fc36649ff54deb2d350a9cd7883c408fd33facdac3af",
+ "count": 249,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a7f896efe58f7115211dea5efa756e788751e462d515f0b1d1b85dcce5de0a53",
+ "sourceSha256": "3321c1cbac9ace0e5333808dcc5a93a4afceda00307fcff8e18488385df9b53d",
  "url": null
 }

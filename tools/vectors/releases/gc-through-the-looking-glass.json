@@ -1,14 +1,14 @@
 {
  "id": "gc-through-the-looking-glass",
  "kind": "book",
- "fileName": "gc-through-the-looking-glass_2026-10-17.gvec",
- "sizeBytes": 86862,
- "sha256": "db5aa1e51c02274a6a5d04649fc878f012479e575fdb46eb5c8590262b9d528a",
- "count": 295,
+ "fileName": "gc-through-the-looking-glass_2026-10-30.gvec",
+ "sizeBytes": 87160,
+ "sha256": "21d67a012209a3e9269068e31654542a4ba9bd8ace4bf06c155305b8be758e2d",
+ "count": 296,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e6c8c2e8099d33d1d6261ad860b93665f71c202ae7ad93b037fa22b7ce42f9b0",
+ "sourceSha256": "ddf7cd9e41139988168530e6fa092ff977b6653a51a9e53f5f23c2a55bce486e",
  "url": null
 }

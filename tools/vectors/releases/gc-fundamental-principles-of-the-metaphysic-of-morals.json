@@ -1,14 +1,14 @@
 {
  "id": "gc-fundamental-principles-of-the-metaphysic-of-morals",
  "kind": "book",
- "fileName": "gc-fundamental-principles-of-the-metaphysic-of-morals_2026-10-17.gvec",
- "sizeBytes": 46878,
- "sha256": "1329bc2139dbe920c6503b1ba0df756c13ea7f4f224cd04f43b28bcab5ec8afe",
- "count": 159,
+ "fileName": "gc-fundamental-principles-of-the-metaphysic-of-morals_2026-10-30.gvec",
+ "sizeBytes": 47176,
+ "sha256": "753f4ee2a8a05b43f21226adfc5bb1a8b20e55e3fd2f2b37429c2d9d01311378",
+ "count": 160,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f80808ced90422fbddb264d0ca4656483afb0a1793864ef4d070b821089948fc",
+ "sourceSha256": "62a3771bc462bc7e0d23a8c42c5a5742b19c3171b8eb343efef8ff8e6c35f028",
  "url": null
 }

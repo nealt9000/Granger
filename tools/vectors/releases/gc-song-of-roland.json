@@ -1,14 +1,14 @@
 {
  "id": "gc-song-of-roland",
  "kind": "book",
- "fileName": "gc-song-of-roland_2026-10-17.gvec",
- "sizeBytes": 85980,
- "sha256": "f85b927b3505fe695437395ec5ed9c72a015c8ad167ba45a875983a0dfb6964b",
- "count": 292,
+ "fileName": "gc-song-of-roland_2026-10-30.gvec",
+ "sizeBytes": 86278,
+ "sha256": "8b538b01cbdbcd4deb58fd95126b8fd2fe334a7897bea91f5eff8656688f212d",
+ "count": 293,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b805b65f637044e8547ddeb65b035398e46e34242aa879eeb3e7fc5559ccbaca",
+ "sourceSha256": "0416aefbab9e3e60d8acd9b7e31659f87b1d93d886fbd1c970eea1e712d85f55",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-idiot",
  "kind": "book",
- "fileName": "gc-idiot_2026-10-17.gvec",
- "sizeBytes": 586662,
- "sha256": "ad08c64818830b6ba9a1e0b1beba1e59d4f9824ff4205714d3fc7cfcdf0a87dd",
- "count": 1995,
+ "fileName": "gc-idiot_2026-10-30.gvec",
+ "sizeBytes": 586960,
+ "sha256": "da554c22cfa895f2af3d7c50fab47e8488efa317f0639b8b8fc20310a24e1125",
+ "count": 1996,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2a92a883c2cb3b37c488b0103019e744eeadda073673be36772a5e30c722a1f0",
+ "sourceSha256": "3bbdfd1110cf56a3de6b36ee67ae639bda09345ccb26d4350df242e8fca337f8",
  "url": null
 }

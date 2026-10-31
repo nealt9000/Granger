@@ -1,14 +1,14 @@
 {
  "id": "gc-notes-from-the-underground",
  "kind": "book",
- "fileName": "gc-notes-from-the-underground_2026-10-17.gvec",
- "sizeBytes": 75102,
- "sha256": "b14ec4b2644657c22da391ec745564c99ffffa166346b7cdf9eeb99a33c53dc5",
- "count": 255,
+ "fileName": "gc-notes-from-the-underground_2026-10-30.gvec",
+ "sizeBytes": 75400,
+ "sha256": "39821c26d9a6864fea6777d85d1bdaae0b65613e5af89a7732c16866d4847e91",
+ "count": 256,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c2cc6ee181088a0725a231aa52ea0575bba1312f5e044f66bcd57fa03e4e7faa",
+ "sourceSha256": "2d32990310f3be00e97d8dd9c1af4d051477fe6d0e4959e8feb29ab0472d4f90",
  "url": null
 }

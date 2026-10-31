@@ -1,14 +1,14 @@
 {
  "id": "gc-idylls-of-the-king",
  "kind": "book",
- "fileName": "gc-idylls-of-the-king_2026-10-17.gvec",
- "sizeBytes": 68928,
- "sha256": "66822d80acaf42a9760d93a9a2c01e0dabc2c02d979a106291e675967a5f72bd",
- "count": 234,
+ "fileName": "gc-idylls-of-the-king_2026-10-30.gvec",
+ "sizeBytes": 69226,
+ "sha256": "893686c90d69f3475df9126d61fe449f3a4a834f5824828ddf789e142acf8de4",
+ "count": 235,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2e451300f8991a2a651015f35d6e781113677885e5ec10d96e8fa8ef94ad3ad9",
+ "sourceSha256": "58430abf06e17ff9101cfc782358b5b3dfae3ccbf34c1da084211cbb3736a70d",
  "url": null
 }

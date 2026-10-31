@@ -1,14 +1,14 @@
 {
  "id": "gc-king-henry-iv-part-2",
  "kind": "book",
- "fileName": "gc-king-henry-iv-part-2_2026-10-17.gvec",
- "sizeBytes": 72162,
- "sha256": "a46fe29204a050ba01dbac65af92a125570517ba30b68fd4f081cfe85932227a",
+ "fileName": "gc-king-henry-iv-part-2_2026-10-30.gvec",
+ "sizeBytes": 72166,
+ "sha256": "19c5e9ff47bf36d8f39d02b723ae95c67852e4b6beca4afe6f9e73fac2ac336a",
  "count": 245,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b59732555a8cd6ea6d11f7acfb901b5f2ac2a6c0484fe48fbb1a1a65f2a616ed",
+ "sourceSha256": "12701c3a3b2385499014a397dbe6088b63105301f5a10d995aabad7a1be5619f",
  "url": null
 }

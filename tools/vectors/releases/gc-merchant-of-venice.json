@@ -1,14 +1,14 @@
 {
  "id": "gc-merchant-of-venice",
  "kind": "book",
- "fileName": "gc-merchant-of-venice_2026-10-17.gvec",
- "sizeBytes": 60402,
- "sha256": "76c2342321aeaff090e870b87c0de38a497d0671f357915bc52c16ac26c88dee",
- "count": 205,
+ "fileName": "gc-merchant-of-venice_2026-10-30.gvec",
+ "sizeBytes": 60700,
+ "sha256": "547d77f750215aba27f2347fc2a181039088016caa9244030dcd9607e9db844e",
+ "count": 206,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d42b90ada15873f041da222c1bcc76a791b4cd1421ed0403b1f17ea867ea7b41",
+ "sourceSha256": "8ac740f38939c4f7e8aed49504045cc967a7f26ed693d8d24e7da8f5b234d4f6",
  "url": null
 }

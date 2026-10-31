@@ -1,14 +1,14 @@
 {
  "id": "gc-uncle-vanya",
  "kind": "book",
- "fileName": "gc-uncle-vanya_2026-10-17.gvec",
- "sizeBytes": 43938,
- "sha256": "d7523d1696ef7a3fde3e8a0e9f18849364c6647c6638f73999c60277c633449b",
+ "fileName": "gc-uncle-vanya_2026-10-30.gvec",
+ "sizeBytes": 43942,
+ "sha256": "e914f96c4abd9d30286a60632a0b07ce24695c23f832a39ffe05287f22aefe5c",
  "count": 149,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b64a4044f2e94e563dba8293a0f61cb1f26397cd97e0b9998d7f38c107618b5c",
+ "sourceSha256": "75832fbe820fc5fa4ede05611dfe5b77c7ad6076de13abdaf2ea23cfae0d8c9a",
  "url": null
 }

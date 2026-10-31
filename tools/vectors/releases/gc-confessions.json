@@ -1,14 +1,14 @@
 {
  "id": "gc-confessions",
  "kind": "book",
- "fileName": "gc-confessions_2026-10-17.gvec",
- "sizeBytes": 28356,
- "sha256": "6fdc0250bd95323e5262459be5710ab6b4f480bc308c7be09287cdbd81af2b74",
- "count": 96,
+ "fileName": "gc-confessions_2026-10-30.gvec",
+ "sizeBytes": 28654,
+ "sha256": "18d921b0f9064caefc5ba3973548ddfed02577ead6cf6cdaaf480f7d428487eb",
+ "count": 97,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "eb8ade80a22127f1f9510157f9c58db8432650c6c029d24f95b5f3aa3e5b2985",
+ "sourceSha256": "c55ebb076a530da10dbe880b313357f5741bf34138101fc487e69d969eaca804",
  "url": null
 }

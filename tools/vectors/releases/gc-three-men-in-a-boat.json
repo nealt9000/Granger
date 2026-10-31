@@ -1,14 +1,14 @@
 {
  "id": "gc-three-men-in-a-boat",
  "kind": "book",
- "fileName": "gc-three-men-in-a-boat_2026-10-17.gvec",
- "sizeBytes": 180942,
- "sha256": "2dc56fe522fefac5fb08077003da2d347801f92c73d966a6fa49826c28aa7c41",
- "count": 615,
+ "fileName": "gc-three-men-in-a-boat_2026-10-30.gvec",
+ "sizeBytes": 181240,
+ "sha256": "8e1209cc006b11a0b6867e83f81688c30d21ca4989e2c1b6fda5b0ab43266d9f",
+ "count": 616,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8458d201f1be8d6822bf3377791c93321a32494ccfb031920037ffc1de3cf58d",
+ "sourceSha256": "84ca3af2e76f917cd415c18b8bbc6754ed5b2326fb2a45c2c83c9d61e6c8984b",
  "url": null
 }

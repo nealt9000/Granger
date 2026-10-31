@@ -1,14 +1,14 @@
 {
  "id": "gc-jane-eyre",
  "kind": "book",
- "fileName": "gc-jane-eyre_2026-10-17.gvec",
- "sizeBytes": 439662,
- "sha256": "039a7f882fd4e19305156d8d6acee64b1d4b49e2df570e025ae27004a6dabbac",
- "count": 1495,
+ "fileName": "gc-jane-eyre_2026-10-30.gvec",
+ "sizeBytes": 439960,
+ "sha256": "abdbd47c3cc29fe62c76560c7fd8e33535b6e9ca2c5053a54a82f7d018ea9e7f",
+ "count": 1496,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "00a6c5391599e48706e5ac13bd937d432a0f1879b9cc417a53b93ff0790bddad",
+ "sourceSha256": "912fc2a5216fa282c9344cf78620eb39c586c3258143adef84598b6e8534448c",
  "url": null
 }

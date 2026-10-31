@@ -1,14 +1,14 @@
 {
  "id": "gc-coriolanus",
  "kind": "book",
- "fileName": "gc-coriolanus_2026-10-17.gvec",
- "sizeBytes": 87450,
- "sha256": "cb88dd0302384bff1d75997f73b84c05de1574fc049d0cc95a69db6f3d21fc15",
- "count": 297,
+ "fileName": "gc-coriolanus_2026-10-30.gvec",
+ "sizeBytes": 87748,
+ "sha256": "fe9eb648cec905e4a29aa1cd5d3315f49b0f29329963d3735df32f4f0fd9397a",
+ "count": 298,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "aa04064e925c7c9af303e9a3584c12c9cadea73eeb090e2276f75af751b4f57c",
+ "sourceSha256": "99e5c330065bd3dc1660b5b47a9fbca374db048e01c0aeb8c307363576260e7b",
  "url": null
 }

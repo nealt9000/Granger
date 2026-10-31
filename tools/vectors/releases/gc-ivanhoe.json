@@ -1,14 +1,14 @@
 {
  "id": "gc-ivanhoe",
  "kind": "book",
- "fileName": "gc-ivanhoe_2026-10-17.gvec",
- "sizeBytes": 442602,
- "sha256": "d3d1c5a9a8a6cbe08a400460b9c4dd0d4236720cc7a90215c7160084b18be90b",
- "count": 1505,
+ "fileName": "gc-ivanhoe_2026-10-30.gvec",
+ "sizeBytes": 442900,
+ "sha256": "389f22c7f00606b635fb2b90ca1fd9907fbc65ab37cc3fc718e842c6a0572714",
+ "count": 1506,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4f95395a25ccfc392c88ce355700dafa9b8c0d2333b19123f0225fc728e9f7bd",
+ "sourceSha256": "b5e1523b83a4b33bb3be0ddf00377d8cbe22d6f8a70d5ecb2f70f6acbe7bcc27",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-castle-of-andalusia",
  "kind": "book",
- "fileName": "gc-castle-of-andalusia_2026-10-17.gvec",
- "sizeBytes": 53934,
- "sha256": "b83dac6c4fbc29dd1ac57daaedd75c0d848e255c569249a5071736df3f419fba",
- "count": 183,
+ "fileName": "gc-castle-of-andalusia_2026-10-30.gvec",
+ "sizeBytes": 54232,
+ "sha256": "88f21d1f6d24c3552614f49abdd771f4f6c6fbea415f5782a93dd44ebd42309b",
+ "count": 184,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2571abea6ae6932953d4b9210d42c1f68099b1baac43ea120efeb896c89259aa",
+ "sourceSha256": "c8100107651ce6c49ce3f251d5daec6aa63086ef624a6fc4e5f7bdef6f2329e4",
  "url": null
 }

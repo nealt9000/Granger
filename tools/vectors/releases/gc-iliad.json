@@ -1,14 +1,14 @@
 {
  "id": "gc-iliad",
  "kind": "book",
- "fileName": "gc-iliad_2026-10-17.gvec",
- "sizeBytes": 267966,
- "sha256": "a2ae7c01896bb2cb3fabdc7df567951458adc09dc66730203d13c3175a5bce38",
- "count": 911,
+ "fileName": "gc-iliad_2026-10-30.gvec",
+ "sizeBytes": 268264,
+ "sha256": "5005e54a6e2d750091fd172038715229b351ef00887301956c25395824ff62e5",
+ "count": 912,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8c4fd5b15d80ad1ac156c3a193995ca67b42fa874ae15b03a5e321325a2a4913",
+ "sourceSha256": "478c4c48909ce29bbfa221212c9a4b24861f4a24b2bd1387ce393abbb76a6682",
  "url": null
 }

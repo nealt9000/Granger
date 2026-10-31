@@ -1,14 +1,14 @@
 {
  "id": "gc-house-of-the-seven-gables",
  "kind": "book",
- "fileName": "gc-house-of-the-seven-gables_2026-10-17.gvec",
- "sizeBytes": 179178,
- "sha256": "9870dd28f4354a09ef00e26997180ebb7d420fc2adef381228c3a8960498cdcf",
- "count": 609,
+ "fileName": "gc-house-of-the-seven-gables_2026-10-30.gvec",
+ "sizeBytes": 179476,
+ "sha256": "524e0471d30bb8c79e531cd667daef5d3c5de62445d87a11974405098b9ce6b7",
+ "count": 610,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9ff63f268cebde1c50c087d045aa8bb0761b04f2c018b7ef49553b450aad259a",
+ "sourceSha256": "505cd0e60207c92e6dadb295927db24f959b56b5a9efe65319c8604e3c1990e1",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-major-barbara",
  "kind": "book",
- "fileName": "gc-major-barbara_2026-10-17.gvec",
- "sizeBytes": 94506,
- "sha256": "3f44499a2dd5aaf893bc2d13e4205c3733e91c5f3ccb1725026c8e1df5083db7",
- "count": 321,
+ "fileName": "gc-major-barbara_2026-10-30.gvec",
+ "sizeBytes": 94804,
+ "sha256": "3190d06ff012b7f42c1d4b5c0914ffb4190bd21706a224443a750c396ccd4431",
+ "count": 322,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5f4a761a5be7af4a0c2807bd5ea1a68cab793a0c27a8109828a5457321477554",
+ "sourceSha256": "ba7b1a34d2cbdbd8e5a4e272ed356f538cdcdaac1974b4ef5beac379a265b946",
  "url": null
 }

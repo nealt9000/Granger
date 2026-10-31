@@ -1,14 +1,14 @@
 {
  "id": "gc-o-pioneers",
  "kind": "book",
- "fileName": "gc-o-pioneers_2026-10-17.gvec",
- "sizeBytes": 125376,
- "sha256": "65784f90560af42e4173c9e786e9b4b5261d021cc7e2ea73005b19b35d3f2734",
- "count": 426,
+ "fileName": "gc-o-pioneers_2026-10-30.gvec",
+ "sizeBytes": 125674,
+ "sha256": "d5f2123baa819ece7b1029d5edaf03f3c0cc51491853e85dabafd6f9731709bd",
+ "count": 427,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c1f80503329a4626f66183f8664361eeb07df97ecc06213390917470e3a01fe8",
+ "sourceSha256": "9ecb1cd530d0a024c7c78500adbe50438b31442b355d0497061cb5b944a5cdd8",
  "url": null
 }

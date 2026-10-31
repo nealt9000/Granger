@@ -1,14 +1,14 @@
 {
  "id": "gc-divine-comedy-hell",
  "kind": "book",
- "fileName": "gc-divine-comedy-hell_2026-10-17.gvec",
- "sizeBytes": 128610,
- "sha256": "5ebe4acd1d6cf8dfa52338e352f0921128987284b378d0690d91902d8a3592aa",
- "count": 437,
+ "fileName": "gc-divine-comedy-hell_2026-10-30.gvec",
+ "sizeBytes": 128908,
+ "sha256": "5e945492ddbb67fc04219f35b50c2877905aa606db37319948a4bd33ffa42ce4",
+ "count": 438,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c20f6af13b61323b1af11503b301ddfa66d1612ffb42248bbceb3721b77a6a45",
+ "sourceSha256": "d08d309c18717de629fc8e759be8cd2d10f48447f73fbfca94e5eb13ae0c26fb",
  "url": null
 }

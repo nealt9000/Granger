@@ -1,14 +1,14 @@
 {
  "id": "gc-little-dorrit",
  "kind": "book",
- "fileName": "gc-little-dorrit_2026-10-17.gvec",
- "sizeBytes": 820392,
- "sha256": "ba1a966e6766a1da28a1447d96c46549ad427a691235c7f4f498ba20f094a032",
- "count": 2790,
+ "fileName": "gc-little-dorrit_2026-10-30.gvec",
+ "sizeBytes": 820690,
+ "sha256": "b46cbb560a6a355615ebf475fcd6274a021925fb3890f4aab44e7ff1be51bc32",
+ "count": 2791,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1ec219f920a7c7011a3ef281861d56add14d4b70a5ca598f3c1f4be4ccd9ce4e",
+ "sourceSha256": "efb68bb7e9cd2c98d91e3be64a406b876fae1da0510d8c4a63ba766f263a0230",
  "url": null
 }

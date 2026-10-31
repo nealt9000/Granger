@@ -1,14 +1,14 @@
 {
  "id": "gc-poems-three-series",
  "kind": "book",
- "fileName": "gc-poems-three-series_2026-10-17.gvec",
- "sizeBytes": 119496,
- "sha256": "5212a39e74c7fd11da3d9cb805c41fe1dff7c6522746f31e2247e3a25f3e1520",
- "count": 406,
+ "fileName": "gc-poems-three-series_2026-10-30.gvec",
+ "sizeBytes": 119794,
+ "sha256": "e8bf58b62e8408c55539b163271790b8cbc68b96a624c35517d39f49fe962a08",
+ "count": 407,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c7e7edfa2f5e599f8f1ce59c32fcdbd730ed13631cb3e862782d2f679a394323",
+ "sourceSha256": "c82e006a45ed3a0b1ebd51de2e03599dcb54fe4456573a7fccdb72e822d1dfae",
  "url": null
 }

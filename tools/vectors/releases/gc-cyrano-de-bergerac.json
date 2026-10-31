@@ -1,14 +1,14 @@
 {
  "id": "gc-cyrano-de-bergerac",
  "kind": "book",
- "fileName": "gc-cyrano-de-bergerac_2026-10-17.gvec",
- "sizeBytes": 120378,
- "sha256": "fdfb47b6d7499d0b4bd80f2e322330180b6737fbe5aee3a9cdfd32cf0b0375e1",
- "count": 409,
+ "fileName": "gc-cyrano-de-bergerac_2026-10-30.gvec",
+ "sizeBytes": 120676,
+ "sha256": "613f3324b043244209517edbb69774aa1d402335fa7073c1335746fafa218474",
+ "count": 410,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "34598f07b5b3f6040e388f39eb7db6c4a90ef1454b8592db3a34c23dbcae478f",
+ "sourceSha256": "990c7cef2e8e5c4d2209887cc8d0dd316c779885ec62fc05c74329839d555d58",
  "url": null
 }

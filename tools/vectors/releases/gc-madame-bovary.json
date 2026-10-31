@@ -1,14 +1,14 @@
 {
  "id": "gc-madame-bovary",
  "kind": "book",
- "fileName": "gc-madame-bovary_2026-10-17.gvec",
- "sizeBytes": 300306,
- "sha256": "b4dfa53f05ec0ca6d2edc4a31efaf44126c59ce6a12d1c6cb3dfa9592f7dbe8f",
- "count": 1021,
+ "fileName": "gc-madame-bovary_2026-10-30.gvec",
+ "sizeBytes": 300604,
+ "sha256": "3ce9b2b52fa952a4e55c91395c95661bfd30088352827965d9a75c8d363eddcb",
+ "count": 1022,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "aa21537f980fc01d0dc4ec5e948889e3effcfc6a0e8f11b3b19f655c062a42cf",
+ "sourceSha256": "b805c124fc526a31eddf4d7d5f8d059964a82fb11efbab7c8cdb690f2558a992",
  "url": null
 }

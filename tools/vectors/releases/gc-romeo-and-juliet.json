@@ -1,14 +1,14 @@
 {
  "id": "gc-romeo-and-juliet",
  "kind": "book",
- "fileName": "gc-romeo-and-juliet_2026-10-17.gvec",
- "sizeBytes": 72456,
- "sha256": "e3a5fba0b807f85cd6c68ce3dc79bd6f8a9c0f51f2c6a69d30cc36fccfb8d4db",
- "count": 246,
+ "fileName": "gc-romeo-and-juliet_2026-10-30.gvec",
+ "sizeBytes": 72754,
+ "sha256": "560cf5aa4c54e22e754a84e9e4027e26a4d99e3250f386590dd1b2700f6b2300",
+ "count": 247,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bd75a8026347961d06ebe738be51e8cedde612acba0766037d2666bf11318636",
+ "sourceSha256": "28f79d62c16ceccb6adc99852cfc3e06d069989e68677bf621f88c2dccf226b3",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-wind-in-the-willows",
  "kind": "book",
- "fileName": "gc-wind-in-the-willows_2026-10-17.gvec",
- "sizeBytes": 135960,
- "sha256": "339e839ab5b7920a1a957ac40beac6953f37e56517f65a3f9b4033217b17dd6a",
- "count": 462,
+ "fileName": "gc-wind-in-the-willows_2026-10-30.gvec",
+ "sizeBytes": 136258,
+ "sha256": "5af62ff6a9fb8849d3c52cc4a94414bd907f0ed9f19a809ff884721d62c65d40",
+ "count": 463,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0e069c5ed5ee5894d22bf0c04644d567698c320138082dd211eb83ee7a61f2c3",
+ "sourceSha256": "c02a4a30c7bdc5a1e8eb1b40a61c88cc633a58db493166beec90dc0172648069",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-house-of-mirth",
  "kind": "book",
- "fileName": "gc-house-of-mirth_2026-10-17.gvec",
- "sizeBytes": 275022,
- "sha256": "8c29b8c2c484056d117bd8bd35646a5325a5564c33470c1815b73ea852811833",
- "count": 935,
+ "fileName": "gc-house-of-mirth_2026-10-30.gvec",
+ "sizeBytes": 275320,
+ "sha256": "e0dcf5a348707437acea601e34e9fb9d8b717a72a46d2c98139554f1a24fe854",
+ "count": 936,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "96018cc5fa9876c54aaccc2a9ba70807236f61032102814662103f20b75d7c08",
+ "sourceSha256": "d579b69a9c455949552fe288a06c8f43b2df1d3d8cfad1a0e4e12f2489e18f45",
  "url": null
 }

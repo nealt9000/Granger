@@ -1,14 +1,14 @@
 {
  "id": "gc-erewhon",
  "kind": "book",
- "fileName": "gc-erewhon_2026-10-17.gvec",
- "sizeBytes": 160656,
- "sha256": "aad471a360620c638dbe57678c6cb2ba57a08baf9a9445d544d2e225cfcff6cf",
- "count": 546,
+ "fileName": "gc-erewhon_2026-10-30.gvec",
+ "sizeBytes": 160954,
+ "sha256": "48b26c3f0f9e51ee831aa00c5a424e37664e9a9729af38674c1bc3cdf7f75498",
+ "count": 547,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5101051936577c46e97d0b0ab033bcc914b713d2d8ba7a5dcc82621a00e12f58",
+ "sourceSha256": "cffe86d44ba218235ca722081dde300489cd06421e2ec93d86fc00cd70cb51a4",
  "url": null
 }

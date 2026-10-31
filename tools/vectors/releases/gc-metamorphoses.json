@@ -1,14 +1,14 @@
 {
  "id": "gc-metamorphoses",
  "kind": "book",
- "fileName": "gc-metamorphoses_2026-10-17.gvec",
- "sizeBytes": 228570,
- "sha256": "3392758b0bf272799a6c0f979d991b1a63572f8d90a37b3eca4c5948bd35f81c",
- "count": 777,
+ "fileName": "gc-metamorphoses_2026-10-30.gvec",
+ "sizeBytes": 228868,
+ "sha256": "47b7cb60a7c97557c3de1282013979f2a3349b71caedd70b6bc90d98abb9077a",
+ "count": 778,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cf76d47caa877506f39e64e7145283c6c1d716c23d768b75a7c72a0c0d6b4cd8",
+ "sourceSha256": "f0f5ce652de5cec0c689044ee5768c05e02c348f78350802d7fc444f694e1b86",
  "url": null
 }

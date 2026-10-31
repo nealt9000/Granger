@@ -1,14 +1,14 @@
 {
  "id": "gc-hunchback-of-notre-dame",
  "kind": "book",
- "fileName": "gc-hunchback-of-notre-dame_2026-10-17.gvec",
- "sizeBytes": 438780,
- "sha256": "a62e9ce7f85399578e93167531536069cc384a976f19fb6b7994e1490fe6edd5",
+ "fileName": "gc-hunchback-of-notre-dame_2026-10-30.gvec",
+ "sizeBytes": 438784,
+ "sha256": "727aa99d677c4087dab8c5564f1ce8f2726bc646df57d6ddabbb2d3160be03ef",
  "count": 1492,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8aefefad2d36c1d21d7e8b8b13f638880409b9e75df02c54c5b0cedf8379c5ac",
+ "sourceSha256": "70c2390a66c73f0734dae168ff623f310e3e2efbf2b9a3ace89471436e2f877f",
  "url": null
 }

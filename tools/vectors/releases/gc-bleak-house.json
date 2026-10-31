@@ -1,14 +1,14 @@
 {
  "id": "gc-bleak-house",
  "kind": "book",
- "fileName": "gc-bleak-house_2026-10-17.gvec",
- "sizeBytes": 875370,
- "sha256": "9fc4cc8c0fc2b18710e0324e8b8518de53423afcb52e19fdf309e56c3e403cab",
- "count": 2977,
+ "fileName": "gc-bleak-house_2026-10-30.gvec",
+ "sizeBytes": 875668,
+ "sha256": "c59b6092700b1343d502d8d3769fc316e0062557ddfe1a148312bb5e4e199078",
+ "count": 2978,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "46016f2561b4b413e2c1c305b652c06a90bd917bdbc7019164d6d24c4de824cb",
+ "sourceSha256": "01371c749aaf3aed5246ea837a4c7358de91756e0c48b6436ff6728994fb653f",
  "url": null
 }

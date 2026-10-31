@@ -1,14 +1,14 @@
 {
  "id": "gc-essays-cotton",
  "kind": "book",
- "fileName": "gc-essays-cotton_2026-10-17.gvec",
- "sizeBytes": 792756,
- "sha256": "d262478502d2649a4f31010c064446877032ff98fe2885b1fef930b63ff75671",
- "count": 2696,
+ "fileName": "gc-essays-cotton_2026-10-30.gvec",
+ "sizeBytes": 793054,
+ "sha256": "a4d2cb8ec90c33aa33c462d2a1a220ae07927f49e1356a20d31c8f8e15815fa4",
+ "count": 2697,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "90e91ac88865f7959d19b1071abb616970dd0373fdba9e6591e6adbebcb30497",
+ "sourceSha256": "6bb5e0cad35f16081e4c8049d0d32eb20727630515969ac1881f1c30cad01d35",
  "url": null
 }

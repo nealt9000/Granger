@@ -1,14 +1,14 @@
 {
  "id": "gc-vindication-of-the-rights-of-woman",
  "kind": "book",
- "fileName": "gc-vindication-of-the-rights-of-woman_2026-10-17.gvec",
- "sizeBytes": 177414,
- "sha256": "5e641f14bdfc060a5b3a4004d4a393789174cea45548426a33b37dc7f5bd8d67",
- "count": 603,
+ "fileName": "gc-vindication-of-the-rights-of-woman_2026-10-30.gvec",
+ "sizeBytes": 177712,
+ "sha256": "32c211b53f54232bd1176997dd0b7e339c4f27e7696143e1054d7fd6c672e0b3",
+ "count": 604,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6c9291801b2f11c14908cb77b53b26e7d915c562875800804ea37ec9d2e8a073",
+ "sourceSha256": "b9bec13083e11663d8796f393167ece82db8c16cde1fa72c03768c4cb50ee62e",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-phaedrus",
  "kind": "book",
- "fileName": "gc-phaedrus_2026-10-17.gvec",
- "sizeBytes": 64518,
- "sha256": "cd806360ac3bfc7646f4836377b594110996e9932d1c2ba9054b2a8a6e35a69b",
- "count": 219,
+ "fileName": "gc-phaedrus_2026-10-30.gvec",
+ "sizeBytes": 64816,
+ "sha256": "aa7956b0edf07eaec89072ca79fc51be54e60f8668864430b97708cc02a64272",
+ "count": 220,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a5b43e229766c00cdbb16de66da47fbe82ca191eddbee3f56fe824e7f5f3a0bc",
+ "sourceSha256": "2956de6fc838e5afa2165ef53616ec4b66c188fdd2bf7d86da02f99e3d1dc434",
  "url": null
 }

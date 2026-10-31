@@ -1,14 +1,14 @@
 {
  "id": "gc-essay-on-man",
  "kind": "book",
- "fileName": "gc-essay-on-man_2026-10-17.gvec",
- "sizeBytes": 48054,
- "sha256": "b294fdb021f2d3d12ffbf527895f152d340e5d62b5f9ae2c7f93f76f46a604c1",
- "count": 163,
+ "fileName": "gc-essay-on-man_2026-10-30.gvec",
+ "sizeBytes": 48352,
+ "sha256": "a6c935ae607c169e983dc6f4f341b823a2be457d8c7c1b9de4d3f40a2696aee4",
+ "count": 164,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0e859a6302eb1ca3dcaddec515d01f86c89f03b739b4af876738b74f669db087",
+ "sourceSha256": "993350887f1f00090f1bcdf495943dbaea9fe7b10221d05196a77a47b9b10bf9",
  "url": null
 }

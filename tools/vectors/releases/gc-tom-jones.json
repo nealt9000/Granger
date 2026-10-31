@@ -1,14 +1,14 @@
 {
  "id": "gc-tom-jones",
  "kind": "book",
- "fileName": "gc-tom-jones_2026-10-17.gvec",
- "sizeBytes": 713670,
- "sha256": "8fd9ee01eeaa5fbb4ec58b92cb52fd8fcb3b456c8f7286506796e228e80ddfbb",
- "count": 2427,
+ "fileName": "gc-tom-jones_2026-10-30.gvec",
+ "sizeBytes": 713968,
+ "sha256": "05fbdd9fd1965111e502252897066464808dcedb45ed9c71117be2ad95a3dd83",
+ "count": 2428,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f3d9f4250f456c0bc8d88a569912b9deea4c7688b2d1029ddffd90a8ff23db3f",
+ "sourceSha256": "3c2c9ca11ac1979460355eb9c0b9f81287a8dce56652b6aa78da0fe32a04cf89",
  "url": null
 }

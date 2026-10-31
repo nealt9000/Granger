@@ -1,14 +1,14 @@
 {
  "id": "gc-she-stoops-to-conquer",
  "kind": "book",
- "fileName": "gc-she-stoops-to-conquer_2026-10-17.gvec",
- "sizeBytes": 73044,
- "sha256": "9380cdb1bb049705f779e6578be62d8930056eddec7c8abe32540111e7d16293",
- "count": 248,
+ "fileName": "gc-she-stoops-to-conquer_2026-10-30.gvec",
+ "sizeBytes": 73342,
+ "sha256": "5cd2b59af2b93504bff943a7a5005bb0ae78ebe335a8d3552619ec9cd9ccdea4",
+ "count": 249,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f1de0a03138b9245058a505ab544dd762de6ba682d7cf240f225fd5254520ff2",
+ "sourceSha256": "2a807038134fc31ba7042721329ef51bdad49735a129348678031e1fb4f46745",
  "url": null
 }

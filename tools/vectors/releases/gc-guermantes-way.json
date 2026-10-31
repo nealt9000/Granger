@@ -1,0 +1,14 @@
+{
+ "id": "gc-guermantes-way",
+ "kind": "book",
+ "fileName": "gc-guermantes-way_2026-10-30.gvec",
+ "sizeBytes": 322360,
+ "sha256": "9adfd1192e865897b1c28b0f9d699ee03164b384efaa232dbda69851e4cbe378",
+ "count": 1096,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7820d335a22719bdeeb4c8075a99984398ceecc5a018161dd9807b41f4e479c2",
+ "url": null
+}

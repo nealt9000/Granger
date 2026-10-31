@@ -1,14 +1,14 @@
 {
  "id": "gc-ramayan-of-valmiki",
  "kind": "book",
- "fileName": "gc-ramayan-of-valmiki_2026-10-17.gvec",
- "sizeBytes": 1551864,
- "sha256": "6549365f2c47c8a2055e1344933f608ed0c45e8c4a353de99492ee821c4595ba",
- "count": 5278,
+ "fileName": "gc-ramayan-of-valmiki_2026-10-30.gvec",
+ "sizeBytes": 1552456,
+ "sha256": "47ddbc08570db2e58aaaf4362e85d628a3fe7b4a9ee2b59053e2b3ed5afd9a4f",
+ "count": 5280,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "18f35679f429ed7a4506ae7667d84bc9f0088f5958b2a3a25f5210200f3fdda5",
+ "sourceSha256": "931891814169c7e7f801a73349c9bc15616509408c4fe7c04a50599f22382e80",
  "url": null
 }

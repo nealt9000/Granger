@@ -1,14 +1,14 @@
 {
  "id": "gc-utilitarianism",
  "kind": "book",
- "fileName": "gc-utilitarianism_2026-10-17.gvec",
- "sizeBytes": 33942,
- "sha256": "f0773e14bbaccc995217babc4969e7c27eefb2d05948a3c6aa3dde72da1de6ea",
- "count": 115,
+ "fileName": "gc-utilitarianism_2026-10-30.gvec",
+ "sizeBytes": 34240,
+ "sha256": "70c82cbdf76127f3eeb9abffd65c9d9a53376b77334ac89a709da463fa4dad3e",
+ "count": 116,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "930ef7f68d3b0c5a70dcac7cd271bb830af080b2dcb02d395c89b46a87335453",
+ "sourceSha256": "73796ca1d211f3e740eef668f4793e5520d5804b8d721fe0155defeea016ec13",
  "url": null
 }

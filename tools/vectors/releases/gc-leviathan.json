@@ -1,14 +1,14 @@
 {
  "id": "gc-leviathan",
  "kind": "book",
- "fileName": "gc-leviathan_2026-10-17.gvec",
- "sizeBytes": 355578,
- "sha256": "6e520ebd4f42b833d8237c8983b1da3c0377bfd2a3ce83c1990964ce5661efa4",
- "count": 1209,
+ "fileName": "gc-leviathan_2026-10-30.gvec",
+ "sizeBytes": 355876,
+ "sha256": "e76ffd581e790160a9cfbaecfca053a195ff8d8f0c5a4afb6fb5954c9a978b9f",
+ "count": 1210,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8dc4fbad207190734c2507bb71487bdca2eaf8a8ac7307706a230389179b292f",
+ "sourceSha256": "b82733e59a9439a4c0765ff0767fe052af4662e2df930af11b3996095ea942c3",
  "url": null
 }

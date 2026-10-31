@@ -1,14 +1,14 @@
 {
  "id": "gc-mansfield-park",
  "kind": "book",
- "fileName": "gc-mansfield-park_2026-10-17.gvec",
- "sizeBytes": 308244,
- "sha256": "0c7a19b59d3635fb12aec79fb6a45615d9494e2b74cf45a7fed241da3394e9dc",
- "count": 1048,
+ "fileName": "gc-mansfield-park_2026-10-30.gvec",
+ "sizeBytes": 308542,
+ "sha256": "1beeed448b8107fd6e78ce9959da2e080074249f2743ff08d63e561eca43b855",
+ "count": 1049,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bb112b74387307b85f132ad1998b8b2ada93b62fb67fe703324d4b14119d02f2",
+ "sourceSha256": "bf34a8925eeaefaf7f3e0a86e7510995a945fc7d75457feb138b41da5294d51e",
  "url": null
 }

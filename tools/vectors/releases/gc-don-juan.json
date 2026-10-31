@@ -1,14 +1,14 @@
 {
  "id": "gc-don-juan",
  "kind": "book",
- "fileName": "gc-don-juan_2026-10-17.gvec",
- "sizeBytes": 105384,
- "sha256": "8ce3e9f8082a3d00daaa1c14d1aee3da7f12676759d8d901dd21df13067bd674",
- "count": 358,
+ "fileName": "gc-don-juan_2026-10-30.gvec",
+ "sizeBytes": 105682,
+ "sha256": "2013e61d4de626b8d87ff41eb0540accacf56908adeb565858043bdb989b8e47",
+ "count": 359,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f25206965e9482c9e4c62ea96a5524232ce351dbb914342aaf313f6e5bdb4dfb",
+ "sourceSha256": "883ff428b4ff95176d12e37c17c4e101fab98997354d5731802b704fe56c7968",
  "url": null
 }

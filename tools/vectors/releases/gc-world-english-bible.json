@@ -1,0 +1,14 @@
+{
+ "id": "gc-world-english-bible",
+ "kind": "book",
+ "fileName": "gc-world-english-bible_2026-10-30.gvec",
+ "sizeBytes": 1795888,
+ "sha256": "6d85ca35525b1553fe6ec0c219ff3b5e108ec402c6d8be6ae3805bdf90a91359",
+ "count": 6108,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7c23a3b6b2a7a56d784bd8331650d7c2a846600c9e1c8d2c6354e545e21de5b5",
+ "url": null
+}

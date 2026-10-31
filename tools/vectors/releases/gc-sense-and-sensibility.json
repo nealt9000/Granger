@@ -1,14 +1,14 @@
 {
  "id": "gc-sense-and-sensibility",
  "kind": "book",
- "fileName": "gc-sense-and-sensibility_2026-10-17.gvec",
- "sizeBytes": 263556,
- "sha256": "89a8bc030068bd49ff351aa8afc2937205454e117b4c85d3fb2b997cf894273c",
- "count": 896,
+ "fileName": "gc-sense-and-sensibility_2026-10-30.gvec",
+ "sizeBytes": 263854,
+ "sha256": "b6bc4c52fd0b30047b273176b0cb480ebbac5aee11263110dd50910155f0007f",
+ "count": 897,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "892520dea666ceaed4d09927c60aefb43ef0ff40569438365eb58543ee1cb0cb",
+ "sourceSha256": "b1f0a8c23f8adeace93f04e30642fde89d8da67ed815f4b011cb9ded464bf499",
  "url": null
 }

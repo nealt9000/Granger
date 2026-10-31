@@ -1,14 +1,14 @@
 {
  "id": "gc-tale-of-two-cities",
  "kind": "book",
- "fileName": "gc-tale-of-two-cities_2026-10-17.gvec",
- "sizeBytes": 351462,
- "sha256": "762e82588dda83b49daeb8ab25e228c0a252cc656cdd0dde2b215a6b6ffc03e2",
- "count": 1195,
+ "fileName": "gc-tale-of-two-cities_2026-10-30.gvec",
+ "sizeBytes": 351760,
+ "sha256": "32da427b6c977ee3908445559d1f001a701027d4e51974f51d6d3081d546c2bb",
+ "count": 1196,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a22b7b04c8a4ea817cee28830c25ec686f370020471b04bd71a2bfba7e40b41e",
+ "sourceSha256": "d9f58960b2f5117ef1105b8f739e6d728d9c3134fff775bb5e566ef312520438",
  "url": null
 }

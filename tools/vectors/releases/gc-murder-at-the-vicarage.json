@@ -1,0 +1,14 @@
+{
+ "id": "gc-murder-at-the-vicarage",
+ "kind": "book",
+ "fileName": "gc-murder-at-the-vicarage_2026-10-30.gvec",
+ "sizeBytes": 221224,
+ "sha256": "4ec77566e187b9115ce6e2ce8df4c1641cd7f3f18dcd0555d4d0213903900f6d",
+ "count": 752,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a06245e67213a2be3e826a83a83f34ce62e8e3f3b8bef517a7f70bcaa0dfe47f",
+ "url": null
+}

@@ -1,14 +1,14 @@
 {
  "id": "gc-hunger",
  "kind": "book",
- "fileName": "gc-hunger_2026-10-17.gvec",
- "sizeBytes": 149778,
- "sha256": "08991973b2d2cbb4efb44a4756caf5309a105ff14662e45e2cba9067b1150782",
- "count": 509,
+ "fileName": "gc-hunger_2026-10-30.gvec",
+ "sizeBytes": 150076,
+ "sha256": "192df011583882ab4d3a6ac46479fff2c0975b2530cf362199972e5ea3de2a0c",
+ "count": 510,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "27edb0d327aca601fbfd926c3cc925c9ef64090f99ce6bd4291a7735239025dc",
+ "sourceSha256": "61763aef6e4345645a107e7e8a9a3cffdbd8fa332103e8466aa05d63f2535ead",
  "url": null
 }

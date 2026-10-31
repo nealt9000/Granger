@@ -1,14 +1,14 @@
 {
  "id": "gc-last-of-the-mohicans",
  "kind": "book",
- "fileName": "gc-last-of-the-mohicans_2026-10-17.gvec",
- "sizeBytes": 330294,
- "sha256": "95309f8803e748a5151dcbf06ff2c903876d3e854123c518ca1290a72911bbc3",
- "count": 1123,
+ "fileName": "gc-last-of-the-mohicans_2026-10-30.gvec",
+ "sizeBytes": 330592,
+ "sha256": "5b1d391bef2d5b737e0c4012c02e90312eeebb0fdd5de7cc8ba94ca6a3eb3fb3",
+ "count": 1124,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9d6c3d47d08d0d6be7060a6eaf9266a59250e73791c5a53092311e660cd1d492",
+ "sourceSha256": "f998f47ded37a2a7e231e05352937cb227a89bc5ae3808c804c6d413f410fd40",
  "url": null
 }

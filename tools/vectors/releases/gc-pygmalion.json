@@ -1,14 +1,14 @@
 {
  "id": "gc-pygmalion",
  "kind": "book",
- "fileName": "gc-pygmalion_2026-10-17.gvec",
- "sizeBytes": 90684,
- "sha256": "fce34cdcc97daf76a3f54c684bf8f325c3b5974dbd38036497e824e08d553e67",
- "count": 308,
+ "fileName": "gc-pygmalion_2026-10-30.gvec",
+ "sizeBytes": 90982,
+ "sha256": "b6f0b112624522d831bee7f343f890fbb34e1d13bad0a58dbf5d442e1b7db008",
+ "count": 309,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "be409b93076ec92305e92bdb49d3ebf242c2812b1e498c74b8f9c1652418c9d7",
+ "sourceSha256": "a17fe5982dded1b827472d5b0df170788359b8b8856dcc941541d7fce6f60d32",
  "url": null
 }

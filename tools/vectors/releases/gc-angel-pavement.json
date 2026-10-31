@@ -1,0 +1,14 @@
+{
+ "id": "gc-angel-pavement",
+ "kind": "book",
+ "fileName": "gc-angel-pavement_2026-10-30.gvec",
+ "sizeBytes": 367342,
+ "sha256": "d73fc56e60cd180dc5e14b1cf8b796e329b47c986f31ef273f74eebee82a204e",
+ "count": 1249,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "da3ebff336d8e7f4ef620d970fe1d521773b73ab558e53e10734953cdb2c964a",
+ "url": null
+}

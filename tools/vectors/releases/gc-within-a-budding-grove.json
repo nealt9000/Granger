@@ -1,0 +1,14 @@
+{
+ "id": "gc-within-a-budding-grove",
+ "kind": "book",
+ "fileName": "gc-within-a-budding-grove_2026-10-30.gvec",
+ "sizeBytes": 268558,
+ "sha256": "8f97e4c3980983129c0e8b48d267d2982facae46659c917633f0c00c0678d842",
+ "count": 913,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3e9d7dfe817a92275e66cdfda1c24dd1e10e6685b7f3611002d8b12d2b7f570a",
+ "url": null
+}

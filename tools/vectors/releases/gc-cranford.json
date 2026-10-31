@@ -1,14 +1,14 @@
 {
  "id": "gc-cranford",
  "kind": "book",
- "fileName": "gc-cranford_2026-10-17.gvec",
- "sizeBytes": 124200,
- "sha256": "c1d37fc41bd345e5a975ff61dda736350e5a9f76a5d1745f82c105a3daea9906",
- "count": 422,
+ "fileName": "gc-cranford_2026-10-30.gvec",
+ "sizeBytes": 124498,
+ "sha256": "6dba2d5d743126a40fbe4684d752cee3ab471674954c24d03a89707de9ae90a7",
+ "count": 423,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ea2dd8d282858b869100790ce3dbffbe2eb3a45fddb7a4e497e0f696c08cbf17",
+ "sourceSha256": "c0c71f855e6d4b077f3049cd07c3245393d92d67d26599a8c0b93e5d708a575c",
  "url": null
 }

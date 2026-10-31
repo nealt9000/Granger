@@ -1,14 +1,14 @@
 {
  "id": "gc-portrait-of-a-lady-volume-1",
  "kind": "book",
- "fileName": "gc-portrait-of-a-lady-volume-1_2026-10-17.gvec",
- "sizeBytes": 234156,
- "sha256": "756ce34aea353e4a6b3d0be612a87e64e485ec7b3956dfb2b2b4e7bf0f86a523",
- "count": 796,
+ "fileName": "gc-portrait-of-a-lady-volume-1_2026-10-30.gvec",
+ "sizeBytes": 234454,
+ "sha256": "04ea0c5f9e1dc95e4eef26314686c51145c7e32fa1d28282d55049f408e82888",
+ "count": 797,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1e8a2f11ce4ef579b52e8033fd81ce99c4b9c95fb4073948464ec0ac4d1cfe03",
+ "sourceSha256": "1029ccaa351fc9b663ac869b2484118a47b3e60c0e631442202e6229fb4f910e",
  "url": null
 }

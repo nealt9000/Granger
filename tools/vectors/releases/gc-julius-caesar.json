@@ -1,14 +1,14 @@
 {
  "id": "gc-julius-caesar",
  "kind": "book",
- "fileName": "gc-julius-caesar_2026-10-17.gvec",
- "sizeBytes": 60696,
- "sha256": "3a71ca4919bf0f0c967894fcbea2ae8a28997fec2c2921ba0599755f3806edd8",
- "count": 206,
+ "fileName": "gc-julius-caesar_2026-10-30.gvec",
+ "sizeBytes": 60994,
+ "sha256": "f03dff414fbb8050c010f1e69706c7b1811728ae576b5cd34a4116d4b5539eeb",
+ "count": 207,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "afc0c328862203e30503365b4d04415305de55e612316be281b5080899b4dad0",
+ "sourceSha256": "f13af40858e30af901c82baf38960e214da91c051bee4450331fdcfd9cb35aac",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-second-treatise-of-government",
  "kind": "book",
- "fileName": "gc-second-treatise-of-government_2026-10-17.gvec",
- "sizeBytes": 81570,
- "sha256": "c4df0e0d56d9b0f0a67e64de02ffb7e5dd0c67ca50038424c1b37ce6716b4cae",
- "count": 277,
+ "fileName": "gc-second-treatise-of-government_2026-10-30.gvec",
+ "sizeBytes": 81868,
+ "sha256": "0ce93966e340307875e2491ef4109d03842715050947d2e29d2b3eca9fde820b",
+ "count": 278,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "95d364cbe70448095b8c859473130184c4acc2a9164e82cc31306f576212f52c",
+ "sourceSha256": "74d43cb9b092edf6fc32343bc8eac970498c9e3b5188426527054500c1a962a4",
  "url": null
 }

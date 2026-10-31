@@ -1,0 +1,14 @@
+{
+ "id": "gc-vile-bodies",
+ "kind": "book",
+ "fileName": "gc-vile-bodies_2026-10-30.gvec",
+ "sizeBytes": 169186,
+ "sha256": "90fbad73377fa539d782b4f3b4ab3b3f9897e967892cc3dfa955a7154793515d",
+ "count": 575,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dbd9f985699e7878a196c19a92d164ffd820443bd5b9b9e157adc7ae6ebd26bc",
+ "url": null
+}

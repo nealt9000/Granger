@@ -1,14 +1,14 @@
 {
  "id": "gc-rubaiyat-of-omar-khayyam",
  "kind": "book",
- "fileName": "gc-rubaiyat-of-omar-khayyam_2026-10-17.gvec",
- "sizeBytes": 31002,
- "sha256": "39264f0a951680f30c047a677d50f2686523d801cc5b7bb624d4cd0c66cb25c0",
- "count": 105,
+ "fileName": "gc-rubaiyat-of-omar-khayyam_2026-10-30.gvec",
+ "sizeBytes": 31300,
+ "sha256": "a7a0458cfffd6190b5352897cec3fa2c137a8bf98bd3a4d90191167247a2858d",
+ "count": 106,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "56cc9eb2facd23d027500ae09cdeda8513a6c571d6b6fb11f9da485806f6d33e",
+ "sourceSha256": "753050fba735bf466e228d9f8bf3b83ee1c26934ad60dbda73e452edb3d0335e",
  "url": null
 }

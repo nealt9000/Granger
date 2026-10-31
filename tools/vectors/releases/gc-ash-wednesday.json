@@ -1,0 +1,14 @@
+{
+ "id": "gc-ash-wednesday",
+ "kind": "book",
+ "fileName": "gc-ash-wednesday_2026-10-30.gvec",
+ "sizeBytes": 7780,
+ "sha256": "f9577d4aa5fb0e3c670cce12da5f4ec21c4781735263670ac5a0b14ad5e37808",
+ "count": 26,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cde45dc4e80a07bb3c3302576cce5a635875ca6552dd96a7772224cdc0e5f8ab",
+ "url": null
+}

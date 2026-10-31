@@ -1,0 +1,14 @@
+{
+ "id": "gc-aeneid-mackail",
+ "kind": "book",
+ "fileName": "gc-aeneid-mackail_2026-10-30.gvec",
+ "sizeBytes": 138610,
+ "sha256": "1f296a9fbfbf004fc0f62bf44cd9f7234eb0884b89b242545f350c54d005fc65",
+ "count": 471,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "49f42d90b628075a501f6cf1820619b1c98b463c991d0d2e4c60eb4624bfdc3a",
+ "url": null
+}

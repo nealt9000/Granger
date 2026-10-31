@@ -1,14 +1,14 @@
 {
  "id": "gc-king-richard-ii",
  "kind": "book",
- "fileName": "gc-king-richard-ii_2026-10-17.gvec",
- "sizeBytes": 60696,
- "sha256": "9d700d278b901d9e1d055491ae9a7a5b9a6875c2c535a444cebe6fe46873b6ae",
- "count": 206,
+ "fileName": "gc-king-richard-ii_2026-10-30.gvec",
+ "sizeBytes": 60994,
+ "sha256": "196c6ab4c085b233a661ed05d90d156fd3b06b76b8e515579979a9fae38ebcf1",
+ "count": 207,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "fb00c6036bf0a7dfe3675980addbda2ab31de33c403a73b826ae77149c234355",
+ "sourceSha256": "c1897263f99fbe3dd17dcfd6c1a724ef0232f8d27bffa30c9044c46d0770b125",
  "url": null
 }

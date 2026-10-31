@@ -1,14 +1,14 @@
 {
  "id": "gc-on-liberty",
  "kind": "book",
- "fileName": "gc-on-liberty_2026-10-17.gvec",
- "sizeBytes": 60990,
- "sha256": "ebddf6a191cc2ee0c9165bbca1be019aaece58c66f3ca099deb20e23a2cc8fee",
- "count": 207,
+ "fileName": "gc-on-liberty_2026-10-30.gvec",
+ "sizeBytes": 61288,
+ "sha256": "f74fb859bf05bbfa920039ad83f701c241f4273f111103e0811d0f6b80cb028c",
+ "count": 208,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d469ad8631ffdb8fb31990008f89a810f2a945216cb92d639a0d5728f65b8577",
+ "sourceSha256": "758262570eb6d3ce8896327991e3502bd7f410f419dd67d5ee90834789f8ac28",
  "url": null
 }

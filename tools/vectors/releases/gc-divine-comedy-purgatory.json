@@ -1,14 +1,14 @@
 {
  "id": "gc-divine-comedy-purgatory",
  "kind": "book",
- "fileName": "gc-divine-comedy-purgatory_2026-10-17.gvec",
- "sizeBytes": 126846,
- "sha256": "7266a34f96e6eb5f10d1a2b10ed6d7c808c7ead81ad3382f3124bd71243cdc8c",
- "count": 431,
+ "fileName": "gc-divine-comedy-purgatory_2026-10-30.gvec",
+ "sizeBytes": 127144,
+ "sha256": "8ec010c5fda4bc096cc7cac48285b1dd4c34db74618f7a8d9d50c9447ab4e8bd",
+ "count": 432,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7946c92b371f2fc0efe1f6c0927ab90c65536d04199191ca7dbc7c48a79e9c3d",
+ "sourceSha256": "860fbc9578aee9de7e52413a55abe81fdb0fd13a8e47dcd223b20f0b9901f97d",
  "url": null
 }

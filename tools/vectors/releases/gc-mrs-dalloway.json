@@ -1,14 +1,14 @@
 {
  "id": "gc-mrs-dalloway",
  "kind": "book",
- "fileName": "gc-mrs-dalloway_2026-10-17.gvec",
- "sizeBytes": 123024,
- "sha256": "e6a9110cd9abe019e45a5f2dc4538fa2167c198e20ee3c53aaa1aea1c5555023",
- "count": 418,
+ "fileName": "gc-mrs-dalloway_2026-10-30.gvec",
+ "sizeBytes": 123322,
+ "sha256": "04ca4d7848daa3be4631ab471319f3afca0bfd3982b8dd43484e977bbad9687f",
+ "count": 419,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d0b3f59fb8f16fd19ca78c74c759aa0231481a7b4d2a27350ebf0821b15ced60",
+ "sourceSha256": "f5b7c67ee0b2ce75541dcda339b5eb480b52c645ed092354af69feb0f0702e52",
  "url": null
 }

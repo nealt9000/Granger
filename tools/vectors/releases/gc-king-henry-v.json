@@ -1,14 +1,14 @@
 {
  "id": "gc-king-henry-v",
  "kind": "book",
- "fileName": "gc-king-henry-v_2026-10-17.gvec",
- "sizeBytes": 67458,
- "sha256": "bbd5d1cafd447e08e78ad883a5b77c485c2a90c0a5625483b0ca5bf16e97b012",
- "count": 229,
+ "fileName": "gc-king-henry-v_2026-10-30.gvec",
+ "sizeBytes": 67756,
+ "sha256": "3c04d1e846b991495af338afe33f62a123bd7cc5d95b3cd1cdc94e0bf7125da3",
+ "count": 230,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e67e9a7ce0e0382f53f9edd46f209d8915ec2c6b1a253cc4d9dbfd4ce01a52e6",
+ "sourceSha256": "21cf4d76fa859f7cf14f3dcd9f537397a47017a0914a55fc2f1d5786cf1edfde",
  "url": null
 }

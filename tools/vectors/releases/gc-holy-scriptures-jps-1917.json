@@ -1,0 +1,14 @@
+{
+ "id": "gc-holy-scriptures-jps-1917",
+ "kind": "book",
+ "fileName": "gc-holy-scriptures-jps-1917_2026-10-30.gvec",
+ "sizeBytes": 578728,
+ "sha256": "95d0d6c7703d8fa783f893efb8b41317717d09f0945fb35612112c06a72af8f5",
+ "count": 1968,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0d18d2d3327f0c8391e7cb6e9a1a43be6986026592c24a4dbed590827f3e6472",
+ "url": null
+}

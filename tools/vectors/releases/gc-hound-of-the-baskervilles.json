@@ -1,14 +1,14 @@
 {
  "id": "gc-hound-of-the-baskervilles",
  "kind": "book",
- "fileName": "gc-hound-of-the-baskervilles_2026-10-17.gvec",
- "sizeBytes": 138900,
- "sha256": "c37da311e18344a8bac5524356fd2cf1f88d33732cca4eba9304f6175b29fd95",
- "count": 472,
+ "fileName": "gc-hound-of-the-baskervilles_2026-10-30.gvec",
+ "sizeBytes": 139198,
+ "sha256": "2157b87c0fd8534cff0a44965e1edc9d268f5ba994403ae9088687eadbea1a8d",
+ "count": 473,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b9bb3f50233265ec75b7dafde0bfc07cb238d60b9cfa1782bd85661c2ec03be9",
+ "sourceSha256": "0278931526a815b5df4cdaf83d5be7d4f700f729c785b90234be68a35e3a47a4",
  "url": null
 }

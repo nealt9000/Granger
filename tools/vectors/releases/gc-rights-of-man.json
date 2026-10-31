@@ -1,14 +1,14 @@
 {
  "id": "gc-rights-of-man",
  "kind": "book",
- "fileName": "gc-rights-of-man_2026-10-17.gvec",
- "sizeBytes": 203874,
- "sha256": "9414e52a00850f1fffa448453f7fb6f99adaa050e228e360b9906883e818b3f3",
- "count": 693,
+ "fileName": "gc-rights-of-man_2026-10-30.gvec",
+ "sizeBytes": 204172,
+ "sha256": "88f26471b9d8a5f07958936222684da9b9c738c627445a43559bccdc789a5565",
+ "count": 694,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b3edf2c9ac94f5bcc96e02ddd56dbe37e72f377777e7c5bc68b0871fc642903a",
+ "sourceSha256": "a5843f27dd9760a4eefab50fe636af1a5366b7f286b818ff79ad454e45189eae",
  "url": null
 }

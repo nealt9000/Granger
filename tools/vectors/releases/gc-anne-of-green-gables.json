@@ -1,14 +1,14 @@
 {
  "id": "gc-anne-of-green-gables",
  "kind": "book",
- "fileName": "gc-anne-of-green-gables_2026-10-17.gvec",
- "sizeBytes": 243564,
- "sha256": "0bffa6cff7b061bb5c5d60cb5226e2045b2ac5417efc11fa91342dad1c20ed02",
- "count": 828,
+ "fileName": "gc-anne-of-green-gables_2026-10-30.gvec",
+ "sizeBytes": 243862,
+ "sha256": "8316450cdf7d0d030569069595b3e08e188c12937ca7efb831bde90a3483f82c",
+ "count": 829,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "59ce1688579069f3ef6aaca47f2fb1a7ad51efe2ed416ca297cc9d5fd290098d",
+ "sourceSha256": "df90572d4d6d154bda9c226bda2a882ba801d0cfab42f7793b49653456e73f77",
  "url": null
 }

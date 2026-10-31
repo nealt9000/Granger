@@ -1,14 +1,14 @@
 {
  "id": "gc-fathers-and-sons",
  "kind": "book",
- "fileName": "gc-fathers-and-sons_2026-10-17.gvec",
- "sizeBytes": 204462,
- "sha256": "e528d940fa5f9792952f4951ba841407de01cc6502b4bbf49f50c23a393c9d38",
- "count": 695,
+ "fileName": "gc-fathers-and-sons_2026-10-30.gvec",
+ "sizeBytes": 204760,
+ "sha256": "70bf89726fc3742b98c84024f580b31c2a592233c7f3eb0b70ffbf20caf2fd89",
+ "count": 696,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f682397998f6108d136ad75cf9a4695e9d31314402423b07222cb5ce9363961a",
+ "sourceSha256": "ccb7dc43c25fa95af5a88082ca4fc813fdb690005278ccd2341a050dbbc1a4d1",
  "url": null
 }

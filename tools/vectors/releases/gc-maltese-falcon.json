@@ -1,0 +1,14 @@
+{
+ "id": "gc-maltese-falcon",
+ "kind": "book",
+ "fileName": "gc-maltese-falcon_2026-10-30.gvec",
+ "sizeBytes": 195352,
+ "sha256": "d12bf2d5321410ccba9d4bbeb3c7459a5c528fa5cfab7ff20aa6ce7172d37c16",
+ "count": 664,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d5a999fe81e8e03a9dabaef58c5ea6ccae67614e5bc91ac088f40c56beec98bc",
+ "url": null
+}

@@ -1,14 +1,14 @@
 {
  "id": "gc-picture-of-dorian-gray",
  "kind": "book",
- "fileName": "gc-picture-of-dorian-gray_2026-10-17.gvec",
- "sizeBytes": 174474,
- "sha256": "0a6f9990b5c14ba66cc32f30202a07f6388e78cc508fd15af78d1ddbce98beed",
- "count": 593,
+ "fileName": "gc-picture-of-dorian-gray_2026-10-30.gvec",
+ "sizeBytes": 174772,
+ "sha256": "0c0d8321dc298aa26c7bb3b5fdaf54fe20007d0bec3a9ad1febed6578b332781",
+ "count": 594,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "82f674c29c19d9a328f3842adb05d921e71aad9c49ea55c5a1b8c78575095b71",
+ "sourceSha256": "21c6542eb5db7edb19cfa43271e8637d452a6096cf2fa48f589047c9fc204c37",
  "url": null
 }

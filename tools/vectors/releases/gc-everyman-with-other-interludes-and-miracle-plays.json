@@ -1,14 +1,14 @@
 {
  "id": "gc-everyman-with-other-interludes-and-miracle-plays",
  "kind": "book",
- "fileName": "gc-everyman-with-other-interludes-and-miracle-plays_2026-10-17.gvec",
- "sizeBytes": 148896,
- "sha256": "745f549a21d7ec6bc03a43b0a7384eac3f10d38ae9744af093eae22b7d495940",
- "count": 506,
+ "fileName": "gc-everyman-with-other-interludes-and-miracle-plays_2026-10-30.gvec",
+ "sizeBytes": 149194,
+ "sha256": "f13089438a6265540f0b6712c1b0b26d9eec3086fcdb5433848d4b88a440ef6c",
+ "count": 507,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cc1cc4949baa338b38cada3d10e953236d718ef5a7425ed06c323992d78d24e2",
+ "sourceSha256": "820a2714bfa60ae6ff9c48738e4aa77ffaf1ad7df75c3a6e68fea466888cacf0",
  "url": null
 }

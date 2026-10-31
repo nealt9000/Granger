@@ -1,0 +1,14 @@
+{
+ "id": "gc-woman-of-andros",
+ "kind": "book",
+ "fileName": "gc-woman-of-andros_2026-10-30.gvec",
+ "sizeBytes": 41590,
+ "sha256": "f7a6015b679fb20e31cd430f47a198dbfab765073b9635e4ee82ba5f22b889c3",
+ "count": 141,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b104058fc96a8e3c6c554de617d429c4e09a2a5df70daa261a6fe15c1db5a5cf",
+ "url": null
+}

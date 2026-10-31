@@ -1,14 +1,14 @@
 {
  "id": "gc-scarlet-pimpernel",
  "kind": "book",
- "fileName": "gc-scarlet-pimpernel_2026-10-17.gvec",
- "sizeBytes": 240330,
- "sha256": "b50177c9102a89204c76040e40b52b0b8e6c702b6f31782d528a9c8aca310bfe",
- "count": 817,
+ "fileName": "gc-scarlet-pimpernel_2026-10-30.gvec",
+ "sizeBytes": 240628,
+ "sha256": "659786d261da5fdd908eaf7236845c553b1bb8c6c775e0c9a73b8f522b5d2360",
+ "count": 818,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ec7f88bac7aa4cae9c5119ceb1fc5e59ad6d84c8ec2b48d6af3970da050e52e1",
+ "sourceSha256": "3385721350f6a8ce36ddd18ee3ad4805b353ef8b5d7c322f9ecf5bfe732bc9d8",
  "url": null
 }

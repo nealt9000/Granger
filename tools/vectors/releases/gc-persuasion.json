@@ -1,14 +1,14 @@
 {
  "id": "gc-persuasion",
  "kind": "book",
- "fileName": "gc-persuasion_2026-10-17.gvec",
- "sizeBytes": 174768,
- "sha256": "7bd0199465f5b5d3b06400ae2d5988aebfcb72219664b809a5b83faa0e7a0083",
- "count": 594,
+ "fileName": "gc-persuasion_2026-10-30.gvec",
+ "sizeBytes": 175066,
+ "sha256": "1a285f185102c3854779157243058165fd4cf2a502a727020b318c0027fb64d6",
+ "count": 595,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e4a627466d10fab2e083542c4280bbc87f5fd5f81261c2b3df33498a7109698a",
+ "sourceSha256": "cdc06b6e6edbe13015b10783a5e0c1cf7ba361adf4f3ec996aeca013df8ee90b",
  "url": null
 }

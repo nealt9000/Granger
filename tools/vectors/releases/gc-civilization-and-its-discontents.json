@@ -1,0 +1,14 @@
+{
+ "id": "gc-civilization-and-its-discontents",
+ "kind": "book",
+ "fileName": "gc-civilization-and-its-discontents_2026-10-30.gvec",
+ "sizeBytes": 41884,
+ "sha256": "d77e2d10aa91524128894359498b50c9ad692b4daf2963c9ea007576912b86bc",
+ "count": 142,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "98915a7c86b28dd025c51f3e9bb507ac9400a6ea80490eaa4d9548628b642827",
+ "url": null
+}

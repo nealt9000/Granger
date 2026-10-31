@@ -1,14 +1,14 @@
 {
  "id": "gc-pericles",
  "kind": "book",
- "fileName": "gc-pericles_2026-10-17.gvec",
- "sizeBytes": 58050,
- "sha256": "b365652a65dfa59da47c43322ffa5324c71300a838c2fea328a775ae13f2afc0",
- "count": 197,
+ "fileName": "gc-pericles_2026-10-30.gvec",
+ "sizeBytes": 58348,
+ "sha256": "04a0664ec5d63f409232b740bb91da1bc76ffd32ceb3866d7f9fba6091db993b",
+ "count": 198,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ab24ffcd852f09e08ff850f34a10103240a5ded675436b26efc581dd35a92ffa",
+ "sourceSha256": "0850daed68f11f20de97b0e5e4fbe183f426182a1b1275263ae125c8cfefe077",
  "url": null
 }

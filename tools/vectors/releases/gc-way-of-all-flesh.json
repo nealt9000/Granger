@@ -1,14 +1,14 @@
 {
  "id": "gc-way-of-all-flesh",
  "kind": "book",
- "fileName": "gc-way-of-all-flesh_2026-10-17.gvec",
- "sizeBytes": 314712,
- "sha256": "1767ff05c065a88f757d858e5382a80b2e5cb586329c43799535f5561d9dfa93",
- "count": 1070,
+ "fileName": "gc-way-of-all-flesh_2026-10-30.gvec",
+ "sizeBytes": 315010,
+ "sha256": "06647fd9451837e769e022a90b72b7aa93589eec796d9871d42440a10116e751",
+ "count": 1071,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a0e2cffcc25b2f2a158c81f1aa602523fd159d7af30436206c1f7bf9c03af217",
+ "sourceSha256": "e4d7bd577f8d591784ad1059c002455c4b457b6b9da50ea61920239bee737753",
  "url": null
 }

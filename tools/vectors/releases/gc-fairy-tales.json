@@ -1,14 +1,14 @@
 {
  "id": "gc-fairy-tales",
  "kind": "book",
- "fileName": "gc-fairy-tales_2026-10-17.gvec",
- "sizeBytes": 736014,
- "sha256": "3ce3a3814c2595afd8da455253911eb84ba8b6fa705714c08313c6550ecf1cc2",
- "count": 2503,
+ "fileName": "gc-fairy-tales_2026-10-30.gvec",
+ "sizeBytes": 736312,
+ "sha256": "c138f70f2f8e9caad577733bc951904ac6538d243159d7032a79313b7bf1e0f9",
+ "count": 2504,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c322e2cf7dfb7c0f16bfc4fb9a3cfaf28e485e751b9720fc88c96ef84748c83a",
+ "sourceSha256": "906ed631e92a87808293a9aa12fefafcac1396065bb1cdc02c3e2c427586f60c",
  "url": null
 }

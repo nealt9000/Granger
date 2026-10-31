@@ -1,14 +1,14 @@
 {
  "id": "gc-twelfth-night",
  "kind": "book",
- "fileName": "gc-twelfth-night_2026-10-17.gvec",
- "sizeBytes": 65694,
- "sha256": "349d347efbb2647b594c91643a963512c9580dbc53e19278268f92366520e116",
- "count": 223,
+ "fileName": "gc-twelfth-night_2026-10-30.gvec",
+ "sizeBytes": 65992,
+ "sha256": "7a26901317f6d0bcdc82346426423189f24415d41731ce973573577e3f9cc6a5",
+ "count": 224,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "14623234a35946596c4c2798f688bd93b45b2ac43f5125fa618bd8fb8eabd12c",
+ "sourceSha256": "d7bd24f6752e3ffc50adb0aeceeb8037b996d08e1276671bff63542d3e96a0a7",
  "url": null
 }

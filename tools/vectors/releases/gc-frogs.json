@@ -1,14 +1,14 @@
 {
  "id": "gc-frogs",
  "kind": "book",
- "fileName": "gc-frogs_2026-10-17.gvec",
- "sizeBytes": 12186,
- "sha256": "bfc2440e55f1c3646ccb44597b187dba5dc4d7d57447137c2b91f88c9d16b6dd",
- "count": 41,
+ "fileName": "gc-frogs_2026-10-30.gvec",
+ "sizeBytes": 12484,
+ "sha256": "d74467c41bcc2782ed505ba04c6547fac0f21c2224c3aa95d5f8f3b6c863711a",
+ "count": 42,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c5447d1868ef2fcb7f46a24a4df1938554d110330e088604a2d5f479dc94beec",
+ "sourceSha256": "4d4830647145ab7d84438cc6c641df7491fe0f36af6fbd481d6d044935ecd708",
  "url": null
 }

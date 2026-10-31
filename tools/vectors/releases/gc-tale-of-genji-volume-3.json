@@ -1,0 +1,14 @@
+{
+ "id": "gc-tale-of-genji-volume-3",
+ "kind": "book",
+ "fileName": "gc-tale-of-genji-volume-3_2026-10-30.gvec",
+ "sizeBytes": 140668,
+ "sha256": "600277f372b840bcc12d37cfd724b94e94c99ac1e2eb6ea088074f7b37469dfe",
+ "count": 478,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "584d0930c9b85f6182346e18c42fc39b09526250afe49f4c21714c05b1feeb92",
+ "url": null
+}

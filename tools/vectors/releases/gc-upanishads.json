@@ -1,14 +1,14 @@
 {
  "id": "gc-upanishads",
  "kind": "book",
- "fileName": "gc-upanishads_2026-10-17.gvec",
- "sizeBytes": 45996,
- "sha256": "f1e3e3f0f927e350f69832971954a3b9f1881d347bae706df26074ae6cbb9b75",
- "count": 156,
+ "fileName": "gc-upanishads_2026-10-30.gvec",
+ "sizeBytes": 46294,
+ "sha256": "94d5e598ac61b87a0349e246df18a71ddaa5cb34779d38c983a7cfe98e28cac8",
+ "count": 157,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ecfefe7da90c4c7c71ca16e531284e2eefd2b27be7948bb8f09b63cb7543b6d5",
+ "sourceSha256": "745c4b16d0537ab810ba7ccaa51a974676b7846c80134ab9316b281d023eb56c",
  "url": null
 }

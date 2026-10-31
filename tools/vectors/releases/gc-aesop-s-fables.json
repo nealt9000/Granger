@@ -1,14 +1,14 @@
 {
  "id": "gc-aesop-s-fables",
  "kind": "book",
- "fileName": "gc-aesop-s-fables_2026-10-17.gvec",
- "sizeBytes": 116262,
- "sha256": "e242b635152f89b92a52c72a50171845ed63e620a6e8ae1fe28f452d8f8848e0",
- "count": 395,
+ "fileName": "gc-aesop-s-fables_2026-10-30.gvec",
+ "sizeBytes": 116560,
+ "sha256": "e9a7d6edc77dffabe60b6bfc4c437b7a0065cc406ed212e6814ea0fafc5e4d8a",
+ "count": 396,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "33700c6c92241ae6ca2099cd597693fab0b79f242cb612360679d7897d1bfb86",
+ "sourceSha256": "3e9d272cf96de844a3f14b43f89e0f6db56c57c3afaf01dba1c54db13ae64bcf",
  "url": null
 }

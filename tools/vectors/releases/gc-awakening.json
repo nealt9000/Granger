@@ -1,14 +1,14 @@
 {
  "id": "gc-awakening",
  "kind": "book",
- "fileName": "gc-awakening_2026-10-17.gvec",
- "sizeBytes": 175062,
- "sha256": "8efc82b09772ff476fdc94c76dcc7e2c52bfdd77442e09f300a1625fc2967c74",
- "count": 595,
+ "fileName": "gc-awakening_2026-10-30.gvec",
+ "sizeBytes": 175360,
+ "sha256": "2adaf58682171f7a69b21a551c08d3b5aa162767b17719c87830a988a8aa9ca7",
+ "count": 596,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9abaaea3454757295d8ec48268d2b4226b51b44fc3850e3a50351028f2d14723",
+ "sourceSha256": "ae1670962143ff7eacd6d22e6dc0c3870007c0734e1c5868f30089d4d7b3b6a3",
  "url": null
 }

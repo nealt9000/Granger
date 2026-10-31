@@ -1,14 +1,14 @@
 {
  "id": "gc-pilgrim-s-progress",
  "kind": "book",
- "fileName": "gc-pilgrim-s-progress_2026-10-17.gvec",
- "sizeBytes": 126258,
- "sha256": "c52de7b11b6c8814a97158c1c749a16c732f6b5f503614d37bf5bb16bccfd6b1",
- "count": 429,
+ "fileName": "gc-pilgrim-s-progress_2026-10-30.gvec",
+ "sizeBytes": 126556,
+ "sha256": "c6670df853286e217ed8b1009198d4de976c0af1723f3435a87886ae75d2a7fa",
+ "count": 430,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2043d5ace80f79bb7b8c1a210446e92b3fe6b41c57686435acb380276182d588",
+ "sourceSha256": "c7b41e4b79f6de0bd6e13ca407649ad0c747bfa3e6bdcfd3d0b7e0ad71686bf1",
  "url": null
 }

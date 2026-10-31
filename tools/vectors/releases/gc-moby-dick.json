@@ -1,14 +1,14 @@
 {
  "id": "gc-moby-dick",
  "kind": "book",
- "fileName": "gc-moby-dick_2026-10-17.gvec",
- "sizeBytes": 442308,
- "sha256": "6afd0f3b5511ba0a469274847da535de2f111a439291c9595a50c0afabe4ffac",
- "count": 1504,
+ "fileName": "gc-moby-dick_2026-10-30.gvec",
+ "sizeBytes": 442606,
+ "sha256": "390d336deacbbdb0e193c1ce52fa8613fb26dc6024b098cdc3a8d36fefdb165d",
+ "count": 1505,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "308eba222e55e15a9bd8cf3ac74e5ba7ef8c97ceebb9a3ef2810e7cf3f695540",
+ "sourceSha256": "d56cbd902d56c21cbff4cd772adde4c3d862e9c596fafd8a0c872644b06c53d6",
  "url": null
 }

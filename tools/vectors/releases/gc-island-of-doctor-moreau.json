@@ -1,14 +1,14 @@
 {
  "id": "gc-island-of-doctor-moreau",
  "kind": "book",
- "fileName": "gc-island-of-doctor-moreau_2026-10-17.gvec",
- "sizeBytes": 103032,
- "sha256": "c6bf5500fac3cc32f820fe1d1f536be5f50f37a4fb8283eafa4b1e119ba70bc5",
- "count": 350,
+ "fileName": "gc-island-of-doctor-moreau_2026-10-30.gvec",
+ "sizeBytes": 103330,
+ "sha256": "b21a852b06b03cbe7302b7022f23af2e47335e062294f3f9b3cdd593dc793462",
+ "count": 351,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "728fb457c3621625f5ed573ea1681a432f3966971ce86321a7da21d4eb616e4c",
+ "sourceSha256": "eede33ba873a5f408c6eaf62050af61780847aad7ab41f623c08fecefdbccb07",
  "url": null
 }

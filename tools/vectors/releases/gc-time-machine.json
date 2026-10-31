@@ -1,14 +1,14 @@
 {
  "id": "gc-time-machine",
  "kind": "book",
- "fileName": "gc-time-machine_2026-10-17.gvec",
- "sizeBytes": 63342,
- "sha256": "dd49c3994e9da8a2764913f31f15c9e000a3843426067d0eb7c7ef6bb0eeaf2d",
- "count": 215,
+ "fileName": "gc-time-machine_2026-10-30.gvec",
+ "sizeBytes": 63640,
+ "sha256": "cfa4812a3459e224b646be6de7413da22035d7666045c88dee2271c0feef4745",
+ "count": 216,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "557babc0f32278f9ed286a12588eec0b5ec8390e095fc3c904a0a50d23149736",
+ "sourceSha256": "db15a4fc425a0f9dfe76db33a41c0924e63722364dfa0985a085173685c3f881",
  "url": null
 }

@@ -1,0 +1,14 @@
+{
+ "id": "gc-cakes-and-ale",
+ "kind": "book",
+ "fileName": "gc-cakes-and-ale_2026-10-30.gvec",
+ "sizeBytes": 136552,
+ "sha256": "3df1da348b257c28810a36fcd0bb4f5b82fa472c7d2d28f909a0afc2b00c28d9",
+ "count": 464,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7a7e5825a0aade355d2e793fbe9297864f433eb736a51ab75c4f7eec1f752b5f",
+ "url": null
+}

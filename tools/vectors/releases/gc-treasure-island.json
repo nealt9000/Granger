@@ -1,14 +1,14 @@
 {
  "id": "gc-treasure-island",
  "kind": "book",
- "fileName": "gc-treasure-island_2026-10-17.gvec",
- "sizeBytes": 177708,
- "sha256": "3d93317a1fed96f463eb4828a8d9c43728a7496b5761319ec53111e2149059d5",
- "count": 604,
+ "fileName": "gc-treasure-island_2026-10-30.gvec",
+ "sizeBytes": 178006,
+ "sha256": "8455216d9d44e9691060922579df59feb1c02ec72ea7ebb7eabf85f2ba9b8a6c",
+ "count": 605,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7a2d911cf7aab040ffac028050969cc316a5ab648061498fda5b177a25ac6349",
+ "sourceSha256": "fc8de019f857f7e7f4c8c474ce3dac037f9562590990edf0d043467abaf171e0",
  "url": null
 }

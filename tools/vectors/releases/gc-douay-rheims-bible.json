@@ -1,0 +1,14 @@
+{
+ "id": "gc-douay-rheims-bible",
+ "kind": "book",
+ "fileName": "gc-douay-rheims-bible_2026-10-30.gvec",
+ "sizeBytes": 3350854,
+ "sha256": "89af8369392e8b872b0856e8c0379ccb788eec9ca49aeefd4cf33ca836da9371",
+ "count": 11397,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "627bfeed7641d2b5d0f909e7d1bdccff1f3e8a505bf3ccfe51fde1718ec76738",
+ "url": null
+}

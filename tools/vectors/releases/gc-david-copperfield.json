@@ -1,14 +1,14 @@
 {
  "id": "gc-david-copperfield",
  "kind": "book",
- "fileName": "gc-david-copperfield_2026-10-17.gvec",
- "sizeBytes": 873900,
- "sha256": "7d63ee9040ce4b5f8dab2e0d8510a101dc49c4a982adb143ccdbd62268cb1af4",
- "count": 2972,
+ "fileName": "gc-david-copperfield_2026-10-30.gvec",
+ "sizeBytes": 874198,
+ "sha256": "ad9828f5f0d134b1e1ab39ba5c3df4cebef514387a9a129b8565b654cde5dfdc",
+ "count": 2973,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "27546ce7d411441faea57c8b9466a2906a6a71bdfae7545ea6a6fd389f0f6a8f",
+ "sourceSha256": "539a70df916222c36268ed6ef1c07f9f56b589720f99d320d161afc85c24813e",
  "url": null
 }

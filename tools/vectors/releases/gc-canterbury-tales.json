@@ -1,14 +1,14 @@
 {
  "id": "gc-canterbury-tales",
  "kind": "book",
- "fileName": "gc-canterbury-tales_2026-10-17.gvec",
- "sizeBytes": 488760,
- "sha256": "c7a7c6c19ec9b3cd8a5e4b5679787d603a18f7c9b300c7b8cb935daa6cdff4d5",
- "count": 1662,
+ "fileName": "gc-canterbury-tales_2026-10-30.gvec",
+ "sizeBytes": 489058,
+ "sha256": "0a258cae8e55f0d0d2e91179c60d1ba645fcec5c372f833405c79b2ca2ef6efc",
+ "count": 1663,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "767020b24ce39a96590dc37fd607ca2f060c6bd8960eadcdc51328fc4d557178",
+ "sourceSha256": "d864c7b63829f4660e183b7d63de0c42456751dac76e24f4ec4fa7db0071cfb2",
  "url": null
 }

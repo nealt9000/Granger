@@ -1,14 +1,14 @@
 {
  "id": "gc-prince",
  "kind": "book",
- "fileName": "gc-prince_2026-10-17.gvec",
- "sizeBytes": 84804,
- "sha256": "3022ce015421187c7b327a65c8887527e9539206d186ed06654be775aa8d5dd2",
+ "fileName": "gc-prince_2026-10-30.gvec",
+ "sizeBytes": 84808,
+ "sha256": "17278b0306b65e3a79ef3338608f8226b87ee4957a3bed2acde42a5fdb01321f",
  "count": 288,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a547e4c555fd9a6a810f9a22c2034b4569727d97072d5c3404fe4863a1658dc6",
+ "sourceSha256": "acaf5291aee5ec67c7d7d174f973bf60e72684670a56d210a6660405c8966317",
  "url": null
 }

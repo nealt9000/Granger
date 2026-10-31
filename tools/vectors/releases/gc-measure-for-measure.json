@@ -1,14 +1,14 @@
 {
  "id": "gc-measure-for-measure",
  "kind": "book",
- "fileName": "gc-measure-for-measure_2026-10-17.gvec",
- "sizeBytes": 68634,
- "sha256": "af23fa3f3c72b6a5f4586765a6521c03e9ffad3fa4d8ca0c3c021f13f734056c",
- "count": 233,
+ "fileName": "gc-measure-for-measure_2026-10-30.gvec",
+ "sizeBytes": 68932,
+ "sha256": "2ff0dc8deb2f3613613888ed8ff42aba32d9dd30132b12e15a8f3d3aac4ffdcd",
+ "count": 234,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "64237b31670bf091cb595bc3ae95b018354d6fd93460fffb144165e3b33dc988",
+ "sourceSha256": "bce6376ff6b0eba4acdff60ff2ce31bb6731d9ac61432e04b830b259b16aebbe",
  "url": null
 }

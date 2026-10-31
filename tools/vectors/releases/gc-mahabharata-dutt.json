@@ -1,0 +1,14 @@
+{
+ "id": "gc-mahabharata-dutt",
+ "kind": "book",
+ "fileName": "gc-mahabharata-dutt_2026-10-30.gvec",
+ "sizeBytes": 170068,
+ "sha256": "895468078a9d532d734d8fdab96fd63b6df806715bc63774538b135366eb4d96",
+ "count": 578,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4932861041f85bf3d13465ac2f83bdf5763d94c2a528c37bbdbf4506d24a4784",
+ "url": null
+}

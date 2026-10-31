@@ -1,14 +1,14 @@
 {
  "id": "gc-wuthering-heights",
  "kind": "book",
- "fileName": "gc-wuthering-heights_2026-10-17.gvec",
- "sizeBytes": 258558,
- "sha256": "af29cf97a289112198cc7576dc14bd554958132f6e25240b259536ef78d8865d",
- "count": 879,
+ "fileName": "gc-wuthering-heights_2026-10-30.gvec",
+ "sizeBytes": 258856,
+ "sha256": "b7925345c9631faf56cb2ef3310c598105e8637e871c9120c144c49fa1380c52",
+ "count": 880,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9ae0c6517c0ea654e9e3bae2958c933211e26633a84b7f3643e615470c1ed511",
+ "sourceSha256": "ad5657f30142e4e30bc08102c2523e215d04e4395ef45d36236ae095c37d8b3d",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-jude-the-obscure",
  "kind": "book",
- "fileName": "gc-jude-the-obscure_2026-10-17.gvec",
- "sizeBytes": 383508,
- "sha256": "eb4d700639202d1134963d4f38d5b21b1d57807db5058c873ffa77b2f1385255",
- "count": 1304,
+ "fileName": "gc-jude-the-obscure_2026-10-30.gvec",
+ "sizeBytes": 383806,
+ "sha256": "ff5a224ff5d8ad6bbae73517d230324eea65b475e71ae8dace08b669847d2ef1",
+ "count": 1305,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a6288df386d6390848c10ed90074e6f6469b8efdbee4130be1e79bfce15094dc",
+ "sourceSha256": "a3b864a3e3d99e4de52316bf281e25d72d8ee4e8a79e8644ee65efd0c718e9d5",
  "url": null
 }

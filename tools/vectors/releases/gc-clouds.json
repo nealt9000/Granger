@@ -1,14 +1,14 @@
 {
  "id": "gc-clouds",
  "kind": "book",
- "fileName": "gc-clouds_2026-10-17.gvec",
- "sizeBytes": 13362,
- "sha256": "7363d39ea981ee4665135af772d9ebfa1190578de1a49fd9b1408341c4627607",
- "count": 45,
+ "fileName": "gc-clouds_2026-10-30.gvec",
+ "sizeBytes": 13660,
+ "sha256": "82a2ea37ed775cfacb999f72803f37002bd482392d9dad512a910a1d539adbb2",
+ "count": 46,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6a427f317786938734c7a7f203d31a7527abfaf8ef77ad5d0a0e1336948034f4",
+ "sourceSha256": "afb9d48baa8993b937bcbe30a303af71a4962b052d1fdc370fc83c0de56b0948",
  "url": null
 }

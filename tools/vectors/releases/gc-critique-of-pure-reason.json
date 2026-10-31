@@ -1,14 +1,14 @@
 {
  "id": "gc-critique-of-pure-reason",
  "kind": "book",
- "fileName": "gc-critique-of-pure-reason_2026-10-17.gvec",
- "sizeBytes": 330294,
- "sha256": "c306ca5d65d442711a6ed7a139de879ecf656b0cd1eeece339c5027923fa178d",
- "count": 1123,
+ "fileName": "gc-critique-of-pure-reason_2026-10-30.gvec",
+ "sizeBytes": 330592,
+ "sha256": "43c128440ec917fd31ff0ed0056fed09e6796b42814ca63a0404b25082f98478",
+ "count": 1124,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "db3ab74f2384d34bc4911a4900a7880f6913dfa3aacb8c60592747e25ee4b4d1",
+ "sourceSha256": "e35abb8b500a1b64a79c8bc68eb4233424cfd4ca36789407ebbb218c9ee693d0",
  "url": null
 }

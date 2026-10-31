@@ -1,14 +1,14 @@
 {
  "id": "gc-yellow-wallpaper",
  "kind": "book",
- "fileName": "gc-yellow-wallpaper_2026-10-17.gvec",
- "sizeBytes": 19536,
- "sha256": "b424a4506348c94bdad860de89dd0a4c8e3a8d023f5c8e5b6aac826b5d890ff3",
- "count": 66,
+ "fileName": "gc-yellow-wallpaper_2026-10-30.gvec",
+ "sizeBytes": 19834,
+ "sha256": "102a4c0c86a1c09aec5596e8e5b5b563672a6bb9c4ebdb201926c6479195c9ae",
+ "count": 67,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9db4f038b961b0536ebc6186cad7ad9faac7ddba2dde89126e0bd8bb617d6fa5",
+ "sourceSha256": "415b3172c1857acca096d1463e8989b9a23fcf783233e8a6eec11f15f377c320",
  "url": null
 }

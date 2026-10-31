@@ -1,14 +1,14 @@
 {
  "id": "gc-silas-marner",
  "kind": "book",
- "fileName": "gc-silas-marner_2026-10-17.gvec",
- "sizeBytes": 135666,
- "sha256": "129fecbadf1bb0dee34f4611eedb5dbb678f6f4af58ce523bdd387f18baf08db",
- "count": 461,
+ "fileName": "gc-silas-marner_2026-10-30.gvec",
+ "sizeBytes": 135964,
+ "sha256": "f276bbaa5aa55b793d1cdb44e85faa22163a0fc139001387d6e28ca7c4b0cd86",
+ "count": 462,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3475e4ec28b822998d1757bb707633a8717492a141c98c6ab8f5f721bf20abce",
+ "sourceSha256": "78be4a3cd493445cb70328ac7397b9f6caead68b9219178a93767f8e07455c0d",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-gorgias",
  "kind": "book",
- "fileName": "gc-gorgias_2026-10-17.gvec",
- "sizeBytes": 109206,
- "sha256": "c354d64de6ecedbe18ac3b07e33a0f2ecc753e93b645222c3751006695cc03f8",
- "count": 371,
+ "fileName": "gc-gorgias_2026-10-30.gvec",
+ "sizeBytes": 109504,
+ "sha256": "2580f1e3d20acc3eebf2f5a0a2cafbc268dcc488c5cd1075a91f5e48efa9be1e",
+ "count": 372,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "78c81c6103ae3d3673e2ce6d6e6f25611c7d4a556a7d096a18290db5bb083ee8",
+ "sourceSha256": "c2c05fb9b99fc9d8020b9928570a6936aa3bf7fbed80fd5a714d09d768f0af60",
  "url": null
 }

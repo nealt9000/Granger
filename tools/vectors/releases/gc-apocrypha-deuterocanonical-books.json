@@ -1,14 +1,14 @@
 {
  "id": "gc-apocrypha-deuterocanonical-books",
  "kind": "book",
- "fileName": "gc-apocrypha-deuterocanonical-books_2026-10-17.gvec",
- "sizeBytes": 483174,
- "sha256": "8640110c509753b500f34612716251efe5ea3181e74a62d3266a2968872a6fde",
- "count": 1643,
+ "fileName": "gc-apocrypha-deuterocanonical-books_2026-10-30.gvec",
+ "sizeBytes": 483472,
+ "sha256": "e0db6280c800ddb46d46a87885b314345294719f74070ce3fa77910029e3ba4f",
+ "count": 1644,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6004358af52a410e5898fdcbd6930ab70aeeff06db5986597deb6cf370857266",
+ "sourceSha256": "bb5cc6c632905e4e432bd7a1da8bc2420fb160bceb74342d81ceca5378e7ff9e",
  "url": null
 }

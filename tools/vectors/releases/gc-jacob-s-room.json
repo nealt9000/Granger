@@ -1,14 +1,14 @@
 {
  "id": "gc-jacob-s-room",
  "kind": "book",
- "fileName": "gc-jacob-s-room_2026-10-17.gvec",
- "sizeBytes": 133902,
- "sha256": "57b1bdd5f52129297557b28f813d4d0cee2f8aea7ba21029b73e64836ce9f3d7",
- "count": 455,
+ "fileName": "gc-jacob-s-room_2026-10-30.gvec",
+ "sizeBytes": 134200,
+ "sha256": "425b0391e6ba227c4734b015e526305d3041fbbbd32710ce68416f637c9f7e85",
+ "count": 456,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a41653601e8a50185fdbc0bcb3bf99827c8c0a3fe0611bf9761cbcbe02917cb6",
+ "sourceSha256": "34be64c48334f9f52bbb04fd50fbc6293c370a8d5d2835a51af560e519748fdc",
  "url": null
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-lost-world",
  "kind": "book",
- "fileName": "gc-lost-world_2026-10-17.gvec",
- "sizeBytes": 156540,
- "sha256": "1f75145d3c186a21c72b57f28e42bbe51f05d4554af5730e4de5904574c3255e",
- "count": 532,
+ "fileName": "gc-lost-world_2026-10-30.gvec",
+ "sizeBytes": 156838,
+ "sha256": "bcd7a60e18f3735d40f2678ed869595070e3c7f2b9d5342057ef9f79f0155961",
+ "count": 533,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "93400197a14d01788ccd75accf1593871905c976f1c7360c01ba9f5a85931952",
+ "sourceSha256": "5710d45005e844b4fdc785facac5efa79240050ef644417aa83682cba476688a",
  "url": null
 }
