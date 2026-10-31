@@ -17,3 +17,6 @@
 -keep class com.tom_roush.** { *; }
 -dontwarn com.gemalto.jp2.**
 -dontwarn org.slf4j.impl.StaticLoggerBinder
+
+# Navigation's typed routes find enum arguments by class name and valueOf (CatalogScope crashed launch).
+-keep enum app.granger.** { *; }
