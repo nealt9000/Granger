@@ -63,4 +63,10 @@
     <string name="media_documents_summary">Música y audiolibros</string>
     <string name="media_documents_music">Música</string>
     <string name="media_documents_audiobooks">Audiolibros</string>
+
+    <string name="media_auto_recent">Recientes</string>
+    <string name="media_auto_music">Música</string>
+    <string name="media_auto_audiobooks">Audiolibros</string>
+    <string name="media_auto_nothing">Aún no hay nada aquí</string>
+    <string name="media_unmounted">%1$s está en un almacenamiento que no está disponible ahora. Vuelve a conectarlo para terminar, o quita la descarga primero.</string>
 </resources>

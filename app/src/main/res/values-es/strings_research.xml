@@ -47,4 +47,7 @@
     <string name="research_delete_all_chats_title">¿Eliminar todos los chats?</string>
     <string name="research_delete_all_chats_body">Se eliminarán todos los chats, también este, con sus respuestas y fuentes.</string>
     <string name="research_delete_all">Eliminar todos</string>
+
+    <string name="research_librarian_no_space">No hay espacio suficiente en %1$s: libera %2$s.</string>
+    <string name="research_librarian_over_cap">Eso llevaría tus descargas por encima del límite de %1$s.</string>
 </resources>

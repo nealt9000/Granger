@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="launch_missing_notice">Lo último que estabas leyendo no está disponible. Revisa que su paquete siga en el teléfono o en la tarjeta SD.</string>
+</resources>

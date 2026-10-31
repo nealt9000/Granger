@@ -55,4 +55,7 @@
         <item quantity="other">Ya hay %1$d elementos fijados. Primero deja de fijar uno.</item>
     </plurals>
     <string name="shell_cant_play">No se puede reproducir “%1$s”: ya no está en la biblioteca o ninguno de sus archivos está en el teléfono.</string>
+
+    <string name="shell_percent">%1$d%%</string>
+    <string name="shell_chapter_percent">%1$s · %2$d%%</string>
 </resources>

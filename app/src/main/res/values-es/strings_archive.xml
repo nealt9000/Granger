@@ -63,4 +63,36 @@
     <string name="archive_offline">No se pudo conectar con archive.org. Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="archive_offer_epub_scan_pdf">EPUB hecho a partir de un escaneo · PDF</string>
     <string name="archive_offer_comic">Cómic: sus páginas, para hacer zoom</string>
+
+    <plurals name="archive_offer_parts">
+        <item quantity="one">%2$s · %1$d parte</item>
+        <item quantity="many">%2$s · %1$d partes</item>
+        <item quantity="other">%2$s · %1$d partes</item>
+    </plurals>
+    <string name="archive_label_size">%1$s · %2$s</string>
+    <string name="archive_choose_parts">Elegir partes</string>
+    <string name="archive_get_all">Descargar todo</string>
+    <string name="archive_get_all_size">Descargar todo · %1$s</string>
+    <plurals name="archive_parts">
+        <item quantity="one">%d parte</item>
+        <item quantity="many">%d partes</item>
+        <item quantity="other">%d partes</item>
+    </plurals>
+    <string name="archive_find_part">Buscar una parte</string>
+    <string name="archive_part_queued">%1$s · en cola</string>
+    <string name="archive_part_downloading">%1$s · descargando, %2$d%%</string>
+    <string name="archive_part_stopped">%1$s · detenida: %2$s</string>
+    <string name="archive_part_in_library">%1$s · en tu biblioteca</string>
+    <string name="archive_large_part">Esta parte pesa %1$s. ¿Descargarla?</string>
+    <string name="archive_large_set">Este conjunto pesa %1$s. ¿Descargarlo?</string>
+    <plurals name="archive_large_parts">
+        <item quantity="one">Esta parte pesa %2$s. ¿Descargarla?</item>
+        <item quantity="many">Estas %1$d partes pesan %2$s. ¿Descargarlas?</item>
+        <item quantity="other">Estas %1$d partes pesan %2$s. ¿Descargarlas?</item>
+    </plurals>
+    <plurals name="archive_row_parts">
+        <item quantity="one">%1$d parte · %2$s</item>
+        <item quantity="many">%1$d partes · %2$s</item>
+        <item quantity="other">%1$d partes · %2$s</item>
+    </plurals>
 </resources>

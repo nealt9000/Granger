@@ -69,6 +69,12 @@ Words the draft added, used the same way everywhere:
 | phone | teléfono | Never *celular* or *móvil* |
 | headphones | auriculares | |
 | Get (a download button) | Descargar | |
+| searchable in full | buscable por completo | Search and Ask can read a book's whole text |
+| media type (Books, Music…) | tipo de contenido | |
+| set (a preset; an archive.org multi-part item) | conjunto | *Paquete* is taken by packs |
+| collection | colección | |
+| pictures (a pack's flavour) | imágenes | "Con imágenes", "Sin imágenes" |
+| covers (a bigger pack holds a smaller) | incluye | |
 
 ## The strings Claude is least sure of
 
@@ -102,6 +108,19 @@ Words the draft added, used the same way everywhere:
 | `audiobooks_missing` | No encontrado | A book whose files are gone. |
 | `ebook_tab_gone`, `reader_tab_gone` | Este marcador se quitó. | The English says "bookmark", but this shows when the rail item that opened the page is gone. The draft follows the English; it may change. |
 | `*_percent` | 25% | No space before %, as most Latin American apps write it; RAE prefers "25 %". |
+| `library_*searchable*`, `library_full_text` | Hacer todos buscables…; Buscable por completo; 312 buscables por completo | *Buscable* is used in software but isn't in every dictionary. The alternative is longer: "se puede buscar en todo el texto". |
+| `library_new_media_type` | Nuevo tipo de contenido | A top-level group such as Books or Music. *Tipo de medio* is the literal, but reads as technical. |
+| `library_sort_recent` | Leídos hace poco | A sort order, "Recently read". *Leídos recientemente* is longer. |
+| `sources_preset_title`, `archive_large_set` | Conjunto %1$s ("Conjunto Clásicos Granger") | A ready-made set of downloads. Does *conjunto* read naturally before a name? |
+| `sources_pictures_only` | Con imágenes (única opción) | English "With pictures only". Spanish can't put *solo* before a capitalised choice name, so the draft puts a note after it. |
+| `sources_get_smaller` | Descargar la versión sin imágenes, 7,0 GB | English "Get no pictures, 7.0 GB"; *la versión* was added so the flavour reads as a noun. |
+| `sources_adds_*` | Amplía tu %1$s (12% nuevo); Agrega unos 4.000 artículos a… | A Wikipedia subject's share of new articles. "(12% nuevo)" is terse; "(12% son nuevos)" is the fuller form. |
+| `sources_tidy_text` | Tus lugares y marcadores se trasladan. | English "move across" to the bigger pack. |
+| `sources_link_models_sub` | Lo que hace funcionar Preguntar y la lectura en voz alta | English "What Ask and Read aloud run on". |
+| `sources_all` | Todas | The chip that shows every category; agrees with *categorías*. |
+| `onboarding_held*`, `readiness_covers*` | Wikipedia Top 1 million incluye Best 50,000… | The slice names come from the catalog, in English until L3, so the sentence mixes languages for now. |
+| `ebook_pdf_reads_badly` | …(%1$s), así que se queda como páginas. | %1$s is the converter's reason, still in English ("no chapters"). |
+| `media_unmounted` | Vuelve a conectarlo para terminar, o quita la descarga primero. | English "Put it back": the storage is usually an SD card, so *insertar* may be better. |
 
 ## Where length forced a shorter wording
 
@@ -112,3 +131,5 @@ Words the draft added, used the same way everywhere:
 - `downloads_time_left_*`, `downloads_in_*`: min, h and s stay abbreviated, as in English.
 - `readiness_show_all`: "Mostrar todo (%1$d)", which also avoids choosing a gender for "gaps".
 - `onboarding_your_picks`: "Lo que elegiste" for "Your picks".
+- `sources_family_stack_exchange`: "Sitios de preguntas y respuestas" is long for a row title; English is "Q&A sites". Task 4 checks it fits.
+- `sources_family_devdocs`: "Documentación para desarrolladores", also long for a row title.

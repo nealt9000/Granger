@@ -69,4 +69,16 @@
     <string name="ebook_tab_gone">Este marcador se quitó.</string>
     <string name="ebook_book_gone">Este libro ya no está en el teléfono. Revisa la tarjeta SD o vuelve a descargarlo desde Granger.</string>
     <string name="ebook_book_damaged">No se pudo abrir este libro. Intenta quitarlo y luego descargarlo o importarlo de nuevo.</string>
+
+    <string name="ebook_original_pages">Páginas originales</string>
+    <string name="ebook_remove_original_pages">Quitar páginas originales · %1$s</string>
+    <string name="ebook_remove_original_title">¿Quitar las páginas originales?</string>
+    <string name="ebook_remove_original_body">Se elimina el PDF con el que se hizo este libro electrónico, y con él el libro tal como se imprimió. El libro electrónico se queda.</string>
+    <string name="ebook_original_pages_removed">Se quitaron las páginas originales</string>
+    <string name="ebook_original_pages_not_removed">No se pudieron quitar las páginas originales</string>
+    <string name="ebook_read_as_ebook">Leer como libro electrónico</string>
+    <string name="ebook_making_ebook">Creando un libro electrónico con este PDF…</string>
+    <string name="ebook_cant_make_ebook">No se pudo crear un libro electrónico con este PDF</string>
+    <!-- %1$s comes from the converter in English, such as "no chapters". -->
+    <string name="ebook_pdf_reads_badly">Este PDF no se lee bien como libro electrónico (%1$s), así que se queda como páginas.</string>
 </resources>

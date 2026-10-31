@@ -58,4 +58,7 @@
     <string name="readiness_checking">Revisando… %1$d%%</string>
     <string name="readiness_check">Revisar</string>
     <string name="readiness_download_again">Volver a descargar</string>
+
+    <string name="readiness_covers_slice">%1$s %2$s incluye %3$s</string>
+    <string name="readiness_covers">%1$s incluye %2$s</string>
 </resources>
