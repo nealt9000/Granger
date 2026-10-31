@@ -11,7 +11,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * A Granger voice: a Piper model through sherpa-onnx, two threads (V0: four add nothing). The text is written out
- * for the phonemizer first ([SpokenText]: years, ranges, units) and respelled second ([Pronunciations]).
+ * for the phonemizer first ([SpokenWords]: quote marks, titles, initials, Roman numerals; then [SpokenText]: years,
+ * ranges, units) and respelled second ([Pronunciations]).
  */
 class SherpaSpeech internal constructor(
     override val voice: Voice,
@@ -36,7 +37,7 @@ class SherpaSpeech internal constructor(
     }
 
     /** What the engine is handed for [text]. */
-    internal fun spoken(text: String): String = Pronunciations.apply(SpokenText.forPiper(text), pronunciations)
+    internal fun spoken(text: String): String = Pronunciations.apply(SpokenText.forPiper(SpokenWords.forPiper(text)), pronunciations)
 
     override fun close() = tts.close()
 
