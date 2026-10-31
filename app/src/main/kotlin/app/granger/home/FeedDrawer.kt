@@ -31,7 +31,9 @@ class FeedDrawer(
     /** Full-text hits inside books. */
     private val bookSearch: suspend (query: String) -> List<BookHit>,
     private val librarySearch: LibrarySearch,
-    /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. */
+    /** The library's languages, main first (Plan L3): On this day reads the first one's encyclopedia. */
+    private val languages: () -> List<String> = { listOf("en") },
+    /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. Last, for a trailing lambda. */
     private val thumbnail: (archive: ZimArchive, path: String, html: String) -> String? = { _, _, _ -> null },
 ) {
     /** The feed's row for the day, or null when it has nothing to show. */
@@ -101,23 +103,42 @@ class FeedDrawer(
     }
 
     private suspend fun onThisDay(scope: Resolved, day: LocalDate, random: Random): List<Card> {
-        val title = DayPage.title(day)
-        val pack = scope.packs.firstOrNull()
-        if (pack == null) {
-            // Books only: the date in the text.
-            return bookSearch(title).shuffled(random).take(CARDS).map { bookCard(it) }
+        val langs = languages().ifEmpty { listOf("en") }
+        val chosen = encyclopedia(scope.packs, langs)
+        if (chosen == null) {
+            // Books only: the date in the text, as the main language writes it.
+            return bookSearch(DayPage.title(day, dayLanguage(langs.first()))).shuffled(random).take(CARDS).map { bookCard(it) }
         }
+        val (pack, lang) = chosen
+        val title = DayPage.title(day, lang)
         val archive = archiveOf(pack) ?: return emptyList()
-        val path = DayPage.paths(day).firstNotNullOfOrNull { archive.resolvePath(it) }
-        val page = path?.let { archive.read(it) }?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8)) }
+        val path = DayPage.paths(day, lang).firstNotNullOfOrNull { archive.resolvePath(it) }
+        val page = path?.let { archive.read(it) }?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8), lang) }
         if (path == null || page == null || page.isEmpty) {
             return archive.search(title, SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) }
         }
         fun pick(lines: List<String>, n: Int, section: String) =
             lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
-        // The section names are the English Wikipedia's (the card's line and its anchor): data, not UI (L3 makes them per language).
-        return pick(page.events, 3, "Events") + pick(page.births, 1, "Births") + pick(page.deaths, 1, "Deaths")
+        // The section names are the pack's Wikipedia's (the card's line and its anchor): data, not UI (Plan L3).
+        val (events, births, deaths) = DayPage.sections(lang)
+        return pick(page.events, 3, events) + pick(page.births, 1, births) + pick(page.deaths, 1, deaths)
     }
+
+    /**
+     * The encyclopedia On this day reads (Plan L3), and the language its day article is in: the first library language
+     * with a Wikipedia installed, else any installed Wikipedia. A general one (Everything, Top) before a subject.
+     */
+    private fun encyclopedia(packs: List<Pack>, langs: List<String>): Pair<Pack, String>? {
+        val ordered = packs.sortedBy { !GENERAL.containsMatchIn(it.name) }
+        for (lang in langs) {
+            ordered.firstOrNull { app.granger.core.catalog.Languages.has(it.language, lang) }?.let { return it to dayLanguage(lang) }
+        }
+        val pack = ordered.firstOrNull() ?: return null
+        return pack to dayLanguage(app.granger.core.catalog.Languages.codes(pack.language).firstOrNull() ?: "en")
+    }
+
+    /** [lang] when its Wikipedia's day articles are read here, else English. */
+    private fun dayLanguage(lang: String) = if (lang in DayPage.LANGUAGES) lang else "en"
 
     private suspend fun search(scope: Resolved, query: String, random: Random): List<Card> {
         val cards = ArrayList<Card>()
@@ -176,6 +197,9 @@ class FeedDrawer(
     companion object {
         const val CARDS = 5
         private const val SEARCH_LIMIT = 30
+
+        /** A whole encyclopedia's ZIM name, not a subject's: `wikipedia_es_all`, `wikipedia_en_top`. */
+        private val GENERAL = Regex("^wikipedia_[a-z]{2,3}_(all|top|top1m|100)(_|$)")
 
         /** Subjects (lower-cased substrings) of books one dips into rather than reads through. */
         val DIP_IN = listOf("poetry", "poem", "scripture", "religion", "philosophy", "quotation", "aphorism", "essay", "proverb")

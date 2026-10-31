@@ -246,6 +246,7 @@ def load_contents(root=None, path=CONTENTS):
 # Plan GB: the two everything-packs, whose summaries describe the producer rather than a subject.
 GUTENBERG_EVERYTHING = {
     "gutenberg_en_all": "Every English book",
+    "gutenberg_es_all": "Todos los libros en español",  # Plan L3: named in its own language, as the app's GutenbergNames
     "gutenberg_mul_all": "Every book, all languages",
 }
 

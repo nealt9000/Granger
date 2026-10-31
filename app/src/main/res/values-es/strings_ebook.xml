@@ -81,4 +81,5 @@
     <string name="ebook_cant_make_ebook">No se pudo crear un libro electrónico con este PDF</string>
     <!-- %1$s comes from the converter in English, such as "no chapters". -->
     <string name="ebook_pdf_reads_badly">Este PDF no se lee bien como libro electrónico (%1$s), así que se queda como páginas.</string>
+    <string name="ebook_defined_in">Definición del Wikcionario en %1$s</string>
 </resources>

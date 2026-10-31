@@ -687,13 +687,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         }
     }
 
-    /** Opens [word]'s Wiktionary entry over the book, so Back returns to the page; false when there is none. */
-    suspend fun lookUpInWiktionary(packId: String, word: String): Boolean {
-        val hit = withContext(Dispatchers.IO) { container.library.archive(packId)?.suggest(word, 5) }
-            ?.let { Dictionary.pick(it, word) } ?: return false
-        val tab = container.sessions.openTab(packId, hit.path, hit.title).let { container.sessions.tab(it) } ?: return false
-        nav.showTab(tab, keepCurrent = true)
-        return true
+    /**
+     * Opens [word]'s Wiktionary entry over the book, so Back returns to the page, at the section for the book's language
+     * (Plan L3: the Wiktionary [Dictionary.choose] picks for a book in [bookLanguage]; [packId] when it picks none).
+     */
+    suspend fun lookUpInWiktionary(packId: String, word: String, bookLanguage: String?): app.granger.ebook.LookUp {
+        val definer = Dictionary.choose(container.library.packs.first(), bookLanguage, container.knowledgeNow.value)
+        val id = definer?.packId ?: packId
+        val hit = withContext(Dispatchers.IO) { container.library.archive(id)?.suggest(word, 5) }
+            ?.let { Dictionary.pick(it, word) } ?: return app.granger.ebook.LookUp.NotFound
+        val tab = container.sessions.openTab(id, hit.path, hit.title).let { container.sessions.tab(it) } ?: return app.granger.ebook.LookUp.NotFound
+        nav.showTab(tab, keepCurrent = true, fragment = definer?.anchor)
+        return app.granger.ebook.LookUp.Found(
+            definer?.takeIf { it.fallback }?.let {
+                UiText.Res(R.string.ebook_defined_in, app.granger.sources.KiwixList.languageName(it.wiktionaryLanguage))
+            },
+        )
     }
 
     val selected = entry?.let { e ->
@@ -1234,6 +1243,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 bookSearch = { container.bookIndex.search(it) },
                                 librarySearch = container.search,
                                 thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
+                                languages = { container.knowledgeNow.value },
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
                             knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,

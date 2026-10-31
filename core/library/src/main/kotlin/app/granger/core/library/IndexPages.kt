@@ -12,6 +12,9 @@ package app.granger.core.library
  *   is a redirect stub `a/<id>`, titled "a/<id>". A question is `questions/<id>/<slug>`, and is kept.
  * - iFixit (`ifixit_en_all`): the main page is `home/home`; a person is `User/<id>/<name>`, titled with their name. The
  *   guides are under `Guide/`, `Device/`, `Teardown/` and `Info/`, and are kept.
+ *
+ * Plan L3: the Stack Exchange paths are the same whatever the site's language (Spanish Language SE is `_mul_`).
+ * `ifixit_es_all` wasn't read: if its people pages aren't under `User/`, they show in the feeds until a row is added here.
  */
 object IndexPages {
     private val EXACT = setOf("users", "tags", "questions")

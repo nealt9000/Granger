@@ -192,4 +192,25 @@ class FeedDrawerTest {
         assertThat(Cards.decode("{\"title\":\"x\",\"cards\":[{\"title\":\"a\",\"subtitle\":\"\",\"target\":{\"kind\":\"Digest\"}}]}")).isNull()
         assertThat(Cards.decode("not json")).isNull()
     }
+
+    @Test fun onThisDayReadsTheMainLibraryLanguagesEncyclopedia() = runTest {
+        val spanishHtml = javaClass.classLoader!!.getResourceAsStream("home/22_de_octubre.html")!!.readBytes().decodeToString()
+        val es = pack("u5", "Wikipedia en español").copy(name = "wikipedia_es_all", language = "spa")
+        val medicine = pack("u6", "WikiMed").copy(name = "wikipedia_es_medicine", language = "spa")
+        val esArchive = FakeZimArchive(uuid = "u5", paths = setOf("index"), contents = mapOf("22_de_octubre" to spanishHtml))
+        fun drawer(langs: List<String>) = FeedDrawer(
+            archiveOf = { when (it.id) { "u1" -> archive; "u5" -> esArchive; else -> null } },
+            chunksOf = { emptyList() }, bookSearch = { emptyList() }, librarySearch = librarySearch, languages = { langs },
+        )
+        val scope = Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia, medicine, es))
+        val spanish = drawer(listOf("es", "en")).draw(feed(FeedKind.ON_THIS_DAY), scope, day)!!
+        assertThat(spanish.cards.map { it.subtitle }).containsExactly("Acontecimientos", "Acontecimientos", "Acontecimientos", "Nacimientos", "Fallecimientos").inOrder()
+        assertThat(spanish.cards.first().target).isEqualTo(CardTarget.Article("u5", "22_de_octubre", fragment = "Acontecimientos"))
+        // English first: the English encyclopedia, as before.
+        val english = drawer(listOf("en", "es")).draw(feed(FeedKind.ON_THIS_DAY), scope, day)!!
+        assertThat(english.cards.first().target).isEqualTo(CardTarget.Article("u1", "October_22", fragment = "Events"))
+        // No Wikipedia in the library's language: any installed one.
+        val any = drawer(listOf("es")).draw(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)!!
+        assertThat(any.cards.first().subtitle).isEqualTo("Events")
+    }
 }

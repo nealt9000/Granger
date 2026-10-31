@@ -414,7 +414,7 @@ None of the five mentions Gutenberg.
 
 ## Task 10: Home, Browse and Define per language (app)
 
-- [ ] **Step 1: `DayPage` per language.**
+- [x] **Step 1: `DayPage` per language.**
   - `title(day, lang)`:
     - English "October 22", unchanged.
     - Spanish "22 de octubre": lower-case month, no leading zero, and 1 January is "1 de enero".
@@ -423,16 +423,21 @@ None of the five mentions Gutenberg.
     - `es`: Acontecimientos / Nacimientos / Fallecimientos.
   - Years are split on "–" for English and ":" for Spanish. A line with no year keeps its text.
   - Tests use fixtures cut from the Spanish ZIM's `22_de_octubre` (research §4).
-- [ ] **Step 2: On this day** draws from the encyclopedia of the first knowledge language that has one installed, then any installed Wikipedia.
-- [ ] **Step 3: Define.**
+- [x] **Step 2: On this day** draws from the encyclopedia of the first knowledge language that has one installed, then any installed Wikipedia.
+- [x] **Step 3: Define.**
   - `Dictionary.choose(packs, bookLanguage, knowledgeLanguages)` prefers, in order:
     1. the Wiktionary in the user's main language when the book is in another language (the learner case: English Wiktionary for a Spanish book);
     2. the Wiktionary in the book's language;
     3. any Wiktionary, with a note ("Defined in English Wiktionary").
   - The page opens at the anchor for the book's language: `#Spanish` in en.wiktionary, `#Español` in es.wiktionary.
   - Tests cover each case and the anchor.
-- [ ] **Step 4: `_en` assumptions.** Check `PageTitles`, `IndexPages`, `Filing`, `GutenbergNames` (add "Todos los libros en español" for `gutenberg_es_all`) and `LibraryDatabase`'s Gutenberg names. Fix each one, or comment why it's language-neutral.
-- [ ] **Step 5:** Commit.
+- [x] **Step 4: `_en` assumptions.** Check `PageTitles`, `IndexPages`, `Filing`, `GutenbergNames` (add "Todos los libros en español" for `gutenberg_es_all`) and `LibraryDatabase`'s Gutenberg names. Fix each one, or comment why it's language-neutral.
+- [x] **Step 5:** Commit.
+  - Done. The fixture is `app/src/test/resources/home/22_de_octubre.html`, cut from `wikipedia_es_top_nopic_2026-10.zim` with `zim_probe.py entry` (4 events, 3 births, 3 deaths, 2 Celebraciones, in mwoffliner's markup; 5.7 KB). Its first event's year is "4004 a. C." and its second line has none ("El 22 de octubre de algún año…"), so both cases are real.
+  - **Years:** `DayPage.split(line, lang)` gives (year, text). The cards still show the line whole, as each Wikipedia writes it: English cards are unchanged.
+  - **On this day:** a general encyclopedia (`_all`, `_top`, `_top1m`, `_100`) before a subject in the same language; a pack in a language without day articles here is read as English. A books-only feed searches the date as the main language writes it.
+  - **Define:** the menu's availability is unchanged (`choose(packs, handler)`); the lookup picks with `Dictionary.choose(packs, bookLanguage, knowledgeLanguages)`, the book's language from its EPUB metadata, and opens the entry at the anchor (`showTab(fragment)`). A book that doesn't say its language is taken to be in the main language. Case 3 (any Wiktionary) prefers the main language's, else the newest, and the reader says "Defined in English Wiktionary" (`ebook_defined_in`).
+  - **`_en` assumptions:** `GutenbergNames` names `gutenberg_es_all` "Todos los libros en español" (and the generator's `GUTENBERG_EVERYTHING` too, with a test; the catalog isn't rebuilt here). `PageTitles` takes "Portada" and "Página principal" as front pages; Spanish Wikipedia titles need no suffix rule. `Filing`'s rules and `LibraryDatabase`'s Gutenberg migration are language-neutral (commented). `IndexPages`: `ifixit_es_all`'s people pages weren't read; commented.
 
 ## Task 11: Sign, merge, walkthrough
 

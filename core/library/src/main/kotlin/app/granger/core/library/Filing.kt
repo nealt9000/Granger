@@ -4,7 +4,11 @@ package app.granger.core.library
 object Filing {
     private class Rule(val matches: (String) -> Boolean, val key: String, val name: String)
 
-    /** Mapping from `Pack.name` to a collection key and name; first match wins. */
+    /**
+     * Mapping from `Pack.name` to a collection key and name; first match wins. Language-neutral on purpose (Plan L3):
+     * `wikipedia_es_all` files beside `wikipedia_en_all` in Wikipedia, as each project is one collection whatever its
+     * language; the names are the projects' own.
+     */
     private val RULES = listOf(
         Rule({ it.startsWith("wikipedia_") }, "wikipedia", "Wikipedia"),
         Rule({ it.startsWith("wiktionary_") }, "wiktionary", "Wiktionary"),

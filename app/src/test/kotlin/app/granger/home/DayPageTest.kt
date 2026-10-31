@@ -62,4 +62,39 @@ class DayPageTest {
         assertThat(DayPage.paths(day)).containsExactly("October_22", "A/October_22", "October 22").inOrder()
         assertThat(DayPage.title(LocalDate.of(2026, 3, 1))).isEqualTo("March 1")
     }
+
+    // Plan L3: Spanish Wikipedia's day articles.
+    private val spanish = javaClass.classLoader!!.getResourceAsStream("home/22_de_octubre.html")!!.readBytes().decodeToString()
+
+    @Test fun theSpanishTitleIsDayDeMonth() {
+        assertThat(DayPage.title(LocalDate.of(2026, 10, 22), "es")).isEqualTo("22 de octubre")
+        assertThat(DayPage.title(LocalDate.of(2026, 1, 1), "es")).isEqualTo("1 de enero")
+        assertThat(DayPage.title(LocalDate.of(2026, 9, 5), "es")).isEqualTo("5 de septiembre")
+        assertThat(DayPage.paths(LocalDate.of(2026, 10, 22), "es")).containsExactly("22_de_octubre", "A/22_de_octubre", "22 de octubre").inOrder()
+        // English is unchanged, and a language without day articles here reads as English.
+        assertThat(DayPage.title(LocalDate.of(2026, 10, 22), "en")).isEqualTo("October 22")
+        assertThat(DayPage.sections("fr")).containsExactly("Events", "Births", "Deaths").inOrder()
+    }
+
+    @Test fun readsTheSpanishArticlesThreeLists() {
+        val page = DayPage.parse(spanish, "es")
+        assertThat(page.events).hasSize(4)
+        assertThat(page.events[2]).startsWith("1383: en Portugal comienzan las guerras civiles")
+        assertThat(page.births.map { it.substringBefore(':') }).containsExactly("1071", "1197", "1511").inOrder()
+        assertThat(page.deaths.first()).startsWith("741: Carlos Martel")
+        // Celebraciones isn't one of the three.
+        assertThat((page.events + page.births + page.deaths).none { "Tartamudez" in it }).isTrue()
+        // Read with English's headings, the Spanish article has none of them.
+        assertThat(DayPage.parse(spanish, "en").isEmpty).isTrue()
+    }
+
+    @Test fun yearsSplitOnTheLanguagesMark() {
+        val page = DayPage.parse(spanish, "es")
+        assertThat(DayPage.split(page.events[2], "es").first).isEqualTo("1383")
+        assertThat(DayPage.split(page.events[0], "es").first).isEqualTo("4004 a. C.")
+        // "El 22 de octubre de algún año…" has no year: it keeps its text.
+        assertThat(DayPage.split(page.events[1], "es")).isEqualTo(null to page.events[1])
+        assertThat(DayPage.split("794 – Emperor Kanmu relocates the capital.", "en")).isEqualTo("794" to "Emperor Kanmu relocates the capital.")
+        assertThat(DayPage.split("It burns for 13.5 hours.", "en")).isEqualTo(null to "It burns for 13.5 hours.")
+    }
 }

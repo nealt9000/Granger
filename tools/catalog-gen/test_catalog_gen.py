@@ -1444,3 +1444,9 @@ def test_real_curated_spanish_tiers_follow_neals_calls():
     featured = {(p["name"], p.get("flavour", "")) for p in curated["packs"]}
     assert {("wikipedia_es_top", "maxi"), ("wikipedia_es_all", "nopic"), ("wiktionary_es_all", "nopic"),
             ("wikipedia_es_medicine", "maxi"), ("wikivoyage_es_all", "maxi")} <= featured
+
+
+def test_spanish_everything_pack_is_named_in_spanish():
+    # Plan L3 Task 10: the same name as the app's GutenbergNames.
+    assert cg.gutenberg_title("gutenberg_es_all", "Los libros en español del primer productor") == \
+        "Todos los libros en español · Project Gutenberg"

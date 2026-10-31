@@ -117,4 +117,7 @@
     <string name="ebook_cant_make_ebook">Couldn\'t make an ebook of this PDF</string>
     <!-- %1$s is the converter's reason, in English, such as "no chapters". -->
     <string name="ebook_pdf_reads_badly">This PDF doesn\'t read well as an ebook (%1$s), so it stays as pages.</string>
+    <!-- Define found the word in a Wiktionary that is neither the library's main language's nor the book's (Plan L3). %1$s
+         is that Wiktionary's language, named in the app's language: "Defined in English Wiktionary". -->
+    <string name="ebook_defined_in">Defined in %1$s Wiktionary</string>
 </resources>

@@ -292,6 +292,12 @@ class ShelvesTest {
         assertThat(Filing.grangerCollection("fr")).isEqualTo("granger-classics")
     }
 
+    @Test fun spanishPacksNamesAndFrontPages() {
+        assertThat(GutenbergNames.packTitle("gutenberg_es_all", "Los libros en español del primer productor")).isEqualTo("Todos los libros en español · Project Gutenberg")
+        assertThat(PageTitles.clean("Portada", "Wikipedia en español")).isEqualTo("Wikipedia en español")
+        assertThat(Filing.defaultKey(named("a", "wikipedia_es_all"))).isEqualTo("wikipedia")
+    }
+
     @Test fun theStoredDefaultNamesAreKnown() {
         assertThat(Filing.storedDefaultName("my-books")).isEqualTo("My books")
         assertThat(Filing.storedDefaultName("other")).isEqualTo("Other")
