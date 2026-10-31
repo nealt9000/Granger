@@ -237,6 +237,17 @@
     {
       "bookRelease": "tools/pack-builder/releases/granger_classics_books.json",
       "license": "Public domain (US)"
+    },
+    {
+      "bookRelease": "tools/pack-builder/releases/clasicos_granger_es_books.json",
+      "license": "Public domain (US)",
+      "title": "Clásicos Granger: todos los libros",
+      "language": "es",
+      "i18n": {
+        "en": {
+          "title": "Clásicos Granger: all books"
+        }
+      }
     }
   ],
   "models": [
@@ -604,7 +615,9 @@
         },
         "languages": {
           "es": {
-            "essential": [],
+            "essential": [
+              "@clasicos-granger"
+            ],
             "comprehensive": [
               "wikisource_es_all_maxi",
               "wikiquote_es_all_maxi"
@@ -637,7 +650,9 @@
         },
         "languages": {
           "es": {
-            "essential": [],
+            "essential": [
+              "@clasicos-granger"
+            ],
             "comprehensive": [
               "wikipedia_es_history_maxi"
             ]
@@ -853,6 +868,7 @@
         "languages": {
           "es": {
             "items": [
+              "@clasicos-granger",
               "wikipedia_es_history_maxi"
             ]
           }

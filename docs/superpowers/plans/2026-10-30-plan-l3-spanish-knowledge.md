@@ -210,7 +210,10 @@ A domain with no list for a language is empty in that language.
 
   Expect about 220–230 works once the rule is applied.
 - [x] **Step 4: Build** the EPUBs and the release descriptor, `releases/clasicos_granger_es_books.json` (collection `clasicos-granger`, about 65 MB). Open five EPUBs in the reader's test harness (or `epubcheck` if it's installed) and check: one learner reader, one verse, one play, one multi-volume, one translation.
-- [ ] **Step 5: Upload (waits for Neal).** Create the GitHub release `clasicos-es-YYYY-MM-DD` and add a `curated.json` `books` row with `"license": "Public domain (US)"`. Then restore `@clasicos-granger` in Task 3's lists.
+- [x] **Step 5: Upload (waits for Neal).** Create the GitHub release `clasicos-es-YYYY-MM-DD` and add a `curated.json` `books` row with `"license": "Public domain (US)"`. Then restore `@clasicos-granger` in Task 3's lists.
+  - Done 2026-10-30. Neal approved; the lead created the release `clasicos-es-2026-10-30` (185 EPUBs, sha256s and sizes checked against the descriptor, URLs answer 200). `curated.json` gains the `books` row for `releases/clasicos_granger_es_books.json` (`"license": "Public domain (US)"`, `"language": "es"`, preset title "Clásicos Granger: todos los libros", English i18n "Clásicos Granger: all books"). `@clasicos-granger` is back as the Spanish essential of *literature* and *thought*, and first in the Spanish Faith use case.
+  - Dry build (scratchpad only, not committed, not signed): 185 `clasicos-granger` books, 46.3 MB (147 *literature*, 38 *thought*), URLs on the release; the `clasicos-granger` preset carries `language: es` and its i18n; `efficient-es` and `comprehensive-es` now hold the 185 books (193 and 199 items). The per-language table is unchanged to one decimal: Spanish 9.4 / 46.7 GB, English 17.7 / 99.7 GB. `pytest tools/catalog-gen`: 114 passed, 2 skipped.
+  - Neal's call: Crivell's Ovid (#66337–66340, four volumes) stays as it is.
 - [x] **Step 6:** Commit "L3: Clásicos Granger".
 
 ### Task 4 results (2026-10-30, branch `l3-clasicos`)
