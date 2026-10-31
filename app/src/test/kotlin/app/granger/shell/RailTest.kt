@@ -151,6 +151,17 @@ class RailTest {
         compose.onNodeWithText("Browse").assertExists()
     }
 
+    /** Ask is on in every build since the friend build (Plan F1 part 2); the phone's tier alone decides whether it shows. */
+    @Test fun askShowsOnlyOnAPhoneThatCanRunIt() {
+        shell(showResearch = false)
+        compose.onAllNodesWithContentDescription("Ask").assertCountEquals(0)
+    }
+
+    @Test fun askShowsOnAnAskTierPhone() {
+        shell(showResearch = true)
+        compose.onNodeWithContentDescription("Ask").assertExists()
+    }
+
     @Test fun homeIsTheFirstTool() {
         assertThat(RailTool.entries.first()).isEqualTo(RailTool.HOME)
         assertThat(RailTool.HOME.shown).isTrue()
