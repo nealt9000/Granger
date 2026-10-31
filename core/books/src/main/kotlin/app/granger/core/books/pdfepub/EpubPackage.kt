@@ -29,12 +29,20 @@ internal class EpubChapter(val title: String, val body: String, val sections: Li
 internal class EpubImage(val path: String, val mediaType: String, val file: java.io.File)
 
 internal object EpubPackage {
+    private val TAG = Regex("<[^>]+>")
+
+    /** Enough of the text for [app.granger.core.text.LanguageGuess.WORDS] words. */
+    private const val GUESS_CHARS = 40_000
+
     fun href(i: Int) = "c%03d.xhtml".format(i + 1)
 
     fun write(book: EpubBook, out: OutputStream) {
         val id = "urn:uuid:" + UUID.nameUUIDFromBytes(book.source.toByteArray(Charsets.UTF_8))
         val modified = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
-        val lang = book.language.ifBlank { "en" }
+        // The declared language, else the text's own (Plan L3): Spanish or English by stopwords.
+        val lang = app.granger.core.text.LanguageGuess.tag(
+            book.language, book.chapters.joinToString(" ") { it.body.replace(TAG, " ") }.take(GUESS_CHARS),
+        )
 
         val manifest = StringBuilder()
         manifest.append("<item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>")

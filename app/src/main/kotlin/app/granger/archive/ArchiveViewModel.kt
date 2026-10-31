@@ -154,6 +154,8 @@ class ArchiveViewModel(
     private val media: MediaDownloader? = null,
     private val today: () -> LocalDate = LocalDate::now,
     private val now: () -> Long = System::currentTimeMillis,
+    /** The library's languages, main first, read at each search (Plan L3): they add archive.org's `language:` clause. */
+    private val languages: () -> List<String> = { listOf("en") },
 ) : ViewModel() {
     init {
         require(kind == ArchiveKind.TEXTS || media != null) { "An archive.org ${kind.noun} view needs a MediaDownloader" }
@@ -423,7 +425,7 @@ class ArchiveViewModel(
             return
         }
         val page = if (reset) 1 else s.page + 1
-        val query = ArchiveQuery.build(s.searchedQuery, s.shelf, s.filtered, kind, today())
+        val query = ArchiveQuery.build(s.searchedQuery, s.shelf, s.filtered, kind, today(), languages())
         state.update {
             if (reset) it.copy(loading = true, error = null, docs = emptyList(), total = 0, page = 0)
             else it.copy(loading = true, error = null)

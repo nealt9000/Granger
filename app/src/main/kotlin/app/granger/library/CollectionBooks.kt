@@ -52,7 +52,7 @@ fun collectionBooks(
     }
     // Titles A–Z skipping The, A and An (Plan LV Decision 3); one title's copies by their full title, then id.
     val byTitle = compareBy<Book>({ SearchText.fold(it.title) }, { it.id })
-    fun titleKey(book: Book) = ShelfKey.of(book.title)
+    fun titleKey(book: Book) = ShelfKey.of(book.title, language = book.language)
     val sections = when (sort) {
         BookSort.TITLE -> ShelfSections.of(shown.sortedByShelfKey(::titleKey, byTitle), byName = true, key = ::bookKey) { ShelfKey.letter(titleKey(it)) }
         // By surname, filed under its letter; unknown authors last (under #), one author's books by title.

@@ -1113,7 +1113,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ArchiveViewModel(
                             container.archiveClient, container.downloads, container.bookshelf, container.archivePrefs,
                             container.volumes, container.downloadPrefs, { container.archiveSidecarDir }, container.appScope,
-                            kind = kind, media = container.mediaDownloader,
+                            kind = kind, media = container.mediaDownloader, languages = { container.knowledgeNow.value },
                         )
                     },
                     detailsUrl = container.archiveClient::detailsUrl,
@@ -1127,7 +1127,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         LibriVoxViewModel(
                             container.librivoxClient, container.archiveClient, container.mediaDownloader, container.downloads,
-                            container.appScope,
+                            container.appScope, languages = { container.knowledgeNow.value },
                         )
                     },
                     onBack = { nav.popBackStack() },

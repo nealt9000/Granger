@@ -75,6 +75,7 @@ class LibriVoxViewModelTest {
                     url.queryParameter("sort_field") != null -> 200 to resource("librivox-recent.json")
                     url.queryParameter("genre") != null -> 200 to resource("librivox-search-time-machine.json")
                     url.queryParameter("title") == "Time Machine" -> 200 to resource("librivox-search-time-machine.json")
+                    url.queryParameter("title") == "Quijote" -> 200 to resource("librivox-mixed-languages.json")
                     else -> 404 to resource("librivox-not-found.json")
                 }
             }
@@ -112,6 +113,9 @@ class LibriVoxViewModelTest {
         }
     }
 
+    /** The library's languages (Plan L3). */
+    private var languages = listOf("en")
+
     private fun TestScope.viewModel(settle: Boolean = true): LibriVoxViewModel {
         // Remove forgets the book's rows; nothing here is filed, so there's nothing to forget.
         val library = object : MediaLibrary by FakeMediaLibrary() {
@@ -120,7 +124,7 @@ class LibriVoxViewModelTest {
         val scanner = DownloadedMediaScanner({ listOf(mediaRoot) }, library, TagReader { _, _ -> FileTags(null, emptyList()) })
         val volumes = FakeVolumes(listOf(volume(mediaRoot.path, "Internal storage")))
         val media = MediaDownloader(downloads, scanner, library, volumes, downloadPrefs, backgroundScope, io = main.dispatcher)
-        val vm = LibriVoxViewModel(librivox, archive, media, downloads, appScope = this, io = main.dispatcher, now = { 5L })
+        val vm = LibriVoxViewModel(librivox, archive, media, downloads, appScope = this, io = main.dispatcher, now = { 5L }, languages = { languages })
         backgroundScope.launch { vm.ui.collect {} }
         if (settle) settle { !vm.ui.value.loading && requests.isNotEmpty() }
         return vm
@@ -350,5 +354,24 @@ class LibriVoxViewModelTest {
         vm.cancel("../x")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.calls.none { "../x" in it }).isTrue()
+    }
+
+    @Test fun theListKeepsTheLibrarysLanguages() = runTest(main.dispatcher) {
+        languages = listOf("es")
+        val vm = viewModel()
+        vm.setQuery("El Quijote")
+        settle { vm.ui.value.rows.any { it.title == "Don Quijote" } }
+        assertThat(vm.ui.value.rows.map { it.title }).containsExactly("Don Quijote")
+        // Spanish's articles come off a title search, as English's do.
+        assertThat(lists().mapNotNull { it.queryParameter("title") }).contains("Quijote")
+    }
+
+    @Test fun languageNamesMatchTheLibrarysCodes() {
+        assertThat(inLanguages("Spanish", listOf("es"))).isTrue()
+        assertThat(inLanguages("English", listOf("es"))).isFalse()
+        assertThat(inLanguages("English", listOf("es", "en"))).isTrue()
+        assertThat(inLanguages("Multilingual", listOf("en"))).isTrue()
+        assertThat(inLanguages("", listOf("en"))).isTrue()
+        assertThat(inLanguages("German", listOf("en"))).isFalse()
     }
 }

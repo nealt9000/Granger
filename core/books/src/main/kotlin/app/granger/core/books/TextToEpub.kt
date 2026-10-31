@@ -1,5 +1,6 @@
 package app.granger.core.books
 
+import app.granger.core.text.LanguageGuess
 import java.io.OutputStream
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -24,11 +25,15 @@ object TextToEpub {
     private val HEADING = Regex("(?m)^\\s*(CHAPTER|Chapter|BOOK|Book|PART|Part)\\s+([0-9]+|[IVXLCDM]+)\\b.*$")
     private val BLANK_LINES = Regex("(?:\\r?\\n[ \\t]*){2,}")
 
-    fun convert(text: String, title: String, markdown: Boolean, out: OutputStream, maxChapterChars: Int = 100_000) {
+    /**
+     * [language] is the book's declared language (archive.org's metadata); blank or unknown, the text's own is guessed,
+     * Spanish or English (Plan L3, [LanguageGuess]).
+     */
+    fun convert(text: String, title: String, markdown: Boolean, out: OutputStream, maxChapterChars: Int = 100_000, language: String? = null) {
         val clean = stripInvalidXml(text)
         val chapters = (if (markdown) markdownChapters(clean) else txtChapters(clean, maxChapterChars))
             .ifEmpty { listOf(Chapter("Part 1", "")) }
-        write(chapters, stripInvalidXml(title), clean, out)
+        write(chapters, stripInvalidXml(title), clean, out, LanguageGuess.tag(language, clean))
     }
 
     // ---- TXT ----
@@ -121,7 +126,7 @@ object TextToEpub {
 
     // ---- EPUB package ----
 
-    private fun write(chapters: List<Chapter>, title: String, source: String, out: OutputStream) {
+    private fun write(chapters: List<Chapter>, title: String, source: String, out: OutputStream, lang: String) {
         val id = "urn:uuid:" + UUID.nameUUIDFromBytes(source.toByteArray(Charsets.UTF_8))
         val modified = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
         fun href(i: Int) = "c%03d.xhtml".format(i + 1)
@@ -133,9 +138,11 @@ object TextToEpub {
             spine.append("<itemref idref=\"c${i + 1}\"/>")
         }
         val opf = """<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="en"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">$id</dc:identifier><dc:title>${esc(title)}</dc:title><dc:language>en</dc:language><meta property="dcterms:modified">$modified</meta></metadata><manifest>$manifest</manifest><spine>$spine</spine></package>"""
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="$lang"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">$id</dc:identifier><dc:title>${esc(title)}</dc:title><dc:language>$lang</dc:language><meta property="dcterms:modified">$modified</meta></metadata><manifest>$manifest</manifest><spine>$spine</spine></package>"""
         val items = chapters.indices.joinToString("") { "<li><a href=\"${href(it)}\">${esc(chapters[it].title)}</a></li>" }
-        val nav = page(title, "<nav epub:type=\"toc\" id=\"toc\"><h1>Contents</h1><ol>$items</ol></nav>")
+        // The book's own words, in its language, as the pack builder writes them ("Índice" in Spanish).
+        val contents = if (lang == "es") "Índice" else "Contents"
+        val nav = page(title, "<nav epub:type=\"toc\" id=\"toc\"><h1>$contents</h1><ol>$items</ol></nav>", lang)
 
         ZipOutputStream(out).use { z ->
             val mime = "application/epub+zip".toByteArray()
@@ -155,11 +162,11 @@ object TextToEpub {
             put("META-INF/container.xml", """<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>""")
             put("OEBPS/content.opf", opf)
             put("OEBPS/nav.xhtml", nav)
-            chapters.forEachIndexed { i, c -> put("OEBPS/${href(i)}", page("${title} - ${c.title}", c.body)) }
+            chapters.forEachIndexed { i, c -> put("OEBPS/${href(i)}", page("${title} - ${c.title}", c.body, lang)) }
         }
     }
 
-    private fun page(title: String, body: String) =
+    private fun page(title: String, body: String, lang: String) =
         """<?xml version="1.0" encoding="utf-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en"><head><meta charset="utf-8"/><title>${esc(title)}</title></head><body>$body</body></html>"""
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="$lang"><head><meta charset="utf-8"/><title>${esc(title)}</title></head><body>$body</body></html>"""
 }

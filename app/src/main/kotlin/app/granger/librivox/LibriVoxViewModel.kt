@@ -96,6 +96,8 @@ class LibriVoxViewModel(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
+    /** The library's languages, main first, read at each page (Plan L3): the list keeps their books. */
+    private val languages: () -> List<String> = { listOf("en") },
 ) : ViewModel() {
     private data class Sheet(val id: String, val loading: Boolean, val book: LibriVoxBook?, val offer: LibriVoxOffer?, val error: UiText?)
 
@@ -248,7 +250,8 @@ class LibriVoxViewModel(
                 if (gen != generation) return@launch
                 state.update { current ->
                     val seen = current.books.mapTo(HashSet()) { it.id }
-                    val books = current.books + page.books.filter { seen.add(it.id) }
+                    val langs = languages()
+                    val books = current.books + page.books.filter { inLanguages(it.language, langs) && seen.add(it.id) }
                     current.copy(books = books, nextOffset = offset + PAGE_SIZE, hasMore = page.hasMore, loading = false)
                 }
             } catch (e: CancellationException) {
@@ -387,3 +390,19 @@ private fun rowDetails(authors: String, duration: UiText?): UiText = when {
     duration == null -> UiText.Raw(authors)
     else -> UiText.Res(R.string.librivox_row_details, authors, duration)
 }
+
+/**
+ * Whether a LibriVox book in [language] (LibriVox names it in English: "English", "Spanish", "Multilingual") belongs in
+ * a library in [languages] (Plan L3). LibriVox can't filter by language, so the list does: a multilingual or unnamed
+ * book is kept, and so is a language name the JVM can't place.
+ */
+internal fun inLanguages(language: String, languages: List<String>): Boolean {
+    val name = language.trim()
+    if (name.isEmpty() || name.equals(MULTILINGUAL, ignoreCase = true)) return true
+    return languages.any { code ->
+        name.equals(code, ignoreCase = true) || name.equals(java.util.Locale.forLanguageTag(code).getDisplayLanguage(java.util.Locale.ENGLISH), ignoreCase = true)
+    }
+}
+
+/** LibriVox's word for a book read in more than one language. */
+private const val MULTILINGUAL = "Multilingual"

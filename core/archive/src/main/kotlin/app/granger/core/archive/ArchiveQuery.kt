@@ -22,20 +22,36 @@ enum class ArchiveKind(val noun: String, val base: String, val datedRecordings: 
     ),
 }
 
-/** [title] is the chip's string resource. */
-enum class ArchiveShelf(val kind: ArchiveKind, val title: Int, val clause: String) {
+/**
+ * [title] is the chip's string resource. [spanish] are the subject words a Spanish library adds to a `subject:` shelf
+ * (Plan L3): archive.org's Spanish items carry Spanish subjects.
+ */
+enum class ArchiveShelf(val kind: ArchiveKind, val title: Int, val clause: String, val spanish: String = "") {
     MOST_DOWNLOADED(ArchiveKind.TEXTS, R.string.archive_shelf_most_downloaded, ""),
     MANUALS(ArchiveKind.TEXTS, R.string.archive_shelf_manuals, "collection:manuals"),
-    SCIENCE(ArchiveKind.TEXTS, R.string.archive_shelf_science, "subject:(science OR engineering OR mechanics OR chemistry OR physics)"),
-    LITERATURE(ArchiveKind.TEXTS, R.string.archive_shelf_literature, "subject:(fiction OR literature OR poetry OR drama)"),
+    SCIENCE(
+        ArchiveKind.TEXTS, R.string.archive_shelf_science, "subject:(science OR engineering OR mechanics OR chemistry OR physics)",
+        spanish = "ciencia OR ciencias OR ingeniería OR mecánica OR química OR física",
+    ),
+    LITERATURE(
+        ArchiveKind.TEXTS, R.string.archive_shelf_literature, "subject:(fiction OR literature OR poetry OR drama)",
+        spanish = "literatura OR novela OR cuentos OR poesía OR teatro",
+    ),
     SPOKEN_MOST_DOWNLOADED(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_most_downloaded, ""),
-    SPOKEN_POETRY(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_poetry, "subject:poetry"),
-    SPOKEN_DRAMA(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_drama, "subject:(drama OR plays)"),
+    SPOKEN_POETRY(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_poetry, "subject:poetry", spanish = "poesía"),
+    SPOKEN_DRAMA(ArchiveKind.SPOKEN_WORD, R.string.archive_shelf_drama, "subject:(drama OR plays)", spanish = "teatro"),
     MUSIC_MOST_DOWNLOADED(ArchiveKind.MUSIC, R.string.archive_shelf_most_downloaded, ""),
     MUSIC_78(ArchiveKind.MUSIC, R.string.archive_shelf_78, "collection:78rpm"),
     MUSIC_CLASSICAL(ArchiveKind.MUSIC, R.string.archive_shelf_classical, "subject:classical"),
     MUSIC_FOLK(ArchiveKind.MUSIC, R.string.archive_shelf_folk, "subject:(folk OR \"field recordings\")"),
     ;
+
+    /** The shelf's clause for a library in [languages] (Plan L3): with Spanish, its subject words join the English ones. */
+    fun clause(languages: List<String>): String {
+        if (spanish.isEmpty() || "es" !in languages) return clause
+        val subjects = clause.removePrefix("subject:").removePrefix("(").removeSuffix(")")
+        return "subject:($subjects OR $spanish)"
+    }
 
     companion object {
         fun of(kind: ArchiveKind): List<ArchiveShelf> = entries.filter { it.kind == kind }
@@ -52,6 +68,20 @@ object ArchiveQuery {
 
     private val identifier = Regex("[A-Za-z0-9._-]+")
 
+    /** archive.org's `language` values per knowledge language: the MARC code and the English name both occur. */
+    private val LANGUAGE_TERMS = linkedMapOf("en" to listOf("eng", "English"), "es" to listOf("spa", "Spanish"))
+
+    /**
+     * The `language:` clause for a library in [languages] (Plan L3), or null: an English-only library asks as before, with
+     * no clause (many English items carry no language). With Spanish: `language:(spa OR Spanish)`, and with English too
+     * `language:(eng OR English OR spa OR Spanish)`, in the library's order. Music has no language to ask by.
+     */
+    fun languageClause(languages: List<String>, kind: ArchiveKind = ArchiveKind.TEXTS): String? {
+        if (kind == ArchiveKind.MUSIC || languages.none { it != "en" && it in LANGUAGE_TERMS }) return null
+        val terms = languages.distinct().flatMap { LANGUAGE_TERMS[it].orEmpty() }
+        return "language:(${terms.joinToString(" OR ")})"
+    }
+
     /**
      * Texts keep Plan 7's date-only filter. An audio kind is filtered by the rolling recording range for [today]; a
      * filtered audio kind without [ArchiveKind.datedRecordings] (spoken word) has nothing it may show, so it throws,
@@ -65,6 +95,8 @@ object ArchiveQuery {
         filtered: Boolean,
         kind: ArchiveKind = ArchiveKind.TEXTS,
         today: LocalDate = LocalDate.now(),
+        /** The library's languages, main first (Plan L3): they add a `language:` clause and the shelves' Spanish words. */
+        languages: List<String> = listOf("en"),
     ): String {
         require(shelf == null || shelf.kind == kind) { "Shelf ${shelf?.name} isn't a ${kind.noun} shelf" }
         require(!filtered || kind == ArchiveKind.TEXTS || kind.datedRecordings) {
@@ -78,7 +110,8 @@ object ArchiveQuery {
                 if (audio) append(" AND (title:(").append(cleaned).append(") OR creator:(").append(cleaned).append("))")
                 else append(" AND (").append(cleaned).append(')')
             }
-            if (shelf != null && shelf.clause.isNotEmpty()) append(" AND ").append(shelf.clause)
+            if (shelf != null && shelf.clause.isNotEmpty()) append(" AND ").append(shelf.clause(languages))
+            languageClause(languages, kind)?.let { append(" AND ").append(it) }
             if (filtered) append(" AND ").append(PublicDomain.clause(kind, today))
         }
     }

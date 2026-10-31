@@ -157,7 +157,7 @@ class RoomBookshelf(
                 return@withContext register(BookIds.of(origin, ref), origin, ref, pdf, meta, details, BookFormat.PDF)
             }
             val epub = if (file.extension.equals("txt", ignoreCase = true)) {
-                convertText(file, details?.title?.takeIf { it.isNotBlank() }) ?: return@withContext null
+                convertText(file, details?.title?.takeIf { it.isNotBlank() }, details?.language) ?: return@withContext null
             } else {
                 file
             }
@@ -173,13 +173,13 @@ class RoomBookshelf(
      * Converts the text file [txt] to `<name>.epub` beside it (via a `.incoming-` partial); null if it is too large
      * or can't be read or written. Leaves the text file in place.
      */
-    private fun convertText(txt: File, title: String?): File? {
+    private fun convertText(txt: File, title: String?, language: String? = null): File? {
         val target = File(txt.parentFile, txt.nameWithoutExtension + ".epub")
         val partial = File(txt.parentFile, ".incoming-${UUID.randomUUID()}.epub")
         return try {
             if (txt.length() > maxTextBytes) return null
             val text = TextDecoding.decode(txt.readBytes())
-            partial.outputStream().use { TextToEpub.convert(text, title ?: txt.nameWithoutExtension, false, it) }
+            partial.outputStream().use { TextToEpub.convert(text, title ?: txt.nameWithoutExtension, false, it, language = language) }
             Files.move(partial.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
             target
         } catch (_: IOException) {

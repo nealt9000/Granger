@@ -395,18 +395,22 @@ None of the five mentions Gutenberg.
 
 ## Task 9: Sources in Spanish (app and `core/archive`)
 
-- [ ] **Step 1: archive.org.**
+- [x] **Step 1: archive.org.**
   - When the knowledge languages include Spanish, queries add `language:(spa OR Spanish)`.
   - With English too, the clause is `language:(eng OR English OR spa OR Spanish)`.
   - The shelves get Spanish subject words, with titles from resources.
   - The 1930 rule is unchanged.
   - Pin the query strings in `ArchiveQuery` tests.
-- [ ] **Step 2: LibriVox.**
+- [x] **Step 2: LibriVox.**
   - Filter each item's `language` field client-side against the knowledge languages.
   - Strip the Spanish articles *el, la, los, las, un, una* for sorting, beside the English ones.
   - Tests use a fixture with one Spanish item and one English item.
-- [ ] **Step 3: `TextToEpub`** writes the book's declared language, or else a detected one: Spanish if its stopword overlap beats English's on the first 2,000 words, using the word list in `core/text`. It no longer hardcodes `en`. `EpubPackage`'s `"en"` fallback works the same way.
-- [ ] **Step 4:** Commit.
+- [x] **Step 3: `TextToEpub`** writes the book's declared language, or else a detected one: Spanish if its stopword overlap beats English's on the first 2,000 words, using the word list in `core/text`. It no longer hardcodes `en`. `EpubPackage`'s `"en"` fallback works the same way.
+- [x] **Step 4:** Commit.
+  - Done. Choices where the plan left room:
+    - **archive.org:** an English-only library asks exactly as before, with no `language:` clause (many English items carry none). With Spanish the clause is `language:(spa OR Spanish)`; with English too, both, in the library's order (`ArchiveQuery.languageClause`). Texts and spoken word take it; music has no language to ask by. The `subject:` shelves (Science, Literature, Poetry, Drama) add Spanish subject words for a Spanish library (`ArchiveShelf.clause(languages)`); their titles were already resources (L1/L2). The view model reads the languages at each search (`container.knowledgeNow`).
+    - **LibriVox:** LibriVox can't filter by language, so each page is filtered client-side; an unnamed or "Multilingual" book always stays. This applies to an English library too: non-English LibriVox books no longer show for it. Spanish articles come off a title search beside English's (`LibriVoxClient.LEADING_ARTICLE`). For sorting, `ShelfKey.of(title, sortTag, language)` drops el/la/los/las/un/una only from a title in Spanish (so "El Paso" and "Los Angeles" stay put); the Library's book shelves pass the book's language. Audiobooks have no language field, so they sort as before.
+    - **`TextToEpub` / `EpubPackage`:** `core/text` had no word list, so `LanguageGuess` adds one (50-odd English and 100-odd Spanish function words) and the rule: the declared language (archive.org's `eng`/`spa`/`Spanish`, any ISO code), else Spanish when its stopwords outnumber English's in the first 2,000 words, else English. A Spanish text's nav heading is "Índice".
 
 ## Task 10: Home, Browse and Define per language (app)
 

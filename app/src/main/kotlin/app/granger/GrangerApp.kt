@@ -145,6 +145,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import org.readium.r2.shared.publication.Publication
@@ -579,6 +582,11 @@ class AppContainer(context: Context) {
     val knowledgeLanguages: KnowledgeLanguages = KnowledgeLanguages.create(
         context, appLanguages.code, catalog.state.map { it.catalog?.languages.orEmpty() }.distinctUntilChanged(),
     )
+
+    /** [knowledgeLanguages] now, for code that reads it at a moment (an archive.org search, LibriVox's list). */
+    val knowledgeNow: StateFlow<List<String>> by lazy {
+        knowledgeLanguages.languages.stateIn(appScope, SharingStarted.Eagerly, listOf(app.granger.core.catalog.ENGLISH))
+    }
     val homePrefs: HomePrefs = SharedHomePrefs(context)
     /** The tidy offers Keep both answered (Plan WF Decision 5), shared by Home and Downloads. */
     val tidyDismissals = app.granger.sources.TidyDismissals.shared(context.getSharedPreferences("home", Context.MODE_PRIVATE))

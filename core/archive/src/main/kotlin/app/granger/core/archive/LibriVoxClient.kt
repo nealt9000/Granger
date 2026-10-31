@@ -139,7 +139,8 @@ class LibriVoxClient(
 
     companion object {
         private val ID = Regex("[0-9]+")
-        private val LEADING_ARTICLE = Regex("^(the|a|an)\\s+", RegexOption.IGNORE_CASE)
+        /** A leading article a title search drops: English, and Spanish beside it (Plan L3). */
+        private val LEADING_ARTICLE = Regex("^(the|a|an|el|la|los|las|un|una)\\s+", RegexOption.IGNORE_CASE)
         private val SPACES = Regex("\\s+")
         private const val SEARCH_FIELDS = "{id,title,authors,language,totaltime,totaltimesecs,num_sections}"
         private const val NO_RESULTS = "could not be found"
