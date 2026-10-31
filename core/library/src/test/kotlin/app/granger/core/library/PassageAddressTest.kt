@@ -7,6 +7,7 @@ import app.granger.core.library.PassageAddress.Book
 import app.granger.core.library.PassageAddress.Pack
 import app.granger.core.library.PassageAddress.Track
 import app.granger.core.research.Passage
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -90,5 +91,27 @@ class PassageAddressTest {
             emptyList(), listOf(article, article.copy(sourceId = "pk2")), emptyList(), 0L)
         assertThat(turn.addresses().map { (it as Article).quote })
             .containsExactly("The stone was found in 1799.", "Champollion read its hieroglyphs in 1822 after years of work.").inOrder()
+    }
+    @Test fun aSpanishPassagesLanguageDropsSpanishStopwordsFromTheQuote() {
+        // Spanish function words in the answer: as English (unknown language) they match the second sentence; with the
+        // passage known to be Spanish they're stopwords, nothing is shared, and the first sentence stands.
+        val text = "Jorge Manrique escribió las coplas famosas. Pero cuando y donde, nadie sabe por qué."
+        val passage = Passage(SourceKind.ARTICLE, "pk", "Coplas", location = "A/Coplas", text = text)
+        val answer = "pero cuando donde nadie [1]"
+        assertThat(PassageAddress.quoteOf(passage, answer, 1)!!.sentence).startsWith("Pero cuando")
+        assertThat(PassageAddress.quoteOf(passage.copy(language = ResearchLanguage.ES), answer, 1)!!.sentence).startsWith("Jorge Manrique")
+        assertThat(PassageAddress.quoteOf(passage, answer, 1, listOf(ResearchLanguage.ES))!!.sentence).startsWith("Jorge Manrique")
+        assertThat(PassageAddress.cited(passage.copy(language = ResearchLanguage.ES), answer, 1))
+            .isEqualTo(Article("pk", "A/Coplas", null, "Jorge Manrique escribió las coplas famosas."))
+    }
+
+    @Test fun anEnglishPassagesLanguageChangesNothing() {
+        val text = "The stone was found in 1799. Champollion read its hieroglyphs in 1822 after years of work."
+        val article = Passage(SourceKind.ARTICLE, "pk", "Rosetta Stone", location = "A/Rosetta_Stone", text = text)
+        for (answer in listOf("Champollion read the hieroglyphs [1].", "Found in 1799 [1].", "[1]")) {
+            val plain = PassageAddress.quoteOf(article, answer, 1)
+            assertThat(PassageAddress.quoteOf(article.copy(language = ResearchLanguage.EN), answer, 1)).isEqualTo(plain)
+            assertThat(PassageAddress.quoteOf(article.copy(language = ResearchLanguage.EN), answer, 1, ResearchLanguage.of(answer))).isEqualTo(plain)
+        }
     }
 }

@@ -194,6 +194,7 @@ class LibraryPassageFinder(
                 text = it.text,
                 meta = SourceMeta(date = pack.date, collection = collection),
                 searchScore = hit.score.toDouble(),
+                language = ResearchLanguage.ofCode(pack.language),
             )
         }
     }
@@ -219,6 +220,7 @@ class LibraryPassageFinder(
                     heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
                     text = it.text,
                     meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
+                    language = ResearchLanguage.ofCode(it.book.language),
                 )
             }
         } catch (e: CancellationException) {

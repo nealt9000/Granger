@@ -110,6 +110,9 @@ class LanguageLayerTest {
             for (p in passages) {
                 same("lifespan", YearFacts.lifespan(p.text, en), YearFacts.lifespan(p.text, of))
                 same("pick", CitedQuote.pick(q, 1, p.text, en), CitedQuote.pick(q, 1, p.text, of))
+                // An English pack's passage carries EN (Passage.language): the quote is the one an unknown language got.
+                same("pick EN passage", CitedQuote.pick(q, 1, p.text, en), CitedQuote.pick(q, 1, p.text, en, ResearchLanguage.EN))
+                same("pick EN passage", CitedQuote.pick(q, 1, p.text, en), CitedQuote.pick(q, 1, p.text, of, ResearchLanguage.EN))
                 same("check", Citations.check(p.text, 4, en), Citations.check(p.text, 4, of))
                 for (name in Entities.named(q, keywords, en)) {
                     same("match", Entities.match(p.sourceTitle, name, en), Entities.match(p.sourceTitle, name, of))

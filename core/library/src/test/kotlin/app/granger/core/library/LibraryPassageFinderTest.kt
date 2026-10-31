@@ -2,6 +2,7 @@ package app.granger.core.library
 
 import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
@@ -383,5 +384,41 @@ class LibraryPassageFinderTest {
         assertThat(found.filter { it.kind == SourceKind.BOOK }).isEmpty()
         val named = finder(emptyList(), emptyMap(), books = listOf(works), bookLimit = 0).find(listOf("works", "x", "zebra"))
         assertThat(named.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("zebra stripes")
+    }
+    @Test fun articlePassagesCarryTheirPacksLanguage() = test {
+        fun archive(id: String) = FakeZimArchive(
+            id, paths = setOf("Agua"), results = listOf(ZimHit("Agua", "Agua", score = 7)), html = mapOf("Agua" to page("El agua hierve.")),
+        )
+        suspend fun languageOf(code: String) =
+            finder(listOf(pack("w").copy(language = code)), mapOf("w" to archive("w"))).find(listOf("agua")).single().language
+        assertThat(languageOf("spa")).isEqualTo(ResearchLanguage.ES)
+        assertThat(languageOf("spa,eng")).isEqualTo(ResearchLanguage.ES)
+        assertThat(languageOf("eng,spa")).isEqualTo(ResearchLanguage.EN)
+        assertThat(languageOf("eng")).isEqualTo(ResearchLanguage.EN)
+        assertThat(languageOf("fra")).isNull()
+        assertThat(languageOf("")).isNull()
+    }
+
+    @Test fun bookPassagesCarryTheBooksLanguageAndCardsHaveNone() = test {
+        val file = TestEpubs.build(
+            File(booksDir, "granger").apply { mkdirs() }, "rayuela_2026-01-01.epub", title = "Rayuela", language = "es-AR",
+            chapters = listOf("<p>La ballena salió a la superficie.</p>"),
+        )
+        val book = shelf.addDownloaded(file, BookOrigin.GRANGER, "rayuela")!!
+        index.indexPending()
+        val found = finder(emptyList(), emptyMap(), books = listOf(book)).find(listOf("ballena", "rayuela"), listOf(ResearchLanguage.ES))
+        assertThat(found.filter { it.kind == SourceKind.BOOK }.map { it.language }).containsExactly(ResearchLanguage.ES)
+        assertThat(found.filter { it.kind == SourceKind.CARD }.map { it.language }).containsExactly(null)
+    }
+
+    @Test fun theQuestionsLanguagesPickTheNamedBookStopwords() = test {
+        // With English alone "las" is a title word that names the book, so it's searched for "azules"; in Spanish it's a
+        // stopword and names nothing.
+        val book = addBook("las", "Las Ballenas", "<p>filler</p>", "<p>ballenas azules</p>")
+        index.indexPending()
+        val spanish = finder(emptyList(), emptyMap(), books = listOf(book), bookLimit = 0).find(listOf("las", "azules"), listOf(ResearchLanguage.ES))
+        assertThat(spanish.filter { it.kind == SourceKind.BOOK }).isEmpty()
+        val named = finder(emptyList(), emptyMap(), books = listOf(book), bookLimit = 0).find(listOf("las", "azules"))
+        assertThat(named.filter { it.kind == SourceKind.BOOK }.map { it.text }).containsExactly("ballenas azules")
     }
 }

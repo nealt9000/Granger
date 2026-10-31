@@ -26,10 +26,12 @@ import app.granger.core.speech.TextReadSource
 import app.granger.player.VoiceButton
 import kotlinx.coroutines.flow.map
 import app.granger.core.research.FailReason
+import app.granger.core.research.Keywords
 import app.granger.core.research.Outcome
 import app.granger.core.research.Passage
 import app.granger.core.research.PriorTurn
 import app.granger.core.research.ResearchEvent
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.ResearchRequest
 import app.granger.core.research.SourceKind
@@ -295,15 +297,16 @@ class ResearchViewModel(
     suspend fun open(turnId: Long, n: Int): CitationTarget {
         val turn = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn ?: return CitationTarget.Gone
         val passage = turn.shown.getOrNull(n - 1) ?: return CitationTarget.Gone
-        return open(passage, turn.answer, n)
+        return open(passage, turn.answer, n, ResearchLanguage.of(turn.question))
     }
 
     /**
      * Opens [passage], cited as `[n]` in [answer], at the sentence the answer used where it can; [CitationTarget.Gone]
      * when it's gone, or can't be opened (a storage error is logged, not thrown into the screen's tap handler).
+     * [languages] are the question's, for picking the quote.
      */
-    suspend fun open(passage: Passage, answer: String = "", n: Int = 0): CitationTarget = try {
-        opener.open(passage, answer, n)
+    suspend fun open(passage: Passage, answer: String = "", n: Int = 0, languages: List<ResearchLanguage> = Keywords.ENGLISH): CitationTarget = try {
+        opener.open(passage, answer, n, languages)
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {

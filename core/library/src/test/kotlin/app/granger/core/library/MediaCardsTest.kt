@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -110,5 +111,11 @@ class MediaCardsTest {
     @Test fun noPartWhenOnlyTheAlbumMatches() {
         assertThat(MediaCards.bestPart(album(), listOf("holst", "the planets"))).isNull()
         assertThat(MediaCards.bestPart(album(), listOf("the", "of"))).isNull()
+    }
+    @Test fun bestPartLeavesOutTheQuestionsStopwords() {
+        val work = album(partTitles = listOf("Para todos", "Elisa"))
+        // English alone: "para" is a word, and the earlier title wins the tie; Spanish: it's a stopword, "Elisa" wins.
+        assertThat(MediaCards.bestPart(work, listOf("para elisa"))).isEqualTo(0)
+        assertThat(MediaCards.bestPart(work, listOf("para elisa"), listOf(ResearchLanguage.ES))).isEqualTo(1)
     }
 }

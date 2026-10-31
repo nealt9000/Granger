@@ -1,7 +1,9 @@
 package app.granger.core.library
 
 import app.granger.core.research.CitedQuote
+import app.granger.core.research.Keywords
 import app.granger.core.research.Passage
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 
 /**
@@ -77,13 +79,15 @@ sealed interface PassageAddress {
 
         /**
          * The sentence of [passage] that [answer] used, citing it as `[n]`, with its context; null for the kinds that
-         * don't open at text (cards and media).
+         * don't open at text (cards and media). [languages] are the question's ([ResearchLanguage.of]), English alone
+         * by default; the passage's own [Passage.language], when known, picks its sentence breaks (languages spec §6.2).
          */
-        fun quoteOf(passage: Passage, answer: String, n: Int): CitedQuote.Quote? =
-            if (passage.kind in QUOTED) CitedQuote.pick(answer, n, passage.text) else null
+        fun quoteOf(passage: Passage, answer: String, n: Int, languages: List<ResearchLanguage> = Keywords.ENGLISH): CitedQuote.Quote? =
+            if (passage.kind in QUOTED) CitedQuote.pick(answer, n, passage.text, languages, passage.language) else null
 
-        /** [passage]'s address as cited `[n]` in [answer]. */
-        fun cited(passage: Passage, answer: String, n: Int): PassageAddress = of(passage, quoteOf(passage, answer, n)?.sentence)
+        /** [passage]'s address as cited `[n]` in [answer]; [languages] as [quoteOf]. */
+        fun cited(passage: Passage, answer: String, n: Int, languages: List<ResearchLanguage> = Keywords.ENGLISH): PassageAddress =
+            of(passage, quoteOf(passage, answer, n, languages)?.sentence)
 
         private val QUOTED = setOf(SourceKind.ARTICLE, SourceKind.BOOK, SourceKind.SELECTION)
 

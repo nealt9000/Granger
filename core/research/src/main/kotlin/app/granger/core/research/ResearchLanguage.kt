@@ -72,6 +72,20 @@ enum class ResearchLanguage(val tag: String) {
             }
         }
 
+        /**
+         * The language a source's metadata names, or null when it's neither English nor Spanish or says nothing: a ZIM's
+         * `Language` (ISO 639-3, comma-separated when several: `spa`, `eng`, `spa,eng`) or a book's (BCP-47 or ISO 639:
+         * `es`, `es-MX`, `en_US`, `eng`). Several take the first.
+         */
+        fun ofCode(code: String?): ResearchLanguage? {
+            val first = code.orEmpty().trim().split(',', ';', ' ').firstOrNull { it.isNotBlank() } ?: return null
+            return when (fold(first).substringBefore('-').substringBefore('_')) {
+                "es", "spa", "spanish", "espanol" -> ES
+                "en", "eng", "english" -> EN
+                else -> null
+            }
+        }
+
         /** The main language of [question]: the first of [of]. */
         fun main(question: String): ResearchLanguage = of(question).first()
     }
