@@ -376,15 +376,19 @@ None of the five mentions Gutenberg.
 
 ## Task 8: Clásicos Granger in the app
 
-- [ ] **Step 1: Generalise the Classics constants.**
+- [x] **Step 1: Generalise the Classics constants.**
   - `OnboardingModel.CLASSICS`, `SourceViewModel.CLASSICS_PRESET` and `HomeViewModel`'s `c:granger-classics` feed become a set of Granger collections: `granger-classics` and `clasicos-granger`.
   - Home's default feed uses the first knowledge language's collection.
-- [ ] **Step 2: Filing.**
+- [x] **Step 2: Filing.**
   - A catalog book files by its catalog `collection`, so `gc-es-*` books land in "Clásicos Granger", not "Granger Classics".
   - Check `Filing.kt` (`BookOrigin.GRANGER`), the default-key list in `LibraryDatabase` and `CollectionScreen`.
   - Add a test that files one book of each collection.
-- [ ] **Step 3: Download order.** Setup downloads the voice first, then either Classics collection (Plan DL Decision 5).
-- [ ] **Step 4:** Commit.
+- [x] **Step 3: Download order.** Setup downloads the voice first, then either Classics collection (Plan DL Decision 5).
+- [x] **Step 4:** Commit.
+  - Done. `Filing.GRANGER_COLLECTIONS` (`en` → `granger-classics`, `es` → `clasicos-granger`) is the one table: onboarding's download order and quick-first line, Get more's Granger presets (first, in knowledge-language order) and Home's first-run feeds read it. Home seeds a Random feed for each of the library's languages' collections, then the app language's (so a Spanish phone seeded before the catalog loads still gets Clásicos); one not on the phone stays dormant, like Quotes.
+  - Filing: the library keeps no catalog collection per book, so a Granger book's id stands in for it: `gc-es-…` files in `clasicos-granger` ("Clásicos Granger"), anything else in Granger Classics (`gc-essays-…` stays English). The v9 migration's Kiwix-folder exclusion lists `clasicos-granger` too.
+  - Default collection names (L2's note), **no schema change**: `ShelfCollection.shownName()` shows the app's words for "My books", "Other" and "On this phone" while the stored name is still the English default (`Filing.storedDefaultName`); a renamed or user-made collection shows as stored. Granger Classics, Clásicos Granger, Archive.org, LibriVox and Kiwix are names and stay as stored. Media type names (Literature, Music…) are still stored English: not in this step.
+  - Glossary change: in Spanish, the English collection keeps its name "Granger Classics" (`onboarding_granger_classics`), since "Clásicos Granger" is now the Spanish collection. The Get more link (`sources_link_classics`) still says "Clásicos Granger": it opens Granger's books, which a Spanish library sees as Clásicos.
 
 ## Task 9: Sources in Spanish (app and `core/archive`)
 

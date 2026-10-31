@@ -103,9 +103,34 @@ object Filing {
 
     private const val KIWIX_BOOKS_PREFIX = "kiwixbooks-"
 
+    /** Granger Classics' collection key: Granger's English books. */
+    const val GRANGER_CLASSICS = "granger-classics"
+
+    /** Clásicos Granger's collection key: Granger's Spanish books (Plan L3), a collection of their own. */
+    const val CLASICOS_GRANGER = "clasicos-granger"
+
+    /** Clásicos Granger's own name, the same in every language, as its catalog preset names it. */
+    const val CLASICOS_GRANGER_NAME = "Clásicos Granger"
+
+    /** The catalog id prefix of Clásicos Granger's books (the builder's `bookIdPrefix`, `gc-es-…`). */
+    const val CLASICOS_ID_PREFIX = "gc-es-"
+
+    /** Granger's book collections by knowledge language (Plan L3); the catalog's `collection` of each one's books. */
+    val GRANGER_COLLECTIONS = mapOf("en" to GRANGER_CLASSICS, "es" to CLASICOS_GRANGER)
+
+    /** The Granger collection of knowledge language [language]; Granger Classics for a language without one. */
+    fun grangerCollection(language: String): String = GRANGER_COLLECTIONS[language] ?: GRANGER_CLASSICS
+
+    /**
+     * The collection a Granger book files in: its catalog collection, which its id says (Plan L3): `gc-es-…` books are
+     * Clásicos Granger's, every other one Granger Classics'. The library keeps no catalog collection per book, so the
+     * id stands in for it.
+     */
+    fun grangerKey(sourceRef: String): String = if (sourceRef.startsWith(CLASICOS_ID_PREFIX)) CLASICOS_GRANGER else GRANGER_CLASSICS
+
     /** Books are filed by origin; these are their collections' keys and names. */
     private val BOOK_COLLECTIONS = mapOf(
-        BookOrigin.GRANGER to ("granger-classics" to "Granger Classics"),
+        BookOrigin.GRANGER to (GRANGER_CLASSICS to "Granger Classics"),
         BookOrigin.IMPORT to ("my-books" to "My books"),
         BookOrigin.ARCHIVE_ORG to ("archive-org" to "Archive.org"),
     )
@@ -123,6 +148,7 @@ object Filing {
         book.origin == BookOrigin.NAUTILUS -> kiwixBooksKey(PackBooks.packNameOf(book))
         book.origin == BookOrigin.ARCHIVE_ORG && SET_PART in book.sourceRef ->
             BOOK_COLLECTIONS.getValue(BookOrigin.ARCHIVE_ORG).first + ":" + book.sourceRef.substringBefore(SET_PART)
+        book.origin == BookOrigin.GRANGER -> grangerKey(book.sourceRef)
         else -> BOOK_COLLECTIONS.getValue(book.origin).first
     }
 
@@ -133,6 +159,7 @@ object Filing {
     fun defaultName(key: String, book: Book, packs: List<Pack> = emptyList()): String = when {
         book.origin == BookOrigin.GUTENBERG -> gutenbergName(packs.firstOrNull { it.name == PackBooks.packNameOf(book) })
         book.origin == BookOrigin.NAUTILUS -> PackBooks.packNameOf(book).let { name -> kiwixBooksName(packs.firstOrNull { it.name == name }, name) }
+        key == CLASICOS_GRANGER -> CLASICOS_GRANGER_NAME
         else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second
             ?: book.title.substringBeforeLast(SET_TITLE).takeIf { key.startsWith("archive-org:") && SET_TITLE in book.title }
             ?: book.title
@@ -160,6 +187,18 @@ object Filing {
     )
 
     fun defaultKey(origin: MediaOrigin): String = MEDIA_COLLECTIONS.getValue(origin).first
+
+    /**
+     * The English name the app stores for an app-made collection with [defaultKey] (Plan L3): the app shows its own
+     * words for it instead, in the app's language, while the stored name is still this one (not renamed). Null for a
+     * key whose name is a pack's or a set's.
+     */
+    fun storedDefaultName(defaultKey: String): String? = when {
+        defaultKey == "other" -> "Other"
+        defaultKey == FOLDER_KEY -> FOLDER_NAME
+        else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == defaultKey }?.second
+            ?: defaultKey.substringAfter(':', "").let { origin -> MEDIA_COLLECTIONS.values.firstOrNull { it.first == origin }?.second }
+    }
 
     /** The name of the media collection with [key] ("On this phone" for `on-this-phone`). */
     fun defaultName(key: String): String =

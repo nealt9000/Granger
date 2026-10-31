@@ -116,13 +116,13 @@ fun CollectionScreen(
                     // A Gutenberg collection is called by its subject (Plan GB Decision 2), often long: two lines, smaller.
                     if (gutenberg != null) {
                         Text(
-                            loaded?.collection?.name.orEmpty(),
+                            loaded?.collection?.shownName()?.resolve().orEmpty(),
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
                     } else {
-                        Text(loaded?.collection?.name.orEmpty())
+                        Text(loaded?.collection?.shownName()?.resolve().orEmpty())
                     }
                 },
                 navigationIcon = {
@@ -174,7 +174,7 @@ fun CollectionScreen(
             items(loaded.children, key = { it.collection.id }) { child ->
                 ListItem(
                     modifier = Modifier.clickable { onOpenCollection(child.collection.id) },
-                    headlineContent = { Text(child.collection.name) },
+                    headlineContent = { Text(child.collection.shownName().resolve()) },
                     supportingContent = { Text(rowCountText(child).resolve()) },
                 )
             }

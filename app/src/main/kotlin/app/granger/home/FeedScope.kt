@@ -2,6 +2,7 @@ package app.granger.home
 
 import app.granger.R
 import app.granger.UiText
+import app.granger.library.shownName
 import app.granger.core.catalog.Catalog
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Audiobook
@@ -77,7 +78,7 @@ fun FeedScope.resolve(snapshot: LibrarySnapshot): Resolved? {
         is FeedScope.Collection -> snapshot.shelves.asSequence().flatMap { it.allCollections }.firstOrNull { it.collection.id == id }
             ?.let { row ->
                 Resolved(
-                    UiText.Raw(row.collection.name),
+                    row.collection.shownName(),
                     packs = row.packs.filter { it.status == PackStatus.OK },
                     books = row.books.filter { it.status == PackStatus.OK },
                     albums = row.albums.filter { it.status == PackStatus.OK },

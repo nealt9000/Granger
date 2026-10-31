@@ -93,4 +93,18 @@ class OnboardingLanguagesTest {
         assertThat(both.first { it.useCase.id == "medical" }.lines.flatMap { it.items }.map { it.id }).containsExactly(medlineEs.id, stackEn.id).inOrder()
         assertThat(both.map { it.useCase.id }).containsExactly("medical", "software")
     }
+
+    @Test fun setupDownloadsTheVoiceThenEitherGrangerCollection() {
+        val voice = app.granger.core.catalog.VoiceEntry(
+            id = "vits-piper-en_GB-granger_nanny-medium", title = "Nanny", engine = "piper", language = "en-GB", sizeBytes = 60,
+            sha256 = "d".repeat(64), url = "https://v.test/nanny.zip", license = "CC BY 4.0",
+        )
+        val clasico = app.granger.bookEntry("gc-es-marianela").copy(collection = "clasicos-granger")
+        val classic = app.granger.bookEntry("gc-pride").copy(collection = "granger-classics")
+        val order = OnboardingModel.downloadOrder(listOf(topEs, clasico, voice, classic), emptyList(), null)
+        assertThat(order.map { it.id }).containsExactly(voice.id, clasico.id, classic.id, topEs.id).inOrder()
+        val review = Review(listOf(ReviewGroup(UiText.Raw("x"), OnboardingModel.lines(listOf(clasico), emptySet()))), 0)
+        assertThat(OnboardingModel.quickFirstText(review)?.en()).isEqualTo("Quick ones first: the Classics land in a few minutes.")
+        assertThat(review.lines.single().title.en()).isEqualTo("Clásicos Granger")
+    }
 }

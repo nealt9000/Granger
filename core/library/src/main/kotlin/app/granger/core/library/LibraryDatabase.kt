@@ -230,7 +230,7 @@ abstract class LibraryDatabase : RoomDatabase() {
          */
         private val IN_KIWIX_FOLDER =
             "userCreated = 0 AND mediaTypeId = 'literature' AND defaultKey IS NOT NULL " +
-                "AND defaultKey NOT IN ('granger-classics', 'my-books', 'archive-org', 'other', 'maps', '${Filing.FOLDER_KEY}') " +
+                "AND defaultKey NOT IN ('granger-classics', 'clasicos-granger', 'my-books', 'archive-org', 'other', 'maps', '${Filing.FOLDER_KEY}') " +
                 "AND (defaultKey LIKE 'pack:%' OR defaultKey NOT LIKE '%:%')"
 
         /**

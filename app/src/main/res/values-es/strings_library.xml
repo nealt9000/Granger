@@ -111,4 +111,7 @@
     <string name="library_import_drm">%1$s tiene protección anticopia (DRM). Granger no puede abrirlo y no quitará la protección.</string>
     <string name="library_import_unsupported">%1$s no es un archivo EPUB, PDF, TXT ni Markdown.</string>
     <string name="library_import_damaged">%1$s está dañado o no es un libro electrónico completo.</string>
+    <string name="library_collection_my_books">Mis libros</string>
+    <string name="library_collection_other">Otros</string>
+    <string name="library_collection_on_this_phone">En este teléfono</string>
 </resources>

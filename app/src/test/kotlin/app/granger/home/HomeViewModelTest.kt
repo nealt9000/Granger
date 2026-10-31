@@ -164,6 +164,13 @@ class HomeViewModelTest {
         assertThat(stripText(ready).text()).isEqualTo("Ready.")
     }
 
+    @Test fun theDefaultClassicsFeedIsTheLibraryLanguagesCollection() {
+        fun collections(langs: List<String>) = HomeViewModel.defaults(langs).map { it.first.text }.filter { it.startsWith("collection:") }
+        assertThat(collections(listOf("en"))).containsExactly("collection:c:granger-classics")
+        assertThat(collections(listOf("es"))).containsExactly("collection:c:clasicos-granger")
+        assertThat(collections(listOf("es", "en"))).containsExactly("collection:c:clasicos-granger", "collection:c:granger-classics").inOrder()
+    }
+
     @Test fun theDefaultsAreSeededOnceAndDormantOnesStayHidden() = runTest(main.dispatcher) {
         installWikipedia()
         val vm = viewModel()

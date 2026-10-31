@@ -43,7 +43,7 @@
     <string name="onboarding_voice_blurb">Una voz de Granger te lee libros y artículos, sin señal.</string>
     <string name="onboarding_save_space">Ahorrar espacio</string>
     <string name="onboarding_save_space_blurb">Enciclopedias sin sus imágenes: los mismos artículos, una lectura más pobre.</string>
-    <string name="onboarding_granger_classics">Clásicos Granger</string>
+    <string name="onboarding_granger_classics">Granger Classics</string>
     <string name="onboarding_title_size">%1$s · %2$s</string>
     <string name="onboarding_on_the_phone">%1$s · en el teléfono</string>
     <string name="onboarding_of_free">%1$s de %2$s libres</string>

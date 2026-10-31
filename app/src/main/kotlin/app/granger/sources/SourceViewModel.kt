@@ -841,7 +841,13 @@ class SourceViewModel(
             preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry } &&
                 // A collection in another language (Clásicos Granger for an English library) waits for All languages (Plan L3).
                 (lang.all || app.granger.core.catalog.Languages.normalise(preset.language) in lang.languages)
-        }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
+        }.sortedWith(
+            // Granger's own collections first (Granger Classics, Clásicos Granger: Plan L3), the main language's first.
+            compareBy(
+                { it.id !in GRANGER_PRESETS },
+                { lang.languages.indexOf(app.granger.core.catalog.Languages.normalise(it.language)).let { i -> if (i < 0) Int.MAX_VALUE else i } },
+            ),
+        ).map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
@@ -913,7 +919,8 @@ class SourceViewModel(
         private const val MULTILINGUAL = "mul"
         private val PICTURES = listOf("maxi", "nopic", "mini")
         private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
-        private const val CLASSICS_PRESET = "granger-classics"
+        /** Granger's collection presets, one per knowledge language (Plan L3). */
+        private val GRANGER_PRESETS = app.granger.core.library.Filing.GRANGER_COLLECTIONS.values.toSet()
 
         /** The family table's categories (tools/catalog-gen/kiwix_families.json); any other sorts after, by name. */
         private val CATEGORY_ORDER = listOf(

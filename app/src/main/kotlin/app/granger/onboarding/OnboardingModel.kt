@@ -306,7 +306,10 @@ object OnboardingModel {
         }
 
     /** The Granger Classics' collection id. */
-    const val CLASSICS = "granger-classics"
+    const val CLASSICS = app.granger.core.library.Filing.GRANGER_CLASSICS
+
+    /** Granger's book collections, one per knowledge language (Plan L3): Granger Classics and Clásicos Granger. */
+    val GRANGER_COLLECTIONS: Set<String> = app.granger.core.library.Filing.GRANGER_COLLECTIONS.values.toSet()
 
     /** Small packs land early (Plan DL Decision 5): 200 MB or less. */
     const val SMALL_PACK_BYTES = 200L * 1000 * 1000
@@ -315,7 +318,8 @@ object OnboardingModel {
     const val QUICK_MAP_BYTES = 2L * 1000 * 1000 * 1000
 
     /**
-     * The order setup downloads [items] in (Plan DL Decision 5, quick wins first): the voice; the Granger Classics; small
+     * The order setup downloads [items] in (Plan DL Decision 5, quick wins first): the voice; either Granger collection
+     * (Granger Classics, Clásicos Granger: Plan L3); small
      * packs in readiness-domain order ([domains]); the region's map ([regionPackId]) if it isn't big; everything else
      * smallest first (so Wikipedia Top and big maps come last among the packs); then Ask's models, the chat model
      * before the embedder. The review keeps its own grouping; only the queue takes this order.
@@ -323,7 +327,7 @@ object OnboardingModel {
     fun downloadOrder(items: List<CatalogItem>, domains: List<String>, regionPackId: String?): List<CatalogItem> {
         fun tier(item: CatalogItem): Int = when {
             item is VoiceEntry -> 0
-            item is BookEntry && item.collection == CLASSICS -> 1
+            item is BookEntry && item.collection in GRANGER_COLLECTIONS -> 1
             item is PackEntry && item.id == regionPackId -> if (item.sizeBytes <= QUICK_MAP_BYTES) 3 else 4
             item is PackEntry && item.sizeBytes <= SMALL_PACK_BYTES -> 2
             item is ModelEntry -> 5
@@ -341,7 +345,7 @@ object OnboardingModel {
     /** The review's one line on the order (Plan DL Decision 5); null when nothing quick is coming. */
     fun quickFirstText(review: Review): UiText? {
         val voice = review.items.any { it is VoiceEntry }
-        val classics = review.items.any { it is BookEntry && it.collection == CLASSICS }
+        val classics = review.items.any { it is BookEntry && it.collection in GRANGER_COLLECTIONS }
         return when {
             voice && classics -> UiText.Res(R.string.onboarding_quick_voice_classics)
             voice -> UiText.Res(R.string.onboarding_quick_voice)
@@ -385,6 +389,8 @@ object OnboardingModel {
 
     private fun collectionTitle(collection: String): UiText = when (collection) {
         CLASSICS -> UiText.Res(R.string.onboarding_granger_classics)
+        // Its own name in every language, like its catalog preset's.
+        app.granger.core.library.Filing.CLASICOS_GRANGER -> UiText.Raw(app.granger.core.library.Filing.CLASICOS_GRANGER_NAME)
         else -> UiText.Raw(collection.replace('-', ' ').replaceFirstChar { it.uppercase() })
     }
 

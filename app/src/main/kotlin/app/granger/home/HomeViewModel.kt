@@ -3,6 +3,7 @@ package app.granger.home
 import androidx.lifecycle.ViewModel
 import app.granger.R
 import app.granger.UiText
+import app.granger.library.shownName
 import androidx.lifecycle.viewModelScope
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.downloads.DownloadQueueSummary
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -120,6 +122,8 @@ class HomeViewModel(
     private val day = MutableStateFlow(today())
 
     private val languages = combine(knowledge, appLanguage) { k, a -> k to a }
+    private val knowledgeFlow = knowledge
+    private val appLanguageFlow = appLanguage
 
     private val strip = combine(catalog.state, library.packs, bookshelf.books, downloads.records, languages) { c, packs, books, records, (langs, app) ->
         ReadinessModel.report(c.catalog, packs, books, records, day.value, langs, app)
@@ -244,7 +248,9 @@ class HomeViewModel(
     private suspend fun seedDefaults() {
         if (prefs.seeded) return
         if (homeFeeds.feeds().isEmpty()) {
-            for ((scope, kind) in DEFAULTS) homeFeeds.add(scope.text, kind)
+            // The library's languages, then the app's: a Spanish phone seeded before the catalog loads still gets Clásicos.
+            val langs = (knowledgeFlow.first() + appLanguageFlow.first()).distinct()
+            for ((scope, kind) in defaults(langs)) homeFeeds.add(scope.text, kind)
         }
         prefs.seeded = true
     }
@@ -252,12 +258,20 @@ class HomeViewModel(
     companion object {
         const val CONTINUE = 8
 
-        val DEFAULTS: List<Pair<FeedScope, FeedKind>> = listOf(
-            FeedScope.Family("wikipedia") to FeedKind.ON_THIS_DAY,
-            FeedScope.Family("wikipedia") to FeedKind.RANDOM,
-            FeedScope.Collection("c:granger-classics") to FeedKind.RANDOM,
-            FeedScope.Family("wikiquote") to FeedKind.RANDOM,
-        )
+        val DEFAULTS: List<Pair<FeedScope, FeedKind>> get() = defaults(listOf(app.granger.core.catalog.ENGLISH))
+
+        /**
+         * The first-run feeds for the library's [languages], main first (Plan L3): a Random feed for each language's
+         * Granger collection (Granger Classics, Clásicos Granger), in that order. A collection not on the phone stays
+         * dormant, like Quotes.
+         */
+        fun defaults(languages: List<String>): List<Pair<FeedScope, FeedKind>> = buildList {
+            add(FeedScope.Family("wikipedia") to FeedKind.ON_THIS_DAY)
+            add(FeedScope.Family("wikipedia") to FeedKind.RANDOM)
+            languages.mapNotNull { app.granger.core.library.Filing.GRANGER_COLLECTIONS[it] }.distinct()
+                .forEach { add(FeedScope.Collection("c:$it") to FeedKind.RANDOM) }
+            add(FeedScope.Family("wikiquote") to FeedKind.RANDOM)
+        }
 
         /**
          * The round while anything waits or runs, for every download, not just setup. With nothing to come, the stopped
@@ -303,7 +317,7 @@ class HomeViewModel(
             snap.packs.filter { it.status == PackStatus.OK && it.name.isNotBlank() }.sortedBy { it.title.lowercase() }
                 .mapTo(choices) { ScopeChoice(FeedScope.Pack(it.name), UiText.Raw(it.title)) }
             snap.shelves.flatMap { it.allCollections }.filterNot { it.isFolder || it.isEmpty }
-                .mapTo(choices) { ScopeChoice(FeedScope.Collection(it.collection.id), UiText.Raw(it.collection.name)) }
+                .mapTo(choices) { ScopeChoice(FeedScope.Collection(it.collection.id), it.collection.shownName()) }
             if (snap.albums.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Music, UiText.Res(R.string.home_scope_music))
             if (snap.audiobooks.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Audiobooks, UiText.Res(R.string.home_scope_audiobooks))
             return choices

@@ -277,6 +277,30 @@ class ShelvesTest {
         assertThat(row.books.map { it.id }).containsExactly(BookIds.of(BookOrigin.GRANGER, "pride"))
     }
 
+    @Test fun eachGrangerBookFilesInItsCatalogCollection() = runTest {
+        val (s, _) = shelves()
+        bookshelf.state.value = listOf(book("gc-pride"), book("gc-es-marianela"))
+        val rows = s.shelves.first().single().collections.associateBy { it.collection.defaultKey }
+        assertThat(rows.keys).containsExactly("granger-classics", "clasicos-granger")
+        assertThat(rows.getValue("granger-classics").collection.name).isEqualTo("Granger Classics")
+        assertThat(rows.getValue("granger-classics").books.map { it.sourceRef }).containsExactly("gc-pride")
+        assertThat(rows.getValue("clasicos-granger").collection.name).isEqualTo("Clásicos Granger")
+        assertThat(rows.getValue("clasicos-granger").books.map { it.sourceRef }).containsExactly("gc-es-marianela")
+        // An English book whose id starts with "gc-es" but not "gc-es-" stays English.
+        assertThat(Filing.defaultKey(book("gc-essays-bacon"))).isEqualTo("granger-classics")
+        assertThat(Filing.grangerCollection("es")).isEqualTo("clasicos-granger")
+        assertThat(Filing.grangerCollection("fr")).isEqualTo("granger-classics")
+    }
+
+    @Test fun theStoredDefaultNamesAreKnown() {
+        assertThat(Filing.storedDefaultName("my-books")).isEqualTo("My books")
+        assertThat(Filing.storedDefaultName("other")).isEqualTo("Other")
+        assertThat(Filing.storedDefaultName("music:on-this-phone")).isEqualTo("On this phone")
+        assertThat(Filing.storedDefaultName("granger-classics")).isEqualTo("Granger Classics")
+        assertThat(Filing.storedDefaultName("pack:zimgit")).isNull()
+        assertThat(Filing.storedDefaultName("archive-org:run")).isNull()
+    }
+
     @Test fun importsFileUnderMyBooks() = runTest {
         val (s, _) = shelves()
         bookshelf.state.value = listOf(book("abc", BookOrigin.IMPORT), book("ia1", BookOrigin.ARCHIVE_ORG))

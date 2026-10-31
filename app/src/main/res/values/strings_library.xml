@@ -133,4 +133,9 @@
     <string name="library_import_drm">%1$s is copy-protected (DRM). Granger can\'t open it and won\'t remove the protection.</string>
     <string name="library_import_unsupported">%1$s isn\'t an EPUB, PDF, TXT or Markdown file.</string>
     <string name="library_import_damaged">%1$s is damaged or isn\'t a complete e-book.</string>
+    <!-- The names of the collections the app makes (Plan L3): shown in place of the English name the library stored. -->
+    <string name="library_collection_my_books">My books</string>
+    <string name="library_collection_other">Other</string>
+    <!-- Music and audiobooks found on the phone, not downloaded by Granger. -->
+    <string name="library_collection_on_this_phone">On this phone</string>
 </resources>

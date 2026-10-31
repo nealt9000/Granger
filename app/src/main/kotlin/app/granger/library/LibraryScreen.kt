@@ -263,7 +263,7 @@ internal fun LazyListScope.kindRows(
                         }
                     }
                     .padding(start = 16.dp),
-                headlineContent = { Text(row.collection.name) },
+                headlineContent = { Text(row.collection.shownName().resolve()) },
                 supportingContent = { Text(rowCountText(row).resolve()) },
             )
         }
