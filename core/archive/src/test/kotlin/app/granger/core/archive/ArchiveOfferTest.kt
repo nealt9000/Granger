@@ -136,8 +136,8 @@ class ArchiveOfferTest {
         assertThat(offer.file.name).isEqualTo("a_text.pdf")
         assertThat(offer.pdf).isNull()
         // Without a Text PDF, the Additional one; without either, the image-only one.
-        assertThat((ArchiveOffers.choose(item(file("b.pdf", "Image Container PDF"), file("c.pdf", "Additional Text PDF"))) as Offer.Download).file.name)
-            .isEqualTo("c.pdf")
+        assertThat((ArchiveOffers.choose(item(file("b.pdf", "Image Container PDF"), file("b_text.pdf", "Additional Text PDF"))) as Offer.Download).file.name)
+            .isEqualTo("b_text.pdf")
         assertThat((ArchiveOffers.choose(item(file("b.pdf", "Image Container PDF"))) as Offer.Download).file.name).isEqualTo("b.pdf")
     }
 

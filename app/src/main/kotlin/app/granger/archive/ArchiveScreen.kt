@@ -156,6 +156,11 @@ fun ArchiveScreen(
             onRetry = { viewModel.retryDownload(sheet.identifier) },
             onRemove = { confirmRemove = sheet.identifier to (sheet.item?.title?.ifBlank { null } ?: sheet.identifier) },
             onOpenInBrowser = { openInBrowser(sheet.identifier) },
+            onGetPart = { number ->
+                beforeDownload()
+                viewModel.getPart(sheet.identifier, number)
+            },
+            onRemovePart = { number -> viewModel.removePart(sheet.identifier, number) },
             onDismiss = viewModel::closeItem,
             onOpenInLibrary = {
                 viewModel.closeItem()

@@ -168,6 +168,27 @@ class ReadinessModelTest {
         assertThat(ReadinessModel.sourceOf(installed(music), cat)).isEqualTo(Source.KIWIX)
     }
 
+    /** Plan KB Decision 6: Water and Food for Preppers are offered under Books, but Food's essentials still list them. */
+    @Test fun foodsEssentialsStillListWaterAndFoodForPreppers() {
+        val water = packEntry("zimgit-water_en", "zimgit-water_en", "food", 20, family = "zimgit-water").copy(content = "books")
+        val prep = packEntry("zimgit-food-preparation_en", "zimgit-food-preparation_en", "food", 90, family = "zimgit-food-preparation")
+            .copy(content = "books")
+        val cooking = packEntry("based.cooking_en_all", "based.cooking_en_all", "food", 30, family = "based.cooking")
+        val food = Domain("food", "Food, water & survival", essential = listOf(cooking.id, water.id, prep.id),
+            comprehensive = listOf(cooking.id, water.id, prep.id))
+        val cat = catalog.copy(packs = catalog.packs + listOf(water, prep, cooking), readiness = Readiness(readiness.domains + food))
+        assertThat(app.granger.sources.scopeOf(water)).isEqualTo(app.granger.sources.CatalogScope.KIWIX_BOOKS)
+
+        val none = domain(report(cat = cat), "food")
+        assertThat(none.coverage).isEqualTo(Coverage.NONE)
+        // Installed as book packs, they still count toward Food, and as Kiwix's storage.
+        val r = report(packs = listOf(installed(water), installed(prep)), cat = cat)
+        assertThat(domain(r, "food").coverage).isEqualTo(Coverage.BASIC)
+        assertThat(domain(r, "food").installedBytes).isEqualTo(110)
+        assertThat(r.storage.single { it.source == Source.KIWIX }.bytes).isEqualTo(110)
+        assertThat(ReadinessModel.sourceOf(installed(water), cat)).isEqualTo(Source.KIWIX)
+    }
+
     @Test fun aPackUnknownToTheCatalogIsStorageOnly() {
         val stranger = pack("u-stranger", "Stranger").copy(name = "stranger_en_all", sizeBytes = 777, filePath = "/internal/packs/stranger.zim")
         val r = report(packs = listOf(stranger))
@@ -296,6 +317,51 @@ class ReadinessModelTest {
     @Test fun installedBytesStayWhatIsOnThePhone() {
         val r = report(packs = listOf(installed(top), installed(top1m)), cat = calibrated)
         assertThat(domain(r, "reference").installedBytes).isEqualTo(19_700)
+    }
+
+    // --- Plan WF: a bigger slice covers the smaller, with no contains table needed ---
+
+    private fun slice(id: String, zim: String, rank: Int, label: String, size: Long) =
+        packEntry(id, zim, "reference", size).copy(setId = "wikipedia_en", setRank = rank, setLabel = label)
+
+    private val wfTop = slice("wikipedia_en_top_maxi", "wikipedia_en_top", 2, "Best 50,000 articles", 7_000)
+    private val wfTop1m = slice("wikipedia_en_top1m_nopic", "wikipedia_en_top1m", 3, "Top 1 million articles", 17_000)
+    private val wfAll = slice("wikipedia_en_all_nopic", "wikipedia_en_all", 4, "Everything", 52_000)
+    private val wfMed = packEntry("wikipedia_en_medicine_maxi", "wikipedia_en_medicine", "medicine", 1_800)
+        .copy(subjectOf = "wikipedia_en", adds = mapOf("wikipedia_en_top" to 0.955, "wikipedia_en_top1m" to 0.656))
+    private val wfCatalog = Catalog(
+        1, "2026-10-30T00:00:00Z", packs = listOf(wfTop, wfTop1m, wfAll, wfMed),
+        readiness = Readiness(
+            listOf(
+                Domain("medicine", "Medicine & first aid", essential = listOf(wfMed.id), comprehensive = listOf(wfMed.id)),
+                Domain("reference", "General reference", essential = listOf(wfTop.id), comprehensive = listOf(wfTop.id, wfTop1m.id)),
+            ),
+        ),
+    )
+
+    @Test fun referenceWithTop1MillionInstalledCountsBest50000AsPresent() {
+        val r = report(packs = listOf(installed(wfTop1m)), cat = wfCatalog)
+        val reference = domain(r, "reference")
+        assertThat(reference.coverage).isEqualTo(Coverage.COMPREHENSIVE)
+        assertThat(reference.missingEssential).isEmpty()
+        assertThat(reference.covers).containsExactly("Wikipedia Top 1 million covers Best 50,000")
+        // Top 1 million holds no subject: WikiMed still counts as missing.
+        assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.NONE)
+    }
+
+    @Test fun everythingCoversTheSubjectsToo() {
+        val r = report(packs = listOf(installed(wfAll)), cat = wfCatalog)
+        assertThat(domain(r, "medicine").coverage).isEqualTo(Coverage.COMPREHENSIVE)
+        assertThat(domain(r, "medicine").covers).containsExactly("Title wikipedia_en_all_nopic covers Title wikipedia_en_medicine_maxi")
+        assertThat(domain(r, "reference").covers).containsExactly(
+            "Wikipedia Everything covers Best 50,000", "Wikipedia Everything covers Top 1 million",
+        )
+    }
+
+    @Test fun tierBytesLeaveOutASliceTheTierAlsoHoldsABiggerOneOf() {
+        val reference = domain(report(cat = wfCatalog), "reference")
+        assertThat(reference.essentialBytes).isEqualTo(7_000L)
+        assertThat(reference.comprehensiveBytes).isEqualTo(17_000L)
     }
 }
 

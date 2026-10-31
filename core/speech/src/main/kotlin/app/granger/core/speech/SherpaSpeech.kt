@@ -2,7 +2,10 @@ package app.granger.core.speech
 
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -14,9 +17,23 @@ class SherpaSpeech internal constructor(
     override val voice: Voice,
     private val tts: SherpaTts,
     private val pronunciations: Map<String, String> = Pronunciations.builtIn,
+    /** The speaker that reads quoted speech ([SherpaVoice.dialogueSpeaker]), or null to read everything as one. */
+    private val dialogueSpeaker: Int? = null,
 ) : Speech {
-    override fun synthesize(text: String, speed: Float): Flow<Pcm> =
-        tts.synthesize(spoken(text), speaker = (voice.id as? VoiceId.Granger)?.speaker ?: 0, speed = speed).map { Pcm(it, tts.sampleRate) }
+    private val narrator: Int get() = (voice.id as? VoiceId.Granger)?.speaker ?: 0
+
+    override fun synthesize(text: String, speed: Float): Flow<Pcm> = synthesize(text, speed, quoteOpen = false)
+
+    /** With a dialogue speaker, each run in and out of quotes is its own call, joined with no pause (V4b). */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun synthesize(text: String, speed: Float, quoteOpen: Boolean): Flow<Pcm> {
+        val dialogue = dialogueSpeaker
+            ?: return tts.synthesize(spoken(text), speaker = narrator, speed = speed).map { Pcm(it, tts.sampleRate) }
+        val spans = QuoteSpans.split(text, quoteOpen).ifEmpty { listOf(QuoteSpans.Span(text, quoteOpen)) }
+        return spans.asFlow().flatMapConcat { span ->
+            tts.synthesize(spoken(span.text), speaker = if (span.quoted) dialogue else narrator, speed = speed)
+        }.map { Pcm(it, tts.sampleRate) }
+    }
 
     /** What the engine is handed for [text]. */
     internal fun spoken(text: String): String = Pronunciations.apply(SpokenText.forPiper(text), pronunciations)
@@ -33,7 +50,7 @@ class SherpaSpeech internal constructor(
             val tts = withContext(Dispatchers.Default) {
                 runCatching { SherpaTts(found, threads) }.getOrElse { throw SpeechException("The voice ${id.dir} didn't load", it) }
             }
-            return SherpaSpeech(voice, tts)
+            return SherpaSpeech(voice, tts, dialogueSpeaker = SherpaVoice.dialogueSpeaker(found))
         }
     }
 
@@ -45,7 +62,11 @@ class SherpaSpeech internal constructor(
             return if (locale >= 0 && locale + 1 < parts.size) parts[locale + 1] else dir
         }
 
-        fun title(dir: String): String = "Granger voice (${shortName(dir)})"
+        /** "Granger voice (ljspeech)"; Granger's own voices drop the prefix: `…-granger_nanny-medium` → "Granger voice (Nanny)". */
+        fun title(dir: String): String {
+            val name = shortName(dir)
+            return "Granger voice (${if (name.startsWith("granger_")) name.removePrefix("granger_").replaceFirstChar { it.uppercase() } else name})"
+        }
 
         /** A named speaker's title: "Granger voice (Maggie)". */
         fun speakerTitle(name: String): String = "Granger voice ($name)"

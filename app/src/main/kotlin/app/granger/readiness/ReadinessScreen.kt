@@ -113,6 +113,9 @@ fun ReadinessContent(
                                 Modifier.padding(top = 6.dp, bottom = 4.dp),
                             )
                             Text(coverageText(domain), style = MaterialTheme.typography.bodySmall)
+                            for (line in domain.covers) {
+                                Text(line, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     },
                     modifier = Modifier.clickable { onOpenKiwix(domain.id) },

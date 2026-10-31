@@ -61,6 +61,9 @@ data class DownloadsActions(
     val onRemove: (DownloadRow) -> Unit = {},
     val onOpen: (DownloadRow) -> Unit = {},
     val onGetMore: () -> Unit = {},
+    /** A tidy offer's Remove and Keep both (Plan WF Decision 5). */
+    val onTidyRemove: (app.granger.sources.TidyOffer) -> Unit = {},
+    val onTidyKeep: (app.granger.sources.TidyOffer) -> Unit = {},
 )
 
 /**
@@ -76,6 +79,7 @@ fun DownloadsScreen(
     onGetMore: () -> Unit,
 ) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val tidy by viewModel.tidy.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     DownloadsContent(
         ui, onBack,
@@ -96,15 +100,22 @@ fun DownloadsScreen(
                 }
             },
             onGetMore = onGetMore,
+            onTidyRemove = viewModel::removeSmaller,
+            onTidyKeep = viewModel::keepBoth,
         ),
         now = viewModel.now(),
+        tidy = tidy,
     )
 }
 
 /** The header, then Now, Up next, Stopped and Done today, each only when it has rows; the empty state points to Get more. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DownloadsContent(ui: DownloadsUi, onBack: () -> Unit, actions: DownloadsActions, now: Long = System.currentTimeMillis()) {
+fun DownloadsContent(
+    ui: DownloadsUi, onBack: () -> Unit, actions: DownloadsActions, now: Long = System.currentTimeMillis(),
+    /** A bigger slice is in: the offers to remove the smaller (Plan WF Decision 5). */
+    tidy: List<app.granger.sources.TidyOffer> = emptyList(),
+) {
     var showAll by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
@@ -117,6 +128,11 @@ fun DownloadsContent(ui: DownloadsUi, onBack: () -> Unit, actions: DownloadsActi
         },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("downloads-list")) {
+            for (offer in tidy) {
+                item(key = "tidy-${offer.key}") {
+                    app.granger.sources.TidyOfferCard(offer, { actions.onTidyRemove(offer) }, { actions.onTidyKeep(offer) })
+                }
+            }
             if (ui.isEmpty) {
                 item(key = "empty") {
                     Text(

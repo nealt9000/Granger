@@ -31,6 +31,11 @@ data class Pack(
     val addedAt: Long,
     /** The ZIM's `Name` metadata, shared by every snapshot of the same content; blank if unknown. */
     @ColumnInfo(defaultValue = "") val name: String = "",
+    /**
+     * The ZIM's `Scraper` metadata, the tool that made it (Plan KB Decision 3); null until the pack is next read (a
+     * row from before version 15), blank when the ZIM doesn't say. It tells a bundle of books ([bookSource]).
+     */
+    val scraper: String? = null,
 ) {
     companion object {
         fun from(archive: ZimArchive, file: File, addedAt: Long) = Pack(
@@ -50,6 +55,7 @@ data class Pack(
             status = PackStatus.OK,
             addedAt = addedAt,
             name = archive.metadata.name,
+            scraper = archive.metadata.scraper,
         )
 
         fun unreadable(file: File, addedAt: Long) = Pack(

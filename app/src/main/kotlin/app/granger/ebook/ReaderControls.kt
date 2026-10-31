@@ -34,13 +34,17 @@ internal fun bookBarActions(
     onListen: (() -> Unit)? = null,
     /** Whether the voice is on this book: then Listen leaves the bar. */
     voice: VoiceButton = VoiceButton.IDLE,
+    /** A fixed-layout EPUB (a picture book): its pages are drawn, so there are no text settings. */
+    fixedLayout: Boolean = false,
+    /** Whether the book has words: without them there is nothing to listen to or search. */
+    hasText: Boolean = true,
 ): ReaderBarActions = ReaderBarActions(
     onBack = onBack,
-    onListen = onListen?.takeIf { !isPdf && voice == VoiceButton.IDLE },
+    onListen = onListen?.takeIf { !isPdf && hasText && voice == VoiceButton.IDLE },
     onContents = onContents,
-    onSearch = onSearch.takeIf { !isPdf },
+    onSearch = onSearch.takeIf { !isPdf && hasText },
     searchLabel = "Search in book",
-    onTextSettings = onTextSettings,
+    onTextSettings = onTextSettings.takeIf { isPdf || !fixedLayout },
     onBookmark = onBookmark,
     bookmarked = bookmarked,
 )

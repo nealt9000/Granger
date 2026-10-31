@@ -52,15 +52,20 @@ class InstalledVoicesTest {
         voiceDir(File(volume, "voices"), "vits-piper-en_US-libritts_r-medium")
         voiceDir(File(volume, "voices"), "vits-piper-en_US-ljspeech-medium")
         voiceDir(File(volume, "voices"), "vits-piper-en_US-granger_libritts-medium")
+        voiceDir(File(volume, "voices"), "vits-piper-en_GB-granger_nanny-medium")
+        voiceDir(File(volume, "voices"), "vits-piper-en_GB-granger_owl-medium")
         val voices = InstalledVoices({ listOf(File(volume, "voices")) }, { listOf(systemVoice) }, noFactory, noFactory)
         voices.refresh()
         assertThat(voices.voices.value.map { (it.id as? VoiceId.Granger)?.dir ?: "system" }.distinct())
             .containsExactly(
-                "vits-piper-en_US-granger_libritts-medium", "vits-piper-en_US-ljspeech-medium", "vits-piper-en_US-libritts_r-medium",
+                "vits-piper-en_GB-granger_owl-medium", "vits-piper-en_GB-granger_nanny-medium", "vits-piper-en_US-granger_libritts-medium",
+                "vits-piper-en_US-ljspeech-medium",
+                "vits-piper-en_US-libritts_r-medium",
                 "kokoro-int8-multi-lang-v1_1", "system",
             ).inOrder()
-        // Maggie & Martin lead when nothing is chosen (U3a); a voice dir with no speaker names is one voice.
-        assertThat((voices.preferred(null)?.id as VoiceId.Granger).dir).isEqualTo("vits-piper-en_US-granger_libritts-medium")
+        // The Owl leads when nothing is chosen (U3a, V5); a voice dir with no speaker names is one voice.
+        assertThat((voices.preferred(null)?.id as VoiceId.Granger).dir).isEqualTo("vits-piper-en_GB-granger_owl-medium")
+        assertThat(voices.voices.value.first().title).isEqualTo("Granger voice (Owl)")
     }
 
     @Test
@@ -125,5 +130,7 @@ class InstalledVoicesTest {
         assertThat(SherpaSpeech.shortName("vits-piper-en_US-ljspeech-medium")).isEqualTo("ljspeech")
         assertThat(SherpaSpeech.shortName("vits-piper-en_GB-alan-low")).isEqualTo("alan")
         assertThat(SherpaSpeech.shortName("kokoro-en-v0_19")).isEqualTo("kokoro-en-v0_19")
+        assertThat(SherpaSpeech.title("vits-piper-en_US-ljspeech-medium")).isEqualTo("Granger voice (ljspeech)")
+        assertThat(SherpaSpeech.title("vits-piper-en_GB-granger_professor-medium")).isEqualTo("Granger voice (Professor)")
     }
 }

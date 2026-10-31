@@ -76,6 +76,9 @@ fun LibraryScreen(
     onGetMore: () -> Unit = {},
     /** A book source the empty Library links to. */
     onOpenSource: (GetMoreLink) -> Unit = {},
+    /** Get books' Import your own asked for the file picker; [onImportAsked] says it has opened. */
+    importAsked: Boolean = false,
+    onImportAsked: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -98,6 +101,11 @@ fun LibraryScreen(
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         viewModel.import(uris)
+    }
+    LaunchedEffect(importAsked) {
+        if (!importAsked) return@LaunchedEffect
+        onImportAsked()
+        picker.launch(IMPORT_TYPES)
     }
     LibraryContent(
         ui, snackbar, onOpenCollection, onSearch, onReadiness,
@@ -264,7 +272,7 @@ internal fun LazyListScope.kindRows(
 const val NO_BOOKS = "No books yet"
 
 /** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2). */
-internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.ARCHIVE_ORG_BOOKS)
+internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS)
 
 private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
@@ -274,11 +282,19 @@ private val IMPORT_TYPES = arrayOf(
 internal fun rowCountText(row: CollectionRow): String {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
-    // A Gutenberg collection is called by its subject; the line under it says whose (Plan GB Decision 2), and, as the
-    // collection's header does, how many of its books are searchable in full once any are.
-    if (!Filing.isGutenbergCollection(row.collection.defaultKey)) return counts
+    // A book pack's collection is called by its subject or pack; the line under it says whose (Plan GB Decision 2, Plan
+    // KB Decision 7), and, as the collection's header does, how many of its books are searchable in full once any are.
+    val key = row.collection.defaultKey
+    if (!Filing.isBookPackCollection(key)) return counts
     val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
-    val header = GutenbergHeader(pack = null, books = rows.sumOf { it.books.size }, searchable = searchable)
+    val books = rows.sumOf { it.books.size }
+    val header = GutenbergHeader(pack = null, books = books, searchable = searchable)
+    if (Filing.isKiwixBooksCollection(key)) {
+        // "Kiwix library · 17 documents · 3 searchable in full" (Plan KB Decision 7).
+        val kiwix = header.copy(provider = KIWIX_LIBRARY, noun = "document")
+        return listOfNotNull(if (books > 0) kiwix.provenance else KIWIX_LIBRARY, kiwix.searchableText.takeIf { searchable > 0 })
+            .joinToString(" · ")
+    }
     return listOfNotNull(GutenbergNames.PROVIDER, counts.ifEmpty { null }, header.searchableText.takeIf { searchable > 0 })
         .joinToString(" · ")
 }

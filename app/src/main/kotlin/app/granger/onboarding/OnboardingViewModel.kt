@@ -157,9 +157,9 @@ class OnboardingViewModel(
         val ids = catalog.items.filter { statusOf(it, records, packs, tier) == ItemStatus.Installed }.mapTo(HashSet()) { it.id }
         val names = packs.filter { it.status == app.granger.core.library.PackStatus.OK }.mapTo(HashSet()) { it.name }
         catalog.packs.filter { it.zimName.isNotBlank() && it.zimName in names }.mapTo(ids) { it.id }
-        // A pack whose articles an installed ZIM holds (Top inside Top 1M) is held too (Plan H4).
-        val readiness = catalog.readiness ?: return ids
-        catalog.packs.filter { it.zimName.isNotBlank() && readiness.containers(it.zimName).any { c -> c in names } }.mapTo(ids) { it.id }
+        // A pack whose articles an installed ZIM holds (Top inside Top 1M) is held too (Plan H4, Plan WF Decision 5).
+        val containment = app.granger.core.catalog.Containment(catalog)
+        catalog.packs.filter { it.zimName.isNotBlank() && containment.containers(it.zimName).any { c -> c in names } }.mapTo(ids) { it.id }
         return ids
     }
 
@@ -181,6 +181,7 @@ class OnboardingViewModel(
         val voiceLine = catalog?.takeIf { offerVoice }?.let { OnboardingModel.voiceLine(it, f.installed) }
         val review = OnboardingModel.review(
             start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
+            containment = catalog?.let { app.granger.core.catalog.Containment(it) },
         )
         return OnboardingUi(
             step = c.step,

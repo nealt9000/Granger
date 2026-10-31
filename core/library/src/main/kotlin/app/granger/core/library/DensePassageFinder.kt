@@ -49,6 +49,8 @@ class DensePassageFinder(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val k: Int = 24,
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
+    /** The sets the packs are slices of, so a smaller slice's articles don't double a bigger one's (Plan WF Decision 6). */
+    private val slices: PackSlices? = null,
 ) : DenseFinder {
     val mismatches = AtomicInteger()
 
@@ -95,7 +97,10 @@ class DensePassageFinder(
             }
         }
         lastTimings = DenseTimings(listed - start, scanned - listed, clock() - scanned, searched.sumOf { it.header.count.toLong() }, searched.size)
-        hits.mapNotNull { rebuilt[it] }
+        SliceDedupe.apply(
+            hits.mapNotNull { rebuilt[it] }, packs.values.toList(), slices, library::archive,
+            { p -> p.sourceId.takeIf { p.kind == SourceKind.ARTICLE } }, { it.location },
+        )
     }
 
     private fun articles(pack: Pack, archive: ZimArchive, hits: List<VectorHit>, collection: String, out: MutableMap<VectorHit, Passage>) {

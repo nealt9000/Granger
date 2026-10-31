@@ -1,0 +1,302 @@
+{
+  "about": "Plan WF Decision 1: the Wikipedia and Wikivoyage sets (rank 1 = smallest) and each Wikipedia subject pack's article count and `adds`, the share of its articles NOT in that slice (a path counts as in when the slice has it as an article or a redirect). Measured 2026-10-30 by zim_probe.py titles on each pack's smallest flavour; section-redirect pages are not counted as articles. Everything's directory (1.0 GB) was over budget: its count is Kiwix's, and it is taken to contain every subject.",
+  "measured": "2026-10-30",
+  "sets": {
+    "wikipedia_en": {
+      "title": "Wikipedia",
+      "description": "The free encyclopedia, from 100 essential articles to all of it.",
+      "slices": [
+        {
+          "zimName": "wikipedia_en_100",
+          "rank": 1,
+          "label": "100 essential articles",
+          "articles": 100,
+          "measuredFrom": "wikipedia_en_100"
+        },
+        {
+          "zimName": "wikipedia_en_top",
+          "rank": 2,
+          "label": "Best 50,000 articles",
+          "articles": 50002,
+          "measuredFrom": "wikipedia_en_top_mini"
+        },
+        {
+          "zimName": "wikipedia_en_top1m",
+          "rank": 3,
+          "label": "Top 1 million articles",
+          "articles": 999593,
+          "measuredFrom": "wikipedia_en_top1m_mini"
+        },
+        {
+          "zimName": "wikipedia_en_all",
+          "rank": 4,
+          "label": "Everything",
+          "articles": 7331817,
+          "measuredFrom": "wikipedia_en_all_mini",
+          "articlesFrom": "Kiwix Counter metadata (text/html); directory not read, over budget"
+        }
+      ]
+    },
+    "wikivoyage_en": {
+      "title": "Wikivoyage",
+      "slices": [
+        {
+          "zimName": "wikivoyage_en_europe",
+          "rank": 1,
+          "label": "Europe",
+          "articles": 10376,
+          "measuredFrom": "wikivoyage_en_europe_nopic"
+        },
+        {
+          "zimName": "wikivoyage_en_all",
+          "rank": 2,
+          "label": "The whole world",
+          "articles": 34600,
+          "measuredFrom": "wikivoyage_en_all_nopic"
+        }
+      ]
+    }
+  },
+  "subjects": {
+    "wikipedia_en_astronomy": {
+      "subjectOf": "wikipedia_en",
+      "articles": 28272,
+      "measuredFrom": "wikipedia_en_astronomy_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.978,
+        "wikipedia_en_top1m": 0.74
+      }
+    },
+    "wikipedia_en_baseball": {
+      "subjectOf": "wikipedia_en",
+      "articles": 50622,
+      "measuredFrom": "wikipedia_en_baseball_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.991,
+        "wikipedia_en_top1m": 0.825
+      }
+    },
+    "wikipedia_en_basketball": {
+      "subjectOf": "wikipedia_en",
+      "articles": 37018,
+      "measuredFrom": "wikipedia_en_basketball_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.994,
+        "wikipedia_en_top1m": 0.853
+      }
+    },
+    "wikipedia_en_chemistry": {
+      "subjectOf": "wikipedia_en",
+      "articles": 9314,
+      "measuredFrom": "wikipedia_en_chemistry_mini",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.937,
+        "wikipedia_en_top1m": 0.559
+      }
+    },
+    "wikipedia_en_climate-change": {
+      "subjectOf": "wikipedia_en",
+      "articles": 3701,
+      "measuredFrom": "wikipedia_en_climate-change_mini",
+      "adds": {
+        "wikipedia_en_100": 0.999,
+        "wikipedia_en_top": 0.923,
+        "wikipedia_en_top1m": 0.572
+      }
+    },
+    "wikipedia_en_comics": {
+      "subjectOf": "wikipedia_en",
+      "articles": 21515,
+      "measuredFrom": "wikipedia_en_comics_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.983,
+        "wikipedia_en_top1m": 0.693
+      }
+    },
+    "wikipedia_en_computer": {
+      "subjectOf": "wikipedia_en",
+      "articles": 43489,
+      "measuredFrom": "wikipedia_en_computer_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.957,
+        "wikipedia_en_top1m": 0.62
+      }
+    },
+    "wikipedia_en_cricket": {
+      "subjectOf": "wikipedia_en",
+      "articles": 46252,
+      "measuredFrom": "wikipedia_en_cricket_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.997,
+        "wikipedia_en_top1m": 0.921
+      }
+    },
+    "wikipedia_en_football": {
+      "subjectOf": "wikipedia_en",
+      "articles": 308031,
+      "measuredFrom": "wikipedia_en_football_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.995,
+        "wikipedia_en_top1m": 0.85
+      }
+    },
+    "wikipedia_en_geography": {
+      "subjectOf": "wikipedia_en",
+      "articles": 91985,
+      "measuredFrom": "wikipedia_en_geography_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.991,
+        "wikipedia_en_top1m": 0.925
+      }
+    },
+    "wikipedia_en_golf": {
+      "subjectOf": "wikipedia_en",
+      "articles": 12140,
+      "measuredFrom": "wikipedia_en_golf_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.996,
+        "wikipedia_en_top1m": 0.898
+      }
+    },
+    "wikipedia_en_history": {
+      "subjectOf": "wikipedia_en",
+      "articles": 48733,
+      "measuredFrom": "wikipedia_en_history_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.968,
+        "wikipedia_en_top1m": 0.677
+      }
+    },
+    "wikipedia_en_ice-hockey": {
+      "subjectOf": "wikipedia_en",
+      "articles": 41982,
+      "measuredFrom": "wikipedia_en_ice-hockey_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.997,
+        "wikipedia_en_top1m": 0.867
+      }
+    },
+    "wikipedia_en_indian-cinema": {
+      "subjectOf": "wikipedia_en",
+      "articles": 28391,
+      "measuredFrom": "wikipedia_en_indian-cinema_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.996,
+        "wikipedia_en_top1m": 0.83
+      }
+    },
+    "wikipedia_en_knots": {
+      "subjectOf": "wikipedia_en",
+      "articles": 599,
+      "measuredFrom": "wikipedia_en_knots_maxi",
+      "adds": {
+        "wikipedia_en_100": 0.998,
+        "wikipedia_en_top": 0.988,
+        "wikipedia_en_top1m": 0.693
+      }
+    },
+    "wikipedia_en_mathematics": {
+      "subjectOf": "wikipedia_en",
+      "articles": 23326,
+      "measuredFrom": "wikipedia_en_mathematics_mini",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.96,
+        "wikipedia_en_top1m": 0.669
+      }
+    },
+    "wikipedia_en_medicine": {
+      "subjectOf": "wikipedia_en",
+      "articles": 72901,
+      "measuredFrom": "wikipedia_en_medicine_mini",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.955,
+        "wikipedia_en_top1m": 0.656
+      }
+    },
+    "wikipedia_en_molcell": {
+      "subjectOf": "wikipedia_en",
+      "articles": 28369,
+      "measuredFrom": "wikipedia_en_molcell_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.976,
+        "wikipedia_en_top1m": 0.808
+      }
+    },
+    "wikipedia_en_movies": {
+      "subjectOf": "wikipedia_en",
+      "articles": 309311,
+      "measuredFrom": "wikipedia_en_movies_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.989,
+        "wikipedia_en_top1m": 0.836
+      }
+    },
+    "wikipedia_en_nollywood": {
+      "subjectOf": "wikipedia_en",
+      "articles": 1916,
+      "measuredFrom": "wikipedia_en_nollywood_maxi",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.997,
+        "wikipedia_en_top1m": 0.935
+      }
+    },
+    "wikipedia_en_physics": {
+      "subjectOf": "wikipedia_en",
+      "articles": 21783,
+      "measuredFrom": "wikipedia_en_physics_mini",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.954,
+        "wikipedia_en_top1m": 0.627
+      }
+    },
+    "wikipedia_en_ray-charles": {
+      "subjectOf": "wikipedia_en",
+      "articles": 152,
+      "sample": true,
+      "adds": {
+        "wikipedia_en_100": 0.993,
+        "wikipedia_en_top": 0.954,
+        "wikipedia_en_top1m": 0.704
+      }
+    },
+    "wikipedia_en_sociology": {
+      "subjectOf": "wikipedia_en",
+      "articles": 10654,
+      "measuredFrom": "wikipedia_en_sociology_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.926,
+        "wikipedia_en_top1m": 0.524
+      }
+    },
+    "wikipedia_en_tennis": {
+      "subjectOf": "wikipedia_en",
+      "articles": 45704,
+      "measuredFrom": "wikipedia_en_tennis_nopic",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.996,
+        "wikipedia_en_top1m": 0.866
+      }
+    }
+  }
+}

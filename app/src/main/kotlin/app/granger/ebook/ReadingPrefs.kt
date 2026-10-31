@@ -13,6 +13,7 @@ import org.readium.r2.navigator.preferences.Axis
 import org.readium.r2.navigator.preferences.Color
 import org.readium.r2.navigator.preferences.Fit
 import org.readium.r2.navigator.preferences.FontFamily
+import org.readium.r2.navigator.preferences.Spread
 import org.readium.r2.navigator.preferences.TextAlign
 import org.readium.r2.navigator.preferences.Theme
 import kotlin.math.roundToInt
@@ -46,9 +47,11 @@ data class ReadingPrefs(
 ) {
     /**
      * Readium's preferences. Publisher styles are always off so the reader's choices win over the book's CSS
-     * (Gutenberg's blue links on black among them), and books are paginated, never scrolled.
+     * (Gutenberg's blue links on black among them), and books are paginated, never scrolled. A [fixedLayout] book
+     * (a picture book, FixedPages) shows one page at a time, fitted to the screen: a phone is too small for two, and
+     * Prunelle's pages are already spreads.
      */
-    fun toEpub(): EpubPreferences = EpubPreferences(
+    fun toEpub(fixedLayout: Boolean = false): EpubPreferences = EpubPreferences(
         theme = when {
             pageNight -> Theme.DARK
             theme == ReadingTheme.SEPIA -> Theme.SEPIA
@@ -78,6 +81,7 @@ data class ReadingPrefs(
         },
         publisherStyles = false,
         scroll = false,
+        spread = if (fixedLayout) Spread.NEVER else null,
     )
 
     /**

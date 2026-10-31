@@ -51,6 +51,7 @@ import app.granger.core.archive.ArchiveKind
 import app.granger.core.library.Albums
 import app.granger.core.library.AudioShelves
 import app.granger.core.library.BookIds
+import app.granger.core.library.isBookPack
 import app.granger.core.library.MediaResults
 import app.granger.core.media.MediaManifest
 import app.granger.core.library.ReadingTab
@@ -130,6 +131,7 @@ import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
 import app.granger.sources.CatalogScope
+import app.granger.sources.GetMoreFor
 import app.granger.sources.GetMoreLink
 import app.granger.sources.GetMoreScreen
 import app.granger.sources.SourceScreen
@@ -277,8 +279,11 @@ fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
 
 @Serializable data class SearchRoute(val query: String = "")
 @Serializable object HistoryRoute
-/** [domain] filters the Kiwix list to a readiness domain (Plan H1); null is the whole catalog. */
-@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null)
+/**
+ * [domain] filters the Kiwix list to a readiness domain (Plan H1); [family] is one folded family's A–Z list (Plan KB
+ * Decision 10); null for both is the whole catalog.
+ */
+@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null, val family: String? = null)
 /** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
 @Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
 /** The LibriVox source: Recently added, six genres and search (Plan M2). */
@@ -286,14 +291,28 @@ fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
 
 fun NavController.openLibriVox() = navigate(LibriVoxRoute) { launchSingleTop = true }
 
-/** Where sources live: Kiwix, books, audiobooks and music, models (Plan U3b Decision 2). */
-@Serializable object GetMoreRoute
+/**
+ * Where sources live: Kiwix, books, audiobooks and music, models (Plan U3b Decision 2). [only] is one tool's sources:
+ * the Library's books, Listen's audio (Plan KB walkthrough 2); null is all of them.
+ */
+@Serializable data class GetMoreRoute(val only: GetMoreFor? = null)
+
+/** The Library entry's saved-state key: Get books' Import your own asked for the file picker. */
+internal const val IMPORT_ASKED = "importAsked"
+
+/** Get books' Import your own: back to the Library, which opens the picker (its import shows its notice there). */
+fun NavController.importIntoLibrary() {
+    val library = runCatching { getBackStackEntry<LibraryRoute>() }.getOrNull() ?: return
+    library.savedStateHandle[IMPORT_ASKED] = true
+    popBackStack<LibraryRoute>(inclusive = false)
+}
 
 /** Where each Get more row goes: today's source screens. */
 internal fun routeOf(link: GetMoreLink): Any = when (link) {
     GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
     GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
     GetMoreLink.GUTENBERG -> SourceRoute(CatalogScope.GUTENBERG)
+    GetMoreLink.KIWIX_BOOKS -> SourceRoute(CatalogScope.KIWIX_BOOKS)
     GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
     GetMoreLink.LIBRIVOX -> LibriVoxRoute
     GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
@@ -344,7 +363,9 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
  * music: [archiveKind] is an [ArchiveRoute]'s kind) are Listen's (Plan U2 Decision 4). Downloads and Readiness cover
  * everything, and stay the Library's.
  */
-internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null): RailTool? = when {
+internal fun railToolOf(
+    destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null, getMoreFor: GetMoreFor? = null,
+): RailTool? = when {
     destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
     destination.hasRoute<SourceRoute>() -> when (sourceScope) {
         CatalogScope.MODELS -> RailTool.SETTINGS
@@ -353,6 +374,7 @@ internal fun railToolOf(destination: NavDestination, sourceScope: CatalogScope? 
     }
     destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
+    destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
     destination.hasRoute<ListenRoute>() || destination.hasRoute<ListenPlayerRoute>() || destination.hasRoute<LibriVoxRoute>() ||
         destination.isMusic() || destination.isAudiobooks() -> RailTool.LISTEN
@@ -618,7 +640,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
     /** A PDF in a pack, in the e-book reader over the article (Plan P2), so Back returns to the page; [linkText] may name it. */
     suspend fun openPackDocument(packId: String, path: String, linkText: String) {
-        // A Gutenberg pack's EPUB opens as its book row (Plan GB), copied out by the reader on its first open.
+        // A book pack's file opens as its listed row (Plan GB, Plan KB Decision 4), copied out by the reader on its first
+        // open, whatever its type.
+        container.packBookLinks.bookFor(packId, path)?.let { book ->
+            val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
+            nav.showTab(tab, keepCurrent = true)
+            return
+        }
         if (path.endsWith(".epub", ignoreCase = true)) {
             val book = container.gutenbergBooks.bookFor(packId, path)
             if (book == null) {
@@ -638,10 +666,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         }
     }
 
-    /** Opens the Library collection of an installed Gutenberg pack's books (Plan GB Decision 4). */
-    fun openGutenbergCollection(packId: String) {
+    /**
+     * Opens an installed pack: a book pack's Library collection of its books (Plan GB Decision 4, Plan KB Decision 6),
+     * any other pack in the reader.
+     */
+    fun openPackOrCollection(packId: String) {
         scope.launch {
-            val pack = container.library.packs.first().firstOrNull { it.id == packId } ?: return@launch
+            val pack = container.library.packs.first().firstOrNull { it.id == packId }
+            if (pack == null || !pack.isBookPack) {
+                openPack(packId)
+                return@launch
+            }
             nav.navigate(CollectionRoute("c:${app.granger.core.library.Filing.defaultKey(pack)}"))
         }
     }
@@ -660,6 +695,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             e.destination,
             sourceScope = if (e.destination.hasRoute<SourceRoute>()) e.toRoute<SourceRoute>().scope else null,
             archiveKind = if (e.destination.hasRoute<ArchiveRoute>()) e.toRoute<ArchiveRoute>().kind else null,
+            getMoreFor = if (e.destination.hasRoute<GetMoreRoute>()) e.toRoute<GetMoreRoute>().only else null,
         )
     }
 
@@ -784,6 +820,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             popExitTransition = { fadeOut(tween(700)) },
         ) {
             composable<LibraryRoute> { backStackEntry ->
+                val importAsked by backStackEntry.savedStateHandle.getStateFlow(IMPORT_ASKED, false).collectAsStateWithLifecycle()
                 LibraryScreen(
                     viewModel = viewModel {
                         val context = appContext
@@ -804,8 +841,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onReadiness = { nav.navigate(ReadinessRoute) },
                     downloadsBadge = downloadsBadge,
                     onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
-                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                    onGetMore = { nav.navigate(GetMoreRoute(GetMoreFor.BOOKS)) { launchSingleTop = true } },
                     onOpenSource = nav::openGetMore,
+                    importAsked = importAsked,
+                    onImportAsked = { backStackEntry.savedStateHandle[IMPORT_ASKED] = false },
                 )
             }
             composable<BrowseRoute> {
@@ -943,6 +982,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
+                    onOpenTab = ::showTab,
+                    // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook. Only if it is
+                    // still on screen: the reader may have been left while the conversion ran.
+                    onReopen = {
+                        if (nav.currentBackStackEntry?.readingTabId() == route.tabId) {
+                            nav.popBackStack()
+                            showTab(route.tabId)
+                        }
+                    },
                 )
             }
             composable<SearchRoute> { backStackEntry ->
@@ -1042,12 +1090,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
+                            family = route.family,
                         )
                     },
                     title = source.title,
                     onBack = { nav.popBackStack() },
-                    // An installed Gutenberg pack opens as its books, in the Library (Plan GB).
-                    onOpenPack = { packId -> if (source == CatalogScope.GUTENBERG) openGutenbergCollection(packId) else openPack(packId) },
+                    // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
+                    onOpenPack = ::openPackOrCollection,
+                    onOpenFamily = { family -> nav.navigate(SourceRoute(source, family = family)) },
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->
@@ -1144,7 +1194,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                         onOpenSource = nav::openGetMore,
                         onFindOnPhone = { nav.navigate(MediaSettingsRoute) { launchSingleTop = true } },
-                        onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                        onGetMore = { nav.navigate(GetMoreRoute(GetMoreFor.LISTEN)) { launchSingleTop = true } },
                     ),
                 )
             }
@@ -1172,7 +1222,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 librarySearch = container.search,
                                 thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
                             ),
-                            container.shelves, container.media, container.homePrefs,
+                            container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
@@ -1214,17 +1264,23 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         DownloadsViewModel(
                             container.downloads, container.library, container.bookshelf, container.sessions, container.appScope,
-                            container.catalog, container.volumes,
+                            container.catalog, container.volumes, tidyDismissals = container.tidyDismissals,
                         )
                     },
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,
                     onOpenPack = ::openPack,
-                    onGetMore = { nav.navigate(GetMoreRoute) { launchSingleTop = true } },
+                    onGetMore = { nav.navigate(GetMoreRoute()) { launchSingleTop = true } },
                 )
             }
-            composable<GetMoreRoute> {
-                GetMoreScreen(onOpen = nav::openGetMore, onBack = { nav.popBackStack() })
+            composable<GetMoreRoute> { backStackEntry ->
+                val only = backStackEntry.toRoute<GetMoreRoute>().only
+                GetMoreScreen(
+                    onOpen = nav::openGetMore,
+                    onBack = { nav.popBackStack() },
+                    only = only,
+                    onImport = if (only == GetMoreFor.BOOKS && Features.IMPORT) nav::importIntoLibrary else null,
+                )
             }
             composable<ReadinessRoute> {
                 ReadinessScreen(

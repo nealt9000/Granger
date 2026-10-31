@@ -1,10 +1,13 @@
 import base64
 import datetime
 import json
+import pathlib
 
 import pytest
 
 import catalog_gen as cg
+
+HERE = pathlib.Path(__file__).resolve().parent
 
 RFC_SEED = bytes.fromhex("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60")
 RFC_PUBLIC = bytes.fromhex("d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a")
@@ -940,3 +943,176 @@ def test_real_curated_gutenberg_rows_carry_no_title_of_their_own():
     curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text(encoding="utf-8"))
     rows = [p for p in curated["packs"] if p.get("name", "").startswith("gutenberg_")]
     assert rows and all("title" not in p for p in rows)
+
+
+# --- Plan KB: which packs are books, and each pack's flavour ---
+
+BOOK_FAMILIES = GUTENBERG_FAMILIES + [
+    {"family": "zimgit-water", "match": "^zimgit-water_", "category": "Survival", "license": "Not stated",
+     "domain": "food"},
+    {"family": "wikipedia", "match": "^wikipedia_", "category": "Reference", "license": "CC BY-SA 4.0"},
+]
+CONTENTS = {"gutenberg_en_lcc-pf": "gutenberg2zim-3.0.1", "zimgit-water_en": "nautiluszim 1.1.1",
+            "wikipedia_en_medicine": "mwoffliner 2.1.1"}
+
+
+def test_book_scrapers_mark_a_pack_as_books():
+    assert cg.content_of("gutenberg_en_lcc-pf", CONTENTS) == "books"
+    assert cg.content_of("zimgit-water_en", CONTENTS) == "books"
+    assert cg.content_of("wikipedia_en_medicine", CONTENTS) == ""
+    assert cg.content_of("unknown_en_all", CONTENTS) == ""
+    assert cg.content_of("zimgit-water_en", None) == ""
+
+
+def test_bulk_packs_carry_content_and_flavour():
+    xml = feed(gutenberg_entry("gutenberg_en_lcc-pf", "West Germanic languages"), feed_entry("zimgit-water_en"),
+               feed_entry("wikipedia_en_medicine", "maxi"), feed_entry("wikipedia_en_medicine", "nopic"),
+               feed_entry("wikipedia_en_medicine", "mini"), feed_entry("wikipedia_en_medicine", "odd"))
+    packs = cg.kiwix_entries({"languages": ["eng"]}, BOOK_FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                             feed_fetch(xml), workers=2, sleep=lambda s: None, contents=CONTENTS)[0]
+    by_id = {p["id"]: p for p in packs}
+    assert by_id["gutenberg_en_lcc-pf"]["content"] == "books"
+    assert by_id["zimgit-water_en"]["content"] == "books"
+    assert by_id["zimgit-water_en"]["flavour"] == ""
+    assert by_id["wikipedia_en_medicine_maxi"]["content"] == ""
+    assert [by_id[f"wikipedia_en_medicine_{f}"]["flavour"] for f in ("maxi", "nopic", "mini", "odd")] == \
+        ["maxi", "nopic", "mini", ""]
+
+
+def test_the_report_lists_the_book_packs():
+    xml = feed(feed_entry("zimgit-water_en"), feed_entry("wikipedia_en_medicine", "maxi"))
+    _, report = cg.kiwix_entries({"languages": ["eng"]}, BOOK_FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                                 feed_fetch(xml), workers=2, sleep=lambda s: None, contents=CONTENTS)
+    at = report.index("Book packs (Plan KB): 1")
+    assert report[at + 1] == "  zimgit-water_en"
+
+
+def test_a_curated_pack_takes_its_content_from_the_contents_file(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": BOOK_FAMILIES}))
+    (tmp_path / "contents.json").write_text(json.dumps({"packs": CONTENTS}))
+    xml = feed(feed_entry("zimgit-water_en"), feed_entry("wikipedia_en_medicine", "nopic"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json", "contents": "contents.json"},
+               "packs": [{"name": "zimgit-water_en", "category": "Survival", "license": "Not stated"},
+                         {"name": "wikipedia_en_medicine", "flavour": "nopic", "category": "Medical",
+                          "license": "CC BY-SA 4.0"}],
+               "models": [], "presets": []}
+    water, med = cg.build(curated, feed_fetch(xml), root=tmp_path)["packs"]
+    assert (water["content"], water["flavour"], water["featured"]) == ("books", "", True)
+    assert (med["content"], med["flavour"]) == ("", "nopic")
+
+
+def test_without_a_contents_file_nothing_is_books(tmp_path):
+    (tmp_path / "families.json").write_text(json.dumps({"families": BOOK_FAMILIES}))
+    xml = feed(feed_entry("zimgit-water_en"))
+    curated = {"kiwix": {"languages": ["eng"], "families": "families.json"}, "packs": [], "models": [], "presets": []}
+    (water,) = cg.build(curated, feed_fetch(xml), root=tmp_path)["packs"]
+    assert water["content"] == ""
+
+
+def test_a_release_pack_has_no_content_or_flavour(tmp_path):
+    write_descriptor(tmp_path / "rel.json")
+    pack = cg.release_entry(RELEASE_ROW, head=lambda url: 123, root=tmp_path)
+    assert (pack["content"], pack["flavour"]) == ("", "")
+
+
+def test_real_pack_contents_name_fifty_book_packs():
+    contents = cg.load_contents()
+    books = sorted(name for name in contents if cg.content_of(name, contents) == "books")
+    assert len(books) == 50
+    assert sum(1 for b in books if b.startswith("gutenberg_")) == 41
+    assert sorted(b for b in books if not b.startswith("gutenberg_")) == [
+        "prunelle_en_budding-authors", "prunelle_en_draw-your-african-story", "prunelle_en_interactive-books",
+        "usda-2015_en", "zimgit-food-preparation_en", "zimgit-knots_en", "zimgit-medicine_en",
+        "zimgit-post-disaster_en", "zimgit-water_en"]
+
+
+def test_real_curated_names_the_contents_file():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text(encoding="utf-8"))
+    assert curated["kiwix"]["contents"] == cg.CONTENTS
+
+
+# --- Plan WF: Wikipedia as one family ---
+
+SETS = {"sets": {"wikipedia_en": {"title": "Wikipedia", "slices": [
+    {"zimName": "wikipedia_en_100", "rank": 1, "label": "100 essential articles", "articles": 100},
+    {"zimName": "wikipedia_en_top", "rank": 2, "label": "Best 50,000 articles", "articles": 50002}]}},
+    "subjects": {"wikipedia_en_medicine": {"subjectOf": "wikipedia_en", "articles": 72901,
+                                           "adds": {"wikipedia_en_100": 1.0, "wikipedia_en_top": 0.955}},
+                 "wikipedia_en_ray-charles": {"subjectOf": "wikipedia_en", "articles": 152, "sample": True,
+                                              "adds": {"wikipedia_en_top": 0.954}}}}
+
+
+def _sets_file(tmp_path, sets=SETS):
+    path = tmp_path / "pack_sets.json"
+    path.write_text(json.dumps(sets))
+    return path
+
+
+def _family_packs():
+    def p(zim, flavour, title):
+        return {"id": f"{zim}_{flavour}" if flavour else zim, "zimName": zim, "flavour": flavour, "title": title}
+    return [p("wikipedia_en_medicine", "nopic", "WikiMed (no pictures)"), p("wikipedia_en_medicine", "maxi", "WikiMed"),
+            p("wikipedia_en_medicine", "mini", "WikiMed Medical Encyclopedia"),
+            p("wikipedia_en_top", "nopic", "Wikipedia: best articles (no pictures)"),
+            p("wikipedia_en_top", "mini", "Best of Wikipedia"), p("wikipedia_en_100", "", "Wikipedia: 100 essential articles"),
+            p("wikipedia_en_ray-charles", "maxi", "Ray Charles"), p("wiktionary_en_all", "nopic", "Wiktionary")]
+
+
+def test_sets_put_rank_label_and_title_on_every_flavour_of_a_slice(tmp_path):
+    packs = _family_packs()
+    curated = [{"name": "wikipedia_en_medicine", "flavour": "nopic", "title": "WikiMed (no pictures)"},
+               {"name": "wikipedia_en_medicine", "flavour": "maxi", "title": "WikiMed"}]
+    assert cg.apply_sets(packs, cg.load_sets(_sets_file(tmp_path)), curated) == []
+    by = {p["id"]: p for p in packs}
+    for i in ("wikipedia_en_top_nopic", "wikipedia_en_top_mini"):
+        assert (by[i]["set"], by[i]["setRank"], by[i]["setLabel"], by[i]["articles"]) == (
+            "wikipedia_en", 2, "Best 50,000 articles", 50002)
+        assert by[i]["title"] == "Wikipedia: Best 50,000 articles"
+    assert by["wikipedia_en_100"]["setRank"] == 1 and "subjectOf" not in by["wikipedia_en_100"]
+    # A curated pack's flavours all take its base title.
+    assert {by[i]["title"] for i in by if i.startswith("wikipedia_en_medicine")} == {"WikiMed"}
+    med = by["wikipedia_en_medicine_mini"]
+    assert (med["subjectOf"], med["articles"], med["adds"]) == ("wikipedia_en", 72901,
+                                                                {"wikipedia_en_100": 1.0, "wikipedia_en_top": 0.955})
+    assert "set" not in med and "sample" not in med
+    assert by["wikipedia_en_ray-charles_maxi"]["sample"] is True
+    assert not any(f in by["wiktionary_en_all_nopic"] for f in cg.SET_FIELDS)
+
+
+def test_sets_report_a_pack_the_catalog_lacks(tmp_path):
+    packs = [p for p in _family_packs() if p["zimName"] != "wikipedia_en_100"]
+    assert cg.apply_sets(packs, cg.load_sets(_sets_file(tmp_path))) == ["wikipedia_en_100"]
+
+
+def test_sets_are_checked_when_loaded(tmp_path):
+    bad = json.loads(json.dumps(SETS))
+    bad["sets"]["wikipedia_en"]["slices"][1]["rank"] = 3
+    with pytest.raises(SystemExit, match="ranks"):
+        cg.load_sets(_sets_file(tmp_path, bad))
+    bad = json.loads(json.dumps(SETS))
+    bad["subjects"]["wikipedia_en_medicine"]["adds"]["wiktionary_en_all"] = 0.5
+    with pytest.raises(SystemExit, match="adds to"):
+        cg.load_sets(_sets_file(tmp_path, bad))
+
+
+def test_the_sets_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, capsys):
+    catalog = {"formatVersion": 1, "generatedAt": "2026-10-30T17:06:54Z", "packs": _family_packs()}
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps(catalog))
+    curated = tmp_path / "curated.json"
+    curated.write_text(json.dumps({"packs": [{"name": "wikipedia_en_medicine", "title": "WikiMed (no pictures)"}]}))
+    cg.main(["sets", str(path), "--sets", str(_sets_file(tmp_path)), "--curated", str(curated)])
+    out = json.loads(path.read_text())
+    assert out["generatedAt"] > "2026-10-30T17:06:54Z"
+    assert sum(1 for p in out["packs"] if "set" in p) == 3
+    assert "3 slice entries, 4 subject entries" in capsys.readouterr().out
+
+
+def test_real_pack_sets_load_and_the_published_catalog_carries_them():
+    sets = cg.load_sets(HERE / "pack_sets.json")
+    catalog = json.loads((HERE.parents[1] / "catalog" / "catalog.json").read_text(encoding="utf-8"))
+    packs = json.loads(json.dumps(catalog["packs"]))
+    curated = json.loads((HERE / "curated.json").read_text(encoding="utf-8"))
+    assert cg.apply_sets(packs, sets, curated["packs"]) == []
+    # Applying again changes nothing: the published catalog already has them.
+    assert packs == catalog["packs"]

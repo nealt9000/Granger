@@ -24,6 +24,27 @@ class MigrationTest {
         buildMap { while (it.moveToNext()) put(it.getString(0), it.getString(1)) }
     }
 
+    /** Plan KB Decision 3: packs gain a nullable scraper, null for every row until the library reads the file again. */
+    @Test fun migration14To15AddsANullScraperAndKeepsEveryPack() {
+        helper.createDatabase("migrate15.db", 14).apply {
+            insertPack("u-w", "zimgit-water_en", "Water", "Water treatment")
+            insertPack("u-m", "gutenberg_en_lcc-m", "Music and books on music · Project Gutenberg", "Music")
+            execSQL("INSERT INTO placements (packKey, collectionId, userSet) VALUES ('zimgit-water_en', 'c:pack:zimgit-water_en', 0)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate15.db", 15, true, LibraryDatabase.MIGRATION_14_15)
+        db.query("SELECT id, title, scraper FROM packs ORDER BY id").use {
+            val rows = buildList { while (it.moveToNext()) add(Triple(it.getString(0), it.getString(1), it.isNull(2))) }
+            assertThat(rows).containsExactly(
+                Triple("u-m", "Music and books on music · Project Gutenberg", true),
+                Triple("u-w", "Water", true),
+            ).inOrder()
+        }
+        db.query("SELECT COUNT(*) FROM placements").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+        db.execSQL("UPDATE packs SET scraper = 'nautiluszim 1.1.1' WHERE id = 'u-w'")
+        db.query("SELECT scraper FROM packs WHERE id = 'u-w'").use { it.moveToFirst(); assertThat(it.getString(0)).isEqualTo("nautiluszim 1.1.1") }
+    }
+
     @Test fun migration13To14NamesGutenbergPacksForTheirSubject() {
         helper.createDatabase("migrate14.db", 13).apply {
             insertPack("u-m", "gutenberg_en_lcc-m", "Project Gutenberg Library", "music and books on music")

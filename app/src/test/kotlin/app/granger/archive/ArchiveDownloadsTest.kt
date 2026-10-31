@@ -128,3 +128,20 @@ class ArchiveDownloadsTest {
         assertThat(ArchiveDownloads.identifierOf("pg1")).isNull()
     }
 }
+
+class ArchivePartIdsTest {
+    @Test fun partKeysAndIds() {
+        assertThat(ArchiveDownloads.partKey("run", 3, 4)).isEqualTo("run~03")
+        assertThat(ArchiveDownloads.partKey("run", 7, 552)).isEqualTo("run~007")
+        val id = ArchiveDownloads.itemId("run~03")
+        assertThat(ArchiveDownloads.identifierOf(id)).isEqualTo("run")
+        assertThat(ArchiveDownloads.partNumberOf(id)).isEqualTo(3)
+        assertThat(ArchiveDownloads.bookRefOf(id)).isEqualTo("run~03")
+        assertThat(ArchiveDownloads.sidecarKeyOf(id)).isEqualTo("run~03")
+        // The item's own download and the PDF beside its text are unchanged.
+        assertThat(ArchiveDownloads.partNumberOf("archive-org:run")).isNull()
+        assertThat(ArchiveDownloads.bookRefOf("archive-org:run#pdf")).isEqualTo("run#pdf")
+        assertThat(ArchiveDownloads.sidecarKeyOf("archive-org:run#pdf")).isEqualTo("run")
+        assertThat(ArchiveDownloads.identifierOf("archive-org:run#pdf")).isEqualTo("run")
+    }
+}

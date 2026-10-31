@@ -11,6 +11,7 @@ one snapshot by its sha256 from Kiwix's metalink file. Models are listed in cura
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
   catalog_gen.py vectors --releases tools/vectors/releases --release-url URL catalog/catalog.json
                                          # puts the search vectors on an already-built catalog (Plan R1)
+  catalog_gen.py sets catalog/catalog.json   # puts pack_sets.json's sets and subjects on a built catalog (Plan WF)
 
 With a "kiwix" setting in curated.json, every pack in Kiwix's catalog in one of its languages is listed too, when its
 family has a row in the family table (kiwix_families.json) that gives its license and no hold. The curated rows win
@@ -28,6 +29,17 @@ its exact source file. `vectors` does the same to a catalog that's already built
 Dead links (Plan DL): `check-links` asks every download URL, mirrors included, whether it is still there, and fails
 listing the dead ones. It leaves `<file>.links-ok` holding the checked file's sha256; `sign` refuses a file without a
 matching one, so a catalog is never signed with a link Kiwix has withdrawn (WikEM, 2026-10).
+
+Book packs (Plan KB): a pack whose ZIM name pack_contents.json gives a book scraper (gutenberg2zim, nautiluszim) is marked
+`content: "books"`; every pack carries its `flavour` ("maxi", "nopic", "mini" or blank). `zim_probe.py probe` refreshes
+pack_contents.json from the packs themselves.
+
+Wikipedia as one family (Plan WF): pack_sets.json (from `zim_probe.py titles`) names the sets, each a ladder of ZIM
+names from smallest to biggest, and the subject packs with the share of their articles each slice lacks. Every
+flavour of a slice gets `set`, `setRank`, `setLabel`, `articles` and the title "<set>: <label>"; every flavour of a
+subject gets `subjectOf`, `adds` and `articles`, and a sample `sample: true`. Every flavour of a curated pack takes the
+curated title less its flavour words ("WikiMed", never "WikiMed (no pictures)"). `build` applies them when curated.json
+has a "sets" setting; `sets` applies them to a built catalog with a fresh generatedAt.
 
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
@@ -164,10 +176,31 @@ def pin(entry, row, fetch=http_get):
         "family": row.get("family", ""),
         # The readiness domain (spec §3.2); blank means storage only.
         "domain": row.get("domain") or "",
+        # Plan KB: "books" for a bundle of books (gutenberg2zim, nautiluszim), and the flavour of a flavoured ZIM.
+        "content": row.get("content") or "",
+        "flavour": flavour if flavour in FLAVOURS else "",
     }
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
     return result
+
+
+# Plan KB Decision 2: the scrapers whose packs are bundles of books, each listing its own books; and the flavours.
+BOOK_SCRAPERS = ("gutenberg2zim", "nautiluszim")
+FLAVOURS = ("maxi", "nopic", "mini")
+CONTENTS = "tools/catalog-gen/pack_contents.json"
+
+
+def content_of(name, contents):
+    """ "books" when the pack named [name] was made by a book scraper, by its Scraper in [contents], else blank."""
+    scraper = (contents or {}).get(name, "")
+    return "books" if scraper.startswith(BOOK_SCRAPERS) else ""
+
+
+def load_contents(root=None, path=CONTENTS):
+    """pack_contents.json's {ZIM name: scraper}; empty when there's no such file."""
+    file = pathlib.Path(root or REPO_ROOT) / path
+    return json.loads(file.read_text(encoding="utf-8"))["packs"] if file.exists() else {}
 
 
 # Plan GB: the two everything-packs, whose summaries describe the producer rather than a subject.
@@ -200,7 +233,8 @@ def family_of(entry, families):
     return None
 
 
-def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep):
+def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep,
+                  contents=None):
     """
     Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
     the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
@@ -233,7 +267,8 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     def pin_with_retries(item):
         e, row = item
         fields = {"family": row["family"], "category": row["category"], "license": row["license"],
-                  "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain")}
+                  "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain"),
+                  "content": content_of(e["name"], contents)}
         for attempt in range(tries):
             try:
                 return pin(e, fields, fetch), None
@@ -258,6 +293,8 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     by_domain = {}
     for p in packs:
         by_domain[p["domain"] or "(storage only)"] = by_domain.get(p["domain"] or "(storage only)", 0) + 1
+    books = sorted(p["id"] for p in packs if p["content"] == "books")
+    report += ["", f"Book packs (Plan KB): {len(books)}"] + [f"  {b}" for b in books]
     report += ["", "Listed, by readiness domain:"] + [f"  {d}: {n}" for d, n in sorted(by_domain.items())]
     for hold, counts in sorted(held.items()):
         report += ["", f"Held back ({hold}): {sum(counts.values())}"] + [f"  {f}: {n}" for f, n in sorted(counts.items())]
@@ -299,6 +336,8 @@ def release_entry(curated, head=http_head, root=None):
         "featured": False,
         "family": "",
         "domain": curated.get("domain", ""),
+        "content": curated.get("content", ""),
+        "flavour": "",
     }
 
 
@@ -344,6 +383,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     else:
         families = json.loads((pathlib.Path(root or REPO_ROOT) / kiwix["families"]).read_text(encoding="utf-8"))["families"]
         feed = kiwix_feed(fetch)
+        contents = load_contents(root, kiwix.get("contents", CONTENTS))
         by_key = {(e["name"], e["flavour"]): e for e in feed}
         packs = []
         for c in curated["packs"]:
@@ -353,9 +393,10 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             sample = by_key.get((c["name"], c.get("flavour", "")))
             row = family_of(sample, families) if sample else None
             packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else "",
-                                     "domain": c.get("domain", row.get("domain") if row else "")}, fetch, feed))
+                                     "domain": c.get("domain", row.get("domain") if row else ""),
+                                     "content": content_of(c["name"], contents)}, fetch, feed))
         curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
-        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch)
+        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents)
         packs += bulk
         if report is not None:
             report += lines
@@ -389,6 +430,10 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                                          vector_descriptors(pathlib.Path(root or REPO_ROOT) / v["releases"]), v.get("releaseUrl"))
         if report is not None:
             report += ["", "Search vectors left out:"] + (vector_lines or ["  none"])
+    if "sets" in curated:
+        missing = apply_sets(packs, load_sets(pathlib.Path(root or REPO_ROOT) / curated["sets"]), curated["packs"])
+        if missing:
+            raise SystemExit(f"pack_sets.json names packs the catalog hasn't: {missing}")
     readiness = None
     if "readiness" in curated:
         readiness, tier_presets = readiness_block(curated["readiness"], packs, books, collections)
@@ -416,6 +461,71 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
 
 VECTOR_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "dims", "dtype", "chunkerVersion", "embedderSha256",
                "sourceSha256")
+
+
+FLAVOUR_WORDS = re.compile(r"\s*\((no|with) pictures\)\s*$", re.IGNORECASE)
+SET_FIELDS = ("set", "setRank", "setLabel", "subjectOf", "adds", "articles", "sample")
+
+
+def base_title(title):
+    """[title] less a flavour's words: "WikiMed (no pictures)" -> "WikiMed"."""
+    return FLAVOUR_WORDS.sub("", title).strip()
+
+
+def load_sets(path):
+    """pack_sets.json, checked: ranks 1..n per set, every subject's `adds` naming slices of its own set."""
+    sets = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+    slices = {}
+    for key, s in sets["sets"].items():
+        ranks = [x["rank"] for x in s["slices"]]
+        if ranks != list(range(1, len(ranks) + 1)):
+            raise SystemExit(f"{path}: set {key} ranks {ranks}, not 1..{len(ranks)}")
+        for x in s["slices"]:
+            slices[x["zimName"]] = key
+    for name, subject in sets["subjects"].items():
+        if subject["subjectOf"] not in sets["sets"]:
+            raise SystemExit(f"{path}: {name} is a subject of unknown set {subject['subjectOf']}")
+        bad = [k for k, v in subject.get("adds", {}).items() if slices.get(k) != subject["subjectOf"] or not 0 <= v <= 1]
+        if bad:
+            raise SystemExit(f"{path}: {name} adds to {bad}, not slices of {subject['subjectOf']} with a share 0..1")
+    return sets
+
+
+def apply_sets(packs, sets, curated_rows=()):
+    """
+    Puts [sets]' fields on every flavour of each slice and subject in [packs], in place, and the family titles: a
+    slice is "<set>: <label>", every flavour of a curated pack ([curated_rows] with a title) the curated base title.
+    Returns the ZIM names [sets] names that no pack has.
+    """
+    by_zim = {}
+    for p in packs:
+        if p.get("zimName"):
+            by_zim.setdefault(p["zimName"], []).append(p)
+    for row in curated_rows:
+        if row.get("title") and "release" not in row:
+            for p in by_zim.get(row["name"], []):
+                p["title"] = base_title(row["title"])
+    missing = []
+    for key, s in sets.get("sets", {}).items():
+        for x in s["slices"]:
+            if x["zimName"] not in by_zim:
+                missing.append(x["zimName"])
+            for p in by_zim.get(x["zimName"], []):
+                for f in SET_FIELDS:
+                    p.pop(f, None)
+                p.update({"set": key, "setRank": x["rank"], "setLabel": x["label"], "articles": x["articles"],
+                          "title": f"{s['title']}: {x['label']}"})
+    for name, subject in sets.get("subjects", {}).items():
+        if name not in by_zim:
+            missing.append(name)
+        for p in by_zim.get(name, []):
+            for f in SET_FIELDS:
+                p.pop(f, None)
+            p.update({"subjectOf": subject["subjectOf"], "adds": dict(subject.get("adds", {})),
+                      "articles": subject["articles"]})
+            if subject.get("sample"):
+                p["sample"] = True
+    return missing
 
 
 def vector_descriptors(folder):
@@ -752,6 +862,9 @@ def main(argv):
     p = sub.add_parser("verify"); p.add_argument("--public-key", required=True); p.add_argument("file")
     p = sub.add_parser("vectors"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
+    p = sub.add_parser("sets"); p.add_argument("file")
+    p.add_argument("--sets", default=str(REPO_ROOT / "tools/catalog-gen/pack_sets.json"))
+    p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
     args = parser.parse_args(argv)
 
     if args.command == "keygen":
@@ -793,6 +906,17 @@ def main(argv):
               f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
         for line in lines:
             print(line)
+    elif args.command == "sets":
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        curated = json.loads(pathlib.Path(args.curated).read_text(encoding="utf-8"))
+        missing = apply_sets(catalog["packs"], load_sets(args.sets), curated["packs"])
+        if missing:
+            raise SystemExit(f"{args.sets} names packs {path} hasn't: {missing}")
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"{path}: {sum(1 for p in catalog['packs'] if 'set' in p)} slice entries, "
+              f"{sum(1 for p in catalog['packs'] if 'subjectOf' in p)} subject entries")
     elif args.command == "verify":
         public = base64.b64decode(pathlib.Path(args.public_key).read_text().strip())
         if not verify_file(public, args.file):
