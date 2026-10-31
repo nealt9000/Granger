@@ -361,9 +361,18 @@ class LibriVoxViewModelTest {
         val vm = viewModel()
         vm.setQuery("El Quijote")
         settle { vm.ui.value.rows.any { it.title == "Don Quijote" } }
+        // The French and English items leave; Spanish stays.
         assertThat(vm.ui.value.rows.map { it.title }).containsExactly("Don Quijote")
         // Spanish's articles come off a title search, as English's do.
         assertThat(lists().mapNotNull { it.queryParameter("title") }).contains("Quijote")
+    }
+
+    @Test fun anEnglishLibrarySeesEveryLanguage() = runTest(main.dispatcher) {
+        languages = listOf("en")
+        val vm = viewModel()
+        vm.setQuery("Quijote")
+        settle { vm.ui.value.rows.size >= 3 }
+        assertThat(vm.ui.value.rows.map { it.title }).containsExactly("Don Quijote", "Don Quixote", "Don Quichotte")
     }
 
     @Test fun languageNamesMatchTheLibrarysCodes() {
@@ -372,6 +381,11 @@ class LibriVoxViewModelTest {
         assertThat(inLanguages("English", listOf("es", "en"))).isTrue()
         assertThat(inLanguages("Multilingual", listOf("en"))).isTrue()
         assertThat(inLanguages("", listOf("en"))).isTrue()
-        assertThat(inLanguages("German", listOf("en"))).isFalse()
+        // An English-only library sees every LibriVox language, as before L3.
+        assertThat(inLanguages("French", listOf("en"))).isTrue()
+        assertThat(inLanguages("Spanish", listOf("en"))).isTrue()
+        // A Spanish library: Spanish, multilingual and unnamed only.
+        assertThat(inLanguages("French", listOf("es"))).isFalse()
+        assertThat(inLanguages("English", listOf("es"))).isFalse()
     }
 }

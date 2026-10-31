@@ -394,9 +394,11 @@ private fun rowDetails(authors: String, duration: UiText?): UiText = when {
 /**
  * Whether a LibriVox book in [language] (LibriVox names it in English: "English", "Spanish", "Multilingual") belongs in
  * a library in [languages] (Plan L3). LibriVox can't filter by language, so the list does: a multilingual or unnamed
- * book is kept, and so is a language name the JVM can't place.
+ * book is kept. An English-only library sees every language, as before L3 (Neal, 2026-10-31); the filter applies
+ * only when the library has a language other than English.
  */
 internal fun inLanguages(language: String, languages: List<String>): Boolean {
+    if (languages.all { it == "en" }) return true
     val name = language.trim()
     if (name.isEmpty() || name.equals(MULTILINGUAL, ignoreCase = true)) return true
     return languages.any { code ->
