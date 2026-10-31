@@ -151,6 +151,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.io.File
+import app.granger.feedback.BuildFacts
+import app.granger.feedback.CrashLog
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 import app.granger.core.library.BookIds
@@ -175,14 +177,27 @@ import java.util.concurrent.Executors
 open class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
 
+    /** The local crash log (Plan F1 part 2); outside the container so a crash while the container is made is caught. */
+    val crashLog: CrashLog by lazy { CrashLog(File(filesDir, "crashes"), BuildFacts.ofThisPhone()) }
+
     override fun onCreate() {
         super.onCreate()
+        startCrashLog()
         // Only keeps the context: PdfBox reads its font metrics from assets on the first PDF.
         PdfSupport.init(this)
         if (Features.PLAYER) startMedia()
         startVectorDownloads()
         startGutenbergSync()
         resumeDownloads()
+    }
+
+    /**
+     * Java crashes are written as they happen, then Android's own handler runs. Native crashes and ANRs are read from
+     * the system's exit records on the next start, off the main thread. JVM tests swap this out (`TestGrangerApp`).
+     */
+    protected open fun startCrashLog() {
+        Thread.setDefaultUncaughtExceptionHandler(crashLog.handler(Thread.getDefaultUncaughtExceptionHandler()))
+        Thread({ runCatching { crashLog.recordExits(CrashLog.pastExits(this)) } }, "crash-log").start()
     }
 
     /** Gutenberg packs' books follow their packs (Plan GB). JVM tests swap this out (`TestGrangerApp`). */
