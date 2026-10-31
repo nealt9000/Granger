@@ -34,3 +34,23 @@ Spec §6.2's word lists, on `l4-spanish-eval` (commits c1b1a628 to 4fde2dee). Be
 - For scale: the English lexicon catches 46/106 of its own labels. In English, the rewrite model's medical flag catches the rest.
 - **So keywords alone can't meet the spec's "catch every one".** Spanish Ask's medical bar has to be measured with the model's flag (and/or the EmbeddingGemma centroid in `rewrite.py medical`). That means the phone baseline: run the three Spanish label sets through the rewrite and count misses of lexicon OR model. Until that passes, Spanish Ask stays off.
 - Don't add `medical-heldout2-es` misses to the lexicon. If the lexicon grows, write a third fresh list to score it.
+
+## Library side (2026-10-31)
+
+This closes the first and last "English-only, outside this pass" items above.
+
+- **The finder gets the question's languages.** `PassageFinder` has a two-argument `find(keywords, languages)`. A fun interface's one abstract method can't take a default value, so the two-argument form calls the English one unless a finder overrides it. `ResearchPipeline` passes `ResearchLanguage.of(question)`. `LibraryPassageFinder` uses it for the named-book, card and media stopword checks and their lexical scores, and `MediaCards.bestPart` takes it. The eval and benchmark recorders pass it through.
+- **A passage's language.** `Passage.language` is null when unknown. `ResearchLanguage.ofCode` maps metadata to a language: `spa`/`es`/`es-MX`/`Español` → ES, `eng`/`en`/`en_US` → EN. Of several (`spa,eng`) it takes the first. Anything else gives null. Where it's filled:
+  - article passages: from the pack's stored ZIM `Language` (`Pack.language`).
+  - book passages: from the book's stored language (`Book.language`, from the EPUB's `dc:language`, the PDF catalog, or the catalog's details). Both the keyword and the dense finder fill it. No migration was needed.
+  - still null: catalogue cards and media cards (their text is English labels); packs and books in other languages; and passages read back from a kept chat (the chat tables don't store the language).
+- **Quotes.** `PassageAddress.quoteOf`/`cited` take the question's languages and pass the passage's to `CitedQuote.pick`. `ChatTurn.addresses()` uses the turn's question. `CitationOpener` looks up the pack's or book's language when a kept passage has none. The quote's stopwords follow `CitedQuote`'s rule: the question's languages plus the passage's, with English leading when the question does. So a Spanish passage under an English question drops only the Spanish stopwords that aren't English too.
+- **multistep.py.** For an item whose question may be Spanish, `--strict` reads YearFacts' Spanish forms: months and "de", a. C./d. C. eras, `SENTENCE_ES` breaks, the part question's Spanish event words, and range ends on an end word. MESES, GROUPS_ES and ENDS_ES are read from `YearFacts.kt`, and tests pin BC_ES and RANGE_ES to it. The worked facts stay English. An English-led question gains only the Spanish event words that aren't English too (English multistep never had event words). I compared English output on 5,957 recorded replies from 67 runs, read both as English alone and as English-then-Spanish. It's byte-identical.
+- **Regression.** `LibraryLanguageTest` runs every English eval question through the finder, `bestPart` and the quotes. The keywords go in both as plain words and as rewrite-style phrases, over a shelf with Spanish-looking titles. English alone and the detected languages give identical results. A deliberate Spanish-led stopword mutation in the named-book check fails it. `LanguageLayerTest` also pins that an EN passage language leaves quotes unchanged.
+
+**Still English-only on the library side**
+- `LibraryPassageFinder.GENERIC_TITLE_WORDS` is English (book, complete, works, volume…). "Obras completas" names a book by "obras".
+- The Classics twin check knows only `granger_classics_en`. A Spanish Clásicos ZIM's pages aren't dropped when its EPUBs are installed.
+- Catalogue and media card labels ("Title:", "In your library as"), and a PDF page heading ("p. 12"), are English prompt text.
+- Whole-word matching (`LexicalScore`, the cards' `mentions`) is accent-sensitive. An unaccented Spanish keyword ("fundo", "publico") doesn't match "fundó"/"publicó". Folding would change some English matches ("cafe"/"café"), so it waits for the Spanish baseline.
+- `multistep.amount` reads English numbers only ("1,500"; Spanish "1.500" and "2,5" aren't read).
