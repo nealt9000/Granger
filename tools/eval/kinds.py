@@ -15,6 +15,7 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
+import language
 import replay
 from metrics import matches
 
@@ -53,12 +54,16 @@ def kind(p):
 
 
 def literary(question, keywords, passages):
-    """A literature cue word in the question, or a keyword naming a fiction work the search found."""
-    if any(w.lower() in LITERARY for w in replay.words(question)):
+    """A literature cue word in the question (Spanish too when it may be Spanish), or a keyword naming a fiction work
+    the search found."""
+    languages = language.of(question)
+    if "en" in languages and any(w.lower() in LITERARY for w in replay.words(question)):
+        return True
+    if language.spanish_literary(question, languages):
         return True
     titles = [{w.lower() for w in replay.words(p.get("title") or "")} for p in passages if kind(p) == "fiction"]
     for k in keywords:
-        ws = [w.lower() for w in replay.words(k) if w.lower() not in replay.STOPWORDS]
+        ws = [w.lower() for w in replay.words(k) if not replay.is_stopword(w.lower(), languages)]
         if ws and any(all(w in t for w in ws) for t in titles):
             return True
     return False
@@ -68,12 +73,13 @@ def lexical_ranker(weight, mode):
     """The app's ranking with fiction weighted on non-literature questions."""
     def rank(question, corpus, cfg):
         kw, ps = corpus["keywords"], corpus["passages"]
-        raw = replay.scorer(kw)
+        languages = language.of(question)
+        raw = replay.scorer(kw, languages)
         w = 1.0 if literary(question, kw, ps) else weight
 
         def weighted(p):
             return raw(p) * (w if kind(p) == "fiction" else 1.0)
-        asked = replay.media_asked(question)
+        asked = replay.media_asked(question, languages)
         found = replay.preselect(ps, kw, cfg, score=weighted)
         gate = weighted if mode == "filter" else raw
         kept = [p for p in sorted(found, key=lambda p: -weighted(p)) if gate(p) >= cfg.lexical_threshold]

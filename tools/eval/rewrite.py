@@ -18,9 +18,12 @@ import re
 import sys
 from pathlib import Path
 
+import language
+
 HERE = Path(__file__).resolve().parent
 RUNS = HERE / "runs"
 KEYWORDS_KT = HERE.parents[1] / "core/research/src/main/kotlin/app/granger/core/research/Keywords.kt"
+MEDICAL_ES_KT = KEYWORDS_KT.with_name("MedicalEs.kt")
 LABELS = HERE / "sets" / "medical-labels.jsonl"
 MODEL = "google/embeddinggemma-2"
 QUERY = "task: search result | query: %s"
@@ -62,8 +65,27 @@ def _strings(body, interpolate=None):
     return out
 
 
-def lexicon(src=None):
-    """(looks_medical, strong, stopwords) as the app has them."""
+def lexicon_es(src=None):
+    """(looks_medical, strong) of MedicalEs and PersonalMedicalEs, matched on the folded text as the app does."""
+    src = src or MEDICAL_ES_KT.read_text(encoding="utf-8")
+    medical = src[src.index("object MedicalEs"):src.index("object PersonalMedicalEs")]
+    personal = src[src.index("object PersonalMedicalEs"):]
+    terms = [r"\b" + re.escape(t) for t in _strings(_block(medical, "TERMS"))]
+    whole = [r"\b%s\b" % t for t in _strings(_block(medical, "WHOLE_WORDS"))]
+    phrases = _strings(_block(medical, "PHRASES"))
+    not_medical = re.compile("|".join(r"\b" + t for t in _strings(_block(medical[medical.index("NOT_MEDICAL"):], "listOf"))), re.ASCII)
+    looks = re.compile("|".join(terms + whole + phrases), re.ASCII)
+    rel = personal[personal.index("const val RELATIVE"):personal.index("private val STRONG")]
+    consts = {"RELATIVE": "".join(_strings(rel))}
+    strong = [re.compile(p, re.ASCII) for p in _strings(_block(personal, "STRONG"), consts)]
+    return (lambda t: bool(looks.search(not_medical.sub(" ", language.fold(t)))),
+            lambda q: any(p.search(language.fold(q)) for p in strong))
+
+
+def lexicon(src=None, src_es=None):
+    """(looks_medical, strong, stopwords) as the app has them. As `Medical.looksMedical`, the English lexicon runs on
+    a text unless it's clearly Spanish and the Spanish one ([lexicon_es]) unless it's clearly English
+    (`language.of`); the strong phrasings of both always count, as in `PersonalMedical.strong`."""
     src = src or KEYWORDS_KT.read_text(encoding="utf-8")
     medical = src[src.index("object Medical"):src.index("object PersonalMedical")]
     personal = src[src.index("object PersonalMedical"):]
@@ -73,18 +95,27 @@ def lexicon(src=None):
     consts = {k: v for k, v in re.findall(r'private val (NUMBER|RELATIVE) = "([^"]*)"', personal)}
     strong = [re.compile(p, re.I) for p in _strings(_block(personal, "STRONG"), consts)]
     stop = set(_strings(_block(src, "STOPWORDS")))
-    return (lambda t: bool(looks.search(t)),
-            lambda q: any(p.search(q.replace("’", "'")) for p in strong),
+    looks_es, strong_es = lexicon_es(src_es)
+
+    def looks_medical(t):
+        languages = language.of(t)
+        return ("en" in languages and bool(looks.search(t))) or ("es" in languages and looks_es(t))
+    return (looks_medical,
+            lambda q: any(p.search(q.replace("’", "'")) for p in strong) or strong_es(q),
             stop)
 
 
-def extract(question, stop, max_n=6):
-    """Keywords.extract."""
+def extract(question, stop, max_n=6, languages=None):
+    """Keywords.extract, with the question's languages (`language.of`) unless given: English's [stop] and the 's
+    possessive for English, the Spanish stopwords for Spanish."""
+    languages = language.of(question) if languages is None else languages
     out = []
     for w in re.split(r"[^\w']+", question.lower().replace("\u2019", "'")):
         w = w.strip("'")
-        w = w[:-2] if w.endswith("'s") else w
-        if len(w) >= 3 and w.replace("'", "") not in stop and w not in out:
+        w = w[:-2] if w.endswith("'s") and "en" in languages else w
+        bare = w.replace("'", "")
+        stopword = ("en" in languages and bare in stop) or language.spanish_stopword(bare, languages)
+        if len(w) >= 3 and not stopword and w not in out:
             out.append(w)
     return out[:max_n]
 
